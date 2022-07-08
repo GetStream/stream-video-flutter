@@ -13,7 +13,7 @@ Download binary from release page and place into a folder included in $PATH
 \* With Go installed
 1. Clone repo
 2. cd tart/protoc-gen-tart
-3. go install
+3. go install (make sure go/bin is in $PATH)
 
 ### protoc-gen-dart
 
