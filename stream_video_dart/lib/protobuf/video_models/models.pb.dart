@@ -9,6 +9,8 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import '../google/protobuf/struct.pb.dart' as $2;
+
 import 'models.pbenum.dart';
 
 export 'models.pbenum.dart';
@@ -123,17 +125,17 @@ class EdgeServer extends $pb.GeneratedMessage {
 
 class Latency extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Latency', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..p<$core.double>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'measurements', $pb.PbFieldType.KF)
+    ..p<$core.double>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'measurementsSeconds', $pb.PbFieldType.KF)
     ..hasRequiredFields = false
   ;
 
   Latency._() : super();
   factory Latency({
-    $core.Iterable<$core.double>? measurements,
+    $core.Iterable<$core.double>? measurementsSeconds,
   }) {
     final _result = create();
-    if (measurements != null) {
-      _result.measurements.addAll(measurements);
+    if (measurementsSeconds != null) {
+      _result.measurementsSeconds.addAll(measurementsSeconds);
     }
     return _result;
   }
@@ -159,7 +161,7 @@ class Latency extends $pb.GeneratedMessage {
   static Latency? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<$core.double> get measurements => $_getList(0);
+  $core.List<$core.double> get measurementsSeconds => $_getList(0);
 }
 
 enum Broadcast_Details {
@@ -534,7 +536,10 @@ class User extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'User', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
     ..pPS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'teams')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'role')
+    ..aOM<$2.Struct>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $2.Struct.create)
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'profileImageUrl')
     ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt')
     ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt')
     ..hasRequiredFields = false
@@ -544,7 +549,10 @@ class User extends $pb.GeneratedMessage {
   factory User({
     $core.String? id,
     $core.Iterable<$core.String>? teams,
-    $core.String? type,
+    $core.String? role,
+    $2.Struct? custom,
+    $core.String? name,
+    $core.String? profileImageUrl,
     $core.String? createdAt,
     $core.String? updatedAt,
   }) {
@@ -555,8 +563,17 @@ class User extends $pb.GeneratedMessage {
     if (teams != null) {
       _result.teams.addAll(teams);
     }
-    if (type != null) {
-      _result.type = type;
+    if (role != null) {
+      _result.role = role;
+    }
+    if (custom != null) {
+      _result.custom = custom;
+    }
+    if (name != null) {
+      _result.name = name;
+    }
+    if (profileImageUrl != null) {
+      _result.profileImageUrl = profileImageUrl;
     }
     if (createdAt != null) {
       _result.createdAt = createdAt;
@@ -600,43 +617,184 @@ class User extends $pb.GeneratedMessage {
   $core.List<$core.String> get teams => $_getList(1);
 
   @$pb.TagNumber(3)
-  $core.String get type => $_getSZ(2);
+  $core.String get role => $_getSZ(2);
   @$pb.TagNumber(3)
-  set type($core.String v) { $_setString(2, v); }
+  set role($core.String v) { $_setString(2, v); }
   @$pb.TagNumber(3)
-  $core.bool hasType() => $_has(2);
+  $core.bool hasRole() => $_has(2);
   @$pb.TagNumber(3)
-  void clearType() => clearField(3);
+  void clearRole() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $2.Struct get custom => $_getN(3);
+  @$pb.TagNumber(4)
+  set custom($2.Struct v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasCustom() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCustom() => clearField(4);
+  @$pb.TagNumber(4)
+  $2.Struct ensureCustom() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $core.String get name => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set name($core.String v) { $_setString(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasName() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearName() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get profileImageUrl => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set profileImageUrl($core.String v) { $_setString(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasProfileImageUrl() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearProfileImageUrl() => clearField(6);
 
   @$pb.TagNumber(7)
-  $core.String get createdAt => $_getSZ(3);
+  $core.String get createdAt => $_getSZ(6);
   @$pb.TagNumber(7)
-  set createdAt($core.String v) { $_setString(3, v); }
+  set createdAt($core.String v) { $_setString(6, v); }
   @$pb.TagNumber(7)
-  $core.bool hasCreatedAt() => $_has(3);
+  $core.bool hasCreatedAt() => $_has(6);
   @$pb.TagNumber(7)
   void clearCreatedAt() => clearField(7);
 
   @$pb.TagNumber(8)
-  $core.String get updatedAt => $_getSZ(4);
+  $core.String get updatedAt => $_getSZ(7);
   @$pb.TagNumber(8)
-  set updatedAt($core.String v) { $_setString(4, v); }
+  set updatedAt($core.String v) { $_setString(7, v); }
   @$pb.TagNumber(8)
-  $core.bool hasUpdatedAt() => $_has(4);
+  $core.bool hasUpdatedAt() => $_has(7);
   @$pb.TagNumber(8)
   void clearUpdatedAt() => clearField(8);
+}
+
+class UserRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
+    ..pPS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'teams')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'role')
+    ..aOM<$2.Struct>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $2.Struct.create)
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'profileImageUrl')
+    ..hasRequiredFields = false
+  ;
+
+  UserRequest._() : super();
+  factory UserRequest({
+    $core.String? id,
+    $core.Iterable<$core.String>? teams,
+    $core.String? role,
+    $2.Struct? custom,
+    $core.String? name,
+    $core.String? profileImageUrl,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (teams != null) {
+      _result.teams.addAll(teams);
+    }
+    if (role != null) {
+      _result.role = role;
+    }
+    if (custom != null) {
+      _result.custom = custom;
+    }
+    if (name != null) {
+      _result.name = name;
+    }
+    if (profileImageUrl != null) {
+      _result.profileImageUrl = profileImageUrl;
+    }
+    return _result;
+  }
+  factory UserRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UserRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  UserRequest clone() => UserRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  UserRequest copyWith(void Function(UserRequest) updates) => super.copyWith((message) => updates(message as UserRequest)) as UserRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UserRequest create() => UserRequest._();
+  UserRequest createEmptyInstance() => create();
+  static $pb.PbList<UserRequest> createRepeated() => $pb.PbList<UserRequest>();
+  @$core.pragma('dart2js:noInline')
+  static UserRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UserRequest>(create);
+  static UserRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get id => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set id($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<$core.String> get teams => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $core.String get role => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set role($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRole() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRole() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $2.Struct get custom => $_getN(3);
+  @$pb.TagNumber(4)
+  set custom($2.Struct v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasCustom() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCustom() => clearField(4);
+  @$pb.TagNumber(4)
+  $2.Struct ensureCustom() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $core.String get name => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set name($core.String v) { $_setString(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasName() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearName() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get profileImageUrl => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set profileImageUrl($core.String v) { $_setString(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasProfileImageUrl() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearProfileImageUrl() => clearField(6);
 }
 
 class Device extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Device', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pushProvider')
-    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'disabled')
-    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'disabledReason')
-    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pushProviderName')
-    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt')
-    ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt')
+    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'disabled')
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'disabledReason')
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pushProviderName')
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt')
+    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt')
     ..hasRequiredFields = false
   ;
 
@@ -644,7 +802,6 @@ class Device extends $pb.GeneratedMessage {
   factory Device({
     $core.String? userId,
     $core.String? id,
-    $core.String? pushProvider,
     $core.bool? disabled,
     $core.String? disabledReason,
     $core.String? pushProviderName,
@@ -657,9 +814,6 @@ class Device extends $pb.GeneratedMessage {
     }
     if (id != null) {
       _result.id = id;
-    }
-    if (pushProvider != null) {
-      _result.pushProvider = pushProvider;
     }
     if (disabled != null) {
       _result.disabled = disabled;
@@ -718,58 +872,152 @@ class Device extends $pb.GeneratedMessage {
   void clearId() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.String get pushProvider => $_getSZ(2);
+  $core.bool get disabled => $_getBF(2);
   @$pb.TagNumber(3)
-  set pushProvider($core.String v) { $_setString(2, v); }
+  set disabled($core.bool v) { $_setBool(2, v); }
   @$pb.TagNumber(3)
-  $core.bool hasPushProvider() => $_has(2);
+  $core.bool hasDisabled() => $_has(2);
   @$pb.TagNumber(3)
-  void clearPushProvider() => clearField(3);
+  void clearDisabled() => clearField(3);
 
   @$pb.TagNumber(4)
-  $core.bool get disabled => $_getBF(3);
+  $core.String get disabledReason => $_getSZ(3);
   @$pb.TagNumber(4)
-  set disabled($core.bool v) { $_setBool(3, v); }
+  set disabledReason($core.String v) { $_setString(3, v); }
   @$pb.TagNumber(4)
-  $core.bool hasDisabled() => $_has(3);
+  $core.bool hasDisabledReason() => $_has(3);
   @$pb.TagNumber(4)
-  void clearDisabled() => clearField(4);
+  void clearDisabledReason() => clearField(4);
 
   @$pb.TagNumber(5)
-  $core.String get disabledReason => $_getSZ(4);
+  $core.String get pushProviderName => $_getSZ(4);
   @$pb.TagNumber(5)
-  set disabledReason($core.String v) { $_setString(4, v); }
+  set pushProviderName($core.String v) { $_setString(4, v); }
   @$pb.TagNumber(5)
-  $core.bool hasDisabledReason() => $_has(4);
+  $core.bool hasPushProviderName() => $_has(4);
   @$pb.TagNumber(5)
-  void clearDisabledReason() => clearField(5);
+  void clearPushProviderName() => clearField(5);
 
   @$pb.TagNumber(6)
-  $core.String get pushProviderName => $_getSZ(5);
+  $core.String get createdAt => $_getSZ(5);
   @$pb.TagNumber(6)
-  set pushProviderName($core.String v) { $_setString(5, v); }
+  set createdAt($core.String v) { $_setString(5, v); }
   @$pb.TagNumber(6)
-  $core.bool hasPushProviderName() => $_has(5);
+  $core.bool hasCreatedAt() => $_has(5);
   @$pb.TagNumber(6)
-  void clearPushProviderName() => clearField(6);
+  void clearCreatedAt() => clearField(6);
 
   @$pb.TagNumber(7)
-  $core.String get createdAt => $_getSZ(6);
+  $core.String get updatedAt => $_getSZ(6);
   @$pb.TagNumber(7)
-  set createdAt($core.String v) { $_setString(6, v); }
+  set updatedAt($core.String v) { $_setString(6, v); }
   @$pb.TagNumber(7)
-  $core.bool hasCreatedAt() => $_has(6);
+  $core.bool hasUpdatedAt() => $_has(6);
   @$pb.TagNumber(7)
-  void clearCreatedAt() => clearField(7);
+  void clearUpdatedAt() => clearField(7);
+}
 
-  @$pb.TagNumber(8)
-  $core.String get updatedAt => $_getSZ(7);
-  @$pb.TagNumber(8)
-  set updatedAt($core.String v) { $_setString(7, v); }
-  @$pb.TagNumber(8)
-  $core.bool hasUpdatedAt() => $_has(7);
-  @$pb.TagNumber(8)
-  void clearUpdatedAt() => clearField(8);
+class DeviceRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DeviceRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
+    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'disabled')
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'disabledReason')
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pushProviderName')
+    ..hasRequiredFields = false
+  ;
+
+  DeviceRequest._() : super();
+  factory DeviceRequest({
+    $core.String? userId,
+    $core.String? id,
+    $core.bool? disabled,
+    $core.String? disabledReason,
+    $core.String? pushProviderName,
+  }) {
+    final _result = create();
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    if (id != null) {
+      _result.id = id;
+    }
+    if (disabled != null) {
+      _result.disabled = disabled;
+    }
+    if (disabledReason != null) {
+      _result.disabledReason = disabledReason;
+    }
+    if (pushProviderName != null) {
+      _result.pushProviderName = pushProviderName;
+    }
+    return _result;
+  }
+  factory DeviceRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DeviceRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  DeviceRequest clone() => DeviceRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  DeviceRequest copyWith(void Function(DeviceRequest) updates) => super.copyWith((message) => updates(message as DeviceRequest)) as DeviceRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static DeviceRequest create() => DeviceRequest._();
+  DeviceRequest createEmptyInstance() => create();
+  static $pb.PbList<DeviceRequest> createRepeated() => $pb.PbList<DeviceRequest>();
+  @$core.pragma('dart2js:noInline')
+  static DeviceRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeviceRequest>(create);
+  static DeviceRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get userId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set userId($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasUserId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUserId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get id => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set id($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearId() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get disabled => $_getBF(2);
+  @$pb.TagNumber(3)
+  set disabled($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasDisabled() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearDisabled() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get disabledReason => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set disabledReason($core.String v) { $_setString(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasDisabledReason() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearDisabledReason() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get pushProviderName => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set pushProviderName($core.String v) { $_setString(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasPushProviderName() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearPushProviderName() => clearField(5);
 }
 
 class RecordingStorageOptions extends $pb.GeneratedMessage {
@@ -1272,6 +1520,9 @@ class Participant extends $pb.GeneratedMessage {
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'role')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'online')
+    ..aOM<$2.Struct>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $2.Struct.create)
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt')
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt')
     ..hasRequiredFields = false
   ;
 
@@ -1280,6 +1531,9 @@ class Participant extends $pb.GeneratedMessage {
     $core.String? userId,
     $core.String? role,
     $core.bool? online,
+    $2.Struct? custom,
+    $core.String? createdAt,
+    $core.String? updatedAt,
   }) {
     final _result = create();
     if (userId != null) {
@@ -1290,6 +1544,15 @@ class Participant extends $pb.GeneratedMessage {
     }
     if (online != null) {
       _result.online = online;
+    }
+    if (custom != null) {
+      _result.custom = custom;
+    }
+    if (createdAt != null) {
+      _result.createdAt = createdAt;
+    }
+    if (updatedAt != null) {
+      _result.updatedAt = updatedAt;
     }
     return _result;
   }
@@ -1340,24 +1603,153 @@ class Participant extends $pb.GeneratedMessage {
   $core.bool hasOnline() => $_has(2);
   @$pb.TagNumber(3)
   void clearOnline() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $2.Struct get custom => $_getN(3);
+  @$pb.TagNumber(4)
+  set custom($2.Struct v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasCustom() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCustom() => clearField(4);
+  @$pb.TagNumber(4)
+  $2.Struct ensureCustom() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $core.String get createdAt => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set createdAt($core.String v) { $_setString(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasCreatedAt() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearCreatedAt() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get updatedAt => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set updatedAt($core.String v) { $_setString(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasUpdatedAt() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearUpdatedAt() => clearField(6);
+}
+
+class ParticipantRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ParticipantRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'role')
+    ..aOM<$2.Struct>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $2.Struct.create)
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt')
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt')
+    ..hasRequiredFields = false
+  ;
+
+  ParticipantRequest._() : super();
+  factory ParticipantRequest({
+    $core.String? userId,
+    $core.String? role,
+    $2.Struct? custom,
+    $core.String? createdAt,
+    $core.String? updatedAt,
+  }) {
+    final _result = create();
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    if (role != null) {
+      _result.role = role;
+    }
+    if (custom != null) {
+      _result.custom = custom;
+    }
+    if (createdAt != null) {
+      _result.createdAt = createdAt;
+    }
+    if (updatedAt != null) {
+      _result.updatedAt = updatedAt;
+    }
+    return _result;
+  }
+  factory ParticipantRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ParticipantRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ParticipantRequest clone() => ParticipantRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ParticipantRequest copyWith(void Function(ParticipantRequest) updates) => super.copyWith((message) => updates(message as ParticipantRequest)) as ParticipantRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ParticipantRequest create() => ParticipantRequest._();
+  ParticipantRequest createEmptyInstance() => create();
+  static $pb.PbList<ParticipantRequest> createRepeated() => $pb.PbList<ParticipantRequest>();
+  @$core.pragma('dart2js:noInline')
+  static ParticipantRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ParticipantRequest>(create);
+  static ParticipantRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get userId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set userId($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasUserId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUserId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get role => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set role($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasRole() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRole() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $2.Struct get custom => $_getN(2);
+  @$pb.TagNumber(3)
+  set custom($2.Struct v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasCustom() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearCustom() => clearField(3);
+  @$pb.TagNumber(3)
+  $2.Struct ensureCustom() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $core.String get createdAt => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set createdAt($core.String v) { $_setString(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasCreatedAt() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCreatedAt() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get updatedAt => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set updatedAt($core.String v) { $_setString(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasUpdatedAt() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearUpdatedAt() => clearField(5);
 }
 
 class CallState extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallState', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
-    ..pc<Participant>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participants', $pb.PbFieldType.PM, subBuilder: Participant.create)
+    ..pc<Participant>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participants', $pb.PbFieldType.PM, subBuilder: Participant.create)
     ..hasRequiredFields = false
   ;
 
   CallState._() : super();
   factory CallState({
-    $core.String? callId,
     $core.Iterable<Participant>? participants,
   }) {
     final _result = create();
-    if (callId != null) {
-      _result.callId = callId;
-    }
     if (participants != null) {
       _result.participants.addAll(participants);
     }
@@ -1385,37 +1777,30 @@ class CallState extends $pb.GeneratedMessage {
   static CallState? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get callId => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set callId($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasCallId() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearCallId() => clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.List<Participant> get participants => $_getList(1);
+  $core.List<Participant> get participants => $_getList(0);
 }
 
 class Call extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Call', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdByUserId')
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt')
-    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt')
-    ..aOB(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcast')
-    ..pc<BroadcastOptions>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcastOptions', $pb.PbFieldType.PM, subBuilder: BroadcastOptions.create)
-    ..aOB(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transcribe')
-    ..aOM<TranscribeOptions>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transcribeOptions', subBuilder: TranscribeOptions.create)
+    ..aOM<$2.Struct>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $2.Struct.create)
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt')
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt')
+    ..aOB(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcast')
+    ..pc<BroadcastOptions>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcastOptions', $pb.PbFieldType.PM, subBuilder: BroadcastOptions.create)
+    ..aOB(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transcribe')
+    ..aOM<TranscribeOptions>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transcribeOptions', subBuilder: TranscribeOptions.create)
     ..hasRequiredFields = false
   ;
 
   Call._() : super();
   factory Call({
+    $core.String? type,
     $core.String? id,
-    $core.String? name,
     $core.String? createdByUserId,
+    $2.Struct? custom,
     $core.String? createdAt,
     $core.String? updatedAt,
     $core.bool? broadcast,
@@ -1424,14 +1809,17 @@ class Call extends $pb.GeneratedMessage {
     TranscribeOptions? transcribeOptions,
   }) {
     final _result = create();
+    if (type != null) {
+      _result.type = type;
+    }
     if (id != null) {
       _result.id = id;
     }
-    if (name != null) {
-      _result.name = name;
-    }
     if (createdByUserId != null) {
       _result.createdByUserId = createdByUserId;
+    }
+    if (custom != null) {
+      _result.custom = custom;
     }
     if (createdAt != null) {
       _result.createdAt = createdAt;
@@ -1475,22 +1863,22 @@ class Call extends $pb.GeneratedMessage {
   static Call? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get id => $_getSZ(0);
+  $core.String get type => $_getSZ(0);
   @$pb.TagNumber(1)
-  set id($core.String v) { $_setString(0, v); }
+  set type($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasId() => $_has(0);
+  $core.bool hasType() => $_has(0);
   @$pb.TagNumber(1)
-  void clearId() => clearField(1);
+  void clearType() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get name => $_getSZ(1);
+  $core.String get id => $_getSZ(1);
   @$pb.TagNumber(2)
-  set name($core.String v) { $_setString(1, v); }
+  set id($core.String v) { $_setString(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasName() => $_has(1);
+  $core.bool hasId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearName() => clearField(2);
+  void clearId() => clearField(2);
 
   @$pb.TagNumber(3)
   $core.String get createdByUserId => $_getSZ(2);
@@ -1502,53 +1890,64 @@ class Call extends $pb.GeneratedMessage {
   void clearCreatedByUserId() => clearField(3);
 
   @$pb.TagNumber(4)
-  $core.String get createdAt => $_getSZ(3);
+  $2.Struct get custom => $_getN(3);
   @$pb.TagNumber(4)
-  set createdAt($core.String v) { $_setString(3, v); }
+  set custom($2.Struct v) { setField(4, v); }
   @$pb.TagNumber(4)
-  $core.bool hasCreatedAt() => $_has(3);
+  $core.bool hasCustom() => $_has(3);
   @$pb.TagNumber(4)
-  void clearCreatedAt() => clearField(4);
+  void clearCustom() => clearField(4);
+  @$pb.TagNumber(4)
+  $2.Struct ensureCustom() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $core.String get updatedAt => $_getSZ(4);
+  $core.String get createdAt => $_getSZ(4);
   @$pb.TagNumber(5)
-  set updatedAt($core.String v) { $_setString(4, v); }
+  set createdAt($core.String v) { $_setString(4, v); }
   @$pb.TagNumber(5)
-  $core.bool hasUpdatedAt() => $_has(4);
+  $core.bool hasCreatedAt() => $_has(4);
   @$pb.TagNumber(5)
-  void clearUpdatedAt() => clearField(5);
+  void clearCreatedAt() => clearField(5);
 
   @$pb.TagNumber(6)
-  $core.bool get broadcast => $_getBF(5);
+  $core.String get updatedAt => $_getSZ(5);
   @$pb.TagNumber(6)
-  set broadcast($core.bool v) { $_setBool(5, v); }
+  set updatedAt($core.String v) { $_setString(5, v); }
   @$pb.TagNumber(6)
-  $core.bool hasBroadcast() => $_has(5);
+  $core.bool hasUpdatedAt() => $_has(5);
   @$pb.TagNumber(6)
-  void clearBroadcast() => clearField(6);
+  void clearUpdatedAt() => clearField(6);
 
   @$pb.TagNumber(7)
-  $core.List<BroadcastOptions> get broadcastOptions => $_getList(6);
+  $core.bool get broadcast => $_getBF(6);
+  @$pb.TagNumber(7)
+  set broadcast($core.bool v) { $_setBool(6, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasBroadcast() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearBroadcast() => clearField(7);
 
   @$pb.TagNumber(8)
-  $core.bool get transcribe => $_getBF(7);
-  @$pb.TagNumber(8)
-  set transcribe($core.bool v) { $_setBool(7, v); }
-  @$pb.TagNumber(8)
-  $core.bool hasTranscribe() => $_has(7);
-  @$pb.TagNumber(8)
-  void clearTranscribe() => clearField(8);
+  $core.List<BroadcastOptions> get broadcastOptions => $_getList(7);
 
   @$pb.TagNumber(9)
-  TranscribeOptions get transcribeOptions => $_getN(8);
+  $core.bool get transcribe => $_getBF(8);
   @$pb.TagNumber(9)
-  set transcribeOptions(TranscribeOptions v) { setField(9, v); }
+  set transcribe($core.bool v) { $_setBool(8, v); }
   @$pb.TagNumber(9)
-  $core.bool hasTranscribeOptions() => $_has(8);
+  $core.bool hasTranscribe() => $_has(8);
   @$pb.TagNumber(9)
-  void clearTranscribeOptions() => clearField(9);
-  @$pb.TagNumber(9)
-  TranscribeOptions ensureTranscribeOptions() => $_ensure(8);
+  void clearTranscribe() => clearField(9);
+
+  @$pb.TagNumber(10)
+  TranscribeOptions get transcribeOptions => $_getN(9);
+  @$pb.TagNumber(10)
+  set transcribeOptions(TranscribeOptions v) { setField(10, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasTranscribeOptions() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearTranscribeOptions() => clearField(10);
+  @$pb.TagNumber(10)
+  TranscribeOptions ensureTranscribeOptions() => $_ensure(9);
 }
 

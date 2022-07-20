@@ -7,19 +7,22 @@ import 'package:protobuf/protobuf.dart';
 import 'package:tart/tart.dart' as twirp;
 import 'coordinator_service.pb.dart';
 import '../video_models/models.pb.dart';
+import '../google/protobuf/struct.pb.dart';
+import '../google/protobuf/wrappers.pb.dart';
+import '../validate/validate.pb.dart';
 
 
 
 abstract class CallCoordinatorService {
-  // basic CRUD operations on calls
+  // CreateCall creates a new call that is unique for the combination of type and id fields// If a call with the same type and id already exists then the call will be updated based on the request (if allowed and if needed)// The user calling this endpoint will be created if necessary ({id: id})// The users listed in the participants field will also be created if necessary ({id: id})
   Future<CreateCallResponse> createCall(twirp.Context ctx, CreateCallRequest req);
-  
+  // GetCall retrieves the state for one call, the user calling this endpoint is created if missing
   Future<GetCallResponse> getCall(twirp.Context ctx, GetCallRequest req);
   
   Future<UpdateCallResponse> updateCall(twirp.Context ctx, UpdateCallRequest req);
   
   Future<DeleteCallResponse> deleteCall(twirp.Context ctx, DeleteCallRequest req);
-  // join call
+  // JoinCall returns the call state and the list of edges that the user should be check for latency// this endpoint is meant to be used to prepare the information needed to call the SelectEdgeServer endpoint
   Future<JoinCallResponse> joinCall(twirp.Context ctx, JoinCallRequest req);
   
   Future<SelectEdgeServerResponse> selectEdgeServer(twirp.Context ctx, SelectEdgeServerRequest req);
@@ -27,7 +30,7 @@ abstract class CallCoordinatorService {
   Future<LeaveCallResponse> leaveCall(twirp.Context ctx, LeaveCallRequest req);
   
   Future<EndCallResponse> endCall(twirp.Context ctx, EndCallRequest req);
-  // register mobile device for push
+  // AddDevice registers the mobile device for push notifications// this endpoint will create the user if missing// if a device with the same id and push_provider_name exists, then the operation will be ignored
   Future<AddDeviceResponse> addDevice(twirp.Context ctx, AddDeviceRequest req);
   
   Future<RemoveDeviceResponse> removeDevice(twirp.Context ctx, RemoveDeviceRequest req);

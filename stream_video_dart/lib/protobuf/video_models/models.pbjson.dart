@@ -55,12 +55,12 @@ final $typed_data.Uint8List edgeServerDescriptor = $convert.base64Decode('CgpFZG
 const Latency$json = const {
   '1': 'Latency',
   '2': const [
-    const {'1': 'measurements', '3': 1, '4': 3, '5': 2, '10': 'measurements'},
+    const {'1': 'measurements_seconds', '3': 1, '4': 3, '5': 2, '10': 'measurementsSeconds'},
   ],
 };
 
 /// Descriptor for `Latency`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List latencyDescriptor = $convert.base64Decode('CgdMYXRlbmN5EiIKDG1lYXN1cmVtZW50cxgBIAMoAlIMbWVhc3VyZW1lbnRz');
+final $typed_data.Uint8List latencyDescriptor = $convert.base64Decode('CgdMYXRlbmN5EjEKFG1lYXN1cmVtZW50c19zZWNvbmRzGAEgAygCUhNtZWFzdXJlbWVudHNTZWNvbmRz');
 @$core.Deprecated('Use broadcastDescriptor instead')
 const Broadcast$json = const {
   '1': 'Broadcast',
@@ -127,31 +127,62 @@ const User$json = const {
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 9, '8': const {}, '10': 'id'},
     const {'1': 'teams', '3': 2, '4': 3, '5': 9, '10': 'teams'},
-    const {'1': 'type', '3': 3, '4': 1, '5': 9, '10': 'type'},
+    const {'1': 'role', '3': 3, '4': 1, '5': 9, '10': 'role'},
+    const {'1': 'custom', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
+    const {'1': 'name', '3': 5, '4': 1, '5': 9, '10': 'name'},
+    const {'1': 'profile_image_url', '3': 6, '4': 1, '5': 9, '10': 'profileImageUrl'},
     const {'1': 'created_at', '3': 7, '4': 1, '5': 9, '10': 'createdAt'},
     const {'1': 'updated_at', '3': 8, '4': 1, '5': 9, '10': 'updatedAt'},
   ],
 };
 
 /// Descriptor for `User`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List userDescriptor = $convert.base64Decode('CgRVc2VyEhcKAmlkGAEgASgJQgf6QgRyAhABUgJpZBIUCgV0ZWFtcxgCIAMoCVIFdGVhbXMSEgoEdHlwZRgDIAEoCVIEdHlwZRIdCgpjcmVhdGVkX2F0GAcgASgJUgljcmVhdGVkQXQSHQoKdXBkYXRlZF9hdBgIIAEoCVIJdXBkYXRlZEF0');
+final $typed_data.Uint8List userDescriptor = $convert.base64Decode('CgRVc2VyEhcKAmlkGAEgASgJQgf6QgRyAhABUgJpZBIUCgV0ZWFtcxgCIAMoCVIFdGVhbXMSEgoEcm9sZRgDIAEoCVIEcm9sZRIvCgZjdXN0b20YBCABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0UgZjdXN0b20SEgoEbmFtZRgFIAEoCVIEbmFtZRIqChFwcm9maWxlX2ltYWdlX3VybBgGIAEoCVIPcHJvZmlsZUltYWdlVXJsEh0KCmNyZWF0ZWRfYXQYByABKAlSCWNyZWF0ZWRBdBIdCgp1cGRhdGVkX2F0GAggASgJUgl1cGRhdGVkQXQ=');
+@$core.Deprecated('Use userRequestDescriptor instead')
+const UserRequest$json = const {
+  '1': 'UserRequest',
+  '2': const [
+    const {'1': 'id', '3': 1, '4': 1, '5': 9, '8': const {}, '10': 'id'},
+    const {'1': 'teams', '3': 2, '4': 3, '5': 9, '10': 'teams'},
+    const {'1': 'role', '3': 3, '4': 1, '5': 9, '10': 'role'},
+    const {'1': 'custom', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
+    const {'1': 'name', '3': 5, '4': 1, '5': 9, '10': 'name'},
+    const {'1': 'profile_image_url', '3': 6, '4': 1, '5': 9, '10': 'profileImageUrl'},
+  ],
+};
+
+/// Descriptor for `UserRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List userRequestDescriptor = $convert.base64Decode('CgtVc2VyUmVxdWVzdBIXCgJpZBgBIAEoCUIH+kIEcgIQAVICaWQSFAoFdGVhbXMYAiADKAlSBXRlYW1zEhIKBHJvbGUYAyABKAlSBHJvbGUSLwoGY3VzdG9tGAQgASgLMhcuZ29vZ2xlLnByb3RvYnVmLlN0cnVjdFIGY3VzdG9tEhIKBG5hbWUYBSABKAlSBG5hbWUSKgoRcHJvZmlsZV9pbWFnZV91cmwYBiABKAlSD3Byb2ZpbGVJbWFnZVVybA==');
 @$core.Deprecated('Use deviceDescriptor instead')
 const Device$json = const {
   '1': 'Device',
   '2': const [
     const {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
     const {'1': 'id', '3': 2, '4': 1, '5': 9, '10': 'id'},
-    const {'1': 'push_provider', '3': 3, '4': 1, '5': 9, '10': 'pushProvider'},
-    const {'1': 'disabled', '3': 4, '4': 1, '5': 8, '10': 'disabled'},
-    const {'1': 'disabled_reason', '3': 5, '4': 1, '5': 9, '10': 'disabledReason'},
-    const {'1': 'push_provider_name', '3': 6, '4': 1, '5': 9, '10': 'pushProviderName'},
-    const {'1': 'created_at', '3': 7, '4': 1, '5': 9, '10': 'createdAt'},
-    const {'1': 'updated_at', '3': 8, '4': 1, '5': 9, '10': 'updatedAt'},
+    const {'1': 'disabled', '3': 3, '4': 1, '5': 8, '10': 'disabled'},
+    const {'1': 'disabled_reason', '3': 4, '4': 1, '5': 9, '10': 'disabledReason'},
+    const {'1': 'push_provider_name', '3': 5, '4': 1, '5': 9, '10': 'pushProviderName'},
+    const {'1': 'created_at', '3': 6, '4': 1, '5': 9, '10': 'createdAt'},
+    const {'1': 'updated_at', '3': 7, '4': 1, '5': 9, '10': 'updatedAt'},
   ],
 };
 
 /// Descriptor for `Device`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List deviceDescriptor = $convert.base64Decode('CgZEZXZpY2USFwoHdXNlcl9pZBgBIAEoCVIGdXNlcklkEg4KAmlkGAIgASgJUgJpZBIjCg1wdXNoX3Byb3ZpZGVyGAMgASgJUgxwdXNoUHJvdmlkZXISGgoIZGlzYWJsZWQYBCABKAhSCGRpc2FibGVkEicKD2Rpc2FibGVkX3JlYXNvbhgFIAEoCVIOZGlzYWJsZWRSZWFzb24SLAoScHVzaF9wcm92aWRlcl9uYW1lGAYgASgJUhBwdXNoUHJvdmlkZXJOYW1lEh0KCmNyZWF0ZWRfYXQYByABKAlSCWNyZWF0ZWRBdBIdCgp1cGRhdGVkX2F0GAggASgJUgl1cGRhdGVkQXQ=');
+final $typed_data.Uint8List deviceDescriptor = $convert.base64Decode('CgZEZXZpY2USFwoHdXNlcl9pZBgBIAEoCVIGdXNlcklkEg4KAmlkGAIgASgJUgJpZBIaCghkaXNhYmxlZBgDIAEoCFIIZGlzYWJsZWQSJwoPZGlzYWJsZWRfcmVhc29uGAQgASgJUg5kaXNhYmxlZFJlYXNvbhIsChJwdXNoX3Byb3ZpZGVyX25hbWUYBSABKAlSEHB1c2hQcm92aWRlck5hbWUSHQoKY3JlYXRlZF9hdBgGIAEoCVIJY3JlYXRlZEF0Eh0KCnVwZGF0ZWRfYXQYByABKAlSCXVwZGF0ZWRBdA==');
+@$core.Deprecated('Use deviceRequestDescriptor instead')
+const DeviceRequest$json = const {
+  '1': 'DeviceRequest',
+  '2': const [
+    const {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
+    const {'1': 'id', '3': 2, '4': 1, '5': 9, '10': 'id'},
+    const {'1': 'disabled', '3': 3, '4': 1, '5': 8, '10': 'disabled'},
+    const {'1': 'disabled_reason', '3': 4, '4': 1, '5': 9, '10': 'disabledReason'},
+    const {'1': 'push_provider_name', '3': 5, '4': 1, '5': 9, '10': 'pushProviderName'},
+  ],
+};
+
+/// Descriptor for `DeviceRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List deviceRequestDescriptor = $convert.base64Decode('Cg1EZXZpY2VSZXF1ZXN0EhcKB3VzZXJfaWQYASABKAlSBnVzZXJJZBIOCgJpZBgCIAEoCVICaWQSGgoIZGlzYWJsZWQYAyABKAhSCGRpc2FibGVkEicKD2Rpc2FibGVkX3JlYXNvbhgEIAEoCVIOZGlzYWJsZWRSZWFzb24SLAoScHVzaF9wcm92aWRlcl9uYW1lGAUgASgJUhBwdXNoUHJvdmlkZXJOYW1l');
 @$core.Deprecated('Use recordingStorageOptionsDescriptor instead')
 const RecordingStorageOptions$json = const {
   '1': 'RecordingStorageOptions',
@@ -237,37 +268,54 @@ const Participant$json = const {
     const {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
     const {'1': 'role', '3': 2, '4': 1, '5': 9, '10': 'role'},
     const {'1': 'online', '3': 3, '4': 1, '5': 8, '10': 'online'},
+    const {'1': 'custom', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
+    const {'1': 'created_at', '3': 5, '4': 1, '5': 9, '8': const {}, '10': 'createdAt'},
+    const {'1': 'updated_at', '3': 6, '4': 1, '5': 9, '8': const {}, '10': 'updatedAt'},
   ],
 };
 
 /// Descriptor for `Participant`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List participantDescriptor = $convert.base64Decode('CgtQYXJ0aWNpcGFudBIXCgd1c2VyX2lkGAEgASgJUgZ1c2VySWQSEgoEcm9sZRgCIAEoCVIEcm9sZRIWCgZvbmxpbmUYAyABKAhSBm9ubGluZQ==');
+final $typed_data.Uint8List participantDescriptor = $convert.base64Decode('CgtQYXJ0aWNpcGFudBIXCgd1c2VyX2lkGAEgASgJUgZ1c2VySWQSEgoEcm9sZRgCIAEoCVIEcm9sZRIWCgZvbmxpbmUYAyABKAhSBm9ubGluZRIvCgZjdXN0b20YBCABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0UgZjdXN0b20SJgoKY3JlYXRlZF9hdBgFIAEoCUIH+kIEcgIQAVIJY3JlYXRlZEF0EiYKCnVwZGF0ZWRfYXQYBiABKAlCB/pCBHICEAFSCXVwZGF0ZWRBdA==');
+@$core.Deprecated('Use participantRequestDescriptor instead')
+const ParticipantRequest$json = const {
+  '1': 'ParticipantRequest',
+  '2': const [
+    const {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
+    const {'1': 'role', '3': 2, '4': 1, '5': 9, '10': 'role'},
+    const {'1': 'custom', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
+    const {'1': 'created_at', '3': 4, '4': 1, '5': 9, '8': const {}, '10': 'createdAt'},
+    const {'1': 'updated_at', '3': 5, '4': 1, '5': 9, '8': const {}, '10': 'updatedAt'},
+  ],
+};
+
+/// Descriptor for `ParticipantRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List participantRequestDescriptor = $convert.base64Decode('ChJQYXJ0aWNpcGFudFJlcXVlc3QSFwoHdXNlcl9pZBgBIAEoCVIGdXNlcklkEhIKBHJvbGUYAiABKAlSBHJvbGUSLwoGY3VzdG9tGAMgASgLMhcuZ29vZ2xlLnByb3RvYnVmLlN0cnVjdFIGY3VzdG9tEiYKCmNyZWF0ZWRfYXQYBCABKAlCB/pCBHICEAFSCWNyZWF0ZWRBdBImCgp1cGRhdGVkX2F0GAUgASgJQgf6QgRyAhABUgl1cGRhdGVkQXQ=');
 @$core.Deprecated('Use callStateDescriptor instead')
 const CallState$json = const {
   '1': 'CallState',
   '2': const [
-    const {'1': 'call_id', '3': 1, '4': 1, '5': 9, '10': 'callId'},
-    const {'1': 'participants', '3': 2, '4': 3, '5': 11, '6': '.stream.video.Participant', '10': 'participants'},
+    const {'1': 'participants', '3': 1, '4': 3, '5': 11, '6': '.stream.video.Participant', '10': 'participants'},
   ],
 };
 
 /// Descriptor for `CallState`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callStateDescriptor = $convert.base64Decode('CglDYWxsU3RhdGUSFwoHY2FsbF9pZBgBIAEoCVIGY2FsbElkEj0KDHBhcnRpY2lwYW50cxgCIAMoCzIZLnN0cmVhbS52aWRlby5QYXJ0aWNpcGFudFIMcGFydGljaXBhbnRz');
+final $typed_data.Uint8List callStateDescriptor = $convert.base64Decode('CglDYWxsU3RhdGUSPQoMcGFydGljaXBhbnRzGAEgAygLMhkuc3RyZWFtLnZpZGVvLlBhcnRpY2lwYW50UgxwYXJ0aWNpcGFudHM=');
 @$core.Deprecated('Use callDescriptor instead')
 const Call$json = const {
   '1': 'Call',
   '2': const [
-    const {'1': 'id', '3': 1, '4': 1, '5': 9, '8': const {}, '10': 'id'},
-    const {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
-    const {'1': 'created_by_user_id', '3': 3, '4': 1, '5': 9, '10': 'createdByUserId'},
-    const {'1': 'created_at', '3': 4, '4': 1, '5': 9, '10': 'createdAt'},
-    const {'1': 'updated_at', '3': 5, '4': 1, '5': 9, '10': 'updatedAt'},
-    const {'1': 'broadcast', '3': 6, '4': 1, '5': 8, '10': 'broadcast'},
-    const {'1': 'broadcast_options', '3': 7, '4': 3, '5': 11, '6': '.stream.video.BroadcastOptions', '10': 'broadcastOptions'},
-    const {'1': 'transcribe', '3': 8, '4': 1, '5': 8, '10': 'transcribe'},
-    const {'1': 'transcribe_options', '3': 9, '4': 1, '5': 11, '6': '.stream.video.TranscribeOptions', '10': 'transcribeOptions'},
+    const {'1': 'type', '3': 1, '4': 1, '5': 9, '8': const {}, '10': 'type'},
+    const {'1': 'id', '3': 2, '4': 1, '5': 9, '8': const {}, '10': 'id'},
+    const {'1': 'created_by_user_id', '3': 3, '4': 1, '5': 9, '8': const {}, '10': 'createdByUserId'},
+    const {'1': 'custom', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
+    const {'1': 'created_at', '3': 5, '4': 1, '5': 9, '8': const {}, '10': 'createdAt'},
+    const {'1': 'updated_at', '3': 6, '4': 1, '5': 9, '8': const {}, '10': 'updatedAt'},
+    const {'1': 'broadcast', '3': 7, '4': 1, '5': 8, '10': 'broadcast'},
+    const {'1': 'broadcast_options', '3': 8, '4': 3, '5': 11, '6': '.stream.video.BroadcastOptions', '10': 'broadcastOptions'},
+    const {'1': 'transcribe', '3': 9, '4': 1, '5': 8, '10': 'transcribe'},
+    const {'1': 'transcribe_options', '3': 10, '4': 1, '5': 11, '6': '.stream.video.TranscribeOptions', '10': 'transcribeOptions'},
   ],
 };
 
 /// Descriptor for `Call`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callDescriptor = $convert.base64Decode('CgRDYWxsEhcKAmlkGAEgASgJQgf6QgRyAhABUgJpZBISCgRuYW1lGAIgASgJUgRuYW1lEisKEmNyZWF0ZWRfYnlfdXNlcl9pZBgDIAEoCVIPY3JlYXRlZEJ5VXNlcklkEh0KCmNyZWF0ZWRfYXQYBCABKAlSCWNyZWF0ZWRBdBIdCgp1cGRhdGVkX2F0GAUgASgJUgl1cGRhdGVkQXQSHAoJYnJvYWRjYXN0GAYgASgIUglicm9hZGNhc3QSSwoRYnJvYWRjYXN0X29wdGlvbnMYByADKAsyHi5zdHJlYW0udmlkZW8uQnJvYWRjYXN0T3B0aW9uc1IQYnJvYWRjYXN0T3B0aW9ucxIeCgp0cmFuc2NyaWJlGAggASgIUgp0cmFuc2NyaWJlEk4KEnRyYW5zY3JpYmVfb3B0aW9ucxgJIAEoCzIfLnN0cmVhbS52aWRlby5UcmFuc2NyaWJlT3B0aW9uc1IRdHJhbnNjcmliZU9wdGlvbnM=');
+final $typed_data.Uint8List callDescriptor = $convert.base64Decode('CgRDYWxsEhsKBHR5cGUYASABKAlCB/pCBHICEAFSBHR5cGUSFwoCaWQYAiABKAlCB/pCBHICEAFSAmlkEjQKEmNyZWF0ZWRfYnlfdXNlcl9pZBgDIAEoCUIH+kIEcgIQAVIPY3JlYXRlZEJ5VXNlcklkEi8KBmN1c3RvbRgEIAEoCzIXLmdvb2dsZS5wcm90b2J1Zi5TdHJ1Y3RSBmN1c3RvbRImCgpjcmVhdGVkX2F0GAUgASgJQgf6QgRyAhABUgljcmVhdGVkQXQSJgoKdXBkYXRlZF9hdBgGIAEoCUIH+kIEcgIQAVIJdXBkYXRlZEF0EhwKCWJyb2FkY2FzdBgHIAEoCFIJYnJvYWRjYXN0EksKEWJyb2FkY2FzdF9vcHRpb25zGAggAygLMh4uc3RyZWFtLnZpZGVvLkJyb2FkY2FzdE9wdGlvbnNSEGJyb2FkY2FzdE9wdGlvbnMSHgoKdHJhbnNjcmliZRgJIAEoCFIKdHJhbnNjcmliZRJOChJ0cmFuc2NyaWJlX29wdGlvbnMYCiABKAsyHy5zdHJlYW0udmlkZW8uVHJhbnNjcmliZU9wdGlvbnNSEXRyYW5zY3JpYmVPcHRpb25z');

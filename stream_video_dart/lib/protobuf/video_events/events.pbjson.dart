@@ -8,6 +8,56 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
+@$core.Deprecated('Use websocketEventDescriptor instead')
+const WebsocketEvent$json = const {
+  '1': 'WebsocketEvent',
+  '2': const [
+    const {'1': 'health_check', '3': 1, '4': 1, '5': 11, '6': '.stream.video.Healthcheck', '9': 0, '10': 'healthCheck'},
+    const {'1': 'call_ringing', '3': 2, '4': 1, '5': 11, '6': '.stream.video.CallRinging', '9': 0, '10': 'callRinging'},
+    const {'1': 'call_created', '3': 3, '4': 1, '5': 11, '6': '.stream.video.CallCreated', '9': 0, '10': 'callCreated'},
+    const {'1': 'call_updated', '3': 4, '4': 1, '5': 11, '6': '.stream.video.CallUpdated', '9': 0, '10': 'callUpdated'},
+    const {'1': 'call_ended', '3': 5, '4': 1, '5': 11, '6': '.stream.video.CallEnded', '9': 0, '10': 'callEnded'},
+    const {'1': 'call_deleted', '3': 6, '4': 1, '5': 11, '6': '.stream.video.CallDeleted', '9': 0, '10': 'callDeleted'},
+    const {'1': 'user_updated', '3': 7, '4': 1, '5': 11, '6': '.stream.video.UserUpdated', '9': 0, '10': 'userUpdated'},
+    const {'1': 'participant_invited', '3': 8, '4': 1, '5': 11, '6': '.stream.video.ParticipantInvited', '9': 0, '10': 'participantInvited'},
+    const {'1': 'participant_updated', '3': 9, '4': 1, '5': 11, '6': '.stream.video.ParticipantUpdated', '9': 0, '10': 'participantUpdated'},
+    const {'1': 'participant_deleted', '3': 10, '4': 1, '5': 11, '6': '.stream.video.ParticipantDeleted', '9': 0, '10': 'participantDeleted'},
+    const {'1': 'participant_joined', '3': 11, '4': 1, '5': 11, '6': '.stream.video.ParticipantJoined', '9': 0, '10': 'participantJoined'},
+    const {'1': 'participant_left', '3': 12, '4': 1, '5': 11, '6': '.stream.video.ParticipantLeft', '9': 0, '10': 'participantLeft'},
+    const {'1': 'broadcast_started', '3': 13, '4': 1, '5': 11, '6': '.stream.video.BroadcastStarted', '9': 0, '10': 'broadcastStarted'},
+    const {'1': 'broadcast_ended', '3': 14, '4': 1, '5': 11, '6': '.stream.video.BroadcastEnded', '9': 0, '10': 'broadcastEnded'},
+    const {'1': 'auth_payload', '3': 15, '4': 1, '5': 11, '6': '.stream.video.AuthPayload', '9': 0, '10': 'authPayload'},
+  ],
+  '8': const [
+    const {'1': 'event_payload'},
+  ],
+};
+
+/// Descriptor for `WebsocketEvent`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List websocketEventDescriptor = $convert.base64Decode('Cg5XZWJzb2NrZXRFdmVudBI+CgxoZWFsdGhfY2hlY2sYASABKAsyGS5zdHJlYW0udmlkZW8uSGVhbHRoY2hlY2tIAFILaGVhbHRoQ2hlY2sSPgoMY2FsbF9yaW5naW5nGAIgASgLMhkuc3RyZWFtLnZpZGVvLkNhbGxSaW5naW5nSABSC2NhbGxSaW5naW5nEj4KDGNhbGxfY3JlYXRlZBgDIAEoCzIZLnN0cmVhbS52aWRlby5DYWxsQ3JlYXRlZEgAUgtjYWxsQ3JlYXRlZBI+CgxjYWxsX3VwZGF0ZWQYBCABKAsyGS5zdHJlYW0udmlkZW8uQ2FsbFVwZGF0ZWRIAFILY2FsbFVwZGF0ZWQSOAoKY2FsbF9lbmRlZBgFIAEoCzIXLnN0cmVhbS52aWRlby5DYWxsRW5kZWRIAFIJY2FsbEVuZGVkEj4KDGNhbGxfZGVsZXRlZBgGIAEoCzIZLnN0cmVhbS52aWRlby5DYWxsRGVsZXRlZEgAUgtjYWxsRGVsZXRlZBI+Cgx1c2VyX3VwZGF0ZWQYByABKAsyGS5zdHJlYW0udmlkZW8uVXNlclVwZGF0ZWRIAFILdXNlclVwZGF0ZWQSUwoTcGFydGljaXBhbnRfaW52aXRlZBgIIAEoCzIgLnN0cmVhbS52aWRlby5QYXJ0aWNpcGFudEludml0ZWRIAFIScGFydGljaXBhbnRJbnZpdGVkElMKE3BhcnRpY2lwYW50X3VwZGF0ZWQYCSABKAsyIC5zdHJlYW0udmlkZW8uUGFydGljaXBhbnRVcGRhdGVkSABSEnBhcnRpY2lwYW50VXBkYXRlZBJTChNwYXJ0aWNpcGFudF9kZWxldGVkGAogASgLMiAuc3RyZWFtLnZpZGVvLlBhcnRpY2lwYW50RGVsZXRlZEgAUhJwYXJ0aWNpcGFudERlbGV0ZWQSUAoScGFydGljaXBhbnRfam9pbmVkGAsgASgLMh8uc3RyZWFtLnZpZGVvLlBhcnRpY2lwYW50Sm9pbmVkSABSEXBhcnRpY2lwYW50Sm9pbmVkEkoKEHBhcnRpY2lwYW50X2xlZnQYDCABKAsyHS5zdHJlYW0udmlkZW8uUGFydGljaXBhbnRMZWZ0SABSD3BhcnRpY2lwYW50TGVmdBJNChFicm9hZGNhc3Rfc3RhcnRlZBgNIAEoCzIeLnN0cmVhbS52aWRlby5Ccm9hZGNhc3RTdGFydGVkSABSEGJyb2FkY2FzdFN0YXJ0ZWQSRwoPYnJvYWRjYXN0X2VuZGVkGA4gASgLMhwuc3RyZWFtLnZpZGVvLkJyb2FkY2FzdEVuZGVkSABSDmJyb2FkY2FzdEVuZGVkEj4KDGF1dGhfcGF5bG9hZBgPIAEoCzIZLnN0cmVhbS52aWRlby5BdXRoUGF5bG9hZEgAUgthdXRoUGF5bG9hZEIPCg1ldmVudF9wYXlsb2Fk');
+@$core.Deprecated('Use healthcheckDescriptor instead')
+const Healthcheck$json = const {
+  '1': 'Healthcheck',
+  '2': const [
+    const {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
+    const {'1': 'client_id', '3': 2, '4': 1, '5': 9, '10': 'clientId'},
+  ],
+};
+
+/// Descriptor for `Healthcheck`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List healthcheckDescriptor = $convert.base64Decode('CgtIZWFsdGhjaGVjaxIXCgd1c2VyX2lkGAEgASgJUgZ1c2VySWQSGwoJY2xpZW50X2lkGAIgASgJUghjbGllbnRJZA==');
+@$core.Deprecated('Use authPayloadDescriptor instead')
+const AuthPayload$json = const {
+  '1': 'AuthPayload',
+  '2': const [
+    const {'1': 'user', '3': 1, '4': 1, '5': 11, '6': '.stream.video.UserRequest', '10': 'user'},
+    const {'1': 'device', '3': 2, '4': 1, '5': 11, '6': '.stream.video.DeviceRequest', '10': 'device'},
+    const {'1': 'token', '3': 3, '4': 1, '5': 9, '10': 'token'},
+  ],
+};
+
+/// Descriptor for `AuthPayload`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List authPayloadDescriptor = $convert.base64Decode('CgtBdXRoUGF5bG9hZBItCgR1c2VyGAEgASgLMhkuc3RyZWFtLnZpZGVvLlVzZXJSZXF1ZXN0UgR1c2VyEjMKBmRldmljZRgCIAEoCzIbLnN0cmVhbS52aWRlby5EZXZpY2VSZXF1ZXN0UgZkZXZpY2USFAoFdG9rZW4YAyABKAlSBXRva2Vu');
 @$core.Deprecated('Use callRingingDescriptor instead')
 const CallRinging$json = const {
   '1': 'CallRinging',
