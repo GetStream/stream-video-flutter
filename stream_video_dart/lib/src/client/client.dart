@@ -222,6 +222,29 @@ class StreamVideoClient {
     }
   }
 
+
+  Future<JoinCallResponse> joinCall({required JoinCallRequest request}) async {
+    try {
+      final ctx = withHttpRequestHeaders(
+          Context(), {'Auth-Token': 'SuperSecretAPIKey'});
+
+      final response = await _client.joinCall(ctx, request);
+      return response;
+    } on TwirpError catch (e) {
+      final method =
+          e.getContext.value(ContextKeys.methodName) ?? 'unknown method';
+      throw StreamVideoError(
+          'Twirp error on method: $method. Code: ${e.getCode}. Message: ${e.getMsg}');
+    } on InvalidTwirpHeader catch (e) {
+      throw StreamVideoError('InvalidTwirpHeader: $e');
+    } catch (e, stack) {
+      throw StreamVideoError('''
+      Unknown Exception Occurred: $e
+      Stack trace: $stack
+      ''');
+    }
+  }
+
 }
 
 /// onClientRequestPrepared is a client hook used to print out the method name of the RPC call
