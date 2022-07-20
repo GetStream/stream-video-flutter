@@ -1,6 +1,5 @@
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
-import 'package:rxdart/subjects.dart';
 import 'package:stream_video_dart/protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
 import 'package:stream_video_dart/protobuf/video_coordinator_rpc/coordinator_service.pbtwirp.dart';
 import 'package:stream_video_dart/protobuf/video_events/events.pbserver.dart';
@@ -8,10 +7,8 @@ import 'package:stream_video_dart/protobuf/video_models/models.pb.dart';
 import 'package:stream_video_dart/src/client/state.dart';
 import 'package:stream_video_dart/src/core/error/error.dart';
 
-import 'package:stream_video_dart/src/core/http/connection_id_manager.dart';
 import 'package:stream_video_dart/src/core/http/token.dart';
 import 'package:stream_video_dart/src/core/http/token_manager.dart';
-import 'package:stream_video_dart/src/ws/connection_status.dart';
 import 'package:stream_video_dart/src/ws/websocket.dart';
 import 'package:tart/tart.dart';
 
@@ -201,6 +198,30 @@ class StreamVideoClient {
       ''');
     }
   }
+
+  Future<CreateCallResponse> createCall(
+      {required CreateCallRequest request}) async {
+    try {
+      final ctx = withHttpRequestHeaders(
+          Context(), {'Auth-Token': 'SuperSecretAPIKey'});
+
+      final response = await _client.createCall(ctx, request);
+      return response;
+    } on TwirpError catch (e) {
+      final method =
+          e.getContext.value(ContextKeys.methodName) ?? 'unknown method';
+      throw StreamVideoError(
+          'Twirp error on method: $method. Code: ${e.getCode}. Message: ${e.getMsg}');
+    } on InvalidTwirpHeader catch (e) {
+      throw StreamVideoError('InvalidTwirpHeader: $e');
+    } catch (e, stack) {
+      throw StreamVideoError('''
+      Unknown Exception Occurred: $e
+      Stack trace: $stack
+      ''');
+    }
+  }
+
 }
 
 /// onClientRequestPrepared is a client hook used to print out the method name of the RPC call
