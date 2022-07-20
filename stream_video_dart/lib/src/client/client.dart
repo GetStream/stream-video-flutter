@@ -47,15 +47,15 @@ class StreamVideoClient {
       // interceptor: myInterceptor()
     );
 
+    state = ClientState();
     _ws = ws ??
         WebSocket(
           apiKey: apiKey,
           baseURL: "whatever",
           // handler: handler,
           tokenManager: _tokenManager,
+          state: state,
         );
-
-    state = ClientState();
   }
 
   /// Client specific logger instance.

@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:stream_video_dart/protobuf/video_events/events.pbserver.dart';
 import 'package:stream_video_dart/protobuf/video_models/models.pb.dart';
+import 'package:stream_video_dart/src/client/state.dart';
 import 'package:stream_video_dart/src/core/error/error.dart';
 import 'package:stream_video_dart/src/core/http/token_manager.dart';
 import 'package:stream_video_dart/src/ws/connection_status.dart';
@@ -23,8 +24,11 @@ class WebSocket with TimerHelper {
     required this.baseURL,
     // required this.handler,
     required this.tokenManager,
+    required this.state,
     this.queryParameters = const {},
   }) : _logger = logger;
+
+  final ClientState state;
 
   final String baseURL;
   // final EventHandler handler;
@@ -45,18 +49,6 @@ class WebSocket with TimerHelper {
   Completer<WebsocketEvent>? connectionCompleter;
 
   StreamSubscription? _webSocketChannelSubscription;
-
-  final _healthcheckController = BehaviorSubject<Healthcheck>();
-
-  set _healthcheck(Healthcheck healthcheck) =>
-      _healthcheckController.add(healthcheck);
-
-  /// The current connection status value
-  Healthcheck get healthcheck => _healthcheckController.value;
-
-  /// This notifies of Healthcheck changes
-  Stream<Healthcheck> get healthcheckStream =>
-      _healthcheckController.stream.distinct();
 
   final _connectionStatusController =
       BehaviorSubject.seeded(ConnectionStatus.disconnected);
@@ -279,6 +271,66 @@ class WebSocket with TimerHelper {
           {
             return _handleHealthCheckEvent(receivedEvent.healthCheck);
           }
+        case WebsocketEvent_EventPayload.callRinging:
+          {
+            return _handleCallRinging(receivedEvent.callRinging);
+          }
+        case WebsocketEvent_EventPayload.callCreated:
+          {
+            return _handleCallCreated(receivedEvent.callCreated);
+          }
+        case WebsocketEvent_EventPayload.callUpdated:
+          {
+            return _handlerCallUpdated(receivedEvent.callUpdated);
+          }
+        case WebsocketEvent_EventPayload.callEnded:
+          {
+            return _handleCallEnded(receivedEvent.callEnded);
+          }
+        case WebsocketEvent_EventPayload.callDeleted:
+          {
+            return _handleCallDeleted(receivedEvent.callDeleted);
+          }
+        case WebsocketEvent_EventPayload.userUpdated:
+          {
+            return _handleUserUpdated(receivedEvent.userUpdated);
+          }
+        case WebsocketEvent_EventPayload.participantInvited:
+          {
+            return _handleParticipantInvited(receivedEvent.participantInvited);
+          }
+        case WebsocketEvent_EventPayload.participantUpdated:
+          {
+            return _handleParticipantUpdated(receivedEvent.participantUpdated);
+          }
+        case WebsocketEvent_EventPayload.participantDeleted:
+          {
+            return _handleParticipantDeleted(receivedEvent.participantDeleted);
+          }
+        case WebsocketEvent_EventPayload.participantJoined:
+          {
+            return _handleParticipantJoined(receivedEvent.participantJoined);
+          }
+        case WebsocketEvent_EventPayload.participantLeft:
+          {
+            return _handleParticipantLeft(receivedEvent.participantLeft);
+          }
+        case WebsocketEvent_EventPayload.broadcastStarted:
+          {
+            return _handleBroadcastStarted(receivedEvent.broadcastStarted);
+          }
+        case WebsocketEvent_EventPayload.broadcastEnded:
+          {
+            return _handleBroadcastEnded(receivedEvent.broadcastEnded);
+          }
+        case WebsocketEvent_EventPayload.authPayload:
+          {
+            return _handleAuthPayload(receivedEvent.authPayload);
+          }
+        case WebsocketEvent_EventPayload.notSet:
+          {
+            _logger?.info("handle event payload not set");
+          }
       }
 
       // handler.call(receivedEvent);
@@ -288,18 +340,93 @@ class WebSocket with TimerHelper {
     }
   }
 
+  //close all controllers
+  Future<void> close() async {
+    await Future.wait([_connectionStatusController.close(), state.dispose()]);
+  }
+
   void _handleHealthCheckEvent(Healthcheck event) {
-    _logger?.info('HealthCheck received : ${event.clientId}');
+    _logger?.info('HealthCheck received : ${event.toString()}');
 
     _connectionId = event.clientId;
 
     connectionStatus = ConnectionStatus.connected;
-    _healthcheck = event;
+    state.healthcheck = event;
   }
 
-  //close all controllers
-  Future<void> close() async {
-    await Future.wait(
-        [_connectionStatusController.close(), _healthcheckController.close()]);
+  void _handleCallRinging(CallRinging event) {
+    _logger?.info('CallRinging event received : ${event.call.toString()}');
+    state.callRinging = event;
+  }
+
+  void _handleCallCreated(CallCreated event) {
+    _logger?.info('CallCreated event received : ${event.call.toString()}');
+    state.callCreated = event;
+  }
+
+  void _handlerCallUpdated(CallUpdated event) {
+    _logger?.info('CallUpdated event received : ${event.call.toString()}');
+    state.callUpdated = event;
+  }
+
+  void _handleCallEnded(CallEnded event) {
+    _logger?.info('CallEnded event received : ${event.call.toString()}');
+    state.callEnded = event;
+  }
+
+  void _handleCallDeleted(CallDeleted event) {
+    _logger?.info('CallDeleted event received : ${event.call.toString()}');
+    state.callDeleted = event;
+  }
+
+  void _handleUserUpdated(UserUpdated event) {
+    _logger?.info('UserUpdated event received : ${event.user.toString()}');
+    state.userUpdated = event;
+  }
+
+  void _handleParticipantInvited(ParticipantInvited event) {
+    _logger?.info(
+        'ParticipantInvited event received : ${event.participant.toString()}');
+    state.participantInvited = event;
+  }
+
+  void _handleParticipantUpdated(ParticipantUpdated event) {
+    _logger?.info(
+        'ParticipantUpdated event received : ${event.participant.toString()}');
+    state.participantUpdated = event;
+  }
+
+  void _handleParticipantDeleted(ParticipantDeleted event) {
+    _logger?.info('ParticipantDeleted event received : ${event.userId}');
+    state.participantDeleted = event;
+  }
+
+  void _handleParticipantJoined(ParticipantJoined event) {
+    _logger?.info(
+        'ParticipantJoined event received : ${event.participant.toString()}');
+    state.participantJoined = event;
+  }
+
+  void _handleParticipantLeft(ParticipantLeft event) {
+    _logger?.info(
+        'ParticipantLeft event received : ${event.participant.toString()}');
+    state.participantLeft = event;
+  }
+
+  void _handleBroadcastStarted(BroadcastStarted event) {
+    _logger?.info(
+        'BroadcastStarted event received : ${event.broadcast.toString()}');
+    state.broadcastStarted = event;
+  }
+
+  void _handleBroadcastEnded(BroadcastEnded event) {
+    _logger
+        ?.info('BroadcastEnded event received : ${event.broadcast.toString()}');
+    state.broadcastEnded = event;
+  }
+
+  void _handleAuthPayload(AuthPayload event) {
+    _logger?.info('AuthPayload event received : ${event.toString()}');
+    state.authPayload = event;
   }
 }
