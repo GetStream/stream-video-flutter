@@ -19,3 +19,9 @@ dart bin/client.dart
 - [ ] LiveKit wrapper
 - [ ] Sample app using LiveKit
 - [ ] Sample app using lower level WebRTC client
+
+## Notes
+
+protoc-gen-tart is a fork from https://github.com/syncapod/tart/tree/main/protoc-gen-tart
+Had to fix it because it was pretty broken
+You don't need it unless you are building it from source
