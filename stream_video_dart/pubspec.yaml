@@ -11,5 +11,7 @@ dependencies:
   http: ^0.13.4
   protobuf: ^2.0.1
   tart: ^0.2.0
+  equatable: ^2.0.3
+  
 dev_dependencies:
-  lints: ^1.0.0
+  dart_code_metrics: ^4.4.0
