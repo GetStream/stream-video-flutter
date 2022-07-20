@@ -1,4 +1,3 @@
-
 import 'package:http/http.dart';
 import 'package:stream_video_dart/protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
 import 'package:stream_video_dart/protobuf/video_coordinator_rpc/coordinator_service.pbtwirp.dart';
@@ -7,9 +6,9 @@ import 'package:tart/tart.dart';
 
 class StreamVideoClient {
   late final CallCoordinatorServiceProtobufClient _client;
-  StreamVideoClient() {
+  StreamVideoClient({String? coordinatorUrl}) {
     _client = CallCoordinatorServiceProtobufClient(
-      "http://localhost:26991",
+      coordinatorUrl ?? "http://localhost:26991",
       "",
       hooks: ClientHooks(
         onRequestPrepared: onClientRequestPrepared,
