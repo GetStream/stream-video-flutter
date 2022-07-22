@@ -24,16 +24,15 @@ final _levelEmojiMapper = {
 
 class StreamVideoClient {
   late final CallCoordinatorServiceProtobufClient _client;
-  late final WebSocket _ws;
+  late final WebSocketClient _ws;
   final _tokenManager = TokenManager();
-  // final _connectionIdManager = ConnectionIdManager();
   StreamVideoClient(
     String apiKey, {
     this.logLevel = Level.WARNING,
     String? coordinatorUrl,
     String? baseURL,
     this.logHandlerFunction = StreamVideoClient.defaultLogHandler,
-    WebSocket? ws,
+    WebSocketClient? ws,
   }) {
     _client = CallCoordinatorServiceProtobufClient(
       coordinatorUrl ?? "http://localhost:26991",
@@ -46,12 +45,8 @@ class StreamVideoClient {
 
     state = ClientState();
     _ws = ws ??
-        WebSocket(
-          apiKey: apiKey,
-          baseURL: "whatever",
-          // handler: handler,
-          tokenManager: _tokenManager,
-          state: state,
+        WebSocketClient(
+          logger: logger,
         );
   }
 
@@ -82,18 +77,12 @@ class StreamVideoClient {
     ..level = logLevel
     ..onRecord.listen(logHandlerFunction);
 
-  void setUser(User user,
+  Future<void> setUser(User user,
       {Token? token,
       TokenProvider? provider,
       bool connectWebSocket = true}) async {
-    if (_ws.connectionCompleter?.isCompleted == false) {
-      throw const StreamVideoError(
-        'User already getting connected, try calling `disconnectUser` '
-        'before trying to connect again',
-      );
-    }
-
     logger.info('setting user : ${user.id}');
+    logger.info('setting token : ${token!.rawValue}');
 
     await _tokenManager.setTokenOrProvider(
       user.id,
@@ -102,78 +91,13 @@ class StreamVideoClient {
     );
 
     state.currentUser = user;
-
-    // if (!connectWebSocket) return state.currentUser;
-
-    // try {
-    //   // if (_originalChatPersistenceClient != null) {
-    //   //   _chatPersistenceClient = _originalChatPersistenceClient;
-    //   //   await _chatPersistenceClient!.connect(ownUser.id);
-    //   // }
-    //   final connectedUser = await openConnection(
-    //     includeUserDetailsInConnectCall: true,
-    //   );
-    //   return state.currentUser = connectedUser;
-    // } catch (e, stk) {
-    //   if (e is StreamWebSocketError ) {//&& e.isRetriable
-    //     // final event = await _chatPersistenceClient?.getConnectionInfo();
-    //     // if (event != null) return ownUser.merge(event.me);
-    //   }
-    //   logger.severe('error connecting user : ${user.id}', e, stk);
-    //   rethrow;
-    // }
   }
 
-  /// Creates a new WebSocket connection with the current user.
-  /// If [includeUserDetailsInConnectCall] is true it will include the current
-  /// user details in the connect call.
-  // Future<User> openConnection({
-  //   bool includeUserDetailsInConnectCall = false,
-  // }) async {
-  //   assert(
-  //     state.currentUser != null,
-  //     'User is not set on client, '
-  //     'use `connectUser` or `connectAnonymousUser` instead',
-  //   );
-
-  //   final user = state.currentUser!;
-
-  //   logger.info('Opening web-socket connection for ${user.id}');
-
-  //   if (_ws.connectionStatus == ConnectionStatus.connecting) {
-  //     throw StreamVideoError('Connection already in progress for ${user.id}');
-  //   }
-
-  //   if (_ws.connectionStatus == ConnectionStatus.connected) {
-  //     throw StreamVideoError('Connection already available for ${user.id}');
-  //   }
-
-  //   _ws.connectionStatus = ConnectionStatus.connecting;
-
-  //   // skipping `ws` seed connection status -> ConnectionStatus.disconnected
-  //   // otherwise `client.wsConnectionStatusStream` will emit in order
-  //   // 1. ConnectionStatus.disconnected -> client seed status
-  //   // 2. ConnectionStatus.connecting -> client connecting status
-  //   // 3. ConnectionStatus.disconnected -> ws seed status
-  //   // _connectionStatusSubscription =
-  //   //     _ws.connectionStatusStream.skip(1).listen(_connectionStatusHandler);
-
-  //   try {
-  //     final event = await _ws.connect(
-  //       user,
-  //       includeUserDetails: includeUserDetailsInConnectCall,
-  //     );
-  //     // return user.merge(event.authPayload.user.);
-  //   } catch (e, stk) {
-  //     logger.severe('error connecting ws', e, stk);
-  //     rethrow;
-  //   }
-  // }
-
-  Future<WebsocketEvent> connect() async {
-    final user = state.currentUser!;
-    final event = await _ws.connect(user);
-    return event;
+  Future<void> connect() async {
+    final user = state.currentUser;
+    final token = await _tokenManager.loadToken();
+    print("TOKEN ${token.rawValue}");
+    _ws.connect(user: user!, token: token);
   }
 
   Future<SelectEdgeServerResponse> selectEdgeServer(
@@ -202,8 +126,9 @@ class StreamVideoClient {
   Future<CreateCallResponse> createCall(
       {required CreateCallRequest request}) async {
     try {
+      final token = await _tokenManager.loadToken();
       final ctx = withHttpRequestHeaders(
-          Context(), {'Auth-Token': 'SuperSecretAPIKey'});
+          Context(), {'authorization': 'Bearer ${token.rawValue}}'});
 
       final response = await _client.createCall(ctx, request);
       return response;
@@ -221,7 +146,6 @@ class StreamVideoClient {
       ''');
     }
   }
-
 
   Future<JoinCallResponse> joinCall({required JoinCallRequest request}) async {
     try {
@@ -244,7 +168,6 @@ class StreamVideoClient {
       ''');
     }
   }
-
 }
 
 /// onClientRequestPrepared is a client hook used to print out the method name of the RPC call

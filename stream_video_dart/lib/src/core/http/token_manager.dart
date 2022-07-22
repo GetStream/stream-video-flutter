@@ -67,7 +67,7 @@ class TokenManager {
     );
     if (refresh || _token == null) {
       final rawValue = await _provider!(_userId!);
-      _token = Token.fromRawValue(rawValue);
+      _token = Token(rawValue);
     }
     return _token!;
   }

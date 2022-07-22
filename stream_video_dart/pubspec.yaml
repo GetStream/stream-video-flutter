@@ -4,7 +4,7 @@ version: 1.0.0
 # homepage: https://www.example.com
 
 environment:
-  sdk: '>=2.15.1 <3.0.0'
+  sdk: '>=2.17.0 <3.0.0'
 
 
 dependencies:
@@ -12,10 +12,10 @@ dependencies:
   http: ^0.13.4
   protobuf: ^2.0.1
   tart: ^0.2.0
-  rxdart: ^0.27.5
   uuid: ^3.0.6
   jose: ^0.3.2
   logging: ^1.0.2
+  rxdart: ^0.27.5
   web_socket_channel: ^2.2.0
 
 dev_dependencies:
