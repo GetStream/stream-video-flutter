@@ -2,6 +2,11 @@ analyzer:
   plugins:
     - dart_code_metrics
   exclude:
+    - packages/*/lib/**/*.pb.dart
+    - packages/*/lib/**/*.pbenum.dart
+    - packages/*/lib/**/*.pbjson.dart
+    - packages/*/lib/**/*.pbserver.dart
+    - packages/*/lib/**/*.pbtwirp.dart
     - packages/*/lib/**/*.g.dart
     - packages/*/lib/src/emoji/**
     - packages/*/lib/scrollable_positioned_list/**
