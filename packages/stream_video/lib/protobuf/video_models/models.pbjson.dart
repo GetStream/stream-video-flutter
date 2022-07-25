@@ -47,10 +47,20 @@ const EdgeServer$json = const {
   '2': const [
     const {'1': 'url', '3': 1, '4': 1, '5': 9, '10': 'url'},
   ],
+  '3': const [EdgeServer_Coordinates$json],
+};
+
+@$core.Deprecated('Use edgeServerDescriptor instead')
+const EdgeServer_Coordinates$json = const {
+  '1': 'Coordinates',
+  '2': const [
+    const {'1': 'lat', '3': 1, '4': 1, '5': 2, '10': 'lat'},
+    const {'1': 'long', '3': 2, '4': 1, '5': 2, '10': 'long'},
+  ],
 };
 
 /// Descriptor for `EdgeServer`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List edgeServerDescriptor = $convert.base64Decode('CgpFZGdlU2VydmVyEhAKA3VybBgBIAEoCVIDdXJs');
+final $typed_data.Uint8List edgeServerDescriptor = $convert.base64Decode('CgpFZGdlU2VydmVyEhAKA3VybBgBIAEoCVIDdXJsGjMKC0Nvb3JkaW5hdGVzEhAKA2xhdBgBIAEoAlIDbGF0EhIKBGxvbmcYAiABKAJSBGxvbmc=');
 @$core.Deprecated('Use latencyDescriptor instead')
 const Latency$json = const {
   '1': 'Latency',
@@ -61,42 +71,6 @@ const Latency$json = const {
 
 /// Descriptor for `Latency`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List latencyDescriptor = $convert.base64Decode('CgdMYXRlbmN5EjEKFG1lYXN1cmVtZW50c19zZWNvbmRzGAEgAygCUhNtZWFzdXJlbWVudHNTZWNvbmRz');
-@$core.Deprecated('Use broadcastDescriptor instead')
-const Broadcast$json = const {
-  '1': 'Broadcast',
-  '2': const [
-    const {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
-    const {'1': 'rtmp', '3': 2, '4': 1, '5': 11, '6': '.stream.video.RTMPBroadcast', '9': 0, '10': 'rtmp'},
-    const {'1': 'hls', '3': 3, '4': 1, '5': 11, '6': '.stream.video.HLSBroadcast', '9': 0, '10': 'hls'},
-    const {'1': 'record', '3': 4, '4': 1, '5': 11, '6': '.stream.video.RecordBroadcast', '9': 0, '10': 'record'},
-  ],
-  '8': const [
-    const {'1': 'Details'},
-  ],
-};
-
-/// Descriptor for `Broadcast`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List broadcastDescriptor = $convert.base64Decode('CglCcm9hZGNhc3QSDgoCaWQYASABKAlSAmlkEjEKBHJ0bXAYAiABKAsyGy5zdHJlYW0udmlkZW8uUlRNUEJyb2FkY2FzdEgAUgRydG1wEi4KA2hscxgDIAEoCzIaLnN0cmVhbS52aWRlby5ITFNCcm9hZGNhc3RIAFIDaGxzEjcKBnJlY29yZBgEIAEoCzIdLnN0cmVhbS52aWRlby5SZWNvcmRCcm9hZGNhc3RIAFIGcmVjb3JkQgkKB0RldGFpbHM=');
-@$core.Deprecated('Use rTMPBroadcastDescriptor instead')
-const RTMPBroadcast$json = const {
-  '1': 'RTMPBroadcast',
-  '2': const [
-    const {'1': 'call_id', '3': 1, '4': 1, '5': 9, '10': 'callId'},
-    const {'1': 'rtmpurls', '3': 2, '4': 3, '5': 9, '10': 'rtmpurls'},
-    const {'1': 'width', '3': 3, '4': 1, '5': 5, '10': 'width'},
-    const {'1': 'height', '3': 4, '4': 1, '5': 5, '10': 'height'},
-  ],
-};
-
-/// Descriptor for `RTMPBroadcast`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List rTMPBroadcastDescriptor = $convert.base64Decode('Cg1SVE1QQnJvYWRjYXN0EhcKB2NhbGxfaWQYASABKAlSBmNhbGxJZBIaCghydG1wdXJscxgCIAMoCVIIcnRtcHVybHMSFAoFd2lkdGgYAyABKAVSBXdpZHRoEhYKBmhlaWdodBgEIAEoBVIGaGVpZ2h0');
-@$core.Deprecated('Use hLSBroadcastDescriptor instead')
-const HLSBroadcast$json = const {
-  '1': 'HLSBroadcast',
-};
-
-/// Descriptor for `HLSBroadcast`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List hLSBroadcastDescriptor = $convert.base64Decode('CgxITFNCcm9hZGNhc3Q=');
 @$core.Deprecated('Use fileDescriptor instead')
 const File$json = const {
   '1': 'File',
@@ -198,17 +172,27 @@ const RecordingStorageOptions$json = const {
 
 /// Descriptor for `RecordingStorageOptions`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List recordingStorageOptionsDescriptor = $convert.base64Decode('ChdSZWNvcmRpbmdTdG9yYWdlT3B0aW9ucxI4CgdzdG9yYWdlGAIgASgOMh4uc3RyZWFtLnZpZGVvLlJlY29yZGluZ1N0b3JhZ2VSB3N0b3JhZ2USHQoKYWNjZXNzX2tleRgDIAEoCVIJYWNjZXNzS2V5Eh0KCnNlY3JldF9rZXkYBCABKAlSCXNlY3JldEtleRIfCgtidWNrZXRfbmFtZRgFIAEoCVIKYnVja2V0TmFtZRIWCgZyZWdpb24YBiABKAlSBnJlZ2lvbhISCgRwYXRoGAcgASgJUgRwYXRo');
-@$core.Deprecated('Use broadcastOptionsDescriptor instead')
-const BroadcastOptions$json = const {
-  '1': 'BroadcastOptions',
+@$core.Deprecated('Use rTMPOptionsDescriptor instead')
+const RTMPOptions$json = const {
+  '1': 'RTMPOptions',
   '2': const [
-    const {'1': 'rtmp_url', '3': 1, '4': 1, '5': 9, '10': 'rtmpUrl'},
+    const {'1': 'urls', '3': 1, '4': 3, '5': 9, '10': 'urls'},
+  ],
+};
+
+/// Descriptor for `RTMPOptions`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List rTMPOptionsDescriptor = $convert.base64Decode('CgtSVE1QT3B0aW9ucxISCgR1cmxzGAEgAygJUgR1cmxz');
+@$core.Deprecated('Use broadcastDescriptor instead')
+const Broadcast$json = const {
+  '1': 'Broadcast',
+  '2': const [
+    const {'1': 'rtmp', '3': 1, '4': 1, '5': 11, '6': '.stream.video.RTMPOptions', '10': 'rtmp'},
     const {'1': 'hls_url', '3': 2, '4': 1, '5': 9, '10': 'hlsUrl'},
   ],
 };
 
-/// Descriptor for `BroadcastOptions`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List broadcastOptionsDescriptor = $convert.base64Decode('ChBCcm9hZGNhc3RPcHRpb25zEhkKCHJ0bXBfdXJsGAEgASgJUgdydG1wVXJsEhcKB2hsc191cmwYAiABKAlSBmhsc1VybA==');
+/// Descriptor for `Broadcast`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List broadcastDescriptor = $convert.base64Decode('CglCcm9hZGNhc3QSLQoEcnRtcBgBIAEoCzIZLnN0cmVhbS52aWRlby5SVE1QT3B0aW9uc1IEcnRtcBIXCgdobHNfdXJsGAIgASgJUgZobHNVcmw=');
 @$core.Deprecated('Use transcribeOptionsDescriptor instead')
 const TranscribeOptions$json = const {
   '1': 'TranscribeOptions',
@@ -222,17 +206,17 @@ const CallType$json = const {
   '2': const [
     const {'1': 'name', '3': 1, '4': 1, '5': 9, '10': 'name'},
     const {'1': 'security', '3': 2, '4': 1, '5': 11, '6': '.stream.video.Security', '10': 'security'},
-    const {'1': 'broadcast', '3': 3, '4': 1, '5': 8, '10': 'broadcast'},
-    const {'1': 'broadcast_options', '3': 4, '4': 3, '5': 11, '6': '.stream.video.BroadcastOptions', '10': 'broadcastOptions'},
-    const {'1': 'transcribe', '3': 5, '4': 1, '5': 8, '10': 'transcribe'},
-    const {'1': 'transcribe_options', '3': 6, '4': 1, '5': 11, '6': '.stream.video.TranscribeOptions', '10': 'transcribeOptions'},
-    const {'1': 'created_at', '3': 7, '4': 1, '5': 9, '10': 'createdAt'},
-    const {'1': 'updated_at', '3': 8, '4': 1, '5': 9, '10': 'updatedAt'},
+    const {'1': 'recording', '3': 4, '4': 1, '5': 8, '10': 'recording'},
+    const {'1': 'hls_broadcast', '3': 5, '4': 1, '5': 8, '10': 'hlsBroadcast'},
+    const {'1': 'transcribe', '3': 6, '4': 1, '5': 8, '10': 'transcribe'},
+    const {'1': 'transcribe_options', '3': 7, '4': 1, '5': 11, '6': '.stream.video.TranscribeOptions', '10': 'transcribeOptions'},
+    const {'1': 'created_at', '3': 8, '4': 1, '5': 9, '10': 'createdAt'},
+    const {'1': 'updated_at', '3': 9, '4': 1, '5': 9, '10': 'updatedAt'},
   ],
 };
 
 /// Descriptor for `CallType`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callTypeDescriptor = $convert.base64Decode('CghDYWxsVHlwZRISCgRuYW1lGAEgASgJUgRuYW1lEjIKCHNlY3VyaXR5GAIgASgLMhYuc3RyZWFtLnZpZGVvLlNlY3VyaXR5UghzZWN1cml0eRIcCglicm9hZGNhc3QYAyABKAhSCWJyb2FkY2FzdBJLChFicm9hZGNhc3Rfb3B0aW9ucxgEIAMoCzIeLnN0cmVhbS52aWRlby5Ccm9hZGNhc3RPcHRpb25zUhBicm9hZGNhc3RPcHRpb25zEh4KCnRyYW5zY3JpYmUYBSABKAhSCnRyYW5zY3JpYmUSTgoSdHJhbnNjcmliZV9vcHRpb25zGAYgASgLMh8uc3RyZWFtLnZpZGVvLlRyYW5zY3JpYmVPcHRpb25zUhF0cmFuc2NyaWJlT3B0aW9ucxIdCgpjcmVhdGVkX2F0GAcgASgJUgljcmVhdGVkQXQSHQoKdXBkYXRlZF9hdBgIIAEoCVIJdXBkYXRlZEF0');
+final $typed_data.Uint8List callTypeDescriptor = $convert.base64Decode('CghDYWxsVHlwZRISCgRuYW1lGAEgASgJUgRuYW1lEjIKCHNlY3VyaXR5GAIgASgLMhYuc3RyZWFtLnZpZGVvLlNlY3VyaXR5UghzZWN1cml0eRIcCglyZWNvcmRpbmcYBCABKAhSCXJlY29yZGluZxIjCg1obHNfYnJvYWRjYXN0GAUgASgIUgxobHNCcm9hZGNhc3QSHgoKdHJhbnNjcmliZRgGIAEoCFIKdHJhbnNjcmliZRJOChJ0cmFuc2NyaWJlX29wdGlvbnMYByABKAsyHy5zdHJlYW0udmlkZW8uVHJhbnNjcmliZU9wdGlvbnNSEXRyYW5zY3JpYmVPcHRpb25zEh0KCmNyZWF0ZWRfYXQYCCABKAlSCWNyZWF0ZWRBdBIdCgp1cGRhdGVkX2F0GAkgASgJUgl1cGRhdGVkQXQ=');
 @$core.Deprecated('Use securityDescriptor instead')
 const Security$json = const {
   '1': 'Security',
@@ -269,13 +253,15 @@ const Participant$json = const {
     const {'1': 'role', '3': 2, '4': 1, '5': 9, '10': 'role'},
     const {'1': 'online', '3': 3, '4': 1, '5': 8, '10': 'online'},
     const {'1': 'custom', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
-    const {'1': 'created_at', '3': 5, '4': 1, '5': 9, '8': const {}, '10': 'createdAt'},
-    const {'1': 'updated_at', '3': 6, '4': 1, '5': 9, '8': const {}, '10': 'updatedAt'},
+    const {'1': 'video', '3': 5, '4': 1, '5': 8, '10': 'video'},
+    const {'1': 'audio', '3': 6, '4': 1, '5': 8, '10': 'audio'},
+    const {'1': 'created_at', '3': 7, '4': 1, '5': 9, '8': const {}, '10': 'createdAt'},
+    const {'1': 'updated_at', '3': 8, '4': 1, '5': 9, '8': const {}, '10': 'updatedAt'},
   ],
 };
 
 /// Descriptor for `Participant`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List participantDescriptor = $convert.base64Decode('CgtQYXJ0aWNpcGFudBIXCgd1c2VyX2lkGAEgASgJUgZ1c2VySWQSEgoEcm9sZRgCIAEoCVIEcm9sZRIWCgZvbmxpbmUYAyABKAhSBm9ubGluZRIvCgZjdXN0b20YBCABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0UgZjdXN0b20SJgoKY3JlYXRlZF9hdBgFIAEoCUIH+kIEcgIQAVIJY3JlYXRlZEF0EiYKCnVwZGF0ZWRfYXQYBiABKAlCB/pCBHICEAFSCXVwZGF0ZWRBdA==');
+final $typed_data.Uint8List participantDescriptor = $convert.base64Decode('CgtQYXJ0aWNpcGFudBIXCgd1c2VyX2lkGAEgASgJUgZ1c2VySWQSEgoEcm9sZRgCIAEoCVIEcm9sZRIWCgZvbmxpbmUYAyABKAhSBm9ubGluZRIvCgZjdXN0b20YBCABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0UgZjdXN0b20SFAoFdmlkZW8YBSABKAhSBXZpZGVvEhQKBWF1ZGlvGAYgASgIUgVhdWRpbxImCgpjcmVhdGVkX2F0GAcgASgJQgf6QgRyAhABUgljcmVhdGVkQXQSJgoKdXBkYXRlZF9hdBgIIAEoCUIH+kIEcgIQAVIJdXBkYXRlZEF0');
 @$core.Deprecated('Use participantRequestDescriptor instead')
 const ParticipantRequest$json = const {
   '1': 'ParticipantRequest',
@@ -310,12 +296,12 @@ const Call$json = const {
     const {'1': 'custom', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
     const {'1': 'created_at', '3': 5, '4': 1, '5': 9, '8': const {}, '10': 'createdAt'},
     const {'1': 'updated_at', '3': 6, '4': 1, '5': 9, '8': const {}, '10': 'updatedAt'},
-    const {'1': 'broadcast', '3': 7, '4': 1, '5': 8, '10': 'broadcast'},
-    const {'1': 'broadcast_options', '3': 8, '4': 3, '5': 11, '6': '.stream.video.BroadcastOptions', '10': 'broadcastOptions'},
+    const {'1': 'recording', '3': 7, '4': 1, '5': 8, '10': 'recording'},
+    const {'1': 'broadcast', '3': 8, '4': 1, '5': 11, '6': '.stream.video.Broadcast', '10': 'broadcast'},
     const {'1': 'transcribe', '3': 9, '4': 1, '5': 8, '10': 'transcribe'},
     const {'1': 'transcribe_options', '3': 10, '4': 1, '5': 11, '6': '.stream.video.TranscribeOptions', '10': 'transcribeOptions'},
   ],
 };
 
 /// Descriptor for `Call`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callDescriptor = $convert.base64Decode('CgRDYWxsEhsKBHR5cGUYASABKAlCB/pCBHICEAFSBHR5cGUSFwoCaWQYAiABKAlCB/pCBHICEAFSAmlkEjQKEmNyZWF0ZWRfYnlfdXNlcl9pZBgDIAEoCUIH+kIEcgIQAVIPY3JlYXRlZEJ5VXNlcklkEi8KBmN1c3RvbRgEIAEoCzIXLmdvb2dsZS5wcm90b2J1Zi5TdHJ1Y3RSBmN1c3RvbRImCgpjcmVhdGVkX2F0GAUgASgJQgf6QgRyAhABUgljcmVhdGVkQXQSJgoKdXBkYXRlZF9hdBgGIAEoCUIH+kIEcgIQAVIJdXBkYXRlZEF0EhwKCWJyb2FkY2FzdBgHIAEoCFIJYnJvYWRjYXN0EksKEWJyb2FkY2FzdF9vcHRpb25zGAggAygLMh4uc3RyZWFtLnZpZGVvLkJyb2FkY2FzdE9wdGlvbnNSEGJyb2FkY2FzdE9wdGlvbnMSHgoKdHJhbnNjcmliZRgJIAEoCFIKdHJhbnNjcmliZRJOChJ0cmFuc2NyaWJlX29wdGlvbnMYCiABKAsyHy5zdHJlYW0udmlkZW8uVHJhbnNjcmliZU9wdGlvbnNSEXRyYW5zY3JpYmVPcHRpb25z');
+final $typed_data.Uint8List callDescriptor = $convert.base64Decode('CgRDYWxsEhsKBHR5cGUYASABKAlCB/pCBHICEAFSBHR5cGUSFwoCaWQYAiABKAlCB/pCBHICEAFSAmlkEjQKEmNyZWF0ZWRfYnlfdXNlcl9pZBgDIAEoCUIH+kIEcgIQAVIPY3JlYXRlZEJ5VXNlcklkEi8KBmN1c3RvbRgEIAEoCzIXLmdvb2dsZS5wcm90b2J1Zi5TdHJ1Y3RSBmN1c3RvbRImCgpjcmVhdGVkX2F0GAUgASgJQgf6QgRyAhABUgljcmVhdGVkQXQSJgoKdXBkYXRlZF9hdBgGIAEoCUIH+kIEcgIQAVIJdXBkYXRlZEF0EhwKCXJlY29yZGluZxgHIAEoCFIJcmVjb3JkaW5nEjUKCWJyb2FkY2FzdBgIIAEoCzIXLnN0cmVhbS52aWRlby5Ccm9hZGNhc3RSCWJyb2FkY2FzdBIeCgp0cmFuc2NyaWJlGAkgASgIUgp0cmFuc2NyaWJlEk4KEnRyYW5zY3JpYmVfb3B0aW9ucxgKIAEoCzIfLnN0cmVhbS52aWRlby5UcmFuc2NyaWJlT3B0aW9uc1IRdHJhbnNjcmliZU9wdGlvbnM=');

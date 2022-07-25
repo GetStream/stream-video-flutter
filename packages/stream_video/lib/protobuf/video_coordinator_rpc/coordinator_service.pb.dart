@@ -14,7 +14,9 @@ import '../video_models/models.pb.dart' as $3;
 import '../google/protobuf/struct.pb.dart' as $2;
 import '../google/protobuf/wrappers.pb.dart' as $4;
 
-import '../video_models/models.pbenum.dart' as $3;
+import 'coordinator_service.pbenum.dart';
+
+export 'coordinator_service.pbenum.dart';
 
 class GetCallRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetCallRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
@@ -230,8 +232,8 @@ class CreateCallRequest extends $pb.GeneratedMessage {
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
     ..aOM<$2.Struct>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $2.Struct.create)
     ..pPS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participantIds')
-    ..aOM<$4.BoolValue>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcast', subBuilder: $4.BoolValue.create)
-    ..pc<$3.BroadcastOptions>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcastOptions', $pb.PbFieldType.PM, subBuilder: $3.BroadcastOptions.create)
+    ..aOM<$4.BoolValue>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hlsBroadcast', subBuilder: $4.BoolValue.create)
+    ..aOM<$3.RTMPOptions>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtmp', subBuilder: $3.RTMPOptions.create)
     ..aOM<$4.BoolValue>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transcribe', subBuilder: $4.BoolValue.create)
     ..aOM<$3.TranscribeOptions>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transcribeOptions', subBuilder: $3.TranscribeOptions.create)
     ..aOM<$4.BoolValue>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recording', subBuilder: $4.BoolValue.create)
@@ -245,8 +247,8 @@ class CreateCallRequest extends $pb.GeneratedMessage {
     $core.String? id,
     $2.Struct? custom,
     $core.Iterable<$core.String>? participantIds,
-    $4.BoolValue? broadcast,
-    $core.Iterable<$3.BroadcastOptions>? broadcastOptions,
+    $4.BoolValue? hlsBroadcast,
+    $3.RTMPOptions? rtmp,
     $4.BoolValue? transcribe,
     $3.TranscribeOptions? transcribeOptions,
     $4.BoolValue? recording,
@@ -265,11 +267,11 @@ class CreateCallRequest extends $pb.GeneratedMessage {
     if (participantIds != null) {
       _result.participantIds.addAll(participantIds);
     }
-    if (broadcast != null) {
-      _result.broadcast = broadcast;
+    if (hlsBroadcast != null) {
+      _result.hlsBroadcast = hlsBroadcast;
     }
-    if (broadcastOptions != null) {
-      _result.broadcastOptions.addAll(broadcastOptions);
+    if (rtmp != null) {
+      _result.rtmp = rtmp;
     }
     if (transcribe != null) {
       _result.transcribe = transcribe;
@@ -339,18 +341,26 @@ class CreateCallRequest extends $pb.GeneratedMessage {
   $core.List<$core.String> get participantIds => $_getList(3);
 
   @$pb.TagNumber(6)
-  $4.BoolValue get broadcast => $_getN(4);
+  $4.BoolValue get hlsBroadcast => $_getN(4);
   @$pb.TagNumber(6)
-  set broadcast($4.BoolValue v) { setField(6, v); }
+  set hlsBroadcast($4.BoolValue v) { setField(6, v); }
   @$pb.TagNumber(6)
-  $core.bool hasBroadcast() => $_has(4);
+  $core.bool hasHlsBroadcast() => $_has(4);
   @$pb.TagNumber(6)
-  void clearBroadcast() => clearField(6);
+  void clearHlsBroadcast() => clearField(6);
   @$pb.TagNumber(6)
-  $4.BoolValue ensureBroadcast() => $_ensure(4);
+  $4.BoolValue ensureHlsBroadcast() => $_ensure(4);
 
   @$pb.TagNumber(7)
-  $core.List<$3.BroadcastOptions> get broadcastOptions => $_getList(5);
+  $3.RTMPOptions get rtmp => $_getN(5);
+  @$pb.TagNumber(7)
+  set rtmp($3.RTMPOptions v) { setField(7, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasRtmp() => $_has(5);
+  @$pb.TagNumber(7)
+  void clearRtmp() => clearField(7);
+  @$pb.TagNumber(7)
+  $3.RTMPOptions ensureRtmp() => $_ensure(5);
 
   @$pb.TagNumber(8)
   $4.BoolValue get transcribe => $_getN(6);
@@ -648,17 +658,22 @@ class DeleteCallResponse extends $pb.GeneratedMessage {
 
 class SelectEdgeServerRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SelectEdgeServerRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
     ..m<$core.String, $3.Latency>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'latencyByEdge', entryClassName: 'SelectEdgeServerRequest.LatencyByEdgeEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: $3.Latency.create, packageName: const $pb.PackageName('stream.video'))
     ..hasRequiredFields = false
   ;
 
   SelectEdgeServerRequest._() : super();
   factory SelectEdgeServerRequest({
+    $core.String? callType,
     $core.String? callId,
     $core.Map<$core.String, $3.Latency>? latencyByEdge,
   }) {
     final _result = create();
+    if (callType != null) {
+      _result.callType = callType;
+    }
     if (callId != null) {
       _result.callId = callId;
     }
@@ -689,16 +704,25 @@ class SelectEdgeServerRequest extends $pb.GeneratedMessage {
   static SelectEdgeServerRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get callId => $_getSZ(0);
+  $core.String get callType => $_getSZ(0);
   @$pb.TagNumber(1)
-  set callId($core.String v) { $_setString(0, v); }
+  set callType($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasCallId() => $_has(0);
+  $core.bool hasCallType() => $_has(0);
   @$pb.TagNumber(1)
-  void clearCallId() => clearField(1);
+  void clearCallType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get callId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set callId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallId() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.Map<$core.String, $3.Latency> get latencyByEdge => $_getMap(1);
+  $core.Map<$core.String, $3.Latency> get latencyByEdge => $_getMap(2);
 }
 
 class SelectEdgeServerResponse extends $pb.GeneratedMessage {
@@ -891,16 +915,21 @@ class AddDeviceResponse extends $pb.GeneratedMessage {
 class RemoveDeviceRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RemoveDeviceRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
     ..hasRequiredFields = false
   ;
 
   RemoveDeviceRequest._() : super();
   factory RemoveDeviceRequest({
     $core.String? id,
+    $core.String? userId,
   }) {
     final _result = create();
     if (id != null) {
       _result.id = id;
+    }
+    if (userId != null) {
+      _result.userId = userId;
     }
     return _result;
   }
@@ -933,6 +962,15 @@ class RemoveDeviceRequest extends $pb.GeneratedMessage {
   $core.bool hasId() => $_has(0);
   @$pb.TagNumber(1)
   void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get userId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set userId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasUserId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearUserId() => clearField(2);
 }
 
 class RemoveDeviceResponse extends $pb.GeneratedMessage {
@@ -1845,17 +1883,32 @@ class EndCallResponse extends $pb.GeneratedMessage {
 
 class StartBroadcastRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StartBroadcastRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type')
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hlsBroadcast')
+    ..aOM<$3.RTMPOptions>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtmp', subBuilder: $3.RTMPOptions.create)
     ..hasRequiredFields = false
   ;
 
   StartBroadcastRequest._() : super();
   factory StartBroadcastRequest({
-    $core.String? type,
+    $core.String? callId,
+    $core.String? callType,
+    $core.bool? hlsBroadcast,
+    $3.RTMPOptions? rtmp,
   }) {
     final _result = create();
-    if (type != null) {
-      _result.type = type;
+    if (callId != null) {
+      _result.callId = callId;
+    }
+    if (callType != null) {
+      _result.callType = callType;
+    }
+    if (hlsBroadcast != null) {
+      _result.hlsBroadcast = hlsBroadcast;
+    }
+    if (rtmp != null) {
+      _result.rtmp = rtmp;
     }
     return _result;
   }
@@ -1881,22 +1934,60 @@ class StartBroadcastRequest extends $pb.GeneratedMessage {
   static StartBroadcastRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get type => $_getSZ(0);
+  $core.String get callId => $_getSZ(0);
   @$pb.TagNumber(1)
-  set type($core.String v) { $_setString(0, v); }
+  set callId($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasType() => $_has(0);
+  $core.bool hasCallId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearType() => clearField(1);
+  void clearCallId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get callType => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set callType($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallType() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallType() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get hlsBroadcast => $_getBF(2);
+  @$pb.TagNumber(3)
+  set hlsBroadcast($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasHlsBroadcast() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearHlsBroadcast() => clearField(3);
+
+  @$pb.TagNumber(5)
+  $3.RTMPOptions get rtmp => $_getN(3);
+  @$pb.TagNumber(5)
+  set rtmp($3.RTMPOptions v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasRtmp() => $_has(3);
+  @$pb.TagNumber(5)
+  void clearRtmp() => clearField(5);
+  @$pb.TagNumber(5)
+  $3.RTMPOptions ensureRtmp() => $_ensure(3);
 }
 
 class StartBroadcastResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StartBroadcastResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOM<$3.Broadcast>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcast', subBuilder: $3.Broadcast.create)
     ..hasRequiredFields = false
   ;
 
   StartBroadcastResponse._() : super();
-  factory StartBroadcastResponse() => create();
+  factory StartBroadcastResponse({
+    $3.Broadcast? broadcast,
+  }) {
+    final _result = create();
+    if (broadcast != null) {
+      _result.broadcast = broadcast;
+    }
+    return _result;
+  }
   factory StartBroadcastResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory StartBroadcastResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -1917,6 +2008,17 @@ class StartBroadcastResponse extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static StartBroadcastResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StartBroadcastResponse>(create);
   static StartBroadcastResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $3.Broadcast get broadcast => $_getN(0);
+  @$pb.TagNumber(1)
+  set broadcast($3.Broadcast v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasBroadcast() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearBroadcast() => clearField(1);
+  @$pb.TagNumber(1)
+  $3.Broadcast ensureBroadcast() => $_ensure(0);
 }
 
 class StopBroadcastRequest extends $pb.GeneratedMessage {
@@ -2153,27 +2255,22 @@ class StoreLatencyResponse extends $pb.GeneratedMessage {
 
 class StartRecordingRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StartRecordingRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
-    ..aOM<$3.RecordingStorageOptions>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'storageOptions', subBuilder: $3.RecordingStorageOptions.create)
-    ..e<$3.Codec>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'codec', $pb.PbFieldType.OE, defaultOrMaker: $3.Codec.CODEC_H264_UNSPECIFIED, valueOf: $3.Codec.valueOf, enumValues: $3.Codec.values)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
     ..hasRequiredFields = false
   ;
 
   StartRecordingRequest._() : super();
   factory StartRecordingRequest({
+    $core.String? callType,
     $core.String? callId,
-    $3.RecordingStorageOptions? storageOptions,
-    $3.Codec? codec,
   }) {
     final _result = create();
+    if (callType != null) {
+      _result.callType = callType;
+    }
     if (callId != null) {
       _result.callId = callId;
-    }
-    if (storageOptions != null) {
-      _result.storageOptions = storageOptions;
-    }
-    if (codec != null) {
-      _result.codec = codec;
     }
     return _result;
   }
@@ -2199,33 +2296,22 @@ class StartRecordingRequest extends $pb.GeneratedMessage {
   static StartRecordingRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get callId => $_getSZ(0);
+  $core.String get callType => $_getSZ(0);
   @$pb.TagNumber(1)
-  set callId($core.String v) { $_setString(0, v); }
+  set callType($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasCallId() => $_has(0);
+  $core.bool hasCallType() => $_has(0);
   @$pb.TagNumber(1)
-  void clearCallId() => clearField(1);
+  void clearCallType() => clearField(1);
 
   @$pb.TagNumber(2)
-  $3.RecordingStorageOptions get storageOptions => $_getN(1);
+  $core.String get callId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set storageOptions($3.RecordingStorageOptions v) { setField(2, v); }
+  set callId($core.String v) { $_setString(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasStorageOptions() => $_has(1);
+  $core.bool hasCallId() => $_has(1);
   @$pb.TagNumber(2)
-  void clearStorageOptions() => clearField(2);
-  @$pb.TagNumber(2)
-  $3.RecordingStorageOptions ensureStorageOptions() => $_ensure(1);
-
-  @$pb.TagNumber(3)
-  $3.Codec get codec => $_getN(2);
-  @$pb.TagNumber(3)
-  set codec($3.Codec v) { setField(3, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasCodec() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearCodec() => clearField(3);
+  void clearCallId() => clearField(2);
 }
 
 class StartRecordingResponse extends $pb.GeneratedMessage {
@@ -2259,15 +2345,20 @@ class StartRecordingResponse extends $pb.GeneratedMessage {
 
 class StopRecordingRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StopRecordingRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
     ..hasRequiredFields = false
   ;
 
   StopRecordingRequest._() : super();
   factory StopRecordingRequest({
+    $core.String? callType,
     $core.String? callId,
   }) {
     final _result = create();
+    if (callType != null) {
+      _result.callType = callType;
+    }
     if (callId != null) {
       _result.callId = callId;
     }
@@ -2295,22 +2386,40 @@ class StopRecordingRequest extends $pb.GeneratedMessage {
   static StopRecordingRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get callId => $_getSZ(0);
+  $core.String get callType => $_getSZ(0);
   @$pb.TagNumber(1)
-  set callId($core.String v) { $_setString(0, v); }
+  set callType($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasCallId() => $_has(0);
+  $core.bool hasCallType() => $_has(0);
   @$pb.TagNumber(1)
-  void clearCallId() => clearField(1);
+  void clearCallType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get callId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set callId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallId() => clearField(2);
 }
 
 class StopRecordingResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StopRecordingResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 's3FileUrl')
     ..hasRequiredFields = false
   ;
 
   StopRecordingResponse._() : super();
-  factory StopRecordingResponse() => create();
+  factory StopRecordingResponse({
+    $core.String? s3FileUrl,
+  }) {
+    final _result = create();
+    if (s3FileUrl != null) {
+      _result.s3FileUrl = s3FileUrl;
+    }
+    return _result;
+  }
   factory StopRecordingResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory StopRecordingResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -2331,6 +2440,15 @@ class StopRecordingResponse extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static StopRecordingResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StopRecordingResponse>(create);
   static StopRecordingResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get s3FileUrl => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set s3FileUrl($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasS3FileUrl() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearS3FileUrl() => clearField(1);
 }
 
 class GetRecordingsRequest extends $pb.GeneratedMessage {
@@ -2362,13 +2480,125 @@ class GetRecordingsRequest extends $pb.GeneratedMessage {
   static GetRecordingsRequest? _defaultInstance;
 }
 
+class GetRecordingsResponse_Recording extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetRecordingsResponse.Recording', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 's3FileUrl')
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startTime')
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stopTime')
+    ..hasRequiredFields = false
+  ;
+
+  GetRecordingsResponse_Recording._() : super();
+  factory GetRecordingsResponse_Recording({
+    $core.String? callType,
+    $core.String? callId,
+    $core.String? s3FileUrl,
+    $core.String? startTime,
+    $core.String? stopTime,
+  }) {
+    final _result = create();
+    if (callType != null) {
+      _result.callType = callType;
+    }
+    if (callId != null) {
+      _result.callId = callId;
+    }
+    if (s3FileUrl != null) {
+      _result.s3FileUrl = s3FileUrl;
+    }
+    if (startTime != null) {
+      _result.startTime = startTime;
+    }
+    if (stopTime != null) {
+      _result.stopTime = stopTime;
+    }
+    return _result;
+  }
+  factory GetRecordingsResponse_Recording.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory GetRecordingsResponse_Recording.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  GetRecordingsResponse_Recording clone() => GetRecordingsResponse_Recording()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  GetRecordingsResponse_Recording copyWith(void Function(GetRecordingsResponse_Recording) updates) => super.copyWith((message) => updates(message as GetRecordingsResponse_Recording)) as GetRecordingsResponse_Recording; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static GetRecordingsResponse_Recording create() => GetRecordingsResponse_Recording._();
+  GetRecordingsResponse_Recording createEmptyInstance() => create();
+  static $pb.PbList<GetRecordingsResponse_Recording> createRepeated() => $pb.PbList<GetRecordingsResponse_Recording>();
+  @$core.pragma('dart2js:noInline')
+  static GetRecordingsResponse_Recording getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetRecordingsResponse_Recording>(create);
+  static GetRecordingsResponse_Recording? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callType => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callType($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get callId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set callId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallId() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get s3FileUrl => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set s3FileUrl($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasS3FileUrl() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearS3FileUrl() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get startTime => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set startTime($core.String v) { $_setString(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasStartTime() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearStartTime() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get stopTime => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set stopTime($core.String v) { $_setString(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasStopTime() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearStopTime() => clearField(5);
+}
+
 class GetRecordingsResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetRecordingsResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..pc<GetRecordingsResponse_Recording>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recordings', $pb.PbFieldType.PM, subBuilder: GetRecordingsResponse_Recording.create)
     ..hasRequiredFields = false
   ;
 
   GetRecordingsResponse._() : super();
-  factory GetRecordingsResponse() => create();
+  factory GetRecordingsResponse({
+    $core.Iterable<GetRecordingsResponse_Recording>? recordings,
+  }) {
+    final _result = create();
+    if (recordings != null) {
+      _result.recordings.addAll(recordings);
+    }
+    return _result;
+  }
   factory GetRecordingsResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory GetRecordingsResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -2389,6 +2619,127 @@ class GetRecordingsResponse extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static GetRecordingsResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetRecordingsResponse>(create);
   static GetRecordingsResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<GetRecordingsResponse_Recording> get recordings => $_getList(0);
+}
+
+class SendEventRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SendEventRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..e<UserEventType>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'eventType', $pb.PbFieldType.OE, defaultOrMaker: UserEventType.USER_EVENT_TYPE_AUDIO_MUTED_UNSPECIFIED, valueOf: UserEventType.valueOf, enumValues: UserEventType.values)
+    ..hasRequiredFields = false
+  ;
+
+  SendEventRequest._() : super();
+  factory SendEventRequest({
+    $core.String? userId,
+    $core.String? callType,
+    $core.String? callId,
+    UserEventType? eventType,
+  }) {
+    final _result = create();
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    if (callType != null) {
+      _result.callType = callType;
+    }
+    if (callId != null) {
+      _result.callId = callId;
+    }
+    if (eventType != null) {
+      _result.eventType = eventType;
+    }
+    return _result;
+  }
+  factory SendEventRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SendEventRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SendEventRequest clone() => SendEventRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SendEventRequest copyWith(void Function(SendEventRequest) updates) => super.copyWith((message) => updates(message as SendEventRequest)) as SendEventRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SendEventRequest create() => SendEventRequest._();
+  SendEventRequest createEmptyInstance() => create();
+  static $pb.PbList<SendEventRequest> createRepeated() => $pb.PbList<SendEventRequest>();
+  @$core.pragma('dart2js:noInline')
+  static SendEventRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SendEventRequest>(create);
+  static SendEventRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get userId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set userId($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasUserId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUserId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get callType => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set callType($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallType() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallType() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get callId => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set callId($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasCallId() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearCallId() => clearField(3);
+
+  @$pb.TagNumber(4)
+  UserEventType get eventType => $_getN(3);
+  @$pb.TagNumber(4)
+  set eventType(UserEventType v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasEventType() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearEventType() => clearField(4);
+}
+
+class SendEventResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SendEventResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  SendEventResponse._() : super();
+  factory SendEventResponse() => create();
+  factory SendEventResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SendEventResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SendEventResponse clone() => SendEventResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SendEventResponse copyWith(void Function(SendEventResponse) updates) => super.copyWith((message) => updates(message as SendEventResponse)) as SendEventResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SendEventResponse create() => SendEventResponse._();
+  SendEventResponse createEmptyInstance() => create();
+  static $pb.PbList<SendEventResponse> createRepeated() => $pb.PbList<SendEventResponse>();
+  @$core.pragma('dart2js:noInline')
+  static SendEventResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SendEventResponse>(create);
+  static SendEventResponse? _defaultInstance;
 }
 
 class CallCoordinatorServiceApi {
@@ -2439,6 +2790,10 @@ class CallCoordinatorServiceApi {
     var emptyResponse = ListDevicesResponse();
     return _client.invoke<ListDevicesResponse>(ctx, 'CallCoordinatorService', 'ListDevices', request, emptyResponse);
   }
+  $async.Future<SendEventResponse> sendEvent($pb.ClientContext? ctx, SendEventRequest request) {
+    var emptyResponse = SendEventResponse();
+    return _client.invoke<SendEventResponse>(ctx, 'CallCoordinatorService', 'SendEvent', request, emptyResponse);
+  }
   $async.Future<SendCustomEventResponse> sendCustomEvent($pb.ClientContext? ctx, SendCustomEventRequest request) {
     var emptyResponse = SendCustomEventResponse();
     return _client.invoke<SendCustomEventResponse>(ctx, 'CallCoordinatorService', 'SendCustomEvent', request, emptyResponse);
@@ -2463,21 +2818,9 @@ class CallCoordinatorServiceApi {
     var emptyResponse = StartBroadcastResponse();
     return _client.invoke<StartBroadcastResponse>(ctx, 'CallCoordinatorService', 'StartBroadcast', request, emptyResponse);
   }
-  $async.Future<StartBroadcastResponse> stopBroadcast($pb.ClientContext? ctx, StopBroadcastRequest request) {
-    var emptyResponse = StartBroadcastResponse();
-    return _client.invoke<StartBroadcastResponse>(ctx, 'CallCoordinatorService', 'StopBroadcast', request, emptyResponse);
-  }
-  $async.Future<CreateUserResponse> createUser($pb.ClientContext? ctx, CreateUserRequest request) {
-    var emptyResponse = CreateUserResponse();
-    return _client.invoke<CreateUserResponse>(ctx, 'CallCoordinatorService', 'CreateUser', request, emptyResponse);
-  }
-  $async.Future<DeleteUserResponse> deleteUser($pb.ClientContext? ctx, DeleteUserRequest request) {
-    var emptyResponse = DeleteUserResponse();
-    return _client.invoke<DeleteUserResponse>(ctx, 'CallCoordinatorService', 'DeleteUser', request, emptyResponse);
-  }
-  $async.Future<ExportUserResponse> exportUser($pb.ClientContext? ctx, ExportUserRequest request) {
-    var emptyResponse = ExportUserResponse();
-    return _client.invoke<ExportUserResponse>(ctx, 'CallCoordinatorService', 'ExportUser', request, emptyResponse);
+  $async.Future<StopBroadcastResponse> stopBroadcast($pb.ClientContext? ctx, StopBroadcastRequest request) {
+    var emptyResponse = StopBroadcastResponse();
+    return _client.invoke<StopBroadcastResponse>(ctx, 'CallCoordinatorService', 'StopBroadcast', request, emptyResponse);
   }
   $async.Future<StartRecordingResponse> startRecording($pb.ClientContext? ctx, StartRecordingRequest request) {
     var emptyResponse = StartRecordingResponse();
@@ -2490,6 +2833,18 @@ class CallCoordinatorServiceApi {
   $async.Future<GetRecordingsResponse> getRecordings($pb.ClientContext? ctx, GetRecordingsRequest request) {
     var emptyResponse = GetRecordingsResponse();
     return _client.invoke<GetRecordingsResponse>(ctx, 'CallCoordinatorService', 'GetRecordings', request, emptyResponse);
+  }
+  $async.Future<CreateUserResponse> createUser($pb.ClientContext? ctx, CreateUserRequest request) {
+    var emptyResponse = CreateUserResponse();
+    return _client.invoke<CreateUserResponse>(ctx, 'CallCoordinatorService', 'CreateUser', request, emptyResponse);
+  }
+  $async.Future<DeleteUserResponse> deleteUser($pb.ClientContext? ctx, DeleteUserRequest request) {
+    var emptyResponse = DeleteUserResponse();
+    return _client.invoke<DeleteUserResponse>(ctx, 'CallCoordinatorService', 'DeleteUser', request, emptyResponse);
+  }
+  $async.Future<ExportUserResponse> exportUser($pb.ClientContext? ctx, ExportUserRequest request) {
+    var emptyResponse = ExportUserResponse();
+    return _client.invoke<ExportUserResponse>(ctx, 'CallCoordinatorService', 'ExportUser', request, emptyResponse);
   }
 }
 

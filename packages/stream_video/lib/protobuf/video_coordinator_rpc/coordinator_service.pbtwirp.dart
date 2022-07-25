@@ -6,10 +6,10 @@ import 'package:http/http.dart' as http;
 import 'package:protobuf/protobuf.dart';
 import 'package:tart/tart.dart' as twirp;
 import 'coordinator_service.pb.dart';
-import '../video_models/models.pb.dart';
 import '../google/protobuf/struct.pb.dart';
 import '../google/protobuf/wrappers.pb.dart';
 import '../validate/validate.pb.dart';
+import '../video_models/models.pb.dart';
 
 
 
@@ -37,6 +37,8 @@ abstract class CallCoordinatorService {
   
   Future<ListDevicesResponse> listDevices(twirp.Context ctx, ListDevicesRequest req);
   // add reaction should perhaps just be handled by chat
+  Future<SendEventResponse> sendEvent(twirp.Context ctx, SendEventRequest req);
+  
   Future<SendCustomEventResponse> sendCustomEvent(twirp.Context ctx, SendCustomEventRequest req);
   // server side sync & advanced endpoints
   Future<CreateOrUpdateCallsResponse> createOrUpdateCalls(twirp.Context ctx, CreateOrUpdateCallsRequest req);
@@ -46,22 +48,22 @@ abstract class CallCoordinatorService {
   Future<TranscribeCallResponse> transcribeCall(twirp.Context ctx, TranscribeCallRequest req);
   
   Future<StopTranscribeCallResponse> stopTranscribeCall(twirp.Context ctx, StopTranscribeCallRequest req);
-  // start broadcast/ stop broadcast to HLS, RTMP and storage
+  // starts broadcast to HLS and/or RTMP, replaces existing settings if broadcasting is already started
   Future<StartBroadcastResponse> startBroadcast(twirp.Context ctx, StartBroadcastRequest req);
+  // stops broadcasting to HLS and/or RTMP
+  Future<StopBroadcastResponse> stopBroadcast(twirp.Context ctx, StopBroadcastRequest req);
   
-  Future<StartBroadcastResponse> stopBroadcast(twirp.Context ctx, StopBroadcastRequest req);
-  // User & GDPR endpoints, delete user
-  Future<CreateUserResponse> createUser(twirp.Context ctx, CreateUserRequest req);
-  
-  Future<DeleteUserResponse> deleteUser(twirp.Context ctx, DeleteUserRequest req);
-  
-  Future<ExportUserResponse> exportUser(twirp.Context ctx, ExportUserRequest req);
-  // call recording endpoints
   Future<StartRecordingResponse> startRecording(twirp.Context ctx, StartRecordingRequest req);
   
   Future<StopRecordingResponse> stopRecording(twirp.Context ctx, StopRecordingRequest req);
   
   Future<GetRecordingsResponse> getRecordings(twirp.Context ctx, GetRecordingsRequest req);
+  // User & GDPR endpoints, delete user// we need to review the API contract based on Chat
+  Future<CreateUserResponse> createUser(twirp.Context ctx, CreateUserRequest req);
+  
+  Future<DeleteUserResponse> deleteUser(twirp.Context ctx, DeleteUserRequest req);
+  
+  Future<ExportUserResponse> exportUser(twirp.Context ctx, ExportUserRequest req);
 }
 
 
@@ -323,6 +325,28 @@ class CallCoordinatorServiceJSONClient implements CallCoordinatorService {
   }
 
   @override
+  Future<SendEventResponse> sendEvent(twirp.Context ctx, SendEventRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'SendEvent');
+    return interceptor((ctx, req) {
+      return callSendEvent(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<SendEventResponse> callSendEvent(twirp.Context ctx, SendEventRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/SendEvent');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final SendEventResponse res = SendEventResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
   Future<SendCustomEventResponse> sendCustomEvent(twirp.Context ctx, SendCustomEventRequest req) async {
     ctx = twirp.withPackageName(ctx, 'video');
     ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
@@ -455,7 +479,7 @@ class CallCoordinatorServiceJSONClient implements CallCoordinatorService {
   }
 
   @override
-  Future<StartBroadcastResponse> stopBroadcast(twirp.Context ctx, StopBroadcastRequest req) async {
+  Future<StopBroadcastResponse> stopBroadcast(twirp.Context ctx, StopBroadcastRequest req) async {
     ctx = twirp.withPackageName(ctx, 'video');
     ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
     ctx = twirp.withMethodName(ctx, 'StopBroadcast');
@@ -464,77 +488,11 @@ class CallCoordinatorServiceJSONClient implements CallCoordinatorService {
     })(ctx, req);
   }
 
-  Future<StartBroadcastResponse> callStopBroadcast(twirp.Context ctx, StopBroadcastRequest req) async {
+  Future<StopBroadcastResponse> callStopBroadcast(twirp.Context ctx, StopBroadcastRequest req) async {
     try {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/StopBroadcast');
       final data = await doJSONRequest(ctx, url, hooks, req);
-      final StartBroadcastResponse res = StartBroadcastResponse.create();
-      res.mergeFromProto3Json(json.decode(data));
-      return Future.value(res);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<CreateUserResponse> createUser(twirp.Context ctx, CreateUserRequest req) async {
-    ctx = twirp.withPackageName(ctx, 'video');
-    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
-    ctx = twirp.withMethodName(ctx, 'CreateUser');
-    return interceptor((ctx, req) {
-      return callCreateUser(ctx, req);
-    })(ctx, req);
-  }
-
-  Future<CreateUserResponse> callCreateUser(twirp.Context ctx, CreateUserRequest req) async {
-    try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/CreateUser');
-      final data = await doJSONRequest(ctx, url, hooks, req);
-      final CreateUserResponse res = CreateUserResponse.create();
-      res.mergeFromProto3Json(json.decode(data));
-      return Future.value(res);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<DeleteUserResponse> deleteUser(twirp.Context ctx, DeleteUserRequest req) async {
-    ctx = twirp.withPackageName(ctx, 'video');
-    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
-    ctx = twirp.withMethodName(ctx, 'DeleteUser');
-    return interceptor((ctx, req) {
-      return callDeleteUser(ctx, req);
-    })(ctx, req);
-  }
-
-  Future<DeleteUserResponse> callDeleteUser(twirp.Context ctx, DeleteUserRequest req) async {
-    try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/DeleteUser');
-      final data = await doJSONRequest(ctx, url, hooks, req);
-      final DeleteUserResponse res = DeleteUserResponse.create();
-      res.mergeFromProto3Json(json.decode(data));
-      return Future.value(res);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<ExportUserResponse> exportUser(twirp.Context ctx, ExportUserRequest req) async {
-    ctx = twirp.withPackageName(ctx, 'video');
-    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
-    ctx = twirp.withMethodName(ctx, 'ExportUser');
-    return interceptor((ctx, req) {
-      return callExportUser(ctx, req);
-    })(ctx, req);
-  }
-
-  Future<ExportUserResponse> callExportUser(twirp.Context ctx, ExportUserRequest req) async {
-    try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/ExportUser');
-      final data = await doJSONRequest(ctx, url, hooks, req);
-      final ExportUserResponse res = ExportUserResponse.create();
+      final StopBroadcastResponse res = StopBroadcastResponse.create();
       res.mergeFromProto3Json(json.decode(data));
       return Future.value(res);
     } catch (e) {
@@ -601,6 +559,72 @@ class CallCoordinatorServiceJSONClient implements CallCoordinatorService {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/GetRecordings');
       final data = await doJSONRequest(ctx, url, hooks, req);
       final GetRecordingsResponse res = GetRecordingsResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<CreateUserResponse> createUser(twirp.Context ctx, CreateUserRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'CreateUser');
+    return interceptor((ctx, req) {
+      return callCreateUser(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<CreateUserResponse> callCreateUser(twirp.Context ctx, CreateUserRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/CreateUser');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final CreateUserResponse res = CreateUserResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<DeleteUserResponse> deleteUser(twirp.Context ctx, DeleteUserRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'DeleteUser');
+    return interceptor((ctx, req) {
+      return callDeleteUser(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<DeleteUserResponse> callDeleteUser(twirp.Context ctx, DeleteUserRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/DeleteUser');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final DeleteUserResponse res = DeleteUserResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ExportUserResponse> exportUser(twirp.Context ctx, ExportUserRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'ExportUser');
+    return interceptor((ctx, req) {
+      return callExportUser(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<ExportUserResponse> callExportUser(twirp.Context ctx, ExportUserRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/ExportUser');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final ExportUserResponse res = ExportUserResponse.create();
       res.mergeFromProto3Json(json.decode(data));
       return Future.value(res);
     } catch (e) {
@@ -868,6 +892,28 @@ class CallCoordinatorServiceProtobufClient implements CallCoordinatorService {
   }
 
   @override
+  Future<SendEventResponse> sendEvent(twirp.Context ctx, SendEventRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'SendEvent');
+    return interceptor((ctx, req) {
+      return callSendEvent(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<SendEventResponse> callSendEvent(twirp.Context ctx, SendEventRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/SendEvent');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final SendEventResponse res = SendEventResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
   Future<SendCustomEventResponse> sendCustomEvent(twirp.Context ctx, SendCustomEventRequest req) async {
     ctx = twirp.withPackageName(ctx, 'video');
     ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
@@ -1000,7 +1046,7 @@ class CallCoordinatorServiceProtobufClient implements CallCoordinatorService {
   }
 
   @override
-  Future<StartBroadcastResponse> stopBroadcast(twirp.Context ctx, StopBroadcastRequest req) async {
+  Future<StopBroadcastResponse> stopBroadcast(twirp.Context ctx, StopBroadcastRequest req) async {
     ctx = twirp.withPackageName(ctx, 'video');
     ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
     ctx = twirp.withMethodName(ctx, 'StopBroadcast');
@@ -1009,77 +1055,11 @@ class CallCoordinatorServiceProtobufClient implements CallCoordinatorService {
     })(ctx, req);
   }
 
-  Future<StartBroadcastResponse> callStopBroadcast(twirp.Context ctx, StopBroadcastRequest req) async {
+  Future<StopBroadcastResponse> callStopBroadcast(twirp.Context ctx, StopBroadcastRequest req) async {
     try {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/StopBroadcast');
       final data = await doProtobufRequest(ctx, url, hooks, req);
-      final StartBroadcastResponse res = StartBroadcastResponse.create();
-      res.mergeFromBuffer(data);
-      return Future.value(res);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<CreateUserResponse> createUser(twirp.Context ctx, CreateUserRequest req) async {
-    ctx = twirp.withPackageName(ctx, 'video');
-    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
-    ctx = twirp.withMethodName(ctx, 'CreateUser');
-    return interceptor((ctx, req) {
-      return callCreateUser(ctx, req);
-    })(ctx, req);
-  }
-
-  Future<CreateUserResponse> callCreateUser(twirp.Context ctx, CreateUserRequest req) async {
-    try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/CreateUser');
-      final data = await doProtobufRequest(ctx, url, hooks, req);
-      final CreateUserResponse res = CreateUserResponse.create();
-      res.mergeFromBuffer(data);
-      return Future.value(res);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<DeleteUserResponse> deleteUser(twirp.Context ctx, DeleteUserRequest req) async {
-    ctx = twirp.withPackageName(ctx, 'video');
-    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
-    ctx = twirp.withMethodName(ctx, 'DeleteUser');
-    return interceptor((ctx, req) {
-      return callDeleteUser(ctx, req);
-    })(ctx, req);
-  }
-
-  Future<DeleteUserResponse> callDeleteUser(twirp.Context ctx, DeleteUserRequest req) async {
-    try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/DeleteUser');
-      final data = await doProtobufRequest(ctx, url, hooks, req);
-      final DeleteUserResponse res = DeleteUserResponse.create();
-      res.mergeFromBuffer(data);
-      return Future.value(res);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<ExportUserResponse> exportUser(twirp.Context ctx, ExportUserRequest req) async {
-    ctx = twirp.withPackageName(ctx, 'video');
-    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
-    ctx = twirp.withMethodName(ctx, 'ExportUser');
-    return interceptor((ctx, req) {
-      return callExportUser(ctx, req);
-    })(ctx, req);
-  }
-
-  Future<ExportUserResponse> callExportUser(twirp.Context ctx, ExportUserRequest req) async {
-    try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/ExportUser');
-      final data = await doProtobufRequest(ctx, url, hooks, req);
-      final ExportUserResponse res = ExportUserResponse.create();
+      final StopBroadcastResponse res = StopBroadcastResponse.create();
       res.mergeFromBuffer(data);
       return Future.value(res);
     } catch (e) {
@@ -1146,6 +1126,72 @@ class CallCoordinatorServiceProtobufClient implements CallCoordinatorService {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/GetRecordings');
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final GetRecordingsResponse res = GetRecordingsResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<CreateUserResponse> createUser(twirp.Context ctx, CreateUserRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'CreateUser');
+    return interceptor((ctx, req) {
+      return callCreateUser(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<CreateUserResponse> callCreateUser(twirp.Context ctx, CreateUserRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/CreateUser');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final CreateUserResponse res = CreateUserResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<DeleteUserResponse> deleteUser(twirp.Context ctx, DeleteUserRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'DeleteUser');
+    return interceptor((ctx, req) {
+      return callDeleteUser(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<DeleteUserResponse> callDeleteUser(twirp.Context ctx, DeleteUserRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/DeleteUser');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final DeleteUserResponse res = DeleteUserResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ExportUserResponse> exportUser(twirp.Context ctx, ExportUserRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'ExportUser');
+    return interceptor((ctx, req) {
+      return callExportUser(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<ExportUserResponse> callExportUser(twirp.Context ctx, ExportUserRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/ExportUser');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final ExportUserResponse res = ExportUserResponse.create();
       res.mergeFromBuffer(data);
       return Future.value(res);
     } catch (e) {

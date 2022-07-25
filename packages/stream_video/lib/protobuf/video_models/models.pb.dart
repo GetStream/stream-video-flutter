@@ -76,6 +76,67 @@ class Edge extends $pb.GeneratedMessage {
   void clearLatencyUrl() => clearField(2);
 }
 
+class EdgeServer_Coordinates extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'EdgeServer.Coordinates', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..a<$core.double>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lat', $pb.PbFieldType.OF)
+    ..a<$core.double>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'long', $pb.PbFieldType.OF)
+    ..hasRequiredFields = false
+  ;
+
+  EdgeServer_Coordinates._() : super();
+  factory EdgeServer_Coordinates({
+    $core.double? lat,
+    $core.double? long,
+  }) {
+    final _result = create();
+    if (lat != null) {
+      _result.lat = lat;
+    }
+    if (long != null) {
+      _result.long = long;
+    }
+    return _result;
+  }
+  factory EdgeServer_Coordinates.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory EdgeServer_Coordinates.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  EdgeServer_Coordinates clone() => EdgeServer_Coordinates()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  EdgeServer_Coordinates copyWith(void Function(EdgeServer_Coordinates) updates) => super.copyWith((message) => updates(message as EdgeServer_Coordinates)) as EdgeServer_Coordinates; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static EdgeServer_Coordinates create() => EdgeServer_Coordinates._();
+  EdgeServer_Coordinates createEmptyInstance() => create();
+  static $pb.PbList<EdgeServer_Coordinates> createRepeated() => $pb.PbList<EdgeServer_Coordinates>();
+  @$core.pragma('dart2js:noInline')
+  static EdgeServer_Coordinates getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<EdgeServer_Coordinates>(create);
+  static EdgeServer_Coordinates? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.double get lat => $_getN(0);
+  @$pb.TagNumber(1)
+  set lat($core.double v) { $_setFloat(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasLat() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearLat() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.double get long => $_getN(1);
+  @$pb.TagNumber(2)
+  set long($core.double v) { $_setFloat(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasLong() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLong() => clearField(2);
+}
+
 class EdgeServer extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'EdgeServer', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'url')
@@ -162,230 +223,6 @@ class Latency extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   $core.List<$core.double> get measurementsSeconds => $_getList(0);
-}
-
-enum Broadcast_Details {
-  rtmp, 
-  hls, 
-  record, 
-  notSet
-}
-
-class Broadcast extends $pb.GeneratedMessage {
-  static const $core.Map<$core.int, Broadcast_Details> _Broadcast_DetailsByTag = {
-    2 : Broadcast_Details.rtmp,
-    3 : Broadcast_Details.hls,
-    4 : Broadcast_Details.record,
-    0 : Broadcast_Details.notSet
-  };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Broadcast', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..oo(0, [2, 3, 4])
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
-    ..aOM<RTMPBroadcast>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtmp', subBuilder: RTMPBroadcast.create)
-    ..aOM<HLSBroadcast>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hls', subBuilder: HLSBroadcast.create)
-    ..aOM<RecordBroadcast>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'record', subBuilder: RecordBroadcast.create)
-    ..hasRequiredFields = false
-  ;
-
-  Broadcast._() : super();
-  factory Broadcast({
-    $core.String? id,
-    RTMPBroadcast? rtmp,
-    HLSBroadcast? hls,
-    RecordBroadcast? record,
-  }) {
-    final _result = create();
-    if (id != null) {
-      _result.id = id;
-    }
-    if (rtmp != null) {
-      _result.rtmp = rtmp;
-    }
-    if (hls != null) {
-      _result.hls = hls;
-    }
-    if (record != null) {
-      _result.record = record;
-    }
-    return _result;
-  }
-  factory Broadcast.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Broadcast.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  Broadcast clone() => Broadcast()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  Broadcast copyWith(void Function(Broadcast) updates) => super.copyWith((message) => updates(message as Broadcast)) as Broadcast; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static Broadcast create() => Broadcast._();
-  Broadcast createEmptyInstance() => create();
-  static $pb.PbList<Broadcast> createRepeated() => $pb.PbList<Broadcast>();
-  @$core.pragma('dart2js:noInline')
-  static Broadcast getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Broadcast>(create);
-  static Broadcast? _defaultInstance;
-
-  Broadcast_Details whichDetails() => _Broadcast_DetailsByTag[$_whichOneof(0)]!;
-  void clearDetails() => clearField($_whichOneof(0));
-
-  @$pb.TagNumber(1)
-  $core.String get id => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set id($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasId() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearId() => clearField(1);
-
-  @$pb.TagNumber(2)
-  RTMPBroadcast get rtmp => $_getN(1);
-  @$pb.TagNumber(2)
-  set rtmp(RTMPBroadcast v) { setField(2, v); }
-  @$pb.TagNumber(2)
-  $core.bool hasRtmp() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearRtmp() => clearField(2);
-  @$pb.TagNumber(2)
-  RTMPBroadcast ensureRtmp() => $_ensure(1);
-
-  @$pb.TagNumber(3)
-  HLSBroadcast get hls => $_getN(2);
-  @$pb.TagNumber(3)
-  set hls(HLSBroadcast v) { setField(3, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasHls() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearHls() => clearField(3);
-  @$pb.TagNumber(3)
-  HLSBroadcast ensureHls() => $_ensure(2);
-
-  @$pb.TagNumber(4)
-  RecordBroadcast get record => $_getN(3);
-  @$pb.TagNumber(4)
-  set record(RecordBroadcast v) { setField(4, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasRecord() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearRecord() => clearField(4);
-  @$pb.TagNumber(4)
-  RecordBroadcast ensureRecord() => $_ensure(3);
-}
-
-class RTMPBroadcast extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RTMPBroadcast', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
-    ..pPS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtmpurls')
-    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'width', $pb.PbFieldType.O3)
-    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'height', $pb.PbFieldType.O3)
-    ..hasRequiredFields = false
-  ;
-
-  RTMPBroadcast._() : super();
-  factory RTMPBroadcast({
-    $core.String? callId,
-    $core.Iterable<$core.String>? rtmpurls,
-    $core.int? width,
-    $core.int? height,
-  }) {
-    final _result = create();
-    if (callId != null) {
-      _result.callId = callId;
-    }
-    if (rtmpurls != null) {
-      _result.rtmpurls.addAll(rtmpurls);
-    }
-    if (width != null) {
-      _result.width = width;
-    }
-    if (height != null) {
-      _result.height = height;
-    }
-    return _result;
-  }
-  factory RTMPBroadcast.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory RTMPBroadcast.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  RTMPBroadcast clone() => RTMPBroadcast()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  RTMPBroadcast copyWith(void Function(RTMPBroadcast) updates) => super.copyWith((message) => updates(message as RTMPBroadcast)) as RTMPBroadcast; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static RTMPBroadcast create() => RTMPBroadcast._();
-  RTMPBroadcast createEmptyInstance() => create();
-  static $pb.PbList<RTMPBroadcast> createRepeated() => $pb.PbList<RTMPBroadcast>();
-  @$core.pragma('dart2js:noInline')
-  static RTMPBroadcast getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RTMPBroadcast>(create);
-  static RTMPBroadcast? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get callId => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set callId($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasCallId() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearCallId() => clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.List<$core.String> get rtmpurls => $_getList(1);
-
-  @$pb.TagNumber(3)
-  $core.int get width => $_getIZ(2);
-  @$pb.TagNumber(3)
-  set width($core.int v) { $_setSignedInt32(2, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasWidth() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearWidth() => clearField(3);
-
-  @$pb.TagNumber(4)
-  $core.int get height => $_getIZ(3);
-  @$pb.TagNumber(4)
-  set height($core.int v) { $_setSignedInt32(3, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasHeight() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearHeight() => clearField(4);
-}
-
-class HLSBroadcast extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'HLSBroadcast', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..hasRequiredFields = false
-  ;
-
-  HLSBroadcast._() : super();
-  factory HLSBroadcast() => create();
-  factory HLSBroadcast.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory HLSBroadcast.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  HLSBroadcast clone() => HLSBroadcast()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  HLSBroadcast copyWith(void Function(HLSBroadcast) updates) => super.copyWith((message) => updates(message as HLSBroadcast)) as HLSBroadcast; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static HLSBroadcast create() => HLSBroadcast._();
-  HLSBroadcast createEmptyInstance() => create();
-  static $pb.PbList<HLSBroadcast> createRepeated() => $pb.PbList<HLSBroadcast>();
-  @$core.pragma('dart2js:noInline')
-  static HLSBroadcast getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<HLSBroadcast>(create);
-  static HLSBroadcast? _defaultInstance;
 }
 
 class File extends $pb.GeneratedMessage {
@@ -1137,56 +974,99 @@ class RecordingStorageOptions extends $pb.GeneratedMessage {
   void clearPath() => clearField(7);
 }
 
-class BroadcastOptions extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BroadcastOptions', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtmpUrl')
+class RTMPOptions extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RTMPOptions', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..pPS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'urls')
+    ..hasRequiredFields = false
+  ;
+
+  RTMPOptions._() : super();
+  factory RTMPOptions({
+    $core.Iterable<$core.String>? urls,
+  }) {
+    final _result = create();
+    if (urls != null) {
+      _result.urls.addAll(urls);
+    }
+    return _result;
+  }
+  factory RTMPOptions.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RTMPOptions.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RTMPOptions clone() => RTMPOptions()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RTMPOptions copyWith(void Function(RTMPOptions) updates) => super.copyWith((message) => updates(message as RTMPOptions)) as RTMPOptions; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RTMPOptions create() => RTMPOptions._();
+  RTMPOptions createEmptyInstance() => create();
+  static $pb.PbList<RTMPOptions> createRepeated() => $pb.PbList<RTMPOptions>();
+  @$core.pragma('dart2js:noInline')
+  static RTMPOptions getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RTMPOptions>(create);
+  static RTMPOptions? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.String> get urls => $_getList(0);
+}
+
+class Broadcast extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Broadcast', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOM<RTMPOptions>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtmp', subBuilder: RTMPOptions.create)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hlsUrl')
     ..hasRequiredFields = false
   ;
 
-  BroadcastOptions._() : super();
-  factory BroadcastOptions({
-    $core.String? rtmpUrl,
+  Broadcast._() : super();
+  factory Broadcast({
+    RTMPOptions? rtmp,
     $core.String? hlsUrl,
   }) {
     final _result = create();
-    if (rtmpUrl != null) {
-      _result.rtmpUrl = rtmpUrl;
+    if (rtmp != null) {
+      _result.rtmp = rtmp;
     }
     if (hlsUrl != null) {
       _result.hlsUrl = hlsUrl;
     }
     return _result;
   }
-  factory BroadcastOptions.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory BroadcastOptions.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory Broadcast.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Broadcast.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  BroadcastOptions clone() => BroadcastOptions()..mergeFromMessage(this);
+  Broadcast clone() => Broadcast()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BroadcastOptions copyWith(void Function(BroadcastOptions) updates) => super.copyWith((message) => updates(message as BroadcastOptions)) as BroadcastOptions; // ignore: deprecated_member_use
+  Broadcast copyWith(void Function(Broadcast) updates) => super.copyWith((message) => updates(message as Broadcast)) as Broadcast; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static BroadcastOptions create() => BroadcastOptions._();
-  BroadcastOptions createEmptyInstance() => create();
-  static $pb.PbList<BroadcastOptions> createRepeated() => $pb.PbList<BroadcastOptions>();
+  static Broadcast create() => Broadcast._();
+  Broadcast createEmptyInstance() => create();
+  static $pb.PbList<Broadcast> createRepeated() => $pb.PbList<Broadcast>();
   @$core.pragma('dart2js:noInline')
-  static BroadcastOptions getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BroadcastOptions>(create);
-  static BroadcastOptions? _defaultInstance;
+  static Broadcast getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Broadcast>(create);
+  static Broadcast? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get rtmpUrl => $_getSZ(0);
+  RTMPOptions get rtmp => $_getN(0);
   @$pb.TagNumber(1)
-  set rtmpUrl($core.String v) { $_setString(0, v); }
+  set rtmp(RTMPOptions v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasRtmpUrl() => $_has(0);
+  $core.bool hasRtmp() => $_has(0);
   @$pb.TagNumber(1)
-  void clearRtmpUrl() => clearField(1);
+  void clearRtmp() => clearField(1);
+  @$pb.TagNumber(1)
+  RTMPOptions ensureRtmp() => $_ensure(0);
 
   @$pb.TagNumber(2)
   $core.String get hlsUrl => $_getSZ(1);
@@ -1231,12 +1111,12 @@ class CallType extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallType', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
     ..aOM<Security>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'security', subBuilder: Security.create)
-    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcast')
-    ..pc<BroadcastOptions>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcastOptions', $pb.PbFieldType.PM, subBuilder: BroadcastOptions.create)
-    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transcribe')
-    ..aOM<TranscribeOptions>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transcribeOptions', subBuilder: TranscribeOptions.create)
-    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt')
-    ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt')
+    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recording')
+    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hlsBroadcast')
+    ..aOB(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transcribe')
+    ..aOM<TranscribeOptions>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transcribeOptions', subBuilder: TranscribeOptions.create)
+    ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt')
+    ..aOS(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt')
     ..hasRequiredFields = false
   ;
 
@@ -1244,8 +1124,8 @@ class CallType extends $pb.GeneratedMessage {
   factory CallType({
     $core.String? name,
     Security? security,
-    $core.bool? broadcast,
-    $core.Iterable<BroadcastOptions>? broadcastOptions,
+    $core.bool? recording,
+    $core.bool? hlsBroadcast,
     $core.bool? transcribe,
     TranscribeOptions? transcribeOptions,
     $core.String? createdAt,
@@ -1258,11 +1138,11 @@ class CallType extends $pb.GeneratedMessage {
     if (security != null) {
       _result.security = security;
     }
-    if (broadcast != null) {
-      _result.broadcast = broadcast;
+    if (recording != null) {
+      _result.recording = recording;
     }
-    if (broadcastOptions != null) {
-      _result.broadcastOptions.addAll(broadcastOptions);
+    if (hlsBroadcast != null) {
+      _result.hlsBroadcast = hlsBroadcast;
     }
     if (transcribe != null) {
       _result.transcribe = transcribe;
@@ -1319,55 +1199,61 @@ class CallType extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   Security ensureSecurity() => $_ensure(1);
 
-  @$pb.TagNumber(3)
-  $core.bool get broadcast => $_getBF(2);
-  @$pb.TagNumber(3)
-  set broadcast($core.bool v) { $_setBool(2, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasBroadcast() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearBroadcast() => clearField(3);
-
   @$pb.TagNumber(4)
-  $core.List<BroadcastOptions> get broadcastOptions => $_getList(3);
+  $core.bool get recording => $_getBF(2);
+  @$pb.TagNumber(4)
+  set recording($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasRecording() => $_has(2);
+  @$pb.TagNumber(4)
+  void clearRecording() => clearField(4);
 
   @$pb.TagNumber(5)
+  $core.bool get hlsBroadcast => $_getBF(3);
+  @$pb.TagNumber(5)
+  set hlsBroadcast($core.bool v) { $_setBool(3, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasHlsBroadcast() => $_has(3);
+  @$pb.TagNumber(5)
+  void clearHlsBroadcast() => clearField(5);
+
+  @$pb.TagNumber(6)
   $core.bool get transcribe => $_getBF(4);
-  @$pb.TagNumber(5)
+  @$pb.TagNumber(6)
   set transcribe($core.bool v) { $_setBool(4, v); }
-  @$pb.TagNumber(5)
+  @$pb.TagNumber(6)
   $core.bool hasTranscribe() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearTranscribe() => clearField(5);
+  @$pb.TagNumber(6)
+  void clearTranscribe() => clearField(6);
 
-  @$pb.TagNumber(6)
+  @$pb.TagNumber(7)
   TranscribeOptions get transcribeOptions => $_getN(5);
-  @$pb.TagNumber(6)
-  set transcribeOptions(TranscribeOptions v) { setField(6, v); }
-  @$pb.TagNumber(6)
+  @$pb.TagNumber(7)
+  set transcribeOptions(TranscribeOptions v) { setField(7, v); }
+  @$pb.TagNumber(7)
   $core.bool hasTranscribeOptions() => $_has(5);
-  @$pb.TagNumber(6)
-  void clearTranscribeOptions() => clearField(6);
-  @$pb.TagNumber(6)
+  @$pb.TagNumber(7)
+  void clearTranscribeOptions() => clearField(7);
+  @$pb.TagNumber(7)
   TranscribeOptions ensureTranscribeOptions() => $_ensure(5);
 
-  @$pb.TagNumber(7)
+  @$pb.TagNumber(8)
   $core.String get createdAt => $_getSZ(6);
-  @$pb.TagNumber(7)
+  @$pb.TagNumber(8)
   set createdAt($core.String v) { $_setString(6, v); }
-  @$pb.TagNumber(7)
+  @$pb.TagNumber(8)
   $core.bool hasCreatedAt() => $_has(6);
-  @$pb.TagNumber(7)
-  void clearCreatedAt() => clearField(7);
+  @$pb.TagNumber(8)
+  void clearCreatedAt() => clearField(8);
 
-  @$pb.TagNumber(8)
+  @$pb.TagNumber(9)
   $core.String get updatedAt => $_getSZ(7);
-  @$pb.TagNumber(8)
+  @$pb.TagNumber(9)
   set updatedAt($core.String v) { $_setString(7, v); }
-  @$pb.TagNumber(8)
+  @$pb.TagNumber(9)
   $core.bool hasUpdatedAt() => $_has(7);
-  @$pb.TagNumber(8)
-  void clearUpdatedAt() => clearField(8);
+  @$pb.TagNumber(9)
+  void clearUpdatedAt() => clearField(9);
 }
 
 class Security extends $pb.GeneratedMessage {
@@ -1521,8 +1407,10 @@ class Participant extends $pb.GeneratedMessage {
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'role')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'online')
     ..aOM<$2.Struct>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $2.Struct.create)
-    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt')
-    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt')
+    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'video')
+    ..aOB(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audio')
+    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt')
+    ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt')
     ..hasRequiredFields = false
   ;
 
@@ -1532,6 +1420,8 @@ class Participant extends $pb.GeneratedMessage {
     $core.String? role,
     $core.bool? online,
     $2.Struct? custom,
+    $core.bool? video,
+    $core.bool? audio,
     $core.String? createdAt,
     $core.String? updatedAt,
   }) {
@@ -1547,6 +1437,12 @@ class Participant extends $pb.GeneratedMessage {
     }
     if (custom != null) {
       _result.custom = custom;
+    }
+    if (video != null) {
+      _result.video = video;
+    }
+    if (audio != null) {
+      _result.audio = audio;
     }
     if (createdAt != null) {
       _result.createdAt = createdAt;
@@ -1616,22 +1512,40 @@ class Participant extends $pb.GeneratedMessage {
   $2.Struct ensureCustom() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $core.String get createdAt => $_getSZ(4);
+  $core.bool get video => $_getBF(4);
   @$pb.TagNumber(5)
-  set createdAt($core.String v) { $_setString(4, v); }
+  set video($core.bool v) { $_setBool(4, v); }
   @$pb.TagNumber(5)
-  $core.bool hasCreatedAt() => $_has(4);
+  $core.bool hasVideo() => $_has(4);
   @$pb.TagNumber(5)
-  void clearCreatedAt() => clearField(5);
+  void clearVideo() => clearField(5);
 
   @$pb.TagNumber(6)
-  $core.String get updatedAt => $_getSZ(5);
+  $core.bool get audio => $_getBF(5);
   @$pb.TagNumber(6)
-  set updatedAt($core.String v) { $_setString(5, v); }
+  set audio($core.bool v) { $_setBool(5, v); }
   @$pb.TagNumber(6)
-  $core.bool hasUpdatedAt() => $_has(5);
+  $core.bool hasAudio() => $_has(5);
   @$pb.TagNumber(6)
-  void clearUpdatedAt() => clearField(6);
+  void clearAudio() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.String get createdAt => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set createdAt($core.String v) { $_setString(6, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasCreatedAt() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearCreatedAt() => clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.String get updatedAt => $_getSZ(7);
+  @$pb.TagNumber(8)
+  set updatedAt($core.String v) { $_setString(7, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasUpdatedAt() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearUpdatedAt() => clearField(8);
 }
 
 class ParticipantRequest extends $pb.GeneratedMessage {
@@ -1788,8 +1702,8 @@ class Call extends $pb.GeneratedMessage {
     ..aOM<$2.Struct>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $2.Struct.create)
     ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt')
     ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt')
-    ..aOB(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcast')
-    ..pc<BroadcastOptions>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcastOptions', $pb.PbFieldType.PM, subBuilder: BroadcastOptions.create)
+    ..aOB(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recording')
+    ..aOM<Broadcast>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcast', subBuilder: Broadcast.create)
     ..aOB(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transcribe')
     ..aOM<TranscribeOptions>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transcribeOptions', subBuilder: TranscribeOptions.create)
     ..hasRequiredFields = false
@@ -1803,8 +1717,8 @@ class Call extends $pb.GeneratedMessage {
     $2.Struct? custom,
     $core.String? createdAt,
     $core.String? updatedAt,
-    $core.bool? broadcast,
-    $core.Iterable<BroadcastOptions>? broadcastOptions,
+    $core.bool? recording,
+    Broadcast? broadcast,
     $core.bool? transcribe,
     TranscribeOptions? transcribeOptions,
   }) {
@@ -1827,11 +1741,11 @@ class Call extends $pb.GeneratedMessage {
     if (updatedAt != null) {
       _result.updatedAt = updatedAt;
     }
+    if (recording != null) {
+      _result.recording = recording;
+    }
     if (broadcast != null) {
       _result.broadcast = broadcast;
-    }
-    if (broadcastOptions != null) {
-      _result.broadcastOptions.addAll(broadcastOptions);
     }
     if (transcribe != null) {
       _result.transcribe = transcribe;
@@ -1919,16 +1833,24 @@ class Call extends $pb.GeneratedMessage {
   void clearUpdatedAt() => clearField(6);
 
   @$pb.TagNumber(7)
-  $core.bool get broadcast => $_getBF(6);
+  $core.bool get recording => $_getBF(6);
   @$pb.TagNumber(7)
-  set broadcast($core.bool v) { $_setBool(6, v); }
+  set recording($core.bool v) { $_setBool(6, v); }
   @$pb.TagNumber(7)
-  $core.bool hasBroadcast() => $_has(6);
+  $core.bool hasRecording() => $_has(6);
   @$pb.TagNumber(7)
-  void clearBroadcast() => clearField(7);
+  void clearRecording() => clearField(7);
 
   @$pb.TagNumber(8)
-  $core.List<BroadcastOptions> get broadcastOptions => $_getList(7);
+  Broadcast get broadcast => $_getN(7);
+  @$pb.TagNumber(8)
+  set broadcast(Broadcast v) { setField(8, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasBroadcast() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearBroadcast() => clearField(8);
+  @$pb.TagNumber(8)
+  Broadcast ensureBroadcast() => $_ensure(7);
 
   @$pb.TagNumber(9)
   $core.bool get transcribe => $_getBF(8);

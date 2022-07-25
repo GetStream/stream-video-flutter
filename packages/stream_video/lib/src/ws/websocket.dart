@@ -203,13 +203,13 @@ class WebSocketClient {
 
   void _handleBroadcastStarted(BroadcastStarted event) {
     _logger?.info(
-        'BroadcastStarted event received : ${event.broadcast.toString()}');
+        'BroadcastStarted event received : ${event.call.toString()}');
     // state.broadcastStarted = event;
   }
 
   void _handleBroadcastEnded(BroadcastEnded event) {
     _logger
-        ?.info('BroadcastEnded event received : ${event.broadcast.toString()}');
+        ?.info('BroadcastEnded event received : ${event.call.toString()}');
     // state.broadcastEnded = event;
   }
 

@@ -27,6 +27,14 @@ enum WebsocketEvent_EventPayload {
   broadcastStarted, 
   broadcastEnded, 
   authPayload, 
+  audioMuted, 
+  audioUnmuted, 
+  videoStarted, 
+  videoStopped, 
+  screenshareStarted, 
+  screenshareStopped, 
+  recordingStarted, 
+  recordingStopped, 
   notSet
 }
 
@@ -47,10 +55,18 @@ class WebsocketEvent extends $pb.GeneratedMessage {
     13 : WebsocketEvent_EventPayload.broadcastStarted,
     14 : WebsocketEvent_EventPayload.broadcastEnded,
     15 : WebsocketEvent_EventPayload.authPayload,
+    16 : WebsocketEvent_EventPayload.audioMuted,
+    17 : WebsocketEvent_EventPayload.audioUnmuted,
+    18 : WebsocketEvent_EventPayload.videoStarted,
+    19 : WebsocketEvent_EventPayload.videoStopped,
+    20 : WebsocketEvent_EventPayload.screenshareStarted,
+    21 : WebsocketEvent_EventPayload.screenshareStopped,
+    22 : WebsocketEvent_EventPayload.recordingStarted,
+    23 : WebsocketEvent_EventPayload.recordingStopped,
     0 : WebsocketEvent_EventPayload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'WebsocketEvent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23])
     ..aOM<Healthcheck>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'healthCheck', subBuilder: Healthcheck.create)
     ..aOM<CallRinging>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callRinging', subBuilder: CallRinging.create)
     ..aOM<CallCreated>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCreated', subBuilder: CallCreated.create)
@@ -66,6 +82,14 @@ class WebsocketEvent extends $pb.GeneratedMessage {
     ..aOM<BroadcastStarted>(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcastStarted', subBuilder: BroadcastStarted.create)
     ..aOM<BroadcastEnded>(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcastEnded', subBuilder: BroadcastEnded.create)
     ..aOM<AuthPayload>(15, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'authPayload', subBuilder: AuthPayload.create)
+    ..aOM<AudioMuted>(16, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audioMuted', subBuilder: AudioMuted.create)
+    ..aOM<AudioUnmuted>(17, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audioUnmuted', subBuilder: AudioUnmuted.create)
+    ..aOM<VideoStarted>(18, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'videoStarted', subBuilder: VideoStarted.create)
+    ..aOM<VideoStopped>(19, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'videoStopped', subBuilder: VideoStopped.create)
+    ..aOM<ScreenshareStarted>(20, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'screenshareStarted', subBuilder: ScreenshareStarted.create)
+    ..aOM<ScreenshareStopped>(21, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'screenshareStopped', subBuilder: ScreenshareStopped.create)
+    ..aOM<RecordingStarted>(22, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recordingStarted', subBuilder: RecordingStarted.create)
+    ..aOM<RecordingStopped>(23, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recordingStopped', subBuilder: RecordingStopped.create)
     ..hasRequiredFields = false
   ;
 
@@ -86,6 +110,14 @@ class WebsocketEvent extends $pb.GeneratedMessage {
     BroadcastStarted? broadcastStarted,
     BroadcastEnded? broadcastEnded,
     AuthPayload? authPayload,
+    AudioMuted? audioMuted,
+    AudioUnmuted? audioUnmuted,
+    VideoStarted? videoStarted,
+    VideoStopped? videoStopped,
+    ScreenshareStarted? screenshareStarted,
+    ScreenshareStopped? screenshareStopped,
+    RecordingStarted? recordingStarted,
+    RecordingStopped? recordingStopped,
   }) {
     final _result = create();
     if (healthCheck != null) {
@@ -132,6 +164,30 @@ class WebsocketEvent extends $pb.GeneratedMessage {
     }
     if (authPayload != null) {
       _result.authPayload = authPayload;
+    }
+    if (audioMuted != null) {
+      _result.audioMuted = audioMuted;
+    }
+    if (audioUnmuted != null) {
+      _result.audioUnmuted = audioUnmuted;
+    }
+    if (videoStarted != null) {
+      _result.videoStarted = videoStarted;
+    }
+    if (videoStopped != null) {
+      _result.videoStopped = videoStopped;
+    }
+    if (screenshareStarted != null) {
+      _result.screenshareStarted = screenshareStarted;
+    }
+    if (screenshareStopped != null) {
+      _result.screenshareStopped = screenshareStopped;
+    }
+    if (recordingStarted != null) {
+      _result.recordingStarted = recordingStarted;
+    }
+    if (recordingStopped != null) {
+      _result.recordingStopped = recordingStopped;
     }
     return _result;
   }
@@ -323,12 +379,104 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   void clearAuthPayload() => clearField(15);
   @$pb.TagNumber(15)
   AuthPayload ensureAuthPayload() => $_ensure(14);
+
+  @$pb.TagNumber(16)
+  AudioMuted get audioMuted => $_getN(15);
+  @$pb.TagNumber(16)
+  set audioMuted(AudioMuted v) { setField(16, v); }
+  @$pb.TagNumber(16)
+  $core.bool hasAudioMuted() => $_has(15);
+  @$pb.TagNumber(16)
+  void clearAudioMuted() => clearField(16);
+  @$pb.TagNumber(16)
+  AudioMuted ensureAudioMuted() => $_ensure(15);
+
+  @$pb.TagNumber(17)
+  AudioUnmuted get audioUnmuted => $_getN(16);
+  @$pb.TagNumber(17)
+  set audioUnmuted(AudioUnmuted v) { setField(17, v); }
+  @$pb.TagNumber(17)
+  $core.bool hasAudioUnmuted() => $_has(16);
+  @$pb.TagNumber(17)
+  void clearAudioUnmuted() => clearField(17);
+  @$pb.TagNumber(17)
+  AudioUnmuted ensureAudioUnmuted() => $_ensure(16);
+
+  @$pb.TagNumber(18)
+  VideoStarted get videoStarted => $_getN(17);
+  @$pb.TagNumber(18)
+  set videoStarted(VideoStarted v) { setField(18, v); }
+  @$pb.TagNumber(18)
+  $core.bool hasVideoStarted() => $_has(17);
+  @$pb.TagNumber(18)
+  void clearVideoStarted() => clearField(18);
+  @$pb.TagNumber(18)
+  VideoStarted ensureVideoStarted() => $_ensure(17);
+
+  @$pb.TagNumber(19)
+  VideoStopped get videoStopped => $_getN(18);
+  @$pb.TagNumber(19)
+  set videoStopped(VideoStopped v) { setField(19, v); }
+  @$pb.TagNumber(19)
+  $core.bool hasVideoStopped() => $_has(18);
+  @$pb.TagNumber(19)
+  void clearVideoStopped() => clearField(19);
+  @$pb.TagNumber(19)
+  VideoStopped ensureVideoStopped() => $_ensure(18);
+
+  @$pb.TagNumber(20)
+  ScreenshareStarted get screenshareStarted => $_getN(19);
+  @$pb.TagNumber(20)
+  set screenshareStarted(ScreenshareStarted v) { setField(20, v); }
+  @$pb.TagNumber(20)
+  $core.bool hasScreenshareStarted() => $_has(19);
+  @$pb.TagNumber(20)
+  void clearScreenshareStarted() => clearField(20);
+  @$pb.TagNumber(20)
+  ScreenshareStarted ensureScreenshareStarted() => $_ensure(19);
+
+  @$pb.TagNumber(21)
+  ScreenshareStopped get screenshareStopped => $_getN(20);
+  @$pb.TagNumber(21)
+  set screenshareStopped(ScreenshareStopped v) { setField(21, v); }
+  @$pb.TagNumber(21)
+  $core.bool hasScreenshareStopped() => $_has(20);
+  @$pb.TagNumber(21)
+  void clearScreenshareStopped() => clearField(21);
+  @$pb.TagNumber(21)
+  ScreenshareStopped ensureScreenshareStopped() => $_ensure(20);
+
+  @$pb.TagNumber(22)
+  RecordingStarted get recordingStarted => $_getN(21);
+  @$pb.TagNumber(22)
+  set recordingStarted(RecordingStarted v) { setField(22, v); }
+  @$pb.TagNumber(22)
+  $core.bool hasRecordingStarted() => $_has(21);
+  @$pb.TagNumber(22)
+  void clearRecordingStarted() => clearField(22);
+  @$pb.TagNumber(22)
+  RecordingStarted ensureRecordingStarted() => $_ensure(21);
+
+  @$pb.TagNumber(23)
+  RecordingStopped get recordingStopped => $_getN(22);
+  @$pb.TagNumber(23)
+  set recordingStopped(RecordingStopped v) { setField(23, v); }
+  @$pb.TagNumber(23)
+  $core.bool hasRecordingStopped() => $_has(22);
+  @$pb.TagNumber(23)
+  void clearRecordingStopped() => clearField(23);
+  @$pb.TagNumber(23)
+  RecordingStopped ensureRecordingStopped() => $_ensure(22);
 }
 
 class Healthcheck extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Healthcheck', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'clientId')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'video')
+    ..aOB(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audio')
     ..hasRequiredFields = false
   ;
 
@@ -336,6 +484,10 @@ class Healthcheck extends $pb.GeneratedMessage {
   factory Healthcheck({
     $core.String? userId,
     $core.String? clientId,
+    $core.String? callType,
+    $core.String? callId,
+    $core.bool? video,
+    $core.bool? audio,
   }) {
     final _result = create();
     if (userId != null) {
@@ -343,6 +495,18 @@ class Healthcheck extends $pb.GeneratedMessage {
     }
     if (clientId != null) {
       _result.clientId = clientId;
+    }
+    if (callType != null) {
+      _result.callType = callType;
+    }
+    if (callId != null) {
+      _result.callId = callId;
+    }
+    if (video != null) {
+      _result.video = video;
+    }
+    if (audio != null) {
+      _result.audio = audio;
     }
     return _result;
   }
@@ -384,6 +548,42 @@ class Healthcheck extends $pb.GeneratedMessage {
   $core.bool hasClientId() => $_has(1);
   @$pb.TagNumber(2)
   void clearClientId() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get callType => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set callType($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasCallType() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearCallType() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get callId => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set callId($core.String v) { $_setString(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasCallId() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCallId() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.bool get video => $_getBF(4);
+  @$pb.TagNumber(5)
+  set video($core.bool v) { $_setBool(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasVideo() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearVideo() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.bool get audio => $_getBF(5);
+  @$pb.TagNumber(6)
+  set audio($core.bool v) { $_setBool(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasAudio() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearAudio() => clearField(6);
 }
 
 class AuthPayload extends $pb.GeneratedMessage {
@@ -710,6 +910,511 @@ class CallDeleted extends $pb.GeneratedMessage {
   $3.Call ensureCall() => $_ensure(0);
 }
 
+enum AudioMuted_Target {
+  userId, 
+  allUsers, 
+  notSet
+}
+
+class AudioMuted extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, AudioMuted_Target> _AudioMuted_TargetByTag = {
+    2 : AudioMuted_Target.userId,
+    3 : AudioMuted_Target.allUsers,
+    0 : AudioMuted_Target.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AudioMuted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..oo(0, [2, 3])
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
+    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'allUsers')
+    ..hasRequiredFields = false
+  ;
+
+  AudioMuted._() : super();
+  factory AudioMuted({
+    $3.Call? call,
+    $core.String? userId,
+    $core.bool? allUsers,
+  }) {
+    final _result = create();
+    if (call != null) {
+      _result.call = call;
+    }
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    if (allUsers != null) {
+      _result.allUsers = allUsers;
+    }
+    return _result;
+  }
+  factory AudioMuted.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AudioMuted.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AudioMuted clone() => AudioMuted()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AudioMuted copyWith(void Function(AudioMuted) updates) => super.copyWith((message) => updates(message as AudioMuted)) as AudioMuted; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AudioMuted create() => AudioMuted._();
+  AudioMuted createEmptyInstance() => create();
+  static $pb.PbList<AudioMuted> createRepeated() => $pb.PbList<AudioMuted>();
+  @$core.pragma('dart2js:noInline')
+  static AudioMuted getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AudioMuted>(create);
+  static AudioMuted? _defaultInstance;
+
+  AudioMuted_Target whichTarget() => _AudioMuted_TargetByTag[$_whichOneof(0)]!;
+  void clearTarget() => clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  $3.Call get call => $_getN(0);
+  @$pb.TagNumber(1)
+  set call($3.Call v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCall() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCall() => clearField(1);
+  @$pb.TagNumber(1)
+  $3.Call ensureCall() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.String get userId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set userId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasUserId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearUserId() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get allUsers => $_getBF(2);
+  @$pb.TagNumber(3)
+  set allUsers($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasAllUsers() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearAllUsers() => clearField(3);
+}
+
+class AudioUnmuted extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AudioUnmuted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
+    ..hasRequiredFields = false
+  ;
+
+  AudioUnmuted._() : super();
+  factory AudioUnmuted({
+    $3.Call? call,
+    $core.String? userId,
+  }) {
+    final _result = create();
+    if (call != null) {
+      _result.call = call;
+    }
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    return _result;
+  }
+  factory AudioUnmuted.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AudioUnmuted.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AudioUnmuted clone() => AudioUnmuted()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AudioUnmuted copyWith(void Function(AudioUnmuted) updates) => super.copyWith((message) => updates(message as AudioUnmuted)) as AudioUnmuted; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AudioUnmuted create() => AudioUnmuted._();
+  AudioUnmuted createEmptyInstance() => create();
+  static $pb.PbList<AudioUnmuted> createRepeated() => $pb.PbList<AudioUnmuted>();
+  @$core.pragma('dart2js:noInline')
+  static AudioUnmuted getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AudioUnmuted>(create);
+  static AudioUnmuted? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $3.Call get call => $_getN(0);
+  @$pb.TagNumber(1)
+  set call($3.Call v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCall() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCall() => clearField(1);
+  @$pb.TagNumber(1)
+  $3.Call ensureCall() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.String get userId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set userId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasUserId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearUserId() => clearField(2);
+}
+
+class VideoStarted extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'VideoStarted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
+    ..hasRequiredFields = false
+  ;
+
+  VideoStarted._() : super();
+  factory VideoStarted({
+    $3.Call? call,
+    $core.String? userId,
+  }) {
+    final _result = create();
+    if (call != null) {
+      _result.call = call;
+    }
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    return _result;
+  }
+  factory VideoStarted.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory VideoStarted.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  VideoStarted clone() => VideoStarted()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  VideoStarted copyWith(void Function(VideoStarted) updates) => super.copyWith((message) => updates(message as VideoStarted)) as VideoStarted; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static VideoStarted create() => VideoStarted._();
+  VideoStarted createEmptyInstance() => create();
+  static $pb.PbList<VideoStarted> createRepeated() => $pb.PbList<VideoStarted>();
+  @$core.pragma('dart2js:noInline')
+  static VideoStarted getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<VideoStarted>(create);
+  static VideoStarted? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $3.Call get call => $_getN(0);
+  @$pb.TagNumber(1)
+  set call($3.Call v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCall() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCall() => clearField(1);
+  @$pb.TagNumber(1)
+  $3.Call ensureCall() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.String get userId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set userId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasUserId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearUserId() => clearField(2);
+}
+
+class VideoStopped extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'VideoStopped', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
+    ..hasRequiredFields = false
+  ;
+
+  VideoStopped._() : super();
+  factory VideoStopped({
+    $3.Call? call,
+    $core.String? userId,
+  }) {
+    final _result = create();
+    if (call != null) {
+      _result.call = call;
+    }
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    return _result;
+  }
+  factory VideoStopped.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory VideoStopped.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  VideoStopped clone() => VideoStopped()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  VideoStopped copyWith(void Function(VideoStopped) updates) => super.copyWith((message) => updates(message as VideoStopped)) as VideoStopped; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static VideoStopped create() => VideoStopped._();
+  VideoStopped createEmptyInstance() => create();
+  static $pb.PbList<VideoStopped> createRepeated() => $pb.PbList<VideoStopped>();
+  @$core.pragma('dart2js:noInline')
+  static VideoStopped getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<VideoStopped>(create);
+  static VideoStopped? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $3.Call get call => $_getN(0);
+  @$pb.TagNumber(1)
+  set call($3.Call v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCall() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCall() => clearField(1);
+  @$pb.TagNumber(1)
+  $3.Call ensureCall() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.String get userId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set userId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasUserId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearUserId() => clearField(2);
+}
+
+class ScreenshareStarted extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ScreenshareStarted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
+    ..hasRequiredFields = false
+  ;
+
+  ScreenshareStarted._() : super();
+  factory ScreenshareStarted({
+    $3.Call? call,
+    $core.String? userId,
+  }) {
+    final _result = create();
+    if (call != null) {
+      _result.call = call;
+    }
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    return _result;
+  }
+  factory ScreenshareStarted.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ScreenshareStarted.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ScreenshareStarted clone() => ScreenshareStarted()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ScreenshareStarted copyWith(void Function(ScreenshareStarted) updates) => super.copyWith((message) => updates(message as ScreenshareStarted)) as ScreenshareStarted; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ScreenshareStarted create() => ScreenshareStarted._();
+  ScreenshareStarted createEmptyInstance() => create();
+  static $pb.PbList<ScreenshareStarted> createRepeated() => $pb.PbList<ScreenshareStarted>();
+  @$core.pragma('dart2js:noInline')
+  static ScreenshareStarted getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ScreenshareStarted>(create);
+  static ScreenshareStarted? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $3.Call get call => $_getN(0);
+  @$pb.TagNumber(1)
+  set call($3.Call v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCall() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCall() => clearField(1);
+  @$pb.TagNumber(1)
+  $3.Call ensureCall() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.String get userId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set userId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasUserId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearUserId() => clearField(2);
+}
+
+class ScreenshareStopped extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ScreenshareStopped', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
+    ..hasRequiredFields = false
+  ;
+
+  ScreenshareStopped._() : super();
+  factory ScreenshareStopped({
+    $3.Call? call,
+    $core.String? userId,
+  }) {
+    final _result = create();
+    if (call != null) {
+      _result.call = call;
+    }
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    return _result;
+  }
+  factory ScreenshareStopped.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ScreenshareStopped.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ScreenshareStopped clone() => ScreenshareStopped()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ScreenshareStopped copyWith(void Function(ScreenshareStopped) updates) => super.copyWith((message) => updates(message as ScreenshareStopped)) as ScreenshareStopped; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ScreenshareStopped create() => ScreenshareStopped._();
+  ScreenshareStopped createEmptyInstance() => create();
+  static $pb.PbList<ScreenshareStopped> createRepeated() => $pb.PbList<ScreenshareStopped>();
+  @$core.pragma('dart2js:noInline')
+  static ScreenshareStopped getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ScreenshareStopped>(create);
+  static ScreenshareStopped? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $3.Call get call => $_getN(0);
+  @$pb.TagNumber(1)
+  set call($3.Call v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCall() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCall() => clearField(1);
+  @$pb.TagNumber(1)
+  $3.Call ensureCall() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.String get userId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set userId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasUserId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearUserId() => clearField(2);
+}
+
+class RecordingStarted extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RecordingStarted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
+    ..hasRequiredFields = false
+  ;
+
+  RecordingStarted._() : super();
+  factory RecordingStarted({
+    $3.Call? call,
+  }) {
+    final _result = create();
+    if (call != null) {
+      _result.call = call;
+    }
+    return _result;
+  }
+  factory RecordingStarted.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RecordingStarted.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RecordingStarted clone() => RecordingStarted()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RecordingStarted copyWith(void Function(RecordingStarted) updates) => super.copyWith((message) => updates(message as RecordingStarted)) as RecordingStarted; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RecordingStarted create() => RecordingStarted._();
+  RecordingStarted createEmptyInstance() => create();
+  static $pb.PbList<RecordingStarted> createRepeated() => $pb.PbList<RecordingStarted>();
+  @$core.pragma('dart2js:noInline')
+  static RecordingStarted getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RecordingStarted>(create);
+  static RecordingStarted? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $3.Call get call => $_getN(0);
+  @$pb.TagNumber(1)
+  set call($3.Call v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCall() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCall() => clearField(1);
+  @$pb.TagNumber(1)
+  $3.Call ensureCall() => $_ensure(0);
+}
+
+class RecordingStopped extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RecordingStopped', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
+    ..hasRequiredFields = false
+  ;
+
+  RecordingStopped._() : super();
+  factory RecordingStopped({
+    $3.Call? call,
+  }) {
+    final _result = create();
+    if (call != null) {
+      _result.call = call;
+    }
+    return _result;
+  }
+  factory RecordingStopped.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RecordingStopped.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  RecordingStopped clone() => RecordingStopped()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  RecordingStopped copyWith(void Function(RecordingStopped) updates) => super.copyWith((message) => updates(message as RecordingStopped)) as RecordingStopped; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RecordingStopped create() => RecordingStopped._();
+  RecordingStopped createEmptyInstance() => create();
+  static $pb.PbList<RecordingStopped> createRepeated() => $pb.PbList<RecordingStopped>();
+  @$core.pragma('dart2js:noInline')
+  static RecordingStopped getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RecordingStopped>(create);
+  static RecordingStopped? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $3.Call get call => $_getN(0);
+  @$pb.TagNumber(1)
+  set call($3.Call v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCall() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCall() => clearField(1);
+  @$pb.TagNumber(1)
+  $3.Call ensureCall() => $_ensure(0);
+}
+
 class UserUpdated extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserUpdated', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
     ..aOM<$3.User>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'user', subBuilder: $3.User.create)
@@ -761,15 +1466,20 @@ class UserUpdated extends $pb.GeneratedMessage {
 
 class ParticipantInvited extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ParticipantInvited', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOM<$3.Participant>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $3.Participant.create)
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
+    ..aOM<$3.Participant>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $3.Participant.create)
     ..hasRequiredFields = false
   ;
 
   ParticipantInvited._() : super();
   factory ParticipantInvited({
+    $3.Call? call,
     $3.Participant? participant,
   }) {
     final _result = create();
+    if (call != null) {
+      _result.call = call;
+    }
     if (participant != null) {
       _result.participant = participant;
     }
@@ -797,28 +1507,44 @@ class ParticipantInvited extends $pb.GeneratedMessage {
   static ParticipantInvited? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $3.Participant get participant => $_getN(0);
+  $3.Call get call => $_getN(0);
   @$pb.TagNumber(1)
-  set participant($3.Participant v) { setField(1, v); }
+  set call($3.Call v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasParticipant() => $_has(0);
+  $core.bool hasCall() => $_has(0);
   @$pb.TagNumber(1)
-  void clearParticipant() => clearField(1);
+  void clearCall() => clearField(1);
   @$pb.TagNumber(1)
-  $3.Participant ensureParticipant() => $_ensure(0);
+  $3.Call ensureCall() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $3.Participant get participant => $_getN(1);
+  @$pb.TagNumber(2)
+  set participant($3.Participant v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasParticipant() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearParticipant() => clearField(2);
+  @$pb.TagNumber(2)
+  $3.Participant ensureParticipant() => $_ensure(1);
 }
 
 class ParticipantUpdated extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ParticipantUpdated', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOM<$3.Participant>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $3.Participant.create)
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
+    ..aOM<$3.Participant>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $3.Participant.create)
     ..hasRequiredFields = false
   ;
 
   ParticipantUpdated._() : super();
   factory ParticipantUpdated({
+    $3.Call? call,
     $3.Participant? participant,
   }) {
     final _result = create();
+    if (call != null) {
+      _result.call = call;
+    }
     if (participant != null) {
       _result.participant = participant;
     }
@@ -846,28 +1572,44 @@ class ParticipantUpdated extends $pb.GeneratedMessage {
   static ParticipantUpdated? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $3.Participant get participant => $_getN(0);
+  $3.Call get call => $_getN(0);
   @$pb.TagNumber(1)
-  set participant($3.Participant v) { setField(1, v); }
+  set call($3.Call v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasParticipant() => $_has(0);
+  $core.bool hasCall() => $_has(0);
   @$pb.TagNumber(1)
-  void clearParticipant() => clearField(1);
+  void clearCall() => clearField(1);
   @$pb.TagNumber(1)
-  $3.Participant ensureParticipant() => $_ensure(0);
+  $3.Call ensureCall() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $3.Participant get participant => $_getN(1);
+  @$pb.TagNumber(2)
+  set participant($3.Participant v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasParticipant() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearParticipant() => clearField(2);
+  @$pb.TagNumber(2)
+  $3.Participant ensureParticipant() => $_ensure(1);
 }
 
 class ParticipantDeleted extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ParticipantDeleted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
     ..hasRequiredFields = false
   ;
 
   ParticipantDeleted._() : super();
   factory ParticipantDeleted({
+    $3.Call? call,
     $core.String? userId,
   }) {
     final _result = create();
+    if (call != null) {
+      _result.call = call;
+    }
     if (userId != null) {
       _result.userId = userId;
     }
@@ -895,26 +1637,42 @@ class ParticipantDeleted extends $pb.GeneratedMessage {
   static ParticipantDeleted? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get userId => $_getSZ(0);
+  $3.Call get call => $_getN(0);
   @$pb.TagNumber(1)
-  set userId($core.String v) { $_setString(0, v); }
+  set call($3.Call v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasUserId() => $_has(0);
+  $core.bool hasCall() => $_has(0);
   @$pb.TagNumber(1)
-  void clearUserId() => clearField(1);
+  void clearCall() => clearField(1);
+  @$pb.TagNumber(1)
+  $3.Call ensureCall() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.String get userId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set userId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasUserId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearUserId() => clearField(2);
 }
 
 class ParticipantJoined extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ParticipantJoined', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOM<$3.Participant>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $3.Participant.create)
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
+    ..aOM<$3.Participant>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $3.Participant.create)
     ..hasRequiredFields = false
   ;
 
   ParticipantJoined._() : super();
   factory ParticipantJoined({
+    $3.Call? call,
     $3.Participant? participant,
   }) {
     final _result = create();
+    if (call != null) {
+      _result.call = call;
+    }
     if (participant != null) {
       _result.participant = participant;
     }
@@ -942,28 +1700,44 @@ class ParticipantJoined extends $pb.GeneratedMessage {
   static ParticipantJoined? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $3.Participant get participant => $_getN(0);
+  $3.Call get call => $_getN(0);
   @$pb.TagNumber(1)
-  set participant($3.Participant v) { setField(1, v); }
+  set call($3.Call v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasParticipant() => $_has(0);
+  $core.bool hasCall() => $_has(0);
   @$pb.TagNumber(1)
-  void clearParticipant() => clearField(1);
+  void clearCall() => clearField(1);
   @$pb.TagNumber(1)
-  $3.Participant ensureParticipant() => $_ensure(0);
+  $3.Call ensureCall() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $3.Participant get participant => $_getN(1);
+  @$pb.TagNumber(2)
+  set participant($3.Participant v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasParticipant() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearParticipant() => clearField(2);
+  @$pb.TagNumber(2)
+  $3.Participant ensureParticipant() => $_ensure(1);
 }
 
 class ParticipantLeft extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ParticipantLeft', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOM<$3.Participant>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $3.Participant.create)
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
+    ..aOM<$3.Participant>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $3.Participant.create)
     ..hasRequiredFields = false
   ;
 
   ParticipantLeft._() : super();
   factory ParticipantLeft({
+    $3.Call? call,
     $3.Participant? participant,
   }) {
     final _result = create();
+    if (call != null) {
+      _result.call = call;
+    }
     if (participant != null) {
       _result.participant = participant;
     }
@@ -991,30 +1765,41 @@ class ParticipantLeft extends $pb.GeneratedMessage {
   static ParticipantLeft? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $3.Participant get participant => $_getN(0);
+  $3.Call get call => $_getN(0);
   @$pb.TagNumber(1)
-  set participant($3.Participant v) { setField(1, v); }
+  set call($3.Call v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasParticipant() => $_has(0);
+  $core.bool hasCall() => $_has(0);
   @$pb.TagNumber(1)
-  void clearParticipant() => clearField(1);
+  void clearCall() => clearField(1);
   @$pb.TagNumber(1)
-  $3.Participant ensureParticipant() => $_ensure(0);
+  $3.Call ensureCall() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $3.Participant get participant => $_getN(1);
+  @$pb.TagNumber(2)
+  set participant($3.Participant v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasParticipant() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearParticipant() => clearField(2);
+  @$pb.TagNumber(2)
+  $3.Participant ensureParticipant() => $_ensure(1);
 }
 
 class BroadcastStarted extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BroadcastStarted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOM<$3.Broadcast>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcast', subBuilder: $3.Broadcast.create)
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
     ..hasRequiredFields = false
   ;
 
   BroadcastStarted._() : super();
   factory BroadcastStarted({
-    $3.Broadcast? broadcast,
+    $3.Call? call,
   }) {
     final _result = create();
-    if (broadcast != null) {
-      _result.broadcast = broadcast;
+    if (call != null) {
+      _result.call = call;
     }
     return _result;
   }
@@ -1040,30 +1825,30 @@ class BroadcastStarted extends $pb.GeneratedMessage {
   static BroadcastStarted? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $3.Broadcast get broadcast => $_getN(0);
+  $3.Call get call => $_getN(0);
   @$pb.TagNumber(1)
-  set broadcast($3.Broadcast v) { setField(1, v); }
+  set call($3.Call v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasBroadcast() => $_has(0);
+  $core.bool hasCall() => $_has(0);
   @$pb.TagNumber(1)
-  void clearBroadcast() => clearField(1);
+  void clearCall() => clearField(1);
   @$pb.TagNumber(1)
-  $3.Broadcast ensureBroadcast() => $_ensure(0);
+  $3.Call ensureCall() => $_ensure(0);
 }
 
 class BroadcastEnded extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BroadcastEnded', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOM<$3.Broadcast>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcast', subBuilder: $3.Broadcast.create)
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
     ..hasRequiredFields = false
   ;
 
   BroadcastEnded._() : super();
   factory BroadcastEnded({
-    $3.Broadcast? broadcast,
+    $3.Call? call,
   }) {
     final _result = create();
-    if (broadcast != null) {
-      _result.broadcast = broadcast;
+    if (call != null) {
+      _result.call = call;
     }
     return _result;
   }
@@ -1089,14 +1874,14 @@ class BroadcastEnded extends $pb.GeneratedMessage {
   static BroadcastEnded? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $3.Broadcast get broadcast => $_getN(0);
+  $3.Call get call => $_getN(0);
   @$pb.TagNumber(1)
-  set broadcast($3.Broadcast v) { setField(1, v); }
+  set call($3.Call v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasBroadcast() => $_has(0);
+  $core.bool hasCall() => $_has(0);
   @$pb.TagNumber(1)
-  void clearBroadcast() => clearField(1);
+  void clearCall() => clearField(1);
   @$pb.TagNumber(1)
-  $3.Broadcast ensureBroadcast() => $_ensure(0);
+  $3.Call ensureCall() => $_ensure(0);
 }
 

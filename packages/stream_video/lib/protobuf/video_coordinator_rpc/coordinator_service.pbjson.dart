@@ -12,6 +12,19 @@ import '../google/protobuf/struct.pbjson.dart' as $2;
 import '../google/protobuf/wrappers.pbjson.dart' as $4;
 import '../video_models/models.pbjson.dart' as $3;
 
+@$core.Deprecated('Use userEventTypeDescriptor instead')
+const UserEventType$json = const {
+  '1': 'UserEventType',
+  '2': const [
+    const {'1': 'USER_EVENT_TYPE_AUDIO_MUTED_UNSPECIFIED', '2': 0},
+    const {'1': 'USER_EVENT_TYPE_AUDIO_UNMUTED', '2': 1},
+    const {'1': 'USER_EVENT_TYPE_VIDEO_STARTED', '2': 2},
+    const {'1': 'USER_EVENT_TYPE_VIDEO_STOPPED', '2': 3},
+  ],
+};
+
+/// Descriptor for `UserEventType`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List userEventTypeDescriptor = $convert.base64Decode('Cg1Vc2VyRXZlbnRUeXBlEisKJ1VTRVJfRVZFTlRfVFlQRV9BVURJT19NVVRFRF9VTlNQRUNJRklFRBAAEiEKHVVTRVJfRVZFTlRfVFlQRV9BVURJT19VTk1VVEVEEAESIQodVVNFUl9FVkVOVF9UWVBFX1ZJREVPX1NUQVJURUQQAhIhCh1VU0VSX0VWRU5UX1RZUEVfVklERU9fU1RPUFBFRBAD');
 @$core.Deprecated('Use getCallRequestDescriptor instead')
 const GetCallRequest$json = const {
   '1': 'GetCallRequest',
@@ -62,8 +75,8 @@ const CreateCallRequest$json = const {
     const {'1': 'id', '3': 2, '4': 1, '5': 9, '10': 'id'},
     const {'1': 'custom', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
     const {'1': 'participant_ids', '3': 4, '4': 3, '5': 9, '10': 'participantIds'},
-    const {'1': 'broadcast', '3': 6, '4': 1, '5': 11, '6': '.google.protobuf.BoolValue', '10': 'broadcast'},
-    const {'1': 'broadcast_options', '3': 7, '4': 3, '5': 11, '6': '.stream.video.BroadcastOptions', '10': 'broadcastOptions'},
+    const {'1': 'hls_broadcast', '3': 6, '4': 1, '5': 11, '6': '.google.protobuf.BoolValue', '10': 'hlsBroadcast'},
+    const {'1': 'rtmp', '3': 7, '4': 1, '5': 11, '6': '.stream.video.RTMPOptions', '10': 'rtmp'},
     const {'1': 'transcribe', '3': 8, '4': 1, '5': 11, '6': '.google.protobuf.BoolValue', '10': 'transcribe'},
     const {'1': 'transcribe_options', '3': 9, '4': 1, '5': 11, '6': '.stream.video.TranscribeOptions', '10': 'transcribeOptions'},
     const {'1': 'recording', '3': 10, '4': 1, '5': 11, '6': '.google.protobuf.BoolValue', '10': 'recording'},
@@ -72,7 +85,7 @@ const CreateCallRequest$json = const {
 };
 
 /// Descriptor for `CreateCallRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List createCallRequestDescriptor = $convert.base64Decode('ChFDcmVhdGVDYWxsUmVxdWVzdBISCgR0eXBlGAEgASgJUgR0eXBlEg4KAmlkGAIgASgJUgJpZBIvCgZjdXN0b20YAyABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0UgZjdXN0b20SJwoPcGFydGljaXBhbnRfaWRzGAQgAygJUg5wYXJ0aWNpcGFudElkcxI4Cglicm9hZGNhc3QYBiABKAsyGi5nb29nbGUucHJvdG9idWYuQm9vbFZhbHVlUglicm9hZGNhc3QSSwoRYnJvYWRjYXN0X29wdGlvbnMYByADKAsyHi5zdHJlYW0udmlkZW8uQnJvYWRjYXN0T3B0aW9uc1IQYnJvYWRjYXN0T3B0aW9ucxI6Cgp0cmFuc2NyaWJlGAggASgLMhouZ29vZ2xlLnByb3RvYnVmLkJvb2xWYWx1ZVIKdHJhbnNjcmliZRJOChJ0cmFuc2NyaWJlX29wdGlvbnMYCSABKAsyHy5zdHJlYW0udmlkZW8uVHJhbnNjcmliZU9wdGlvbnNSEXRyYW5zY3JpYmVPcHRpb25zEjgKCXJlY29yZGluZxgKIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5Cb29sVmFsdWVSCXJlY29yZGluZxIyCgZub3RpZnkYCyABKAsyGi5nb29nbGUucHJvdG9idWYuQm9vbFZhbHVlUgZub3RpZnk=');
+final $typed_data.Uint8List createCallRequestDescriptor = $convert.base64Decode('ChFDcmVhdGVDYWxsUmVxdWVzdBISCgR0eXBlGAEgASgJUgR0eXBlEg4KAmlkGAIgASgJUgJpZBIvCgZjdXN0b20YAyABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0UgZjdXN0b20SJwoPcGFydGljaXBhbnRfaWRzGAQgAygJUg5wYXJ0aWNpcGFudElkcxI/Cg1obHNfYnJvYWRjYXN0GAYgASgLMhouZ29vZ2xlLnByb3RvYnVmLkJvb2xWYWx1ZVIMaGxzQnJvYWRjYXN0Ei0KBHJ0bXAYByABKAsyGS5zdHJlYW0udmlkZW8uUlRNUE9wdGlvbnNSBHJ0bXASOgoKdHJhbnNjcmliZRgIIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5Cb29sVmFsdWVSCnRyYW5zY3JpYmUSTgoSdHJhbnNjcmliZV9vcHRpb25zGAkgASgLMh8uc3RyZWFtLnZpZGVvLlRyYW5zY3JpYmVPcHRpb25zUhF0cmFuc2NyaWJlT3B0aW9ucxI4CglyZWNvcmRpbmcYCiABKAsyGi5nb29nbGUucHJvdG9idWYuQm9vbFZhbHVlUglyZWNvcmRpbmcSMgoGbm90aWZ5GAsgASgLMhouZ29vZ2xlLnByb3RvYnVmLkJvb2xWYWx1ZVIGbm90aWZ5');
 @$core.Deprecated('Use createCallResponseDescriptor instead')
 const CreateCallResponse$json = const {
   '1': 'CreateCallResponse',
@@ -126,7 +139,8 @@ final $typed_data.Uint8List deleteCallResponseDescriptor = $convert.base64Decode
 const SelectEdgeServerRequest$json = const {
   '1': 'SelectEdgeServerRequest',
   '2': const [
-    const {'1': 'call_id', '3': 1, '4': 1, '5': 9, '10': 'callId'},
+    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
     const {'1': 'latency_by_edge', '3': 3, '4': 3, '5': 11, '6': '.stream.video.SelectEdgeServerRequest.LatencyByEdgeEntry', '10': 'latencyByEdge'},
   ],
   '3': const [SelectEdgeServerRequest_LatencyByEdgeEntry$json],
@@ -143,18 +157,18 @@ const SelectEdgeServerRequest_LatencyByEdgeEntry$json = const {
 };
 
 /// Descriptor for `SelectEdgeServerRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List selectEdgeServerRequestDescriptor = $convert.base64Decode('ChdTZWxlY3RFZGdlU2VydmVyUmVxdWVzdBIXCgdjYWxsX2lkGAEgASgJUgZjYWxsSWQSYAoPbGF0ZW5jeV9ieV9lZGdlGAMgAygLMjguc3RyZWFtLnZpZGVvLlNlbGVjdEVkZ2VTZXJ2ZXJSZXF1ZXN0LkxhdGVuY3lCeUVkZ2VFbnRyeVINbGF0ZW5jeUJ5RWRnZRpXChJMYXRlbmN5QnlFZGdlRW50cnkSEAoDa2V5GAEgASgJUgNrZXkSKwoFdmFsdWUYAiABKAsyFS5zdHJlYW0udmlkZW8uTGF0ZW5jeVIFdmFsdWU6AjgB');
+final $typed_data.Uint8List selectEdgeServerRequestDescriptor = $convert.base64Decode('ChdTZWxlY3RFZGdlU2VydmVyUmVxdWVzdBIbCgljYWxsX3R5cGUYASABKAlSCGNhbGxUeXBlEhcKB2NhbGxfaWQYAiABKAlSBmNhbGxJZBJgCg9sYXRlbmN5X2J5X2VkZ2UYAyADKAsyOC5zdHJlYW0udmlkZW8uU2VsZWN0RWRnZVNlcnZlclJlcXVlc3QuTGF0ZW5jeUJ5RWRnZUVudHJ5Ug1sYXRlbmN5QnlFZGdlGlcKEkxhdGVuY3lCeUVkZ2VFbnRyeRIQCgNrZXkYASABKAlSA2tleRIrCgV2YWx1ZRgCIAEoCzIVLnN0cmVhbS52aWRlby5MYXRlbmN5UgV2YWx1ZToCOAE=');
 @$core.Deprecated('Use selectEdgeServerResponseDescriptor instead')
 const SelectEdgeServerResponse$json = const {
   '1': 'SelectEdgeServerResponse',
   '2': const [
-    const {'1': 'edge_server', '3': 1, '4': 1, '5': 11, '6': '.stream.video.EdgeServer', '10': 'edgeServer'},
+    const {'1': 'edge_server', '3': 1, '4': 1, '5': 11, '6': '.stream.video.EdgeServer', '8': const {}, '10': 'edgeServer'},
     const {'1': 'token', '3': 2, '4': 1, '5': 9, '8': const {}, '10': 'token'},
   ],
 };
 
 /// Descriptor for `SelectEdgeServerResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List selectEdgeServerResponseDescriptor = $convert.base64Decode('ChhTZWxlY3RFZGdlU2VydmVyUmVzcG9uc2USOQoLZWRnZV9zZXJ2ZXIYASABKAsyGC5zdHJlYW0udmlkZW8uRWRnZVNlcnZlclIKZWRnZVNlcnZlchIdCgV0b2tlbhgCIAEoCUIH+kIEcgIQAVIFdG9rZW4=');
+final $typed_data.Uint8List selectEdgeServerResponseDescriptor = $convert.base64Decode('ChhTZWxlY3RFZGdlU2VydmVyUmVzcG9uc2USQwoLZWRnZV9zZXJ2ZXIYASABKAsyGC5zdHJlYW0udmlkZW8uRWRnZVNlcnZlckII+kIFigECEAFSCmVkZ2VTZXJ2ZXISHQoFdG9rZW4YAiABKAlCB/pCBHICEAFSBXRva2Vu');
 @$core.Deprecated('Use addDeviceRequestDescriptor instead')
 const AddDeviceRequest$json = const {
   '1': 'AddDeviceRequest',
@@ -182,11 +196,12 @@ const RemoveDeviceRequest$json = const {
   '1': 'RemoveDeviceRequest',
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
+    const {'1': 'user_id', '3': 2, '4': 1, '5': 9, '10': 'userId'},
   ],
 };
 
 /// Descriptor for `RemoveDeviceRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List removeDeviceRequestDescriptor = $convert.base64Decode('ChNSZW1vdmVEZXZpY2VSZXF1ZXN0Eg4KAmlkGAEgASgJUgJpZA==');
+final $typed_data.Uint8List removeDeviceRequestDescriptor = $convert.base64Decode('ChNSZW1vdmVEZXZpY2VSZXF1ZXN0Eg4KAmlkGAEgASgJUgJpZBIXCgd1c2VyX2lkGAIgASgJUgZ1c2VySWQ=');
 @$core.Deprecated('Use removeDeviceResponseDescriptor instead')
 const RemoveDeviceResponse$json = const {
   '1': 'RemoveDeviceResponse',
@@ -380,19 +395,25 @@ final $typed_data.Uint8List endCallResponseDescriptor = $convert.base64Decode('C
 const StartBroadcastRequest$json = const {
   '1': 'StartBroadcastRequest',
   '2': const [
-    const {'1': 'type', '3': 1, '4': 1, '5': 9, '10': 'type'},
+    const {'1': 'call_id', '3': 1, '4': 1, '5': 9, '10': 'callId'},
+    const {'1': 'call_type', '3': 2, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'hls_broadcast', '3': 3, '4': 1, '5': 8, '10': 'hlsBroadcast'},
+    const {'1': 'rtmp', '3': 5, '4': 1, '5': 11, '6': '.stream.video.RTMPOptions', '10': 'rtmp'},
   ],
 };
 
 /// Descriptor for `StartBroadcastRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List startBroadcastRequestDescriptor = $convert.base64Decode('ChVTdGFydEJyb2FkY2FzdFJlcXVlc3QSEgoEdHlwZRgBIAEoCVIEdHlwZQ==');
+final $typed_data.Uint8List startBroadcastRequestDescriptor = $convert.base64Decode('ChVTdGFydEJyb2FkY2FzdFJlcXVlc3QSFwoHY2FsbF9pZBgBIAEoCVIGY2FsbElkEhsKCWNhbGxfdHlwZRgCIAEoCVIIY2FsbFR5cGUSIwoNaGxzX2Jyb2FkY2FzdBgDIAEoCFIMaGxzQnJvYWRjYXN0Ei0KBHJ0bXAYBSABKAsyGS5zdHJlYW0udmlkZW8uUlRNUE9wdGlvbnNSBHJ0bXA=');
 @$core.Deprecated('Use startBroadcastResponseDescriptor instead')
 const StartBroadcastResponse$json = const {
   '1': 'StartBroadcastResponse',
+  '2': const [
+    const {'1': 'broadcast', '3': 1, '4': 1, '5': 11, '6': '.stream.video.Broadcast', '10': 'broadcast'},
+  ],
 };
 
 /// Descriptor for `StartBroadcastResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List startBroadcastResponseDescriptor = $convert.base64Decode('ChZTdGFydEJyb2FkY2FzdFJlc3BvbnNl');
+final $typed_data.Uint8List startBroadcastResponseDescriptor = $convert.base64Decode('ChZTdGFydEJyb2FkY2FzdFJlc3BvbnNlEjUKCWJyb2FkY2FzdBgBIAEoCzIXLnN0cmVhbS52aWRlby5Ccm9hZGNhc3RSCWJyb2FkY2FzdA==');
 @$core.Deprecated('Use stopBroadcastRequestDescriptor instead')
 const StopBroadcastRequest$json = const {
   '1': 'StopBroadcastRequest',
@@ -453,14 +474,13 @@ final $typed_data.Uint8List storeLatencyResponseDescriptor = $convert.base64Deco
 const StartRecordingRequest$json = const {
   '1': 'StartRecordingRequest',
   '2': const [
-    const {'1': 'call_id', '3': 1, '4': 1, '5': 9, '10': 'callId'},
-    const {'1': 'storage_options', '3': 2, '4': 1, '5': 11, '6': '.stream.video.RecordingStorageOptions', '10': 'storageOptions'},
-    const {'1': 'codec', '3': 3, '4': 1, '5': 14, '6': '.stream.video.Codec', '10': 'codec'},
+    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
   ],
 };
 
 /// Descriptor for `StartRecordingRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List startRecordingRequestDescriptor = $convert.base64Decode('ChVTdGFydFJlY29yZGluZ1JlcXVlc3QSFwoHY2FsbF9pZBgBIAEoCVIGY2FsbElkEk4KD3N0b3JhZ2Vfb3B0aW9ucxgCIAEoCzIlLnN0cmVhbS52aWRlby5SZWNvcmRpbmdTdG9yYWdlT3B0aW9uc1IOc3RvcmFnZU9wdGlvbnMSKQoFY29kZWMYAyABKA4yEy5zdHJlYW0udmlkZW8uQ29kZWNSBWNvZGVj');
+final $typed_data.Uint8List startRecordingRequestDescriptor = $convert.base64Decode('ChVTdGFydFJlY29yZGluZ1JlcXVlc3QSGwoJY2FsbF90eXBlGAEgASgJUghjYWxsVHlwZRIXCgdjYWxsX2lkGAIgASgJUgZjYWxsSWQ=');
 @$core.Deprecated('Use startRecordingResponseDescriptor instead')
 const StartRecordingResponse$json = const {
   '1': 'StartRecordingResponse',
@@ -472,19 +492,23 @@ final $typed_data.Uint8List startRecordingResponseDescriptor = $convert.base64De
 const StopRecordingRequest$json = const {
   '1': 'StopRecordingRequest',
   '2': const [
-    const {'1': 'call_id', '3': 1, '4': 1, '5': 9, '10': 'callId'},
+    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
   ],
 };
 
 /// Descriptor for `StopRecordingRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List stopRecordingRequestDescriptor = $convert.base64Decode('ChRTdG9wUmVjb3JkaW5nUmVxdWVzdBIXCgdjYWxsX2lkGAEgASgJUgZjYWxsSWQ=');
+final $typed_data.Uint8List stopRecordingRequestDescriptor = $convert.base64Decode('ChRTdG9wUmVjb3JkaW5nUmVxdWVzdBIbCgljYWxsX3R5cGUYASABKAlSCGNhbGxUeXBlEhcKB2NhbGxfaWQYAiABKAlSBmNhbGxJZA==');
 @$core.Deprecated('Use stopRecordingResponseDescriptor instead')
 const StopRecordingResponse$json = const {
   '1': 'StopRecordingResponse',
+  '2': const [
+    const {'1': 's3_file_url', '3': 1, '4': 1, '5': 9, '10': 's3FileUrl'},
+  ],
 };
 
 /// Descriptor for `StopRecordingResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List stopRecordingResponseDescriptor = $convert.base64Decode('ChVTdG9wUmVjb3JkaW5nUmVzcG9uc2U=');
+final $typed_data.Uint8List stopRecordingResponseDescriptor = $convert.base64Decode('ChVTdG9wUmVjb3JkaW5nUmVzcG9uc2USHgoLczNfZmlsZV91cmwYASABKAlSCXMzRmlsZVVybA==');
 @$core.Deprecated('Use getRecordingsRequestDescriptor instead')
 const GetRecordingsRequest$json = const {
   '1': 'GetRecordingsRequest',
@@ -495,10 +519,46 @@ final $typed_data.Uint8List getRecordingsRequestDescriptor = $convert.base64Deco
 @$core.Deprecated('Use getRecordingsResponseDescriptor instead')
 const GetRecordingsResponse$json = const {
   '1': 'GetRecordingsResponse',
+  '2': const [
+    const {'1': 'recordings', '3': 1, '4': 3, '5': 11, '6': '.stream.video.GetRecordingsResponse.Recording', '10': 'recordings'},
+  ],
+  '3': const [GetRecordingsResponse_Recording$json],
+};
+
+@$core.Deprecated('Use getRecordingsResponseDescriptor instead')
+const GetRecordingsResponse_Recording$json = const {
+  '1': 'Recording',
+  '2': const [
+    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
+    const {'1': 's3_file_url', '3': 3, '4': 1, '5': 9, '10': 's3FileUrl'},
+    const {'1': 'start_time', '3': 4, '4': 1, '5': 9, '10': 'startTime'},
+    const {'1': 'stop_time', '3': 5, '4': 1, '5': 9, '10': 'stopTime'},
+  ],
 };
 
 /// Descriptor for `GetRecordingsResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List getRecordingsResponseDescriptor = $convert.base64Decode('ChVHZXRSZWNvcmRpbmdzUmVzcG9uc2U=');
+final $typed_data.Uint8List getRecordingsResponseDescriptor = $convert.base64Decode('ChVHZXRSZWNvcmRpbmdzUmVzcG9uc2USTQoKcmVjb3JkaW5ncxgBIAMoCzItLnN0cmVhbS52aWRlby5HZXRSZWNvcmRpbmdzUmVzcG9uc2UuUmVjb3JkaW5nUgpyZWNvcmRpbmdzGp0BCglSZWNvcmRpbmcSGwoJY2FsbF90eXBlGAEgASgJUghjYWxsVHlwZRIXCgdjYWxsX2lkGAIgASgJUgZjYWxsSWQSHgoLczNfZmlsZV91cmwYAyABKAlSCXMzRmlsZVVybBIdCgpzdGFydF90aW1lGAQgASgJUglzdGFydFRpbWUSGwoJc3RvcF90aW1lGAUgASgJUghzdG9wVGltZQ==');
+@$core.Deprecated('Use sendEventRequestDescriptor instead')
+const SendEventRequest$json = const {
+  '1': 'SendEventRequest',
+  '2': const [
+    const {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
+    const {'1': 'call_type', '3': 2, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'call_id', '3': 3, '4': 1, '5': 9, '10': 'callId'},
+    const {'1': 'event_type', '3': 4, '4': 1, '5': 14, '6': '.stream.video.UserEventType', '10': 'eventType'},
+  ],
+};
+
+/// Descriptor for `SendEventRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sendEventRequestDescriptor = $convert.base64Decode('ChBTZW5kRXZlbnRSZXF1ZXN0EhcKB3VzZXJfaWQYASABKAlSBnVzZXJJZBIbCgljYWxsX3R5cGUYAiABKAlSCGNhbGxUeXBlEhcKB2NhbGxfaWQYAyABKAlSBmNhbGxJZBI6CgpldmVudF90eXBlGAQgASgOMhsuc3RyZWFtLnZpZGVvLlVzZXJFdmVudFR5cGVSCWV2ZW50VHlwZQ==');
+@$core.Deprecated('Use sendEventResponseDescriptor instead')
+const SendEventResponse$json = const {
+  '1': 'SendEventResponse',
+};
+
+/// Descriptor for `SendEventResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sendEventResponseDescriptor = $convert.base64Decode('ChFTZW5kRXZlbnRSZXNwb25zZQ==');
 const $core.Map<$core.String, $core.dynamic> CallCoordinatorServiceBase$json = const {
   '1': 'CallCoordinatorService',
   '2': const [
@@ -513,19 +573,20 @@ const $core.Map<$core.String, $core.dynamic> CallCoordinatorServiceBase$json = c
     const {'1': 'AddDevice', '2': '.stream.video.AddDeviceRequest', '3': '.stream.video.AddDeviceResponse'},
     const {'1': 'RemoveDevice', '2': '.stream.video.RemoveDeviceRequest', '3': '.stream.video.RemoveDeviceResponse'},
     const {'1': 'ListDevices', '2': '.stream.video.ListDevicesRequest', '3': '.stream.video.ListDevicesResponse'},
+    const {'1': 'SendEvent', '2': '.stream.video.SendEventRequest', '3': '.stream.video.SendEventResponse'},
     const {'1': 'SendCustomEvent', '2': '.stream.video.SendCustomEventRequest', '3': '.stream.video.SendCustomEventResponse'},
     const {'1': 'CreateOrUpdateCalls', '2': '.stream.video.CreateOrUpdateCallsRequest', '3': '.stream.video.CreateOrUpdateCallsResponse'},
     const {'1': 'CreateOrUpdateUsers', '2': '.stream.video.CreateOrUpdateUsersRequest', '3': '.stream.video.CreateOrUpdateUsersResponse'},
     const {'1': 'TranscribeCall', '2': '.stream.video.TranscribeCallRequest', '3': '.stream.video.TranscribeCallResponse'},
     const {'1': 'StopTranscribeCall', '2': '.stream.video.StopTranscribeCallRequest', '3': '.stream.video.StopTranscribeCallResponse'},
     const {'1': 'StartBroadcast', '2': '.stream.video.StartBroadcastRequest', '3': '.stream.video.StartBroadcastResponse'},
-    const {'1': 'StopBroadcast', '2': '.stream.video.StopBroadcastRequest', '3': '.stream.video.StartBroadcastResponse'},
-    const {'1': 'CreateUser', '2': '.stream.video.CreateUserRequest', '3': '.stream.video.CreateUserResponse'},
-    const {'1': 'DeleteUser', '2': '.stream.video.DeleteUserRequest', '3': '.stream.video.DeleteUserResponse'},
-    const {'1': 'ExportUser', '2': '.stream.video.ExportUserRequest', '3': '.stream.video.ExportUserResponse'},
+    const {'1': 'StopBroadcast', '2': '.stream.video.StopBroadcastRequest', '3': '.stream.video.StopBroadcastResponse'},
     const {'1': 'StartRecording', '2': '.stream.video.StartRecordingRequest', '3': '.stream.video.StartRecordingResponse'},
     const {'1': 'StopRecording', '2': '.stream.video.StopRecordingRequest', '3': '.stream.video.StopRecordingResponse'},
     const {'1': 'GetRecordings', '2': '.stream.video.GetRecordingsRequest', '3': '.stream.video.GetRecordingsResponse'},
+    const {'1': 'CreateUser', '2': '.stream.video.CreateUserRequest', '3': '.stream.video.CreateUserResponse'},
+    const {'1': 'DeleteUser', '2': '.stream.video.DeleteUserRequest', '3': '.stream.video.DeleteUserResponse'},
+    const {'1': 'ExportUser', '2': '.stream.video.ExportUserRequest', '3': '.stream.video.ExportUserResponse'},
   ],
 };
 
@@ -537,10 +598,11 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> CallCoordi
   '.google.protobuf.Value': $2.Value$json,
   '.google.protobuf.ListValue': $2.ListValue$json,
   '.google.protobuf.BoolValue': $4.BoolValue$json,
-  '.stream.video.BroadcastOptions': $3.BroadcastOptions$json,
+  '.stream.video.RTMPOptions': $3.RTMPOptions$json,
   '.stream.video.TranscribeOptions': $3.TranscribeOptions$json,
   '.stream.video.CreateCallResponse': CreateCallResponse$json,
   '.stream.video.Call': $3.Call$json,
+  '.stream.video.Broadcast': $3.Broadcast$json,
   '.stream.video.GetCallRequest': GetCallRequest$json,
   '.stream.video.GetCallResponse': GetCallResponse$json,
   '.stream.video.CallState': $3.CallState$json,
@@ -570,6 +632,8 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> CallCoordi
   '.stream.video.RemoveDeviceResponse': RemoveDeviceResponse$json,
   '.stream.video.ListDevicesRequest': ListDevicesRequest$json,
   '.stream.video.ListDevicesResponse': ListDevicesResponse$json,
+  '.stream.video.SendEventRequest': SendEventRequest$json,
+  '.stream.video.SendEventResponse': SendEventResponse$json,
   '.stream.video.SendCustomEventRequest': SendCustomEventRequest$json,
   '.stream.video.SendCustomEventResponse': SendCustomEventResponse$json,
   '.stream.video.CreateOrUpdateCallsRequest': CreateOrUpdateCallsRequest$json,
@@ -584,19 +648,20 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> CallCoordi
   '.stream.video.StartBroadcastRequest': StartBroadcastRequest$json,
   '.stream.video.StartBroadcastResponse': StartBroadcastResponse$json,
   '.stream.video.StopBroadcastRequest': StopBroadcastRequest$json,
-  '.stream.video.CreateUserResponse': CreateUserResponse$json,
-  '.stream.video.DeleteUserRequest': DeleteUserRequest$json,
-  '.stream.video.DeleteUserResponse': DeleteUserResponse$json,
-  '.stream.video.ExportUserRequest': ExportUserRequest$json,
-  '.stream.video.ExportUserResponse': ExportUserResponse$json,
+  '.stream.video.StopBroadcastResponse': StopBroadcastResponse$json,
   '.stream.video.StartRecordingRequest': StartRecordingRequest$json,
-  '.stream.video.RecordingStorageOptions': $3.RecordingStorageOptions$json,
   '.stream.video.StartRecordingResponse': StartRecordingResponse$json,
   '.stream.video.StopRecordingRequest': StopRecordingRequest$json,
   '.stream.video.StopRecordingResponse': StopRecordingResponse$json,
   '.stream.video.GetRecordingsRequest': GetRecordingsRequest$json,
   '.stream.video.GetRecordingsResponse': GetRecordingsResponse$json,
+  '.stream.video.GetRecordingsResponse.Recording': GetRecordingsResponse_Recording$json,
+  '.stream.video.CreateUserResponse': CreateUserResponse$json,
+  '.stream.video.DeleteUserRequest': DeleteUserRequest$json,
+  '.stream.video.DeleteUserResponse': DeleteUserResponse$json,
+  '.stream.video.ExportUserRequest': ExportUserRequest$json,
+  '.stream.video.ExportUserResponse': ExportUserResponse$json,
 };
 
 /// Descriptor for `CallCoordinatorService`. Decode as a `google.protobuf.ServiceDescriptorProto`.
-final $typed_data.Uint8List callCoordinatorServiceDescriptor = $convert.base64Decode('ChZDYWxsQ29vcmRpbmF0b3JTZXJ2aWNlEk8KCkNyZWF0ZUNhbGwSHy5zdHJlYW0udmlkZW8uQ3JlYXRlQ2FsbFJlcXVlc3QaIC5zdHJlYW0udmlkZW8uQ3JlYXRlQ2FsbFJlc3BvbnNlEkYKB0dldENhbGwSHC5zdHJlYW0udmlkZW8uR2V0Q2FsbFJlcXVlc3QaHS5zdHJlYW0udmlkZW8uR2V0Q2FsbFJlc3BvbnNlEk8KClVwZGF0ZUNhbGwSHy5zdHJlYW0udmlkZW8uVXBkYXRlQ2FsbFJlcXVlc3QaIC5zdHJlYW0udmlkZW8uVXBkYXRlQ2FsbFJlc3BvbnNlEk8KCkRlbGV0ZUNhbGwSHy5zdHJlYW0udmlkZW8uRGVsZXRlQ2FsbFJlcXVlc3QaIC5zdHJlYW0udmlkZW8uRGVsZXRlQ2FsbFJlc3BvbnNlEkkKCEpvaW5DYWxsEh0uc3RyZWFtLnZpZGVvLkpvaW5DYWxsUmVxdWVzdBoeLnN0cmVhbS52aWRlby5Kb2luQ2FsbFJlc3BvbnNlEmEKEFNlbGVjdEVkZ2VTZXJ2ZXISJS5zdHJlYW0udmlkZW8uU2VsZWN0RWRnZVNlcnZlclJlcXVlc3QaJi5zdHJlYW0udmlkZW8uU2VsZWN0RWRnZVNlcnZlclJlc3BvbnNlEkwKCUxlYXZlQ2FsbBIeLnN0cmVhbS52aWRlby5MZWF2ZUNhbGxSZXF1ZXN0Gh8uc3RyZWFtLnZpZGVvLkxlYXZlQ2FsbFJlc3BvbnNlEkYKB0VuZENhbGwSHC5zdHJlYW0udmlkZW8uRW5kQ2FsbFJlcXVlc3QaHS5zdHJlYW0udmlkZW8uRW5kQ2FsbFJlc3BvbnNlEkwKCUFkZERldmljZRIeLnN0cmVhbS52aWRlby5BZGREZXZpY2VSZXF1ZXN0Gh8uc3RyZWFtLnZpZGVvLkFkZERldmljZVJlc3BvbnNlElUKDFJlbW92ZURldmljZRIhLnN0cmVhbS52aWRlby5SZW1vdmVEZXZpY2VSZXF1ZXN0GiIuc3RyZWFtLnZpZGVvLlJlbW92ZURldmljZVJlc3BvbnNlElIKC0xpc3REZXZpY2VzEiAuc3RyZWFtLnZpZGVvLkxpc3REZXZpY2VzUmVxdWVzdBohLnN0cmVhbS52aWRlby5MaXN0RGV2aWNlc1Jlc3BvbnNlEl4KD1NlbmRDdXN0b21FdmVudBIkLnN0cmVhbS52aWRlby5TZW5kQ3VzdG9tRXZlbnRSZXF1ZXN0GiUuc3RyZWFtLnZpZGVvLlNlbmRDdXN0b21FdmVudFJlc3BvbnNlEmoKE0NyZWF0ZU9yVXBkYXRlQ2FsbHMSKC5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVDYWxsc1JlcXVlc3QaKS5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVDYWxsc1Jlc3BvbnNlEmoKE0NyZWF0ZU9yVXBkYXRlVXNlcnMSKC5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVVc2Vyc1JlcXVlc3QaKS5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVVc2Vyc1Jlc3BvbnNlElsKDlRyYW5zY3JpYmVDYWxsEiMuc3RyZWFtLnZpZGVvLlRyYW5zY3JpYmVDYWxsUmVxdWVzdBokLnN0cmVhbS52aWRlby5UcmFuc2NyaWJlQ2FsbFJlc3BvbnNlEmcKElN0b3BUcmFuc2NyaWJlQ2FsbBInLnN0cmVhbS52aWRlby5TdG9wVHJhbnNjcmliZUNhbGxSZXF1ZXN0Giguc3RyZWFtLnZpZGVvLlN0b3BUcmFuc2NyaWJlQ2FsbFJlc3BvbnNlElsKDlN0YXJ0QnJvYWRjYXN0EiMuc3RyZWFtLnZpZGVvLlN0YXJ0QnJvYWRjYXN0UmVxdWVzdBokLnN0cmVhbS52aWRlby5TdGFydEJyb2FkY2FzdFJlc3BvbnNlElkKDVN0b3BCcm9hZGNhc3QSIi5zdHJlYW0udmlkZW8uU3RvcEJyb2FkY2FzdFJlcXVlc3QaJC5zdHJlYW0udmlkZW8uU3RhcnRCcm9hZGNhc3RSZXNwb25zZRJPCgpDcmVhdGVVc2VyEh8uc3RyZWFtLnZpZGVvLkNyZWF0ZVVzZXJSZXF1ZXN0GiAuc3RyZWFtLnZpZGVvLkNyZWF0ZVVzZXJSZXNwb25zZRJPCgpEZWxldGVVc2VyEh8uc3RyZWFtLnZpZGVvLkRlbGV0ZVVzZXJSZXF1ZXN0GiAuc3RyZWFtLnZpZGVvLkRlbGV0ZVVzZXJSZXNwb25zZRJPCgpFeHBvcnRVc2VyEh8uc3RyZWFtLnZpZGVvLkV4cG9ydFVzZXJSZXF1ZXN0GiAuc3RyZWFtLnZpZGVvLkV4cG9ydFVzZXJSZXNwb25zZRJbCg5TdGFydFJlY29yZGluZxIjLnN0cmVhbS52aWRlby5TdGFydFJlY29yZGluZ1JlcXVlc3QaJC5zdHJlYW0udmlkZW8uU3RhcnRSZWNvcmRpbmdSZXNwb25zZRJYCg1TdG9wUmVjb3JkaW5nEiIuc3RyZWFtLnZpZGVvLlN0b3BSZWNvcmRpbmdSZXF1ZXN0GiMuc3RyZWFtLnZpZGVvLlN0b3BSZWNvcmRpbmdSZXNwb25zZRJYCg1HZXRSZWNvcmRpbmdzEiIuc3RyZWFtLnZpZGVvLkdldFJlY29yZGluZ3NSZXF1ZXN0GiMuc3RyZWFtLnZpZGVvLkdldFJlY29yZGluZ3NSZXNwb25zZQ==');
+final $typed_data.Uint8List callCoordinatorServiceDescriptor = $convert.base64Decode('ChZDYWxsQ29vcmRpbmF0b3JTZXJ2aWNlEk8KCkNyZWF0ZUNhbGwSHy5zdHJlYW0udmlkZW8uQ3JlYXRlQ2FsbFJlcXVlc3QaIC5zdHJlYW0udmlkZW8uQ3JlYXRlQ2FsbFJlc3BvbnNlEkYKB0dldENhbGwSHC5zdHJlYW0udmlkZW8uR2V0Q2FsbFJlcXVlc3QaHS5zdHJlYW0udmlkZW8uR2V0Q2FsbFJlc3BvbnNlEk8KClVwZGF0ZUNhbGwSHy5zdHJlYW0udmlkZW8uVXBkYXRlQ2FsbFJlcXVlc3QaIC5zdHJlYW0udmlkZW8uVXBkYXRlQ2FsbFJlc3BvbnNlEk8KCkRlbGV0ZUNhbGwSHy5zdHJlYW0udmlkZW8uRGVsZXRlQ2FsbFJlcXVlc3QaIC5zdHJlYW0udmlkZW8uRGVsZXRlQ2FsbFJlc3BvbnNlEkkKCEpvaW5DYWxsEh0uc3RyZWFtLnZpZGVvLkpvaW5DYWxsUmVxdWVzdBoeLnN0cmVhbS52aWRlby5Kb2luQ2FsbFJlc3BvbnNlEmEKEFNlbGVjdEVkZ2VTZXJ2ZXISJS5zdHJlYW0udmlkZW8uU2VsZWN0RWRnZVNlcnZlclJlcXVlc3QaJi5zdHJlYW0udmlkZW8uU2VsZWN0RWRnZVNlcnZlclJlc3BvbnNlEkwKCUxlYXZlQ2FsbBIeLnN0cmVhbS52aWRlby5MZWF2ZUNhbGxSZXF1ZXN0Gh8uc3RyZWFtLnZpZGVvLkxlYXZlQ2FsbFJlc3BvbnNlEkYKB0VuZENhbGwSHC5zdHJlYW0udmlkZW8uRW5kQ2FsbFJlcXVlc3QaHS5zdHJlYW0udmlkZW8uRW5kQ2FsbFJlc3BvbnNlEkwKCUFkZERldmljZRIeLnN0cmVhbS52aWRlby5BZGREZXZpY2VSZXF1ZXN0Gh8uc3RyZWFtLnZpZGVvLkFkZERldmljZVJlc3BvbnNlElUKDFJlbW92ZURldmljZRIhLnN0cmVhbS52aWRlby5SZW1vdmVEZXZpY2VSZXF1ZXN0GiIuc3RyZWFtLnZpZGVvLlJlbW92ZURldmljZVJlc3BvbnNlElIKC0xpc3REZXZpY2VzEiAuc3RyZWFtLnZpZGVvLkxpc3REZXZpY2VzUmVxdWVzdBohLnN0cmVhbS52aWRlby5MaXN0RGV2aWNlc1Jlc3BvbnNlEkwKCVNlbmRFdmVudBIeLnN0cmVhbS52aWRlby5TZW5kRXZlbnRSZXF1ZXN0Gh8uc3RyZWFtLnZpZGVvLlNlbmRFdmVudFJlc3BvbnNlEl4KD1NlbmRDdXN0b21FdmVudBIkLnN0cmVhbS52aWRlby5TZW5kQ3VzdG9tRXZlbnRSZXF1ZXN0GiUuc3RyZWFtLnZpZGVvLlNlbmRDdXN0b21FdmVudFJlc3BvbnNlEmoKE0NyZWF0ZU9yVXBkYXRlQ2FsbHMSKC5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVDYWxsc1JlcXVlc3QaKS5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVDYWxsc1Jlc3BvbnNlEmoKE0NyZWF0ZU9yVXBkYXRlVXNlcnMSKC5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVVc2Vyc1JlcXVlc3QaKS5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVVc2Vyc1Jlc3BvbnNlElsKDlRyYW5zY3JpYmVDYWxsEiMuc3RyZWFtLnZpZGVvLlRyYW5zY3JpYmVDYWxsUmVxdWVzdBokLnN0cmVhbS52aWRlby5UcmFuc2NyaWJlQ2FsbFJlc3BvbnNlEmcKElN0b3BUcmFuc2NyaWJlQ2FsbBInLnN0cmVhbS52aWRlby5TdG9wVHJhbnNjcmliZUNhbGxSZXF1ZXN0Giguc3RyZWFtLnZpZGVvLlN0b3BUcmFuc2NyaWJlQ2FsbFJlc3BvbnNlElsKDlN0YXJ0QnJvYWRjYXN0EiMuc3RyZWFtLnZpZGVvLlN0YXJ0QnJvYWRjYXN0UmVxdWVzdBokLnN0cmVhbS52aWRlby5TdGFydEJyb2FkY2FzdFJlc3BvbnNlElgKDVN0b3BCcm9hZGNhc3QSIi5zdHJlYW0udmlkZW8uU3RvcEJyb2FkY2FzdFJlcXVlc3QaIy5zdHJlYW0udmlkZW8uU3RvcEJyb2FkY2FzdFJlc3BvbnNlElsKDlN0YXJ0UmVjb3JkaW5nEiMuc3RyZWFtLnZpZGVvLlN0YXJ0UmVjb3JkaW5nUmVxdWVzdBokLnN0cmVhbS52aWRlby5TdGFydFJlY29yZGluZ1Jlc3BvbnNlElgKDVN0b3BSZWNvcmRpbmcSIi5zdHJlYW0udmlkZW8uU3RvcFJlY29yZGluZ1JlcXVlc3QaIy5zdHJlYW0udmlkZW8uU3RvcFJlY29yZGluZ1Jlc3BvbnNlElgKDUdldFJlY29yZGluZ3MSIi5zdHJlYW0udmlkZW8uR2V0UmVjb3JkaW5nc1JlcXVlc3QaIy5zdHJlYW0udmlkZW8uR2V0UmVjb3JkaW5nc1Jlc3BvbnNlEk8KCkNyZWF0ZVVzZXISHy5zdHJlYW0udmlkZW8uQ3JlYXRlVXNlclJlcXVlc3QaIC5zdHJlYW0udmlkZW8uQ3JlYXRlVXNlclJlc3BvbnNlEk8KCkRlbGV0ZVVzZXISHy5zdHJlYW0udmlkZW8uRGVsZXRlVXNlclJlcXVlc3QaIC5zdHJlYW0udmlkZW8uRGVsZXRlVXNlclJlc3BvbnNlEk8KCkV4cG9ydFVzZXISHy5zdHJlYW0udmlkZW8uRXhwb3J0VXNlclJlcXVlc3QaIC5zdHJlYW0udmlkZW8uRXhwb3J0VXNlclJlc3BvbnNl');
