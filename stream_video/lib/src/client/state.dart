@@ -1,6 +1,6 @@
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video_dart/protobuf/video_events/events.pb.dart';
-import 'package:stream_video_dart/protobuf/video_models/models.pb.dart';
+import 'package:stream_video/protobuf/video_events/events.pb.dart';
+import 'package:stream_video/protobuf/video_models/models.pb.dart';
 
 class ClientState {
   //ingest this in state

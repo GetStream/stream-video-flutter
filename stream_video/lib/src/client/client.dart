@@ -1,15 +1,14 @@
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
-import 'package:stream_video_dart/protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
-import 'package:stream_video_dart/protobuf/video_coordinator_rpc/coordinator_service.pbtwirp.dart';
-import 'package:stream_video_dart/protobuf/video_events/events.pbserver.dart';
-import 'package:stream_video_dart/protobuf/video_models/models.pb.dart';
-import 'package:stream_video_dart/src/client/state.dart';
-import 'package:stream_video_dart/src/core/error/error.dart';
+import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
+import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbtwirp.dart';
+import 'package:stream_video/protobuf/video_models/models.pb.dart';
+import 'package:stream_video/src/client/state.dart';
+import 'package:stream_video/src/core/error/error.dart';
 
-import 'package:stream_video_dart/src/core/http/token.dart';
-import 'package:stream_video_dart/src/core/http/token_manager.dart';
-import 'package:stream_video_dart/src/ws/websocket.dart';
+import 'package:stream_video/src/core/http/token.dart';
+import 'package:stream_video/src/core/http/token_manager.dart';
+import 'package:stream_video/src/ws/websocket.dart';
 import 'package:tart/tart.dart';
 
 /// Handler function used for logging records. Function requires a single

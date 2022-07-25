@@ -1,21 +1,10 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:math' as math;
 
 import 'package:logging/logging.dart';
 import 'package:protobuf/protobuf.dart';
-import 'package:rxdart/subjects.dart';
-import 'package:stream_video_dart/protobuf/video_events/events.pbserver.dart';
-import 'package:stream_video_dart/protobuf/video_models/models.pb.dart';
-import 'package:stream_video_dart/src/client/state.dart';
-import 'package:stream_video_dart/src/core/error/error.dart';
-import 'package:stream_video_dart/src/core/http/token.dart';
-import 'package:stream_video_dart/src/core/http/token_manager.dart';
-import 'package:stream_video_dart/src/ws/connection_status.dart';
-import 'package:stream_video_dart/src/ws/timer_helper.dart';
+import 'package:stream_video/protobuf/video_events/events.pbserver.dart';
+import 'package:stream_video/protobuf/video_models/models.pb.dart';
+import 'package:stream_video/src/core/http/token.dart';
 import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/status.dart' as status;
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketClient {
   WebSocketClient({Logger? logger}) : _logger = logger;
