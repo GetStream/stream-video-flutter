@@ -8,8 +8,6 @@ analyzer:
     - packages/*/lib/**/*.pbserver.dart
     - packages/*/lib/**/*.pbtwirp.dart
     - packages/*/lib/**/*.g.dart
-    - packages/*/lib/src/emoji/**
-    - packages/*/lib/scrollable_positioned_list/**
     - packages/*/lib/**/*.freezed.dart
 
 linter:
