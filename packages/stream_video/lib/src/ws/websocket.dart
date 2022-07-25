@@ -1,4 +1,3 @@
-
 import 'package:logging/logging.dart';
 import 'package:protobuf/protobuf.dart';
 import 'package:stream_video/protobuf/video_events/events.pbserver.dart';
@@ -94,10 +93,42 @@ class WebSocketClient {
           {
             return _handleAuthPayload(receivedEvent.authPayload);
           }
-        case WebsocketEvent_EventPayload.notSet:
+
+        case WebsocketEvent_EventPayload.audioMuted:
           {
-            _logger?.info("handle event payload not set");
+            return _handleAudioMuted(receivedEvent.audioMuted);
           }
+        case WebsocketEvent_EventPayload.audioUnmuted:
+          {
+            return _handleAudioUnmuted(receivedEvent.audioUnmuted);
+          }
+        case WebsocketEvent_EventPayload.videoStarted:
+          {
+            return _handleVideoStarted(receivedEvent.videoStarted);
+          }
+        case WebsocketEvent_EventPayload.videoStopped:
+          {
+            return _handleVideoStopped(receivedEvent.videoStopped);
+          }
+        case WebsocketEvent_EventPayload.screenshareStarted:
+          {
+            return _handleScreenshareStarted(receivedEvent.screenshareStarted);
+          }
+        case WebsocketEvent_EventPayload.screenshareStopped:
+          {
+            return _handleScreenshareStopped(receivedEvent.screenshareStopped);
+          }
+        case WebsocketEvent_EventPayload.recordingStarted:
+          {
+            return _handleRecordingStarted(receivedEvent.recordingStarted);
+          }
+        case WebsocketEvent_EventPayload.recordingStopped:
+          {
+            return _handleRecordingStopped(receivedEvent.recordingStopped);
+          }
+        case WebsocketEvent_EventPayload.notSet:
+          // TODO: Handle this case.
+          break;
       }
 
       // handler.call(receivedEvent);
@@ -202,19 +233,57 @@ class WebSocketClient {
   }
 
   void _handleBroadcastStarted(BroadcastStarted event) {
-    _logger?.info(
-        'BroadcastStarted event received : ${event.call.toString()}');
+    _logger?.info('BroadcastStarted event received : ${event.call.toString()}');
     // state.broadcastStarted = event;
   }
 
   void _handleBroadcastEnded(BroadcastEnded event) {
-    _logger
-        ?.info('BroadcastEnded event received : ${event.call.toString()}');
+    _logger?.info('BroadcastEnded event received : ${event.call.toString()}');
     // state.broadcastEnded = event;
   }
 
   void _handleAuthPayload(AuthPayload event) {
     _logger?.info('AuthPayload event received : ${event.toString()}');
     // state.authPayload = event;
+  }
+
+  void _handleAudioMuted(AudioMuted event) {
+    _logger?.info('AudioMuted event received : ${event.toString()}');
+    // state.audioMuted = event;
+  }
+
+  void _handleAudioUnmuted(AudioUnmuted event) {
+    _logger?.info('AudioUnmuted event received : ${event.toString()}');
+    // state.audioUnmuted = event;
+  }
+
+  void _handleVideoStarted(VideoStarted event) {
+    _logger?.info('VideoStarted event received : ${event.toString()}');
+    // state.videoStarted = event;
+  }
+
+  void _handleVideoStopped(VideoStopped event) {
+    _logger?.info('VideoStopped event received : ${event.toString()}');
+    // state.videoStopped = event;
+  }
+
+  void _handleScreenshareStarted(ScreenshareStarted event) {
+    _logger?.info('ScreenshareStarted event received : ${event.toString()}');
+    // state.screenshareStarted = event;
+  }
+
+  void _handleScreenshareStopped(ScreenshareStopped event) {
+    _logger?.info('ScreenshareStopped event received : ${event.toString()}');
+    // state.screenshareStopped = event;
+  }
+
+  void _handleRecordingStarted(RecordingStarted event) {
+    _logger?.info('RecordingStarted event received : ${event.toString()}');
+    // state.recordingStarted = event;
+  }
+
+  void _handleRecordingStopped(RecordingStopped event) {
+    _logger?.info('RecordingStopped event received : ${event.toString()}');
+    // state.recordingStopped = event;
   }
 }
