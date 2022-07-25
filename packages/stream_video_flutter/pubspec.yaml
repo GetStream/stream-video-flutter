@@ -8,11 +8,14 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  eva_icons_flutter: ^3.1.0
+  flutter_background: ^1.1.0
+  google_fonts: ^3.0.1
   flutter:
     sdk: flutter
   stream_video:
     path: ../stream_video
-
+  livekit_client: ^1.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
