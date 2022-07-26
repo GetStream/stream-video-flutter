@@ -4,12 +4,12 @@ import 'package:stream_video/protobuf/google/protobuf/struct.pb.dart';
 
 class UserInfo {
   final String id;
-  final String? name;
+  final String name;
   final String? imageURL; //Uri
   final Map<String, Object?>? extraData;
   UserInfo({
     required this.id,
-    this.name,
+    required this.name,
     this.imageURL,
     this.extraData,
   });
