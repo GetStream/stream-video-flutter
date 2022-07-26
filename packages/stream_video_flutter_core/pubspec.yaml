@@ -1,4 +1,4 @@
-name: stream_video_flutter
+name: stream_video_flutter_core
 description: A new Flutter package project.
 version: 0.0.1
 homepage:
@@ -8,14 +8,11 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  eva_icons_flutter: ^3.1.0
-  flutter_background: ^1.1.0
-  google_fonts: ^3.0.1
   flutter:
     sdk: flutter
-  stream_video_flutter_core:
-    path: ../stream_video_flutter_core
- 
+  stream_video:
+    path: ../stream_video
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -4,13 +4,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/src/models/events/events.dart';
 import 'package:stream_video/protobuf/video_events/events.pb.dart';
 import 'package:stream_video/protobuf/video_models/models.pb.dart';
-import 'package:stream_video/src/state/audio_controller.dart';
-import 'package:stream_video/src/state/broadcast_controller.dart';
-import 'package:stream_video/src/state/call_controller.dart';
-import 'package:stream_video/src/state/participant_controller.dart';
-import 'package:stream_video/src/state/recording_controller.dart';
-import 'package:stream_video/src/state/screenshare_controller.dart';
-import 'package:stream_video/src/state/video_controller.dart';
+import 'package:stream_video/src/state/controllers/controllers.dart';
+import 'package:stream_video/src/state/controllers/room_controller.dart';
 
 class ClientState {
   //ingest this in state
@@ -37,19 +32,21 @@ class ClientState {
   Stream<Healthcheck> get healthcheckStream =>
       _healthcheckController.stream.distinct();
 
-  final calls = CallController();
+  final _roomController = RoomController();
 
-  final participants = ParticipantController();
+    CallController get calls => _roomController.calls;
 
-  final broadcasts = BroadcastController();
+  ParticipantController get participants => _roomController.participants;
 
-  final screenshares = ScreenshareController();
+  BroadcastController get broadcasts => _roomController.broadcasts;
 
-  final audios = AudioController();
+  ScreenshareController get screenshares => _roomController.screenshares;
 
-  final videos = VideoController();
+  AudioController get audios => _roomController.audios;
 
-  final recordings = RecordingController();
+  VideoController get videos => _roomController.videos;
+
+  RecordingController get recordings => _roomController.recordings;
 
   final _userUpdatedController = BehaviorSubject<UserUpdated>();
 
@@ -75,14 +72,8 @@ class ClientState {
   Stream<AuthPayload> get authPayloadStream =>
       _authPayloadController.stream.distinct();
 
-  Future<void> disposeCall() async {
-    await Future.wait([
-      calls.dispose(),
-      participants.dispose(),
-      screenshares.dispose(),
-      audios.dispose(),
-      videos.dispose(),
-      recordings.dispose()
-    ]);
+  Future<void> dispose() async {
+    //TODO: dispose other controllers
+    await Future.wait([_roomController.disposeCall()]);
   }
 }
