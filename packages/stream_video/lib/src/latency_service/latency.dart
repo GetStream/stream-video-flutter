@@ -10,12 +10,12 @@ class LatencyService {
 
   Future<Map<String, Latency>> measureLatencies(List<Edge> edges) async {
     final latencies =
-        await Future.wait(edges.map((edge) => measureLatency(edge, 3)));
+        await Future.wait(edges.map((edge) => _measureLatency(edge, 3)));
 
     return Map.fromEntries(latencies);
   }
 
-  Future<MapEntry<String, Latency>> measureLatency(Edge egde,
+  Future<MapEntry<String, Latency>> _measureLatency(Edge egde,
       [int tries = 1]) async {
     final latencyUrl = egde.latencyUrl;
     final url = Uri.tryParse(latencyUrl);
