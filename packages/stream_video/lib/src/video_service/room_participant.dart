@@ -10,7 +10,7 @@ class RoomParticipant {
 
   String get name => _participant.name;
 
-  ConnectionQuality get connectionQuality => _participant.connectionQuality;
+  VideoConnectionQuality get connectionQuality => _participant.connectionQuality;
 
   bool get isSpeaking => _participant.isSpeaking;
 

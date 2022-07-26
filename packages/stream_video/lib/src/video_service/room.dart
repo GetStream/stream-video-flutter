@@ -19,7 +19,7 @@ class VideoRoom {
   Participant? remove(Participant participant) =>
       participants.remove(participant.userId);
 
-  List<MapEntry<String, RemoteParticipant>> get remoteParticipants =>
+  List<MapEntry<String, StreamRemoteParticipant>> get remoteParticipants =>
       _room.participants.entries.toList();
 
   LocalParticipant? get localParticipant => _room.localParticipant;

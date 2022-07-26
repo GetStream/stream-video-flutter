@@ -16,6 +16,8 @@ class ParticipantController {
 
   emitJoined(ParticipantJoined payload) => emit(ParticipantJoinEvent(payload));
 
+  //onJoined()=> room.addParticipant()
+
   emitInvited(ParticipantInvited payload) =>
       emit(ParticipantInvitedEvent(payload));
 

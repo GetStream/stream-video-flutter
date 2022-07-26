@@ -15,3 +15,7 @@ typedef StreamRoomDisconnectedEvent = RoomDisconnectedEvent;
 typedef StreamParticipantConnectedEvent = ParticipantConnectedEvent;
 typedef StreamTrackType = TrackType;
 typedef StreamVideoTrackRenderer = VideoTrackRenderer;
+
+typedef StreamRemoteParticipant = RemoteParticipant;
+
+typedef StreamLocalParticipant = LocalParticipant;
