@@ -15,7 +15,7 @@ dependencies:
     sdk: flutter
   stream_video:
     path: ../stream_video
-  livekit_client: ^1.0.0
+ 
 dev_dependencies:
   flutter_test:
     sdk: flutter

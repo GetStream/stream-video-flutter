@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video/events/events.dart';
+import 'package:stream_video/models/events/events.dart';
 import 'package:stream_video/protobuf/video_events/events.pb.dart';
 
 class AudioController {

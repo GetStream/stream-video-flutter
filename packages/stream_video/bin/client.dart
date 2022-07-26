@@ -10,7 +10,7 @@ void main(List<String> arguments) async {
   final token = Token(
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoid2hhdGV2ZXIifQ.ros60dPlc_0hAIc0DbGjlvHYajBevgpUyqCLzvqHB3o");
   await client.setUser(user, token: token);
-  await client.connect();
+  await client.connectWs();
 
   await client.createCall(
       request: CreateCallRequest(

@@ -8,6 +8,7 @@ import 'package:stream_video/src/core/error/error.dart';
 import 'package:stream_video/src/core/http/token.dart';
 import 'package:stream_video/src/core/http/token_manager.dart';
 import 'package:stream_video/src/state/state.dart';
+import 'package:stream_video/src/video_service/video_service.dart';
 import 'package:stream_video/src/ws/websocket.dart';
 import 'package:tart/tart.dart';
 
@@ -22,9 +23,11 @@ final _levelEmojiMapper = {
 };
 
 class StreamVideoClient {
-  late final CallCoordinatorServiceProtobufClient _client;
+  late final CallCoordinatorServiceProtobufClient _callCoordinatorService;
   late final WebSocketClient _ws;
   final _tokenManager = TokenManager();
+
+  late final VideoService _videoService;
   StreamVideoClient(
     String apiKey, {
     this.logLevel = Level.WARNING,
@@ -33,7 +36,7 @@ class StreamVideoClient {
     this.logHandlerFunction = StreamVideoClient.defaultLogHandler,
     WebSocketClient? ws,
   }) {
-    _client = CallCoordinatorServiceProtobufClient(
+    _callCoordinatorService = CallCoordinatorServiceProtobufClient(
       coordinatorUrl ?? "http://localhost:26991",
       "",
       hooks: ClientHooks(
@@ -43,11 +46,7 @@ class StreamVideoClient {
     );
 
     state = ClientState();
-    _ws = ws ??
-        WebSocketClient(
-          logger: logger,
-          state:state
-        );
+    _ws = ws ?? WebSocketClient(logger: logger, state: state);
   }
 
   /// Client specific logger instance.
@@ -93,7 +92,7 @@ class StreamVideoClient {
     state.currentUser = user;
   }
 
-  Future<void> connect() async {
+  Future<void> connectWs() async {
     final user = state.currentUser;
     final token = await _tokenManager.loadToken();
     print("TOKEN ${token.rawValue}");
@@ -103,10 +102,12 @@ class StreamVideoClient {
   Future<SelectEdgeServerResponse> selectEdgeServer(
       {required SelectEdgeServerRequest request}) async {
     try {
+      final token = await _tokenManager.loadToken();
       final ctx = withHttpRequestHeaders(
-          Context(), {'Auth-Token': 'SuperSecretAPIKey'});
+          Context(), {'authorization': 'Bearer ${token.rawValue}}'});
 
-      final response = await _client.selectEdgeServer(ctx, request);
+      final response =
+          await _callCoordinatorService.selectEdgeServer(ctx, request);
       return response;
     } on TwirpError catch (e) {
       final method =
@@ -130,7 +131,7 @@ class StreamVideoClient {
       final ctx = withHttpRequestHeaders(
           Context(), {'authorization': 'Bearer ${token.rawValue}}'});
 
-      final response = await _client.createCall(ctx, request);
+      final response = await _callCoordinatorService.createCall(ctx, request);
       return response;
     } on TwirpError catch (e) {
       final method =
@@ -149,10 +150,11 @@ class StreamVideoClient {
 
   Future<JoinCallResponse> joinCall({required JoinCallRequest request}) async {
     try {
+      final token = await _tokenManager.loadToken();
       final ctx = withHttpRequestHeaders(
-          Context(), {'Auth-Token': 'SuperSecretAPIKey'});
+          Context(), {'authorization': 'Bearer ${token.rawValue}}'});
 
-      final response = await _client.joinCall(ctx, request);
+      final response = await _callCoordinatorService.joinCall(ctx, request);
       return response;
     } on TwirpError catch (e) {
       final method =

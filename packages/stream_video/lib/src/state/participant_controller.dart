@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:protobuf/protobuf.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video/events/events.dart';
+import 'package:stream_video/models/events/events.dart';
 
 import '../../protobuf/video_events/events.pb.dart';
 

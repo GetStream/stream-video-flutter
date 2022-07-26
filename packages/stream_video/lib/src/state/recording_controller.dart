@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video/events/events.dart';
+import 'package:stream_video/models/events/events.dart';
 import 'package:stream_video/protobuf/video_events/events.pb.dart';
 
 class RecordingController {
@@ -9,14 +9,16 @@ class RecordingController {
 
   void emit(RecordingEvent event) => _recordingController.add(event);
 
-  void emitStarted(RecordingStarted event) => emit(RecordingStartedEvent(event));
+  void emitStarted(RecordingStarted event) =>
+      emit(RecordingStartedEvent(event));
 
- void emitStopped(RecordingStopped event) => emit(RecordingStoppedEvent(event));
-  
+  void emitStopped(RecordingStopped event) =>
+      emit(RecordingStoppedEvent(event));
 
   RecordingEvent get recordingEvent => _recordingController.value;
 
-  Stream<RecordingEvent> get recordingStream => _recordingController.stream.distinct();
+  Stream<RecordingEvent> get recordingStream =>
+      _recordingController.stream.distinct();
 
   StreamSubscription<RecordingEvent> listen(
           FutureOr<void> Function(RecordingEvent event) onEvent) =>
@@ -35,6 +37,4 @@ class RecordingController {
       });
 
   Future<void> dispose() async => _recordingController.close();
-
- 
 }

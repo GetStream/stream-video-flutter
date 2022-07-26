@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video/events/events.dart';
+import 'package:stream_video/models/events/events.dart';
 import 'package:stream_video/protobuf/video_events/events.pb.dart';
 
 class CallController {
   final _callController = BehaviorSubject<CallEvent>();
 
   void emit(CallEvent event) => _callController.add(event);
-  
+
   emitRinging(CallRinging payload) => emit(CallRingingEvent(payload));
 
   emitCreated(CallCreated payload) => emit(CallCreatedEvent(payload));
