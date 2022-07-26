@@ -2,6 +2,97 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 
+class UnmuteAudioButton extends StatelessWidget {
+  const UnmuteAudioButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return _NormalButton(
+      iconButton: Icons.mic,
+      label: 'Unmute audio',
+      color: Colors.black,
+    );
+  }
+}
+
+class MuteAudioButton extends StatelessWidget {
+  const MuteAudioButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return _NormalButton(
+      iconButton: Icons.mic_off,
+      label: 'Mute audio',
+      color: Colors.black,
+    );
+  }
+}
+
+class StopScreenButton extends StatelessWidget {
+  const StopScreenButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return _NormalButton(
+      iconButton: Icons.stop_screen_share,
+      label: 'Stop screen sharing',
+      color: Colors.black,
+    );
+  }
+}
+
+class StartScreenShare extends StatelessWidget {
+  const StartScreenShare({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return _NormalButton(
+      iconButton: Icons.screen_share,
+      label: 'Start screen sharing',
+      color: Colors.black,
+    );
+  }
+}
+
+class EnableVideoButton extends StatelessWidget {
+  const EnableVideoButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return _NormalButton(
+      iconButton: Icons.videocam,
+      label: 'Enable Video',
+      color: Colors.black,
+    );
+  }
+}
+
+class DisableVideoButton extends StatelessWidget {
+  const DisableVideoButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return _NormalButton(
+      iconButton: Icons.videocam,
+      label: 'Disable Video',
+      color: Colors.black,
+    );
+  }
+}
+
+class EndCallButton extends StatelessWidget {
+  const EndCallButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return _NormalButton(
+      iconButton: Icons.call_end,
+      label: 'End',
+      color: Colors.red,
+    );
+  }
+}
+
 class JoinCallButton extends StatelessWidget {
   const JoinCallButton({Key? key}) : super(key: key);
 
@@ -23,7 +114,7 @@ class CallAcceptButton extends StatelessWidget {
     return _NormalButton(
       iconButton: Icons.call,
       label: 'Accept',
-      color: Colors.red,
+      color: Colors.green,
     );
   }
 }
@@ -134,5 +225,14 @@ class _NormalButton extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class SwitchVideo extends StatelessWidget {
+  const SwitchVideo({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchVideo();
   }
 }
