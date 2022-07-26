@@ -3,11 +3,11 @@ import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
 import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbtwirp.dart';
 import 'package:stream_video/protobuf/video_models/models.pb.dart';
-import 'package:stream_video/src/client/state.dart';
 import 'package:stream_video/src/core/error/error.dart';
 
 import 'package:stream_video/src/core/http/token.dart';
 import 'package:stream_video/src/core/http/token_manager.dart';
+import 'package:stream_video/src/state/state.dart';
 import 'package:stream_video/src/ws/websocket.dart';
 import 'package:tart/tart.dart';
 
@@ -46,6 +46,7 @@ class StreamVideoClient {
     _ws = ws ??
         WebSocketClient(
           logger: logger,
+          state:state
         );
   }
 

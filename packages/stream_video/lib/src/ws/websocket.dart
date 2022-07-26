@@ -3,10 +3,14 @@ import 'package:protobuf/protobuf.dart';
 import 'package:stream_video/protobuf/video_events/events.pbserver.dart';
 import 'package:stream_video/protobuf/video_models/models.pb.dart';
 import 'package:stream_video/src/core/http/token.dart';
+import 'package:stream_video/src/state/state.dart';
 import 'package:web_socket_channel/io.dart';
 
 class WebSocketClient {
-  WebSocketClient({Logger? logger}) : _logger = logger;
+  WebSocketClient({Logger? logger, required ClientState state})
+      : _logger = logger,
+        _state = state;
+  final ClientState _state;
   late final IOWebSocketChannel? channel;
   late final Uri? uri;
 
@@ -175,7 +179,7 @@ class WebSocketClient {
 
   void _handleCallRinging(CallRinging event) {
     _logger?.info('CallRinging event received : ${event.call.toString()}');
-    // state.callRinging = event;
+    _state.calls.emitRinging(event);//= event;
   }
 
   void _handleCallCreated(CallCreated event) {
