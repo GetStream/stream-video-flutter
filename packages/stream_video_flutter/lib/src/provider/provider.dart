@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 class StreamVideoProvider extends InheritedWidget {
   const StreamVideoProvider({
     Key? key,
-    required this.color,
+    required this.client,
     required Widget child,
   }) : super(key: key, child: child);
 
-  final StreamVideoClient color;
+  final StreamVideoClient client;
 
   static StreamVideoProvider of(BuildContext context) {
     final StreamVideoProvider? result =
@@ -18,5 +18,5 @@ class StreamVideoProvider extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(StreamVideoProvider old) => color != old.color;
+  bool updateShouldNotify(StreamVideoProvider old) => client != old.client;
 }
