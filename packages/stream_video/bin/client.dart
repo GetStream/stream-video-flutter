@@ -3,6 +3,7 @@ import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.
 import 'package:stream_video/protobuf/video_models/models.pb.dart';
 import 'package:stream_video/src/client/client.dart';
 import 'package:stream_video/src/core/http/token.dart';
+import 'package:stream_video/src/models/models.dart';
 
 void main(List<String> arguments) async {
   final client = StreamVideoClient('something', logLevel: Level.INFO);
@@ -13,10 +14,9 @@ void main(List<String> arguments) async {
   await client.connectWs();
 
   await client.createCall(
-      request: CreateCallRequest(
-          id: "123",
-          participantIds: [
-            "whatever",
-          ],
-          type: "video"));
+      id: "123",
+      participantIds: [
+        "whatever",
+      ],
+      type: StreamCallType.video);
 }

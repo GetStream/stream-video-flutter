@@ -1,15 +1,20 @@
+// import 'package:http/http.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
 import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbtwirp.dart';
-import 'package:stream_video/protobuf/video_models/models.pb.dart';
+import 'package:stream_video/protobuf/video_models/models.pb.dart' hide EdgeServer;
 import 'package:stream_video/src/core/error/error.dart';
 
 import 'package:stream_video/src/core/http/token.dart';
 import 'package:stream_video/src/core/http/token_manager.dart';
+import 'package:stream_video/src/latency_service/latency.dart';
+import 'package:stream_video/src/models/edge_server.dart';
+import 'package:stream_video/src/models/video_options.dart';
 import 'package:stream_video/src/state/state.dart';
 import 'package:stream_video/src/video_service/video_service.dart';
 import 'package:stream_video/src/ws/websocket.dart';
+import 'package:stream_video/stream_video.dart';
 import 'package:tart/tart.dart';
 
 /// Handler function used for logging records. Function requires a single
@@ -24,6 +29,7 @@ final _levelEmojiMapper = {
 
 class StreamVideoClient {
   late final CallCoordinatorServiceProtobufClient _callCoordinatorService;
+  late final LatencyService _latencyService;
   late final WebSocketClient _ws;
   final _tokenManager = TokenManager();
 
@@ -45,8 +51,9 @@ class StreamVideoClient {
       // interceptor: myInterceptor()
     );
 
-    state = ClientState();
-    _ws = ws ?? WebSocketClient(logger: logger, state: state);
+    _state = ClientState();
+    _ws = ws ?? WebSocketClient(logger: logger, state: _state);
+    _latencyService = LatencyService(logger: logger);
   }
 
   /// Client specific logger instance.
@@ -55,7 +62,7 @@ class StreamVideoClient {
   late final Logger logger = detachedLogger('📡');
 
   /// This client state
-  late ClientState state;
+  late final ClientState _state;
   final LogHandlerFunction logHandlerFunction;
 
   final Level logLevel;
@@ -89,26 +96,29 @@ class StreamVideoClient {
       provider: provider,
     );
 
-    state.currentUser = user;
+    _state.currentUser = user;
   }
 
   Future<void> connectWs() async {
-    final user = state.currentUser;
+    final user = _state.currentUser;
     final token = await _tokenManager.loadToken();
     print("TOKEN ${token.rawValue}");
     _ws.connect(user: user!, token: token);
   }
 
-  Future<SelectEdgeServerResponse> selectEdgeServer(
-      {required SelectEdgeServerRequest request}) async {
+  Future<EdgeServer> selectEdgeServer({
+    required String callId,
+    required Map<String, Latency> latencyByEdge,
+  }) async {
     try {
       final token = await _tokenManager.loadToken();
-      final ctx = withHttpRequestHeaders(
-          Context(), {'authorization': 'Bearer ${token.rawValue}}'});
+      final ctx = _authorizationCtx(token);
 
-      final response =
-          await _callCoordinatorService.selectEdgeServer(ctx, request);
-      return response;
+      final response = await _callCoordinatorService.selectEdgeServer(
+          ctx,
+          SelectEdgeServerRequest(
+              callId: callId, latencyByEdge: latencyByEdge));
+      return EdgeServer(token: response.token, url: response.edgeServer.url);
     } on TwirpError catch (e) {
       final method =
           e.getContext.value(ContextKeys.methodName) ?? 'unknown method';
@@ -123,15 +133,48 @@ class StreamVideoClient {
       ''');
     }
   }
+
+  Future<VideoRoom> startCall({
+    required String id,
+    required List<String> participantIds,
+    required StreamCallType type,
+    required VideoOptions videoOptions,
+    //TODO: expose more parameters
+  }) async {
+    final createCallResponse =
+        await createCall(id: id, participantIds: participantIds, type: type);
+    //TODO: is this debug stuff really useful?
+    assert(StreamCallType.video.rawType == createCallResponse.call.type,
+        "call type from backend and client are different");
+
+    final edges =
+        await joinCall(callId: createCallResponse.call.id, type: type);
+    Map<String, Latency> latencyByEdge = await _latencyService.measureLatencies(edges);
+    final edgeServer = await selectEdgeServer(
+        callId: createCallResponse.call.id, latencyByEdge: latencyByEdge);
+    final room = await _videoService.connect(
+        url: edgeServer.url, token: edgeServer.token, options: videoOptions);
+    _state.participants.room = room;
+    return room;
+  }
+
+ 
 
   Future<CreateCallResponse> createCall(
-      {required CreateCallRequest request}) async {
+      {required String id,
+      required List<String> participantIds,
+      required StreamCallType type
+      //TODO: expose more parameters
+
+      }) async {
     try {
       final token = await _tokenManager.loadToken();
-      final ctx = withHttpRequestHeaders(
-          Context(), {'authorization': 'Bearer ${token.rawValue}}'});
+      final ctx = _authorizationCtx(token);
 
-      final response = await _callCoordinatorService.createCall(ctx, request);
+      final response = await _callCoordinatorService.createCall(
+          ctx,
+          CreateCallRequest(
+              id: id, participantIds: participantIds, type: type.rawType));
       return response;
     } on TwirpError catch (e) {
       final method =
@@ -148,14 +191,20 @@ class StreamVideoClient {
     }
   }
 
-  Future<JoinCallResponse> joinCall({required JoinCallRequest request}) async {
+  Context _authorizationCtx(Token token) {
+    return withHttpRequestHeaders(
+        Context(), {'authorization': 'Bearer ${token.rawValue}}'});
+  }
+
+  Future<List<Edge>> joinCall(
+      {required String callId, required StreamCallType type}) async {
     try {
       final token = await _tokenManager.loadToken();
-      final ctx = withHttpRequestHeaders(
-          Context(), {'authorization': 'Bearer ${token.rawValue}}'});
+      final ctx = _authorizationCtx(token);
 
-      final response = await _callCoordinatorService.joinCall(ctx, request);
-      return response;
+      final response = await _callCoordinatorService.joinCall(
+          ctx, JoinCallRequest(id: callId, type: type.rawType));
+      return response.edges;
     } on TwirpError catch (e) {
       final method =
           e.getContext.value(ContextKeys.methodName) ?? 'unknown method';
@@ -178,9 +227,6 @@ Context onClientRequestPrepared(Context ctx, Request req) {
   print('RequestPrepared for $methodNameVal');
   return ctx;
 }
-
-
-
 
 /// myInterceptor is an example of how to use an interceptor to catch the context and request
 /// before the RPC is made to the server. Depending on how many interceptors there are [next]

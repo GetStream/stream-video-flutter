@@ -7,8 +7,6 @@ typedef StreamVideoTrack = Track;
 typedef VideoConnectionQuality = ConnectionQuality;
 typedef StreamRemoteTrackPublication = RemoteTrackPublication;
 
-
-
 // inspired by me
 typedef StreamEventsListener<T> = EventsListener<T>;
 typedef StreamRoomEvent = RoomEvent;

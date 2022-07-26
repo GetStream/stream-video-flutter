@@ -1,5 +1,5 @@
 import 'package:livekit_client/livekit_client.dart';
-import 'package:stream_video/models/aliases.dart';
+import 'package:stream_video/src/models/aliases.dart';
 
 class RoomParticipant {
   final Participant _participant;

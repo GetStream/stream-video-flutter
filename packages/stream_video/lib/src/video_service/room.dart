@@ -1,12 +1,12 @@
 import 'package:livekit_client/livekit_client.dart' hide Participant;
-import 'package:stream_video/models/aliases.dart';
+import 'package:stream_video/src/models/aliases.dart';
 
 import 'package:stream_video/protobuf/video_models/models.pb.dart';
 import 'package:stream_video/src/video_service/video_connection_status.dart';
 
 class VideoRoom {
   VideoRoom({required Room room}) : _room = room;
-  final Room ?_room;
+  final Room? _room;
 
   final Map<String, Participant> participants = {};
 
@@ -25,5 +25,6 @@ class VideoRoom {
   LocalParticipant? get localParticipant => _room?.localParticipant;
 
   VideoConnectionStatus? get connectionStatus => _room?.connectionState.mapped;
-  StreamEventsListener<StreamRoomEvent>?  get createListener => _room?.createListener();
+  StreamEventsListener<StreamRoomEvent>? get createListener =>
+      _room?.createListener();
 }

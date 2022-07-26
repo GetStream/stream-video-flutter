@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:protobuf/protobuf.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video/models/events/events.dart';
+import 'package:stream_video/src/models/events/events.dart';
+import 'package:stream_video/src/video_service/room.dart';
 
 import '../../protobuf/video_events/events.pb.dart';
 
 class ParticipantController {
   final _participantInvitedController = BehaviorSubject<ParticipantEvent>();
+  VideoRoom? _room;
+  set room(VideoRoom room) => _room = room;
 
   void emit(ParticipantEvent event) => _participantInvitedController.add(event);
 
