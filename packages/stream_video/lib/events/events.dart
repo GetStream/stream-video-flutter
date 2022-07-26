@@ -92,7 +92,6 @@ class ParticipantLeftEvent with ParticipantEvent {
   String toString() => 'participant.left ${payload.toString()}';
 }
 
-
 mixin BroadcastEvent implements CoordinatorEvent {}
 
 class BroadcastStartedEvent with BroadcastEvent {
@@ -101,4 +100,84 @@ class BroadcastStartedEvent with BroadcastEvent {
 
   @override
   String toString() => 'broadcast.started ${payload.toString()}';
+}
+
+class BroadcastEndedEvent with BroadcastEvent {
+  const BroadcastEndedEvent(this.payload);
+  final BroadcastEnded payload;
+
+  @override
+  String toString() => 'broadcast.ended ${payload.toString()}';
+}
+
+mixin VideoEvent implements CoordinatorEvent {}
+
+class VideoStartedEvent with VideoEvent {
+  const VideoStartedEvent(this.payload);
+  final VideoStarted payload;
+
+  @override
+  String toString() => 'video.started ${payload.toString()}';
+}
+
+class VideoStoppedEvent with VideoEvent {
+  const VideoStoppedEvent(this.payload);
+  final VideoStopped payload;
+
+  @override
+  String toString() => 'video.stopped ${payload.toString()}';
+}
+
+mixin ScreenshareEvent implements CoordinatorEvent {}
+
+class ScreenshareStartedEvent with ScreenshareEvent {
+  const ScreenshareStartedEvent(this.payload);
+  final ScreenshareStarted payload;
+
+  @override
+  String toString() => 'screenshare.started ${payload.toString()}';
+}
+
+class ScreenshareStoppedEvent with ScreenshareEvent {
+  const ScreenshareStoppedEvent(this.payload);
+  final ScreenshareStopped payload;
+
+  @override
+  String toString() => 'screenshare.stopped ${payload.toString()}';
+}
+
+mixin AudioEvent implements CoordinatorEvent {}
+
+class AudioMutedEvent with AudioEvent {
+  const AudioMutedEvent(this.payload);
+  final AudioMuted payload;
+
+  @override
+  String toString() => 'audio.muted ${payload.toString()}';
+}
+
+class AudioUnmutedEvent with AudioEvent {
+  const AudioUnmutedEvent(this.payload);
+  final AudioUnmuted payload;
+
+  @override
+  String toString() => 'audio.unmuted ${payload.toString()}';
+}
+
+mixin RecordingEvent implements CoordinatorEvent {}
+
+class RecordingStartedEvent with RecordingEvent {
+  const RecordingStartedEvent(this.payload);
+  final RecordingStarted payload;
+
+  @override
+  String toString() => 'recording.started ${payload.toString()}';
+}
+
+class RecordingStoppedEvent with RecordingEvent {
+  const RecordingStoppedEvent(this.payload);
+  final RecordingStopped payload;
+
+  @override
+  String toString() => 'recording.stopped ${payload.toString()}';
 }

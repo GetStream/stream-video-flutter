@@ -11,6 +11,8 @@ class BroadcastController {
 
   emitStarted(BroadcastStarted payload) => emit(BroadcastStartedEvent(payload));
 
+  emitEnded(BroadcastEnded payload) => emit(BroadcastEndedEvent(payload));
+
   BroadcastEvent get broadcastEvent => _broadcastStartedController.value;
 
   Stream<BroadcastEvent> get broadcastStream =>

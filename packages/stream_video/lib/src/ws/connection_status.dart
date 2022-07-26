@@ -1,4 +1,3 @@
-
 /// Used to notify the WS connection status
 enum ConnectionStatus {
   /// WS is connected and everything is good

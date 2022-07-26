@@ -179,115 +179,115 @@ class WebSocketClient {
 
   void _handleCallRinging(CallRinging event) {
     _logger?.info('CallRinging event received : ${event.call.toString()}');
-    _state.calls.emitRinging(event);//= event;
+    _state.calls.emitRinging(event);
   }
 
   void _handleCallCreated(CallCreated event) {
     _logger?.info('CallCreated event received : ${event.call.toString()}');
-    // state.callCreated = event;
+    _state.calls.emitCreated(event);
   }
 
   void _handlerCallUpdated(CallUpdated event) {
     _logger?.info('CallUpdated event received : ${event.call.toString()}');
-    // state.callUpdated = event;
+    _state.calls.emitUpdated(event);
   }
 
   void _handleCallEnded(CallEnded event) {
     _logger?.info('CallEnded event received : ${event.call.toString()}');
-    // state.callEnded = event;
+    _state.calls.emitEnded(event);
   }
 
   void _handleCallDeleted(CallDeleted event) {
     _logger?.info('CallDeleted event received : ${event.call.toString()}');
-    // state.callDeleted = event;
+    _state.calls.emitDeleted(event);
   }
 
   void _handleUserUpdated(UserUpdated event) {
     _logger?.info('UserUpdated event received : ${event.user.toString()}');
-    // state.userUpdated = event;
+    _state.userUpdated = event;
   }
 
   void _handleParticipantInvited(ParticipantInvited event) {
     _logger?.info(
         'ParticipantInvited event received : ${event.participant.toString()}');
-    // state.participantInvited = event;
+    _state.participants.emitInvited(event);
   }
 
   void _handleParticipantUpdated(ParticipantUpdated event) {
     _logger?.info(
         'ParticipantUpdated event received : ${event.participant.toString()}');
-    // state.participantUpdated = event;
+    _state.participants.emitUpdated(event);
   }
 
   void _handleParticipantDeleted(ParticipantDeleted event) {
     _logger?.info('ParticipantDeleted event received : ${event.userId}');
-    // state.participantDeleted = event;
+    _state.participants.emitDeleted(event);
   }
 
   void _handleParticipantJoined(ParticipantJoined event) {
     _logger?.info(
         'ParticipantJoined event received : ${event.participant.toString()}');
-    // state.participantJoined = event;
+    _state.participants.emitJoined(event);
   }
 
   void _handleParticipantLeft(ParticipantLeft event) {
     _logger?.info(
         'ParticipantLeft event received : ${event.participant.toString()}');
-    // state.participantLeft = event;
+    _state.participants.emitLeft(event);
   }
 
   void _handleBroadcastStarted(BroadcastStarted event) {
     _logger?.info('BroadcastStarted event received : ${event.call.toString()}');
-    // state.broadcastStarted = event;
+    _state.broadcasts.emitStarted(event);
   }
 
   void _handleBroadcastEnded(BroadcastEnded event) {
     _logger?.info('BroadcastEnded event received : ${event.call.toString()}');
-    // state.broadcastEnded = event;
+    _state.broadcasts.emitEnded(event);
   }
 
   void _handleAuthPayload(AuthPayload event) {
     _logger?.info('AuthPayload event received : ${event.toString()}');
-    // state.authPayload = event;
+    _state.authPayload = event;
   }
 
   void _handleAudioMuted(AudioMuted event) {
     _logger?.info('AudioMuted event received : ${event.toString()}');
-    // state.audioMuted = event;
+    _state.audios.emitMuted(event);
   }
 
   void _handleAudioUnmuted(AudioUnmuted event) {
     _logger?.info('AudioUnmuted event received : ${event.toString()}');
-    // state.audioUnmuted = event;
+    _state.audios.emitUnmuted(event);
   }
 
   void _handleVideoStarted(VideoStarted event) {
     _logger?.info('VideoStarted event received : ${event.toString()}');
-    // state.videoStarted = event;
+    _state.videos.emitStarted(event);
   }
 
   void _handleVideoStopped(VideoStopped event) {
     _logger?.info('VideoStopped event received : ${event.toString()}');
-    // state.videoStopped = event;
+    _state.videos.emitStopped(event);
   }
 
   void _handleScreenshareStarted(ScreenshareStarted event) {
     _logger?.info('ScreenshareStarted event received : ${event.toString()}');
-    // state.screenshareStarted = event;
+    _state.screenshares.emitStarted(event);
   }
 
   void _handleScreenshareStopped(ScreenshareStopped event) {
     _logger?.info('ScreenshareStopped event received : ${event.toString()}');
-    // state.screenshareStopped = event;
+    _state.screenshares.emitStopped(event);
   }
 
   void _handleRecordingStarted(RecordingStarted event) {
     _logger?.info('RecordingStarted event received : ${event.toString()}');
-    // state.recordingStarted = event;
+    _state.recordings.emitStarted(event);
   }
 
   void _handleRecordingStopped(RecordingStopped event) {
     _logger?.info('RecordingStopped event received : ${event.toString()}');
-    // state.recordingStopped = event;
+    _state.recordings.emitStopped(event);
   }
 }

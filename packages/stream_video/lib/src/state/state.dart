@@ -4,9 +4,13 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/events/events.dart';
 import 'package:stream_video/protobuf/video_events/events.pb.dart';
 import 'package:stream_video/protobuf/video_models/models.pb.dart';
+import 'package:stream_video/src/state/audio_controller.dart';
 import 'package:stream_video/src/state/broadcast_controller.dart';
 import 'package:stream_video/src/state/call_controller.dart';
 import 'package:stream_video/src/state/participant_controller.dart';
+import 'package:stream_video/src/state/recording_controller.dart';
+import 'package:stream_video/src/state/screenshare_controller.dart';
+import 'package:stream_video/src/state/video_controller.dart';
 
 class ClientState {
   //ingest this in state
@@ -39,6 +43,14 @@ class ClientState {
 
   final broadcasts = BroadcastController();
 
+  final screenshares = ScreenshareController();
+
+  final audios = AudioController();
+
+  final videos = VideoController();
+
+  final recordings = RecordingController();
+
   final _userUpdatedController = BehaviorSubject<UserUpdated>();
 
   set userUpdated(UserUpdated userUpdated) =>
@@ -63,8 +75,14 @@ class ClientState {
   Stream<AuthPayload> get authPayloadStream =>
       _authPayloadController.stream.distinct();
 
-  // Call this method to dispose this object
-  Future<void> dispose() async {
-    await Future.wait([calls.dispose(), participants.dispose()]);
+  Future<void> disposeCall() async {
+    await Future.wait([
+      calls.dispose(),
+      participants.dispose(),
+      screenshares.dispose(),
+      audios.dispose(),
+      videos.dispose(),
+      recordings.dispose()
+    ]);
   }
 }
