@@ -40,6 +40,14 @@ class RoomParticipant {
       return null;
     }
   }
+
+  List<VideoTrackPublication> get videoTracks => _participant.videoTracks;
+
+  void addListener(void Function() onParticipantChanged) =>
+      _participant.addListener(onParticipantChanged);
+
+  void removeListener(void Function() onParticipantChanged) =>
+      _participant.removeListener(onParticipantChanged);
 }
 
 extension RoomParticipantX on RoomParticipant {

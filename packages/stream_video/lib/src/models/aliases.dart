@@ -10,3 +10,8 @@ typedef StreamRemoteTrackPublication = RemoteTrackPublication;
 // inspired by me
 typedef StreamEventsListener<T> = EventsListener<T>;
 typedef StreamRoomEvent = RoomEvent;
+typedef StreamRoomDisconnectedEvent = RoomDisconnectedEvent;
+
+typedef StreamParticipantConnectedEvent = ParticipantConnectedEvent;
+typedef StreamTrackType = TrackType;
+typedef StreamVideoTrackRenderer = VideoTrackRenderer;
