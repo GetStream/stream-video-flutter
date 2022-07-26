@@ -3,6 +3,7 @@ import 'package:protobuf/protobuf.dart';
 import 'package:stream_video/protobuf/video_events/events.pbserver.dart';
 import 'package:stream_video/protobuf/video_models/models.pb.dart';
 import 'package:stream_video/src/core/http/token.dart';
+import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/state/state.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -16,7 +17,7 @@ class WebSocketClient {
 
   final Logger? _logger;
 
-  void connect({required User user, required Token token}) {
+  void connect({required UserInfo user, required Token token}) {
     uri = _buildUri();
     channel = IOWebSocketChannel.connect(uri!);
 
@@ -150,12 +151,13 @@ class WebSocketClient {
     print("connection closed");
   }
 
-  AuthPayload getAuthPayload(User user, Token token) {
+  AuthPayload getAuthPayload(UserInfo user, Token token) {
     final authPayload = AuthPayload(
         user: UserRequest(
-          id: user.id, //TODO: ext for converting User to UserRequest
-          // custom: Struct(
-          //     fields: {"something": Value(stringValue: "something")})
+          id: user.id,
+          custom: user.custom,
+          name: user.name,
+          profileImageUrl: user.imageURL,
         ),
         token: token.toString(),
         device: DeviceRequest(disabled: true));

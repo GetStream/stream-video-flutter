@@ -10,6 +10,7 @@ import 'package:stream_video/src/core/http/token.dart';
 import 'package:stream_video/src/core/http/token_manager.dart';
 import 'package:stream_video/src/latency_service/latency.dart';
 import 'package:stream_video/src/models/edge_server.dart';
+import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/models/video_options.dart';
 import 'package:stream_video/src/state/state.dart';
 import 'package:stream_video/src/video_service/video_service.dart';
@@ -83,7 +84,7 @@ class StreamVideoClient {
     ..level = logLevel
     ..onRecord.listen(logHandlerFunction);
 
-  Future<void> setUser(User user,
+  Future<void> setUser(UserInfo user,
       {Token? token,
       TokenProvider? provider,
       bool connectWebSocket = true}) async {

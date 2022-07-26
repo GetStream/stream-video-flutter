@@ -4,21 +4,22 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/src/models/events/events.dart';
 import 'package:stream_video/protobuf/video_events/events.pb.dart';
 import 'package:stream_video/protobuf/video_models/models.pb.dart';
+import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/state/controllers/controllers.dart';
 import 'package:stream_video/src/state/controllers/room_controller.dart';
 
 class ClientState {
   //ingest this in state
 
-  final _currentUserController = BehaviorSubject<User?>();
+  final _currentUserController = BehaviorSubject<UserInfo?>();
 
-  set currentUser(User? user) {
+  set currentUser(UserInfo? user) {
     // _computeUnreadCounts(user);
     _currentUserController.add(user);
   }
 
   /// The current user
-  User? get currentUser => _currentUserController.valueOrNull;
+  UserInfo? get currentUser => _currentUserController.valueOrNull;
 
   final _healthcheckController = BehaviorSubject<Healthcheck>();
 
@@ -34,7 +35,7 @@ class ClientState {
 
   final _roomController = RoomController();
 
-    CallController get calls => _roomController.calls;
+  CallController get calls => _roomController.calls;
 
   ParticipantController get participants => _roomController.participants;
 
