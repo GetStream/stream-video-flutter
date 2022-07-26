@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_video/events/events.dart';
 import 'package:stream_video/protobuf/video_events/events.pb.dart';
 import 'package:stream_video/protobuf/video_models/models.pb.dart';
+import 'package:stream_video/src/client/call_controller.dart';
 
 class ClientState {
   //ingest this in state
@@ -26,65 +30,7 @@ class ClientState {
   /// This notifies of Healthcheck changes
   Stream<Healthcheck> get healthcheckStream =>
       _healthcheckController.stream.distinct();
-
-  final _callRingingController = BehaviorSubject<CallRinging>();
-
-  set callRinging(CallRinging callRinging) =>
-      _callRingingController.add(callRinging);
-
-  /// The current connection status value
-  CallRinging get callRinging => _callRingingController.value;
-
-  /// This notifies of Healthcheck changes
-  Stream<CallRinging> get callRingingStream =>
-      _callRingingController.stream.distinct();
-
-  final _callCreatedController = BehaviorSubject<CallCreated>();
-
-  set callCreated(CallCreated callCreated) =>
-      _callCreatedController.add(callCreated);
-
-  /// The current connection status value
-  CallCreated get callCreated => _callCreatedController.value;
-
-  /// This notifies of Healthcheck changes
-  Stream<CallCreated> get callCreatedStream =>
-      _callCreatedController.stream.distinct();
-
-  final _callUpdatedController = BehaviorSubject<CallUpdated>();
-
-  set callUpdated(CallUpdated callUpdated) =>
-      _callUpdatedController.add(callUpdated);
-
-  /// The current connection status value
-  CallUpdated get callUpdated => _callUpdatedController.value;
-
-  /// This notifies of Healthcheck changes
-  Stream<CallUpdated> get callUpdatedStream =>
-      _callUpdatedController.stream.distinct();
-
-  final _callEndedController = BehaviorSubject<CallEnded>();
-
-  set callEnded(CallEnded callEnded) => _callEndedController.add(callEnded);
-
-  /// The current connection status value
-  CallEnded get callEnded => _callEndedController.value;
-
-  /// This notifies of Healthcheck changes
-  Stream<CallEnded> get callEndedStream =>
-      _callEndedController.stream.distinct();
-
-  final _callDeletedController = BehaviorSubject<CallDeleted>();
-
-  set callDeleted(CallDeleted callDeleted) =>
-      _callDeletedController.add(callDeleted);
-
-  /// The current connection status value
-  CallDeleted get callDeleted => _callDeletedController.value;
-
-  /// This notifies of Healthcheck changes
-  Stream<CallDeleted> get callDeletedStream =>
-      _callDeletedController.stream.distinct();
+  final calls = CallController();
 
   final _userUpdatedController = BehaviorSubject<UserUpdated>();
 
@@ -198,24 +144,24 @@ class ClientState {
       _authPayloadController.stream.distinct();
 
   /// Call this method to dispose this object
-  Future<void> dispose() async {
-    await Future.wait([
-      _currentUserController.close(),
-      _healthcheckController.close(),
-      _callRingingController.close(),
-      _callCreatedController.close(),
-      _callUpdatedController.close(),
-      _callEndedController.close(),
-      _callDeletedController.close(),
-      _userUpdatedController.close(),
-      _participantInvitedController.close(),
-      _participantInvitedController.close(),
-      _participantDeletedController.close(),
-      _participantJoinedController.close(),
-      _participantLeftController.close(),
-      _broadcastStartedController.close(),
-      _broadcastEndedController.close(),
-      _broadcastEndedController.close()
-    ]);
-  }
+  // Future<void> dispose() async {
+  //   await Future.wait([
+  //     _currentUserController.close(),
+  //     _healthcheckController.close(),
+  //     _callRingingController.close(),
+  //     _callCreatedController.close(),
+  //     _callUpdatedController.close(),
+  //     _callEndedController.close(),
+  //     _callDeletedController.close(),
+  //     _userUpdatedController.close(),
+  //     _participantInvitedController.close(),
+  //     _participantInvitedController.close(),
+  //     _participantDeletedController.close(),
+  //     _participantJoinedController.close(),
+  //     _participantLeftController.close(),
+  //     _broadcastStartedController.close(),
+  //     _broadcastEndedController.close(),
+  //     _broadcastEndedController.close()
+  //   ]);
+  // }
 }
