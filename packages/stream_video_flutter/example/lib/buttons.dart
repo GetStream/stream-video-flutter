@@ -231,11 +231,15 @@ class _NormalButton extends StatelessWidget {
   }
 }
 
-class SwitchVideo extends StatelessWidget {
-  const SwitchVideo({Key? key}) : super(key: key);
+class SwitchVideoButton extends StatelessWidget {
+  const SwitchVideoButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SwitchVideo();
+    return _NormalButton(
+      iconButton: Icons.switch_video,
+      label: 'Join',
+      color: Colors.blue,
+    );
   }
 }
