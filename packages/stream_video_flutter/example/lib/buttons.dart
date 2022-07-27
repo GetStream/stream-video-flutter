@@ -93,9 +93,9 @@ class EndCallButton extends StatelessWidget {
   }
 }
 
-class JoinCallButton extends StatelessWidget {
+class StartCallButton extends StatelessWidget {
   final VoidCallback onTap;
-  const JoinCallButton({Key? key, required this.onTap}) : super(key: key);
+  const StartCallButton({Key? key, required this.onTap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -231,15 +231,15 @@ class _NormalButton extends StatelessWidget {
   }
 }
 
-class SwitchVideoButton extends StatelessWidget {
-  const SwitchVideoButton({Key? key}) : super(key: key);
-
+class JoinCallButton extends StatelessWidget {
+  const JoinCallButton({Key? key, required this.onTap}) : super(key: key);
+  final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
     return _NormalButton(
-      iconButton: Icons.switch_video,
-      label: 'Join',
-      color: Colors.blue,
-    );
+        iconButton: Icons.switch_video,
+        label: 'Join',
+        color: Colors.blue,
+        onTap: onTap);
   }
 }

@@ -34,10 +34,10 @@ class StartCallView extends StatelessWidget {
         Expanded(child: UserCheckBoxInListView(controller)),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: JoinCallButton(onTap: () {
+          child: StartCallButton(onTap: () {
             print("currentUser ${currentUserController.value}");
             print("participants ${controller.getIsChecked()}");
-            print("call");
+            print("startCall");
           }),
         )
       ],

@@ -1,4 +1,3 @@
-
 import 'package:example/buttons.dart';
 import 'package:flutter/material.dart';
 
@@ -11,8 +10,29 @@ class JoinCallView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SwitchVideoButton(),
+    final controller = TextEditingController();
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text("The Call ID"),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Enter the Call ID',
+            ),
+          ),
+        ),
+        Spacer(),
+        JoinCallButton(onTap: () {
+          print("join call ${controller.text}");
+        }),
+      ],
     );
   }
 }
