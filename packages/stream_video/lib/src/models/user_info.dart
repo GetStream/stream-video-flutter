@@ -15,6 +15,9 @@ class UserInfo {
   });
 
   Struct? get custom => extraData?.toStruct();
+
+  @override
+  String toString()=> '$id $name $imageURL $extraData';
 }
 
 extension ExtraDataX on Map<String, Object?> {

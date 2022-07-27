@@ -1,36 +1,31 @@
 import 'package:example/circle_avatar.dart';
+import 'package:example/checkbox_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class UserCheckBoxInListView extends StatefulWidget {
-  final List<UserInfo> users;
+  final CheckboxController userController;
 
-  UserCheckBoxInListView(this.users);
+  UserCheckBoxInListView(this.userController);
+
   @override
-  _UserCheckBoxInListViewState createState() => _UserCheckBoxInListViewState();
+  State<UserCheckBoxInListView> createState() => _UserCheckBoxInListViewState();
 }
 
 class _UserCheckBoxInListViewState extends State<UserCheckBoxInListView> {
-  late final List<CheckBoxItem> _checkBoxItems;
-
-  @override
-  void initState() {
-    _checkBoxItems = widget.users.map((e) => CheckBoxItem(e, false)).toList();
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) => ListView(
         padding: const EdgeInsets.all(8),
-        children: _checkBoxItems
+        children: widget.userController.value
             .map(
               (CheckBoxItem item) => CheckboxListTile(
-                title: StreamCircleAvatar(
+                secondary: StreamCircleAvatar(
                     initial: item.userInfo.name.toUpperCase()),
-                subtitle: Text(item.userInfo.name),
+                title: Text(item.userInfo.name),
                 value: item.isChecked,
                 onChanged: (bool? val) {
-                  setState(() => item.isChecked = val!);
+                  widget.userController.updateItem(item, val!);
+                  setState(() => item.isChecked = val);
                 },
               ),
             )
@@ -43,4 +38,7 @@ class CheckBoxItem {
   bool isChecked;
 
   CheckBoxItem(this.userInfo, this.isChecked);
+
+  @override
+  String toString() => '$userInfo $isChecked';
 }

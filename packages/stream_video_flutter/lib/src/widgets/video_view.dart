@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_flutter_core/stream_video_flutter_core.dart';
