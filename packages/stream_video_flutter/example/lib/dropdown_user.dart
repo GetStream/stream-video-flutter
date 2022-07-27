@@ -27,7 +27,6 @@ class _UserDropDropdownState extends State<UserDropDropdown> {
       },
       items: demoUsers
           .map((e) => e.userInfo)
-          // .expand((element) => element)
           .toList()
           .map<DropdownMenuItem<UserInfo>>((UserInfo value) {
         return DropdownMenuItem<UserInfo>(
