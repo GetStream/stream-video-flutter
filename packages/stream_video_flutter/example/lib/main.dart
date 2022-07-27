@@ -32,6 +32,7 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     var controller = CheckboxController(
         demoUsers.map((e) => CheckBoxItem(e.userInfo, false)).toList());
+    var currentUserController = CurrentUserController(demoUsers[0].userInfo);
     return Scaffold(
         appBar: AppBar(
           title: Text(title),
@@ -43,7 +44,7 @@ class HomeView extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: Text("Who are you?"),
             ),
-            UserDropDropdown(),
+            UserDropDropdown(currentUserController),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text("Select Participants"),
@@ -52,9 +53,8 @@ class HomeView extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: JoinCallButton(onTap: () {
-                for (var user in controller.value) {
-                  print(user.toString());
-                }
+                print("currentUser ${currentUserController.value}");
+                print("participants ${controller.getIsChecked()}");
                 print("call");
               }),
             )

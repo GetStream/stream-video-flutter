@@ -1,9 +1,12 @@
+import 'package:example/checkbox_controller.dart';
 import 'package:example/demo_users.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class UserDropDropdown extends StatefulWidget {
-  const UserDropDropdown({Key? key}) : super(key: key);
+  final CurrentUserController currentUserController;
+  const UserDropDropdown(this.currentUserController, {Key? key})
+      : super(key: key);
 
   @override
   State<UserDropDropdown> createState() => _UserDropDropdownState();
@@ -17,8 +20,9 @@ class _UserDropDropdownState extends State<UserDropDropdown> {
     return DropdownButton<UserInfo>(
       value: dropdownValue,
       onChanged: (UserInfo? newValue) {
+        widget.currentUserController.value = newValue!;
         setState(() {
-          dropdownValue = newValue!;
+          dropdownValue = newValue;
         });
       },
       items: demoUsers
