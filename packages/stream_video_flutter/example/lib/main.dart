@@ -2,13 +2,12 @@ import 'package:example/buttons.dart';
 import 'package:example/checkbox.dart';
 import 'package:example/demo_users.dart';
 import 'package:example/checkbox_controller.dart';
+import 'package:example/dropdown_user.dart';
 import 'package:flutter/material.dart';
 
 void main() {
   runApp(const MyApp());
 }
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -37,26 +36,29 @@ class HomeView extends StatelessWidget {
         appBar: AppBar(
           title: Text(title),
         ),
-        body: Center(
-          child: Column(
-            // mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text("Select Participants"),
-              ),
-              Expanded(child: UserCheckBoxInListView(controller)),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: JoinCallButton(onTap: () {
-                  for (var user in controller.value) {
-                    print(user.toString());
-                  }
-                  print("call");
-                }),
-              )
-            ],
-          ),
+        body: Column(
+          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text("Who are you?"),
+            ),
+            UserDropDropdown(),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text("Select Participants"),
+            ),
+            Expanded(child: UserCheckBoxInListView(controller)),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: JoinCallButton(onTap: () {
+                for (var user in controller.value) {
+                  print(user.toString());
+                }
+                print("call");
+              }),
+            )
+          ],
         ));
   }
 }

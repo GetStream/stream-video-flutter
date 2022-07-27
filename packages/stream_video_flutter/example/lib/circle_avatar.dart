@@ -9,9 +9,12 @@ class StreamCircleAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-        child: Text(
-      initial,
-      style: TextStyle(fontSize: 12),
+        child: Padding(
+      padding: const EdgeInsets.all(2.0),
+      child: Text(
+        initial,
+        style: TextStyle(fontSize: 10),
+      ),
     ));
   }
 }

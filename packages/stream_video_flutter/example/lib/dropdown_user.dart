@@ -16,13 +16,6 @@ class _UserDropDropdownState extends State<UserDropDropdown> {
   Widget build(BuildContext context) {
     return DropdownButton<UserInfo>(
       value: dropdownValue,
-      icon: const Icon(Icons.arrow_downward),
-      elevation: 16,
-      style: const TextStyle(color: Colors.deepPurple),
-      underline: Container(
-        height: 2,
-        color: Colors.deepPurpleAccent,
-      ),
       onChanged: (UserInfo? newValue) {
         setState(() {
           dropdownValue = newValue!;
