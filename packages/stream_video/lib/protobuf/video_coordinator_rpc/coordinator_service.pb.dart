@@ -1093,16 +1093,41 @@ class ListDevicesResponse extends $pb.GeneratedMessage {
 class CreateUserRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateUserRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
+    ..pPS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'teams')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'role')
+    ..aOM<$2.Struct>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $2.Struct.create)
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'imageUrl')
     ..hasRequiredFields = false
   ;
 
   CreateUserRequest._() : super();
   factory CreateUserRequest({
     $core.String? id,
+    $core.Iterable<$core.String>? teams,
+    $core.String? role,
+    $2.Struct? custom,
+    $core.String? name,
+    $core.String? imageUrl,
   }) {
     final _result = create();
     if (id != null) {
       _result.id = id;
+    }
+    if (teams != null) {
+      _result.teams.addAll(teams);
+    }
+    if (role != null) {
+      _result.role = role;
+    }
+    if (custom != null) {
+      _result.custom = custom;
+    }
+    if (name != null) {
+      _result.name = name;
+    }
+    if (imageUrl != null) {
+      _result.imageUrl = imageUrl;
     }
     return _result;
   }
@@ -1135,21 +1160,67 @@ class CreateUserRequest extends $pb.GeneratedMessage {
   $core.bool hasId() => $_has(0);
   @$pb.TagNumber(1)
   void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<$core.String> get teams => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $core.String get role => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set role($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRole() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRole() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $2.Struct get custom => $_getN(3);
+  @$pb.TagNumber(4)
+  set custom($2.Struct v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasCustom() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCustom() => clearField(4);
+  @$pb.TagNumber(4)
+  $2.Struct ensureCustom() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $core.String get name => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set name($core.String v) { $_setString(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasName() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearName() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get imageUrl => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set imageUrl($core.String v) { $_setString(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasImageUrl() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearImageUrl() => clearField(6);
 }
 
 class CreateOrUpdateUsersRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateOrUpdateUsersRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
     ..pc<CreateUserRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'users', $pb.PbFieldType.PM, subBuilder: CreateUserRequest.create)
+    ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fullUpdate')
     ..hasRequiredFields = false
   ;
 
   CreateOrUpdateUsersRequest._() : super();
   factory CreateOrUpdateUsersRequest({
     $core.Iterable<CreateUserRequest>? users,
+    $core.bool? fullUpdate,
   }) {
     final _result = create();
     if (users != null) {
       _result.users.addAll(users);
+    }
+    if (fullUpdate != null) {
+      _result.fullUpdate = fullUpdate;
     }
     return _result;
   }
@@ -1176,6 +1247,15 @@ class CreateOrUpdateUsersRequest extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   $core.List<CreateUserRequest> get users => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.bool get fullUpdate => $_getBF(1);
+  @$pb.TagNumber(2)
+  set fullUpdate($core.bool v) { $_setBool(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasFullUpdate() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearFullUpdate() => clearField(2);
 }
 
 class CreateOrUpdateUsersResponse extends $pb.GeneratedMessage {
@@ -2314,6 +2394,657 @@ class StartRecordingRequest extends $pb.GeneratedMessage {
   void clearCallId() => clearField(2);
 }
 
+class StoreCallStatsRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StoreCallStatsRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..aOM<$2.Struct>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stats', subBuilder: $2.Struct.create)
+    ..hasRequiredFields = false
+  ;
+
+  StoreCallStatsRequest._() : super();
+  factory StoreCallStatsRequest({
+    $core.String? callType,
+    $core.String? callId,
+    $2.Struct? stats,
+  }) {
+    final _result = create();
+    if (callType != null) {
+      _result.callType = callType;
+    }
+    if (callId != null) {
+      _result.callId = callId;
+    }
+    if (stats != null) {
+      _result.stats = stats;
+    }
+    return _result;
+  }
+  factory StoreCallStatsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StoreCallStatsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  StoreCallStatsRequest clone() => StoreCallStatsRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  StoreCallStatsRequest copyWith(void Function(StoreCallStatsRequest) updates) => super.copyWith((message) => updates(message as StoreCallStatsRequest)) as StoreCallStatsRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static StoreCallStatsRequest create() => StoreCallStatsRequest._();
+  StoreCallStatsRequest createEmptyInstance() => create();
+  static $pb.PbList<StoreCallStatsRequest> createRepeated() => $pb.PbList<StoreCallStatsRequest>();
+  @$core.pragma('dart2js:noInline')
+  static StoreCallStatsRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StoreCallStatsRequest>(create);
+  static StoreCallStatsRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callType => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callType($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get callId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set callId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallId() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $2.Struct get stats => $_getN(2);
+  @$pb.TagNumber(3)
+  set stats($2.Struct v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasStats() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearStats() => clearField(3);
+  @$pb.TagNumber(3)
+  $2.Struct ensureStats() => $_ensure(2);
+}
+
+class CallStatEvent extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallStatEvent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..e<CallStatEventType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: CallStatEventType.AUDIO_FROZEN, valueOf: CallStatEventType.valueOf, enumValues: CallStatEventType.values)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'time')
+    ..hasRequiredFields = false
+  ;
+
+  CallStatEvent._() : super();
+  factory CallStatEvent({
+    CallStatEventType? type,
+    $core.String? time,
+  }) {
+    final _result = create();
+    if (type != null) {
+      _result.type = type;
+    }
+    if (time != null) {
+      _result.time = time;
+    }
+    return _result;
+  }
+  factory CallStatEvent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CallStatEvent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CallStatEvent clone() => CallStatEvent()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CallStatEvent copyWith(void Function(CallStatEvent) updates) => super.copyWith((message) => updates(message as CallStatEvent)) as CallStatEvent; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CallStatEvent create() => CallStatEvent._();
+  CallStatEvent createEmptyInstance() => create();
+  static $pb.PbList<CallStatEvent> createRepeated() => $pb.PbList<CallStatEvent>();
+  @$core.pragma('dart2js:noInline')
+  static CallStatEvent getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallStatEvent>(create);
+  static CallStatEvent? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  CallStatEventType get type => $_getN(0);
+  @$pb.TagNumber(1)
+  set type(CallStatEventType v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get time => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set time($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasTime() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTime() => clearField(2);
+}
+
+class ReportIssueRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ReportIssueRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'description')
+    ..aOM<$2.Struct>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $2.Struct.create)
+    ..hasRequiredFields = false
+  ;
+
+  ReportIssueRequest._() : super();
+  factory ReportIssueRequest({
+    $core.String? callType,
+    $core.String? callId,
+    $core.String? description,
+    $2.Struct? custom,
+  }) {
+    final _result = create();
+    if (callType != null) {
+      _result.callType = callType;
+    }
+    if (callId != null) {
+      _result.callId = callId;
+    }
+    if (description != null) {
+      _result.description = description;
+    }
+    if (custom != null) {
+      _result.custom = custom;
+    }
+    return _result;
+  }
+  factory ReportIssueRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ReportIssueRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ReportIssueRequest clone() => ReportIssueRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ReportIssueRequest copyWith(void Function(ReportIssueRequest) updates) => super.copyWith((message) => updates(message as ReportIssueRequest)) as ReportIssueRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ReportIssueRequest create() => ReportIssueRequest._();
+  ReportIssueRequest createEmptyInstance() => create();
+  static $pb.PbList<ReportIssueRequest> createRepeated() => $pb.PbList<ReportIssueRequest>();
+  @$core.pragma('dart2js:noInline')
+  static ReportIssueRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ReportIssueRequest>(create);
+  static ReportIssueRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callType => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callType($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get callId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set callId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallId() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get description => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set description($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasDescription() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearDescription() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $2.Struct get custom => $_getN(3);
+  @$pb.TagNumber(4)
+  set custom($2.Struct v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasCustom() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCustom() => clearField(4);
+  @$pb.TagNumber(4)
+  $2.Struct ensureCustom() => $_ensure(3);
+}
+
+class ReviewCallRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ReviewCallRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..a<$core.double>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stars', $pb.PbFieldType.OF)
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'description')
+    ..aOM<$2.Struct>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $2.Struct.create)
+    ..hasRequiredFields = false
+  ;
+
+  ReviewCallRequest._() : super();
+  factory ReviewCallRequest({
+    $core.String? callType,
+    $core.String? callId,
+    $core.double? stars,
+    $core.String? description,
+    $2.Struct? custom,
+  }) {
+    final _result = create();
+    if (callType != null) {
+      _result.callType = callType;
+    }
+    if (callId != null) {
+      _result.callId = callId;
+    }
+    if (stars != null) {
+      _result.stars = stars;
+    }
+    if (description != null) {
+      _result.description = description;
+    }
+    if (custom != null) {
+      _result.custom = custom;
+    }
+    return _result;
+  }
+  factory ReviewCallRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ReviewCallRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ReviewCallRequest clone() => ReviewCallRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ReviewCallRequest copyWith(void Function(ReviewCallRequest) updates) => super.copyWith((message) => updates(message as ReviewCallRequest)) as ReviewCallRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ReviewCallRequest create() => ReviewCallRequest._();
+  ReviewCallRequest createEmptyInstance() => create();
+  static $pb.PbList<ReviewCallRequest> createRepeated() => $pb.PbList<ReviewCallRequest>();
+  @$core.pragma('dart2js:noInline')
+  static ReviewCallRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ReviewCallRequest>(create);
+  static ReviewCallRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callType => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callType($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get callId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set callId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallId() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.double get stars => $_getN(2);
+  @$pb.TagNumber(3)
+  set stars($core.double v) { $_setFloat(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasStars() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearStars() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get description => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set description($core.String v) { $_setString(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasDescription() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearDescription() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $2.Struct get custom => $_getN(4);
+  @$pb.TagNumber(5)
+  set custom($2.Struct v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasCustom() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearCustom() => clearField(5);
+  @$pb.TagNumber(5)
+  $2.Struct ensureCustom() => $_ensure(4);
+}
+
+class ReviewCallResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ReviewCallResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  ReviewCallResponse._() : super();
+  factory ReviewCallResponse() => create();
+  factory ReviewCallResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ReviewCallResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ReviewCallResponse clone() => ReviewCallResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ReviewCallResponse copyWith(void Function(ReviewCallResponse) updates) => super.copyWith((message) => updates(message as ReviewCallResponse)) as ReviewCallResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ReviewCallResponse create() => ReviewCallResponse._();
+  ReviewCallResponse createEmptyInstance() => create();
+  static $pb.PbList<ReviewCallResponse> createRepeated() => $pb.PbList<ReviewCallResponse>();
+  @$core.pragma('dart2js:noInline')
+  static ReviewCallResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ReviewCallResponse>(create);
+  static ReviewCallResponse? _defaultInstance;
+}
+
+class ReportIssueResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ReportIssueResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  ReportIssueResponse._() : super();
+  factory ReportIssueResponse() => create();
+  factory ReportIssueResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ReportIssueResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ReportIssueResponse clone() => ReportIssueResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ReportIssueResponse copyWith(void Function(ReportIssueResponse) updates) => super.copyWith((message) => updates(message as ReportIssueResponse)) as ReportIssueResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ReportIssueResponse create() => ReportIssueResponse._();
+  ReportIssueResponse createEmptyInstance() => create();
+  static $pb.PbList<ReportIssueResponse> createRepeated() => $pb.PbList<ReportIssueResponse>();
+  @$core.pragma('dart2js:noInline')
+  static ReportIssueResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ReportIssueResponse>(create);
+  static ReportIssueResponse? _defaultInstance;
+}
+
+class ParticipantCallStatEvent extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ParticipantCallStatEvent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participantId')
+    ..pc<CallStatEvent>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callTimeline', $pb.PbFieldType.PM, subBuilder: CallStatEvent.create)
+    ..hasRequiredFields = false
+  ;
+
+  ParticipantCallStatEvent._() : super();
+  factory ParticipantCallStatEvent({
+    $core.String? participantId,
+    $core.Iterable<CallStatEvent>? callTimeline,
+  }) {
+    final _result = create();
+    if (participantId != null) {
+      _result.participantId = participantId;
+    }
+    if (callTimeline != null) {
+      _result.callTimeline.addAll(callTimeline);
+    }
+    return _result;
+  }
+  factory ParticipantCallStatEvent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ParticipantCallStatEvent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ParticipantCallStatEvent clone() => ParticipantCallStatEvent()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ParticipantCallStatEvent copyWith(void Function(ParticipantCallStatEvent) updates) => super.copyWith((message) => updates(message as ParticipantCallStatEvent)) as ParticipantCallStatEvent; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ParticipantCallStatEvent create() => ParticipantCallStatEvent._();
+  ParticipantCallStatEvent createEmptyInstance() => create();
+  static $pb.PbList<ParticipantCallStatEvent> createRepeated() => $pb.PbList<ParticipantCallStatEvent>();
+  @$core.pragma('dart2js:noInline')
+  static ParticipantCallStatEvent getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ParticipantCallStatEvent>(create);
+  static ParticipantCallStatEvent? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get participantId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set participantId($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasParticipantId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearParticipantId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<CallStatEvent> get callTimeline => $_getList(1);
+}
+
+class GetCallStatsRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetCallStatsRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..hasRequiredFields = false
+  ;
+
+  GetCallStatsRequest._() : super();
+  factory GetCallStatsRequest({
+    $core.String? callType,
+    $core.String? callId,
+  }) {
+    final _result = create();
+    if (callType != null) {
+      _result.callType = callType;
+    }
+    if (callId != null) {
+      _result.callId = callId;
+    }
+    return _result;
+  }
+  factory GetCallStatsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory GetCallStatsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  GetCallStatsRequest clone() => GetCallStatsRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  GetCallStatsRequest copyWith(void Function(GetCallStatsRequest) updates) => super.copyWith((message) => updates(message as GetCallStatsRequest)) as GetCallStatsRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static GetCallStatsRequest create() => GetCallStatsRequest._();
+  GetCallStatsRequest createEmptyInstance() => create();
+  static $pb.PbList<GetCallStatsRequest> createRepeated() => $pb.PbList<GetCallStatsRequest>();
+  @$core.pragma('dart2js:noInline')
+  static GetCallStatsRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetCallStatsRequest>(create);
+  static GetCallStatsRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callType => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callType($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get callId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set callId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallId() => clearField(2);
+}
+
+class CallStats extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallStats', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..pc<CallStatEvent>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callTimeline', $pb.PbFieldType.PM, subBuilder: CallStatEvent.create)
+    ..pc<ParticipantCallStatEvent>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participantTimelines', $pb.PbFieldType.PM, subBuilder: ParticipantCallStatEvent.create)
+    ..hasRequiredFields = false
+  ;
+
+  CallStats._() : super();
+  factory CallStats({
+    $core.Iterable<CallStatEvent>? callTimeline,
+    $core.Iterable<ParticipantCallStatEvent>? participantTimelines,
+  }) {
+    final _result = create();
+    if (callTimeline != null) {
+      _result.callTimeline.addAll(callTimeline);
+    }
+    if (participantTimelines != null) {
+      _result.participantTimelines.addAll(participantTimelines);
+    }
+    return _result;
+  }
+  factory CallStats.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CallStats.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CallStats clone() => CallStats()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CallStats copyWith(void Function(CallStats) updates) => super.copyWith((message) => updates(message as CallStats)) as CallStats; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CallStats create() => CallStats._();
+  CallStats createEmptyInstance() => create();
+  static $pb.PbList<CallStats> createRepeated() => $pb.PbList<CallStats>();
+  @$core.pragma('dart2js:noInline')
+  static CallStats getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallStats>(create);
+  static CallStats? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<CallStatEvent> get callTimeline => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.List<ParticipantCallStatEvent> get participantTimelines => $_getList(1);
+}
+
+class GetCallStatsResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetCallStatsResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..aOM<$3.Call>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.Call.create)
+    ..aOM<CallStats>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callStats', subBuilder: CallStats.create)
+    ..hasRequiredFields = false
+  ;
+
+  GetCallStatsResponse._() : super();
+  factory GetCallStatsResponse({
+    $3.Call? call,
+    CallStats? callStats,
+  }) {
+    final _result = create();
+    if (call != null) {
+      _result.call = call;
+    }
+    if (callStats != null) {
+      _result.callStats = callStats;
+    }
+    return _result;
+  }
+  factory GetCallStatsResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory GetCallStatsResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  GetCallStatsResponse clone() => GetCallStatsResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  GetCallStatsResponse copyWith(void Function(GetCallStatsResponse) updates) => super.copyWith((message) => updates(message as GetCallStatsResponse)) as GetCallStatsResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static GetCallStatsResponse create() => GetCallStatsResponse._();
+  GetCallStatsResponse createEmptyInstance() => create();
+  static $pb.PbList<GetCallStatsResponse> createRepeated() => $pb.PbList<GetCallStatsResponse>();
+  @$core.pragma('dart2js:noInline')
+  static GetCallStatsResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetCallStatsResponse>(create);
+  static GetCallStatsResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $3.Call get call => $_getN(0);
+  @$pb.TagNumber(1)
+  set call($3.Call v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCall() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCall() => clearField(1);
+  @$pb.TagNumber(1)
+  $3.Call ensureCall() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  CallStats get callStats => $_getN(1);
+  @$pb.TagNumber(2)
+  set callStats(CallStats v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallStats() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallStats() => clearField(2);
+  @$pb.TagNumber(2)
+  CallStats ensureCallStats() => $_ensure(1);
+}
+
+class StoreCallStatsResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StoreCallStatsResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  StoreCallStatsResponse._() : super();
+  factory StoreCallStatsResponse() => create();
+  factory StoreCallStatsResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StoreCallStatsResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  StoreCallStatsResponse clone() => StoreCallStatsResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  StoreCallStatsResponse copyWith(void Function(StoreCallStatsResponse) updates) => super.copyWith((message) => updates(message as StoreCallStatsResponse)) as StoreCallStatsResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static StoreCallStatsResponse create() => StoreCallStatsResponse._();
+  StoreCallStatsResponse createEmptyInstance() => create();
+  static $pb.PbList<StoreCallStatsResponse> createRepeated() => $pb.PbList<StoreCallStatsResponse>();
+  @$core.pragma('dart2js:noInline')
+  static StoreCallStatsResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StoreCallStatsResponse>(create);
+  static StoreCallStatsResponse? _defaultInstance;
+}
+
 class StartRecordingResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StartRecordingResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
     ..hasRequiredFields = false
@@ -2845,6 +3576,22 @@ class CallCoordinatorServiceApi {
   $async.Future<ExportUserResponse> exportUser($pb.ClientContext? ctx, ExportUserRequest request) {
     var emptyResponse = ExportUserResponse();
     return _client.invoke<ExportUserResponse>(ctx, 'CallCoordinatorService', 'ExportUser', request, emptyResponse);
+  }
+  $async.Future<StoreCallStatsResponse> storeCallStats($pb.ClientContext? ctx, StoreCallStatsRequest request) {
+    var emptyResponse = StoreCallStatsResponse();
+    return _client.invoke<StoreCallStatsResponse>(ctx, 'CallCoordinatorService', 'StoreCallStats', request, emptyResponse);
+  }
+  $async.Future<GetCallStatsResponse> getCallStats($pb.ClientContext? ctx, GetCallStatsRequest request) {
+    var emptyResponse = GetCallStatsResponse();
+    return _client.invoke<GetCallStatsResponse>(ctx, 'CallCoordinatorService', 'GetCallStats', request, emptyResponse);
+  }
+  $async.Future<ReviewCallResponse> reviewCall($pb.ClientContext? ctx, ReviewCallRequest request) {
+    var emptyResponse = ReviewCallResponse();
+    return _client.invoke<ReviewCallResponse>(ctx, 'CallCoordinatorService', 'ReviewCall', request, emptyResponse);
+  }
+  $async.Future<ReportIssueResponse> reportIssue($pb.ClientContext? ctx, ReportIssueRequest request) {
+    var emptyResponse = ReportIssueResponse();
+    return _client.invoke<ReportIssueResponse>(ctx, 'CallCoordinatorService', 'ReportIssue', request, emptyResponse);
   }
 }
 

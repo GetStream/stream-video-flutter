@@ -7,6 +7,8 @@ import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/state/state.dart';
 import 'package:web_socket_channel/io.dart';
 
+import '../../protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
+
 class WebSocketClient {
   WebSocketClient({Logger? logger, required ClientState state})
       : _logger = logger,
@@ -153,11 +155,11 @@ class WebSocketClient {
 
   AuthPayload getAuthPayload(UserInfo user, Token token) {
     final authPayload = AuthPayload(
-        user: UserRequest(
+        user: CreateUserRequest(
           id: user.id,
           custom: user.custom,
           name: user.name,
-          profileImageUrl: user.imageURL,
+          // profileImageUrl: user.imageURL,
         ),
         token: token.toString(),
         device: DeviceRequest(disabled: true));

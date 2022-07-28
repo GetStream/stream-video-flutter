@@ -104,14 +104,14 @@ const User$json = const {
     const {'1': 'role', '3': 3, '4': 1, '5': 9, '10': 'role'},
     const {'1': 'custom', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
     const {'1': 'name', '3': 5, '4': 1, '5': 9, '10': 'name'},
-    const {'1': 'profile_image_url', '3': 6, '4': 1, '5': 9, '10': 'profileImageUrl'},
+    const {'1': 'image_url', '3': 6, '4': 1, '5': 9, '10': 'imageUrl'},
     const {'1': 'created_at', '3': 7, '4': 1, '5': 9, '10': 'createdAt'},
     const {'1': 'updated_at', '3': 8, '4': 1, '5': 9, '10': 'updatedAt'},
   ],
 };
 
 /// Descriptor for `User`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List userDescriptor = $convert.base64Decode('CgRVc2VyEhcKAmlkGAEgASgJQgf6QgRyAhABUgJpZBIUCgV0ZWFtcxgCIAMoCVIFdGVhbXMSEgoEcm9sZRgDIAEoCVIEcm9sZRIvCgZjdXN0b20YBCABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0UgZjdXN0b20SEgoEbmFtZRgFIAEoCVIEbmFtZRIqChFwcm9maWxlX2ltYWdlX3VybBgGIAEoCVIPcHJvZmlsZUltYWdlVXJsEh0KCmNyZWF0ZWRfYXQYByABKAlSCWNyZWF0ZWRBdBIdCgp1cGRhdGVkX2F0GAggASgJUgl1cGRhdGVkQXQ=');
+final $typed_data.Uint8List userDescriptor = $convert.base64Decode('CgRVc2VyEhcKAmlkGAEgASgJQgf6QgRyAhABUgJpZBIUCgV0ZWFtcxgCIAMoCVIFdGVhbXMSEgoEcm9sZRgDIAEoCVIEcm9sZRIvCgZjdXN0b20YBCABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0UgZjdXN0b20SEgoEbmFtZRgFIAEoCVIEbmFtZRIbCglpbWFnZV91cmwYBiABKAlSCGltYWdlVXJsEh0KCmNyZWF0ZWRfYXQYByABKAlSCWNyZWF0ZWRBdBIdCgp1cGRhdGVkX2F0GAggASgJUgl1cGRhdGVkQXQ=');
 @$core.Deprecated('Use userRequestDescriptor instead')
 const UserRequest$json = const {
   '1': 'UserRequest',
@@ -249,7 +249,7 @@ final $typed_data.Uint8List securityDescriptor = $convert.base64Decode('CghTZWN1
 const Participant$json = const {
   '1': 'Participant',
   '2': const [
-    const {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
+    const {'1': 'user', '3': 1, '4': 1, '5': 11, '6': '.stream.video.User', '10': 'user'},
     const {'1': 'role', '3': 2, '4': 1, '5': 9, '10': 'role'},
     const {'1': 'online', '3': 3, '4': 1, '5': 8, '10': 'online'},
     const {'1': 'custom', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
@@ -261,7 +261,7 @@ const Participant$json = const {
 };
 
 /// Descriptor for `Participant`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List participantDescriptor = $convert.base64Decode('CgtQYXJ0aWNpcGFudBIXCgd1c2VyX2lkGAEgASgJUgZ1c2VySWQSEgoEcm9sZRgCIAEoCVIEcm9sZRIWCgZvbmxpbmUYAyABKAhSBm9ubGluZRIvCgZjdXN0b20YBCABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0UgZjdXN0b20SFAoFdmlkZW8YBSABKAhSBXZpZGVvEhQKBWF1ZGlvGAYgASgIUgVhdWRpbxImCgpjcmVhdGVkX2F0GAcgASgJQgf6QgRyAhABUgljcmVhdGVkQXQSJgoKdXBkYXRlZF9hdBgIIAEoCUIH+kIEcgIQAVIJdXBkYXRlZEF0');
+final $typed_data.Uint8List participantDescriptor = $convert.base64Decode('CgtQYXJ0aWNpcGFudBImCgR1c2VyGAEgASgLMhIuc3RyZWFtLnZpZGVvLlVzZXJSBHVzZXISEgoEcm9sZRgCIAEoCVIEcm9sZRIWCgZvbmxpbmUYAyABKAhSBm9ubGluZRIvCgZjdXN0b20YBCABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0UgZjdXN0b20SFAoFdmlkZW8YBSABKAhSBXZpZGVvEhQKBWF1ZGlvGAYgASgIUgVhdWRpbxImCgpjcmVhdGVkX2F0GAcgASgJQgf6QgRyAhABUgljcmVhdGVkQXQSJgoKdXBkYXRlZF9hdBgIIAEoCUIH+kIEcgIQAVIJdXBkYXRlZEF0');
 @$core.Deprecated('Use participantRequestDescriptor instead')
 const ParticipantRequest$json = const {
   '1': 'ParticipantRequest',

@@ -9,6 +9,7 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import '../video_coordinator_rpc/coordinator_service.pb.dart' as $5;
 import '../video_models/models.pb.dart' as $3;
 
 enum WebsocketEvent_EventPayload {
@@ -588,7 +589,7 @@ class Healthcheck extends $pb.GeneratedMessage {
 
 class AuthPayload extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AuthPayload', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOM<$3.UserRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'user', subBuilder: $3.UserRequest.create)
+    ..aOM<$5.CreateUserRequest>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'user', subBuilder: $5.CreateUserRequest.create)
     ..aOM<$3.DeviceRequest>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'device', subBuilder: $3.DeviceRequest.create)
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'token')
     ..hasRequiredFields = false
@@ -596,7 +597,7 @@ class AuthPayload extends $pb.GeneratedMessage {
 
   AuthPayload._() : super();
   factory AuthPayload({
-    $3.UserRequest? user,
+    $5.CreateUserRequest? user,
     $3.DeviceRequest? device,
     $core.String? token,
   }) {
@@ -634,15 +635,15 @@ class AuthPayload extends $pb.GeneratedMessage {
   static AuthPayload? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $3.UserRequest get user => $_getN(0);
+  $5.CreateUserRequest get user => $_getN(0);
   @$pb.TagNumber(1)
-  set user($3.UserRequest v) { setField(1, v); }
+  set user($5.CreateUserRequest v) { setField(1, v); }
   @$pb.TagNumber(1)
   $core.bool hasUser() => $_has(0);
   @$pb.TagNumber(1)
   void clearUser() => clearField(1);
   @$pb.TagNumber(1)
-  $3.UserRequest ensureUser() => $_ensure(0);
+  $5.CreateUserRequest ensureUser() => $_ensure(0);
 
   @$pb.TagNumber(2)
   $3.DeviceRequest get device => $_getN(1);

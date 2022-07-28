@@ -3,6 +3,7 @@ syntax = "proto3";
 package stream.video;
 
 import "video_models/models.proto";
+import "video_coordinator_rpc/coordinator_service.proto";
 
 option go_package = "github.com/GetStream/video/protobuf/video_events";
 
@@ -46,7 +47,7 @@ message Healthcheck {
 }
 
 message AuthPayload {
-  UserRequest user = 1;
+  CreateUserRequest user = 1;
   DeviceRequest device = 2;
   string token = 3;
 }
@@ -138,6 +139,7 @@ message ParticipantDeleted {
   string user_id = 2;
 }
 
+// ParticipantJoined is fired when a user joins a call
 message ParticipantJoined {
   Call call = 1;
   Participant participant = 2;

@@ -8,6 +8,7 @@ class StreamVideoProvider extends InheritedWidget {
     required Widget child,
   }) : super(key: key, child: child);
 
+//Todo make this private and expose controllers
   final StreamVideoClient client;
 
   static StreamVideoProvider of(BuildContext context) {

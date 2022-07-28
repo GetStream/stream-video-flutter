@@ -41,6 +41,10 @@ abstract class CallCoordinatorServiceBase extends $pb.GeneratedService {
   $async.Future<$5.CreateUserResponse> createUser($pb.ServerContext ctx, $5.CreateUserRequest request);
   $async.Future<$5.DeleteUserResponse> deleteUser($pb.ServerContext ctx, $5.DeleteUserRequest request);
   $async.Future<$5.ExportUserResponse> exportUser($pb.ServerContext ctx, $5.ExportUserRequest request);
+  $async.Future<$5.StoreCallStatsResponse> storeCallStats($pb.ServerContext ctx, $5.StoreCallStatsRequest request);
+  $async.Future<$5.GetCallStatsResponse> getCallStats($pb.ServerContext ctx, $5.GetCallStatsRequest request);
+  $async.Future<$5.ReviewCallResponse> reviewCall($pb.ServerContext ctx, $5.ReviewCallRequest request);
+  $async.Future<$5.ReportIssueResponse> reportIssue($pb.ServerContext ctx, $5.ReportIssueRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
@@ -69,6 +73,10 @@ abstract class CallCoordinatorServiceBase extends $pb.GeneratedService {
       case 'CreateUser': return $5.CreateUserRequest();
       case 'DeleteUser': return $5.DeleteUserRequest();
       case 'ExportUser': return $5.ExportUserRequest();
+      case 'StoreCallStats': return $5.StoreCallStatsRequest();
+      case 'GetCallStats': return $5.GetCallStatsRequest();
+      case 'ReviewCall': return $5.ReviewCallRequest();
+      case 'ReportIssue': return $5.ReportIssueRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
@@ -100,6 +108,10 @@ abstract class CallCoordinatorServiceBase extends $pb.GeneratedService {
       case 'CreateUser': return this.createUser(ctx, request as $5.CreateUserRequest);
       case 'DeleteUser': return this.deleteUser(ctx, request as $5.DeleteUserRequest);
       case 'ExportUser': return this.exportUser(ctx, request as $5.ExportUserRequest);
+      case 'StoreCallStats': return this.storeCallStats(ctx, request as $5.StoreCallStatsRequest);
+      case 'GetCallStats': return this.getCallStats(ctx, request as $5.GetCallStatsRequest);
+      case 'ReviewCall': return this.reviewCall(ctx, request as $5.ReviewCallRequest);
+      case 'ReportIssue': return this.reportIssue(ctx, request as $5.ReportIssueRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

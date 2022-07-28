@@ -12,6 +12,20 @@ import '../google/protobuf/struct.pbjson.dart' as $2;
 import '../google/protobuf/wrappers.pbjson.dart' as $4;
 import '../video_models/models.pbjson.dart' as $3;
 
+@$core.Deprecated('Use callStatEventTypeDescriptor instead')
+const CallStatEventType$json = const {
+  '1': 'CallStatEventType',
+  '2': const [
+    const {'1': 'AUDIO_FROZEN', '2': 0},
+    const {'1': 'AUDIO_DELAY', '2': 1},
+    const {'1': 'VIDEO_FROZEN', '2': 2},
+    const {'1': 'VIDEO_DELAY', '2': 3},
+    const {'1': 'VIDEO_NOT_OPTIMAL', '2': 4},
+  ],
+};
+
+/// Descriptor for `CallStatEventType`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List callStatEventTypeDescriptor = $convert.base64Decode('ChFDYWxsU3RhdEV2ZW50VHlwZRIQCgxBVURJT19GUk9aRU4QABIPCgtBVURJT19ERUxBWRABEhAKDFZJREVPX0ZST1pFThACEg8KC1ZJREVPX0RFTEFZEAMSFQoRVklERU9fTk9UX09QVElNQUwQBA==');
 @$core.Deprecated('Use userEventTypeDescriptor instead')
 const UserEventType$json = const {
   '1': 'UserEventType',
@@ -234,21 +248,27 @@ const CreateUserRequest$json = const {
   '1': 'CreateUserRequest',
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
+    const {'1': 'teams', '3': 2, '4': 3, '5': 9, '10': 'teams'},
+    const {'1': 'role', '3': 3, '4': 1, '5': 9, '10': 'role'},
+    const {'1': 'custom', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
+    const {'1': 'name', '3': 5, '4': 1, '5': 9, '10': 'name'},
+    const {'1': 'image_url', '3': 6, '4': 1, '5': 9, '10': 'imageUrl'},
   ],
 };
 
 /// Descriptor for `CreateUserRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List createUserRequestDescriptor = $convert.base64Decode('ChFDcmVhdGVVc2VyUmVxdWVzdBIOCgJpZBgBIAEoCVICaWQ=');
+final $typed_data.Uint8List createUserRequestDescriptor = $convert.base64Decode('ChFDcmVhdGVVc2VyUmVxdWVzdBIOCgJpZBgBIAEoCVICaWQSFAoFdGVhbXMYAiADKAlSBXRlYW1zEhIKBHJvbGUYAyABKAlSBHJvbGUSLwoGY3VzdG9tGAQgASgLMhcuZ29vZ2xlLnByb3RvYnVmLlN0cnVjdFIGY3VzdG9tEhIKBG5hbWUYBSABKAlSBG5hbWUSGwoJaW1hZ2VfdXJsGAYgASgJUghpbWFnZVVybA==');
 @$core.Deprecated('Use createOrUpdateUsersRequestDescriptor instead')
 const CreateOrUpdateUsersRequest$json = const {
   '1': 'CreateOrUpdateUsersRequest',
   '2': const [
     const {'1': 'users', '3': 1, '4': 3, '5': 11, '6': '.stream.video.CreateUserRequest', '10': 'users'},
+    const {'1': 'full_update', '3': 2, '4': 1, '5': 8, '10': 'fullUpdate'},
   ],
 };
 
 /// Descriptor for `CreateOrUpdateUsersRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List createOrUpdateUsersRequestDescriptor = $convert.base64Decode('ChpDcmVhdGVPclVwZGF0ZVVzZXJzUmVxdWVzdBI1CgV1c2VycxgBIAMoCzIfLnN0cmVhbS52aWRlby5DcmVhdGVVc2VyUmVxdWVzdFIFdXNlcnM=');
+final $typed_data.Uint8List createOrUpdateUsersRequestDescriptor = $convert.base64Decode('ChpDcmVhdGVPclVwZGF0ZVVzZXJzUmVxdWVzdBI1CgV1c2VycxgBIAMoCzIfLnN0cmVhbS52aWRlby5DcmVhdGVVc2VyUmVxdWVzdFIFdXNlcnMSHwoLZnVsbF91cGRhdGUYAiABKAhSCmZ1bGxVcGRhdGU=');
 @$core.Deprecated('Use createOrUpdateUsersResponseDescriptor instead')
 const CreateOrUpdateUsersResponse$json = const {
   '1': 'CreateOrUpdateUsersResponse',
@@ -481,6 +501,121 @@ const StartRecordingRequest$json = const {
 
 /// Descriptor for `StartRecordingRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List startRecordingRequestDescriptor = $convert.base64Decode('ChVTdGFydFJlY29yZGluZ1JlcXVlc3QSGwoJY2FsbF90eXBlGAEgASgJUghjYWxsVHlwZRIXCgdjYWxsX2lkGAIgASgJUgZjYWxsSWQ=');
+@$core.Deprecated('Use storeCallStatsRequestDescriptor instead')
+const StoreCallStatsRequest$json = const {
+  '1': 'StoreCallStatsRequest',
+  '2': const [
+    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
+    const {'1': 'stats', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'stats'},
+  ],
+};
+
+/// Descriptor for `StoreCallStatsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List storeCallStatsRequestDescriptor = $convert.base64Decode('ChVTdG9yZUNhbGxTdGF0c1JlcXVlc3QSGwoJY2FsbF90eXBlGAEgASgJUghjYWxsVHlwZRIXCgdjYWxsX2lkGAIgASgJUgZjYWxsSWQSLQoFc3RhdHMYAyABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0UgVzdGF0cw==');
+@$core.Deprecated('Use callStatEventDescriptor instead')
+const CallStatEvent$json = const {
+  '1': 'CallStatEvent',
+  '2': const [
+    const {'1': 'type', '3': 1, '4': 1, '5': 14, '6': '.stream.video.CallStatEventType', '10': 'type'},
+    const {'1': 'time', '3': 2, '4': 1, '5': 9, '8': const {}, '10': 'time'},
+  ],
+};
+
+/// Descriptor for `CallStatEvent`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List callStatEventDescriptor = $convert.base64Decode('Cg1DYWxsU3RhdEV2ZW50EjMKBHR5cGUYASABKA4yHy5zdHJlYW0udmlkZW8uQ2FsbFN0YXRFdmVudFR5cGVSBHR5cGUSGwoEdGltZRgCIAEoCUIH+kIEcgIQAVIEdGltZQ==');
+@$core.Deprecated('Use reportIssueRequestDescriptor instead')
+const ReportIssueRequest$json = const {
+  '1': 'ReportIssueRequest',
+  '2': const [
+    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
+    const {'1': 'description', '3': 3, '4': 1, '5': 9, '10': 'description'},
+    const {'1': 'custom', '3': 4, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
+  ],
+};
+
+/// Descriptor for `ReportIssueRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List reportIssueRequestDescriptor = $convert.base64Decode('ChJSZXBvcnRJc3N1ZVJlcXVlc3QSGwoJY2FsbF90eXBlGAEgASgJUghjYWxsVHlwZRIXCgdjYWxsX2lkGAIgASgJUgZjYWxsSWQSIAoLZGVzY3JpcHRpb24YAyABKAlSC2Rlc2NyaXB0aW9uEi8KBmN1c3RvbRgEIAEoCzIXLmdvb2dsZS5wcm90b2J1Zi5TdHJ1Y3RSBmN1c3RvbQ==');
+@$core.Deprecated('Use reviewCallRequestDescriptor instead')
+const ReviewCallRequest$json = const {
+  '1': 'ReviewCallRequest',
+  '2': const [
+    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
+    const {'1': 'stars', '3': 3, '4': 1, '5': 2, '10': 'stars'},
+    const {'1': 'description', '3': 4, '4': 1, '5': 9, '10': 'description'},
+    const {'1': 'custom', '3': 5, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
+  ],
+};
+
+/// Descriptor for `ReviewCallRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List reviewCallRequestDescriptor = $convert.base64Decode('ChFSZXZpZXdDYWxsUmVxdWVzdBIbCgljYWxsX3R5cGUYASABKAlSCGNhbGxUeXBlEhcKB2NhbGxfaWQYAiABKAlSBmNhbGxJZBIUCgVzdGFycxgDIAEoAlIFc3RhcnMSIAoLZGVzY3JpcHRpb24YBCABKAlSC2Rlc2NyaXB0aW9uEi8KBmN1c3RvbRgFIAEoCzIXLmdvb2dsZS5wcm90b2J1Zi5TdHJ1Y3RSBmN1c3RvbQ==');
+@$core.Deprecated('Use reviewCallResponseDescriptor instead')
+const ReviewCallResponse$json = const {
+  '1': 'ReviewCallResponse',
+};
+
+/// Descriptor for `ReviewCallResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List reviewCallResponseDescriptor = $convert.base64Decode('ChJSZXZpZXdDYWxsUmVzcG9uc2U=');
+@$core.Deprecated('Use reportIssueResponseDescriptor instead')
+const ReportIssueResponse$json = const {
+  '1': 'ReportIssueResponse',
+};
+
+/// Descriptor for `ReportIssueResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List reportIssueResponseDescriptor = $convert.base64Decode('ChNSZXBvcnRJc3N1ZVJlc3BvbnNl');
+@$core.Deprecated('Use participantCallStatEventDescriptor instead')
+const ParticipantCallStatEvent$json = const {
+  '1': 'ParticipantCallStatEvent',
+  '2': const [
+    const {'1': 'participant_id', '3': 1, '4': 1, '5': 9, '10': 'participantId'},
+    const {'1': 'call_timeline', '3': 2, '4': 3, '5': 11, '6': '.stream.video.CallStatEvent', '10': 'callTimeline'},
+  ],
+};
+
+/// Descriptor for `ParticipantCallStatEvent`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List participantCallStatEventDescriptor = $convert.base64Decode('ChhQYXJ0aWNpcGFudENhbGxTdGF0RXZlbnQSJQoOcGFydGljaXBhbnRfaWQYASABKAlSDXBhcnRpY2lwYW50SWQSQAoNY2FsbF90aW1lbGluZRgCIAMoCzIbLnN0cmVhbS52aWRlby5DYWxsU3RhdEV2ZW50UgxjYWxsVGltZWxpbmU=');
+@$core.Deprecated('Use getCallStatsRequestDescriptor instead')
+const GetCallStatsRequest$json = const {
+  '1': 'GetCallStatsRequest',
+  '2': const [
+    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
+  ],
+};
+
+/// Descriptor for `GetCallStatsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getCallStatsRequestDescriptor = $convert.base64Decode('ChNHZXRDYWxsU3RhdHNSZXF1ZXN0EhsKCWNhbGxfdHlwZRgBIAEoCVIIY2FsbFR5cGUSFwoHY2FsbF9pZBgCIAEoCVIGY2FsbElk');
+@$core.Deprecated('Use callStatsDescriptor instead')
+const CallStats$json = const {
+  '1': 'CallStats',
+  '2': const [
+    const {'1': 'call_timeline', '3': 1, '4': 3, '5': 11, '6': '.stream.video.CallStatEvent', '10': 'callTimeline'},
+    const {'1': 'participant_timelines', '3': 2, '4': 3, '5': 11, '6': '.stream.video.ParticipantCallStatEvent', '10': 'participantTimelines'},
+  ],
+};
+
+/// Descriptor for `CallStats`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List callStatsDescriptor = $convert.base64Decode('CglDYWxsU3RhdHMSQAoNY2FsbF90aW1lbGluZRgBIAMoCzIbLnN0cmVhbS52aWRlby5DYWxsU3RhdEV2ZW50UgxjYWxsVGltZWxpbmUSWwoVcGFydGljaXBhbnRfdGltZWxpbmVzGAIgAygLMiYuc3RyZWFtLnZpZGVvLlBhcnRpY2lwYW50Q2FsbFN0YXRFdmVudFIUcGFydGljaXBhbnRUaW1lbGluZXM=');
+@$core.Deprecated('Use getCallStatsResponseDescriptor instead')
+const GetCallStatsResponse$json = const {
+  '1': 'GetCallStatsResponse',
+  '2': const [
+    const {'1': 'call', '3': 1, '4': 1, '5': 11, '6': '.stream.video.Call', '10': 'call'},
+    const {'1': 'call_stats', '3': 2, '4': 1, '5': 11, '6': '.stream.video.CallStats', '10': 'callStats'},
+  ],
+};
+
+/// Descriptor for `GetCallStatsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getCallStatsResponseDescriptor = $convert.base64Decode('ChRHZXRDYWxsU3RhdHNSZXNwb25zZRImCgRjYWxsGAEgASgLMhIuc3RyZWFtLnZpZGVvLkNhbGxSBGNhbGwSNgoKY2FsbF9zdGF0cxgCIAEoCzIXLnN0cmVhbS52aWRlby5DYWxsU3RhdHNSCWNhbGxTdGF0cw==');
+@$core.Deprecated('Use storeCallStatsResponseDescriptor instead')
+const StoreCallStatsResponse$json = const {
+  '1': 'StoreCallStatsResponse',
+};
+
+/// Descriptor for `StoreCallStatsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List storeCallStatsResponseDescriptor = $convert.base64Decode('ChZTdG9yZUNhbGxTdGF0c1Jlc3BvbnNl');
 @$core.Deprecated('Use startRecordingResponseDescriptor instead')
 const StartRecordingResponse$json = const {
   '1': 'StartRecordingResponse',
@@ -587,6 +722,10 @@ const $core.Map<$core.String, $core.dynamic> CallCoordinatorServiceBase$json = c
     const {'1': 'CreateUser', '2': '.stream.video.CreateUserRequest', '3': '.stream.video.CreateUserResponse'},
     const {'1': 'DeleteUser', '2': '.stream.video.DeleteUserRequest', '3': '.stream.video.DeleteUserResponse'},
     const {'1': 'ExportUser', '2': '.stream.video.ExportUserRequest', '3': '.stream.video.ExportUserResponse'},
+    const {'1': 'StoreCallStats', '2': '.stream.video.StoreCallStatsRequest', '3': '.stream.video.StoreCallStatsResponse'},
+    const {'1': 'GetCallStats', '2': '.stream.video.GetCallStatsRequest', '3': '.stream.video.GetCallStatsResponse'},
+    const {'1': 'ReviewCall', '2': '.stream.video.ReviewCallRequest', '3': '.stream.video.ReviewCallResponse'},
+    const {'1': 'ReportIssue', '2': '.stream.video.ReportIssueRequest', '3': '.stream.video.ReportIssueResponse'},
   ],
 };
 
@@ -607,13 +746,13 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> CallCoordi
   '.stream.video.GetCallResponse': GetCallResponse$json,
   '.stream.video.CallState': $3.CallState$json,
   '.stream.video.Participant': $3.Participant$json,
+  '.stream.video.User': $3.User$json,
   '.stream.video.UpdateCallRequest': UpdateCallRequest$json,
   '.stream.video.UpdateCallResponse': UpdateCallResponse$json,
   '.stream.video.DeleteCallRequest': DeleteCallRequest$json,
   '.stream.video.DeleteCallResponse': DeleteCallResponse$json,
   '.stream.video.JoinCallRequest': JoinCallRequest$json,
   '.stream.video.JoinCallResponse': JoinCallResponse$json,
-  '.stream.video.User': $3.User$json,
   '.stream.video.Edge': $3.Edge$json,
   '.stream.video.UserCapability': UserCapability$json,
   '.stream.video.SelectEdgeServerRequest': SelectEdgeServerRequest$json,
@@ -661,7 +800,18 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> CallCoordi
   '.stream.video.DeleteUserResponse': DeleteUserResponse$json,
   '.stream.video.ExportUserRequest': ExportUserRequest$json,
   '.stream.video.ExportUserResponse': ExportUserResponse$json,
+  '.stream.video.StoreCallStatsRequest': StoreCallStatsRequest$json,
+  '.stream.video.StoreCallStatsResponse': StoreCallStatsResponse$json,
+  '.stream.video.GetCallStatsRequest': GetCallStatsRequest$json,
+  '.stream.video.GetCallStatsResponse': GetCallStatsResponse$json,
+  '.stream.video.CallStats': CallStats$json,
+  '.stream.video.CallStatEvent': CallStatEvent$json,
+  '.stream.video.ParticipantCallStatEvent': ParticipantCallStatEvent$json,
+  '.stream.video.ReviewCallRequest': ReviewCallRequest$json,
+  '.stream.video.ReviewCallResponse': ReviewCallResponse$json,
+  '.stream.video.ReportIssueRequest': ReportIssueRequest$json,
+  '.stream.video.ReportIssueResponse': ReportIssueResponse$json,
 };
 
 /// Descriptor for `CallCoordinatorService`. Decode as a `google.protobuf.ServiceDescriptorProto`.
-final $typed_data.Uint8List callCoordinatorServiceDescriptor = $convert.base64Decode('ChZDYWxsQ29vcmRpbmF0b3JTZXJ2aWNlEk8KCkNyZWF0ZUNhbGwSHy5zdHJlYW0udmlkZW8uQ3JlYXRlQ2FsbFJlcXVlc3QaIC5zdHJlYW0udmlkZW8uQ3JlYXRlQ2FsbFJlc3BvbnNlEkYKB0dldENhbGwSHC5zdHJlYW0udmlkZW8uR2V0Q2FsbFJlcXVlc3QaHS5zdHJlYW0udmlkZW8uR2V0Q2FsbFJlc3BvbnNlEk8KClVwZGF0ZUNhbGwSHy5zdHJlYW0udmlkZW8uVXBkYXRlQ2FsbFJlcXVlc3QaIC5zdHJlYW0udmlkZW8uVXBkYXRlQ2FsbFJlc3BvbnNlEk8KCkRlbGV0ZUNhbGwSHy5zdHJlYW0udmlkZW8uRGVsZXRlQ2FsbFJlcXVlc3QaIC5zdHJlYW0udmlkZW8uRGVsZXRlQ2FsbFJlc3BvbnNlEkkKCEpvaW5DYWxsEh0uc3RyZWFtLnZpZGVvLkpvaW5DYWxsUmVxdWVzdBoeLnN0cmVhbS52aWRlby5Kb2luQ2FsbFJlc3BvbnNlEmEKEFNlbGVjdEVkZ2VTZXJ2ZXISJS5zdHJlYW0udmlkZW8uU2VsZWN0RWRnZVNlcnZlclJlcXVlc3QaJi5zdHJlYW0udmlkZW8uU2VsZWN0RWRnZVNlcnZlclJlc3BvbnNlEkwKCUxlYXZlQ2FsbBIeLnN0cmVhbS52aWRlby5MZWF2ZUNhbGxSZXF1ZXN0Gh8uc3RyZWFtLnZpZGVvLkxlYXZlQ2FsbFJlc3BvbnNlEkYKB0VuZENhbGwSHC5zdHJlYW0udmlkZW8uRW5kQ2FsbFJlcXVlc3QaHS5zdHJlYW0udmlkZW8uRW5kQ2FsbFJlc3BvbnNlEkwKCUFkZERldmljZRIeLnN0cmVhbS52aWRlby5BZGREZXZpY2VSZXF1ZXN0Gh8uc3RyZWFtLnZpZGVvLkFkZERldmljZVJlc3BvbnNlElUKDFJlbW92ZURldmljZRIhLnN0cmVhbS52aWRlby5SZW1vdmVEZXZpY2VSZXF1ZXN0GiIuc3RyZWFtLnZpZGVvLlJlbW92ZURldmljZVJlc3BvbnNlElIKC0xpc3REZXZpY2VzEiAuc3RyZWFtLnZpZGVvLkxpc3REZXZpY2VzUmVxdWVzdBohLnN0cmVhbS52aWRlby5MaXN0RGV2aWNlc1Jlc3BvbnNlEkwKCVNlbmRFdmVudBIeLnN0cmVhbS52aWRlby5TZW5kRXZlbnRSZXF1ZXN0Gh8uc3RyZWFtLnZpZGVvLlNlbmRFdmVudFJlc3BvbnNlEl4KD1NlbmRDdXN0b21FdmVudBIkLnN0cmVhbS52aWRlby5TZW5kQ3VzdG9tRXZlbnRSZXF1ZXN0GiUuc3RyZWFtLnZpZGVvLlNlbmRDdXN0b21FdmVudFJlc3BvbnNlEmoKE0NyZWF0ZU9yVXBkYXRlQ2FsbHMSKC5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVDYWxsc1JlcXVlc3QaKS5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVDYWxsc1Jlc3BvbnNlEmoKE0NyZWF0ZU9yVXBkYXRlVXNlcnMSKC5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVVc2Vyc1JlcXVlc3QaKS5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVVc2Vyc1Jlc3BvbnNlElsKDlRyYW5zY3JpYmVDYWxsEiMuc3RyZWFtLnZpZGVvLlRyYW5zY3JpYmVDYWxsUmVxdWVzdBokLnN0cmVhbS52aWRlby5UcmFuc2NyaWJlQ2FsbFJlc3BvbnNlEmcKElN0b3BUcmFuc2NyaWJlQ2FsbBInLnN0cmVhbS52aWRlby5TdG9wVHJhbnNjcmliZUNhbGxSZXF1ZXN0Giguc3RyZWFtLnZpZGVvLlN0b3BUcmFuc2NyaWJlQ2FsbFJlc3BvbnNlElsKDlN0YXJ0QnJvYWRjYXN0EiMuc3RyZWFtLnZpZGVvLlN0YXJ0QnJvYWRjYXN0UmVxdWVzdBokLnN0cmVhbS52aWRlby5TdGFydEJyb2FkY2FzdFJlc3BvbnNlElgKDVN0b3BCcm9hZGNhc3QSIi5zdHJlYW0udmlkZW8uU3RvcEJyb2FkY2FzdFJlcXVlc3QaIy5zdHJlYW0udmlkZW8uU3RvcEJyb2FkY2FzdFJlc3BvbnNlElsKDlN0YXJ0UmVjb3JkaW5nEiMuc3RyZWFtLnZpZGVvLlN0YXJ0UmVjb3JkaW5nUmVxdWVzdBokLnN0cmVhbS52aWRlby5TdGFydFJlY29yZGluZ1Jlc3BvbnNlElgKDVN0b3BSZWNvcmRpbmcSIi5zdHJlYW0udmlkZW8uU3RvcFJlY29yZGluZ1JlcXVlc3QaIy5zdHJlYW0udmlkZW8uU3RvcFJlY29yZGluZ1Jlc3BvbnNlElgKDUdldFJlY29yZGluZ3MSIi5zdHJlYW0udmlkZW8uR2V0UmVjb3JkaW5nc1JlcXVlc3QaIy5zdHJlYW0udmlkZW8uR2V0UmVjb3JkaW5nc1Jlc3BvbnNlEk8KCkNyZWF0ZVVzZXISHy5zdHJlYW0udmlkZW8uQ3JlYXRlVXNlclJlcXVlc3QaIC5zdHJlYW0udmlkZW8uQ3JlYXRlVXNlclJlc3BvbnNlEk8KCkRlbGV0ZVVzZXISHy5zdHJlYW0udmlkZW8uRGVsZXRlVXNlclJlcXVlc3QaIC5zdHJlYW0udmlkZW8uRGVsZXRlVXNlclJlc3BvbnNlEk8KCkV4cG9ydFVzZXISHy5zdHJlYW0udmlkZW8uRXhwb3J0VXNlclJlcXVlc3QaIC5zdHJlYW0udmlkZW8uRXhwb3J0VXNlclJlc3BvbnNl');
+final $typed_data.Uint8List callCoordinatorServiceDescriptor = $convert.base64Decode('ChZDYWxsQ29vcmRpbmF0b3JTZXJ2aWNlEk8KCkNyZWF0ZUNhbGwSHy5zdHJlYW0udmlkZW8uQ3JlYXRlQ2FsbFJlcXVlc3QaIC5zdHJlYW0udmlkZW8uQ3JlYXRlQ2FsbFJlc3BvbnNlEkYKB0dldENhbGwSHC5zdHJlYW0udmlkZW8uR2V0Q2FsbFJlcXVlc3QaHS5zdHJlYW0udmlkZW8uR2V0Q2FsbFJlc3BvbnNlEk8KClVwZGF0ZUNhbGwSHy5zdHJlYW0udmlkZW8uVXBkYXRlQ2FsbFJlcXVlc3QaIC5zdHJlYW0udmlkZW8uVXBkYXRlQ2FsbFJlc3BvbnNlEk8KCkRlbGV0ZUNhbGwSHy5zdHJlYW0udmlkZW8uRGVsZXRlQ2FsbFJlcXVlc3QaIC5zdHJlYW0udmlkZW8uRGVsZXRlQ2FsbFJlc3BvbnNlEkkKCEpvaW5DYWxsEh0uc3RyZWFtLnZpZGVvLkpvaW5DYWxsUmVxdWVzdBoeLnN0cmVhbS52aWRlby5Kb2luQ2FsbFJlc3BvbnNlEmEKEFNlbGVjdEVkZ2VTZXJ2ZXISJS5zdHJlYW0udmlkZW8uU2VsZWN0RWRnZVNlcnZlclJlcXVlc3QaJi5zdHJlYW0udmlkZW8uU2VsZWN0RWRnZVNlcnZlclJlc3BvbnNlEkwKCUxlYXZlQ2FsbBIeLnN0cmVhbS52aWRlby5MZWF2ZUNhbGxSZXF1ZXN0Gh8uc3RyZWFtLnZpZGVvLkxlYXZlQ2FsbFJlc3BvbnNlEkYKB0VuZENhbGwSHC5zdHJlYW0udmlkZW8uRW5kQ2FsbFJlcXVlc3QaHS5zdHJlYW0udmlkZW8uRW5kQ2FsbFJlc3BvbnNlEkwKCUFkZERldmljZRIeLnN0cmVhbS52aWRlby5BZGREZXZpY2VSZXF1ZXN0Gh8uc3RyZWFtLnZpZGVvLkFkZERldmljZVJlc3BvbnNlElUKDFJlbW92ZURldmljZRIhLnN0cmVhbS52aWRlby5SZW1vdmVEZXZpY2VSZXF1ZXN0GiIuc3RyZWFtLnZpZGVvLlJlbW92ZURldmljZVJlc3BvbnNlElIKC0xpc3REZXZpY2VzEiAuc3RyZWFtLnZpZGVvLkxpc3REZXZpY2VzUmVxdWVzdBohLnN0cmVhbS52aWRlby5MaXN0RGV2aWNlc1Jlc3BvbnNlEkwKCVNlbmRFdmVudBIeLnN0cmVhbS52aWRlby5TZW5kRXZlbnRSZXF1ZXN0Gh8uc3RyZWFtLnZpZGVvLlNlbmRFdmVudFJlc3BvbnNlEl4KD1NlbmRDdXN0b21FdmVudBIkLnN0cmVhbS52aWRlby5TZW5kQ3VzdG9tRXZlbnRSZXF1ZXN0GiUuc3RyZWFtLnZpZGVvLlNlbmRDdXN0b21FdmVudFJlc3BvbnNlEmoKE0NyZWF0ZU9yVXBkYXRlQ2FsbHMSKC5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVDYWxsc1JlcXVlc3QaKS5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVDYWxsc1Jlc3BvbnNlEmoKE0NyZWF0ZU9yVXBkYXRlVXNlcnMSKC5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVVc2Vyc1JlcXVlc3QaKS5zdHJlYW0udmlkZW8uQ3JlYXRlT3JVcGRhdGVVc2Vyc1Jlc3BvbnNlElsKDlRyYW5zY3JpYmVDYWxsEiMuc3RyZWFtLnZpZGVvLlRyYW5zY3JpYmVDYWxsUmVxdWVzdBokLnN0cmVhbS52aWRlby5UcmFuc2NyaWJlQ2FsbFJlc3BvbnNlEmcKElN0b3BUcmFuc2NyaWJlQ2FsbBInLnN0cmVhbS52aWRlby5TdG9wVHJhbnNjcmliZUNhbGxSZXF1ZXN0Giguc3RyZWFtLnZpZGVvLlN0b3BUcmFuc2NyaWJlQ2FsbFJlc3BvbnNlElsKDlN0YXJ0QnJvYWRjYXN0EiMuc3RyZWFtLnZpZGVvLlN0YXJ0QnJvYWRjYXN0UmVxdWVzdBokLnN0cmVhbS52aWRlby5TdGFydEJyb2FkY2FzdFJlc3BvbnNlElgKDVN0b3BCcm9hZGNhc3QSIi5zdHJlYW0udmlkZW8uU3RvcEJyb2FkY2FzdFJlcXVlc3QaIy5zdHJlYW0udmlkZW8uU3RvcEJyb2FkY2FzdFJlc3BvbnNlElsKDlN0YXJ0UmVjb3JkaW5nEiMuc3RyZWFtLnZpZGVvLlN0YXJ0UmVjb3JkaW5nUmVxdWVzdBokLnN0cmVhbS52aWRlby5TdGFydFJlY29yZGluZ1Jlc3BvbnNlElgKDVN0b3BSZWNvcmRpbmcSIi5zdHJlYW0udmlkZW8uU3RvcFJlY29yZGluZ1JlcXVlc3QaIy5zdHJlYW0udmlkZW8uU3RvcFJlY29yZGluZ1Jlc3BvbnNlElgKDUdldFJlY29yZGluZ3MSIi5zdHJlYW0udmlkZW8uR2V0UmVjb3JkaW5nc1JlcXVlc3QaIy5zdHJlYW0udmlkZW8uR2V0UmVjb3JkaW5nc1Jlc3BvbnNlEk8KCkNyZWF0ZVVzZXISHy5zdHJlYW0udmlkZW8uQ3JlYXRlVXNlclJlcXVlc3QaIC5zdHJlYW0udmlkZW8uQ3JlYXRlVXNlclJlc3BvbnNlEk8KCkRlbGV0ZVVzZXISHy5zdHJlYW0udmlkZW8uRGVsZXRlVXNlclJlcXVlc3QaIC5zdHJlYW0udmlkZW8uRGVsZXRlVXNlclJlc3BvbnNlEk8KCkV4cG9ydFVzZXISHy5zdHJlYW0udmlkZW8uRXhwb3J0VXNlclJlcXVlc3QaIC5zdHJlYW0udmlkZW8uRXhwb3J0VXNlclJlc3BvbnNlElsKDlN0b3JlQ2FsbFN0YXRzEiMuc3RyZWFtLnZpZGVvLlN0b3JlQ2FsbFN0YXRzUmVxdWVzdBokLnN0cmVhbS52aWRlby5TdG9yZUNhbGxTdGF0c1Jlc3BvbnNlElUKDEdldENhbGxTdGF0cxIhLnN0cmVhbS52aWRlby5HZXRDYWxsU3RhdHNSZXF1ZXN0GiIuc3RyZWFtLnZpZGVvLkdldENhbGxTdGF0c1Jlc3BvbnNlEk8KClJldmlld0NhbGwSHy5zdHJlYW0udmlkZW8uUmV2aWV3Q2FsbFJlcXVlc3QaIC5zdHJlYW0udmlkZW8uUmV2aWV3Q2FsbFJlc3BvbnNlElIKC1JlcG9ydElzc3VlEiAuc3RyZWFtLnZpZGVvLlJlcG9ydElzc3VlUmVxdWVzdBohLnN0cmVhbS52aWRlby5SZXBvcnRJc3N1ZVJlc3BvbnNl');

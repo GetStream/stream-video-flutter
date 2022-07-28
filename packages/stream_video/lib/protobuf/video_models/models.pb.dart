@@ -376,7 +376,7 @@ class User extends $pb.GeneratedMessage {
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'role')
     ..aOM<$2.Struct>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $2.Struct.create)
     ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'profileImageUrl')
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'imageUrl')
     ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt')
     ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt')
     ..hasRequiredFields = false
@@ -389,7 +389,7 @@ class User extends $pb.GeneratedMessage {
     $core.String? role,
     $2.Struct? custom,
     $core.String? name,
-    $core.String? profileImageUrl,
+    $core.String? imageUrl,
     $core.String? createdAt,
     $core.String? updatedAt,
   }) {
@@ -409,8 +409,8 @@ class User extends $pb.GeneratedMessage {
     if (name != null) {
       _result.name = name;
     }
-    if (profileImageUrl != null) {
-      _result.profileImageUrl = profileImageUrl;
+    if (imageUrl != null) {
+      _result.imageUrl = imageUrl;
     }
     if (createdAt != null) {
       _result.createdAt = createdAt;
@@ -483,13 +483,13 @@ class User extends $pb.GeneratedMessage {
   void clearName() => clearField(5);
 
   @$pb.TagNumber(6)
-  $core.String get profileImageUrl => $_getSZ(5);
+  $core.String get imageUrl => $_getSZ(5);
   @$pb.TagNumber(6)
-  set profileImageUrl($core.String v) { $_setString(5, v); }
+  set imageUrl($core.String v) { $_setString(5, v); }
   @$pb.TagNumber(6)
-  $core.bool hasProfileImageUrl() => $_has(5);
+  $core.bool hasImageUrl() => $_has(5);
   @$pb.TagNumber(6)
-  void clearProfileImageUrl() => clearField(6);
+  void clearImageUrl() => clearField(6);
 
   @$pb.TagNumber(7)
   $core.String get createdAt => $_getSZ(6);
@@ -1403,7 +1403,7 @@ class Security extends $pb.GeneratedMessage {
 
 class Participant extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Participant', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
+    ..aOM<User>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'user', subBuilder: User.create)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'role')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'online')
     ..aOM<$2.Struct>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $2.Struct.create)
@@ -1416,7 +1416,7 @@ class Participant extends $pb.GeneratedMessage {
 
   Participant._() : super();
   factory Participant({
-    $core.String? userId,
+    User? user,
     $core.String? role,
     $core.bool? online,
     $2.Struct? custom,
@@ -1426,8 +1426,8 @@ class Participant extends $pb.GeneratedMessage {
     $core.String? updatedAt,
   }) {
     final _result = create();
-    if (userId != null) {
-      _result.userId = userId;
+    if (user != null) {
+      _result.user = user;
     }
     if (role != null) {
       _result.role = role;
@@ -1474,13 +1474,15 @@ class Participant extends $pb.GeneratedMessage {
   static Participant? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get userId => $_getSZ(0);
+  User get user => $_getN(0);
   @$pb.TagNumber(1)
-  set userId($core.String v) { $_setString(0, v); }
+  set user(User v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasUserId() => $_has(0);
+  $core.bool hasUser() => $_has(0);
   @$pb.TagNumber(1)
-  void clearUserId() => clearField(1);
+  void clearUser() => clearField(1);
+  @$pb.TagNumber(1)
+  User ensureUser() => $_ensure(0);
 
   @$pb.TagNumber(2)
   $core.String get role => $_getSZ(1);

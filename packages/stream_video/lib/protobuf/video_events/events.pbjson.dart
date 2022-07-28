@@ -62,14 +62,14 @@ final $typed_data.Uint8List healthcheckDescriptor = $convert.base64Decode('CgtIZ
 const AuthPayload$json = const {
   '1': 'AuthPayload',
   '2': const [
-    const {'1': 'user', '3': 1, '4': 1, '5': 11, '6': '.stream.video.UserRequest', '10': 'user'},
+    const {'1': 'user', '3': 1, '4': 1, '5': 11, '6': '.stream.video.CreateUserRequest', '10': 'user'},
     const {'1': 'device', '3': 2, '4': 1, '5': 11, '6': '.stream.video.DeviceRequest', '10': 'device'},
     const {'1': 'token', '3': 3, '4': 1, '5': 9, '10': 'token'},
   ],
 };
 
 /// Descriptor for `AuthPayload`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List authPayloadDescriptor = $convert.base64Decode('CgtBdXRoUGF5bG9hZBItCgR1c2VyGAEgASgLMhkuc3RyZWFtLnZpZGVvLlVzZXJSZXF1ZXN0UgR1c2VyEjMKBmRldmljZRgCIAEoCzIbLnN0cmVhbS52aWRlby5EZXZpY2VSZXF1ZXN0UgZkZXZpY2USFAoFdG9rZW4YAyABKAlSBXRva2Vu');
+final $typed_data.Uint8List authPayloadDescriptor = $convert.base64Decode('CgtBdXRoUGF5bG9hZBIzCgR1c2VyGAEgASgLMh8uc3RyZWFtLnZpZGVvLkNyZWF0ZVVzZXJSZXF1ZXN0UgR1c2VyEjMKBmRldmljZRgCIAEoCzIbLnN0cmVhbS52aWRlby5EZXZpY2VSZXF1ZXN0UgZkZXZpY2USFAoFdG9rZW4YAyABKAlSBXRva2Vu');
 @$core.Deprecated('Use callRingingDescriptor instead')
 const CallRinging$json = const {
   '1': 'CallRinging',

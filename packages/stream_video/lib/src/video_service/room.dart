@@ -14,10 +14,10 @@ class VideoRoom {
 
   Future<void> disconnect() => _room.disconnect();
 
-  void add(Participant participant) => _participants[participant.userId];
+  void add(Participant participant) => _participants[participant.user.id];
 
   Participant? remove(Participant participant) =>
-      _participants.remove(participant.userId);
+      _participants.remove(participant.user.id);
 
   // List<Participant> get participants =>
   //     _participants.entries.map((entry) => entry.value).toList();

@@ -64,6 +64,14 @@ abstract class CallCoordinatorService {
   Future<DeleteUserResponse> deleteUser(twirp.Context ctx, DeleteUserRequest req);
   
   Future<ExportUserResponse> exportUser(twirp.Context ctx, ExportUserRequest req);
+  // endpoint for storing stats (perhaps we should move this to the SFU layer though)
+  Future<StoreCallStatsResponse> storeCallStats(twirp.Context ctx, StoreCallStatsRequest req);
+  
+  Future<GetCallStatsResponse> getCallStats(twirp.Context ctx, GetCallStatsRequest req);
+  // endpoint for reviewing/rating the quality of calls
+  Future<ReviewCallResponse> reviewCall(twirp.Context ctx, ReviewCallRequest req);
+  // endpoint for users to report issues with a call
+  Future<ReportIssueResponse> reportIssue(twirp.Context ctx, ReportIssueRequest req);
 }
 
 
@@ -631,6 +639,94 @@ class CallCoordinatorServiceJSONClient implements CallCoordinatorService {
       rethrow;
     }
   }
+
+  @override
+  Future<StoreCallStatsResponse> storeCallStats(twirp.Context ctx, StoreCallStatsRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'StoreCallStats');
+    return interceptor((ctx, req) {
+      return callStoreCallStats(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StoreCallStatsResponse> callStoreCallStats(twirp.Context ctx, StoreCallStatsRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/StoreCallStats');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final StoreCallStatsResponse res = StoreCallStatsResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<GetCallStatsResponse> getCallStats(twirp.Context ctx, GetCallStatsRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'GetCallStats');
+    return interceptor((ctx, req) {
+      return callGetCallStats(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<GetCallStatsResponse> callGetCallStats(twirp.Context ctx, GetCallStatsRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/GetCallStats');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final GetCallStatsResponse res = GetCallStatsResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ReviewCallResponse> reviewCall(twirp.Context ctx, ReviewCallRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'ReviewCall');
+    return interceptor((ctx, req) {
+      return callReviewCall(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<ReviewCallResponse> callReviewCall(twirp.Context ctx, ReviewCallRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/ReviewCall');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final ReviewCallResponse res = ReviewCallResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ReportIssueResponse> reportIssue(twirp.Context ctx, ReportIssueRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'ReportIssue');
+    return interceptor((ctx, req) {
+      return callReportIssue(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<ReportIssueResponse> callReportIssue(twirp.Context ctx, ReportIssueRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/ReportIssue');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final ReportIssueResponse res = ReportIssueResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
 
 
@@ -1192,6 +1288,94 @@ class CallCoordinatorServiceProtobufClient implements CallCoordinatorService {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/ExportUser');
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final ExportUserResponse res = ExportUserResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StoreCallStatsResponse> storeCallStats(twirp.Context ctx, StoreCallStatsRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'StoreCallStats');
+    return interceptor((ctx, req) {
+      return callStoreCallStats(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StoreCallStatsResponse> callStoreCallStats(twirp.Context ctx, StoreCallStatsRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/StoreCallStats');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final StoreCallStatsResponse res = StoreCallStatsResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<GetCallStatsResponse> getCallStats(twirp.Context ctx, GetCallStatsRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'GetCallStats');
+    return interceptor((ctx, req) {
+      return callGetCallStats(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<GetCallStatsResponse> callGetCallStats(twirp.Context ctx, GetCallStatsRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/GetCallStats');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final GetCallStatsResponse res = GetCallStatsResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ReviewCallResponse> reviewCall(twirp.Context ctx, ReviewCallRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'ReviewCall');
+    return interceptor((ctx, req) {
+      return callReviewCall(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<ReviewCallResponse> callReviewCall(twirp.Context ctx, ReviewCallRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/ReviewCall');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final ReviewCallResponse res = ReviewCallResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ReportIssueResponse> reportIssue(twirp.Context ctx, ReportIssueRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'video');
+    ctx = twirp.withServiceName(ctx, 'CallCoordinatorService');
+    ctx = twirp.withMethodName(ctx, 'ReportIssue');
+    return interceptor((ctx, req) {
+      return callReportIssue(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<ReportIssueResponse> callReportIssue(twirp.Context ctx, ReportIssueRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.CallCoordinatorService/ReportIssue');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final ReportIssueResponse res = ReportIssueResponse.create();
       res.mergeFromBuffer(data);
       return Future.value(res);
     } catch (e) {
