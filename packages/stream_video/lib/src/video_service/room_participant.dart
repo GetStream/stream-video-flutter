@@ -10,32 +10,40 @@ class RoomParticipant {
 
   String get name => _participant.name;
 
-  VideoConnectionQuality get connectionQuality => _participant.connectionQuality;
+  VideoConnectionQuality get connectionQuality =>
+      _participant.connectionQuality;
 
   bool get isSpeaking => _participant.isSpeaking;
 
-  VideoTrackPublication get firstCameraPublication => _participant.videoTracks
-      .firstWhere((element) => element.source == TrackSource.camera);
+  VideoTrackPublication? get firstCameraPublication => _participant.videoTracks
+      .firstWhere((element) => element.source == TrackSource.camera,
+          orElse: null);
 
-  VideoTrackPublication get firstScreenSharePublication => _participant
-      .videoTracks
-      .firstWhere((element) => element.source == TrackSource.screenShareVideo);
+  VideoTrackPublication? get firstScreenSharePublication =>
+      _participant.videoTracks.firstWhere(
+          (element) => element.source == TrackSource.screenShareVideo,
+          orElse: null);
 
   VideoTrackPublication get firstAudioPublication =>
       _participant.audioTracks.first;
 
   StreamVideoTrack? get firstCameraVideoTrack {
-    if (!firstCameraPublication.muted && firstCameraPublication.subscribed) {
-      return firstCameraPublication.track;
+    if (firstCameraPublication != null) {
+      if (!firstCameraPublication!.muted &&
+          firstCameraPublication!.subscribed) {
+        return firstCameraPublication!.track;
+      }
     } else {
       return null;
     }
   }
 
   StreamVideoTrack? get firstScreenShareVideoTrack {
-    if (!firstScreenSharePublication.muted &&
-        firstScreenSharePublication.subscribed) {
-      return firstScreenSharePublication.track;
+    if (firstScreenSharePublication != null) {
+      if (!firstScreenSharePublication!.muted &&
+          firstScreenSharePublication!.subscribed) {
+        return firstScreenSharePublication!.track;
+      }
     } else {
       return null;
     }
