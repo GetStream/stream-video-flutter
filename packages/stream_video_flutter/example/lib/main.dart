@@ -4,13 +4,16 @@ import 'package:example/checkbox_controller.dart';
 import 'package:example/views/join_call.dart';
 import 'package:example/views/start_call.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 void main() {
-  runApp(const MyApp());
+  final client = StreamVideoClient("apiKey");
+  runApp(MyApp(client: client));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final StreamVideoClient client;
+  const MyApp({Key? key, required this.client}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +23,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const HomeView(title: 'Stream Video Flutter'),
+      builder: (context, child) {
+        return StreamVideoProvider(
+          client: client,
+          child: child!,
+        );
+      },
     );
   }
 }
@@ -60,4 +69,3 @@ class HomeView extends StatelessWidget {
     );
   }
 }
-
