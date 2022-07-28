@@ -108,7 +108,8 @@ class StartCallButton extends StatelessWidget {
 }
 
 class CallAcceptButton extends StatelessWidget {
-  const CallAcceptButton({Key? key}) : super(key: key);
+  const CallAcceptButton({Key? key, required this.onTap}) : super(key: key);
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -116,19 +117,21 @@ class CallAcceptButton extends StatelessWidget {
       iconButton: Icons.call,
       label: 'Accept',
       color: Colors.green,
+      onTap: onTap,
     );
   }
 }
 
 class CallRejectButton extends StatelessWidget {
-  const CallRejectButton({Key? key}) : super(key: key);
-
+  const CallRejectButton({Key? key, required this.onTap}) : super(key: key);
+  final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
     return _NormalButton(
       iconButton: Icons.call_end,
       label: 'Reject',
       color: Colors.red,
+      onTap: onTap,
     );
   }
 }

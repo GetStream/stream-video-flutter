@@ -2,6 +2,7 @@ import 'package:example/buttons.dart';
 import 'package:example/checkbox.dart';
 import 'package:example/checkbox_controller.dart';
 import 'package:example/dropdown_user.dart';
+import 'package:example/ringer.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -36,7 +37,7 @@ class StartCallView extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Text("Select Participants"),
         ),
-        Expanded(child: UserCheckBoxInListView(controller)),
+        Expanded(child: UserCheckBoxListView(controller)),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: StartCallButton(onTap: () {
@@ -44,6 +45,14 @@ class StartCallView extends StatelessWidget {
             print("currentUser ${streamVideo.client.currentUser}");
             print("participants ${controller.getIsChecked()}");
             print("startCall");
+            showDialog<void>(
+                context: context,
+                barrierDismissible: false, // user must tap button!
+                builder: (BuildContext context) {
+                  return RingerDialog(caller: "sacha");
+                });
+            // ScaffoldMessenger.of(context)
+            //     .showSnackBar(RingerSnackBar(caller: "Sacha"));
           }),
         )
       ],

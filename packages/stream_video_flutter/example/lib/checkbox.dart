@@ -3,16 +3,16 @@ import 'package:example/checkbox_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-class UserCheckBoxInListView extends StatefulWidget {
+class UserCheckBoxListView extends StatefulWidget {
   final CheckboxController userController;
 
-  UserCheckBoxInListView(this.userController);
+  UserCheckBoxListView(this.userController);
 
   @override
-  State<UserCheckBoxInListView> createState() => _UserCheckBoxInListViewState();
+  State<UserCheckBoxListView> createState() => _UserCheckBoxListViewState();
 }
 
-class _UserCheckBoxInListViewState extends State<UserCheckBoxInListView> {
+class _UserCheckBoxListViewState extends State<UserCheckBoxListView> {
   @override
   Widget build(BuildContext context) => ListView(
         padding: const EdgeInsets.all(8),
