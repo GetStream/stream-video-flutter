@@ -44,6 +44,7 @@ class _StartCallViewState extends State<StartCallView> {
           padding: const EdgeInsets.all(8.0),
           child: LoginButton(
             onTap: () {
+              //TODO: connect ws
               print("login");
             },
           ),
