@@ -221,6 +221,7 @@ class _NormalButton extends StatelessWidget {
                   iconButton,
                   color: Colors.white,
                 ),
+                SizedBox(width: 10),
                 Text(label),
               ],
             ),
@@ -241,5 +242,19 @@ class JoinCallButton extends StatelessWidget {
         label: 'Join',
         color: Colors.blue,
         onTap: onTap);
+  }
+}
+
+class LoginButton extends StatelessWidget {
+  const LoginButton({Key? key, required this.onTap}) : super(key: key);
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) {
+    return _NormalButton(
+      iconButton: Icons.login,
+      label: 'Login',
+      color: Colors.blue,
+      onTap: onTap,
+    );
   }
 }

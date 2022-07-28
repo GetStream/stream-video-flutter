@@ -26,13 +26,16 @@ class StartCallView extends StatelessWidget {
         UserDropDropdown(),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text("Select Participants"),
-        ),
-        TextButton(
-            onPressed: () {
+          child: LoginButton(
+            onTap: () {
               print("login");
             },
-            child: Text("Login")),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text("Select Participants"),
+        ),
         Expanded(child: UserCheckBoxInListView(controller)),
         Padding(
           padding: const EdgeInsets.all(8.0),

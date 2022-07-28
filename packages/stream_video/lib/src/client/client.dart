@@ -161,7 +161,7 @@ class StreamVideoClient {
         'call type from backend and client are different');
 
     final edges =
-        await joinCall(callId: createCallResponse.call.id, type: type);
+        await joinCall(id: createCallResponse.call.id, type: type);
     final latencyByEdge =
         await _latencyService.measureLatencies(edges, _options.retries);
     final edgeServer = await selectEdgeServer(
@@ -209,13 +209,13 @@ class StreamVideoClient {
   }
 
   Future<List<Edge>> joinCall(
-      {required String callId, required StreamCallType type}) async {
+      {required String id, required StreamCallType type}) async {
     try {
       final token = await _tokenManager.loadToken();
       final ctx = _authorizationCtx(token);
 
       final response = await _callCoordinatorService.joinCall(
-          ctx, JoinCallRequest(id: callId, type: type.rawType));
+          ctx, JoinCallRequest(id: id, type: type.rawType));
       return response.edges;
     } on TwirpError catch (e) {
       final method =
