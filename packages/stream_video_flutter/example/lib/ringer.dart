@@ -19,7 +19,7 @@ class RingerDialog extends StatelessWidget {
               child: CallAcceptButton(
                 onTap: () {
                   Navigator.of(context).pop();
-                  Navigator.of(context).pushNamed(StagedView.routeName);
+                  Navigator.of(context).pushNamed(StageView.routeName);
                 },
               ),
             ),

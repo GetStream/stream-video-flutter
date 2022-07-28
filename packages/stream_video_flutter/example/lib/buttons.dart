@@ -73,7 +73,7 @@ class DisableVideoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _NormalButton(
-      iconButton: Icons.videocam,
+      iconButton: Icons.videocam_off,
       label: 'Disable Video',
       color: Colors.black,
     );

@@ -56,10 +56,11 @@ class _StartCallViewState extends State<StartCallView> {
         Expanded(child: UserCheckBoxListView(widget.controller)),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: StartCallButton(onTap: () {
+          child: StartCallButton(onTap: () async {
             final streamVideo = StreamVideoProvider.of(context);
             print("currentUser ${streamVideo.client.currentUser}");
             print("participants ${widget.controller.getIsChecked()}");
+            //  await streamVideo.client.startCall();
             //TODO: client.startCall
             print("startCall");
             //emit an event CallCreated

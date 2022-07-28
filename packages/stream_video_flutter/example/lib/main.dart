@@ -2,6 +2,7 @@ import 'package:example/checkbox.dart';
 import 'package:example/demo_users.dart';
 import 'package:example/checkbox_controller.dart';
 import 'package:example/views/join_call.dart';
+import 'package:example/views/participants_view.dart';
 import 'package:example/views/staged_view.dart';
 import 'package:example/views/start_call.dart';
 import 'package:flutter/material.dart';
@@ -18,13 +19,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final title = 'Stream Video Flutter';
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const HomeView(title: 'Stream Video Flutter'),
-      routes: {StagedView.routeName : (context)=> StagedView(controller: client.participants,)},
+      home: HomeView(title: title),
+      routes: {
+        HomeView.routeName: (context) => HomeView(title: title),
+        
+        StageView.routeName: (context) => StageView(
+              controller: client.participants,
+            ),
+      },
       builder: (context, child) {
         return StreamVideoProvider(
           client: client,
@@ -36,6 +44,7 @@ class MyApp extends StatelessWidget {
 }
 
 class HomeView extends StatelessWidget {
+  static String routeName = "/home";
   final String title;
   const HomeView({Key? key, required this.title}) : super(key: key);
 
@@ -63,7 +72,7 @@ class HomeView extends StatelessWidget {
           body: TabBarView(
             children: [
               StartCallView(
-                callController: StreamVideoProvider.of(context).client.calls,
+                  callController: StreamVideoProvider.of(context).client.calls,
                   controller: controller),
               JoinCallView()
             ],
