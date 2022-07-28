@@ -61,6 +61,7 @@ class HomeView extends StatelessWidget {
           body: TabBarView(
             children: [
               StartCallView(
+                callController: StreamVideoProvider.of(context).client.calls,
                   controller: controller),
               JoinCallView()
             ],

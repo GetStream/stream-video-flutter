@@ -6,14 +6,29 @@ import 'package:example/ringer.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-class StartCallView extends StatelessWidget {
+class StartCallView extends StatefulWidget {
   static const Icon tabIcon = Icon(Icons.video_call);
-  const StartCallView({
-    Key? key,
-    required this.controller,
-  }) : super(key: key);
+  const StartCallView(
+      {Key? key, required this.controller, required this.callController})
+      : super(key: key);
 
   final CheckboxController controller;
+  final CallController callController;
+
+  @override
+  State<StartCallView> createState() => _StartCallViewState();
+}
+
+class _StartCallViewState extends State<StartCallView> {
+  String caller = "unkown";
+  @override
+  void initState() {
+    widget.callController.on<CallCreatedEvent>((event) {
+      caller = event.payload.call.createdByUserId;
+      showRinger(context, caller: caller);
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,25 +52,29 @@ class StartCallView extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Text("Select Participants"),
         ),
-        Expanded(child: UserCheckBoxListView(controller)),
+        Expanded(child: UserCheckBoxListView(widget.controller)),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: StartCallButton(onTap: () {
             final streamVideo = StreamVideoProvider.of(context);
             print("currentUser ${streamVideo.client.currentUser}");
-            print("participants ${controller.getIsChecked()}");
+            print("participants ${widget.controller.getIsChecked()}");
+            //TODO: client.startCall
             print("startCall");
-            showDialog<void>(
-                context: context,
-                barrierDismissible: false, // user must tap button!
-                builder: (BuildContext context) {
-                  return RingerDialog(caller: "sacha");
-                });
-            // ScaffoldMessenger.of(context)
-            //     .showSnackBar(RingerSnackBar(caller: "Sacha"));
+            //emit an event CallCreated
+            streamVideo.client.fakeIncomingCall("Sacha");
           }),
         )
       ],
     );
+  }
+
+  void showRinger(BuildContext context, {required String caller}) {
+    showDialog<void>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) {
+          return RingerDialog(caller: caller);
+        });
   }
 }

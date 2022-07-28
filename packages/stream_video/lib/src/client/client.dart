@@ -3,6 +3,7 @@ import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
 import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbtwirp.dart';
+import 'package:stream_video/protobuf/video_events/events.pb.dart';
 import 'package:stream_video/protobuf/video_models/models.pb.dart'
     hide EdgeServer;
 import 'package:stream_video/src/core/error/error.dart';
@@ -112,6 +113,14 @@ class StreamVideoClient {
     _state.currentUser = user;
   }
 
+  CallController get calls => _state.calls;
+
+  void fakeIncomingCall(String createdByUserId) {
+    logger.info("faking call from $createdByUserId");
+    _state.calls
+        .emitCreated(CallCreated(call: Call(createdByUserId: createdByUserId)));
+  }
+
   Future<void> connectWs() async {
     final user = _state.currentUser;
     final token = await _tokenManager.loadToken();
@@ -160,8 +169,7 @@ class StreamVideoClient {
     assert(StreamCallType.video.rawType == createCallResponse.call.type,
         'call type from backend and client are different');
 
-    final edges =
-        await joinCall(id: createCallResponse.call.id, type: type);
+    final edges = await joinCall(id: createCallResponse.call.id, type: type);
     final latencyByEdge =
         await _latencyService.measureLatencies(edges, _options.retries);
     final edgeServer = await selectEdgeServer(
