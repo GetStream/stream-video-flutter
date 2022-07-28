@@ -3,7 +3,8 @@ import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
 import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbtwirp.dart';
-import 'package:stream_video/protobuf/video_models/models.pb.dart' hide EdgeServer;
+import 'package:stream_video/protobuf/video_models/models.pb.dart'
+    hide EdgeServer;
 import 'package:stream_video/src/core/error/error.dart';
 
 import 'package:stream_video/src/core/http/token.dart';
@@ -84,6 +85,8 @@ class StreamVideoClient {
     ..level = logLevel
     ..onRecord.listen(logHandlerFunction);
 
+  UserInfo? get currentUser => _state.currentUser;
+
   Future<void> setUser(UserInfo user,
       {Token? token,
       TokenProvider? provider,
@@ -150,7 +153,8 @@ class StreamVideoClient {
 
     final edges =
         await joinCall(callId: createCallResponse.call.id, type: type);
-    Map<String, Latency> latencyByEdge = await _latencyService.measureLatencies(edges);
+    Map<String, Latency> latencyByEdge =
+        await _latencyService.measureLatencies(edges);
     final edgeServer = await selectEdgeServer(
         callId: createCallResponse.call.id, latencyByEdge: latencyByEdge);
     final room = await _videoService.connect(
@@ -158,8 +162,6 @@ class StreamVideoClient {
     _state.participants.room = room;
     return room;
   }
-
- 
 
   Future<CreateCallResponse> createCall(
       {required String id,

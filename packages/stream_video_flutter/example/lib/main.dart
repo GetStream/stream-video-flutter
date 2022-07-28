@@ -41,7 +41,7 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     var controller = CheckboxController(
         demoUsers.map((e) => CheckBoxItem(e.userInfo, false)).toList());
-    var currentUserController = CurrentUserController(demoUsers[0].userInfo);
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -61,7 +61,7 @@ class HomeView extends StatelessWidget {
           body: TabBarView(
             children: [
               StartCallView(
-                  currentUserController: currentUserController,
+                  // currentUserController: currentUserController,
                   controller: controller),
               JoinCallView()
             ],

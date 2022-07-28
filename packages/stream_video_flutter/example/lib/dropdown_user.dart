@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class UserDropDropdown extends StatefulWidget {
-  final CurrentUserController currentUserController;
-  const UserDropDropdown(this.currentUserController, {Key? key})
+  // final CurrentUserController currentUserController;
+  const UserDropDropdown( {Key? key})
       : super(key: key);
 
   @override
@@ -13,25 +13,27 @@ class UserDropDropdown extends StatefulWidget {
 }
 
 class _UserDropDropdownState extends State<UserDropDropdown> {
-  UserInfo dropdownValue = demoUsers[0].userInfo;
+  UserCredentials dropdownValue = demoUsers[0];
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton<UserInfo>(
+    return DropdownButton<UserCredentials>(
       value: dropdownValue,
-      onChanged: (UserInfo? newValue) {
-        widget.currentUserController.value = newValue!;
+      onChanged: (UserCredentials? newValue) async {
+        final streamVideo = StreamVideoProvider.of(context);
+      await  streamVideo.client.setUser(newValue!.userInfo,token: newValue.token);
+        // widget.currentUserController.value = newValue;
         setState(() {
           dropdownValue = newValue;
         });
       },
       items: demoUsers
-          .map((e) => e.userInfo)
+          .map((e) => e)
           .toList()
-          .map<DropdownMenuItem<UserInfo>>((UserInfo value) {
-        return DropdownMenuItem<UserInfo>(
+          .map<DropdownMenuItem<UserCredentials>>((UserCredentials value) {
+        return DropdownMenuItem<UserCredentials>(
           value: value,
-          child: Text(value.name),
+          child: Text(value.userInfo.name),
         );
       }).toList(),
     );
