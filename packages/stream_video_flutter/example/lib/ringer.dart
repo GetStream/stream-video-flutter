@@ -8,7 +8,7 @@ class RingerDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      content: Text("Iconming call from $caller"),
+      content: Text("Incoming call from $caller"),
       actions: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
