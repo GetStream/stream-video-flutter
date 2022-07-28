@@ -27,6 +27,11 @@ final _levelEmojiMapper = {
   Level.SEVERE: '🚨',
 };
 
+class StreamVideoClientOptions {
+  final int retries;
+  StreamVideoClientOptions({this.retries = 3});
+}
+
 class StreamVideoClient {
   late final CallCoordinatorServiceProtobufClient _callCoordinatorService;
   late final LatencyService _latencyService;
@@ -39,6 +44,7 @@ class StreamVideoClient {
     this.logLevel = Level.WARNING,
     String? coordinatorUrl,
     String? baseURL,
+    StreamVideoClientOptions? options,
     this.logHandlerFunction = StreamVideoClient.defaultLogHandler,
     WebSocketClient? ws,
   }) {
@@ -52,6 +58,7 @@ class StreamVideoClient {
     );
 
     _state = ClientState();
+    _options = options ?? StreamVideoClientOptions();
     _ws = ws ?? WebSocketClient(logger: logger, state: _state);
     _latencyService = LatencyService(logger: logger);
   }
@@ -63,6 +70,9 @@ class StreamVideoClient {
 
   /// This client state
   late final ClientState _state;
+
+  ///options
+  late final StreamVideoClientOptions _options;
   final LogHandlerFunction logHandlerFunction;
 
   final Level logLevel;
@@ -148,12 +158,12 @@ class StreamVideoClient {
         await createCall(id: id, participantIds: participantIds, type: type);
     //TODO: is this debug stuff really useful?
     assert(StreamCallType.video.rawType == createCallResponse.call.type,
-        "call type from backend and client are different");
+        'call type from backend and client are different');
 
     final edges =
         await joinCall(callId: createCallResponse.call.id, type: type);
-    Map<String, Latency> latencyByEdge =
-        await _latencyService.measureLatencies(edges);
+    final latencyByEdge =
+        await _latencyService.measureLatencies(edges, _options.retries);
     final edgeServer = await selectEdgeServer(
         callId: createCallResponse.call.id, latencyByEdge: latencyByEdge);
     final room = await _videoService.connect(

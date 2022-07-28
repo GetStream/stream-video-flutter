@@ -8,9 +8,9 @@ class LatencyService {
   final Logger? logger;
   LatencyService({this.logger});
 
-  Future<Map<String, Latency>> measureLatencies(List<Edge> edges) async {
+  Future<Map<String, Latency>> measureLatencies(List<Edge> edges, [int tries = 1]) async {
     final latencies =
-        await Future.wait(edges.map((edge) => _measureLatency(edge, 3)));
+        await Future.wait(edges.map((edge) => _measureLatency(edge, tries)));
 
     return Map.fromEntries(latencies);
   }
