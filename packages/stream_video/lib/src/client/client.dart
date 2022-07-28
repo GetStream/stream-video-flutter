@@ -50,7 +50,7 @@ class StreamVideoClient {
     WebSocketClient? ws,
   }) {
     _callCoordinatorService = CallCoordinatorServiceProtobufClient(
-      coordinatorUrl ?? "http://localhost:26991",
+      coordinatorUrl ?? "http://192.168.1.17:26991",
       "",
       hooks: ClientHooks(
         onRequestPrepared: onClientRequestPrepared,
@@ -124,6 +124,7 @@ class StreamVideoClient {
 
   Future<void> connectWs() async {
     final user = _state.currentUser;
+    print(user);
     final token = await _tokenManager.loadToken();
     logger.info('connect ws with token ${token.rawValue}');
     _ws.connect(user: user!, token: token);

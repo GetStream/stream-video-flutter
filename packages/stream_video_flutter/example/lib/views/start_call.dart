@@ -43,7 +43,9 @@ class _StartCallViewState extends State<StartCallView> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: LoginButton(
-            onTap: () {
+            onTap: () async {
+              await StreamVideoProvider.of(context).client.connectWs();
+              print("connecting");
               //TODO: connect ws
               print("login");
             },

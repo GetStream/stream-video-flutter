@@ -161,8 +161,8 @@ class WebSocketClient {
           name: user.name,
           // profileImageUrl: user.imageURL,
         ),
-        token: token.toString(),
-        device: DeviceRequest(disabled: true));
+        token: token.rawValue,
+        device: DeviceRequest(id: "1", pushProviderName: "firebase"));
     return authPayload;
   }
 
@@ -170,7 +170,7 @@ class WebSocketClient {
     channel!.sink.add(generatedMessage.writeToBuffer().buffer.asUint8List());
   }
 
-  Uri _buildUri() => Uri.parse('ws://127.0.0.1:8989');
+  Uri _buildUri() => Uri.parse('ws://192.168.1.17:8989');
 
   void _handleHealthCheckEvent(Healthcheck event) {
     _logger?.info('HealthCheck received : ${event.toString()}');

@@ -1,4 +1,16 @@
-import 'package:livekit_client/livekit_client.dart';
+import 'package:livekit_client/livekit_client.dart'
+    show
+        TrackPublication,
+        Track,
+        ConnectionQuality,
+        RemoteTrackPublication,
+        EventsListener,
+        RoomEvent,
+        RoomDisconnectedEvent,
+        ParticipantConnectedEvent,
+        TrackType,
+        RemoteParticipant,
+        LocalParticipant;
 
 // inspired by swift
 typedef VideoTrackPublication = TrackPublication;

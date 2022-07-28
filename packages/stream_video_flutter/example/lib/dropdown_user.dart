@@ -5,8 +5,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class UserDropDropdown extends StatefulWidget {
   // final CurrentUserController currentUserController;
-  const UserDropDropdown( {Key? key})
-      : super(key: key);
+  const UserDropDropdown({Key? key}) : super(key: key);
 
   @override
   State<UserDropDropdown> createState() => _UserDropDropdownState();
@@ -21,7 +20,8 @@ class _UserDropDropdownState extends State<UserDropDropdown> {
       value: dropdownValue,
       onChanged: (UserCredentials? newValue) async {
         final streamVideo = StreamVideoProvider.of(context);
-      await  streamVideo.client.setUser(newValue!.userInfo,token: newValue.token);
+        await streamVideo.client
+            .setUser(newValue!.userInfo, token: newValue.token);
         // widget.currentUserController.value = newValue;
         setState(() {
           dropdownValue = newValue;

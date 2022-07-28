@@ -1,4 +1,5 @@
-import 'package:livekit_client/livekit_client.dart';
+import 'package:livekit_client/livekit_client.dart'
+    show TrackSource, Participant;
 import 'package:stream_video/src/models/aliases.dart';
 
 class RoomParticipant {

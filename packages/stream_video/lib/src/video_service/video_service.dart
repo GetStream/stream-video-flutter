@@ -1,4 +1,10 @@
-import 'package:livekit_client/livekit_client.dart';
+import 'package:livekit_client/livekit_client.dart'
+    show
+        Room,
+        ConnectOptions,
+        RoomOptions,
+        ScreenShareCaptureOptions,
+        VideoPublishOptions;
 import 'package:stream_video/src/core/error/error.dart';
 import 'package:stream_video/src/models/video_options.dart';
 import 'package:stream_video/src/video_service/room.dart';
