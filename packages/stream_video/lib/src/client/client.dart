@@ -7,11 +7,9 @@ import 'package:stream_video/protobuf/video_models/models.pb.dart'
     hide EdgeServer;
 import 'package:stream_video/src/core/error/error.dart';
 
-import 'package:stream_video/src/core/http/token.dart';
 import 'package:stream_video/src/core/http/token_manager.dart';
 import 'package:stream_video/src/latency_service/latency.dart';
 import 'package:stream_video/src/models/edge_server.dart';
-import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/models/video_options.dart';
 import 'package:stream_video/src/state/state.dart';
 import 'package:stream_video/src/video_service/video_service.dart';
@@ -91,8 +89,9 @@ class StreamVideoClient {
       {Token? token,
       TokenProvider? provider,
       bool connectWebSocket = true}) async {
-    logger.info('setting user : ${user.id}');
-    logger.info('setting token : ${token!.rawValue}');
+    logger
+      ..info('setting user : ${user.id}')
+      ..info('setting token : ${token!.rawValue}');
 
     await _tokenManager.setTokenOrProvider(
       user.id,
@@ -106,7 +105,7 @@ class StreamVideoClient {
   Future<void> connectWs() async {
     final user = _state.currentUser;
     final token = await _tokenManager.loadToken();
-    print("TOKEN ${token.rawValue}");
+    logger.info('connect ws with token ${token.rawValue}');
     _ws.connect(user: user!, token: token);
   }
 

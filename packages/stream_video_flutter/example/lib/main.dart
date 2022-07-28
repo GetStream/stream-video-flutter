@@ -61,7 +61,6 @@ class HomeView extends StatelessWidget {
           body: TabBarView(
             children: [
               StartCallView(
-                  // currentUserController: currentUserController,
                   controller: controller),
               JoinCallView()
             ],

@@ -9,11 +9,9 @@ class StartCallView extends StatelessWidget {
   static const Icon tabIcon = Icon(Icons.video_call);
   const StartCallView({
     Key? key,
-    // required this.currentUserController,
     required this.controller,
   }) : super(key: key);
 
-  // final CurrentUserController currentUserController;
   final CheckboxController controller;
 
   @override

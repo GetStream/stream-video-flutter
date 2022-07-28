@@ -35,6 +35,8 @@ class ClientState {
 
   final _roomController = RoomController();
 
+  //TODO: set participants
+
   CallController get calls => _roomController.calls;
 
   ParticipantController get participants => _roomController.participants;
