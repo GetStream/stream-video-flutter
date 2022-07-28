@@ -114,6 +114,7 @@ class StreamVideoClient {
   }
 
   CallController get calls => _state.calls;
+  ParticipantController get participants => _state.participants;
 
   void fakeIncomingCall(String createdByUserId) {
     logger.info("faking call from $createdByUserId");

@@ -2,6 +2,7 @@ import 'package:example/checkbox.dart';
 import 'package:example/demo_users.dart';
 import 'package:example/checkbox_controller.dart';
 import 'package:example/views/join_call.dart';
+import 'package:example/views/staged_view.dart';
 import 'package:example/views/start_call.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const HomeView(title: 'Stream Video Flutter'),
+      routes: {StagedView.routeName : (context)=> StagedView(controller: client.participants,)},
       builder: (context, child) {
         return StreamVideoProvider(
           client: client,

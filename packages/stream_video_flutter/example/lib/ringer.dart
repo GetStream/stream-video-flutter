@@ -1,4 +1,5 @@
 import 'package:example/buttons.dart';
+import 'package:example/views/staged_view.dart';
 import 'package:flutter/material.dart';
 
 class RingerDialog extends StatelessWidget {
@@ -17,7 +18,8 @@ class RingerDialog extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: CallAcceptButton(
                 onTap: () {
-                  print("accepting call");
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pushNamed(StagedView.routeName);
                 },
               ),
             ),
@@ -25,6 +27,7 @@ class RingerDialog extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: CallRejectButton(
                 onTap: () {
+                  Navigator.of(context).pop();
                   print("rejecting call");
                 },
               ),

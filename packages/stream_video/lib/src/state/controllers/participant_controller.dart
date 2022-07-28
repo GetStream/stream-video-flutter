@@ -12,6 +12,8 @@ class ParticipantController {
   VideoRoom? _room;
   set room(VideoRoom room) => _room = room;
 
+  VideoRoom get room => _room!;
+
   void emit(ParticipantEvent event) => _participantInvitedController.add(event);
 
   emitJoined(ParticipantJoined payload) => emit(ParticipantJoinEvent(payload));

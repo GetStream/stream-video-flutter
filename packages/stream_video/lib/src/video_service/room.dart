@@ -8,16 +8,21 @@ class VideoRoom {
   VideoRoom({required Room room}) : _room = room;
   final Room _room;
 
-  final Map<String, Participant> participants = {};
+  final Map<String, Participant> _participants = {};
 
   factory VideoRoom.create({required Room room}) => VideoRoom(room: room);
 
   Future<void> disconnect() => _room.disconnect();
 
-  void add(Participant participant) => participants[participant.userId];
+  void add(Participant participant) => _participants[participant.userId];
 
   Participant? remove(Participant participant) =>
-      participants.remove(participant.userId);
+      _participants.remove(participant.userId);
+
+  // List<Participant> get participants =>
+  //     _participants.entries.map((entry) => entry.value).toList();
+
+      
 
   List<MapEntry<String, StreamRemoteParticipant>> get remoteParticipants =>
       _room.participants.entries.toList();
@@ -25,11 +30,11 @@ class VideoRoom {
   LocalParticipant? get localParticipant => _room.localParticipant;
 
   VideoConnectionStatus get connectionStatus => _room.connectionState.mapped;
-  StreamEventsListener<StreamRoomEvent> createListener() =>
-      _room.createListener();
+//   StreamEventsListener<StreamRoomEvent> createListener() =>
+//       _room.createListener();
 
-  void addListener(void Function() onChange) => _room.addListener(onChange);
+//   void addListener(void Function() onChange) => _room.addListener(onChange);
 
-  void removeListener(void Function() onChange) =>
-      _room.removeListener(onChange);
+//   void removeListener(void Function() onChange) =>
+//       _room.removeListener(onChange);
 }
