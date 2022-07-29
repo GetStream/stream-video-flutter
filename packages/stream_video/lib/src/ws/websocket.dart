@@ -20,7 +20,7 @@ class WebSocketClient {
       : _logger = logger,
         _state = state;
   final ClientState _state;
-  late final IOWebSocketChannel? channel;
+  late final IOWebSocketChannel? _channel;
   late final Uri? uri;
 
   late final Timer pingTimer;
@@ -28,20 +28,21 @@ class WebSocketClient {
 
   void connect({required UserInfo user, required Token token}) {
     uri = _buildUri();
-    channel = IOWebSocketChannel.connect(uri!);
+    _channel = IOWebSocketChannel.connect(uri!);
     _state.connectionStatus = ConnectionStatus.connecting;
     _sendAuthPayload(user, token);
     _state.connectionStatus = ConnectionStatus.initialized;
-    listen();
-    schedulePing();
+    _listen();
+    _schedulePing();
   }
 
   void _sendAuthPayload(UserInfo user, Token token) {
+    _state.connectionStatus = ConnectionStatus.authenticating;
     final authPayload = _getAuthPayload(user, token);
     _sendPayload(authPayload);
   }
 
-  void schedulePing() {
+  void _schedulePing() {
     pingTimer = Timer.periodic(pingTimeInterval, (s) {
       _sendHealthcheck();
 
@@ -65,9 +66,9 @@ class WebSocketClient {
     ));
   }
 
-  void listen() {
-    channel!.stream.listen(
-      (event) => _onDataReceived(event),
+  void _listen() {
+    _channel!.stream.listen(
+      _onDataReceived,
       onError: _onConnectionError,
       onDone: _onConnectionClosed,
     );
@@ -205,8 +206,7 @@ class WebSocketClient {
   }
 
   void _sendPayload(GeneratedMessage generatedMessage) {
-    _state.connectionStatus = ConnectionStatus.authenticating;
-    channel!.sink.add(generatedMessage.writeToBuffer().buffer.asUint8List());
+    _channel!.sink.add(generatedMessage.writeToBuffer().buffer.asUint8List());
   }
 
   Uri _buildUri() => Uri.parse('ws://192.168.1.17:8989');
