@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:logging/logging.dart';
 import 'package:protobuf/protobuf.dart';
 import 'package:stream_video/protobuf/video_events/events.pbserver.dart';
@@ -7,9 +9,13 @@ import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/state/state.dart';
 import 'package:web_socket_channel/io.dart';
 
-import '../../protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
+import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
 
 class WebSocketClient {
+  static const pingTimeInterval = Duration(seconds: 20);
+  static const pongTimeoutTimeInterval = Duration(seconds: 3);
+  late final String _connectionId;
+
   WebSocketClient({Logger? logger, required ClientState state})
       : _logger = logger,
         _state = state;
@@ -17,15 +23,46 @@ class WebSocketClient {
   late final IOWebSocketChannel? channel;
   late final Uri? uri;
 
+  late final Timer pingTimer;
   final Logger? _logger;
 
   void connect({required UserInfo user, required Token token}) {
     uri = _buildUri();
     channel = IOWebSocketChannel.connect(uri!);
-
-    final authPayload = getAuthPayload(user, token);
-    _sendPayload(authPayload);
+    _state.connectionStatus = ConnectionStatus.connecting;
+    _sendAuthPayload(user, token);
+    _state.connectionStatus = ConnectionStatus.initialized;
     listen();
+    schedulePing();
+  }
+
+  void _sendAuthPayload(UserInfo user, Token token) {
+    final authPayload = _getAuthPayload(user, token);
+    _sendPayload(authPayload);
+  }
+
+  void schedulePing() {
+    pingTimer = Timer.periodic(pingTimeInterval, (s) {
+      _sendHealthcheck();
+
+      Future.delayed(pongTimeoutTimeInterval, () {
+        if (_state.connectionStatus.pingOK == PingOK.notReceived) {
+          _state.connectionStatus = ConnectionStatus.disconnected;
+          pingTimer.cancel();
+        }
+      });
+    });
+  }
+
+  void _sendHealthcheck() {
+    _sendPayload(Healthcheck(
+      userId: _state.callState.userId,
+      clientId: _state.callState.clientId,
+      callType: _state.callState.callType,
+      callId: _state.callState.callId,
+      video: _state.callState.video,
+      audio: _state.callState.audio,
+    ));
   }
 
   void listen() {
@@ -146,6 +183,7 @@ class WebSocketClient {
   }
 
   void _onConnectionError(error) {
+    // _state.connectionStatus = const ConnectionStatus(error:" e");
     print("received $error");
   }
 
@@ -153,7 +191,7 @@ class WebSocketClient {
     print("connection closed");
   }
 
-  AuthPayload getAuthPayload(UserInfo user, Token token) {
+  AuthPayload _getAuthPayload(UserInfo user, Token token) {
     final authPayload = AuthPayload(
         user: CreateUserRequest(
           id: user.id,
@@ -167,6 +205,7 @@ class WebSocketClient {
   }
 
   void _sendPayload(GeneratedMessage generatedMessage) {
+    _state.connectionStatus = ConnectionStatus.authenticating;
     channel!.sink.add(generatedMessage.writeToBuffer().buffer.asUint8List());
   }
 
@@ -174,11 +213,11 @@ class WebSocketClient {
 
   void _handleHealthCheckEvent(Healthcheck event) {
     _logger?.info('HealthCheck received : ${event.toString()}');
-
+    _state.connectionStatus = ConnectionStatus.connected;
+    print(event.clientId);
     // _connectionId = event.clientId;
-
     // connectionStatus = ConnectionStatus.connected;
-    // state.healthcheck = event;
+    _state.healthcheck = event;
   }
 
   void _handleCallRinging(CallRinging event) {

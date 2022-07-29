@@ -8,10 +8,57 @@ import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/state/controllers/controllers.dart';
 import 'package:stream_video/src/state/controllers/room_controller.dart';
 
+class StreamCallState {
+  final String? userId;
+  final String? clientId;
+  final String? callType;
+  final String? callId;
+  final bool? video;
+  final bool? audio;
+
+  StreamCallState(
+      {this.userId,
+      this.clientId,
+      this.callType,
+      this.callId,
+      this.video,
+      this.audio});
+}
+
+enum ConnectionStatus {
+  authenticating,
+  initialized,
+  disconnecting,
+  connecting,
+  reconnecting,
+  disconnected,
+  connected(pingOK: PingOK.received);
+
+  const ConnectionStatus({
+    this.pingOK = PingOK.notReceived,
+  });
+  final PingOK? pingOK;
+}
+
+enum PingOK { received, notReceived }
+
 class ClientState {
   //ingest this in state
 
   final _currentUserController = BehaviorSubject<UserInfo?>();
+
+  final _callStateController = BehaviorSubject.seeded(StreamCallState());
+
+  set callState(StreamCallState state) => _callStateController.add(state);
+
+  StreamCallState get callState => _callStateController.value;
+  
+  final _connectionStatusController =
+      BehaviorSubject.seeded(ConnectionStatus.disconnected);
+
+  set connectionStatus(ConnectionStatus status) =>
+      _connectionStatusController.add(status);
+  ConnectionStatus get connectionStatus => _connectionStatusController.value;
 
   set currentUser(UserInfo? user) {
     // _computeUnreadCounts(user);
