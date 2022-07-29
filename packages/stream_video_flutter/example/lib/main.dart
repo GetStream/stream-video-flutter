@@ -2,7 +2,6 @@ import 'package:example/checkbox.dart';
 import 'package:example/demo_users.dart';
 import 'package:example/checkbox_controller.dart';
 import 'package:example/views/join_call.dart';
-import 'package:example/views/participants_view.dart';
 import 'package:example/views/staged_view.dart';
 import 'package:example/views/start_call.dart';
 import 'package:flutter/material.dart';

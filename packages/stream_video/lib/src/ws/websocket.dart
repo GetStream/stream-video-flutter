@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:logging/logging.dart';
 import 'package:protobuf/protobuf.dart';
+import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
 import 'package:stream_video/protobuf/video_events/events.pbserver.dart';
 import 'package:stream_video/protobuf/video_models/models.pb.dart';
 import 'package:stream_video/src/core/http/token.dart';
@@ -9,16 +10,14 @@ import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/state/state.dart';
 import 'package:web_socket_channel/io.dart';
 
-import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
-
 class WebSocketClient {
-  static const pingTimeInterval = Duration(seconds: 20);
-  static const pongTimeoutTimeInterval = Duration(seconds: 3);
-  late final String _connectionId;
 
   WebSocketClient({Logger? logger, required ClientState state})
       : _logger = logger,
         _state = state;
+  static const pingTimeInterval = Duration(seconds: 20);
+  static const pongTimeoutTimeInterval = Duration(seconds: 3);
+  late final String _connectionId;
   final ClientState _state;
   late final IOWebSocketChannel? _channel;
   late final Uri? uri;

@@ -1,4 +1,3 @@
-import 'package:example/views/participants_view.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -22,7 +21,6 @@ class StageView extends StatelessWidget {
     final List<Map> myProducts = List.generate(
         100000, (index) => {"id": index, "name": "Product $index"}).toList();
     return MaterialApp(
-      routes: {ParticipantsView.routeName: (context) => ParticipantsView()},
       home: Scaffold(
         bottomNavigationBar:
             BottomAppBar(color: Colors.blue, child: BottomControls()),
@@ -84,10 +82,10 @@ class BottomControls extends StatelessWidget {
 
               BottomControl(
                   icon: Icon(
-                    Icons.stop_screen_share,
-                    color: Colors.white,
+                    Icons.call_end_outlined,
+                    color: Colors.red,
                   ),
-                  text: Text("Start Screenshare")),
+                  text: Text("Hang up")),
               BottomControl(
                 icon: Row(
                   children: [
@@ -97,8 +95,12 @@ class BottomControls extends StatelessWidget {
                         color: Colors.white,
                       ),
                       onPressed: () {
-                        Navigator.of(context)
-                            .pushNamed(ParticipantsView.routeName);
+                        showModalBottomSheet<void>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return ParticipantsBottomSheet();
+                          },
+                        );
                         print("show call participants");
                       },
                     ),
@@ -119,6 +121,93 @@ class BottomControls extends StatelessWidget {
               //   ),
               // ),
             ]));
+  }
+}
+
+class ParticipantsBottomSheet extends StatelessWidget {
+  const ParticipantsBottomSheet({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 200,
+      color: Colors.amber,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Expanded(
+                child: ListView(
+              shrinkWrap: true,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Online participants"),
+                      ),
+                      OnlineParticipant(
+                        //TODO: remove hardcoded values
+                        participantName: "Alice",
+                      ),
+                      OnlineParticipant(
+                        participantName: "Bob",
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Offline participants"),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Trudy"),
+                      )
+                    ],
+                  ),
+                )
+                //Your content
+              ],
+            ))
+            // ElevatedButton(
+            //   child: const Text('Close BottomSheet'),
+            //   onPressed: () => Navigator.pop(context),
+            // )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class OnlineParticipant extends StatelessWidget {
+  final String participantName;
+  const OnlineParticipant({Key? key, required this.participantName})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      // crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text("$participantName"),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(Icons.mic_off),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(Icons.videocam),
+        )
+      ],
+    );
   }
 }
 
