@@ -19,9 +19,6 @@ class StageView extends StatefulWidget {
 }
 
 class _StageViewState extends State<StageView> {
-  // List<RoomParticipant> get roomParticipants =>
-  //     widget.controller.room.allParticipants.values.toList();
-
   @override
   Widget build(BuildContext context) {
     //TODO: busy widget
@@ -42,43 +39,50 @@ class _StageViewState extends State<StageView> {
       ),
       body: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(children: [
-            allParticipants[0].videoTracks.isNotEmpty
-                ? SizedBox(
-                    height: 100,
-                    width: 100,
-                    child: StreamVideoTrackRenderer(//widget.controller.room
-                        // .allParticipants[index]!.activeVideoTrack!
-                        allParticipants[0].videoTracks[0].track!),
-                  )
-                : Container(
-                    color: Colors.grey,
+          child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 200,
+                  childAspectRatio: 3 / 2,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20),
+              itemCount: allParticipants.length, //
+              itemBuilder: (BuildContext ctx, int index) {
+                return Stack(children: [
+                  allParticipants[index].videoTracks.isNotEmpty
+                      ? SizedBox(
+                          height: 150,
+                          width: 150,
+                          child: StreamVideoTrackRenderer(
+                              allParticipants[index].videoTracks[0].track!),
+                        )
+                      : Container(
+                          color: Colors.grey,
+                        ),
+                  Align(
+                    alignment: FractionalOffset.bottomLeft,
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Icon(
+                            Icons.mic_off,
+                            color: Colors.red,
+                            size: 12,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Text(
+                            allParticipants[index].name,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-            Text(allParticipants[0].name),
-            Text("${allParticipants[0].videoTracks.length}")
-          ])
-          // GridView.builder(
-          //     gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          //         maxCrossAxisExtent: 200,
-          //         childAspectRatio: 3 / 2,
-          //         crossAxisSpacing: 20,
-          //         mainAxisSpacing: 20),
-          //     itemCount: allParticipants.length, //
-          //     itemBuilder: (BuildContext ctx, int index) {
-          //       return Stack(children: [
-          //         allParticipants[index].activeVideoTrack != null
-          //             ? StreamVideoTrackRenderer(//widget.controller.room
-          //                 // .allParticipants[index]!.activeVideoTrack!
-          //                 allParticipants[index].activeVideoTrack!)
-          //             : Container(
-          //                 color: Colors.grey,
-          //               ),
-          //         Text(allParticipants[index].name),
-          //       ]);
-          //       // );
-          //     })
-
-          ),
+                ]);
+                // );
+              })),
       // ),
     ));
   }
