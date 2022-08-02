@@ -11,7 +11,6 @@ import 'package:stream_video/src/state/state.dart';
 import 'package:web_socket_channel/io.dart';
 
 class WebSocketClient {
-
   WebSocketClient({Logger? logger, required ClientState state})
       : _logger = logger,
         _state = state;
@@ -20,14 +19,14 @@ class WebSocketClient {
   late final String _connectionId;
   final ClientState _state;
   late final IOWebSocketChannel? _channel;
-  late final Uri? uri;
+  // late final Uri? uri;
 
   late final Timer pingTimer;
   final Logger? _logger;
 
   void connect({required UserInfo user, required Token token}) {
-    uri = _buildUri();
-    _channel = IOWebSocketChannel.connect(uri!);
+    final uri = _buildUri();
+    _channel = IOWebSocketChannel.connect(uri);
     _state.connectionStatus = ConnectionStatus.connecting;
     _sendAuthPayload(user, token);
     _state.connectionStatus = ConnectionStatus.initialized;

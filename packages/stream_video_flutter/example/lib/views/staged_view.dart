@@ -48,7 +48,8 @@ class _StageViewState extends State<StageView> {
               itemCount: allParticipants.length, //
               itemBuilder: (BuildContext ctx, int index) {
                 return Stack(children: [
-                  allParticipants[index].videoTracks.isNotEmpty
+                  allParticipants[index].videoTracks.isNotEmpty &&
+                          allParticipants[index].isCameraEnabled()
                       ? SizedBox(
                           height: 150,
                           width: 150,
@@ -62,14 +63,15 @@ class _StageViewState extends State<StageView> {
                     alignment: FractionalOffset.bottomLeft,
                     child: Row(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Icon(
-                            Icons.mic_off,
-                            color: Colors.red,
-                            size: 12,
+                        if (!allParticipants[index].isMicrophoneEnabled())
+                          Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Icon(
+                              Icons.mic_off,
+                              color: Colors.red,
+                              size: 12,
+                            ),
                           ),
-                        ),
                         Padding(
                           padding: const EdgeInsets.all(6.0),
                           child: Text(
@@ -89,26 +91,4 @@ class _StageViewState extends State<StageView> {
 
   List<RoomParticipant> get allParticipants =>
       widget.controller.room.allParticipants;
-}
-
-//Temporary or will be a wrapper widget around StreamVideoTrackRenderer
-class VideoView extends StatelessWidget {
-  const VideoView({
-    Key? key,
-    required this.myProducts,
-    required this.index,
-  }) : super(key: key);
-
-  final List<Map> myProducts;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-          color: Colors.amber, borderRadius: BorderRadius.circular(15)),
-      child: Text(myProducts[index]["name"]),
-    );
-  }
 }

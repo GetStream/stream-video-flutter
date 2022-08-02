@@ -159,6 +159,33 @@ class StreamVideoClient {
     }
   }
 
+  Future<VideoRoom> joinExistingCall({
+    required String id,
+    required StreamCallType type,
+    VideoOptions videoOptions = const VideoOptions(
+      adaptiveStream: true,
+      dynacast: true,
+      autoSubscribe: true,
+      simulcast: true,
+      videoPresets: VideoParametersPresets.screenShareH720FPS15,
+      reportStats: true,
+    ),
+    //TODO: expose more parameters
+  }) async {
+    final edges = await joinCall(id: id, type: type);
+    final latencyByEdge =
+        await _latencyService.measureLatencies(edges, _options.retries);
+    final edgeServer =
+        await selectEdgeServer(callId: id, latencyByEdge: latencyByEdge);
+    final room = await _videoService.connect(
+        url: edgeServer.url, token: edgeServer.token, options: videoOptions);
+    //TODO: remove fast connection setup from here
+    // await room.localParticipant!.setCameraEnabled(true);
+    // await room.localParticipant!.setMicrophoneEnabled(true);
+    _state.participants.room = room;
+    return room;
+  }
+
   Future<VideoRoom> startCall({
     required String id,
     required List<String> participantIds,

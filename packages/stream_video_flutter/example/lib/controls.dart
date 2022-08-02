@@ -8,6 +8,14 @@ class BottomControls extends StatelessWidget {
     required this.onRefresh,
   }) : super(key: key);
   final VoidCallback onRefresh;
+  VideoRoom room(BuildContext context) =>
+      StreamVideoProvider.of(context).client.participants.room;
+  StreamLocalParticipant localParticipant(BuildContext context) =>
+      StreamVideoProvider.of(context)
+          .client
+          .participants
+          .room
+          .localParticipant!;
 
   @override
   Widget build(BuildContext context) {
@@ -20,38 +28,41 @@ class BottomControls extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: BottomControl(
-                    onTap: () {
-                      final controller = StreamVideoProvider.of(context)
-                          .client
-                          .participants
-                          .room
-                          .localParticipant!
-                          .setMicrophoneEnabled(true);
+                    onTap: () async {
+                      print("DISABLE AUDIO");
+
+                      isMicrophoneEnabled(context)
+                          ? room(context).disableAudio()
+                          : room(context).enableAudio();
+                      await Future.delayed(const Duration(milliseconds: 300));
+
+                      onRefresh();
                     },
                     icon: Icon(
-                      Icons.mic_off,
+                      isMicrophoneEnabled(context) ? Icons.mic_off : Icons.mic,
                       color: Colors.white,
                     ),
-                    text: Text("Join audio")),
+                    text: Text(
+                        "${isMicrophoneEnabled(context) ? 'Disable' : 'Enable'} Audio")),
               ),
               BottomControl(
-                  onTap: () {
+                  onTap: () async {
                     print("DISABLE VIDEO");
-                    final localParticipant = StreamVideoProvider.of(context)
-                        .client
-                        .participants
-                        .room
-                        .localParticipant!;
-                    print("HAS VIDEO ${localParticipant.hasVideo}");
-                    localParticipant.setCameraEnabled(true);
+
+                    isCameraEnabled(context)
+                        ? room(context).disableVideo()
+                        : room(context).enableVideo();
+                    await Future.delayed(const Duration(milliseconds: 300));
                     onRefresh();
-                    print("HAS VIDEO ${localParticipant.hasVideo}");
                   },
                   icon: Icon(
-                    Icons.videocam,
+                    isCameraEnabled(context)
+                        ? Icons.videocam_off
+                        : Icons.videocam,
                     color: Colors.white,
                   ),
-                  text: Text("Disable Video")),
+                  text: Text(
+                      "${isCameraEnabled(context) ? 'Disable' : 'Enable'} Video")),
               BottomControl(
                   icon: Icon(
                     Icons.call_end_outlined,
@@ -60,7 +71,6 @@ class BottomControls extends StatelessWidget {
                   text: Text("Hang up")),
               BottomControl(
                 icon: Stack(
-                  // mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Align(
                         alignment: FractionalOffset.topRight,
@@ -89,6 +99,12 @@ class BottomControls extends StatelessWidget {
               ),
             ]));
   }
+
+  isMicrophoneEnabled(BuildContext context) =>
+      localParticipant(context).isMicrophoneEnabled();
+
+  isCameraEnabled(BuildContext context) =>
+      localParticipant(context).isCameraEnabled();
 }
 
 class BottomControl extends StatelessWidget {

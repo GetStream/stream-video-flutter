@@ -11,14 +11,6 @@ class VideoRoom {
 
   final Map<String, CallParticipant> _participants = {};
 
-  void muteAudio() {
-    localParticipant!.setMicrophoneEnabled(false);
-  }
-
-  void unMuteAudio() {
-    localParticipant!.setMicrophoneEnabled(true);
-  }
-
   Future<void> disconnect() => _room.disconnect();
 
   void add(CallParticipant participant) =>
@@ -37,7 +29,6 @@ class VideoRoom {
       .where((element) => element.isOnline == false)
       .toList();
 
- 
   List<RoomParticipant> get allParticipants => [
         RoomParticipant(localParticipant!),
         ..._room.participants.entries
@@ -45,9 +36,15 @@ class VideoRoom {
             .toList()
       ];
 
-  
-
-  LocalParticipant? get localParticipant => _room.localParticipant;
+  StreamLocalParticipant? get localParticipant => _room.localParticipant;
 
   VideoConnectionStatus get connectionStatus => _room.connectionState.mapped;
+
+  void enableAudio() => localParticipant!.setMicrophoneEnabled(true);
+
+  void enableVideo() => localParticipant!.setCameraEnabled(true);
+
+  void disableAudio() => localParticipant!.setMicrophoneEnabled(false);
+
+  void disableVideo() => localParticipant!.setCameraEnabled(false);
 }
