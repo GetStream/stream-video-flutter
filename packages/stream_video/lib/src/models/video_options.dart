@@ -12,7 +12,9 @@ class VideoOptions {
 
   final bool adaptiveStream;
 
-  VideoOptions({
+  // static const VideoOptions default_ = 
+
+  const VideoOptions({
     required this.autoSubscribe,
     required this.reportStats,
     required this.dynacast,

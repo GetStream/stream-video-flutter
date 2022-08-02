@@ -1,5 +1,5 @@
-// import 'package:http/http.dart';
 import 'package:http/http.dart';
+import 'package:livekit_client/livekit_client.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
 import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbtwirp.dart';
@@ -61,6 +61,7 @@ class StreamVideoClient {
     _state = ClientState();
     _options = options ?? StreamVideoClientOptions();
     _ws = ws ?? WebSocketClient(logger: logger, state: _state);
+    _videoService = VideoService();
     _latencyService = LatencyService(logger: logger);
   }
 
@@ -162,7 +163,14 @@ class StreamVideoClient {
     required String id,
     required List<String> participantIds,
     required StreamCallType type,
-    required VideoOptions videoOptions,
+    VideoOptions videoOptions = const VideoOptions(
+      adaptiveStream: true,
+      dynacast: true,
+      autoSubscribe: true,
+      simulcast: true,
+      videoPresets: VideoParametersPresets.screenShareH720FPS15,
+      reportStats: true,
+    ),
     //TODO: expose more parameters
   }) async {
     final createCallResponse =
@@ -178,6 +186,9 @@ class StreamVideoClient {
         callId: createCallResponse.call.id, latencyByEdge: latencyByEdge);
     final room = await _videoService.connect(
         url: edgeServer.url, token: edgeServer.token, options: videoOptions);
+    //TODO: remove fast connection setup from here
+    // await room.localParticipant!.setCameraEnabled(true);
+    // await room.localParticipant!.setMicrophoneEnabled(true);
     _state.participants.room = room;
     return room;
   }

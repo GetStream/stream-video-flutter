@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:stream_video/protobuf/google/protobuf/struct.pb.dart';
 
 class UserInfo {
@@ -17,7 +15,7 @@ class UserInfo {
   Struct? get custom => extraData?.toStruct();
 
   @override
-  String toString()=> '$id $name $imageURL $extraData';
+  String toString() => '$id $name $imageURL $extraData';
 }
 
 extension ExtraDataX on Map<String, Object?> {

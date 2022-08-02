@@ -2,7 +2,9 @@ import 'package:example/buttons.dart';
 import 'package:example/checkbox.dart';
 import 'package:example/checkbox_controller.dart';
 import 'package:example/dropdown_user.dart';
+import 'package:example/input.dart';
 import 'package:example/ringer.dart';
+import 'package:example/views/staged_view.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -32,6 +34,7 @@ class _StartCallViewState extends State<StartCallView> {
 
   @override
   Widget build(BuildContext context) {
+    var textEditingController = TextEditingController();
     return Column(
       // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -51,6 +54,9 @@ class _StartCallViewState extends State<StartCallView> {
             },
           ),
         ),
+        CallInput(
+          controller: textEditingController,
+        ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text("Select Participants"),
@@ -62,11 +68,18 @@ class _StartCallViewState extends State<StartCallView> {
             final streamVideo = StreamVideoProvider.of(context);
             print("currentUser ${streamVideo.client.currentUser}");
             print("participants ${widget.controller.getIsChecked()}");
-            //  await streamVideo.client.startCall();
+            await streamVideo.client.startCall(
+                id: textEditingController.text,
+                participantIds: widget.controller
+                    .getIsChecked()
+                    .map((e) => e.userInfo.id)
+                    .toList(),
+                type: StreamCallType.video);
+             Navigator.of(context).pushNamed(StageView.routeName);
             //TODO: client.startCall
             print("startCall");
             //emit an event CallCreated
-            streamVideo.client.fakeIncomingCall("Sacha");
+            // streamVideo.client.fakeIncomingCall("Sacha");
           }),
         )
       ],

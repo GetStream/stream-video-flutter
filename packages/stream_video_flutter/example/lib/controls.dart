@@ -1,12 +1,13 @@
-
 import 'package:example/bottom_sheet.dart';
 import 'package:flutter/material.dart';
-
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class BottomControls extends StatelessWidget {
   const BottomControls({
     Key? key,
+    required this.onRefresh,
   }) : super(key: key);
+  final VoidCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +20,14 @@ class BottomControls extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: BottomControl(
+                    onTap: () {
+                      final controller = StreamVideoProvider.of(context)
+                          .client
+                          .participants
+                          .room
+                          .localParticipant!
+                          .setMicrophoneEnabled(true);
+                    },
                     icon: Icon(
                       Icons.mic_off,
                       color: Colors.white,
@@ -26,6 +35,18 @@ class BottomControls extends StatelessWidget {
                     text: Text("Join audio")),
               ),
               BottomControl(
+                  onTap: () {
+                    print("DISABLE VIDEO");
+                    final localParticipant = StreamVideoProvider.of(context)
+                        .client
+                        .participants
+                        .room
+                        .localParticipant!;
+                    print("HAS VIDEO ${localParticipant.hasVideo}");
+                    localParticipant.setCameraEnabled(true);
+                    onRefresh();
+                    print("HAS VIDEO ${localParticipant.hasVideo}");
+                  },
                   icon: Icon(
                     Icons.videocam,
                     color: Colors.white,
@@ -38,29 +59,32 @@ class BottomControls extends StatelessWidget {
                   ),
                   text: Text("Hang up")),
               BottomControl(
-                icon: Row(
+                icon: Stack(
+                  // mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.people,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {
-                        showModalBottomSheet<void>(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return ParticipantsBottomSheet();
-                          },
-                        );
-                        print("show call participants");
-                      },
-                    ),
-                    Text(
-                      "2",
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    Align(
+                        alignment: FractionalOffset.topRight,
+                        child: Text(
+                          "2",
+                          style: TextStyle(color: Colors.grey),
+                        )),
+                    Align(
+                        alignment: FractionalOffset.bottomLeft,
+                        child: Icon(
+                          Icons.people,
+                          color: Colors.white,
+                        )),
                   ],
                 ),
+                onTap: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return ParticipantsBottomSheet();
+                    },
+                  );
+                  print("show call participants");
+                },
                 text: Text("Participants"),
               ),
             ]));
@@ -70,7 +94,9 @@ class BottomControls extends StatelessWidget {
 class BottomControl extends StatelessWidget {
   final Widget icon;
   final Widget text;
-  const BottomControl({Key? key, required this.icon, required this.text})
+  final VoidCallback? onTap;
+  const BottomControl(
+      {Key? key, required this.icon, required this.text, this.onTap})
       : super(key: key);
 
   @override
@@ -78,7 +104,7 @@ class BottomControl extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        icon,
+        IconButton(icon: icon, onPressed: onTap),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 4.0),
           child: text,

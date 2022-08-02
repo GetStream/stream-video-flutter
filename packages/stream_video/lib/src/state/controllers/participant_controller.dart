@@ -1,13 +1,18 @@
 import 'dart:async';
 
-import 'package:protobuf/protobuf.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_video/protobuf/video_events/events.pb.dart';
 import 'package:stream_video/src/models/events/events.dart';
 import 'package:stream_video/src/video_service/room.dart';
 
-import '../../../protobuf/video_events/events.pb.dart';
-
 class ParticipantController {
+
+  
+  StreamSubscription<ParticipantEvent> onParticipantJoined(Function(ParticipantJoinEvent) handle ) {
+    return on<ParticipantJoinEvent>(
+        (event) => handle(event) );
+  }
+
   final _participantInvitedController = BehaviorSubject<ParticipantEvent>();
   VideoRoom? _room;
   set room(VideoRoom room) => _room = room;

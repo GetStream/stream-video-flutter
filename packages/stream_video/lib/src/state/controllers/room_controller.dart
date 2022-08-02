@@ -1,9 +1,17 @@
-import 'package:stream_video/src/state/controllers/controllers.dart';
+import 'dart:async';
+
+import 'package:stream_video/src/models/call_participant.dart';
+import 'package:stream_video/stream_video.dart';
 
 class RoomController {
+  RoomController() {
+    // _listener = participants.onParticipantJoined((event) =>
+    //     participants.room.add(event.payload.participant.toCallParticipant()));
+  }
   final calls = CallController();
 
   final participants = ParticipantController();
+  late final StreamSubscription<ParticipantEvent> _listener;
 
   final broadcasts = BroadcastController();
 
@@ -17,6 +25,7 @@ class RoomController {
 
   Future<void> disposeCall() async {
     await Future.wait([
+      _listener.cancel(),
       calls.dispose(),
       participants.dispose(),
       screenshares.dispose(),

@@ -28,5 +28,13 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>UIBackgroundModes</key>
+  	<array>
+    	<string>audio</string>
+  	</array>
+	<key>NSCameraUsageDescription</key>
+  	<string>Access camera</string>
+  	<key>NSMicrophoneUsageDescription</key>
+  	<string>Uses your microphone</string>
 </dict>
 </plist>

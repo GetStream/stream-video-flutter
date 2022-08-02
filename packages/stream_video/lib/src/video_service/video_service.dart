@@ -19,6 +19,7 @@ class VideoService {
     final roomOptions = RoomOptions(
       defaultScreenShareCaptureOptions:
           ScreenShareCaptureOptions(params: options.videoPresets),
+          
       defaultVideoPublishOptions:
           VideoPublishOptions(simulcast: options.simulcast),
       adaptiveStream: options.adaptiveStream,
@@ -27,10 +28,16 @@ class VideoService {
     );
 
     try {
-      await room.connect(url, token);
+      print("connecting to livekit");
+      print("uwith rl $url");
+      print("and token $token");
+      await room.connect("wss://$url", token,
+          connectOptions: connectOptions, roomOptions: roomOptions);
       // final listener = streamVideo.createListener();
       return VideoRoom(room: room);
     } catch (e, stack) {
+      await room.dispose();
+      // rethrow;
       throw StreamVideoError('''
       Unknown Exception Occurred: $e
       Stack trace: $stack

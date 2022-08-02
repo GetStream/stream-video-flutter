@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:livekit_client/livekit_client.dart' hide Participant;
 import 'package:stream_video/src/models/aliases.dart';
 import 'package:stream_video/src/models/call_participant.dart';
@@ -10,13 +11,11 @@ class VideoRoom {
 
   final Map<String, CallParticipant> _participants = {};
 
-  factory VideoRoom.create({required Room room}) => VideoRoom(room: room);
-
   void muteAudio() {
     localParticipant!.setMicrophoneEnabled(false);
   }
 
-    void unMuteAudio() {
+  void unMuteAudio() {
     localParticipant!.setMicrophoneEnabled(true);
   }
 
@@ -38,28 +37,17 @@ class VideoRoom {
       .where((element) => element.isOnline == false)
       .toList();
 
-  Map<String, StreamRemoteParticipant> get _remoteParticipants =>
-      Map.fromEntries(_room.participants.entries);
-  // _room.participants.entries.toList();
+ 
+  List<RoomParticipant> get allParticipants => [
+        RoomParticipant(localParticipant!),
+        ..._room.participants.entries
+            .map((e) => RoomParticipant(e.value))
+            .toList()
+      ];
 
-  Map<String, RoomParticipant> get roomParticipants =>
-      Map.fromEntries(_remoteParticipants.entries
-          .map((e) => MapEntry(e.key, RoomParticipant(e.value))));
-
-  Map<String, RoomParticipant> get allParticipants {
-    roomParticipants[localParticipant!.sid] =
-        RoomParticipant(localParticipant!);
-    return roomParticipants;
-  }
+  
 
   LocalParticipant? get localParticipant => _room.localParticipant;
 
   VideoConnectionStatus get connectionStatus => _room.connectionState.mapped;
-//   StreamEventsListener<StreamRoomEvent> createListener() =>
-//       _room.createListener();
-
-//   void addListener(void Function() onChange) => _room.addListener(onChange);
-
-//   void removeListener(void Function() onChange) =>
-//       _room.removeListener(onChange);
 }
