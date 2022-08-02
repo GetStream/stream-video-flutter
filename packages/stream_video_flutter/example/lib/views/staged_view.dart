@@ -51,8 +51,8 @@ class _StageViewState extends State<StageView> {
                   allParticipants[index].videoTracks.isNotEmpty &&
                           allParticipants[index].isCameraEnabled()
                       ? SizedBox(
-                          height: 150,
-                          width: 150,
+                          height: 200,
+                          width: 200,
                           child: StreamVideoTrackRenderer(
                               allParticipants[index].videoTracks[0].track!),
                         )
