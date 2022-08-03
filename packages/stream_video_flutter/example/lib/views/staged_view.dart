@@ -49,13 +49,10 @@ class _StageViewState extends State<StageView> {
               itemBuilder: (BuildContext ctx, int index) {
                 return Stack(children: [
                   allParticipants[index].videoTracks.isNotEmpty &&
+                          allParticipants[index].videoTracks[0].track != null &&
                           allParticipants[index].isCameraEnabled()
-                      ? SizedBox(
-                          height: 200,
-                          width: 200,
-                          child: StreamVideoTrackRenderer(
-                              allParticipants[index].videoTracks[0].track!),
-                        )
+                      ? StreamVideoTrackRenderer(
+                          allParticipants[index].videoTracks[0].track!)
                       : Container(
                           color: Colors.grey,
                         ),

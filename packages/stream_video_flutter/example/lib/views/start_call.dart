@@ -76,8 +76,8 @@ class _StartCallViewState extends State<StartCallView> {
                     .toList(),
                 type: StreamCallType.video);
              Navigator.of(context).pushNamed(StageView.routeName);
-            //TODO: client.startCall
-            print("startCall");
+    
+            print("starting call");
             //emit an event CallCreated
             // streamVideo.client.fakeIncomingCall("Sacha");
           }),
