@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:http/http.dart';
 import 'package:livekit_client/livekit_client.dart';
 import 'package:logging/logging.dart';
@@ -14,6 +16,7 @@ import 'package:stream_video/src/models/edge_server.dart';
 import 'package:stream_video/src/models/video_options.dart';
 import 'package:stream_video/src/state/state.dart';
 import 'package:stream_video/src/video_service/video_service.dart';
+import 'package:stream_video/src/video_service/webrtc_stats.dart';
 import 'package:stream_video/src/ws/websocket.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:tart/tart.dart';
@@ -40,6 +43,8 @@ class StreamVideoClient {
   final _tokenManager = TokenManager();
 
   late final VideoService _videoService;
+
+  late final StreamSubscription<StatsEvent>? statsListener;
   StreamVideoClient(
     String apiKey, {
     this.logLevel = Level.WARNING,
@@ -179,10 +184,10 @@ class StreamVideoClient {
         await selectEdgeServer(callId: id, latencyByEdge: latencyByEdge);
     final room = await _videoService.connect(
         url: edgeServer.url, token: edgeServer.token, options: videoOptions);
-    //TODO: remove fast connection setup from here
-    // await room.localParticipant!.setCameraEnabled(true);
-    // await room.localParticipant!.setMicrophoneEnabled(true);
-    _state.participants.room = room;
+    _state.participants.currentRoom = room;
+    // statsListener?.cancel();
+    statsListener = _state.participants.currentRoom
+        .onStatEvent((event) async => await reportCallStats(event));
     return room;
   }
 
@@ -213,10 +218,11 @@ class StreamVideoClient {
         callId: createCallResponse.call.id, latencyByEdge: latencyByEdge);
     final room = await _videoService.connect(
         url: edgeServer.url, token: edgeServer.token, options: videoOptions);
-    //TODO: remove fast connection setup from here
-    // await room.localParticipant!.setCameraEnabled(true);
-    // await room.localParticipant!.setMicrophoneEnabled(true);
-    _state.participants.room = room;
+
+    _state.participants.currentRoom = room;
+    // statsListener?.cancel();
+    statsListener = _state.participants.currentRoom
+        .onStatEvent((event) async => await reportCallStats(event));
     return room;
   }
 
@@ -278,6 +284,11 @@ class StreamVideoClient {
       Stack trace: $stack
       ''');
     }
+  }
+
+  Future<void> reportCallStats(StatsEvent event) async {
+    await Future.delayed(Duration(milliseconds: 300));
+    print("GOT EVENT $event");
   }
 }
 

@@ -81,6 +81,7 @@ class ClientState {
       _healthcheckController.stream.distinct();
 
   final _roomController = RoomController();
+  
 
   //TODO: set participants
 

@@ -1,13 +1,64 @@
-import 'package:collection/collection.dart';
+import 'dart:async';
+
 import 'package:livekit_client/livekit_client.dart' hide Participant;
 import 'package:stream_video/src/models/aliases.dart';
 import 'package:stream_video/src/models/call_participant.dart';
 import 'package:stream_video/src/video_service/room_participant.dart';
 import 'package:stream_video/src/video_service/video_connection_status.dart';
+import 'package:stream_video/src/video_service/webrtc_stats.dart';
 
 class VideoRoom {
-  VideoRoom({required Room room}) : _room = room;
+  VideoRoom({required Room room})
+      : _room = room,
+        _stats = WebRTCStats(room: room);
   final Room _room;
+
+  final WebRTCStats _stats;
+
+  Stream<StatsEvent> get statsStream => _stats.statsStream;
+
+  StreamSubscription<StatsEvent> onStatEvent(
+      Function(StatsEvent) handle) {
+    return on<StatsEvent>((event) => handle(event));
+  }
+
+  void registerPeer() {
+    final subscriberPeerConnection = _room.engine.subscriber?.pc;
+    if (subscriberPeerConnection != null) {
+      _stats.addConnection(
+        pc: subscriberPeerConnection,
+        peerId: 'subscriber',
+      );
+    }
+
+    //TODO: fix two timers bug
+
+    // final publisherPeerConnection = _room.engine.publisher?.pc;
+    // if (publisherPeerConnection != null) {
+    //   _stats.addConnection(
+    //     pc: publisherPeerConnection,
+    //     peerId: 'publisher',
+    //   );
+    // }
+
+  }
+
+    StreamSubscription<StatsEvent> listen(
+          FutureOr<void> Function(StatsEvent event) onEvent) =>
+      statsStream.listen(onEvent);
+
+    StreamSubscription<StatsEvent> on<E extends StatsEvent>(
+          FutureOr<void> Function(E) then,
+          {bool Function(E)? filter}) =>
+      listen((event) async {
+        // event must be E
+        if (event is! E) return;
+        // filter must be true (if filter is used)
+        if (filter != null && !filter(event)) return;
+        // cast to E
+        await then(event);
+      });
+
 
   final Map<String, CallParticipant> _participants = {};
 

@@ -9,12 +9,12 @@ class BottomControls extends StatelessWidget {
   }) : super(key: key);
   final VoidCallback onRefresh;
   VideoRoom room(BuildContext context) =>
-      StreamVideoProvider.of(context).client.participants.room;
+      StreamVideoProvider.of(context).client.participants.currentRoom;
   StreamLocalParticipant localParticipant(BuildContext context) =>
       StreamVideoProvider.of(context)
           .client
           .participants
-          .room
+          .currentRoom
           .localParticipant!;
 
   @override

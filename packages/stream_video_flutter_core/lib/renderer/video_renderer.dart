@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter_webrtc/flutter_webrtc.dart' show RTCVideoViewObjectFit;
+import 'package:flutter_webrtc/flutter_webrtc.dart' show RTCVideoViewObjectFit;
 // ignore: depend_on_referenced_packages
 import 'package:livekit_client/livekit_client.dart'
     show VideoTrackRenderer, VideoTrack, VideoViewMirrorMode;
@@ -14,7 +14,7 @@ class StreamVideoTrackRenderer extends StatelessWidget {
     return VideoTrackRenderer(
       track as VideoTrack,
       // mirrorMode: VideoViewMirrorMode.auto,
-      // fit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+      fit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
     );
   }
 }

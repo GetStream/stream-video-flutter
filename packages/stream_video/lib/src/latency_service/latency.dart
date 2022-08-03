@@ -1,8 +1,7 @@
 import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/video_models/models.pb.dart';
 import 'package:http/http.dart' as http;
-
-double toSeconds(int milliseconds) => milliseconds / 1000;
+import 'package:stream_video/src/core/utils/utils.dart';
 
 class LatencyService {
   final Logger? logger;
@@ -27,7 +26,7 @@ class LatencyService {
         final stopwatch = Stopwatch()..start();
         final _ = await http.get(url!);
         stopwatch.stop();
-        final durationInMs = stopwatch.elapsed.inSeconds;
+        final durationInMs = stopwatch.elapsed.inMilliseconds;
         measurementsSeconds.add(toSeconds(durationInMs));
       } catch (e) {
         logger?.warning("failed to measure latency to ${url}");

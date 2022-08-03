@@ -51,10 +51,16 @@ class _StageViewState extends State<StageView> {
                   allParticipants[index].videoTracks.isNotEmpty &&
                           allParticipants[index].videoTracks[0].track != null &&
                           allParticipants[index].isCameraEnabled()
-                      ? StreamVideoTrackRenderer(
-                          allParticipants[index].videoTracks[0].track!)
-                      : Container(
-                          color: Colors.grey,
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: StreamVideoTrackRenderer(
+                              allParticipants[index].videoTracks[0].track!),
+                        )
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            color: Colors.grey,
+                          ),
                         ),
                   Align(
                     alignment: FractionalOffset.bottomLeft,
@@ -87,5 +93,5 @@ class _StageViewState extends State<StageView> {
   }
 
   List<RoomParticipant> get allParticipants =>
-      widget.controller.room.allParticipants;
+      widget.controller.currentRoom.allParticipants;
 }
