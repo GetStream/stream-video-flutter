@@ -16,9 +16,11 @@ dart bin/client.dart
 ## TODOs
 - [x] twirp code generation tool
 - [x] SelectEdgeServer POC
+- [x] ws auth flow
+- [x] measure latencies
 - [ ] add protobuf submodule from GetStream/video instead of copy pasting every time
-- [ ] LiveKit wrapper
-- [ ] Sample app using LiveKit
+- [x] LiveKit wrapper
+- [x] Sample app using LiveKit
 - [ ] Sample app using lower level WebRTC client
 
 ## Notes
