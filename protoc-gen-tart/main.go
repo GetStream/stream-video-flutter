@@ -6,6 +6,7 @@ import (
 	"strings"
 	"text/template"
 
+	gengo "google.golang.org/protobuf/cmd/protoc-gen-go/internal_gengo"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
@@ -17,6 +18,7 @@ func main() {
 			}
 			generateFile(gen, f)
 		}
+		gen.SupportedFeatures = gengo.SupportedFeatures
 		return nil
 	})
 }
