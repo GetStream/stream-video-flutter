@@ -1,13 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:http/http.dart';
 import 'package:livekit_client/livekit_client.dart';
 import 'package:logging/logging.dart';
-import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbserver.dart';
-import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pbtwirp.dart';
-import 'package:stream_video/protobuf/video_events/events.pb.dart';
-import 'package:stream_video/protobuf/video_models/models.pb.dart'
+import 'package:stream_video/protobuf/google/protobuf/struct.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/call_v1/call.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pbtwirp.dart';
+import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart'
     hide EdgeServer;
+import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/src/core/error/error.dart';
 
 import 'package:stream_video/src/core/http/token_manager.dart';
@@ -37,14 +40,14 @@ class StreamVideoClientOptions {
 }
 
 class StreamVideoClient {
-  late final CallCoordinatorServiceProtobufClient _callCoordinatorService;
+  late final ClientRPCProtobufClient _callCoordinatorService;
   late final LatencyService _latencyService;
   late final WebSocketClient _ws;
   final _tokenManager = TokenManager();
 
   late final VideoService _videoService;
 
-  late final StreamSubscription<StatsEvent>? statsListener;
+  // late final StreamSubscription<StatsEvent>? statsListener;
   StreamVideoClient(
     String apiKey, {
     this.logLevel = Level.WARNING,
@@ -54,7 +57,7 @@ class StreamVideoClient {
     this.logHandlerFunction = StreamVideoClient.defaultLogHandler,
     WebSocketClient? ws,
   }) {
-    _callCoordinatorService = CallCoordinatorServiceProtobufClient(
+    _callCoordinatorService = ClientRPCProtobufClient(
       coordinatorUrl ?? "http://192.168.1.17:26991",
       "",
       hooks: ClientHooks(
@@ -66,7 +69,7 @@ class StreamVideoClient {
     _state = ClientState();
     _options = options ?? StreamVideoClientOptions();
     _ws = ws ?? WebSocketClient(logger: logger, state: _state);
-    _videoService = VideoService();
+    _videoService = VideoService(this);
     _latencyService = LatencyService(logger: logger);
   }
 
@@ -124,8 +127,7 @@ class StreamVideoClient {
 
   void fakeIncomingCall(String createdByUserId) {
     logger.info("faking call from $createdByUserId");
-    _state.calls
-        .emitCreated(CallCreated(call: Call(createdByUserId: createdByUserId)));
+    _state.calls.emitCreated(CallCreated(callMemberUserIds: [createdByUserId]));
   }
 
   Future<void> connectWs() async {
@@ -144,11 +146,14 @@ class StreamVideoClient {
       final token = await _tokenManager.loadToken();
       final ctx = _authorizationCtx(token);
 
-      final response = await _callCoordinatorService.selectEdgeServer(
+      final response = await _callCoordinatorService.getCallEdgeServer(
           ctx,
-          SelectEdgeServerRequest(
-              callId: callId, latencyByEdge: latencyByEdge));
-      return EdgeServer(token: response.token, url: response.edgeServer.url);
+          GetCallEdgeServerRequest(
+              callCid: callId,
+              measurements: LatencyMeasurements(measurements: latencyByEdge)));
+      return EdgeServer(
+          token: response.credentials.token,
+          url: response.credentials.server.url);
     } on TwirpError catch (e) {
       final method =
           e.getContext.value(ContextKeys.methodName) ?? 'unknown method';
@@ -165,8 +170,8 @@ class StreamVideoClient {
   }
 
   Future<VideoRoom> joinExistingCall({
-    required String id,
-    required StreamCallType type,
+    required String callId,
+    required StreamCallType callType,
     VideoOptions videoOptions = const VideoOptions(
       adaptiveStream: true,
       dynacast: true,
@@ -177,24 +182,29 @@ class StreamVideoClient {
     ),
     //TODO: expose more parameters
   }) async {
-    final edges = await joinCall(id: id, type: type);
+    final edges = await joinCall(callId: callId, callType: callType);
     final latencyByEdge =
         await _latencyService.measureLatencies(edges, _options.retries);
     final edgeServer =
-        await selectEdgeServer(callId: id, latencyByEdge: latencyByEdge);
+        await selectEdgeServer(callId: callId, latencyByEdge: latencyByEdge);
     final room = await _videoService.connect(
-        url: edgeServer.url, token: edgeServer.token, options: videoOptions);
-    _state.participants.currentRoom = room;
+      callId: callId,
+      callType: callType,
+      url: edgeServer.url,
+      token: edgeServer.token,
+      options: videoOptions,
+    );
+    // _state.participants.currentRoom = room;
     // statsListener?.cancel();
-    statsListener = _state.participants.currentRoom
-        .onStatEvent((event) async => await reportCallStats(event));
+    // statsListener = _state.participants.currentRoom
+    // .onStatEvent((event) async => await reportCallStats(event));
     return room;
   }
 
   Future<VideoRoom> startCall({
     required String id,
     required List<String> participantIds,
-    required StreamCallType type,
+    required StreamCallType callType,
     VideoOptions videoOptions = const VideoOptions(
       adaptiveStream: true,
       dynacast: true,
@@ -205,42 +215,61 @@ class StreamVideoClient {
     ),
     //TODO: expose more parameters
   }) async {
-    final createCallResponse =
-        await createCall(id: id, participantIds: participantIds, type: type);
+    final createCallResponse = await createCall(
+        callId: id, participantIds: participantIds, callType: callType);
     //TODO: is this debug stuff really useful?
-    assert(StreamCallType.video.rawType == createCallResponse.call.type,
+    assert(StreamCallType.video.rawType == createCallResponse.call.call.type,
         'call type from backend and client are different');
-
-    final edges = await joinCall(id: createCallResponse.call.id, type: type);
+    final callId = createCallResponse.call.call.id;
+    final edges = await joinCall(callId: callId, callType: callType);
     final latencyByEdge =
         await _latencyService.measureLatencies(edges, _options.retries);
-    final edgeServer = await selectEdgeServer(
-        callId: createCallResponse.call.id, latencyByEdge: latencyByEdge);
+    final edgeServer =
+        await selectEdgeServer(callId: callId, latencyByEdge: latencyByEdge);
     final room = await _videoService.connect(
-        url: edgeServer.url, token: edgeServer.token, options: videoOptions);
+      callId: callId,
+      callType: callType,
+      url: edgeServer.url,
+      token: edgeServer.token,
+      options: videoOptions,
+    );
 
     _state.participants.currentRoom = room;
     // statsListener?.cancel();
-    statsListener = _state.participants.currentRoom
-        .onStatEvent((event) async => await reportCallStats(event));
+    // statsListener = _state.participants.currentRoom
+    // .onStatEvent((event) async => await reportCallStats(event));
     return room;
   }
 
   Future<CreateCallResponse> createCall(
-      {required String id,
+      {required String callId,
       required List<String> participantIds,
-      required StreamCallType type
+      required StreamCallType callType
       //TODO: expose more parameters
 
       }) async {
     try {
       final token = await _tokenManager.loadToken();
       final ctx = _authorizationCtx(token);
+      const jsonEncoder = JsonEncoder();
+      final members = Map<String, MemberInput>.fromIterable(
+        participantIds,
+        key: (item) => item,
+        value: (item) => MemberInput(
+          role: "admin",
+          customJson: utf8.encode(
+            jsonEncoder.convert({}),
+          ),
+        ),
+      );
 
       final response = await _callCoordinatorService.createCall(
           ctx,
           CreateCallRequest(
-              id: id, participantIds: participantIds, type: type.rawType));
+            id: callId,
+            input: CreateCallInput(members: members),
+            type: callType.rawType,
+          ));
       return response;
     } on TwirpError catch (e) {
       final method =
@@ -262,20 +291,25 @@ class StreamVideoClient {
         Context(), {'authorization': 'Bearer ${token.rawValue}}'});
   }
 
-  Future<List<Edge>> joinCall(
-      {required String id, required StreamCallType type}) async {
+  Future<LatencyMeasurementClaim> joinCall({
+    required String callId,
+    required StreamCallType callType,
+  }) async {
     try {
       final token = await _tokenManager.loadToken();
       final ctx = _authorizationCtx(token);
 
       final response = await _callCoordinatorService.joinCall(
-          ctx, JoinCallRequest(id: id, type: type.rawType));
-      return response.edges;
+          ctx,
+          JoinCallRequest(
+              id: callId, type: callType.rawType, datacenterId: 'milan'));
+      return response.latencyClaim;
     } on TwirpError catch (e) {
       final method =
           e.getContext.value(ContextKeys.methodName) ?? 'unknown method';
       throw StreamVideoError(
-          'Twirp error on method: $method. Code: ${e.getCode}. Message: ${e.getMsg}');
+        'Twirp error on method: $method. Code: ${e.getCode}. Message: ${e.getMsg}',
+      );
     } on InvalidTwirpHeader catch (e) {
       throw StreamVideoError('InvalidTwirpHeader: $e');
     } catch (e, stack) {
@@ -286,9 +320,36 @@ class StreamVideoClient {
     }
   }
 
-  Future<void> reportCallStats(StatsEvent event) async {
-    await Future.delayed(Duration(milliseconds: 300));
-    print("GOT EVENT $event");
+  Future<void> reportCallStats({
+    required StreamCallType callType,
+    required String callId,
+    required Struct stats,
+  }) async {
+    try {
+      final token = await _tokenManager.loadToken();
+      final ctx = _authorizationCtx(token);
+
+      await _callCoordinatorService.reportCallStats(
+          ctx,
+          ReportCallStatsRequest(
+            callId: callId,
+            callType: callType.rawType,
+            stats: stats,
+          ));
+    } on TwirpError catch (e) {
+      final method =
+          e.getContext.value(ContextKeys.methodName) ?? 'unknown method';
+      throw StreamVideoError(
+        'Twirp error on method: $method. Code: ${e.getCode}. Message: ${e.getMsg}',
+      );
+    } on InvalidTwirpHeader catch (e) {
+      throw StreamVideoError('InvalidTwirpHeader: $e');
+    } catch (e, stack) {
+      throw StreamVideoError('''
+      Unknown Exception Occurred: $e
+      Stack trace: $stack
+      ''');
+    }
   }
 }
 

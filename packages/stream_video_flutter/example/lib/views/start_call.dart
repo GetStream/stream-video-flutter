@@ -26,7 +26,7 @@ class _StartCallViewState extends State<StartCallView> {
   @override
   void initState() {
     widget.callController.on<CallCreatedEvent>((event) {
-      caller = event.payload.call.createdByUserId;
+      caller = event.payload.callMemberUserIds.first;
       showRinger(context, caller: caller);
     });
     super.initState();
@@ -74,9 +74,9 @@ class _StartCallViewState extends State<StartCallView> {
                     .getIsChecked()
                     .map((e) => e.userInfo.id)
                     .toList(),
-                type: StreamCallType.video);
-             Navigator.of(context).pushNamed(StageView.routeName);
-    
+                callType: StreamCallType.video);
+            Navigator.of(context).pushNamed(StageView.routeName);
+
             print("starting call");
             //emit an event CallCreated
             // streamVideo.client.fakeIncomingCall("Sacha");

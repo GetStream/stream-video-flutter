@@ -14,9 +14,9 @@ void main(List<String> arguments) async {
   await client.connectWs();
 
   await client.createCall(
-      id: "123",
+      callId: "123",
       participantIds: [
         "whatever",
       ],
-      type: StreamCallType.video);
+      callType: StreamCallType.video);
 }

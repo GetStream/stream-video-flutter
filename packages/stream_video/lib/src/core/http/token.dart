@@ -1,5 +1,4 @@
-
-import 'package:stream_video/protobuf/video_models/models.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/user_v1/user.pbserver.dart';
 
 /// A function which can be used to request a Stream Chat API token from your
 /// own backend server

@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/src/models/events/events.dart';
-import 'package:stream_video/protobuf/video_events/events.pb.dart';
 
 class RecordingController {
   final _recordingController = BehaviorSubject<RecordingEvent>();

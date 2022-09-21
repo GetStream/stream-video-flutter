@@ -3,31 +3,42 @@ import 'dart:async';
 import 'package:livekit_client/livekit_client.dart' hide Participant;
 import 'package:stream_video/src/models/aliases.dart';
 import 'package:stream_video/src/models/call_participant.dart';
+import 'package:stream_video/src/models/call_types.dart';
 import 'package:stream_video/src/video_service/room_participant.dart';
 import 'package:stream_video/src/video_service/video_connection_status.dart';
 import 'package:stream_video/src/video_service/webrtc_stats.dart';
+import 'package:stream_video/stream_video.dart';
 
 class VideoRoom {
-  VideoRoom({required Room room})
-      : _room = room,
-        _stats = WebRTCStats(room: room);
+  VideoRoom({
+    required Room room,
+    required this.callId,
+    required this.callType,
+    required StreamVideoClient client,
+  })  : _room = room,
+        _stats = WebRTCStats(room: room, client: client);
   final Room _room;
+
+  final String callId;
+  final StreamCallType callType;
 
   final WebRTCStats _stats;
 
-  Stream<StatsEvent> get statsStream => _stats.statsStream;
+  // Stream<StatsEvent> get statsStream => _stats.statsStream;
 
-  StreamSubscription<StatsEvent> onStatEvent(
-      Function(StatsEvent) handle) {
-    return on<StatsEvent>((event) => handle(event));
-  }
+  // StreamSubscription<StatsEvent> onStatEvent(Function(StatsEvent) handle) {
+  //   return on<StatsEvent>((event) => handle(event));
+  // }
 
   void registerPeer() {
     final subscriberPeerConnection = _room.engine.subscriber?.pc;
-    if (subscriberPeerConnection != null) {
-      _stats.addConnection(
-        pc: subscriberPeerConnection,
-        peerId: 'subscriber',
+    final publisherPeerConnection = _room.engine.publisher?.pc;
+    if (subscriberPeerConnection != null && publisherPeerConnection != null) {
+      _stats.addConnections(
+        publisherPc: publisherPeerConnection,
+        subscriberPc: subscriberPeerConnection,
+        callId: callId,
+        callType: callType,
       );
     }
 
@@ -40,25 +51,23 @@ class VideoRoom {
     //     peerId: 'publisher',
     //   );
     // }
-
   }
 
-    StreamSubscription<StatsEvent> listen(
-          FutureOr<void> Function(StatsEvent event) onEvent) =>
-      statsStream.listen(onEvent);
+  // StreamSubscription<StatsEvent> listen(
+  //         FutureOr<void> Function(StatsEvent event) onEvent) =>
+  //     statsStream.listen(onEvent);
 
-    StreamSubscription<StatsEvent> on<E extends StatsEvent>(
-          FutureOr<void> Function(E) then,
-          {bool Function(E)? filter}) =>
-      listen((event) async {
-        // event must be E
-        if (event is! E) return;
-        // filter must be true (if filter is used)
-        if (filter != null && !filter(event)) return;
-        // cast to E
-        await then(event);
-      });
-
+  // StreamSubscription<StatsEvent> on<E extends StatsEvent>(
+  //         FutureOr<void> Function(E) then,
+  //         {bool Function(E)? filter}) =>
+  //     listen((event) async {
+  //       // event must be E
+  //       if (event is! E) return;
+  //       // filter must be true (if filter is used)
+  //       if (filter != null && !filter(event)) return;
+  //       // cast to E
+  //       await then(event);
+  //     });
 
   final Map<String, CallParticipant> _participants = {};
 

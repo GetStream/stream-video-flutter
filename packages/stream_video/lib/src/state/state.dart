@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pbserver.dart';
+import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/src/models/events/events.dart';
-import 'package:stream_video/protobuf/video_events/events.pb.dart';
-import 'package:stream_video/protobuf/video_models/models.pb.dart';
 import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/state/controllers/controllers.dart';
 import 'package:stream_video/src/state/controllers/room_controller.dart';
+
+import 'controllers/call_members_controller.dart';
 
 class StreamCallState {
   final String? userId;
@@ -68,16 +71,16 @@ class ClientState {
   /// The current user
   UserInfo? get currentUser => _currentUserController.valueOrNull;
 
-  final _healthcheckController = BehaviorSubject<Healthcheck>();
+  final _healthcheckController = BehaviorSubject<WebsocketHealthcheck>();
 
-  set healthcheck(Healthcheck healthcheck) =>
+  set healthcheck(WebsocketHealthcheck healthcheck) =>
       _healthcheckController.add(healthcheck);
 
   /// The current connection status value
-  Healthcheck get healthcheck => _healthcheckController.value;
+  WebsocketHealthcheck get healthcheck => _healthcheckController.value;
 
   /// This notifies of Healthcheck changes
-  Stream<Healthcheck> get healthcheckStream =>
+  Stream<WebsocketHealthcheck> get healthcheckStream =>
       _healthcheckController.stream.distinct();
 
   final _roomController = RoomController();
@@ -91,13 +94,14 @@ class ClientState {
 
   BroadcastController get broadcasts => _roomController.broadcasts;
 
-  ScreenshareController get screenshares => _roomController.screenshares;
+  // ScreenshareController get screenshares => _roomController.screenshares;
 
-  AudioController get audios => _roomController.audios;
+  // AudioController get audios => _roomController.audios;
 
-  VideoController get videos => _roomController.videos;
+  // VideoController get videos => _roomController.videos;
 
   RecordingController get recordings => _roomController.recordings;
+  CallMembersController get callMembers => _roomController.callMembers;
 
   final _userUpdatedController = BehaviorSubject<UserUpdated>();
 
@@ -111,16 +115,16 @@ class ClientState {
   Stream<UserUpdated> get userUpdatedStream =>
       _userUpdatedController.stream.distinct();
 
-  final _authPayloadController = BehaviorSubject<AuthPayload>();
+  final _authPayloadController = BehaviorSubject<WebsocketAuthRequest>();
 
-  set authPayload(AuthPayload authPayload) =>
+  set authPayload(WebsocketAuthRequest authPayload) =>
       _authPayloadController.add(authPayload);
 
   /// The current connection status value
-  AuthPayload get authPayload => _authPayloadController.value;
+  WebsocketAuthRequest get authPayload => _authPayloadController.value;
 
   /// This notifies of Healthcheck changes
-  Stream<AuthPayload> get authPayloadStream =>
+  Stream<WebsocketAuthRequest> get authPayloadStream =>
       _authPayloadController.stream.distinct();
 
   Future<void> dispose() async {

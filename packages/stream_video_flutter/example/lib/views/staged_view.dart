@@ -1,7 +1,6 @@
 import 'package:example/controls.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-import 'package:collection/collection.dart';
 
 // class CallArgs {
 //   final String callId;

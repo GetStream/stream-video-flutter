@@ -1,23 +1,24 @@
 import 'package:logging/logging.dart';
-import 'package:stream_video/protobuf/video_models/models.pb.dart';
 import 'package:http/http.dart' as http;
+import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
 import 'package:stream_video/src/core/utils/utils.dart';
 
 class LatencyService {
   final Logger? logger;
   LatencyService({this.logger});
 
-  Future<Map<String, Latency>> measureLatencies(List<Edge> edges,
+  Future<Map<String, Latency>> measureLatencies(LatencyMeasurementClaim edges,
       [int tries = 1]) async {
-    final latencies =
-        await Future.wait(edges.map((edge) => _measureLatency(edge, tries)));
+    final latencies = await Future.wait(
+        edges.endpoints.map((edge) => _measureLatency(edge, tries)));
 
     return Map.fromEntries(latencies);
   }
 
-  Future<MapEntry<String, Latency>> _measureLatency(Edge egde,
+  Future<MapEntry<String, Latency>> _measureLatency(LatencyEndpoint edge,
       [int tries = 1]) async {
-    final latencyUrl = "http://192.168.1.17:5764";  //egde.latencyUrl;
+    final latencyUrl =
+        edge.url; // "http://192.168.1.17:5764";  //egde.latencyUrl;
     final url = Uri.tryParse(latencyUrl);
     final measurementsSeconds = <double>[];
 
@@ -33,6 +34,6 @@ class LatencyService {
       }
     }
     return MapEntry<String, Latency>(
-        latencyUrl, Latency(measurementsSeconds: measurementsSeconds));
+        edge.id, Latency(measurementsSeconds: measurementsSeconds));
   }
 }

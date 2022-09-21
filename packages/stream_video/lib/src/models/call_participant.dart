@@ -1,5 +1,5 @@
-import 'package:stream_video/protobuf/video_coordinator_rpc/coordinator_service.pb.dart';
-import 'package:stream_video/protobuf/video_models/models.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/participant_v1/participant.pb.dart';
 
 class CallParticipant {
   final String id;
@@ -33,7 +33,7 @@ extension VideoParticipantX on Participant {
       );
 }
 
-extension JoinCallResponseX on JoinCallResponse {
-  List<CallParticipant> callParticipants() =>
-      callState.participants.map((e) => e.toCallParticipant()).toList();
-}
+// extension JoinCallResponseX on JoinCallResponse {
+//   List<CallParticipant> callParticipants() =>
+//       callState.participants.map((e) => e.toCallParticipant()).toList();
+// }
