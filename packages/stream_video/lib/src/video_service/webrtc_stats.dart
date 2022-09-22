@@ -8,7 +8,7 @@ import 'package:uuid/uuid.dart';
 import 'package:webrtc_interface/src/rtc_peerconnection.dart';
 import 'package:webrtc_interface/src/rtc_stats_report.dart';
 
-import '../../protobuf/google/protobuf/struct.pb.dart';
+import 'package:stream_video/protobuf/google/protobuf/struct.pb.dart';
 
 // class Constants {
 //   static String mediaType = 'mediaType';
