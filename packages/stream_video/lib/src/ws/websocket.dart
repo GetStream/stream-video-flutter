@@ -86,10 +86,10 @@ class WebSocketClient {
           {
             return _handleCallCreated(receivedEvent.callCreated);
           }
-        case WebsocketEvent_Event.callRinging:
-          {
-            return _handleCallRinging(receivedEvent.callRinging);
-          }
+        // case WebsocketEvent_Event.callRinging:
+        //   {
+        //     return _handleCallRinging(receivedEvent.callRinging);
+        //   }
         case WebsocketEvent_Event.callUpdated:
           {
             return _handlerCallUpdated(receivedEvent.callUpdated);
@@ -135,14 +135,14 @@ class WebSocketClient {
         //   {
         //     return _handleParticipantLeft(receivedEvent.participantLeft);
         //   }
-        case WebsocketEvent_Event.broadcastStarted:
-          {
-            return _handleBroadcastStarted(receivedEvent.broadcastStarted);
-          }
-        case WebsocketEvent_Event.broadcastEnded:
-          {
-            return _handleBroadcastEnded(receivedEvent.broadcastEnded);
-          }
+        // case WebsocketEvent_Event.broadcastStarted:
+        //   {
+        //     return _handleBroadcastStarted(receivedEvent.broadcastStarted);
+        //   }
+        // case WebsocketEvent_Event.broadcastEnded:
+        //   {
+        //     return _handleBroadcastEnded(receivedEvent.broadcastEnded);
+        //   }
         // case WebsocketEvent_EventPayload.authPayload:
         //   {
         //     return _handleAuthPayload(receivedEvent.authPayload);
@@ -172,17 +172,21 @@ class WebSocketClient {
         //   {
         //     return _handleScreenshareStopped(receivedEvent.screenshareStopped);
         //   }
-        case WebsocketEvent_Event.recordingStarted:
-          {
-            return _handleRecordingStarted(receivedEvent.recordingStarted);
-          }
-        case WebsocketEvent_Event.recordingStopped:
-          {
-            return _handleRecordingStopped(receivedEvent.recordingStopped);
-          }
+        // case WebsocketEvent_Event.recordingStarted:
+        //   {
+        //     return _handleRecordingStarted(receivedEvent.recordingStarted);
+        //   }
+        // case WebsocketEvent_Event.recordingStopped:
+        //   {
+        //     return _handleRecordingStopped(receivedEvent.recordingStopped);
+        //   }
         case WebsocketEvent_Event.notSet:
           // TODO: Handle this case.
           break;
+        case WebsocketEvent_Event.callStarted:
+          {
+            return _handleCallStarted(receivedEvent.callStarted);
+          }
       }
 
       // handler.call(receivedEvent);
@@ -231,10 +235,10 @@ class WebSocketClient {
     _state.healthcheck = event;
   }
 
-  void _handleCallRinging(CallRinging event) {
-    _logger?.info('CallRinging event received : ${event.toString()}');
-    _state.calls.emitRinging(event);
-  }
+  // void _handleCallRinging(CallRinging event) {
+  //   _logger?.info('CallRinging event received : ${event.toString()}');
+  //   _state.calls.emitRinging(event);
+  // }
 
   void _handleCallCreated(CallCreated event) {
     _logger?.info('CallCreated event received : ${event.toString()}');
@@ -254,6 +258,11 @@ class WebSocketClient {
   void _handleCallDeleted(CallDeleted event) {
     _logger?.info('CallDeleted event received : ${event.toString()}');
     _state.calls.emitDeleted(event);
+  }
+
+   void _handleCallStarted(CallStarted event) {
+       _logger?.info('CallStarted event received : ${event.toString()}');
+    _state.calls.emitStarted(event);
   }
 
   void _handleUserUpdated(UserUpdated event) {
@@ -289,20 +298,20 @@ class WebSocketClient {
   //   _state.participants.emitLeft(event);
   // }
 
-  void _handleBroadcastStarted(BroadcastStarted event) {
-    _logger?.info('BroadcastStarted event received : ${event.toString()}');
-    _state.broadcasts.emitStarted(event);
-  }
+  // void _handleBroadcastStarted(BroadcastStarted event) {
+  //   _logger?.info('BroadcastStarted event received : ${event.toString()}');
+  //   _state.broadcasts.emitStarted(event);
+  // }
 
-  void _handleBroadcastEnded(BroadcastEnded event) {
-    _logger?.info('BroadcastEnded event received : ${event.toString()}');
-    _state.broadcasts.emitEnded(event);
-  }
+  // void _handleBroadcastEnded(BroadcastEnded event) {
+  //   _logger?.info('BroadcastEnded event received : ${event.toString()}');
+  //   _state.broadcasts.emitEnded(event);
+  // }
 
-  void _handleAuthPayload(WebsocketAuthRequest event) {
-    _logger?.info('AuthPayload event received : ${event.toString()}');
-    _state.authPayload = event;
-  }
+  // void _handleAuthPayload(WebsocketAuthRequest event) {
+  //   _logger?.info('AuthPayload event received : ${event.toString()}');
+  //   _state.authPayload = event;
+  // }
 
   // void _handleAudioMuted(AudioMuted event) {
   //   _logger?.info('AudioMuted event received : ${event.toString()}');
@@ -334,15 +343,15 @@ class WebSocketClient {
   //   _state.screenshares.emitStopped(event);
   // }
 
-  void _handleRecordingStarted(RecordingStarted event) {
-    _logger?.info('RecordingStarted event received : ${event.toString()}');
-    _state.recordings.emitStarted(event);
-  }
+  // void _handleRecordingStarted(RecordingStarted event) {
+  //   _logger?.info('RecordingStarted event received : ${event.toString()}');
+  //   _state.recordings.emitStarted(event);
+  // }
 
-  void _handleRecordingStopped(RecordingStopped event) {
-    _logger?.info('RecordingStopped event received : ${event.toString()}');
-    _state.recordings.emitStopped(event);
-  }
+  // void _handleRecordingStopped(RecordingStopped event) {
+  //   _logger?.info('RecordingStopped event received : ${event.toString()}');
+  //   _state.recordings.emitStopped(event);
+  // }
 
   void _handleCallMembersUpdated(CallMembersUpdated event) {
     _logger?.info('CallMembersUpdated event received : ${event.toString()}');
@@ -353,4 +362,7 @@ class WebSocketClient {
      _logger?.info('CallMembersDeleted event received : ${event.toString()}');
     _state.callMembers.emitDeleted(event);
   }
+  
+ 
 }
+

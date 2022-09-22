@@ -6,14 +6,11 @@ import 'package:http/http.dart' as http;
 import 'package:protobuf/protobuf.dart';
 import 'package:tart/tart.dart' as twirp;
 import 'client_rpc.pb.dart';
-import '../google/protobuf/duration.pb.dart';
 import '../google/protobuf/struct.pb.dart';
-import '../google/protobuf/timestamp.pb.dart';
-import '../video/coordinator/client_v1_rpc/envelopes.pb.dart';
 import '../video/coordinator/call_v1/call.pb.dart';
+import '../video/coordinator/client_v1_rpc/envelopes.pb.dart';
 import '../video/coordinator/edge_v1/edge.pb.dart';
 import '../video/coordinator/push_v1/push.pb.dart';
-import '../video/coordinator/stat_v1/stat.pb.dart';
 import '../video/coordinator/utils_v1/utils.pb.dart';
 
 
@@ -43,8 +40,6 @@ abstract class ClientRPC {
   Future<UpdateCallMembersResponse> updateCallMembers(twirp.Context ctx, UpdateCallMembersRequest req);
   // DeleteMembers deletes members from a room.// TODO: response with room data
   Future<DeleteCallMembersResponse> deleteCallMembers(twirp.Context ctx, DeleteCallMembersRequest req);
-  
-  Future<QueryCallTimelineEventsResponse> queryCallTimelineEvents(twirp.Context ctx, QueryCallTimelineEventsRequest req);
   
   Future<SendCustomEventResponse> sendCustomEvent(twirp.Context ctx, SendCustomEventRequest req);
   // endpoint for storing stats (perhaps we should move this to the SFU layer though)
@@ -328,28 +323,6 @@ class ClientRPCJSONClient implements ClientRPC {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/DeleteCallMembers');
       final data = await doJSONRequest(ctx, url, hooks, req);
       final DeleteCallMembersResponse res = DeleteCallMembersResponse.create();
-      res.mergeFromProto3Json(json.decode(data));
-      return Future.value(res);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<QueryCallTimelineEventsResponse> queryCallTimelineEvents(twirp.Context ctx, QueryCallTimelineEventsRequest req) async {
-    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
-    ctx = twirp.withServiceName(ctx, 'ClientRPC');
-    ctx = twirp.withMethodName(ctx, 'QueryCallTimelineEvents');
-    return interceptor((ctx, req) {
-      return callQueryCallTimelineEvents(ctx, req);
-    })(ctx, req);
-  }
-
-  Future<QueryCallTimelineEventsResponse> callQueryCallTimelineEvents(twirp.Context ctx, QueryCallTimelineEventsRequest req) async {
-    try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/QueryCallTimelineEvents');
-      final data = await doJSONRequest(ctx, url, hooks, req);
-      final QueryCallTimelineEventsResponse res = QueryCallTimelineEventsResponse.create();
       res.mergeFromProto3Json(json.decode(data));
       return Future.value(res);
     } catch (e) {
@@ -719,28 +692,6 @@ class ClientRPCProtobufClient implements ClientRPC {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/DeleteCallMembers');
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final DeleteCallMembersResponse res = DeleteCallMembersResponse.create();
-      res.mergeFromBuffer(data);
-      return Future.value(res);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<QueryCallTimelineEventsResponse> queryCallTimelineEvents(twirp.Context ctx, QueryCallTimelineEventsRequest req) async {
-    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
-    ctx = twirp.withServiceName(ctx, 'ClientRPC');
-    ctx = twirp.withMethodName(ctx, 'QueryCallTimelineEvents');
-    return interceptor((ctx, req) {
-      return callQueryCallTimelineEvents(ctx, req);
-    })(ctx, req);
-  }
-
-  Future<QueryCallTimelineEventsResponse> callQueryCallTimelineEvents(twirp.Context ctx, QueryCallTimelineEventsRequest req) async {
-    try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/QueryCallTimelineEvents');
-      final data = await doProtobufRequest(ctx, url, hooks, req);
-      final QueryCallTimelineEventsResponse res = QueryCallTimelineEventsResponse.create();
       res.mergeFromBuffer(data);
       return Future.value(res);
     } catch (e) {

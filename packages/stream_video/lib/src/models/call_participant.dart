@@ -1,5 +1,6 @@
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/participant_v1/participant.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/user_v1/user.pb.dart';
 
 class CallParticipant {
   final String id;
@@ -21,19 +22,19 @@ class CallParticipant {
   });
 }
 
-extension VideoParticipantX on Participant {
+extension VideoParticipantX on User {
   CallParticipant toCallParticipant() => CallParticipant(
-        id: user.id,
+        id: id,
         role: role,
-        name: user.name.isEmpty ? user.id : user.name,
-        profileImageURL: user.imageUrl,
-        isOnline: online,
-        hasVideo: video,
-        hasAudio: audio,
+        name: name.isEmpty ? id : name,
+        profileImageURL: imageUrl,
+        isOnline: false,
+        hasVideo: false,
+        hasAudio: false,
       );
 }
 
-// extension JoinCallResponseX on JoinCallResponse {
-//   List<CallParticipant> callParticipants() =>
-//       callState.participants.map((e) => e.toCallParticipant()).toList();
-// }
+extension JoinCallResponseX on JoinCallResponse {
+  List<CallParticipant> callParticipants() =>
+      call.users.values.map((e) => e.toCallParticipant()).toList();
+}

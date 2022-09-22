@@ -11,13 +11,13 @@ mixin CoordinatorEvent implements StreamVideoEvent {}
 
 mixin CallEvent implements CoordinatorEvent {}
 
-class CallRingingEvent with CallEvent {
-  const CallRingingEvent(this.payload);
-  final CallRinging payload;
+// class CallRingingEvent with CallEvent {
+//   const CallRingingEvent(this.payload);
+//   final CallRinging payload;
 
-  @override
-  String toString() => 'call.ringing ${payload.toString()}';
-}
+//   @override
+//   String toString() => 'call.ringing ${payload.toString()}';
+// }
 
 class CallCreatedEvent with CallEvent {
   const CallCreatedEvent(this.payload);
@@ -40,7 +40,15 @@ class CallEndedEvent with CallEvent {
   final CallEnded payload;
 
   @override
-  String toString() => 'call.updated ${payload.toString()}';
+  String toString() => 'call.ended ${payload.toString()}';
+}
+
+class CallStartedEvent with CallEvent {
+  const CallStartedEvent(this.payload);
+  final CallStarted payload;
+
+  @override
+  String toString() => 'call.deleted ${payload.toString()}';
 }
 
 class CallDeletedEvent with CallEvent {
@@ -68,7 +76,6 @@ class CallMembersDeletedEvent with CallMembersEvent {
   @override
   String toString() => 'callMembers.deleted ${payload.toString()}';
 }
-
 
 // mixin ParticipantEvent implements CoordinatorEvent {}
 

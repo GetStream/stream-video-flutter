@@ -14,11 +14,8 @@ import 'envelopes.pb.dart' as $3;
 import '../edge_v1/edge.pb.dart' as $4;
 import '../call_v1/call.pb.dart' as $0;
 import '../utils_v1/utils.pb.dart' as $5;
-import '../../../google/protobuf/duration.pb.dart' as $6;
-import '../../../google/protobuf/timestamp.pb.dart' as $7;
-import '../stat_v1/stat.pb.dart' as $8;
-import '../push_v1/push.pb.dart' as $9;
-import '../../../google/protobuf/struct.pb.dart' as $10;
+import '../push_v1/push.pb.dart' as $6;
+import '../../../google/protobuf/struct.pb.dart' as $7;
 
 import 'client_rpc.pbenum.dart';
 
@@ -1389,197 +1386,15 @@ class GetCallEdgeServerResponse extends $pb.GeneratedMessage {
   $4.Credentials ensureCredentials() => $_ensure(1);
 }
 
-class QueryCallTimelineEventsRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'QueryCallTimelineEventsRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
-    ..aOM<$6.Duration>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'duration', subBuilder: $6.Duration.create)
-    ..aOM<$7.Timestamp>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'since', subBuilder: $7.Timestamp.create)
-    ..hasRequiredFields = false
-  ;
-
-  QueryCallTimelineEventsRequest._() : super();
-  factory QueryCallTimelineEventsRequest({
-    $core.String? type,
-    $core.String? id,
-    $6.Duration? duration,
-    $7.Timestamp? since,
-  }) {
-    final _result = create();
-    if (type != null) {
-      _result.type = type;
-    }
-    if (id != null) {
-      _result.id = id;
-    }
-    if (duration != null) {
-      _result.duration = duration;
-    }
-    if (since != null) {
-      _result.since = since;
-    }
-    return _result;
-  }
-  factory QueryCallTimelineEventsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory QueryCallTimelineEventsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  QueryCallTimelineEventsRequest clone() => QueryCallTimelineEventsRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  QueryCallTimelineEventsRequest copyWith(void Function(QueryCallTimelineEventsRequest) updates) => super.copyWith((message) => updates(message as QueryCallTimelineEventsRequest)) as QueryCallTimelineEventsRequest; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static QueryCallTimelineEventsRequest create() => QueryCallTimelineEventsRequest._();
-  QueryCallTimelineEventsRequest createEmptyInstance() => create();
-  static $pb.PbList<QueryCallTimelineEventsRequest> createRepeated() => $pb.PbList<QueryCallTimelineEventsRequest>();
-  @$core.pragma('dart2js:noInline')
-  static QueryCallTimelineEventsRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<QueryCallTimelineEventsRequest>(create);
-  static QueryCallTimelineEventsRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get type => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set type($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasType() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearType() => clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get id => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set id($core.String v) { $_setString(1, v); }
-  @$pb.TagNumber(2)
-  $core.bool hasId() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearId() => clearField(2);
-
-  @$pb.TagNumber(3)
-  $6.Duration get duration => $_getN(2);
-  @$pb.TagNumber(3)
-  set duration($6.Duration v) { setField(3, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasDuration() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearDuration() => clearField(3);
-  @$pb.TagNumber(3)
-  $6.Duration ensureDuration() => $_ensure(2);
-
-  @$pb.TagNumber(4)
-  $7.Timestamp get since => $_getN(3);
-  @$pb.TagNumber(4)
-  set since($7.Timestamp v) { setField(4, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasSince() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearSince() => clearField(4);
-  @$pb.TagNumber(4)
-  $7.Timestamp ensureSince() => $_ensure(3);
-}
-
-class QueryCallTimelineEventsResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'QueryCallTimelineEventsResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
-    ..aOM<$7.Timestamp>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'start', subBuilder: $7.Timestamp.create)
-    ..aOM<$7.Timestamp>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'end', subBuilder: $7.Timestamp.create)
-    ..aOM<$7.Timestamp>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'next', subBuilder: $7.Timestamp.create)
-    ..pc<$8.CallParticipantTimeline>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participantEvents', $pb.PbFieldType.PM, subBuilder: $8.CallParticipantTimeline.create)
-    ..hasRequiredFields = false
-  ;
-
-  QueryCallTimelineEventsResponse._() : super();
-  factory QueryCallTimelineEventsResponse({
-    $7.Timestamp? start,
-    $7.Timestamp? end,
-    $7.Timestamp? next,
-    $core.Iterable<$8.CallParticipantTimeline>? participantEvents,
-  }) {
-    final _result = create();
-    if (start != null) {
-      _result.start = start;
-    }
-    if (end != null) {
-      _result.end = end;
-    }
-    if (next != null) {
-      _result.next = next;
-    }
-    if (participantEvents != null) {
-      _result.participantEvents.addAll(participantEvents);
-    }
-    return _result;
-  }
-  factory QueryCallTimelineEventsResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory QueryCallTimelineEventsResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  QueryCallTimelineEventsResponse clone() => QueryCallTimelineEventsResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  QueryCallTimelineEventsResponse copyWith(void Function(QueryCallTimelineEventsResponse) updates) => super.copyWith((message) => updates(message as QueryCallTimelineEventsResponse)) as QueryCallTimelineEventsResponse; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static QueryCallTimelineEventsResponse create() => QueryCallTimelineEventsResponse._();
-  QueryCallTimelineEventsResponse createEmptyInstance() => create();
-  static $pb.PbList<QueryCallTimelineEventsResponse> createRepeated() => $pb.PbList<QueryCallTimelineEventsResponse>();
-  @$core.pragma('dart2js:noInline')
-  static QueryCallTimelineEventsResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<QueryCallTimelineEventsResponse>(create);
-  static QueryCallTimelineEventsResponse? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $7.Timestamp get start => $_getN(0);
-  @$pb.TagNumber(1)
-  set start($7.Timestamp v) { setField(1, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasStart() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearStart() => clearField(1);
-  @$pb.TagNumber(1)
-  $7.Timestamp ensureStart() => $_ensure(0);
-
-  @$pb.TagNumber(2)
-  $7.Timestamp get end => $_getN(1);
-  @$pb.TagNumber(2)
-  set end($7.Timestamp v) { setField(2, v); }
-  @$pb.TagNumber(2)
-  $core.bool hasEnd() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearEnd() => clearField(2);
-  @$pb.TagNumber(2)
-  $7.Timestamp ensureEnd() => $_ensure(1);
-
-  @$pb.TagNumber(3)
-  $7.Timestamp get next => $_getN(2);
-  @$pb.TagNumber(3)
-  set next($7.Timestamp v) { setField(3, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasNext() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearNext() => clearField(3);
-  @$pb.TagNumber(3)
-  $7.Timestamp ensureNext() => $_ensure(2);
-
-  @$pb.TagNumber(4)
-  $core.List<$8.CallParticipantTimeline> get participantEvents => $_getList(3);
-}
-
 class CreateDeviceRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateDeviceRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
-    ..aOM<$9.DeviceInput>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'input', subBuilder: $9.DeviceInput.create)
+    ..aOM<$6.DeviceInput>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'input', subBuilder: $6.DeviceInput.create)
     ..hasRequiredFields = false
   ;
 
   CreateDeviceRequest._() : super();
   factory CreateDeviceRequest({
-    $9.DeviceInput? input,
+    $6.DeviceInput? input,
   }) {
     final _result = create();
     if (input != null) {
@@ -1609,26 +1424,26 @@ class CreateDeviceRequest extends $pb.GeneratedMessage {
   static CreateDeviceRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $9.DeviceInput get input => $_getN(0);
+  $6.DeviceInput get input => $_getN(0);
   @$pb.TagNumber(1)
-  set input($9.DeviceInput v) { setField(1, v); }
+  set input($6.DeviceInput v) { setField(1, v); }
   @$pb.TagNumber(1)
   $core.bool hasInput() => $_has(0);
   @$pb.TagNumber(1)
   void clearInput() => clearField(1);
   @$pb.TagNumber(1)
-  $9.DeviceInput ensureInput() => $_ensure(0);
+  $6.DeviceInput ensureInput() => $_ensure(0);
 }
 
 class CreateDeviceResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateDeviceResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
-    ..aOM<$9.Device>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'device', subBuilder: $9.Device.create)
+    ..aOM<$6.Device>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'device', subBuilder: $6.Device.create)
     ..hasRequiredFields = false
   ;
 
   CreateDeviceResponse._() : super();
   factory CreateDeviceResponse({
-    $9.Device? device,
+    $6.Device? device,
   }) {
     final _result = create();
     if (device != null) {
@@ -1658,15 +1473,15 @@ class CreateDeviceResponse extends $pb.GeneratedMessage {
   static CreateDeviceResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $9.Device get device => $_getN(0);
+  $6.Device get device => $_getN(0);
   @$pb.TagNumber(1)
-  set device($9.Device v) { setField(1, v); }
+  set device($6.Device v) { setField(1, v); }
   @$pb.TagNumber(1)
   $core.bool hasDevice() => $_has(0);
   @$pb.TagNumber(1)
   void clearDevice() => clearField(1);
   @$pb.TagNumber(1)
-  $9.Device ensureDevice() => $_ensure(0);
+  $6.Device ensureDevice() => $_ensure(0);
 }
 
 class DeleteDeviceRequest extends $pb.GeneratedMessage {
@@ -1776,13 +1591,13 @@ class QueryDevicesRequest extends $pb.GeneratedMessage {
 
 class QueryDevicesResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'QueryDevicesResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
-    ..pc<$9.Device>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'devices', $pb.PbFieldType.PM, subBuilder: $9.Device.create)
+    ..pc<$6.Device>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'devices', $pb.PbFieldType.PM, subBuilder: $6.Device.create)
     ..hasRequiredFields = false
   ;
 
   QueryDevicesResponse._() : super();
   factory QueryDevicesResponse({
-    $core.Iterable<$9.Device>? devices,
+    $core.Iterable<$6.Device>? devices,
   }) {
     final _result = create();
     if (devices != null) {
@@ -1812,7 +1627,7 @@ class QueryDevicesResponse extends $pb.GeneratedMessage {
   static QueryDevicesResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<$9.Device> get devices => $_getList(0);
+  $core.List<$6.Device> get devices => $_getList(0);
 }
 
 class SendCustomEventRequest extends $pb.GeneratedMessage {
@@ -1909,7 +1724,7 @@ class ReportCallStatsRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ReportCallStatsRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
-    ..aOM<$10.Struct>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stats', subBuilder: $10.Struct.create)
+    ..aOM<$7.Struct>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stats', subBuilder: $7.Struct.create)
     ..hasRequiredFields = false
   ;
 
@@ -1917,7 +1732,7 @@ class ReportCallStatsRequest extends $pb.GeneratedMessage {
   factory ReportCallStatsRequest({
     $core.String? callType,
     $core.String? callId,
-    $10.Struct? stats,
+    $7.Struct? stats,
   }) {
     final _result = create();
     if (callType != null) {
@@ -1971,15 +1786,15 @@ class ReportCallStatsRequest extends $pb.GeneratedMessage {
   void clearCallId() => clearField(2);
 
   @$pb.TagNumber(3)
-  $10.Struct get stats => $_getN(2);
+  $7.Struct get stats => $_getN(2);
   @$pb.TagNumber(3)
-  set stats($10.Struct v) { setField(3, v); }
+  set stats($7.Struct v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasStats() => $_has(2);
   @$pb.TagNumber(3)
   void clearStats() => clearField(3);
   @$pb.TagNumber(3)
-  $10.Struct ensureStats() => $_ensure(2);
+  $7.Struct ensureStats() => $_ensure(2);
 }
 
 class ReportCallStatsResponse extends $pb.GeneratedMessage {
@@ -2373,10 +2188,6 @@ class ClientRPCApi {
   $async.Future<DeleteCallMembersResponse> deleteCallMembers($pb.ClientContext? ctx, DeleteCallMembersRequest request) {
     var emptyResponse = DeleteCallMembersResponse();
     return _client.invoke<DeleteCallMembersResponse>(ctx, 'ClientRPC', 'DeleteCallMembers', request, emptyResponse);
-  }
-  $async.Future<QueryCallTimelineEventsResponse> queryCallTimelineEvents($pb.ClientContext? ctx, QueryCallTimelineEventsRequest request) {
-    var emptyResponse = QueryCallTimelineEventsResponse();
-    return _client.invoke<QueryCallTimelineEventsResponse>(ctx, 'ClientRPC', 'QueryCallTimelineEvents', request, emptyResponse);
   }
   $async.Future<SendCustomEventResponse> sendCustomEvent($pb.ClientContext? ctx, SendCustomEventRequest request) {
     var emptyResponse = SendCustomEventResponse();

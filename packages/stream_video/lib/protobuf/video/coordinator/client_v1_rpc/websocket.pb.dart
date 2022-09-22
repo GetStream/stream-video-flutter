@@ -9,63 +9,51 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import '../event_v1/event.pb.dart' as $12;
+import '../event_v1/event.pb.dart' as $10;
 import '../user_v1/user.pb.dart' as $1;
 import '../call_v1/call.pb.dart' as $0;
-import '../push_v1/push.pb.dart' as $9;
+import '../push_v1/push.pb.dart' as $6;
 
 enum WebsocketEvent_Event {
   healthcheck, 
   callCreated, 
   callUpdated, 
-  callEnded, 
   callDeleted, 
-  callRinging, 
-  userUpdated, 
-  broadcastStarted, 
-  broadcastEnded, 
-  recordingStarted, 
-  recordingStopped, 
   callMembersUpdated, 
   callMembersDeleted, 
+  callStarted, 
+  callEnded, 
+  userUpdated, 
   notSet
 }
 
 class WebsocketEvent extends $pb.GeneratedMessage {
   static const $core.Map<$core.int, WebsocketEvent_Event> _WebsocketEvent_EventByTag = {
     20 : WebsocketEvent_Event.healthcheck,
-    21 : WebsocketEvent_Event.callCreated,
-    22 : WebsocketEvent_Event.callUpdated,
-    23 : WebsocketEvent_Event.callEnded,
-    24 : WebsocketEvent_Event.callDeleted,
-    25 : WebsocketEvent_Event.callRinging,
-    26 : WebsocketEvent_Event.userUpdated,
-    27 : WebsocketEvent_Event.broadcastStarted,
-    28 : WebsocketEvent_Event.broadcastEnded,
-    29 : WebsocketEvent_Event.recordingStarted,
-    30 : WebsocketEvent_Event.recordingStopped,
-    31 : WebsocketEvent_Event.callMembersUpdated,
-    32 : WebsocketEvent_Event.callMembersDeleted,
+    30 : WebsocketEvent_Event.callCreated,
+    31 : WebsocketEvent_Event.callUpdated,
+    32 : WebsocketEvent_Event.callDeleted,
+    33 : WebsocketEvent_Event.callMembersUpdated,
+    34 : WebsocketEvent_Event.callMembersDeleted,
+    35 : WebsocketEvent_Event.callStarted,
+    36 : WebsocketEvent_Event.callEnded,
+    40 : WebsocketEvent_Event.userUpdated,
     0 : WebsocketEvent_Event.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'WebsocketEvent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
-    ..oo(0, [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32])
+    ..oo(0, [20, 30, 31, 32, 33, 34, 35, 36, 40])
     ..m<$core.String, $1.User>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'users', entryClassName: 'WebsocketEvent.UsersEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: $1.User.create, packageName: const $pb.PackageName('stream.video.coordinator.client_v1_rpc'))
     ..m<$core.String, $0.Call>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'calls', entryClassName: 'WebsocketEvent.CallsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: $0.Call.create, packageName: const $pb.PackageName('stream.video.coordinator.client_v1_rpc'))
     ..m<$core.String, $0.CallDetails>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callDetails', entryClassName: 'WebsocketEvent.CallDetailsEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: $0.CallDetails.create, packageName: const $pb.PackageName('stream.video.coordinator.client_v1_rpc'))
     ..aOM<WebsocketHealthcheck>(20, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'healthcheck', subBuilder: WebsocketHealthcheck.create)
-    ..aOM<$12.CallCreated>(21, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCreated', subBuilder: $12.CallCreated.create)
-    ..aOM<$12.CallUpdated>(22, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callUpdated', subBuilder: $12.CallUpdated.create)
-    ..aOM<$12.CallEnded>(23, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callEnded', subBuilder: $12.CallEnded.create)
-    ..aOM<$12.CallDeleted>(24, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callDeleted', subBuilder: $12.CallDeleted.create)
-    ..aOM<$12.CallRinging>(25, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callRinging', subBuilder: $12.CallRinging.create)
-    ..aOM<$12.UserUpdated>(26, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userUpdated', subBuilder: $12.UserUpdated.create)
-    ..aOM<$12.BroadcastStarted>(27, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcastStarted', subBuilder: $12.BroadcastStarted.create)
-    ..aOM<$12.BroadcastEnded>(28, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcastEnded', subBuilder: $12.BroadcastEnded.create)
-    ..aOM<$12.RecordingStarted>(29, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recordingStarted', subBuilder: $12.RecordingStarted.create)
-    ..aOM<$12.RecordingStopped>(30, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recordingStopped', subBuilder: $12.RecordingStopped.create)
-    ..aOM<$12.CallMembersUpdated>(31, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callMembersUpdated', subBuilder: $12.CallMembersUpdated.create)
-    ..aOM<$12.CallMembersDeleted>(32, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callMembersDeleted', subBuilder: $12.CallMembersDeleted.create)
+    ..aOM<$10.CallCreated>(30, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCreated', subBuilder: $10.CallCreated.create)
+    ..aOM<$10.CallUpdated>(31, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callUpdated', subBuilder: $10.CallUpdated.create)
+    ..aOM<$10.CallDeleted>(32, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callDeleted', subBuilder: $10.CallDeleted.create)
+    ..aOM<$10.CallMembersUpdated>(33, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callMembersUpdated', subBuilder: $10.CallMembersUpdated.create)
+    ..aOM<$10.CallMembersDeleted>(34, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callMembersDeleted', subBuilder: $10.CallMembersDeleted.create)
+    ..aOM<$10.CallStarted>(35, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callStarted', subBuilder: $10.CallStarted.create)
+    ..aOM<$10.CallEnded>(36, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callEnded', subBuilder: $10.CallEnded.create)
+    ..aOM<$10.UserUpdated>(40, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userUpdated', subBuilder: $10.UserUpdated.create)
     ..hasRequiredFields = false
   ;
 
@@ -75,18 +63,14 @@ class WebsocketEvent extends $pb.GeneratedMessage {
     $core.Map<$core.String, $0.Call>? calls,
     $core.Map<$core.String, $0.CallDetails>? callDetails,
     WebsocketHealthcheck? healthcheck,
-    $12.CallCreated? callCreated,
-    $12.CallUpdated? callUpdated,
-    $12.CallEnded? callEnded,
-    $12.CallDeleted? callDeleted,
-    $12.CallRinging? callRinging,
-    $12.UserUpdated? userUpdated,
-    $12.BroadcastStarted? broadcastStarted,
-    $12.BroadcastEnded? broadcastEnded,
-    $12.RecordingStarted? recordingStarted,
-    $12.RecordingStopped? recordingStopped,
-    $12.CallMembersUpdated? callMembersUpdated,
-    $12.CallMembersDeleted? callMembersDeleted,
+    $10.CallCreated? callCreated,
+    $10.CallUpdated? callUpdated,
+    $10.CallDeleted? callDeleted,
+    $10.CallMembersUpdated? callMembersUpdated,
+    $10.CallMembersDeleted? callMembersDeleted,
+    $10.CallStarted? callStarted,
+    $10.CallEnded? callEnded,
+    $10.UserUpdated? userUpdated,
   }) {
     final _result = create();
     if (users != null) {
@@ -107,35 +91,23 @@ class WebsocketEvent extends $pb.GeneratedMessage {
     if (callUpdated != null) {
       _result.callUpdated = callUpdated;
     }
-    if (callEnded != null) {
-      _result.callEnded = callEnded;
-    }
     if (callDeleted != null) {
       _result.callDeleted = callDeleted;
-    }
-    if (callRinging != null) {
-      _result.callRinging = callRinging;
-    }
-    if (userUpdated != null) {
-      _result.userUpdated = userUpdated;
-    }
-    if (broadcastStarted != null) {
-      _result.broadcastStarted = broadcastStarted;
-    }
-    if (broadcastEnded != null) {
-      _result.broadcastEnded = broadcastEnded;
-    }
-    if (recordingStarted != null) {
-      _result.recordingStarted = recordingStarted;
-    }
-    if (recordingStopped != null) {
-      _result.recordingStopped = recordingStopped;
     }
     if (callMembersUpdated != null) {
       _result.callMembersUpdated = callMembersUpdated;
     }
     if (callMembersDeleted != null) {
       _result.callMembersDeleted = callMembersDeleted;
+    }
+    if (callStarted != null) {
+      _result.callStarted = callStarted;
+    }
+    if (callEnded != null) {
+      _result.callEnded = callEnded;
+    }
+    if (userUpdated != null) {
+      _result.userUpdated = userUpdated;
     }
     return _result;
   }
@@ -183,137 +155,93 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(20)
   WebsocketHealthcheck ensureHealthcheck() => $_ensure(3);
 
-  @$pb.TagNumber(21)
-  $12.CallCreated get callCreated => $_getN(4);
-  @$pb.TagNumber(21)
-  set callCreated($12.CallCreated v) { setField(21, v); }
-  @$pb.TagNumber(21)
+  @$pb.TagNumber(30)
+  $10.CallCreated get callCreated => $_getN(4);
+  @$pb.TagNumber(30)
+  set callCreated($10.CallCreated v) { setField(30, v); }
+  @$pb.TagNumber(30)
   $core.bool hasCallCreated() => $_has(4);
-  @$pb.TagNumber(21)
-  void clearCallCreated() => clearField(21);
-  @$pb.TagNumber(21)
-  $12.CallCreated ensureCallCreated() => $_ensure(4);
+  @$pb.TagNumber(30)
+  void clearCallCreated() => clearField(30);
+  @$pb.TagNumber(30)
+  $10.CallCreated ensureCallCreated() => $_ensure(4);
 
-  @$pb.TagNumber(22)
-  $12.CallUpdated get callUpdated => $_getN(5);
-  @$pb.TagNumber(22)
-  set callUpdated($12.CallUpdated v) { setField(22, v); }
-  @$pb.TagNumber(22)
+  @$pb.TagNumber(31)
+  $10.CallUpdated get callUpdated => $_getN(5);
+  @$pb.TagNumber(31)
+  set callUpdated($10.CallUpdated v) { setField(31, v); }
+  @$pb.TagNumber(31)
   $core.bool hasCallUpdated() => $_has(5);
-  @$pb.TagNumber(22)
-  void clearCallUpdated() => clearField(22);
-  @$pb.TagNumber(22)
-  $12.CallUpdated ensureCallUpdated() => $_ensure(5);
-
-  @$pb.TagNumber(23)
-  $12.CallEnded get callEnded => $_getN(6);
-  @$pb.TagNumber(23)
-  set callEnded($12.CallEnded v) { setField(23, v); }
-  @$pb.TagNumber(23)
-  $core.bool hasCallEnded() => $_has(6);
-  @$pb.TagNumber(23)
-  void clearCallEnded() => clearField(23);
-  @$pb.TagNumber(23)
-  $12.CallEnded ensureCallEnded() => $_ensure(6);
-
-  @$pb.TagNumber(24)
-  $12.CallDeleted get callDeleted => $_getN(7);
-  @$pb.TagNumber(24)
-  set callDeleted($12.CallDeleted v) { setField(24, v); }
-  @$pb.TagNumber(24)
-  $core.bool hasCallDeleted() => $_has(7);
-  @$pb.TagNumber(24)
-  void clearCallDeleted() => clearField(24);
-  @$pb.TagNumber(24)
-  $12.CallDeleted ensureCallDeleted() => $_ensure(7);
-
-  @$pb.TagNumber(25)
-  $12.CallRinging get callRinging => $_getN(8);
-  @$pb.TagNumber(25)
-  set callRinging($12.CallRinging v) { setField(25, v); }
-  @$pb.TagNumber(25)
-  $core.bool hasCallRinging() => $_has(8);
-  @$pb.TagNumber(25)
-  void clearCallRinging() => clearField(25);
-  @$pb.TagNumber(25)
-  $12.CallRinging ensureCallRinging() => $_ensure(8);
-
-  @$pb.TagNumber(26)
-  $12.UserUpdated get userUpdated => $_getN(9);
-  @$pb.TagNumber(26)
-  set userUpdated($12.UserUpdated v) { setField(26, v); }
-  @$pb.TagNumber(26)
-  $core.bool hasUserUpdated() => $_has(9);
-  @$pb.TagNumber(26)
-  void clearUserUpdated() => clearField(26);
-  @$pb.TagNumber(26)
-  $12.UserUpdated ensureUserUpdated() => $_ensure(9);
-
-  @$pb.TagNumber(27)
-  $12.BroadcastStarted get broadcastStarted => $_getN(10);
-  @$pb.TagNumber(27)
-  set broadcastStarted($12.BroadcastStarted v) { setField(27, v); }
-  @$pb.TagNumber(27)
-  $core.bool hasBroadcastStarted() => $_has(10);
-  @$pb.TagNumber(27)
-  void clearBroadcastStarted() => clearField(27);
-  @$pb.TagNumber(27)
-  $12.BroadcastStarted ensureBroadcastStarted() => $_ensure(10);
-
-  @$pb.TagNumber(28)
-  $12.BroadcastEnded get broadcastEnded => $_getN(11);
-  @$pb.TagNumber(28)
-  set broadcastEnded($12.BroadcastEnded v) { setField(28, v); }
-  @$pb.TagNumber(28)
-  $core.bool hasBroadcastEnded() => $_has(11);
-  @$pb.TagNumber(28)
-  void clearBroadcastEnded() => clearField(28);
-  @$pb.TagNumber(28)
-  $12.BroadcastEnded ensureBroadcastEnded() => $_ensure(11);
-
-  @$pb.TagNumber(29)
-  $12.RecordingStarted get recordingStarted => $_getN(12);
-  @$pb.TagNumber(29)
-  set recordingStarted($12.RecordingStarted v) { setField(29, v); }
-  @$pb.TagNumber(29)
-  $core.bool hasRecordingStarted() => $_has(12);
-  @$pb.TagNumber(29)
-  void clearRecordingStarted() => clearField(29);
-  @$pb.TagNumber(29)
-  $12.RecordingStarted ensureRecordingStarted() => $_ensure(12);
-
-  @$pb.TagNumber(30)
-  $12.RecordingStopped get recordingStopped => $_getN(13);
-  @$pb.TagNumber(30)
-  set recordingStopped($12.RecordingStopped v) { setField(30, v); }
-  @$pb.TagNumber(30)
-  $core.bool hasRecordingStopped() => $_has(13);
-  @$pb.TagNumber(30)
-  void clearRecordingStopped() => clearField(30);
-  @$pb.TagNumber(30)
-  $12.RecordingStopped ensureRecordingStopped() => $_ensure(13);
-
   @$pb.TagNumber(31)
-  $12.CallMembersUpdated get callMembersUpdated => $_getN(14);
+  void clearCallUpdated() => clearField(31);
   @$pb.TagNumber(31)
-  set callMembersUpdated($12.CallMembersUpdated v) { setField(31, v); }
-  @$pb.TagNumber(31)
-  $core.bool hasCallMembersUpdated() => $_has(14);
-  @$pb.TagNumber(31)
-  void clearCallMembersUpdated() => clearField(31);
-  @$pb.TagNumber(31)
-  $12.CallMembersUpdated ensureCallMembersUpdated() => $_ensure(14);
+  $10.CallUpdated ensureCallUpdated() => $_ensure(5);
 
   @$pb.TagNumber(32)
-  $12.CallMembersDeleted get callMembersDeleted => $_getN(15);
+  $10.CallDeleted get callDeleted => $_getN(6);
   @$pb.TagNumber(32)
-  set callMembersDeleted($12.CallMembersDeleted v) { setField(32, v); }
+  set callDeleted($10.CallDeleted v) { setField(32, v); }
   @$pb.TagNumber(32)
-  $core.bool hasCallMembersDeleted() => $_has(15);
+  $core.bool hasCallDeleted() => $_has(6);
   @$pb.TagNumber(32)
-  void clearCallMembersDeleted() => clearField(32);
+  void clearCallDeleted() => clearField(32);
   @$pb.TagNumber(32)
-  $12.CallMembersDeleted ensureCallMembersDeleted() => $_ensure(15);
+  $10.CallDeleted ensureCallDeleted() => $_ensure(6);
+
+  @$pb.TagNumber(33)
+  $10.CallMembersUpdated get callMembersUpdated => $_getN(7);
+  @$pb.TagNumber(33)
+  set callMembersUpdated($10.CallMembersUpdated v) { setField(33, v); }
+  @$pb.TagNumber(33)
+  $core.bool hasCallMembersUpdated() => $_has(7);
+  @$pb.TagNumber(33)
+  void clearCallMembersUpdated() => clearField(33);
+  @$pb.TagNumber(33)
+  $10.CallMembersUpdated ensureCallMembersUpdated() => $_ensure(7);
+
+  @$pb.TagNumber(34)
+  $10.CallMembersDeleted get callMembersDeleted => $_getN(8);
+  @$pb.TagNumber(34)
+  set callMembersDeleted($10.CallMembersDeleted v) { setField(34, v); }
+  @$pb.TagNumber(34)
+  $core.bool hasCallMembersDeleted() => $_has(8);
+  @$pb.TagNumber(34)
+  void clearCallMembersDeleted() => clearField(34);
+  @$pb.TagNumber(34)
+  $10.CallMembersDeleted ensureCallMembersDeleted() => $_ensure(8);
+
+  @$pb.TagNumber(35)
+  $10.CallStarted get callStarted => $_getN(9);
+  @$pb.TagNumber(35)
+  set callStarted($10.CallStarted v) { setField(35, v); }
+  @$pb.TagNumber(35)
+  $core.bool hasCallStarted() => $_has(9);
+  @$pb.TagNumber(35)
+  void clearCallStarted() => clearField(35);
+  @$pb.TagNumber(35)
+  $10.CallStarted ensureCallStarted() => $_ensure(9);
+
+  @$pb.TagNumber(36)
+  $10.CallEnded get callEnded => $_getN(10);
+  @$pb.TagNumber(36)
+  set callEnded($10.CallEnded v) { setField(36, v); }
+  @$pb.TagNumber(36)
+  $core.bool hasCallEnded() => $_has(10);
+  @$pb.TagNumber(36)
+  void clearCallEnded() => clearField(36);
+  @$pb.TagNumber(36)
+  $10.CallEnded ensureCallEnded() => $_ensure(10);
+
+  @$pb.TagNumber(40)
+  $10.UserUpdated get userUpdated => $_getN(11);
+  @$pb.TagNumber(40)
+  set userUpdated($10.UserUpdated v) { setField(40, v); }
+  @$pb.TagNumber(40)
+  $core.bool hasUserUpdated() => $_has(11);
+  @$pb.TagNumber(40)
+  void clearUserUpdated() => clearField(40);
+  @$pb.TagNumber(40)
+  $10.UserUpdated ensureUserUpdated() => $_ensure(11);
 }
 
 enum WebsocketClientEvent_Event {
@@ -401,7 +329,7 @@ class WebsocketAuthRequest extends $pb.GeneratedMessage {
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'apiKey')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'token')
     ..aOM<$1.UserInput>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'user', subBuilder: $1.UserInput.create)
-    ..aOM<$9.DeviceInput>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'device', subBuilder: $9.DeviceInput.create)
+    ..aOM<$6.DeviceInput>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'device', subBuilder: $6.DeviceInput.create)
     ..hasRequiredFields = false
   ;
 
@@ -410,7 +338,7 @@ class WebsocketAuthRequest extends $pb.GeneratedMessage {
     $core.String? apiKey,
     $core.String? token,
     $1.UserInput? user,
-    $9.DeviceInput? device,
+    $6.DeviceInput? device,
   }) {
     final _result = create();
     if (apiKey != null) {
@@ -478,15 +406,15 @@ class WebsocketAuthRequest extends $pb.GeneratedMessage {
   $1.UserInput ensureUser() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  $9.DeviceInput get device => $_getN(3);
+  $6.DeviceInput get device => $_getN(3);
   @$pb.TagNumber(4)
-  set device($9.DeviceInput v) { setField(4, v); }
+  set device($6.DeviceInput v) { setField(4, v); }
   @$pb.TagNumber(4)
   $core.bool hasDevice() => $_has(3);
   @$pb.TagNumber(4)
   void clearDevice() => clearField(4);
   @$pb.TagNumber(4)
-  $9.DeviceInput ensureDevice() => $_ensure(3);
+  $6.DeviceInput ensureDevice() => $_ensure(3);
 }
 
 class WebsocketHealthcheck extends $pb.GeneratedMessage {
