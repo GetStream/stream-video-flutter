@@ -219,7 +219,7 @@ class WebRTCStats {
     required String callId,
     required StreamCallType callType,
   }) async {
-    client.reportCallStats(
+    await client.reportCallStats(
       callType: callType,
       callId: callId,
       stats: await _getStats(pc),

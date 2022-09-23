@@ -34,6 +34,8 @@ class LatencyService {
       }
     }
     return MapEntry<String, Latency>(
-        edge.latencyUrl, Latency(measurementsSeconds: measurementsSeconds));
+      latencyUrl,
+      Latency(measurementsSeconds: measurementsSeconds),
+    );
   }
 }

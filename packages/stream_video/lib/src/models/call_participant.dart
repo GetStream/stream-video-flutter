@@ -1,6 +1,7 @@
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/participant_v1/participant.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/user_v1/user.pb.dart';
+import 'package:stream_video/stream_video.dart';
 
 class CallParticipant {
   final String id;
@@ -31,6 +32,15 @@ extension VideoParticipantX on User {
         isOnline: false,
         hasVideo: false,
         hasAudio: false,
+      );
+}
+
+extension CallParticipantX on CallParticipant {
+  User toUserInfo() => User(
+        id: id,
+        role: role,
+        name: name,
+        imageUrl: profileImageURL,
       );
 }
 

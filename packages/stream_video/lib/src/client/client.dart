@@ -256,10 +256,10 @@ class StreamVideoClient {
         participantIds,
         key: (item) => item,
         value: (item) => MemberInput(
-          role: "admin",
-          customJson: utf8.encode(
-            jsonEncoder.convert({}),
-          ),
+          // role: "admin",
+          // customJson: utf8.encode(
+          //   jsonEncoder.convert({}),
+          // ),
         ),
       );
 
