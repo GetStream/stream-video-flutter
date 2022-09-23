@@ -2,13 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:livekit_client/livekit_client.dart';
-import 'package:rxdart/subjects.dart';
+import 'package:stream_video/protobuf/google/protobuf/struct.pb.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:uuid/uuid.dart';
 import 'package:webrtc_interface/src/rtc_peerconnection.dart';
-import 'package:webrtc_interface/src/rtc_stats_report.dart';
-
-import '../../protobuf/google/protobuf/struct.pb.dart';
 
 // class Constants {
 //   static String mediaType = 'mediaType';

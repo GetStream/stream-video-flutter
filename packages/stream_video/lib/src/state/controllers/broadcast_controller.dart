@@ -19,12 +19,14 @@ class BroadcastController {
       _broadcastStartedController.stream.distinct();
 
   StreamSubscription<BroadcastEvent> listen(
-          FutureOr<void> Function(BroadcastEvent event) onEvent) =>
+    FutureOr<void> Function(BroadcastEvent event) onEvent,
+  ) =>
       broadcastStream.listen(onEvent);
 
   StreamSubscription<BroadcastEvent> on<E extends BroadcastEvent>(
-          FutureOr<void> Function(E) then,
-          {bool Function(E)? filter}) =>
+    FutureOr<void> Function(E) then, {
+    bool Function(E)? filter,
+  }) =>
       listen((event) async {
         // event must be E
         if (event is! E) return;

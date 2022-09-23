@@ -26,12 +26,14 @@ class CallController {
   Stream<CallEvent> get callEventStream => _callController.stream.distinct();
 
   StreamSubscription<CallEvent> listen(
-          FutureOr<void> Function(CallEvent event) onEvent) =>
+    FutureOr<void> Function(CallEvent event) onEvent,
+  ) =>
       callEventStream.listen(onEvent);
 
   StreamSubscription<CallEvent> on<E extends CallEvent>(
-          FutureOr<void> Function(E) then,
-          {bool Function(E)? filter}) =>
+    FutureOr<void> Function(E) then, {
+    bool Function(E)? filter,
+  }) =>
       listen((event) async {
         // event must be E
         if (event is! E) return;
