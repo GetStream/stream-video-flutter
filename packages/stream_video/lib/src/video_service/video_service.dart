@@ -12,8 +12,8 @@ import 'package:stream_video/src/models/video_options.dart';
 import 'package:stream_video/src/video_service/room.dart';
 
 class VideoService {
-  final StreamVideoClient client;
   VideoService(this.client);
+  final StreamVideoClient client;
   Future<VideoRoom> connect({
     required String url,
     required String token,
@@ -35,9 +35,9 @@ class VideoService {
     );
 
     try {
-      print("connecting to livekit");
-      print("uwith rl $url");
-      print("and token $token");
+      print('connecting to livekit');
+      print('uwith rl $url');
+      print('and token $token');
       await room.connect(
         "wss://$url",
         token,
@@ -46,7 +46,11 @@ class VideoService {
       );
       // final listener = streamVideo.createListener();
       return VideoRoom(
-          room: room, callId: callId, callType: callType, client: client);
+        room: room,
+        callId: callId,
+        callType: callType,
+        client: client,
+      );
     } catch (e, stack) {
       await room.dispose();
       // rethrow;

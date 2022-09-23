@@ -208,15 +208,16 @@ class WebSocketClient {
   WebsocketAuthRequest _getAuthPayload(UserInfo user, Token token) {
     const jsonEncoder = JsonEncoder();
     final authPayload = WebsocketAuthRequest(
-        user: UserInput(
-          // id: user.id,
-          customJson: utf8.encode(jsonEncoder.convert(user.extraData)),
-          name: user.name,
-          imageUrl: user.imageUrl,
-        ),
-        token: token.rawValue,
-        //TODO: remove hardcoded value
-        device: DeviceInput(id: "1", pushProviderId: "firebase"));
+      user: UserInput(
+        // id: user.id,
+        customJson: utf8.encode(jsonEncoder.convert(user.extraData)),
+        name: user.name,
+        imageUrl: user.imageUrl,
+      ),
+      token: token.rawValue,
+      //TODO: remove hardcoded value
+      device: DeviceInput(id: "1", pushProviderId: "firebase"),
+    );
     return authPayload;
   }
 
@@ -260,8 +261,8 @@ class WebSocketClient {
     _state.calls.emitDeleted(event);
   }
 
-   void _handleCallStarted(CallStarted event) {
-       _logger?.info('CallStarted event received : ${event.toString()}');
+  void _handleCallStarted(CallStarted event) {
+    _logger?.info('CallStarted event received : ${event.toString()}');
     _state.calls.emitStarted(event);
   }
 
@@ -359,10 +360,7 @@ class WebSocketClient {
   }
 
   void _handleCallMembersDeleted(CallMembersDeleted event) {
-     _logger?.info('CallMembersDeleted event received : ${event.toString()}');
+    _logger?.info('CallMembersDeleted event received : ${event.toString()}');
     _state.callMembers.emitDeleted(event);
   }
-  
- 
 }
-

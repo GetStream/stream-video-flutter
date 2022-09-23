@@ -236,7 +236,7 @@ class WebRTCStats {
 
   Future<Struct> _getStats(RTCPeerConnection pc) async {
     final stats = await pc.getStats();
-    var s = <String, Value>{};
+    final s = <String, Value>{};
     stats.forEach((v) =>
         s[v.id] = Value(structValue: Struct.fromJson(jsonEncode(v.values))));
 

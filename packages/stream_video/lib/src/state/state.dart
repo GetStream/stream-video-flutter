@@ -15,13 +15,14 @@ class StreamCallState {
   final bool? video;
   final bool? audio;
 
-  StreamCallState(
-      {this.userId,
-      this.clientId,
-      this.callType,
-      this.callId,
-      this.video,
-      this.audio});
+  StreamCallState({
+    this.userId,
+    this.clientId,
+    this.callType,
+    this.callId,
+    this.video,
+    this.audio,
+  });
 }
 
 enum ConnectionStatus {
@@ -51,7 +52,7 @@ class ClientState {
   set callState(StreamCallState state) => _callStateController.add(state);
 
   StreamCallState get callState => _callStateController.value;
-  
+
   final _connectionStatusController =
       BehaviorSubject.seeded(ConnectionStatus.disconnected);
 
@@ -80,7 +81,6 @@ class ClientState {
       _healthcheckController.stream.distinct();
 
   final _roomController = RoomController();
-  
 
   //TODO: set participants
 

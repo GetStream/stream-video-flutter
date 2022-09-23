@@ -90,7 +90,7 @@ class VideoRoom {
         RoomParticipant(localParticipant!),
         ..._room.participants.entries
             .map((e) => RoomParticipant(e.value))
-            .toList()
+            .toList(),
       ];
 
   StreamLocalParticipant? get localParticipant => _room.localParticipant;
