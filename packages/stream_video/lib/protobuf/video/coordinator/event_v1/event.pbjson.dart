@@ -8,57 +8,6 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-@$core.Deprecated('Use callCreatedDescriptor instead')
-const CallCreated$json = const {
-  '1': 'CallCreated',
-  '2': const [
-    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
-    const {'1': 'call_member_user_ids', '3': 2, '4': 3, '5': 9, '10': 'callMemberUserIds'},
-  ],
-};
-
-/// Descriptor for `CallCreated`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callCreatedDescriptor = $convert.base64Decode('CgtDYWxsQ3JlYXRlZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZBIvChRjYWxsX21lbWJlcl91c2VyX2lkcxgCIAMoCVIRY2FsbE1lbWJlclVzZXJJZHM=');
-@$core.Deprecated('Use callUpdatedDescriptor instead')
-const CallUpdated$json = const {
-  '1': 'CallUpdated',
-  '2': const [
-    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
-  ],
-};
-
-/// Descriptor for `CallUpdated`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callUpdatedDescriptor = $convert.base64Decode('CgtDYWxsVXBkYXRlZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZA==');
-@$core.Deprecated('Use callStartedDescriptor instead')
-const CallStarted$json = const {
-  '1': 'CallStarted',
-  '2': const [
-    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
-  ],
-};
-
-/// Descriptor for `CallStarted`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callStartedDescriptor = $convert.base64Decode('CgtDYWxsU3RhcnRlZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZA==');
-@$core.Deprecated('Use callEndedDescriptor instead')
-const CallEnded$json = const {
-  '1': 'CallEnded',
-  '2': const [
-    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
-  ],
-};
-
-/// Descriptor for `CallEnded`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callEndedDescriptor = $convert.base64Decode('CglDYWxsRW5kZWQSGQoIY2FsbF9jaWQYASABKAlSB2NhbGxDaWQ=');
-@$core.Deprecated('Use callDeletedDescriptor instead')
-const CallDeleted$json = const {
-  '1': 'CallDeleted',
-  '2': const [
-    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
-  ],
-};
-
-/// Descriptor for `CallDeleted`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callDeletedDescriptor = $convert.base64Decode('CgtDYWxsRGVsZXRlZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZA==');
 @$core.Deprecated('Use recordingStartedDescriptor instead')
 const RecordingStarted$json = const {
   '1': 'RecordingStarted',
@@ -114,20 +63,68 @@ const CallMembersUpdated$json = const {
   '1': 'CallMembersUpdated',
   '2': const [
     const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
-    const {'1': 'call_member_user_ids', '3': 2, '4': 3, '5': 9, '10': 'callMemberUserIds'},
   ],
 };
 
 /// Descriptor for `CallMembersUpdated`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callMembersUpdatedDescriptor = $convert.base64Decode('ChJDYWxsTWVtYmVyc1VwZGF0ZWQSGQoIY2FsbF9jaWQYASABKAlSB2NhbGxDaWQSLwoUY2FsbF9tZW1iZXJfdXNlcl9pZHMYAiADKAlSEWNhbGxNZW1iZXJVc2VySWRz');
+final $typed_data.Uint8List callMembersUpdatedDescriptor = $convert.base64Decode('ChJDYWxsTWVtYmVyc1VwZGF0ZWQSGQoIY2FsbF9jaWQYASABKAlSB2NhbGxDaWQ=');
 @$core.Deprecated('Use callMembersDeletedDescriptor instead')
 const CallMembersDeleted$json = const {
   '1': 'CallMembersDeleted',
   '2': const [
     const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
-    const {'1': 'call_member_user_ids', '3': 2, '4': 3, '5': 9, '10': 'callMemberUserIds'},
   ],
 };
 
 /// Descriptor for `CallMembersDeleted`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callMembersDeletedDescriptor = $convert.base64Decode('ChJDYWxsTWVtYmVyc0RlbGV0ZWQSGQoIY2FsbF9jaWQYASABKAlSB2NhbGxDaWQSLwoUY2FsbF9tZW1iZXJfdXNlcl9pZHMYAiADKAlSEWNhbGxNZW1iZXJVc2VySWRz');
+final $typed_data.Uint8List callMembersDeletedDescriptor = $convert.base64Decode('ChJDYWxsTWVtYmVyc0RlbGV0ZWQSGQoIY2FsbF9jaWQYASABKAlSB2NhbGxDaWQ=');
+@$core.Deprecated('Use callCreatedDescriptor instead')
+const CallCreated$json = const {
+  '1': 'CallCreated',
+  '2': const [
+    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
+  ],
+};
+
+/// Descriptor for `CallCreated`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List callCreatedDescriptor = $convert.base64Decode('CgtDYWxsQ3JlYXRlZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZA==');
+@$core.Deprecated('Use callUpdatedDescriptor instead')
+const CallUpdated$json = const {
+  '1': 'CallUpdated',
+  '2': const [
+    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
+  ],
+};
+
+/// Descriptor for `CallUpdated`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List callUpdatedDescriptor = $convert.base64Decode('CgtDYWxsVXBkYXRlZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZA==');
+@$core.Deprecated('Use callStartedDescriptor instead')
+const CallStarted$json = const {
+  '1': 'CallStarted',
+  '2': const [
+    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
+  ],
+};
+
+/// Descriptor for `CallStarted`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List callStartedDescriptor = $convert.base64Decode('CgtDYWxsU3RhcnRlZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZA==');
+@$core.Deprecated('Use callEndedDescriptor instead')
+const CallEnded$json = const {
+  '1': 'CallEnded',
+  '2': const [
+    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
+  ],
+};
+
+/// Descriptor for `CallEnded`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List callEndedDescriptor = $convert.base64Decode('CglDYWxsRW5kZWQSGQoIY2FsbF9jaWQYASABKAlSB2NhbGxDaWQ=');
+@$core.Deprecated('Use callDeletedDescriptor instead')
+const CallDeleted$json = const {
+  '1': 'CallDeleted',
+  '2': const [
+    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
+  ],
+};
+
+/// Descriptor for `CallDeleted`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List callDeletedDescriptor = $convert.base64Decode('CgtDYWxsRGVsZXRlZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZA==');

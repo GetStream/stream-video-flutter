@@ -7,18 +7,18 @@ class LatencyService {
   final Logger? logger;
   LatencyService({this.logger});
 
-  Future<Map<String, Latency>> measureLatencies(LatencyMeasurementClaim edges,
+  Future<Map<String, Latency>> measureLatencies(List<Edge> edges,
       [int tries = 1]) async {
-    final latencies = await Future.wait(
-        edges.endpoints.map((edge) => _measureLatency(edge, tries)));
+    final latencies =
+        await Future.wait(edges.map((edge) => _measureLatency(edge, tries)));
 
     return Map.fromEntries(latencies);
   }
 
-  Future<MapEntry<String, Latency>> _measureLatency(LatencyEndpoint edge,
+  Future<MapEntry<String, Latency>> _measureLatency(Edge edge,
       [int tries = 1]) async {
     final latencyUrl =
-        edge.url; // "http://192.168.1.17:5764";  //egde.latencyUrl;
+        edge.latencyUrl; // "http://192.168.1.17:5764";  //egde.latencyUrl;
     final url = Uri.tryParse(latencyUrl);
     final measurementsSeconds = <double>[];
 
@@ -34,6 +34,6 @@ class LatencyService {
       }
     }
     return MapEntry<String, Latency>(
-        edge.id, Latency(measurementsSeconds: measurementsSeconds));
+        edge.latencyUrl, Latency(measurementsSeconds: measurementsSeconds));
   }
 }

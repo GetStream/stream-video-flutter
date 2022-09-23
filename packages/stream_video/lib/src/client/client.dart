@@ -127,7 +127,7 @@ class StreamVideoClient {
 
   void fakeIncomingCall(String createdByUserId) {
     logger.info("faking call from $createdByUserId");
-    _state.calls.emitCreated(CallCreated(callMemberUserIds: [createdByUserId]));
+    // _state.calls.emitCreated(CallCreated(callCid: [createdByUserId]));
   }
 
   Future<void> connectWs() async {
@@ -291,7 +291,7 @@ class StreamVideoClient {
         Context(), {'authorization': 'Bearer ${token.rawValue}}'});
   }
 
-  Future<LatencyMeasurementClaim> joinCall({
+  Future<List<Edge>> joinCall({
     required String callId,
     required StreamCallType callType,
   }) async {
@@ -303,7 +303,7 @@ class StreamVideoClient {
           ctx,
           JoinCallRequest(
               id: callId, type: callType.rawType, datacenterId: 'milan'));
-      return response.latencyClaim;
+      return response.edges;
     } on TwirpError catch (e) {
       final method =
           e.getContext.value(ContextKeys.methodName) ?? 'unknown method';
