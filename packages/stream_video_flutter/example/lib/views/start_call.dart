@@ -74,7 +74,7 @@ class _StartCallViewState extends State<StartCallView> {
                     .getIsChecked()
                     .map((e) => e.userInfo.id)
                     .toList(),
-                callType: StreamCallType.video);
+                callType: StreamCallType.$default);
             Navigator.of(context).pushNamed(StageView.routeName);
 
             print("starting call");

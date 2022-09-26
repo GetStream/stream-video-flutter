@@ -38,9 +38,10 @@ class StreamVideoClientOptions {
 
 class StreamVideoClient {
   // late final StreamSubscription<StatsEvent>? statsListener;
+  final String apiKey;
   StreamVideoClient(
-    String apiKey, {
-    this.logLevel = Level.WARNING,
+    this.apiKey, {
+    this.logLevel = Level.INFO,
     String? coordinatorUrl,
     String? baseURL,
     StreamVideoClientOptions? options,
@@ -48,7 +49,8 @@ class StreamVideoClient {
     WebSocketClient? ws,
   }) {
     _callCoordinatorService = ClientRPCProtobufClient(
-      coordinatorUrl ?? "http://192.168.1.17:26991",
+      // Change it to your local IP address.
+      coordinatorUrl ?? "http://192.168.1.32:26991/rpc",
       "",
       hooks: ClientHooks(
         onRequestPrepared: onClientRequestPrepared,
@@ -58,7 +60,14 @@ class StreamVideoClient {
 
     _state = ClientState();
     _options = options ?? StreamVideoClientOptions();
-    _ws = ws ?? WebSocketClient(logger: logger, state: _state, apiKey: apiKey);
+    _ws = ws ??
+        WebSocketClient(
+            logger: logger,
+            state: _state,
+            apiKey: apiKey,
+            endpoint:
+                // Change it to your local IP address.
+                'ws://192.168.1.32:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect');
     _videoService = VideoService(this);
     _latencyService = LatencyService(logger: logger);
   }
@@ -142,7 +151,7 @@ class StreamVideoClient {
   }) async {
     try {
       final token = await _tokenManager.loadToken();
-      final ctx = _authorizationCtx(token);
+      final ctx = _withAuth(token);
 
       final response = await _callCoordinatorService.getCallEdgeServer(
         ctx,
@@ -225,9 +234,11 @@ class StreamVideoClient {
       callType: callType,
     );
     //TODO: is this debug stuff really useful?
-    assert(StreamCallType.video.rawType == createCallResponse.call.call.type,
-        'call type from backend and client are different');
-    final callId = createCallResponse.call.call.id;
+    // assert(StreamCallType.video.rawType == createCallResponse.call.call.type,
+    //     'call type from backend and client are different');
+    final callId = createCallResponse.call.call.callCid;
+    print("callId $callId");
+    print("PARTICIPANTS $participantIds");
     final edges = await joinCall(callId: callId, callType: callType);
     final latencyByEdge =
         await _latencyService.measureLatencies(edges, _options.retries);
@@ -256,18 +267,28 @@ class StreamVideoClient {
   }) async {
     try {
       final token = await _tokenManager.loadToken();
-      final ctx = _authorizationCtx(token);
-      // const jsonEncoder = JsonEncoder();
-      final members = Map<String, MemberInput>.fromIterable(
-        participantIds,
-        key: (item) => item,
-        value: (item) => MemberInput(
-            // role: "admin",
-            // customJson: utf8.encode(
-            //   jsonEncoder.convert({}),
-            // ),
+      final ctx = _withAuth(token);
+      const jsonEncoder = JsonEncoder();
+      final members = {
+        for (var participantId in participantIds)
+          participantId: MemberInput(
+            role: "admin",
+            customJson: utf8.encode(
+              jsonEncoder.convert({}),
             ),
-      );
+          )
+      };
+
+      // Map<String, MemberInput>.fromIterable(
+      //   participantIds,
+      //   key: (item) => item,
+      //   value: (item) => MemberInput(
+      //       // role: "admin",
+      //       // customJson: utf8.encode(
+      //       //   jsonEncoder.convert({}),
+      //       // ),
+      //       ),
+      // );
 
       final response = await _callCoordinatorService.createCall(
         ctx,
@@ -294,10 +315,10 @@ class StreamVideoClient {
     }
   }
 
-  Context _authorizationCtx(Token token) {
+  Context _withAuth(Token token) {
     return withHttpRequestHeaders(
       Context(),
-      {'authorization': 'Bearer ${token.rawValue}}'},
+      {'authorization': 'Bearer ${token.rawValue}', 'api_key': apiKey},
     );
   }
 
@@ -307,7 +328,7 @@ class StreamVideoClient {
   }) async {
     try {
       final token = await _tokenManager.loadToken();
-      final ctx = _authorizationCtx(token);
+      final ctx = _withAuth(token);
 
       final response = await _callCoordinatorService.joinCall(
         ctx,
@@ -341,7 +362,7 @@ class StreamVideoClient {
   }) async {
     try {
       final token = await _tokenManager.loadToken();
-      final ctx = _authorizationCtx(token);
+      final ctx = _withAuth(token);
 
       await _callCoordinatorService.reportCallStats(
         ctx,

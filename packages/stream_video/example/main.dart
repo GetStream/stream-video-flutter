@@ -21,6 +21,6 @@ void main(List<String> arguments) async {
     participantIds: [
       "whatever",
     ],
-    callType: StreamCallType.video,
+    callType: StreamCallType.$default,
   );
 }

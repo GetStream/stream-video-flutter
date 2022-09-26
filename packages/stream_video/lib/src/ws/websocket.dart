@@ -17,6 +17,7 @@ class WebSocketClient {
     Logger? logger,
     required ClientState state,
     required this.apiKey,
+    required this.endpoint
   })  : _logger = logger,
         _state = state;
   static const pingTimeInterval = Duration(seconds: 20);
@@ -26,7 +27,7 @@ class WebSocketClient {
   final String apiKey;
   late final IOWebSocketChannel? _channel;
   // late final Uri? uri;
-
+final String endpoint;
   late final Timer pingTimer;
   final Logger? _logger;
 
@@ -232,7 +233,7 @@ class WebSocketClient {
   }
 
   Uri _buildUri() => Uri.parse(
-      'ws://192.168.1.32:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect');
+     endpoint);
 
   void _handleHealthCheckEvent(WebsocketHealthcheck event) {
     _logger?.info('HealthCheck received : ${event.toString()}');
