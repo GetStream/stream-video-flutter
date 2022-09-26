@@ -58,7 +58,7 @@ class StreamVideoClient {
 
     _state = ClientState();
     _options = options ?? StreamVideoClientOptions();
-    _ws = ws ?? WebSocketClient(logger: logger, state: _state);
+    _ws = ws ?? WebSocketClient(logger: logger, state: _state, apiKey: apiKey);
     _videoService = VideoService(this);
     _latencyService = LatencyService(logger: logger);
   }

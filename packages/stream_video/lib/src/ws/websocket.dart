@@ -13,13 +13,17 @@ import 'package:stream_video/src/state/state.dart';
 import 'package:web_socket_channel/io.dart';
 
 class WebSocketClient {
-  WebSocketClient({Logger? logger, required ClientState state})
-      : _logger = logger,
+  WebSocketClient({
+    Logger? logger,
+    required ClientState state,
+    required this.apiKey,
+  })  : _logger = logger,
         _state = state;
   static const pingTimeInterval = Duration(seconds: 20);
   static const pongTimeoutTimeInterval = Duration(seconds: 3);
   late final String _connectionId;
   final ClientState _state;
+  final String apiKey;
   late final IOWebSocketChannel? _channel;
   // late final Uri? uri;
 
@@ -39,7 +43,7 @@ class WebSocketClient {
   void _sendAuthPayload(UserInfo user, Token token) {
     _state.connectionStatus = ConnectionStatus.authenticating;
     final authPayload = _getAuthPayload(user, token);
-    _sendPayload(authPayload);
+    _sendPayload(WebsocketClientEvent(authRequest: authPayload));
   }
 
   void _schedulePing() {
@@ -207,17 +211,19 @@ class WebSocketClient {
 
   WebsocketAuthRequest _getAuthPayload(UserInfo user, Token token) {
     const jsonEncoder = JsonEncoder();
+    print("apiKey $apiKey");
     final authPayload = WebsocketAuthRequest(
-      user: UserInput(
-        // id: user.id,
-        customJson: utf8.encode(jsonEncoder.convert(user.extraData)),
-        name: user.name,
-        imageUrl: user.imageUrl,
-      ),
-      token: token.rawValue,
-      //TODO: remove hardcoded value
-      device: DeviceInput(id: "1", pushProviderId: "firebase"),
-    );
+        token: token.rawValue,
+        user: UserInput(
+          // id: user.id,
+          customJson: utf8.encode(jsonEncoder.convert(user.extraData)),
+          name: user.name,
+          imageUrl: user.imageUrl,
+        ),
+        apiKey: apiKey
+        //TODO: remove hardcoded value
+        // device: DeviceInput(id: "1", pushProviderId: "firebase"),
+        );
     return authPayload;
   }
 
@@ -225,7 +231,8 @@ class WebSocketClient {
     _channel!.sink.add(generatedMessage.writeToBuffer().buffer.asUint8List());
   }
 
-  Uri _buildUri() => Uri.parse('ws://192.168.1.17:8989');
+  Uri _buildUri() => Uri.parse(
+      'ws://192.168.1.32:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect');
 
   void _handleHealthCheckEvent(WebsocketHealthcheck event) {
     _logger?.info('HealthCheck received : ${event.toString()}');

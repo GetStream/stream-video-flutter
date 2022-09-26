@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 void main() {
-  final client = StreamVideoClient("apiKey");
+  final client = StreamVideoClient(
+    'key10', // see <video>/data/fixtures/apps.yaml for API secret
+  );
   runApp(MyApp(client: client));
 }
 
