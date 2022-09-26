@@ -6,12 +6,12 @@ import 'package:http/http.dart' as http;
 import 'package:protobuf/protobuf.dart';
 import 'package:tart/tart.dart' as twirp;
 import 'client_rpc.pb.dart';
-import '../google/protobuf/struct.pb.dart';
-import '../video/coordinator/call_v1/call.pb.dart';
-import '../video/coordinator/client_v1_rpc/envelopes.pb.dart';
-import '../video/coordinator/edge_v1/edge.pb.dart';
-import '../video/coordinator/push_v1/push.pb.dart';
-import '../video/coordinator/utils_v1/utils.pb.dart';
+import 'package:stream_video/protobuf/google/protobuf/struct.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/call_v1/call.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/push_v1/push.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/utils_v1/utils.pb.dart';
 
 
 
