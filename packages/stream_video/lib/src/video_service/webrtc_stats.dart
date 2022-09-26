@@ -2,13 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:livekit_client/livekit_client.dart';
-import 'package:rxdart/subjects.dart';
+import 'package:stream_video/protobuf/google/protobuf/struct.pb.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:uuid/uuid.dart';
 import 'package:webrtc_interface/src/rtc_peerconnection.dart';
 import 'package:webrtc_interface/src/rtc_stats_report.dart';
-
-import 'package:stream_video/protobuf/google/protobuf/struct.pb.dart';
 
 // class Constants {
 //   static String mediaType = 'mediaType';
@@ -219,7 +216,7 @@ class WebRTCStats {
     required String callId,
     required StreamCallType callType,
   }) async {
-    client.reportCallStats(
+    await client.reportCallStats(
       callType: callType,
       callId: callId,
       stats: await _getStats(pc),
@@ -240,7 +237,7 @@ class WebRTCStats {
 
   Future<Struct> _getStats(RTCPeerConnection pc) async {
     final stats = await pc.getStats();
-    var s = <String, Value>{};
+    final s = <String, Value>{};
     stats.forEach((v) =>
         s[v.id] = Value(structValue: Struct.fromJson(jsonEncode(v.values))));
 

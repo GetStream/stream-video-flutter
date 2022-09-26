@@ -9,249 +9,6 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-class CallCreated extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallCreated', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.event_v1'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
-    ..pPS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callMemberUserIds')
-    ..hasRequiredFields = false
-  ;
-
-  CallCreated._() : super();
-  factory CallCreated({
-    $core.String? callCid,
-    $core.Iterable<$core.String>? callMemberUserIds,
-  }) {
-    final _result = create();
-    if (callCid != null) {
-      _result.callCid = callCid;
-    }
-    if (callMemberUserIds != null) {
-      _result.callMemberUserIds.addAll(callMemberUserIds);
-    }
-    return _result;
-  }
-  factory CallCreated.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CallCreated.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  CallCreated clone() => CallCreated()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  CallCreated copyWith(void Function(CallCreated) updates) => super.copyWith((message) => updates(message as CallCreated)) as CallCreated; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static CallCreated create() => CallCreated._();
-  CallCreated createEmptyInstance() => create();
-  static $pb.PbList<CallCreated> createRepeated() => $pb.PbList<CallCreated>();
-  @$core.pragma('dart2js:noInline')
-  static CallCreated getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallCreated>(create);
-  static CallCreated? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get callCid => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set callCid($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasCallCid() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearCallCid() => clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.List<$core.String> get callMemberUserIds => $_getList(1);
-}
-
-class CallUpdated extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallUpdated', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.event_v1'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
-    ..hasRequiredFields = false
-  ;
-
-  CallUpdated._() : super();
-  factory CallUpdated({
-    $core.String? callCid,
-  }) {
-    final _result = create();
-    if (callCid != null) {
-      _result.callCid = callCid;
-    }
-    return _result;
-  }
-  factory CallUpdated.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CallUpdated.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  CallUpdated clone() => CallUpdated()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  CallUpdated copyWith(void Function(CallUpdated) updates) => super.copyWith((message) => updates(message as CallUpdated)) as CallUpdated; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static CallUpdated create() => CallUpdated._();
-  CallUpdated createEmptyInstance() => create();
-  static $pb.PbList<CallUpdated> createRepeated() => $pb.PbList<CallUpdated>();
-  @$core.pragma('dart2js:noInline')
-  static CallUpdated getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallUpdated>(create);
-  static CallUpdated? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get callCid => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set callCid($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasCallCid() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearCallCid() => clearField(1);
-}
-
-class CallStarted extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallStarted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.event_v1'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
-    ..hasRequiredFields = false
-  ;
-
-  CallStarted._() : super();
-  factory CallStarted({
-    $core.String? callCid,
-  }) {
-    final _result = create();
-    if (callCid != null) {
-      _result.callCid = callCid;
-    }
-    return _result;
-  }
-  factory CallStarted.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CallStarted.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  CallStarted clone() => CallStarted()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  CallStarted copyWith(void Function(CallStarted) updates) => super.copyWith((message) => updates(message as CallStarted)) as CallStarted; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static CallStarted create() => CallStarted._();
-  CallStarted createEmptyInstance() => create();
-  static $pb.PbList<CallStarted> createRepeated() => $pb.PbList<CallStarted>();
-  @$core.pragma('dart2js:noInline')
-  static CallStarted getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallStarted>(create);
-  static CallStarted? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get callCid => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set callCid($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasCallCid() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearCallCid() => clearField(1);
-}
-
-class CallEnded extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallEnded', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.event_v1'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
-    ..hasRequiredFields = false
-  ;
-
-  CallEnded._() : super();
-  factory CallEnded({
-    $core.String? callCid,
-  }) {
-    final _result = create();
-    if (callCid != null) {
-      _result.callCid = callCid;
-    }
-    return _result;
-  }
-  factory CallEnded.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CallEnded.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  CallEnded clone() => CallEnded()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  CallEnded copyWith(void Function(CallEnded) updates) => super.copyWith((message) => updates(message as CallEnded)) as CallEnded; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static CallEnded create() => CallEnded._();
-  CallEnded createEmptyInstance() => create();
-  static $pb.PbList<CallEnded> createRepeated() => $pb.PbList<CallEnded>();
-  @$core.pragma('dart2js:noInline')
-  static CallEnded getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallEnded>(create);
-  static CallEnded? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get callCid => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set callCid($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasCallCid() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearCallCid() => clearField(1);
-}
-
-class CallDeleted extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallDeleted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.event_v1'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
-    ..hasRequiredFields = false
-  ;
-
-  CallDeleted._() : super();
-  factory CallDeleted({
-    $core.String? callCid,
-  }) {
-    final _result = create();
-    if (callCid != null) {
-      _result.callCid = callCid;
-    }
-    return _result;
-  }
-  factory CallDeleted.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CallDeleted.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  CallDeleted clone() => CallDeleted()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  CallDeleted copyWith(void Function(CallDeleted) updates) => super.copyWith((message) => updates(message as CallDeleted)) as CallDeleted; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static CallDeleted create() => CallDeleted._();
-  CallDeleted createEmptyInstance() => create();
-  static $pb.PbList<CallDeleted> createRepeated() => $pb.PbList<CallDeleted>();
-  @$core.pragma('dart2js:noInline')
-  static CallDeleted getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallDeleted>(create);
-  static CallDeleted? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get callCid => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set callCid($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasCallCid() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearCallCid() => clearField(1);
-}
-
 class RecordingStarted extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RecordingStarted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.event_v1'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
@@ -490,21 +247,16 @@ class BroadcastEnded extends $pb.GeneratedMessage {
 class CallMembersUpdated extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallMembersUpdated', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.event_v1'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
-    ..pPS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callMemberUserIds')
     ..hasRequiredFields = false
   ;
 
   CallMembersUpdated._() : super();
   factory CallMembersUpdated({
     $core.String? callCid,
-    $core.Iterable<$core.String>? callMemberUserIds,
   }) {
     final _result = create();
     if (callCid != null) {
       _result.callCid = callCid;
-    }
-    if (callMemberUserIds != null) {
-      _result.callMemberUserIds.addAll(callMemberUserIds);
     }
     return _result;
   }
@@ -537,29 +289,21 @@ class CallMembersUpdated extends $pb.GeneratedMessage {
   $core.bool hasCallCid() => $_has(0);
   @$pb.TagNumber(1)
   void clearCallCid() => clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.List<$core.String> get callMemberUserIds => $_getList(1);
 }
 
 class CallMembersDeleted extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallMembersDeleted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.event_v1'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
-    ..pPS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callMemberUserIds')
     ..hasRequiredFields = false
   ;
 
   CallMembersDeleted._() : super();
   factory CallMembersDeleted({
     $core.String? callCid,
-    $core.Iterable<$core.String>? callMemberUserIds,
   }) {
     final _result = create();
     if (callCid != null) {
       _result.callCid = callCid;
-    }
-    if (callMemberUserIds != null) {
-      _result.callMemberUserIds.addAll(callMemberUserIds);
     }
     return _result;
   }
@@ -592,8 +336,240 @@ class CallMembersDeleted extends $pb.GeneratedMessage {
   $core.bool hasCallCid() => $_has(0);
   @$pb.TagNumber(1)
   void clearCallCid() => clearField(1);
+}
 
-  @$pb.TagNumber(2)
-  $core.List<$core.String> get callMemberUserIds => $_getList(1);
+class CallCreated extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallCreated', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.event_v1'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
+    ..hasRequiredFields = false
+  ;
+
+  CallCreated._() : super();
+  factory CallCreated({
+    $core.String? callCid,
+  }) {
+    final _result = create();
+    if (callCid != null) {
+      _result.callCid = callCid;
+    }
+    return _result;
+  }
+  factory CallCreated.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CallCreated.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CallCreated clone() => CallCreated()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CallCreated copyWith(void Function(CallCreated) updates) => super.copyWith((message) => updates(message as CallCreated)) as CallCreated; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CallCreated create() => CallCreated._();
+  CallCreated createEmptyInstance() => create();
+  static $pb.PbList<CallCreated> createRepeated() => $pb.PbList<CallCreated>();
+  @$core.pragma('dart2js:noInline')
+  static CallCreated getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallCreated>(create);
+  static CallCreated? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callCid => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callCid($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallCid() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallCid() => clearField(1);
+}
+
+class CallUpdated extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallUpdated', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.event_v1'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
+    ..hasRequiredFields = false
+  ;
+
+  CallUpdated._() : super();
+  factory CallUpdated({
+    $core.String? callCid,
+  }) {
+    final _result = create();
+    if (callCid != null) {
+      _result.callCid = callCid;
+    }
+    return _result;
+  }
+  factory CallUpdated.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CallUpdated.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CallUpdated clone() => CallUpdated()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CallUpdated copyWith(void Function(CallUpdated) updates) => super.copyWith((message) => updates(message as CallUpdated)) as CallUpdated; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CallUpdated create() => CallUpdated._();
+  CallUpdated createEmptyInstance() => create();
+  static $pb.PbList<CallUpdated> createRepeated() => $pb.PbList<CallUpdated>();
+  @$core.pragma('dart2js:noInline')
+  static CallUpdated getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallUpdated>(create);
+  static CallUpdated? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callCid => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callCid($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallCid() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallCid() => clearField(1);
+}
+
+class CallStarted extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallStarted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.event_v1'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
+    ..hasRequiredFields = false
+  ;
+
+  CallStarted._() : super();
+  factory CallStarted({
+    $core.String? callCid,
+  }) {
+    final _result = create();
+    if (callCid != null) {
+      _result.callCid = callCid;
+    }
+    return _result;
+  }
+  factory CallStarted.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CallStarted.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CallStarted clone() => CallStarted()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CallStarted copyWith(void Function(CallStarted) updates) => super.copyWith((message) => updates(message as CallStarted)) as CallStarted; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CallStarted create() => CallStarted._();
+  CallStarted createEmptyInstance() => create();
+  static $pb.PbList<CallStarted> createRepeated() => $pb.PbList<CallStarted>();
+  @$core.pragma('dart2js:noInline')
+  static CallStarted getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallStarted>(create);
+  static CallStarted? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callCid => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callCid($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallCid() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallCid() => clearField(1);
+}
+
+class CallEnded extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallEnded', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.event_v1'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
+    ..hasRequiredFields = false
+  ;
+
+  CallEnded._() : super();
+  factory CallEnded({
+    $core.String? callCid,
+  }) {
+    final _result = create();
+    if (callCid != null) {
+      _result.callCid = callCid;
+    }
+    return _result;
+  }
+  factory CallEnded.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CallEnded.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CallEnded clone() => CallEnded()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CallEnded copyWith(void Function(CallEnded) updates) => super.copyWith((message) => updates(message as CallEnded)) as CallEnded; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CallEnded create() => CallEnded._();
+  CallEnded createEmptyInstance() => create();
+  static $pb.PbList<CallEnded> createRepeated() => $pb.PbList<CallEnded>();
+  @$core.pragma('dart2js:noInline')
+  static CallEnded getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallEnded>(create);
+  static CallEnded? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callCid => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callCid($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallCid() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallCid() => clearField(1);
+}
+
+class CallDeleted extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallDeleted', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.event_v1'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
+    ..hasRequiredFields = false
+  ;
+
+  CallDeleted._() : super();
+  factory CallDeleted({
+    $core.String? callCid,
+  }) {
+    final _result = create();
+    if (callCid != null) {
+      _result.callCid = callCid;
+    }
+    return _result;
+  }
+  factory CallDeleted.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CallDeleted.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CallDeleted clone() => CallDeleted()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CallDeleted copyWith(void Function(CallDeleted) updates) => super.copyWith((message) => updates(message as CallDeleted)) as CallDeleted; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CallDeleted create() => CallDeleted._();
+  CallDeleted createEmptyInstance() => create();
+  static $pb.PbList<CallDeleted> createRepeated() => $pb.PbList<CallDeleted>();
+  @$core.pragma('dart2js:noInline')
+  static CallDeleted getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallDeleted>(create);
+  static CallDeleted? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callCid => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callCid($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallCid() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallCid() => clearField(1);
 }
 

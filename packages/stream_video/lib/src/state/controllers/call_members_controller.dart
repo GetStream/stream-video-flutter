@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/src/models/events/events.dart';
+
 class CallMembersController {
   final _callMembersController = BehaviorSubject<CallMembersEvent>();
 
@@ -20,12 +21,14 @@ class CallMembersController {
       _callMembersController.stream.distinct();
 
   StreamSubscription<CallMembersEvent> listen(
-          FutureOr<void> Function(CallMembersEvent event) onEvent) =>
+    FutureOr<void> Function(CallMembersEvent event) onEvent,
+  ) =>
       callMembersStream.listen(onEvent);
 
   StreamSubscription<CallMembersEvent> on<E extends CallMembersEvent>(
-          FutureOr<void> Function(E) then,
-          {bool Function(E)? filter}) =>
+    FutureOr<void> Function(E) then, {
+    bool Function(E)? filter,
+  }) =>
       listen((event) async {
         // event must be E
         if (event is! E) return;

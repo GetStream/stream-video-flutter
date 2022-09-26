@@ -177,12 +177,12 @@ const JoinCallResponse$json = const {
   '2': const [
     const {'1': 'call', '3': 1, '4': 1, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.CallEnvelope', '10': 'call'},
     const {'1': 'created', '3': 2, '4': 1, '5': 8, '10': 'created'},
-    const {'1': 'latency_claim', '3': 3, '4': 1, '5': 11, '6': '.stream.video.coordinator.edge_v1.LatencyMeasurementClaim', '10': 'latencyClaim'},
+    const {'1': 'edges', '3': 3, '4': 3, '5': 11, '6': '.stream.video.coordinator.edge_v1.Edge', '10': 'edges'},
   ],
 };
 
 /// Descriptor for `JoinCallResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List joinCallResponseDescriptor = $convert.base64Decode('ChBKb2luQ2FsbFJlc3BvbnNlEkgKBGNhbGwYASABKAsyNC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5DYWxsRW52ZWxvcGVSBGNhbGwSGAoHY3JlYXRlZBgCIAEoCFIHY3JlYXRlZBJeCg1sYXRlbmN5X2NsYWltGAMgASgLMjkuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmVkZ2VfdjEuTGF0ZW5jeU1lYXN1cmVtZW50Q2xhaW1SDGxhdGVuY3lDbGFpbQ==');
+final $typed_data.Uint8List joinCallResponseDescriptor = $convert.base64Decode('ChBKb2luQ2FsbFJlc3BvbnNlEkgKBGNhbGwYASABKAsyNC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5DYWxsRW52ZWxvcGVSBGNhbGwSGAoHY3JlYXRlZBgCIAEoCFIHY3JlYXRlZBI8CgVlZGdlcxgDIAMoCzImLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5lZGdlX3YxLkVkZ2VSBWVkZ2Vz');
 @$core.Deprecated('Use callInputDescriptor instead')
 const CallInput$json = const {
   '1': 'CallInput',
@@ -497,15 +497,15 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ClientRPCS
   '.stream.video.coordinator.client_v1_rpc.GetOrCreateCallResponse': GetOrCreateCallResponse$json,
   '.stream.video.coordinator.client_v1_rpc.JoinCallRequest': JoinCallRequest$json,
   '.stream.video.coordinator.client_v1_rpc.JoinCallResponse': JoinCallResponse$json,
-  '.stream.video.coordinator.edge_v1.LatencyMeasurementClaim': $4.LatencyMeasurementClaim$json,
-  '.stream.video.coordinator.edge_v1.LatencyEndpoint': $4.LatencyEndpoint$json,
+  '.stream.video.coordinator.edge_v1.Edge': $4.Edge$json,
   '.stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest': GetCallEdgeServerRequest$json,
   '.stream.video.coordinator.edge_v1.LatencyMeasurements': $4.LatencyMeasurements$json,
   '.stream.video.coordinator.edge_v1.LatencyMeasurements.MeasurementsEntry': $4.LatencyMeasurements_MeasurementsEntry$json,
   '.stream.video.coordinator.edge_v1.Latency': $4.Latency$json,
   '.stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse': GetCallEdgeServerResponse$json,
   '.stream.video.coordinator.edge_v1.Credentials': $4.Credentials$json,
-  '.stream.video.coordinator.edge_v1.Server': $4.Server$json,
+  '.stream.video.coordinator.edge_v1.EdgeServer': $4.EdgeServer$json,
+  '.stream.video.coordinator.edge_v1.ICEServer': $4.ICEServer$json,
   '.stream.video.coordinator.client_v1_rpc.UpdateCallRequest': UpdateCallRequest$json,
   '.stream.video.coordinator.client_v1_rpc.UpdateCallResponse': UpdateCallResponse$json,
   '.stream.video.coordinator.client_v1_rpc.QueryCallsRequest': QueryCallsRequest$json,

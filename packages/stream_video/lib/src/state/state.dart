@@ -1,15 +1,11 @@
 import 'dart:async';
 
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pbserver.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
-import 'package:stream_video/src/models/events/events.dart';
 import 'package:stream_video/src/models/user_info.dart';
+import 'package:stream_video/src/state/controllers/call_members_controller.dart';
 import 'package:stream_video/src/state/controllers/controllers.dart';
-import 'package:stream_video/src/state/controllers/room_controller.dart';
-
-import 'controllers/call_members_controller.dart';
 
 class StreamCallState {
   final String? userId;
@@ -19,13 +15,14 @@ class StreamCallState {
   final bool? video;
   final bool? audio;
 
-  StreamCallState(
-      {this.userId,
-      this.clientId,
-      this.callType,
-      this.callId,
-      this.video,
-      this.audio});
+  StreamCallState({
+    this.userId,
+    this.clientId,
+    this.callType,
+    this.callId,
+    this.video,
+    this.audio,
+  });
 }
 
 enum ConnectionStatus {
@@ -55,7 +52,7 @@ class ClientState {
   set callState(StreamCallState state) => _callStateController.add(state);
 
   StreamCallState get callState => _callStateController.value;
-  
+
   final _connectionStatusController =
       BehaviorSubject.seeded(ConnectionStatus.disconnected);
 
@@ -84,7 +81,6 @@ class ClientState {
       _healthcheckController.stream.distinct();
 
   final _roomController = RoomController();
-  
 
   //TODO: set participants
 

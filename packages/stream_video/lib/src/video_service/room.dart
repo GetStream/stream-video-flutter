@@ -1,10 +1,7 @@
 import 'dart:async';
 
 import 'package:livekit_client/livekit_client.dart' hide Participant;
-import 'package:stream_video/src/models/aliases.dart';
 import 'package:stream_video/src/models/call_participant.dart';
-import 'package:stream_video/src/models/call_types.dart';
-import 'package:stream_video/src/video_service/room_participant.dart';
 import 'package:stream_video/src/video_service/video_connection_status.dart';
 import 'package:stream_video/src/video_service/webrtc_stats.dart';
 import 'package:stream_video/stream_video.dart';
@@ -93,7 +90,7 @@ class VideoRoom {
         RoomParticipant(localParticipant!),
         ..._room.participants.entries
             .map((e) => RoomParticipant(e.value))
-            .toList()
+            .toList(),
       ];
 
   StreamLocalParticipant? get localParticipant => _room.localParticipant;

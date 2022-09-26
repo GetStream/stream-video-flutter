@@ -8,51 +8,18 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
-@$core.Deprecated('Use latencyEndpointDescriptor instead')
-const LatencyEndpoint$json = const {
-  '1': 'LatencyEndpoint',
-  '2': const [
-    const {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
-    const {'1': 'url', '3': 2, '4': 1, '5': 9, '10': 'url'},
-    const {'1': 'proximity', '3': 3, '4': 1, '5': 1, '10': 'proximity'},
-    const {'1': 'latency', '3': 4, '4': 1, '5': 1, '10': 'latency'},
-  ],
-};
-
-/// Descriptor for `LatencyEndpoint`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List latencyEndpointDescriptor = $convert.base64Decode('Cg9MYXRlbmN5RW5kcG9pbnQSDgoCaWQYASABKAlSAmlkEhAKA3VybBgCIAEoCVIDdXJsEhwKCXByb3hpbWl0eRgDIAEoAVIJcHJveGltaXR5EhgKB2xhdGVuY3kYBCABKAFSB2xhdGVuY3k=');
-@$core.Deprecated('Use serverDescriptor instead')
-const Server$json = const {
-  '1': 'Server',
-  '2': const [
-    const {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
-    const {'1': 'url', '3': 2, '4': 1, '5': 9, '10': 'url'},
-  ],
-};
-
-/// Descriptor for `Server`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List serverDescriptor = $convert.base64Decode('CgZTZXJ2ZXISDgoCaWQYASABKAlSAmlkEhAKA3VybBgCIAEoCVIDdXJs');
 @$core.Deprecated('Use credentialsDescriptor instead')
 const Credentials$json = const {
   '1': 'Credentials',
   '2': const [
-    const {'1': 'server', '3': 1, '4': 1, '5': 11, '6': '.stream.video.coordinator.edge_v1.Server', '8': const {}, '10': 'server'},
+    const {'1': 'server', '3': 1, '4': 1, '5': 11, '6': '.stream.video.coordinator.edge_v1.EdgeServer', '8': const {}, '10': 'server'},
     const {'1': 'token', '3': 2, '4': 1, '5': 9, '8': const {}, '10': 'token'},
+    const {'1': 'ice_servers', '3': 3, '4': 3, '5': 11, '6': '.stream.video.coordinator.edge_v1.ICEServer', '10': 'iceServers'},
   ],
 };
 
 /// Descriptor for `Credentials`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List credentialsDescriptor = $convert.base64Decode('CgtDcmVkZW50aWFscxJKCgZzZXJ2ZXIYASABKAsyKC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuZWRnZV92MS5TZXJ2ZXJCCPpCBYoBAhABUgZzZXJ2ZXISHQoFdG9rZW4YAiABKAlCB/pCBHICEAFSBXRva2Vu');
-@$core.Deprecated('Use latencyMeasurementClaimDescriptor instead')
-const LatencyMeasurementClaim$json = const {
-  '1': 'LatencyMeasurementClaim',
-  '2': const [
-    const {'1': 'endpoints', '3': 1, '4': 3, '5': 11, '6': '.stream.video.coordinator.edge_v1.LatencyEndpoint', '10': 'endpoints'},
-  ],
-};
-
-/// Descriptor for `LatencyMeasurementClaim`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List latencyMeasurementClaimDescriptor = $convert.base64Decode('ChdMYXRlbmN5TWVhc3VyZW1lbnRDbGFpbRJPCgllbmRwb2ludHMYASADKAsyMS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuZWRnZV92MS5MYXRlbmN5RW5kcG9pbnRSCWVuZHBvaW50cw==');
+final $typed_data.Uint8List credentialsDescriptor = $convert.base64Decode('CgtDcmVkZW50aWFscxJOCgZzZXJ2ZXIYASABKAsyLC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuZWRnZV92MS5FZGdlU2VydmVyQgj6QgWKAQIQAVIGc2VydmVyEh0KBXRva2VuGAIgASgJQgf6QgRyAhABUgV0b2tlbhJMCgtpY2Vfc2VydmVycxgDIAMoCzIrLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5lZGdlX3YxLklDRVNlcnZlclIKaWNlU2VydmVycw==');
 @$core.Deprecated('Use latencyMeasurementsDescriptor instead')
 const LatencyMeasurements$json = const {
   '1': 'LatencyMeasurements',
@@ -91,21 +58,11 @@ const Edge$json = const {
     const {'1': 'name', '3': 1, '4': 1, '5': 9, '8': const {}, '10': 'name'},
     const {'1': 'latency_url', '3': 2, '4': 1, '5': 9, '8': const {}, '10': 'latencyUrl'},
   ],
+  '3': const [Edge_Coordinates$json],
 };
 
-/// Descriptor for `Edge`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List edgeDescriptor = $convert.base64Decode('CgRFZGdlEhsKBG5hbWUYASABKAlCB/pCBHICEAFSBG5hbWUSKAoLbGF0ZW5jeV91cmwYAiABKAlCB/pCBHICEAFSCmxhdGVuY3lVcmw=');
-@$core.Deprecated('Use edgeServerDescriptor instead')
-const EdgeServer$json = const {
-  '1': 'EdgeServer',
-  '2': const [
-    const {'1': 'url', '3': 1, '4': 1, '5': 9, '10': 'url'},
-  ],
-  '3': const [EdgeServer_Coordinates$json],
-};
-
-@$core.Deprecated('Use edgeServerDescriptor instead')
-const EdgeServer_Coordinates$json = const {
+@$core.Deprecated('Use edgeDescriptor instead')
+const Edge_Coordinates$json = const {
   '1': 'Coordinates',
   '2': const [
     const {'1': 'lat', '3': 1, '4': 1, '5': 2, '10': 'lat'},
@@ -113,5 +70,28 @@ const EdgeServer_Coordinates$json = const {
   ],
 };
 
+/// Descriptor for `Edge`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List edgeDescriptor = $convert.base64Decode('CgRFZGdlEhsKBG5hbWUYASABKAlCB/pCBHICEAFSBG5hbWUSKAoLbGF0ZW5jeV91cmwYAiABKAlCB/pCBHICEAFSCmxhdGVuY3lVcmwaMwoLQ29vcmRpbmF0ZXMSEAoDbGF0GAEgASgCUgNsYXQSEgoEbG9uZxgCIAEoAlIEbG9uZw==');
+@$core.Deprecated('Use iCEServerDescriptor instead')
+const ICEServer$json = const {
+  '1': 'ICEServer',
+  '2': const [
+    const {'1': 'urls', '3': 1, '4': 3, '5': 9, '10': 'urls'},
+    const {'1': 'username', '3': 2, '4': 1, '5': 9, '10': 'username'},
+    const {'1': 'password', '3': 3, '4': 1, '5': 9, '10': 'password'},
+  ],
+};
+
+/// Descriptor for `ICEServer`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List iCEServerDescriptor = $convert.base64Decode('CglJQ0VTZXJ2ZXISEgoEdXJscxgBIAMoCVIEdXJscxIaCgh1c2VybmFtZRgCIAEoCVIIdXNlcm5hbWUSGgoIcGFzc3dvcmQYAyABKAlSCHBhc3N3b3Jk');
+@$core.Deprecated('Use edgeServerDescriptor instead')
+const EdgeServer$json = const {
+  '1': 'EdgeServer',
+  '2': const [
+    const {'1': 'url', '3': 1, '4': 1, '5': 9, '10': 'url'},
+    const {'1': 'edge_name', '3': 2, '4': 1, '5': 9, '10': 'edgeName'},
+  ],
+};
+
 /// Descriptor for `EdgeServer`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List edgeServerDescriptor = $convert.base64Decode('CgpFZGdlU2VydmVyEhAKA3VybBgBIAEoCVIDdXJsGjMKC0Nvb3JkaW5hdGVzEhAKA2xhdBgBIAEoAlIDbGF0EhIKBGxvbmcYAiABKAJSBGxvbmc=');
+final $typed_data.Uint8List edgeServerDescriptor = $convert.base64Decode('CgpFZGdlU2VydmVyEhAKA3VybBgBIAEoCVIDdXJsEhsKCWVkZ2VfbmFtZRgCIAEoCVIIZWRnZU5hbWU=');

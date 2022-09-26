@@ -13,16 +13,21 @@ import 'package:stream_video/src/state/state.dart';
 import 'package:web_socket_channel/io.dart';
 
 class WebSocketClient {
-  WebSocketClient({Logger? logger, required ClientState state})
-      : _logger = logger,
+  WebSocketClient({
+    Logger? logger,
+    required ClientState state,
+    required this.apiKey,
+    required this.endpoint
+  })  : _logger = logger,
         _state = state;
   static const pingTimeInterval = Duration(seconds: 20);
   static const pongTimeoutTimeInterval = Duration(seconds: 3);
   late final String _connectionId;
   final ClientState _state;
+  final String apiKey;
   late final IOWebSocketChannel? _channel;
   // late final Uri? uri;
-
+final String endpoint;
   late final Timer pingTimer;
   final Logger? _logger;
 
@@ -39,7 +44,7 @@ class WebSocketClient {
   void _sendAuthPayload(UserInfo user, Token token) {
     _state.connectionStatus = ConnectionStatus.authenticating;
     final authPayload = _getAuthPayload(user, token);
-    _sendPayload(authPayload);
+    _sendPayload(WebsocketClientEvent(authRequest: authPayload));
   }
 
   void _schedulePing() {
@@ -207,16 +212,19 @@ class WebSocketClient {
 
   WebsocketAuthRequest _getAuthPayload(UserInfo user, Token token) {
     const jsonEncoder = JsonEncoder();
+    print("apiKey $apiKey");
     final authPayload = WebsocketAuthRequest(
+        token: token.rawValue,
         user: UserInput(
           // id: user.id,
           customJson: utf8.encode(jsonEncoder.convert(user.extraData)),
           name: user.name,
           imageUrl: user.imageUrl,
         ),
-        token: token.rawValue,
+        apiKey: apiKey
         //TODO: remove hardcoded value
-        device: DeviceInput(id: "1", pushProviderId: "firebase"));
+        // device: DeviceInput(id: "1", pushProviderId: "firebase"),
+        );
     return authPayload;
   }
 
@@ -224,7 +232,8 @@ class WebSocketClient {
     _channel!.sink.add(generatedMessage.writeToBuffer().buffer.asUint8List());
   }
 
-  Uri _buildUri() => Uri.parse('ws://192.168.1.17:8989');
+  Uri _buildUri() => Uri.parse(
+     endpoint);
 
   void _handleHealthCheckEvent(WebsocketHealthcheck event) {
     _logger?.info('HealthCheck received : ${event.toString()}');
@@ -260,8 +269,8 @@ class WebSocketClient {
     _state.calls.emitDeleted(event);
   }
 
-   void _handleCallStarted(CallStarted event) {
-       _logger?.info('CallStarted event received : ${event.toString()}');
+  void _handleCallStarted(CallStarted event) {
+    _logger?.info('CallStarted event received : ${event.toString()}');
     _state.calls.emitStarted(event);
   }
 
@@ -359,10 +368,7 @@ class WebSocketClient {
   }
 
   void _handleCallMembersDeleted(CallMembersDeleted event) {
-     _logger?.info('CallMembersDeleted event received : ${event.toString()}');
+    _logger?.info('CallMembersDeleted event received : ${event.toString()}');
     _state.callMembers.emitDeleted(event);
   }
-  
- 
 }
-

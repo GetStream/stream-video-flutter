@@ -21,12 +21,14 @@ class RecordingController {
       _recordingController.stream.distinct();
 
   StreamSubscription<RecordingEvent> listen(
-          FutureOr<void> Function(RecordingEvent event) onEvent) =>
+    FutureOr<void> Function(RecordingEvent event) onEvent,
+  ) =>
       recordingStream.listen(onEvent);
 
   StreamSubscription<RecordingEvent> on<E extends RecordingEvent>(
-          FutureOr<void> Function(E) then,
-          {bool Function(E)? filter}) =>
+    FutureOr<void> Function(E) then, {
+    bool Function(E)? filter,
+  }) =>
       listen((event) async {
         // event must be E
         if (event is! E) return;

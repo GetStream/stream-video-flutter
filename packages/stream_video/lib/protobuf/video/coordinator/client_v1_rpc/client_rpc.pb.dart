@@ -660,7 +660,7 @@ class JoinCallResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'JoinCallResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
     ..aOM<$3.CallEnvelope>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: $3.CallEnvelope.create)
     ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'created')
-    ..aOM<$4.LatencyMeasurementClaim>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'latencyClaim', subBuilder: $4.LatencyMeasurementClaim.create)
+    ..pc<$4.Edge>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'edges', $pb.PbFieldType.PM, subBuilder: $4.Edge.create)
     ..hasRequiredFields = false
   ;
 
@@ -668,7 +668,7 @@ class JoinCallResponse extends $pb.GeneratedMessage {
   factory JoinCallResponse({
     $3.CallEnvelope? call,
     $core.bool? created,
-    $4.LatencyMeasurementClaim? latencyClaim,
+    $core.Iterable<$4.Edge>? edges,
   }) {
     final _result = create();
     if (call != null) {
@@ -677,8 +677,8 @@ class JoinCallResponse extends $pb.GeneratedMessage {
     if (created != null) {
       _result.created = created;
     }
-    if (latencyClaim != null) {
-      _result.latencyClaim = latencyClaim;
+    if (edges != null) {
+      _result.edges.addAll(edges);
     }
     return _result;
   }
@@ -724,15 +724,7 @@ class JoinCallResponse extends $pb.GeneratedMessage {
   void clearCreated() => clearField(2);
 
   @$pb.TagNumber(3)
-  $4.LatencyMeasurementClaim get latencyClaim => $_getN(2);
-  @$pb.TagNumber(3)
-  set latencyClaim($4.LatencyMeasurementClaim v) { setField(3, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasLatencyClaim() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearLatencyClaim() => clearField(3);
-  @$pb.TagNumber(3)
-  $4.LatencyMeasurementClaim ensureLatencyClaim() => $_ensure(2);
+  $core.List<$4.Edge> get edges => $_getList(2);
 }
 
 class CallInput extends $pb.GeneratedMessage {
