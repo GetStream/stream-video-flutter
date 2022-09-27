@@ -1,7 +1,6 @@
 import 'package:stream_video/src/sdp-transform/models.dart';
 import 'package:test/test.dart';
 
-
 void main() {
 //   test('Pass it an unprocessed SDP string. give you a ParsedSdp', () async {
 //     const sdpStr = """v=0\r\n\
@@ -32,8 +31,6 @@ void main() {
 //     expect(result, expectedParsedSdp);
 //   });
 
-
-
   test('ParseCandidate', () async {
     final expected_candidate = Candidate(
         foundation: 1,
@@ -43,6 +40,27 @@ void main() {
         ip: '203.0.113.1',
         port: 55401,
         type: 'host');
-  });
+    RegExp exp = RegExp(
+        r"^candidate:(?<foundation>\S*) (?<component>\d*) (?<transport>\S*) (?<priority>\d*) (?<ip>\S*) (?<port>\d*) typ (?<type>\S*)(?: raddr (?<raddr>\S*) rport (?<rport>\d*))?(?: tcptype (?<tcptype>\S*))?(?: generation (?<generation>\d*))?(?: network-id (?<networkId>\d*))?(?: network-cost (?<networkCost>\d*))?");
+    String str = "candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host";
+    final match = exp.firstMatch(str);//.toList();
+    // final match = matches[0];
+    final foundation = match!.namedGroup('foundation');
+    final component = match.namedGroup('component');
+    final transport = match.namedGroup('transport');
+    final priority = match.namedGroup('priority');
+    final ip = match.namedGroup('ip');
+    final port = match.namedGroup('port');
+    final type = match.namedGroup('type');
+    final candidate = Candidate(
+        foundation: int.parse(foundation!),
+        component: int.parse(component!),
+        transport: transport!,
+        priority: int.parse(priority!),
+        ip: ip!,
+        port: int.parse(port!),
+        type: type!);
 
+    expect(candidate, expected_candidate);
+  });
 }
