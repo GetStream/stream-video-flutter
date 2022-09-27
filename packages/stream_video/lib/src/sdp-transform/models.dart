@@ -24,7 +24,7 @@ class ParsedSdp {
   final List<Media> media;
 }
 
-class Connection {
+class Connection with EquatableMixin{
   Connection({
     required this.version,
     required this.ip,
@@ -32,6 +32,9 @@ class Connection {
 
   final int version;
   final String ip;
+  
+  @override
+  List<Object?> get props => [version, ip];
 }
 
 class Fingerprint with EquatableMixin {

@@ -136,6 +136,15 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
     expect(candidate, expected_candidate);
   });
 
+  test('ParseConnection', () {
+    final expected_connection = Connection(version: 4, ip: '203.0.113.1');
+    String str =
+        "IN IP4 203.0.113.1";
+    Connection connection = parseConnection(str);
+
+    expect(connection, expected_connection);
+  });
+
   test('ParseFingerPrint', () {
     final expected_fingerprint = Fingerprint(
         type: 'sha-1',
@@ -167,6 +176,14 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
     final expected_rtp = expected_rtps[0];
     expect(rtp, expected_rtp);
   });
+}
+
+Connection parseConnection(String str) {
+  RegExp exp = RegExp(r"^IN IP(?<version>\d) (?<ip>\S*)");
+  final match = exp.firstMatch(str);
+  final version = match!.namedGroup('version');
+  final ip = match.namedGroup('ip');
+  return Connection(version: int.parse(version!), ip: ip!);
 }
 
 Fingerprint parseFingerprint(String str) {
