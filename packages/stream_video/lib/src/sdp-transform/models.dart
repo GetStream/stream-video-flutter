@@ -90,7 +90,7 @@ class Candidate with EquatableMixin {
       [foundation, component, transport, priority, ip, port, type];
 }
 
-class Fmtp {
+class Fmtp with EquatableMixin {
   Fmtp({
     required this.payload,
     required this.config,
@@ -98,6 +98,9 @@ class Fmtp {
 
   final int payload;
   final String config;
+
+  @override
+  List<Object?> get props => [payload, config];
 }
 
 class Rtp with EquatableMixin {

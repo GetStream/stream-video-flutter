@@ -136,6 +136,16 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
     expect(candidate, expected_candidate);
   });
 
+  test('Parse fmtp', () {
+    final expected_fmtps = [
+      Fmtp(payload: 97, config: 'profile-level-id=4d0028;packetization-mode=1')
+    ];
+    String str = "fmtp:97 profile-level-id=4d0028;packetization-mode=1";
+    Fmtp fmtp = parseFmtp(str);
+    final expected_fmtp = expected_fmtps[0];
+    expect(fmtp, expected_fmtp);
+  });
+
   test('Parse RTP', () {
     final expected_rtps = <Rtp>[
       Rtp(payload: 97, codec: 'H264', rate: 90000),
@@ -146,6 +156,14 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
     final expected_rtp = expected_rtps[0];
     expect(rtp, expected_rtp);
   });
+}
+
+Fmtp parseFmtp(String str) {
+  RegExp exp = RegExp(r"^fmtp:(?<payload>\d*) (?<config>[\S| ]*)");
+  final match = exp.firstMatch(str);
+  final payload = match!.namedGroup('payload');
+  final config = match.namedGroup('config');
+  return Fmtp(payload: int.parse(payload!), config: config!);
 }
 
 Rtp parseRtp(String str) {
