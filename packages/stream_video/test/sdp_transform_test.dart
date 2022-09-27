@@ -121,6 +121,20 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
     expect(content, "candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host");
   });
 
+  test('Parse Origin', () {
+    final expected_origin = Origin(
+        username: '-',
+        sessionId: 20518,
+        sessionVersion: 0,
+        netType: 'IN',
+        ipVer: 4,
+        address: '203.0.113.1');
+    String str = "- 20518 0 IN IP4 203.0.113.1";
+    Origin origin = parseOrigin(str);
+
+    expect(origin, expected_origin);
+  });
+
   test('Parse Timing', () {
     final expected_timing = Timing(start: 0, stop: 0);
     String str = "0 0";
@@ -183,6 +197,25 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
     final expected_rtp = expected_rtps[0];
     expect(rtp, expected_rtp);
   });
+}
+
+Origin parseOrigin(String str) {
+  RegExp exp = RegExp(r"^(?<username>\S*) (?<sessionId>\d*) (?<sessionVersion>\d*) (?<netType>\S*) IP(?<ipVer>\d) (?<address>\S*)");
+  final match = exp.firstMatch(str);
+  final username = match!.namedGroup('username');
+  final sessionId = match.namedGroup('sessionId');
+  final sessionVersion = match.namedGroup('sessionVersion');
+  final netType = match.namedGroup('netType');
+  final ipVer = match.namedGroup('ipVer');
+  final address = match.namedGroup('address');
+  return Origin(
+    username: username!,
+    sessionId: int.parse(sessionId!),
+    sessionVersion: int.parse(sessionVersion!),
+    netType: netType!,
+    ipVer: int.parse(ipVer!),
+    address: address!,
+  );
 }
 
 Timing parseTiming(String str) {

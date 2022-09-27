@@ -24,7 +24,7 @@ class ParsedSdp {
   final List<Media> media;
 }
 
-class Connection with EquatableMixin{
+class Connection with EquatableMixin {
   Connection({
     required this.version,
     required this.ip,
@@ -32,7 +32,7 @@ class Connection with EquatableMixin{
 
   final int version;
   final String ip;
-  
+
   @override
   List<Object?> get props => [version, ip];
 }
@@ -45,7 +45,7 @@ class Fingerprint with EquatableMixin {
 
   final String type;
   final String hash;
-  
+
   @override
   List<Object?> get props => [type, hash];
 }
@@ -124,7 +124,7 @@ class Rtp with EquatableMixin {
   List<Object?> get props => [payload, codec, rate];
 }
 
-class Origin {
+class Origin with EquatableMixin {
   Origin({
     required this.username,
     required this.sessionId,
@@ -140,6 +140,10 @@ class Origin {
   final String netType;
   final int ipVer;
   final String address;
+
+  @override
+  List<Object?> get props =>
+      [sessionId, sessionVersion, netType, ipVer, address];
 }
 
 class Timing with EquatableMixin {
@@ -150,7 +154,7 @@ class Timing with EquatableMixin {
 
   final int start;
   final int stop;
-  
+
   @override
   List<Object?> get props => [start, stop];
 }
