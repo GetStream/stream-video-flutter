@@ -117,80 +117,83 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
     final indexes = mediaIndexes(lines);
     expect(indexes, [8, 15]);
     final splitted = splitAt(lines, mediaIndexes(lines));
+    final header = splitted.removeAt(0);
     // print(medias);
-    final first_media = splitted[1];
-    final candidates = <Candidate>[];
-    final fmtps = <Fmtp>[];
-    final rtps = <Rtp>[];
     final medias = <Media>[];
-    var directions = "";
-    first_media.reversed.forEach((mediaLine) {
-      // print(mediaLine);
-      var type = mediaLine[0];
-      var content = mediaLine.substring(2);
+    splitted.forEach((media) {
+      final candidates = <Candidate>[];
+      final fmtps = <Fmtp>[];
+      final rtps = <Rtp>[];
 
-      if (mediaLine.contains("sendrecv") |
-          mediaLine.contains("recvonly") |
-          mediaLine.contains("sendonly") |
-          mediaLine.contains("inactive")) {
-        directions = content;
-      }
+      var directions = "";
+      media.reversed.forEach((mediaLine) {
+        // print(mediaLine);
+        var type = mediaLine[0];
+        var content = mediaLine.substring(2);
 
-      if (mediaLine.contains("candidate")) {
-        final candidate = parseCandidate(content);
-        candidates.add(candidate);
-      }
-      if (mediaLine.contains("fmtp")) {
-        final fmtp = parseFmtp(content);
-        fmtps.add(fmtp);
-      }
+        if (mediaLine.contains("sendrecv") |
+            mediaLine.contains("recvonly") |
+            mediaLine.contains("sendonly") |
+            mediaLine.contains("inactive")) {
+          directions = content;
+        }
 
-      if (mediaLine.contains("rtp")) {
-        final rtp = parseRtp(content);
-        rtps.add(rtp);
-      }
+        if (mediaLine.contains("candidate")) {
+          final candidate = parseCandidate(content);
+          candidates.add(candidate);
+        }
+        if (mediaLine.contains("fmtp")) {
+          final fmtp = parseFmtp(content);
+          fmtps.add(fmtp);
+        }
 
-      if (type == "m") {
-        final media = parseMedia(content,
-            candidates: candidates,
-            fmtps: fmtps.isEmpty ? null : fmtps,
-            rtps: rtps,
-            direction: directions);
-        medias.add(media);
-      }
+        if (mediaLine.contains("rtp")) {
+          final rtp = parseRtp(content);
+          rtps.add(rtp);
+        }
+
+        if (type == "m") {
+          final media = parseMedia(content,
+              candidates: candidates,
+              fmtps: fmtps.isEmpty ? null : fmtps,
+              rtps: rtps,
+              direction: directions);
+          medias.add(media);
+        }
+      });
     });
 
-    expect(medias, [
-      Media(
-          rtp: [
-            Rtp(payload: 96, codec: "H264", rate: 48000),
-            Rtp(payload: 0, codec: "H264", rate: 8000)
-          ],
-          fmtp: null,
-          type: "audio",
-          port: 54400,
-          protocol: "RTP/SAVPF",
-          payloads: "0 96",
-          direction: "sendrecv",
-          candidates: [
-            Candidate(
-                foundation: 1,
-                component: 2,
-                transport: "UDP",
-                priority: 2113667326,
-                ip: "203.0.113.1",
-                port: 54401,
-                type: "host"),
-            Candidate(
-                foundation: 0,
-                component: 1,
-                transport: "UDP",
-                priority: 2113667327,
-                ip: "203.0.113.1",
-                port: 54400,
-                type: "host")
-          ])
-    ]);
+    expect(
+        medias.first,
+        Media(
+            rtp: [
+              Rtp(payload: 96, codec: "H264", rate: 48000),
+              Rtp(payload: 0, codec: "H264", rate: 8000)
+            ],
+            fmtp: null,
+            type: "audio",
+            port: 54400,
+            protocol: "RTP/SAVPF",
+            payloads: "0 96",
+            direction: "sendrecv",
+            candidates: [
+              Candidate(
+                  foundation: 1,
+                  component: 2,
+                  transport: "UDP",
+                  priority: 2113667326,
+                  ip: "203.0.113.1",
+                  port: 54401,
+                  type: "host"),
+              Candidate(
+                  foundation: 0,
+                  component: 1,
+                  transport: "UDP",
+                  priority: 2113667327,
+                  ip: "203.0.113.1",
+                  port: 54400,
+                  type: "host")
+            ]));
     // expect(fmtps, <Fmtp>[]);
   });
 
