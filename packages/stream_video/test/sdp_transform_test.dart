@@ -125,16 +125,15 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
     // //parse media
     // expect(type, 'a');
     // expect(content, "candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host");
+    lines.removeWhere((value) => value == "");
     final indexes = mediaIndexes(lines);
-    expect(indexes, [16, 30]);
+    expect(indexes, [8, 15]);
     final medias = splitAt(lines, mediaIndexes(lines));
     // print(medias);
     final first_media = medias[1];
     final candidates = <Candidate>[];
     final fmtps = <Fmtp>[];
     final rtps = <Rtp>[];
-
-    first_media.removeWhere((value) => value == "");
 
     first_media.forEach((mediaLine) {
       // print(mediaLine);
@@ -150,15 +149,10 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
         fmtps.add(fmtp);
       }
 
-      if (mediaLine.contains("fmtp")) {
-        final fmtp = parseFmtp(content);
-        fmtps.add(fmtp);
+      if (mediaLine.contains("rtp")) {
+        final rtp = parseRtp(content);
+        rtps.add(rtp);
       }
-
-      // if (mediaLine.contains("rtp")) {
-      //   final rtp = parseRtp(content);
-      //   rtps.add(rtp);
-      // }
     });
 
     expect(candidates, <Candidate>[
@@ -180,7 +174,11 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
           type: "host")
     ]);
 
-    // expect(candidates, <Candidate>[]);
+    expect(fmtps, <Fmtp>[]);
+    expect(rtps, <Rtp>[
+      Rtp(payload: 0, codec: "H264", rate: 8000),
+      Rtp(payload: 96, codec: "H264", rate: 48000)
+    ]);
   });
 
   test('Parse Origin', () {
