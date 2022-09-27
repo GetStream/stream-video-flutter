@@ -136,6 +136,17 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
     expect(candidate, expected_candidate);
   });
 
+  test('ParseFingerPrint', () {
+    final expected_fingerprint = Fingerprint(
+        type: 'sha-1',
+        hash: '42:89:c5:c6:55:9d:6e:c8:e8:83:55:2a:39:f9:b6:eb:e9:a3:a9:e7');
+    String str =
+        "fingerprint:sha-1 42:89:c5:c6:55:9d:6e:c8:e8:83:55:2a:39:f9:b6:eb:e9:a3:a9:e7";
+    Fingerprint fingerprint = parseFingerprint(str);
+
+    expect(fingerprint, expected_fingerprint);
+  });
+
   test('Parse fmtp', () {
     final expected_fmtps = [
       Fmtp(payload: 97, config: 'profile-level-id=4d0028;packetization-mode=1')
@@ -156,6 +167,14 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
     final expected_rtp = expected_rtps[0];
     expect(rtp, expected_rtp);
   });
+}
+
+Fingerprint parseFingerprint(String str) {
+  RegExp exp = RegExp(r"^fingerprint:(?<type>\S*) (?<hash>\S*)");
+  final match = exp.firstMatch(str);
+  final type = match!.namedGroup('type');
+  final hash = match.namedGroup('hash');
+  return Fingerprint(type: type!, hash: hash!);
 }
 
 Fmtp parseFmtp(String str) {

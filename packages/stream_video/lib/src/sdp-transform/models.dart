@@ -34,7 +34,7 @@ class Connection {
   final String ip;
 }
 
-class Fingerprint {
+class Fingerprint with EquatableMixin {
   Fingerprint({
     required this.type,
     required this.hash,
@@ -42,6 +42,9 @@ class Fingerprint {
 
   final String type;
   final String hash;
+  
+  @override
+  List<Object?> get props => [type, hash];
 }
 
 class Media {
