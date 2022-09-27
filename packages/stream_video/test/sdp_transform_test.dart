@@ -121,6 +121,14 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
     expect(content, "candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host");
   });
 
+  test('Parse Timing', () {
+    final expected_timing = Timing(start: 0, stop: 0);
+    String str = "0 0";
+    Timing timing = parseTiming(str);
+
+    expect(timing, expected_timing);
+  });
+
   test('ParseCandidate', () {
     final expected_candidate = Candidate(
         foundation: 1,
@@ -138,8 +146,7 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
 
   test('ParseConnection', () {
     final expected_connection = Connection(version: 4, ip: '203.0.113.1');
-    String str =
-        "IN IP4 203.0.113.1";
+    String str = "IN IP4 203.0.113.1";
     Connection connection = parseConnection(str);
 
     expect(connection, expected_connection);
@@ -176,6 +183,14 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
     final expected_rtp = expected_rtps[0];
     expect(rtp, expected_rtp);
   });
+}
+
+Timing parseTiming(String str) {
+  RegExp exp = RegExp(r"^(?<start>\d*) (?<stop>\d*)");
+  final match = exp.firstMatch(str);
+  final start = match!.namedGroup('start');
+  final stop = match.namedGroup('stop');
+  return Timing(start: int.parse(start!), stop: int.parse(stop!));
 }
 
 Connection parseConnection(String str) {

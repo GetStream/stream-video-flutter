@@ -142,7 +142,7 @@ class Origin {
   final String address;
 }
 
-class Timing {
+class Timing with EquatableMixin {
   Timing({
     required this.start,
     required this.stop,
@@ -150,4 +150,7 @@ class Timing {
 
   final int start;
   final int stop;
+  
+  @override
+  List<Object?> get props => [start, stop];
 }
