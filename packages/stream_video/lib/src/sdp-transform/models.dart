@@ -100,7 +100,7 @@ class Fmtp {
   final String config;
 }
 
-class Rtp {
+class Rtp with EquatableMixin {
   Rtp({
     required this.payload,
     required this.codec,
@@ -110,6 +110,9 @@ class Rtp {
   final int payload;
   final String codec;
   final int rate;
+
+  @override
+  List<Object?> get props => [payload, codec, rate];
 }
 
 class Origin {

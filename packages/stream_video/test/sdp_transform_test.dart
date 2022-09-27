@@ -135,6 +135,28 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
 
     expect(candidate, expected_candidate);
   });
+
+  test('Parse RTP', () {
+    final expected_rtps = <Rtp>[
+      Rtp(payload: 97, codec: 'H264', rate: 90000),
+      Rtp(payload: 98, codec: 'VP8', rate: 90000)
+    ];
+    String str = "rtpmap:97 H264/90000";
+    Rtp rtp = parseRtp(str);
+    final expected_rtp = expected_rtps[0];
+    expect(rtp, expected_rtp);
+  });
+}
+
+Rtp parseRtp(String str) {
+  RegExp exp = RegExp(
+      r"^rtpmap:(?<payload>\d*) (?<codec>[\w\-.]*)(?:\s*\/(?<rate>\d*)(?:\s*\/(\S*))?)?");
+  final match = exp.firstMatch(str);
+  final payload = match!.namedGroup('payload');
+  final codec = match.namedGroup('codec');
+  final rate = match.namedGroup('rate');
+  return Rtp(
+      payload: int.parse(payload!), codec: 'H264', rate: int.parse(rate!));
 }
 
 Candidate parseCandidate(String str) {
