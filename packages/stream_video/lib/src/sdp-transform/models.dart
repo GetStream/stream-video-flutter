@@ -50,7 +50,7 @@ class Fingerprint with EquatableMixin {
   List<Object?> get props => [type, hash];
 }
 
-class Media {
+class Media with EquatableMixin {
   Media({
     required this.rtp,
     required this.fmtp,
@@ -70,6 +70,10 @@ class Media {
   final String payloads;
   final String direction;
   final List<Candidate> candidates;
+
+  @override
+  List<Object?> get props =>
+      [rtp, fmtp, type, port, protocol, payloads, direction, candidates];
 }
 
 class Candidate with EquatableMixin {

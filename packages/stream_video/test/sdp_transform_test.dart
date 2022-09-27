@@ -203,6 +203,50 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
     expect(timing, expected_timing);
   });
 
+  test('Parse Media', () {
+    final rtps = [
+      Rtp(payload: 97, codec: 'H264', rate: 90000),
+      Rtp(payload: 98, codec: 'VP8', rate: 90000)
+    ];
+    final fmtps = [
+      Fmtp(payload: 97, config: 'profile-level-id=4d0028;packetization-mode=1')
+    ];
+    final candidates = [
+      Candidate(
+          foundation: 0,
+          component: 1,
+          transport: 'UDP',
+          priority: 2113667327,
+          ip: '203.0.113.1',
+          port: 55400,
+          type: 'host'),
+      Candidate(
+          foundation: 1,
+          component: 2,
+          transport: 'UDP',
+          priority: 2113667326,
+          ip: '203.0.113.1',
+          port: 55401,
+          type: 'host')
+    ];
+    final direction = 'sendrecv';
+    final expected_media = Media(
+      rtp: rtps,
+      fmtp: fmtps,
+      type: 'video',
+      port: 55400,
+      protocol: 'RTP/SAVPF',
+      payloads: '97 98',
+      direction: direction,
+      candidates: candidates,
+    );
+    String str = "video 55400 RTP/SAVPF 97 98";
+    Media media = parseMedia(str,
+        candidates: candidates, fmtps: fmtps, rtps: rtps, direction: direction);
+
+    expect(media, expected_media);
+  });
+
   test('ParseCandidate', () {
     final expected_candidate = Candidate(
         foundation: 1,
@@ -276,6 +320,33 @@ Origin parseOrigin(String str) {
     netType: netType!,
     ipVer: int.parse(ipVer!),
     address: address!,
+  );
+}
+
+Media parseMedia(
+  String str, {
+  required List<Rtp> rtps,
+  required List<Fmtp> fmtps,
+  required List<Candidate> candidates,
+  required String direction,
+}) {
+  RegExp exp = RegExp(
+      r"(?<type>\w*) (?<port>\d*) (?<protocol>[\w/]*)(?: (?<payloads>.*))?");
+  final match = exp.firstMatch(str);
+  final type = match!.namedGroup('type');
+  final port = match.namedGroup('port');
+  final protocol = match.namedGroup('protocol');
+  final payloads = match.namedGroup('payloads');
+
+  return Media(
+    rtp: rtps,
+    fmtp: fmtps,
+    type: type!,
+    port: int.parse(port!),
+    protocol: protocol!,
+    payloads: payloads!,
+    direction: direction,
+    candidates: candidates,
   );
 }
 
