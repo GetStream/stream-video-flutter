@@ -15,6 +15,16 @@ List<List<T>> splitAt<T>(List<T> list, List<int> indexes) {
   return result;
 }
 
+List<int> mediaIndexes(List<String> lines) {
+  final mediaIndexes = <int>[];
+  lines.asMap().forEach((i, el) {
+    if (el.startsWith("m")) {
+      mediaIndexes.add(i);
+    }
+  });
+  return mediaIndexes;
+}
+
 void main() {
   test('splitAt', () {
     final list = [
@@ -47,6 +57,7 @@ void main() {
       ['m', 'a', 'a', 'a', 'a', 'a', 'a']
     ], splitAt(list, [8, 15]));
   });
+
   test('mediaIndexes', () {
     final list = [
       "v",
@@ -57,14 +68,14 @@ void main() {
       "a",
       "a",
       "a",
-      "m",
+      "m=audio 54400 RTP/SAVPF 0 96",
       "a",
       "a",
       "a",
       "a",
       "a",
       "a",
-      "m",
+      "m=video 55400 RTP/SAVPF 97 98",
       "a",
       "a",
       "a",
@@ -72,13 +83,8 @@ void main() {
       "a",
       "a"
     ];
-    final mediaIndexes = [];
-    list.asMap().forEach((i, el) {
-      if (el == "m") {
-        mediaIndexes.add(i);
-      }
-    });
-    expect(mediaIndexes, [8, 15]);
+
+    expect(mediaIndexes(list), [8, 15]);
   });
   test('Pass it an unprocessed SDP string. give you a ParsedSdp', () {
     const sdpStr = """v=0\r\n\
@@ -113,12 +119,68 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
     //   if (l == "m") {}
     // });
     // expect(actual, matcher)
-    final l = lines[42];
-    var type = l[0];
-    var content = l.substring(2);
-    //parse media
-    expect(type, 'a');
-    expect(content, "candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host");
+    // final l = lines[42];
+    // var type = l[0];
+    // var content = l.substring(2);
+    // //parse media
+    // expect(type, 'a');
+    // expect(content, "candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host");
+    final indexes = mediaIndexes(lines);
+    expect(indexes, [16, 30]);
+    final medias = splitAt(lines, mediaIndexes(lines));
+    // print(medias);
+    final first_media = medias[1];
+    final candidates = <Candidate>[];
+    final fmtps = <Fmtp>[];
+    final rtps = <Rtp>[];
+
+    first_media.removeWhere((value) => value == "");
+
+    first_media.forEach((mediaLine) {
+      // print(mediaLine);
+      var type = mediaLine[0];
+      var content = mediaLine.substring(2);
+
+      if (mediaLine.contains("candidate")) {
+        final candidate = parseCandidate(content);
+        candidates.add(candidate);
+      }
+      if (mediaLine.contains("fmtp")) {
+        final fmtp = parseFmtp(content);
+        fmtps.add(fmtp);
+      }
+
+      if (mediaLine.contains("fmtp")) {
+        final fmtp = parseFmtp(content);
+        fmtps.add(fmtp);
+      }
+
+      // if (mediaLine.contains("rtp")) {
+      //   final rtp = parseRtp(content);
+      //   rtps.add(rtp);
+      // }
+    });
+
+    expect(candidates, <Candidate>[
+      Candidate(
+          foundation: 0,
+          component: 1,
+          transport: "UDP",
+          priority: 2113667327,
+          ip: "203.0.113.1",
+          port: 54400,
+          type: "host"),
+      Candidate(
+          foundation: 1,
+          component: 2,
+          transport: "UDP",
+          priority: 2113667326,
+          ip: "203.0.113.1",
+          port: 54401,
+          type: "host")
+    ]);
+
+    // expect(candidates, <Candidate>[]);
   });
 
   test('Parse Origin', () {
@@ -200,7 +262,8 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
 }
 
 Origin parseOrigin(String str) {
-  RegExp exp = RegExp(r"^(?<username>\S*) (?<sessionId>\d*) (?<sessionVersion>\d*) (?<netType>\S*) IP(?<ipVer>\d) (?<address>\S*)");
+  RegExp exp = RegExp(
+      r"^(?<username>\S*) (?<sessionId>\d*) (?<sessionVersion>\d*) (?<netType>\S*) IP(?<ipVer>\d) (?<address>\S*)");
   final match = exp.firstMatch(str);
   final username = match!.namedGroup('username');
   final sessionId = match.namedGroup('sessionId');
