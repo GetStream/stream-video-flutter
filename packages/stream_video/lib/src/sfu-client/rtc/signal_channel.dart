@@ -1,9 +1,13 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:stream_video/protobuf/video/sfu/sfu_events/events.pb.dart';
 
-typedef OnMessage = void Function(dynamic); //SfuEvent
+typedef OnMessage = void Function(SfuEvent); //SfuEvent
 
-Future<RTCDataChannel> createSignalChannel(
-    String label, RTCPeerConnection pc, OnMessage onMessage) async {
+Future<RTCDataChannel> createSignalChannel({
+  required String label,
+  required RTCPeerConnection pc,
+  required OnMessage onMessage,
+}) async {
   var dataChannelDict = RTCDataChannelInit();
   dataChannelDict.binaryType = 'arraybuffer';
   final signal = await pc.createDataChannel(label, dataChannelDict);
@@ -17,9 +21,13 @@ Future<RTCDataChannel> createSignalChannel(
   };
 
   signal.onMessage = (message) {
-    //  const binaryData = new Uint8Array(e.data);
-    //   const message = SfuEvent.fromBinary(binaryData);
-    onMessage(message);
+    if (!message.isBinary) {
+      print("This socket only accepts exchanging binary data");
+    }
+
+    final receivedEvent = SfuEvent.fromBuffer(message.binary);
+
+    onMessage(receivedEvent);
   };
 
   return signal;

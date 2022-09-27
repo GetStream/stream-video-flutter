@@ -1,12 +1,6 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:stream_video/src/sfu-client/rpc/signal.dart';
 
-// class Publisher {
-// late RTCPeerConnection pc;
-
-// Publisher(this.rpcClient);
-
-// final SfuSignalingClient rpcClient;
 Future<RTCPeerConnection> createPublisher(
     String sfuUrl, SfuSignalingClient rpcClient) async {
   final publisher = await createPeerConnection({
@@ -41,6 +35,4 @@ Future<RTCPeerConnection> createPublisher(
         .setRemoteDescription(RTCSessionDescription(sfu.sdp, 'answer'));
   };
   return publisher;
-  // pc = publisher;
 }
-// }
