@@ -64,11 +64,11 @@ Future<List<Codec>> _getCodecsFromPeerConnection(
   parsedSdp.media.forEach((media) {
     if (media.type == kind.toStr()) {
       media.rtp.forEach((rtp) {
-        final fmtpLine = media.fmtp.firstWhere((f) => f.payload == rtp.payload);
+        final fmtpLine = media.fmtp?.firstWhere((f) => f.payload == rtp.payload);
         supportedCodecs.add(Codec(
           hwAccelerated: true,
           clockRate: rtp.rate, //?? 0,
-          fmtpLine: fmtpLine.config, //?? '',
+          fmtpLine: fmtpLine?.config ?? '',
           mime: '${kind}/${rtp.codec}',
         ));
       });

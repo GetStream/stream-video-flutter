@@ -53,7 +53,7 @@ class Fingerprint with EquatableMixin {
 class Media with EquatableMixin {
   Media({
     required this.rtp,
-    required this.fmtp,
+    this.fmtp,
     required this.type,
     required this.port,
     required this.protocol,
@@ -63,7 +63,7 @@ class Media with EquatableMixin {
   });
 
   final List<Rtp> rtp;
-  final List<Fmtp> fmtp;
+  final List<Fmtp>? fmtp;
   final String type;
   final int port;
   final String protocol;
@@ -74,6 +74,9 @@ class Media with EquatableMixin {
   @override
   List<Object?> get props =>
       [rtp, fmtp, type, port, protocol, payloads, direction, candidates];
+  @override
+  String toString() =>
+      'rtp: ${rtp.map((e) => e.toString())}, fmtp: ${fmtp?.map((e) => e.toString())}, type: $type, port: $port, protocol: $protocol, payloads: $payloads, direction: $direction, candidates: ${candidates.map((e) => e.toString())}';
 }
 
 class Candidate with EquatableMixin {
@@ -98,6 +101,9 @@ class Candidate with EquatableMixin {
   @override
   List<Object?> get props =>
       [foundation, component, transport, priority, ip, port, type];
+  @override
+  String toString() =>
+      'foundation: $foundation, component: $component, transport: $transport, priority: $priority, ip: $ip, port: $port, type: $type';
 }
 
 class Fmtp with EquatableMixin {
@@ -111,6 +117,9 @@ class Fmtp with EquatableMixin {
 
   @override
   List<Object?> get props => [payload, config];
+
+  @override
+  String toString() => 'payload: $payload, config: $config';
 }
 
 class Rtp with EquatableMixin {
@@ -126,6 +135,8 @@ class Rtp with EquatableMixin {
 
   @override
   List<Object?> get props => [payload, codec, rate];
+  @override
+  String toString() => 'payload: $payload, codec: $codec, rate: $rate';
 }
 
 class Origin with EquatableMixin {

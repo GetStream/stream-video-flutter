@@ -112,33 +112,29 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
 """;
     final ls = LineSplitter();
     final lines = ls.convert(sdpStr);
-    // final media = lines.asMap().forEach((i, l) {
-    //   //  final l = lines[42];
-    //   var type = l[0];
-    //   var content = l.substring(2);
-    //   if (l == "m") {}
-    // });
-    // expect(actual, matcher)
-    // final l = lines[42];
-    // var type = l[0];
-    // var content = l.substring(2);
-    // //parse media
-    // expect(type, 'a');
-    // expect(content, "candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host");
+
     lines.removeWhere((value) => value == "");
     final indexes = mediaIndexes(lines);
     expect(indexes, [8, 15]);
-    final medias = splitAt(lines, mediaIndexes(lines));
+    final splitted = splitAt(lines, mediaIndexes(lines));
     // print(medias);
-    final first_media = medias[1];
+    final first_media = splitted[1];
     final candidates = <Candidate>[];
     final fmtps = <Fmtp>[];
     final rtps = <Rtp>[];
-
-    first_media.forEach((mediaLine) {
+    final medias = <Media>[];
+    var directions = "";
+    first_media.reversed.forEach((mediaLine) {
       // print(mediaLine);
       var type = mediaLine[0];
       var content = mediaLine.substring(2);
+
+      if (mediaLine.contains("sendrecv") |
+          mediaLine.contains("recvonly") |
+          mediaLine.contains("sendonly") |
+          mediaLine.contains("inactive")) {
+        directions = content;
+      }
 
       if (mediaLine.contains("candidate")) {
         final candidate = parseCandidate(content);
@@ -153,32 +149,49 @@ a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
         final rtp = parseRtp(content);
         rtps.add(rtp);
       }
+
+      if (type == "m") {
+        final media = parseMedia(content,
+            candidates: candidates,
+            fmtps: fmtps.isEmpty ? null : fmtps,
+            rtps: rtps,
+            direction: directions);
+        medias.add(media);
+      }
     });
 
-    expect(candidates, <Candidate>[
-      Candidate(
-          foundation: 0,
-          component: 1,
-          transport: "UDP",
-          priority: 2113667327,
-          ip: "203.0.113.1",
+    expect(medias, [
+      Media(
+          rtp: [
+            Rtp(payload: 96, codec: "H264", rate: 48000),
+            Rtp(payload: 0, codec: "H264", rate: 8000)
+          ],
+          fmtp: null,
+          type: "audio",
           port: 54400,
-          type: "host"),
-      Candidate(
-          foundation: 1,
-          component: 2,
-          transport: "UDP",
-          priority: 2113667326,
-          ip: "203.0.113.1",
-          port: 54401,
-          type: "host")
+          protocol: "RTP/SAVPF",
+          payloads: "0 96",
+          direction: "sendrecv",
+          candidates: [
+            Candidate(
+                foundation: 1,
+                component: 2,
+                transport: "UDP",
+                priority: 2113667326,
+                ip: "203.0.113.1",
+                port: 54401,
+                type: "host"),
+            Candidate(
+                foundation: 0,
+                component: 1,
+                transport: "UDP",
+                priority: 2113667327,
+                ip: "203.0.113.1",
+                port: 54400,
+                type: "host")
+          ])
     ]);
-
-    expect(fmtps, <Fmtp>[]);
-    expect(rtps, <Rtp>[
-      Rtp(payload: 0, codec: "H264", rate: 8000),
-      Rtp(payload: 96, codec: "H264", rate: 48000)
-    ]);
+    // expect(fmtps, <Fmtp>[]);
   });
 
   test('Parse Origin', () {
@@ -326,7 +339,7 @@ Origin parseOrigin(String str) {
 Media parseMedia(
   String str, {
   required List<Rtp> rtps,
-  required List<Fmtp> fmtps,
+  List<Fmtp>? fmtps,
   required List<Candidate> candidates,
   required String direction,
 }) {
