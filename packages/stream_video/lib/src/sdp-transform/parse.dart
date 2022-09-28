@@ -1,11 +1,165 @@
-import 'package:stream_video/src/sdp-transform/models.dart';
-//Given a string of SDP, return a ParsedSdp object
+import 'dart:convert';
 
-ParsedSdp parseSdp(String sdpStr) {
-  throw UnimplementedError();
+import 'package:stream_video/src/sdp-transform/models.dart';
+import 'package:stream_video/src/sdp-transform/utils.dart';
+/// Given a raw SDP string, return a parsed Sdp object
+Sdp parseSdp(String sdpStr) {
+  final ls = LineSplitter();
+  final lines = ls.convert(sdpStr);
+
+  lines.removeWhere((value) => value == "");
+  final indexes = mediaIndexes(lines);
+  final splitted = splitAt(lines, mediaIndexes(lines));
+  final header = splitted.removeAt(0);
+  Origin? origin;
+  Timing? timing;
+  Connection? connection;
+  Fingerprint? fingerprint;
+  int? version;
+  String? name;
+  String? icePwd;
+  String? iceUfrag;
+  header.forEach((line) {
+    var type = line[0];
+    var content = line.substring(2);
+
+    if (type == "o") {
+      origin = parseOrigin(content);
+    }
+    if (type == "t") {
+      timing = parseTiming(content);
+    }
+    if (type == "c") {
+      connection = parseConnection(content);
+    }
+
+    if (type == "v") {
+      version = parseVersion(content);
+    }
+
+    if (type == "s") {
+      name = parseName(content);
+    }
+
+    if (line.contains("fingerprint")) {
+      fingerprint = parseFingerprint(content);
+    }
+    if (line.contains("ice-ufrag")) {
+      iceUfrag = parseIceUfrag(content);
+    }
+    if (line.contains("ice-pwd")) {
+      icePwd = parseIcePwd(content);
+    }
+  });
+  final medias = <Media>[];
+  splitted.forEach((media) {
+    final candidates = <Candidate>[];
+    final fmtps = <Fmtp>[];
+    final rtps = <Rtp>[];
+
+    var directions = "";
+    media.reversed.forEach((mediaLine) {
+      // print(mediaLine);
+      var type = mediaLine[0];
+      var content = mediaLine.substring(2);
+
+      if (mediaLine.contains("sendrecv") |
+          mediaLine.contains("recvonly") |
+          mediaLine.contains("sendonly") |
+          mediaLine.contains("inactive")) {
+        directions = content;
+      }
+
+      if (mediaLine.contains("candidate")) {
+        final candidate = parseCandidate(content);
+        candidates.add(candidate);
+      }
+      if (mediaLine.contains("fmtp")) {
+        final fmtp = parseFmtp(content);
+        fmtps.add(fmtp);
+      }
+
+      if (mediaLine.contains("rtp")) {
+        final rtp = parseRtp(content);
+        rtps.add(rtp);
+      }
+
+      if (type == "m") {
+        final media = parseMedia(
+          content,
+          candidates: candidates,
+          fmtps: fmtps.isEmpty ? null : fmtps,
+          rtps: rtps,
+          direction: directions,
+        );
+        medias.add(media);
+      }
+    });
+  });
+  final result = sdp(
+    connection: connection!,
+    fingerprint: fingerprint!,
+    icePwd: icePwd!,
+    iceUfrag: iceUfrag!,
+    media: medias,
+    name: name!,
+    origin: origin!,
+    timing: timing!,
+    version: version!,
+  );
+  return result;
 }
 
+Sdp sdp({
+  required Origin origin,
+  required Timing timing,
+  required Connection connection,
+  required Fingerprint fingerprint,
+  required List<Media> media,
+  required int version,
+  required String iceUfrag,
+  required String name,
+  required String icePwd,
+}) =>
+    Sdp(
+      version: version,
+      origin: origin,
+      name: name,
+      timing: timing,
+      connection: connection,
+      iceUfrag: iceUfrag, // 'F7gI',
+      icePwd: icePwd, //'x9cml/YzichV2+XlhiMu8g',
+      fingerprint: fingerprint,
+      media: media,
+    );
 
+String parseName(String str) {
+  RegExp exp = RegExp(r"(?<name>.*)");
+  final match = exp.firstMatch(str);
+  final name = match!.namedGroup('name');
+  return name!;
+}
+
+int parseVersion(String str) {
+  RegExp exp = RegExp(r"^(?<version>\d*)");
+  final match = exp.firstMatch(str);
+  final version = match!.namedGroup('version');
+  return int.parse(version!);
+}
+
+String parseIcePwd(String str) {
+  RegExp exp = RegExp(r"^ice-pwd:(?<icePwd>\S*)");
+  final match = exp.firstMatch(str);
+  final icePwd = match!.namedGroup('icePwd');
+  return icePwd!;
+}
+
+String parseIceUfrag(String str) {
+  RegExp exp = RegExp(r"^ice-ufrag:(?<iceUfrag>\S*)");
+  final match = exp.firstMatch(str);
+  final iceUfrag = match!.namedGroup('iceUfrag');
+  return iceUfrag!;
+}
 
 Origin parseOrigin(String str) {
   RegExp exp = RegExp(

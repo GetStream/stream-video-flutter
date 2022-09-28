@@ -66,7 +66,8 @@ void main() {
 
     expect(mediaIndexes(list), [8, 15]);
   });
-  test('Pass it an unprocessed SDP string. give you a ParsedSdp', () {
+
+  test('Parse SDP', () {
     const sdpStr = """v=0\r\n\
 o=- 20518 0 IN IP4 203.0.113.1\r\n\
 s= \r\n\
@@ -90,90 +91,91 @@ a=sendrecv\r\n\
 a=candidate:0 1 UDP 2113667327 203.0.113.1 55400 typ host\r\n\
 a=candidate:1 2 UDP 2113667326 203.0.113.1 55401 typ host\r\n\
 """;
-    final ls = LineSplitter();
-    final lines = ls.convert(sdpStr);
+    final sdp = parseSdp(sdpStr);
 
-    lines.removeWhere((value) => value == "");
-    final indexes = mediaIndexes(lines);
-    expect(indexes, [8, 15]);
-    final splitted = splitAt(lines, mediaIndexes(lines));
-    final header = splitted.removeAt(0);
-    // print(medias);
-    final medias = <Media>[];
-    splitted.forEach((media) {
-      final candidates = <Candidate>[];
-      final fmtps = <Fmtp>[];
-      final rtps = <Rtp>[];
+    final expected_sdp = Sdp(
+        version: 0,
+        origin: Origin(
+            username: '-',
+            sessionId: 20518,
+            sessionVersion: 0,
+            netType: 'IN',
+            ipVer: 4,
+            address: '203.0.113.1'),
+        name: ' ',
+        timing: Timing(start: 0, stop: 0),
+        connection: Connection(version: 4, ip: '203.0.113.1'),
+        iceUfrag: 'F7gI',
+        icePwd: 'x9cml/YzichV2+XlhiMu8g',
+        fingerprint: Fingerprint(
+            type: 'sha-1',
+            hash:
+                '42:89:c5:c6:55:9d:6e:c8:e8:83:55:2a:39:f9:b6:eb:e9:a3:a9:e7'),
+        media: [
+          Media(
+              rtp: [
+                Rtp(payload: 96, codec: "H264", rate: 48000),
+                Rtp(payload: 0, codec: "H264", rate: 8000)
+              ],
+              type: "audio",
+              port: 54400,
+              protocol: "RTP/SAVPF",
+              payloads: "0 96",
+              direction: "sendrecv",
+              candidates: [
+                Candidate(
+                    foundation: 1,
+                    component: 2,
+                    transport: "UDP",
+                    priority: 2113667326,
+                    ip: "203.0.113.1",
+                    port: 54401,
+                    type: "host"),
+                Candidate(
+                    foundation: 0,
+                    component: 1,
+                    transport: "UDP",
+                    priority: 2113667327,
+                    ip: "203.0.113.1",
+                    port: 54400,
+                    type: "host")
+              ]),
+          Media(
+              rtp: [
+                Rtp(payload: 98, codec: "H264", rate: 90000),
+                Rtp(payload: 97, codec: "H264", rate: 90000)
+              ],
+              fmtp: [
+                Fmtp(
+                    payload: 97,
+                    config: "profile-level-id=4d0028;packetization-mode=1")
+              ],
+              type: "video",
+              port: 55400,
+              protocol: "RTP/SAVPF",
+              payloads: "97 98",
+              direction: "sendrecv",
+              candidates: [
+                Candidate(
+                    foundation: 1,
+                    component: 2,
+                    transport: "UDP",
+                    priority: 2113667326,
+                    ip: "203.0.113.1",
+                    port: 55401,
+                    type: "host"),
+                Candidate(
+                    foundation: 0,
+                    component: 1,
+                    transport: "UDP",
+                    priority: 2113667327,
+                    ip: "203.0.113.1",
+                    port: 55400,
+                    type: "host")
+              ])
+        ]);
 
-      var directions = "";
-      media.reversed.forEach((mediaLine) {
-        // print(mediaLine);
-        var type = mediaLine[0];
-        var content = mediaLine.substring(2);
-
-        if (mediaLine.contains("sendrecv") |
-            mediaLine.contains("recvonly") |
-            mediaLine.contains("sendonly") |
-            mediaLine.contains("inactive")) {
-          directions = content;
-        }
-
-        if (mediaLine.contains("candidate")) {
-          final candidate = parseCandidate(content);
-          candidates.add(candidate);
-        }
-        if (mediaLine.contains("fmtp")) {
-          final fmtp = parseFmtp(content);
-          fmtps.add(fmtp);
-        }
-
-        if (mediaLine.contains("rtp")) {
-          final rtp = parseRtp(content);
-          rtps.add(rtp);
-        }
-
-        if (type == "m") {
-          final media = parseMedia(content,
-              candidates: candidates,
-              fmtps: fmtps.isEmpty ? null : fmtps,
-              rtps: rtps,
-              direction: directions);
-          medias.add(media);
-        }
-      });
-    });
-
-    expect(
-        medias.first,
-        Media(
-            rtp: [
-              Rtp(payload: 96, codec: "H264", rate: 48000),
-              Rtp(payload: 0, codec: "H264", rate: 8000)
-            ],
-            type: "audio",
-            port: 54400,
-            protocol: "RTP/SAVPF",
-            payloads: "0 96",
-            direction: "sendrecv",
-            candidates: [
-              Candidate(
-                  foundation: 1,
-                  component: 2,
-                  transport: "UDP",
-                  priority: 2113667326,
-                  ip: "203.0.113.1",
-                  port: 54401,
-                  type: "host"),
-              Candidate(
-                  foundation: 0,
-                  component: 1,
-                  transport: "UDP",
-                  priority: 2113667327,
-                  ip: "203.0.113.1",
-                  port: 54400,
-                  type: "host")
-            ]));
-    // expect(fmtps, <Fmtp>[]);
+    expect(sdp, expected_sdp);
   });
 
   test('Parse Origin', () {

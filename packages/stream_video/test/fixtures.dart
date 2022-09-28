@@ -1,6 +1,6 @@
 import 'package:stream_video/src/sdp-transform/models.dart';
 
-final expectedParsedSdp = ParsedSdp(
+final expectedParsedSdp = Sdp(
     version: 0,
     origin: Origin(
         username: '-',

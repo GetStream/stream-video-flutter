@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-class ParsedSdp {
-  ParsedSdp({
+class Sdp with EquatableMixin {
+  Sdp({
     required this.version,
     required this.origin,
     required this.name,
@@ -22,6 +22,19 @@ class ParsedSdp {
   final String icePwd;
   final Fingerprint fingerprint;
   final List<Media> media;
+  
+  @override
+  List<Object?> get props => [
+        version,
+        origin,
+        name,
+        timing,
+        connection,
+        iceUfrag,
+        icePwd,
+        fingerprint,
+        media,
+      ];
 }
 
 class Connection with EquatableMixin {
