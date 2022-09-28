@@ -6,7 +6,7 @@ import 'package:stream_video/src/core/error/error.dart';
 import 'package:stream_video/src/core/http/token_manager.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:tart/tart.dart';
-import 'package:webrtc_interface/src/rtc_ice_candidate.dart';
+import 'package:uuid/uuid.dart';
 
 class SfuSignalingClient {
   SfuSignalingClient(this.tokenManager) {
@@ -20,7 +20,7 @@ class SfuSignalingClient {
   }
   final TokenManager tokenManager;
   late final SignalServerProtobufClient client;
-  //his.sessionId = uuidv4();
+  final sessionId = Uuid().v4();
 
   Future<IceCandidateResponse> sendCandidate({
     required bool publisher,
@@ -35,6 +35,7 @@ class SfuSignalingClient {
       final response = await client.sendIceCandidate(
         ctx,
         IceCandidateRequest(
+          sessionId: sessionId,
           publisher: publisher,
           candidate: candidate,
           sdpMid: sdpMid,
@@ -60,12 +61,101 @@ class SfuSignalingClient {
     }
   }
 
+  Future<UpdateMuteStateResponse> updateAudioMuteState(
+      {required bool muted}) async {
+    try {
+      final token = await tokenManager.loadToken();
+      final ctx = _withAuth(token);
+      final response = await client.updateMuteState(
+        ctx,
+        UpdateMuteStateRequest(
+          sessionId: sessionId,
+          audioMuteChanged: AudioMuteChanged(muted: muted),
+        ),
+      );
+      return response;
+    } on TwirpError catch (e) {
+      final method =
+          e.getContext.value(ContextKeys.methodName) ?? 'unknown method';
+      throw StreamVideoError(
+        'Twirp error on method: $method. Code: ${e.getCode}. Message: ${e.getMsg}',
+      );
+    } on InvalidTwirpHeader catch (e) {
+      throw StreamVideoError('InvalidTwirpHeader: $e');
+    } catch (e, stack) {
+      throw StreamVideoError('''
+      Unknown Exception Occurred: $e
+      Stack trace: $stack
+      ''');
+    }
+  }
+
+  Future<UpdateMuteStateResponse> updateVideoMuteState({
+    required bool muted,
+  }) async {
+    try {
+      final token = await tokenManager.loadToken();
+      final ctx = _withAuth(token);
+      final response = await client.updateMuteState(
+        ctx,
+        UpdateMuteStateRequest(
+          sessionId: sessionId,
+          videoMuteChanged: VideoMuteChanged(muted: muted),
+        ),
+      );
+      return response;
+    } on TwirpError catch (e) {
+      final method =
+          e.getContext.value(ContextKeys.methodName) ?? 'unknown method';
+      throw StreamVideoError(
+        'Twirp error on method: $method. Code: ${e.getCode}. Message: ${e.getMsg}',
+      );
+    } on InvalidTwirpHeader catch (e) {
+      throw StreamVideoError('InvalidTwirpHeader: $e');
+    } catch (e, stack) {
+      throw StreamVideoError('''
+      Unknown Exception Occurred: $e
+      Stack trace: $stack
+      ''');
+    }
+  }
+
+  Future<UpdateVideoQualityResponse> requestVideoQuality({
+    required String forUserId,
+    required VideoQuality videoQuality,
+  }) async {
+    try {
+      final token = await tokenManager.loadToken();
+      final ctx = _withAuth(token);
+      final response = await client.requestVideoQuality(
+        ctx,
+        UpdateVideoQualityRequest(sessionId: sessionId, streamQualities: [
+          StreamQuality(userId: forUserId, videoQuality: videoQuality)
+        ]),
+      );
+      return response;
+    } on TwirpError catch (e) {
+      final method =
+          e.getContext.value(ContextKeys.methodName) ?? 'unknown method';
+      throw StreamVideoError(
+        'Twirp error on method: $method. Code: ${e.getCode}. Message: ${e.getMsg}',
+      );
+    } on InvalidTwirpHeader catch (e) {
+      throw StreamVideoError('InvalidTwirpHeader: $e');
+    } catch (e, stack) {
+      throw StreamVideoError('''
+      Unknown Exception Occurred: $e
+      Stack trace: $stack
+      ''');
+    }
+  }
+
   Future<SetPublisherResponse> setPublisher({String? sdp}) async {
     try {
       final token = await tokenManager.loadToken();
       final ctx = _withAuth(token);
-      final response =
-          await client.setPublisher(ctx, SetPublisherRequest(sdp: sdp));
+      final response = await client.setPublisher(
+          ctx, SetPublisherRequest(sessionId: sessionId, sdp: sdp));
       return response;
     } on TwirpError catch (e) {
       final method =
@@ -95,7 +185,7 @@ class SfuSignalingClient {
         ctx,
         JoinRequest(
           subscriberSdpOffer: subscriberSdpOffer,
-          sessionId: "sessionId",
+          sessionId: sessionId,
           codecSettings: codecSettings,
         ),
       );

@@ -8,11 +8,12 @@ import 'package:stream_video/src/sfu-client/rtc/subscriber.dart';
 
 typedef HandleOnTrack = void Function(RTCTrackEvent);
 
-class RTCRoom {
-  RTCRoom(this.client, {HandleOnTrack? handleOnTrack})
+class WebRTCClient {
+  WebRTCClient(this.client, {HandleOnTrack? handleOnTrack})
       : _handleOnTrack = handleOnTrack;
   RTCPeerConnection? publisher;
   RTCPeerConnection? subscriber;
+  RTCDataChannel? dataChannel;
 
   List<OptimalVideoLayer>? videoLayers;
   final SfuSignalingClient client;
@@ -33,10 +34,11 @@ class RTCRoom {
     });
     await publisher?.close();
     publisher = null;
+    dataChannel = null;
     // this.dispatcher.offAll();
   }
 
-  Future<CallState> join(MediaStream? videoStream) async {
+  Future<CallState> join(MediaStream videoStream) async {
     if (subscriber != null) {
       subscriber!.close();
       subscriber = null;
@@ -52,10 +54,10 @@ class RTCRoom {
         _handleOnTrack?.call(e);
       },
     );
-    await createSignalChannel(
+    dataChannel = await createSignalChannel(
       label: 'signalling',
       pc: subscriber!,
-      onMessage: (message) {
+      onEventReceived: (message) {
         //TODO: handle this
         // print('Received event ${message.eventPayload}');
         // dispatcher.dispatch(message);

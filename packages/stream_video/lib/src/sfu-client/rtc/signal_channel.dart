@@ -6,7 +6,7 @@ typedef OnMessage = void Function(SfuEvent); //SfuEvent
 Future<RTCDataChannel> createSignalChannel({
   required String label,
   required RTCPeerConnection pc,
-  required OnMessage onMessage,
+  required OnMessage onEventReceived,
 }) async {
   var dataChannelDict = RTCDataChannelInit();
   dataChannelDict.binaryType = 'arraybuffer';
@@ -27,7 +27,7 @@ Future<RTCDataChannel> createSignalChannel({
 
     final receivedEvent = SfuEvent.fromBuffer(message.binary);
 
-    onMessage(receivedEvent);
+    onEventReceived(receivedEvent);
   };
 
   return signal;
