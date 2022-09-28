@@ -10,6 +10,7 @@ List<List<T>> splitAt<T>(List<T> list, List<int> indexes) {
   return result;
 }
 
+// find the indexes of the media lines
 List<int> mediaIndexes(List<String> lines) {
   final mediaIndexes = <int>[];
   lines.asMap().forEach((i, el) {

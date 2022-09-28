@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:stream_video/src/sdp-transform/models.dart';
 import 'package:stream_video/src/sdp-transform/utils.dart';
+
 /// Given a raw SDP string, return a parsed Sdp object
 Sdp parseSdp(String sdpStr) {
   final ls = LineSplitter();
@@ -59,7 +60,6 @@ Sdp parseSdp(String sdpStr) {
 
     var directions = "";
     media.reversed.forEach((mediaLine) {
-      // print(mediaLine);
       var type = mediaLine[0];
       var content = mediaLine.substring(2);
 
@@ -163,7 +163,8 @@ String parseIceUfrag(String str) {
 
 Origin parseOrigin(String str) {
   RegExp exp = RegExp(
-      r"^(?<username>\S*) (?<sessionId>\d*) (?<sessionVersion>\d*) (?<netType>\S*) IP(?<ipVer>\d) (?<address>\S*)");
+    r"^(?<username>\S*) (?<sessionId>\d*) (?<sessionVersion>\d*) (?<netType>\S*) IP(?<ipVer>\d) (?<address>\S*)",
+  );
   final match = exp.firstMatch(str);
   final username = match!.namedGroup('username');
   final sessionId = match.namedGroup('sessionId');
@@ -189,7 +190,8 @@ Media parseMedia(
   required String direction,
 }) {
   RegExp exp = RegExp(
-      r"(?<type>\w*) (?<port>\d*) (?<protocol>[\w/]*)(?: (?<payloads>.*))?");
+    r"(?<type>\w*) (?<port>\d*) (?<protocol>[\w/]*)(?: (?<payloads>.*))?",
+  );
   final match = exp.firstMatch(str);
   final type = match!.namedGroup('type');
   final port = match.namedGroup('port');
@@ -242,18 +244,23 @@ Fmtp parseFmtp(String str) {
 
 Rtp parseRtp(String str) {
   RegExp exp = RegExp(
-      r"^rtpmap:(?<payload>\d*) (?<codec>[\w\-.]*)(?:\s*\/(?<rate>\d*)(?:\s*\/(\S*))?)?");
+    r"^rtpmap:(?<payload>\d*) (?<codec>[\w\-.]*)(?:\s*\/(?<rate>\d*)(?:\s*\/(\S*))?)?",
+  );
   final match = exp.firstMatch(str);
   final payload = match!.namedGroup('payload');
   final codec = match.namedGroup('codec');
   final rate = match.namedGroup('rate');
   return Rtp(
-      payload: int.parse(payload!), codec: 'H264', rate: int.parse(rate!));
+    payload: int.parse(payload!),
+    codec: 'H264',
+    rate: int.parse(rate!),
+  );
 }
 
 Candidate parseCandidate(String str) {
   RegExp exp = RegExp(
-      r"^candidate:(?<foundation>\S*) (?<component>\d*) (?<transport>\S*) (?<priority>\d*) (?<ip>\S*) (?<port>\d*) typ (?<type>\S*)(?: raddr (?<raddr>\S*) rport (?<rport>\d*))?(?: tcptype (?<tcptype>\S*))?(?: generation (?<generation>\d*))?(?: network-id (?<networkId>\d*))?(?: network-cost (?<networkCost>\d*))?");
+    r"^candidate:(?<foundation>\S*) (?<component>\d*) (?<transport>\S*) (?<priority>\d*) (?<ip>\S*) (?<port>\d*) typ (?<type>\S*)(?: raddr (?<raddr>\S*) rport (?<rport>\d*))?(?: tcptype (?<tcptype>\S*))?(?: generation (?<generation>\d*))?(?: network-id (?<networkId>\d*))?(?: network-cost (?<networkCost>\d*))?",
+  );
 
   final match = exp.firstMatch(str);
   final foundation = match!.namedGroup('foundation');
@@ -264,12 +271,13 @@ Candidate parseCandidate(String str) {
   final port = match.namedGroup('port');
   final type = match.namedGroup('type');
   final candidate = Candidate(
-      foundation: int.parse(foundation!),
-      component: int.parse(component!),
-      transport: transport!,
-      priority: int.parse(priority!),
-      ip: ip!,
-      port: int.parse(port!),
-      type: type!);
+    foundation: int.parse(foundation!),
+    component: int.parse(component!),
+    transport: transport!,
+    priority: int.parse(priority!),
+    ip: ip!,
+    port: int.parse(port!),
+    type: type!,
+  );
   return candidate;
 }
