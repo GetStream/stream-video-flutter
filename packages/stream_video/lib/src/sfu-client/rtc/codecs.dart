@@ -20,7 +20,7 @@ final defaultVideoPublishEncodings = [
     active: true,
     scaleResolutionDownBy: 4.0,
     maxBitrate: 125000,
-  )
+  ),
 ];
 
 extension RTCRtpMediaTypeX on RTCRtpMediaType {

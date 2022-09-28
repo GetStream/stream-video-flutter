@@ -61,8 +61,9 @@ class SfuSignalingClient {
     }
   }
 
-  Future<UpdateMuteStateResponse> updateAudioMuteState(
-      {required bool muted}) async {
+  Future<UpdateMuteStateResponse> updateAudioMuteState({
+    required bool muted,
+  }) async {
     try {
       final token = await tokenManager.loadToken();
       final ctx = _withAuth(token);
@@ -130,7 +131,10 @@ class SfuSignalingClient {
       final response = await client.requestVideoQuality(
         ctx,
         UpdateVideoQualityRequest(sessionId: sessionId, streamQualities: [
-          StreamQuality(userId: forUserId, videoQuality: videoQuality)
+          StreamQuality(
+            userId: forUserId,
+            videoQuality: videoQuality,
+          ),
         ]),
       );
       return response;
@@ -155,7 +159,9 @@ class SfuSignalingClient {
       final token = await tokenManager.loadToken();
       final ctx = _withAuth(token);
       final response = await client.setPublisher(
-          ctx, SetPublisherRequest(sessionId: sessionId, sdp: sdp));
+        ctx,
+        SetPublisherRequest(sessionId: sessionId, sdp: sdp),
+      );
       return response;
     } on TwirpError catch (e) {
       final method =

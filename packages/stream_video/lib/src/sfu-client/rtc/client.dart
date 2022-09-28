@@ -38,7 +38,7 @@ class WebRTCClient {
     // this.dispatcher.offAll();
   }
 
-  Future<CallState> join(MediaStream videoStream) async {
+  Future<CallState> join({MediaStream? videoStream}) async {
     if (subscriber != null) {
       subscriber!.close();
       subscriber = null;
