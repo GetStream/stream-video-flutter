@@ -9,7 +9,6 @@ Sdp parseSdp(String sdpStr) {
   final lines = ls.convert(sdpStr);
 
   lines.removeWhere((value) => value == "");
-  final indexes = mediaIndexes(lines);
   final splitted = splitAt(lines, mediaIndexes(lines));
   final header = splitted.removeAt(0);
   Origin? origin;

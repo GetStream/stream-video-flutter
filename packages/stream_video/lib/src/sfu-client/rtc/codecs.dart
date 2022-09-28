@@ -70,7 +70,7 @@ Future<List<Codec>> _getCodecsFromPeerConnection(
           hwAccelerated: true,
           clockRate: rtp.rate ?? 0,
           fmtpLine: fmtpLine?.config ?? '',
-          mime: '${kind}/${rtp.codec}',
+          mime: '$kind/${rtp.codec}',
         ));
       });
     }
