@@ -1,8 +1,10 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:stream_video/src/sfu-client/rpc/signal.dart';
 
-Future<RTCPeerConnection> createPublisher(
-    {required String sfuUrl, required SfuSignalingClient rpcClient}) async {
+Future<RTCPeerConnection> createPublisher({
+  required String sfuUrl,
+  required SfuSignalingClient rpcClient,
+}) async {
   final publisher = await createPeerConnection({
     'iceServers': [
       {

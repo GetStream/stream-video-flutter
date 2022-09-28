@@ -120,20 +120,122 @@ class RTCRoom {
 
     final videoTracks = videoStream.getVideoTracks();
     final videoTransceiver = await publisher!.addTransceiver(
-        track: videoTracks.first,
-        kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
-        init: RTCRtpTransceiverInit(
-          direction: TransceiverDirection.SendOnly,
-          streams: [videoStream],
-          sendEncodings: videoEncodings,
-        ));
+      track: videoTracks.first,
+      kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
+      init: RTCRtpTransceiverInit(
+        direction: TransceiverDirection.SendOnly,
+        streams: [videoStream],
+        sendEncodings: videoEncodings,
+      ),
+    );
     final audioTracks = audioStream.getAudioTracks();
     await publisher!.addTransceiver(
-        track: audioTracks.first,
-        kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
-        init: RTCRtpTransceiverInit(
-          direction: TransceiverDirection.SendOnly,
-          // streams: [audioStream],
-        ));
+      track: audioTracks.first,
+      kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
+      init: RTCRtpTransceiverInit(
+        direction: TransceiverDirection.SendOnly,
+        // streams: [audioStream],
+      ),
+    );
+  }
+
+  Future<bool> isPublishing(List<String> kinds) async {
+    if (publisher == null) return false;
+    final senders = await publisher!.getSenders();
+    if (kinds.length == 0 && senders.length > 0) return true;
+    return senders.any((s) => s.track != null && kinds.contains(s.track!.kind));
+  }
+
+  Future<MediaStream> changeInputDevice({
+    required String kind,
+    required String deviceId,
+    Map<String, dynamic>? extras,
+  }) async {
+    if (publisher == null) {
+      print(
+        "Can't change input device without publish connection established: $kind $deviceId",
+      );
+      //TODO: throw error
+    }
+
+    //TODO: handle kind + extras
+
+    var constraints = <String, dynamic>{};
+    //   'audio': kind == "audioinput",
+    //   'video': {
+    //     'deviceId': {'exact': deviceId},
+    //   }
+    // };
+    if (kind == 'audioinput') {
+      constraints["audio"] = {
+        // ...extras,
+        "deviceId": deviceId,
+      };
+    } else if (kind == 'videoinput') {
+      constraints["video"] = {
+        // ...extras,
+        "deviceId": deviceId,
+      };
+    }
+
+    final mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+    final newTracks = kind == 'videoinput'
+        ? mediaStream.getVideoTracks()
+        : mediaStream.getAudioTracks();
+    final newTrack = newTracks.isEmpty ? null : newTracks.first;
+
+    final senders = await publisher!.getSenders();
+    final newSenders =
+        senders.where((s) => s.track?.kind == newTrack?.kind).toList();
+    if (newSenders.isEmpty ||
+        newSenders.first.track == null ||
+        newTrack == null) {
+      print('No sender found for track kind $newTrack $kind $senders');
+      //TODO: throw error
+    }
+    final sender = newSenders.first;
+    sender.track!.stop(); // release old track
+    await sender.replaceTrack(newTrack);
+
+    return mediaStream; //
+  }
+
+  Future<String?> getActiveInputDeviceId(String kind) async {
+    if (publisher == null) //TODO: throw error
+      print(
+          "Can't get active input device without publish connection established: $kind");
+    final senders = await publisher!.getSenders();
+    final sender = senders.firstWhere((s) => s.track?.kind == kind);
+    return sender.track?.getConstraints()['deviceId'] as String?;
+  }
+
+  Future<List<StatsReport>?> getStats(StatKind kind) async {
+    return kind == StatKind.publisher
+        ? await publisher?.getStats()
+        : await subscriber?.getStats();
+  }
+
+  Future<void> updatePublishQuality(List<String> enabledRids) async {
+    final senders = await publisher?.getSenders();
+
+    final videoSender = senders?.firstWhere((s) => s.track?.kind == 'video');
+    if (videoSender == null) throw 'No video sender found';
+    final params = await videoSender.parameters;
+    var changed = false;
+    params.encodings!.forEach((enc) {
+      print("${enc.rid} ${enc.maxBitrate} ${enc.maxFramerate}");
+      // flip 'active' flag only when necessary
+      final shouldEnable = enabledRids.contains(enc.rid!);
+      if (shouldEnable != enc.active) {
+        enc.active = shouldEnable;
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      await videoSender.setParameters(params);
+    }
   }
 }
+
+enum StatKind { sender, publisher }
