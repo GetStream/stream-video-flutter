@@ -253,7 +253,7 @@ Rtp parseRtp(String str) {
   return Rtp(
     payload: int.parse(payload!),
     codec: 'H264',
-    rate: int.parse(rate!),
+    rate: rate != null ? int.parse(rate) : null,
   );
 }
 

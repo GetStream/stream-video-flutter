@@ -22,7 +22,7 @@ class Sdp with EquatableMixin {
   final String icePwd;
   final Fingerprint fingerprint;
   final List<Media> media;
-  
+
   @override
   List<Object?> get props => [
         version,
@@ -139,12 +139,12 @@ class Rtp with EquatableMixin {
   Rtp({
     required this.payload,
     required this.codec,
-    required this.rate,
+    this.rate,
   });
 
   final int payload;
   final String codec;
-  final int rate;
+  final int? rate;
 
   @override
   List<Object?> get props => [payload, codec, rate];
