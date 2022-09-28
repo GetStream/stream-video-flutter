@@ -2,6 +2,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:stream_video/protobuf/video/sfu/sfu_models/models.pb.dart';
 import 'package:stream_video/src/sfu-client/rpc/signal.dart';
 import 'package:stream_video/src/sfu-client/rtc/codecs.dart';
+import 'package:stream_video/src/sfu-client/rtc/publisher.dart';
 import 'package:stream_video/src/sfu-client/rtc/signal_channel.dart';
 import 'package:stream_video/src/sfu-client/rtc/subscriber.dart';
 
@@ -40,6 +41,7 @@ class RTCRoom {
       subscriber!.close();
       subscriber = null;
     }
+    //TODO:logger
     print('Setting up subscriber');
     subscriber = await createSubscriber(
       sfuUrl: 'localhost',
@@ -96,5 +98,42 @@ class RTCRoom {
     );
     subscriber!.setRemoteDescription(RTCSessionDescription(sfu.sdp, 'answer'));
     return sfu.callState;
+  }
+
+  Future<void> publish({
+    required MediaStream audioStream,
+    required MediaStream videoStream,
+  }) async {
+    if (publisher != null) {
+      publisher!.close();
+      publisher = null;
+    }
+    print('Setting up publisher');
+    publisher = await createPublisher(
+      sfuUrl: 'localhost',
+      rpcClient: this.client,
+    );
+    final videoEncodings =
+        (videoLayers != null && videoLayers!.isNotEmpty == true)
+            ? videoLayers!.map((e) => e.encoding).toList()
+            : defaultVideoPublishEncodings;
+
+    final videoTracks = videoStream.getVideoTracks();
+    final videoTransceiver = await publisher!.addTransceiver(
+        track: videoTracks.first,
+        kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
+        init: RTCRtpTransceiverInit(
+          direction: TransceiverDirection.SendOnly,
+          streams: [videoStream],
+          sendEncodings: videoEncodings,
+        ));
+    final audioTracks = audioStream.getAudioTracks();
+    await publisher!.addTransceiver(
+        track: audioTracks.first,
+        kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
+        init: RTCRtpTransceiverInit(
+          direction: TransceiverDirection.SendOnly,
+          // streams: [audioStream],
+        ));
   }
 }

@@ -3,6 +3,26 @@ import 'package:stream_video/protobuf/video/sfu/sfu_models/models.pb.dart';
 // import 'package:stream_video/protobuf/video/coordinator/broadcast_v1/broadcast.pbenum.dart';
 import 'package:stream_video/src/sdp-transform/parse.dart';
 
+final defaultVideoPublishEncodings = [
+  RTCRtpEncoding(
+    rid: 'f',
+    active: true,
+    maxBitrate: 1200000,
+  ),
+  RTCRtpEncoding(
+    rid: 'h',
+    active: true,
+    scaleResolutionDownBy: 2.0,
+    maxBitrate: 500000,
+  ),
+  RTCRtpEncoding(
+    rid: 'q',
+    active: true,
+    scaleResolutionDownBy: 4.0,
+    maxBitrate: 125000,
+  )
+];
+
 extension RTCRtpMediaTypeX on RTCRtpMediaType {
   String toStr() {
     switch (this) {
