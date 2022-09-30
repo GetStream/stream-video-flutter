@@ -22,12 +22,12 @@ class CallController {
 
   CallEvent get callEvent => _callController.value;
 
-  Stream<CallEvent> get callEventStream => _callController.stream.distinct();
+  Stream<CallEvent> get _callEventStream => _callController.stream.distinct();
 
   StreamSubscription<CallEvent> _listen(
     FutureOr<void> Function(CallEvent event) onEvent,
   ) =>
-      callEventStream.listen(onEvent);
+      _callEventStream.listen(onEvent);
 
   StreamSubscription<CallEvent> on<E extends CallEvent>(
     FutureOr<void> Function(E) then, {

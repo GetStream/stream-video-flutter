@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/src/models/events/events.dart';
 
+@internal
 class TrackController {
   final _trackController = BehaviorSubject<TrackEvent>();
 
@@ -17,12 +19,12 @@ class TrackController {
 
   TrackEvent get trackEvent => _trackController.value;
 
-  Stream<TrackEvent> get videoStream => _trackController.stream.distinct();
+  Stream<TrackEvent> get _trackStream => _trackController.stream.distinct();
 
   StreamSubscription<TrackEvent> _listen(
     FutureOr<void> Function(TrackEvent event) onEvent,
   ) =>
-      videoStream.listen(onEvent);
+      _trackStream.listen(onEvent);
 
   StreamSubscription<TrackEvent> on<E extends TrackEvent>(
     FutureOr<void> Function(E) then, {

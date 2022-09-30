@@ -21,7 +21,7 @@ class VideoService {
     required String callId,
     required StreamCallType callType,
   }) async {
-    final room = Room();//RTCRoom()
+    final room = Room();
     final connectOptions = ConnectOptions(autoSubscribe: options.autoSubscribe);
     final roomOptions = RoomOptions(
       defaultScreenShareCaptureOptions:

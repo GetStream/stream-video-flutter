@@ -4,6 +4,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/src/models/events/events.dart';
 
+//TODO: internal?
 class CallMembersController {
   final _callMembersController = BehaviorSubject<CallMembersEvent>();
 
@@ -17,13 +18,13 @@ class CallMembersController {
 
   CallMembersEvent get callMembersEvent => _callMembersController.value;
 
-  Stream<CallMembersEvent> get callMembersStream =>
+  Stream<CallMembersEvent> get _callMembersStream =>
       _callMembersController.stream.distinct();
 
   StreamSubscription<CallMembersEvent> _listen(
     FutureOr<void> Function(CallMembersEvent event) onEvent,
   ) =>
-      callMembersStream.listen(onEvent);
+      _callMembersStream.listen(onEvent);
 
   StreamSubscription<CallMembersEvent> on<E extends CallMembersEvent>(
     FutureOr<void> Function(E) then, {

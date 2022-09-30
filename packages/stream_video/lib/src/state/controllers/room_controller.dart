@@ -1,18 +1,19 @@
 import 'dart:async';
 
-import 'package:stream_video/src/state/controllers/call_members_controller.dart';
-import 'package:stream_video/src/state/controllers/sfu_controller.dart';
-import 'package:stream_video/src/state/controllers/track_controller.dart';
-import 'package:stream_video/stream_video.dart';
+import 'package:meta/meta.dart';
+import 'package:stream_video/src/state/controllers/controllers.dart';
 
+@internal
 class RoomController {
+  final participants = CallParticipantController();
+
   final calls = CallController();
 
   final tracks = TrackController();
 
   final sfu = SfuController();
 
-  final participants = ParticipantController();
+  // final participants = ParticipantController();
 
   final broadcasts = BroadcastController();
 
@@ -23,10 +24,11 @@ class RoomController {
     await Future.wait([
       calls.dispose(),
       tracks.dispose(),
-      participants.dispose(),
+      // participants.dispose(),
       recordings.dispose(),
       callMembers.dispose(),
       recordings.dispose(),
+      participants.dispose(),
     ]);
   }
 }

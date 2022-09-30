@@ -15,13 +15,13 @@ class BroadcastController {
 
   BroadcastEvent get broadcastEvent => _broadcastStartedController.value;
 
-  Stream<BroadcastEvent> get broadcastStream =>
+  Stream<BroadcastEvent> get _broadcastStream =>
       _broadcastStartedController.stream.distinct();
 
   StreamSubscription<BroadcastEvent> _listen(
     FutureOr<void> Function(BroadcastEvent event) onEvent,
   ) =>
-      broadcastStream.listen(onEvent);
+      _broadcastStream.listen(onEvent);
 
   StreamSubscription<BroadcastEvent> on<E extends BroadcastEvent>(
     FutureOr<void> Function(E) then, {

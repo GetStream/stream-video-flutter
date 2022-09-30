@@ -4,6 +4,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/src/models/events/events.dart';
 
+
 class RecordingController {
   final _recordingController = BehaviorSubject<RecordingEvent>();
 
@@ -17,13 +18,13 @@ class RecordingController {
 
   RecordingEvent get recordingEvent => _recordingController.value;
 
-  Stream<RecordingEvent> get recordingStream =>
+  Stream<RecordingEvent> get _recordingStream =>
       _recordingController.stream.distinct();
 
   StreamSubscription<RecordingEvent> _listen(
     FutureOr<void> Function(RecordingEvent event) onEvent,
   ) =>
-      recordingStream.listen(onEvent);
+      _recordingStream.listen(onEvent);
 
   StreamSubscription<RecordingEvent> on<E extends RecordingEvent>(
     FutureOr<void> Function(E) then, {

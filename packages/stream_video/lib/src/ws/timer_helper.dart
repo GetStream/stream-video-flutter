@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:uuid/uuid.dart';
 
+//TODO: use this instead of the Timer.periodic in ws client and stats
 class TimerHelper {
   final _uuid = const Uuid();
   late final _timers = <String, Timer>{};

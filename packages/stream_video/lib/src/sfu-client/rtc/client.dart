@@ -1,6 +1,8 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:stream_video/protobuf/video/sfu/sfu_events/events.pb.dart';
 import 'package:stream_video/protobuf/video/sfu/sfu_models/models.pb.dart';
+import 'package:stream_video/protobuf/video/sfu/sfu_signal_rpc/signal.pb.dart';
+import 'package:stream_video/src/models/call_participant.dart';
 import 'package:stream_video/src/sfu-client/rpc/signal.dart';
 import 'package:stream_video/src/sfu-client/rtc/codecs.dart';
 import 'package:stream_video/src/state/state.dart';
@@ -9,6 +11,21 @@ import 'package:stream_video/stream_video.dart';
 typedef OnEventReceived = void Function(SfuEvent); //SfuEvent
 
 typedef OnTrack = void Function(RTCTrackEvent);
+
+extension VideoParticipantX on Participant {
+  CallParticipant toCallParticipant(bool showTrack) {
+    return CallParticipant(
+      id: user.id,
+      role: role,
+      name: user.name.isEmpty ? user.id : user.name,
+      profileImageURL: user.imageUrl,
+      isOnline: online,
+      hasVideo: video,
+      hasAudio: audio,
+      showTrack: showTrack,
+    );
+  }
+}
 
 class WebRTCClient {
   WebRTCClient(
@@ -24,8 +41,9 @@ class WebRTCClient {
   List<OptimalVideoLayer>? videoLayers;
   final SfuSignalingClient client;
 
+  final _participantsThreshold = 4;
   Future<RTCPeerConnection> createPublisher() async {
-    final publisher = await createPeerConnection({
+    final configuration = {
       'iceServers': [
         {
           'urls': 'stun:stun.l.google.com:19302',
@@ -36,7 +54,8 @@ class WebRTCClient {
           'credential': 'video',
         },
       ],
-    });
+    };
+    final publisher = await createPeerConnection(configuration);
     publisher.onIceCandidate = (candidate) async {
       await client.sendCandidate(
         publisher: true,
@@ -146,7 +165,9 @@ class WebRTCClient {
     // this.dispatcher.offAll();
   }
 
-  Future<CallState> join({MediaStream? videoStream}) async {
+//TODO: call settings and video options
+  Future<CallState> connect({MediaStream? videoStream}) async {
+    //join in react
     if (subscriber != null) {
       subscriber!.close();
       subscriber = null;
@@ -210,8 +231,21 @@ class WebRTCClient {
         ),
       ),
     );
+    final participants = _loadParticipants(sfu);
+    state.participants.emitNew(participants);
     subscriber!.setRemoteDescription(RTCSessionDescription(sfu.sdp, 'answer'));
     return sfu.callState;
+  }
+
+  Map<String, CallParticipant> _loadParticipants(JoinResponse sfu) {
+    final participants = sfu.callState.participants;
+    // For more than threshold participants, the activation of track is on view appearance.
+    final showTrack = participants.length < _participantsThreshold;
+    var temp = <String, CallParticipant>{};
+    for (var participant in participants) {
+      temp[participant.user.id] = participant.toCallParticipant(showTrack);
+    }
+    return temp;
   }
 
   Future<void> publish({
@@ -403,11 +437,15 @@ class WebRTCClient {
   }
 
   void _handleParticipantJoined(ParticipantJoined payload) {
-    state.participants.emitJoined(payload);
+    final showTrack = (state.participants.count + 1) < _participantsThreshold;
+    final participant = payload.participant.toCallParticipant(showTrack);
+
+    state.participants.emitJoined(participant);
   }
 
   void _handleParticipantLeft(ParticipantLeft payload) {
-    state.participants.emitLeft(payload);
+    // payload.
+    // state.participants.emitLeft(payload);
   }
 
   void _handleSubscriberOffer(SubscriberOffer subscriberOffer) {

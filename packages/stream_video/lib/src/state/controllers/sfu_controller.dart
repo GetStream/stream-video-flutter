@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/protobuf/video/sfu/sfu_events/events.pb.dart';
 import 'package:stream_video/src/models/events/events.dart';
 
+@internal
 class SfuController {
   final _sfuController = BehaviorSubject<SFUEvent>();
 
@@ -14,12 +16,12 @@ class SfuController {
 
   SFUEvent get sfuEvent => _sfuController.value;
 
-  Stream<SFUEvent> get videoStream => _sfuController.stream.distinct();
+  Stream<SFUEvent> get _sfuStream => _sfuController.stream.distinct();
 
   StreamSubscription<SFUEvent> _listen(
     FutureOr<void> Function(SFUEvent event) onEvent,
   ) =>
-      videoStream.listen(onEvent);
+      _sfuStream.listen(onEvent);
 
   StreamSubscription<SFUEvent> on<E extends SFUEvent>(
     FutureOr<void> Function(E) then, {

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/protobuf/video/sfu/sfu_events/events.pb.dart';
+import 'package:stream_video/src/models/call_participant.dart';
 import 'package:webrtc_interface/src/media_stream_track.dart';
 
 /// Base type for all StreamVideoEvent events.
@@ -153,3 +154,41 @@ class SubscriberOfferEvent with SFUEvent {
   @override
   String toString() => 'sfu.subscriberOffer ${payload.toString()}';
 }
+
+mixin AppStateEvent implements StreamVideoEvent {}
+
+mixin CallParticipantEvent implements AppStateEvent {}
+
+class CallParticipantNew with CallParticipantEvent {
+  const CallParticipantNew(this.participants);
+  final Map<String, CallParticipant> participants;
+
+  @override
+  String toString() => 'callParticipant.new ${participants.toString()}';
+}
+
+class CallParticipantUpdated with CallParticipantEvent {
+  const CallParticipantUpdated(this.participants);
+  final Map<String, CallParticipant> participants;
+
+  @override
+  String toString() => 'callParticipant.updated ${participants.toString()}';
+}
+
+class CallParticipantRemoved with CallParticipantEvent {
+  const CallParticipantRemoved(this.participants);
+  final Map<String, CallParticipant> participants;
+
+  @override
+  String toString() => 'callParticipant.removed ${participants.toString()}';
+}
+
+class CallParticipantJoined with CallParticipantEvent {
+  const CallParticipantJoined(this.participants);
+  final Map<String, CallParticipant> participants;
+
+  @override
+  String toString() => 'callParticipant.joined ${participants.toString()}';
+}
+
+

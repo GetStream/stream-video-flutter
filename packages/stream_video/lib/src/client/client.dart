@@ -62,7 +62,8 @@ class StreamVideoClient {
 
     _state = ClientState();
     _options = options ?? StreamVideoClientOptions();
-    _rtcClient = WebRTCClient(SfuSignalingClient(_tokenManager), state: _state,sfuUrl: 'localhost');
+    _rtcClient = WebRTCClient(SfuSignalingClient(_tokenManager),
+        state: _state, sfuUrl: 'localhost');
     _ws = ws ??
         WebSocketClient(
             logger: logger,
@@ -134,7 +135,7 @@ class StreamVideoClient {
   }
 
   CallController get calls => _state.calls;
-  ParticipantController get participants => _state.participants;
+  // ParticipantController get participants => _state.participants;
 
   void fakeIncomingCall(String createdByUserId) {
     logger.info('faking call from $createdByUserId');
@@ -256,7 +257,7 @@ class StreamVideoClient {
       options: videoOptions,
     );
 
-    _state.participants.currentRoom = room;
+    // _state.participants.currentRoom = room;
     // statsListener?.cancel();
     // statsListener = _state.participants.currentRoom
     // .onStatEvent((event) async => await reportCallStats(event));
@@ -280,7 +281,7 @@ class StreamVideoClient {
             customJson: utf8.encode(
               jsonEncoder.convert({}),
             ),
-          )
+          ),
       };
 
       // Map<String, MemberInput>.fromIterable(
@@ -298,7 +299,11 @@ class StreamVideoClient {
         ctx,
         CreateCallRequest(
           id: callId,
-          input: CreateCallInput(members: members),
+          input: CreateCallInput(
+            // call:CallInput(
+            //   options: CallOptions()
+            // ),
+            members: members),
           type: callType.rawType,
         ),
       );
@@ -339,6 +344,7 @@ class StreamVideoClient {
         JoinCallRequest(
           id: callId,
           type: callType.rawType,
+          // input: CreateCallInput(call: CallInput(options: CallOptions())),
           datacenterId: 'milan',
         ),
       );

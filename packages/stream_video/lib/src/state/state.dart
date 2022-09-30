@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/state/controllers/call_members_controller.dart';
+import 'package:stream_video/src/state/controllers/call_participant_controller.dart';
 import 'package:stream_video/src/state/controllers/controllers.dart';
 import 'package:stream_video/src/state/controllers/sfu_controller.dart';
 import 'package:stream_video/src/state/controllers/track_controller.dart';
@@ -90,7 +92,10 @@ class ClientState {
 
   CallController get calls => _roomController.calls;
 
-  ParticipantController get participants => _roomController.participants;
+  CallParticipantController get participants => _roomController.participants;
+
+  // @internal
+  // ParticipantController get participants => _roomController.participants;
 
   BroadcastController get broadcasts => _roomController.broadcasts;
 
