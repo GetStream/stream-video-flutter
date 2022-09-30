@@ -81,7 +81,7 @@ class WebRTCClient {
   Future<RTCPeerConnection> createSubscriber({
     OnTrack? onTrack,
   }) async {
-    final subscriber = await createPeerConnection({
+    final config = {
       'iceServers': [
         {
           'urls': 'stun:stun.l.google.com:19302',
@@ -92,7 +92,8 @@ class WebRTCClient {
           'credential': 'video',
         },
       ],
-    });
+    };
+    final subscriber = await createPeerConnection(config);
     subscriber.onIceCandidate = (candidate) async {
       await client.sendCandidate(
         //  sessionId: rpcClient.sessionId,

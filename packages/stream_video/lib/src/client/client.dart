@@ -303,7 +303,8 @@ class StreamVideoClient {
             // call:CallInput(
             //   options: CallOptions()
             // ),
-            members: members),
+            members: members,
+          ),
           type: callType.rawType,
         ),
       );
