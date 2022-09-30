@@ -175,6 +175,15 @@ class CallParticipantUpdated with CallParticipantEvent {
   String toString() => 'callParticipant.updated ${participants.toString()}';
 }
 
+
+class CallParticipantLeft with CallParticipantEvent {
+  const CallParticipantLeft(this.participants);
+  final Map<String, CallParticipant> participants;
+
+  @override
+  String toString() => 'callParticipant.left ${participants.toString()}';
+}
+
 class CallParticipantRemoved with CallParticipantEvent {
   const CallParticipantRemoved(this.participants);
   final Map<String, CallParticipant> participants;

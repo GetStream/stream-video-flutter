@@ -444,8 +444,8 @@ class WebRTCClient {
   }
 
   void _handleParticipantLeft(ParticipantLeft payload) {
-    // payload.
-    // state.participants.emitLeft(payload);
+    final participant = payload.participant.toCallParticipant(false);
+    state.participants.emitLeft(participant);
   }
 
   void _handleSubscriberOffer(SubscriberOffer subscriberOffer) {

@@ -32,6 +32,11 @@ class CallParticipantController {
     _emit(CallParticipantRemoved(_callParticipants));
   }
 
+  void emitLeft(CallParticipant callParticipant) {
+    _remove(callParticipant);
+    _emit(CallParticipantLeft(_callParticipants));
+  }
+
   void emitNew(Map<String, CallParticipant> callParticipants) {
     _new(callParticipants);
     _emit(CallParticipantUpdated(_callParticipants));
