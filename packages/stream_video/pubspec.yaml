@@ -20,6 +20,7 @@ dependencies:
   web_socket_channel: ^2.2.0
   collection: ^1.16.0
   flutter_webrtc: ^0.9.7
+  meta: ^1.8.0
 
 dev_dependencies:
   dart_code_metrics: ^4.4.0
