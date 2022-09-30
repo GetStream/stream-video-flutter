@@ -9,7 +9,6 @@ class CallController {
 
   void _emit(CallEvent event) => _callController.add(event);
 
-  // emitRinging(CallRinging payload) => emit(CallRingingEvent(payload));
 
   emitCreated(CallCreated payload) => _emit(CallCreatedEvent(payload));
 

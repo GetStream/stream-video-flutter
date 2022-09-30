@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:stream_video/src/models/call_participant.dart';
 import 'package:stream_video/src/state/controllers/call_members_controller.dart';
+import 'package:stream_video/src/state/controllers/sfu_controller.dart';
+import 'package:stream_video/src/state/controllers/track_controller.dart';
 import 'package:stream_video/stream_video.dart';
 
 class RoomController {
@@ -10,6 +11,10 @@ class RoomController {
     //     participants.room.add(event.payload.participant.toCallParticipant()));
   }
   final calls = CallController();
+
+  final tracks = TrackController();
+
+  final sfu = SfuController();
 
   final participants = ParticipantController();
   // late final StreamSubscription<ParticipantEvent> _listener;

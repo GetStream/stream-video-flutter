@@ -6,6 +6,8 @@ import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/state/controllers/call_members_controller.dart';
 import 'package:stream_video/src/state/controllers/controllers.dart';
+import 'package:stream_video/src/state/controllers/sfu_controller.dart';
+import 'package:stream_video/src/state/controllers/track_controller.dart';
 
 class StreamCallState {
   final String? userId;
@@ -83,6 +85,10 @@ class ClientState {
   final _roomController = RoomController();
 
   //TODO: set participants
+
+  SfuController get sfu => _roomController.sfu;
+
+  TrackController get tracks => _roomController.tracks;
 
   CallController get calls => _roomController.calls;
 

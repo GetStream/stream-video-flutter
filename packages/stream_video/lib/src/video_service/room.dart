@@ -21,11 +21,6 @@ class VideoRoom {
 
   final WebRTCStats _stats;
 
-  // Stream<StatsEvent> get statsStream => _stats.statsStream;
-
-  // StreamSubscription<StatsEvent> onStatEvent(Function(StatsEvent) handle) {
-  //   return on<StatsEvent>((event) => handle(event));
-  // }
 
   void registerPeer() {
     final subscriberPeerConnection = _room.engine.subscriber?.pc;
@@ -38,33 +33,8 @@ class VideoRoom {
         callType: callType,
       );
     }
-
-    //TODO: fix two timers bug
-
-    // final publisherPeerConnection = _room.engine.publisher?.pc;
-    // if (publisherPeerConnection != null) {
-    //   _stats.addConnection(
-    //     pc: publisherPeerConnection,
-    //     peerId: 'publisher',
-    //   );
-    // }
   }
 
-  // StreamSubscription<StatsEvent> listen(
-  //         FutureOr<void> Function(StatsEvent event) onEvent) =>
-  //     statsStream.listen(onEvent);
-
-  // StreamSubscription<StatsEvent> on<E extends StatsEvent>(
-  //         FutureOr<void> Function(E) then,
-  //         {bool Function(E)? filter}) =>
-  //     listen((event) async {
-  //       // event must be E
-  //       if (event is! E) return;
-  //       // filter must be true (if filter is used)
-  //       if (filter != null && !filter(event)) return;
-  //       // cast to E
-  //       await then(event);
-  //     });
 
   final Map<String, CallParticipant> _participants = {};
 

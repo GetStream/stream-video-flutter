@@ -15,6 +15,8 @@ import 'package:stream_video/src/core/http/token_manager.dart';
 import 'package:stream_video/src/latency_service/latency.dart';
 import 'package:stream_video/src/models/edge_server.dart';
 import 'package:stream_video/src/models/video_options.dart';
+import 'package:stream_video/src/sfu-client/rpc/signal.dart';
+import 'package:stream_video/src/sfu-client/rtc/client.dart';
 import 'package:stream_video/src/state/state.dart';
 import 'package:stream_video/src/video_service/video_service.dart';
 import 'package:stream_video/src/ws/websocket.dart';
@@ -60,6 +62,7 @@ class StreamVideoClient {
 
     _state = ClientState();
     _options = options ?? StreamVideoClientOptions();
+    _rtcClient = WebRTCClient(SfuSignalingClient(_tokenManager), state: _state,sfuUrl: 'localhost');
     _ws = ws ??
         WebSocketClient(
             logger: logger,
@@ -74,6 +77,7 @@ class StreamVideoClient {
   late final ClientRPCProtobufClient _callCoordinatorService;
   late final LatencyService _latencyService;
   late final WebSocketClient _ws;
+  late final WebRTCClient _rtcClient;
   final _tokenManager = TokenManager();
 
   late final VideoService _videoService;

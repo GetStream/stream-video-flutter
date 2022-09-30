@@ -7,13 +7,13 @@ import 'package:stream_video/src/models/events/events.dart';
 class CallMembersController {
   final _callMembersController = BehaviorSubject<CallMembersEvent>();
 
-  void emit(CallMembersEvent event) => _callMembersController.add(event);
+  void _emit(CallMembersEvent event) => _callMembersController.add(event);
 
   void emitUpdated(CallMembersUpdated event) =>
-      emit(CallMembersUpdatedEvent(event));
+      _emit(CallMembersUpdatedEvent(event));
 
   void emitDeleted(CallMembersDeleted event) =>
-      emit(CallMembersDeletedEvent(event));
+      _emit(CallMembersDeletedEvent(event));
 
   CallMembersEvent get callMembersEvent => _callMembersController.value;
 

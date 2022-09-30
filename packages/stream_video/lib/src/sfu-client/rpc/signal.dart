@@ -212,12 +212,30 @@ class SfuSignalingClient {
     }
   }
 
-// updateAudioMuteState
-// updateVideoMuteState
-
-// requestVideoQuality
-// updateSubscriptions
-  // sendIceCandidate
+  Future<SendAnswerResponse> sendAnswer({required PeerType peerType, String? sdp}) async {
+    try {
+      final token = await tokenManager.loadToken();
+      final ctx = _withAuth(token);
+      final response = await client.sendAnswer(
+        ctx,
+        SendAnswerRequest(sessionId: sessionId, peerType: peerType, sdp: sdp),
+      );
+      return response;
+    } on TwirpError catch (e) {
+      final method =
+          e.getContext.value(ContextKeys.methodName) ?? 'unknown method';
+      throw StreamVideoError(
+        'Twirp error on method: $method. Code: ${e.getCode}. Message: ${e.getMsg}',
+      );
+    } on InvalidTwirpHeader catch (e) {
+      throw StreamVideoError('InvalidTwirpHeader: $e');
+    } catch (e, stack) {
+      throw StreamVideoError('''
+      Unknown Exception Occurred: $e
+      Stack trace: $stack
+      ''');
+    }
+  }
 
   /// onClientRequestPrepared is a client hook used to print out the method name of the RPC call
   Context onClientRequestPrepared(Context ctx, Request req) {

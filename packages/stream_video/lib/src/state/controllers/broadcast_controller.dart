@@ -7,11 +7,11 @@ import 'package:stream_video/src/models/events/events.dart';
 class BroadcastController {
   final _broadcastStartedController = BehaviorSubject<BroadcastEvent>();
 
-  void emit(BroadcastEvent event) => _broadcastStartedController.add(event);
+  void _emit(BroadcastEvent event) => _broadcastStartedController.add(event);
 
-  emitStarted(BroadcastStarted payload) => emit(BroadcastStartedEvent(payload));
+  emitStarted(BroadcastStarted payload) => _emit(BroadcastStartedEvent(payload));
 
-  emitEnded(BroadcastEnded payload) => emit(BroadcastEndedEvent(payload));
+  emitEnded(BroadcastEnded payload) => _emit(BroadcastEndedEvent(payload));
 
   BroadcastEvent get broadcastEvent => _broadcastStartedController.value;
 

@@ -1,29 +1,136 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:stream_video/protobuf/video/sfu/sfu_events/events.pb.dart';
 import 'package:stream_video/protobuf/video/sfu/sfu_models/models.pb.dart';
 import 'package:stream_video/src/sfu-client/rpc/signal.dart';
 import 'package:stream_video/src/sfu-client/rtc/codecs.dart';
-import 'package:stream_video/src/sfu-client/rtc/publisher.dart';
-import 'package:stream_video/src/sfu-client/rtc/signal_channel.dart';
-import 'package:stream_video/src/sfu-client/rtc/subscriber.dart';
+import 'package:stream_video/src/state/state.dart';
+import 'package:stream_video/stream_video.dart';
 
-typedef HandleOnTrack = void Function(RTCTrackEvent);
+typedef OnEventReceived = void Function(SfuEvent); //SfuEvent
+
+typedef OnTrack = void Function(RTCTrackEvent);
 
 class WebRTCClient {
-  WebRTCClient(this.client, {HandleOnTrack? handleOnTrack})
-      : _handleOnTrack = handleOnTrack;
+  WebRTCClient(
+    this.client, {
+    required this.state,
+    required this.sfuUrl,
+  });
   RTCPeerConnection? publisher;
   RTCPeerConnection? subscriber;
-  RTCDataChannel? dataChannel;
-
+  RTCDataChannel? signalChannel;
+  final ClientState state;
+  final String sfuUrl;
   List<OptimalVideoLayer>? videoLayers;
   final SfuSignalingClient client;
 
-  HandleOnTrack? _handleOnTrack;
-  set handleOnTrack(HandleOnTrack? handleOnTrack) {
-    _handleOnTrack = handleOnTrack;
+  Future<RTCPeerConnection> createPublisher() async {
+    final publisher = await createPeerConnection({
+      'iceServers': [
+        {
+          'urls': 'stun:stun.l.google.com:19302',
+        },
+        {
+          'urls': "turn:${sfuUrl}:3478",
+          'username': 'video',
+          'credential': 'video',
+        },
+      ],
+    });
+    publisher.onIceCandidate = (candidate) async {
+      await client.sendCandidate(
+        publisher: true,
+        candidate: candidate.candidate,
+        sdpMid: candidate.sdpMid,
+        sdpMLineIndex: candidate.sdpMLineIndex,
+        // usernameFragment: candidate.use as String?,
+      );
+    };
+    publisher.onRenegotiationNeeded = () async {
+      final offer = await publisher.createOffer();
+      await publisher.setLocalDescription(offer);
+      final sfu = await client.setPublisher(
+        sdp: offer.sdp,
+      );
+
+      await publisher
+          .setRemoteDescription(RTCSessionDescription(sfu.sdp, 'answer'));
+    };
+    return publisher;
   }
 
-  HandleOnTrack? get handleOnTrack => _handleOnTrack;
+  Future<RTCPeerConnection> createSubscriber({
+    OnTrack? onTrack,
+  }) async {
+    final subscriber = await createPeerConnection({
+      'iceServers': [
+        {
+          'urls': 'stun:stun.l.google.com:19302',
+        },
+        {
+          'urls': 'turn:${sfuUrl}:3478',
+          'username': 'video',
+          'credential': 'video',
+        },
+      ],
+    });
+    subscriber.onIceCandidate = (candidate) async {
+      await client.sendCandidate(
+        //  sessionId: rpcClient.sessionId,
+        publisher: false,
+        candidate: candidate.candidate,
+        sdpMid: candidate.sdpMid, // ?? undefined,
+        sdpMLineIndex: candidate.sdpMLineIndex, //?? undefined,
+        // usernameFragment: candidate.usernameFragment?? undefined,
+      );
+    };
+    subscriber.onTrack = onTrack;
+    state.sfu.on<SubscriberOfferEvent>((event) async {
+      print("Received subscriberOffer event.payload");
+
+      await subscriber.setRemoteDescription(
+          RTCSessionDescription(event.payload.sdp, 'offer'));
+      final answer = await subscriber.createAnswer();
+      await subscriber.setLocalDescription(answer);
+      client.sendAnswer(
+        peerType: PeerType.SUBSCRIBER,
+        sdp: answer.sdp ?? '',
+      );
+    });
+
+    return subscriber;
+  }
+
+  Future<RTCDataChannel> createSignalChannel({
+    required String label,
+    required RTCPeerConnection pc,
+    required OnEventReceived onEventReceived,
+  }) async {
+    var dataChannelDict = RTCDataChannelInit();
+    dataChannelDict.binaryType = 'arraybuffer';
+    final signal = await pc.createDataChannel(label, dataChannelDict);
+    //TODO: get rid of js callback hell
+    signal.onDataChannelState = (state) async {
+      if (state == RTCDataChannelState.RTCDataChannelOpen) {
+        print('Data channel is open');
+        await signal.send(RTCDataChannelMessage('ss'));
+      } else {
+        print('Data channel is closed');
+      }
+    };
+    //TODO: get rid of js callback hell
+    signal.onMessage = (message) {
+      if (!message.isBinary) {
+        print("This socket only accepts exchanging binary data");
+      }
+
+      final receivedEvent = SfuEvent.fromBuffer(message.binary);
+
+      onEventReceived(receivedEvent);
+    };
+
+    return signal;
+  }
 
   Future<void> leave() async {
     await subscriber?.close();
@@ -34,7 +141,7 @@ class WebRTCClient {
     });
     await publisher?.close();
     publisher = null;
-    dataChannel = null;
+    signalChannel = null;
     // this.dispatcher.offAll();
   }
 
@@ -46,23 +153,27 @@ class WebRTCClient {
     //TODO:logger
     print('Setting up subscriber');
     subscriber = await createSubscriber(
-      sfuUrl: 'localhost',
-      rpcClient: client,
       // dispatcher: this.dispatcher,
       onTrack: (e) {
         print('Got remote track:${e.track}');
-        _handleOnTrack?.call(e);
+
+        state.tracks.emitRemoteUpdated(e.track);
+        // _handleOnTrack?.call(e);
       },
     );
-    dataChannel = await createSignalChannel(
+
+    signalChannel = await createSignalChannel(
       label: 'signalling',
       pc: subscriber!,
-      onEventReceived: (message) {
+      //TODO: get rid of js callback hell
+      onEventReceived: (event) {
+        handle(event);
         //TODO: handle this
         // print('Received event ${message.eventPayload}');
         // dispatcher.dispatch(message);
       },
     );
+
     final offer = await subscriber?.createOffer({});
     if (offer?.sdp == null) {
       throw 'Failed to configure protocol, null SDP';
@@ -111,16 +222,17 @@ class WebRTCClient {
       publisher = null;
     }
     print('Setting up publisher');
-    publisher = await createPublisher(
-      sfuUrl: 'localhost',
-      rpcClient: this.client,
-    );
+    publisher = await createPublisher();
     final videoEncodings =
         (videoLayers != null && videoLayers!.isNotEmpty == true)
             ? videoLayers!.map((e) => e.encoding).toList()
             : defaultVideoPublishEncodings;
 
     final videoTracks = videoStream.getVideoTracks();
+    //TODO: check if videoTracks is empty
+    //if empty throw error
+    // else videoTrack = videoTracks.first;
+    //TODO: state.tracks.emitLocalUpdated(videoTrack);
     final videoTransceiver = await publisher!.addTransceiver(
       track: videoTracks.first,
       kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
@@ -196,10 +308,10 @@ class WebRTCClient {
       //TODO: throw error
     }
     final sender = newSenders.first;
-    sender.track!.stop(); // release old track
+    await sender.track!.stop(); // release old track
     await sender.replaceTrack(newTrack);
 
-    return mediaStream; //
+    return mediaStream;
   }
 
   Future<String?> getActiveInputDeviceId(String kind) async {
@@ -237,6 +349,67 @@ class WebRTCClient {
     if (changed) {
       await videoSender.setParameters(params);
     }
+  }
+
+  void handle(SfuEvent event) {
+    print("Received an event $event)");
+    switch (event.whichEventPayload()) {
+      case SfuEvent_EventPayload.participantJoined:
+        {
+          return _handleParticipantJoined(event.participantJoined);
+        }
+      case SfuEvent_EventPayload.participantLeft:
+        {
+          return _handleParticipantLeft(event.participantLeft);
+        }
+      case SfuEvent_EventPayload.subscriberOffer:
+        {
+          return _handleSubscriberOffer(event.subscriberOffer);
+        }
+      case SfuEvent_EventPayload.connectionQualityChanged:
+        // TODO: Handle this case.
+        break;
+      case SfuEvent_EventPayload.audioLevelChanged:
+        // TODO: Handle this case.
+        break;
+      case SfuEvent_EventPayload.subscriberCandidate:
+        // TODO: Handle this case.
+        break;
+      case SfuEvent_EventPayload.publisherCandidate:
+        // TODO: Handle this case.
+        break;
+      case SfuEvent_EventPayload.changePublishQuality:
+        // TODO: Handle this case.
+        break;
+      case SfuEvent_EventPayload.localDeviceChange:
+        // TODO: Handle this case.
+        break;
+      case SfuEvent_EventPayload.muteStateChanged:
+        // TODO: Handle this case.
+        break;
+      case SfuEvent_EventPayload.videoQualityChanged:
+        // TODO: Handle this case.
+        break;
+
+      case SfuEvent_EventPayload.dominantSpeakerChanged:
+        // TODO: Handle this case.
+        break;
+      case SfuEvent_EventPayload.notSet:
+        // TODO: Handle this case.
+        break;
+    }
+  }
+
+  void _handleParticipantJoined(ParticipantJoined payload) {
+    state.participants.emitJoined(payload);
+  }
+
+  void _handleParticipantLeft(ParticipantLeft payload) {
+    state.participants.emitLeft(payload);
+  }
+
+  void _handleSubscriberOffer(SubscriberOffer subscriberOffer) {
+    state.sfu.emitSubscriberOffer(subscriberOffer);
   }
 }
 
