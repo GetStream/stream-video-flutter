@@ -20,12 +20,14 @@ class TrackController {
   Stream<TrackEvent> get videoStream => _trackController.stream.distinct();
 
   StreamSubscription<TrackEvent> _listen(
-          FutureOr<void> Function(TrackEvent event) onEvent) =>
+    FutureOr<void> Function(TrackEvent event) onEvent,
+  ) =>
       videoStream.listen(onEvent);
 
   StreamSubscription<TrackEvent> on<E extends TrackEvent>(
-          FutureOr<void> Function(E) then,
-          {bool Function(E)? filter}) =>
+    FutureOr<void> Function(E) then, {
+    bool Function(E)? filter,
+  }) =>
       _listen((event) async {
         // event must be E
         if (event is! E) return;

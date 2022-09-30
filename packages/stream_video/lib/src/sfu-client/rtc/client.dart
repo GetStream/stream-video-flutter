@@ -89,7 +89,8 @@ class WebRTCClient {
       print("Received subscriberOffer event.payload");
 
       await subscriber.setRemoteDescription(
-          RTCSessionDescription(event.payload.sdp, 'offer'));
+        RTCSessionDescription(event.payload.sdp, 'offer'),
+      );
       final answer = await subscriber.createAnswer();
       await subscriber.setLocalDescription(answer);
       client.sendAnswer(
@@ -317,7 +318,8 @@ class WebRTCClient {
   Future<String?> getActiveInputDeviceId(String kind) async {
     if (publisher == null) //TODO: throw error
       print(
-          "Can't get active input device without publish connection established: $kind");
+        "Can't get active input device without publish connection established: $kind",
+      );
     final senders = await publisher!.getSenders();
     final sender = senders.firstWhere((s) => s.track?.kind == kind);
     return sender.track?.getConstraints()['deviceId'] as String?;

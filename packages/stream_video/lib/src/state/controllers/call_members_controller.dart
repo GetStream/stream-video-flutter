@@ -20,7 +20,7 @@ class CallMembersController {
   Stream<CallMembersEvent> get callMembersStream =>
       _callMembersController.stream.distinct();
 
-  StreamSubscription<CallMembersEvent> listen(
+  StreamSubscription<CallMembersEvent> _listen(
     FutureOr<void> Function(CallMembersEvent event) onEvent,
   ) =>
       callMembersStream.listen(onEvent);
@@ -29,7 +29,7 @@ class CallMembersController {
     FutureOr<void> Function(E) then, {
     bool Function(E)? filter,
   }) =>
-      listen((event) async {
+      _listen((event) async {
         // event must be E
         if (event is! E) return;
         // filter must be true (if filter is used)

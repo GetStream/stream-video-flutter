@@ -84,8 +84,6 @@ class ClientState {
 
   final _roomController = RoomController();
 
-  //TODO: set participants
-
   SfuController get sfu => _roomController.sfu;
 
   TrackController get tracks => _roomController.tracks;
@@ -95,12 +93,6 @@ class ClientState {
   ParticipantController get participants => _roomController.participants;
 
   BroadcastController get broadcasts => _roomController.broadcasts;
-
-  // ScreenshareController get screenshares => _roomController.screenshares;
-
-  // AudioController get audios => _roomController.audios;
-
-  // VideoController get videos => _roomController.videos;
 
   RecordingController get recordings => _roomController.recordings;
   CallMembersController get callMembers => _roomController.callMembers;
@@ -130,7 +122,14 @@ class ClientState {
       _authPayloadController.stream.distinct();
 
   Future<void> dispose() async {
-    //TODO: dispose other controllers
-    await Future.wait([_roomController.disposeCall()]);
+    await Future.wait([
+      _roomController.disposeCall(),
+      _callStateController.close(),
+      _connectionStatusController.close(),
+      _healthcheckController.close(),
+      _currentUserController.close(),
+      _userUpdatedController.close(),
+      _authPayloadController.close(),
+    ]);
   }
 }

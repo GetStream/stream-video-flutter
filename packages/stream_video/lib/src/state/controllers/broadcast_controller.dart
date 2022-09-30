@@ -18,7 +18,7 @@ class BroadcastController {
   Stream<BroadcastEvent> get broadcastStream =>
       _broadcastStartedController.stream.distinct();
 
-  StreamSubscription<BroadcastEvent> listen(
+  StreamSubscription<BroadcastEvent> _listen(
     FutureOr<void> Function(BroadcastEvent event) onEvent,
   ) =>
       broadcastStream.listen(onEvent);
@@ -27,7 +27,7 @@ class BroadcastController {
     FutureOr<void> Function(E) then, {
     bool Function(E)? filter,
   }) =>
-      listen((event) async {
+      _listen((event) async {
         // event must be E
         if (event is! E) return;
         // filter must be true (if filter is used)
@@ -38,25 +38,4 @@ class BroadcastController {
 
   Future<void> dispose() async => _broadcastStartedController.close();
 
-  // set broadcastStarted(BroadcastStarted broadcastStarted) =>
-  //     _broadcastStartedController.add(broadcastStarted);
-
-  // /// The current connection status value
-  // BroadcastStarted get broadcastStarted => _broadcastStartedController.value;
-
-  // /// This notifies of Healthcheck changes
-  // Stream<BroadcastStarted> get broadcastStartedStream =>
-  //     _broadcastStartedController.stream.distinct();
-
-  // final _broadcastEndedController = BehaviorSubject<BroadcastEnded>();
-
-  // set broadcastEnded(BroadcastEnded broadcastEnded) =>
-  //     _broadcastEndedController.add(broadcastEnded);
-
-  // /// The current connection status value
-  // BroadcastEnded get broadcastEnded => _broadcastEndedController.value;
-
-  // /// This notifies of Healthcheck changes
-  // Stream<BroadcastEnded> get broadcastEndedStream =>
-  //     _broadcastEndedController.stream.distinct();
 }

@@ -28,12 +28,14 @@ class ParticipantController {
       _participantInvitedController.stream.distinct();
 
   StreamSubscription<ParticipantEvent> _listen(
-          FutureOr<void> Function(ParticipantEvent event) onEvent) =>
+    FutureOr<void> Function(ParticipantEvent event) onEvent,
+  ) =>
       participantEventStream.listen(onEvent);
 
   StreamSubscription<ParticipantEvent> on<E extends ParticipantEvent>(
-          FutureOr<void> Function(E) then,
-          {bool Function(E)? filter}) =>
+    FutureOr<void> Function(E) then, {
+    bool Function(E)? filter,
+  }) =>
       _listen((event) async {
         // event must be E
         if (event is! E) return;

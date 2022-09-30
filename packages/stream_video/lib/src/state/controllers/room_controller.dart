@@ -6,10 +6,6 @@ import 'package:stream_video/src/state/controllers/track_controller.dart';
 import 'package:stream_video/stream_video.dart';
 
 class RoomController {
-  RoomController() {
-    // _listener = participants.onParticipantJoined((event) =>
-    //     participants.room.add(event.payload.participant.toCallParticipant()));
-  }
   final calls = CallController();
 
   final tracks = TrackController();
@@ -17,28 +13,20 @@ class RoomController {
   final sfu = SfuController();
 
   final participants = ParticipantController();
-  // late final StreamSubscription<ParticipantEvent> _listener;
 
   final broadcasts = BroadcastController();
-
-  // final screenshares = ScreenshareController();
-
-  // final audios = AudioController();
-
-  // final videos = VideoController();
 
   final recordings = RecordingController();
   final callMembers = CallMembersController();
 
   Future<void> disposeCall() async {
     await Future.wait([
-      // _listener.cancel(),
       calls.dispose(),
-      // participants.dispose(),
-      // screenshares.dispose(),
-      // audios.dispose(),
-      // videos.dispose(),
-      // recordings.dispose()
+      tracks.dispose(),
+      participants.dispose(),
+      recordings.dispose(),
+      callMembers.dispose(),
+      recordings.dispose(),
     ]);
   }
 }

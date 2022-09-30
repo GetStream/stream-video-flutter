@@ -17,12 +17,14 @@ class SfuController {
   Stream<SFUEvent> get videoStream => _sfuController.stream.distinct();
 
   StreamSubscription<SFUEvent> _listen(
-          FutureOr<void> Function(SFUEvent event) onEvent) =>
+    FutureOr<void> Function(SFUEvent event) onEvent,
+  ) =>
       videoStream.listen(onEvent);
 
   StreamSubscription<SFUEvent> on<E extends SFUEvent>(
-          FutureOr<void> Function(E) then,
-          {bool Function(E)? filter}) =>
+    FutureOr<void> Function(E) then, {
+    bool Function(E)? filter,
+  }) =>
       _listen((event) async {
         // event must be E
         if (event is! E) return;

@@ -7,20 +7,20 @@ import 'package:stream_video/src/models/events/events.dart';
 class RecordingController {
   final _recordingController = BehaviorSubject<RecordingEvent>();
 
-  void emit(RecordingEvent event) => _recordingController.add(event);
+  void _emit(RecordingEvent event) => _recordingController.add(event);
 
   void emitStarted(RecordingStarted event) =>
-      emit(RecordingStartedEvent(event));
+      _emit(RecordingStartedEvent(event));
 
   void emitStopped(RecordingStopped event) =>
-      emit(RecordingStoppedEvent(event));
+      _emit(RecordingStoppedEvent(event));
 
   RecordingEvent get recordingEvent => _recordingController.value;
 
   Stream<RecordingEvent> get recordingStream =>
       _recordingController.stream.distinct();
 
-  StreamSubscription<RecordingEvent> listen(
+  StreamSubscription<RecordingEvent> _listen(
     FutureOr<void> Function(RecordingEvent event) onEvent,
   ) =>
       recordingStream.listen(onEvent);
@@ -29,7 +29,7 @@ class RecordingController {
     FutureOr<void> Function(E) then, {
     bool Function(E)? filter,
   }) =>
-      listen((event) async {
+      _listen((event) async {
         // event must be E
         if (event is! E) return;
         // filter must be true (if filter is used)
