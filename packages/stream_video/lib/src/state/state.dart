@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart';
@@ -16,6 +17,8 @@ class StreamCallState {
   final String? clientId;
   final String? callType;
   final String? callId;
+  final String? sfuUrl;
+  final String? sfuToken;
   final bool? video;
   final bool? audio;
 
@@ -26,7 +29,21 @@ class StreamCallState {
     this.callId,
     this.video,
     this.audio,
+    this.sfuUrl,
+    this.sfuToken,
   });
+
+  @override
+  String toString() => '''StreamCallState(
+    userId: $userId,
+    clientId: $clientId,
+    callType: $callType,
+    callId: $callId,
+    video: $video,
+    audio: $audio,
+    sfuUrl: $sfuUrl,
+    sfuToken: $sfuToken,
+  )''';
 }
 
 enum ConnectionStatus {
@@ -48,12 +65,16 @@ enum PingOK { received, notReceived }
 
 class ClientState {
   //ingest this in state
-
+  final Logger? logger;
+  ClientState(this.logger);
   final _currentUserController = BehaviorSubject<UserInfo?>();
 
   final _callStateController = BehaviorSubject.seeded(StreamCallState());
 
-  set callState(StreamCallState state) => _callStateController.add(state);
+  set callState(StreamCallState state) {
+    logger?.info("setting call state to $state");
+    _callStateController.add(state);
+  }
 
   StreamCallState get callState => _callStateController.value;
 

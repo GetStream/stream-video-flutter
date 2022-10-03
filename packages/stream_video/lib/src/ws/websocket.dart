@@ -24,7 +24,7 @@ class WebSocketClient {
   late final String _connectionId;
   final ClientState _state;
   final String apiKey;
-  late final IOWebSocketChannel? _channel;
+  IOWebSocketChannel? _channel;
   // late final Uri? uri;
   final String endpoint;
   late final Timer pingTimer;
@@ -128,35 +128,35 @@ class WebSocketClient {
 
       // handler.call(receivedEvent);
     } catch (e, s) {
-      print("error occured $e");
-      print("stacktrace $s");
+      _logger?.severe("error occured $e");
+      _logger?.severe("stacktrace $s");
     }
   }
 
   void _onConnectionError(error) {
     // _state.connectionStatus = const ConnectionStatus(error:" e");
-    print("received $error");
+    _logger?.severe("received $error");
   }
 
   void _onConnectionClosed() {
-    print("connection closed");
+     _logger?.warning("connection closed");
   }
 
   WebsocketAuthRequest _getAuthPayload(UserInfo user, Token token) {
     const jsonEncoder = JsonEncoder();
-    print("apiKey $apiKey");
+    _logger?.info("getAuthPayload apiKey $apiKey");
     final authPayload = WebsocketAuthRequest(
-        token: token.rawValue,
-        user: UserInput(
-          // id: user.id,
-          customJson: utf8.encode(jsonEncoder.convert(user.extraData)),
-          name: user.name,
-          imageUrl: user.imageUrl,
-        ),
-        apiKey: apiKey
-        //TODO: remove hardcoded value
-        // device: DeviceInput(id: "1", pushProviderId: "firebase"),
-        );
+      token: token.rawValue,
+      user: UserInput(
+        // id: user.id,
+        customJson: utf8.encode(jsonEncoder.convert(user.extraData)),
+        name: user.name,
+        imageUrl: user.imageUrl,
+      ),
+      apiKey: apiKey,
+      //TODO: remove hardcoded value
+      // device: DeviceInput(id: "1", pushProviderId: "firebase"),
+    );
     return authPayload;
   }
 
@@ -169,7 +169,7 @@ class WebSocketClient {
   void _handleHealthCheckEvent(WebsocketHealthcheck event) {
     _logger?.info('HealthCheck received : ${event.toString()}');
     _state.connectionStatus = ConnectionStatus.connected;
-    print(event.clientId);
+    _logger?.info("client id ${event.clientId}");
     // _connectionId = event.clientId;
     // connectionStatus = ConnectionStatus.connected;
     _state.healthcheck = event;

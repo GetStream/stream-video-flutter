@@ -53,7 +53,7 @@ class StreamVideoClient {
   }) {
     _callCoordinatorService = ClientRPCProtobufClient(
       // Change it to your local IP address.
-      coordinatorUrl ?? "http://192.168.1.32:26991/rpc",
+      coordinatorUrl ?? "http://192.168.1.17:26991/rpc",
       "",
       hooks: ClientHooks(
         onRequestPrepared: onClientRequestPrepared,
@@ -61,10 +61,12 @@ class StreamVideoClient {
       // interceptor: myInterceptor()
     );
 
-    _state = ClientState();
+    _state = ClientState(logger);
     _options = options ?? StreamVideoClientOptions();
-    _rtcClient = WebRTCClient(SignalService(_tokenManager),
-        state: _state, sfuUrl: 'localhost');
+    _rtcClient = WebRTCClient(
+      SignalService(_tokenManager),
+      state: _state,
+    );
     _ws = ws ??
         WebSocketClient(
             logger: logger,
@@ -72,7 +74,7 @@ class StreamVideoClient {
             apiKey: apiKey,
             endpoint:
                 // Change it to your local IP address.
-                'ws://192.168.1.32:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect');
+                'ws://192.168.1.17:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect');
     // _videoService = VideoService(this);
     _latencyService = LatencyService(logger: logger);
   }
@@ -147,9 +149,9 @@ class StreamVideoClient {
 
   Future<void> connectWs() async {
     final user = _state.currentUser;
-    print(user);
+
     final token = await _tokenManager.loadToken();
-    logger.info('connect ws with token ${token.rawValue}');
+    logger.info('connect user $user with token ${token.rawValue}');
     _ws.connect(user: user!, token: token);
   }
 
@@ -191,18 +193,18 @@ class StreamVideoClient {
   }
 
   Future<void> disableAudio() async {
-   await _rtcClient.disableAudio();
+    await _rtcClient.disableAudio();
   }
 
   Future<void> enableAudio() async {
     await _rtcClient.disableAudio();
   }
 
-   Future<void> enableVideo() async {
+  Future<void> enableVideo() async {
     await _rtcClient.disableAudio();
   }
 
-   Future<void> disableVideo() async {
+  Future<void> disableVideo() async {
     await _rtcClient.disableVideo();
   }
 
@@ -225,7 +227,13 @@ class StreamVideoClient {
     final edgeServer =
         await selectEdgeServer(callId: callId, latencyByEdge: latencyByEdge);
 
-    final callState = await _rtcClient.connect();
+    final callState = await _rtcClient.connect(
+      callId: callId,
+      callType: callType,
+      sfuUrl: edgeServer.url,
+      sfuToken: edgeServer.token,
+      options: videoOptions,
+    );
     // final room = await _videoService.connect(
     //   callId: callId,
     //   callType: callType,
@@ -264,8 +272,9 @@ class StreamVideoClient {
     // assert(StreamCallType.video.rawType == createCallResponse.call.call.type,
     //     'call type from backend and client are different');
     final callId = createCallResponse.call.call.callCid;
-    print("callId $callId");
-    print("PARTICIPANTS $participantIds");
+    logger
+        .info("created call with id $callId and participants $participantIds");
+
     final edges = await joinCall(callId: callId, callType: callType);
     final latencyByEdge =
         await _latencyService.measureLatencies(edges, _options.retries);
@@ -279,7 +288,13 @@ class StreamVideoClient {
     //   token: edgeServer.token,
     //   options: videoOptions,
     // );
-    final callState = await _rtcClient.connect();
+    final callState = await _rtcClient.connect(
+      callId: callId,
+      callType: callType,
+      sfuUrl: edgeServer.url,
+      sfuToken: edgeServer.token,
+      options: videoOptions,
+    );
     // final callParticipants = {
     //   for (var participant in callState.participants)
     //     participant.user.id: participant.toCallParticipant(),
@@ -375,7 +390,7 @@ class StreamVideoClient {
           id: callId,
           type: callType.rawType,
           // input: CreateCallInput(call: CallInput(options: CallOptions())),
-          datacenterId: 'milan',
+          // datacenterId: 'milan',
         ),
       );
       return response.edges;

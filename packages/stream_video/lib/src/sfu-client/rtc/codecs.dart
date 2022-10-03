@@ -49,27 +49,27 @@ class OptimalVideoLayer {
 
 Future<List<Codec>> getSenderCodecs(
   RTCRtpMediaType kind,
-  RTCPeerConnection pc,
+  RTCPeerConnection? pc,
 ) async {
   return _getCodecsFromPeerConnection(kind, pc, TransceiverDirection.SendOnly);
 }
 
 Future<List<Codec>> getReceiverCodecs(
   RTCRtpMediaType kind,
-  RTCPeerConnection pc,
+  RTCPeerConnection? pc,
 ) async {
   return _getCodecsFromPeerConnection(kind, pc, TransceiverDirection.RecvOnly);
 }
 
 Future<List<Codec>> _getCodecsFromPeerConnection(
   RTCRtpMediaType kind,
-  RTCPeerConnection pc,
+  RTCPeerConnection? pc,
   TransceiverDirection direction,
 ) async {
   var sdp = direction == TransceiverDirection.SendOnly
-      ? (await pc.getLocalDescription())?.sdp
+      ? (await pc?.getLocalDescription())?.sdp
       : direction == TransceiverDirection.RecvOnly
-          ? (await pc.getRemoteDescription())?.sdp
+          ? (await pc?.getRemoteDescription())?.sdp
           : null;
   if (sdp == null) {
     final tempPc = await createPeerConnection({});

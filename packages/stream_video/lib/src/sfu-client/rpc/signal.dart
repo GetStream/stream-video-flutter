@@ -28,9 +28,10 @@ class SignalService {
     String? sdpMid,
     int? sdpMLineIndex,
     String? usernameFragment,
+    required Token token,
   }) async {
     try {
-      final token = await tokenManager.loadToken();
+      // final token = await tokenManager.loadToken();
       final ctx = _withAuth(token);
       final response = await client.sendIceCandidate(
         ctx,
@@ -63,9 +64,10 @@ class SignalService {
 
   Future<UpdateMuteStateResponse> updateAudioMuteState({
     required bool muted,
+    required Token token,
   }) async {
     try {
-      final token = await tokenManager.loadToken();
+      // final token = await tokenManager.loadToken();
       final ctx = _withAuth(token);
       final response = await client.updateMuteState(
         ctx,
@@ -93,9 +95,10 @@ class SignalService {
 
   Future<UpdateMuteStateResponse> updateVideoMuteState({
     required bool muted,
+    required Token token,
   }) async {
     try {
-      final token = await tokenManager.loadToken();
+      // final token = await tokenManager.loadToken();
       final ctx = _withAuth(token);
       final response = await client.updateMuteState(
         ctx,
@@ -124,9 +127,10 @@ class SignalService {
   Future<UpdateVideoQualityResponse> requestVideoQuality({
     required String forUserId,
     required VideoQuality videoQuality,
+    required Token token,
   }) async {
     try {
-      final token = await tokenManager.loadToken();
+      // final token = await tokenManager.loadToken();
       final ctx = _withAuth(token);
       final response = await client.requestVideoQuality(
         ctx,
@@ -154,9 +158,12 @@ class SignalService {
     }
   }
 
-  Future<SetPublisherResponse> setPublisher({String? sdp}) async {
+  Future<SetPublisherResponse> setPublisher({
+    String? sdp,
+    required Token token,
+  }) async {
     try {
-      final token = await tokenManager.loadToken();
+      // final token = await tokenManager.loadToken();
       final ctx = _withAuth(token);
       final response = await client.setPublisher(
         ctx,
@@ -183,9 +190,10 @@ class SignalService {
     required String? subscriberSdpOffer,
     // required String? sessionId,
     required CodecSettings? codecSettings,
+    required Token token,
   }) async {
     try {
-      final token = await tokenManager.loadToken();
+      // final token = await tokenManager.loadToken();
       final ctx = _withAuth(token);
       final response = await client.join(
         ctx,
@@ -212,9 +220,13 @@ class SignalService {
     }
   }
 
-  Future<SendAnswerResponse> sendAnswer({required PeerType peerType, String? sdp}) async {
+  Future<SendAnswerResponse> sendAnswer({
+    required PeerType peerType,
+    String? sdp,
+    required Token token,
+  }) async {
     try {
-      final token = await tokenManager.loadToken();
+      // final token = await tokenManager.loadToken();
       final ctx = _withAuth(token);
       final response = await client.sendAnswer(
         ctx,
