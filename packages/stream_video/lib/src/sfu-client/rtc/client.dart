@@ -396,7 +396,7 @@ class WebRTCClient {
   }
 
   Future<void> disableVideo() async {
-   await signalService.updateVideoMuteState(muted: false);
+    await signalService.updateVideoMuteState(muted: false);
   }
 
   Future<void> enableVideo() async {
@@ -419,33 +419,44 @@ class WebRTCClient {
           return _handleSubscriberOffer(event.subscriberOffer);
         }
       case SfuEvent_EventPayload.connectionQualityChanged:
-        // TODO: Handle this case.
-        break;
+        {
+          return _handleConnectionQualityChanged(
+            event.connectionQualityChanged,
+          );
+        }
       case SfuEvent_EventPayload.audioLevelChanged:
-        // TODO: Handle this case.
-        break;
+        {
+          return _handleAudioLevelChanged(event.audioLevelChanged);
+        }
       case SfuEvent_EventPayload.subscriberCandidate:
-        // TODO: Handle this case.
-        break;
+        {
+          return _handleSubscriberCandidate(event.subscriberCandidate);
+        }
       case SfuEvent_EventPayload.publisherCandidate:
-        // TODO: Handle this case.
-        break;
+        {
+          return _handlePublisherCandidate(event.publisherCandidate);
+        }
       case SfuEvent_EventPayload.changePublishQuality:
-        // TODO: Handle this case.
-        break;
+        {
+          return _handleChangePublishQuality(event.changePublishQuality);
+        }
       case SfuEvent_EventPayload.localDeviceChange:
-        // TODO: Handle this case.
-        break;
+        {
+          return _handleLocalDeviceChange(event.localDeviceChange);
+        }
       case SfuEvent_EventPayload.muteStateChanged:
-        // TODO: Handle this case.
-        break;
+        {
+          return _handleMuteStateChanged(event.muteStateChanged);
+        }
       case SfuEvent_EventPayload.videoQualityChanged:
-        // TODO: Handle this case.
-        break;
+        {
+          return _handleVideoQualityChanged(event.videoQualityChanged);
+        }
 
       case SfuEvent_EventPayload.dominantSpeakerChanged:
-        // TODO: Handle this case.
-        break;
+        {
+          return _handleDominantSpeakerChanged(event.dominantSpeakerChanged);
+        }
       case SfuEvent_EventPayload.notSet:
         // TODO: Handle this case.
         break;
@@ -477,9 +488,45 @@ class WebRTCClient {
   }
 
   void _handleOnTrack(RTCTrackEvent event) {
-    print('Got remote track event:${event}');
+    print('Handling remote track event: ${event}');
 //TODO: hmm maybe merge maybe this with state.participants.emitTrackUpdated
     state.tracks.emitRemoteUpdated(event.track);
+  }
+
+  void _handleConnectionQualityChanged(ConnectionQualityChanged event) {
+    print('Received event ConnectionQualityChanged: ${event}');
+  }
+
+  void _handleAudioLevelChanged(AudioLevelChanged event) {
+    print('Received event AudioLevelChanged: ${event}');
+  }
+
+  void _handleSubscriberCandidate(ICECandidateTrickle event) {
+    print('Received event SubscriberCandidate: ${event}');
+  }
+
+  void _handlePublisherCandidate(ICECandidateTrickle event) {
+    print('Received event PublisherCandidate: ${event}');
+  }
+
+  void _handleChangePublishQuality(ChangePublishQuality event) {
+    print('Received event ChangePublishQuality: ${event}');
+  }
+
+  void _handleLocalDeviceChange(LocalDeviceChange event) {
+    print('Received event LocalDeviceChange: ${event}');
+  }
+
+  void _handleMuteStateChanged(MuteStateChanged event) {
+    print('Received event MuteStateChanged: ${event}');
+  }
+
+  void _handleVideoQualityChanged(VideoQualityChanged event) {
+    print('Received event VideoQualityChanged: ${event}');
+  }
+  
+  void _handleDominantSpeakerChanged(DominantSpeakerChanged event) {
+       print('Received event DominantSpeakerChanged: ${event}');
   }
 }
 
