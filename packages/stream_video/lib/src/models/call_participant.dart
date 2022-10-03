@@ -14,7 +14,7 @@ class CallParticipant {
   final bool hasAudio;
   final bool showTrack;
   //webrtc track
-  final MediaStreamTrack? track;
+  final MediaStream? track;
 
   CallParticipant({
     required this.id,
@@ -38,6 +38,7 @@ class CallParticipant {
     bool? hasVideo,
     bool? hasAudio,
     bool? showTrack,
+    MediaStream? track,
   }) {
     return CallParticipant(
       id: id ?? this.id,

@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart';
-import 'package:livekit_client/livekit_client.dart';
+// import 'package:livekit_client/livekit_client.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/google/protobuf/struct.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pbtwirp.dart';
 import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart'
     hide EdgeServer;
+import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/src/core/error/error.dart';
 
 import 'package:stream_video/src/core/http/token_manager.dart';
@@ -62,7 +63,7 @@ class StreamVideoClient {
 
     _state = ClientState();
     _options = options ?? StreamVideoClientOptions();
-    _rtcClient = WebRTCClient(SfuSignalingClient(_tokenManager),
+    _rtcClient = WebRTCClient(SignalService(_tokenManager),
         state: _state, sfuUrl: 'localhost');
     _ws = ws ??
         WebSocketClient(
@@ -72,7 +73,7 @@ class StreamVideoClient {
             endpoint:
                 // Change it to your local IP address.
                 'ws://192.168.1.32:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect');
-    _videoService = VideoService(this);
+    // _videoService = VideoService(this);
     _latencyService = LatencyService(logger: logger);
   }
   late final ClientRPCProtobufClient _callCoordinatorService;
@@ -81,7 +82,7 @@ class StreamVideoClient {
   late final WebRTCClient _rtcClient;
   final _tokenManager = TokenManager();
 
-  late final VideoService _videoService;
+  // late final VideoService _videoService;
 
   /// Client specific logger instance.
   /// Refer to the class [Logger] to learn more about the specific
@@ -114,6 +115,8 @@ class StreamVideoClient {
     ..onRecord.listen(logHandlerFunction);
 
   UserInfo? get currentUser => _state.currentUser;
+
+  CallParticipantController get room => _state.participants;
 
   Future<void> setUser(
     UserInfo user, {
@@ -187,7 +190,23 @@ class StreamVideoClient {
     }
   }
 
-  Future<VideoRoom> joinExistingCall({
+  Future<void> disableAudio() async {
+   await _rtcClient.disableAudio();
+  }
+
+  Future<void> enableAudio() async {
+    await _rtcClient.disableAudio();
+  }
+
+   Future<void> enableVideo() async {
+    await _rtcClient.disableAudio();
+  }
+
+   Future<void> disableVideo() async {
+    await _rtcClient.disableVideo();
+  }
+
+  Future<void> joinExistingCall({
     required String callId,
     required StreamCallType callType,
     VideoOptions videoOptions = const VideoOptions(
@@ -195,7 +214,7 @@ class StreamVideoClient {
       dynacast: true,
       autoSubscribe: true,
       simulcast: true,
-      videoPresets: VideoParametersPresets.screenShareH720FPS15,
+      // videoPresets: VideoParametersPresets.screenShareH720FPS15,
       reportStats: true,
     ),
     //TODO: expose more parameters
@@ -205,21 +224,23 @@ class StreamVideoClient {
         await _latencyService.measureLatencies(edges, _options.retries);
     final edgeServer =
         await selectEdgeServer(callId: callId, latencyByEdge: latencyByEdge);
-    final room = await _videoService.connect(
-      callId: callId,
-      callType: callType,
-      url: edgeServer.url,
-      token: edgeServer.token,
-      options: videoOptions,
-    );
+
+    final callState = await _rtcClient.connect();
+    // final room = await _videoService.connect(
+    //   callId: callId,
+    //   callType: callType,
+    //   url: edgeServer.url,
+    //   token: edgeServer.token,
+    //   options: videoOptions,
+    // );
     // _state.participants.currentRoom = room;
     // statsListener?.cancel();
     // statsListener = _state.participants.currentRoom
     // .onStatEvent((event) async => await reportCallStats(event));
-    return room;
+    // return room;
   }
 
-  Future<VideoRoom> startCall({
+  Future<void> startCall({
     required String id,
     required List<String> participantIds,
     required StreamCallType callType,
@@ -228,7 +249,7 @@ class StreamVideoClient {
       dynacast: true,
       autoSubscribe: true,
       simulcast: true,
-      videoPresets: VideoParametersPresets.screenShareH720FPS15,
+      // videoPresets: VideoParametersPresets.screenShareH720FPS15,
       reportStats: true,
     ),
     //TODO: expose more parameters
@@ -238,6 +259,7 @@ class StreamVideoClient {
       participantIds: participantIds,
       callType: callType,
     );
+
     //TODO: is this debug stuff really useful?
     // assert(StreamCallType.video.rawType == createCallResponse.call.call.type,
     //     'call type from backend and client are different');
@@ -249,19 +271,26 @@ class StreamVideoClient {
         await _latencyService.measureLatencies(edges, _options.retries);
     final edgeServer =
         await selectEdgeServer(callId: callId, latencyByEdge: latencyByEdge);
-    final room = await _videoService.connect(
-      callId: callId,
-      callType: callType,
-      url: edgeServer.url,
-      token: edgeServer.token,
-      options: videoOptions,
-    );
-
+    //replace this with webrtc connect
+    // final room = await _videoService.connect(
+    //   callId: callId,
+    //   callType: callType,
+    //   url: edgeServer.url,
+    //   token: edgeServer.token,
+    //   options: videoOptions,
+    // );
+    final callState = await _rtcClient.connect();
+    // final callParticipants = {
+    //   for (var participant in callState.participants)
+    //     participant.user.id: participant.toCallParticipant(),
+    // };
+    // _state.participants.emitNew(callParticipants,_state.currentUser!.id);
+// _state.calls.emitStarted(CallStarted)
     // _state.participants.currentRoom = room;
     // statsListener?.cancel();
     // statsListener = _state.participants.currentRoom
     // .onStatEvent((event) async => await reportCallStats(event));
-    return room;
+    // return room;
   }
 
   Future<CreateCallResponse> createCall({

@@ -8,7 +8,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 // }
 
 class StageView extends StatefulWidget {
-  final ParticipantController controller;
+  final CallParticipantController controller;
   static String routeName = "/stageView";
 
   const StageView({Key? key, required this.controller}) : super(key: key);
@@ -47,13 +47,13 @@ class _StageViewState extends State<StageView> {
               itemCount: allParticipants.length, //
               itemBuilder: (BuildContext ctx, int index) {
                 return Stack(children: [
-                  allParticipants[index].videoTracks.isNotEmpty &&
-                          allParticipants[index].videoTracks[0].track != null &&
-                          allParticipants[index].isCameraEnabled()
+                  // allParticipants[index].videoTracks.isNotEmpty &&
+                  //         allParticipants[index].videoTracks[0].track != null &&
+                  allParticipants[index].hasVideo
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: StreamVideoTrackRenderer(
-                              allParticipants[index].videoTracks[0].track!),
+                              track: allParticipants[index].track!),
                         )
                       : ClipRRect(
                           borderRadius: BorderRadius.circular(12),
@@ -65,7 +65,7 @@ class _StageViewState extends State<StageView> {
                     alignment: FractionalOffset.bottomLeft,
                     child: Row(
                       children: [
-                        if (!allParticipants[index].isMicrophoneEnabled())
+                        if (!allParticipants[index].hasAudio)
                           Padding(
                             padding: const EdgeInsets.all(6.0),
                             child: Icon(
@@ -91,6 +91,5 @@ class _StageViewState extends State<StageView> {
     ));
   }
 
-  List<RoomParticipant> get allParticipants =>
-      widget.controller.currentRoom.allParticipants;
+  List<CallParticipant> get allParticipants => widget.controller.participants;
 }

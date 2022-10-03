@@ -1,8 +1,8 @@
-import 'package:livekit_client/src/types/video_parameters.dart';
+// import 'package:livekit_client/src/types/video_parameters.dart';
 
 class VideoOptions {
   final bool autoSubscribe;
-  final VideoParameters videoPresets;
+  // final VideoParameters videoPresets;
 
   final bool simulcast;
 
@@ -19,7 +19,7 @@ class VideoOptions {
     required this.reportStats,
     required this.dynacast,
     required this.adaptiveStream,
-    required this.videoPresets,
+    // required this.videoPresets,
     required this.simulcast,
   });
 }

@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/src/models/events/events.dart';
 
-//TODO: internal?
+@internal
 class CallMembersController {
   final _callMembersController = BehaviorSubject<CallMembersEvent>();
 

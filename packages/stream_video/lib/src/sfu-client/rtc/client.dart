@@ -12,8 +12,11 @@ typedef OnEventReceived = void Function(SfuEvent); //SfuEvent
 
 typedef OnTrack = void Function(RTCTrackEvent);
 
+typedef OnAddStream = void Function(MediaStream);
+typedef OnRemoveStream = void Function(MediaStream);
+
 extension VideoParticipantX on Participant {
-  CallParticipant toCallParticipant(bool showTrack) {
+  CallParticipant toCallParticipant([bool showTrack = false]) {
     return CallParticipant(
       id: user.id,
       role: role,
@@ -29,7 +32,7 @@ extension VideoParticipantX on Participant {
 
 class WebRTCClient {
   WebRTCClient(
-    this.client, {
+    this.signalService, {
     required this.state,
     required this.sfuUrl,
   });
@@ -39,7 +42,7 @@ class WebRTCClient {
   final ClientState state;
   final String sfuUrl;
   List<OptimalVideoLayer>? videoLayers;
-  final SfuSignalingClient client;
+  final SignalService signalService;
 
   final _participantsThreshold = 4;
   Future<RTCPeerConnection> createPublisher() async {
@@ -57,7 +60,7 @@ class WebRTCClient {
     };
     final publisher = await createPeerConnection(configuration);
     publisher.onIceCandidate = (candidate) async {
-      await client.sendCandidate(
+      await signalService.sendCandidate(
         publisher: true,
         candidate: candidate.candidate,
         sdpMid: candidate.sdpMid,
@@ -68,7 +71,7 @@ class WebRTCClient {
     publisher.onRenegotiationNeeded = () async {
       final offer = await publisher.createOffer();
       await publisher.setLocalDescription(offer);
-      final sfu = await client.setPublisher(
+      final sfu = await signalService.setPublisher(
         sdp: offer.sdp,
       );
 
@@ -79,7 +82,9 @@ class WebRTCClient {
   }
 
   Future<RTCPeerConnection> createSubscriber({
-    OnTrack? onTrack,
+    // OnTrack? onTrack,
+    OnAddStream? onAddStream,
+    OnRemoveStream? onRemoveStream,
   }) async {
     final config = {
       'iceServers': [
@@ -95,8 +100,7 @@ class WebRTCClient {
     };
     final subscriber = await createPeerConnection(config);
     subscriber.onIceCandidate = (candidate) async {
-      await client.sendCandidate(
-        //  sessionId: rpcClient.sessionId,
+      await signalService.sendCandidate(
         publisher: false,
         candidate: candidate.candidate,
         sdpMid: candidate.sdpMid, // ?? undefined,
@@ -104,7 +108,10 @@ class WebRTCClient {
         // usernameFragment: candidate.usernameFragment?? undefined,
       );
     };
-    subscriber.onTrack = onTrack;
+    // subscriber.onTrack = onTrack;
+    subscriber.onAddStream = onAddStream;
+    subscriber.onRemoveStream = onRemoveStream;
+
     state.sfu.on<SubscriberOfferEvent>((event) async {
       print("Received subscriberOffer event.payload");
 
@@ -113,7 +120,7 @@ class WebRTCClient {
       );
       final answer = await subscriber.createAnswer();
       await subscriber.setLocalDescription(answer);
-      client.sendAnswer(
+      await signalService.sendAnswer(
         peerType: PeerType.SUBSCRIBER,
         sdp: answer.sdp ?? '',
       );
@@ -163,6 +170,7 @@ class WebRTCClient {
     await publisher?.close();
     publisher = null;
     signalChannel = null;
+    // state.dispose();
     // this.dispatcher.offAll();
   }
 
@@ -176,25 +184,16 @@ class WebRTCClient {
     //TODO:logger
     print('Setting up subscriber');
     subscriber = await createSubscriber(
-      // dispatcher: this.dispatcher,
-      onTrack: (e) {
-        print('Got remote track:${e.track}');
-
-        state.tracks.emitRemoteUpdated(e.track);
-        // _handleOnTrack?.call(e);
-      },
+      // onTrack: _handleOnTrack,
+      onAddStream: _handleStreamAdded,
+      onRemoveStream: _handleStreamRemoved,
     );
 
     signalChannel = await createSignalChannel(
       label: 'signalling',
       pc: subscriber!,
       //TODO: get rid of js callback hell
-      onEventReceived: (event) {
-        handle(event);
-        //TODO: handle this
-        // print('Received event ${message.eventPayload}');
-        // dispatcher.dispatch(message);
-      },
+      onEventReceived: handleEvent,
     );
 
     final offer = await subscriber?.createOffer({});
@@ -218,7 +217,7 @@ class WebRTCClient {
     videoLayers = videoStream != null
         ? findOptimalVideoLayers(videoStream)
         : defaultVideoLayers;
-    final sfu = await client.join(
+    final sfu = await signalService.join(
       subscriberSdpOffer: offer!.sdp,
       codecSettings: CodecSettings(
         audio: AudioCodecs(encode: audioEncode, decode: audioDecode),
@@ -233,7 +232,7 @@ class WebRTCClient {
       ),
     );
     final participants = _loadParticipants(sfu);
-    state.participants.emitNew(participants);
+    state.participants.emitNew(participants, state.currentUser!.id);
     subscriber!.setRemoteDescription(RTCSessionDescription(sfu.sdp, 'answer'));
     return sfu.callState;
   }
@@ -388,7 +387,23 @@ class WebRTCClient {
     }
   }
 
-  void handle(SfuEvent event) {
+  Future<void> disableAudio() async {
+    await signalService.updateAudioMuteState(muted: true);
+  }
+
+  Future<void> enableAudio() async {
+    await signalService.updateAudioMuteState(muted: false);
+  }
+
+  Future<void> disableVideo() async {
+   await signalService.updateVideoMuteState(muted: false);
+  }
+
+  Future<void> enableVideo() async {
+    await signalService.updateVideoMuteState(muted: false);
+  }
+
+  void handleEvent(SfuEvent event) {
     print("Received an event $event)");
     switch (event.whichEventPayload()) {
       case SfuEvent_EventPayload.participantJoined:
@@ -451,6 +466,20 @@ class WebRTCClient {
 
   void _handleSubscriberOffer(SubscriberOffer subscriberOffer) {
     state.sfu.emitSubscriberOffer(subscriberOffer);
+  }
+
+  void _handleStreamAdded(MediaStream stream) {
+    state.participants.emitTrackUpdated(stream, stream.id);
+  }
+
+  void _handleStreamRemoved(MediaStream stream) {
+    state.participants.emitTrackRemoved(stream.id);
+  }
+
+  void _handleOnTrack(RTCTrackEvent event) {
+    print('Got remote track event:${event}');
+//TODO: hmm maybe merge maybe this with state.participants.emitTrackUpdated
+    state.tracks.emitRemoteUpdated(event.track);
   }
 }
 

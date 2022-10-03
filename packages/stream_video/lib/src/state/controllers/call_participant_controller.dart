@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/src/models/call_participant.dart';
 import 'package:stream_video/src/models/events/events.dart';
@@ -7,11 +8,22 @@ import 'package:stream_video/src/models/events/events.dart';
 class CallParticipantController {
   final _callParticipantController = BehaviorSubject<CallParticipantEvent>();
   Map<String, CallParticipant> _callParticipants = {};
+  String? _currentUserId;
 
-  get count => _callParticipants.keys.length; //TODO:unique
+  CallParticipant get localParticipant => _callParticipants.values
+      .firstWhere((callParticipant) => callParticipant.id == _currentUserId!);
 
-  void _add(CallParticipant participant) =>
-      _callParticipants[participant.id] = participant;
+  // Map<String, MediaStreamTrack> _tracks = {};
+
+  int get count => _callParticipants.keys.length; //TODO:unique
+
+  List<CallParticipant> get participants => _callParticipants.values
+      .where((element) => element.id != _currentUserId)
+      .toList();
+
+  void _upsert(CallParticipant participant) {
+    _callParticipants[participant.id] = participant;
+  }
 
   void _new(Map<String, CallParticipant> participants) =>
       _callParticipants = participants;
@@ -23,7 +35,7 @@ class CallParticipantController {
       _callParticipantController.add(event);
 
   void emitJoined(CallParticipant callParticipant) {
-    _add(callParticipant);
+    _upsert(callParticipant);
     _emit(CallParticipantJoined(_callParticipants));
   }
 
@@ -37,13 +49,27 @@ class CallParticipantController {
     _emit(CallParticipantLeft(_callParticipants));
   }
 
-  void emitNew(Map<String, CallParticipant> callParticipants) {
+  void emitNew(Map<String, CallParticipant> callParticipants, String id) {
+    _currentUserId = id;
     _new(callParticipants);
     _emit(CallParticipantUpdated(_callParticipants));
   }
 
   void emitUpdated(CallParticipant callParticipant) {
-    _add(callParticipant);
+    _upsert(callParticipant);
+    _emit(CallParticipantUpdated(_callParticipants));
+  }
+
+  void emitTrackUpdated(MediaStream track, String trackId) {
+    final callParticipant = _callParticipants[trackId];
+    final participantWithTrack = callParticipant!.copyWith(track: track);
+    _upsert(participantWithTrack);
+    _emit(CallParticipantUpdated(_callParticipants));
+  }
+
+  void emitTrackRemoved(String trackId) {
+    final callParticipant = _callParticipants[trackId];
+    _remove(callParticipant!);
     _emit(CallParticipantUpdated(_callParticipants));
   }
 

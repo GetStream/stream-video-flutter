@@ -1,77 +1,78 @@
-import 'dart:async';
+// import 'dart:async';
 
-import 'package:livekit_client/livekit_client.dart' hide Participant;
-import 'package:stream_video/src/models/call_participant.dart';
-import 'package:stream_video/src/video_service/video_connection_status.dart';
-import 'package:stream_video/src/video_service/webrtc_stats.dart';
-import 'package:stream_video/stream_video.dart';
+// // import 'package:livekit_client/livekit_client.dart' hide Participant;
+// import 'package:stream_video/src/models/call_participant.dart';
+// import 'package:stream_video/src/video_service/video_connection_status.dart';
+// import 'package:stream_video/src/video_service/webrtc_stats.dart';
+// import 'package:stream_video/stream_video.dart';
 
-class VideoRoom {
-  VideoRoom({
-    required Room room,
-    required this.callId,
-    required this.callType,
-    required StreamVideoClient client,
-  })  : _room = room,
-        _stats = WebRTCStats(room: room, client: client);
-  final Room _room;
+// class VideoRoom {
+//   VideoRoom({
+//     // required Room room,
+//     required this.callId,
+//     required this.callType,
+//     required StreamVideoClient client,
+//   })  : 
+//   // _room = room,
+//         // _stats = WebRTCStats(room: room, client: client);
+//   // final Room _room;
 
-  final String callId;
-  final StreamCallType callType;
+//   final String callId;
+//   final StreamCallType callType;
 
-  final WebRTCStats _stats;
-
-
-  void registerPeer() {
-    final subscriberPeerConnection = _room.engine.subscriber?.pc;
-    final publisherPeerConnection = _room.engine.publisher?.pc;
-    if (subscriberPeerConnection != null && publisherPeerConnection != null) {
-      _stats.addConnections(
-        publisherPc: publisherPeerConnection,
-        subscriberPc: subscriberPeerConnection,
-        callId: callId,
-        callType: callType,
-      );
-    }
-  }
+//   final WebRTCStats _stats;
 
 
-  final Map<String, CallParticipant> _participants = {};
+//   void registerPeer() {
+//     final subscriberPeerConnection = _room.engine.subscriber?.pc;
+//     final publisherPeerConnection = _room.engine.publisher?.pc;
+//     if (subscriberPeerConnection != null && publisherPeerConnection != null) {
+//       _stats.addConnections(
+//         publisherPc: publisherPeerConnection,
+//         subscriberPc: subscriberPeerConnection,
+//         callId: callId,
+//         callType: callType,
+//       );
+//     }
+//   }
 
-  Future<void> disconnect() => _room.disconnect();
 
-  void add(CallParticipant participant) =>
-      _participants[participant.id] = participant;
+//   final Map<String, CallParticipant> _participants = {};
 
-  CallParticipant? remove(CallParticipant participant) =>
-      _participants.remove(participant.id);
+//   Future<void> disconnect() => _room.disconnect();
 
-  List<CallParticipant> get onlineParticipants => _participants.entries
-      .map((entry) => entry.value)
-      .where((element) => element.isOnline == true)
-      .toList();
+//   void add(CallParticipant participant) =>
+//       _participants[participant.id] = participant;
 
-  List<CallParticipant> get offlineParticipants => _participants.entries
-      .map((entry) => entry.value)
-      .where((element) => element.isOnline == false)
-      .toList();
+//   CallParticipant? remove(CallParticipant participant) =>
+//       _participants.remove(participant.id);
 
-  List<RoomParticipant> get allParticipants => [
-        RoomParticipant(localParticipant!),
-        ..._room.participants.entries
-            .map((e) => RoomParticipant(e.value))
-            .toList(),
-      ];
+//   List<CallParticipant> get onlineParticipants => _participants.entries
+//       .map((entry) => entry.value)
+//       .where((element) => element.isOnline == true)
+//       .toList();
 
-  StreamLocalParticipant? get localParticipant => _room.localParticipant;
+//   List<CallParticipant> get offlineParticipants => _participants.entries
+//       .map((entry) => entry.value)
+//       .where((element) => element.isOnline == false)
+//       .toList();
 
-  VideoConnectionStatus get connectionStatus => _room.connectionState.mapped;
+//   // List<RoomParticipant> get allParticipants => [
+//   //       RoomParticipant(localParticipant!),
+//   //       ..._room.participants.entries
+//   //           .map((e) => RoomParticipant(e.value))
+//   //           .toList(),
+//   //     ];
 
-  void enableAudio() => localParticipant!.setMicrophoneEnabled(true);
+//   StreamLocalParticipant? get localParticipant => _room.localParticipant;
 
-  void enableVideo() => localParticipant!.setCameraEnabled(true);
+//   VideoConnectionStatus get connectionStatus => _room.connectionState.mapped;
 
-  void disableAudio() => localParticipant!.setMicrophoneEnabled(false);
+//   void enableAudio() => localParticipant!.setMicrophoneEnabled(true);
 
-  void disableVideo() => localParticipant!.setCameraEnabled(false);
-}
+//   void enableVideo() => localParticipant!.setCameraEnabled(true);
+
+//   void disableAudio() => localParticipant!.setMicrophoneEnabled(false);
+
+//   void disableVideo() => localParticipant!.setCameraEnabled(false);
+// }

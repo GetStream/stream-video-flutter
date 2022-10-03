@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:livekit_client/livekit_client.dart';
+// import 'package:livekit_client/livekit_client.dart';
 import 'package:stream_video/protobuf/google/protobuf/struct.pb.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:webrtc_interface/src/rtc_peerconnection.dart';
 
 class WebRTCStats {
-  WebRTCStats({required this.room, required this.client});
+  WebRTCStats({required this.client});
 
   final StreamVideoClient client;
-  final Room room;
+  // final Room room;
 
   late final Timer? statsMonitoringTimer;
 

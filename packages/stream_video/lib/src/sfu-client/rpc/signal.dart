@@ -8,8 +8,8 @@ import 'package:stream_video/stream_video.dart';
 import 'package:tart/tart.dart';
 import 'package:uuid/uuid.dart';
 
-class SfuSignalingClient {
-  SfuSignalingClient(this.tokenManager) {
+class SignalService {
+  SignalService(this.tokenManager) {
     client = SignalServerProtobufClient(
       'http://localhost:8080',
       "",
