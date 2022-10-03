@@ -9,17 +9,18 @@ import 'package:tart/tart.dart';
 import 'package:uuid/uuid.dart';
 
 class SignalService {
-  SignalService(this.tokenManager) {
-    client = SignalServerProtobufClient(
-      'http://localhost:8080',
+  SignalService(this.tokenManager, {required this.endpoint}) {
+    client = SignalServerJSONClient(
+      endpoint,
       "",
       hooks: ClientHooks(
         onRequestPrepared: onClientRequestPrepared,
       ),
     );
   }
+  final String endpoint;
   final TokenManager tokenManager;
-  late final SignalServerProtobufClient client;
+  late final SignalServerJSONClient client;
   final sessionId = Uuid().v4();
 
   Future<IceCandidateResponse> sendCandidate({

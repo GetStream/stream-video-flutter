@@ -211,7 +211,7 @@ class WebRTCClient {
       onEventReceived: handleEvent,
     );
 
-    final offer = await subscriber?.createOffer({});
+    final offer = await subscriber?.createOffer();
     if (offer?.sdp == null) {
       throw 'Failed to configure protocol, null SDP';
     }

@@ -27,7 +27,7 @@ class WebSocketClient {
   IOWebSocketChannel? _channel;
   // late final Uri? uri;
   final String endpoint;
-  late final Timer pingTimer;
+  Timer? pingTimer;
   final Logger? _logger;
 
   void connect({required UserInfo user, required Token token}) {
@@ -53,7 +53,7 @@ class WebSocketClient {
       Future.delayed(pongTimeoutTimeInterval, () {
         if (_state.connectionStatus.pingOK == PingOK.notReceived) {
           _state.connectionStatus = ConnectionStatus.disconnected;
-          pingTimer.cancel();
+          pingTimer?.cancel();
         }
       });
     });
@@ -139,7 +139,7 @@ class WebSocketClient {
   }
 
   void _onConnectionClosed() {
-     _logger?.warning("connection closed");
+    _logger?.warning("connection closed");
   }
 
   WebsocketAuthRequest _getAuthPayload(UserInfo user, Token token) {

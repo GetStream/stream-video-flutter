@@ -53,7 +53,7 @@ class StreamVideoClient {
   }) {
     _callCoordinatorService = ClientRPCProtobufClient(
       // Change it to your local IP address.
-      coordinatorUrl ?? "http://192.168.1.17:26991/rpc",
+      coordinatorUrl ?? "http://fe80-2a01-cb20-87c-f00-fc18-dbfb-9f86-6e13.ngrok.io/rpc",
       "",
       hooks: ClientHooks(
         onRequestPrepared: onClientRequestPrepared,
@@ -64,8 +64,9 @@ class StreamVideoClient {
     _state = ClientState(logger);
     _options = options ?? StreamVideoClientOptions();
     _rtcClient = WebRTCClient(
-      SignalService(_tokenManager),
+      SignalService(_tokenManager, endpoint: "http://192.168.1.17:3031/rpc"),
       state: _state,
+      logger: logger,
     );
     _ws = ws ??
         WebSocketClient(
