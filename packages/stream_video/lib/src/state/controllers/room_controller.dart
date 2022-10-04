@@ -13,19 +13,15 @@ class RoomController {
 
   final sfu = SfuController();
 
-  // final participants = ParticipantController();
-
   final broadcasts = BroadcastController();
 
   final recordings = RecordingController();
   final callMembers = CallMembersController();
 
-
   Future<void> disposeCall() async {
     await Future.wait([
       calls.dispose(),
       tracks.dispose(),
-      // participants.dispose(),
       recordings.dispose(),
       callMembers.dispose(),
       recordings.dispose(),

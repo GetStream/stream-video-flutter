@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/protobuf/video/sfu/sfu_events/events.pb.dart';
 import 'package:stream_video/src/models/call_participant.dart';
-import 'package:webrtc_interface/src/media_stream_track.dart';
 
 /// Base type for all StreamVideoEvent events.
 mixin StreamVideoEvent {}

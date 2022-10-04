@@ -6,9 +6,6 @@ import 'package:flutter_webrtc/flutter_webrtc.dart'
         RTCVideoRenderer,
         RTCVideoView,
         RTCVideoViewObjectFit;
-// ignore: depend_on_referenced_packages
-// import 'package:livekit_client/livekit_client.dart'
-//     show VideoTrackRenderer, VideoTrack, VideoViewMirrorMode;
 import 'package:stream_video/stream_video.dart';
 
 enum VideoViewMirrorMode {
@@ -66,6 +63,7 @@ class _StreamVideoTrackRendererState extends State<StreamVideoTrackRenderer> {
     _renderer.srcObject = widget.track;
     // await _listener?.dispose();
     // _listener = widget.track.createListener()
+    //TODO: use our events
     //   ..on<TrackStreamUpdatedEvent>((event) {
     //     if (!mounted) return;
     //     _renderer.srcObject = event.stream;

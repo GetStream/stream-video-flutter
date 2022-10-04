@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-// import 'package:livekit_client/livekit_client.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:stream_video/protobuf/google/protobuf/struct.pb.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:webrtc_interface/src/rtc_peerconnection.dart';
 
 class WebRTCStats {
   WebRTCStats({required this.client});
