@@ -1,28 +1,49 @@
 import 'dart:async';
 
+import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video/src/models/events/events.dart';
-import 'package:stream_video/protobuf/video_events/events.pb.dart';
-import 'package:stream_video/protobuf/video_models/models.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/src/models/user_info.dart';
+import 'package:stream_video/src/state/controllers/call_members_controller.dart';
+import 'package:stream_video/src/state/controllers/call_participant_controller.dart';
 import 'package:stream_video/src/state/controllers/controllers.dart';
-import 'package:stream_video/src/state/controllers/room_controller.dart';
+import 'package:stream_video/src/state/controllers/sfu_controller.dart';
+import 'package:stream_video/src/state/controllers/track_controller.dart';
 
 class StreamCallState {
   final String? userId;
   final String? clientId;
   final String? callType;
   final String? callId;
+  final String? sfuUrl;
+  final String? sfuToken;
   final bool? video;
   final bool? audio;
 
-  StreamCallState(
-      {this.userId,
-      this.clientId,
-      this.callType,
-      this.callId,
-      this.video,
-      this.audio});
+  StreamCallState({
+    this.userId,
+    this.clientId,
+    this.callType,
+    this.callId,
+    this.video,
+    this.audio,
+    this.sfuUrl,
+    this.sfuToken,
+  });
+
+  @override
+  String toString() => '''StreamCallState(
+    userId: $userId,
+    clientId: $clientId,
+    callType: $callType,
+    callId: $callId,
+    video: $video,
+    audio: $audio,
+    sfuUrl: $sfuUrl,
+    sfuToken: $sfuToken,
+  )''';
 }
 
 enum ConnectionStatus {
@@ -44,15 +65,19 @@ enum PingOK { received, notReceived }
 
 class ClientState {
   //ingest this in state
-
+  final Logger? logger;
+  ClientState(this.logger);
   final _currentUserController = BehaviorSubject<UserInfo?>();
 
   final _callStateController = BehaviorSubject.seeded(StreamCallState());
 
-  set callState(StreamCallState state) => _callStateController.add(state);
+  set callState(StreamCallState state) {
+    logger?.info("setting call state to $state");
+    _callStateController.add(state);
+  }
 
   StreamCallState get callState => _callStateController.value;
-  
+
   final _connectionStatusController =
       BehaviorSubject.seeded(ConnectionStatus.disconnected);
 
@@ -68,36 +93,35 @@ class ClientState {
   /// The current user
   UserInfo? get currentUser => _currentUserController.valueOrNull;
 
-  final _healthcheckController = BehaviorSubject<Healthcheck>();
+  final _healthcheckController = BehaviorSubject<WebsocketHealthcheck>();
 
-  set healthcheck(Healthcheck healthcheck) =>
+  set healthcheck(WebsocketHealthcheck healthcheck) =>
       _healthcheckController.add(healthcheck);
 
   /// The current connection status value
-  Healthcheck get healthcheck => _healthcheckController.value;
+  WebsocketHealthcheck get healthcheck => _healthcheckController.value;
 
   /// This notifies of Healthcheck changes
-  Stream<Healthcheck> get healthcheckStream =>
+  Stream<WebsocketHealthcheck> get healthcheckStream =>
       _healthcheckController.stream.distinct();
 
   final _roomController = RoomController();
-  
 
-  //TODO: set participants
+  SfuController get sfu => _roomController.sfu;
+
+  TrackController get tracks => _roomController.tracks;
 
   CallController get calls => _roomController.calls;
 
-  ParticipantController get participants => _roomController.participants;
+  CallParticipantController get participants => _roomController.participants;
+
+  // @internal
+  // ParticipantController get participants => _roomController.participants;
 
   BroadcastController get broadcasts => _roomController.broadcasts;
 
-  ScreenshareController get screenshares => _roomController.screenshares;
-
-  AudioController get audios => _roomController.audios;
-
-  VideoController get videos => _roomController.videos;
-
   RecordingController get recordings => _roomController.recordings;
+  CallMembersController get callMembers => _roomController.callMembers;
 
   final _userUpdatedController = BehaviorSubject<UserUpdated>();
 
@@ -111,20 +135,27 @@ class ClientState {
   Stream<UserUpdated> get userUpdatedStream =>
       _userUpdatedController.stream.distinct();
 
-  final _authPayloadController = BehaviorSubject<AuthPayload>();
+  final _authPayloadController = BehaviorSubject<WebsocketAuthRequest>();
 
-  set authPayload(AuthPayload authPayload) =>
+  set authPayload(WebsocketAuthRequest authPayload) =>
       _authPayloadController.add(authPayload);
 
   /// The current connection status value
-  AuthPayload get authPayload => _authPayloadController.value;
+  WebsocketAuthRequest get authPayload => _authPayloadController.value;
 
   /// This notifies of Healthcheck changes
-  Stream<AuthPayload> get authPayloadStream =>
+  Stream<WebsocketAuthRequest> get authPayloadStream =>
       _authPayloadController.stream.distinct();
 
   Future<void> dispose() async {
-    //TODO: dispose other controllers
-    await Future.wait([_roomController.disposeCall()]);
+    await Future.wait([
+      _roomController.disposeCall(),
+      _callStateController.close(),
+      _connectionStatusController.close(),
+      _healthcheckController.close(),
+      _currentUserController.close(),
+      _userUpdatedController.close(),
+      _authPayloadController.close(),
+    ]);
   }
 }

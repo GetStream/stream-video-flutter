@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 void main() {
-  final client = StreamVideoClient("apiKey");
+  final client = StreamVideoClient(
+    'key1', // see <video>/data/fixtures/apps.yaml for API secret
+  );
   runApp(MyApp(client: client));
 }
 
@@ -24,7 +26,7 @@ class MyApp extends StatelessWidget {
       routes: {
         HomeView.routeName: (context) => HomeView(title: title),
         StageView.routeName: (context) => StageView(
-              controller: client.participants,
+              controller: client.room,
             ),
       },
       builder: (context, child) {

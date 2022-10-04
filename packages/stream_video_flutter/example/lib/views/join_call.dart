@@ -22,7 +22,7 @@ class JoinCallView extends StatelessWidget {
         print("join call ${controller.text}");
         await StreamVideoProvider.of(context)
             .client
-            .joinExistingCall(id: controller.text, type: StreamCallType.video);
+            .joinExistingCall(callId: controller.text, callType: StreamCallType.$default);
         Navigator.of(context).pushNamed(StageView.routeName);
       }),
     ]);

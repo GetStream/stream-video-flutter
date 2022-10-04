@@ -1,33 +1,36 @@
 import 'dart:async';
 
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/src/models/events/events.dart';
-import 'package:stream_video/protobuf/video_events/events.pb.dart';
+
 
 class RecordingController {
   final _recordingController = BehaviorSubject<RecordingEvent>();
 
-  void emit(RecordingEvent event) => _recordingController.add(event);
+  void _emit(RecordingEvent event) => _recordingController.add(event);
 
   void emitStarted(RecordingStarted event) =>
-      emit(RecordingStartedEvent(event));
+      _emit(RecordingStartedEvent(event));
 
   void emitStopped(RecordingStopped event) =>
-      emit(RecordingStoppedEvent(event));
+      _emit(RecordingStoppedEvent(event));
 
   RecordingEvent get recordingEvent => _recordingController.value;
 
-  Stream<RecordingEvent> get recordingStream =>
+  Stream<RecordingEvent> get _recordingStream =>
       _recordingController.stream.distinct();
 
-  StreamSubscription<RecordingEvent> listen(
-          FutureOr<void> Function(RecordingEvent event) onEvent) =>
-      recordingStream.listen(onEvent);
+  StreamSubscription<RecordingEvent> _listen(
+    FutureOr<void> Function(RecordingEvent event) onEvent,
+  ) =>
+      _recordingStream.listen(onEvent);
 
   StreamSubscription<RecordingEvent> on<E extends RecordingEvent>(
-          FutureOr<void> Function(E) then,
-          {bool Function(E)? filter}) =>
-      listen((event) async {
+    FutureOr<void> Function(E) then, {
+    bool Function(E)? filter,
+  }) =>
+      _listen((event) async {
         // event must be E
         if (event is! E) return;
         // filter must be true (if filter is used)
