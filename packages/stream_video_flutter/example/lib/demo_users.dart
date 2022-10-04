@@ -15,33 +15,33 @@ final demoUsers = [
         name: "Sacha",
       ),
       token: Token(
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9zYWNoYSIsImV4cCI6MTY2NDI4MTU5NCwiaWF0IjoxNjY0MTk1MTk0LCJ1c2VyX2lkIjoic2FjaGEifQ.Qx3p5Vk9VHTfEIc4ApoRZ32HrqZugj04x0ZakEZcXVQ")),
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9zYWNoYSIsImV4cCI6MTY2NDkwOTU0OSwiaWF0IjoxNjY0ODIzMTQ5LCJ1c2VyX2lkIjoic2FjaGEifQ.nUXdIylNPcRi9YwXoumvBR_iCrTcPvjp7d4bytPSh6U")),
   UserCredentials(
       userInfo: UserInfo(
         id: "salvatore",
         name: "Salvatore",
       ),
       token: Token(
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9zYWx2YXRvcmUiLCJleHAiOjE2NjQyODE2MjcsImlhdCI6MTY2NDE5NTIyNywidXNlcl9pZCI6InNhbHZhdG9yZSJ9.dBuO-BZ-FQcMpPyLNLg24NL-j79rrXgG13GT-UULEAQ")),
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9zYWx2YXRvcmUiLCJleHAiOjE2NjQ5MDk2MTUsImlhdCI6MTY2NDgyMzIxNSwidXNlcl9pZCI6InNhbHZhdG9yZSJ9.Mvi0MbnVre4LMUBzpZ7IoXMTFyYnjT8bSHAmzA9b6wk")),
   UserCredentials(
       userInfo: UserInfo(
         id: "sahil",
         name: "Sahil",
       ),
       token: Token(
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9zYWhpbCIsImV4cCI6MTY2NDI4MTY2MCwiaWF0IjoxNjY0MTk1MjYwLCJ1c2VyX2lkIjoic2FoaWwifQ.ECN1N1y9AfmYY07CzjSG03QzVBitvw1oXG7przebSr4")),
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9zYWhpbCIsImV4cCI6MTY2NDkwOTYzOCwiaWF0IjoxNjY0ODIzMjM4LCJ1c2VyX2lkIjoic2FoaWwifQ.-Jh6ZGhh4OrgwZYHxnXNpI02FuBk8ZqaF7YVe6wvRJ0")),
   UserCredentials(
       userInfo: UserInfo(
         id: "gordon",
         name: "Gordon",
       ),
       token: Token(
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9nb3Jkb24iLCJleHAiOjE2NjQyODE3MDAsImlhdCI6MTY2NDE5NTMwMCwidXNlcl9pZCI6ImdvcmRvbiJ9._3LFW8NjS1tpGj6dnSZf83V6ZBBh-5gfoXfk-UUSqr8")),
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9nb3Jkb24iLCJleHAiOjE2NjQ5MDk2NTksImlhdCI6MTY2NDgyMzI1OSwidXNlcl9pZCI6ImdvcmRvbiJ9.4gNkAfS9MFfP3vkW0RA3BZdm_vaK85dXQ-GT2iB61yw")),
   UserCredentials(
       userInfo: UserInfo(
         id: "deven",
         name: "Deven",
       ),
       token: Token(
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9kZXZlbiIsImV4cCI6MTY2NDI4MTczOSwiaWF0IjoxNjY0MTk1MzM5LCJ1c2VyX2lkIjoiZGV2ZW4ifQ.w167QwHZ6OMWEHqYmZBkTgRe_eaXXzEZn4FcedG1xac"))
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9kZXZlbiIsImV4cCI6MTY2NDkwOTY3NywiaWF0IjoxNjY0ODIzMjc3LCJ1c2VyX2lkIjoiZGV2ZW4ifQ.k4IeCNVAfY1fcD4gv3LpnujPPyAHw7FRUqE8q2KkKLQ"))
 ];

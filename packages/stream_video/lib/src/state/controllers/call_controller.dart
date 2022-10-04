@@ -9,7 +9,6 @@ class CallController {
 
   void _emit(CallEvent event) => _callController.add(event);
 
-  // emitRinging(CallRinging payload) => emit(CallRingingEvent(payload));
 
   emitCreated(CallCreated payload) => _emit(CallCreatedEvent(payload));
 
@@ -23,18 +22,18 @@ class CallController {
 
   CallEvent get callEvent => _callController.value;
 
-  Stream<CallEvent> get callEventStream => _callController.stream.distinct();
+  Stream<CallEvent> get _callEventStream => _callController.stream.distinct();
 
-  StreamSubscription<CallEvent> listen(
+  StreamSubscription<CallEvent> _listen(
     FutureOr<void> Function(CallEvent event) onEvent,
   ) =>
-      callEventStream.listen(onEvent);
+      _callEventStream.listen(onEvent);
 
   StreamSubscription<CallEvent> on<E extends CallEvent>(
     FutureOr<void> Function(E) then, {
     bool Function(E)? filter,
   }) =>
-      listen((event) async {
+      _listen((event) async {
         // event must be E
         if (event is! E) return;
         // filter must be true (if filter is used)
