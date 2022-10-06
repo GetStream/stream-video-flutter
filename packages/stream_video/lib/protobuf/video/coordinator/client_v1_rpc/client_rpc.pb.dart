@@ -15,7 +15,6 @@ import '../edge_v1/edge.pb.dart' as $4;
 import '../call_v1/call.pb.dart' as $0;
 import '../utils_v1/utils.pb.dart' as $5;
 import '../push_v1/push.pb.dart' as $6;
-import '../../../google/protobuf/struct.pb.dart' as $7;
 
 import 'client_rpc.pbenum.dart';
 
@@ -1716,7 +1715,7 @@ class ReportCallStatsRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ReportCallStatsRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
-    ..aOM<$7.Struct>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stats', subBuilder: $7.Struct.create)
+    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'statsJson', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
@@ -1724,7 +1723,7 @@ class ReportCallStatsRequest extends $pb.GeneratedMessage {
   factory ReportCallStatsRequest({
     $core.String? callType,
     $core.String? callId,
-    $7.Struct? stats,
+    $core.List<$core.int>? statsJson,
   }) {
     final _result = create();
     if (callType != null) {
@@ -1733,8 +1732,8 @@ class ReportCallStatsRequest extends $pb.GeneratedMessage {
     if (callId != null) {
       _result.callId = callId;
     }
-    if (stats != null) {
-      _result.stats = stats;
+    if (statsJson != null) {
+      _result.statsJson = statsJson;
     }
     return _result;
   }
@@ -1778,15 +1777,13 @@ class ReportCallStatsRequest extends $pb.GeneratedMessage {
   void clearCallId() => clearField(2);
 
   @$pb.TagNumber(3)
-  $7.Struct get stats => $_getN(2);
+  $core.List<$core.int> get statsJson => $_getN(2);
   @$pb.TagNumber(3)
-  set stats($7.Struct v) { setField(3, v); }
+  set statsJson($core.List<$core.int> v) { $_setBytes(2, v); }
   @$pb.TagNumber(3)
-  $core.bool hasStats() => $_has(2);
+  $core.bool hasStatsJson() => $_has(2);
   @$pb.TagNumber(3)
-  void clearStats() => clearField(3);
-  @$pb.TagNumber(3)
-  $7.Struct ensureStats() => $_ensure(2);
+  void clearStatsJson() => clearField(3);
 }
 
 class ReportCallStatsResponse extends $pb.GeneratedMessage {

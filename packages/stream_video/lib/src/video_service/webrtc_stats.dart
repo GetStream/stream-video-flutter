@@ -51,13 +51,13 @@ class WebRTCStats {
         )));
   }
 
-  Future<Struct> _getStats(RTCPeerConnection pc) async {
+  Future<List<int>> _getStats(RTCPeerConnection pc) async {
     final stats = await pc.getStats();
-    final s = <String, Value>{};
-    stats.forEach((v) =>
-        s[v.id] = Value(structValue: Struct.fromJson(jsonEncode(v.values))));
-
-    return Struct(fields: s);
+    final s = <String, dynamic>{};
+    stats.forEach((v) => s[v.id] = v.values);
+    const jsonEncoder = JsonEncoder();
+    final result = utf8.encode(jsonEncoder.convert(s));
+    return result;
   }
 
   void addConnections({

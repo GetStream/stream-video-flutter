@@ -11,12 +11,11 @@ import 'dart:typed_data' as $typed_data;
 import '../call_v1/call.pbjson.dart' as $0;
 import 'envelopes.pbjson.dart' as $3;
 import '../user_v1/user.pbjson.dart' as $1;
-import '../../../google/protobuf/timestamp.pbjson.dart' as $8;
+import '../../../google/protobuf/timestamp.pbjson.dart' as $7;
 import '../member_v1/member.pbjson.dart' as $2;
 import '../edge_v1/edge.pbjson.dart' as $4;
 import '../utils_v1/utils.pbjson.dart' as $5;
 import '../push_v1/push.pbjson.dart' as $6;
-import '../../../google/protobuf/struct.pbjson.dart' as $7;
 
 @$core.Deprecated('Use memberFieldDescriptor instead')
 const MemberField$json = const {
@@ -386,12 +385,12 @@ const ReportCallStatsRequest$json = const {
   '2': const [
     const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
     const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
-    const {'1': 'stats', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'stats'},
+    const {'1': 'stats_json', '3': 3, '4': 1, '5': 12, '10': 'statsJson'},
   ],
 };
 
 /// Descriptor for `ReportCallStatsRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List reportCallStatsRequestDescriptor = $convert.base64Decode('ChZSZXBvcnRDYWxsU3RhdHNSZXF1ZXN0EhsKCWNhbGxfdHlwZRgBIAEoCVIIY2FsbFR5cGUSFwoHY2FsbF9pZBgCIAEoCVIGY2FsbElkEi0KBXN0YXRzGAMgASgLMhcuZ29vZ2xlLnByb3RvYnVmLlN0cnVjdFIFc3RhdHM=');
+final $typed_data.Uint8List reportCallStatsRequestDescriptor = $convert.base64Decode('ChZSZXBvcnRDYWxsU3RhdHNSZXF1ZXN0EhsKCWNhbGxfdHlwZRgBIAEoCVIIY2FsbFR5cGUSFwoHY2FsbF9pZBgCIAEoCVIGY2FsbElkEh0KCnN0YXRzX2pzb24YAyABKAxSCXN0YXRzSnNvbg==');
 @$core.Deprecated('Use reportCallStatsResponseDescriptor instead')
 const ReportCallStatsResponse$json = const {
   '1': 'ReportCallStatsResponse',
@@ -481,14 +480,13 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ClientRPCS
   '.stream.video.coordinator.call_v1.CallOptions': $0.CallOptions$json,
   '.stream.video.coordinator.call_v1.RecordingOptions': $0.RecordingOptions$json,
   '.stream.video.coordinator.call_v1.BroadcastingOptions': $0.BroadcastingOptions$json,
-  '.stream.video.coordinator.call_v1.TranscriptionOptions': $0.TranscriptionOptions$json,
   '.stream.video.coordinator.client_v1_rpc.CreateCallInput.MembersEntry': CreateCallInput_MembersEntry$json,
   '.stream.video.coordinator.client_v1_rpc.MemberInput': MemberInput$json,
   '.stream.video.coordinator.client_v1_rpc.CreateCallResponse': CreateCallResponse$json,
   '.stream.video.coordinator.client_v1_rpc.CallEnvelope': $3.CallEnvelope$json,
   '.stream.video.coordinator.client_v1_rpc.CallEnvelope.UsersEntry': $3.CallEnvelope_UsersEntry$json,
   '.stream.video.coordinator.user_v1.User': $1.User$json,
-  '.google.protobuf.Timestamp': $8.Timestamp$json,
+  '.google.protobuf.Timestamp': $7.Timestamp$json,
   '.stream.video.coordinator.call_v1.Call': $0.Call$json,
   '.stream.video.coordinator.call_v1.CallDetails': $0.CallDetails$json,
   '.stream.video.coordinator.call_v1.CallDetails.MembersEntry': $0.CallDetails_MembersEntry$json,
@@ -498,6 +496,7 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ClientRPCS
   '.stream.video.coordinator.client_v1_rpc.JoinCallRequest': JoinCallRequest$json,
   '.stream.video.coordinator.client_v1_rpc.JoinCallResponse': JoinCallResponse$json,
   '.stream.video.coordinator.edge_v1.Edge': $4.Edge$json,
+  '.stream.video.coordinator.edge_v1.Coordinates': $4.Coordinates$json,
   '.stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest': GetCallEdgeServerRequest$json,
   '.stream.video.coordinator.edge_v1.LatencyMeasurements': $4.LatencyMeasurements$json,
   '.stream.video.coordinator.edge_v1.LatencyMeasurements.MeasurementsEntry': $4.LatencyMeasurements_MeasurementsEntry$json,
@@ -536,10 +535,6 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ClientRPCS
   '.stream.video.coordinator.client_v1_rpc.SendCustomEventRequest': SendCustomEventRequest$json,
   '.stream.video.coordinator.client_v1_rpc.SendCustomEventResponse': SendCustomEventResponse$json,
   '.stream.video.coordinator.client_v1_rpc.ReportCallStatsRequest': ReportCallStatsRequest$json,
-  '.google.protobuf.Struct': $7.Struct$json,
-  '.google.protobuf.Struct.FieldsEntry': $7.Struct_FieldsEntry$json,
-  '.google.protobuf.Value': $7.Value$json,
-  '.google.protobuf.ListValue': $7.ListValue$json,
   '.stream.video.coordinator.client_v1_rpc.ReportCallStatsResponse': ReportCallStatsResponse$json,
   '.stream.video.coordinator.client_v1_rpc.ReviewCallRequest': ReviewCallRequest$json,
   '.stream.video.coordinator.client_v1_rpc.ReviewCallResponse': ReviewCallResponse$json,

@@ -67,12 +67,11 @@ const CallOptions$json = const {
   '2': const [
     const {'1': 'recording', '3': 1, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.RecordingOptions', '10': 'recording'},
     const {'1': 'broadcasting', '3': 2, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.BroadcastingOptions', '10': 'broadcasting'},
-    const {'1': 'transcription', '3': 3, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.TranscriptionOptions', '10': 'transcription'},
   ],
 };
 
 /// Descriptor for `CallOptions`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callOptionsDescriptor = $convert.base64Decode('CgtDYWxsT3B0aW9ucxJQCglyZWNvcmRpbmcYASABKAsyMi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2FsbF92MS5SZWNvcmRpbmdPcHRpb25zUglyZWNvcmRpbmcSWQoMYnJvYWRjYXN0aW5nGAIgASgLMjUuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNhbGxfdjEuQnJvYWRjYXN0aW5nT3B0aW9uc1IMYnJvYWRjYXN0aW5nElwKDXRyYW5zY3JpcHRpb24YAyABKAsyNi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2FsbF92MS5UcmFuc2NyaXB0aW9uT3B0aW9uc1INdHJhbnNjcmlwdGlvbg==');
+final $typed_data.Uint8List callOptionsDescriptor = $convert.base64Decode('CgtDYWxsT3B0aW9ucxJQCglyZWNvcmRpbmcYASABKAsyMi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2FsbF92MS5SZWNvcmRpbmdPcHRpb25zUglyZWNvcmRpbmcSWQoMYnJvYWRjYXN0aW5nGAIgASgLMjUuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNhbGxfdjEuQnJvYWRjYXN0aW5nT3B0aW9uc1IMYnJvYWRjYXN0aW5n');
 @$core.Deprecated('Use recordingOptionsDescriptor instead')
 const RecordingOptions$json = const {
   '1': 'RecordingOptions',
@@ -99,16 +98,3 @@ const BroadcastingOptions$json = const {
 
 /// Descriptor for `BroadcastingOptions`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List broadcastingOptionsDescriptor = $convert.base64Decode('ChNCcm9hZGNhc3RpbmdPcHRpb25zEh0KB2VuYWJsZWQYASABKAhIAFIHZW5hYmxlZIgBAUIKCghfZW5hYmxlZA==');
-@$core.Deprecated('Use transcriptionOptionsDescriptor instead')
-const TranscriptionOptions$json = const {
-  '1': 'TranscriptionOptions',
-  '2': const [
-    const {'1': 'enabled', '3': 1, '4': 1, '5': 8, '9': 0, '10': 'enabled', '17': true},
-  ],
-  '8': const [
-    const {'1': '_enabled'},
-  ],
-};
-
-/// Descriptor for `TranscriptionOptions`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List transcriptionOptionsDescriptor = $convert.base64Decode('ChRUcmFuc2NyaXB0aW9uT3B0aW9ucxIdCgdlbmFibGVkGAEgASgISABSB2VuYWJsZWSIAQFCCgoIX2VuYWJsZWQ=');

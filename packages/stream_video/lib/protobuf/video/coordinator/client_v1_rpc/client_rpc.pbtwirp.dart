@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:protobuf/protobuf.dart';
 import 'package:tart/tart.dart' as twirp;
 import 'client_rpc.pb.dart';
-import 'package:stream_video/protobuf/google/protobuf/struct.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/call_v1/call.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';

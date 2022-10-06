@@ -22,7 +22,8 @@ class LatencyService {
     Edge edge, [
     int tries = 1,
   ]) async {
-    final latencyUrl = "http://192.168.1.17:5764/ping"; //egde.latencyUrl;
+    final latencyUrl =
+        edge.latencyUrl; // "http://192.168.1.17:5764/ping"; //egde.latencyUrl;
     logger?.info("measuring latencyUrl: $latencyUrl");
     final url = Uri.tryParse(latencyUrl);
     final measurementsSeconds = <double>[];

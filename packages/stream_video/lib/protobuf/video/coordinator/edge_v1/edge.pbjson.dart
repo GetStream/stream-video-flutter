@@ -51,18 +51,8 @@ const Latency$json = const {
 
 /// Descriptor for `Latency`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List latencyDescriptor = $convert.base64Decode('CgdMYXRlbmN5EjEKFG1lYXN1cmVtZW50c19zZWNvbmRzGAEgAygBUhNtZWFzdXJlbWVudHNTZWNvbmRz');
-@$core.Deprecated('Use edgeDescriptor instead')
-const Edge$json = const {
-  '1': 'Edge',
-  '2': const [
-    const {'1': 'name', '3': 1, '4': 1, '5': 9, '8': const {}, '10': 'name'},
-    const {'1': 'latency_url', '3': 2, '4': 1, '5': 9, '8': const {}, '10': 'latencyUrl'},
-  ],
-  '3': const [Edge_Coordinates$json],
-};
-
-@$core.Deprecated('Use edgeDescriptor instead')
-const Edge_Coordinates$json = const {
+@$core.Deprecated('Use coordinatesDescriptor instead')
+const Coordinates$json = const {
   '1': 'Coordinates',
   '2': const [
     const {'1': 'lat', '3': 1, '4': 1, '5': 2, '10': 'lat'},
@@ -70,8 +60,20 @@ const Edge_Coordinates$json = const {
   ],
 };
 
+/// Descriptor for `Coordinates`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List coordinatesDescriptor = $convert.base64Decode('CgtDb29yZGluYXRlcxIQCgNsYXQYASABKAJSA2xhdBISCgRsb25nGAIgASgCUgRsb25n');
+@$core.Deprecated('Use edgeDescriptor instead')
+const Edge$json = const {
+  '1': 'Edge',
+  '2': const [
+    const {'1': 'name', '3': 1, '4': 1, '5': 9, '8': const {}, '10': 'name'},
+    const {'1': 'latency_url', '3': 2, '4': 1, '5': 9, '8': const {}, '10': 'latencyUrl'},
+    const {'1': 'coordinates', '3': 3, '4': 1, '5': 11, '6': '.stream.video.coordinator.edge_v1.Coordinates', '10': 'coordinates'},
+  ],
+};
+
 /// Descriptor for `Edge`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List edgeDescriptor = $convert.base64Decode('CgRFZGdlEhsKBG5hbWUYASABKAlCB/pCBHICEAFSBG5hbWUSKAoLbGF0ZW5jeV91cmwYAiABKAlCB/pCBHICEAFSCmxhdGVuY3lVcmwaMwoLQ29vcmRpbmF0ZXMSEAoDbGF0GAEgASgCUgNsYXQSEgoEbG9uZxgCIAEoAlIEbG9uZw==');
+final $typed_data.Uint8List edgeDescriptor = $convert.base64Decode('CgRFZGdlEhsKBG5hbWUYASABKAlCB/pCBHICEAFSBG5hbWUSKAoLbGF0ZW5jeV91cmwYAiABKAlCB/pCBHICEAFSCmxhdGVuY3lVcmwSTwoLY29vcmRpbmF0ZXMYAyABKAsyLS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuZWRnZV92MS5Db29yZGluYXRlc1ILY29vcmRpbmF0ZXM=');
 @$core.Deprecated('Use iCEServerDescriptor instead')
 const ICEServer$json = const {
   '1': 'ICEServer',

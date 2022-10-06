@@ -10,7 +10,7 @@ import 'package:uuid/uuid.dart';
 
 class SignalService {
   SignalService(this.tokenManager, {required this.endpoint}) {
-    client = SignalServerJSONClient(
+    client = SignalServerProtobufClient(
       endpoint,
       "",
       hooks: ClientHooks(
@@ -20,7 +20,7 @@ class SignalService {
   }
   final String endpoint;
   final TokenManager tokenManager;
-  late final SignalServerJSONClient client;
+  late final SignalServerProtobufClient client;
   final sessionId = Uuid().v4();
 
   Future<IceCandidateResponse> sendCandidate({

@@ -162,15 +162,15 @@ class Latency extends $pb.GeneratedMessage {
   $core.List<$core.double> get measurementsSeconds => $_getList(0);
 }
 
-class Edge_Coordinates extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Edge.Coordinates', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.edge_v1'), createEmptyInstance: create)
+class Coordinates extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Coordinates', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.edge_v1'), createEmptyInstance: create)
     ..a<$core.double>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lat', $pb.PbFieldType.OF)
     ..a<$core.double>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'long', $pb.PbFieldType.OF)
     ..hasRequiredFields = false
   ;
 
-  Edge_Coordinates._() : super();
-  factory Edge_Coordinates({
+  Coordinates._() : super();
+  factory Coordinates({
     $core.double? lat,
     $core.double? long,
   }) {
@@ -183,26 +183,26 @@ class Edge_Coordinates extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory Edge_Coordinates.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Edge_Coordinates.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory Coordinates.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Coordinates.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  Edge_Coordinates clone() => Edge_Coordinates()..mergeFromMessage(this);
+  Coordinates clone() => Coordinates()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  Edge_Coordinates copyWith(void Function(Edge_Coordinates) updates) => super.copyWith((message) => updates(message as Edge_Coordinates)) as Edge_Coordinates; // ignore: deprecated_member_use
+  Coordinates copyWith(void Function(Coordinates) updates) => super.copyWith((message) => updates(message as Coordinates)) as Coordinates; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static Edge_Coordinates create() => Edge_Coordinates._();
-  Edge_Coordinates createEmptyInstance() => create();
-  static $pb.PbList<Edge_Coordinates> createRepeated() => $pb.PbList<Edge_Coordinates>();
+  static Coordinates create() => Coordinates._();
+  Coordinates createEmptyInstance() => create();
+  static $pb.PbList<Coordinates> createRepeated() => $pb.PbList<Coordinates>();
   @$core.pragma('dart2js:noInline')
-  static Edge_Coordinates getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Edge_Coordinates>(create);
-  static Edge_Coordinates? _defaultInstance;
+  static Coordinates getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Coordinates>(create);
+  static Coordinates? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.double get lat => $_getN(0);
@@ -227,6 +227,7 @@ class Edge extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Edge', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.edge_v1'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'latencyUrl')
+    ..aOM<Coordinates>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'coordinates', subBuilder: Coordinates.create)
     ..hasRequiredFields = false
   ;
 
@@ -234,6 +235,7 @@ class Edge extends $pb.GeneratedMessage {
   factory Edge({
     $core.String? name,
     $core.String? latencyUrl,
+    Coordinates? coordinates,
   }) {
     final _result = create();
     if (name != null) {
@@ -241,6 +243,9 @@ class Edge extends $pb.GeneratedMessage {
     }
     if (latencyUrl != null) {
       _result.latencyUrl = latencyUrl;
+    }
+    if (coordinates != null) {
+      _result.coordinates = coordinates;
     }
     return _result;
   }
@@ -282,6 +287,17 @@ class Edge extends $pb.GeneratedMessage {
   $core.bool hasLatencyUrl() => $_has(1);
   @$pb.TagNumber(2)
   void clearLatencyUrl() => clearField(2);
+
+  @$pb.TagNumber(3)
+  Coordinates get coordinates => $_getN(2);
+  @$pb.TagNumber(3)
+  set coordinates(Coordinates v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasCoordinates() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearCoordinates() => clearField(3);
+  @$pb.TagNumber(3)
+  Coordinates ensureCoordinates() => $_ensure(2);
 }
 
 class ICEServer extends $pb.GeneratedMessage {
