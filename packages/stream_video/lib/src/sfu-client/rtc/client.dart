@@ -407,18 +407,22 @@ class WebRTCClient {
   String get _sfuUrl => state.callState.sfuUrl!;
 
   Future<void> disableAudio() async {
+    //TODO: webrtc
     await signalService.updateAudioMuteState(muted: true, token: _sfuToken);
   }
 
   Future<void> enableAudio() async {
+        //TODO: webrtc
     await signalService.updateAudioMuteState(muted: false, token: _sfuToken);
   }
 
   Future<void> disableVideo() async {
+        //TODO: webrtc
     await signalService.updateVideoMuteState(muted: false, token: _sfuToken);
   }
 
   Future<void> enableVideo() async {
+        //TODO: webrtc
     await signalService.updateVideoMuteState(muted: false, token: _sfuToken);
   }
 
