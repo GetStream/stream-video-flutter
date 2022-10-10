@@ -74,10 +74,10 @@ Future<List<Codec>> _getCodecsFromPeerConnection(
   if (sdp == null) {
     final tempPc = await createPeerConnection({});
     final transceiver = await tempPc.addTransceiver(kind: kind);
-    transceiver.setDirection(direction);
+    await transceiver.setDirection(direction);
     final offer = await tempPc.createOffer();
     sdp = offer.sdp;
-    tempPc.close();
+    await tempPc.close();
   }
   final parsedSdp = parseSdp(sdp!);
   final supportedCodecs = <Codec>[];

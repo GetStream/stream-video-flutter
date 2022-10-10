@@ -64,6 +64,9 @@ class WebRTCClient {
         // usernameFragment: candidate.use as String?,
       );
     };
+    publisher.onIceConnectionState = (state) {
+      logger?.info('Publisher ICE connection state: $state');
+    };
     publisher.onRenegotiationNeeded = () async {
       final offer = await publisher.createOffer();
       await publisher.setLocalDescription(offer);
@@ -76,29 +79,34 @@ class WebRTCClient {
     return publisher;
   }
 
+  /// create a subscriber
   Future<RTCPeerConnection> createSubscriber({
-    // OnTrack? onTrack,
+    OnTrack? onTrack,
     OnAddStream? onAddStream,
     OnRemoveStream? onRemoveStream,
   }) async {
-    print("creating subscriber with configuration: $defaultConfig");
+    print('creating subscriber with configuration: $defaultConfig');
     final subscriber = await createPeerConnection(defaultConfig);
-    subscriber.onIceCandidate = (candidate) async {
-      await signalService.sendCandidate(
-        publisher: false,
-        candidate: candidate.candidate,
-        sdpMid: candidate.sdpMid, // ?? undefined,
-        sdpMLineIndex: candidate.sdpMLineIndex, //?? undefined,
-        // usernameFragment: candidate.usernameFragment?? undefined,
-        token: Token(state.callState.sfuToken!),
-      );
-    };
-    // subscriber.onTrack = onTrack;
-    subscriber.onAddStream = onAddStream;
-    subscriber.onRemoveStream = onRemoveStream;
+    subscriber
+      ..onIceCandidate = (candidate) async {
+        await signalService.sendCandidate(
+          publisher: false,
+          candidate: candidate.candidate,
+          sdpMid: candidate.sdpMid, // ?? undefined,
+          sdpMLineIndex: candidate.sdpMLineIndex, //?? undefined,
+          // usernameFragment: candidate.usernameFragment?? undefined,
+          token: Token(state.callState.sfuToken!),
+        );
+      }
+      ..onIceConnectionState = (state) {
+        logger?.info('Subscriber ICE connection state: $state');
+      }
+      ..onTrack = onTrack;
+    // ..onAddStream = onAddStream
+    // ..onRemoveStream = onRemoveStream;
 
     state.sfu.on<SubscriberOfferEvent>((event) async {
-      logger?.info("Received subscriberOffer ${event.payload}");
+      logger?.info('Received subscriberOffer ${event.payload}');
 
       await subscriber.setRemoteDescription(
         RTCSessionDescription(event.payload.sdp, 'offer'),
@@ -115,6 +123,12 @@ class WebRTCClient {
     return subscriber;
   }
 
+  final offerSdpConstraints = <String, dynamic>{
+    'OfferToReceiveAudio': true,
+    'OfferToReceiveVideo': true,
+  };
+
+  /// Config
   Map<String, Object> get defaultConfig => {
         'sdpSemantics': sdpSemantics,
         'iceServers': [
@@ -122,7 +136,7 @@ class WebRTCClient {
             'urls': 'stun:stun.l.google.com:19302',
           },
           {
-            'urls': "turn:http://192.168.1.17:3478",
+            'urls': 'turn:192.168.1.17:3478',
             'username': 'video',
             'credential': 'video',
           },
@@ -146,7 +160,7 @@ class WebRTCClient {
         logger?.info('Data channel is closed');
       }
     };
-    
+
     signal.onMessage = (message) {
       if (!message.isBinary) {
         logger?.info('This socket only accepts exchanging binary data');
@@ -199,17 +213,16 @@ class WebRTCClient {
     //TODO:logger
     logger?.info('Setting up subscriber');
     subscriber = await createSubscriber(
-      // onTrack: _handleOnTrack,
-      onAddStream: _handleStreamAdded,
-      onRemoveStream: _handleStreamRemoved,
+      onTrack: _handleOnTrack,
+      // onAddStream: _handleStreamAdded,
+      // onRemoveStream: _handleStreamRemoved,
     );
 
-    signalChannel = await createSignalChannel(
-      label: 'signalling',
-      pc: subscriber!,
-      
-      onEventReceived: handleEvent,
-    );
+    // signalChannel = await createSignalChannel(
+    //   label: 'signalling',
+    //   pc: subscriber!,
+    //   onEventReceived: handleEvent,
+    // );
 
     final offer = await subscriber?.createOffer();
     if (offer?.sdp == null) {

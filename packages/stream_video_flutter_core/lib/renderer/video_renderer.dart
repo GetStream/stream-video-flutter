@@ -108,7 +108,7 @@ class _StreamVideoTrackRendererState extends State<StreamVideoTrackRenderer> {
             // );
             return RTCVideoView(
               _renderer,
-              mirror: _shouldMirror(),
+              mirror: true, //_shouldMirror(),
               filterQuality: FilterQuality.medium,
               objectFit: widget.fit,
             );

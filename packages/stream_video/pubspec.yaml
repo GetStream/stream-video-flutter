@@ -18,6 +18,8 @@ dependencies:
   web_socket_channel: ^2.2.0
   collection: ^1.16.0
   flutter_webrtc: ^0.9.8
+  dart_webrtc: 1.0.8
+  webrtc_interface: 1.0.8
   meta: ^1.8.0
 
 dev_dependencies:
