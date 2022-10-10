@@ -9,7 +9,6 @@ class CallController {
 
   void _emit(CallEvent event) => _callController.add(event);
 
-
   emitCreated(CallCreated payload) => _emit(CallCreatedEvent(payload));
 
   emitUpdated(CallUpdated payload) => _emit(CallUpdatedEvent(payload));
@@ -18,7 +17,9 @@ class CallController {
 
   emitDeleted(CallDeleted payload) => _emit(CallDeletedEvent(payload));
 
-  emitStarted(CallStarted payload) => _emit(CallStartedEvent(payload));
+  emitAccepted(CallAccepted payload) => _emit(CallAcceptedEvent(payload));
+
+  emitRejected(CallRejected event) => _emit(CallRejectedEvent(event));
 
   CallEvent get callEvent => _callController.value;
 
@@ -43,4 +44,6 @@ class CallController {
       });
 
   Future<void> dispose() async => _callController.close();
+
+  void emitCancelled(CallCancelled event) {}
 }

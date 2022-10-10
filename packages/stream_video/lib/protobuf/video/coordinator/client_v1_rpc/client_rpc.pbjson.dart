@@ -29,6 +29,19 @@ const MemberField$json = const {
 
 /// Descriptor for `MemberField`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List memberFieldDescriptor = $convert.base64Decode('CgtNZW1iZXJGaWVsZBIcChhNRU1CRVJfRklFTERfVU5TUEVDSUZJRUQQABIVChFNRU1CRVJfRklFTERfUk9MRRABEhcKE01FTUJFUl9GSUVMRF9DVVNUT00QAg==');
+@$core.Deprecated('Use userEventTypeDescriptor instead')
+const UserEventType$json = const {
+  '1': 'UserEventType',
+  '2': const [
+    const {'1': 'USER_EVENT_TYPE_UNSPECIFIED', '2': 0},
+    const {'1': 'USER_EVENT_TYPE_ACCEPTED_CALL', '2': 1},
+    const {'1': 'USER_EVENT_TYPE_REJECTED_CALL', '2': 2},
+    const {'1': 'USER_EVENT_TYPE_CANCELLED_CALL', '2': 3},
+  ],
+};
+
+/// Descriptor for `UserEventType`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List userEventTypeDescriptor = $convert.base64Decode('Cg1Vc2VyRXZlbnRUeXBlEh8KG1VTRVJfRVZFTlRfVFlQRV9VTlNQRUNJRklFRBAAEiEKHVVTRVJfRVZFTlRfVFlQRV9BQ0NFUFRFRF9DQUxMEAESIQodVVNFUl9FVkVOVF9UWVBFX1JFSkVDVEVEX0NBTEwQAhIiCh5VU0VSX0VWRU5UX1RZUEVfQ0FOQ0VMTEVEX0NBTEwQAw==');
 @$core.Deprecated('Use getCallRequestDescriptor instead')
 const GetCallRequest$json = const {
   '1': 'GetCallRequest',
@@ -114,8 +127,12 @@ const CreateCallInput$json = const {
   '2': const [
     const {'1': 'call', '3': 1, '4': 1, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.CallInput', '10': 'call'},
     const {'1': 'members', '3': 2, '4': 3, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.CreateCallInput.MembersEntry', '10': 'members'},
+    const {'1': 'ring', '3': 4, '4': 1, '5': 8, '9': 0, '10': 'ring', '17': true},
   ],
   '3': const [CreateCallInput_MembersEntry$json],
+  '8': const [
+    const {'1': '_ring'},
+  ],
 };
 
 @$core.Deprecated('Use createCallInputDescriptor instead')
@@ -129,7 +146,7 @@ const CreateCallInput_MembersEntry$json = const {
 };
 
 /// Descriptor for `CreateCallInput`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List createCallInputDescriptor = $convert.base64Decode('Cg9DcmVhdGVDYWxsSW5wdXQSRQoEY2FsbBgBIAEoCzIxLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkNhbGxJbnB1dFIEY2FsbBJeCgdtZW1iZXJzGAIgAygLMkQuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuQ3JlYXRlQ2FsbElucHV0Lk1lbWJlcnNFbnRyeVIHbWVtYmVycxpvCgxNZW1iZXJzRW50cnkSEAoDa2V5GAEgASgJUgNrZXkSSQoFdmFsdWUYAiABKAsyMy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5NZW1iZXJJbnB1dFIFdmFsdWU6AjgB');
+final $typed_data.Uint8List createCallInputDescriptor = $convert.base64Decode('Cg9DcmVhdGVDYWxsSW5wdXQSRQoEY2FsbBgBIAEoCzIxLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkNhbGxJbnB1dFIEY2FsbBJeCgdtZW1iZXJzGAIgAygLMkQuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuQ3JlYXRlQ2FsbElucHV0Lk1lbWJlcnNFbnRyeVIHbWVtYmVycxIXCgRyaW5nGAQgASgISABSBHJpbmeIAQEabwoMTWVtYmVyc0VudHJ5EhAKA2tleRgBIAEoCVIDa2V5EkkKBXZhbHVlGAIgASgLMjMuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuTWVtYmVySW5wdXRSBXZhbHVlOgI4AUIHCgVfcmluZw==');
 @$core.Deprecated('Use createCallRequestDescriptor instead')
 const CreateCallRequest$json = const {
   '1': 'CreateCallRequest',
@@ -361,6 +378,25 @@ const QueryDevicesResponse$json = const {
 
 /// Descriptor for `QueryDevicesResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List queryDevicesResponseDescriptor = $convert.base64Decode('ChRRdWVyeURldmljZXNSZXNwb25zZRJCCgdkZXZpY2VzGAEgAygLMiguc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLnB1c2hfdjEuRGV2aWNlUgdkZXZpY2Vz');
+@$core.Deprecated('Use sendEventRequestDescriptor instead')
+const SendEventRequest$json = const {
+  '1': 'SendEventRequest',
+  '2': const [
+    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
+    const {'1': 'event_type', '3': 3, '4': 1, '5': 14, '6': '.stream.video.coordinator.client_v1_rpc.UserEventType', '10': 'eventType'},
+  ],
+};
+
+/// Descriptor for `SendEventRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sendEventRequestDescriptor = $convert.base64Decode('ChBTZW5kRXZlbnRSZXF1ZXN0EhsKCWNhbGxfdHlwZRgBIAEoCVIIY2FsbFR5cGUSFwoHY2FsbF9pZBgCIAEoCVIGY2FsbElkElQKCmV2ZW50X3R5cGUYAyABKA4yNS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5Vc2VyRXZlbnRUeXBlUglldmVudFR5cGU=');
+@$core.Deprecated('Use sendEventResponseDescriptor instead')
+const SendEventResponse$json = const {
+  '1': 'SendEventResponse',
+};
+
+/// Descriptor for `SendEventResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sendEventResponseDescriptor = $convert.base64Decode('ChFTZW5kRXZlbnRSZXNwb25zZQ==');
 @$core.Deprecated('Use sendCustomEventRequestDescriptor instead')
 const SendCustomEventRequest$json = const {
   '1': 'SendCustomEventRequest',
@@ -465,6 +501,7 @@ const $core.Map<$core.String, $core.dynamic> ClientRPCServiceBase$json = const {
     const {'1': 'QueryDevices', '2': '.stream.video.coordinator.client_v1_rpc.QueryDevicesRequest', '3': '.stream.video.coordinator.client_v1_rpc.QueryDevicesResponse'},
     const {'1': 'UpdateCallMembers', '2': '.stream.video.coordinator.client_v1_rpc.UpdateCallMembersRequest', '3': '.stream.video.coordinator.client_v1_rpc.UpdateCallMembersResponse'},
     const {'1': 'DeleteCallMembers', '2': '.stream.video.coordinator.client_v1_rpc.DeleteCallMembersRequest', '3': '.stream.video.coordinator.client_v1_rpc.DeleteCallMembersResponse'},
+    const {'1': 'SendEvent', '2': '.stream.video.coordinator.client_v1_rpc.SendEventRequest', '3': '.stream.video.coordinator.client_v1_rpc.SendEventResponse'},
     const {'1': 'SendCustomEvent', '2': '.stream.video.coordinator.client_v1_rpc.SendCustomEventRequest', '3': '.stream.video.coordinator.client_v1_rpc.SendCustomEventResponse'},
     const {'1': 'ReportCallStats', '2': '.stream.video.coordinator.client_v1_rpc.ReportCallStatsRequest', '3': '.stream.video.coordinator.client_v1_rpc.ReportCallStatsResponse'},
     const {'1': 'ReviewCall', '2': '.stream.video.coordinator.client_v1_rpc.ReviewCallRequest', '3': '.stream.video.coordinator.client_v1_rpc.ReviewCallResponse'},
@@ -532,6 +569,8 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ClientRPCS
   '.stream.video.coordinator.client_v1_rpc.UpdateCallMembersResponse': UpdateCallMembersResponse$json,
   '.stream.video.coordinator.client_v1_rpc.DeleteCallMembersRequest': DeleteCallMembersRequest$json,
   '.stream.video.coordinator.client_v1_rpc.DeleteCallMembersResponse': DeleteCallMembersResponse$json,
+  '.stream.video.coordinator.client_v1_rpc.SendEventRequest': SendEventRequest$json,
+  '.stream.video.coordinator.client_v1_rpc.SendEventResponse': SendEventResponse$json,
   '.stream.video.coordinator.client_v1_rpc.SendCustomEventRequest': SendCustomEventRequest$json,
   '.stream.video.coordinator.client_v1_rpc.SendCustomEventResponse': SendCustomEventResponse$json,
   '.stream.video.coordinator.client_v1_rpc.ReportCallStatsRequest': ReportCallStatsRequest$json,
@@ -543,4 +582,4 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ClientRPCS
 };
 
 /// Descriptor for `ClientRPC`. Decode as a `google.protobuf.ServiceDescriptorProto`.
-final $typed_data.Uint8List clientRPCServiceDescriptor = $convert.base64Decode('CglDbGllbnRSUEMSgwEKCkNyZWF0ZUNhbGwSOS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5DcmVhdGVDYWxsUmVxdWVzdBo6LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkNyZWF0ZUNhbGxSZXNwb25zZRKSAQoPR2V0T3JDcmVhdGVDYWxsEj4uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuR2V0T3JDcmVhdGVDYWxsUmVxdWVzdBo/LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkdldE9yQ3JlYXRlQ2FsbFJlc3BvbnNlEn0KCEpvaW5DYWxsEjcuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuSm9pbkNhbGxSZXF1ZXN0Gjguc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuSm9pbkNhbGxSZXNwb25zZRKYAQoRR2V0Q2FsbEVkZ2VTZXJ2ZXISQC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5HZXRDYWxsRWRnZVNlcnZlclJlcXVlc3QaQS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5HZXRDYWxsRWRnZVNlcnZlclJlc3BvbnNlEoMBCgpVcGRhdGVDYWxsEjkuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuVXBkYXRlQ2FsbFJlcXVlc3QaOi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5VcGRhdGVDYWxsUmVzcG9uc2USgwEKClF1ZXJ5Q2FsbHMSOS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5RdWVyeUNhbGxzUmVxdWVzdBo6LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlF1ZXJ5Q2FsbHNSZXNwb25zZRKJAQoMUXVlcnlNZW1iZXJzEjsuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuUXVlcnlNZW1iZXJzUmVxdWVzdBo8LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlF1ZXJ5TWVtYmVyc1Jlc3BvbnNlEokBCgxDcmVhdGVEZXZpY2USOy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5DcmVhdGVEZXZpY2VSZXF1ZXN0Gjwuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuQ3JlYXRlRGV2aWNlUmVzcG9uc2USiQEKDERlbGV0ZURldmljZRI7LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkRlbGV0ZURldmljZVJlcXVlc3QaPC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5EZWxldGVEZXZpY2VSZXNwb25zZRKJAQoMUXVlcnlEZXZpY2VzEjsuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuUXVlcnlEZXZpY2VzUmVxdWVzdBo8LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlF1ZXJ5RGV2aWNlc1Jlc3BvbnNlEpgBChFVcGRhdGVDYWxsTWVtYmVycxJALnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlVwZGF0ZUNhbGxNZW1iZXJzUmVxdWVzdBpBLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlVwZGF0ZUNhbGxNZW1iZXJzUmVzcG9uc2USmAEKEURlbGV0ZUNhbGxNZW1iZXJzEkAuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuRGVsZXRlQ2FsbE1lbWJlcnNSZXF1ZXN0GkEuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuRGVsZXRlQ2FsbE1lbWJlcnNSZXNwb25zZRKSAQoPU2VuZEN1c3RvbUV2ZW50Ej4uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuU2VuZEN1c3RvbUV2ZW50UmVxdWVzdBo/LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlNlbmRDdXN0b21FdmVudFJlc3BvbnNlEpIBCg9SZXBvcnRDYWxsU3RhdHMSPi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5SZXBvcnRDYWxsU3RhdHNSZXF1ZXN0Gj8uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuUmVwb3J0Q2FsbFN0YXRzUmVzcG9uc2USgwEKClJldmlld0NhbGwSOS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5SZXZpZXdDYWxsUmVxdWVzdBo6LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlJldmlld0NhbGxSZXNwb25zZRKGAQoLUmVwb3J0SXNzdWUSOi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5SZXBvcnRJc3N1ZVJlcXVlc3QaOy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5SZXBvcnRJc3N1ZVJlc3BvbnNl');
+final $typed_data.Uint8List clientRPCServiceDescriptor = $convert.base64Decode('CglDbGllbnRSUEMSgwEKCkNyZWF0ZUNhbGwSOS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5DcmVhdGVDYWxsUmVxdWVzdBo6LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkNyZWF0ZUNhbGxSZXNwb25zZRKSAQoPR2V0T3JDcmVhdGVDYWxsEj4uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuR2V0T3JDcmVhdGVDYWxsUmVxdWVzdBo/LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkdldE9yQ3JlYXRlQ2FsbFJlc3BvbnNlEn0KCEpvaW5DYWxsEjcuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuSm9pbkNhbGxSZXF1ZXN0Gjguc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuSm9pbkNhbGxSZXNwb25zZRKYAQoRR2V0Q2FsbEVkZ2VTZXJ2ZXISQC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5HZXRDYWxsRWRnZVNlcnZlclJlcXVlc3QaQS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5HZXRDYWxsRWRnZVNlcnZlclJlc3BvbnNlEoMBCgpVcGRhdGVDYWxsEjkuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuVXBkYXRlQ2FsbFJlcXVlc3QaOi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5VcGRhdGVDYWxsUmVzcG9uc2USgwEKClF1ZXJ5Q2FsbHMSOS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5RdWVyeUNhbGxzUmVxdWVzdBo6LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlF1ZXJ5Q2FsbHNSZXNwb25zZRKJAQoMUXVlcnlNZW1iZXJzEjsuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuUXVlcnlNZW1iZXJzUmVxdWVzdBo8LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlF1ZXJ5TWVtYmVyc1Jlc3BvbnNlEokBCgxDcmVhdGVEZXZpY2USOy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5DcmVhdGVEZXZpY2VSZXF1ZXN0Gjwuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuQ3JlYXRlRGV2aWNlUmVzcG9uc2USiQEKDERlbGV0ZURldmljZRI7LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkRlbGV0ZURldmljZVJlcXVlc3QaPC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5EZWxldGVEZXZpY2VSZXNwb25zZRKJAQoMUXVlcnlEZXZpY2VzEjsuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuUXVlcnlEZXZpY2VzUmVxdWVzdBo8LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlF1ZXJ5RGV2aWNlc1Jlc3BvbnNlEpgBChFVcGRhdGVDYWxsTWVtYmVycxJALnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlVwZGF0ZUNhbGxNZW1iZXJzUmVxdWVzdBpBLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlVwZGF0ZUNhbGxNZW1iZXJzUmVzcG9uc2USmAEKEURlbGV0ZUNhbGxNZW1iZXJzEkAuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuRGVsZXRlQ2FsbE1lbWJlcnNSZXF1ZXN0GkEuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuRGVsZXRlQ2FsbE1lbWJlcnNSZXNwb25zZRKAAQoJU2VuZEV2ZW50Ejguc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuU2VuZEV2ZW50UmVxdWVzdBo5LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlNlbmRFdmVudFJlc3BvbnNlEpIBCg9TZW5kQ3VzdG9tRXZlbnQSPi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5TZW5kQ3VzdG9tRXZlbnRSZXF1ZXN0Gj8uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuU2VuZEN1c3RvbUV2ZW50UmVzcG9uc2USkgEKD1JlcG9ydENhbGxTdGF0cxI+LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlJlcG9ydENhbGxTdGF0c1JlcXVlc3QaPy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5SZXBvcnRDYWxsU3RhdHNSZXNwb25zZRKDAQoKUmV2aWV3Q2FsbBI5LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlJldmlld0NhbGxSZXF1ZXN0Gjouc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuUmV2aWV3Q2FsbFJlc3BvbnNlEoYBCgtSZXBvcnRJc3N1ZRI6LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlJlcG9ydElzc3VlUmVxdWVzdBo7LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlJlcG9ydElzc3VlUmVzcG9uc2U=');

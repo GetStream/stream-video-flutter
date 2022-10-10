@@ -83,11 +83,12 @@ const CallCreated$json = const {
   '1': 'CallCreated',
   '2': const [
     const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
+    const {'1': 'ringing', '3': 2, '4': 1, '5': 8, '10': 'ringing'},
   ],
 };
 
 /// Descriptor for `CallCreated`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callCreatedDescriptor = $convert.base64Decode('CgtDYWxsQ3JlYXRlZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZA==');
+final $typed_data.Uint8List callCreatedDescriptor = $convert.base64Decode('CgtDYWxsQ3JlYXRlZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZBIYCgdyaW5naW5nGAIgASgIUgdyaW5naW5n');
 @$core.Deprecated('Use callUpdatedDescriptor instead')
 const CallUpdated$json = const {
   '1': 'CallUpdated',
@@ -98,16 +99,6 @@ const CallUpdated$json = const {
 
 /// Descriptor for `CallUpdated`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List callUpdatedDescriptor = $convert.base64Decode('CgtDYWxsVXBkYXRlZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZA==');
-@$core.Deprecated('Use callStartedDescriptor instead')
-const CallStarted$json = const {
-  '1': 'CallStarted',
-  '2': const [
-    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
-  ],
-};
-
-/// Descriptor for `CallStarted`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callStartedDescriptor = $convert.base64Decode('CgtDYWxsU3RhcnRlZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZA==');
 @$core.Deprecated('Use callEndedDescriptor instead')
 const CallEnded$json = const {
   '1': 'CallEnded',
@@ -128,3 +119,24 @@ const CallDeleted$json = const {
 
 /// Descriptor for `CallDeleted`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List callDeletedDescriptor = $convert.base64Decode('CgtDYWxsRGVsZXRlZBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZA==');
+@$core.Deprecated('Use callAcceptedDescriptor instead')
+const CallAccepted$json = const {
+  '1': 'CallAccepted',
+};
+
+/// Descriptor for `CallAccepted`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List callAcceptedDescriptor = $convert.base64Decode('CgxDYWxsQWNjZXB0ZWQ=');
+@$core.Deprecated('Use callRejectedDescriptor instead')
+const CallRejected$json = const {
+  '1': 'CallRejected',
+};
+
+/// Descriptor for `CallRejected`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List callRejectedDescriptor = $convert.base64Decode('CgxDYWxsUmVqZWN0ZWQ=');
+@$core.Deprecated('Use callCancelledDescriptor instead')
+const CallCancelled$json = const {
+  '1': 'CallCancelled',
+};
+
+/// Descriptor for `CallCancelled`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List callCancelledDescriptor = $convert.base64Decode('Cg1DYWxsQ2FuY2VsbGVk');

@@ -40,6 +40,8 @@ abstract class ClientRPC {
   // DeleteMembers deletes members from a room.// TODO: response with room data
   Future<DeleteCallMembersResponse> deleteCallMembers(twirp.Context ctx, DeleteCallMembersRequest req);
   
+  Future<SendEventResponse> sendEvent(twirp.Context ctx, SendEventRequest req);
+  
   Future<SendCustomEventResponse> sendCustomEvent(twirp.Context ctx, SendCustomEventRequest req);
   // endpoint for storing stats (perhaps we should move this to the SFU layer though)
   Future<ReportCallStatsResponse> reportCallStats(twirp.Context ctx, ReportCallStatsRequest req);
@@ -322,6 +324,28 @@ class ClientRPCJSONClient implements ClientRPC {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/DeleteCallMembers');
       final data = await doJSONRequest(ctx, url, hooks, req);
       final DeleteCallMembersResponse res = DeleteCallMembersResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<SendEventResponse> sendEvent(twirp.Context ctx, SendEventRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'SendEvent');
+    return interceptor((ctx, req) {
+      return callSendEvent(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<SendEventResponse> callSendEvent(twirp.Context ctx, SendEventRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/SendEvent');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final SendEventResponse res = SendEventResponse.create();
       res.mergeFromProto3Json(json.decode(data));
       return Future.value(res);
     } catch (e) {
@@ -691,6 +715,28 @@ class ClientRPCProtobufClient implements ClientRPC {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/DeleteCallMembers');
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final DeleteCallMembersResponse res = DeleteCallMembersResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<SendEventResponse> sendEvent(twirp.Context ctx, SendEventRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'SendEvent');
+    return interceptor((ctx, req) {
+      return callSendEvent(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<SendEventResponse> callSendEvent(twirp.Context ctx, SendEventRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/SendEvent');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final SendEventResponse res = SendEventResponse.create();
       res.mergeFromBuffer(data);
       return Future.value(res);
     } catch (e) {

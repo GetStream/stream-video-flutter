@@ -120,9 +120,18 @@ class WebSocketClient {
         case WebsocketEvent_Event.notSet:
           // TODO: Handle this case.
           break;
-        case WebsocketEvent_Event.callStarted:
+
+        case WebsocketEvent_Event.callAccepted:
           {
-            return _handleCallStarted(receivedEvent.callStarted);
+            return _handleCallAccepted(receivedEvent.callAccepted);
+          }
+        case WebsocketEvent_Event.callRejected:
+          {
+            return _handleCallRejected(receivedEvent.callRejected);
+          }
+        case WebsocketEvent_Event.callCancelled:
+          {
+            return _handleCallCancelled(receivedEvent.callCancelled);
           }
       }
 
@@ -195,9 +204,19 @@ class WebSocketClient {
     _state.calls.emitDeleted(event);
   }
 
-  void _handleCallStarted(CallStarted event) {
-    _logger?.info('CallStarted event received : ${event.toString()}');
-    _state.calls.emitStarted(event);
+  void _handleCallAccepted(CallAccepted event) {
+    _logger?.info('CallAccepted event received : ${event.toString()}');
+    _state.calls.emitAccepted(event);
+  }
+
+  void _handleCallRejected(CallRejected event) {
+    _logger?.info('CallRejected event received : ${event.toString()}');
+    _state.calls.emitRejected(event);
+  }
+
+  void _handleCallCancelled(CallCancelled event) {
+    _logger?.info('CallCancelled event received : ${event.toString()}');
+    _state.calls.emitCancelled(event);
   }
 
   void _handleUserUpdated(UserUpdated event) {

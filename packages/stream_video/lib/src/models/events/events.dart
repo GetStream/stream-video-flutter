@@ -37,12 +37,20 @@ class CallEndedEvent with CallEvent {
   String toString() => 'call.ended ${payload.toString()}';
 }
 
-class CallStartedEvent with CallEvent {
-  const CallStartedEvent(this.payload);
-  final CallStarted payload;
+class CallAcceptedEvent with CallEvent {
+  const CallAcceptedEvent(this.payload);
+  final CallAccepted payload;
 
   @override
-  String toString() => 'call.deleted ${payload.toString()}';
+  String toString() => 'call.accepted ${payload.toString()}';
+}
+
+class CallRejectedEvent with CallEvent {
+  const CallRejectedEvent(this.payload);
+  final CallRejected payload;
+
+  @override
+  String toString() => 'call.rejected ${payload.toString()}';
 }
 
 class CallDeletedEvent with CallEvent {
@@ -175,7 +183,6 @@ class CallParticipantUpdated with CallParticipantEvent {
   String toString() => 'callParticipant.updated ${participants.toString()}';
 }
 
-
 class CallParticipantLeft with CallParticipantEvent {
   const CallParticipantLeft(this.participants);
   final Map<String, CallParticipant> participants;
@@ -199,5 +206,3 @@ class CallParticipantJoined with CallParticipantEvent {
   @override
   String toString() => 'callParticipant.joined ${participants.toString()}';
 }
-
-

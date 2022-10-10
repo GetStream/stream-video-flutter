@@ -357,6 +357,7 @@ class CreateCallInput extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateCallInput', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
     ..aOM<CallInput>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: CallInput.create)
     ..m<$core.String, MemberInput>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'members', entryClassName: 'CreateCallInput.MembersEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: MemberInput.create, packageName: const $pb.PackageName('stream.video.coordinator.client_v1_rpc'))
+    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ring')
     ..hasRequiredFields = false
   ;
 
@@ -364,6 +365,7 @@ class CreateCallInput extends $pb.GeneratedMessage {
   factory CreateCallInput({
     CallInput? call,
     $core.Map<$core.String, MemberInput>? members,
+    $core.bool? ring,
   }) {
     final _result = create();
     if (call != null) {
@@ -371,6 +373,9 @@ class CreateCallInput extends $pb.GeneratedMessage {
     }
     if (members != null) {
       _result.members.addAll(members);
+    }
+    if (ring != null) {
+      _result.ring = ring;
     }
     return _result;
   }
@@ -408,6 +413,15 @@ class CreateCallInput extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(2)
   $core.Map<$core.String, MemberInput> get members => $_getMap(1);
+
+  @$pb.TagNumber(4)
+  $core.bool get ring => $_getBF(2);
+  @$pb.TagNumber(4)
+  set ring($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasRing() => $_has(2);
+  @$pb.TagNumber(4)
+  void clearRing() => clearField(4);
 }
 
 class CreateCallRequest extends $pb.GeneratedMessage {
@@ -1621,6 +1635,110 @@ class QueryDevicesResponse extends $pb.GeneratedMessage {
   $core.List<$6.Device> get devices => $_getList(0);
 }
 
+class SendEventRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SendEventRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..e<UserEventType>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'eventType', $pb.PbFieldType.OE, defaultOrMaker: UserEventType.USER_EVENT_TYPE_UNSPECIFIED, valueOf: UserEventType.valueOf, enumValues: UserEventType.values)
+    ..hasRequiredFields = false
+  ;
+
+  SendEventRequest._() : super();
+  factory SendEventRequest({
+    $core.String? callType,
+    $core.String? callId,
+    UserEventType? eventType,
+  }) {
+    final _result = create();
+    if (callType != null) {
+      _result.callType = callType;
+    }
+    if (callId != null) {
+      _result.callId = callId;
+    }
+    if (eventType != null) {
+      _result.eventType = eventType;
+    }
+    return _result;
+  }
+  factory SendEventRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SendEventRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SendEventRequest clone() => SendEventRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SendEventRequest copyWith(void Function(SendEventRequest) updates) => super.copyWith((message) => updates(message as SendEventRequest)) as SendEventRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SendEventRequest create() => SendEventRequest._();
+  SendEventRequest createEmptyInstance() => create();
+  static $pb.PbList<SendEventRequest> createRepeated() => $pb.PbList<SendEventRequest>();
+  @$core.pragma('dart2js:noInline')
+  static SendEventRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SendEventRequest>(create);
+  static SendEventRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callType => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callType($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get callId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set callId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallId() => clearField(2);
+
+  @$pb.TagNumber(3)
+  UserEventType get eventType => $_getN(2);
+  @$pb.TagNumber(3)
+  set eventType(UserEventType v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasEventType() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearEventType() => clearField(3);
+}
+
+class SendEventResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SendEventResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  SendEventResponse._() : super();
+  factory SendEventResponse() => create();
+  factory SendEventResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SendEventResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SendEventResponse clone() => SendEventResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SendEventResponse copyWith(void Function(SendEventResponse) updates) => super.copyWith((message) => updates(message as SendEventResponse)) as SendEventResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SendEventResponse create() => SendEventResponse._();
+  SendEventResponse createEmptyInstance() => create();
+  static $pb.PbList<SendEventResponse> createRepeated() => $pb.PbList<SendEventResponse>();
+  @$core.pragma('dart2js:noInline')
+  static SendEventResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SendEventResponse>(create);
+  static SendEventResponse? _defaultInstance;
+}
+
 class SendCustomEventRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SendCustomEventRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type')
@@ -2177,6 +2295,10 @@ class ClientRPCApi {
   $async.Future<DeleteCallMembersResponse> deleteCallMembers($pb.ClientContext? ctx, DeleteCallMembersRequest request) {
     var emptyResponse = DeleteCallMembersResponse();
     return _client.invoke<DeleteCallMembersResponse>(ctx, 'ClientRPC', 'DeleteCallMembers', request, emptyResponse);
+  }
+  $async.Future<SendEventResponse> sendEvent($pb.ClientContext? ctx, SendEventRequest request) {
+    var emptyResponse = SendEventResponse();
+    return _client.invoke<SendEventResponse>(ctx, 'ClientRPC', 'SendEvent', request, emptyResponse);
   }
   $async.Future<SendCustomEventResponse> sendCustomEvent($pb.ClientContext? ctx, SendCustomEventRequest request) {
     var emptyResponse = SendCustomEventResponse();

@@ -25,7 +25,7 @@ class _StartCallViewState extends State<StartCallView> {
   String caller = "unkown";
   @override
   void initState() {
-    widget.callController.on<CallStartedEvent>((event) {
+    widget.callController.on<CallAcceptedEvent>((event) {
       // caller = event.payload.callMemberUserIds.first;
       showRinger(context, caller: caller);
     });

@@ -28,6 +28,7 @@ abstract class ClientRPCServiceBase extends $pb.GeneratedService {
   $async.Future<$8.QueryDevicesResponse> queryDevices($pb.ServerContext ctx, $8.QueryDevicesRequest request);
   $async.Future<$8.UpdateCallMembersResponse> updateCallMembers($pb.ServerContext ctx, $8.UpdateCallMembersRequest request);
   $async.Future<$8.DeleteCallMembersResponse> deleteCallMembers($pb.ServerContext ctx, $8.DeleteCallMembersRequest request);
+  $async.Future<$8.SendEventResponse> sendEvent($pb.ServerContext ctx, $8.SendEventRequest request);
   $async.Future<$8.SendCustomEventResponse> sendCustomEvent($pb.ServerContext ctx, $8.SendCustomEventRequest request);
   $async.Future<$8.ReportCallStatsResponse> reportCallStats($pb.ServerContext ctx, $8.ReportCallStatsRequest request);
   $async.Future<$8.ReviewCallResponse> reviewCall($pb.ServerContext ctx, $8.ReviewCallRequest request);
@@ -47,6 +48,7 @@ abstract class ClientRPCServiceBase extends $pb.GeneratedService {
       case 'QueryDevices': return $8.QueryDevicesRequest();
       case 'UpdateCallMembers': return $8.UpdateCallMembersRequest();
       case 'DeleteCallMembers': return $8.DeleteCallMembersRequest();
+      case 'SendEvent': return $8.SendEventRequest();
       case 'SendCustomEvent': return $8.SendCustomEventRequest();
       case 'ReportCallStats': return $8.ReportCallStatsRequest();
       case 'ReviewCall': return $8.ReviewCallRequest();
@@ -69,6 +71,7 @@ abstract class ClientRPCServiceBase extends $pb.GeneratedService {
       case 'QueryDevices': return this.queryDevices(ctx, request as $8.QueryDevicesRequest);
       case 'UpdateCallMembers': return this.updateCallMembers(ctx, request as $8.UpdateCallMembersRequest);
       case 'DeleteCallMembers': return this.deleteCallMembers(ctx, request as $8.DeleteCallMembersRequest);
+      case 'SendEvent': return this.sendEvent(ctx, request as $8.SendEventRequest);
       case 'SendCustomEvent': return this.sendCustomEvent(ctx, request as $8.SendCustomEventRequest);
       case 'ReportCallStats': return this.reportCallStats(ctx, request as $8.ReportCallStatsRequest);
       case 'ReviewCall': return this.reviewCall(ctx, request as $8.ReviewCallRequest);

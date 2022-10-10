@@ -26,3 +26,22 @@ class MemberField extends $pb.ProtobufEnum {
   const MemberField._($core.int v, $core.String n) : super(v, n);
 }
 
+class UserEventType extends $pb.ProtobufEnum {
+  static const UserEventType USER_EVENT_TYPE_UNSPECIFIED = UserEventType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER_EVENT_TYPE_UNSPECIFIED');
+  static const UserEventType USER_EVENT_TYPE_ACCEPTED_CALL = UserEventType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER_EVENT_TYPE_ACCEPTED_CALL');
+  static const UserEventType USER_EVENT_TYPE_REJECTED_CALL = UserEventType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER_EVENT_TYPE_REJECTED_CALL');
+  static const UserEventType USER_EVENT_TYPE_CANCELLED_CALL = UserEventType._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER_EVENT_TYPE_CANCELLED_CALL');
+
+  static const $core.List<UserEventType> values = <UserEventType> [
+    USER_EVENT_TYPE_UNSPECIFIED,
+    USER_EVENT_TYPE_ACCEPTED_CALL,
+    USER_EVENT_TYPE_REJECTED_CALL,
+    USER_EVENT_TYPE_CANCELLED_CALL,
+  ];
+
+  static final $core.Map<$core.int, UserEventType> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static UserEventType? valueOf($core.int value) => _byValue[value];
+
+  const UserEventType._($core.int v, $core.String n) : super(v, n);
+}
+

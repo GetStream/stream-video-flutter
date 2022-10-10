@@ -15,22 +15,22 @@ const WebsocketEvent$json = const {
     const {'1': 'users', '3': 1, '4': 3, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.WebsocketEvent.UsersEntry', '10': 'users'},
     const {'1': 'calls', '3': 2, '4': 3, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.WebsocketEvent.CallsEntry', '10': 'calls'},
     const {'1': 'call_details', '3': 3, '4': 3, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.WebsocketEvent.CallDetailsEntry', '10': 'callDetails'},
+    const {'1': 'event_sender_id', '3': 4, '4': 1, '5': 9, '10': 'eventSenderId'},
     const {'1': 'healthcheck', '3': 20, '4': 1, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck', '9': 0, '10': 'healthcheck'},
     const {'1': 'call_created', '3': 30, '4': 1, '5': 11, '6': '.stream.video.coordinator.event_v1.CallCreated', '9': 0, '10': 'callCreated'},
     const {'1': 'call_updated', '3': 31, '4': 1, '5': 11, '6': '.stream.video.coordinator.event_v1.CallUpdated', '9': 0, '10': 'callUpdated'},
     const {'1': 'call_deleted', '3': 32, '4': 1, '5': 11, '6': '.stream.video.coordinator.event_v1.CallDeleted', '9': 0, '10': 'callDeleted'},
     const {'1': 'call_members_updated', '3': 33, '4': 1, '5': 11, '6': '.stream.video.coordinator.event_v1.CallMembersUpdated', '9': 0, '10': 'callMembersUpdated'},
     const {'1': 'call_members_deleted', '3': 34, '4': 1, '5': 11, '6': '.stream.video.coordinator.event_v1.CallMembersDeleted', '9': 0, '10': 'callMembersDeleted'},
-    const {'1': 'call_started', '3': 35, '4': 1, '5': 11, '6': '.stream.video.coordinator.event_v1.CallStarted', '9': 0, '10': 'callStarted'},
     const {'1': 'call_ended', '3': 36, '4': 1, '5': 11, '6': '.stream.video.coordinator.event_v1.CallEnded', '9': 0, '10': 'callEnded'},
-    const {'1': 'user_updated', '3': 40, '4': 1, '5': 11, '6': '.stream.video.coordinator.event_v1.UserUpdated', '9': 0, '10': 'userUpdated'},
+    const {'1': 'call_accepted', '3': 40, '4': 1, '5': 11, '6': '.stream.video.coordinator.event_v1.CallAccepted', '9': 0, '10': 'callAccepted'},
+    const {'1': 'call_rejected', '3': 41, '4': 1, '5': 11, '6': '.stream.video.coordinator.event_v1.CallRejected', '9': 0, '10': 'callRejected'},
+    const {'1': 'call_cancelled', '3': 42, '4': 1, '5': 11, '6': '.stream.video.coordinator.event_v1.CallCancelled', '9': 0, '10': 'callCancelled'},
+    const {'1': 'user_updated', '3': 50, '4': 1, '5': 11, '6': '.stream.video.coordinator.event_v1.UserUpdated', '9': 0, '10': 'userUpdated'},
   ],
   '3': const [WebsocketEvent_UsersEntry$json, WebsocketEvent_CallsEntry$json, WebsocketEvent_CallDetailsEntry$json],
   '8': const [
     const {'1': 'event'},
-  ],
-  '9': const [
-    const {'1': 4, '2': 20},
   ],
 };
 
@@ -65,7 +65,7 @@ const WebsocketEvent_CallDetailsEntry$json = const {
 };
 
 /// Descriptor for `WebsocketEvent`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List websocketEventDescriptor = $convert.base64Decode('Cg5XZWJzb2NrZXRFdmVudBJXCgV1c2VycxgBIAMoCzJBLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLldlYnNvY2tldEV2ZW50LlVzZXJzRW50cnlSBXVzZXJzElcKBWNhbGxzGAIgAygLMkEuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuV2Vic29ja2V0RXZlbnQuQ2FsbHNFbnRyeVIFY2FsbHMSagoMY2FsbF9kZXRhaWxzGAMgAygLMkcuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuV2Vic29ja2V0RXZlbnQuQ2FsbERldGFpbHNFbnRyeVILY2FsbERldGFpbHMSYAoLaGVhbHRoY2hlY2sYFCABKAsyPC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5XZWJzb2NrZXRIZWFsdGhjaGVja0gAUgtoZWFsdGhjaGVjaxJTCgxjYWxsX2NyZWF0ZWQYHiABKAsyLi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuZXZlbnRfdjEuQ2FsbENyZWF0ZWRIAFILY2FsbENyZWF0ZWQSUwoMY2FsbF91cGRhdGVkGB8gASgLMi4uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmV2ZW50X3YxLkNhbGxVcGRhdGVkSABSC2NhbGxVcGRhdGVkElMKDGNhbGxfZGVsZXRlZBggIAEoCzIuLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5ldmVudF92MS5DYWxsRGVsZXRlZEgAUgtjYWxsRGVsZXRlZBJpChRjYWxsX21lbWJlcnNfdXBkYXRlZBghIAEoCzI1LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5ldmVudF92MS5DYWxsTWVtYmVyc1VwZGF0ZWRIAFISY2FsbE1lbWJlcnNVcGRhdGVkEmkKFGNhbGxfbWVtYmVyc19kZWxldGVkGCIgASgLMjUuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmV2ZW50X3YxLkNhbGxNZW1iZXJzRGVsZXRlZEgAUhJjYWxsTWVtYmVyc0RlbGV0ZWQSUwoMY2FsbF9zdGFydGVkGCMgASgLMi4uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmV2ZW50X3YxLkNhbGxTdGFydGVkSABSC2NhbGxTdGFydGVkEk0KCmNhbGxfZW5kZWQYJCABKAsyLC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuZXZlbnRfdjEuQ2FsbEVuZGVkSABSCWNhbGxFbmRlZBJTCgx1c2VyX3VwZGF0ZWQYKCABKAsyLi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuZXZlbnRfdjEuVXNlclVwZGF0ZWRIAFILdXNlclVwZGF0ZWQaYAoKVXNlcnNFbnRyeRIQCgNrZXkYASABKAlSA2tleRI8CgV2YWx1ZRgCIAEoCzImLnN0cmVhbS52aWRlby5jb29yZGluYXRvci51c2VyX3YxLlVzZXJSBXZhbHVlOgI4ARpgCgpDYWxsc0VudHJ5EhAKA2tleRgBIAEoCVIDa2V5EjwKBXZhbHVlGAIgASgLMiYuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNhbGxfdjEuQ2FsbFIFdmFsdWU6AjgBGm0KEENhbGxEZXRhaWxzRW50cnkSEAoDa2V5GAEgASgJUgNrZXkSQwoFdmFsdWUYAiABKAsyLS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2FsbF92MS5DYWxsRGV0YWlsc1IFdmFsdWU6AjgBQgcKBWV2ZW50SgQIBBAU');
+final $typed_data.Uint8List websocketEventDescriptor = $convert.base64Decode('Cg5XZWJzb2NrZXRFdmVudBJXCgV1c2VycxgBIAMoCzJBLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLldlYnNvY2tldEV2ZW50LlVzZXJzRW50cnlSBXVzZXJzElcKBWNhbGxzGAIgAygLMkEuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuV2Vic29ja2V0RXZlbnQuQ2FsbHNFbnRyeVIFY2FsbHMSagoMY2FsbF9kZXRhaWxzGAMgAygLMkcuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuV2Vic29ja2V0RXZlbnQuQ2FsbERldGFpbHNFbnRyeVILY2FsbERldGFpbHMSJgoPZXZlbnRfc2VuZGVyX2lkGAQgASgJUg1ldmVudFNlbmRlcklkEmAKC2hlYWx0aGNoZWNrGBQgASgLMjwuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuV2Vic29ja2V0SGVhbHRoY2hlY2tIAFILaGVhbHRoY2hlY2sSUwoMY2FsbF9jcmVhdGVkGB4gASgLMi4uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmV2ZW50X3YxLkNhbGxDcmVhdGVkSABSC2NhbGxDcmVhdGVkElMKDGNhbGxfdXBkYXRlZBgfIAEoCzIuLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5ldmVudF92MS5DYWxsVXBkYXRlZEgAUgtjYWxsVXBkYXRlZBJTCgxjYWxsX2RlbGV0ZWQYICABKAsyLi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuZXZlbnRfdjEuQ2FsbERlbGV0ZWRIAFILY2FsbERlbGV0ZWQSaQoUY2FsbF9tZW1iZXJzX3VwZGF0ZWQYISABKAsyNS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuZXZlbnRfdjEuQ2FsbE1lbWJlcnNVcGRhdGVkSABSEmNhbGxNZW1iZXJzVXBkYXRlZBJpChRjYWxsX21lbWJlcnNfZGVsZXRlZBgiIAEoCzI1LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5ldmVudF92MS5DYWxsTWVtYmVyc0RlbGV0ZWRIAFISY2FsbE1lbWJlcnNEZWxldGVkEk0KCmNhbGxfZW5kZWQYJCABKAsyLC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuZXZlbnRfdjEuQ2FsbEVuZGVkSABSCWNhbGxFbmRlZBJWCg1jYWxsX2FjY2VwdGVkGCggASgLMi8uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmV2ZW50X3YxLkNhbGxBY2NlcHRlZEgAUgxjYWxsQWNjZXB0ZWQSVgoNY2FsbF9yZWplY3RlZBgpIAEoCzIvLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5ldmVudF92MS5DYWxsUmVqZWN0ZWRIAFIMY2FsbFJlamVjdGVkElkKDmNhbGxfY2FuY2VsbGVkGCogASgLMjAuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmV2ZW50X3YxLkNhbGxDYW5jZWxsZWRIAFINY2FsbENhbmNlbGxlZBJTCgx1c2VyX3VwZGF0ZWQYMiABKAsyLi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuZXZlbnRfdjEuVXNlclVwZGF0ZWRIAFILdXNlclVwZGF0ZWQaYAoKVXNlcnNFbnRyeRIQCgNrZXkYASABKAlSA2tleRI8CgV2YWx1ZRgCIAEoCzImLnN0cmVhbS52aWRlby5jb29yZGluYXRvci51c2VyX3YxLlVzZXJSBXZhbHVlOgI4ARpgCgpDYWxsc0VudHJ5EhAKA2tleRgBIAEoCVIDa2V5EjwKBXZhbHVlGAIgASgLMiYuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNhbGxfdjEuQ2FsbFIFdmFsdWU6AjgBGm0KEENhbGxEZXRhaWxzRW50cnkSEAoDa2V5GAEgASgJUgNrZXkSQwoFdmFsdWUYAiABKAsyLS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2FsbF92MS5DYWxsRGV0YWlsc1IFdmFsdWU6AjgBQgcKBWV2ZW50');
 @$core.Deprecated('Use websocketClientEventDescriptor instead')
 const WebsocketClientEvent$json = const {
   '1': 'WebsocketClientEvent',
