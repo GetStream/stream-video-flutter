@@ -122,22 +122,22 @@ class WebRTCClient {
             'urls': 'stun:stun.l.google.com:19302',
           },
           {
-            'urls': "turn:http://192.168.1.17/3478",
+            'urls': "turn:http://192.168.1.17:3478",
             'username': 'video',
             'credential': 'video',
           },
         ],
       };
 
+  /// create a data channel
   Future<RTCDataChannel> createSignalChannel({
     required String label,
     required RTCPeerConnection pc,
     required OnEventReceived onEventReceived,
   }) async {
-    var dataChannelDict = RTCDataChannelInit();
-    dataChannelDict.binaryType = 'arraybuffer';
+    final dataChannelDict = RTCDataChannelInit()..binaryType = 'arraybuffer';
     final signal = await pc.createDataChannel(label, dataChannelDict);
-    //TODO: get rid of js callback hell
+
     signal.onDataChannelState = (state) async {
       if (state == RTCDataChannelState.RTCDataChannelOpen) {
         logger?.info('Data channel is open');
@@ -146,10 +146,10 @@ class WebRTCClient {
         logger?.info('Data channel is closed');
       }
     };
-    //TODO: get rid of js callback hell
+    
     signal.onMessage = (message) {
       if (!message.isBinary) {
-        logger?.info("This socket only accepts exchanging binary data");
+        logger?.info('This socket only accepts exchanging binary data');
       }
 
       final receivedEvent = SfuEvent.fromBuffer(message.binary);
@@ -207,7 +207,7 @@ class WebRTCClient {
     signalChannel = await createSignalChannel(
       label: 'signalling',
       pc: subscriber!,
-      //TODO: get rid of js callback hell
+      
       onEventReceived: handleEvent,
     );
 
@@ -233,19 +233,20 @@ class WebRTCClient {
         ? findOptimalVideoLayers(videoStream)
         : defaultVideoLayers;
     final sfu = await signalService.join(
-        subscriberSdpOffer: offer!.sdp,
-        codecSettings: CodecSettings(
-          audio: AudioCodecs(encode: audioEncode, decode: audioDecode),
-          video: VideoCodecs(encode: videoEncode, decode: videoDecode),
-          layers: videoLayers!.map(
-            (layer) => VideoLayer(
-              bitrate: layer.encoding.maxBitrate,
-              videoDimension:
-                  VideoDimension(height: layer.height, width: layer.width),
-            ),
+      subscriberSdpOffer: offer!.sdp,
+      codecSettings: CodecSettings(
+        audio: AudioCodecs(encode: audioEncode, decode: audioDecode),
+        video: VideoCodecs(encode: videoEncode, decode: videoDecode),
+        layers: videoLayers!.map(
+          (layer) => VideoLayer(
+            bitrate: layer.encoding.maxBitrate,
+            videoDimension:
+                VideoDimension(height: layer.height, width: layer.width),
           ),
         ),
-        token: Token(state.callState.sfuToken!));
+      ),
+      token: Token(state.callState.sfuToken!),
+    );
     final participants = _loadParticipants(sfu);
     state.participants.emitNew(participants, state.currentUser!.id);
     subscriber!.setRemoteDescription(RTCSessionDescription(sfu.sdp, 'answer'));
@@ -412,17 +413,17 @@ class WebRTCClient {
   }
 
   Future<void> enableAudio() async {
-        //TODO: webrtc
+    //TODO: webrtc
     await signalService.updateAudioMuteState(muted: false, token: _sfuToken);
   }
 
   Future<void> disableVideo() async {
-        //TODO: webrtc
+    //TODO: webrtc
     await signalService.updateVideoMuteState(muted: false, token: _sfuToken);
   }
 
   Future<void> enableVideo() async {
-        //TODO: webrtc
+    //TODO: webrtc
     await signalService.updateVideoMuteState(muted: false, token: _sfuToken);
   }
 

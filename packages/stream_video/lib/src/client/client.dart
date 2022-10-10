@@ -52,7 +52,7 @@ class StreamVideoClient {
     _callCoordinatorService = ClientRPCProtobufClient(
       // Change it to your local IP address.
       coordinatorUrl ??
-          "https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc",
+          "http://b873-2a01-cb20-87c-f00-c4dd-69bb-2922-d1c0.ngrok.io/rpc", //https://rpc-video-coordinator.oregon-v1.stream-io-video.com
       "",
       hooks: ClientHooks(
         onRequestPrepared: onClientRequestPrepared,
@@ -63,7 +63,9 @@ class StreamVideoClient {
     _state = ClientState(logger);
     _options = options ?? StreamVideoClientOptions();
     _rtcClient = WebRTCClient(
-      SignalService(_tokenManager, endpoint: "https://sfu2.fra1.gtstrm.com/rpc/twirp"),
+      SignalService(_tokenManager,
+          endpoint:
+              "http://192.168.1.17:3031/twirp"), //https://sfu2.fra1.gtstrm.com/twirp
       state: _state,
       logger: logger,
     );
@@ -74,7 +76,7 @@ class StreamVideoClient {
             apiKey: apiKey,
             endpoint:
                 // Change it to your local IP address.
-                'ws://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect');
+                'ws://192.168.1.17:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect'); // 'ws://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect');
 
     _latencyService = LatencyService(logger: logger);
   }
