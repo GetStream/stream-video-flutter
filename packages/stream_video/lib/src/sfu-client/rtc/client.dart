@@ -3,7 +3,6 @@ import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/video/sfu/sfu_events/events.pb.dart';
 import 'package:stream_video/protobuf/video/sfu/sfu_models/models.pb.dart';
 import 'package:stream_video/protobuf/video/sfu/sfu_signal_rpc/signal.pb.dart';
-import 'package:stream_video/src/models/call_participant.dart';
 import 'package:stream_video/src/models/video_options.dart';
 import 'package:stream_video/src/sfu-client/rpc/signal.dart';
 import 'package:stream_video/src/sfu-client/rtc/codecs.dart';
@@ -51,8 +50,9 @@ class WebRTCClient {
   final _participantsThreshold = 4;
 
   static String sdpSemantics = 'unified-plan';
+
   Future<RTCPeerConnection> createPublisher() async {
-    print("creating Publisher with configuration: $defaultConfig");
+    print('creating Publisher with configuration: $defaultConfig');
     final publisher = await createPeerConnection(defaultConfig);
     publisher.onIceCandidate = (candidate) async {
       await signalService.sendCandidate(
@@ -71,7 +71,9 @@ class WebRTCClient {
       final offer = await publisher.createOffer();
       await publisher.setLocalDescription(offer);
       final sfu = await signalService.setPublisher(
-          sdp: offer.sdp, token: Token(state.callState.sfuToken!));
+        sdp: offer.sdp,
+        token: Token(state.callState.sfuToken!),
+      );
 
       await publisher
           .setRemoteDescription(RTCSessionDescription(sfu.sdp, 'answer'));
@@ -122,11 +124,6 @@ class WebRTCClient {
 
     return subscriber;
   }
-
-  final offerSdpConstraints = <String, dynamic>{
-    'OfferToReceiveAudio': true,
-    'OfferToReceiveVideo': true,
-  };
 
   /// Config
   Map<String, Object> get defaultConfig => {
@@ -202,7 +199,7 @@ class WebRTCClient {
       subscriber!.close();
       subscriber = null;
     }
-    logger?.info("connect with sfuToken: $sfuToken and suUrl: $sfuUrl");
+    logger?.info('connect with sfuToken: $sfuToken and suUrl: $sfuUrl');
     state.callState = StreamCallState(
       callId: callId,
       callType: callType.rawType,
@@ -289,7 +286,7 @@ class WebRTCClient {
     logger?.info('Setting up publisher');
     publisher = await createPublisher();
     final videoEncodings =
-        (videoLayers != null && videoLayers!.isNotEmpty == true)
+        (videoLayers != null && videoLayers!.isNotEmpty)
             ? videoLayers!.map((e) => e.encoding).toList()
             : defaultVideoPublishEncodings;
 
@@ -321,7 +318,7 @@ class WebRTCClient {
   Future<bool> isPublishing(List<String> kinds) async {
     if (publisher == null) return false;
     final senders = await publisher!.getSenders();
-    if (kinds.length == 0 && senders.length > 0) return true;
+    if (kinds.isEmpty && senders.isNotEmpty) return true;
     return senders.any((s) => s.track != null && kinds.contains(s.track!.kind));
   }
 
@@ -346,14 +343,14 @@ class WebRTCClient {
     //   }
     // };
     if (kind == 'audioinput') {
-      constraints["audio"] = {
+      constraints['audio'] = {
         // ...extras,
-        "deviceId": deviceId,
+        'deviceId': deviceId,
       };
     } else if (kind == 'videoinput') {
-      constraints["video"] = {
+      constraints['video'] = {
         // ...extras,
-        "deviceId": deviceId,
+        'deviceId': deviceId,
       };
     }
 
@@ -400,10 +397,10 @@ class WebRTCClient {
 
     final videoSender = senders?.firstWhere((s) => s.track?.kind == 'video');
     if (videoSender == null) throw 'No video sender found';
-    final params = await videoSender.parameters;
+    final params = videoSender.parameters;
     var changed = false;
     params.encodings!.forEach((enc) {
-      logger?.info("${enc.rid} ${enc.maxBitrate} ${enc.maxFramerate}");
+      logger?.info('${enc.rid} ${enc.maxBitrate} ${enc.maxFramerate}');
       // flip 'active' flag only when necessary
       final shouldEnable = enabledRids.contains(enc.rid!);
       if (shouldEnable != enc.active) {
@@ -418,30 +415,29 @@ class WebRTCClient {
   }
 
   Token get _sfuToken => Token(state.callState.sfuToken!);
-  String get _sfuUrl => state.callState.sfuUrl!;
 
   Future<void> disableAudio() async {
-    //TODO: webrtc
+    //TODO: webrtc?
     await signalService.updateAudioMuteState(muted: true, token: _sfuToken);
   }
 
   Future<void> enableAudio() async {
-    //TODO: webrtc
+    //TODO: webrtc?
     await signalService.updateAudioMuteState(muted: false, token: _sfuToken);
   }
 
   Future<void> disableVideo() async {
-    //TODO: webrtc
+    //TODO: webrtc?
     await signalService.updateVideoMuteState(muted: false, token: _sfuToken);
   }
 
   Future<void> enableVideo() async {
-    //TODO: webrtc
+    //TODO: webrtc?
     await signalService.updateVideoMuteState(muted: false, token: _sfuToken);
   }
 
   void handleEvent(SfuEvent event) {
-    logger?.info("Received an event $event)");
+    logger?.info('Received an event $event)');
     switch (event.whichEventPayload()) {
       case SfuEvent_EventPayload.participantJoined:
         {
@@ -508,20 +504,12 @@ class WebRTCClient {
   }
 
   void _handleParticipantLeft(ParticipantLeft payload) {
-    final participant = payload.participant.toCallParticipant(false);
+    final participant = payload.participant.toCallParticipant();
     state.participants.emitLeft(participant);
   }
 
   void _handleSubscriberOffer(SubscriberOffer subscriberOffer) {
     state.sfu.emitSubscriberOffer(subscriberOffer);
-  }
-
-  void _handleStreamAdded(MediaStream stream) {
-    state.participants.emitTrackUpdated(stream, stream.id);
-  }
-
-  void _handleStreamRemoved(MediaStream stream) {
-    state.participants.emitTrackRemoved(stream.id);
   }
 
   void _handleOnTrack(RTCTrackEvent event) {
