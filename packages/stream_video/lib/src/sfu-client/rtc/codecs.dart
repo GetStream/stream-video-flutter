@@ -1,6 +1,6 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart';
-// import 'package:stream_video/protobuf/video/coordinator/broadcast_v1/broadcast.pbenum.dart';
 import 'package:stream_video/src/sdp-transform/parse.dart';
 
 final defaultVideoPublishEncodings = [
@@ -85,7 +85,7 @@ Future<List<Codec>> _getCodecsFromPeerConnection(
     if (media.type == kind.toStr()) {
       media.rtp.forEach((rtp) {
         final fmtpLine =
-            media.fmtp?.firstWhere((f) => f.payload == rtp.payload);
+            media.fmtp?.firstWhereOrNull((f) => f.payload == rtp.payload);
         supportedCodecs.add(Codec(
           hwAccelerated: true,
           clockRate: rtp.rate ?? 0,

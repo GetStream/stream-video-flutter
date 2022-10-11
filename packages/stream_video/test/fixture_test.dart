@@ -1,6 +1,6 @@
 import 'package:stream_video/src/sdp-transform/parse.dart';
 import 'package:test/test.dart';
-
+import 'package:collection/collection.dart';
 main() {
   test('test', () {
     final sdpStr = """v=0
@@ -144,7 +144,20 @@ a=rtcp-fb:37 goog-remb
 a=rtcp-fb:37 transport-cc
 a=fmtp:37 repair-window=10000000
 """;
-    final sdp = parseSdp(sdpStr);
-    expect(sdp, null);
+    final parsedSdp = parseSdp(sdpStr);
+    // final supportedCodecs = <Map<String, dynamic>>[];
+    // parsedSdp.media.forEach((media) {
+    //   media.rtp.forEach((rtp) {
+    //     final fmtpLine =
+    //         media.fmtp?.firstWhere((f) => f.payload == rtp.payload,orElse: null);
+    //     supportedCodecs.add({
+    //       "hwAccelerated": true,
+    //       "clockRate": rtp.rate ?? 0,
+    //       "fmtpLine": fmtpLine?.config ?? '',
+    //       // mime: '$kind/${rtp.codec}',
+    //     });
+    //   });
+    // });
+    // expect(sdp, parsedSdp);
   });
 }
