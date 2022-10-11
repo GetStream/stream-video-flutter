@@ -52,7 +52,7 @@ class StreamVideoClient {
     _callCoordinatorService = ClientRPCProtobufClient(
       // Change it to your local IP address.
       coordinatorUrl ??
-          "http://b873-2a01-cb20-87c-f00-c4dd-69bb-2922-d1c0.ngrok.io/rpc", //https://rpc-video-coordinator.oregon-v1.stream-io-video.com
+          "http://05a8-2a01-cb20-87c-f00-710c-711a-2bbb-ef5.ngrok.io/rpc", //https://rpc-video-coordinator.oregon-v1.stream-io-video.com
       "",
       hooks: ClientHooks(
         onRequestPrepared: onClientRequestPrepared,
@@ -65,7 +65,7 @@ class StreamVideoClient {
     _rtcClient = WebRTCClient(
       SignalService(_tokenManager,
           endpoint:
-              "http://192.168.1.17:3031/twirp"), //https://sfu2.fra1.gtstrm.com/twirp
+              "http://192.168.1.17:3031/rpc"), //https://sfu2.fra1.gtstrm.com/twirp
       state: _state,
       logger: logger,
     );

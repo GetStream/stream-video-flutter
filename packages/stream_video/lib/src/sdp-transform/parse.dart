@@ -78,7 +78,7 @@ Sdp parseSdp(String sdpStr) {
         fmtps.add(fmtp);
       }
 
-      if (mediaLine.contains("rtp")) {
+      if (mediaLine.contains("rtpmap")) {
         final rtp = parseRtp(content);
         rtps.add(rtp);
       }
@@ -92,6 +92,23 @@ Sdp parseSdp(String sdpStr) {
           direction: directions,
         );
         medias.add(media);
+      }
+      if (type == "c") {
+        connection = parseConnection(content);
+      }
+
+      if (mediaLine.contains("fingerprint")) {
+        fingerprint = parseFingerprint(content);
+      }
+
+      if (mediaLine.contains("fingerprint")) {
+        fingerprint = parseFingerprint(content);
+      }
+      if (mediaLine.contains("ice-ufrag")) {
+        iceUfrag = parseIceUfrag(content);
+      }
+      if (mediaLine.contains("ice-pwd")) {
+        icePwd = parseIcePwd(content);
       }
     });
   });
@@ -249,8 +266,9 @@ Rtp parseRtp(String str) {
   final payload = match!.namedGroup('payload');
   final codec = match.namedGroup('codec');
   final rate = match.namedGroup('rate');
+  final payloadInt = int.parse(payload!);
   return Rtp(
-    payload: int.parse(payload!),
+    payload: payloadInt,
     codec: 'H264',
     rate: rate != null ? int.parse(rate) : null,
   );
