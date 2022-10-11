@@ -1,8 +1,8 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:logging/logging.dart';
-import 'package:stream_video/protobuf/video/sfu/sfu_events/events.pb.dart';
-import 'package:stream_video/protobuf/video/sfu/sfu_models/models.pb.dart';
-import 'package:stream_video/protobuf/video/sfu/sfu_signal_rpc/signal.pb.dart';
+import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart';
+import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart';
+import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart';
 import 'package:stream_video/src/models/video_options.dart';
 import 'package:stream_video/src/sfu-client/rpc/signal.dart';
 import 'package:stream_video/src/sfu-client/rtc/codecs.dart';

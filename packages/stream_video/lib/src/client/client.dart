@@ -65,7 +65,7 @@ class StreamVideoClient {
     _rtcClient = WebRTCClient(
       SignalService(_tokenManager,
           endpoint:
-              "http://192.168.1.17:3031/rpc"), //https://sfu2.fra1.gtstrm.com/twirp
+              "http://192.168.1.17:3031/twirp"), //https://sfu2.fra1.gtstrm.com/twirp
       state: _state,
       logger: logger,
     );

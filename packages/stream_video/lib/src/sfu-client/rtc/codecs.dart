@@ -1,5 +1,5 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:stream_video/protobuf/video/sfu/sfu_models/models.pb.dart';
+import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart';
 // import 'package:stream_video/protobuf/video/coordinator/broadcast_v1/broadcast.pbenum.dart';
 import 'package:stream_video/src/sdp-transform/parse.dart';
 

@@ -1,7 +1,7 @@
 import 'package:http/http.dart';
-import 'package:stream_video/protobuf/video/sfu/sfu_models/models.pb.dart';
-import 'package:stream_video/protobuf/video/sfu/sfu_signal_rpc/signal.pb.dart';
-import 'package:stream_video/protobuf/video/sfu/sfu_signal_rpc/signal.pbtwirp.dart';
+import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart';
+import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart';
+import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart';
 import 'package:stream_video/src/core/error/error.dart';
 import 'package:stream_video/src/core/http/token_manager.dart';
 import 'package:stream_video/stream_video.dart';
@@ -31,6 +31,7 @@ class SignalService {
     String? usernameFragment,
     required Token token,
   }) async {
+    print(endpoint);
     try {
       // final token = await tokenManager.loadToken();
       final ctx = _withAuth(token);
@@ -252,6 +253,7 @@ class SignalService {
 
   /// onClientRequestPrepared is a client hook used to print out the method name of the RPC call
   Context onClientRequestPrepared(Context ctx, Request req) {
+    print(req.url);
     final methodNameVal = ctx.value(ContextKeys.methodName);
     print('RequestPrepared for $methodNameVal');
     return ctx;

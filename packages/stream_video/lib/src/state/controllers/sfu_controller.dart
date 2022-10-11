@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video/protobuf/video/sfu/sfu_events/events.pb.dart';
+import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart';
 import 'package:stream_video/src/models/events/events.dart';
 
 @internal
