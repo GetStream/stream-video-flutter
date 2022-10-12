@@ -4,12 +4,14 @@ Stream Video repository for Flutter.
 
 # Getting started
 Make sure you cloned and followed the instructions to run the backend stack in those repositories
-- video-sfu
-- video
- 
-`video$ APP_CONFIG_FILE=./configs/local.yaml go run cmd/coordinator/main.go`
-`video_sfu$ go run cmd/video-sfu/main.go`
-`ngrok http 26991` note the url
+- [video-sfu](https://github.com/GetStream/video-sfu)
+- [video](https://github.com/GetStream/video)
+
+```bash
+video$ APP_CONFIG_FILE=./configs/local.yaml go run cmd/coordinator/main.go
+video_sfu$ go run cmd/video-sfu/main.go
+ngrok http 26991 #note the url
+``` 
 
 Once, it's done when instantiating the client `main.dart`, replace those endpoints:
 ```dart
@@ -26,12 +28,16 @@ Once, it's done when instantiating the client `main.dart`, replace those endpoin
 
 
 # Generating protobuf
-Go to the video-proto backend and follow the instructions to install the proto dependencies. Once it's done this is the command I use to generate the protos in the stream_video package:
-`video_proto$ sh generate.sh dart ~/flutter-dev/stream-video-flutter/packages/stream_video/lib/protobuf`
+Go to the [video-proto](https://github.com/GetStream/video-proto) backend repo and follow the instructions there to install the proto dependencies. Once it's done, this is the command (depends on where is your flutter projects folder) I use to generate the protos in the `stream_video` package:
+```bash
+video_proto$ sh generate.sh dart ~/flutter-dev/stream-video-flutter/packages/stream_video/lib/protobuf
+```
 
 
 # Possible Issues One Can Facing
 
 ## Token expiring 
 If this happens, in the example, you need to update the `example/lib/demo_users` tokens using the command from the coordinator repo:
-`video$ ctl auth token key1 secret1 <user_id>`
+```bash
+video$ ctl auth token key1 secret1 <user_id>
+```
