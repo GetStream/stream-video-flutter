@@ -50,7 +50,7 @@ class StreamVideoClient {
     WebSocketClient? ws,
   }) {
     _callCoordinatorService = ClientRPCProtobufClient(
-      // Change it to your local IP address.
+      // Change it to the endpoint obtained by: ngrok 26991
       coordinatorUrl ??
           "http://05a8-2a01-cb20-87c-f00-710c-711a-2bbb-ef5.ngrok.io/rpc", //https://rpc-video-coordinator.oregon-v1.stream-io-video.com
       "",

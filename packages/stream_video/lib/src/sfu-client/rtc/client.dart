@@ -51,6 +51,12 @@ class WebRTCClient {
 
   static String sdpSemantics = 'unified-plan';
 
+  final offerSdpConstraints = <String, dynamic>{
+    'OfferToReceiveAudio': false,
+    'OfferToReceiveVideo': false,
+  };
+
+
   Future<RTCPeerConnection> createPublisher() async {
     print('creating Publisher with configuration: $defaultConfig');
     final publisher = await createPeerConnection(defaultConfig);
@@ -68,7 +74,7 @@ class WebRTCClient {
       logger?.info('Publisher ICE connection state: $state');
     };
     publisher.onRenegotiationNeeded = () async {
-      final offer = await publisher.createOffer();
+      final offer = await publisher.createOffer(offerSdpConstraints);
       await publisher.setLocalDescription(offer);
       final sfu = await signalService.setPublisher(
         sdp: offer.sdp,

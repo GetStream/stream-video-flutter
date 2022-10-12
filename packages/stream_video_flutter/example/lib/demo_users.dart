@@ -6,8 +6,8 @@ class UserCredentials {
   final UserInfo userInfo;
 }
 
-// generated using the cli command is the backend
-// `./video/ctl auth token key10 secret10 <user_id>`
+// generated using the cli command in the backend
+// `./video/ctl auth token key1 secret1 <user_id>`
 final demoUsers = [
   UserCredentials(
       userInfo: UserInfo(
