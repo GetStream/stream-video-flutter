@@ -44,7 +44,8 @@ class StreamVideoClient {
     this.apiKey, {
     this.logLevel = Level.INFO,
     String? coordinatorUrl,
-    String? baseURL,
+    String? sfuUrl,
+    String? coordinatorWs,
     StreamVideoClientOptions? options,
     this.logHandlerFunction = StreamVideoClient.defaultLogHandler,
     WebSocketClient? ws,
@@ -64,7 +65,7 @@ class StreamVideoClient {
     _options = options ?? StreamVideoClientOptions();
     _rtcClient = WebRTCClient(
       SignalService(_tokenManager,
-          endpoint:
+          endpoint: sfuUrl ??
               "http://192.168.1.17:3031/twirp"), //https://sfu2.fra1.gtstrm.com/twirp
       state: _state,
       logger: logger,
@@ -76,7 +77,8 @@ class StreamVideoClient {
             apiKey: apiKey,
             endpoint:
                 // Change it to your local IP address.
-                'ws://192.168.1.17:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect'); // 'ws://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect');
+                coordinatorWs ??
+                    'ws://192.168.1.17:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect'); // 'ws://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect');
 
     _latencyService = LatencyService(logger: logger);
   }

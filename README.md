@@ -1,41 +1,37 @@
 # Stream Video Flutter
 
-## Generating Protobufs
-./generate.sh
+Stream Video repository for Flutter.
 
-## Calling SelectEdgeServer
+# Getting started
+Make sure you cloned and followed the instructions to run the backend stack in those repositories
+- video-sfu
+- video
+ 
+`video$ APP_CONFIG_FILE=./configs/local.yaml go run cmd/coordinator/main.go`
+`video_sfu$ go run cmd/video-sfu/main.go`
+`ngrok http 26991` note the url
 
-Make sure you have GetStream/video server up and running
-
-```bash
-cd stream_video_dart
-dart bin/client.dart
+Once, it's done when instantiating the client `main.dart`, replace those endpoints:
+```dart
+  final client = StreamVideoClient(
+    'key1',
+    coordinatorUrl: //replace with the url obtained with ngrok http 26991 previously
+        'http://05a8-2a01-cb20-87c-f00-710c-711a-2bbb-ef5.ngrok.io/rpc',
+    coordinatorWs: //replace host with your local ip address
+        'ws://192.168.1.17:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
+    //replace host with your local ip address
+    sfuUrl: 'http://192.168.1.17:3031/twirp',
+  );
 ```
 
 
-## TODOs
-- [x] twirp code generation tool
-- [x] SelectEdgeServer POC
-- [x] ws auth flow
-- [x] measure latencies
-- [ ] add protobuf submodule from GetStream/video instead of copy pasting every time
-- [x] LiveKit wrapper
-- [x] Sample app using LiveKit
-- [ ] Sample app using lower level WebRTC client
+# Generating protobuf
+Go to the video-proto backend and follow the instructions to install the proto dependencies. Once it's done this is the command I use to generate the protos in the stream_video package:
+`video_proto$ sh generate.sh dart ~/flutter-dev/stream-video-flutter/packages/stream_video/lib/protobuf`
 
-## Notes
 
-protoc-gen-tart is a fork from https://github.com/syncapod/tart/tree/main/protoc-gen-tart
-Had to fix it because it was pretty broken
-You don't need it unless you are building it from source
+# Possible Issues One Can Facing
 
-## Research
-
-wrapper around RTCPeerConnection
-
-https://github.com/GetStream/stream-video-react/blob/41afa0072c759448ecd0897b8f14f14410903b53/packages/components/src/hooks/useWebRtcStats.ts#L34
-
-https://github.com/peermetrics/webrtc-stats/blob/7f2bba92450b1677a7214576ab21596f86c30637/src/index.ts#L310
-https://github.com/peermetrics/webrtc-stats
-
-https://pub.dev/documentation/webrtc_interface/latest/webrtc_interface/RTCPeerConnection-class.html
+## Token expiring 
+If this happens, in the example, you need to update the `example/lib/demo_users` tokens using the command from the coordinator repo:
+`video$ ctl auth token key1 secret1 <user_id>`
