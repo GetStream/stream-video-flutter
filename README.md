@@ -14,7 +14,7 @@ video_sfu$ go run cmd/video-sfu/main.go
 ngrok http 26991 #note the url
 ``` 
 
-Once, it's done when instantiating the client `main.dart`, replace those endpoints:
+Once it's done, when instantiating the client `main.dart`, replace those endpoints:
 ```dart
   final client = StreamVideoClient(
     'key1',
