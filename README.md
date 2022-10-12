@@ -3,6 +3,7 @@
 Stream Video repository for Flutter.
 
 # Getting started
+
 Make sure you cloned and followed the instructions to run the backend stack in those repositories
 - [video-sfu](https://github.com/GetStream/video-sfu)
 - [video](https://github.com/GetStream/video)
@@ -26,9 +27,13 @@ Once, it's done when instantiating the client `main.dart`, replace those endpoin
   );
 ```
 
+If you are developing with a physical device (recommended), make sure it's connected to the same wifi as your laptop.
+
+Finally, you can run the flutter sample app in `stream_video/packages/stream_video_flutter`
+
 
 # Generating protobuf
-Go to the [video-proto](https://github.com/GetStream/video-proto) backend repo and follow the instructions there to install the proto dependencies. Once it's done, this is the command (depends on where is your flutter projects folder) I use to generate the protos in the `stream_video` package:
+Go to the [video-proto](https://github.com/GetStream/video-proto) backend repo and follow the instructions there to install the proto dependencies. Once it's done, this is the command (depending on where is your flutter projects folder) I use to generate the protos in the `stream_video` package:
 ```bash
 video_proto$ sh generate.sh dart ~/flutter-dev/stream-video-flutter/packages/stream_video/lib/protobuf
 ```
