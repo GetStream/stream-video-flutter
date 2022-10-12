@@ -8,7 +8,7 @@ class StreamVideoProvider extends InheritedWidget {
     required Widget child,
   }) : super(key: key, child: child);
 
-//Todo make this private and expose controllers
+//TODO: make this private and expose controllers
   final StreamVideoClient client;
 
   static StreamVideoProvider of(BuildContext context) {
@@ -19,5 +19,6 @@ class StreamVideoProvider extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(StreamVideoProvider old) => client != old.client;
+  bool updateShouldNotify(StreamVideoProvider oldWidget) =>
+      client != oldWidget.client;
 }
