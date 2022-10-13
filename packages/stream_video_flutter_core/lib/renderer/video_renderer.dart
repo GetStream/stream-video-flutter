@@ -19,11 +19,12 @@ class StreamVideoTrackRenderer extends StatefulWidget {
   final MediaStream track;
   final RTCVideoViewObjectFit fit;
   final VideoViewMirrorMode mirrorMode;
-
+  final TrackController controller;
   const StreamVideoTrackRenderer({
     required this.track,
     this.fit = RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
     this.mirrorMode = VideoViewMirrorMode.auto,
+    required this.controller,
     Key? key,
   }) : super(key: key);
 
@@ -36,7 +37,7 @@ class _StreamVideoTrackRendererState extends State<StreamVideoTrackRenderer> {
   bool _rendererReady = false;
   // EventsListener<TrackEvent>? _listener;
   // Used to compute visibility information
-  late GlobalKey _internalKey;
+  // late GlobalKey _internalKey;
 
   @override
   void initState() {
@@ -63,6 +64,11 @@ class _StreamVideoTrackRendererState extends State<StreamVideoTrackRenderer> {
     _renderer.srcObject = widget.track;
     // await _listener?.dispose();
     // _listener = widget.track.createListener()
+    widget.controller.on<TrackUpdatedEvent>((event) {
+      //TODO: maybe filter by
+      if (!mounted) return;
+      _renderer.srcObject = event.payload;
+    });
     //TODO: use our events
     //   ..on<TrackStreamUpdatedEvent>((event) {
     //     if (!mounted) return;
@@ -93,7 +99,7 @@ class _StreamVideoTrackRendererState extends State<StreamVideoTrackRenderer> {
   Widget build(BuildContext context) => !_rendererReady
       ? Container()
       : Builder(
-          key: _internalKey,
+          // key: _internalKey,
           builder: (ctx) {
             // // let it render before notifying build
             // WidgetsBindingCompatible.instance

@@ -15,14 +15,16 @@ final demoUsers = [
         name: "Sacha",
       ),
       token: Token(
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9zYWNoYSIsImV4cCI6MTY2NTYwMTk0MiwiaWF0IjoxNjY1NTE1NTQyLCJ1c2VyX2lkIjoic2FjaGEifQ._OEtjHcUs1BlGvdcqaeKU5hW4wjc_BXM7pzYxM6IxaQ")),
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9zYWNoYSIsImV4cCI6MTY2NTc2MTExOCwiaWF0IjoxNjY1Njc0NzE4LCJ1c2VyX2lkIjoic2FjaGEifQ.ut3hk5QdaZ0wbxWl7Qh1GLsMVp07JJ4aGCJnwcTEoc8")),
   UserCredentials(
-      userInfo: UserInfo(
-        id: "salvatore",
-        name: "Salvatore",
-      ),
-      token: Token(
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9zYWx2YXRvcmUiLCJleHAiOjE2NjU2MDE5NjksImlhdCI6MTY2NTUxNTU2OSwidXNlcl9pZCI6InNhbHZhdG9yZSJ9.bDJQQ5ghMSmqVj0StabYK-JIQ4O5aOU_WBvly1rSzvE")),
+    userInfo: UserInfo(
+      id: "salvatore",
+      name: "Salvatore",
+    ),
+    token: Token(
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9zYWx2YXRvcmUiLCJleHAiOjE2NjU3NjEwNjksImlhdCI6MTY2NTY3NDY2OSwidXNlcl9pZCI6InNhbHZhdG9yZSJ9.zzDWjbLNCuBu5iwxZrrbSeIS6Nbvu6NDdaah6rMWYo0",
+    ),
+  ),
   UserCredentials(
       userInfo: UserInfo(
         id: "sahil",

@@ -1,4 +1,3 @@
-
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart';
@@ -134,19 +133,23 @@ class RecordingStartedEvent with RecordingEvent {
 
 mixin WebRTCEvent implements StreamVideoEvent {}
 
-mixin TrackEvent implements WebRTCEvent {}
+class TrackUpdatedEvent implements WebRTCEvent {
+  const TrackUpdatedEvent(this.payload, this.id);
+  final MediaStream payload;
+  final String id;
+}
 
-class LocalTrackUpdatedEvent with TrackEvent {
-  const LocalTrackUpdatedEvent(this.payload);
-  final MediaStreamTrack payload;
+class LocalTrackUpdatedEvent extends TrackUpdatedEvent {
+  const LocalTrackUpdatedEvent(super.payload, super.id);
+  // final MediaStream payload;
 
   @override
   String toString() => 'track.local.updated ${payload.toString()}';
 }
 
-class RemoteTrackUpdatedEvent with TrackEvent {
-  const RemoteTrackUpdatedEvent(this.payload);
-  final MediaStreamTrack payload;
+class RemoteTrackUpdatedEvent extends TrackUpdatedEvent {
+  const RemoteTrackUpdatedEvent(super.payload, super.id);
+  // final MediaStream payload;
 
   @override
   String toString() => 'track.remote.updated ${payload.toString()}';

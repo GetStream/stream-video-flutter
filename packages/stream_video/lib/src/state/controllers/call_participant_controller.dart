@@ -13,13 +13,20 @@ class CallParticipantController {
   CallParticipant get localParticipant => _callParticipants.values
       .firstWhere((callParticipant) => callParticipant.id == _currentUserId!);
 
+//set local participant
+  // set localParticipant(CallParticipant callParticipant) {
+  //   _callParticipants[_currentUserId!] = callParticipant;
+  // }
+  // CallParticipant set localParticipant => _callParticipants.values
+  // .firstWhere((callParticipant) => callParticipant.id == _currentUserId!);
+
   // Map<String, MediaStreamTrack> _tracks = {};
 
   int get count => _callParticipants.keys.length; //TODO:unique
 
-  List<CallParticipant> get participants => _callParticipants.values
-      .where((element) => element.id != _currentUserId)
-      .toList();
+  List<CallParticipant> get participants => _callParticipants.values.toList();
+  // .where((element) => element.id != _currentUserId)
+  // .toList();
 
   void _upsert(CallParticipant participant) {
     _callParticipants[participant.id] = participant;
@@ -60,14 +67,19 @@ class CallParticipantController {
     _emit(CallParticipantUpdated(_callParticipants));
   }
 
-  void emitTrackUpdated(MediaStream track, String trackId) {
-    final callParticipant = _callParticipants[trackId];
+  void trackUpdated({required MediaStream track, required String userId}) {
+    print("TRACK ID: ${track.id}");
+    final callParticipant = _callParticipants[userId];
+    if (callParticipant == null) {
+      print('trackUpdated: callParticipant is null $userId');
+      print(_callParticipants);
+    }
     final participantWithTrack = callParticipant!.copyWith(track: track);
     _upsert(participantWithTrack);
     _emit(CallParticipantUpdated(_callParticipants));
   }
 
-  void emitTrackRemoved(String trackId) {
+  void trackRemoved(String trackId) {
     final callParticipant = _callParticipants[trackId];
     _remove(callParticipant!);
     _emit(CallParticipantUpdated(_callParticipants));

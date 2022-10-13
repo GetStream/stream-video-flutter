@@ -5,28 +5,29 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/src/models/events/events.dart';
 
-@internal
+//needs to communicate with call_participant_controller
 class TrackController {
-  final _trackController = BehaviorSubject<TrackEvent>();
+  final _trackController = BehaviorSubject<TrackUpdatedEvent>();
 
-  void _emit(TrackEvent event) => _trackController.add(event);
+  void _emit(TrackUpdatedEvent event) => _trackController.add(event);
 
-  void emitLocalUpdated(MediaStreamTrack payload) =>
-      _emit(LocalTrackUpdatedEvent(payload));
+  void emitLocalUpdated(MediaStream payload, String id) =>
+      _emit(LocalTrackUpdatedEvent(payload, id));
 
-  void emitRemoteUpdated(MediaStreamTrack payload) =>
-      _emit(RemoteTrackUpdatedEvent(payload));
+  void emitRemoteUpdated(MediaStream payload, String id) =>
+      _emit(RemoteTrackUpdatedEvent(payload, id));
 
-  TrackEvent get trackEvent => _trackController.value;
+  TrackUpdatedEvent get trackEvent => _trackController.value;
 
-  Stream<TrackEvent> get _trackStream => _trackController.stream.distinct();
+  Stream<TrackUpdatedEvent> get _trackStream =>
+      _trackController.stream.distinct();
 
-  StreamSubscription<TrackEvent> _listen(
-    FutureOr<void> Function(TrackEvent event) onEvent,
+  StreamSubscription<TrackUpdatedEvent> _listen(
+    FutureOr<void> Function(TrackUpdatedEvent event) onEvent,
   ) =>
       _trackStream.listen(onEvent);
 
-  StreamSubscription<TrackEvent> on<E extends TrackEvent>(
+  StreamSubscription<TrackUpdatedEvent> on<E extends TrackUpdatedEvent>(
     FutureOr<void> Function(E) then, {
     bool Function(E)? filter,
   }) =>

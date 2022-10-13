@@ -188,6 +188,36 @@ class SignalService {
     }
   }
 
+
+  Future<UpdateSubscriptionsResponse> updateSubscriptions({
+    String? sdp,
+    Map<String, VideoDimension>? subscriptions,
+    required Token token,
+  }) async {
+    try {
+      // final token = await tokenManager.loadToken();
+      final ctx = _withAuth(token);
+      final response = await client.updateSubscriptions(
+        ctx,
+        UpdateSubscriptionsRequest(sessionId: sessionId, subscriptions: subscriptions),
+      );
+      return response;
+    } on TwirpError catch (e) {
+      final method =
+          e.getContext.value(ContextKeys.methodName) ?? 'unknown method';
+      throw StreamVideoError(
+        'Twirp error on method: $method. Code: ${e.getCode}. Message: ${e.getMsg}',
+      );
+    } on InvalidTwirpHeader catch (e) {
+      throw StreamVideoError('InvalidTwirpHeader: $e');
+    } catch (e, stack) {
+      throw StreamVideoError('''
+      Unknown Exception Occurred: $e
+      Stack trace: $stack
+      ''');
+    }
+  }
+
   Future<JoinResponse> join({
     required String? subscriberSdpOffer,
     // required String? sessionId,

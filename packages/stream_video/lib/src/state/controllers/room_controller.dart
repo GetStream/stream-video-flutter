@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:stream_video/src/state/controllers/controllers.dart';
+import 'package:stream_video/stream_video.dart';
 
 @internal
 class RoomController {
@@ -9,7 +10,16 @@ class RoomController {
 
   final calls = CallController();
 
-  final tracks = TrackController();
+  late final tracks = TrackController()
+    ..on<TrackUpdatedEvent>(
+      (event) {
+        print("WE ARE HERE");
+        participants.trackUpdated(track: event.payload, userId: event.id);
+      },
+    );
+  // ..on<RemoteTrackUpdatedEvent>(
+  //   (event) => participants.trackUpdated(event.payload, event.payload.id),
+  // );
 
   final sfu = SfuController();
 

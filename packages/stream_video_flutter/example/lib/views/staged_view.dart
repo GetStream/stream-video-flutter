@@ -9,9 +9,14 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class StageView extends StatefulWidget {
   final CallParticipantController controller;
+  final TrackController trackController;
   static String routeName = "/stageView";
 
-  const StageView({Key? key, required this.controller}) : super(key: key);
+  const StageView({
+    Key? key,
+    required this.controller,
+    required this.trackController,
+  }) : super(key: key);
 
   @override
   State<StageView> createState() => _StageViewState();
@@ -53,7 +58,9 @@ class _StageViewState extends State<StageView> {
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: StreamVideoTrackRenderer(
-                              track: allParticipants[index].track!),
+                              controller: widget.trackController,
+                              track: allParticipants[index].track!
+                              ),
                         )
                       : ClipRRect(
                           borderRadius: BorderRadius.circular(12),
@@ -91,5 +98,6 @@ class _StageViewState extends State<StageView> {
     ));
   }
 
-  List<CallParticipant> get allParticipants => widget.controller.participants;
+  List<CallParticipant> get allParticipants =>
+      widget.controller.participants;
 }

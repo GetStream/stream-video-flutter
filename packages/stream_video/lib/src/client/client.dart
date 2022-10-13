@@ -120,7 +120,8 @@ class StreamVideoClient {
 
   UserInfo? get currentUser => _state.currentUser;
 
-  CallParticipantController get room => _state.participants;
+  CallParticipantController get participants => _state.participants;
+  TrackController get tracks => _state.tracks;
 
   Future<void> setUser(
     UserInfo user, {

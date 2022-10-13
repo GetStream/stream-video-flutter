@@ -27,6 +27,18 @@ class CallParticipant {
     required this.showTrack,
     this.track,
   });
+  @override
+  String toString() => '''CallParticipant(
+    id: $id,
+    role: $role,
+    name: $name,
+    profileImageURL: $profileImageURL,
+    isOnline: $isOnline,
+    hasVideo: $hasVideo,
+    hasAudio: $hasAudio,
+    showTrack: $showTrack,
+    hasTrack: ${track!=null},
+  )''';
 
   //generate copy with
   CallParticipant copyWith({

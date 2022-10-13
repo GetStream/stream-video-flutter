@@ -32,7 +32,8 @@ class MyApp extends StatelessWidget {
       routes: {
         HomeView.routeName: (context) => HomeView(title: title),
         StageView.routeName: (context) => StageView(
-              controller: client.room,
+              controller: client.participants,
+              trackController: client.tracks,
             ),
       },
       builder: (context, child) {
