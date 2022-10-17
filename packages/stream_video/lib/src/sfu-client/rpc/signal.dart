@@ -2,7 +2,7 @@ import 'package:http/http.dart';
 import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart';
 import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart';
 import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart';
-import 'package:stream_video/src/core/error/error.dart';
+import 'package:stream_video/src/core/error/video_error.dart';
 import 'package:stream_video/src/core/http/token_manager.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:tart/tart.dart';

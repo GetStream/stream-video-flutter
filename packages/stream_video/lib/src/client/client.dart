@@ -85,7 +85,6 @@ class StreamVideoClient {
               // Change it to your local IP address.
               coordinatorWs ??
                     'ws://192.168.1.17:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect'); // 'ws://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
-        );
 
     _latencyService = LatencyService(logger: logger);
   }
@@ -129,6 +128,7 @@ class StreamVideoClient {
   UserInfo? get currentUser => _state.currentUser;
 
   CallParticipantController get participants => _state.participants;
+
   TrackController get tracks => _state.tracks;
 
   Future<void> setUser(
@@ -428,8 +428,12 @@ class StreamVideoClient {
         return _handleCallMembersUpdated(event.callMembersUpdated);
       case WebsocketEvent_Event.callMembersDeleted:
         return _handleCallMembersDeleted(event.callMembersDeleted);
-      case WebsocketEvent_Event.callStarted:
-        return _handleCallStarted(event.callStarted);
+      case WebsocketEvent_Event.callAccepted:
+        return _handleCallAccepted(event.callAccepted);
+      case WebsocketEvent_Event.callRejected:
+        return _handleCallRejected(event.callRejected);
+      case WebsocketEvent_Event.callCancelled:
+        return _handleCallCancelled(event.callCancelled);
       case WebsocketEvent_Event.notSet:
         // TODO: Handle this case.
         break;
@@ -456,11 +460,6 @@ class StreamVideoClient {
     _state.calls.emitDeleted(event);
   }
 
-  void _handleCallStarted(CallStarted event) {
-    logger.info('CallStarted event received : ${event.toString()}');
-    _state.calls.emitStarted(event);
-  }
-
   void _handleUserUpdated(UserUpdated event) {
     logger.info('UserUpdated event received : ${event.toString()}');
     _state.userUpdated = event;
@@ -474,6 +473,21 @@ class StreamVideoClient {
   void _handleCallMembersDeleted(CallMembersDeleted event) {
     logger.info('CallMembersDeleted event received : ${event.toString()}');
     _state.callMembers.emitDeleted(event);
+  }
+
+  void _handleCallAccepted(CallAccepted event) {
+    logger.info('CallAccepted event received : ${event.toString()}');
+    _state.calls.emitAccepted(event);
+  }
+
+  void _handleCallRejected(CallRejected event) {
+    logger.info('CallRejected event received : ${event.toString()}');
+    _state.calls.emitRejected(event);
+  }
+
+  void _handleCallCancelled(CallCancelled event) {
+    logger.info('CallCancelled event received : ${event.toString()}');
+    _state.calls.emitCancelled(event);
   }
 }
 
