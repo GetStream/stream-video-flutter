@@ -14,14 +14,13 @@ class StreamVideoError with EquatableMixin implements Exception {
   String toString() => 'StreamVideoError(message: $message)';
 }
 
-class StreamWebSocketError extends StreamVideoError {
-  StreamWebSocketError(String message) : super(message);
+class StreamVideoWebSocketError extends StreamVideoError {
+  const StreamVideoWebSocketError(super.message);
 
-  factory StreamWebSocketError.fromWebSocketChannelError(
+  factory StreamVideoWebSocketError.fromWebSocketChannelError(
     WebSocketChannelException error,
   ) {
     final message = error.message ?? '';
-    return StreamWebSocketError(message);
+    return StreamVideoWebSocketError(message);
   }
-
 }

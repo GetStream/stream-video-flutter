@@ -93,18 +93,6 @@ class ClientState {
   /// The current user
   UserInfo? get currentUser => _currentUserController.valueOrNull;
 
-  final _healthcheckController = BehaviorSubject<WebsocketHealthcheck>();
-
-  set healthcheck(WebsocketHealthcheck healthcheck) =>
-      _healthcheckController.add(healthcheck);
-
-  /// The current connection status value
-  WebsocketHealthcheck get healthcheck => _healthcheckController.value;
-
-  /// This notifies of Healthcheck changes
-  Stream<WebsocketHealthcheck> get healthcheckStream =>
-      _healthcheckController.stream.distinct();
-
   final _roomController = RoomController();
 
   SfuController get sfu => _roomController.sfu;
@@ -152,7 +140,6 @@ class ClientState {
       _roomController.disposeCall(),
       _callStateController.close(),
       _connectionStatusController.close(),
-      _healthcheckController.close(),
       _currentUserController.close(),
       _userUpdatedController.close(),
       _authPayloadController.close(),
