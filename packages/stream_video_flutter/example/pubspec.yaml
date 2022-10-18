@@ -29,9 +29,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  stream_video_flutter: 
-    path: ../../stream_video_flutter
-
+  stream_video_flutter: #replace with a version once published
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

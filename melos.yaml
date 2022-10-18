@@ -7,6 +7,10 @@ versioning:
 packages:
   - packages/**
 
+command:
+  bootstrap:
+    usePubspecOverrides: true
+
 scripts:
   postclean:
     run: melos run clean:flutter --no-select
