@@ -6,10 +6,11 @@ import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/google/protobuf/struct.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pbtwirp.dart';
+import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart'
     hide EdgeServer;
 import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
-import 'package:stream_video/src/core/error/error.dart';
+import 'package:stream_video/src/core/error/video_error.dart';
 
 import 'package:stream_video/src/core/http/token_manager.dart';
 import 'package:stream_video/src/latency_service/latency.dart';
@@ -18,6 +19,7 @@ import 'package:stream_video/src/models/video_options.dart';
 import 'package:stream_video/src/sfu-client/rpc/signal.dart';
 import 'package:stream_video/src/sfu-client/rtc/client.dart';
 import 'package:stream_video/src/state/state.dart';
+import 'package:stream_video/src/ws/websocket.dart';
 import 'package:stream_video/src/ws/websocket.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:tart/tart.dart';
@@ -34,15 +36,17 @@ final _levelEmojiMapper = {
 
 class StreamVideoClientOptions {
   StreamVideoClientOptions({this.retries = 3});
+
   final int retries;
 }
 
 class StreamVideoClient {
   // late final StreamSubscription<StatsEvent>? statsListener;
   final String apiKey;
+
   StreamVideoClient(
     this.apiKey, {
-    this.logLevel = Level.INFO,
+    this.logLevel = Level.ALL,
     String? coordinatorUrl,
     String? sfuUrl,
     String? coordinatorWs,
@@ -72,16 +76,19 @@ class StreamVideoClient {
     );
     _ws = ws ??
         WebSocketClient(
-            logger: logger,
-            state: _state,
-            apiKey: apiKey,
-            endpoint:
-                // Change it to your local IP address.
-                coordinatorWs ??
-                    'ws://192.168.1.17:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect'); // 'ws://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect');
+          apiKey: apiKey,
+          tokenManager: _tokenManager,
+          logger: logger,
+          state: _state,
+          handler: handleEvent,
+          baseUrl:
+              // Change it to your local IP address.
+              coordinatorWs ??
+                    'ws://192.168.1.17:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect'); // 'ws://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
 
     _latencyService = LatencyService(logger: logger);
   }
+
   late final ClientRPCProtobufClient _callCoordinatorService;
   late final LatencyService _latencyService;
   late final WebSocketClient _ws;
@@ -121,6 +128,7 @@ class StreamVideoClient {
   UserInfo? get currentUser => _state.currentUser;
 
   CallParticipantController get participants => _state.participants;
+
   TrackController get tracks => _state.tracks;
 
   Future<void> setUser(
@@ -150,11 +158,9 @@ class StreamVideoClient {
   }
 
   Future<void> connectWs() async {
-    final user = _state.currentUser;
-
-    final token = await _tokenManager.loadToken();
-    logger.info('connect user $user with token ${token.rawValue}');
-    _ws.connect(user: user!, token: token);
+    final user = _state.currentUser!;
+    _ws.connectionStatusStream.listen(print);
+    return _ws.connect(user);
   }
 
   Future<EdgeServer> selectEdgeServer({
@@ -399,6 +405,89 @@ class StreamVideoClient {
       Stack trace: $stack
       ''');
     }
+  }
+
+  /// Method called to handle events emitted by [_ws].
+  void handleEvent(WebsocketEvent event) {
+    final eventType = event.whichEvent();
+    switch (eventType) {
+      case WebsocketEvent_Event.healthcheck:
+        // returning as already handled in websocket.
+        return;
+      case WebsocketEvent_Event.callCreated:
+        return _handleCallCreated(event.callCreated);
+      case WebsocketEvent_Event.callUpdated:
+        return _handlerCallUpdated(event.callUpdated);
+      case WebsocketEvent_Event.callEnded:
+        return _handleCallEnded(event.callEnded);
+      case WebsocketEvent_Event.callDeleted:
+        return _handleCallDeleted(event.callDeleted);
+      case WebsocketEvent_Event.userUpdated:
+        return _handleUserUpdated(event.userUpdated);
+      case WebsocketEvent_Event.callMembersUpdated:
+        return _handleCallMembersUpdated(event.callMembersUpdated);
+      case WebsocketEvent_Event.callMembersDeleted:
+        return _handleCallMembersDeleted(event.callMembersDeleted);
+      case WebsocketEvent_Event.callAccepted:
+        return _handleCallAccepted(event.callAccepted);
+      case WebsocketEvent_Event.callRejected:
+        return _handleCallRejected(event.callRejected);
+      case WebsocketEvent_Event.callCancelled:
+        return _handleCallCancelled(event.callCancelled);
+      case WebsocketEvent_Event.notSet:
+        // TODO: Handle this case.
+        break;
+    }
+  }
+
+  void _handleCallCreated(CallCreated event) {
+    logger.info('CallCreated event received : ${event.toString()}');
+    _state.calls.emitCreated(event);
+  }
+
+  void _handlerCallUpdated(CallUpdated event) {
+    logger.info('CallUpdated event received : ${event.toString()}');
+    _state.calls.emitUpdated(event);
+  }
+
+  void _handleCallEnded(CallEnded event) {
+    logger.info('CallEnded event received : ${event.toString()}');
+    _state.calls.emitEnded(event);
+  }
+
+  void _handleCallDeleted(CallDeleted event) {
+    logger.info('CallDeleted event received : ${event.toString()}');
+    _state.calls.emitDeleted(event);
+  }
+
+  void _handleUserUpdated(UserUpdated event) {
+    logger.info('UserUpdated event received : ${event.toString()}');
+    _state.userUpdated = event;
+  }
+
+  void _handleCallMembersUpdated(CallMembersUpdated event) {
+    logger.info('CallMembersUpdated event received : ${event.toString()}');
+    _state.callMembers.emitUpdated(event);
+  }
+
+  void _handleCallMembersDeleted(CallMembersDeleted event) {
+    logger.info('CallMembersDeleted event received : ${event.toString()}');
+    _state.callMembers.emitDeleted(event);
+  }
+
+  void _handleCallAccepted(CallAccepted event) {
+    logger.info('CallAccepted event received : ${event.toString()}');
+    _state.calls.emitAccepted(event);
+  }
+
+  void _handleCallRejected(CallRejected event) {
+    logger.info('CallRejected event received : ${event.toString()}');
+    _state.calls.emitRejected(event);
+  }
+
+  void _handleCallCancelled(CallCancelled event) {
+    logger.info('CallCancelled event received : ${event.toString()}');
+    _state.calls.emitCancelled(event);
   }
 }
 
