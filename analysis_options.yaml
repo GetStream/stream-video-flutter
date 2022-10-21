@@ -101,3 +101,5 @@ dart_code_metrics:
     - prefer-conditional-expressions: false
     - prefer-correct-identifier-length: false
     - member-ordering-extended: false
+    - newline-before-return: false
+    - format-comment: false
