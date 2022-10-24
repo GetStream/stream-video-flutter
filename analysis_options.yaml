@@ -19,6 +19,12 @@ analyzer:
 
 linter:
   rules:
+    ## Disabled rules because the repository doesn't respect them (yet)
+    avoid_setters_without_getters: false
+    discarded_futures: false
+
+    #############
+
     # TODO(Sacha) re-enable documentation rule and fix issues.
     public_member_api_docs: false
 
@@ -60,6 +66,11 @@ linter:
     # There are situations where we voluntarily want to catch everything,
     # especially as a library.
     avoid_catches_without_on_clauses: false
+
+    # Boring as it sometimes force a line of 81 characters to be split in two.
+    # As long as we try to respect that 80 characters limit, going slightly
+    # above is fine.
+    lines_longer_than_80_chars: false
 
     # Conflicts with disabling `implicit-dynamic`
     avoid_annotating_with_dynamic: false
