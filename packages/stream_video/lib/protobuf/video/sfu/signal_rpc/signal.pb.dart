@@ -372,7 +372,7 @@ class UpdateSubscriptionsRequest extends $pb.GeneratedMessage {
 
 class SendAnswerRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SendAnswerRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.signal'), createEmptyInstance: create)
-    ..e<$0.PeerType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'peerType', $pb.PbFieldType.OE, defaultOrMaker: $0.PeerType.PUBLISHER, valueOf: $0.PeerType.valueOf, enumValues: $0.PeerType.values)
+    ..e<$0.PeerType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'peerType', $pb.PbFieldType.OE, defaultOrMaker: $0.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED, valueOf: $0.PeerType.valueOf, enumValues: $0.PeerType.values)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sdp')
     ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
     ..hasRequiredFields = false
@@ -478,9 +478,9 @@ class IceCandidateRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'IceCandidateRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.signal'), createEmptyInstance: create)
     ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'publisher')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'candidate')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sdpMid', protoName: 'sdpMid')
-    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sdpMLineIndex', $pb.PbFieldType.OU3, protoName: 'sdpMLineIndex')
-    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'usernameFragment', protoName: 'usernameFragment')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sdpMid')
+    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sdpMlineIndex', $pb.PbFieldType.OU3)
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'usernameFragment')
     ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
     ..hasRequiredFields = false
   ;
@@ -490,7 +490,7 @@ class IceCandidateRequest extends $pb.GeneratedMessage {
     $core.bool? publisher,
     $core.String? candidate,
     $core.String? sdpMid,
-    $core.int? sdpMLineIndex,
+    $core.int? sdpMlineIndex,
     $core.String? usernameFragment,
     $core.String? sessionId,
   }) {
@@ -504,8 +504,8 @@ class IceCandidateRequest extends $pb.GeneratedMessage {
     if (sdpMid != null) {
       _result.sdpMid = sdpMid;
     }
-    if (sdpMLineIndex != null) {
-      _result.sdpMLineIndex = sdpMLineIndex;
+    if (sdpMlineIndex != null) {
+      _result.sdpMlineIndex = sdpMlineIndex;
     }
     if (usernameFragment != null) {
       _result.usernameFragment = usernameFragment;
@@ -564,13 +564,13 @@ class IceCandidateRequest extends $pb.GeneratedMessage {
   void clearSdpMid() => clearField(3);
 
   @$pb.TagNumber(4)
-  $core.int get sdpMLineIndex => $_getIZ(3);
+  $core.int get sdpMlineIndex => $_getIZ(3);
   @$pb.TagNumber(4)
-  set sdpMLineIndex($core.int v) { $_setUnsignedInt32(3, v); }
+  set sdpMlineIndex($core.int v) { $_setUnsignedInt32(3, v); }
   @$pb.TagNumber(4)
-  $core.bool hasSdpMLineIndex() => $_has(3);
+  $core.bool hasSdpMlineIndex() => $_has(3);
   @$pb.TagNumber(4)
-  void clearSdpMLineIndex() => clearField(4);
+  void clearSdpMlineIndex() => clearField(4);
 
   @$pb.TagNumber(5)
   $core.String get usernameFragment => $_getSZ(4);
@@ -591,33 +591,33 @@ class IceCandidateRequest extends $pb.GeneratedMessage {
   void clearSessionId() => clearField(7);
 }
 
-class IceCandidateResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'IceCandidateResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.signal'), createEmptyInstance: create)
+class ICETrickleResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ICETrickleResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.signal'), createEmptyInstance: create)
     ..hasRequiredFields = false
   ;
 
-  IceCandidateResponse._() : super();
-  factory IceCandidateResponse() => create();
-  factory IceCandidateResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory IceCandidateResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  ICETrickleResponse._() : super();
+  factory ICETrickleResponse() => create();
+  factory ICETrickleResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ICETrickleResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  IceCandidateResponse clone() => IceCandidateResponse()..mergeFromMessage(this);
+  ICETrickleResponse clone() => ICETrickleResponse()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  IceCandidateResponse copyWith(void Function(IceCandidateResponse) updates) => super.copyWith((message) => updates(message as IceCandidateResponse)) as IceCandidateResponse; // ignore: deprecated_member_use
+  ICETrickleResponse copyWith(void Function(ICETrickleResponse) updates) => super.copyWith((message) => updates(message as ICETrickleResponse)) as ICETrickleResponse; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static IceCandidateResponse create() => IceCandidateResponse._();
-  IceCandidateResponse createEmptyInstance() => create();
-  static $pb.PbList<IceCandidateResponse> createRepeated() => $pb.PbList<IceCandidateResponse>();
+  static ICETrickleResponse create() => ICETrickleResponse._();
+  ICETrickleResponse createEmptyInstance() => create();
+  static $pb.PbList<ICETrickleResponse> createRepeated() => $pb.PbList<ICETrickleResponse>();
   @$core.pragma('dart2js:noInline')
-  static IceCandidateResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<IceCandidateResponse>(create);
-  static IceCandidateResponse? _defaultInstance;
+  static ICETrickleResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ICETrickleResponse>(create);
+  static ICETrickleResponse? _defaultInstance;
 }
 
 class UpdateSubscriptionsResponse extends $pb.GeneratedMessage {
@@ -769,146 +769,6 @@ class SetPublisherResponse extends $pb.GeneratedMessage {
   $core.bool hasSessionId() => $_has(1);
   @$pb.TagNumber(3)
   void clearSessionId() => clearField(3);
-}
-
-class JoinRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'JoinRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.signal'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscriberSdpOffer')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
-    ..aOM<$0.CodecSettings>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'codecSettings', subBuilder: $0.CodecSettings.create)
-    ..hasRequiredFields = false
-  ;
-
-  JoinRequest._() : super();
-  factory JoinRequest({
-    $core.String? subscriberSdpOffer,
-    $core.String? sessionId,
-    $0.CodecSettings? codecSettings,
-  }) {
-    final _result = create();
-    if (subscriberSdpOffer != null) {
-      _result.subscriberSdpOffer = subscriberSdpOffer;
-    }
-    if (sessionId != null) {
-      _result.sessionId = sessionId;
-    }
-    if (codecSettings != null) {
-      _result.codecSettings = codecSettings;
-    }
-    return _result;
-  }
-  factory JoinRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory JoinRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  JoinRequest clone() => JoinRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  JoinRequest copyWith(void Function(JoinRequest) updates) => super.copyWith((message) => updates(message as JoinRequest)) as JoinRequest; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static JoinRequest create() => JoinRequest._();
-  JoinRequest createEmptyInstance() => create();
-  static $pb.PbList<JoinRequest> createRepeated() => $pb.PbList<JoinRequest>();
-  @$core.pragma('dart2js:noInline')
-  static JoinRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<JoinRequest>(create);
-  static JoinRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get subscriberSdpOffer => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set subscriberSdpOffer($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasSubscriberSdpOffer() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearSubscriberSdpOffer() => clearField(1);
-
-  @$pb.TagNumber(3)
-  $core.String get sessionId => $_getSZ(1);
-  @$pb.TagNumber(3)
-  set sessionId($core.String v) { $_setString(1, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasSessionId() => $_has(1);
-  @$pb.TagNumber(3)
-  void clearSessionId() => clearField(3);
-
-  @$pb.TagNumber(4)
-  $0.CodecSettings get codecSettings => $_getN(2);
-  @$pb.TagNumber(4)
-  set codecSettings($0.CodecSettings v) { setField(4, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasCodecSettings() => $_has(2);
-  @$pb.TagNumber(4)
-  void clearCodecSettings() => clearField(4);
-  @$pb.TagNumber(4)
-  $0.CodecSettings ensureCodecSettings() => $_ensure(2);
-}
-
-class JoinResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'JoinResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.signal'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sdp')
-    ..aOM<$0.CallState>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callState', subBuilder: $0.CallState.create)
-    ..hasRequiredFields = false
-  ;
-
-  JoinResponse._() : super();
-  factory JoinResponse({
-    $core.String? sdp,
-    $0.CallState? callState,
-  }) {
-    final _result = create();
-    if (sdp != null) {
-      _result.sdp = sdp;
-    }
-    if (callState != null) {
-      _result.callState = callState;
-    }
-    return _result;
-  }
-  factory JoinResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory JoinResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  JoinResponse clone() => JoinResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  JoinResponse copyWith(void Function(JoinResponse) updates) => super.copyWith((message) => updates(message as JoinResponse)) as JoinResponse; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static JoinResponse create() => JoinResponse._();
-  JoinResponse createEmptyInstance() => create();
-  static $pb.PbList<JoinResponse> createRepeated() => $pb.PbList<JoinResponse>();
-  @$core.pragma('dart2js:noInline')
-  static JoinResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<JoinResponse>(create);
-  static JoinResponse? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get sdp => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set sdp($core.String v) { $_setString(0, v); }
-  @$pb.TagNumber(1)
-  $core.bool hasSdp() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearSdp() => clearField(1);
-
-  @$pb.TagNumber(2)
-  $0.CallState get callState => $_getN(1);
-  @$pb.TagNumber(2)
-  set callState($0.CallState v) { setField(2, v); }
-  @$pb.TagNumber(2)
-  $core.bool hasCallState() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearCallState() => clearField(2);
-  @$pb.TagNumber(2)
-  $0.CallState ensureCallState() => $_ensure(1);
 }
 
 class ConnectRequest extends $pb.GeneratedMessage {
@@ -1413,10 +1273,6 @@ class SignalServerApi {
   $pb.RpcClient _client;
   SignalServerApi(this._client);
 
-  $async.Future<JoinResponse> join($pb.ClientContext? ctx, JoinRequest request) {
-    var emptyResponse = JoinResponse();
-    return _client.invoke<JoinResponse>(ctx, 'SignalServer', 'Join', request, emptyResponse);
-  }
   $async.Future<SetPublisherResponse> setPublisher($pb.ClientContext? ctx, SetPublisherRequest request) {
     var emptyResponse = SetPublisherResponse();
     return _client.invoke<SetPublisherResponse>(ctx, 'SignalServer', 'SetPublisher', request, emptyResponse);
@@ -1425,9 +1281,9 @@ class SignalServerApi {
     var emptyResponse = SendAnswerResponse();
     return _client.invoke<SendAnswerResponse>(ctx, 'SignalServer', 'SendAnswer', request, emptyResponse);
   }
-  $async.Future<IceCandidateResponse> sendIceCandidate($pb.ClientContext? ctx, IceCandidateRequest request) {
-    var emptyResponse = IceCandidateResponse();
-    return _client.invoke<IceCandidateResponse>(ctx, 'SignalServer', 'SendIceCandidate', request, emptyResponse);
+  $async.Future<ICETrickleResponse> iceTrickle($pb.ClientContext? ctx, $0.ICETrickle request) {
+    var emptyResponse = ICETrickleResponse();
+    return _client.invoke<ICETrickleResponse>(ctx, 'SignalServer', 'IceTrickle', request, emptyResponse);
   }
   $async.Future<UpdateSubscriptionsResponse> updateSubscriptions($pb.ClientContext? ctx, UpdateSubscriptionsRequest request) {
     var emptyResponse = UpdateSubscriptionsResponse();

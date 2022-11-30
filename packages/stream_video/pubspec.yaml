@@ -6,21 +6,21 @@ version: 1.0.0
 environment:
   sdk: '>=2.17.0 <3.0.0'
 
-
 dependencies:
   equatable: ^2.0.3
   http: ^0.13.4
-  protobuf: ^2.0.1
-  tart: ^0.2.0
+  protobuf: ^2.1.0
+  tart: ^0.3.0
   uuid: ^3.0.6
   logging: ^1.0.2
   rxdart: ^0.27.5
   web_socket_channel: ^2.2.0
   collection: ^1.16.0
   flutter_webrtc: ^0.9.8
-  dart_webrtc: 1.0.8
-  webrtc_interface: 1.0.8
   meta: ^1.8.0
+  sdp_transform: ^0.3.2
+  synchronized: ^3.0.0+3
+  rate_limiter: ^0.1.1
 
 dev_dependencies:
   dart_code_metrics: ^4.4.0

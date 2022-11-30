@@ -11,14 +11,12 @@ import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart';
 
 
 abstract class SignalServer {
-  // Join sets up the peer connection that is used to subscribe to A/V and the data channel for signaling// in WebRTC terms, this contains the SDP offer for the user peer connection
-  Future<JoinResponse> join(twirp.Context ctx, JoinRequest req);
   // SetPublisher sends the WebRTC offer for the peer connection used to publish A/V
   Future<SetPublisherResponse> setPublisher(twirp.Context ctx, SetPublisherRequest req);
-  
+  // answer is sent by the client to the SFU after receiving a subscriber_offer.
   Future<SendAnswerResponse> sendAnswer(twirp.Context ctx, SendAnswerRequest req);
-  
-  Future<IceCandidateResponse> sendIceCandidate(twirp.Context ctx, IceCandidateRequest req);
+  // SendICECandidate sends an ICE candidate to the client
+  Future<ICETrickleResponse> iceTrickle(twirp.Context ctx, ICETrickle req);
   // UpdateSubscribers is used to notify the SFU about the list of video subscriptions// TODO: sync subscriptions based on this + update tracks using the dimension info sent by the user
   Future<UpdateSubscriptionsResponse> updateSubscriptions(twirp.Context ctx, UpdateSubscriptionsRequest req);
   
@@ -41,28 +39,6 @@ class SignalServerJSONClient implements SignalServer {
 
     this.hooks = hooks ?? twirp.ClientHooks();
     this.interceptor = interceptor ?? twirp.chainInterceptor([]);
-  }
-
-  @override
-  Future<JoinResponse> join(twirp.Context ctx, JoinRequest req) async {
-    ctx = twirp.withPackageName(ctx, 'signal');
-    ctx = twirp.withServiceName(ctx, 'SignalServer');
-    ctx = twirp.withMethodName(ctx, 'Join');
-    return interceptor((ctx, req) {
-      return callJoin(ctx, req);
-    })(ctx, req);
-  }
-
-  Future<JoinResponse> callJoin(twirp.Context ctx, JoinRequest req) async {
-    try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/Join');
-      final data = await doJSONRequest(ctx, url, hooks, req);
-      final JoinResponse res = JoinResponse.create();
-      res.mergeFromProto3Json(json.decode(data));
-      return Future.value(res);
-    } catch (e) {
-      rethrow;
-    }
   }
 
   @override
@@ -110,20 +86,20 @@ class SignalServerJSONClient implements SignalServer {
   }
 
   @override
-  Future<IceCandidateResponse> sendIceCandidate(twirp.Context ctx, IceCandidateRequest req) async {
+  Future<ICETrickleResponse> iceTrickle(twirp.Context ctx, ICETrickle req) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
-    ctx = twirp.withMethodName(ctx, 'SendIceCandidate');
+    ctx = twirp.withMethodName(ctx, 'IceTrickle');
     return interceptor((ctx, req) {
-      return callSendIceCandidate(ctx, req);
+      return callIceTrickle(ctx, req);
     })(ctx, req);
   }
 
-  Future<IceCandidateResponse> callSendIceCandidate(twirp.Context ctx, IceCandidateRequest req) async {
+  Future<ICETrickleResponse> callIceTrickle(twirp.Context ctx, ICETrickle req) async {
     try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendIceCandidate');
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/IceTrickle');
       final data = await doJSONRequest(ctx, url, hooks, req);
-      final IceCandidateResponse res = IceCandidateResponse.create();
+      final ICETrickleResponse res = ICETrickleResponse.create();
       res.mergeFromProto3Json(json.decode(data));
       return Future.value(res);
     } catch (e) {
@@ -215,28 +191,6 @@ class SignalServerProtobufClient implements SignalServer {
   }
 
   @override
-  Future<JoinResponse> join(twirp.Context ctx, JoinRequest req) async {
-    ctx = twirp.withPackageName(ctx, 'signal');
-    ctx = twirp.withServiceName(ctx, 'SignalServer');
-    ctx = twirp.withMethodName(ctx, 'Join');
-    return interceptor((ctx, req) {
-      return callJoin(ctx, req);
-    })(ctx, req);
-  }
-
-  Future<JoinResponse> callJoin(twirp.Context ctx, JoinRequest req) async {
-    try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/Join');
-      final data = await doProtobufRequest(ctx, url, hooks, req);
-      final JoinResponse res = JoinResponse.create();
-      res.mergeFromBuffer(data);
-      return Future.value(res);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
   Future<SetPublisherResponse> setPublisher(twirp.Context ctx, SetPublisherRequest req) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
@@ -281,20 +235,20 @@ class SignalServerProtobufClient implements SignalServer {
   }
 
   @override
-  Future<IceCandidateResponse> sendIceCandidate(twirp.Context ctx, IceCandidateRequest req) async {
+  Future<ICETrickleResponse> iceTrickle(twirp.Context ctx, ICETrickle req) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
-    ctx = twirp.withMethodName(ctx, 'SendIceCandidate');
+    ctx = twirp.withMethodName(ctx, 'IceTrickle');
     return interceptor((ctx, req) {
-      return callSendIceCandidate(ctx, req);
+      return callIceTrickle(ctx, req);
     })(ctx, req);
   }
 
-  Future<IceCandidateResponse> callSendIceCandidate(twirp.Context ctx, IceCandidateRequest req) async {
+  Future<ICETrickleResponse> callIceTrickle(twirp.Context ctx, ICETrickle req) async {
     try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendIceCandidate');
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/IceTrickle');
       final data = await doProtobufRequest(ctx, url, hooks, req);
-      final IceCandidateResponse res = IceCandidateResponse.create();
+      final ICETrickleResponse res = ICETrickleResponse.create();
       res.mergeFromBuffer(data);
       return Future.value(res);
     } catch (e) {

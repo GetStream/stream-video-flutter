@@ -204,6 +204,8 @@ class Participant extends $pb.GeneratedMessage {
     ..aOB(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audio')
     ..aOM<$1.Timestamp>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt', subBuilder: $1.Timestamp.create)
     ..aOM<$1.Timestamp>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt', subBuilder: $1.Timestamp.create)
+    ..aOS(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
+    ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackLookupPrefix')
     ..hasRequiredFields = false
   ;
 
@@ -217,6 +219,8 @@ class Participant extends $pb.GeneratedMessage {
     $core.bool? audio,
     $1.Timestamp? createdAt,
     $1.Timestamp? updatedAt,
+    $core.String? sessionId,
+    $core.String? trackLookupPrefix,
   }) {
     final _result = create();
     if (user != null) {
@@ -242,6 +246,12 @@ class Participant extends $pb.GeneratedMessage {
     }
     if (updatedAt != null) {
       _result.updatedAt = updatedAt;
+    }
+    if (sessionId != null) {
+      _result.sessionId = sessionId;
+    }
+    if (trackLookupPrefix != null) {
+      _result.trackLookupPrefix = trackLookupPrefix;
     }
     return _result;
   }
@@ -345,6 +355,24 @@ class Participant extends $pb.GeneratedMessage {
   void clearUpdatedAt() => clearField(8);
   @$pb.TagNumber(8)
   $1.Timestamp ensureUpdatedAt() => $_ensure(7);
+
+  @$pb.TagNumber(9)
+  $core.String get sessionId => $_getSZ(8);
+  @$pb.TagNumber(9)
+  set sessionId($core.String v) { $_setString(8, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasSessionId() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearSessionId() => clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.String get trackLookupPrefix => $_getSZ(9);
+  @$pb.TagNumber(10)
+  set trackLookupPrefix($core.String v) { $_setString(9, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasTrackLookupPrefix() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearTrackLookupPrefix() => clearField(10);
 }
 
 class User extends $pb.GeneratedMessage {
@@ -490,7 +518,7 @@ class User extends $pb.GeneratedMessage {
 
 class StreamQuality extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StreamQuality', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
-    ..e<VideoQuality>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'videoQuality', $pb.PbFieldType.OE, defaultOrMaker: VideoQuality.LOW, valueOf: VideoQuality.valueOf, enumValues: VideoQuality.values)
+    ..e<VideoQuality>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'videoQuality', $pb.PbFieldType.OE, defaultOrMaker: VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED, valueOf: VideoQuality.valueOf, enumValues: VideoQuality.values)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
     ..hasRequiredFields = false
   ;
@@ -861,22 +889,22 @@ class Codec extends $pb.GeneratedMessage {
 
 class AudioCodecs extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AudioCodecs', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
-    ..pc<Codec>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'encode', $pb.PbFieldType.PM, subBuilder: Codec.create)
-    ..pc<Codec>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'decode', $pb.PbFieldType.PM, subBuilder: Codec.create)
+    ..pc<Codec>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'encodes', $pb.PbFieldType.PM, subBuilder: Codec.create)
+    ..pc<Codec>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'decodes', $pb.PbFieldType.PM, subBuilder: Codec.create)
     ..hasRequiredFields = false
   ;
 
   AudioCodecs._() : super();
   factory AudioCodecs({
-    $core.Iterable<Codec>? encode,
-    $core.Iterable<Codec>? decode,
+    $core.Iterable<Codec>? encodes,
+    $core.Iterable<Codec>? decodes,
   }) {
     final _result = create();
-    if (encode != null) {
-      _result.encode.addAll(encode);
+    if (encodes != null) {
+      _result.encodes.addAll(encodes);
     }
-    if (decode != null) {
-      _result.decode.addAll(decode);
+    if (decodes != null) {
+      _result.decodes.addAll(decodes);
     }
     return _result;
   }
@@ -902,30 +930,30 @@ class AudioCodecs extends $pb.GeneratedMessage {
   static AudioCodecs? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<Codec> get encode => $_getList(0);
+  $core.List<Codec> get encodes => $_getList(0);
 
   @$pb.TagNumber(2)
-  $core.List<Codec> get decode => $_getList(1);
+  $core.List<Codec> get decodes => $_getList(1);
 }
 
 class VideoCodecs extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'VideoCodecs', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
-    ..pc<Codec>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'encode', $pb.PbFieldType.PM, subBuilder: Codec.create)
-    ..pc<Codec>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'decode', $pb.PbFieldType.PM, subBuilder: Codec.create)
+    ..pc<Codec>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'encodes', $pb.PbFieldType.PM, subBuilder: Codec.create)
+    ..pc<Codec>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'decodes', $pb.PbFieldType.PM, subBuilder: Codec.create)
     ..hasRequiredFields = false
   ;
 
   VideoCodecs._() : super();
   factory VideoCodecs({
-    $core.Iterable<Codec>? encode,
-    $core.Iterable<Codec>? decode,
+    $core.Iterable<Codec>? encodes,
+    $core.Iterable<Codec>? decodes,
   }) {
     final _result = create();
-    if (encode != null) {
-      _result.encode.addAll(encode);
+    if (encodes != null) {
+      _result.encodes.addAll(encodes);
     }
-    if (decode != null) {
-      _result.decode.addAll(decode);
+    if (decodes != null) {
+      _result.decodes.addAll(decodes);
     }
     return _result;
   }
@@ -951,10 +979,10 @@ class VideoCodecs extends $pb.GeneratedMessage {
   static VideoCodecs? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<Codec> get encode => $_getList(0);
+  $core.List<Codec> get encodes => $_getList(0);
 
   @$pb.TagNumber(2)
-  $core.List<Codec> get decode => $_getList(1);
+  $core.List<Codec> get decodes => $_getList(1);
 }
 
 class CodecSettings extends $pb.GeneratedMessage {
@@ -1028,5 +1056,80 @@ class CodecSettings extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(3)
   $core.List<VideoLayer> get layers => $_getList(2);
+}
+
+class ICETrickle extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ICETrickle', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
+    ..e<PeerType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'peerType', $pb.PbFieldType.OE, defaultOrMaker: PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED, valueOf: PeerType.valueOf, enumValues: PeerType.values)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'iceCandidate')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
+    ..hasRequiredFields = false
+  ;
+
+  ICETrickle._() : super();
+  factory ICETrickle({
+    PeerType? peerType,
+    $core.String? iceCandidate,
+    $core.String? sessionId,
+  }) {
+    final _result = create();
+    if (peerType != null) {
+      _result.peerType = peerType;
+    }
+    if (iceCandidate != null) {
+      _result.iceCandidate = iceCandidate;
+    }
+    if (sessionId != null) {
+      _result.sessionId = sessionId;
+    }
+    return _result;
+  }
+  factory ICETrickle.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ICETrickle.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ICETrickle clone() => ICETrickle()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ICETrickle copyWith(void Function(ICETrickle) updates) => super.copyWith((message) => updates(message as ICETrickle)) as ICETrickle; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ICETrickle create() => ICETrickle._();
+  ICETrickle createEmptyInstance() => create();
+  static $pb.PbList<ICETrickle> createRepeated() => $pb.PbList<ICETrickle>();
+  @$core.pragma('dart2js:noInline')
+  static ICETrickle getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ICETrickle>(create);
+  static ICETrickle? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  PeerType get peerType => $_getN(0);
+  @$pb.TagNumber(1)
+  set peerType(PeerType v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasPeerType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPeerType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get iceCandidate => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set iceCandidate($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasIceCandidate() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearIceCandidate() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get sessionId => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set sessionId($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasSessionId() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearSessionId() => clearField(3);
 }
 

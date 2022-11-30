@@ -9,23 +9,6 @@
 import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-class MemberField extends $pb.ProtobufEnum {
-  static const MemberField MEMBER_FIELD_UNSPECIFIED = MemberField._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'MEMBER_FIELD_UNSPECIFIED');
-  static const MemberField MEMBER_FIELD_ROLE = MemberField._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'MEMBER_FIELD_ROLE');
-  static const MemberField MEMBER_FIELD_CUSTOM = MemberField._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'MEMBER_FIELD_CUSTOM');
-
-  static const $core.List<MemberField> values = <MemberField> [
-    MEMBER_FIELD_UNSPECIFIED,
-    MEMBER_FIELD_ROLE,
-    MEMBER_FIELD_CUSTOM,
-  ];
-
-  static final $core.Map<$core.int, MemberField> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static MemberField? valueOf($core.int value) => _byValue[value];
-
-  const MemberField._($core.int v, $core.String n) : super(v, n);
-}
-
 class UserEventType extends $pb.ProtobufEnum {
   static const UserEventType USER_EVENT_TYPE_UNSPECIFIED = UserEventType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER_EVENT_TYPE_UNSPECIFIED');
   static const UserEventType USER_EVENT_TYPE_ACCEPTED_CALL = UserEventType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER_EVENT_TYPE_ACCEPTED_CALL');

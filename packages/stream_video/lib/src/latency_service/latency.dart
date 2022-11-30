@@ -1,47 +1,36 @@
 import 'package:http/http.dart' as http;
-import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
-import 'package:stream_video/src/core/utils/utils.dart';
 
-class LatencyService {
-  LatencyService({this.logger});
-  final Logger? logger;
-
-  Future<Map<String, Latency>> measureLatencies(
-    List<Edge> edges, [
-    int tries = 1,
-  ]) async {
-    if (edges.isEmpty) logger?.warning("received empty list of edges");
-    final latencies =
-        await Future.wait(edges.map((edge) => _measureLatency(edge, tries)));
-
-    return Map.fromEntries(latencies);
+/// A service that provides the latency of a given [edge] server in seconds.
+///
+/// [rounds] is the number of times to ping the server to get an average
+/// latency.
+///
+/// The latency is determined by sending a request to the edge server and
+/// measuring the time it takes to receive a response.
+Future<Latency> measureEdgeLatency({
+  required Edge edge,
+  int rounds = 3,
+}) async {
+  final latencyUrl = Uri.tryParse(edge.latencyUrl);
+  if (latencyUrl == null) {
+    return Latency(measurementsSeconds: [double.maxFinite]);
   }
 
-  Future<MapEntry<String, Latency>> _measureLatency(
-    Edge edge, [
-    int tries = 1,
-  ]) async {
-    final latencyUrl =
-        edge.latencyUrl; // "http://192.168.1.17:5764/ping"; //egde.latencyUrl;
-    logger?.info("measuring latencyUrl: $latencyUrl");
-    final url = Uri.tryParse(latencyUrl);
-    final measurementsSeconds = <double>[];
-
-    for (final _ in List<int>.generate(tries, (i) => i + 1)) {
-      try {
-        final stopwatch = Stopwatch()..start();
-        final _ = await http.get(url!);
-        stopwatch.stop();
-        final durationInMs = stopwatch.elapsed.inMilliseconds;
-        measurementsSeconds.add(toSeconds(durationInMs));
-      } catch (e) {
-        logger?.warning('failed to measure latency to $url');
-      }
+  final measurementsSeconds = <double>[];
+  for (var i = 0; i < rounds; i++) {
+    final sw = Stopwatch()..start();
+    try {
+      final _ = await http.get(latencyUrl);
+      sw.stop();
+      final diff = sw.elapsedMilliseconds.toDouble();
+      final diffInSeconds = diff / 1000;
+      measurementsSeconds.add(diffInSeconds);
+    } catch (_) {
+      sw.stop();
+      measurementsSeconds.add(double.maxFinite);
     }
-    return MapEntry<String, Latency>(
-      latencyUrl,
-      Latency(measurementsSeconds: measurementsSeconds),
-    );
   }
+
+  return Latency(measurementsSeconds: measurementsSeconds);
 }

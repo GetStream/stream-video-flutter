@@ -1,6 +1,6 @@
 import 'package:stream_video/src/sdp-transform/parse.dart';
 import 'package:test/test.dart';
-import 'package:collection/collection.dart';
+
 main() {
   test('test', () {
     final sdpStr = """v=0

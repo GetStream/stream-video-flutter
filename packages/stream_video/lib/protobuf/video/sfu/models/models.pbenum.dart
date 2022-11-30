@@ -10,12 +10,12 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class PeerType extends $pb.ProtobufEnum {
-  static const PeerType PUBLISHER = PeerType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'PUBLISHER');
-  static const PeerType SUBSCRIBER = PeerType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SUBSCRIBER');
+  static const PeerType PEER_TYPE_PUBLISHER_UNSPECIFIED = PeerType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'PEER_TYPE_PUBLISHER_UNSPECIFIED');
+  static const PeerType PEER_TYPE_SUBSCRIBER = PeerType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'PEER_TYPE_SUBSCRIBER');
 
   static const $core.List<PeerType> values = <PeerType> [
-    PUBLISHER,
-    SUBSCRIBER,
+    PEER_TYPE_PUBLISHER_UNSPECIFIED,
+    PEER_TYPE_SUBSCRIBER,
   ];
 
   static final $core.Map<$core.int, PeerType> _byValue = $pb.ProtobufEnum.initByValue(values);
@@ -25,14 +25,14 @@ class PeerType extends $pb.ProtobufEnum {
 }
 
 class ConnectionQuality extends $pb.ProtobufEnum {
-  static const ConnectionQuality BAD = ConnectionQuality._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'BAD');
-  static const ConnectionQuality POOR = ConnectionQuality._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'POOR');
-  static const ConnectionQuality GOOD = ConnectionQuality._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'GOOD');
+  static const ConnectionQuality CONNECTION_QUALITY_BAD_UNSPECIFIED = ConnectionQuality._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CONNECTION_QUALITY_BAD_UNSPECIFIED');
+  static const ConnectionQuality CONNECTION_QUALITY_POOR = ConnectionQuality._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CONNECTION_QUALITY_POOR');
+  static const ConnectionQuality CONNECTION_QUALITY_GOOD = ConnectionQuality._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CONNECTION_QUALITY_GOOD');
 
   static const $core.List<ConnectionQuality> values = <ConnectionQuality> [
-    BAD,
-    POOR,
-    GOOD,
+    CONNECTION_QUALITY_BAD_UNSPECIFIED,
+    CONNECTION_QUALITY_POOR,
+    CONNECTION_QUALITY_GOOD,
   ];
 
   static final $core.Map<$core.int, ConnectionQuality> _byValue = $pb.ProtobufEnum.initByValue(values);
@@ -42,14 +42,14 @@ class ConnectionQuality extends $pb.ProtobufEnum {
 }
 
 class VideoQuality extends $pb.ProtobufEnum {
-  static const VideoQuality LOW = VideoQuality._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'LOW');
-  static const VideoQuality MID = VideoQuality._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'MID');
-  static const VideoQuality HIGH = VideoQuality._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'HIGH');
+  static const VideoQuality VIDEO_QUALITY_LOW_UNSPECIFIED = VideoQuality._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VIDEO_QUALITY_LOW_UNSPECIFIED');
+  static const VideoQuality VIDEO_QUALITY_MID = VideoQuality._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VIDEO_QUALITY_MID');
+  static const VideoQuality VIDEO_QUALITY_HIGH = VideoQuality._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VIDEO_QUALITY_HIGH');
 
   static const $core.List<VideoQuality> values = <VideoQuality> [
-    LOW,
-    MID,
-    HIGH,
+    VIDEO_QUALITY_LOW_UNSPECIFIED,
+    VIDEO_QUALITY_MID,
+    VIDEO_QUALITY_HIGH,
   ];
 
   static final $core.Map<$core.int, VideoQuality> _byValue = $pb.ProtobufEnum.initByValue(values);
