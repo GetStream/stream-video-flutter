@@ -9,8 +9,6 @@ import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
 import '../models/models.pbjson.dart' as $0;
-import '../../../google/protobuf/struct.pbjson.dart' as $1;
-import '../../../google/protobuf/timestamp.pbjson.dart' as $2;
 
 @$core.Deprecated('Use updateVideoQualityRequestDescriptor instead')
 const UpdateVideoQualityRequest$json = const {
@@ -119,27 +117,27 @@ const IceCandidateRequest$json = const {
   '2': const [
     const {'1': 'publisher', '3': 1, '4': 1, '5': 8, '10': 'publisher'},
     const {'1': 'candidate', '3': 2, '4': 1, '5': 9, '10': 'candidate'},
-    const {'1': 'sdpMid', '3': 3, '4': 1, '5': 9, '9': 0, '10': 'sdpMid', '17': true},
-    const {'1': 'sdpMLineIndex', '3': 4, '4': 1, '5': 13, '9': 1, '10': 'sdpMLineIndex', '17': true},
-    const {'1': 'usernameFragment', '3': 5, '4': 1, '5': 9, '9': 2, '10': 'usernameFragment', '17': true},
+    const {'1': 'sdp_mid', '3': 3, '4': 1, '5': 9, '9': 0, '10': 'sdpMid', '17': true},
+    const {'1': 'sdp_mline_index', '3': 4, '4': 1, '5': 13, '9': 1, '10': 'sdpMlineIndex', '17': true},
+    const {'1': 'username_fragment', '3': 5, '4': 1, '5': 9, '9': 2, '10': 'usernameFragment', '17': true},
     const {'1': 'session_id', '3': 7, '4': 1, '5': 9, '10': 'sessionId'},
   ],
   '8': const [
-    const {'1': '_sdpMid'},
-    const {'1': '_sdpMLineIndex'},
-    const {'1': '_usernameFragment'},
+    const {'1': '_sdp_mid'},
+    const {'1': '_sdp_mline_index'},
+    const {'1': '_username_fragment'},
   ],
 };
 
 /// Descriptor for `IceCandidateRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List iceCandidateRequestDescriptor = $convert.base64Decode('ChNJY2VDYW5kaWRhdGVSZXF1ZXN0EhwKCXB1Ymxpc2hlchgBIAEoCFIJcHVibGlzaGVyEhwKCWNhbmRpZGF0ZRgCIAEoCVIJY2FuZGlkYXRlEhsKBnNkcE1pZBgDIAEoCUgAUgZzZHBNaWSIAQESKQoNc2RwTUxpbmVJbmRleBgEIAEoDUgBUg1zZHBNTGluZUluZGV4iAEBEi8KEHVzZXJuYW1lRnJhZ21lbnQYBSABKAlIAlIQdXNlcm5hbWVGcmFnbWVudIgBARIdCgpzZXNzaW9uX2lkGAcgASgJUglzZXNzaW9uSWRCCQoHX3NkcE1pZEIQCg5fc2RwTUxpbmVJbmRleEITChFfdXNlcm5hbWVGcmFnbWVudA==');
-@$core.Deprecated('Use iceCandidateResponseDescriptor instead')
-const IceCandidateResponse$json = const {
-  '1': 'IceCandidateResponse',
+final $typed_data.Uint8List iceCandidateRequestDescriptor = $convert.base64Decode('ChNJY2VDYW5kaWRhdGVSZXF1ZXN0EhwKCXB1Ymxpc2hlchgBIAEoCFIJcHVibGlzaGVyEhwKCWNhbmRpZGF0ZRgCIAEoCVIJY2FuZGlkYXRlEhwKB3NkcF9taWQYAyABKAlIAFIGc2RwTWlkiAEBEisKD3NkcF9tbGluZV9pbmRleBgEIAEoDUgBUg1zZHBNbGluZUluZGV4iAEBEjAKEXVzZXJuYW1lX2ZyYWdtZW50GAUgASgJSAJSEHVzZXJuYW1lRnJhZ21lbnSIAQESHQoKc2Vzc2lvbl9pZBgHIAEoCVIJc2Vzc2lvbklkQgoKCF9zZHBfbWlkQhIKEF9zZHBfbWxpbmVfaW5kZXhCFAoSX3VzZXJuYW1lX2ZyYWdtZW50');
+@$core.Deprecated('Use iCETrickleResponseDescriptor instead')
+const ICETrickleResponse$json = const {
+  '1': 'ICETrickleResponse',
 };
 
-/// Descriptor for `IceCandidateResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List iceCandidateResponseDescriptor = $convert.base64Decode('ChRJY2VDYW5kaWRhdGVSZXNwb25zZQ==');
+/// Descriptor for `ICETrickleResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List iCETrickleResponseDescriptor = $convert.base64Decode('ChJJQ0VUcmlja2xlUmVzcG9uc2U=');
 @$core.Deprecated('Use updateSubscriptionsResponseDescriptor instead')
 const UpdateSubscriptionsResponse$json = const {
   '1': 'UpdateSubscriptionsResponse',
@@ -169,29 +167,6 @@ const SetPublisherResponse$json = const {
 
 /// Descriptor for `SetPublisherResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List setPublisherResponseDescriptor = $convert.base64Decode('ChRTZXRQdWJsaXNoZXJSZXNwb25zZRIQCgNzZHAYASABKAlSA3NkcBIdCgpzZXNzaW9uX2lkGAMgASgJUglzZXNzaW9uSWQ=');
-@$core.Deprecated('Use joinRequestDescriptor instead')
-const JoinRequest$json = const {
-  '1': 'JoinRequest',
-  '2': const [
-    const {'1': 'subscriber_sdp_offer', '3': 1, '4': 1, '5': 9, '10': 'subscriberSdpOffer'},
-    const {'1': 'session_id', '3': 3, '4': 1, '5': 9, '10': 'sessionId'},
-    const {'1': 'codec_settings', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.models.CodecSettings', '10': 'codecSettings'},
-  ],
-};
-
-/// Descriptor for `JoinRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List joinRequestDescriptor = $convert.base64Decode('CgtKb2luUmVxdWVzdBIwChRzdWJzY3JpYmVyX3NkcF9vZmZlchgBIAEoCVISc3Vic2NyaWJlclNkcE9mZmVyEh0KCnNlc3Npb25faWQYAyABKAlSCXNlc3Npb25JZBJNCg5jb2RlY19zZXR0aW5ncxgEIAEoCzImLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkNvZGVjU2V0dGluZ3NSDWNvZGVjU2V0dGluZ3M=');
-@$core.Deprecated('Use joinResponseDescriptor instead')
-const JoinResponse$json = const {
-  '1': 'JoinResponse',
-  '2': const [
-    const {'1': 'sdp', '3': 1, '4': 1, '5': 9, '10': 'sdp'},
-    const {'1': 'call_state', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.CallState', '10': 'callState'},
-  ],
-};
-
-/// Descriptor for `JoinResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List joinResponseDescriptor = $convert.base64Decode('CgxKb2luUmVzcG9uc2USEAoDc2RwGAEgASgJUgNzZHASQQoKY2FsbF9zdGF0ZRgCIAEoCzIiLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkNhbGxTdGF0ZVIJY2FsbFN0YXRl');
 @$core.Deprecated('Use connectRequestDescriptor instead')
 const ConnectRequest$json = const {
   '1': 'ConnectRequest',
@@ -287,10 +262,9 @@ final $typed_data.Uint8List publishResponseDescriptor = $convert.base64Decode('C
 const $core.Map<$core.String, $core.dynamic> SignalServerServiceBase$json = const {
   '1': 'SignalServer',
   '2': const [
-    const {'1': 'Join', '2': '.stream.video.sfu.signal.JoinRequest', '3': '.stream.video.sfu.signal.JoinResponse'},
     const {'1': 'SetPublisher', '2': '.stream.video.sfu.signal.SetPublisherRequest', '3': '.stream.video.sfu.signal.SetPublisherResponse'},
     const {'1': 'SendAnswer', '2': '.stream.video.sfu.signal.SendAnswerRequest', '3': '.stream.video.sfu.signal.SendAnswerResponse'},
-    const {'1': 'SendIceCandidate', '2': '.stream.video.sfu.signal.IceCandidateRequest', '3': '.stream.video.sfu.signal.IceCandidateResponse'},
+    const {'1': 'IceTrickle', '2': '.stream.video.sfu.models.ICETrickle', '3': '.stream.video.sfu.signal.ICETrickleResponse'},
     const {'1': 'UpdateSubscriptions', '2': '.stream.video.sfu.signal.UpdateSubscriptionsRequest', '3': '.stream.video.sfu.signal.UpdateSubscriptionsResponse'},
     const {'1': 'UpdateMuteState', '2': '.stream.video.sfu.signal.UpdateMuteStateRequest', '3': '.stream.video.sfu.signal.UpdateMuteStateResponse'},
     const {'1': 'RequestVideoQuality', '2': '.stream.video.sfu.signal.UpdateVideoQualityRequest', '3': '.stream.video.sfu.signal.UpdateVideoQualityResponse'},
@@ -299,30 +273,15 @@ const $core.Map<$core.String, $core.dynamic> SignalServerServiceBase$json = cons
 
 @$core.Deprecated('Use signalServerServiceDescriptor instead')
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> SignalServerServiceBase$messageJson = const {
-  '.stream.video.sfu.signal.JoinRequest': JoinRequest$json,
-  '.stream.video.sfu.models.CodecSettings': $0.CodecSettings$json,
-  '.stream.video.sfu.models.AudioCodecs': $0.AudioCodecs$json,
-  '.stream.video.sfu.models.Codec': $0.Codec$json,
-  '.stream.video.sfu.models.VideoCodecs': $0.VideoCodecs$json,
-  '.stream.video.sfu.models.VideoLayer': $0.VideoLayer$json,
-  '.stream.video.sfu.models.VideoDimension': $0.VideoDimension$json,
-  '.stream.video.sfu.signal.JoinResponse': JoinResponse$json,
-  '.stream.video.sfu.models.CallState': $0.CallState$json,
-  '.stream.video.sfu.models.Participant': $0.Participant$json,
-  '.stream.video.sfu.models.User': $0.User$json,
-  '.google.protobuf.Struct': $1.Struct$json,
-  '.google.protobuf.Struct.FieldsEntry': $1.Struct_FieldsEntry$json,
-  '.google.protobuf.Value': $1.Value$json,
-  '.google.protobuf.ListValue': $1.ListValue$json,
-  '.google.protobuf.Timestamp': $2.Timestamp$json,
   '.stream.video.sfu.signal.SetPublisherRequest': SetPublisherRequest$json,
   '.stream.video.sfu.signal.SetPublisherResponse': SetPublisherResponse$json,
   '.stream.video.sfu.signal.SendAnswerRequest': SendAnswerRequest$json,
   '.stream.video.sfu.signal.SendAnswerResponse': SendAnswerResponse$json,
-  '.stream.video.sfu.signal.IceCandidateRequest': IceCandidateRequest$json,
-  '.stream.video.sfu.signal.IceCandidateResponse': IceCandidateResponse$json,
+  '.stream.video.sfu.models.ICETrickle': $0.ICETrickle$json,
+  '.stream.video.sfu.signal.ICETrickleResponse': ICETrickleResponse$json,
   '.stream.video.sfu.signal.UpdateSubscriptionsRequest': UpdateSubscriptionsRequest$json,
   '.stream.video.sfu.signal.UpdateSubscriptionsRequest.SubscriptionsEntry': UpdateSubscriptionsRequest_SubscriptionsEntry$json,
+  '.stream.video.sfu.models.VideoDimension': $0.VideoDimension$json,
   '.stream.video.sfu.signal.UpdateSubscriptionsResponse': UpdateSubscriptionsResponse$json,
   '.stream.video.sfu.signal.UpdateMuteStateRequest': UpdateMuteStateRequest$json,
   '.stream.video.sfu.signal.AudioMuteChanged': AudioMuteChanged$json,
@@ -334,4 +293,4 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> SignalServ
 };
 
 /// Descriptor for `SignalServer`. Decode as a `google.protobuf.ServiceDescriptorProto`.
-final $typed_data.Uint8List signalServerServiceDescriptor = $convert.base64Decode('CgxTaWduYWxTZXJ2ZXISUwoESm9pbhIkLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLkpvaW5SZXF1ZXN0GiUuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuSm9pblJlc3BvbnNlEmsKDFNldFB1Ymxpc2hlchIsLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlNldFB1Ymxpc2hlclJlcXVlc3QaLS5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5TZXRQdWJsaXNoZXJSZXNwb25zZRJlCgpTZW5kQW5zd2VyEiouc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuU2VuZEFuc3dlclJlcXVlc3QaKy5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5TZW5kQW5zd2VyUmVzcG9uc2USbwoQU2VuZEljZUNhbmRpZGF0ZRIsLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLkljZUNhbmRpZGF0ZVJlcXVlc3QaLS5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5JY2VDYW5kaWRhdGVSZXNwb25zZRKAAQoTVXBkYXRlU3Vic2NyaXB0aW9ucxIzLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlVwZGF0ZVN1YnNjcmlwdGlvbnNSZXF1ZXN0GjQuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuVXBkYXRlU3Vic2NyaXB0aW9uc1Jlc3BvbnNlEnQKD1VwZGF0ZU11dGVTdGF0ZRIvLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlVwZGF0ZU11dGVTdGF0ZVJlcXVlc3QaMC5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5VcGRhdGVNdXRlU3RhdGVSZXNwb25zZRJ+ChNSZXF1ZXN0VmlkZW9RdWFsaXR5EjIuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuVXBkYXRlVmlkZW9RdWFsaXR5UmVxdWVzdBozLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlVwZGF0ZVZpZGVvUXVhbGl0eVJlc3BvbnNl');
+final $typed_data.Uint8List signalServerServiceDescriptor = $convert.base64Decode('CgxTaWduYWxTZXJ2ZXISawoMU2V0UHVibGlzaGVyEiwuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuU2V0UHVibGlzaGVyUmVxdWVzdBotLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlNldFB1Ymxpc2hlclJlc3BvbnNlEmUKClNlbmRBbnN3ZXISKi5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5TZW5kQW5zd2VyUmVxdWVzdBorLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlNlbmRBbnN3ZXJSZXNwb25zZRJeCgpJY2VUcmlja2xlEiMuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuSUNFVHJpY2tsZRorLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLklDRVRyaWNrbGVSZXNwb25zZRKAAQoTVXBkYXRlU3Vic2NyaXB0aW9ucxIzLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlVwZGF0ZVN1YnNjcmlwdGlvbnNSZXF1ZXN0GjQuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuVXBkYXRlU3Vic2NyaXB0aW9uc1Jlc3BvbnNlEnQKD1VwZGF0ZU11dGVTdGF0ZRIvLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlVwZGF0ZU11dGVTdGF0ZVJlcXVlc3QaMC5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5VcGRhdGVNdXRlU3RhdGVSZXNwb25zZRJ+ChNSZXF1ZXN0VmlkZW9RdWFsaXR5EjIuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuVXBkYXRlVmlkZW9RdWFsaXR5UmVxdWVzdBozLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlVwZGF0ZVZpZGVvUXVhbGl0eVJlc3BvbnNl');

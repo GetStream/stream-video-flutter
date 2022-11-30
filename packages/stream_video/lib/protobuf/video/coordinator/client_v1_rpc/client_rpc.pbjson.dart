@@ -9,26 +9,16 @@ import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
 import '../call_v1/call.pbjson.dart' as $0;
-import 'envelopes.pbjson.dart' as $3;
 import '../user_v1/user.pbjson.dart' as $1;
+import 'envelopes.pbjson.dart' as $3;
 import '../../../google/protobuf/timestamp.pbjson.dart' as $7;
 import '../member_v1/member.pbjson.dart' as $2;
 import '../edge_v1/edge.pbjson.dart' as $4;
 import '../utils_v1/utils.pbjson.dart' as $5;
 import '../push_v1/push.pbjson.dart' as $6;
+import '../broadcast_v1/broadcast.pbjson.dart' as $9;
+import '../stat_v1/stat.pbjson.dart' as $8;
 
-@$core.Deprecated('Use memberFieldDescriptor instead')
-const MemberField$json = const {
-  '1': 'MemberField',
-  '2': const [
-    const {'1': 'MEMBER_FIELD_UNSPECIFIED', '2': 0},
-    const {'1': 'MEMBER_FIELD_ROLE', '2': 1},
-    const {'1': 'MEMBER_FIELD_CUSTOM', '2': 2},
-  ],
-};
-
-/// Descriptor for `MemberField`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List memberFieldDescriptor = $convert.base64Decode('CgtNZW1iZXJGaWVsZBIcChhNRU1CRVJfRklFTERfVU5TUEVDSUZJRUQQABIVChFNRU1CRVJfRklFTERfUk9MRRABEhcKE01FTUJFUl9GSUVMRF9DVVNUT00QAg==');
 @$core.Deprecated('Use userEventTypeDescriptor instead')
 const UserEventType$json = const {
   '1': 'UserEventType',
@@ -66,43 +56,34 @@ final $typed_data.Uint8List getCallResponseDescriptor = $convert.base64Decode('C
 const MemberInput$json = const {
   '1': 'MemberInput',
   '2': const [
-    const {'1': 'role', '3': 1, '4': 1, '5': 9, '10': 'role'},
-    const {'1': 'custom_json', '3': 2, '4': 1, '5': 12, '10': 'customJson'},
+    const {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
+    const {'1': 'role', '3': 2, '4': 1, '5': 9, '10': 'role'},
+    const {'1': 'custom_json', '3': 3, '4': 1, '5': 12, '10': 'customJson'},
+    const {'1': 'user_input', '3': 4, '4': 1, '5': 11, '6': '.stream.video.coordinator.user_v1.UserInput', '10': 'userInput'},
   ],
 };
 
 /// Descriptor for `MemberInput`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List memberInputDescriptor = $convert.base64Decode('CgtNZW1iZXJJbnB1dBISCgRyb2xlGAEgASgJUgRyb2xlEh8KC2N1c3RvbV9qc29uGAIgASgMUgpjdXN0b21Kc29u');
-@$core.Deprecated('Use updateCallMembersRequestDescriptor instead')
-const UpdateCallMembersRequest$json = const {
-  '1': 'UpdateCallMembersRequest',
+final $typed_data.Uint8List memberInputDescriptor = $convert.base64Decode('CgtNZW1iZXJJbnB1dBIXCgd1c2VyX2lkGAEgASgJUgZ1c2VySWQSEgoEcm9sZRgCIAEoCVIEcm9sZRIfCgtjdXN0b21fanNvbhgDIAEoDFIKY3VzdG9tSnNvbhJKCgp1c2VyX2lucHV0GAQgASgLMisuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLnVzZXJfdjEuVXNlcklucHV0Ugl1c2VySW5wdXQ=');
+@$core.Deprecated('Use upsertCallMembersRequestDescriptor instead')
+const UpsertCallMembersRequest$json = const {
+  '1': 'UpsertCallMembersRequest',
   '2': const [
     const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
-    const {'1': 'members', '3': 2, '4': 3, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.UpdateCallMembersRequest.MembersEntry', '10': 'members'},
-    const {'1': 'fields', '3': 3, '4': 3, '5': 14, '6': '.stream.video.coordinator.client_v1_rpc.MemberField', '10': 'fields'},
+    const {'1': 'members', '3': 2, '4': 3, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.MemberInput', '10': 'members'},
+    const {'1': 'ring', '3': 3, '4': 1, '5': 8, '10': 'ring'},
   ],
-  '3': const [UpdateCallMembersRequest_MembersEntry$json],
 };
 
-@$core.Deprecated('Use updateCallMembersRequestDescriptor instead')
-const UpdateCallMembersRequest_MembersEntry$json = const {
-  '1': 'MembersEntry',
-  '2': const [
-    const {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
-    const {'1': 'value', '3': 2, '4': 1, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.MemberInput', '10': 'value'},
-  ],
-  '7': const {'7': true},
+/// Descriptor for `UpsertCallMembersRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List upsertCallMembersRequestDescriptor = $convert.base64Decode('ChhVcHNlcnRDYWxsTWVtYmVyc1JlcXVlc3QSGQoIY2FsbF9jaWQYASABKAlSB2NhbGxDaWQSTQoHbWVtYmVycxgCIAMoCzIzLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLk1lbWJlcklucHV0UgdtZW1iZXJzEhIKBHJpbmcYAyABKAhSBHJpbmc=');
+@$core.Deprecated('Use upsertCallMembersResponseDescriptor instead')
+const UpsertCallMembersResponse$json = const {
+  '1': 'UpsertCallMembersResponse',
 };
 
-/// Descriptor for `UpdateCallMembersRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List updateCallMembersRequestDescriptor = $convert.base64Decode('ChhVcGRhdGVDYWxsTWVtYmVyc1JlcXVlc3QSGQoIY2FsbF9jaWQYASABKAlSB2NhbGxDaWQSZwoHbWVtYmVycxgCIAMoCzJNLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlVwZGF0ZUNhbGxNZW1iZXJzUmVxdWVzdC5NZW1iZXJzRW50cnlSB21lbWJlcnMSSwoGZmllbGRzGAMgAygOMjMuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuTWVtYmVyRmllbGRSBmZpZWxkcxpvCgxNZW1iZXJzRW50cnkSEAoDa2V5GAEgASgJUgNrZXkSSQoFdmFsdWUYAiABKAsyMy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5NZW1iZXJJbnB1dFIFdmFsdWU6AjgB');
-@$core.Deprecated('Use updateCallMembersResponseDescriptor instead')
-const UpdateCallMembersResponse$json = const {
-  '1': 'UpdateCallMembersResponse',
-};
-
-/// Descriptor for `UpdateCallMembersResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List updateCallMembersResponseDescriptor = $convert.base64Decode('ChlVcGRhdGVDYWxsTWVtYmVyc1Jlc3BvbnNl');
+/// Descriptor for `UpsertCallMembersResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List upsertCallMembersResponseDescriptor = $convert.base64Decode('ChlVcHNlcnRDYWxsTWVtYmVyc1Jlc3BvbnNl');
 @$core.Deprecated('Use deleteCallMembersRequestDescriptor instead')
 const DeleteCallMembersRequest$json = const {
   '1': 'DeleteCallMembersRequest',
@@ -126,27 +107,16 @@ const CreateCallInput$json = const {
   '1': 'CreateCallInput',
   '2': const [
     const {'1': 'call', '3': 1, '4': 1, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.CallInput', '10': 'call'},
-    const {'1': 'members', '3': 2, '4': 3, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.CreateCallInput.MembersEntry', '10': 'members'},
-    const {'1': 'ring', '3': 4, '4': 1, '5': 8, '9': 0, '10': 'ring', '17': true},
+    const {'1': 'members', '3': 2, '4': 3, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.MemberInput', '10': 'members'},
+    const {'1': 'ring', '3': 3, '4': 1, '5': 8, '9': 0, '10': 'ring', '17': true},
   ],
-  '3': const [CreateCallInput_MembersEntry$json],
   '8': const [
     const {'1': '_ring'},
   ],
 };
 
-@$core.Deprecated('Use createCallInputDescriptor instead')
-const CreateCallInput_MembersEntry$json = const {
-  '1': 'MembersEntry',
-  '2': const [
-    const {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
-    const {'1': 'value', '3': 2, '4': 1, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.MemberInput', '10': 'value'},
-  ],
-  '7': const {'7': true},
-};
-
 /// Descriptor for `CreateCallInput`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List createCallInputDescriptor = $convert.base64Decode('Cg9DcmVhdGVDYWxsSW5wdXQSRQoEY2FsbBgBIAEoCzIxLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkNhbGxJbnB1dFIEY2FsbBJeCgdtZW1iZXJzGAIgAygLMkQuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuQ3JlYXRlQ2FsbElucHV0Lk1lbWJlcnNFbnRyeVIHbWVtYmVycxIXCgRyaW5nGAQgASgISABSBHJpbmeIAQEabwoMTWVtYmVyc0VudHJ5EhAKA2tleRgBIAEoCVIDa2V5EkkKBXZhbHVlGAIgASgLMjMuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuTWVtYmVySW5wdXRSBXZhbHVlOgI4AUIHCgVfcmluZw==');
+final $typed_data.Uint8List createCallInputDescriptor = $convert.base64Decode('Cg9DcmVhdGVDYWxsSW5wdXQSRQoEY2FsbBgBIAEoCzIxLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkNhbGxJbnB1dFIEY2FsbBJNCgdtZW1iZXJzGAIgAygLMjMuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuTWVtYmVySW5wdXRSB21lbWJlcnMSFwoEcmluZxgDIAEoCEgAUgRyaW5niAEBQgcKBV9yaW5n');
 @$core.Deprecated('Use createCallRequestDescriptor instead')
 const CreateCallRequest$json = const {
   '1': 'CreateCallRequest',
@@ -242,6 +212,70 @@ const UpdateCallResponse$json = const {
 
 /// Descriptor for `UpdateCallResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List updateCallResponseDescriptor = $convert.base64Decode('ChJVcGRhdGVDYWxsUmVzcG9uc2USSAoEY2FsbBgBIAEoCzI0LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkNhbGxFbnZlbG9wZVIEY2FsbA==');
+@$core.Deprecated('Use roleOverrideDescriptor instead')
+const RoleOverride$json = const {
+  '1': 'RoleOverride',
+  '2': const [
+    const {'1': 'user_ids', '3': 1, '4': 3, '5': 9, '10': 'userIds'},
+    const {'1': 'role_name', '3': 2, '4': 1, '5': 9, '9': 0, '10': 'roleName', '17': true},
+  ],
+  '8': const [
+    const {'1': '_role_name'},
+  ],
+};
+
+/// Descriptor for `RoleOverride`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List roleOverrideDescriptor = $convert.base64Decode('CgxSb2xlT3ZlcnJpZGUSGQoIdXNlcl9pZHMYASADKAlSB3VzZXJJZHMSIAoJcm9sZV9uYW1lGAIgASgJSABSCHJvbGVOYW1liAEBQgwKCl9yb2xlX25hbWU=');
+@$core.Deprecated('Use permissionGrantOverrideDescriptor instead')
+const PermissionGrantOverride$json = const {
+  '1': 'PermissionGrantOverride',
+  '2': const [
+    const {'1': 'user_ids', '3': 1, '4': 3, '5': 9, '10': 'userIds'},
+    const {'1': 'permissions', '3': 2, '4': 3, '5': 9, '10': 'permissions'},
+  ],
+};
+
+/// Descriptor for `PermissionGrantOverride`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List permissionGrantOverrideDescriptor = $convert.base64Decode('ChdQZXJtaXNzaW9uR3JhbnRPdmVycmlkZRIZCgh1c2VyX2lkcxgBIAMoCVIHdXNlcklkcxIgCgtwZXJtaXNzaW9ucxgCIAMoCVILcGVybWlzc2lvbnM=');
+@$core.Deprecated('Use updateCallPermissionsRequestDescriptor instead')
+const UpdateCallPermissionsRequest$json = const {
+  '1': 'UpdateCallPermissionsRequest',
+  '2': const [
+    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
+    const {'1': 'role_override', '3': 2, '4': 1, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.RoleOverride', '9': 0, '10': 'roleOverride'},
+    const {'1': 'permission_override', '3': 3, '4': 1, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.PermissionGrantOverride', '9': 0, '10': 'permissionOverride'},
+  ],
+  '8': const [
+    const {'1': 'grant_input'},
+  ],
+};
+
+/// Descriptor for `UpdateCallPermissionsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List updateCallPermissionsRequestDescriptor = $convert.base64Decode('ChxVcGRhdGVDYWxsUGVybWlzc2lvbnNSZXF1ZXN0EhkKCGNhbGxfY2lkGAEgASgJUgdjYWxsQ2lkElsKDXJvbGVfb3ZlcnJpZGUYAiABKAsyNC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5Sb2xlT3ZlcnJpZGVIAFIMcm9sZU92ZXJyaWRlEnIKE3Blcm1pc3Npb25fb3ZlcnJpZGUYAyABKAsyPy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5QZXJtaXNzaW9uR3JhbnRPdmVycmlkZUgAUhJwZXJtaXNzaW9uT3ZlcnJpZGVCDQoLZ3JhbnRfaW5wdXQ=');
+@$core.Deprecated('Use updateCallPermissionsResponseDescriptor instead')
+const UpdateCallPermissionsResponse$json = const {
+  '1': 'UpdateCallPermissionsResponse',
+};
+
+/// Descriptor for `UpdateCallPermissionsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List updateCallPermissionsResponseDescriptor = $convert.base64Decode('Ch1VcGRhdGVDYWxsUGVybWlzc2lvbnNSZXNwb25zZQ==');
+@$core.Deprecated('Use endCallRequestDescriptor instead')
+const EndCallRequest$json = const {
+  '1': 'EndCallRequest',
+  '2': const [
+    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
+  ],
+};
+
+/// Descriptor for `EndCallRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List endCallRequestDescriptor = $convert.base64Decode('Cg5FbmRDYWxsUmVxdWVzdBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZA==');
+@$core.Deprecated('Use endCallResponseDescriptor instead')
+const EndCallResponse$json = const {
+  '1': 'EndCallResponse',
+};
+
+/// Descriptor for `EndCallResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List endCallResponseDescriptor = $convert.base64Decode('Cg9FbmRDYWxsUmVzcG9uc2U=');
 @$core.Deprecated('Use createCallResponseDescriptor instead')
 const CreateCallResponse$json = const {
   '1': 'CreateCallResponse',
@@ -382,14 +416,13 @@ final $typed_data.Uint8List queryDevicesResponseDescriptor = $convert.base64Deco
 const SendEventRequest$json = const {
   '1': 'SendEventRequest',
   '2': const [
-    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
-    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
-    const {'1': 'event_type', '3': 3, '4': 1, '5': 14, '6': '.stream.video.coordinator.client_v1_rpc.UserEventType', '10': 'eventType'},
+    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
+    const {'1': 'event_type', '3': 2, '4': 1, '5': 14, '6': '.stream.video.coordinator.client_v1_rpc.UserEventType', '10': 'eventType'},
   ],
 };
 
 /// Descriptor for `SendEventRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List sendEventRequestDescriptor = $convert.base64Decode('ChBTZW5kRXZlbnRSZXF1ZXN0EhsKCWNhbGxfdHlwZRgBIAEoCVIIY2FsbFR5cGUSFwoHY2FsbF9pZBgCIAEoCVIGY2FsbElkElQKCmV2ZW50X3R5cGUYAyABKA4yNS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5Vc2VyRXZlbnRUeXBlUglldmVudFR5cGU=');
+final $typed_data.Uint8List sendEventRequestDescriptor = $convert.base64Decode('ChBTZW5kRXZlbnRSZXF1ZXN0EhkKCGNhbGxfY2lkGAEgASgJUgdjYWxsQ2lkElQKCmV2ZW50X3R5cGUYAiABKA4yNS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5Vc2VyRXZlbnRUeXBlUglldmVudFR5cGU=');
 @$core.Deprecated('Use sendEventResponseDescriptor instead')
 const SendEventResponse$json = const {
   '1': 'SendEventResponse',
@@ -401,13 +434,14 @@ final $typed_data.Uint8List sendEventResponseDescriptor = $convert.base64Decode(
 const SendCustomEventRequest$json = const {
   '1': 'SendCustomEventRequest',
   '2': const [
-    const {'1': 'type', '3': 1, '4': 1, '5': 9, '10': 'type'},
-    const {'1': 'data', '3': 2, '4': 1, '5': 12, '10': 'data'},
+    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
+    const {'1': 'type', '3': 2, '4': 1, '5': 9, '10': 'type'},
+    const {'1': 'data_json', '3': 3, '4': 1, '5': 12, '10': 'dataJson'},
   ],
 };
 
 /// Descriptor for `SendCustomEventRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List sendCustomEventRequestDescriptor = $convert.base64Decode('ChZTZW5kQ3VzdG9tRXZlbnRSZXF1ZXN0EhIKBHR5cGUYASABKAlSBHR5cGUSEgoEZGF0YRgCIAEoDFIEZGF0YQ==');
+final $typed_data.Uint8List sendCustomEventRequestDescriptor = $convert.base64Decode('ChZTZW5kQ3VzdG9tRXZlbnRSZXF1ZXN0EhkKCGNhbGxfY2lkGAEgASgJUgdjYWxsQ2lkEhIKBHR5cGUYAiABKAlSBHR5cGUSGwoJZGF0YV9qc29uGAMgASgMUghkYXRhSnNvbg==');
 @$core.Deprecated('Use sendCustomEventResponseDescriptor instead')
 const SendCustomEventResponse$json = const {
   '1': 'SendCustomEventResponse',
@@ -419,14 +453,13 @@ final $typed_data.Uint8List sendCustomEventResponseDescriptor = $convert.base64D
 const ReportCallStatsRequest$json = const {
   '1': 'ReportCallStatsRequest',
   '2': const [
-    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
-    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
-    const {'1': 'stats_json', '3': 3, '4': 1, '5': 12, '10': 'statsJson'},
+    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
+    const {'1': 'stats_json', '3': 2, '4': 1, '5': 12, '10': 'statsJson'},
   ],
 };
 
 /// Descriptor for `ReportCallStatsRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List reportCallStatsRequestDescriptor = $convert.base64Decode('ChZSZXBvcnRDYWxsU3RhdHNSZXF1ZXN0EhsKCWNhbGxfdHlwZRgBIAEoCVIIY2FsbFR5cGUSFwoHY2FsbF9pZBgCIAEoCVIGY2FsbElkEh0KCnN0YXRzX2pzb24YAyABKAxSCXN0YXRzSnNvbg==');
+final $typed_data.Uint8List reportCallStatsRequestDescriptor = $convert.base64Decode('ChZSZXBvcnRDYWxsU3RhdHNSZXF1ZXN0EhkKCGNhbGxfY2lkGAEgASgJUgdjYWxsQ2lkEh0KCnN0YXRzX2pzb24YAiABKAxSCXN0YXRzSnNvbg==');
 @$core.Deprecated('Use reportCallStatsResponseDescriptor instead')
 const ReportCallStatsResponse$json = const {
   '1': 'ReportCallStatsResponse',
@@ -434,30 +467,52 @@ const ReportCallStatsResponse$json = const {
 
 /// Descriptor for `ReportCallStatsResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List reportCallStatsResponseDescriptor = $convert.base64Decode('ChdSZXBvcnRDYWxsU3RhdHNSZXNwb25zZQ==');
+@$core.Deprecated('Use reportCallStatEventRequestDescriptor instead')
+const ReportCallStatEventRequest$json = const {
+  '1': 'ReportCallStatEventRequest',
+  '2': const [
+    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
+    const {'1': 'timestamp', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'timestamp'},
+    const {'1': 'participant_connected', '3': 3, '4': 1, '5': 11, '6': '.stream.video.coordinator.stat_v1.ParticipantConnected', '9': 0, '10': 'participantConnected'},
+    const {'1': 'participant_disconnected', '3': 4, '4': 1, '5': 11, '6': '.stream.video.coordinator.stat_v1.ParticipantDisconnected', '9': 0, '10': 'participantDisconnected'},
+    const {'1': 'media_state_changed', '3': 5, '4': 1, '5': 11, '6': '.stream.video.coordinator.stat_v1.MediaStateChanged', '9': 0, '10': 'mediaStateChanged'},
+  ],
+  '8': const [
+    const {'1': 'event'},
+  ],
+};
+
+/// Descriptor for `ReportCallStatEventRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List reportCallStatEventRequestDescriptor = $convert.base64Decode('ChpSZXBvcnRDYWxsU3RhdEV2ZW50UmVxdWVzdBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZBI4Cgl0aW1lc3RhbXAYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUgl0aW1lc3RhbXASbQoVcGFydGljaXBhbnRfY29ubmVjdGVkGAMgASgLMjYuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLnN0YXRfdjEuUGFydGljaXBhbnRDb25uZWN0ZWRIAFIUcGFydGljaXBhbnRDb25uZWN0ZWQSdgoYcGFydGljaXBhbnRfZGlzY29ubmVjdGVkGAQgASgLMjkuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLnN0YXRfdjEuUGFydGljaXBhbnREaXNjb25uZWN0ZWRIAFIXcGFydGljaXBhbnREaXNjb25uZWN0ZWQSZQoTbWVkaWFfc3RhdGVfY2hhbmdlZBgFIAEoCzIzLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5zdGF0X3YxLk1lZGlhU3RhdGVDaGFuZ2VkSABSEW1lZGlhU3RhdGVDaGFuZ2VkQgcKBWV2ZW50');
+@$core.Deprecated('Use reportCallStatEventResponseDescriptor instead')
+const ReportCallStatEventResponse$json = const {
+  '1': 'ReportCallStatEventResponse',
+};
+
+/// Descriptor for `ReportCallStatEventResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List reportCallStatEventResponseDescriptor = $convert.base64Decode('ChtSZXBvcnRDYWxsU3RhdEV2ZW50UmVzcG9uc2U=');
 @$core.Deprecated('Use getCallStatsRequestDescriptor instead')
 const GetCallStatsRequest$json = const {
   '1': 'GetCallStatsRequest',
   '2': const [
-    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
-    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
+    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
   ],
 };
 
 /// Descriptor for `GetCallStatsRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List getCallStatsRequestDescriptor = $convert.base64Decode('ChNHZXRDYWxsU3RhdHNSZXF1ZXN0EhsKCWNhbGxfdHlwZRgBIAEoCVIIY2FsbFR5cGUSFwoHY2FsbF9pZBgCIAEoCVIGY2FsbElk');
+final $typed_data.Uint8List getCallStatsRequestDescriptor = $convert.base64Decode('ChNHZXRDYWxsU3RhdHNSZXF1ZXN0EhkKCGNhbGxfY2lkGAEgASgJUgdjYWxsQ2lk');
 @$core.Deprecated('Use reportIssueRequestDescriptor instead')
 const ReportIssueRequest$json = const {
   '1': 'ReportIssueRequest',
   '2': const [
-    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
-    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
-    const {'1': 'description', '3': 3, '4': 1, '5': 9, '10': 'description'},
-    const {'1': 'custom_json', '3': 4, '4': 1, '5': 12, '10': 'customJson'},
+    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
+    const {'1': 'description', '3': 2, '4': 1, '5': 9, '10': 'description'},
+    const {'1': 'custom_json', '3': 3, '4': 1, '5': 12, '10': 'customJson'},
   ],
 };
 
 /// Descriptor for `ReportIssueRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List reportIssueRequestDescriptor = $convert.base64Decode('ChJSZXBvcnRJc3N1ZVJlcXVlc3QSGwoJY2FsbF90eXBlGAEgASgJUghjYWxsVHlwZRIXCgdjYWxsX2lkGAIgASgJUgZjYWxsSWQSIAoLZGVzY3JpcHRpb24YAyABKAlSC2Rlc2NyaXB0aW9uEh8KC2N1c3RvbV9qc29uGAQgASgMUgpjdXN0b21Kc29u');
+final $typed_data.Uint8List reportIssueRequestDescriptor = $convert.base64Decode('ChJSZXBvcnRJc3N1ZVJlcXVlc3QSGQoIY2FsbF9jaWQYASABKAlSB2NhbGxDaWQSIAoLZGVzY3JpcHRpb24YAiABKAlSC2Rlc2NyaXB0aW9uEh8KC2N1c3RvbV9qc29uGAMgASgMUgpjdXN0b21Kc29u');
 @$core.Deprecated('Use reportIssueResponseDescriptor instead')
 const ReportIssueResponse$json = const {
   '1': 'ReportIssueResponse',
@@ -469,16 +524,15 @@ final $typed_data.Uint8List reportIssueResponseDescriptor = $convert.base64Decod
 const ReviewCallRequest$json = const {
   '1': 'ReviewCallRequest',
   '2': const [
-    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
-    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
-    const {'1': 'stars', '3': 3, '4': 1, '5': 2, '10': 'stars'},
-    const {'1': 'description', '3': 4, '4': 1, '5': 9, '10': 'description'},
-    const {'1': 'custom_json', '3': 5, '4': 1, '5': 12, '10': 'customJson'},
+    const {'1': 'call_cid', '3': 1, '4': 1, '5': 9, '10': 'callCid'},
+    const {'1': 'stars', '3': 2, '4': 1, '5': 2, '10': 'stars'},
+    const {'1': 'description', '3': 3, '4': 1, '5': 9, '10': 'description'},
+    const {'1': 'custom_json', '3': 4, '4': 1, '5': 12, '10': 'customJson'},
   ],
 };
 
 /// Descriptor for `ReviewCallRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List reviewCallRequestDescriptor = $convert.base64Decode('ChFSZXZpZXdDYWxsUmVxdWVzdBIbCgljYWxsX3R5cGUYASABKAlSCGNhbGxUeXBlEhcKB2NhbGxfaWQYAiABKAlSBmNhbGxJZBIUCgVzdGFycxgDIAEoAlIFc3RhcnMSIAoLZGVzY3JpcHRpb24YBCABKAlSC2Rlc2NyaXB0aW9uEh8KC2N1c3RvbV9qc29uGAUgASgMUgpjdXN0b21Kc29u');
+final $typed_data.Uint8List reviewCallRequestDescriptor = $convert.base64Decode('ChFSZXZpZXdDYWxsUmVxdWVzdBIZCghjYWxsX2NpZBgBIAEoCVIHY2FsbENpZBIUCgVzdGFycxgCIAEoAlIFc3RhcnMSIAoLZGVzY3JpcHRpb24YAyABKAlSC2Rlc2NyaXB0aW9uEh8KC2N1c3RvbV9qc29uGAQgASgMUgpjdXN0b21Kc29u');
 @$core.Deprecated('Use reviewCallResponseDescriptor instead')
 const ReviewCallResponse$json = const {
   '1': 'ReviewCallResponse',
@@ -486,6 +540,83 @@ const ReviewCallResponse$json = const {
 
 /// Descriptor for `ReviewCallResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List reviewCallResponseDescriptor = $convert.base64Decode('ChJSZXZpZXdDYWxsUmVzcG9uc2U=');
+@$core.Deprecated('Use startBroadcastRequestDescriptor instead')
+const StartBroadcastRequest$json = const {
+  '1': 'StartBroadcastRequest',
+  '2': const [
+    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
+    const {'1': 'hls_broadcast', '3': 3, '4': 1, '5': 8, '10': 'hlsBroadcast'},
+    const {'1': 'rtmp', '3': 5, '4': 1, '5': 11, '6': '.stream.video.coordinator.broadcast_v1.RTMPOptions', '10': 'rtmp'},
+  ],
+};
+
+/// Descriptor for `StartBroadcastRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List startBroadcastRequestDescriptor = $convert.base64Decode('ChVTdGFydEJyb2FkY2FzdFJlcXVlc3QSGwoJY2FsbF90eXBlGAEgASgJUghjYWxsVHlwZRIXCgdjYWxsX2lkGAIgASgJUgZjYWxsSWQSIwoNaGxzX2Jyb2FkY2FzdBgDIAEoCFIMaGxzQnJvYWRjYXN0EkYKBHJ0bXAYBSABKAsyMi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuYnJvYWRjYXN0X3YxLlJUTVBPcHRpb25zUgRydG1w');
+@$core.Deprecated('Use startBroadcastResponseDescriptor instead')
+const StartBroadcastResponse$json = const {
+  '1': 'StartBroadcastResponse',
+  '2': const [
+    const {'1': 'broadcast', '3': 1, '4': 1, '5': 11, '6': '.stream.video.coordinator.broadcast_v1.Broadcast', '10': 'broadcast'},
+  ],
+};
+
+/// Descriptor for `StartBroadcastResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List startBroadcastResponseDescriptor = $convert.base64Decode('ChZTdGFydEJyb2FkY2FzdFJlc3BvbnNlEk4KCWJyb2FkY2FzdBgBIAEoCzIwLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5icm9hZGNhc3RfdjEuQnJvYWRjYXN0Uglicm9hZGNhc3Q=');
+@$core.Deprecated('Use stopBroadcastRequestDescriptor instead')
+const StopBroadcastRequest$json = const {
+  '1': 'StopBroadcastRequest',
+  '2': const [
+    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
+  ],
+};
+
+/// Descriptor for `StopBroadcastRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List stopBroadcastRequestDescriptor = $convert.base64Decode('ChRTdG9wQnJvYWRjYXN0UmVxdWVzdBIbCgljYWxsX3R5cGUYASABKAlSCGNhbGxUeXBlEhcKB2NhbGxfaWQYAiABKAlSBmNhbGxJZA==');
+@$core.Deprecated('Use stopBroadcastResponseDescriptor instead')
+const StopBroadcastResponse$json = const {
+  '1': 'StopBroadcastResponse',
+};
+
+/// Descriptor for `StopBroadcastResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List stopBroadcastResponseDescriptor = $convert.base64Decode('ChVTdG9wQnJvYWRjYXN0UmVzcG9uc2U=');
+@$core.Deprecated('Use startRecordingRequestDescriptor instead')
+const StartRecordingRequest$json = const {
+  '1': 'StartRecordingRequest',
+  '2': const [
+    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
+  ],
+};
+
+/// Descriptor for `StartRecordingRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List startRecordingRequestDescriptor = $convert.base64Decode('ChVTdGFydFJlY29yZGluZ1JlcXVlc3QSGwoJY2FsbF90eXBlGAEgASgJUghjYWxsVHlwZRIXCgdjYWxsX2lkGAIgASgJUgZjYWxsSWQ=');
+@$core.Deprecated('Use startRecordingResponseDescriptor instead')
+const StartRecordingResponse$json = const {
+  '1': 'StartRecordingResponse',
+};
+
+/// Descriptor for `StartRecordingResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List startRecordingResponseDescriptor = $convert.base64Decode('ChZTdGFydFJlY29yZGluZ1Jlc3BvbnNl');
+@$core.Deprecated('Use stopRecordingRequestDescriptor instead')
+const StopRecordingRequest$json = const {
+  '1': 'StopRecordingRequest',
+  '2': const [
+    const {'1': 'call_type', '3': 1, '4': 1, '5': 9, '10': 'callType'},
+    const {'1': 'call_id', '3': 2, '4': 1, '5': 9, '10': 'callId'},
+  ],
+};
+
+/// Descriptor for `StopRecordingRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List stopRecordingRequestDescriptor = $convert.base64Decode('ChRTdG9wUmVjb3JkaW5nUmVxdWVzdBIbCgljYWxsX3R5cGUYASABKAlSCGNhbGxUeXBlEhcKB2NhbGxfaWQYAiABKAlSBmNhbGxJZA==');
+@$core.Deprecated('Use stopRecordingResponseDescriptor instead')
+const StopRecordingResponse$json = const {
+  '1': 'StopRecordingResponse',
+};
+
+/// Descriptor for `StopRecordingResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List stopRecordingResponseDescriptor = $convert.base64Decode('ChVTdG9wUmVjb3JkaW5nUmVzcG9uc2U=');
 const $core.Map<$core.String, $core.dynamic> ClientRPCServiceBase$json = const {
   '1': 'ClientRPC',
   '2': const [
@@ -494,16 +625,23 @@ const $core.Map<$core.String, $core.dynamic> ClientRPCServiceBase$json = const {
     const {'1': 'JoinCall', '2': '.stream.video.coordinator.client_v1_rpc.JoinCallRequest', '3': '.stream.video.coordinator.client_v1_rpc.JoinCallResponse'},
     const {'1': 'GetCallEdgeServer', '2': '.stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest', '3': '.stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse'},
     const {'1': 'UpdateCall', '2': '.stream.video.coordinator.client_v1_rpc.UpdateCallRequest', '3': '.stream.video.coordinator.client_v1_rpc.UpdateCallResponse'},
+    const {'1': 'UpdateCallPermissions', '2': '.stream.video.coordinator.client_v1_rpc.UpdateCallPermissionsRequest', '3': '.stream.video.coordinator.client_v1_rpc.UpdateCallPermissionsResponse'},
+    const {'1': 'EndCall', '2': '.stream.video.coordinator.client_v1_rpc.EndCallRequest', '3': '.stream.video.coordinator.client_v1_rpc.EndCallResponse'},
     const {'1': 'QueryCalls', '2': '.stream.video.coordinator.client_v1_rpc.QueryCallsRequest', '3': '.stream.video.coordinator.client_v1_rpc.QueryCallsResponse'},
     const {'1': 'QueryMembers', '2': '.stream.video.coordinator.client_v1_rpc.QueryMembersRequest', '3': '.stream.video.coordinator.client_v1_rpc.QueryMembersResponse'},
     const {'1': 'CreateDevice', '2': '.stream.video.coordinator.client_v1_rpc.CreateDeviceRequest', '3': '.stream.video.coordinator.client_v1_rpc.CreateDeviceResponse'},
     const {'1': 'DeleteDevice', '2': '.stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest', '3': '.stream.video.coordinator.client_v1_rpc.DeleteDeviceResponse'},
     const {'1': 'QueryDevices', '2': '.stream.video.coordinator.client_v1_rpc.QueryDevicesRequest', '3': '.stream.video.coordinator.client_v1_rpc.QueryDevicesResponse'},
-    const {'1': 'UpdateCallMembers', '2': '.stream.video.coordinator.client_v1_rpc.UpdateCallMembersRequest', '3': '.stream.video.coordinator.client_v1_rpc.UpdateCallMembersResponse'},
+    const {'1': 'StartBroadcast', '2': '.stream.video.coordinator.client_v1_rpc.StartBroadcastRequest', '3': '.stream.video.coordinator.client_v1_rpc.StartBroadcastResponse'},
+    const {'1': 'StopBroadcast', '2': '.stream.video.coordinator.client_v1_rpc.StopBroadcastRequest', '3': '.stream.video.coordinator.client_v1_rpc.StopBroadcastResponse'},
+    const {'1': 'StartRecording', '2': '.stream.video.coordinator.client_v1_rpc.StartRecordingRequest', '3': '.stream.video.coordinator.client_v1_rpc.StartRecordingResponse'},
+    const {'1': 'StopRecording', '2': '.stream.video.coordinator.client_v1_rpc.StopRecordingRequest', '3': '.stream.video.coordinator.client_v1_rpc.StopRecordingResponse'},
+    const {'1': 'UpsertCallMembers', '2': '.stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest', '3': '.stream.video.coordinator.client_v1_rpc.UpsertCallMembersResponse'},
     const {'1': 'DeleteCallMembers', '2': '.stream.video.coordinator.client_v1_rpc.DeleteCallMembersRequest', '3': '.stream.video.coordinator.client_v1_rpc.DeleteCallMembersResponse'},
     const {'1': 'SendEvent', '2': '.stream.video.coordinator.client_v1_rpc.SendEventRequest', '3': '.stream.video.coordinator.client_v1_rpc.SendEventResponse'},
     const {'1': 'SendCustomEvent', '2': '.stream.video.coordinator.client_v1_rpc.SendCustomEventRequest', '3': '.stream.video.coordinator.client_v1_rpc.SendCustomEventResponse'},
     const {'1': 'ReportCallStats', '2': '.stream.video.coordinator.client_v1_rpc.ReportCallStatsRequest', '3': '.stream.video.coordinator.client_v1_rpc.ReportCallStatsResponse'},
+    const {'1': 'ReportCallStatEvent', '2': '.stream.video.coordinator.client_v1_rpc.ReportCallStatEventRequest', '3': '.stream.video.coordinator.client_v1_rpc.ReportCallStatEventResponse'},
     const {'1': 'ReviewCall', '2': '.stream.video.coordinator.client_v1_rpc.ReviewCallRequest', '3': '.stream.video.coordinator.client_v1_rpc.ReviewCallResponse'},
     const {'1': 'ReportIssue', '2': '.stream.video.coordinator.client_v1_rpc.ReportIssueRequest', '3': '.stream.video.coordinator.client_v1_rpc.ReportIssueResponse'},
   ],
@@ -517,8 +655,8 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ClientRPCS
   '.stream.video.coordinator.call_v1.CallOptions': $0.CallOptions$json,
   '.stream.video.coordinator.call_v1.RecordingOptions': $0.RecordingOptions$json,
   '.stream.video.coordinator.call_v1.BroadcastingOptions': $0.BroadcastingOptions$json,
-  '.stream.video.coordinator.client_v1_rpc.CreateCallInput.MembersEntry': CreateCallInput_MembersEntry$json,
   '.stream.video.coordinator.client_v1_rpc.MemberInput': MemberInput$json,
+  '.stream.video.coordinator.user_v1.UserInput': $1.UserInput$json,
   '.stream.video.coordinator.client_v1_rpc.CreateCallResponse': CreateCallResponse$json,
   '.stream.video.coordinator.client_v1_rpc.CallEnvelope': $3.CallEnvelope$json,
   '.stream.video.coordinator.client_v1_rpc.CallEnvelope.UsersEntry': $3.CallEnvelope_UsersEntry$json,
@@ -544,6 +682,12 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ClientRPCS
   '.stream.video.coordinator.edge_v1.ICEServer': $4.ICEServer$json,
   '.stream.video.coordinator.client_v1_rpc.UpdateCallRequest': UpdateCallRequest$json,
   '.stream.video.coordinator.client_v1_rpc.UpdateCallResponse': UpdateCallResponse$json,
+  '.stream.video.coordinator.client_v1_rpc.UpdateCallPermissionsRequest': UpdateCallPermissionsRequest$json,
+  '.stream.video.coordinator.client_v1_rpc.RoleOverride': RoleOverride$json,
+  '.stream.video.coordinator.client_v1_rpc.PermissionGrantOverride': PermissionGrantOverride$json,
+  '.stream.video.coordinator.client_v1_rpc.UpdateCallPermissionsResponse': UpdateCallPermissionsResponse$json,
+  '.stream.video.coordinator.client_v1_rpc.EndCallRequest': EndCallRequest$json,
+  '.stream.video.coordinator.client_v1_rpc.EndCallResponse': EndCallResponse$json,
   '.stream.video.coordinator.client_v1_rpc.QueryCallsRequest': QueryCallsRequest$json,
   '.stream.video.coordinator.utils_v1.Sort': $5.Sort$json,
   '.stream.video.coordinator.client_v1_rpc.QueryCallsResponse': QueryCallsResponse$json,
@@ -564,9 +708,18 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ClientRPCS
   '.stream.video.coordinator.client_v1_rpc.DeleteDeviceResponse': DeleteDeviceResponse$json,
   '.stream.video.coordinator.client_v1_rpc.QueryDevicesRequest': QueryDevicesRequest$json,
   '.stream.video.coordinator.client_v1_rpc.QueryDevicesResponse': QueryDevicesResponse$json,
-  '.stream.video.coordinator.client_v1_rpc.UpdateCallMembersRequest': UpdateCallMembersRequest$json,
-  '.stream.video.coordinator.client_v1_rpc.UpdateCallMembersRequest.MembersEntry': UpdateCallMembersRequest_MembersEntry$json,
-  '.stream.video.coordinator.client_v1_rpc.UpdateCallMembersResponse': UpdateCallMembersResponse$json,
+  '.stream.video.coordinator.client_v1_rpc.StartBroadcastRequest': StartBroadcastRequest$json,
+  '.stream.video.coordinator.broadcast_v1.RTMPOptions': $9.RTMPOptions$json,
+  '.stream.video.coordinator.client_v1_rpc.StartBroadcastResponse': StartBroadcastResponse$json,
+  '.stream.video.coordinator.broadcast_v1.Broadcast': $9.Broadcast$json,
+  '.stream.video.coordinator.client_v1_rpc.StopBroadcastRequest': StopBroadcastRequest$json,
+  '.stream.video.coordinator.client_v1_rpc.StopBroadcastResponse': StopBroadcastResponse$json,
+  '.stream.video.coordinator.client_v1_rpc.StartRecordingRequest': StartRecordingRequest$json,
+  '.stream.video.coordinator.client_v1_rpc.StartRecordingResponse': StartRecordingResponse$json,
+  '.stream.video.coordinator.client_v1_rpc.StopRecordingRequest': StopRecordingRequest$json,
+  '.stream.video.coordinator.client_v1_rpc.StopRecordingResponse': StopRecordingResponse$json,
+  '.stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest': UpsertCallMembersRequest$json,
+  '.stream.video.coordinator.client_v1_rpc.UpsertCallMembersResponse': UpsertCallMembersResponse$json,
   '.stream.video.coordinator.client_v1_rpc.DeleteCallMembersRequest': DeleteCallMembersRequest$json,
   '.stream.video.coordinator.client_v1_rpc.DeleteCallMembersResponse': DeleteCallMembersResponse$json,
   '.stream.video.coordinator.client_v1_rpc.SendEventRequest': SendEventRequest$json,
@@ -575,6 +728,11 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ClientRPCS
   '.stream.video.coordinator.client_v1_rpc.SendCustomEventResponse': SendCustomEventResponse$json,
   '.stream.video.coordinator.client_v1_rpc.ReportCallStatsRequest': ReportCallStatsRequest$json,
   '.stream.video.coordinator.client_v1_rpc.ReportCallStatsResponse': ReportCallStatsResponse$json,
+  '.stream.video.coordinator.client_v1_rpc.ReportCallStatEventRequest': ReportCallStatEventRequest$json,
+  '.stream.video.coordinator.stat_v1.ParticipantConnected': $8.ParticipantConnected$json,
+  '.stream.video.coordinator.stat_v1.ParticipantDisconnected': $8.ParticipantDisconnected$json,
+  '.stream.video.coordinator.stat_v1.MediaStateChanged': $8.MediaStateChanged$json,
+  '.stream.video.coordinator.client_v1_rpc.ReportCallStatEventResponse': ReportCallStatEventResponse$json,
   '.stream.video.coordinator.client_v1_rpc.ReviewCallRequest': ReviewCallRequest$json,
   '.stream.video.coordinator.client_v1_rpc.ReviewCallResponse': ReviewCallResponse$json,
   '.stream.video.coordinator.client_v1_rpc.ReportIssueRequest': ReportIssueRequest$json,
@@ -582,4 +740,4 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ClientRPCS
 };
 
 /// Descriptor for `ClientRPC`. Decode as a `google.protobuf.ServiceDescriptorProto`.
-final $typed_data.Uint8List clientRPCServiceDescriptor = $convert.base64Decode('CglDbGllbnRSUEMSgwEKCkNyZWF0ZUNhbGwSOS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5DcmVhdGVDYWxsUmVxdWVzdBo6LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkNyZWF0ZUNhbGxSZXNwb25zZRKSAQoPR2V0T3JDcmVhdGVDYWxsEj4uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuR2V0T3JDcmVhdGVDYWxsUmVxdWVzdBo/LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkdldE9yQ3JlYXRlQ2FsbFJlc3BvbnNlEn0KCEpvaW5DYWxsEjcuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuSm9pbkNhbGxSZXF1ZXN0Gjguc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuSm9pbkNhbGxSZXNwb25zZRKYAQoRR2V0Q2FsbEVkZ2VTZXJ2ZXISQC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5HZXRDYWxsRWRnZVNlcnZlclJlcXVlc3QaQS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5HZXRDYWxsRWRnZVNlcnZlclJlc3BvbnNlEoMBCgpVcGRhdGVDYWxsEjkuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuVXBkYXRlQ2FsbFJlcXVlc3QaOi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5VcGRhdGVDYWxsUmVzcG9uc2USgwEKClF1ZXJ5Q2FsbHMSOS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5RdWVyeUNhbGxzUmVxdWVzdBo6LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlF1ZXJ5Q2FsbHNSZXNwb25zZRKJAQoMUXVlcnlNZW1iZXJzEjsuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuUXVlcnlNZW1iZXJzUmVxdWVzdBo8LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlF1ZXJ5TWVtYmVyc1Jlc3BvbnNlEokBCgxDcmVhdGVEZXZpY2USOy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5DcmVhdGVEZXZpY2VSZXF1ZXN0Gjwuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuQ3JlYXRlRGV2aWNlUmVzcG9uc2USiQEKDERlbGV0ZURldmljZRI7LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkRlbGV0ZURldmljZVJlcXVlc3QaPC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5EZWxldGVEZXZpY2VSZXNwb25zZRKJAQoMUXVlcnlEZXZpY2VzEjsuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuUXVlcnlEZXZpY2VzUmVxdWVzdBo8LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlF1ZXJ5RGV2aWNlc1Jlc3BvbnNlEpgBChFVcGRhdGVDYWxsTWVtYmVycxJALnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlVwZGF0ZUNhbGxNZW1iZXJzUmVxdWVzdBpBLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlVwZGF0ZUNhbGxNZW1iZXJzUmVzcG9uc2USmAEKEURlbGV0ZUNhbGxNZW1iZXJzEkAuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuRGVsZXRlQ2FsbE1lbWJlcnNSZXF1ZXN0GkEuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuRGVsZXRlQ2FsbE1lbWJlcnNSZXNwb25zZRKAAQoJU2VuZEV2ZW50Ejguc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuU2VuZEV2ZW50UmVxdWVzdBo5LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlNlbmRFdmVudFJlc3BvbnNlEpIBCg9TZW5kQ3VzdG9tRXZlbnQSPi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5TZW5kQ3VzdG9tRXZlbnRSZXF1ZXN0Gj8uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuU2VuZEN1c3RvbUV2ZW50UmVzcG9uc2USkgEKD1JlcG9ydENhbGxTdGF0cxI+LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlJlcG9ydENhbGxTdGF0c1JlcXVlc3QaPy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5SZXBvcnRDYWxsU3RhdHNSZXNwb25zZRKDAQoKUmV2aWV3Q2FsbBI5LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlJldmlld0NhbGxSZXF1ZXN0Gjouc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuUmV2aWV3Q2FsbFJlc3BvbnNlEoYBCgtSZXBvcnRJc3N1ZRI6LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlJlcG9ydElzc3VlUmVxdWVzdBo7LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlJlcG9ydElzc3VlUmVzcG9uc2U=');
+final $typed_data.Uint8List clientRPCServiceDescriptor = $convert.base64Decode('CglDbGllbnRSUEMSgwEKCkNyZWF0ZUNhbGwSOS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5DcmVhdGVDYWxsUmVxdWVzdBo6LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkNyZWF0ZUNhbGxSZXNwb25zZRKSAQoPR2V0T3JDcmVhdGVDYWxsEj4uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuR2V0T3JDcmVhdGVDYWxsUmVxdWVzdBo/LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkdldE9yQ3JlYXRlQ2FsbFJlc3BvbnNlEn0KCEpvaW5DYWxsEjcuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuSm9pbkNhbGxSZXF1ZXN0Gjguc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuSm9pbkNhbGxSZXNwb25zZRKYAQoRR2V0Q2FsbEVkZ2VTZXJ2ZXISQC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5HZXRDYWxsRWRnZVNlcnZlclJlcXVlc3QaQS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5HZXRDYWxsRWRnZVNlcnZlclJlc3BvbnNlEoMBCgpVcGRhdGVDYWxsEjkuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuVXBkYXRlQ2FsbFJlcXVlc3QaOi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5VcGRhdGVDYWxsUmVzcG9uc2USpAEKFVVwZGF0ZUNhbGxQZXJtaXNzaW9ucxJELnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlVwZGF0ZUNhbGxQZXJtaXNzaW9uc1JlcXVlc3QaRS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5VcGRhdGVDYWxsUGVybWlzc2lvbnNSZXNwb25zZRJ6CgdFbmRDYWxsEjYuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuRW5kQ2FsbFJlcXVlc3QaNy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5FbmRDYWxsUmVzcG9uc2USgwEKClF1ZXJ5Q2FsbHMSOS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5RdWVyeUNhbGxzUmVxdWVzdBo6LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlF1ZXJ5Q2FsbHNSZXNwb25zZRKJAQoMUXVlcnlNZW1iZXJzEjsuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuUXVlcnlNZW1iZXJzUmVxdWVzdBo8LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlF1ZXJ5TWVtYmVyc1Jlc3BvbnNlEokBCgxDcmVhdGVEZXZpY2USOy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5DcmVhdGVEZXZpY2VSZXF1ZXN0Gjwuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuQ3JlYXRlRGV2aWNlUmVzcG9uc2USiQEKDERlbGV0ZURldmljZRI7LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkRlbGV0ZURldmljZVJlcXVlc3QaPC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5EZWxldGVEZXZpY2VSZXNwb25zZRKJAQoMUXVlcnlEZXZpY2VzEjsuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuUXVlcnlEZXZpY2VzUmVxdWVzdBo8LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlF1ZXJ5RGV2aWNlc1Jlc3BvbnNlEo8BCg5TdGFydEJyb2FkY2FzdBI9LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlN0YXJ0QnJvYWRjYXN0UmVxdWVzdBo+LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlN0YXJ0QnJvYWRjYXN0UmVzcG9uc2USjAEKDVN0b3BCcm9hZGNhc3QSPC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5TdG9wQnJvYWRjYXN0UmVxdWVzdBo9LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlN0b3BCcm9hZGNhc3RSZXNwb25zZRKPAQoOU3RhcnRSZWNvcmRpbmcSPS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5TdGFydFJlY29yZGluZ1JlcXVlc3QaPi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5TdGFydFJlY29yZGluZ1Jlc3BvbnNlEowBCg1TdG9wUmVjb3JkaW5nEjwuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuU3RvcFJlY29yZGluZ1JlcXVlc3QaPS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5TdG9wUmVjb3JkaW5nUmVzcG9uc2USmAEKEVVwc2VydENhbGxNZW1iZXJzEkAuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuVXBzZXJ0Q2FsbE1lbWJlcnNSZXF1ZXN0GkEuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuVXBzZXJ0Q2FsbE1lbWJlcnNSZXNwb25zZRKYAQoRRGVsZXRlQ2FsbE1lbWJlcnMSQC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5EZWxldGVDYWxsTWVtYmVyc1JlcXVlc3QaQS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5EZWxldGVDYWxsTWVtYmVyc1Jlc3BvbnNlEoABCglTZW5kRXZlbnQSOC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5TZW5kRXZlbnRSZXF1ZXN0Gjkuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuU2VuZEV2ZW50UmVzcG9uc2USkgEKD1NlbmRDdXN0b21FdmVudBI+LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlNlbmRDdXN0b21FdmVudFJlcXVlc3QaPy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5TZW5kQ3VzdG9tRXZlbnRSZXNwb25zZRKSAQoPUmVwb3J0Q2FsbFN0YXRzEj4uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuUmVwb3J0Q2FsbFN0YXRzUmVxdWVzdBo/LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlJlcG9ydENhbGxTdGF0c1Jlc3BvbnNlEp4BChNSZXBvcnRDYWxsU3RhdEV2ZW50EkIuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuUmVwb3J0Q2FsbFN0YXRFdmVudFJlcXVlc3QaQy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5SZXBvcnRDYWxsU3RhdEV2ZW50UmVzcG9uc2USgwEKClJldmlld0NhbGwSOS5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5SZXZpZXdDYWxsUmVxdWVzdBo6LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLlJldmlld0NhbGxSZXNwb25zZRKGAQoLUmVwb3J0SXNzdWUSOi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5SZXBvcnRJc3N1ZVJlcXVlc3QaOy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2xpZW50X3YxX3JwYy5SZXBvcnRJc3N1ZVJlc3BvbnNl');

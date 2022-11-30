@@ -1,46 +1,74 @@
-import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/participant_v1/participant.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/user_v1/user.pb.dart';
-import 'package:stream_video/stream_video.dart';
+import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart' as sfu;
+import 'package:stream_video/src/track/local/local.dart';
+import 'package:stream_video/src/track/track.dart';
 
-class CallParticipant {
-  final String id;
-  final String role;
-  final String name;
-  final String profileImageURL;
-  final bool isOnline;
-  final bool hasVideo;
-  final bool hasAudio;
-  final bool showTrack;
-  //webrtc track
-  final MediaStream? track;
+typedef TrackSize = sfu.VideoDimension;
 
-  CallParticipant({
+/// Represents a Participant in the [Call].
+class CallParticipant<T extends Track> {
+  /// Creates a new [CallParticipant].
+  const CallParticipant({
     required this.id,
     required this.role,
     required this.name,
-    required this.profileImageURL,
+    this.profileImageURL,
     required this.isOnline,
     required this.hasVideo,
     required this.hasAudio,
-    required this.showTrack,
-    this.track,
+    this.tracks,
+    this.trackSize,
+    required this.audioLevel,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.sessionId,
+    required this.trackLookupPrefix,
+    this.extraData,
   });
-  @override
-  String toString() => '''CallParticipant(
-    id: $id,
-    role: $role,
-    name: $name,
-    profileImageURL: $profileImageURL,
-    isOnline: $isOnline,
-    hasVideo: $hasVideo,
-    hasAudio: $hasAudio,
-    showTrack: $showTrack,
-    hasTrack: ${track!=null},
-  )''';
 
-  //generate copy with
+  /// Creates a new [CallParticipant] from the sfu [Participant].
+  CallParticipant.fromSfu(sfu.Participant participant)
+      : id = participant.user.id,
+        role = participant.user.role,
+        name = participant.user.name,
+        profileImageURL = participant.user.imageUrl,
+        isOnline = true,
+        hasVideo = participant.video,
+        hasAudio = participant.audio,
+        tracks = null,
+        trackSize = null,
+        audioLevel = 0,
+        createdAt = participant.createdAt.toDateTime(),
+        updatedAt = participant.updatedAt.toDateTime(),
+        sessionId = participant.sessionId,
+        trackLookupPrefix = participant.trackLookupPrefix,
+        extraData = participant.custom.fields;
+
+  final String id;
+  final String role;
+  final String name;
+  final String? profileImageURL;
+  final bool isOnline;
+  final bool hasVideo;
+  final bool hasAudio;
+  final Iterable<T>? tracks;
+  final TrackSize? trackSize;
+  final double audioLevel;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String sessionId;
+  final String trackLookupPrefix;
+  final Map<String, Object?>? extraData;
+
+  bool get isLocal => false;
+
+  /// Returns all the [VideoTrack]s of this [CallParticipant].
+  Iterable<VideoTrack>? get videoTracks => tracks?.whereType<VideoTrack>();
+
+  /// Returns all the [AudioTrack]s of this [CallParticipant].
+  Iterable<AudioTrack>? get audioTracks => tracks?.whereType<AudioTrack>();
+
+  /// Creates a copy of this [CallParticipant] with the given fields replaced
+  /// with the new values.
   CallParticipant copyWith({
     String? id,
     String? role,
@@ -49,8 +77,14 @@ class CallParticipant {
     bool? isOnline,
     bool? hasVideo,
     bool? hasAudio,
-    bool? showTrack,
-    MediaStream? track,
+    Iterable<T>? tracks,
+    TrackSize? trackSize,
+    double? audioLevel,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? sessionId,
+    String? trackLookupPrefix,
+    Map<String, Object?>? extraData,
   }) {
     return CallParticipant(
       id: id ?? this.id,
@@ -60,62 +94,96 @@ class CallParticipant {
       isOnline: isOnline ?? this.isOnline,
       hasVideo: hasVideo ?? this.hasVideo,
       hasAudio: hasAudio ?? this.hasAudio,
-      showTrack: showTrack ?? this.showTrack,
-      track: track ?? this.track,
+      tracks: tracks ?? this.tracks,
+      trackSize: trackSize ?? this.trackSize,
+      audioLevel: audioLevel ?? this.audioLevel,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      sessionId: sessionId ?? this.sessionId,
+      trackLookupPrefix: trackLookupPrefix ?? this.trackLookupPrefix,
+      extraData: extraData ?? this.extraData,
     );
   }
 }
 
-// extension VideoParticipantX on Participant {
-//   CallParticipant toCallParticipant(bool showTrack) {
-//     return CallParticipant(
-//       id: user.id,
-//       role: role,
-//       name: user.name.isEmpty ? user.id : user.name,
-//       profileImageURL: user.imageUrl,
-//       isOnline: online,
-//       hasVideo: video,
-//       hasAudio: audio,
-//       showTrack: showTrack,
-//     );
-//   }
-// }
+/// Represents a local [CallParticipant].
+class LocalCallParticipant extends CallParticipant<LocalTrack> {
+  /// Creates a new [LocalCallParticipant].
+  const LocalCallParticipant({
+    required super.id,
+    required super.role,
+    required super.name,
+    super.profileImageURL,
+    required super.isOnline,
+    required super.hasVideo,
+    required super.hasAudio,
+    super.tracks,
+    super.trackSize,
+    required super.audioLevel,
+    required super.createdAt,
+    required super.updatedAt,
+    required super.sessionId,
+    required super.trackLookupPrefix,
+    this.audioDeviceId,
+    this.videoDeviceId,
+    super.extraData,
+  });
 
-extension UserX on User {
-  CallParticipant toCallParticipant() => CallParticipant(
-        id: id,
-        role: role,
-        name: name.isEmpty ? id : name,
-        profileImageURL: imageUrl,
-        isOnline: false,
-        hasVideo: false,
-        hasAudio: false,
-        showTrack: false,
-      );
-}
+  /// Creates a new [LocalCallParticipant] from the sfu [Participant].
+  LocalCallParticipant.fromSfu(sfu.Participant participant)
+      : audioDeviceId = null,
+        videoDeviceId = null,
+        super.fromSfu(participant);
 
-extension CallParticipantX on CallParticipant {
-  User toUserInfo() => User(
-        id: id,
-        role: role,
-        name: name,
-        imageUrl: profileImageURL,
-      );
-}
+  /// The device ID of the currently selected audio input device of the local
+  /// participant (returned by the [MediaDevices API](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia))
+  final String? audioDeviceId;
 
-extension JoinCallResponseX on JoinCallResponse {
-  List<CallParticipant> callParticipants() =>
-      call.users.values.map((e) => e.toCallParticipant()).toList();
-}
+  /// The device ID of the currently selected video input device of the local
+  /// participant (returned by the [MediaDevices API](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia))
+  final String? videoDeviceId;
 
-extension CallParticipantsX on Map<String, CallParticipant> {
-  List<CallParticipant> get onlineParticipants => entries
-      .map((entry) => entry.value)
-      .where((element) => element.isOnline == true)
-      .toList();
+  @override
+  bool get isLocal => true;
 
-  List<CallParticipant> get offlineParticipants => entries
-      .map((entry) => entry.value)
-      .where((element) => element.isOnline == false)
-      .toList();
+  @override
+  LocalCallParticipant copyWith({
+    String? id,
+    String? role,
+    String? name,
+    String? profileImageURL,
+    bool? isOnline,
+    bool? hasVideo,
+    bool? hasAudio,
+    Iterable<LocalTrack>? tracks,
+    TrackSize? trackSize,
+    double? audioLevel,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? sessionId,
+    String? trackLookupPrefix,
+    String? audioDeviceId,
+    String? videoDeviceId,
+    Map<String, Object?>? extraData,
+  }) {
+    return LocalCallParticipant(
+      id: id ?? this.id,
+      role: role ?? this.role,
+      name: name ?? this.name,
+      profileImageURL: profileImageURL ?? this.profileImageURL,
+      isOnline: isOnline ?? this.isOnline,
+      hasVideo: hasVideo ?? this.hasVideo,
+      hasAudio: hasAudio ?? this.hasAudio,
+      tracks: tracks ?? this.tracks,
+      trackSize: trackSize ?? this.trackSize,
+      audioLevel: audioLevel ?? this.audioLevel,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      sessionId: sessionId ?? this.sessionId,
+      trackLookupPrefix: trackLookupPrefix ?? this.trackLookupPrefix,
+      audioDeviceId: audioDeviceId ?? this.audioDeviceId,
+      videoDeviceId: videoDeviceId ?? this.videoDeviceId,
+      extraData: extraData ?? this.extraData,
+    );
+  }
 }

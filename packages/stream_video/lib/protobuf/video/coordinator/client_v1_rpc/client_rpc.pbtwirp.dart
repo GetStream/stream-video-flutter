@@ -6,10 +6,14 @@ import 'package:http/http.dart' as http;
 import 'package:protobuf/protobuf.dart';
 import 'package:tart/tart.dart' as twirp;
 import 'client_rpc.pb.dart';
+import 'package:stream_video/protobuf/google/protobuf/timestamp.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/broadcast_v1/broadcast.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/call_v1/call.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/push_v1/push.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/stat_v1/stat.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/user_v1/user.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/utils_v1/utils.pb.dart';
 
 
@@ -25,6 +29,10 @@ abstract class ClientRPC {
   Future<GetCallEdgeServerResponse> getCallEdgeServer(twirp.Context ctx, GetCallEdgeServerRequest req);
   
   Future<UpdateCallResponse> updateCall(twirp.Context ctx, UpdateCallRequest req);
+  // UpdateCallPermissions allows users to change permissions granted to members// this can be done in three ways:// 1. grant users a different role for this call (eg. make a host)// 2. grant users a permission on this call (eg. allow one user to screen-share)// 3. grant some permissions to all users (eg. allow participants to unmute themselves)
+  Future<UpdateCallPermissionsResponse> updateCallPermissions(twirp.Context ctx, UpdateCallPermissionsRequest req);
+  // EndCall sets the call as ended with the following side-effects:// the call itself is updated and ended_at set to current time// on-going call recording and broadcasting is stopped// all participants connected to the call are disconnected
+  Future<EndCallResponse> endCall(twirp.Context ctx, EndCallRequest req);
   
   Future<QueryCallsResponse> queryCalls(twirp.Context ctx, QueryCallsRequest req);
   // QueryMembers gets a list of members that match your query criteria
@@ -35,9 +43,17 @@ abstract class ClientRPC {
   Future<DeleteDeviceResponse> deleteDevice(twirp.Context ctx, DeleteDeviceRequest req);
   
   Future<QueryDevicesResponse> queryDevices(twirp.Context ctx, QueryDevicesRequest req);
-  // UpdateMembers creates or updates members in a room.// If a member is not found, It will be created.// TODO: response with room data
-  Future<UpdateCallMembersResponse> updateCallMembers(twirp.Context ctx, UpdateCallMembersRequest req);
-  // DeleteMembers deletes members from a room.// TODO: response with room data
+  // starts broadcast to HLS and/or RTMP, replaces existing settings if broadcasting is already started
+  Future<StartBroadcastResponse> startBroadcast(twirp.Context ctx, StartBroadcastRequest req);
+  // stops broadcasting to HLS and/or RTMP
+  Future<StopBroadcastResponse> stopBroadcast(twirp.Context ctx, StopBroadcastRequest req);
+  
+  Future<StartRecordingResponse> startRecording(twirp.Context ctx, StartRecordingRequest req);
+  
+  Future<StopRecordingResponse> stopRecording(twirp.Context ctx, StopRecordingRequest req);
+  // Adds members to a call
+  Future<UpsertCallMembersResponse> upsertCallMembers(twirp.Context ctx, UpsertCallMembersRequest req);
+  // DeleteMembers deletes members from a room.
   Future<DeleteCallMembersResponse> deleteCallMembers(twirp.Context ctx, DeleteCallMembersRequest req);
   
   Future<SendEventResponse> sendEvent(twirp.Context ctx, SendEventRequest req);
@@ -45,6 +61,8 @@ abstract class ClientRPC {
   Future<SendCustomEventResponse> sendCustomEvent(twirp.Context ctx, SendCustomEventRequest req);
   // endpoint for storing stats (perhaps we should move this to the SFU layer though)
   Future<ReportCallStatsResponse> reportCallStats(twirp.Context ctx, ReportCallStatsRequest req);
+  // endpoint for storing stat-related events raised by the client
+  Future<ReportCallStatEventResponse> reportCallStatEvent(twirp.Context ctx, ReportCallStatEventRequest req);
   // endpoint for reviewing/rating the quality of calls
   Future<ReviewCallResponse> reviewCall(twirp.Context ctx, ReviewCallRequest req);
   // endpoint for users to report issues with a call
@@ -178,6 +196,50 @@ class ClientRPCJSONClient implements ClientRPC {
   }
 
   @override
+  Future<UpdateCallPermissionsResponse> updateCallPermissions(twirp.Context ctx, UpdateCallPermissionsRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'UpdateCallPermissions');
+    return interceptor((ctx, req) {
+      return callUpdateCallPermissions(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<UpdateCallPermissionsResponse> callUpdateCallPermissions(twirp.Context ctx, UpdateCallPermissionsRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/UpdateCallPermissions');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final UpdateCallPermissionsResponse res = UpdateCallPermissionsResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<EndCallResponse> endCall(twirp.Context ctx, EndCallRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'EndCall');
+    return interceptor((ctx, req) {
+      return callEndCall(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<EndCallResponse> callEndCall(twirp.Context ctx, EndCallRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/EndCall');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final EndCallResponse res = EndCallResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
   Future<QueryCallsResponse> queryCalls(twirp.Context ctx, QueryCallsRequest req) async {
     ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
     ctx = twirp.withServiceName(ctx, 'ClientRPC');
@@ -288,20 +350,108 @@ class ClientRPCJSONClient implements ClientRPC {
   }
 
   @override
-  Future<UpdateCallMembersResponse> updateCallMembers(twirp.Context ctx, UpdateCallMembersRequest req) async {
+  Future<StartBroadcastResponse> startBroadcast(twirp.Context ctx, StartBroadcastRequest req) async {
     ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
     ctx = twirp.withServiceName(ctx, 'ClientRPC');
-    ctx = twirp.withMethodName(ctx, 'UpdateCallMembers');
+    ctx = twirp.withMethodName(ctx, 'StartBroadcast');
     return interceptor((ctx, req) {
-      return callUpdateCallMembers(ctx, req);
+      return callStartBroadcast(ctx, req);
     })(ctx, req);
   }
 
-  Future<UpdateCallMembersResponse> callUpdateCallMembers(twirp.Context ctx, UpdateCallMembersRequest req) async {
+  Future<StartBroadcastResponse> callStartBroadcast(twirp.Context ctx, StartBroadcastRequest req) async {
     try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/UpdateCallMembers');
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StartBroadcast');
       final data = await doJSONRequest(ctx, url, hooks, req);
-      final UpdateCallMembersResponse res = UpdateCallMembersResponse.create();
+      final StartBroadcastResponse res = StartBroadcastResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StopBroadcastResponse> stopBroadcast(twirp.Context ctx, StopBroadcastRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'StopBroadcast');
+    return interceptor((ctx, req) {
+      return callStopBroadcast(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StopBroadcastResponse> callStopBroadcast(twirp.Context ctx, StopBroadcastRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StopBroadcast');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final StopBroadcastResponse res = StopBroadcastResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StartRecordingResponse> startRecording(twirp.Context ctx, StartRecordingRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'StartRecording');
+    return interceptor((ctx, req) {
+      return callStartRecording(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StartRecordingResponse> callStartRecording(twirp.Context ctx, StartRecordingRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StartRecording');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final StartRecordingResponse res = StartRecordingResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StopRecordingResponse> stopRecording(twirp.Context ctx, StopRecordingRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'StopRecording');
+    return interceptor((ctx, req) {
+      return callStopRecording(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StopRecordingResponse> callStopRecording(twirp.Context ctx, StopRecordingRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StopRecording');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final StopRecordingResponse res = StopRecordingResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UpsertCallMembersResponse> upsertCallMembers(twirp.Context ctx, UpsertCallMembersRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'UpsertCallMembers');
+    return interceptor((ctx, req) {
+      return callUpsertCallMembers(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<UpsertCallMembersResponse> callUpsertCallMembers(twirp.Context ctx, UpsertCallMembersRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/UpsertCallMembers');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final UpsertCallMembersResponse res = UpsertCallMembersResponse.create();
       res.mergeFromProto3Json(json.decode(data));
       return Future.value(res);
     } catch (e) {
@@ -390,6 +540,28 @@ class ClientRPCJSONClient implements ClientRPC {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/ReportCallStats');
       final data = await doJSONRequest(ctx, url, hooks, req);
       final ReportCallStatsResponse res = ReportCallStatsResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ReportCallStatEventResponse> reportCallStatEvent(twirp.Context ctx, ReportCallStatEventRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'ReportCallStatEvent');
+    return interceptor((ctx, req) {
+      return callReportCallStatEvent(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<ReportCallStatEventResponse> callReportCallStatEvent(twirp.Context ctx, ReportCallStatEventRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/ReportCallStatEvent');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final ReportCallStatEventResponse res = ReportCallStatEventResponse.create();
       res.mergeFromProto3Json(json.decode(data));
       return Future.value(res);
     } catch (e) {
@@ -569,6 +741,50 @@ class ClientRPCProtobufClient implements ClientRPC {
   }
 
   @override
+  Future<UpdateCallPermissionsResponse> updateCallPermissions(twirp.Context ctx, UpdateCallPermissionsRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'UpdateCallPermissions');
+    return interceptor((ctx, req) {
+      return callUpdateCallPermissions(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<UpdateCallPermissionsResponse> callUpdateCallPermissions(twirp.Context ctx, UpdateCallPermissionsRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/UpdateCallPermissions');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final UpdateCallPermissionsResponse res = UpdateCallPermissionsResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<EndCallResponse> endCall(twirp.Context ctx, EndCallRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'EndCall');
+    return interceptor((ctx, req) {
+      return callEndCall(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<EndCallResponse> callEndCall(twirp.Context ctx, EndCallRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/EndCall');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final EndCallResponse res = EndCallResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
   Future<QueryCallsResponse> queryCalls(twirp.Context ctx, QueryCallsRequest req) async {
     ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
     ctx = twirp.withServiceName(ctx, 'ClientRPC');
@@ -679,20 +895,108 @@ class ClientRPCProtobufClient implements ClientRPC {
   }
 
   @override
-  Future<UpdateCallMembersResponse> updateCallMembers(twirp.Context ctx, UpdateCallMembersRequest req) async {
+  Future<StartBroadcastResponse> startBroadcast(twirp.Context ctx, StartBroadcastRequest req) async {
     ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
     ctx = twirp.withServiceName(ctx, 'ClientRPC');
-    ctx = twirp.withMethodName(ctx, 'UpdateCallMembers');
+    ctx = twirp.withMethodName(ctx, 'StartBroadcast');
     return interceptor((ctx, req) {
-      return callUpdateCallMembers(ctx, req);
+      return callStartBroadcast(ctx, req);
     })(ctx, req);
   }
 
-  Future<UpdateCallMembersResponse> callUpdateCallMembers(twirp.Context ctx, UpdateCallMembersRequest req) async {
+  Future<StartBroadcastResponse> callStartBroadcast(twirp.Context ctx, StartBroadcastRequest req) async {
     try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/UpdateCallMembers');
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StartBroadcast');
       final data = await doProtobufRequest(ctx, url, hooks, req);
-      final UpdateCallMembersResponse res = UpdateCallMembersResponse.create();
+      final StartBroadcastResponse res = StartBroadcastResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StopBroadcastResponse> stopBroadcast(twirp.Context ctx, StopBroadcastRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'StopBroadcast');
+    return interceptor((ctx, req) {
+      return callStopBroadcast(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StopBroadcastResponse> callStopBroadcast(twirp.Context ctx, StopBroadcastRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StopBroadcast');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final StopBroadcastResponse res = StopBroadcastResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StartRecordingResponse> startRecording(twirp.Context ctx, StartRecordingRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'StartRecording');
+    return interceptor((ctx, req) {
+      return callStartRecording(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StartRecordingResponse> callStartRecording(twirp.Context ctx, StartRecordingRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StartRecording');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final StartRecordingResponse res = StartRecordingResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StopRecordingResponse> stopRecording(twirp.Context ctx, StopRecordingRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'StopRecording');
+    return interceptor((ctx, req) {
+      return callStopRecording(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StopRecordingResponse> callStopRecording(twirp.Context ctx, StopRecordingRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StopRecording');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final StopRecordingResponse res = StopRecordingResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UpsertCallMembersResponse> upsertCallMembers(twirp.Context ctx, UpsertCallMembersRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'UpsertCallMembers');
+    return interceptor((ctx, req) {
+      return callUpsertCallMembers(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<UpsertCallMembersResponse> callUpsertCallMembers(twirp.Context ctx, UpsertCallMembersRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/UpsertCallMembers');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final UpsertCallMembersResponse res = UpsertCallMembersResponse.create();
       res.mergeFromBuffer(data);
       return Future.value(res);
     } catch (e) {
@@ -781,6 +1085,28 @@ class ClientRPCProtobufClient implements ClientRPC {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/ReportCallStats');
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final ReportCallStatsResponse res = ReportCallStatsResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ReportCallStatEventResponse> reportCallStatEvent(twirp.Context ctx, ReportCallStatEventRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'ReportCallStatEvent');
+    return interceptor((ctx, req) {
+      return callReportCallStatEvent(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<ReportCallStatEventResponse> callReportCallStatEvent(twirp.Context ctx, ReportCallStatEventRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/ReportCallStatEvent');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final ReportCallStatEventResponse res = ReportCallStatEventResponse.create();
       res.mergeFromBuffer(data);
       return Future.value(res);
     } catch (e) {

@@ -72,6 +72,9 @@ class TokenManager {
     return _token!;
   }
 
+  /// Returns the token refreshing the existing one.
+  Future<Token> refreshToken() => loadToken(refresh: true);
+
   /// Resets the token manager
   void reset() {
     _userId = null;

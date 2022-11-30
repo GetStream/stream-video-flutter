@@ -10,42 +10,40 @@ import 'dart:async' as $async;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'dart:core' as $core;
-import 'signal.pb.dart' as $3;
+import 'signal.pb.dart' as $1;
+import '../models/models.pb.dart' as $0;
 import 'signal.pbjson.dart';
 
 export 'signal.pb.dart';
 
 abstract class SignalServerServiceBase extends $pb.GeneratedService {
-  $async.Future<$3.JoinResponse> join($pb.ServerContext ctx, $3.JoinRequest request);
-  $async.Future<$3.SetPublisherResponse> setPublisher($pb.ServerContext ctx, $3.SetPublisherRequest request);
-  $async.Future<$3.SendAnswerResponse> sendAnswer($pb.ServerContext ctx, $3.SendAnswerRequest request);
-  $async.Future<$3.IceCandidateResponse> sendIceCandidate($pb.ServerContext ctx, $3.IceCandidateRequest request);
-  $async.Future<$3.UpdateSubscriptionsResponse> updateSubscriptions($pb.ServerContext ctx, $3.UpdateSubscriptionsRequest request);
-  $async.Future<$3.UpdateMuteStateResponse> updateMuteState($pb.ServerContext ctx, $3.UpdateMuteStateRequest request);
-  $async.Future<$3.UpdateVideoQualityResponse> requestVideoQuality($pb.ServerContext ctx, $3.UpdateVideoQualityRequest request);
+  $async.Future<$1.SetPublisherResponse> setPublisher($pb.ServerContext ctx, $1.SetPublisherRequest request);
+  $async.Future<$1.SendAnswerResponse> sendAnswer($pb.ServerContext ctx, $1.SendAnswerRequest request);
+  $async.Future<$1.ICETrickleResponse> iceTrickle($pb.ServerContext ctx, $0.ICETrickle request);
+  $async.Future<$1.UpdateSubscriptionsResponse> updateSubscriptions($pb.ServerContext ctx, $1.UpdateSubscriptionsRequest request);
+  $async.Future<$1.UpdateMuteStateResponse> updateMuteState($pb.ServerContext ctx, $1.UpdateMuteStateRequest request);
+  $async.Future<$1.UpdateVideoQualityResponse> requestVideoQuality($pb.ServerContext ctx, $1.UpdateVideoQualityRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
-      case 'Join': return $3.JoinRequest();
-      case 'SetPublisher': return $3.SetPublisherRequest();
-      case 'SendAnswer': return $3.SendAnswerRequest();
-      case 'SendIceCandidate': return $3.IceCandidateRequest();
-      case 'UpdateSubscriptions': return $3.UpdateSubscriptionsRequest();
-      case 'UpdateMuteState': return $3.UpdateMuteStateRequest();
-      case 'RequestVideoQuality': return $3.UpdateVideoQualityRequest();
+      case 'SetPublisher': return $1.SetPublisherRequest();
+      case 'SendAnswer': return $1.SendAnswerRequest();
+      case 'IceTrickle': return $0.ICETrickle();
+      case 'UpdateSubscriptions': return $1.UpdateSubscriptionsRequest();
+      case 'UpdateMuteState': return $1.UpdateMuteStateRequest();
+      case 'RequestVideoQuality': return $1.UpdateVideoQualityRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
 
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx, $core.String method, $pb.GeneratedMessage request) {
     switch (method) {
-      case 'Join': return this.join(ctx, request as $3.JoinRequest);
-      case 'SetPublisher': return this.setPublisher(ctx, request as $3.SetPublisherRequest);
-      case 'SendAnswer': return this.sendAnswer(ctx, request as $3.SendAnswerRequest);
-      case 'SendIceCandidate': return this.sendIceCandidate(ctx, request as $3.IceCandidateRequest);
-      case 'UpdateSubscriptions': return this.updateSubscriptions(ctx, request as $3.UpdateSubscriptionsRequest);
-      case 'UpdateMuteState': return this.updateMuteState(ctx, request as $3.UpdateMuteStateRequest);
-      case 'RequestVideoQuality': return this.requestVideoQuality(ctx, request as $3.UpdateVideoQualityRequest);
+      case 'SetPublisher': return this.setPublisher(ctx, request as $1.SetPublisherRequest);
+      case 'SendAnswer': return this.sendAnswer(ctx, request as $1.SendAnswerRequest);
+      case 'IceTrickle': return this.iceTrickle(ctx, request as $0.ICETrickle);
+      case 'UpdateSubscriptions': return this.updateSubscriptions(ctx, request as $1.UpdateSubscriptionsRequest);
+      case 'UpdateMuteState': return this.updateMuteState(ctx, request as $1.UpdateMuteStateRequest);
+      case 'RequestVideoQuality': return this.requestVideoQuality(ctx, request as $1.UpdateVideoQualityRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

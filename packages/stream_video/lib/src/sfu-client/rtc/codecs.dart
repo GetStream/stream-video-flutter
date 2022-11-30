@@ -1,92 +1,84 @@
+import 'dart:math' as math;
+
 import 'package:collection/collection.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart' as sfu;
+import 'package:stream_video/src/options.dart';
 import 'package:stream_video/src/sdp-transform/parse.dart';
+import 'package:stream_video/src/types/video_dimensions.dart';
+import 'package:stream_video/src/types/video_encoding.dart';
+import 'package:stream_video/src/types/video_parameters.dart';
 
 final defaultVideoPublishEncodings = [
-  RTCRtpEncoding(
+  rtc.RTCRtpEncoding(
     rid: 'f',
     active: true,
     maxBitrate: 1200000,
   ),
-  RTCRtpEncoding(
+  rtc.RTCRtpEncoding(
     rid: 'h',
     active: true,
-    scaleResolutionDownBy: 2.0,
+    scaleResolutionDownBy: 2,
     maxBitrate: 500000,
   ),
-  RTCRtpEncoding(
+  rtc.RTCRtpEncoding(
     rid: 'q',
     active: true,
-    scaleResolutionDownBy: 4.0,
+    scaleResolutionDownBy: 4,
     maxBitrate: 125000,
   ),
 ];
 
-extension RTCRtpMediaTypeX on RTCRtpMediaType {
-  String toStr() {
-    switch (this) {
-      case RTCRtpMediaType.RTCRtpMediaTypeAudio:
-        return 'audio';
-      case RTCRtpMediaType.RTCRtpMediaTypeVideo:
-        return 'video';
-      default:
-        return 'data';
-    }
-  }
+Future<List<sfu.Codec>> getSenderCodecs(
+  rtc.RTCRtpMediaType kind, [
+  rtc.RTCPeerConnection? pc,
+]) {
+  return _getCodecsFromPeerConnection(
+    kind,
+    pc,
+    rtc.TransceiverDirection.SendOnly,
+  );
 }
 
-class OptimalVideoLayer {
-  final RTCRtpEncoding encoding;
-  final int width;
-  final int height;
-  OptimalVideoLayer({
-    required this.width,
-    required this.height,
-    required this.encoding,
-  });
+Future<List<sfu.Codec>> getReceiverCodecs(
+  rtc.RTCRtpMediaType kind, [
+  rtc.RTCPeerConnection? pc,
+]) {
+  return _getCodecsFromPeerConnection(
+    kind,
+    pc,
+    rtc.TransceiverDirection.RecvOnly,
+  );
 }
 
-Future<List<Codec>> getSenderCodecs(
-  RTCRtpMediaType kind,
-  RTCPeerConnection? pc,
+Future<List<sfu.Codec>> _getCodecsFromPeerConnection(
+  rtc.RTCRtpMediaType kind,
+  rtc.RTCPeerConnection? pc,
+  rtc.TransceiverDirection direction,
 ) async {
-  return _getCodecsFromPeerConnection(kind, pc, TransceiverDirection.SendOnly);
-}
-
-Future<List<Codec>> getReceiverCodecs(
-  RTCRtpMediaType kind,
-  RTCPeerConnection? pc,
-) async {
-  return _getCodecsFromPeerConnection(kind, pc, TransceiverDirection.RecvOnly);
-}
-
-Future<List<Codec>> _getCodecsFromPeerConnection(
-  RTCRtpMediaType kind,
-  RTCPeerConnection? pc,
-  TransceiverDirection direction,
-) async {
-  var sdp = direction == TransceiverDirection.SendOnly
+  var sdp = direction == rtc.TransceiverDirection.SendOnly
       ? (await pc?.getLocalDescription())?.sdp
-      : direction == TransceiverDirection.RecvOnly
+      : direction == rtc.TransceiverDirection.RecvOnly
           ? (await pc?.getRemoteDescription())?.sdp
           : null;
+
   if (sdp == null) {
-    final tempPc = await createPeerConnection({});
+    final tempPc = await rtc.createPeerConnection({});
     final transceiver = await tempPc.addTransceiver(kind: kind);
     await transceiver.setDirection(direction);
     final offer = await tempPc.createOffer();
     sdp = offer.sdp;
     await tempPc.close();
   }
+
   final parsedSdp = parseSdp(sdp!);
-  final supportedCodecs = <Codec>[];
+  final supportedCodecs = <sfu.Codec>[];
   parsedSdp.media.forEach((media) {
-    if (media.type == kind.toStr()) {
+    if (media.type == rtc.typeRTCRtpMediaTypetoString[kind]) {
       media.rtp.forEach((rtp) {
         final fmtpLine =
             media.fmtp?.firstWhereOrNull((f) => f.payload == rtp.payload);
-        supportedCodecs.add(Codec(
+        supportedCodecs.add(sfu.Codec(
           hwAccelerated: true,
           clockRate: rtp.rate ?? 0,
           fmtpLine: fmtpLine?.config ?? '',
@@ -95,71 +87,232 @@ Future<List<Codec>> _getCodecsFromPeerConnection(
       });
     }
   });
+
   return supportedCodecs;
 }
 
-List<OptimalVideoLayer> findOptimalVideoLayers(MediaStream mediaStream) {
-  final steps = [
-    // [4096, 2160], // 4K
-    // [1920, 1080, 3_072_000], // Full-HD
-    [1280, 720, 1536000], // HD
-    [640, 480, 768000], // VGA
-    [320, 240, 384000], // QVGA
-    [160, 120, 128000],
-  ];
-  final optimalVideoLayers = <OptimalVideoLayer>[];
-  for (var step = 0; step < steps.length; step++) {
-    final wh = steps[step];
+/// order of rids
+final videoRids = ['q', 'h', 'f'];
 
-    final videoTracks = mediaStream.getVideoTracks();
-    final settings = videoTracks[0].getSettings();
-    final width = wh[0];
-    final height = wh[1];
-    if (width == settings['width'] && height == settings['height']) {
-      var scaleFactor = 1.0;
-      ['f', 'h', 'q'].asMap().forEach((i, rid) {
-        final width_height_bitrate = steps[step + i];
-        final width = width_height_bitrate[0];
-        final height = width_height_bitrate[1];
-        final bitrate = width_height_bitrate[2];
-        optimalVideoLayers.add(OptimalVideoLayer(
-          width: width,
-          height: height,
-          encoding: RTCRtpEncoding(
-            rid: rid,
-            maxBitrate: bitrate,
-            scaleResolutionDownBy: scaleFactor,
-          ),
-        ));
-        scaleFactor *= 2.0;
-      });
-
-      break;
-    }
+List<VideoParameters> _presetsForDimensions({
+  required bool isScreenShare,
+  required VideoDimensions dimensions,
+}) {
+  if (isScreenShare) {
+    return VideoParametersPresets.allScreenShare;
   }
-  return optimalVideoLayers;
+
+  final a = dimensions.aspect();
+  if ((a - VideoDimensionsHelpers.aspect169).abs() <
+      (a - VideoDimensionsHelpers.aspect43).abs()) {
+    return VideoParametersPresets.all169;
+  }
+
+  return VideoParametersPresets.all43;
 }
 
-final defaultVideoLayers = <OptimalVideoLayer>[
-  OptimalVideoLayer(
-    encoding: RTCRtpEncoding(
-      rid: 'f',
-      maxBitrate: 1000000,
-    ),
-    width: 1280,
-    height: 720,
-  ),
-  OptimalVideoLayer(
-    encoding: RTCRtpEncoding(
-      rid: 'h',
-      maxBitrate: 500000,
-    ),
-    width: 640,
-    height: 480,
-  ),
-  OptimalVideoLayer(
-    encoding: RTCRtpEncoding(rid: 'q', maxBitrate: 300000),
-    width: 480,
-    height: 360,
-  ),
-];
+List<VideoParameters> _computeDefaultScreenShareSimulcastParams({
+  required VideoParameters original,
+}) {
+  final layers = [
+    rtc.RTCRtpEncoding(scaleResolutionDownBy: 2, maxFramerate: 3),
+  ];
+  return layers.map((e) {
+    final scale = e.scaleResolutionDownBy ?? 1;
+    final fps = e.maxFramerate ?? 3;
+
+    return VideoParameters(
+      dimensions: VideoDimensions(
+        (original.dimensions.width / scale).floor(),
+        (original.dimensions.height / scale).floor(),
+      ),
+      encoding: VideoEncoding(
+        maxBitrate: math.max(
+          150 * 1000,
+          (original.encoding.maxBitrate /
+                  (math.pow(scale, 2) * (original.encoding.maxFramerate / fps)))
+              .floor(),
+        ),
+        maxFramerate: fps,
+      ),
+    );
+  }).toList();
+}
+
+List<VideoParameters> _computeDefaultSimulcastParams({
+  required bool isScreenShare,
+  required VideoParameters original,
+}) {
+  if (isScreenShare) {
+    return _computeDefaultScreenShareSimulcastParams(original: original);
+  }
+  final a = original.dimensions.aspect();
+  if ((a - VideoDimensionsHelpers.aspect169).abs() <
+      (a - VideoDimensionsHelpers.aspect43).abs()) {
+    return VideoParametersPresets.defaultSimulcast169;
+  }
+
+  return VideoParametersPresets.defaultSimulcast43;
+}
+
+VideoEncoding _findAppropriateEncoding({
+  required bool isScreenShare,
+  required VideoDimensions dimensions,
+  required List<VideoParameters> presets,
+}) {
+  assert(presets.isNotEmpty, 'presets should not be empty');
+  var result = presets.first.encoding;
+
+  // handle portrait by swapping dimensions
+  final size = dimensions.max();
+
+  for (final preset in presets) {
+    result = preset.encoding;
+    if (preset.dimensions.width >= size) break;
+  }
+
+  return result;
+}
+
+List<rtc.RTCRtpEncoding> encodingsFromPresets(
+  VideoDimensions dimensions, {
+  required List<VideoParameters> presets,
+}) {
+  final result = <rtc.RTCRtpEncoding>[];
+  presets.forEachIndexed((i, e) {
+    if (i >= videoRids.length) {
+      return;
+    }
+    final size = dimensions.min();
+    final rid = videoRids[i];
+
+    result.add(e.encoding.toRTCRtpEncoding(
+      rid: rid,
+      scaleResolutionDownBy: math.max(1, size / e.dimensions.min()),
+    ));
+  });
+  return result;
+}
+
+double findEvenScaleDownBy(
+  VideoDimensions sourceDimensions,
+  VideoDimensions targetDimensions,
+) {
+  final sourceSize = sourceDimensions.max();
+  final targetSize = targetDimensions.max();
+
+  for (var i = 0; i <= 30; i++) {
+    final scaleDownBy = sourceSize.toDouble() / (targetSize + i);
+    // Internally, WebRTC casts directly to int without rounding.
+    // https://github.com/webrtc-sdk/webrtc/blob/8c7139f8e6fa19ddf2c91510c177a19746e1ded3/media/engine/webrtc_video_engine.cc#L3676
+    final scaledWidth = sourceDimensions.width ~/ scaleDownBy;
+    final scaledHeight = sourceDimensions.height ~/ scaleDownBy;
+
+    if (scaledWidth.isEven && scaledHeight.isEven) {
+      return scaleDownBy;
+    }
+  }
+
+  // couldn't find an even scale, just return original scale and hope it works.
+  return sourceSize / targetSize;
+}
+
+List<rtc.RTCRtpEncoding>? computeVideoEncodings({
+  required bool isScreenShare,
+  VideoDimensions? dimensions,
+  VideoPublishOptions? options,
+}) {
+  options ??= const VideoPublishOptions();
+
+  var videoEncoding = options.videoEncoding;
+
+  if ((videoEncoding == null && !options.simulcast) || dimensions == null) {
+    // don't set encoding when we are not simulcasting and user isn't
+    // restricting encoding parameters.
+    return [rtc.RTCRtpEncoding()];
+  }
+
+  final presets = _presetsForDimensions(
+    isScreenShare: isScreenShare,
+    dimensions: dimensions,
+  );
+
+  videoEncoding ??= _findAppropriateEncoding(
+    isScreenShare: isScreenShare,
+    dimensions: dimensions,
+    presets: presets,
+  );
+
+  if (!options.simulcast) {
+    // not using simulcast
+    return [videoEncoding.toRTCRtpEncoding()];
+  }
+
+  final original = VideoParameters(
+    dimensions: dimensions,
+    encoding: videoEncoding,
+  );
+
+  final userParams = isScreenShare
+      ? options.screenShareSimulcastLayers
+      : options.videoSimulcastLayers;
+
+  final params = (userParams.isNotEmpty
+          ? userParams
+          : _computeDefaultSimulcastParams(
+              isScreenShare: isScreenShare,
+              original: original,
+            ))
+      .sorted();
+
+  final lowPreset = params.first;
+  VideoParameters? midPreset;
+  if (params.length > 1) {
+    midPreset = params[1];
+  }
+
+  final size = dimensions.max();
+  var computedParams = <VideoParameters>[original];
+
+  if (size >= 960 && midPreset != null) {
+    computedParams = [lowPreset, midPreset, original];
+  } else if (size >= 480) {
+    computedParams = [lowPreset, original];
+  }
+
+  return encodingsFromPresets(
+    dimensions,
+    presets: computedParams,
+  );
+}
+
+List<sfu.VideoLayer> computeVideoLayers(
+  VideoDimensions dimensions,
+  List<rtc.RTCRtpEncoding>? encodings,
+) {
+  // default to a single layer, HQ
+  if (encodings == null) {
+    return [
+      sfu.VideoLayer(
+        rid: 'f',
+        bitrate: 0,
+        videoDimension: sfu.VideoDimension(
+          width: dimensions.width,
+          height: dimensions.height,
+        ),
+      ),
+    ];
+  }
+
+  return encodings.map((e) {
+    final scale = e.scaleResolutionDownBy ?? 1;
+    return sfu.VideoLayer(
+      rid: e.rid ?? 'f',
+      bitrate: e.maxBitrate ?? 0,
+      videoDimension: sfu.VideoDimension(
+        width: (dimensions.width / scale).floor(),
+        height: (dimensions.height / scale).floor(),
+      ),
+    );
+  }).toList();
+}

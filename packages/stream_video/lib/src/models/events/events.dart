@@ -1,6 +1,8 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:protobuf/protobuf.dart';
 import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart';
-import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart';
+import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
+    hide CallEnded;
 import 'package:stream_video/src/models/call_participant.dart';
 
 /// Base type for all StreamVideoEvent events.
@@ -9,10 +11,13 @@ mixin StreamVideoEvent {}
 /// Base type for all Coordinator events.
 mixin CoordinatorEvent implements StreamVideoEvent {}
 
-mixin CallEvent implements CoordinatorEvent {}
+mixin CallEvent implements CoordinatorEvent {
+  GeneratedMessage get payload;
+}
 
 class CallCreatedEvent with CallEvent {
   const CallCreatedEvent(this.payload);
+
   final CallCreated payload;
 
   @override
@@ -21,6 +26,7 @@ class CallCreatedEvent with CallEvent {
 
 class CallUpdatedEvent with CallEvent {
   const CallUpdatedEvent(this.payload);
+
   final CallUpdated payload;
 
   @override
@@ -29,6 +35,7 @@ class CallUpdatedEvent with CallEvent {
 
 class CallEndedEvent with CallEvent {
   const CallEndedEvent(this.payload);
+
   final CallEnded payload;
 
   @override
@@ -37,6 +44,7 @@ class CallEndedEvent with CallEvent {
 
 class CallAcceptedEvent with CallEvent {
   const CallAcceptedEvent(this.payload);
+
   final CallAccepted payload;
 
   @override
@@ -45,6 +53,7 @@ class CallAcceptedEvent with CallEvent {
 
 class CallRejectedEvent with CallEvent {
   const CallRejectedEvent(this.payload);
+
   final CallRejected payload;
 
   @override
@@ -53,16 +62,20 @@ class CallRejectedEvent with CallEvent {
 
 class CallDeletedEvent with CallEvent {
   const CallDeletedEvent(this.payload);
+
   final CallDeleted payload;
 
   @override
   String toString() => 'call.deleted ${payload.toString()}';
 }
 
-mixin CallMembersEvent implements CoordinatorEvent {}
+mixin CallMembersEvent implements CoordinatorEvent {
+  GeneratedMessage get payload;
+}
 
 class CallMembersUpdatedEvent with CallMembersEvent {
   const CallMembersUpdatedEvent(this.payload);
+
   final CallMembersUpdated payload;
 
   @override
@@ -71,6 +84,7 @@ class CallMembersUpdatedEvent with CallMembersEvent {
 
 class CallMembersDeletedEvent with CallMembersEvent {
   const CallMembersDeletedEvent(this.payload);
+
   final CallMembersDeleted payload;
 
   @override
@@ -79,6 +93,7 @@ class CallMembersDeletedEvent with CallMembersEvent {
 
 class RecordingStoppedEvent with RecordingEvent {
   const RecordingStoppedEvent(this.payload);
+
   final RecordingStopped payload;
 
   @override
@@ -89,6 +104,7 @@ mixin ParticipantEvent implements SFUEvent {}
 
 class ParticipantJoinEvent with ParticipantEvent {
   const ParticipantJoinEvent(this.payload);
+
   final ParticipantJoined payload;
 
   @override
@@ -97,6 +113,7 @@ class ParticipantJoinEvent with ParticipantEvent {
 
 class ParticipantLeftEvent with ParticipantEvent {
   const ParticipantLeftEvent(this.payload);
+
   final ParticipantLeft payload;
 
   @override
@@ -107,6 +124,7 @@ mixin BroadcastEvent implements CoordinatorEvent {}
 
 class BroadcastStartedEvent with BroadcastEvent {
   const BroadcastStartedEvent(this.payload);
+
   final BroadcastStarted payload;
 
   @override
@@ -115,6 +133,7 @@ class BroadcastStartedEvent with BroadcastEvent {
 
 class BroadcastEndedEvent with BroadcastEvent {
   const BroadcastEndedEvent(this.payload);
+
   final BroadcastEnded payload;
 
   @override
@@ -125,6 +144,7 @@ mixin RecordingEvent implements CoordinatorEvent {}
 
 class RecordingStartedEvent with RecordingEvent {
   const RecordingStartedEvent(this.payload);
+
   final RecordingStarted payload;
 
   @override
@@ -134,14 +154,14 @@ class RecordingStartedEvent with RecordingEvent {
 mixin WebRTCEvent implements StreamVideoEvent {}
 
 class TrackUpdatedEvent implements WebRTCEvent {
-  const TrackUpdatedEvent(this.payload, this.id);
-  final MediaStream payload;
+  const TrackUpdatedEvent(this.id, this.payload);
+
   final String id;
+  final MediaStream payload;
 }
 
 class LocalTrackUpdatedEvent extends TrackUpdatedEvent {
-  const LocalTrackUpdatedEvent(super.payload, super.id);
-  // final MediaStream payload;
+  const LocalTrackUpdatedEvent(super.id, super.payload);
 
   @override
   String toString() => 'track.local.updated ${payload.toString()}';
@@ -149,7 +169,6 @@ class LocalTrackUpdatedEvent extends TrackUpdatedEvent {
 
 class RemoteTrackUpdatedEvent extends TrackUpdatedEvent {
   const RemoteTrackUpdatedEvent(super.payload, super.id);
-  // final MediaStream payload;
 
   @override
   String toString() => 'track.remote.updated ${payload.toString()}';
@@ -159,6 +178,7 @@ mixin SFUEvent implements StreamVideoEvent {}
 
 class SubscriberOfferEvent with SFUEvent {
   const SubscriberOfferEvent(this.payload);
+
   final SubscriberOffer payload;
 
   @override
@@ -167,10 +187,13 @@ class SubscriberOfferEvent with SFUEvent {
 
 mixin AppStateEvent implements StreamVideoEvent {}
 
-mixin CallParticipantEvent implements AppStateEvent {}
+mixin CallParticipantEvent implements AppStateEvent {
+  Map<String, CallParticipant> get participants;
+}
 
 class CallParticipantNew with CallParticipantEvent {
   const CallParticipantNew(this.participants);
+
   final Map<String, CallParticipant> participants;
 
   @override
@@ -179,6 +202,7 @@ class CallParticipantNew with CallParticipantEvent {
 
 class CallParticipantUpdated with CallParticipantEvent {
   const CallParticipantUpdated(this.participants);
+
   final Map<String, CallParticipant> participants;
 
   @override
@@ -187,6 +211,7 @@ class CallParticipantUpdated with CallParticipantEvent {
 
 class CallParticipantLeft with CallParticipantEvent {
   const CallParticipantLeft(this.participants);
+
   final Map<String, CallParticipant> participants;
 
   @override
@@ -195,6 +220,7 @@ class CallParticipantLeft with CallParticipantEvent {
 
 class CallParticipantRemoved with CallParticipantEvent {
   const CallParticipantRemoved(this.participants);
+
   final Map<String, CallParticipant> participants;
 
   @override
@@ -203,6 +229,7 @@ class CallParticipantRemoved with CallParticipantEvent {
 
 class CallParticipantJoined with CallParticipantEvent {
   const CallParticipantJoined(this.participants);
+
   final Map<String, CallParticipant> participants;
 
   @override

@@ -12,37 +12,37 @@ import 'dart:typed_data' as $typed_data;
 const PeerType$json = const {
   '1': 'PeerType',
   '2': const [
-    const {'1': 'PUBLISHER', '2': 0},
-    const {'1': 'SUBSCRIBER', '2': 1},
+    const {'1': 'PEER_TYPE_PUBLISHER_UNSPECIFIED', '2': 0},
+    const {'1': 'PEER_TYPE_SUBSCRIBER', '2': 1},
   ],
 };
 
 /// Descriptor for `PeerType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List peerTypeDescriptor = $convert.base64Decode('CghQZWVyVHlwZRINCglQVUJMSVNIRVIQABIOCgpTVUJTQ1JJQkVSEAE=');
+final $typed_data.Uint8List peerTypeDescriptor = $convert.base64Decode('CghQZWVyVHlwZRIjCh9QRUVSX1RZUEVfUFVCTElTSEVSX1VOU1BFQ0lGSUVEEAASGAoUUEVFUl9UWVBFX1NVQlNDUklCRVIQAQ==');
 @$core.Deprecated('Use connectionQualityDescriptor instead')
 const ConnectionQuality$json = const {
   '1': 'ConnectionQuality',
   '2': const [
-    const {'1': 'BAD', '2': 0},
-    const {'1': 'POOR', '2': 1},
-    const {'1': 'GOOD', '2': 2},
+    const {'1': 'CONNECTION_QUALITY_BAD_UNSPECIFIED', '2': 0},
+    const {'1': 'CONNECTION_QUALITY_POOR', '2': 1},
+    const {'1': 'CONNECTION_QUALITY_GOOD', '2': 2},
   ],
 };
 
 /// Descriptor for `ConnectionQuality`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List connectionQualityDescriptor = $convert.base64Decode('ChFDb25uZWN0aW9uUXVhbGl0eRIHCgNCQUQQABIICgRQT09SEAESCAoER09PRBAC');
+final $typed_data.Uint8List connectionQualityDescriptor = $convert.base64Decode('ChFDb25uZWN0aW9uUXVhbGl0eRImCiJDT05ORUNUSU9OX1FVQUxJVFlfQkFEX1VOU1BFQ0lGSUVEEAASGwoXQ09OTkVDVElPTl9RVUFMSVRZX1BPT1IQARIbChdDT05ORUNUSU9OX1FVQUxJVFlfR09PRBAC');
 @$core.Deprecated('Use videoQualityDescriptor instead')
 const VideoQuality$json = const {
   '1': 'VideoQuality',
   '2': const [
-    const {'1': 'LOW', '2': 0},
-    const {'1': 'MID', '2': 1},
-    const {'1': 'HIGH', '2': 2},
+    const {'1': 'VIDEO_QUALITY_LOW_UNSPECIFIED', '2': 0},
+    const {'1': 'VIDEO_QUALITY_MID', '2': 1},
+    const {'1': 'VIDEO_QUALITY_HIGH', '2': 2},
   ],
 };
 
 /// Descriptor for `VideoQuality`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List videoQualityDescriptor = $convert.base64Decode('CgxWaWRlb1F1YWxpdHkSBwoDTE9XEAASBwoDTUlEEAESCAoESElHSBAC');
+final $typed_data.Uint8List videoQualityDescriptor = $convert.base64Decode('CgxWaWRlb1F1YWxpdHkSIQodVklERU9fUVVBTElUWV9MT1dfVU5TUEVDSUZJRUQQABIVChFWSURFT19RVUFMSVRZX01JRBABEhYKElZJREVPX1FVQUxJVFlfSElHSBAC');
 @$core.Deprecated('Use callStateDescriptor instead')
 const CallState$json = const {
   '1': 'CallState',
@@ -81,11 +81,13 @@ const Participant$json = const {
     const {'1': 'audio', '3': 6, '4': 1, '5': 8, '10': 'audio'},
     const {'1': 'created_at', '3': 7, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'createdAt'},
     const {'1': 'updated_at', '3': 8, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
+    const {'1': 'session_id', '3': 9, '4': 1, '5': 9, '10': 'sessionId'},
+    const {'1': 'track_lookup_prefix', '3': 10, '4': 1, '5': 9, '10': 'trackLookupPrefix'},
   ],
 };
 
 /// Descriptor for `Participant`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List participantDescriptor = $convert.base64Decode('CgtQYXJ0aWNpcGFudBIxCgR1c2VyGAEgASgLMh0uc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuVXNlclIEdXNlchISCgRyb2xlGAIgASgJUgRyb2xlEhYKBm9ubGluZRgDIAEoCFIGb25saW5lEi8KBmN1c3RvbRgEIAEoCzIXLmdvb2dsZS5wcm90b2J1Zi5TdHJ1Y3RSBmN1c3RvbRIUCgV2aWRlbxgFIAEoCFIFdmlkZW8SFAoFYXVkaW8YBiABKAhSBWF1ZGlvEjkKCmNyZWF0ZWRfYXQYByABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUgljcmVhdGVkQXQSOQoKdXBkYXRlZF9hdBgIIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCXVwZGF0ZWRBdA==');
+final $typed_data.Uint8List participantDescriptor = $convert.base64Decode('CgtQYXJ0aWNpcGFudBIxCgR1c2VyGAEgASgLMh0uc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuVXNlclIEdXNlchISCgRyb2xlGAIgASgJUgRyb2xlEhYKBm9ubGluZRgDIAEoCFIGb25saW5lEi8KBmN1c3RvbRgEIAEoCzIXLmdvb2dsZS5wcm90b2J1Zi5TdHJ1Y3RSBmN1c3RvbRIUCgV2aWRlbxgFIAEoCFIFdmlkZW8SFAoFYXVkaW8YBiABKAhSBWF1ZGlvEjkKCmNyZWF0ZWRfYXQYByABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUgljcmVhdGVkQXQSOQoKdXBkYXRlZF9hdBgIIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCXVwZGF0ZWRBdBIdCgpzZXNzaW9uX2lkGAkgASgJUglzZXNzaW9uSWQSLgoTdHJhY2tfbG9va3VwX3ByZWZpeBgKIAEoCVIRdHJhY2tMb29rdXBQcmVmaXg=');
 @$core.Deprecated('Use userDescriptor instead')
 const User$json = const {
   '1': 'User',
@@ -167,24 +169,24 @@ final $typed_data.Uint8List codecDescriptor = $convert.base64Decode('CgVDb2RlYxI
 const AudioCodecs$json = const {
   '1': 'AudioCodecs',
   '2': const [
-    const {'1': 'encode', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'encode'},
-    const {'1': 'decode', '3': 2, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'decode'},
+    const {'1': 'encodes', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'encodes'},
+    const {'1': 'decodes', '3': 2, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'decodes'},
   ],
 };
 
 /// Descriptor for `AudioCodecs`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List audioCodecsDescriptor = $convert.base64Decode('CgtBdWRpb0NvZGVjcxI2CgZlbmNvZGUYASADKAsyHi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Db2RlY1IGZW5jb2RlEjYKBmRlY29kZRgCIAMoCzIeLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkNvZGVjUgZkZWNvZGU=');
+final $typed_data.Uint8List audioCodecsDescriptor = $convert.base64Decode('CgtBdWRpb0NvZGVjcxI4CgdlbmNvZGVzGAEgAygLMh4uc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuQ29kZWNSB2VuY29kZXMSOAoHZGVjb2RlcxgCIAMoCzIeLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkNvZGVjUgdkZWNvZGVz');
 @$core.Deprecated('Use videoCodecsDescriptor instead')
 const VideoCodecs$json = const {
   '1': 'VideoCodecs',
   '2': const [
-    const {'1': 'encode', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'encode'},
-    const {'1': 'decode', '3': 2, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'decode'},
+    const {'1': 'encodes', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'encodes'},
+    const {'1': 'decodes', '3': 2, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'decodes'},
   ],
 };
 
 /// Descriptor for `VideoCodecs`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List videoCodecsDescriptor = $convert.base64Decode('CgtWaWRlb0NvZGVjcxI2CgZlbmNvZGUYASADKAsyHi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Db2RlY1IGZW5jb2RlEjYKBmRlY29kZRgCIAMoCzIeLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkNvZGVjUgZkZWNvZGU=');
+final $typed_data.Uint8List videoCodecsDescriptor = $convert.base64Decode('CgtWaWRlb0NvZGVjcxI4CgdlbmNvZGVzGAEgAygLMh4uc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuQ29kZWNSB2VuY29kZXMSOAoHZGVjb2RlcxgCIAMoCzIeLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkNvZGVjUgdkZWNvZGVz');
 @$core.Deprecated('Use codecSettingsDescriptor instead')
 const CodecSettings$json = const {
   '1': 'CodecSettings',
@@ -197,3 +199,15 @@ const CodecSettings$json = const {
 
 /// Descriptor for `CodecSettings`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List codecSettingsDescriptor = $convert.base64Decode('Cg1Db2RlY1NldHRpbmdzEjoKBWF1ZGlvGAEgASgLMiQuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuQXVkaW9Db2RlY3NSBWF1ZGlvEjoKBXZpZGVvGAIgASgLMiQuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuVmlkZW9Db2RlY3NSBXZpZGVvEjsKBmxheWVycxgDIAMoCzIjLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlZpZGVvTGF5ZXJSBmxheWVycw==');
+@$core.Deprecated('Use iCETrickleDescriptor instead')
+const ICETrickle$json = const {
+  '1': 'ICETrickle',
+  '2': const [
+    const {'1': 'peer_type', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.PeerType', '10': 'peerType'},
+    const {'1': 'ice_candidate', '3': 2, '4': 1, '5': 9, '10': 'iceCandidate'},
+    const {'1': 'session_id', '3': 3, '4': 1, '5': 9, '10': 'sessionId'},
+  ],
+};
+
+/// Descriptor for `ICETrickle`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List iCETrickleDescriptor = $convert.base64Decode('CgpJQ0VUcmlja2xlEj4KCXBlZXJfdHlwZRgBIAEoDjIhLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlBlZXJUeXBlUghwZWVyVHlwZRIjCg1pY2VfY2FuZGlkYXRlGAIgASgJUgxpY2VDYW5kaWRhdGUSHQoKc2Vzc2lvbl9pZBgDIAEoCVIJc2Vzc2lvbklk');
