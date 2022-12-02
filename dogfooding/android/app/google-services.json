@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "248009810755",
+    "project_id": "dogfooding-d769a",
+    "storage_bucket": "dogfooding-d769a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:248009810755:android:bbfcbcd22d6da5387585f6",
+        "android_client_info": {
+          "package_name": "io.getstream.video.flutter.dogfooding.dogfooding"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "248009810755-9219gfpfi7fmksk6rbltbm6r6g861i08.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.getstream.video.flutter.dogfooding.dogfooding",
+            "certificate_hash": "e34b7960260e0586f55d02a1d6b0a3a6d06c4876"
+          }
+        },
+        {
+          "client_id": "248009810755-8k5328q32caj1l3ihjc5l5v4l5dfdinj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXy4FMxcRErB8VW9CvPGG5spLVSUQzhc4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "248009810755-8k5328q32caj1l3ihjc5l5v4l5dfdinj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "248009810755-7cdrjg8rl5rppt69ftcpds4200nvvekg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "io.getstream.video.flutter.dogfooding.dogfooding"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
