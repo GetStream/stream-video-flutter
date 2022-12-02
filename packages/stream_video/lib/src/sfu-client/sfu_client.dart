@@ -9,7 +9,7 @@ import 'package:stream_video/src/sfu-client/rpc/signal_ws.dart';
 import 'package:stream_video/src/types/other.dart';
 import 'package:uuid/uuid.dart';
 
-const localUrl = 'http://192.168.1.6:3031/twirp';
+const localUrl = 'http://192.168.1.56:3031/twirp';
 
 class SfuClient with EventEmitterMixin<SfuEvent> {
   ///
@@ -18,7 +18,7 @@ class SfuClient with EventEmitterMixin<SfuEvent> {
     required String url,
     required String token,
   }) {
-    // url = localUrl;
+    url = localUrl;
 
     this.sessionId = sessionId ??= const Uuid().v4();
 
@@ -33,7 +33,7 @@ class SfuClient with EventEmitterMixin<SfuEvent> {
       final sfuUrl = Uri.parse(url);
       wsEndpoint = sfuUrl
           .replace(
-            scheme: 'wss',
+            scheme: 'ws',
             path: '/ws',
           )
           .toString();

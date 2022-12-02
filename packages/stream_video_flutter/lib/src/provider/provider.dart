@@ -9,7 +9,7 @@ class StreamVideoProvider extends InheritedWidget {
   }) : super(key: key, child: child);
 
 //TODO: make this private and expose controllers
-  final StreamVideo client;
+  final StreamVideoClient client;
 
   static StreamVideoProvider of(BuildContext context) {
     final StreamVideoProvider? result =

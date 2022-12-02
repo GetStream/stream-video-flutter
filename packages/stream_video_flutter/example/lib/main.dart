@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 void main() {
-  final client = StreamVideo(
+  final client = StreamVideoClient(
     'key10', // see <video>/data/fixtures/apps.yaml for API secret
     coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
-        'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
-        // 'http://192.168.1.6:26991/rpc',
+        // 'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
+        'http://192.168.1.56:26991/rpc',
     coordinatorWsUrl: //replace host with your local ip address
-        'wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
-        // 'ws://192.168.1.6:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
+        // 'wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
+        'ws://192.168.1.56:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
     //replace host with your local ip address
     // sfuUrl: 'http://192.168.1.10:3031/twirp',
   );
@@ -19,7 +19,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  final StreamVideo client;
+  final StreamVideoClient client;
 
   const MyApp({Key? key, required this.client}) : super(key: key);
 

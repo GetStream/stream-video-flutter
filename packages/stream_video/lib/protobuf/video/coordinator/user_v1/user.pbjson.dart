@@ -29,13 +29,14 @@ final $typed_data.Uint8List userDescriptor = $convert.base64Decode('CgRVc2VyEhcK
 const UserInput$json = const {
   '1': 'UserInput',
   '2': const [
-    const {'1': 'name', '3': 1, '4': 1, '5': 9, '10': 'name'},
-    const {'1': 'role', '3': 2, '4': 1, '5': 9, '10': 'role'},
-    const {'1': 'teams', '3': 3, '4': 3, '5': 9, '10': 'teams'},
-    const {'1': 'image_url', '3': 4, '4': 1, '5': 9, '10': 'imageUrl'},
-    const {'1': 'custom_json', '3': 5, '4': 1, '5': 12, '10': 'customJson'},
+    const {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
+    const {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
+    const {'1': 'role', '3': 3, '4': 1, '5': 9, '10': 'role'},
+    const {'1': 'teams', '3': 4, '4': 3, '5': 9, '10': 'teams'},
+    const {'1': 'image_url', '3': 5, '4': 1, '5': 9, '10': 'imageUrl'},
+    const {'1': 'custom_json', '3': 6, '4': 1, '5': 12, '10': 'customJson'},
   ],
 };
 
 /// Descriptor for `UserInput`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List userInputDescriptor = $convert.base64Decode('CglVc2VySW5wdXQSEgoEbmFtZRgBIAEoCVIEbmFtZRISCgRyb2xlGAIgASgJUgRyb2xlEhQKBXRlYW1zGAMgAygJUgV0ZWFtcxIbCglpbWFnZV91cmwYBCABKAlSCGltYWdlVXJsEh8KC2N1c3RvbV9qc29uGAUgASgMUgpjdXN0b21Kc29u');
+final $typed_data.Uint8List userInputDescriptor = $convert.base64Decode('CglVc2VySW5wdXQSDgoCaWQYASABKAlSAmlkEhIKBG5hbWUYAiABKAlSBG5hbWUSEgoEcm9sZRgDIAEoCVIEcm9sZRIUCgV0ZWFtcxgEIAMoCVIFdGVhbXMSGwoJaW1hZ2VfdXJsGAUgASgJUghpbWFnZVVybBIfCgtjdXN0b21fanNvbhgGIAEoDFIKY3VzdG9tSnNvbg==');

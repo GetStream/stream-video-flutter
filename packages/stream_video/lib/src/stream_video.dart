@@ -42,14 +42,14 @@ const _defaultCoordinatorRpcUrl =
 const _defaultCoordinatorWsUrl =
     'wss://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
 
-class StreamVideo {
-  StreamVideo(
+class StreamVideoClient {
+  StreamVideoClient(
     this.apiKey, {
     this.coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     this.coordinatorWsUrl = _defaultCoordinatorWsUrl,
     this.latencyMeasurementRounds = 3,
     Level logLevel = Level.ALL,
-    LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
+    LogHandlerFunction logHandlerFunction = StreamVideoClient.defaultLogHandler,
   }) {
     // Preparing logger
     setLogLevel(logLevel);
@@ -215,11 +215,7 @@ class StreamVideo {
     CallOptions callOptions = const CallOptions(),
   }) async {
     final response = await _client.joinCall(
-      JoinCallRequest(
-        id: id,
-        type: type,
-        datacenterId: '',
-      ),
+      JoinCallRequest(id: id, type: type),
     );
 
     final edges = response.edges;

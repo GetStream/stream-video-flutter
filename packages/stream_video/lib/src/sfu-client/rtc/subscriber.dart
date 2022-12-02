@@ -24,21 +24,18 @@ Future<RTCPeerConnection> createSubscriber({
 
   subscriber
     ..onIceConnectionState = (state) {
-      logger.info('Subscriber ICE connection state: $state');
+      logger.shout('Subscriber ICE connection state: $state');
     }
     ..onIceGatheringState = (state) {
-      logger.info('Subscriber ICE gathering state: $state');
+      logger.shout('Subscriber ICE gathering state: $state');
     }
     ..onIceCandidate = (candidate) async {
-      logger.info('Subscriber onIceCandidate: $candidate');
+      logger.shout('Subscriber onIceCandidate: $candidate');
 
       final iceCandidate = json.encode(candidate.toMap());
-      await sfuClient.rpc.iceTrickle(
-        ICETrickle(
-          iceCandidate: iceCandidate,
-          sessionId: sfuClient.sessionId,
-          peerType: PeerType.PEER_TYPE_SUBSCRIBER,
-        ),
+      await sfuClient.iceTrickle(
+        iceCandidate: iceCandidate,
+        peerType: PeerType.PEER_TYPE_SUBSCRIBER,
       );
     }
     ..onTrack = onTrack
@@ -50,7 +47,7 @@ Future<RTCPeerConnection> createSubscriber({
   sfuClient.on(
     SfuEvent_EventPayload.subscriberOffer.name,
     (payload) async {
-      logger.info('Subscriber offer: $payload');
+      logger.shout('Subscriber offer: $payload');
 
       final offer = payload.subscriberOffer;
 
@@ -59,9 +56,9 @@ Future<RTCPeerConnection> createSubscriber({
       );
 
       await candidatesSubscription?.cancel();
-      logger.info('Started listening subscriber ice candidates');
+      logger.shout('Started listening subscriber ice candidates');
       candidatesSubscription = onIceCandidates.listen((candidate) async {
-        logger.info('Subscriber ice candidate: $candidate');
+        logger.shout('Subscriber ice candidate: $candidate');
         try {
           final iceCandidateJson = json.decode(candidate.iceCandidate);
           final iceCandidate = RTCIceCandidate(
@@ -70,10 +67,10 @@ Future<RTCPeerConnection> createSubscriber({
             iceCandidateJson['sdpMLineIndex'],
           );
 
-          logger.info('Adding subscriber ice candidate: $iceCandidate');
+          logger.shout('Adding subscriber ice candidate: $iceCandidate');
           await subscriber.addCandidate(iceCandidate);
         } catch (e, stk) {
-          logger.warning('Error adding subscriber ice candidate', e, stk);
+          logger.shout('Error adding subscriber ice candidate', e, stk);
         }
       });
 
