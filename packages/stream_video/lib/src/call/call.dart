@@ -88,13 +88,41 @@ class Call with EventEmitterMixin<SfuEvent> {
       ..addListener(
         SfuEvent_EventPayload.participantLeft.name,
         (data) {
-          final payload = data.participantJoined;
+          final payload = data.participantLeft;
           final participant = payload.participant;
           return _controller.participants.removeBySessionId(
             participant.sessionId,
           );
         },
       );
+
+    _controller.localTracks.stream.listen((_) {
+      print('Local tracks changed');
+      // Updating local participant tracks.
+      _controller.participants.value = [
+        ...participants.map((it) {
+          if (it.isLocal) {
+            return (it as LocalCallParticipant).copyWith(
+              tracks: [...localTracks],
+            );
+          }
+          return it;
+        }),
+      ];
+    });
+
+    _controller.remoteTracks.stream.listen((_) {
+      print('Remote tracks changed');
+      // Updating remote participant tracks.
+      _controller.participants.value = [
+        ...participants.map((it) {
+          if (it.isLocal) return it;
+          return it.copyWith(
+            tracks: [...getRemoteTracks(it.sessionId)],
+          );
+        }),
+      ];
+    });
   }
 
   late final CallConfiguration callConfiguration;
@@ -271,7 +299,7 @@ class Call with EventEmitterMixin<SfuEvent> {
     final callState = response.callState;
     final sfuParticipants = callState.participants;
 
-    // Updating all the participants first.
+    // Adding all the participants.
     _controller.participants.value = [
       ...sfuParticipants.map((it) {
         CallParticipant participant;
@@ -314,22 +342,6 @@ class Call with EventEmitterMixin<SfuEvent> {
         await setScreenShareEnabled();
       }
     }
-
-    // Updating local participant tracks.
-    _controller.participants.value = [
-      ...participants.map((it) {
-        if (it.isLocal) {
-          return (it as LocalCallParticipant).copyWith(
-            tracks: [
-              ...?_controller.localTracks
-                  .getTracksForSession(ownSessionId)
-                  ?.values,
-            ],
-          );
-        }
-        return it;
-      }),
-    ];
   }
 
   Future<rtc.MediaStream> changeInputDevice({
@@ -502,6 +514,7 @@ class Call with EventEmitterMixin<SfuEvent> {
     logger.fine('[WebRTC] pc.onTrack');
 
     final stream = event.streams.firstOrNull;
+    logger.shout('onTrack: ${stream?.id}');
     if (stream == null) {
       // we need the stream to get the track's id
       logger.severe('received track without mediaStream');
@@ -545,6 +558,9 @@ class Call with EventEmitterMixin<SfuEvent> {
     logger.fine('EngineTrackAddedEvent trackSid:${event.track.id}');
 
     final track = event.track;
+
+    print('track muted: ${track.muted}');
+
     final idParts = stream.id.split(':');
     final trackLookupId = idParts.first;
 
@@ -566,16 +582,6 @@ class Call with EventEmitterMixin<SfuEvent> {
         stream,
         trackLookupId,
         participantToUpdate.sessionId,
-      );
-
-      _controller.participants.update(
-        participantToUpdate.copyWith(
-          tracks: [
-            ...?_controller.remoteTracks
-                .getTracksForSession(participantToUpdate.sessionId)
-                ?.values,
-          ],
-        ),
       );
     } catch (exception) {
       // We don't want to pass up any exception so catch everything here.
@@ -600,6 +606,79 @@ class _CallController {
     await participants.dispose();
     await localTracks.dispose();
     await remoteTracks.dispose();
+  }
+}
+
+extension _TrackHandler on Call {
+  /// true if the published [AudioTrack] is muted.
+  bool _isMuted<T extends Track>(List<T> audioTracks) {
+    return audioTracks.firstOrNull?.muted == true;
+  }
+
+  /// true if contains more than 1 [AudioTrack].
+  bool _hasAudio<T extends Track>(List<T> audioTracks) =>
+      audioTracks.isNotEmpty;
+
+  /// true if contains more than 1 [VideoTrack].
+  bool _hasVideo<T extends Track>(List<T> videoTracks) =>
+      videoTracks.isNotEmpty;
+
+  /// Convenience property to check whether [TrackSource.camera] is published
+  /// or not.
+  bool _isCameraEnabled<T extends Track>(List<T> publishedTracks) {
+    return !(_getPublishedTrackBySource(
+          source: TrackSource.camera,
+          publishedTracks: publishedTracks,
+        )?.muted ==
+        true);
+  }
+
+  /// Convenience property to check whether [TrackSource.microphone] is
+  /// published or not.
+  bool _isMicrophoneEnabled<T extends Track>(List<T> publishedTracks) {
+    return !(_getPublishedTrackBySource(
+          source: TrackSource.microphone,
+          publishedTracks: publishedTracks,
+        )?.muted ==
+        true);
+  }
+
+  /// Convenience property to check whether [TrackSource.screenShareVideo] is
+  /// published or not.
+  bool _isScreenShareEnabled<T extends Track>(List<T> publishedTracks) {
+    return !(_getPublishedTrackBySource(
+          source: TrackSource.screenShareVideo,
+          publishedTracks: publishedTracks,
+        )?.muted ==
+        true);
+  }
+
+  /// Tries to find a [TrackPublication] by its [TrackSource]. Otherwise, will
+  /// return a compatible type of [TrackPublication] for the [TrackSource] specified.
+  /// returns null when not found.
+  T? _getPublishedTrackBySource<T extends Track>({
+    required TrackSource source,
+    required List<T> publishedTracks,
+  }) {
+    if (source == TrackSource.unknown) return null;
+
+    // try to find by source
+    final result = publishedTracks.firstWhereOrNull((e) => e.source == source);
+    if (result != null) return result;
+    // try to find by compatibility
+    return publishedTracks
+        .where((e) => e.source == TrackSource.unknown)
+        .firstWhereOrNull((e) =>
+            (source == TrackSource.microphone && e.kind == TrackType.audio) ||
+            (source == TrackSource.camera &&
+                e.kind == TrackType.video &&
+                e.name != Track.screenShareName) ||
+            (source == TrackSource.screenShareVideo &&
+                e.kind == TrackType.video &&
+                e.name == Track.screenShareName) ||
+            (source == TrackSource.screenShareAudio &&
+                e.kind == TrackType.audio &&
+                e.name == Track.screenShareName));
   }
 }
 
@@ -649,6 +728,11 @@ extension LocalTrackHandler on Call {
           await track.mute();
         }
       }
+
+      final sessionId = _client.sessionId;
+      // Updating the track
+      _controller.localTracks.add(sessionId, track);
+
       return track;
     } else if (enabled) {
       if (source == TrackSource.camera) {
@@ -851,48 +935,94 @@ extension LocalTrackHandler on Call {
     return [..._controller.localTracks.audio(_client.sessionId).values];
   }
 
-  /// Tries to find a [TrackPublication] by its [TrackSource]. Otherwise, will
-  /// return a compatible type of [TrackPublication] for the [TrackSource] specified.
+  /// true if the published [LocalAudioTrack] is muted.
+  bool get isLocalMuted => _isMuted(localAudioTracks);
+
+  /// true if contains more than 1 [LocalAudioTrack].
+  bool get hasLocalAudio => _hasAudio(localAudioTracks);
+
+  /// true if contains more than 1 [LocalVideoTrack].
+  bool get hasLocalVideo => _hasVideo(localVideoTracks);
+
+  /// Convenience property to check whether [TrackSource.camera] is published
+  /// or not.
+  bool get isLocalCameraEnabled => _isCameraEnabled(localTracks);
+
+  /// Convenience property to check whether [TrackSource.microphone] is
+  /// published or not.
+  bool get isLocalMicrophoneEnabled => _isMicrophoneEnabled(localTracks);
+
+  /// Convenience property to check whether [TrackSource.screenShareVideo] is
+  /// published or not.
+  bool get isLocalScreenShareEnabled => _isScreenShareEnabled(localTracks);
+
+  /// Tries to find a [Track] by its [TrackSource]. Otherwise, will
+  /// return a compatible type of [Track] for the [TrackSource]
+  /// specified.
+  ///
   /// returns null when not found.
   LocalTrack? getPublishedLocalTrackBySource(TrackSource source) {
-    if (source == TrackSource.unknown) return null;
-
-    final publishedTracks = [...localTracks];
-    // try to find by source
-    final result = publishedTracks.firstWhereOrNull((e) => e.source == source);
-    if (result != null) return result;
-    // try to find by compatibility
-    return publishedTracks
-        .where((e) => e.source == TrackSource.unknown)
-        .firstWhereOrNull((e) =>
-            (source == TrackSource.microphone && e.kind == TrackType.audio) ||
-            (source == TrackSource.camera &&
-                e.kind == TrackType.video &&
-                e.name != Track.screenShareName) ||
-            (source == TrackSource.screenShareVideo &&
-                e.kind == TrackType.video &&
-                e.name == Track.screenShareName) ||
-            (source == TrackSource.screenShareAudio &&
-                e.kind == TrackType.audio &&
-                e.name == Track.screenShareName));
+    return _getPublishedTrackBySource(
+      source: source,
+      publishedTracks: localTracks,
+    );
   }
 }
 
 ///
 extension RemoteTrackHandler on Call {
   /// A convenience property to get all remote tracks.
-  List<RemoteTrack> get localTracks {
-    return [..._controller.remoteTracks.all(_client.sessionId).values];
+  List<RemoteTrack> getRemoteTracks(String participantSid) {
+    return [..._controller.remoteTracks.all(participantSid).values];
   }
 
   /// A convenience property to get all remote video tracks.
-  List<RemoteVideoTrack> get localVideoTracks {
-    return [..._controller.remoteTracks.video(_client.sessionId).values];
+  List<RemoteVideoTrack> getRemoteVideoTracks(String participantSid) {
+    return [..._controller.remoteTracks.video(participantSid).values];
   }
 
   /// A convenience property to get all remote audio tracks.
-  List<RemoteAudioTrack> get localAudioTracks {
-    return [..._controller.remoteTracks.audio(_client.sessionId).values];
+  List<RemoteAudioTrack> getRemoteAudioTracks(String participantSid) {
+    return [..._controller.remoteTracks.audio(participantSid).values];
+  }
+
+  /// true if the published [RemoteAudioTrack] is muted.
+  bool isRemoteMuted(String participantSid) {
+    final tracks = getRemoteAudioTracks(participantSid);
+    return _isMuted(tracks);
+  }
+
+  /// true if contains more than 1 [RemoteAudioTrack].
+  bool hasRemoteAudio(String participantSid) {
+    final tracks = getRemoteAudioTracks(participantSid);
+    return _hasAudio(tracks);
+  }
+
+  /// true if contains more than 1 [RemoteVideoTrack].
+  bool hasRemoteVideo(String participantSid) {
+    final tracks = getRemoteVideoTracks(participantSid);
+    return _hasVideo(tracks);
+  }
+
+  /// Convenience property to check whether [TrackSource.camera] is published
+  /// or not.
+  bool isRemoteCameraEnabled(String participantSid) {
+    final tracks = getRemoteTracks(participantSid);
+    return _isCameraEnabled(tracks);
+  }
+
+  /// Convenience property to check whether [TrackSource.microphone] is
+  /// published or not.
+  bool isRemoteMicrophoneEnabled(String participantSid) {
+    final tracks = getRemoteTracks(participantSid);
+    return _isMicrophoneEnabled(tracks);
+  }
+
+  /// Convenience property to check whether [TrackSource.screenShareVideo] is
+  /// published or not.
+  bool isRemoteScreenShareEnabled(String participantSid) {
+    final tracks = getRemoteTracks(participantSid);
+    return _isScreenShareEnabled(tracks);
   }
 
   Future<void> addSubscribedRemoteMediaTrack(
@@ -998,5 +1128,21 @@ extension RemoteTrackHandler on Call {
         participantSessionId: participantSessionId,
       );
     }
+  }
+
+  /// Tries to find a [Track] by its [TrackSource]. Otherwise, will
+  /// return a compatible type of [Track] for the [TrackSource]
+  /// specified.
+  ///
+  /// returns null when not found.
+  RemoteTrack? getPublishedRemoteTrackBySource({
+    required TrackSource source,
+    required String participantSid,
+  }) {
+    final tracks = getRemoteTracks(participantSid);
+    return _getPublishedTrackBySource(
+      source: source,
+      publishedTracks: tracks,
+    );
   }
 }

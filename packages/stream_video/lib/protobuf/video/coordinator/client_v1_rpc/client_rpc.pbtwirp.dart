@@ -59,6 +59,10 @@ abstract class ClientRPC {
   Future<SendEventResponse> sendEvent(twirp.Context ctx, SendEventRequest req);
   
   Future<SendCustomEventResponse> sendCustomEvent(twirp.Context ctx, SendCustomEventRequest req);
+  
+  Future<QueryUsersResponse> queryUsers(twirp.Context ctx, QueryUsersRequest req);
+  
+  Future<UpsertUsersResponse> upsertUsers(twirp.Context ctx, UpsertUsersRequest req);
   // endpoint for storing stats (perhaps we should move this to the SFU layer though)
   Future<ReportCallStatsResponse> reportCallStats(twirp.Context ctx, ReportCallStatsRequest req);
   // endpoint for storing stat-related events raised by the client
@@ -518,6 +522,50 @@ class ClientRPCJSONClient implements ClientRPC {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/SendCustomEvent');
       final data = await doJSONRequest(ctx, url, hooks, req);
       final SendCustomEventResponse res = SendCustomEventResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<QueryUsersResponse> queryUsers(twirp.Context ctx, QueryUsersRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'QueryUsers');
+    return interceptor((ctx, req) {
+      return callQueryUsers(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<QueryUsersResponse> callQueryUsers(twirp.Context ctx, QueryUsersRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/QueryUsers');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final QueryUsersResponse res = QueryUsersResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UpsertUsersResponse> upsertUsers(twirp.Context ctx, UpsertUsersRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'UpsertUsers');
+    return interceptor((ctx, req) {
+      return callUpsertUsers(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<UpsertUsersResponse> callUpsertUsers(twirp.Context ctx, UpsertUsersRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/UpsertUsers');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final UpsertUsersResponse res = UpsertUsersResponse.create();
       res.mergeFromProto3Json(json.decode(data));
       return Future.value(res);
     } catch (e) {
@@ -1063,6 +1111,50 @@ class ClientRPCProtobufClient implements ClientRPC {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/SendCustomEvent');
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final SendCustomEventResponse res = SendCustomEventResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<QueryUsersResponse> queryUsers(twirp.Context ctx, QueryUsersRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'QueryUsers');
+    return interceptor((ctx, req) {
+      return callQueryUsers(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<QueryUsersResponse> callQueryUsers(twirp.Context ctx, QueryUsersRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/QueryUsers');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final QueryUsersResponse res = QueryUsersResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<UpsertUsersResponse> upsertUsers(twirp.Context ctx, UpsertUsersRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'UpsertUsers');
+    return interceptor((ctx, req) {
+      return callUpsertUsers(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<UpsertUsersResponse> callUpsertUsers(twirp.Context ctx, UpsertUsersRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/UpsertUsers');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final UpsertUsersResponse res = UpsertUsersResponse.create();
       res.mergeFromBuffer(data);
       return Future.value(res);
     } catch (e) {

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart';
 import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart';
 import 'package:stream_video/src/core/logger/logger.dart';
 import 'package:stream_video/src/sfu-client/sfu_client.dart';
@@ -20,31 +21,28 @@ Future<RTCPeerConnection> createPublisher({
 
   publisher
     ..onIceConnectionState = (state) {
-      logger.info('Publisher ICE connection state: $state');
+      logger.shout('Publisher ICE connection state: $state');
     }
     ..onIceGatheringState = (state) {
-      logger.info('Publisher ICE gathering state: $state');
+      logger.shout('Publisher ICE gathering state: $state');
     }
     ..onAddStream = (stream) {
-      logger.info('Publisher onAddStream: $stream');
+      logger.shout('Publisher onAddStream: $stream');
     }
     ..onIceCandidate = (candidate) async {
-      logger.info('Publisher onIceCandidate: $candidate');
+      logger.shout('Publisher onIceCandidate: $candidate');
 
       final iceCandidate = json.encode(candidate.toMap());
-      await sfuClient.rpc.iceTrickle(
-        ICETrickle(
-          iceCandidate: iceCandidate,
-          sessionId: sfuClient.sessionId,
-          peerType: PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
-        ),
+      await sfuClient.iceTrickle(
+        iceCandidate: iceCandidate,
+        peerType: PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
       );
     };
 
   StreamSubscription<ICETrickle>? candidatesSubscription;
   // will fire once media is attached to the peer connection
   publisher.onRenegotiationNeeded = () async {
-    logger.info('Publisher onRenegotiationNeeded');
+    logger.shout('Publisher onRenegotiationNeeded');
 
     final offer = await publisher.createOffer();
     await publisher.setLocalDescription(offer);
@@ -56,9 +54,9 @@ Future<RTCPeerConnection> createPublisher({
     );
 
     await candidatesSubscription?.cancel();
-    logger.info('Started listening publisher ice candidates');
+    logger.shout('Started listening publisher ice candidates');
     candidatesSubscription = onIceCandidates.listen((candidate) async {
-      logger.info('Publisher ice candidate: $candidate');
+      logger.shout('Publisher ice candidate: $candidate');
       try {
         final iceCandidateJson = json.decode(candidate.iceCandidate);
         final iceCandidate = RTCIceCandidate(
@@ -67,10 +65,10 @@ Future<RTCPeerConnection> createPublisher({
           iceCandidateJson['sdpMLineIndex'],
         );
 
-        logger.info('Adding publisher ice candidate: $iceCandidate');
+        logger.shout('Adding publisher ice candidate: $iceCandidate');
         await publisher.addCandidate(iceCandidate);
       } catch (e, stk) {
-        logger.warning('Error adding publisher ice candidate', e, stk);
+        logger.shout('Error adding publisher ice candidate', e, stk);
       }
     });
   };

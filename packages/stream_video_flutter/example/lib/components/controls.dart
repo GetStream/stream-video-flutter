@@ -1,4 +1,4 @@
-import 'package:example/components/bottom_sheet.dart';
+import 'package:example/bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -11,7 +11,8 @@ class BottomControls extends StatelessWidget {
   // VideoRoom room(BuildContext context) =>
   //     StreamVideoProvider.of(context).client.participants;
 
-  StreamVideo client(BuildContext context) => StreamVideo.instance;
+  StreamVideoClient client(BuildContext context) =>
+      StreamVideoProvider.of(context).client;
   // CallParticipant localParticipant(BuildContext context) =>
   //     client(context).activeCall?.participants;
 

@@ -55,6 +55,18 @@ class CallParticipantsController<T extends CallParticipant>
     value = participants.where((it) => it.sessionId != sessionId).toList();
   }
 
+  /// Returns the participant with the given [id].
+  T? getById(String id) {
+    final participants = [...value];
+    return participants.firstWhereOrNull((it) => it.id == id);
+  }
+
+  /// Returns the participant with the given [sessionId].
+  T? getBySessionId(String sessionId) {
+    final participants = [...value];
+    return participants.firstWhereOrNull((it) => it.sessionId == sessionId);
+  }
+
   /// Updates a participant in the list of participants.
   void update(T participant) {
     final participants = [...value];

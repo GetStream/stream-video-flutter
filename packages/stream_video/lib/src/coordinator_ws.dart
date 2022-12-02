@@ -54,6 +54,7 @@ class CoordinatorWebSocket extends StreamWebSocket
       apiKey: apiKey,
       token: token.rawValue,
       user: UserInput(
+        id: userInfo.id,
         name: userInfo.name,
         imageUrl: userInfo.imageUrl,
         role: userInfo.role,

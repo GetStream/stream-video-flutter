@@ -31,7 +31,7 @@ abstract class LocalTrack extends Track {
         }
       } else {
         if (!CurrentPlatform.isWindows) {
-          await start();
+          await start(restart: true);
         }
         await enable();
       }

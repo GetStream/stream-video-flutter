@@ -33,27 +33,24 @@ final $typed_data.Uint8List pushProviderDescriptor = $convert.base64Decode('CgxQ
 const ApnCredentials$json = const {
   '1': 'ApnCredentials',
   '2': const [
-    const {'1': 'auth_key', '3': 1, '4': 1, '5': 9, '10': 'authKey'},
-    const {'1': 'key_id', '3': 2, '4': 1, '5': 9, '10': 'keyId'},
-    const {'1': 'apn_topic', '3': 3, '4': 1, '5': 9, '10': 'apnTopic'},
-    const {'1': 'team_id', '3': 4, '4': 1, '5': 9, '10': 'teamId'},
-    const {'1': 'development', '3': 5, '4': 1, '5': 8, '10': 'development'},
+    const {'1': 'certificate_p12', '3': 1, '4': 1, '5': 12, '10': 'certificateP12'},
+    const {'1': 'topic', '3': 2, '4': 1, '5': 9, '10': 'topic'},
+    const {'1': 'team_id', '3': 3, '4': 1, '5': 9, '10': 'teamId'},
   ],
 };
 
 /// Descriptor for `ApnCredentials`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List apnCredentialsDescriptor = $convert.base64Decode('Cg5BcG5DcmVkZW50aWFscxIZCghhdXRoX2tleRgBIAEoCVIHYXV0aEtleRIVCgZrZXlfaWQYAiABKAlSBWtleUlkEhsKCWFwbl90b3BpYxgDIAEoCVIIYXBuVG9waWMSFwoHdGVhbV9pZBgEIAEoCVIGdGVhbUlkEiAKC2RldmVsb3BtZW50GAUgASgIUgtkZXZlbG9wbWVudA==');
+final $typed_data.Uint8List apnCredentialsDescriptor = $convert.base64Decode('Cg5BcG5DcmVkZW50aWFscxInCg9jZXJ0aWZpY2F0ZV9wMTIYASABKAxSDmNlcnRpZmljYXRlUDEyEhQKBXRvcGljGAIgASgJUgV0b3BpYxIXCgd0ZWFtX2lkGAMgASgJUgZ0ZWFtSWQ=');
 @$core.Deprecated('Use firebaseCredentialsDescriptor instead')
 const FirebaseCredentials$json = const {
   '1': 'FirebaseCredentials',
   '2': const [
-    const {'1': 'server_key', '3': 1, '4': 1, '5': 9, '10': 'serverKey'},
-    const {'1': 'credentials_json', '3': 2, '4': 1, '5': 9, '10': 'credentialsJson'},
+    const {'1': 'credentials', '3': 1, '4': 1, '5': 9, '10': 'credentials'},
   ],
 };
 
 /// Descriptor for `FirebaseCredentials`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List firebaseCredentialsDescriptor = $convert.base64Decode('ChNGaXJlYmFzZUNyZWRlbnRpYWxzEh0KCnNlcnZlcl9rZXkYASABKAlSCXNlcnZlcktleRIpChBjcmVkZW50aWFsc19qc29uGAIgASgJUg9jcmVkZW50aWFsc0pzb24=');
+final $typed_data.Uint8List firebaseCredentialsDescriptor = $convert.base64Decode('ChNGaXJlYmFzZUNyZWRlbnRpYWxzEiAKC2NyZWRlbnRpYWxzGAEgASgJUgtjcmVkZW50aWFscw==');
 @$core.Deprecated('Use huaweiCredentialsDescriptor instead')
 const HuaweiCredentials$json = const {
   '1': 'HuaweiCredentials',
