@@ -291,28 +291,35 @@ class StreamVideo {
 
     final credentials = edgeServer.credentials;
 
-    final call = Call(
+    final call = Call.fromDetails(
       cid: callCid,
       credentials: credentials,
       callOptions: callOptions,
       onCallConnected: (it) {
-        _state.activeCall.value = it;
-
-        // Updating ws about the current call.
-        final callInfo = CallInfo(callId: callId, callType: callType);
-        _ws?.callInfo = callInfo;
+        updateCallStateConnected(it, callId, callType);
       },
-      onCallLeft: (_) {
-        _state.activeCall.value = null;
-
-        // Updating ws about the current call.
-        _ws?.callInfo = null;
-      },
+      onCallLeft: updateStateDisconnected,
+      client: this,
     );
 
     _state.pendingCalls.add(call);
 
     return call;
+  }
+
+  void updateCallStateConnected(Call it, String callId, String callType) {
+    _state.activeCall.value = it;
+
+    // Updating ws about the current call.
+    final callInfo = CallInfo(callId: callId, callType: callType);
+    _ws?.callInfo = callInfo;
+  }
+
+  void updateStateDisconnected(Call c) {
+    _state.activeCall.value = null;
+
+    // Updating ws about the current call.
+    _ws?.callInfo = null;
   }
 
   Future<ReportCallStatsResponse> reportCallStats({

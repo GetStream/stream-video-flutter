@@ -74,18 +74,26 @@ class _StartCallState extends State<StartCall> {
               ),
             );
 
-            await client.getOrCreateCall(
-                type: 'default',
-                id: 'my_new_second_test_id',
+            // await client.getOrCreateCall(
+            //     type: 'default',
+            //     id: 'test_call_123',
+            //     participantIds: [
+            //       'sahil',
+            //       'deven',
+            //     ]);
+
+            var call = Call(
+              callConfiguration: const CallConfiguration(
+                'default',
+                'test_call_1234',
                 participantIds: [
                   'sahil',
                   'deven',
-                ]);
-
-            final call = await client.joinCall(
-              type: 'default',
-              id: 'my_new_second_test_id',
+                ],
+              ),
             );
+
+            var res = await call.create();
 
             await call.connect(
               options: const ConnectOptions(

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
@@ -13,6 +12,7 @@ import 'package:stream_video/src/core/logger/logger.dart';
 import 'package:stream_video/src/core/platform_detector/platform_detector.dart';
 import 'package:stream_video/src/core/utils/event_emitter.dart';
 import 'package:stream_video/src/core/utils/utils.dart';
+import 'package:stream_video/src/models/call_configuration.dart';
 import 'package:stream_video/src/models/call_participant.dart';
 import 'package:stream_video/src/options.dart';
 import 'package:stream_video/src/sfu-client/rtc/codecs.dart' as codecs;
@@ -20,6 +20,7 @@ import 'package:stream_video/src/sfu-client/rtc/ice_trickle_buffer.dart';
 import 'package:stream_video/src/sfu-client/rtc/publisher.dart';
 import 'package:stream_video/src/sfu-client/rtc/subscriber.dart';
 import 'package:stream_video/src/sfu-client/sfu_client.dart';
+import 'package:stream_video/src/stream_video.dart';
 import 'package:stream_video/src/track/local/audio.dart';
 import 'package:stream_video/src/track/local/local.dart';
 import 'package:stream_video/src/track/local/video.dart';
@@ -30,19 +31,39 @@ import 'package:stream_video/src/track/remote/video.dart';
 import 'package:stream_video/src/track/track.dart';
 import 'package:stream_video/src/types/other.dart';
 
+import '../../protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
+
 const _timeoutDuration = Duration(seconds: 30);
 
 enum StatKind { sender, publisher }
 
 class Call with EventEmitterMixin<SfuEvent> {
-  /// Creates a new [Call] instance.
-  Call({
+  /// Creates a new [Call] instance if already connected.
+  Call.fromDetails({
     required this.cid,
     required this.credentials,
+    required StreamVideo client,
     this.callOptions = const CallOptions(),
     this.onCallConnected,
     this.onCallLeft,
-  }) {
+  }) : _streamVideoClient = client {
+    _initialiseCall();
+  }
+
+  Call({
+    required CallConfiguration callConfiguration,
+    StreamVideo? client,
+  })  : _callConfiguration = callConfiguration,
+        _streamVideoClient = client ?? StreamVideo.instance {
+    onCallConnected = (c) {
+      _streamVideoClient.updateCallStateConnected(
+          c, callConfiguration.id, callConfiguration.callType);
+    };
+    onCallLeft = _streamVideoClient.updateStateDisconnected;
+  }
+
+  void _initialiseCall() {
+    _initialised = true;
     final url = credentials.server.url;
     final token = credentials.token;
     _client = SfuClient(
@@ -81,12 +102,20 @@ class Call with EventEmitterMixin<SfuEvent> {
       );
   }
 
-  final String cid;
-  final Credentials credentials;
-  final CallOptions callOptions;
+  /// Used if not created from the client
+  late CallConfiguration _callConfiguration;
+  late StreamVideo _streamVideoClient;
 
-  final void Function(Call)? onCallConnected;
-  final void Function(Call)? onCallLeft;
+  /// Used if created from the client
+  late final String cid;
+  late final Credentials credentials;
+  late final CallOptions callOptions;
+
+  /// Used to check if call is from default constructor or client
+  bool _initialised = false;
+
+  late final void Function(Call)? onCallConnected;
+  late final void Function(Call)? onCallLeft;
 
   late final SfuClient _client;
 
@@ -110,6 +139,15 @@ class Call with EventEmitterMixin<SfuEvent> {
 
   List<CallParticipant> get remoteParticipants {
     return _controller.participants.remote;
+  }
+
+  Future<CallEnvelope> create() {
+    return _streamVideoClient.createCall(
+      type: _callConfiguration.callType,
+      id: _callConfiguration.id,
+      participantIds: _callConfiguration.participantIds,
+      ringing: _callConfiguration.ringing ?? false,
+    );
   }
 
   Future<void> leave() async {
@@ -138,6 +176,21 @@ class Call with EventEmitterMixin<SfuEvent> {
   Future<Call> connect({
     ConnectOptions options = const ConnectOptions(),
   }) async {
+    if (!_initialised) {
+      final result = await _streamVideoClient.joinCall(
+        type: _callConfiguration.callType,
+        id: _callConfiguration.id,
+        callOptions: _callConfiguration.callOptions ?? const CallOptions(),
+      );
+
+      cid = result.cid;
+      credentials = result.credentials;
+      callOptions = _callConfiguration.callOptions ?? const CallOptions();
+
+      _initialiseCall();
+      _initialised = true;
+    }
+
     logger.info('Joining call $cid');
 
     await _client.connect();
