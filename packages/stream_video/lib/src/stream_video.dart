@@ -43,13 +43,51 @@ const _defaultCoordinatorWsUrl =
     'wss://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
 
 class StreamVideo {
-  StreamVideo(
+  StreamVideo.init(
     this.apiKey, {
     this.coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     this.coordinatorWsUrl = _defaultCoordinatorWsUrl,
     this.latencyMeasurementRounds = 3,
     Level logLevel = Level.ALL,
     LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
+  }) {
+    _instance = StreamVideo._(
+      apiKey,
+      coordinatorRpcUrl: coordinatorRpcUrl,
+      coordinatorWsUrl: coordinatorWsUrl,
+      latencyMeasurementRounds: latencyMeasurementRounds,
+      logLevel: logLevel,
+      logHandlerFunction: logHandlerFunction,
+    );
+
+    // TODO(Deven): Reinitialise values if init is called again
+  }
+
+  factory StreamVideo.new(
+    String apiKey, {
+    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
+    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
+    int latencyMeasurementRounds = 3,
+    Level logLevel = Level.ALL,
+    LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
+  }) {
+    return StreamVideo._(
+      apiKey,
+      coordinatorRpcUrl: coordinatorRpcUrl,
+      coordinatorWsUrl: coordinatorWsUrl,
+      latencyMeasurementRounds: latencyMeasurementRounds,
+      logLevel: logLevel,
+      logHandlerFunction: logHandlerFunction,
+    );
+  }
+
+  StreamVideo._(
+    this.apiKey, {
+    required this.coordinatorRpcUrl,
+    required this.coordinatorWsUrl,
+    required this.latencyMeasurementRounds,
+    required Level logLevel,
+    required LogHandlerFunction logHandlerFunction,
   }) {
     // Preparing logger
     setLogLevel(logLevel);
@@ -60,6 +98,17 @@ class StreamVideo {
       tokenManager: _tokenManager,
       baseUrl: coordinatorRpcUrl,
     );
+  }
+
+  static late final StreamVideo _instance;
+  static StreamVideo get instance {
+    try {
+      return _instance;
+    } catch (e) {
+      throw Exception(
+        'Please initialise the client using StreamVideo.init() before using the instance.',
+      );
+    }
   }
 
   final String apiKey;

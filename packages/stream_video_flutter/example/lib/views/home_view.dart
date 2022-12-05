@@ -62,7 +62,7 @@ class _StartCallState extends State<StartCall> {
         child: OutlinedButton(
           child: const Text("Start Call"),
           onPressed: () async {
-            final client = StreamVideoProvider.of(context).client;
+            final client = StreamVideo.instance;
             await client.connect(
               const UserInfo(
                 id: 'sahil',
@@ -121,7 +121,7 @@ class _JoinCallState extends State<JoinCall> {
         child: OutlinedButton(
             child: const Text("Join Call"),
             onPressed: () async {
-              final client = StreamVideoProvider.of(context).client;
+              final client = StreamVideo.instance;
               await client.connect(
                 const UserInfo(
                   id: 'deven',
