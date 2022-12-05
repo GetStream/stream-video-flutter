@@ -1,5 +1,5 @@
-import 'package:example/checkbox.dart';
-import 'package:example/demo_users.dart';
+import 'package:example/components/checkbox.dart';
+import 'package:example/utils/demo_users.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -12,6 +12,6 @@ extension CheckboxControllerX on CheckboxController {
     value = newValue;
   }
 
-  List<CheckBoxItem>  getIsChecked() =>
+  List<CheckBoxItem> getIsChecked() =>
       value.where((element) => element.isChecked == true).toList();
 }

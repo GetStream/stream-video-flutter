@@ -1,5 +1,4 @@
-
-import 'package:example/participant.dart';
+import 'package:example/components/participant.dart';
 import 'package:flutter/material.dart';
 
 class ParticipantsBottomSheet extends StatelessWidget {

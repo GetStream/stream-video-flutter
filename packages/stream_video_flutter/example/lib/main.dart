@@ -8,10 +8,10 @@ void main() {
     'key10', // see <video>/data/fixtures/apps.yaml for API secret
     coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
         'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
-        // 'http://192.168.1.6:26991/rpc',
+    // 'http://192.168.1.6:26991/rpc',
     coordinatorWsUrl: //replace host with your local ip address
         'wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
-        // 'ws://192.168.1.6:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
+    // 'ws://192.168.1.6:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
     //replace host with your local ip address
     // sfuUrl: 'http://192.168.1.10:3031/twirp',
   );

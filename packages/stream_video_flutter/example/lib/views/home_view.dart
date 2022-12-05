@@ -1,6 +1,6 @@
-import 'package:example/checkbox.dart';
-import 'package:example/checkbox_controller.dart';
-import 'package:example/demo_users.dart';
+import 'package:example/components/checkbox.dart';
+import 'package:example/utils/checkbox_controller.dart';
+import 'package:example/utils/demo_users.dart';
 import 'package:example/views/join_call.dart';
 import 'package:example/views/start_call.dart';
 import 'package:flutter/material.dart';

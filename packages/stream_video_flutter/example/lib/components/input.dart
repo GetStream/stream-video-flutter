@@ -1,12 +1,10 @@
-
 import 'package:flutter/material.dart';
 
 class CallInput extends StatelessWidget {
   final List<Widget>? children;
   final TextEditingController controller;
 
-
-  const CallInput({Key? key,  this.children, required this.controller})
+  const CallInput({Key? key, this.children, required this.controller})
       : super(key: key);
 
   @override
