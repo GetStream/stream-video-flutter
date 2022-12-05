@@ -111,6 +111,38 @@ class StreamVideo {
     }
   }
 
+  static Future<void> connectUser(
+    UserInfo user, {
+    Token? token,
+    TokenProvider? provider,
+  }) async {
+    var client = StreamVideo.instance;
+
+    if (client._ws != null) return;
+
+    logger.info('setting user : ${user.id}');
+
+    client._state.currentUser.value = user;
+    client._tokenManager.setTokenOrProvider(
+      user.id,
+      token: token,
+      provider: provider,
+    );
+
+    try {
+      client._ws = CoordinatorWebSocket(
+        client.coordinatorWsUrl,
+        apiKey: client.apiKey,
+        userInfo: user,
+        tokenManager: client._tokenManager,
+      );
+      return client._ws!.connect();
+    } catch (e, stk) {
+      logger.severe('error connecting user : ${user.id}', e, stk);
+      rethrow;
+    }
+  }
+
   final String apiKey;
   final String coordinatorRpcUrl;
   final String coordinatorWsUrl;

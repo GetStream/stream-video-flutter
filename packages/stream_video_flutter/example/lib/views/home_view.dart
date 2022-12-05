@@ -62,8 +62,7 @@ class _StartCallState extends State<StartCall> {
         child: OutlinedButton(
           child: const Text("Start Call"),
           onPressed: () async {
-            final client = StreamVideo.instance;
-            await client.connect(
+            await StreamVideo.connectUser(
               const UserInfo(
                 id: 'sahil',
                 role: 'admin',
@@ -73,14 +72,6 @@ class _StartCallState extends State<StartCall> {
                 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9zYWhpbCIsImlhdCI6MTY2OTcyNjkxNSwidXNlcl9pZCI6InNhaGlsIn0.aOOWXDmX-8hG57N7R3w320XZzxAj256Lm2YZj_sqCuQ",
               ),
             );
-
-            // await client.getOrCreateCall(
-            //     type: 'default',
-            //     id: 'test_call_123',
-            //     participantIds: [
-            //       'sahil',
-            //       'deven',
-            //     ]);
 
             var call = Call(
               callConfiguration: const CallConfiguration(
@@ -93,7 +84,7 @@ class _StartCallState extends State<StartCall> {
               ),
             );
 
-            var res = await call.create();
+            var res = await call.getOrCreate();
 
             await call.connect(
               options: const ConnectOptions(

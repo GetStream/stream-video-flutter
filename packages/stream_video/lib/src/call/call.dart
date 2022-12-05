@@ -153,6 +153,15 @@ class Call with EventEmitterMixin<SfuEvent> {
     );
   }
 
+  Future<CallEnvelope> getOrCreate() {
+    return _streamVideoClient.getOrCreateCall(
+      type: _callConfiguration.callType,
+      id: _callConfiguration.id,
+      participantIds: _callConfiguration.participantIds,
+      ringing: _callConfiguration.ringing ?? false,
+    );
+  }
+
   Future<void> leave() async {
     await _subscriber?.close();
     _subscriber = null;
