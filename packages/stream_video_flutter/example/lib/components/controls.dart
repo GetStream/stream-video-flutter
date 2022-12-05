@@ -1,4 +1,4 @@
-import 'package:example/bottom_sheet.dart';
+import 'package:example/components/bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 

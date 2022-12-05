@@ -1,5 +1,5 @@
-import 'package:example/circle_avatar.dart';
-import 'package:example/checkbox_controller.dart';
+import 'package:example/components/circle_avatar.dart';
+import 'package:example/utils/checkbox_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
