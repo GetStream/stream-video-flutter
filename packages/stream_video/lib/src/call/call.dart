@@ -57,7 +57,10 @@ class Call with EventEmitterMixin<SfuEvent> {
         _streamVideoClient = client ?? StreamVideo.instance {
     onCallConnected = (c) {
       _streamVideoClient.updateCallStateConnected(
-          c, callConfiguration.id, callConfiguration.callType);
+        c,
+        c.cid,
+        callConfiguration.callType,
+      );
     };
     onCallLeft = _streamVideoClient.updateStateDisconnected;
   }
