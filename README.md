@@ -7,6 +7,7 @@ Find the documentation here: {Add link when available}
 ## Current Features
 
 | Platform | Subscribe/Publish | Simulcast | Screen sharing |
+| :-----:  | :---------------: | :-------: | :-------------:|
 |   Android   |        ✅        |    ❌    |       ❌      |
 |   iOS   |        ✅         |    ❌     |        ❌        |
 | Web |        ✅         |    ❌     |        ❌        |     
