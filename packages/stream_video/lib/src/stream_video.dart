@@ -60,7 +60,7 @@ class StreamVideo {
       logHandlerFunction: logHandlerFunction,
     );
 
-    // TODO(Deven): Reinitialise values if init is called again
+    disconnectUser();
   }
 
   factory StreamVideo.new(
@@ -116,7 +116,7 @@ class StreamVideo {
     Token? token,
     TokenProvider? provider,
   }) async {
-    var client = StreamVideo.instance;
+    final client = StreamVideo.instance;
 
     if (client._ws != null) return;
 
@@ -141,6 +141,21 @@ class StreamVideo {
       logger.severe('error connecting user : ${user.id}', e, stk);
       rethrow;
     }
+  }
+
+  static Future<void> disconnectUser() async {
+    final client = StreamVideo.instance;
+
+    logger.info('disconnecting user : ${client.currentUser?.id}');
+
+    if (client._ws == null) return;
+    await client._ws?.disconnect();
+    client._ws = null;
+    client._tokenManager.reset();
+
+    // Resetting the state.
+    await client._state.dispose();
+    client._state = _StreamVideoState();
   }
 
   final String apiKey;
