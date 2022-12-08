@@ -18,7 +18,7 @@ jobs:
           reporter: github-pr-check
           # Set fail_on_error to true to make sure builds fail.
           fail_on_error: true
-          files: '["./docusaurus", "README.md"]'
+          files: docusaurus
     env:
       # Required, set by GitHub actions automatically:
       # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
