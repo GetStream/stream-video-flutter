@@ -87,7 +87,7 @@ await call.connect(
 ### Disconnecting user -
 
 ```dart
-StreamVideo.disconnectUser();
+await StreamVideo.disconnectUser();
 ```
 
 # OLD README:
