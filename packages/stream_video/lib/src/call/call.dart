@@ -59,10 +59,10 @@ class Call with EventEmitterMixin<SfuEvent> {
       _streamVideoClient.updateCallStateConnected(
         c,
         c.cid,
-        callConfiguration.callType,
+        callConfiguration.type,
       );
     };
-    onCallLeft = _streamVideoClient.updateStateDisconnected;
+    onCallLeft = _streamVideoClient.updateCallStateDisconnected;
   }
 
   void _initialiseCall() {
@@ -146,19 +146,19 @@ class Call with EventEmitterMixin<SfuEvent> {
 
   Future<CallEnvelope> create() {
     return _streamVideoClient.createCall(
-      type: _callConfiguration.callType,
+      type: _callConfiguration.type,
       id: _callConfiguration.id,
       participantIds: _callConfiguration.participantIds,
-      ringing: _callConfiguration.ringing ?? false,
+      ringing: _callConfiguration.ringing,
     );
   }
 
   Future<CallEnvelope> getOrCreate() {
     return _streamVideoClient.getOrCreateCall(
-      type: _callConfiguration.callType,
+      type: _callConfiguration.type,
       id: _callConfiguration.id,
       participantIds: _callConfiguration.participantIds,
-      ringing: _callConfiguration.ringing ?? false,
+      ringing: _callConfiguration.ringing,
     );
   }
 
@@ -190,7 +190,7 @@ class Call with EventEmitterMixin<SfuEvent> {
   }) async {
     if (!_initialised) {
       final result = await _streamVideoClient.joinCall(
-        type: _callConfiguration.callType,
+        type: _callConfiguration.type,
         id: _callConfiguration.id,
         callOptions: _callConfiguration.callOptions ?? const CallOptions(),
       );

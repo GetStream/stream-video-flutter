@@ -43,6 +43,7 @@ const _defaultCoordinatorWsUrl =
     'wss://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
 
 class StreamVideo {
+  /// Initialises the Stream Video SDK and creates the singleton instance of the client
   StreamVideo.init(
     this.apiKey, {
     this.coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
@@ -63,6 +64,8 @@ class StreamVideo {
     disconnectUser();
   }
 
+  /// Creates a new Stream Video client unassociated with the
+  /// Stream Video singleton instance
   factory StreamVideo.new(
     String apiKey, {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
@@ -111,6 +114,8 @@ class StreamVideo {
     }
   }
 
+  /// Connects user to Stream Video
+  /// Client state can only connect one user at one time
   static Future<void> connectUser(
     UserInfo user, {
     Token? token,
@@ -143,6 +148,7 @@ class StreamVideo {
     }
   }
 
+  /// Disconnects user and resets client state
   static Future<void> disconnectUser() async {
     final client = StreamVideo.instance;
 
@@ -345,7 +351,7 @@ class StreamVideo {
       onCallConnected: (it) {
         updateCallStateConnected(it, callId, callType);
       },
-      onCallLeft: updateStateDisconnected,
+      onCallLeft: updateCallStateDisconnected,
       client: this,
     );
 
@@ -362,7 +368,7 @@ class StreamVideo {
     _ws?.callInfo = callInfo;
   }
 
-  void updateStateDisconnected(Call c) {
+  void updateCallStateDisconnected(Call c) {
     _state.activeCall.value = null;
 
     // Updating ws about the current call.
