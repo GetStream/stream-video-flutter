@@ -1,5 +1,97 @@
 # Stream Video Flutter
 
+Official [Stream](https://getstream.io) SDK for adding Video and Audio Calling to your Flutter app.
+
+Find the documentation here: {Add link when available}
+
+## Current Features
+
+| Platform | Subscribe/Publish | Simulcast | Screen sharing |
+| :-----:  | :---------------: | :-------: | :-------------:|
+|   Android   |        ✅        |    ❌    |       ❌      |
+|   iOS   |        ✅         |    ❌     |        ❌        |
+| Web |        ✅         |    ❌     |        ❌        |     
+|   Mac   |        ✅         |    ❌     |        ❌        |    
+| Windows |        ✅         |    ❌     |        ❌        | 
+| Linux |        ✅         |    ❌     |        ❌        |  
+
+## Installation
+
+Add the SDK you need to your `pubspec.yaml` file:
+
+```yaml
+dependencies:
+  stream_video: <version>
+```
+
+OR for the Flutter UI SDK:
+
+```yaml
+dependencies:
+  stream_video_flutter: <version>
+```
+
+## Getting Started
+
+### Step 1: Initialise `StreamVideo` -
+
+```dart
+  await StreamVideo.init(
+    'YOUR_API_KEY', 
+  );
+```
+
+### Step 2: Connect your user -
+
+```dart
+await StreamVideo.connectUser(
+  const UserInfo(
+    id: 'user-id',
+    role: 'admin',
+    name: 'User',
+  ),
+  token: Token(
+    "YOUR-USER-TOKEN",
+  ),
+);
+```
+
+### Step 3: Create a `Call` -
+
+```dart
+var call = Call(
+  callConfiguration: const CallConfiguration(
+    type: 'default',
+    id: 'test_call_1234',
+    participantIds: [
+      'sahil',
+      'deven',
+    ],
+  ),
+);
+```
+
+### Step 4: Create/Get the call and connect - 
+
+```dart
+var res = await call.getOrCreate();
+
+await call.connect(
+  options: const ConnectOptions(
+    microphone: TrackOption(enabled: true),
+    camera: TrackOption(enabled: true),
+  ),
+);
+```
+
+### Disconnecting user -
+
+```dart
+await StreamVideo.disconnectUser();
+```
+
+# OLD README:
+
 Stream Video repository for Flutter.
 
 # Getting started
