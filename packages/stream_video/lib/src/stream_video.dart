@@ -52,7 +52,7 @@ class StreamVideo {
     Level logLevel = Level.ALL,
     LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
   }) {
-    _instance = StreamVideo._(
+    _instance ??= StreamVideo._(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
@@ -60,8 +60,6 @@ class StreamVideo {
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
     );
-
-    disconnectUser();
   }
 
   /// Creates a new Stream Video client unassociated with the
@@ -103,10 +101,16 @@ class StreamVideo {
     );
   }
 
-  static late final StreamVideo _instance;
+  static StreamVideo? _instance;
   static StreamVideo get instance {
+    if (_instance == null) {
+      throw Exception(
+        'Please initialise Stream Video by calling StreamVideo.init()',
+      );
+    }
+
     try {
-      return _instance;
+      return _instance!;
     } catch (e) {
       throw Exception(
         'Please initialise the client using StreamVideo.init() before using the instance.',

@@ -61,8 +61,8 @@ await StreamVideo.connectUser(
 ```dart
 var call = Call(
   callConfiguration: const CallConfiguration(
-    'default',
-    'test_call_1234',
+    type: 'default',
+    id: 'test_call_1234',
     participantIds: [
       'sahil',
       'deven',
