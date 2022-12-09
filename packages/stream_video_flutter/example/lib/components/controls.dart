@@ -11,8 +11,7 @@ class BottomControls extends StatelessWidget {
   // VideoRoom room(BuildContext context) =>
   //     StreamVideoProvider.of(context).client.participants;
 
-  StreamVideo client(BuildContext context) =>
-      StreamVideoProvider.of(context).client;
+  StreamVideo client(BuildContext context) => StreamVideo.instance;
   // CallParticipant localParticipant(BuildContext context) =>
   //     client(context).activeCall?.participants;
 

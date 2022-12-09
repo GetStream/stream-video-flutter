@@ -43,13 +43,59 @@ const _defaultCoordinatorWsUrl =
     'wss://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
 
 class StreamVideo {
-  StreamVideo(
+  /// Initialises the Stream Video SDK and creates the singleton instance of the client.
+  StreamVideo.init(
     this.apiKey, {
     this.coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     this.coordinatorWsUrl = _defaultCoordinatorWsUrl,
     this.latencyMeasurementRounds = 3,
     Level logLevel = Level.ALL,
     LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
+  }) {
+    if (_instance != null) {
+      throw Exception('''
+        StreamVideo has already been initialised, use StreamVideo.instance to access the singleton instance.
+        If you want to re-initialise the SDK, call StreamVideo.reset() first.
+        If you want to use multiple instances of the SDK, use StreamVideo.new() instead.
+        ''');
+    }
+    _instance = StreamVideo._(
+      apiKey,
+      coordinatorRpcUrl: coordinatorRpcUrl,
+      coordinatorWsUrl: coordinatorWsUrl,
+      latencyMeasurementRounds: latencyMeasurementRounds,
+      logLevel: logLevel,
+      logHandlerFunction: logHandlerFunction,
+    );
+  }
+
+  /// Creates a new Stream Video client unassociated with the
+  /// Stream Video singleton instance
+  factory StreamVideo.new(
+    String apiKey, {
+    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
+    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
+    int latencyMeasurementRounds = 3,
+    Level logLevel = Level.ALL,
+    LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
+  }) {
+    return StreamVideo._(
+      apiKey,
+      coordinatorRpcUrl: coordinatorRpcUrl,
+      coordinatorWsUrl: coordinatorWsUrl,
+      latencyMeasurementRounds: latencyMeasurementRounds,
+      logLevel: logLevel,
+      logHandlerFunction: logHandlerFunction,
+    );
+  }
+
+  StreamVideo._(
+    this.apiKey, {
+    required this.coordinatorRpcUrl,
+    required this.coordinatorWsUrl,
+    required this.latencyMeasurementRounds,
+    required Level logLevel,
+    required LogHandlerFunction logHandlerFunction,
   }) {
     // Preparing logger
     setLogLevel(logLevel);
@@ -60,6 +106,32 @@ class StreamVideo {
       tokenManager: _tokenManager,
       baseUrl: coordinatorRpcUrl,
     );
+  }
+
+  static StreamVideo? _instance;
+
+  /// The singleton instance of the Stream Video client.
+  static StreamVideo get instance {
+    final instance = _instance;
+    if (instance == null) {
+      throw Exception(
+        'Please initialise Stream Video by calling StreamVideo.init()',
+      );
+    }
+
+    return instance;
+  }
+
+  /// Resets the singleton instance of the Stream Video client.
+  ///
+  /// This is useful if you want to re-initialise the SDK with a different
+  /// API key.
+  static void reset({bool disconnectUser = false}) async {
+    if (disconnectUser) {
+      _instance?.activeCall?.leave();
+      _instance?.disconnectUser();
+    }
+    _instance = null;
   }
 
   final String apiKey;
@@ -93,7 +165,8 @@ class StreamVideo {
     if (record.stackTrace != null) print(record.stackTrace);
   }
 
-  Future<void> connect(
+  /// Connects the [user] to the Stream Video service.
+  Future<void> connectUser(
     UserInfo user, {
     Token? token,
     TokenProvider? provider,
@@ -123,7 +196,8 @@ class StreamVideo {
     }
   }
 
-  Future<void> disconnect() async {
+  /// Disconnects the [user] from the Stream Video service.
+  Future<void> disconnectUser() async {
     logger.info('disconnecting user : ${currentUser?.id}');
 
     if (_ws == null) return;
@@ -242,28 +316,32 @@ class StreamVideo {
 
     final credentials = edgeServer.credentials;
 
-    final call = Call(
-      cid: callCid,
+    final call = Call.fromDetails(
+      callId: callId,
+      callType: callType,
       credentials: credentials,
       callOptions: callOptions,
-      onCallConnected: (it) {
-        _state.activeCall.value = it;
-
-        // Updating ws about the current call.
-        final callInfo = CallInfo(callId: callId, callType: callType);
-        _ws?.callInfo = callInfo;
-      },
-      onCallLeft: (_) {
-        _state.activeCall.value = null;
-
-        // Updating ws about the current call.
-        _ws?.callInfo = null;
-      },
+      client: this,
     );
 
     _state.pendingCalls.add(call);
 
     return call;
+  }
+
+  void updateCallStateConnected(Call call) {
+    _state.activeCall.value = call;
+
+    // Updating ws about the current call.
+    final callInfo = CallInfo(callId: call.callId, callType: call.callType);
+    _ws?.callInfo = callInfo;
+  }
+
+  void updateCallStateDisconnected(Call call) {
+    _state.activeCall.value = null;
+
+    // Updating ws about the current call.
+    _ws?.callInfo = null;
   }
 
   Future<ReportCallStatsResponse> reportCallStats({
@@ -334,7 +412,7 @@ class StreamVideo {
     final call = await joinCall(type: type, id: id);
 
     await sendEvent(
-      callCid: call.cid,
+      callCid: call.callCid,
       eventType: UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL,
     );
 
@@ -405,6 +483,6 @@ class PendingCallsController extends RxController<List<Call>> {
 
   void remove(Call call) {
     final calls = [...value];
-    value = calls.where((it) => it.cid != call.cid).toList();
+    value = calls.where((it) => it.callCid != call.callCid).toList();
   }
 }
