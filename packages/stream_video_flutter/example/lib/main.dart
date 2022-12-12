@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 void main() {
-  final client = StreamVideo(
+  StreamVideo.init(
     'key10', // see <video>/data/fixtures/apps.yaml for API secret
     coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
         'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
@@ -15,17 +15,15 @@ void main() {
     //replace host with your local ip address
     // sfuUrl: 'http://192.168.1.10:3031/twirp',
   );
-  runApp(MyApp(client: client));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final StreamVideo client;
-
-  const MyApp({Key? key, required this.client}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final title = 'Stream Video Flutter';
+    const title = 'Stream Video Flutter';
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -38,12 +36,6 @@ class MyApp extends StatelessWidget {
         //       controller: client.participants,
         //       trackController: client.tracks,
         //     ),
-      },
-      builder: (context, child) {
-        return StreamVideoProvider(
-          client: client,
-          child: child!,
-        );
       },
     );
   }

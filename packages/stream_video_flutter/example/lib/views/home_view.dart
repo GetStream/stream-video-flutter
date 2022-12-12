@@ -62,8 +62,7 @@ class _StartCallState extends State<StartCall> {
         child: OutlinedButton(
           child: const Text("Start Call"),
           onPressed: () async {
-            final client = StreamVideoProvider.of(context).client;
-            await client.connect(
+            await StreamVideo.instance.connectUser(
               const UserInfo(
                 id: 'sahil',
                 role: 'admin',
@@ -74,18 +73,18 @@ class _StartCallState extends State<StartCall> {
               ),
             );
 
-            await client.getOrCreateCall(
+            var call = Call(
+              callConfiguration: const CallConfiguration(
                 type: 'default',
-                id: 'my_new_second_test_id',
+                id: 'test_call_1234',
                 participantIds: [
                   'sahil',
                   'deven',
-                ]);
-
-            final call = await client.joinCall(
-              type: 'default',
-              id: 'my_new_second_test_id',
+                ],
+              ),
             );
+
+            var res = await call.getOrCreate();
 
             await call.connect(
               options: const ConnectOptions(
@@ -121,8 +120,8 @@ class _JoinCallState extends State<JoinCall> {
         child: OutlinedButton(
             child: const Text("Join Call"),
             onPressed: () async {
-              final client = StreamVideoProvider.of(context).client;
-              await client.connect(
+              final client = StreamVideo.instance;
+              await client.connectUser(
                 const UserInfo(
                   id: 'deven',
                   role: 'admin',
