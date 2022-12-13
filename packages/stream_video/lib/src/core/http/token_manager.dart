@@ -1,6 +1,6 @@
 import 'package:stream_video/src/core/http/token.dart';
 
-/// A function which can be used to request a Stream Chat API token from your
+/// A function which can be used to request a Stream Video API token from your
 /// own backend server.
 /// Function requires a single [userId].
 typedef TokenProvider = Future<String> Function(String userId);
