@@ -2,8 +2,8 @@ import 'package:flutter/material.dart' hide TextTheme;
 
 import 'themes.dart';
 
-/// {@template streamChatThemeData}
-/// Theme data for Stream Chat
+/// {@template streamVideoThemeData}
+/// Theme data for Stream Video
 /// {@endtemplate}
 class StreamVideoThemeData {
   /// Creates a theme from scratch
