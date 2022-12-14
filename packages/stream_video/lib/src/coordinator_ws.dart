@@ -1,19 +1,23 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/user_v1/user.pb.dart';
-import 'package:stream_video/src/core/error/video_error.dart';
-import 'package:stream_video/src/core/http/token_manager.dart';
-import 'package:stream_video/src/core/logger/logger.dart';
-import 'package:stream_video/src/core/utils/event_emitter.dart';
+import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart'
+    as coordinator;
+import 'package:stream_video/protobuf/video/coordinator/user_v1/user.pb.dart'
+    as coordinator_user;
+import 'package:stream_video/src/core/video_error.dart';
+import 'package:stream_video/src/event_emitter.dart';
+import 'package:stream_video/src/events.dart';
+import 'package:stream_video/src/internal/events.dart';
+import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/models/user_info.dart';
+import 'package:stream_video/src/token/token_manager.dart';
 import 'package:stream_video/src/types/other.dart';
 import 'package:stream_video/src/ws/keep_alive.dart';
 import 'package:stream_video/src/ws/ws.dart';
 
 class CoordinatorWebSocket extends StreamWebSocket
-    with KeepAlive, ConnectionStateMixin, EventEmitterMixin<WebsocketEvent> {
+    with KeepAlive, ConnectionStateMixin, EventEmittable<CoordinatorEvent> {
   CoordinatorWebSocket(
     super.url, {
     super.protocols,
@@ -38,6 +42,9 @@ class CoordinatorWebSocket extends StreamWebSocket
   CallInfo? _callInfo;
 
   @override
+  OnConnectionStateUpdated get onConnectionStateUpdated => events.emit;
+
+  @override
   Future<void> connect({bool reconnect = false}) {
     connectionState = reconnect //
         ? ConnectionState.reconnecting
@@ -50,10 +57,10 @@ class CoordinatorWebSocket extends StreamWebSocket
     logger.info('Authenticating user with $url');
 
     final token = await tokenManager.loadToken();
-    final authPayload = WebsocketAuthRequest(
+    final authPayload = coordinator.WebsocketAuthRequest(
       apiKey: apiKey,
       token: token.rawValue,
-      user: UserInput(
+      user: coordinator_user.UserInput(
         id: userInfo.id,
         name: userInfo.name,
         imageUrl: userInfo.imageUrl,
@@ -65,7 +72,7 @@ class CoordinatorWebSocket extends StreamWebSocket
       ),
     );
 
-    return send(WebsocketClientEvent(
+    return send(coordinator.WebsocketClientEvent(
       authRequest: authPayload,
     ));
   }
@@ -80,16 +87,13 @@ class CoordinatorWebSocket extends StreamWebSocket
     // Waiting for the first health check to start the keep alive.
     // This is to avoid sending keep alive messages before the connection is
     // established.
-    once(
-      WebsocketEvent_Event.healthcheck.name,
-      (_) {
-        // Mark connected once we receives the first healthcheck.
-        connectionState = ConnectionState.connected;
+    events.on<CoordinatorHealthCheckEvent>(limit: 1, (data) {
+      // Mark connected once we receives the first healthcheck.
+      connectionState = ConnectionState.connected;
 
-        logger.info('Starting ping pong timer');
-        startPingPong();
-      },
-    );
+      logger.info('Starting ping pong timer');
+      startPingPong();
+    });
 
     // Authenticate the user.
     _authenticateUser();
@@ -132,9 +136,9 @@ class CoordinatorWebSocket extends StreamWebSocket
 
   @override
   void onMessage(dynamic message) {
-    WebsocketEvent? event;
+    coordinator.WebsocketEvent? event;
     try {
-      event = WebsocketEvent.fromBuffer(message);
+      event = coordinator.WebsocketEvent.fromBuffer(message);
     } catch (e, stk) {
       logger.warning('Error parsing an event: $e');
       logger.warning('Stack trace: $stk');
@@ -145,14 +149,14 @@ class CoordinatorWebSocket extends StreamWebSocket
     final eventType = event.whichEvent();
     logger.info('Event received: $eventType');
 
-    if (eventType == WebsocketEvent_Event.healthcheck) {
+    if (eventType == coordinator.WebsocketEvent_Event.healthcheck) {
       _handleHealthCheckEvent(event.healthcheck);
     }
 
-    return emitter.emit(eventType.name, event);
+    return events.emitCoordinatorEventFromSfu(event);
   }
 
-  void _handleHealthCheckEvent(WebsocketHealthcheck event) {
+  void _handleHealthCheckEvent(coordinator.WebsocketHealthcheck event) {
     ackPong(event);
     _userId = event.userId;
     _clientId = event.clientId;
@@ -174,21 +178,21 @@ class CoordinatorWebSocket extends StreamWebSocket
   }
 
   @override
-  void send(WebsocketClientEvent event) {
+  void send(coordinator.WebsocketClientEvent event) {
     logger.info('Sending ws event: $event');
     super.send(event.writeToBuffer());
   }
 
   @override
   void sendPing() {
-    final healthCheck = WebsocketHealthcheck(
+    final healthCheck = coordinator.WebsocketHealthcheck(
       userId: _userId,
       clientId: _clientId,
       callType: _callInfo?.callType,
       callId: _callInfo?.callId,
     );
 
-    return send(WebsocketClientEvent(
+    return send(coordinator.WebsocketClientEvent(
       healthcheck: healthCheck,
     ));
   }
@@ -232,4 +236,65 @@ class CallInfo {
   final String callId;
 
   String get callCid => '$callType:$callId';
+}
+
+extension on EventEmitter<CoordinatorEvent> {
+  void emitCoordinatorEventFromSfu(coordinator.WebsocketEvent event) {
+    final eventType = event.whichEvent();
+    switch (eventType) {
+      case coordinator.WebsocketEvent_Event.error:
+        final error = event.error;
+        return emit(CoordinatorErrorEvent(error: error));
+      case coordinator.WebsocketEvent_Event.healthcheck:
+        final healthCheck = event.healthcheck;
+        return emit(CoordinatorHealthCheckEvent(healthcheck: healthCheck));
+      case coordinator.WebsocketEvent_Event.callCreated:
+        final callCreated = event.callCreated;
+        return emit(CoordinatorCallCreatedEvent(callCreated: callCreated));
+      case coordinator.WebsocketEvent_Event.callUpdated:
+        final callUpdated = event.callUpdated;
+        return emit(CoordinatorCallUpdatedEvent(callUpdated: callUpdated));
+      case coordinator.WebsocketEvent_Event.callDeleted:
+        final callDeleted = event.callDeleted;
+        return emit(CoordinatorCallDeletedEvent(callDeleted: callDeleted));
+      case coordinator.WebsocketEvent_Event.callMembersCreated:
+        final callMembersCreated = event.callMembersCreated;
+        return emit(CoordinatorCallMembersCreatedEvent(
+          callMembersCreated: callMembersCreated,
+        ));
+      case coordinator.WebsocketEvent_Event.callMembersUpdated:
+        final callMembersUpdated = event.callMembersUpdated;
+        return emit(CoordinatorCallMembersUpdatedEvent(
+          callMembersUpdated: callMembersUpdated,
+        ));
+      case coordinator.WebsocketEvent_Event.callMembersDeleted:
+        final callMembersDeleted = event.callMembersDeleted;
+        return emit(CoordinatorCallMembersDeletedEvent(
+          callMembersDeleted: callMembersDeleted,
+        ));
+      case coordinator.WebsocketEvent_Event.callEnded:
+        final callEnded = event.callEnded;
+        return emit(CoordinatorCallEndedEvent(callEnded: callEnded));
+      case coordinator.WebsocketEvent_Event.callAccepted:
+        final callAccepted = event.callAccepted;
+        return emit(CoordinatorCallAcceptedEvent(callAccepted: callAccepted));
+      case coordinator.WebsocketEvent_Event.callRejected:
+        final callRejected = event.callRejected;
+        return emit(CoordinatorCallRejectedEvent(callRejected: callRejected));
+      case coordinator.WebsocketEvent_Event.callCancelled:
+        final callCancelled = event.callCancelled;
+        return emit(CoordinatorCallCancelledEvent(
+          callCancelled: callCancelled,
+        ));
+      case coordinator.WebsocketEvent_Event.userUpdated:
+        final userUpdated = event.userUpdated;
+        return emit(CoordinatorUserUpdatedEvent(userUpdated: userUpdated));
+      case coordinator.WebsocketEvent_Event.callCustom:
+        final callCustom = event.callCustom;
+        return emit(CoordinatorCallCustomEvent(callCustom: callCustom));
+      case coordinator.WebsocketEvent_Event.notSet:
+        logger.info('Received an coordinator event with no payload');
+        break;
+    }
+  }
 }

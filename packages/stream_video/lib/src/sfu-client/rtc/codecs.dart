@@ -2,93 +2,39 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart' as sfu;
+import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
+    as sfu_models;
 import 'package:stream_video/src/options.dart';
-import 'package:stream_video/src/sdp-transform/parse.dart';
 import 'package:stream_video/src/types/video_dimensions.dart';
 import 'package:stream_video/src/types/video_encoding.dart';
 import 'package:stream_video/src/types/video_parameters.dart';
 
-final defaultVideoPublishEncodings = [
-  rtc.RTCRtpEncoding(
-    rid: 'f',
-    active: true,
-    maxBitrate: 1200000,
-  ),
-  rtc.RTCRtpEncoding(
-    rid: 'h',
-    active: true,
-    scaleResolutionDownBy: 2,
-    maxBitrate: 500000,
-  ),
-  rtc.RTCRtpEncoding(
-    rid: 'q',
-    active: true,
-    scaleResolutionDownBy: 4,
-    maxBitrate: 125000,
-  ),
-];
+/// Returns a generic sdp for the given [direction].
+Future<String> getGenericSdp({
+  required rtc.TransceiverDirection direction,
+}) async {
+  final tempPc = await rtc.createPeerConnection({});
 
-Future<List<sfu.Codec>> getSenderCodecs(
-  rtc.RTCRtpMediaType kind, [
-  rtc.RTCPeerConnection? pc,
-]) {
-  return _getCodecsFromPeerConnection(
-    kind,
-    pc,
-    rtc.TransceiverDirection.SendOnly,
+  // Add 'audio' transceiver
+  final audioTransceiver = await tempPc.addTransceiver(
+    kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
+    init: rtc.RTCRtpTransceiverInit(direction: direction),
   );
-}
 
-Future<List<sfu.Codec>> getReceiverCodecs(
-  rtc.RTCRtpMediaType kind, [
-  rtc.RTCPeerConnection? pc,
-]) {
-  return _getCodecsFromPeerConnection(
-    kind,
-    pc,
-    rtc.TransceiverDirection.RecvOnly,
+  // Add 'video' transceiver
+  final videoTransceiver = await tempPc.addTransceiver(
+    kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
+    init: rtc.RTCRtpTransceiverInit(direction: direction),
   );
-}
 
-Future<List<sfu.Codec>> _getCodecsFromPeerConnection(
-  rtc.RTCRtpMediaType kind,
-  rtc.RTCPeerConnection? pc,
-  rtc.TransceiverDirection direction,
-) async {
-  var sdp = direction == rtc.TransceiverDirection.SendOnly
-      ? (await pc?.getLocalDescription())?.sdp
-      : direction == rtc.TransceiverDirection.RecvOnly
-          ? (await pc?.getRemoteDescription())?.sdp
-          : null;
+  final offer = await tempPc.createOffer();
+  final sdp = offer.sdp;
 
-  if (sdp == null) {
-    final tempPc = await rtc.createPeerConnection({});
-    final transceiver = await tempPc.addTransceiver(kind: kind);
-    await transceiver.setDirection(direction);
-    final offer = await tempPc.createOffer();
-    sdp = offer.sdp;
-    await tempPc.close();
-  }
+  // await audioTransceiver.stop();
+  // await videoTransceiver.stop();
+  await tempPc.close();
 
-  final parsedSdp = parseSdp(sdp!);
-  final supportedCodecs = <sfu.Codec>[];
-  parsedSdp.media.forEach((media) {
-    if (media.type == rtc.typeRTCRtpMediaTypetoString[kind]) {
-      media.rtp.forEach((rtp) {
-        final fmtpLine =
-            media.fmtp?.firstWhereOrNull((f) => f.payload == rtp.payload);
-        supportedCodecs.add(sfu.Codec(
-          hwAccelerated: true,
-          clockRate: rtp.rate ?? 0,
-          fmtpLine: fmtpLine?.config ?? '',
-          mime: '$kind/${rtp.codec}',
-        ));
-      });
-    }
-  });
-
-  return supportedCodecs;
+  return sdp!;
 }
 
 /// order of rids
@@ -96,15 +42,15 @@ final videoRids = ['q', 'h', 'f'];
 
 List<VideoParameters> _presetsForDimensions({
   required bool isScreenShare,
-  required VideoDimensions dimensions,
+  required VideoDimension dimensions,
 }) {
   if (isScreenShare) {
     return VideoParametersPresets.allScreenShare;
   }
 
   final a = dimensions.aspect();
-  if ((a - VideoDimensionsHelpers.aspect169).abs() <
-      (a - VideoDimensionsHelpers.aspect43).abs()) {
+  if ((a - VideoDimensionHelpers.aspect169).abs() <
+      (a - VideoDimensionHelpers.aspect43).abs()) {
     return VideoParametersPresets.all169;
   }
 
@@ -122,7 +68,7 @@ List<VideoParameters> _computeDefaultScreenShareSimulcastParams({
     final fps = e.maxFramerate ?? 3;
 
     return VideoParameters(
-      dimensions: VideoDimensions(
+      dimensions: VideoDimension(
         (original.dimensions.width / scale).floor(),
         (original.dimensions.height / scale).floor(),
       ),
@@ -147,8 +93,8 @@ List<VideoParameters> _computeDefaultSimulcastParams({
     return _computeDefaultScreenShareSimulcastParams(original: original);
   }
   final a = original.dimensions.aspect();
-  if ((a - VideoDimensionsHelpers.aspect169).abs() <
-      (a - VideoDimensionsHelpers.aspect43).abs()) {
+  if ((a - VideoDimensionHelpers.aspect169).abs() <
+      (a - VideoDimensionHelpers.aspect43).abs()) {
     return VideoParametersPresets.defaultSimulcast169;
   }
 
@@ -157,7 +103,7 @@ List<VideoParameters> _computeDefaultSimulcastParams({
 
 VideoEncoding _findAppropriateEncoding({
   required bool isScreenShare,
-  required VideoDimensions dimensions,
+  required VideoDimension dimensions,
   required List<VideoParameters> presets,
 }) {
   assert(presets.isNotEmpty, 'presets should not be empty');
@@ -175,7 +121,7 @@ VideoEncoding _findAppropriateEncoding({
 }
 
 List<rtc.RTCRtpEncoding> encodingsFromPresets(
-  VideoDimensions dimensions, {
+  VideoDimension dimensions, {
   required List<VideoParameters> presets,
 }) {
   final result = <rtc.RTCRtpEncoding>[];
@@ -195,8 +141,8 @@ List<rtc.RTCRtpEncoding> encodingsFromPresets(
 }
 
 double findEvenScaleDownBy(
-  VideoDimensions sourceDimensions,
-  VideoDimensions targetDimensions,
+  VideoDimension sourceDimensions,
+  VideoDimension targetDimensions,
 ) {
   final sourceSize = sourceDimensions.max();
   final targetSize = targetDimensions.max();
@@ -219,7 +165,7 @@ double findEvenScaleDownBy(
 
 List<rtc.RTCRtpEncoding>? computeVideoEncodings({
   required bool isScreenShare,
-  VideoDimensions? dimensions,
+  VideoDimension? dimensions,
   VideoPublishOptions? options,
 }) {
   options ??= const VideoPublishOptions();
@@ -286,17 +232,17 @@ List<rtc.RTCRtpEncoding>? computeVideoEncodings({
   );
 }
 
-List<sfu.VideoLayer> computeVideoLayers(
-  VideoDimensions dimensions,
+List<sfu_models.VideoLayer> computeVideoLayers(
+  VideoDimension dimensions,
   List<rtc.RTCRtpEncoding>? encodings,
 ) {
   // default to a single layer, HQ
   if (encodings == null) {
     return [
-      sfu.VideoLayer(
+      sfu_models.VideoLayer(
         rid: 'f',
         bitrate: 0,
-        videoDimension: sfu.VideoDimension(
+        videoDimension: sfu_models.VideoDimension(
           width: dimensions.width,
           height: dimensions.height,
         ),
@@ -306,10 +252,10 @@ List<sfu.VideoLayer> computeVideoLayers(
 
   return encodings.map((e) {
     final scale = e.scaleResolutionDownBy ?? 1;
-    return sfu.VideoLayer(
+    return sfu_models.VideoLayer(
       rid: e.rid ?? 'f',
       bitrate: e.maxBitrate ?? 0,
-      videoDimension: sfu.VideoDimension(
+      videoDimension: sfu_models.VideoDimension(
         width: (dimensions.width / scale).floor(),
         height: (dimensions.height / scale).floor(),
       ),

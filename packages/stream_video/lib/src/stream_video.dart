@@ -3,20 +3,20 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
 import 'package:stream_video/src/call/call.dart';
 import 'package:stream_video/src/coordinator_client.dart';
 import 'package:stream_video/src/coordinator_ws.dart';
-import 'package:stream_video/src/core/error/video_error.dart';
-import 'package:stream_video/src/core/http/token.dart';
-import 'package:stream_video/src/core/http/token_manager.dart';
-import 'package:stream_video/src/core/logger/logger.dart';
-import 'package:stream_video/src/core/utils/event_emitter.dart';
-import 'package:stream_video/src/core/utils/rx_controller.dart';
+import 'package:stream_video/src/core/rx_controller.dart';
+import 'package:stream_video/src/core/video_error.dart';
+import 'package:stream_video/src/event_emitter.dart';
+import 'package:stream_video/src/events.dart';
 import 'package:stream_video/src/latency_service/latency.dart';
+import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/options.dart';
+import 'package:stream_video/src/token/token.dart';
+import 'package:stream_video/src/token/token_manager.dart';
 import 'package:synchronized/synchronized.dart';
 
 /// Handler function used for logging records. Function requires a single
@@ -42,7 +42,7 @@ const _defaultCoordinatorRpcUrl =
 const _defaultCoordinatorWsUrl =
     'wss://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
 
-class StreamVideoClient {
+class StreamVideoClient with EventEmittable<CoordinatorEvent> {
   /// Initialises the Stream Video SDK and creates the singleton instance of the client.
   StreamVideoClient.init(
     this.apiKey, {
@@ -188,7 +188,8 @@ class StreamVideoClient {
         apiKey: apiKey,
         userInfo: user,
         tokenManager: _tokenManager,
-      );
+      )..events.listen(events.emit);
+
       return _ws!.connect();
     } catch (e, stk) {
       logger.severe('error connecting user : ${user.id}', e, stk);
@@ -208,30 +209,6 @@ class StreamVideoClient {
     // Resetting the state.
     await _state.dispose();
     _state = _StreamVideoState();
-  }
-
-  /// Binds the [listener] to the passed [event] to be invoked at most [limit].
-  void addListener(
-    WebsocketEvent_Event event,
-    Listener<WebsocketEvent> listener, {
-    int? limit,
-  }) {
-    return _ws?.addListener(
-      event.name,
-      listener,
-      limit: limit,
-    );
-  }
-
-  /// Unbinds the [listener] from the passed [event].
-  void removeListener(
-    WebsocketEvent_Event event,
-    Listener<WebsocketEvent> listener,
-  ) {
-    return _ws?.removeListener(
-      event.name,
-      listener,
-    );
   }
 
   Future<CallEnvelope> createCall({

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:stream_video/src/core/logger/logger.dart';
+import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/ws/connect/connect.dart'
     if (dart.library.html) 'package:stream_video/src/ws/connect/connect_html.dart'
     if (dart.library.io) 'package:stream_video/src/ws/connect/connect_io.dart'

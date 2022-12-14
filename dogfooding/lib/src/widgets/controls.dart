@@ -12,7 +12,7 @@ class ControlsWidget extends StatefulWidget {
   }) : super(key: key);
 
   final Call call;
-  final LocalCallParticipant participant;
+  final LocalParticipant participant;
 
   @override
   State<StatefulWidget> createState() => _ControlsWidgetState();
@@ -30,9 +30,17 @@ class _ControlsWidgetState extends State<ControlsWidget> {
 
   StreamSubscription? _deviceChangeSubscription;
 
+  LocalParticipant get participant => widget.participant;
+
+  void _onChange(_) {
+    // trigger refresh
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
+    participant.events.listen(_onChange);
     _deviceChangeSubscription = Hardware.instance.onDeviceChange.stream.listen(
       (devices) => _loadDevices(devices),
     );
@@ -41,6 +49,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
 
   @override
   void dispose() {
+    participant.events.cancel(_onChange);
     _deviceChangeSubscription?.cancel();
     super.dispose();
   }
@@ -55,30 +64,25 @@ class _ControlsWidgetState extends State<ControlsWidget> {
 
   void _unpublishAll() async {
     final result = await context.showUnPublishDialog();
-    if (result == true) await call.unpublishAllLocalTracks();
-    setState(() {});
+    if (result == true) await participant.unpublishAllTracks();
   }
 
-  bool get isMuted => call.isLocalMuted;
+  bool get isMuted => participant.isMuted;
 
-  Future<void> _disableAudio() async {
-    await call.setMicrophoneEnabled(enabled: false);
-    setState(() {});
+  void _disableAudio() async {
+    await participant.setMicrophoneEnabled(enabled: false);
   }
 
   Future<void> _enableAudio() async {
-    await call.setMicrophoneEnabled();
-    setState(() {});
+    await participant.setMicrophoneEnabled(enabled: true);
   }
 
-  Future<void> _disableVideo() async {
-    await call.setCameraEnabled(enabled: false);
-    setState(() {});
+  void _disableVideo() async {
+    await participant.setCameraEnabled(enabled: false);
   }
 
-  Future<void> _enableVideo() async {
-    await call.setCameraEnabled();
-    setState(() {});
+  void _enableVideo() async {
+    await participant.setCameraEnabled(enabled: true);
   }
 
   void _selectAudioOutput(MediaDevice device) async {
@@ -92,33 +96,35 @@ class _ControlsWidgetState extends State<ControlsWidget> {
   }
 
   void _selectVideoInput(MediaDevice device) async {
-    final track = call.localVideoTracks.firstOrNull;
+    final track = participant.videoTracks.firstOrNull?.track;
     if (track == null) return;
     if (_selectedVideoInput?.deviceId != device.deviceId) {
-      track.switchCamera(device.deviceId);
+      await track.switchCamera(device.deviceId);
       _selectedVideoInput = device;
       setState(() {});
     }
   }
 
   void _toggleCamera() async {
-    final track = call.localVideoTracks.firstOrNull;
+    //
+    final track = participant.videoTracks.firstOrNull?.track;
     if (track == null) return;
 
     try {
       final newPosition = position.switched();
       await track.setCameraPosition(newPosition);
-      setState(() => position = newPosition);
+      setState(() {
+        position = newPosition;
+      });
     } catch (error) {
-      debugPrint('could not restart track: $error');
+      print('could not restart track: $error');
       return;
     }
   }
 
   void _onTapDisconnect() async {
     final result = await context.showDisconnectDialog();
-    if (result == true) await call.leave();
-    setState(() {});
+    if (result == true) await widget.call.disconnect();
   }
 
   @override
@@ -133,12 +139,12 @@ class _ControlsWidgetState extends State<ControlsWidget> {
         spacing: 5,
         runSpacing: 5,
         children: [
-          // IconButton(
-          //   onPressed: _unpublishAll,
-          //   icon: const Icon(Icons.close_rounded),
-          //   tooltip: 'Unpublish all',
-          // ),
-          if (call.isLocalMicrophoneEnabled)
+          IconButton(
+            onPressed: _unpublishAll,
+            icon: const Icon(Icons.close_rounded),
+            tooltip: 'Unpublish all',
+          ),
+          if (participant.isMicrophoneEnabled)
             PopupMenuButton<MediaDevice>(
               constraints: const BoxConstraints(minWidth: 200),
               icon: const Icon(Icons.settings_voice),
@@ -207,7 +213,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
               ];
             },
           ),
-          if (call.isLocalCameraEnabled)
+          if (participant.isCameraEnabled)
             PopupMenuButton<MediaDevice>(
               constraints: const BoxConstraints(minWidth: 200),
               icon: const Icon(Icons.videocam_rounded),
@@ -244,15 +250,15 @@ class _ControlsWidgetState extends State<ControlsWidget> {
               icon: const Icon(Icons.videocam_off_rounded),
               tooltip: 'un-mute video',
             ),
-          // IconButton(
-          //   icon: Icon(
-          //     position == CameraPosition.back
-          //         ? Icons.camera_rear_rounded
-          //         : Icons.camera_front_rounded,
-          //   ),
-          //   onPressed: () => _toggleCamera(),
-          //   tooltip: 'toggle camera',
-          // ),
+          IconButton(
+            icon: Icon(
+              position == CameraPosition.back
+                  ? Icons.camera_rear_rounded
+                  : Icons.camera_front_rounded,
+            ),
+            onPressed: () => _toggleCamera(),
+            tooltip: 'toggle camera',
+          ),
           IconButton(
             onPressed: _onTapDisconnect,
             icon: const Icon(

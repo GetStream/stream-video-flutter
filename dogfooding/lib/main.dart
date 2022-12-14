@@ -8,13 +8,13 @@ import 'firebase_options.dart';
 
 // TODO: Use DI to scope the client
 final streamVideoClient = StreamVideoClient(
-  'key10', // see <video>/data/fixtures/apps.yaml for API secret
+  'us83cfwuhy8n', // see <video>/data/fixtures/apps.yaml for API secret
   coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
-  // 'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
-  'http://192.168.1.56:26991/rpc',
+      'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
+  // 'http://192.168.1.7:26991/rpc',
   coordinatorWsUrl: //replace host with your local ip address
-  // 'wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
-  'ws://192.168.1.56:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
+      'wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
+  // 'ws://192.168.1.7:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
 );
 
 Future<void> main() async {

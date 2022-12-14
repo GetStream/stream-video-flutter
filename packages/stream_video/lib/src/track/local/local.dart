@@ -1,15 +1,15 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-
-import 'package:stream_video/src/core/logger/logger.dart';
-import 'package:stream_video/src/core/platform_detector/platform_detector.dart';
+import 'package:meta/meta.dart';
+import 'package:stream_video/src/exceptions.dart';
+import 'package:stream_video/src/internal/events.dart';
+import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/track/options.dart';
 import 'package:stream_video/src/track/track.dart';
 
+/// Base class for [LocalAudioTrack] and [LocalVideoTrack].
 abstract class LocalTrack extends Track {
   LocalTrack({
-    required super.name,
-    required super.kind,
-    required super.source,
+    required super.type,
     required super.mediaStream,
     required super.mediaStreamTrack,
   });
@@ -17,38 +17,41 @@ abstract class LocalTrack extends Track {
   /// Options used for this track
   abstract LocalTrackOptions currentOptions;
 
+  /// Whether this track is published to the server.
   bool get isPublished => _published;
   bool _published = false;
 
-  /// Mutes/Unmutes this [LocalTrack].
-  Future<bool> mute({bool muted = true}) async {
-    final didMute = await super.mute(muted: muted);
-    if (didMute) {
-      if (muted) {
-        await disable();
-        if (!CurrentPlatform.isWindows) {
-          await stop();
-        }
-      } else {
-        if (!CurrentPlatform.isWindows) {
-          await start(restart: true);
-        }
-        await enable();
-      }
-    }
-    return didMute;
+  /// Mutes this [LocalTrack]. This will stop the sending of track data
+  /// and notify the [RemoteParticipant] with [TrackMutedEvent].
+  /// Returns true if muted, false if unchanged.
+  Future<bool> mute() async {
+    logger.fine('LocalTrack.mute() muted: $muted');
+    if (muted) return false; // already muted
+    await disable();
+    await stop();
+    updateMuted(muted: true, notifyServer: true);
+    return true;
+  }
+
+  /// Un-mutes this [LocalTrack]. This will re-start the sending of track data
+  /// and notify the [RemoteParticipant] with [TrackUnmutedEvent].
+  /// Returns true if un-muted, false if unchanged.
+  Future<bool> unmute() async {
+    logger.fine('LocalTrack.unmute() muted: $muted');
+    if (!muted) return false; // already un-muted
+    await restart();
+    await enable();
+    updateMuted(muted: false, notifyServer: true);
+    return true;
   }
 
   /// Restarts the track with new options. This is useful when switching between
   /// front and back cameras.
-  @override
-  Future<bool> start({
-    bool restart = false,
-    LocalTrackOptions? options,
-  }) async {
-    if (!restart) return super.start();
-
-    if (sender == null) throw 'could not restart track';
+  Future<void> restart({LocalTrackOptions? options}) async {
+    if (sender == null) throw TrackCreateException('could not restart track');
+    if (options != null && currentOptions.runtimeType != options.runtimeType) {
+      throw Exception('options must be a ${currentOptions.runtimeType}');
+    }
 
     final trackOptions = options ?? currentOptions;
 
@@ -66,17 +69,26 @@ abstract class LocalTrack extends Track {
     }
 
     // set new stream & track to this object
-    mediaStream = newStream;
-    mediaStreamTrack = newTrack;
+    updateMediaStreamAndTrack(
+      stream: newStream,
+      track: newTrack,
+    );
 
     // mark as started
-    return super.start();
+    await start();
+
+    // notify so VideoView can re-compute mirror mode if necessary
+    events.emit(LocalTrackOptionsUpdatedEvent(
+      track: this,
+      options: currentOptions,
+    ));
   }
 
   @override
   Future<bool> stop() async {
     final didStop = await super.stop();
     if (didStop) {
+      // sender?.setTrack(null);
       logger.fine('Stopping mediaStreamTrack...');
       try {
         await mediaStreamTrack.stop();
@@ -84,7 +96,7 @@ abstract class LocalTrack extends Track {
         logger.severe('MediaStreamTrack.stop() did throw $error');
       }
       try {
-        await mediaStream.dispose();
+        // await mediaStream.dispose();
       } catch (error) {
         logger.severe('MediaStreamTrack.dispose() did throw $error');
       }
@@ -126,5 +138,31 @@ abstract class LocalTrack extends Track {
       throw 'Failed to create stream, at least 1 video or audio track should exist';
     }
     return stream;
+  }
+
+  @mustCallSuper
+  Future<bool> onPublish() async {
+    if (_published) {
+      // already published
+      return false;
+    }
+
+    logger.fine('$runtimeType.publish()');
+
+    _published = true;
+    return true;
+  }
+
+  @mustCallSuper
+  Future<bool> onUnpublish() async {
+    if (!_published) {
+      // already unpublished
+      return false;
+    }
+
+    logger.fine('$runtimeType.unpublish()');
+
+    _published = false;
+    return true;
   }
 }

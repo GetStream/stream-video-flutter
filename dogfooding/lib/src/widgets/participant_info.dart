@@ -9,7 +9,7 @@ class ParticipantTrack {
   });
 
   final VideoTrack? videoTrack;
-  final CallParticipant participant;
+  final Participant participant;
   final bool isScreenShare;
 }
 
@@ -17,12 +17,14 @@ class ParticipantInfoWidget extends StatelessWidget {
   const ParticipantInfoWidget({
     this.title,
     this.audioAvailable = true,
+    this.connectionQuality = ConnectionQuality.unknown,
     this.isScreenShare = false,
     Key? key,
   }) : super(key: key);
 
   final String? title;
   final bool audioAvailable;
+  final ConnectionQuality connectionQuality;
   final bool isScreenShare;
 
   @override
@@ -61,6 +63,21 @@ class ParticipantInfoWidget extends StatelessWidget {
                     size: 16,
                   ),
                 ),
+          if (connectionQuality != ConnectionQuality.unknown)
+            Padding(
+              padding: const EdgeInsets.only(left: 5),
+              child: Icon(
+                connectionQuality == ConnectionQuality.poor
+                    ? Icons.wifi_off_rounded
+                    : Icons.wifi_rounded,
+                color: {
+                  ConnectionQuality.excellent: Colors.green,
+                  ConnectionQuality.good: Colors.orange,
+                  ConnectionQuality.poor: Colors.red,
+                }[connectionQuality],
+                size: 16,
+              ),
+            ),
         ],
       ),
     );

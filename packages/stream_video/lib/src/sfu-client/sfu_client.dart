@@ -1,28 +1,32 @@
 import 'dart:async';
 
-import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart';
-import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart';
-import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart';
-import 'package:stream_video/src/core/utils/event_emitter.dart';
-import 'package:stream_video/src/sfu-client/rpc/signal.dart';
+import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
+    as sfu_events;
+import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
+    as sfu_models;
+import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
+    as signal;
+import 'package:stream_video/src/event_emitter.dart';
+import 'package:stream_video/src/events.dart';
+import 'package:stream_video/src/sfu-client/rpc/signal_client.dart';
 import 'package:stream_video/src/sfu-client/rpc/signal_ws.dart';
 import 'package:stream_video/src/types/other.dart';
 import 'package:uuid/uuid.dart';
 
-const localUrl = 'http://192.168.1.56:3031/twirp';
+const _localUrl = 'http://192.168.1.7:3031/twirp';
 
-class SfuClient with EventEmitterMixin<SfuEvent> {
+class SfuClient with EventEmittable<SfuEvent> {
   ///
   SfuClient({
     String? sessionId,
     required String url,
     required String token,
   }) {
-    url = localUrl;
+    // url = _localUrl;
 
     this.sessionId = sessionId ??= const Uuid().v4();
 
-    rpc = Signal(
+    rpc = SignalClient(
       baseUrl: url,
       authToken: token,
     );
@@ -33,7 +37,7 @@ class SfuClient with EventEmitterMixin<SfuEvent> {
       final sfuUrl = Uri.parse(url);
       wsEndpoint = sfuUrl
           .replace(
-            scheme: 'ws',
+            scheme: 'wss',
             path: '/ws',
           )
           .toString();
@@ -44,22 +48,15 @@ class SfuClient with EventEmitterMixin<SfuEvent> {
     _signal = SignalWebSocket(
       wsEndpoint,
       sessionId: sessionId,
-    )..listen((data) {
-        final event = data.whichEventPayload();
-        emitter.emit(event.name, data);
-      });
+    )..events.listen(events.emit);
   }
 
   late final String sessionId;
-  late final Signal rpc;
+  late final SignalClient rpc;
   late final SignalWebSocket _signal;
 
   /// Connection state of the [Call].
   ConnectionState get connectionState => _signal.connectionState;
-
-  // set onConnectionStateUpdated(OnConnectionStateUpdated handler) {
-  //   return _signal.onConnectionStateUpdated = handler;
-  // }
 
   Future<void> connect() async {
     return _signal.connect();
@@ -69,68 +66,54 @@ class SfuClient with EventEmitterMixin<SfuEvent> {
     return _signal.disconnect();
   }
 
-  Future<UpdateMuteStateResponse> updateAudioMuteState({
-    bool muted = false,
+  Future<signal.UpdateMuteStatesResponse> updateMuteStates({
+    required Iterable<signal.TrackMuteState> muteStates,
   }) async {
-    final response = await rpc.updateMuteState(
-      UpdateMuteStateRequest(
+    print('updateMuteStates: $muteStates');
+    final response = await rpc.updateMuteStates(
+      signal.UpdateMuteStatesRequest(
         sessionId: sessionId,
-        audioMuteChanged: AudioMuteChanged(
-          muted: muted,
-        ),
+        muteStates: muteStates,
       ),
     );
 
     return response;
   }
 
-  Future<UpdateMuteStateResponse> updateVideoMuteState({
-    bool muted = false,
-  }) async {
-    final response = await rpc.updateMuteState(
-      UpdateMuteStateRequest(
-        sessionId: sessionId,
-        videoMuteChanged: VideoMuteChanged(
-          muted: muted,
-        ),
-      ),
-    );
-
-    return response;
-  }
-
-  Future<UpdateSubscriptionsResponse> updateSubscriptions({
-    required Map<String, VideoDimension> subscriptions,
+  Future<signal.UpdateSubscriptionsResponse> updateSubscriptions({
+    required Iterable<signal.TrackSubscriptionDetails>? tracks,
   }) async {
     final response = await rpc.updateSubscriptions(
-      UpdateSubscriptionsRequest(
+      signal.UpdateSubscriptionsRequest(
         sessionId: sessionId,
-        subscriptions: subscriptions,
+        tracks: tracks,
       ),
     );
 
     return response;
   }
 
-  Future<SetPublisherResponse> setPublisher({
+  Future<signal.SetPublisherResponse> setPublisher({
     required String sdp,
+    Iterable<sfu_models.TrackInfo>? tracks,
   }) async {
     final response = await rpc.setPublisher(
-      SetPublisherRequest(
+      signal.SetPublisherRequest(
         sdp: sdp,
         sessionId: sessionId,
+        tracks: tracks,
       ),
     );
 
     return response;
   }
 
-  Future<SendAnswerResponse> sendAnswer({
+  Future<signal.SendAnswerResponse> sendAnswer({
     required String sdp,
-    required PeerType peerType,
+    required sfu_models.PeerType peerType,
   }) async {
     final response = await rpc.sendAnswer(
-      SendAnswerRequest(
+      signal.SendAnswerRequest(
         sdp: sdp,
         peerType: peerType,
         sessionId: sessionId,
@@ -140,12 +123,12 @@ class SfuClient with EventEmitterMixin<SfuEvent> {
     return response;
   }
 
-  Future<ICETrickleResponse> iceTrickle({
-    required PeerType peerType,
+  Future<signal.ICETrickleResponse> iceTrickle({
+    required sfu_models.PeerType peerType,
     required String iceCandidate,
   }) async {
     final response = await rpc.iceTrickle(
-      ICETrickle(
+      sfu_models.ICETrickle(
         peerType: peerType,
         sessionId: sessionId,
         iceCandidate: iceCandidate,
@@ -156,7 +139,7 @@ class SfuClient with EventEmitterMixin<SfuEvent> {
   }
 
   void send({
-    required SfuRequest request,
+    required sfu_events.SfuRequest request,
     bool enqueueIfConnecting = true,
   }) {
     return _signal.send(

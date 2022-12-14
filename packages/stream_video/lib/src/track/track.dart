@@ -1,7 +1,12 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import 'package:meta/meta.dart';
-import 'package:stream_video/src/core/logger/logger.dart';
-import 'package:stream_video/src/types/other.dart';
+import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
+    as sfu;
+import 'package:stream_video/src/logger/logger.dart';
+import 'package:stream_video/src/disposable.dart';
+import 'package:stream_video/src/event_emitter.dart';
+import 'package:stream_video/src/events.dart';
+import 'package:stream_video/src/internal/events.dart';
 import 'package:uuid/uuid.dart';
 
 /// Used to group [LocalAudioTrack] and [RemoteAudioTrack].
@@ -9,38 +14,48 @@ mixin AudioTrack on Track {}
 
 /// Used to group [LocalVideoTrack] and [RemoteVideoTrack].
 mixin VideoTrack on Track {
-  /// True when the track is published with name [Track.screenShareName].
-  bool get isScreenShare {
-    return kind == TrackType.video && name == Track.screenShareName;
+  late final viewKey = <GlobalKey>[];
+
+  void Function(Key)? onVideoViewBuild;
+
+  void Function(Key)? onVideoViewSizeChange;
+
+  GlobalKey addViewKey() {
+    final key = GlobalKey();
+    viewKey.add(key);
+    return key;
+  }
+
+  void removeViewKey(GlobalKey key) {
+    viewKey.remove(key);
   }
 }
 
 const _uuid = Uuid();
 
-abstract class Track {
+/// Wrapper around a MediaStreamTrack with additional metadata.
+/// Base for [AudioTrack] and [VideoTrack],
+/// can not be instantiated directly.
+abstract class Track with Disposable, EventEmittable<TrackEvent> {
   Track({
-    required this.name,
-    required this.kind,
-    required this.source,
-    required this.mediaStream,
-    required this.mediaStreamTrack,
+    required this.type,
+    required rtc.MediaStream mediaStream,
+    required rtc.MediaStreamTrack mediaStreamTrack,
     this.receiver,
-  });
+  })  : _mediaStream = mediaStream,
+        _mediaStreamTrack = mediaStreamTrack;
 
-  static const cameraName = 'camera';
-  static const microphoneName = 'microphone';
-  static const screenShareName = 'screenshare';
+  final sfu.TrackType type;
 
-  final String name;
-  final TrackType kind;
-  final TrackSource source;
+  rtc.MediaStream get mediaStream => _mediaStream;
+  rtc.MediaStream _mediaStream;
 
-  rtc.MediaStream mediaStream;
-  rtc.MediaStreamTrack mediaStreamTrack;
+  rtc.MediaStreamTrack get mediaStreamTrack => _mediaStreamTrack;
+  rtc.MediaStreamTrack _mediaStreamTrack;
 
   rtc.RTCRtpReceiver? receiver;
 
-  // kind : lookupId
+  // lookupId : type
   String? sid;
   String? _cid;
 
@@ -48,8 +63,21 @@ abstract class Track {
   bool get isActive => _active;
   bool _active = false;
 
+  /// Whether this track is muted.
   bool get muted => _muted;
   bool _muted = false;
+  void updateMuted({
+    required bool muted,
+    bool notifyServer = false,
+  }) {
+    if (_muted == muted) return;
+    _muted = muted;
+    events.emit(InternalTrackMuteUpdatedEvent(
+      track: this,
+      muted: muted,
+      notifyServer: notifyServer,
+    ));
+  }
 
   rtc.RTCRtpTransceiver? transceiver;
 
@@ -63,18 +91,6 @@ abstract class Track {
       _cid = cid;
     }
     return cid;
-  }
-
-  Future<bool> mute({bool muted = true}) async {
-    if (muted == _muted) {
-      // already muted
-      return false;
-    }
-
-    logger.fine('$runtimeType.mute($muted)');
-
-    _muted = muted;
-    return true;
   }
 
   /// Start this [Track] if not started.
@@ -131,5 +147,23 @@ abstract class Track {
         '[$runtimeType] set mediaStreamTrack.enabled did throw $_',
       );
     }
+  }
+
+  void updateMediaStreamAndTrack({
+    required rtc.MediaStream stream,
+    required rtc.MediaStreamTrack track,
+  }) {
+    _mediaStream = stream;
+    _mediaStreamTrack = track;
+    events.emit(TrackStreamUpdatedEvent(
+      track: this,
+      stream: stream,
+    ));
+  }
+
+  @override
+  Future<void> dispose() async {
+    events.dispose();
+    return super.dispose();
   }
 }

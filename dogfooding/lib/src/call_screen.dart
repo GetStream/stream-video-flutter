@@ -1,7 +1,8 @@
 import 'package:dogfooding/src/widgets/controls.dart';
-import 'package:dogfooding/src/widgets/participant_info.dart';
 import 'package:dogfooding/src/widgets/participant_widget.dart';
+import 'package:dogfooding/src/widgets/participant_info.dart';
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 import 'package:stream_video/stream_video.dart';
 
 class CallScreen extends StatefulWidget {
@@ -18,56 +19,72 @@ class CallScreen extends StatefulWidget {
 class _CallScreenState extends State<CallScreen> {
   List<ParticipantTrack> participantTracks = [];
 
-  void _onCallEnded(SfuEvent event) {
-    final payload = event.callEnded;
-    debugPrint('Call Ended: ${payload.message}');
-    Navigator.of(context).pop();
-  }
+  List<Participant> allParticipants = [];
 
-  void _onParticipantUpdate(List<CallParticipant> participants) {
-    List<ParticipantTrack> screenTracks = [];
+  // void _onCallEnded(SfuEvent event) {
+  //   final payload = event.callEnded;
+  //   debugPrint('Call Ended: ${payload.message}');
+  //   Navigator.of(context).pop();
+  // }
+
+  void _onParticipantUpdate() {
+    allParticipants = [
+      ...widget.call.participants.values,
+      if (widget.call.localParticipant != null) widget.call.localParticipant!,
+    ];
+
+    setState(() {});
+
     List<ParticipantTrack> userMediaTracks = [];
-    for (var participant in participants.where((it) => !it.isLocal)) {
-      final videoTracks = participant.videoTracks;
-      if (videoTracks != null && videoTracks.isNotEmpty) {
-        for (var track in videoTracks) {
-          if (track.isScreenShare) {
-            screenTracks.add(ParticipantTrack(
-              participant: participant,
-              videoTrack: track,
-              isScreenShare: true,
-            ));
-          } else {
-            userMediaTracks.add(ParticipantTrack(
-              participant: participant,
-              videoTrack: track,
-              isScreenShare: false,
-            ));
-          }
-        }
+    List<ParticipantTrack> screenTracks = [];
+    for (var participant in widget.call.participants.values) {
+      for (var t in participant.videoTracks) {
+        screenTracks.add(ParticipantTrack(
+          participant: participant,
+          videoTrack: t.track,
+          isScreenShare: t.isScreenShare,
+        ));
       }
     }
-
-    final localParticipant = widget.call.localParticipant;
-    final localParticipantTracks = localParticipant?.videoTracks;
-    if (localParticipantTracks != null) {
-      for (var track in localParticipantTracks) {
-        if (track.isScreenShare) {
-          screenTracks.add(ParticipantTrack(
-            participant: localParticipant!,
-            videoTrack: track,
-            isScreenShare: true,
-          ));
+    // sort speakers for the grid
+    userMediaTracks.sort((a, b) {
+      // loudest speaker first
+      if (a.participant.isSpeaking && b.participant.isSpeaking) {
+        if (a.participant.audioLevel > b.participant.audioLevel) {
+          return -1;
         } else {
-          userMediaTracks.add(ParticipantTrack(
-            participant: localParticipant!,
-            videoTrack: track,
-            isScreenShare: false,
-          ));
+          return 1;
         }
       }
-    }
 
+      // last spoken at
+      final aSpokeAt = a.participant.lastSpokeAt?.millisecondsSinceEpoch ?? 0;
+      final bSpokeAt = b.participant.lastSpokeAt?.millisecondsSinceEpoch ?? 0;
+
+      if (aSpokeAt != bSpokeAt) {
+        return aSpokeAt > bSpokeAt ? -1 : 1;
+      }
+
+      // video on
+      if (a.participant.hasVideo != b.participant.hasVideo) {
+        return a.participant.hasVideo ? -1 : 1;
+      }
+
+      // joinedAt
+      return a.participant.joinedAt.millisecondsSinceEpoch -
+          b.participant.joinedAt.millisecondsSinceEpoch;
+    });
+
+    final localParticipantTracks = widget.call.localParticipant?.videoTracks;
+    if (localParticipantTracks != null) {
+      for (var t in localParticipantTracks) {
+        screenTracks.add(ParticipantTrack(
+          participant: widget.call.localParticipant!,
+          videoTrack: t.track,
+          isScreenShare: t.isScreenShare,
+        ));
+      }
+    }
     setState(() {
       participantTracks = [...screenTracks, ...userMediaTracks];
     });
@@ -76,18 +93,21 @@ class _CallScreenState extends State<CallScreen> {
   @override
   void initState() {
     super.initState();
-    _onParticipantUpdate(widget.call.participants);
-    widget.call.participantsStream.listen(_onParticipantUpdate);
-    widget.call.addListener(SfuEvent_EventPayload.callEnded.name, _onCallEnded);
+    _onParticipantUpdate();
+    widget.call.events
+      ..listen((_) {
+        _onParticipantUpdate();
+      });
+    // widget.call.addListener(SfuEvent_EventPayload.callEnded.name, _onCallEnded);
   }
 
   @override
   void dispose() async {
-    widget.call.removeListener(
-      SfuEvent_EventPayload.callEnded.name,
-      _onCallEnded,
-    );
-    await widget.call.leave();
+    // widget.call.removeListener(
+    //   SfuEvent_EventPayload.callEnded.name,
+    //   _onCallEnded,
+    // );
+    await widget.call.disconnect();
     super.dispose();
   }
 
@@ -99,12 +119,20 @@ class _CallScreenState extends State<CallScreen> {
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
       ),
-      itemCount: participantTracks.length,
+      itemCount: allParticipants.length,
       itemBuilder: (context, index) {
-        final participantTrack = participantTracks[index];
-        return ParticipantWidget(
-          track: participantTrack,
+        final participant = allParticipants[index];
+        if (participant is RemoteParticipant) {
+          print('All tracks: ${participant.videoTracks.length}');
+          print(
+              'Track: ${participant.videoTracks.map((e) => e.track?.mediaStreamTrack)}');
+        }
+        final participantTrack = ParticipantTrack(
+          participant: participant,
+          videoTrack: participant.videoTracks.firstOrNull?.track as VideoTrack?,
+          isScreenShare: false,
         );
+        return ParticipantWidget.widgetFor(participantTrack);
       },
     );
 
@@ -126,81 +154,5 @@ class _CallScreenState extends State<CallScreen> {
         ],
       ),
     );
-
-    return Scaffold(
-      body: Column(
-        children: [
-          participantTracks.isEmpty
-              ? Container()
-              : Expanded(
-                  // Creates a grid of all the participants in the call.
-                  child: GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                    ),
-                    itemCount: participantTracks.length,
-                    itemBuilder: (context, index) {
-                      final participantTrack = participantTracks[index];
-                      return ParticipantWidget(
-                        // participant: participantTrack.participant,
-                        // videoTrack: participantTrack.videoTrack,
-                        // isScreenShare: participantTrack.isScreenShare,
-                        track: participantTrack,
-                      );
-                    },
-                  ),
-                ),
-          Expanded(
-            child: Column(
-              children: [
-                // Expanded(
-                //   child: Center(
-                //     child: ParticipantInfo(
-                //       participant: widget.call.localParticipant!,
-                //     ),
-                //   ),
-                // ),
-                ControlsWidget(
-                  widget.call,
-                  widget.call.localParticipant!,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
-//                   child: ListView.builder(
-//                     // gridDelegate:
-//                     //     const SliverGridDelegateWithMaxCrossAxisExtent(
-//                     //   maxCrossAxisExtent: 200,
-//                     //   // childAspectRatio: 3 / 2,
-//                     //   crossAxisSpacing: 20,
-//                     //   mainAxisSpacing: 20,
-//                     // ),
-//                     itemCount: participantTracks.length, //
-//                     itemBuilder: (BuildContext ctx, int index) {
-//                       final track = participantTracks[index];
-//
-//                       return Container(
-//                         child: ParticipantWidget(track: track),
-//                       );
-//                     },
-//                   ),
-//                 ),
-//           if (widget.call.localParticipant != null)
-//             SafeArea(
-//               top: false,
-//               child: ControlsWidget(
-//                 widget.call,
-//                 widget.call.localParticipant!,
-//               ),
-//             ),
-//         ],
-//       ),
-//     );
-//   }
-// }

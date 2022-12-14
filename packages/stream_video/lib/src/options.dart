@@ -36,7 +36,7 @@ class CallOptions {
     this.defaultAudioCaptureOptions = const AudioCaptureOptions(),
     this.defaultVideoPublishOptions = const VideoPublishOptions(),
     this.defaultAudioPublishOptions = const AudioPublishOptions(),
-    this.adaptiveStream = false,
+    this.adaptiveStream = true,
     this.dynacast = false,
     this.stopLocalTrackOnUnpublish = true,
   });
@@ -76,8 +76,11 @@ class CallOptions {
   final bool stopLocalTrackOnUnpublish;
 }
 
+/// Used to group [AudioPublishOptions] and [VideoPublishOptions].
+mixin PublishOptions {}
+
 /// Options used when publishing video.
-class VideoPublishOptions {
+class VideoPublishOptions with PublishOptions {
   const VideoPublishOptions({
     this.videoEncoding,
     this.simulcast = true,
@@ -105,11 +108,10 @@ class VideoPublishOptions {
 }
 
 /// Options used when publishing audio.
-class AudioPublishOptions {
+class AudioPublishOptions with PublishOptions {
   const AudioPublishOptions({
     this.dtx = true,
     this.audioBitrate = AudioPreset.music,
-    this.stopMicTrackOnMute = true,
   });
 
   /// Whether to enable DTX (Discontinuous Transmission) or not.
@@ -119,10 +121,6 @@ class AudioPublishOptions {
 
   /// max audio bitrate
   final int audioBitrate;
-
-  /// Turn off the audio track when muted, to avoid the microphone
-  /// indicator light on.
-  final bool stopMicTrackOnMute;
 
   @override
   String toString() => '${runtimeType}(dtx: ${dtx})';

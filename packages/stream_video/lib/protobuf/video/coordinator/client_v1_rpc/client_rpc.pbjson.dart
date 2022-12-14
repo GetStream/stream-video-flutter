@@ -174,12 +174,12 @@ const CallInput$json = const {
   '1': 'CallInput',
   '2': const [
     const {'1': 'custom_json', '3': 1, '4': 1, '5': 12, '10': 'customJson'},
-    const {'1': 'options', '3': 2, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.CallOptions', '10': 'options'},
+    const {'1': 'settings_overrides', '3': 2, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.CallSettings', '10': 'settingsOverrides'},
   ],
 };
 
 /// Descriptor for `CallInput`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callInputDescriptor = $convert.base64Decode('CglDYWxsSW5wdXQSHwoLY3VzdG9tX2pzb24YASABKAxSCmN1c3RvbUpzb24SRwoHb3B0aW9ucxgCIAEoCzItLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jYWxsX3YxLkNhbGxPcHRpb25zUgdvcHRpb25z');
+final $typed_data.Uint8List callInputDescriptor = $convert.base64Decode('CglDYWxsSW5wdXQSHwoLY3VzdG9tX2pzb24YASABKAxSCmN1c3RvbUpzb24SXQoSc2V0dGluZ3Nfb3ZlcnJpZGVzGAIgASgLMi4uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNhbGxfdjEuQ2FsbFNldHRpbmdzUhFzZXR0aW5nc092ZXJyaWRlcw==');
 @$core.Deprecated('Use getOrCreateCallResponseDescriptor instead')
 const GetOrCreateCallResponse$json = const {
   '1': 'GetOrCreateCallResponse',
@@ -699,7 +699,7 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ClientRPCS
   '.stream.video.coordinator.client_v1_rpc.CreateCallRequest': CreateCallRequest$json,
   '.stream.video.coordinator.client_v1_rpc.CreateCallInput': CreateCallInput$json,
   '.stream.video.coordinator.client_v1_rpc.CallInput': CallInput$json,
-  '.stream.video.coordinator.call_v1.CallOptions': $0.CallOptions$json,
+  '.stream.video.coordinator.call_v1.CallSettings': $0.CallSettings$json,
   '.stream.video.coordinator.call_v1.RecordingOptions': $0.RecordingOptions$json,
   '.stream.video.coordinator.call_v1.BroadcastingOptions': $0.BroadcastingOptions$json,
   '.stream.video.coordinator.client_v1_rpc.MemberInput': MemberInput$json,

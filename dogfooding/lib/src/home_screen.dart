@@ -36,19 +36,15 @@ class _HomeScreenState extends State<HomeScreen> {
         type: 'default',
       );
 
-      await call.connect(
-        options: const ConnectOptions(
-          microphone: TrackOption(enabled: true),
-          camera: TrackOption(enabled: true),
-        ),
-      );
+      await call.connect();
 
       Navigator.of(context).pushReplacementNamed(
         CallScreen.routeName,
         arguments: call,
       );
-    } catch (e) {
+    } catch (e ,stk) {
       debugPrint('Error joining or creating call: $e');
+      debugPrint(stk.toString());
     } finally {
       setState(() => _isInProgress = false);
     }

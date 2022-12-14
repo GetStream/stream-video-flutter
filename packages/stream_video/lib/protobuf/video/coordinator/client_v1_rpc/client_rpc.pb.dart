@@ -783,21 +783,21 @@ class JoinCallResponse extends $pb.GeneratedMessage {
 class CallInput extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallInput', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'customJson', $pb.PbFieldType.OY)
-    ..aOM<$0.CallOptions>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'options', subBuilder: $0.CallOptions.create)
+    ..aOM<$0.CallSettings>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'settingsOverrides', subBuilder: $0.CallSettings.create)
     ..hasRequiredFields = false
   ;
 
   CallInput._() : super();
   factory CallInput({
     $core.List<$core.int>? customJson,
-    $0.CallOptions? options,
+    $0.CallSettings? settingsOverrides,
   }) {
     final _result = create();
     if (customJson != null) {
       _result.customJson = customJson;
     }
-    if (options != null) {
-      _result.options = options;
+    if (settingsOverrides != null) {
+      _result.settingsOverrides = settingsOverrides;
     }
     return _result;
   }
@@ -832,15 +832,15 @@ class CallInput extends $pb.GeneratedMessage {
   void clearCustomJson() => clearField(1);
 
   @$pb.TagNumber(2)
-  $0.CallOptions get options => $_getN(1);
+  $0.CallSettings get settingsOverrides => $_getN(1);
   @$pb.TagNumber(2)
-  set options($0.CallOptions v) { setField(2, v); }
+  set settingsOverrides($0.CallSettings v) { setField(2, v); }
   @$pb.TagNumber(2)
-  $core.bool hasOptions() => $_has(1);
+  $core.bool hasSettingsOverrides() => $_has(1);
   @$pb.TagNumber(2)
-  void clearOptions() => clearField(2);
+  void clearSettingsOverrides() => clearField(2);
   @$pb.TagNumber(2)
-  $0.CallOptions ensureOptions() => $_ensure(1);
+  $0.CallSettings ensureSettingsOverrides() => $_ensure(1);
 }
 
 class GetOrCreateCallResponse extends $pb.GeneratedMessage {
