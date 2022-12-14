@@ -154,7 +154,7 @@ class StreamVideo {
 
   CoordinatorWebSocket? _ws;
 
-  /// Default log handler function for the [StreamChatClient] logger.
+  /// Default log handler function for the [StreamVideo] logger.
   static void defaultLogHandler(LogRecord record) {
     print(
       '${record.time} '

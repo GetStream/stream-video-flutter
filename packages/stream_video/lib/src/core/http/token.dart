@@ -1,6 +1,6 @@
 import 'package:stream_video/protobuf/video/coordinator/user_v1/user.pbserver.dart';
 
-/// A function which can be used to request a Stream Chat API token from your
+/// A function which can be used to request a Stream Video API token from your
 /// own backend server
 typedef GuestTokenProvider = Future<String> Function(User user);
 
