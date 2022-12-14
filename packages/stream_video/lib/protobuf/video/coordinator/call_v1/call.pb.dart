@@ -15,7 +15,7 @@ import '../member_v1/member.pb.dart' as $1;
 class CallType extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallType', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.call_v1'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..aOM<CallOptions>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'options', subBuilder: CallOptions.create)
+    ..aOM<CallSettings>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'settings', subBuilder: CallSettings.create)
     ..aOM<$0.Timestamp>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt', subBuilder: $0.Timestamp.create)
     ..aOM<$0.Timestamp>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt', subBuilder: $0.Timestamp.create)
     ..hasRequiredFields = false
@@ -24,7 +24,7 @@ class CallType extends $pb.GeneratedMessage {
   CallType._() : super();
   factory CallType({
     $core.String? name,
-    CallOptions? options,
+    CallSettings? settings,
     $0.Timestamp? createdAt,
     $0.Timestamp? updatedAt,
   }) {
@@ -32,8 +32,8 @@ class CallType extends $pb.GeneratedMessage {
     if (name != null) {
       _result.name = name;
     }
-    if (options != null) {
-      _result.options = options;
+    if (settings != null) {
+      _result.settings = settings;
     }
     if (createdAt != null) {
       _result.createdAt = createdAt;
@@ -74,15 +74,15 @@ class CallType extends $pb.GeneratedMessage {
   void clearName() => clearField(1);
 
   @$pb.TagNumber(2)
-  CallOptions get options => $_getN(1);
+  CallSettings get settings => $_getN(1);
   @$pb.TagNumber(2)
-  set options(CallOptions v) { setField(2, v); }
+  set settings(CallSettings v) { setField(2, v); }
   @$pb.TagNumber(2)
-  $core.bool hasOptions() => $_has(1);
+  $core.bool hasSettings() => $_has(1);
   @$pb.TagNumber(2)
-  void clearOptions() => clearField(2);
+  void clearSettings() => clearField(2);
   @$pb.TagNumber(2)
-  CallOptions ensureOptions() => $_ensure(1);
+  CallSettings ensureSettings() => $_ensure(1);
 
   @$pb.TagNumber(3)
   $0.Timestamp get createdAt => $_getN(2);
@@ -114,9 +114,11 @@ class Call extends $pb.GeneratedMessage {
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
     ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdByUserId')
     ..a<$core.List<$core.int>>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'customJson', $pb.PbFieldType.OY)
-    ..aOM<CallOptions>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'options', subBuilder: CallOptions.create)
+    ..aOM<CallSettings>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'settingsOverrides', subBuilder: CallSettings.create)
     ..aOM<$0.Timestamp>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdAt', subBuilder: $0.Timestamp.create)
     ..aOM<$0.Timestamp>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt', subBuilder: $0.Timestamp.create)
+    ..aOB(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recordingActive')
+    ..aOB(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcastingActive')
     ..hasRequiredFields = false
   ;
 
@@ -127,9 +129,11 @@ class Call extends $pb.GeneratedMessage {
     $core.String? callCid,
     $core.String? createdByUserId,
     $core.List<$core.int>? customJson,
-    CallOptions? options,
+    CallSettings? settingsOverrides,
     $0.Timestamp? createdAt,
     $0.Timestamp? updatedAt,
+    $core.bool? recordingActive,
+    $core.bool? broadcastingActive,
   }) {
     final _result = create();
     if (type != null) {
@@ -147,14 +151,20 @@ class Call extends $pb.GeneratedMessage {
     if (customJson != null) {
       _result.customJson = customJson;
     }
-    if (options != null) {
-      _result.options = options;
+    if (settingsOverrides != null) {
+      _result.settingsOverrides = settingsOverrides;
     }
     if (createdAt != null) {
       _result.createdAt = createdAt;
     }
     if (updatedAt != null) {
       _result.updatedAt = updatedAt;
+    }
+    if (recordingActive != null) {
+      _result.recordingActive = recordingActive;
+    }
+    if (broadcastingActive != null) {
+      _result.broadcastingActive = broadcastingActive;
     }
     return _result;
   }
@@ -225,15 +235,15 @@ class Call extends $pb.GeneratedMessage {
   void clearCustomJson() => clearField(5);
 
   @$pb.TagNumber(6)
-  CallOptions get options => $_getN(5);
+  CallSettings get settingsOverrides => $_getN(5);
   @$pb.TagNumber(6)
-  set options(CallOptions v) { setField(6, v); }
+  set settingsOverrides(CallSettings v) { setField(6, v); }
   @$pb.TagNumber(6)
-  $core.bool hasOptions() => $_has(5);
+  $core.bool hasSettingsOverrides() => $_has(5);
   @$pb.TagNumber(6)
-  void clearOptions() => clearField(6);
+  void clearSettingsOverrides() => clearField(6);
   @$pb.TagNumber(6)
-  CallOptions ensureOptions() => $_ensure(5);
+  CallSettings ensureSettingsOverrides() => $_ensure(5);
 
   @$pb.TagNumber(7)
   $0.Timestamp get createdAt => $_getN(6);
@@ -256,11 +266,29 @@ class Call extends $pb.GeneratedMessage {
   void clearUpdatedAt() => clearField(8);
   @$pb.TagNumber(8)
   $0.Timestamp ensureUpdatedAt() => $_ensure(7);
+
+  @$pb.TagNumber(9)
+  $core.bool get recordingActive => $_getBF(8);
+  @$pb.TagNumber(9)
+  set recordingActive($core.bool v) { $_setBool(8, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasRecordingActive() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearRecordingActive() => clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.bool get broadcastingActive => $_getBF(9);
+  @$pb.TagNumber(10)
+  set broadcastingActive($core.bool v) { $_setBool(9, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasBroadcastingActive() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearBroadcastingActive() => clearField(10);
 }
 
 class CallDetails extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallDetails', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.call_v1'), createEmptyInstance: create)
-    ..aOM<CallOptions>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'options', subBuilder: CallOptions.create)
+    ..aOM<CallSettings>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'settings', subBuilder: CallSettings.create)
     ..pPS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'memberUserIds')
     ..m<$core.String, $1.Member>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'members', entryClassName: 'CallDetails.MembersEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: $1.Member.create, packageName: const $pb.PackageName('stream.video.coordinator.call_v1'))
     ..hasRequiredFields = false
@@ -268,13 +296,13 @@ class CallDetails extends $pb.GeneratedMessage {
 
   CallDetails._() : super();
   factory CallDetails({
-    CallOptions? options,
+    CallSettings? settings,
     $core.Iterable<$core.String>? memberUserIds,
     $core.Map<$core.String, $1.Member>? members,
   }) {
     final _result = create();
-    if (options != null) {
-      _result.options = options;
+    if (settings != null) {
+      _result.settings = settings;
     }
     if (memberUserIds != null) {
       _result.memberUserIds.addAll(memberUserIds);
@@ -306,15 +334,15 @@ class CallDetails extends $pb.GeneratedMessage {
   static CallDetails? _defaultInstance;
 
   @$pb.TagNumber(1)
-  CallOptions get options => $_getN(0);
+  CallSettings get settings => $_getN(0);
   @$pb.TagNumber(1)
-  set options(CallOptions v) { setField(1, v); }
+  set settings(CallSettings v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasOptions() => $_has(0);
+  $core.bool hasSettings() => $_has(0);
   @$pb.TagNumber(1)
-  void clearOptions() => clearField(1);
+  void clearSettings() => clearField(1);
   @$pb.TagNumber(1)
-  CallOptions ensureOptions() => $_ensure(0);
+  CallSettings ensureSettings() => $_ensure(0);
 
   @$pb.TagNumber(2)
   $core.List<$core.String> get memberUserIds => $_getList(1);
@@ -323,15 +351,15 @@ class CallDetails extends $pb.GeneratedMessage {
   $core.Map<$core.String, $1.Member> get members => $_getMap(2);
 }
 
-class CallOptions extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallOptions', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.call_v1'), createEmptyInstance: create)
+class CallSettings extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallSettings', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.call_v1'), createEmptyInstance: create)
     ..aOM<RecordingOptions>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recording', subBuilder: RecordingOptions.create)
     ..aOM<BroadcastingOptions>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcasting', subBuilder: BroadcastingOptions.create)
     ..hasRequiredFields = false
   ;
 
-  CallOptions._() : super();
-  factory CallOptions({
+  CallSettings._() : super();
+  factory CallSettings({
     RecordingOptions? recording,
     BroadcastingOptions? broadcasting,
   }) {
@@ -344,26 +372,26 @@ class CallOptions extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory CallOptions.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CallOptions.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory CallSettings.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CallSettings.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  CallOptions clone() => CallOptions()..mergeFromMessage(this);
+  CallSettings clone() => CallSettings()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  CallOptions copyWith(void Function(CallOptions) updates) => super.copyWith((message) => updates(message as CallOptions)) as CallOptions; // ignore: deprecated_member_use
+  CallSettings copyWith(void Function(CallSettings) updates) => super.copyWith((message) => updates(message as CallSettings)) as CallSettings; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static CallOptions create() => CallOptions._();
-  CallOptions createEmptyInstance() => create();
-  static $pb.PbList<CallOptions> createRepeated() => $pb.PbList<CallOptions>();
+  static CallSettings create() => CallSettings._();
+  CallSettings createEmptyInstance() => create();
+  static $pb.PbList<CallSettings> createRepeated() => $pb.PbList<CallSettings>();
   @$core.pragma('dart2js:noInline')
-  static CallOptions getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallOptions>(create);
-  static CallOptions? _defaultInstance;
+  static CallSettings getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallSettings>(create);
+  static CallSettings? _defaultInstance;
 
   @$pb.TagNumber(1)
   RecordingOptions get recording => $_getN(0);

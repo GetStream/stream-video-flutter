@@ -783,21 +783,21 @@ class JoinCallResponse extends $pb.GeneratedMessage {
 class CallInput extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallInput', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'customJson', $pb.PbFieldType.OY)
-    ..aOM<$0.CallOptions>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'options', subBuilder: $0.CallOptions.create)
+    ..aOM<$0.CallSettings>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'settingsOverrides', subBuilder: $0.CallSettings.create)
     ..hasRequiredFields = false
   ;
 
   CallInput._() : super();
   factory CallInput({
     $core.List<$core.int>? customJson,
-    $0.CallOptions? options,
+    $0.CallSettings? settingsOverrides,
   }) {
     final _result = create();
     if (customJson != null) {
       _result.customJson = customJson;
     }
-    if (options != null) {
-      _result.options = options;
+    if (settingsOverrides != null) {
+      _result.settingsOverrides = settingsOverrides;
     }
     return _result;
   }
@@ -832,15 +832,15 @@ class CallInput extends $pb.GeneratedMessage {
   void clearCustomJson() => clearField(1);
 
   @$pb.TagNumber(2)
-  $0.CallOptions get options => $_getN(1);
+  $0.CallSettings get settingsOverrides => $_getN(1);
   @$pb.TagNumber(2)
-  set options($0.CallOptions v) { setField(2, v); }
+  set settingsOverrides($0.CallSettings v) { setField(2, v); }
   @$pb.TagNumber(2)
-  $core.bool hasOptions() => $_has(1);
+  $core.bool hasSettingsOverrides() => $_has(1);
   @$pb.TagNumber(2)
-  void clearOptions() => clearField(2);
+  void clearSettingsOverrides() => clearField(2);
   @$pb.TagNumber(2)
-  $0.CallOptions ensureOptions() => $_ensure(1);
+  $0.CallSettings ensureSettingsOverrides() => $_ensure(1);
 }
 
 class GetOrCreateCallResponse extends $pb.GeneratedMessage {
@@ -1604,6 +1604,198 @@ class QueryMembersResponse extends $pb.GeneratedMessage {
   void clearMembers() => clearField(1);
   @$pb.TagNumber(1)
   $3.MembersEnvelope ensureMembers() => $_ensure(0);
+}
+
+class QueryUsersRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'QueryUsersRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'mqJson', $pb.PbFieldType.OY)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'limit', $pb.PbFieldType.O3)
+    ..pc<$5.Sort>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sorts', $pb.PbFieldType.PM, subBuilder: $5.Sort.create)
+    ..hasRequiredFields = false
+  ;
+
+  QueryUsersRequest._() : super();
+  factory QueryUsersRequest({
+    $core.List<$core.int>? mqJson,
+    $core.int? limit,
+    $core.Iterable<$5.Sort>? sorts,
+  }) {
+    final _result = create();
+    if (mqJson != null) {
+      _result.mqJson = mqJson;
+    }
+    if (limit != null) {
+      _result.limit = limit;
+    }
+    if (sorts != null) {
+      _result.sorts.addAll(sorts);
+    }
+    return _result;
+  }
+  factory QueryUsersRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory QueryUsersRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  QueryUsersRequest clone() => QueryUsersRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  QueryUsersRequest copyWith(void Function(QueryUsersRequest) updates) => super.copyWith((message) => updates(message as QueryUsersRequest)) as QueryUsersRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static QueryUsersRequest create() => QueryUsersRequest._();
+  QueryUsersRequest createEmptyInstance() => create();
+  static $pb.PbList<QueryUsersRequest> createRepeated() => $pb.PbList<QueryUsersRequest>();
+  @$core.pragma('dart2js:noInline')
+  static QueryUsersRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<QueryUsersRequest>(create);
+  static QueryUsersRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get mqJson => $_getN(0);
+  @$pb.TagNumber(1)
+  set mqJson($core.List<$core.int> v) { $_setBytes(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasMqJson() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearMqJson() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get limit => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set limit($core.int v) { $_setSignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasLimit() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLimit() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.List<$5.Sort> get sorts => $_getList(2);
+}
+
+class QueryUsersResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'QueryUsersResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..pc<$1.User>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'users', $pb.PbFieldType.PM, subBuilder: $1.User.create)
+    ..hasRequiredFields = false
+  ;
+
+  QueryUsersResponse._() : super();
+  factory QueryUsersResponse({
+    $core.Iterable<$1.User>? users,
+  }) {
+    final _result = create();
+    if (users != null) {
+      _result.users.addAll(users);
+    }
+    return _result;
+  }
+  factory QueryUsersResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory QueryUsersResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  QueryUsersResponse clone() => QueryUsersResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  QueryUsersResponse copyWith(void Function(QueryUsersResponse) updates) => super.copyWith((message) => updates(message as QueryUsersResponse)) as QueryUsersResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static QueryUsersResponse create() => QueryUsersResponse._();
+  QueryUsersResponse createEmptyInstance() => create();
+  static $pb.PbList<QueryUsersResponse> createRepeated() => $pb.PbList<QueryUsersResponse>();
+  @$core.pragma('dart2js:noInline')
+  static QueryUsersResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<QueryUsersResponse>(create);
+  static QueryUsersResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$1.User> get users => $_getList(0);
+}
+
+class UpsertUsersRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpsertUsersRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..pc<$1.UserInput>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'users', $pb.PbFieldType.PM, subBuilder: $1.UserInput.create)
+    ..hasRequiredFields = false
+  ;
+
+  UpsertUsersRequest._() : super();
+  factory UpsertUsersRequest({
+    $core.Iterable<$1.UserInput>? users,
+  }) {
+    final _result = create();
+    if (users != null) {
+      _result.users.addAll(users);
+    }
+    return _result;
+  }
+  factory UpsertUsersRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UpsertUsersRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  UpsertUsersRequest clone() => UpsertUsersRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  UpsertUsersRequest copyWith(void Function(UpsertUsersRequest) updates) => super.copyWith((message) => updates(message as UpsertUsersRequest)) as UpsertUsersRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UpsertUsersRequest create() => UpsertUsersRequest._();
+  UpsertUsersRequest createEmptyInstance() => create();
+  static $pb.PbList<UpsertUsersRequest> createRepeated() => $pb.PbList<UpsertUsersRequest>();
+  @$core.pragma('dart2js:noInline')
+  static UpsertUsersRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UpsertUsersRequest>(create);
+  static UpsertUsersRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$1.UserInput> get users => $_getList(0);
+}
+
+class UpsertUsersResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpsertUsersResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..pc<$1.User>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'users', $pb.PbFieldType.PM, subBuilder: $1.User.create)
+    ..hasRequiredFields = false
+  ;
+
+  UpsertUsersResponse._() : super();
+  factory UpsertUsersResponse({
+    $core.Iterable<$1.User>? users,
+  }) {
+    final _result = create();
+    if (users != null) {
+      _result.users.addAll(users);
+    }
+    return _result;
+  }
+  factory UpsertUsersResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UpsertUsersResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  UpsertUsersResponse clone() => UpsertUsersResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  UpsertUsersResponse copyWith(void Function(UpsertUsersResponse) updates) => super.copyWith((message) => updates(message as UpsertUsersResponse)) as UpsertUsersResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UpsertUsersResponse create() => UpsertUsersResponse._();
+  UpsertUsersResponse createEmptyInstance() => create();
+  static $pb.PbList<UpsertUsersResponse> createRepeated() => $pb.PbList<UpsertUsersResponse>();
+  @$core.pragma('dart2js:noInline')
+  static UpsertUsersResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UpsertUsersResponse>(create);
+  static UpsertUsersResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$1.User> get users => $_getList(0);
 }
 
 class GetCallEdgeServerRequest extends $pb.GeneratedMessage {
@@ -3181,6 +3373,14 @@ class ClientRPCApi {
   $async.Future<SendCustomEventResponse> sendCustomEvent($pb.ClientContext? ctx, SendCustomEventRequest request) {
     var emptyResponse = SendCustomEventResponse();
     return _client.invoke<SendCustomEventResponse>(ctx, 'ClientRPC', 'SendCustomEvent', request, emptyResponse);
+  }
+  $async.Future<QueryUsersResponse> queryUsers($pb.ClientContext? ctx, QueryUsersRequest request) {
+    var emptyResponse = QueryUsersResponse();
+    return _client.invoke<QueryUsersResponse>(ctx, 'ClientRPC', 'QueryUsers', request, emptyResponse);
+  }
+  $async.Future<UpsertUsersResponse> upsertUsers($pb.ClientContext? ctx, UpsertUsersRequest request) {
+    var emptyResponse = UpsertUsersResponse();
+    return _client.invoke<UpsertUsersResponse>(ctx, 'ClientRPC', 'UpsertUsers', request, emptyResponse);
   }
   $async.Future<ReportCallStatsResponse> reportCallStats($pb.ClientContext? ctx, ReportCallStatsRequest request) {
     var emptyResponse = ReportCallStatsResponse();

@@ -21,8 +21,7 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
   $async.Future<$1.SendAnswerResponse> sendAnswer($pb.ServerContext ctx, $1.SendAnswerRequest request);
   $async.Future<$1.ICETrickleResponse> iceTrickle($pb.ServerContext ctx, $0.ICETrickle request);
   $async.Future<$1.UpdateSubscriptionsResponse> updateSubscriptions($pb.ServerContext ctx, $1.UpdateSubscriptionsRequest request);
-  $async.Future<$1.UpdateMuteStateResponse> updateMuteState($pb.ServerContext ctx, $1.UpdateMuteStateRequest request);
-  $async.Future<$1.UpdateVideoQualityResponse> requestVideoQuality($pb.ServerContext ctx, $1.UpdateVideoQualityRequest request);
+  $async.Future<$1.UpdateMuteStatesResponse> updateMuteStates($pb.ServerContext ctx, $1.UpdateMuteStatesRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
@@ -30,8 +29,7 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
       case 'SendAnswer': return $1.SendAnswerRequest();
       case 'IceTrickle': return $0.ICETrickle();
       case 'UpdateSubscriptions': return $1.UpdateSubscriptionsRequest();
-      case 'UpdateMuteState': return $1.UpdateMuteStateRequest();
-      case 'RequestVideoQuality': return $1.UpdateVideoQualityRequest();
+      case 'UpdateMuteStates': return $1.UpdateMuteStatesRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
@@ -42,8 +40,7 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
       case 'SendAnswer': return this.sendAnswer(ctx, request as $1.SendAnswerRequest);
       case 'IceTrickle': return this.iceTrickle(ctx, request as $0.ICETrickle);
       case 'UpdateSubscriptions': return this.updateSubscriptions(ctx, request as $1.UpdateSubscriptionsRequest);
-      case 'UpdateMuteState': return this.updateMuteState(ctx, request as $1.UpdateMuteStateRequest);
-      case 'RequestVideoQuality': return this.requestVideoQuality(ctx, request as $1.UpdateVideoQualityRequest);
+      case 'UpdateMuteStates': return this.updateMuteStates(ctx, request as $1.UpdateMuteStatesRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
