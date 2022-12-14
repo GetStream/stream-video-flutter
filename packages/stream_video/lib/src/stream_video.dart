@@ -59,7 +59,7 @@ class StreamVideoClient with EventEmittable<CoordinatorEvent> {
         If you want to use multiple instances of the SDK, use StreamVideo.new() instead.
         ''');
     }
-    _instance = StreamVideo._(
+    _instance = StreamVideoClient._(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
@@ -71,15 +71,15 @@ class StreamVideoClient with EventEmittable<CoordinatorEvent> {
 
   /// Creates a new Stream Video client unassociated with the
   /// Stream Video singleton instance
-  factory StreamVideo.new(
+  factory StreamVideoClient.new(
     String apiKey, {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
     Level logLevel = Level.ALL,
-    LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
+    LogHandlerFunction logHandlerFunction = StreamVideoClient.defaultLogHandler,
   }) {
-    return StreamVideo._(
+    return StreamVideoClient._(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
@@ -89,7 +89,7 @@ class StreamVideoClient with EventEmittable<CoordinatorEvent> {
     );
   }
 
-  StreamVideo._(
+  StreamVideoClient._(
     this.apiKey, {
     required this.coordinatorRpcUrl,
     required this.coordinatorWsUrl,
@@ -108,10 +108,10 @@ class StreamVideoClient with EventEmittable<CoordinatorEvent> {
     );
   }
 
-  static StreamVideo? _instance;
+  static StreamVideoClient? _instance;
 
   /// The singleton instance of the Stream Video client.
-  static StreamVideo get instance {
+  static StreamVideoClient get instance {
     final instance = _instance;
     if (instance == null) {
       throw Exception(
@@ -128,7 +128,7 @@ class StreamVideoClient with EventEmittable<CoordinatorEvent> {
   /// API key.
   static void reset({bool disconnectUser = false}) async {
     if (disconnectUser) {
-      _instance?.activeCall?.leave();
+      _instance?.activeCall?.disconnect();
       _instance?.disconnectUser();
     }
     _instance = null;

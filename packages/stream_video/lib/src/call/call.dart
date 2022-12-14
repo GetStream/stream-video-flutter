@@ -4,8 +4,10 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:meta/meta.dart';
+import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart'
+    as rpc;
 import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart'
-    as coordinator;
+    as edge;
 import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
     as sfu_events;
 import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
@@ -13,12 +15,13 @@ import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
 import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
     as signal;
 import 'package:stream_video/src/call/transport.dart';
-import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/core/utils.dart';
 import 'package:stream_video/src/event_emitter.dart';
 import 'package:stream_video/src/events.dart';
 import 'package:stream_video/src/extensions.dart';
 import 'package:stream_video/src/internal/events.dart';
+import 'package:stream_video/src/logger/logger.dart';
+import 'package:stream_video/src/models/call_configuration.dart';
 import 'package:stream_video/src/options.dart';
 import 'package:stream_video/src/participant/local.dart';
 import 'package:stream_video/src/participant/participant.dart';
@@ -26,6 +29,7 @@ import 'package:stream_video/src/participant/participant_info.dart';
 import 'package:stream_video/src/participant/remote.dart';
 import 'package:stream_video/src/sfu-client/rtc/codecs.dart' as codecs;
 import 'package:stream_video/src/sfu-client/sfu_client.dart';
+import 'package:stream_video/src/stream_video.dart';
 import 'package:stream_video/src/types/other.dart';
 
 const _timeoutDuration = Duration(seconds: 30);
@@ -35,45 +39,46 @@ class Call with EventEmittable<CallEvent> {
   /// Creates a new [Call] instance from a [CallConfiguration].
   Call({
     required this.callConfiguration,
-    StreamVideo? client,
+    StreamVideoClient? client,
   })  : callOptions = callConfiguration.callOptions,
-        _streamVideoClient = client ?? StreamVideo.instance;
+        _streamVideoClient = client ?? StreamVideoClient.instance;
 
   /// Creates a new [Call] instance if the call already created.
   Call.fromDetails({
     required this.callId,
     required this.callType,
     required this.credentials,
-    required StreamVideo client,
+    required StreamVideoClient client,
     this.callOptions = const CallOptions(),
   }) : _streamVideoClient = client {
     _initialiseCall(credentials: credentials);
-    _initialised = true;
   }
 
   // Determines whether the call is initialised.
   bool _initialised = false;
-  void _initialiseCall({required Credentials credentials}) {
+  void _initialiseCall({required edge.Credentials credentials}) {
     final url = credentials.server.url;
     final token = credentials.token;
-    _client = SfuClient(
+    sfuClient = SfuClient(
       url: url,
       token: token,
     );
 
     _startListeningSfuEvents();
+
+    _initialised = true;
   }
 
   late final CallConfiguration callConfiguration;
-  late final StreamVideo _streamVideoClient;
+  late final StreamVideoClient _streamVideoClient;
 
   late final String callId;
   late final String callType;
   String get callCid => '$callType:$callId';
-  late final coordinator.Credentials credentials;
+  late final edge.Credentials credentials;
   final CallOptions callOptions;
 
-  late final SfuClient _client;
+  late final SfuClient sfuClient;
 
   @internal
   Transport? publisher;
@@ -95,7 +100,7 @@ class Call with EventEmittable<CallEvent> {
   Participant? get dominantSpeaker => _dominantSpeaker;
   Participant? _dominantSpeaker;
 
-  Future<CallEnvelope> create() {
+  Future<rpc.CallEnvelope> create() {
     return _streamVideoClient.createCall(
       type: callConfiguration.type,
       id: callConfiguration.id,
@@ -104,7 +109,7 @@ class Call with EventEmittable<CallEvent> {
     );
   }
 
-  Future<CallEnvelope> getOrCreate() {
+  Future<rpc.CallEnvelope> getOrCreate() {
     return _streamVideoClient.getOrCreateCall(
       type: callConfiguration.type,
       id: callConfiguration.id,
@@ -121,9 +126,8 @@ class Call with EventEmittable<CallEvent> {
     }
     _participants.clear();
 
-  Future<void> leave() async {
-    await _subscriber?.close();
-    _subscriber = null;
+    // clean up LocalParticipant
+    await localParticipant?.dispose();
 
     // reset dominant speaker
     _dominantSpeaker = null;
@@ -157,7 +161,6 @@ class Call with EventEmittable<CallEvent> {
       credentials = result.credentials;
 
       _initialiseCall(credentials: credentials);
-      _initialised = true;
     }
 
     logger.info('Joining call $callType:$callId');
@@ -520,7 +523,6 @@ class Call with EventEmittable<CallEvent> {
     return config ?? defaultRtcConfiguration(credentials.server.url);
   }
 
-  // TODO: Send event to UI
   void _startListeningSfuEvents() {
     sfuClient.events
       ..on<ConnectionStateUpdatedEvent>(events.emit)

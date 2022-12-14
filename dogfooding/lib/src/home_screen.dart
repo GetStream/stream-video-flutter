@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await streamVideoClient.disconnect();
+              await streamVideoClient.disconnectUser();
               Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
             },
           ),
