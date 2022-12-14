@@ -13,11 +13,13 @@ class MediaType extends $pb.ProtobufEnum {
   static const MediaType MEDIA_TYPE_UNSPECIFIED = MediaType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'MEDIA_TYPE_UNSPECIFIED');
   static const MediaType MEDIA_TYPE_AUDIO = MediaType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'MEDIA_TYPE_AUDIO');
   static const MediaType MEDIA_TYPE_VIDEO = MediaType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'MEDIA_TYPE_VIDEO');
+  static const MediaType MEDIA_TYPE_SCREEN_SHARE = MediaType._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'MEDIA_TYPE_SCREEN_SHARE');
 
   static const $core.List<MediaType> values = <MediaType> [
     MEDIA_TYPE_UNSPECIFIED,
     MEDIA_TYPE_AUDIO,
     MEDIA_TYPE_VIDEO,
+    MEDIA_TYPE_SCREEN_SHARE,
   ];
 
   static final $core.Map<$core.int, MediaType> _byValue = $pb.ProtobufEnum.initByValue(values);

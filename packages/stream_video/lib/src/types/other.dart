@@ -1,5 +1,5 @@
-import 'package:meta/meta.dart';
-import 'package:stream_video/src/core/logger/logger.dart';
+import 'package:stream_video/src/logger/logger.dart';
+import 'package:stream_video/src/events.dart';
 
 /// Connection state type used throughout the SDK.
 enum ConnectionState {
@@ -9,34 +9,20 @@ enum ConnectionState {
   connected,
 }
 
-enum TrackSource {
+/// Connection quality between the [Participant] and server.
+enum ConnectionQuality {
   unknown,
-  camera,
-  microphone,
-  screenShareVideo,
-  screenShareAudio,
+  poor,
+  good,
+  excellent,
 }
 
-enum TrackType {
-  audio,
-  video;
-
-  String toRtcTrackKind() {
-    switch (this) {
-      case TrackType.audio:
-        return 'audio';
-      case TrackType.video:
-        return 'video';
-    }
-  }
-
-  static TrackType? fromRtcTrackKind(String? kind) {
-    if (kind == null) return null;
-    return {
-      'audio': TrackType.audio,
-      'video': TrackType.video,
-    }[kind];
-  }
+/// The reason why a track failed to publish.
+enum TrackSubscribeFailReason {
+  invalidServerResponse,
+  notTrackMetadataFound,
+  unsupportedTrackType,
+  // ...
 }
 
 /// The iceTransportPolicy used for [RTCConfiguration].
@@ -105,7 +91,7 @@ class RTCIceServer {
       };
 }
 
-typedef OnConnectionStateUpdated = void Function(ConnectionStateUpdated);
+typedef OnConnectionStateUpdated = void Function(ConnectionStateUpdatedEvent);
 
 /// Connection state mixin used throughout the SDK.
 mixin ConnectionStateMixin {
@@ -142,7 +128,7 @@ mixin ConnectionStateMixin {
     final didConnected = oldState != ConnectionState.connected &&
         newState == ConnectionState.connected;
 
-    final updatedState = ConnectionStateUpdated(
+    final updatedState = ConnectionStateUpdatedEvent(
       oldState: oldState,
       newState: newState,
       didConnected: didConnected,
@@ -150,23 +136,4 @@ mixin ConnectionStateMixin {
 
     return onConnectionStateUpdated?.call(updatedState);
   }
-}
-
-/// Model class for connection state updates.
-class ConnectionStateUpdated {
-  /// Creates a new instance of [ConnectionStateUpdated].
-  const ConnectionStateUpdated({
-    required this.newState,
-    required this.oldState,
-    required this.didConnected,
-  });
-
-  /// The new connection state.
-  final ConnectionState newState;
-
-  /// The old connection state.
-  final ConnectionState oldState;
-
-  /// Whether the connection state changed to [ConnectionState.connected].
-  final bool didConnected;
 }

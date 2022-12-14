@@ -2,9 +2,7 @@ import 'package:stream_video/src/track/track.dart';
 
 abstract class RemoteTrack extends Track {
   RemoteTrack({
-    required super.name,
-    required super.kind,
-    required super.source,
+    required super.type,
     required super.mediaStream,
     required super.mediaStreamTrack,
     super.receiver,

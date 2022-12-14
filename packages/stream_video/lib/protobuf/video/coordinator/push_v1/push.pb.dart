@@ -203,37 +203,27 @@ class PushProvider extends $pb.GeneratedMessage {
 
 class ApnCredentials extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ApnCredentials', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.push_v1'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'authKey')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'keyId')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'apnTopic')
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'teamId')
-    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'development')
+    ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'certificateP12', $pb.PbFieldType.OY)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'topic')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'teamId')
     ..hasRequiredFields = false
   ;
 
   ApnCredentials._() : super();
   factory ApnCredentials({
-    $core.String? authKey,
-    $core.String? keyId,
-    $core.String? apnTopic,
+    $core.List<$core.int>? certificateP12,
+    $core.String? topic,
     $core.String? teamId,
-    $core.bool? development,
   }) {
     final _result = create();
-    if (authKey != null) {
-      _result.authKey = authKey;
+    if (certificateP12 != null) {
+      _result.certificateP12 = certificateP12;
     }
-    if (keyId != null) {
-      _result.keyId = keyId;
-    }
-    if (apnTopic != null) {
-      _result.apnTopic = apnTopic;
+    if (topic != null) {
+      _result.topic = topic;
     }
     if (teamId != null) {
       _result.teamId = teamId;
-    }
-    if (development != null) {
-      _result.development = development;
     }
     return _result;
   }
@@ -259,69 +249,46 @@ class ApnCredentials extends $pb.GeneratedMessage {
   static ApnCredentials? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get authKey => $_getSZ(0);
+  $core.List<$core.int> get certificateP12 => $_getN(0);
   @$pb.TagNumber(1)
-  set authKey($core.String v) { $_setString(0, v); }
+  set certificateP12($core.List<$core.int> v) { $_setBytes(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasAuthKey() => $_has(0);
+  $core.bool hasCertificateP12() => $_has(0);
   @$pb.TagNumber(1)
-  void clearAuthKey() => clearField(1);
+  void clearCertificateP12() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get keyId => $_getSZ(1);
+  $core.String get topic => $_getSZ(1);
   @$pb.TagNumber(2)
-  set keyId($core.String v) { $_setString(1, v); }
+  set topic($core.String v) { $_setString(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasKeyId() => $_has(1);
+  $core.bool hasTopic() => $_has(1);
   @$pb.TagNumber(2)
-  void clearKeyId() => clearField(2);
+  void clearTopic() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.String get apnTopic => $_getSZ(2);
+  $core.String get teamId => $_getSZ(2);
   @$pb.TagNumber(3)
-  set apnTopic($core.String v) { $_setString(2, v); }
+  set teamId($core.String v) { $_setString(2, v); }
   @$pb.TagNumber(3)
-  $core.bool hasApnTopic() => $_has(2);
+  $core.bool hasTeamId() => $_has(2);
   @$pb.TagNumber(3)
-  void clearApnTopic() => clearField(3);
-
-  @$pb.TagNumber(4)
-  $core.String get teamId => $_getSZ(3);
-  @$pb.TagNumber(4)
-  set teamId($core.String v) { $_setString(3, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasTeamId() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearTeamId() => clearField(4);
-
-  @$pb.TagNumber(5)
-  $core.bool get development => $_getBF(4);
-  @$pb.TagNumber(5)
-  set development($core.bool v) { $_setBool(4, v); }
-  @$pb.TagNumber(5)
-  $core.bool hasDevelopment() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearDevelopment() => clearField(5);
+  void clearTeamId() => clearField(3);
 }
 
 class FirebaseCredentials extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'FirebaseCredentials', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.push_v1'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'serverKey')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'credentialsJson')
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'credentials')
     ..hasRequiredFields = false
   ;
 
   FirebaseCredentials._() : super();
   factory FirebaseCredentials({
-    $core.String? serverKey,
-    $core.String? credentialsJson,
+    $core.String? credentials,
   }) {
     final _result = create();
-    if (serverKey != null) {
-      _result.serverKey = serverKey;
-    }
-    if (credentialsJson != null) {
-      _result.credentialsJson = credentialsJson;
+    if (credentials != null) {
+      _result.credentials = credentials;
     }
     return _result;
   }
@@ -347,22 +314,13 @@ class FirebaseCredentials extends $pb.GeneratedMessage {
   static FirebaseCredentials? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get serverKey => $_getSZ(0);
+  $core.String get credentials => $_getSZ(0);
   @$pb.TagNumber(1)
-  set serverKey($core.String v) { $_setString(0, v); }
+  set credentials($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasServerKey() => $_has(0);
+  $core.bool hasCredentials() => $_has(0);
   @$pb.TagNumber(1)
-  void clearServerKey() => clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get credentialsJson => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set credentialsJson($core.String v) { $_setString(1, v); }
-  @$pb.TagNumber(2)
-  $core.bool hasCredentialsJson() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearCredentialsJson() => clearField(2);
+  void clearCredentials() => clearField(1);
 }
 
 class HuaweiCredentials extends $pb.GeneratedMessage {

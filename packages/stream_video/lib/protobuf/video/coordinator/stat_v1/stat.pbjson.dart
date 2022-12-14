@@ -15,11 +15,12 @@ const MediaType$json = const {
     const {'1': 'MEDIA_TYPE_UNSPECIFIED', '2': 0},
     const {'1': 'MEDIA_TYPE_AUDIO', '2': 1},
     const {'1': 'MEDIA_TYPE_VIDEO', '2': 2},
+    const {'1': 'MEDIA_TYPE_SCREEN_SHARE', '2': 3},
   ],
 };
 
 /// Descriptor for `MediaType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List mediaTypeDescriptor = $convert.base64Decode('CglNZWRpYVR5cGUSGgoWTUVESUFfVFlQRV9VTlNQRUNJRklFRBAAEhQKEE1FRElBX1RZUEVfQVVESU8QARIUChBNRURJQV9UWVBFX1ZJREVPEAI=');
+final $typed_data.Uint8List mediaTypeDescriptor = $convert.base64Decode('CglNZWRpYVR5cGUSGgoWTUVESUFfVFlQRV9VTlNQRUNJRklFRBAAEhQKEE1FRElBX1RZUEVfQVVESU8QARIUChBNRURJQV9UWVBFX1ZJREVPEAISGwoXTUVESUFfVFlQRV9TQ1JFRU5fU0hBUkUQAw==');
 @$core.Deprecated('Use mediaStateChangeDescriptor instead')
 const MediaStateChange$json = const {
   '1': 'MediaStateChange',

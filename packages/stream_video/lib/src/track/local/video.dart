@@ -1,21 +1,20 @@
-import 'package:stream_video/src/core/logger/logger.dart';
+import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
+    as sfu;
+import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/track/local/audio.dart';
 import 'package:stream_video/src/track/local/local.dart';
 import 'package:stream_video/src/track/options.dart';
 import 'package:stream_video/src/track/track.dart';
 
-import 'package:stream_video/src/types/other.dart';
-
 /// A video track from the local device. Use static methods in this class to create
 /// video tracks.
 class LocalVideoTrack extends LocalTrack with VideoTrack {
   LocalVideoTrack._({
-    required super.name,
-    required super.source,
+    required super.type,
     required super.mediaStream,
     required super.mediaStreamTrack,
     required this.currentOptions,
-  }) : super(kind: TrackType.video);
+  });
 
   @override
   covariant VideoCaptureOptions currentOptions;
@@ -28,8 +27,7 @@ class LocalVideoTrack extends LocalTrack with VideoTrack {
 
     final stream = await LocalTrack.createStream(options);
     return LocalVideoTrack._(
-      name: Track.cameraName,
-      source: TrackSource.camera,
+      type: sfu.TrackType.TRACK_TYPE_VIDEO,
       mediaStream: stream,
       mediaStreamTrack: stream.getVideoTracks().first,
       currentOptions: options,
@@ -47,8 +45,7 @@ class LocalVideoTrack extends LocalTrack with VideoTrack {
 
     final stream = await LocalTrack.createStream(options);
     return LocalVideoTrack._(
-      name: Track.screenShareName,
-      source: TrackSource.screenShareVideo,
+      type: sfu.TrackType.TRACK_TYPE_SCREEN_SHARE,
       mediaStream: stream,
       mediaStreamTrack: stream.getVideoTracks().first,
       currentOptions: options,
@@ -69,8 +66,7 @@ class LocalVideoTrack extends LocalTrack with VideoTrack {
 
     final tracks = <LocalTrack>[
       LocalVideoTrack._(
-        name: Track.screenShareName,
-        source: TrackSource.screenShareVideo,
+        type: sfu.TrackType.TRACK_TYPE_SCREEN_SHARE,
         mediaStream: stream,
         mediaStreamTrack: stream.getVideoTracks().first,
         currentOptions: options,
@@ -79,8 +75,7 @@ class LocalVideoTrack extends LocalTrack with VideoTrack {
 
     if (stream.getAudioTracks().isNotEmpty) {
       tracks.add(LocalAudioTrack(
-        name: Track.screenShareName,
-        source: TrackSource.screenShareAudio,
+        type: sfu.TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO,
         mediaStream: stream,
         mediaStreamTrack: stream.getAudioTracks().first,
         currentOptions: const AudioCaptureOptions(),
@@ -101,10 +96,7 @@ extension LocalVideoTrackX on LocalVideoTrack {
     }
 
     // restart with new options
-    await start(
-      restart: true,
-      options: options.copyWith(cameraPosition: position),
-    );
+    await restart(options: options.copyWith(cameraPosition: position));
   }
 
   Future<void> switchCamera(String deviceId) async {
@@ -115,9 +107,6 @@ extension LocalVideoTrackX on LocalVideoTrack {
     }
 
     // restart with new options
-    await start(
-      restart: true,
-      options: options.copyWith(deviceId: deviceId),
-    );
+    await restart(options: options.copyWith(deviceId: deviceId));
   }
 }
