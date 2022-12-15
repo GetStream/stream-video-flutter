@@ -18,6 +18,8 @@ dependencies:
   google_fonts: ^3.0.1
   stream_video:
     path: ../packages/stream_video
+  stream_video_flutter:
+    path: ../packages/stream_video_flutter
 
 dev_dependencies:
   flutter_test:
