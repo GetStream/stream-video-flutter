@@ -90,6 +90,18 @@ class StreamTextTheme {
     ),
   });
 
+  /// Raw theme initialization
+  const StreamTextTheme.raw({
+    required this.title,
+    required this.headlineBold,
+    required this.headline,
+    required this.bodyBold,
+    required this.body,
+    required this.footnoteBold,
+    required this.footnote,
+    required this.captionBold,
+  });
+
   /// Text theme for title
   final TextStyle title;
 
@@ -116,7 +128,6 @@ class StreamTextTheme {
 
   /// Copy with theme
   StreamTextTheme copyWith({
-    Brightness brightness = Brightness.light,
     TextStyle? body,
     TextStyle? title,
     TextStyle? headlineBold,
@@ -126,27 +137,16 @@ class StreamTextTheme {
     TextStyle? footnote,
     TextStyle? captionBold,
   }) =>
-      brightness == Brightness.light
-          ? StreamTextTheme.light(
-              body: body ?? this.body,
-              title: title ?? this.title,
-              headlineBold: headlineBold ?? this.headlineBold,
-              headline: headline ?? this.headline,
-              bodyBold: bodyBold ?? this.bodyBold,
-              footnoteBold: footnoteBold ?? this.footnoteBold,
-              footnote: footnote ?? this.footnote,
-              captionBold: captionBold ?? this.captionBold,
-            )
-          : StreamTextTheme.dark(
-              body: body ?? this.body,
-              title: title ?? this.title,
-              headlineBold: headlineBold ?? this.headlineBold,
-              headline: headline ?? this.headline,
-              bodyBold: bodyBold ?? this.bodyBold,
-              footnoteBold: footnoteBold ?? this.footnoteBold,
-              footnote: footnote ?? this.footnote,
-              captionBold: captionBold ?? this.captionBold,
-            );
+      StreamTextTheme.raw(
+        body: body ?? this.body,
+        title: title ?? this.title,
+        headlineBold: headlineBold ?? this.headlineBold,
+        headline: headline ?? this.headline,
+        bodyBold: bodyBold ?? this.bodyBold,
+        footnoteBold: footnoteBold ?? this.footnoteBold,
+        footnote: footnote ?? this.footnote,
+        captionBold: captionBold ?? this.captionBold,
+      );
 
   /// Merge text theme
   StreamTextTheme merge(StreamTextTheme? other) {
