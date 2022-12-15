@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 /// {@endtemplate}
 class StreamTextTheme {
   /// Initialise light text theme
-  StreamTextTheme.light({
+  const StreamTextTheme.light({
     this.title = const TextStyle(
       fontSize: 22,
       fontWeight: FontWeight.bold,
@@ -48,7 +48,7 @@ class StreamTextTheme {
   });
 
   /// Initialise with dark theme
-  StreamTextTheme.dark({
+  const StreamTextTheme.dark({
     this.title = const TextStyle(
       fontSize: 22,
       fontWeight: FontWeight.bold,

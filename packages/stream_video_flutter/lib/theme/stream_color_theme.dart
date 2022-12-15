@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 /// {@endtemplate}
 class StreamColorTheme {
   /// Initialise with light theme
-  StreamColorTheme.light({
+  const StreamColorTheme.light({
     this.textHighEmphasis = const Color(0xff000000),
     this.textLowEmphasis = const Color(0xff7a7a7a),
     this.disabled = const Color(0xffdbdbdb),
@@ -59,7 +59,7 @@ class StreamColorTheme {
   }) : brightness = Brightness.light;
 
   /// Initialise with dark theme
-  StreamColorTheme.dark({
+  const StreamColorTheme.dark({
     this.textHighEmphasis = const Color(0xffffffff),
     this.textLowEmphasis = const Color(0xff7a7a7a),
     this.disabled = const Color(0xff2d2f2f),
