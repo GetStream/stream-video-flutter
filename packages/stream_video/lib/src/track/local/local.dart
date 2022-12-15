@@ -88,7 +88,6 @@ abstract class LocalTrack extends Track {
   Future<bool> stop() async {
     final didStop = await super.stop();
     if (didStop) {
-      // sender?.setTrack(null);
       logger.fine('Stopping mediaStreamTrack...');
       try {
         await mediaStreamTrack.stop();
@@ -96,7 +95,7 @@ abstract class LocalTrack extends Track {
         logger.severe('MediaStreamTrack.stop() did throw $error');
       }
       try {
-        // await mediaStream.dispose();
+        await mediaStream.dispose();
       } catch (error) {
         logger.severe('MediaStreamTrack.dispose() did throw $error');
       }

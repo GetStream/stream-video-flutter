@@ -1,10 +1,10 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
     as sfu;
-import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/events.dart';
 import 'package:stream_video/src/exceptions.dart';
 import 'package:stream_video/src/extensions.dart';
+import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/participant/participant.dart';
 import 'package:stream_video/src/participant/participant_info.dart';
 import 'package:stream_video/src/publication/remote.dart';
@@ -158,7 +158,11 @@ class RemoteParticipant extends Participant<RemoteTrackPublication> {
     for (final trackInfo in tracks) {
       final pub = getTrackPublication(trackInfo.sid);
       if (pub != null) {
-        pub.info = pub.info.merge(trackInfo);
+        pub
+          // updating the track info
+          ..info = pub.info.merge(trackInfo)
+          // unmute track in case it was muted
+          ..track?.updateMuted(muted: false);
         continue;
       }
 
@@ -201,16 +205,16 @@ class RemoteParticipant extends Participant<RemoteTrackPublication> {
       }
     }
 
-    // remove any published track that is not in the info
+    // mute any published track that is not in the info
     final validSids = tracks.map((it) => it.sid);
     final removeSids = {
       ...trackPublications.keys.where((e) => !validSids.contains(e)),
     };
 
-    await Future.wait([
-      for (final sid in removeSids) //
-        unpublishTrack(sid),
-    ]);
+    for (final sid in removeSids) {
+      final pub = trackPublications[sid];
+      pub?.track?.updateMuted(muted: true);
+    }
   }
 
   @override
