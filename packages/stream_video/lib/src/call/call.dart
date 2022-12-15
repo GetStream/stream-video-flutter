@@ -39,16 +39,16 @@ class Call with EventEmittable<CallEvent> {
   /// Creates a new [Call] instance from a [CallConfiguration].
   Call({
     required this.callConfiguration,
-    StreamVideoClient? client,
+    StreamVideo? client,
   })  : callOptions = callConfiguration.callOptions,
-        _streamVideoClient = client ?? StreamVideoClient.instance;
+        _streamVideoClient = client ?? StreamVideo.instance;
 
   /// Creates a new [Call] instance if the call already created.
   Call.fromDetails({
     required this.callId,
     required this.callType,
     required this.credentials,
-    required StreamVideoClient client,
+    required StreamVideo client,
     this.callOptions = const CallOptions(),
   }) : _streamVideoClient = client {
     _initialiseCall(credentials: credentials);
@@ -70,7 +70,7 @@ class Call with EventEmittable<CallEvent> {
   }
 
   late final CallConfiguration callConfiguration;
-  late final StreamVideoClient _streamVideoClient;
+  late final StreamVideo _streamVideoClient;
 
   late final String callId;
   late final String callType;

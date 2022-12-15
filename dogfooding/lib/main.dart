@@ -7,7 +7,7 @@ import 'package:stream_video/stream_video.dart';
 import 'firebase_options.dart';
 
 // TODO: Use DI to scope the client
-final streamVideoClient = StreamVideoClient(
+final streamVideoClient = StreamVideo(
   'us83cfwuhy8n', // see <video>/data/fixtures/apps.yaml for API secret
   coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
       'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',

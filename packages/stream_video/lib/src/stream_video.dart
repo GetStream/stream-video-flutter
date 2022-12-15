@@ -42,15 +42,16 @@ const _defaultCoordinatorRpcUrl =
 const _defaultCoordinatorWsUrl =
     'wss://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
 
-class StreamVideoClient with EventEmittable<CoordinatorEvent> {
+/// The client responsible for handling config and maintaining calls
+class StreamVideo with EventEmittable<CoordinatorEvent> {
   /// Initialises the Stream Video SDK and creates the singleton instance of the client.
-  StreamVideoClient.init(
+  StreamVideo.init(
     this.apiKey, {
     this.coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     this.coordinatorWsUrl = _defaultCoordinatorWsUrl,
     this.latencyMeasurementRounds = 3,
     Level logLevel = Level.ALL,
-    LogHandlerFunction logHandlerFunction = StreamVideoClient.defaultLogHandler,
+    LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
   }) {
     if (_instance != null) {
       throw Exception('''
@@ -59,7 +60,7 @@ class StreamVideoClient with EventEmittable<CoordinatorEvent> {
         If you want to use multiple instances of the SDK, use StreamVideo.new() instead.
         ''');
     }
-    _instance = StreamVideoClient._(
+    _instance = StreamVideo._(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
@@ -71,15 +72,15 @@ class StreamVideoClient with EventEmittable<CoordinatorEvent> {
 
   /// Creates a new Stream Video client unassociated with the
   /// Stream Video singleton instance
-  factory StreamVideoClient.new(
+  factory StreamVideo.new(
     String apiKey, {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
     Level logLevel = Level.ALL,
-    LogHandlerFunction logHandlerFunction = StreamVideoClient.defaultLogHandler,
+    LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
   }) {
-    return StreamVideoClient._(
+    return StreamVideo._(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
@@ -89,7 +90,7 @@ class StreamVideoClient with EventEmittable<CoordinatorEvent> {
     );
   }
 
-  StreamVideoClient._(
+  StreamVideo._(
     this.apiKey, {
     required this.coordinatorRpcUrl,
     required this.coordinatorWsUrl,
@@ -108,10 +109,10 @@ class StreamVideoClient with EventEmittable<CoordinatorEvent> {
     );
   }
 
-  static StreamVideoClient? _instance;
+  static StreamVideo? _instance;
 
   /// The singleton instance of the Stream Video client.
-  static StreamVideoClient get instance {
+  static StreamVideo get instance {
     final instance = _instance;
     if (instance == null) {
       throw Exception(
