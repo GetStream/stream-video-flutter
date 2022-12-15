@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -34,6 +35,9 @@ class StreamDogFoodingApp extends StatelessWidget {
       title: 'Stream Dog Fooding',
       theme: ThemeData(
         textTheme: GoogleFonts.robotoMonoTextTheme(),
+        extensions: <ThemeExtension<dynamic>>[
+          StreamVideoTheme.light(),
+        ],
       ),
       onGenerateRoute: Routes.generateRoute,
     );
