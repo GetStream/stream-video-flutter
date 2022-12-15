@@ -8,14 +8,15 @@ import 'themes.dart';
 class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Creates a theme from scratch
   factory StreamVideoTheme({
-    Brightness? brightness,
+    required Brightness? brightness,
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
   }) {
-    brightness ??= colorTheme?.brightness ?? Brightness.light;
     final isDark = brightness == Brightness.dark;
-    textTheme ??= isDark ? StreamTextTheme.dark() : StreamTextTheme.light();
-    colorTheme ??= isDark ? StreamColorTheme.dark() : StreamColorTheme.light();
+    textTheme ??=
+        isDark ? const StreamTextTheme.dark() : const StreamTextTheme.light();
+    colorTheme ??=
+        isDark ? const StreamColorTheme.dark() : const StreamColorTheme.light();
 
     final defaultData = StreamVideoTheme.fromColorAndTextTheme(
       colorTheme,

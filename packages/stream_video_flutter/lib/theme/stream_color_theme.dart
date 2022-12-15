@@ -56,7 +56,7 @@ class StreamColorTheme {
       alpha: 1,
       blur: 8,
     ),
-  }) : brightness = Brightness.light;
+  });
 
   /// Initialise with dark theme
   const StreamColorTheme.dark({
@@ -110,7 +110,30 @@ class StreamColorTheme {
       ],
       stops: [0, 1],
     ),
-  }) : brightness = Brightness.dark;
+  });
+
+  /// Raw theme initialization
+  const StreamColorTheme.raw({
+    required this.textHighEmphasis,
+    required this.textLowEmphasis,
+    required this.disabled,
+    required this.borders,
+    required this.inputBg,
+    required this.appBg,
+    required this.barsBg,
+    required this.linkBg,
+    required this.accentPrimary,
+    required this.accentError,
+    required this.accentInfo,
+    required this.borderTop,
+    required this.borderBottom,
+    required this.shadowIconButton,
+    required this.modalShadow,
+    required this.highlight,
+    required this.overlay,
+    required this.overlayDark,
+    required this.bgGradient,
+  });
 
   ///
   final Color textHighEmphasis;
@@ -169,12 +192,8 @@ class StreamColorTheme {
   ///
   final Gradient bgGradient;
 
-  ///
-  final Brightness brightness;
-
   /// Copy with theme
   StreamColorTheme copyWith({
-    Brightness brightness = Brightness.light,
     Color? textHighEmphasis,
     Color? textLowEmphasis,
     Color? disabled,
@@ -195,49 +214,27 @@ class StreamColorTheme {
     Color? overlayDark,
     Gradient? bgGradient,
   }) {
-    return brightness == Brightness.light
-        ? StreamColorTheme.light(
-            textHighEmphasis: textHighEmphasis ?? this.textHighEmphasis,
-            textLowEmphasis: textLowEmphasis ?? this.textLowEmphasis,
-            disabled: disabled ?? this.disabled,
-            borders: borders ?? this.borders,
-            inputBg: inputBg ?? this.inputBg,
-            appBg: appBg ?? this.appBg,
-            barsBg: barsBg ?? this.barsBg,
-            linkBg: linkBg ?? this.linkBg,
-            accentPrimary: accentPrimary ?? this.accentPrimary,
-            accentError: accentError ?? this.accentError,
-            accentInfo: accentInfo ?? this.accentInfo,
-            borderTop: borderTop ?? this.borderTop,
-            borderBottom: borderBottom ?? this.borderBottom,
-            shadowIconButton: shadowIconButton ?? this.shadowIconButton,
-            modalShadow: modalShadow ?? this.modalShadow,
-            highlight: highlight ?? this.highlight,
-            overlay: overlay ?? this.overlay,
-            overlayDark: overlayDark ?? this.overlayDark,
-            bgGradient: bgGradient ?? this.bgGradient,
-          )
-        : StreamColorTheme.dark(
-            textHighEmphasis: textHighEmphasis ?? this.textHighEmphasis,
-            textLowEmphasis: textLowEmphasis ?? this.textLowEmphasis,
-            disabled: disabled ?? this.disabled,
-            borders: borders ?? this.borders,
-            inputBg: inputBg ?? this.inputBg,
-            appBg: appBg ?? this.appBg,
-            barsBg: barsBg ?? this.barsBg,
-            linkBg: linkBg ?? this.linkBg,
-            accentPrimary: accentPrimary ?? this.accentPrimary,
-            accentError: accentError ?? this.accentError,
-            accentInfo: accentInfo ?? this.accentInfo,
-            borderTop: borderTop ?? this.borderTop,
-            borderBottom: borderBottom ?? this.borderBottom,
-            shadowIconButton: shadowIconButton ?? this.shadowIconButton,
-            modalShadow: modalShadow ?? this.modalShadow,
-            highlight: highlight ?? this.highlight,
-            overlay: overlay ?? this.overlay,
-            overlayDark: overlayDark ?? this.overlayDark,
-            bgGradient: bgGradient ?? this.bgGradient,
-          );
+    return StreamColorTheme.raw(
+      textHighEmphasis: textHighEmphasis ?? this.textHighEmphasis,
+      textLowEmphasis: textLowEmphasis ?? this.textLowEmphasis,
+      disabled: disabled ?? this.disabled,
+      borders: borders ?? this.borders,
+      inputBg: inputBg ?? this.inputBg,
+      appBg: appBg ?? this.appBg,
+      barsBg: barsBg ?? this.barsBg,
+      linkBg: linkBg ?? this.linkBg,
+      accentPrimary: accentPrimary ?? this.accentPrimary,
+      accentError: accentError ?? this.accentError,
+      accentInfo: accentInfo ?? this.accentInfo,
+      borderTop: borderTop ?? this.borderTop,
+      borderBottom: borderBottom ?? this.borderBottom,
+      shadowIconButton: shadowIconButton ?? this.shadowIconButton,
+      modalShadow: modalShadow ?? this.modalShadow,
+      highlight: highlight ?? this.highlight,
+      overlay: overlay ?? this.overlay,
+      overlayDark: overlayDark ?? this.overlayDark,
+      bgGradient: bgGradient ?? this.bgGradient,
+    );
   }
 
   /// Merge color theme
