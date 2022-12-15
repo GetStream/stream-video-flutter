@@ -162,4 +162,9 @@ class StreamTextTheme {
       captionBold: captionBold.merge(other.captionBold),
     );
   }
+
+  StreamTextTheme lerp(StreamTextTheme other, double t) {
+    if (t == 0.0) return this;
+    return other;
+  }
 }

@@ -5,9 +5,9 @@ import 'themes.dart';
 /// {@template streamVideoThemeData}
 /// Theme data for Stream Video
 /// {@endtemplate}
-class StreamVideoThemeData {
+class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Creates a theme from scratch
-  factory StreamVideoThemeData({
+  factory StreamVideoTheme({
     Brightness? brightness,
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
@@ -17,7 +17,7 @@ class StreamVideoThemeData {
     textTheme ??= isDark ? StreamTextTheme.dark() : StreamTextTheme.light();
     colorTheme ??= isDark ? StreamColorTheme.dark() : StreamColorTheme.light();
 
-    final defaultData = StreamVideoThemeData.fromColorAndTextTheme(
+    final defaultData = StreamVideoTheme.fromColorAndTextTheme(
       colorTheme,
       textTheme,
     );
@@ -28,23 +28,23 @@ class StreamVideoThemeData {
   }
 
   /// Theme initialized with light
-  factory StreamVideoThemeData.light() =>
-      StreamVideoThemeData(brightness: Brightness.light);
+  factory StreamVideoTheme.light() =>
+      StreamVideoTheme(brightness: Brightness.light);
 
   /// Theme initialized with dark
-  factory StreamVideoThemeData.dark() =>
-      StreamVideoThemeData(brightness: Brightness.dark);
+  factory StreamVideoTheme.dark() =>
+      StreamVideoTheme(brightness: Brightness.dark);
 
   /// Raw theme initialization
-  const StreamVideoThemeData.raw({
+  const StreamVideoTheme.raw({
     required this.textTheme,
     required this.colorTheme,
   });
 
   /// Creates a theme from a Material [Theme]
-  factory StreamVideoThemeData.fromTheme(ThemeData theme) {
-    final defaultTheme = StreamVideoThemeData(brightness: theme.brightness);
-    final customizedTheme = StreamVideoThemeData.fromColorAndTextTheme(
+  factory StreamVideoTheme.fromTheme(ThemeData theme) {
+    final defaultTheme = StreamVideoTheme(brightness: theme.brightness);
+    final customizedTheme = StreamVideoTheme.fromColorAndTextTheme(
       defaultTheme.colorTheme.copyWith(
         accentPrimary: theme.colorScheme.secondary,
       ),
@@ -54,11 +54,11 @@ class StreamVideoThemeData {
   }
 
   /// Creates a theme from a [StreamColorTheme] and a [StreamTextTheme]
-  factory StreamVideoThemeData.fromColorAndTextTheme(
+  factory StreamVideoTheme.fromColorAndTextTheme(
     StreamColorTheme colorTheme,
     StreamTextTheme textTheme,
   ) {
-    return StreamVideoThemeData.raw(
+    return StreamVideoTheme.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
     );
@@ -70,23 +70,36 @@ class StreamVideoThemeData {
   /// The color themes used in the widgets
   final StreamColorTheme colorTheme;
 
-  /// Creates a copy of [StreamVideoThemeData] with specified attributes
+  /// Creates a copy of [StreamVideoTheme] with specified attributes
   /// overridden.
-  StreamVideoThemeData copyWith({
+  @override
+  StreamVideoTheme copyWith({
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
   }) =>
-      StreamVideoThemeData.raw(
+      StreamVideoTheme.raw(
         textTheme: this.textTheme.merge(textTheme),
         colorTheme: this.colorTheme.merge(colorTheme),
       );
 
   /// Merge themes
-  StreamVideoThemeData merge(StreamVideoThemeData? other) {
+  StreamVideoTheme merge(StreamVideoTheme? other) {
     if (other == null) return this;
     return copyWith(
       textTheme: textTheme.merge(other.textTheme),
       colorTheme: colorTheme.merge(other.colorTheme),
+    );
+  }
+
+  @override
+  ThemeExtension<StreamVideoTheme> lerp(
+      ThemeExtension<StreamVideoTheme>? other, double t) {
+    if (other is! StreamVideoTheme) {
+      return this;
+    }
+    return StreamVideoTheme.raw(
+      textTheme: textTheme.lerp(other.textTheme, t),
+      colorTheme: colorTheme.lerp(other.colorTheme, t),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 /// {@template color_theme}
@@ -263,6 +265,31 @@ class StreamColorTheme {
       modalShadow: other.modalShadow,
     );
   }
+
+  StreamColorTheme lerp(StreamColorTheme? other, double t) {
+    if (other == null) return this;
+    return copyWith(
+      textHighEmphasis: Color.lerp(textHighEmphasis, other.textHighEmphasis, t),
+      textLowEmphasis: Color.lerp(textHighEmphasis, other.textHighEmphasis, t),
+      disabled: Color.lerp(textHighEmphasis, other.textHighEmphasis, t),
+      borders: Color.lerp(textHighEmphasis, other.textHighEmphasis, t),
+      inputBg: Color.lerp(textHighEmphasis, other.textHighEmphasis, t),
+      appBg: Color.lerp(textHighEmphasis, other.textHighEmphasis, t),
+      barsBg: Color.lerp(textHighEmphasis, other.textHighEmphasis, t),
+      linkBg: Color.lerp(textHighEmphasis, other.textHighEmphasis, t),
+      accentPrimary: Color.lerp(textHighEmphasis, other.textHighEmphasis, t),
+      accentError: Color.lerp(textHighEmphasis, other.textHighEmphasis, t),
+      accentInfo: Color.lerp(textHighEmphasis, other.textHighEmphasis, t),
+      highlight: Color.lerp(textHighEmphasis, other.textHighEmphasis, t),
+      overlay: Color.lerp(textHighEmphasis, other.textHighEmphasis, t),
+      overlayDark: Color.lerp(textHighEmphasis, other.textHighEmphasis, t),
+      bgGradient: Gradient.lerp(bgGradient, other.bgGradient, t),
+      borderTop: borderTop.lerp(other.borderTop, t),
+      borderBottom: borderBottom.lerp(other.borderBottom, t),
+      shadowIconButton: shadowIconButton.lerp(other.shadowIconButton, t),
+      modalShadow: modalShadow.lerp(other.modalShadow, t),
+    );
+  }
 }
 
 /// Effect store
@@ -305,6 +332,17 @@ class Effect {
       color: color ?? this.color,
       alpha: color as double? ?? this.alpha,
       blur: blur ?? this.blur,
+    );
+  }
+
+  Effect lerp(Effect other, double t) {
+    return Effect(
+      sigmaX: lerpDouble(sigmaX, other.sigmaX, t),
+      sigmaY: lerpDouble(sigmaY, other.sigmaY, t),
+      color: Color.lerp(color, other.color, t),
+      alpha: lerpDouble(
+          color as double? ?? alpha, other.color as double? ?? other.alpha, t),
+      blur: lerpDouble(blur, other.blur, t),
     );
   }
 }
