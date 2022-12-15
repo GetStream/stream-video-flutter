@@ -56,6 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final token = json.decode(response.body)['token'];
 
+    var streamVideoClient = StreamVideo.instance;
     await streamVideoClient.connectUser(
       user,
       token: Token(token),

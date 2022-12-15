@@ -67,7 +67,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '248009810755',
     projectId: 'dogfooding-d769a',
     storageBucket: 'dogfooding-d769a.appspot.com',
-    iosClientId: '248009810755-7cdrjg8rl5rppt69ftcpds4200nvvekg.apps.googleusercontent.com',
+    iosClientId:
+        '248009810755-7cdrjg8rl5rppt69ftcpds4200nvvekg.apps.googleusercontent.com',
     iosBundleId: 'io.getstream.video.flutter.dogfooding.dogfooding',
   );
 
@@ -77,7 +78,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '248009810755',
     projectId: 'dogfooding-d769a',
     storageBucket: 'dogfooding-d769a.appspot.com',
-    iosClientId: '248009810755-7cdrjg8rl5rppt69ftcpds4200nvvekg.apps.googleusercontent.com',
+    iosClientId:
+        '248009810755-7cdrjg8rl5rppt69ftcpds4200nvvekg.apps.googleusercontent.com',
     iosBundleId: 'io.getstream.video.flutter.dogfooding.dogfooding',
   );
 }

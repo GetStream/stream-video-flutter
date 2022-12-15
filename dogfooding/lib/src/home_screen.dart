@@ -18,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  var streamVideoClient = StreamVideo.instance;
   late final currentUser = streamVideoClient.currentUser!;
 
   final _callIdController = TextEditingController();
@@ -42,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
         CallScreen.routeName,
         arguments: call,
       );
-    } catch (e ,stk) {
+    } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());
     } finally {
