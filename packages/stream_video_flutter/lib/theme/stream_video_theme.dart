@@ -8,7 +8,7 @@ import 'themes.dart';
 class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Creates a theme from scratch
   factory StreamVideoTheme({
-    required Brightness? brightness,
+    required Brightness brightness,
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
   }) {
