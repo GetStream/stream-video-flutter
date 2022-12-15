@@ -18,14 +18,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     colorTheme ??=
         isDark ? const StreamColorTheme.dark() : const StreamColorTheme.light();
 
-    final defaultData = StreamVideoTheme.fromColorAndTextTheme(
-      colorTheme,
-      textTheme,
+    return StreamVideoTheme.raw(
+      textTheme: textTheme,
+      colorTheme: colorTheme,
     );
-
-    final customizedData = defaultData.copyWith();
-
-    return defaultData.merge(customizedData);
   }
 
   /// Theme initialized with light
