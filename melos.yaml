@@ -5,6 +5,7 @@ versioning:
   mode: independent
 
 packages:
+  - dogfooding
   - packages/**
   - dogfooding
 

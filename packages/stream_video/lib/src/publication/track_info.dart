@@ -30,7 +30,8 @@ class TrackInfo {
   }
 
   /// Returns a copy of this [TrackInfo] after merging the given [TrackInfo].
-  TrackInfo merge(TrackInfo other) {
+  TrackInfo merge(TrackInfo? other) {
+    if (other == null) return this;
     return copyWith(
       id: other.id,
       type: other.type,
