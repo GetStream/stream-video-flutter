@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/ui/widgets/common/control_toggle_button.dart';
+import 'package:stream_video_flutter/ui/widgets/common/control_buttons.dart';
+
+const borderRadiusTop = 20.0;
 
 class CallControlsView extends StatefulWidget {
   const CallControlsView(
@@ -111,40 +113,70 @@ class _CallControlsViewState extends State<CallControlsView> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.symmetric(
         vertical: 15,
         horizontal: 15,
       ),
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(borderRadiusTop),
+          topRight: Radius.circular(borderRadiusTop),
+        ),
+      ),
       child: Wrap(
         alignment: WrapAlignment.spaceEvenly,
         children: [
-          ControlToggleButton(
-            Icons.mic_none_rounded,
-            Icons.mic_off_rounded,
-            participant,
-          ),
-          controlButton(),
-          controlButton(),
-          controlButton(),
-          controlButton(),
+          toggleSoundButton(),
+          toggleVideoButton(),
+          toggleMicButton(),
+          switchCameraButton(),
+          hangUpButton(),
         ],
       ),
     );
   }
 
-  Widget controlButton() {
-    return IconButton(
-      icon: const Icon(Icons.close_rounded),
-      onPressed: () => {},
+  Widget toggleSoundButton() {
+    return ControlToggleButton(
+      Icons.volume_up,
+      Icons.volume_off,
+      participant.isMicrophoneEnabled,
+      participant.isMuted,
     );
   }
 
-  Widget muteButton() {
+  Widget toggleVideoButton() {
     return ControlToggleButton(
-      Icons.mic_none_rounded,
-      Icons.mic_off_rounded,
-      participant,
+      Icons.video_camera_front,
+      Icons.video_camera_front_outlined, //Find a icon from video cancellation
+      participant.isMicrophoneEnabled,
+      participant.isMuted,
+    );
+  }
+
+  Widget toggleMicButton() {
+    return ControlToggleButton(
+      Icons.mic,
+      Icons.mic_off,
+      participant.isMicrophoneEnabled,
+      participant.isMuted,
+    );
+  }
+
+  Widget switchCameraButton() {
+    return const ControlButton(
+      Icons.flip_camera_ios,
+      backgroundColor: Colors.white,
+      iconColor: Colors.black,
+    );
+  }
+
+  Widget hangUpButton() {
+    return const ControlButton(
+      Icons.phone,
+      backgroundColor: Colors.red,
+      iconColor: Colors.white,
     );
   }
 }

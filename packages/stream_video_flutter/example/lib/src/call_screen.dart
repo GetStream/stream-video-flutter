@@ -4,6 +4,7 @@ import 'package:example/src/widgets/participant_info.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/ui/widgets/call_controlls_view.dart';
 
 class CallScreen extends StatefulWidget {
   const CallScreen({Key? key, required this.call}) : super(key: key);
@@ -145,7 +146,7 @@ class _CallScreenState extends State<CallScreen> {
             child: Material(
               elevation: 4,
               // color: ,
-              child: ControlsWidget(
+              child: CallControlsView(
                 widget.call,
                 widget.call.localParticipant!,
               ),
