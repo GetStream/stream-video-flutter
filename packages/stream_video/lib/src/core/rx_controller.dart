@@ -21,6 +21,8 @@ class RxController<T> {
 
   final BehaviorSubject<T> _controller;
 
+  Stream<T> take(int n) => stream.transform(TakeLastStreamTransformer(n));
+
   Stream<T> get stream => _controller.stream;
 
   T? get valueOrNull => _controller.valueOrNull;

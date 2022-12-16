@@ -1,0 +1,68 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "dogfooding",
+            "cwd": "dogfooding",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "dogfooding (profile mode)",
+            "cwd": "dogfooding",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "dogfooding (release mode)",
+            "cwd": "dogfooding",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "stream_video",
+            "cwd": "packages/stream_video",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "stream_video (profile mode)",
+            "cwd": "packages/stream_video",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "stream_video (release mode)",
+            "cwd": "packages/stream_video",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "stream_video_flutter",
+            "cwd": "packages/stream_video_flutter",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "stream_video_flutter (profile mode)",
+            "cwd": "packages/stream_video_flutter",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "stream_video_flutter (release mode)",
+            "cwd": "packages/stream_video_flutter",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

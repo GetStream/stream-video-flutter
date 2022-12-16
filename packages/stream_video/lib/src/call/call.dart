@@ -22,6 +22,7 @@ import 'package:stream_video/src/extensions.dart';
 import 'package:stream_video/src/internal/events.dart';
 import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/models/call_configuration.dart';
+import 'package:stream_video/src/models/closed_caption.dart';
 import 'package:stream_video/src/options.dart';
 import 'package:stream_video/src/participant/local.dart';
 import 'package:stream_video/src/participant/participant.dart';
@@ -522,6 +523,7 @@ class Call with EventEmittable<CallEvent> {
     final config = rtcConfigurationFromICEServers(credentials.iceServers);
     return config ?? defaultRtcConfiguration(credentials.server.url);
   }
+
 
   void _startListeningSfuEvents() {
     sfuClient.events

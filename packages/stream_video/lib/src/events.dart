@@ -1,3 +1,4 @@
+import 'package:stream_video/src/models/closed_caption.dart';
 import 'package:stream_video/src/participant/local.dart';
 import 'package:stream_video/src/participant/participant.dart';
 import 'package:stream_video/src/participant/remote.dart';
@@ -57,6 +58,17 @@ class ParticipantJoinedEvent with CallEvent {
 
   @override
   String toString() => '${runtimeType}(participant: ${participant})';
+}
+
+class ClosedCaptionEvent with CallEvent {
+  final ClosedCaption closedCaption;
+
+  const ClosedCaptionEvent({
+    required this.closedCaption,
+  });
+
+  @override
+  String toString() => '${runtimeType}(closedCaption: ${closedCaption})';
 }
 
 /// When a [RemoteParticipant] leaves the call.

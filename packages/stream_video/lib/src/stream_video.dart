@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
@@ -11,8 +12,10 @@ import 'package:stream_video/src/core/rx_controller.dart';
 import 'package:stream_video/src/core/video_error.dart';
 import 'package:stream_video/src/event_emitter.dart';
 import 'package:stream_video/src/events.dart';
+import 'package:stream_video/src/internal/events.dart';
 import 'package:stream_video/src/latency_service/latency.dart';
 import 'package:stream_video/src/logger/logger.dart';
+import 'package:stream_video/src/models/closed_caption.dart';
 import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/options.dart';
 import 'package:stream_video/src/token/token.dart';
@@ -196,6 +199,21 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
       logger.severe('error connecting user : ${user.id}', e, stk);
       rethrow;
     }
+  }
+
+  // TODO: start listening when calling rpc startClosedCaption
+  void _startListeningToClosedCaptionEvents() {
+    _ws!.events.on<CoordinatorCallCustomEvent>((callCustom) {
+      final type = callCustom.callCustom.type;
+      if (type == 'closed_caption') {
+        final closedCaptionJson =
+            json.decode(utf8.decode(callCustom.callCustom.dataJson));
+        final closedCaption = ClosedCaption.fromJson(closedCaptionJson);
+        _state.activeCall.value!.events
+            .emit(ClosedCaptionEvent(closedCaption: closedCaption));
+        // events.emit(ClosedCaptionEvent(closedCaption: closedCaption));
+      }
+    });
   }
 
   /// Disconnects the [user] from the Stream Video service.
@@ -435,6 +453,7 @@ class _StreamVideoState {
   final currentUser = UserInfoController();
   final activeCall = ActiveCallController();
   final pendingCalls = PendingCallsController();
+  final closedCaptions = ClosedCaptionsController();
 
   Future<void> dispose() async {
     await currentUser.dispose();
@@ -446,6 +465,18 @@ class _StreamVideoState {
 typedef UserInfoController = RxController<UserInfo>;
 
 typedef ActiveCallController = RxController<Call?>;
+
+//TODO: group captions by users
+class ClosedCaptionsController extends RxController<List<ClosedCaptionEvent>> {
+  ClosedCaptionsController() : super(seedValue: const []);
+
+  Stream<List<ClosedCaptionEvent>> recentCaptions(int n) => take(n);
+
+  void add(ClosedCaptionEvent event) {
+    final closedCaptions = [...value];
+    value = [...closedCaptions, event];
+  }
+}
 
 class PendingCallsController extends RxController<List<Call>> {
   PendingCallsController() : super(seedValue: const []);
