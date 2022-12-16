@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
-
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/avatar/stream_user_avatar.dart';
 
 class NoVideoWidget extends StatelessWidget {
   const NoVideoWidget({
@@ -13,16 +12,25 @@ class NoVideoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String name = participant.userId;
+    var userId = participant.userId;
+
     return Center(
-      child: LayoutBuilder(
-        builder: (context, constraints) => CircleAvatar(
-          radius: math.min(constraints.maxHeight, constraints.maxWidth) * 0.15,
-          child: Text(
-            name[0].toUpperCase(),
-            style: Theme.of(context).textTheme.headline6,
-          ),
+      child: StreamUserAvatar(
+        user: UserInfo(
+          id: userId,
+          role: "admin",
+          name: userId,
         ),
+        initialsTextStyle: const TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+        constraints: const BoxConstraints.tightFor(
+          height: 96,
+          width: 96,
+        ),
+        borderRadius: BorderRadius.circular(48),
       ),
     );
   }
