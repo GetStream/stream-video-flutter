@@ -6,6 +6,7 @@ versioning:
 
 packages:
   - packages/**
+  - dogfooding
 
 scripts:
   postclean:
