@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/ui/widgets/common/control_toggle_button.dart';
 
 class CallControlsView extends StatefulWidget {
   const CallControlsView(
@@ -32,14 +33,12 @@ class _CallControlsViewState extends State<CallControlsView> {
 
   LocalParticipant get participant => widget.participant;
 
-  bool get isMuted => participant.isMuted;
-
   @override
   void initState() {
     super.initState();
-    _deviceChangeSubscription =
-        Hardware.instance.onDeviceChange.stream.listen(_loadDevices);
-    Hardware.instance.enumerateDevices().then(_loadDevices);
+    // _deviceChangeSubscription =
+    //     Hardware.instance.onDeviceChange.stream.listen(_loadDevices);
+    // Hardware.instance.enumerateDevices().then(_loadDevices);
   }
 
   void _loadDevices(List<MediaDevice> devices) async {
@@ -120,7 +119,11 @@ class _CallControlsViewState extends State<CallControlsView> {
       child: Wrap(
         alignment: WrapAlignment.spaceEvenly,
         children: [
-          controlButton(),
+          ControlToggleButton(
+            Icons.mic_none_rounded,
+            Icons.mic_off_rounded,
+            participant,
+          ),
           controlButton(),
           controlButton(),
           controlButton(),
@@ -134,6 +137,14 @@ class _CallControlsViewState extends State<CallControlsView> {
     return IconButton(
       icon: const Icon(Icons.close_rounded),
       onPressed: () => {},
+    );
+  }
+
+  Widget muteButton() {
+    return ControlToggleButton(
+      Icons.mic_none_rounded,
+      Icons.mic_off_rounded,
+      participant,
     );
   }
 }
