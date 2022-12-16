@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 const buttonPadding = 16.0;
 
 class ControlToggleButton extends StatefulWidget {
-  const ControlToggleButton(
-      this.enabledIcon, this.disabledIcon, this.permissionEnabled, this.enabled,
+  const ControlToggleButton(this.enabledIcon, this.disabledIcon,
+      this.permissionEnabled, this.enabled, this.onPressed,
       {Key? key})
       : super(key: key);
 
@@ -12,6 +12,7 @@ class ControlToggleButton extends StatefulWidget {
   final bool enabled;
   final IconData enabledIcon;
   final IconData disabledIcon;
+  final Function() onPressed;
 
   @override
   State<ControlToggleButton> createState() => _ControlToggleButtonState();
@@ -25,7 +26,7 @@ class _ControlToggleButtonState extends State<ControlToggleButton> {
 
   Widget button() {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: widget.permissionEnabled ? widget.onPressed :  widget.onPressed,
       style: ElevatedButton.styleFrom(
         shape: const CircleBorder(),
         padding: const EdgeInsets.all(buttonPadding),
@@ -41,24 +42,27 @@ class _ControlToggleButtonState extends State<ControlToggleButton> {
   }
 
   Color backgroundColor(bool permissionEnabled, bool enabled) {
-    return permissionEnabled && enabled ? Colors.white : Colors.red;
+    return permissionEnabled && enabled ? Colors.white : Colors.white;
   }
 
   Icon icon(bool permissionEnabled, bool enabled) {
     var buttonEnabled = permissionEnabled && enabled;
     return Icon(
-      color: buttonEnabled ? Colors.black : Colors.white,
+      color: buttonEnabled ? Colors.black : Colors.grey,
       buttonEnabled ? widget.enabledIcon : widget.disabledIcon,
     );
   }
 }
 
 class ControlButton extends StatelessWidget {
-  const ControlButton(this.iconData, {Key? key, required this.backgroundColor, required this.iconColor}) : super(key: key);
+  const ControlButton(this.iconData, this.onPressed,
+      {Key? key, required this.backgroundColor, required this.iconColor})
+      : super(key: key);
 
   final IconData iconData;
   final Color backgroundColor;
   final Color iconColor;
+  final Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -78,4 +82,3 @@ class ControlButton extends StatelessWidget {
     );
   }
 }
-

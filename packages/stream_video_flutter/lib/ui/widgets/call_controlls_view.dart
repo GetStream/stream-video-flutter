@@ -54,20 +54,25 @@ class _CallControlsViewState extends State<CallControlsView> {
     setState(() {});
   }
 
-  void _disableAudio() async {
-    await participant.setMicrophoneEnabled(enabled: false);
+  void _toggleSound() async {
+    if (!participant.isMicrophoneEnabled) return;
+
+    await participant.setMicrophoneEnabled(enabled: !participant.isMuted);
+    setState(() {});
   }
 
-  void _enableAudio() async {
-    await participant.setMicrophoneEnabled(enabled: true);
+  void _toggleVideo() async {
+    if (!participant.isCameraEnabled) return;
+
+    await participant.setCameraEnabled(enabled: !participant.hasVideo);
+    setState(() {});
   }
 
-  void _disableVideo() async {
-    await participant.setCameraEnabled(enabled: false);
-  }
+  void _toggleMic() async {
+    if (!participant.isMicrophoneEnabled) return;
 
-  void _enableVideo() async {
-    await participant.setCameraEnabled(enabled: true);
+    await participant.setMicrophoneEnabled(enabled: !participant.isMuted);
+    setState(() {});
   }
 
   void _selectAudioOutput(MediaDevice device) async {
@@ -90,7 +95,7 @@ class _CallControlsViewState extends State<CallControlsView> {
     }
   }
 
-  void _toggleCamera() async {
+  void _switchCamera() async {
     //
     final track = participant.videoTracks.firstOrNull?.track;
     if (track == null) return;
@@ -143,6 +148,7 @@ class _CallControlsViewState extends State<CallControlsView> {
       Icons.volume_off,
       participant.isMicrophoneEnabled,
       participant.isMuted,
+      _toggleSound,
     );
   }
 
@@ -152,6 +158,7 @@ class _CallControlsViewState extends State<CallControlsView> {
       Icons.video_camera_front_outlined, //Find a icon from video cancellation
       participant.isMicrophoneEnabled,
       participant.isMuted,
+      _toggleVideo,
     );
   }
 
@@ -161,22 +168,27 @@ class _CallControlsViewState extends State<CallControlsView> {
       Icons.mic_off,
       participant.isMicrophoneEnabled,
       participant.isMuted,
+      _toggleMic,
     );
   }
 
   Widget switchCameraButton() {
-    return const ControlButton(
+    return ControlButton(
       Icons.flip_camera_ios,
+      _switchCamera,
       backgroundColor: Colors.white,
       iconColor: Colors.black,
     );
   }
 
   Widget hangUpButton() {
-    return const ControlButton(
+    return ControlButton(
       Icons.phone,
+      _disconnect,
       backgroundColor: Colors.red,
       iconColor: Colors.white,
     );
   }
+
+  void mock() async {}
 }
