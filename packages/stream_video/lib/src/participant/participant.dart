@@ -27,8 +27,6 @@ class LocalA extends A<LocalParticipantValue> {
   LocalA(super.value);
 }
 
-void abc() {}
-
 /// Represents a Participant in the call, notifies changes via delegates as
 /// well as ChangeNotifier/providers.
 /// A change notification is triggered when
@@ -206,8 +204,10 @@ abstract class Participant<T extends TrackPublication>
 
   @override
   Future<void> dispose() async {
-    events.dispose();
-    await unpublishAllTracks();
+    if (events.mounted) {
+      events.dispose();
+    }
+    await unpublishAllTracks(notify: false);
     return super.dispose();
   }
 

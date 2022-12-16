@@ -257,7 +257,7 @@ class ParticipantInfoUpdatedEvent with CallEvent, ParticipantEvent {
   String toString() => '${runtimeType}(participant: ${participant})';
 }
 
-/// [Pariticpant]'s [ConnectionQuality] has updated.
+/// [Participant]'s [ConnectionQuality] has updated.
 /// Emitted by [Call] and [Participant].
 class ParticipantConnectionQualityUpdatedEvent
     with CallEvent, ParticipantEvent {

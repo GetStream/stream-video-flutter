@@ -196,6 +196,14 @@ class EventEmitter<T> {
   /// besides [mounted] inaccessible.
   @mustCallSuper
   void dispose() {
+    //TODO
+    // It seems like the check below is redundant.
+    //
+    // This function is called from multiple places and
+    // it is unlikely to get into unexpected state because
+    // of multiple `dispose` calls.
+    //
+    // Can we wrap this by IF statement using [mounted] flag?
     assert(_debugIsMounted(), '');
     _listeners.clear();
     _mounted = false;
