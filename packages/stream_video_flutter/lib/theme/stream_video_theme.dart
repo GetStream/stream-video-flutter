@@ -65,15 +65,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   static final StreamVideoTheme _kDarkFallbackTheme = StreamVideoTheme.dark();
 
   static StreamVideoTheme of(BuildContext context) {
-    var theme = Theme.of(context);
-    var streamVideoTheme = theme.extension<StreamVideoTheme>();
-    var brightness = theme.brightness;
-
-    streamVideoTheme ??= brightness == Brightness.light
-        ? _kLightFallbackTheme
-        : _kDarkFallbackTheme;
-
-    return streamVideoTheme;
+    final theme = Theme.of(context);
+    final streamVideoTheme = theme.extension<StreamVideoTheme>();
+    
+    if(streamVideoTheme != null) return streamVideoTheme;
+    if(theme.brightness == Brightness.light) return _kLightFallbackTheme;
+    return _kDarkFallbackTheme;
   }
 
   /// The text themes used in the widgets
