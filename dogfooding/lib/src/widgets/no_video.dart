@@ -1,19 +1,19 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
 class NoVideoWidget extends StatelessWidget {
   const NoVideoWidget({
-    Key? key,
+    super.key,
     required this.participant,
-  }) : super(key: key);
+  });
 
   final Participant participant;
 
   @override
   Widget build(BuildContext context) {
-    final String name = participant.userId;
+    final name = participant.userId;
     return Center(
       child: LayoutBuilder(
         builder: (context, constraints) => CircleAvatar(

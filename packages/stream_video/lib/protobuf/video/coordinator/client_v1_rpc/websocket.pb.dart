@@ -14,60 +14,148 @@ import '../user_v1/user.pb.dart' as $1;
 import '../push_v1/push.pb.dart' as $6;
 
 enum WebsocketEvent_Event {
-  error, 
-  healthcheck, 
-  callCreated, 
-  callUpdated, 
-  callDeleted, 
-  callMembersCreated, 
-  callMembersUpdated, 
-  callMembersDeleted, 
-  callEnded, 
-  callAccepted, 
-  callRejected, 
-  callCancelled, 
-  userUpdated, 
-  callCustom, 
+  error,
+  healthcheck,
+  callCreated,
+  callUpdated,
+  callDeleted,
+  callMembersCreated,
+  callMembersUpdated,
+  callMembersDeleted,
+  callEnded,
+  callAccepted,
+  callRejected,
+  callCancelled,
+  userUpdated,
+  callCustom,
   notSet
 }
 
 class WebsocketEvent extends $pb.GeneratedMessage {
-  static const $core.Map<$core.int, WebsocketEvent_Event> _WebsocketEvent_EventByTag = {
-    19 : WebsocketEvent_Event.error,
-    20 : WebsocketEvent_Event.healthcheck,
-    30 : WebsocketEvent_Event.callCreated,
-    31 : WebsocketEvent_Event.callUpdated,
-    32 : WebsocketEvent_Event.callDeleted,
-    33 : WebsocketEvent_Event.callMembersCreated,
-    34 : WebsocketEvent_Event.callMembersUpdated,
-    35 : WebsocketEvent_Event.callMembersDeleted,
-    36 : WebsocketEvent_Event.callEnded,
-    40 : WebsocketEvent_Event.callAccepted,
-    41 : WebsocketEvent_Event.callRejected,
-    42 : WebsocketEvent_Event.callCancelled,
-    50 : WebsocketEvent_Event.userUpdated,
-    99 : WebsocketEvent_Event.callCustom,
-    0 : WebsocketEvent_Event.notSet
+  static const $core.Map<$core.int, WebsocketEvent_Event>
+      _WebsocketEvent_EventByTag = {
+    19: WebsocketEvent_Event.error,
+    20: WebsocketEvent_Event.healthcheck,
+    30: WebsocketEvent_Event.callCreated,
+    31: WebsocketEvent_Event.callUpdated,
+    32: WebsocketEvent_Event.callDeleted,
+    33: WebsocketEvent_Event.callMembersCreated,
+    34: WebsocketEvent_Event.callMembersUpdated,
+    35: WebsocketEvent_Event.callMembersDeleted,
+    36: WebsocketEvent_Event.callEnded,
+    40: WebsocketEvent_Event.callAccepted,
+    41: WebsocketEvent_Event.callRejected,
+    42: WebsocketEvent_Event.callCancelled,
+    50: WebsocketEvent_Event.userUpdated,
+    99: WebsocketEvent_Event.callCustom,
+    0: WebsocketEvent_Event.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'WebsocketEvent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      const $core.bool.fromEnvironment('protobuf.omit_message_names')
+          ? ''
+          : 'WebsocketEvent',
+      package: const $pb.PackageName(
+          const $core.bool.fromEnvironment('protobuf.omit_message_names')
+              ? ''
+              : 'stream.video.coordinator.client_v1_rpc'),
+      createEmptyInstance: create)
     ..oo(0, [19, 20, 30, 31, 32, 33, 34, 35, 36, 40, 41, 42, 50, 99])
-    ..m<$core.String, $1.User>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'users', entryClassName: 'WebsocketEvent.UsersEntry', keyFieldType: $pb.PbFieldType.OS, valueFieldType: $pb.PbFieldType.OM, valueCreator: $1.User.create, packageName: const $pb.PackageName('stream.video.coordinator.client_v1_rpc'))
-    ..aOM<WebsocketError>(19, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error', subBuilder: WebsocketError.create)
-    ..aOM<WebsocketHealthcheck>(20, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'healthcheck', subBuilder: WebsocketHealthcheck.create)
-    ..aOM<$11.CallCreated>(30, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCreated', subBuilder: $11.CallCreated.create)
-    ..aOM<$11.CallUpdated>(31, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callUpdated', subBuilder: $11.CallUpdated.create)
-    ..aOM<$11.CallDeleted>(32, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callDeleted', subBuilder: $11.CallDeleted.create)
-    ..aOM<$11.CallMembersCreated>(33, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callMembersCreated', subBuilder: $11.CallMembersCreated.create)
-    ..aOM<$11.CallMembersUpdated>(34, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callMembersUpdated', subBuilder: $11.CallMembersUpdated.create)
-    ..aOM<$11.CallMembersDeleted>(35, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callMembersDeleted', subBuilder: $11.CallMembersDeleted.create)
-    ..aOM<$11.CallEnded>(36, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callEnded', subBuilder: $11.CallEnded.create)
-    ..aOM<$11.CallAccepted>(40, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callAccepted', subBuilder: $11.CallAccepted.create)
-    ..aOM<$11.CallRejected>(41, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callRejected', subBuilder: $11.CallRejected.create)
-    ..aOM<$11.CallCancelled>(42, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCancelled', subBuilder: $11.CallCancelled.create)
-    ..aOM<$11.UserUpdated>(50, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userUpdated', subBuilder: $11.UserUpdated.create)
-    ..aOM<$11.CallCustom>(99, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCustom', subBuilder: $11.CallCustom.create)
-    ..hasRequiredFields = false
-  ;
+    ..m<$core.String, $1.User>(
+        1,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'users',
+        entryClassName: 'WebsocketEvent.UsersEntry',
+        keyFieldType: $pb.PbFieldType.OS,
+        valueFieldType: $pb.PbFieldType.OM,
+        valueCreator: $1.User.create,
+        packageName:
+            const $pb.PackageName('stream.video.coordinator.client_v1_rpc'))
+    ..aOM<WebsocketError>(
+        19,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'error',
+        subBuilder: WebsocketError.create)
+    ..aOM<WebsocketHealthcheck>(
+        20,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'healthcheck',
+        subBuilder: WebsocketHealthcheck.create)
+    ..aOM<$11.CallCreated>(
+        30,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'callCreated',
+        subBuilder: $11.CallCreated.create)
+    ..aOM<$11.CallUpdated>(
+        31,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'callUpdated',
+        subBuilder: $11.CallUpdated.create)
+    ..aOM<$11.CallDeleted>(
+        32,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'callDeleted',
+        subBuilder: $11.CallDeleted.create)
+    ..aOM<$11.CallMembersCreated>(
+        33,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'callMembersCreated',
+        subBuilder: $11.CallMembersCreated.create)
+    ..aOM<$11.CallMembersUpdated>(
+        34,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'callMembersUpdated',
+        subBuilder: $11.CallMembersUpdated.create)
+    ..aOM<$11.CallMembersDeleted>(
+        35,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'callMembersDeleted',
+        subBuilder: $11.CallMembersDeleted.create)
+    ..aOM<$11.CallEnded>(
+        36,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'callEnded',
+        subBuilder: $11.CallEnded.create)
+    ..aOM<$11.CallAccepted>(
+        40,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'callAccepted',
+        subBuilder: $11.CallAccepted.create)
+    ..aOM<$11.CallRejected>(
+        41,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'callRejected',
+        subBuilder: $11.CallRejected.create)
+    ..aOM<$11.CallCancelled>(
+        42,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'callCancelled',
+        subBuilder: $11.CallCancelled.create)
+    ..aOM<$11.UserUpdated>(
+        50,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'userUpdated',
+        subBuilder: $11.UserUpdated.create)
+    ..aOM<$11.CallCustom>(
+        99,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'callCustom',
+        subBuilder: $11.CallCustom.create)
+    ..hasRequiredFields = false;
 
   WebsocketEvent._() : super();
   factory WebsocketEvent({
@@ -135,28 +223,35 @@ class WebsocketEvent extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory WebsocketEvent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory WebsocketEvent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  factory WebsocketEvent.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory WebsocketEvent.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   WebsocketEvent clone() => WebsocketEvent()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  WebsocketEvent copyWith(void Function(WebsocketEvent) updates) => super.copyWith((message) => updates(message as WebsocketEvent)) as WebsocketEvent; // ignore: deprecated_member_use
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  WebsocketEvent copyWith(void Function(WebsocketEvent) updates) =>
+      super.copyWith((message) => updates(message as WebsocketEvent))
+          as WebsocketEvent; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static WebsocketEvent create() => WebsocketEvent._();
   WebsocketEvent createEmptyInstance() => create();
-  static $pb.PbList<WebsocketEvent> createRepeated() => $pb.PbList<WebsocketEvent>();
+  static $pb.PbList<WebsocketEvent> createRepeated() =>
+      $pb.PbList<WebsocketEvent>();
   @$core.pragma('dart2js:noInline')
-  static WebsocketEvent getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<WebsocketEvent>(create);
+  static WebsocketEvent getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<WebsocketEvent>(create);
   static WebsocketEvent? _defaultInstance;
 
-  WebsocketEvent_Event whichEvent() => _WebsocketEvent_EventByTag[$_whichOneof(0)]!;
+  WebsocketEvent_Event whichEvent() =>
+      _WebsocketEvent_EventByTag[$_whichOneof(0)]!;
   void clearEvent() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -165,7 +260,10 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(19)
   WebsocketError get error => $_getN(1);
   @$pb.TagNumber(19)
-  set error(WebsocketError v) { setField(19, v); }
+  set error(WebsocketError v) {
+    setField(19, v);
+  }
+
   @$pb.TagNumber(19)
   $core.bool hasError() => $_has(1);
   @$pb.TagNumber(19)
@@ -176,7 +274,10 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(20)
   WebsocketHealthcheck get healthcheck => $_getN(2);
   @$pb.TagNumber(20)
-  set healthcheck(WebsocketHealthcheck v) { setField(20, v); }
+  set healthcheck(WebsocketHealthcheck v) {
+    setField(20, v);
+  }
+
   @$pb.TagNumber(20)
   $core.bool hasHealthcheck() => $_has(2);
   @$pb.TagNumber(20)
@@ -187,7 +288,10 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(30)
   $11.CallCreated get callCreated => $_getN(3);
   @$pb.TagNumber(30)
-  set callCreated($11.CallCreated v) { setField(30, v); }
+  set callCreated($11.CallCreated v) {
+    setField(30, v);
+  }
+
   @$pb.TagNumber(30)
   $core.bool hasCallCreated() => $_has(3);
   @$pb.TagNumber(30)
@@ -198,7 +302,10 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(31)
   $11.CallUpdated get callUpdated => $_getN(4);
   @$pb.TagNumber(31)
-  set callUpdated($11.CallUpdated v) { setField(31, v); }
+  set callUpdated($11.CallUpdated v) {
+    setField(31, v);
+  }
+
   @$pb.TagNumber(31)
   $core.bool hasCallUpdated() => $_has(4);
   @$pb.TagNumber(31)
@@ -209,7 +316,10 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(32)
   $11.CallDeleted get callDeleted => $_getN(5);
   @$pb.TagNumber(32)
-  set callDeleted($11.CallDeleted v) { setField(32, v); }
+  set callDeleted($11.CallDeleted v) {
+    setField(32, v);
+  }
+
   @$pb.TagNumber(32)
   $core.bool hasCallDeleted() => $_has(5);
   @$pb.TagNumber(32)
@@ -220,7 +330,10 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(33)
   $11.CallMembersCreated get callMembersCreated => $_getN(6);
   @$pb.TagNumber(33)
-  set callMembersCreated($11.CallMembersCreated v) { setField(33, v); }
+  set callMembersCreated($11.CallMembersCreated v) {
+    setField(33, v);
+  }
+
   @$pb.TagNumber(33)
   $core.bool hasCallMembersCreated() => $_has(6);
   @$pb.TagNumber(33)
@@ -231,7 +344,10 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(34)
   $11.CallMembersUpdated get callMembersUpdated => $_getN(7);
   @$pb.TagNumber(34)
-  set callMembersUpdated($11.CallMembersUpdated v) { setField(34, v); }
+  set callMembersUpdated($11.CallMembersUpdated v) {
+    setField(34, v);
+  }
+
   @$pb.TagNumber(34)
   $core.bool hasCallMembersUpdated() => $_has(7);
   @$pb.TagNumber(34)
@@ -242,7 +358,10 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(35)
   $11.CallMembersDeleted get callMembersDeleted => $_getN(8);
   @$pb.TagNumber(35)
-  set callMembersDeleted($11.CallMembersDeleted v) { setField(35, v); }
+  set callMembersDeleted($11.CallMembersDeleted v) {
+    setField(35, v);
+  }
+
   @$pb.TagNumber(35)
   $core.bool hasCallMembersDeleted() => $_has(8);
   @$pb.TagNumber(35)
@@ -253,7 +372,10 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(36)
   $11.CallEnded get callEnded => $_getN(9);
   @$pb.TagNumber(36)
-  set callEnded($11.CallEnded v) { setField(36, v); }
+  set callEnded($11.CallEnded v) {
+    setField(36, v);
+  }
+
   @$pb.TagNumber(36)
   $core.bool hasCallEnded() => $_has(9);
   @$pb.TagNumber(36)
@@ -264,7 +386,10 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(40)
   $11.CallAccepted get callAccepted => $_getN(10);
   @$pb.TagNumber(40)
-  set callAccepted($11.CallAccepted v) { setField(40, v); }
+  set callAccepted($11.CallAccepted v) {
+    setField(40, v);
+  }
+
   @$pb.TagNumber(40)
   $core.bool hasCallAccepted() => $_has(10);
   @$pb.TagNumber(40)
@@ -275,7 +400,10 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(41)
   $11.CallRejected get callRejected => $_getN(11);
   @$pb.TagNumber(41)
-  set callRejected($11.CallRejected v) { setField(41, v); }
+  set callRejected($11.CallRejected v) {
+    setField(41, v);
+  }
+
   @$pb.TagNumber(41)
   $core.bool hasCallRejected() => $_has(11);
   @$pb.TagNumber(41)
@@ -286,7 +414,10 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(42)
   $11.CallCancelled get callCancelled => $_getN(12);
   @$pb.TagNumber(42)
-  set callCancelled($11.CallCancelled v) { setField(42, v); }
+  set callCancelled($11.CallCancelled v) {
+    setField(42, v);
+  }
+
   @$pb.TagNumber(42)
   $core.bool hasCallCancelled() => $_has(12);
   @$pb.TagNumber(42)
@@ -297,7 +428,10 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(50)
   $11.UserUpdated get userUpdated => $_getN(13);
   @$pb.TagNumber(50)
-  set userUpdated($11.UserUpdated v) { setField(50, v); }
+  set userUpdated($11.UserUpdated v) {
+    setField(50, v);
+  }
+
   @$pb.TagNumber(50)
   $core.bool hasUserUpdated() => $_has(13);
   @$pb.TagNumber(50)
@@ -308,7 +442,10 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(99)
   $11.CallCustom get callCustom => $_getN(14);
   @$pb.TagNumber(99)
-  set callCustom($11.CallCustom v) { setField(99, v); }
+  set callCustom($11.CallCustom v) {
+    setField(99, v);
+  }
+
   @$pb.TagNumber(99)
   $core.bool hasCallCustom() => $_has(14);
   @$pb.TagNumber(99)
@@ -317,24 +454,38 @@ class WebsocketEvent extends $pb.GeneratedMessage {
   $11.CallCustom ensureCallCustom() => $_ensure(14);
 }
 
-enum WebsocketClientEvent_Event {
-  healthcheck, 
-  authRequest, 
-  notSet
-}
+enum WebsocketClientEvent_Event { healthcheck, authRequest, notSet }
 
 class WebsocketClientEvent extends $pb.GeneratedMessage {
-  static const $core.Map<$core.int, WebsocketClientEvent_Event> _WebsocketClientEvent_EventByTag = {
-    1 : WebsocketClientEvent_Event.healthcheck,
-    2 : WebsocketClientEvent_Event.authRequest,
-    0 : WebsocketClientEvent_Event.notSet
+  static const $core.Map<$core.int, WebsocketClientEvent_Event>
+      _WebsocketClientEvent_EventByTag = {
+    1: WebsocketClientEvent_Event.healthcheck,
+    2: WebsocketClientEvent_Event.authRequest,
+    0: WebsocketClientEvent_Event.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'WebsocketClientEvent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      const $core.bool.fromEnvironment('protobuf.omit_message_names')
+          ? ''
+          : 'WebsocketClientEvent',
+      package: const $pb.PackageName(
+          const $core.bool.fromEnvironment('protobuf.omit_message_names')
+              ? ''
+              : 'stream.video.coordinator.client_v1_rpc'),
+      createEmptyInstance: create)
     ..oo(0, [1, 2])
-    ..aOM<WebsocketHealthcheck>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'healthcheck', subBuilder: WebsocketHealthcheck.create)
-    ..aOM<WebsocketAuthRequest>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'authRequest', subBuilder: WebsocketAuthRequest.create)
-    ..hasRequiredFields = false
-  ;
+    ..aOM<WebsocketHealthcheck>(
+        1,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'healthcheck',
+        subBuilder: WebsocketHealthcheck.create)
+    ..aOM<WebsocketAuthRequest>(
+        2,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'authRequest',
+        subBuilder: WebsocketAuthRequest.create)
+    ..hasRequiredFields = false;
 
   WebsocketClientEvent._() : super();
   factory WebsocketClientEvent({
@@ -350,34 +501,45 @@ class WebsocketClientEvent extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory WebsocketClientEvent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory WebsocketClientEvent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  WebsocketClientEvent clone() => WebsocketClientEvent()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  WebsocketClientEvent copyWith(void Function(WebsocketClientEvent) updates) => super.copyWith((message) => updates(message as WebsocketClientEvent)) as WebsocketClientEvent; // ignore: deprecated_member_use
+  factory WebsocketClientEvent.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory WebsocketClientEvent.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  WebsocketClientEvent clone() =>
+      WebsocketClientEvent()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  WebsocketClientEvent copyWith(void Function(WebsocketClientEvent) updates) =>
+      super.copyWith((message) => updates(message as WebsocketClientEvent))
+          as WebsocketClientEvent; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static WebsocketClientEvent create() => WebsocketClientEvent._();
   WebsocketClientEvent createEmptyInstance() => create();
-  static $pb.PbList<WebsocketClientEvent> createRepeated() => $pb.PbList<WebsocketClientEvent>();
+  static $pb.PbList<WebsocketClientEvent> createRepeated() =>
+      $pb.PbList<WebsocketClientEvent>();
   @$core.pragma('dart2js:noInline')
-  static WebsocketClientEvent getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<WebsocketClientEvent>(create);
+  static WebsocketClientEvent getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<WebsocketClientEvent>(create);
   static WebsocketClientEvent? _defaultInstance;
 
-  WebsocketClientEvent_Event whichEvent() => _WebsocketClientEvent_EventByTag[$_whichOneof(0)]!;
+  WebsocketClientEvent_Event whichEvent() =>
+      _WebsocketClientEvent_EventByTag[$_whichOneof(0)]!;
   void clearEvent() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
   WebsocketHealthcheck get healthcheck => $_getN(0);
   @$pb.TagNumber(1)
-  set healthcheck(WebsocketHealthcheck v) { setField(1, v); }
+  set healthcheck(WebsocketHealthcheck v) {
+    setField(1, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasHealthcheck() => $_has(0);
   @$pb.TagNumber(1)
@@ -388,7 +550,10 @@ class WebsocketClientEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   WebsocketAuthRequest get authRequest => $_getN(1);
   @$pb.TagNumber(2)
-  set authRequest(WebsocketAuthRequest v) { setField(2, v); }
+  set authRequest(WebsocketAuthRequest v) {
+    setField(2, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasAuthRequest() => $_has(1);
   @$pb.TagNumber(2)
@@ -398,13 +563,38 @@ class WebsocketClientEvent extends $pb.GeneratedMessage {
 }
 
 class WebsocketAuthRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'WebsocketAuthRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'apiKey')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'token')
-    ..aOM<$1.UserInput>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'user', subBuilder: $1.UserInput.create)
-    ..aOM<$6.DeviceInput>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'device', subBuilder: $6.DeviceInput.create)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      const $core.bool.fromEnvironment('protobuf.omit_message_names')
+          ? ''
+          : 'WebsocketAuthRequest',
+      package: const $pb.PackageName(
+          const $core.bool.fromEnvironment('protobuf.omit_message_names')
+              ? ''
+              : 'stream.video.coordinator.client_v1_rpc'),
+      createEmptyInstance: create)
+    ..aOS(
+        1,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'apiKey')
+    ..aOS(
+        2,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'token')
+    ..aOM<$1.UserInput>(
+        3,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'user',
+        subBuilder: $1.UserInput.create)
+    ..aOM<$6.DeviceInput>(
+        4,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'device',
+        subBuilder: $6.DeviceInput.create)
+    ..hasRequiredFields = false;
 
   WebsocketAuthRequest._() : super();
   factory WebsocketAuthRequest({
@@ -428,31 +618,41 @@ class WebsocketAuthRequest extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory WebsocketAuthRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory WebsocketAuthRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  WebsocketAuthRequest clone() => WebsocketAuthRequest()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  WebsocketAuthRequest copyWith(void Function(WebsocketAuthRequest) updates) => super.copyWith((message) => updates(message as WebsocketAuthRequest)) as WebsocketAuthRequest; // ignore: deprecated_member_use
+  factory WebsocketAuthRequest.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory WebsocketAuthRequest.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  WebsocketAuthRequest clone() =>
+      WebsocketAuthRequest()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  WebsocketAuthRequest copyWith(void Function(WebsocketAuthRequest) updates) =>
+      super.copyWith((message) => updates(message as WebsocketAuthRequest))
+          as WebsocketAuthRequest; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static WebsocketAuthRequest create() => WebsocketAuthRequest._();
   WebsocketAuthRequest createEmptyInstance() => create();
-  static $pb.PbList<WebsocketAuthRequest> createRepeated() => $pb.PbList<WebsocketAuthRequest>();
+  static $pb.PbList<WebsocketAuthRequest> createRepeated() =>
+      $pb.PbList<WebsocketAuthRequest>();
   @$core.pragma('dart2js:noInline')
-  static WebsocketAuthRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<WebsocketAuthRequest>(create);
+  static WebsocketAuthRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<WebsocketAuthRequest>(create);
   static WebsocketAuthRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get apiKey => $_getSZ(0);
   @$pb.TagNumber(1)
-  set apiKey($core.String v) { $_setString(0, v); }
+  set apiKey($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasApiKey() => $_has(0);
   @$pb.TagNumber(1)
@@ -461,7 +661,10 @@ class WebsocketAuthRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.String get token => $_getSZ(1);
   @$pb.TagNumber(2)
-  set token($core.String v) { $_setString(1, v); }
+  set token($core.String v) {
+    $_setString(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasToken() => $_has(1);
   @$pb.TagNumber(2)
@@ -470,7 +673,10 @@ class WebsocketAuthRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $1.UserInput get user => $_getN(2);
   @$pb.TagNumber(3)
-  set user($1.UserInput v) { setField(3, v); }
+  set user($1.UserInput v) {
+    setField(3, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasUser() => $_has(2);
   @$pb.TagNumber(3)
@@ -481,7 +687,10 @@ class WebsocketAuthRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $6.DeviceInput get device => $_getN(3);
   @$pb.TagNumber(4)
-  set device($6.DeviceInput v) { setField(4, v); }
+  set device($6.DeviceInput v) {
+    setField(4, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasDevice() => $_has(3);
   @$pb.TagNumber(4)
@@ -491,15 +700,46 @@ class WebsocketAuthRequest extends $pb.GeneratedMessage {
 }
 
 class WebsocketHealthcheck extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'WebsocketHealthcheck', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'clientId')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
-    ..aOB(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'video')
-    ..aOB(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audio')
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      const $core.bool.fromEnvironment('protobuf.omit_message_names')
+          ? ''
+          : 'WebsocketHealthcheck',
+      package: const $pb.PackageName(
+          const $core.bool.fromEnvironment('protobuf.omit_message_names')
+              ? ''
+              : 'stream.video.coordinator.client_v1_rpc'),
+      createEmptyInstance: create)
+    ..aOS(
+        1,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'userId')
+    ..aOS(
+        2,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'clientId')
+    ..aOS(
+        3,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'callType')
+    ..aOS(
+        4,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'callId')
+    ..aOB(
+        5,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'video')
+    ..aOB(
+        6,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'audio')
+    ..hasRequiredFields = false;
 
   WebsocketHealthcheck._() : super();
   factory WebsocketHealthcheck({
@@ -531,31 +771,41 @@ class WebsocketHealthcheck extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory WebsocketHealthcheck.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory WebsocketHealthcheck.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  WebsocketHealthcheck clone() => WebsocketHealthcheck()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  WebsocketHealthcheck copyWith(void Function(WebsocketHealthcheck) updates) => super.copyWith((message) => updates(message as WebsocketHealthcheck)) as WebsocketHealthcheck; // ignore: deprecated_member_use
+  factory WebsocketHealthcheck.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory WebsocketHealthcheck.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  WebsocketHealthcheck clone() =>
+      WebsocketHealthcheck()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  WebsocketHealthcheck copyWith(void Function(WebsocketHealthcheck) updates) =>
+      super.copyWith((message) => updates(message as WebsocketHealthcheck))
+          as WebsocketHealthcheck; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static WebsocketHealthcheck create() => WebsocketHealthcheck._();
   WebsocketHealthcheck createEmptyInstance() => create();
-  static $pb.PbList<WebsocketHealthcheck> createRepeated() => $pb.PbList<WebsocketHealthcheck>();
+  static $pb.PbList<WebsocketHealthcheck> createRepeated() =>
+      $pb.PbList<WebsocketHealthcheck>();
   @$core.pragma('dart2js:noInline')
-  static WebsocketHealthcheck getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<WebsocketHealthcheck>(create);
+  static WebsocketHealthcheck getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<WebsocketHealthcheck>(create);
   static WebsocketHealthcheck? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get userId => $_getSZ(0);
   @$pb.TagNumber(1)
-  set userId($core.String v) { $_setString(0, v); }
+  set userId($core.String v) {
+    $_setString(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
@@ -564,7 +814,10 @@ class WebsocketHealthcheck extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.String get clientId => $_getSZ(1);
   @$pb.TagNumber(2)
-  set clientId($core.String v) { $_setString(1, v); }
+  set clientId($core.String v) {
+    $_setString(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasClientId() => $_has(1);
   @$pb.TagNumber(2)
@@ -573,7 +826,10 @@ class WebsocketHealthcheck extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.String get callType => $_getSZ(2);
   @$pb.TagNumber(3)
-  set callType($core.String v) { $_setString(2, v); }
+  set callType($core.String v) {
+    $_setString(2, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasCallType() => $_has(2);
   @$pb.TagNumber(3)
@@ -582,7 +838,10 @@ class WebsocketHealthcheck extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.String get callId => $_getSZ(3);
   @$pb.TagNumber(4)
-  set callId($core.String v) { $_setString(3, v); }
+  set callId($core.String v) {
+    $_setString(3, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasCallId() => $_has(3);
   @$pb.TagNumber(4)
@@ -591,7 +850,10 @@ class WebsocketHealthcheck extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $core.bool get video => $_getBF(4);
   @$pb.TagNumber(5)
-  set video($core.bool v) { $_setBool(4, v); }
+  set video($core.bool v) {
+    $_setBool(4, v);
+  }
+
   @$pb.TagNumber(5)
   $core.bool hasVideo() => $_has(4);
   @$pb.TagNumber(5)
@@ -600,7 +862,10 @@ class WebsocketHealthcheck extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   $core.bool get audio => $_getBF(5);
   @$pb.TagNumber(6)
-  set audio($core.bool v) { $_setBool(5, v); }
+  set audio($core.bool v) {
+    $_setBool(5, v);
+  }
+
   @$pb.TagNumber(6)
   $core.bool hasAudio() => $_has(5);
   @$pb.TagNumber(6)
@@ -608,11 +873,27 @@ class WebsocketHealthcheck extends $pb.GeneratedMessage {
 }
 
 class WebsocketError extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'WebsocketError', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'code', $pb.PbFieldType.O3)
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      const $core.bool.fromEnvironment('protobuf.omit_message_names')
+          ? ''
+          : 'WebsocketError',
+      package: const $pb.PackageName(
+          const $core.bool.fromEnvironment('protobuf.omit_message_names')
+              ? ''
+              : 'stream.video.coordinator.client_v1_rpc'),
+      createEmptyInstance: create)
+    ..a<$core.int>(
+        1,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'code',
+        $pb.PbFieldType.O3)
+    ..aOS(
+        2,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'message')
+    ..hasRequiredFields = false;
 
   WebsocketError._() : super();
   factory WebsocketError({
@@ -628,31 +909,40 @@ class WebsocketError extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory WebsocketError.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory WebsocketError.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  factory WebsocketError.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory WebsocketError.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   WebsocketError clone() => WebsocketError()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  WebsocketError copyWith(void Function(WebsocketError) updates) => super.copyWith((message) => updates(message as WebsocketError)) as WebsocketError; // ignore: deprecated_member_use
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  WebsocketError copyWith(void Function(WebsocketError) updates) =>
+      super.copyWith((message) => updates(message as WebsocketError))
+          as WebsocketError; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
   static WebsocketError create() => WebsocketError._();
   WebsocketError createEmptyInstance() => create();
-  static $pb.PbList<WebsocketError> createRepeated() => $pb.PbList<WebsocketError>();
+  static $pb.PbList<WebsocketError> createRepeated() =>
+      $pb.PbList<WebsocketError>();
   @$core.pragma('dart2js:noInline')
-  static WebsocketError getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<WebsocketError>(create);
+  static WebsocketError getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<WebsocketError>(create);
   static WebsocketError? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.int get code => $_getIZ(0);
   @$pb.TagNumber(1)
-  set code($core.int v) { $_setSignedInt32(0, v); }
+  set code($core.int v) {
+    $_setSignedInt32(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasCode() => $_has(0);
   @$pb.TagNumber(1)
@@ -661,10 +951,12 @@ class WebsocketError extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.String get message => $_getSZ(1);
   @$pb.TagNumber(2)
-  set message($core.String v) { $_setString(1, v); }
+  set message($core.String v) {
+    $_setString(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
   void clearMessage() => clearField(2);
 }
-

@@ -1,17 +1,15 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:meta/meta.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart'
+import '../../protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart'
     as coordinator;
-import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart'
+import '../../protobuf/video/coordinator/event_v1/event.pb.dart'
     as coordinator_event;
-import 'package:stream_video/protobuf/video/sfu/event/events.pbserver.dart'
-    as sfu_events;
-import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
-    as sfu_models;
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/track/local/local.dart';
-import 'package:stream_video/src/track/options.dart';
-import 'package:stream_video/src/track/track.dart';
+import '../../protobuf/video/sfu/event/events.pbserver.dart' as sfu_events;
+import '../../protobuf/video/sfu/models/models.pbserver.dart' as sfu_models;
+import '../events.dart';
+import '../track/local/local.dart';
+import '../track/options.dart';
+import '../track/track.dart';
 
 mixin InternalEvent implements StreamCallEvent {}
 
@@ -48,8 +46,7 @@ class InternalTrackMuteUpdatedEvent with TrackEvent, InternalEvent {
   final bool notifyServer;
 
   @override
-  String toString() =>
-      'TrackMuteUpdatedEvent(track: ${track}, muted: ${muted})';
+  String toString() => 'TrackMuteUpdatedEvent(track: $track, muted: $muted)';
 }
 
 // ----------------------------------------------------------------------

@@ -1,5 +1,5 @@
-import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
-import 'package:stream_video/src/types/other.dart';
+import '../../protobuf/video/coordinator/edge_v1/edge.pb.dart';
+import '../types/other.dart';
 
 RTCConfiguration? rtcConfigurationFromICEServers(
   Iterable<ICEServer>? config,

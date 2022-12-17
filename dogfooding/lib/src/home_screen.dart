@@ -1,15 +1,14 @@
 import 'dart:convert';
-
-import 'package:dogfooding/main.dart';
-import 'package:dogfooding/src/call_screen.dart';
-import 'package:dogfooding/src/login_screen.dart';
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
+import 'call_screen.dart';
+import 'login_screen.dart';
+
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   static const routeName = '/home';
 
@@ -18,7 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  var streamVideoClient = StreamVideo.instance;
+  StreamVideo streamVideoClient = StreamVideo.instance;
   late final currentUser = streamVideoClient.currentUser!;
 
   final _callIdController = TextEditingController();
@@ -39,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       await call.connect();
 
-      Navigator.of(context).pushReplacementNamed(
+      await Navigator.of(context).pushReplacementNamed(
         CallScreen.routeName,
         arguments: call,
       );
@@ -65,13 +64,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final avatar = imageUrl != null
         ? CircleAvatar(
             backgroundColor: Colors.white,
-            backgroundImage: NetworkImage(imageUrl))
+            backgroundImage: NetworkImage(imageUrl),
+          )
         : CircleAvatar(child: Text(name[0].toUpperCase()));
 
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: avatar,
         ),
         title: const Text('Stream Dog Fooding'),
@@ -80,7 +80,8 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await streamVideoClient.disconnectUser();
-              Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
+              await Navigator.of(context)
+                  .pushReplacementNamed(LoginScreen.routeName);
             },
           ),
         ],

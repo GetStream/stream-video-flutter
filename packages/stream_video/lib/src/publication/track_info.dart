@@ -1,6 +1,5 @@
-import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
-    as sfu;
-import 'package:stream_video/src/types/video_dimensions.dart';
+import '../../protobuf/video/sfu/models/models.pbserver.dart' as sfu;
+import '../types/video_dimensions.dart';
 
 class TrackInfo {
   TrackInfo({

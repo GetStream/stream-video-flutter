@@ -1,17 +1,17 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
-import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
-    as sfu;
-import 'package:stream_video/src/call/call.dart';
-import 'package:stream_video/src/disposable.dart';
-import 'package:stream_video/src/event_emitter.dart';
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/extensions.dart';
-import 'package:stream_video/src/participant/participant_info.dart';
-import 'package:stream_video/src/publication/track_publication.dart';
-import 'package:stream_video/src/track/track.dart';
-import 'package:stream_video/src/types/other.dart';
+
+import '../../protobuf/video/sfu/models/models.pbserver.dart' as sfu;
+import '../call/call.dart';
+import '../disposable.dart';
+import '../event_emitter.dart';
+import '../events.dart';
+import '../extensions.dart';
+import '../publication/track_publication.dart';
+import '../track/track.dart';
+import '../types/other.dart';
+import 'participant_info.dart';
 
 const _kDefaultSpeakingThreshold = 0.3;
 
@@ -91,9 +91,11 @@ abstract class Participant<T extends TrackPublication>
   late ParticipantInfo _info;
   void updateInfo(ParticipantInfo info) {
     _info = info;
-    [events, call.events].emit(ParticipantInfoUpdatedEvent(
-      participant: this,
-    ));
+    [events, call.events].emit(
+      ParticipantInfoUpdatedEvent(
+        participant: this,
+      ),
+    );
   }
 
   /// Audio level between 0-1, 1 being the loudest.
@@ -121,10 +123,12 @@ abstract class Participant<T extends TrackPublication>
       lastSpokeAt = DateTime.now();
     }
 
-    events.emit(SpeakingChangedEvent(
-      participant: this,
-      speaking: speaking,
-    ));
+    events.emit(
+      SpeakingChangedEvent(
+        participant: this,
+        speaking: speaking,
+      ),
+    );
   }
 
   /// Connection quality between the [Participant] and the Server.
@@ -134,10 +138,12 @@ abstract class Participant<T extends TrackPublication>
     if (_connectionQuality == quality) return;
     _connectionQuality = quality;
 
-    [events, call.events].emit(ParticipantConnectionQualityUpdatedEvent(
-      participant: this,
-      connectionQuality: _connectionQuality,
-    ));
+    [events, call.events].emit(
+      ParticipantConnectionQualityUpdatedEvent(
+        participant: this,
+        connectionQuality: _connectionQuality,
+      ),
+    );
   }
 
   /// for internal use

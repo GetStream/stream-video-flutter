@@ -19,8 +19,8 @@ class ParticipantInfoWidget extends StatelessWidget {
     this.audioAvailable = true,
     this.connectionQuality = ConnectionQuality.unknown,
     this.isScreenShare = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String? title;
   final bool audioAvailable;
@@ -37,7 +37,6 @@ class ParticipantInfoWidget extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (title != null)
             Flexible(
@@ -46,23 +45,24 @@ class ParticipantInfoWidget extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-          isScreenShare
-              ? const Padding(
-                  padding: EdgeInsets.only(left: 5),
-                  child: Icon(
-                    Icons.monitor,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: Icon(
-                    audioAvailable ? Icons.mic : Icons.mic_off,
-                    color: audioAvailable ? Colors.white : Colors.red,
-                    size: 16,
-                  ),
-                ),
+          if (isScreenShare)
+            const Padding(
+              padding: EdgeInsets.only(left: 5),
+              child: Icon(
+                Icons.monitor,
+                color: Colors.white,
+                size: 16,
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(left: 5),
+              child: Icon(
+                audioAvailable ? Icons.mic : Icons.mic_off,
+                color: audioAvailable ? Colors.white : Colors.red,
+                size: 16,
+              ),
+            ),
           if (connectionQuality != ConnectionQuality.unknown)
             Padding(
               padding: const EdgeInsets.only(left: 5),

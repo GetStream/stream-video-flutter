@@ -1,7 +1,7 @@
-import 'package:stream_video/src/track/remote/remote.dart';
-import 'package:stream_video/src/track/track.dart';
-import 'package:stream_video/src/track/web/audio_api.dart'
-    if (dart.library.html) '../web/audio_html.dart' as audio;
+import '../track.dart';
+import '../web/audio_api.dart' if (dart.library.html) '../web/audio_html.dart'
+    as audio;
+import 'remote.dart';
 
 class RemoteAudioTrack extends RemoteTrack with AudioTrack {
   RemoteAudioTrack({

@@ -1,12 +1,12 @@
-import 'package:stream_video/src/participant/local.dart';
-import 'package:stream_video/src/participant/participant.dart';
-import 'package:stream_video/src/participant/remote.dart';
-import 'package:stream_video/src/publication/local.dart';
-import 'package:stream_video/src/publication/remote.dart';
-import 'package:stream_video/src/publication/track_publication.dart';
-import 'package:stream_video/src/sfu-client/sfu_client.dart';
-import 'package:stream_video/src/track/track.dart';
-import 'package:stream_video/src/types/other.dart';
+import 'participant/local.dart';
+import 'participant/participant.dart';
+import 'participant/remote.dart';
+import 'publication/local.dart';
+import 'publication/remote.dart';
+import 'publication/track_publication.dart';
+import 'sfu-client/sfu_client.dart';
+import 'track/track.dart';
+import 'types/other.dart';
 
 /// Base type for all StreamCallEvent events.
 mixin StreamCallEvent {}
@@ -49,175 +49,164 @@ class ConnectionStateUpdatedEvent with SfuEvent, CoordinatorEvent, CallEvent {
 /// It will not fire for participants that are already in the call
 /// Emitted by [Call].
 class ParticipantJoinedEvent with CallEvent {
-  final RemoteParticipant participant;
-
   const ParticipantJoinedEvent({
     required this.participant,
   });
+  final RemoteParticipant participant;
 
   @override
-  String toString() => '${runtimeType}(participant: ${participant})';
+  String toString() => '$runtimeType(participant: $participant)';
 }
 
 /// When a [RemoteParticipant] leaves the call.
 /// Emitted by [Call].
 class ParticipantLeftEvent with CallEvent {
-  final RemoteParticipant participant;
-
   const ParticipantLeftEvent({
     required this.participant,
   });
+  final RemoteParticipant participant;
 
   @override
-  String toString() => '${runtimeType}(participant: ${participant})';
+  String toString() => '$runtimeType(participant: $participant)';
 }
 
 /// When a [RemoteParticipant] or [LocalParticipant] becomes the loudest speaker
 /// in the call.
 class DominantSpeakerChangedEvent with CallEvent {
-  final Participant speaker;
-
   const DominantSpeakerChangedEvent({
     required this.speaker,
   });
+  final Participant speaker;
 
   @override
-  String toString() => '${runtimeType}(speaker: ${speaker})';
+  String toString() => '$runtimeType(speaker: $speaker)';
 }
 
 /// When a new [Track] is published to [Call] *after* the current participant has
 /// joined. It will not fire for tracks that are already published.
 /// Emitted by [Call] and [RemoteParticipant].
 class TrackPublishedEvent with CallEvent, ParticipantEvent {
-  final RemoteParticipant participant;
-  final RemoteTrackPublication publication;
-
   const TrackPublishedEvent({
     required this.participant,
     required this.publication,
   });
+  final RemoteParticipant participant;
+  final RemoteTrackPublication publication;
 
   @override
-  String toString() => '${runtimeType}'
-      '(participant: ${participant}, publication: ${publication})';
+  String toString() => '$runtimeType'
+      '(participant: $participant, publication: $publication)';
 }
 
 /// The participant has unpublished one of their [Track].
 /// Emitted by [Call] and [RemoteParticipant].
 class TrackUnpublishedEvent with CallEvent, ParticipantEvent {
-  final RemoteParticipant participant;
-  final RemoteTrackPublication publication;
-
   const TrackUnpublishedEvent({
     required this.participant,
     required this.publication,
   });
+  final RemoteParticipant participant;
+  final RemoteTrackPublication publication;
 
   @override
-  String toString() => '${runtimeType}'
-      '(participant: ${participant}, publication: ${publication})';
+  String toString() => '$runtimeType'
+      '(participant: $participant, publication: $publication)';
 }
 
 /// When the local participant publishes a new [Track] to the Call.
 /// Emitted by [Call] and [LocalParticipant].
 class LocalTrackPublishedEvent with CallEvent, ParticipantEvent {
-  final LocalParticipant participant;
-  final LocalTrackPublication publication;
-
   const LocalTrackPublishedEvent({
     required this.participant,
     required this.publication,
   });
+  final LocalParticipant participant;
+  final LocalTrackPublication publication;
 
   @override
-  String toString() => '${runtimeType}'
-      '(participant: ${participant}, publication: ${publication})';
+  String toString() => '$runtimeType'
+      '(participant: $participant, publication: $publication)';
 }
 
 /// The local participant has unpublished one of their [Track].
 /// Emitted by [Call] and [LocalParticipant].
 class LocalTrackUnpublishedEvent with CallEvent, ParticipantEvent {
-  final LocalParticipant participant;
-  final LocalTrackPublication publication;
-
   const LocalTrackUnpublishedEvent({
     required this.participant,
     required this.publication,
   });
+  final LocalParticipant participant;
+  final LocalTrackPublication publication;
 
   @override
-  String toString() => '${runtimeType}'
-      '(participant: ${participant}, publication: ${publication})';
+  String toString() => '$runtimeType'
+      '(participant: $participant, publication: $publication)';
 }
 
 /// [LocalParticipant] has subscribed to a new track published by a
 /// [RemoteParticipant].
 /// Emitted by [Call] and [RemoteParticipant].
 class TrackSubscribedEvent with CallEvent, ParticipantEvent {
-  final RemoteParticipant participant;
-  final RemoteTrackPublication publication;
-  final Track track;
-
   const TrackSubscribedEvent({
     required this.participant,
     required this.publication,
     required this.track,
   });
+  final RemoteParticipant participant;
+  final RemoteTrackPublication publication;
+  final Track track;
 
   @override
-  String toString() => '${runtimeType}'
-      '(participant: ${participant}, publication: ${publication}, '
-      'track: ${track})';
+  String toString() => '$runtimeType'
+      '(participant: $participant, publication: $publication, '
+      'track: $track)';
 }
 
 /// An error has occured during track subscription.
 /// Emitted by [Call] and [RemoteParticipant].
 class TrackSubscriptionExceptionEvent with CallEvent, ParticipantEvent {
-  final RemoteParticipant participant;
-  final String? sid;
-  final TrackSubscribeFailReason reason;
-
   const TrackSubscriptionExceptionEvent({
     required this.participant,
     this.sid,
     required this.reason,
   });
+  final RemoteParticipant participant;
+  final String? sid;
+  final TrackSubscribeFailReason reason;
 }
 
 /// The [LocalParticipant] has unsubscribed from a track published by a
 /// [RemoteParticipant]. This event is fired when the track was unpublished.
 /// Emitted by [Call] and [RemoteParticipant].
 class TrackUnsubscribedEvent with CallEvent, ParticipantEvent {
-  final RemoteParticipant participant;
-  final RemoteTrackPublication publication;
-  final Track track;
-
   const TrackUnsubscribedEvent({
     required this.participant,
     required this.publication,
     required this.track,
   });
+  final RemoteParticipant participant;
+  final RemoteTrackPublication publication;
+  final Track track;
 
   @override
-  String toString() => '${runtimeType}'
-      '(participant: ${participant}, publication: ${publication}, '
-      'track: ${track})';
+  String toString() => '$runtimeType'
+      '(participant: $participant, publication: $publication, '
+      'track: $track)';
 }
 
 /// A Participant has muted one of the track.
 /// Emitted by [RemoteParticipant] and [LocalParticipant].
 class TrackMutedEvent with CallEvent, ParticipantEvent {
-  final Participant participant;
-  final TrackPublication publication;
-
   const TrackMutedEvent({
     required this.participant,
     required this.publication,
   });
+  final Participant participant;
+  final TrackPublication publication;
 
   @override
-  String toString() => '${runtimeType}'
-      '(participant: ${participant}, publication: ${publication})';
+  String toString() => '$runtimeType'
+      '(participant: $participant, publication: $publication)';
 
   @Deprecated('Use publication instead')
   TrackPublication get track => publication;
@@ -226,17 +215,16 @@ class TrackMutedEvent with CallEvent, ParticipantEvent {
 /// This participant has unmuted one of their tracks
 /// Emitted by [RemoteParticipant] and [LocalParticipant].
 class TrackUnmutedEvent with CallEvent, ParticipantEvent {
-  final Participant participant;
-  final TrackPublication publication;
-
   const TrackUnmutedEvent({
     required this.participant,
     required this.publication,
   });
+  final Participant participant;
+  final TrackPublication publication;
 
   @override
-  String toString() => '${runtimeType}'
-      '(participant: ${participant}, publication: ${publication})';
+  String toString() => '$runtimeType'
+      '(participant: $participant, publication: $publication)';
 
   @Deprecated('Use publication instead')
   TrackPublication get track => publication;
@@ -247,45 +235,42 @@ class TrackUnmutedEvent with CallEvent, ParticipantEvent {
 /// [Participant]'s state, *all* [Participant]s in the Call will fire this event.
 /// Emitted by [Call] and [Participant].
 class ParticipantInfoUpdatedEvent with CallEvent, ParticipantEvent {
-  final Participant participant;
-
   const ParticipantInfoUpdatedEvent({
     required this.participant,
   });
+  final Participant participant;
 
   @override
-  String toString() => '${runtimeType}(participant: ${participant})';
+  String toString() => '$runtimeType(participant: $participant)';
 }
 
 /// [Pariticpant]'s [ConnectionQuality] has updated.
 /// Emitted by [Call] and [Participant].
 class ParticipantConnectionQualityUpdatedEvent
     with CallEvent, ParticipantEvent {
-  final Participant participant;
-  final ConnectionQuality connectionQuality;
-
   const ParticipantConnectionQualityUpdatedEvent({
     required this.participant,
     required this.connectionQuality,
   });
+  final Participant participant;
+  final ConnectionQuality connectionQuality;
 
   @override
-  String toString() => '${runtimeType}'
-      '(participant: ${participant}, connectionQuality: ${connectionQuality})';
+  String toString() => '$runtimeType'
+      '(participant: $participant, connectionQuality: $connectionQuality)';
 }
 
 /// The participant's isSpeaking property has changed
 /// Emitted by [Participant].
 class SpeakingChangedEvent with ParticipantEvent {
-  final Participant participant;
-  final bool speaking;
-
   const SpeakingChangedEvent({
     required this.participant,
     required this.speaking,
   });
+  final Participant participant;
+  final bool speaking;
 
   @override
-  String toString() => '${runtimeType}'
-      '(participant: ${participant}, speaking: ${speaking})';
+  String toString() => '$runtimeType'
+      '(participant: $participant, speaking: $speaking)';
 }

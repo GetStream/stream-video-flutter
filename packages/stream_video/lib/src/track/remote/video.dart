@@ -1,5 +1,5 @@
-import 'package:stream_video/src/track/remote/remote.dart';
-import 'package:stream_video/src/track/track.dart';
+import '../track.dart';
+import 'remote.dart';
 
 class RemoteVideoTrack extends RemoteTrack with VideoTrack {
   RemoteVideoTrack({

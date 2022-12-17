@@ -1,13 +1,14 @@
 import 'dart:async';
 
-import 'package:dogfooding/src/utils/after_layout.dart';
-import 'package:dogfooding/src/utils/assets.dart';
-import 'package:dogfooding/src/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'login_screen.dart';
+import 'utils/after_layout.dart';
+import 'utils/assets.dart';
+
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   static const routeName = '/';
 
@@ -21,7 +22,7 @@ class _SplashScreenState extends State<SplashScreen> with AfterLayoutMixin {
     // Show splash screen for 2 seconds.
     Future.delayed(const Duration(seconds: 2)).then(
       (_) async {
-        Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
+        await Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
       },
     );
   }
@@ -33,7 +34,6 @@ class _SplashScreenState extends State<SplashScreen> with AfterLayoutMixin {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Hero(
               tag: 'stream_logo',

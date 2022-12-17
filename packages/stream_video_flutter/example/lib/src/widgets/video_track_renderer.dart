@@ -10,16 +10,15 @@ enum VideoViewMirrorMode {
 
 /// Widget that renders a [VideoTrack].
 class VideoTrackRenderer extends StatefulWidget {
-  final VideoTrack track;
-  final rtc.RTCVideoViewObjectFit fit;
-  final VideoViewMirrorMode mirrorMode;
-
   const VideoTrackRenderer(
     this.track, {
     this.fit = rtc.RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
     this.mirrorMode = VideoViewMirrorMode.auto,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
+  final VideoTrack track;
+  final rtc.RTCVideoViewObjectFit fit;
+  final VideoViewMirrorMode mirrorMode;
 
   @override
   State<StatefulWidget> createState() => _VideoTrackRendererState();
@@ -46,7 +45,7 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
   @override
   void dispose() {
     widget.track.removeViewKey(_internalKey);
-    for (var it in cancelables) {
+    for (final it in cancelables) {
       it();
     }
     _renderer.srcObject = null;
@@ -58,17 +57,22 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
 
   Future<void> _attach() async {
     _renderer.srcObject = widget.track.mediaStream;
-    for (var it in cancelables) it();
-    cancelables.add(widget.track.events.on<TrackStreamUpdatedEvent>((event) {
-      if (!mounted) return;
-      _renderer.srcObject = event.stream;
-    }));
-    cancelables
-        .add(widget.track.events.on<LocalTrackOptionsUpdatedEvent>((event) {
-      if (!mounted) return;
-      // force recompute of mirror mode
-      setState(() {});
-    }));
+    for (final it in cancelables) {
+      it();
+    }
+    cancelables.add(
+      widget.track.events.on<TrackStreamUpdatedEvent>((event) {
+        if (!mounted) return;
+        _renderer.srcObject = event.stream;
+      }),
+    );
+    cancelables.add(
+      widget.track.events.on<LocalTrackOptionsUpdatedEvent>((event) {
+        if (!mounted) return;
+        // force recompute of mirror mode
+        setState(() {});
+      }),
+    );
   }
 
   @override

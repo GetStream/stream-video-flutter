@@ -1,5 +1,5 @@
-import 'package:stream_video/src/platform_detector/platform_detector.dart';
-import 'package:stream_video/src/types/video_parameters.dart';
+import '../platform_detector/platform_detector.dart';
+import '../types/video_parameters.dart';
 
 /// A type that represents front or back of the camera.
 enum CameraPosition {

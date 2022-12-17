@@ -1,20 +1,20 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
-    as sfu_models;
-import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart';
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/exceptions.dart';
-import 'package:stream_video/src/extensions.dart';
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/options.dart';
-import 'package:stream_video/src/participant/participant.dart';
-import 'package:stream_video/src/platform_detector/platform_detector.dart';
-import 'package:stream_video/src/publication/local.dart';
-import 'package:stream_video/src/publication/track_info.dart';
-import 'package:stream_video/src/sfu-client/rtc/codecs.dart' as codecs;
-import 'package:stream_video/src/track/local/audio.dart';
-import 'package:stream_video/src/track/local/video.dart';
-import 'package:stream_video/src/track/track.dart';
+
+import '../../protobuf/video/sfu/models/models.pbserver.dart' as sfu_models;
+import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart';
+import '../events.dart';
+import '../exceptions.dart';
+import '../extensions.dart';
+import '../logger/logger.dart';
+import '../options.dart';
+import '../platform_detector/platform_detector.dart';
+import '../publication/local.dart';
+import '../publication/track_info.dart';
+import '../sfu-client/rtc/codecs.dart' as codecs;
+import '../track/local/audio.dart';
+import '../track/local/video.dart';
+import '../track/track.dart';
+import 'participant.dart';
 
 /// Represents the current participant in the room. Instance of [LocalParticipant] is automatically
 /// created after successfully connecting to a [Call] and will be accessible from [Call.localParticipant].
@@ -72,10 +72,12 @@ class LocalParticipant extends Participant<LocalTrackPublication> {
     // did publish
     await track.onPublish();
 
-    [events, call.events].emit(LocalTrackPublishedEvent(
-      participant: this,
-      publication: pub,
-    ));
+    [events, call.events].emit(
+      LocalTrackPublishedEvent(
+        participant: this,
+        publication: pub,
+      ),
+    );
 
     return pub;
   }
@@ -162,10 +164,12 @@ class LocalParticipant extends Participant<LocalTrackPublication> {
     // did publish
     await track.onPublish();
 
-    [events, call.events].emit(LocalTrackPublishedEvent(
-      participant: this,
-      publication: pub,
-    ));
+    [events, call.events].emit(
+      LocalTrackPublishedEvent(
+        participant: this,
+        publication: pub,
+      ),
+    );
 
     return pub;
   }
@@ -199,10 +203,12 @@ class LocalParticipant extends Participant<LocalTrackPublication> {
     }
 
     if (notify) {
-      [events, call.events].emit(LocalTrackUnpublishedEvent(
-        participant: this,
-        publication: pub,
-      ));
+      [events, call.events].emit(
+        LocalTrackUnpublishedEvent(
+          participant: this,
+          publication: pub,
+        ),
+      );
     }
 
     await pub.dispose();

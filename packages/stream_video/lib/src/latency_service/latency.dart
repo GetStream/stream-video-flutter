@@ -1,5 +1,5 @@
 import 'package:http/http.dart' as http;
-import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
+import '../../protobuf/video/coordinator/edge_v1/edge.pb.dart';
 
 /// A service that provides the latency of a given [edge] server in seconds.
 ///

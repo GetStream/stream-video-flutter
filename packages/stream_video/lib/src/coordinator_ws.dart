@@ -1,20 +1,19 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart'
+import '../protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart'
     as coordinator;
-import 'package:stream_video/protobuf/video/coordinator/user_v1/user.pb.dart'
-    as coordinator_user;
-import 'package:stream_video/src/core/video_error.dart';
-import 'package:stream_video/src/event_emitter.dart';
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/internal/events.dart';
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/models/user_info.dart';
-import 'package:stream_video/src/token/token_manager.dart';
-import 'package:stream_video/src/types/other.dart';
-import 'package:stream_video/src/ws/keep_alive.dart';
-import 'package:stream_video/src/ws/ws.dart';
+import '../protobuf/video/coordinator/user_v1/user.pb.dart' as coordinator_user;
+import 'core/video_error.dart';
+import 'event_emitter.dart';
+import 'events.dart';
+import 'internal/events.dart';
+import 'logger/logger.dart';
+import 'models/user_info.dart';
+import 'token/token_manager.dart';
+import 'types/other.dart';
+import 'ws/keep_alive.dart';
+import 'ws/ws.dart';
 
 class CoordinatorWebSocket extends StreamWebSocket
     with KeepAlive, ConnectionStateMixin, EventEmittable<CoordinatorEvent> {
@@ -53,7 +52,7 @@ class CoordinatorWebSocket extends StreamWebSocket
     return super.connect();
   }
 
-  void _authenticateUser() async {
+  Future<void> _authenticateUser() async {
     logger.info('Authenticating user with $url');
 
     final token = await tokenManager.loadToken();
@@ -72,9 +71,11 @@ class CoordinatorWebSocket extends StreamWebSocket
       ),
     );
 
-    return send(coordinator.WebsocketClientEvent(
-      authRequest: authPayload,
-    ));
+    return send(
+      coordinator.WebsocketClientEvent(
+        authRequest: authPayload,
+      ),
+    );
   }
 
   @override
@@ -136,6 +137,11 @@ class CoordinatorWebSocket extends StreamWebSocket
 
   @override
   void onMessage(dynamic message) {
+    if (message is! List<int>) {
+      logger.warning('Received message is not a list of bytes');
+      return;
+    }
+
     coordinator.WebsocketEvent? event;
     try {
       event = coordinator.WebsocketEvent.fromBuffer(message);
@@ -192,14 +198,16 @@ class CoordinatorWebSocket extends StreamWebSocket
       callId: _callInfo?.callId,
     );
 
-    return send(coordinator.WebsocketClientEvent(
-      healthcheck: healthCheck,
-    ));
+    return send(
+      coordinator.WebsocketClientEvent(
+        healthcheck: healthCheck,
+      ),
+    );
   }
 
   int _reconnectAttempt = 0;
 
-  void _reconnect({bool refreshToken = false}) async {
+  Future<void> _reconnect({bool refreshToken = false}) async {
     if (isConnecting || isReconnecting) return;
 
     logger.info('Reconnecting: $_reconnectAttempt');
@@ -211,7 +219,7 @@ class CoordinatorWebSocket extends StreamWebSocket
       Duration(milliseconds: delay),
       () async {
         if (refreshToken) await tokenManager.refreshToken();
-        connect(reconnect: true);
+        await connect(reconnect: true);
       },
     );
   }
@@ -259,19 +267,25 @@ extension on EventEmitter<CoordinatorEvent> {
         return emit(CoordinatorCallDeletedEvent(callDeleted: callDeleted));
       case coordinator.WebsocketEvent_Event.callMembersCreated:
         final callMembersCreated = event.callMembersCreated;
-        return emit(CoordinatorCallMembersCreatedEvent(
-          callMembersCreated: callMembersCreated,
-        ));
+        return emit(
+          CoordinatorCallMembersCreatedEvent(
+            callMembersCreated: callMembersCreated,
+          ),
+        );
       case coordinator.WebsocketEvent_Event.callMembersUpdated:
         final callMembersUpdated = event.callMembersUpdated;
-        return emit(CoordinatorCallMembersUpdatedEvent(
-          callMembersUpdated: callMembersUpdated,
-        ));
+        return emit(
+          CoordinatorCallMembersUpdatedEvent(
+            callMembersUpdated: callMembersUpdated,
+          ),
+        );
       case coordinator.WebsocketEvent_Event.callMembersDeleted:
         final callMembersDeleted = event.callMembersDeleted;
-        return emit(CoordinatorCallMembersDeletedEvent(
-          callMembersDeleted: callMembersDeleted,
-        ));
+        return emit(
+          CoordinatorCallMembersDeletedEvent(
+            callMembersDeleted: callMembersDeleted,
+          ),
+        );
       case coordinator.WebsocketEvent_Event.callEnded:
         final callEnded = event.callEnded;
         return emit(CoordinatorCallEndedEvent(callEnded: callEnded));
@@ -283,9 +297,11 @@ extension on EventEmitter<CoordinatorEvent> {
         return emit(CoordinatorCallRejectedEvent(callRejected: callRejected));
       case coordinator.WebsocketEvent_Event.callCancelled:
         final callCancelled = event.callCancelled;
-        return emit(CoordinatorCallCancelledEvent(
-          callCancelled: callCancelled,
-        ));
+        return emit(
+          CoordinatorCallCancelledEvent(
+            callCancelled: callCancelled,
+          ),
+        );
       case coordinator.WebsocketEvent_Event.userUpdated:
         final userUpdated = event.userUpdated;
         return emit(CoordinatorUserUpdatedEvent(userUpdated: userUpdated));

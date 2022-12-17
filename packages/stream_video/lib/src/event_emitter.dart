@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
-import 'package:stream_video/src/events.dart';
 
 /// A listener that can be added to a [EventEmitter] using
 /// [EventEmitter.on] or [EventEmitter.listen].
@@ -56,15 +55,18 @@ class EventEmitter<T> {
   bool get mounted => _mounted;
 
   bool _debugIsMounted() {
-    assert(() {
-      if (!_mounted) {
-        throw StateError('''
+    assert(
+      () {
+        if (!_mounted) {
+          throw StateError('''
         Tried to use $runtimeType after `dispose` was called.
         Consider checking `mounted`.
         ''');
-      }
-      return true;
-    }(), '');
+        }
+        return true;
+      }(),
+      '',
+    );
     return true;
   }
 

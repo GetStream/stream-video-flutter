@@ -1,17 +1,15 @@
-import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
-    as sfu_models;
-import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
-    as signal;
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/disposable.dart';
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/extensions.dart';
-import 'package:stream_video/src/internal/events.dart';
-import 'package:stream_video/src/options.dart';
-import 'package:stream_video/src/participant/participant.dart';
-import 'package:stream_video/src/publication/track_info.dart';
-import 'package:stream_video/src/track/track.dart';
-import 'package:stream_video/src/types/video_dimensions.dart';
+import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as signal;
+import '../disposable.dart';
+import '../events.dart';
+import '../extensions.dart';
+import '../internal/events.dart';
+import '../logger/logger.dart';
+import '../options.dart';
+import '../participant/participant.dart';
+import '../track/track.dart';
+import '../types/video_dimensions.dart';
+import 'track_info.dart';
 
 /// Represents a track that's published to the server. This class contains
 /// metadata associated with tracks.
@@ -99,12 +97,14 @@ abstract class TrackPublication<T extends Track> with Disposable {
       logger.fine(
         '${this} Sending mute signal... sid:$sid, muted:${event.muted}',
       );
-      participant.call.sfuClient.updateMuteStates(muteStates: [
-        signal.TrackMuteState(
-          trackType: event.track.type,
-          muted: event.muted,
-        ),
-      ]);
+      participant.call.sfuClient.updateMuteStates(
+        muteStates: [
+          signal.TrackMuteState(
+            trackType: event.track.type,
+            muted: event.muted,
+          ),
+        ],
+      );
     }
 
     // emit events

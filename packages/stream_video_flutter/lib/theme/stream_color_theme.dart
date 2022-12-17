@@ -327,7 +327,7 @@ class Effect {
       sigmaX: sigmaX ?? this.sigmaX,
       sigmaY: sigmaY ?? this.sigmaY,
       color: color ?? this.color,
-      alpha: color as double? ?? this.alpha,
+      alpha: alpha ?? this.alpha,
       blur: blur ?? this.blur,
     );
   }
@@ -338,7 +338,10 @@ class Effect {
       sigmaY: lerpDouble(sigmaY, other.sigmaY, t),
       color: Color.lerp(color, other.color, t),
       alpha: lerpDouble(
-          color as double? ?? alpha, other.color as double? ?? other.alpha, t),
+        color as double? ?? alpha,
+        other.color as double? ?? other.alpha,
+        t,
+      ),
       blur: lerpDouble(blur, other.blur, t),
     );
   }

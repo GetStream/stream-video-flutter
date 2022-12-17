@@ -8,8 +8,8 @@ class ControlsWidget extends StatefulWidget {
   const ControlsWidget(
     this.call,
     this.participant, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Call call;
   final LocalParticipant participant;
@@ -42,7 +42,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
     super.initState();
     participant.events.listen(_onChange);
     _deviceChangeSubscription = Hardware.instance.onDeviceChange.stream.listen(
-      (devices) => _loadDevices(devices),
+      _loadDevices,
     );
     Hardware.instance.enumerateDevices().then(_loadDevices);
   }
@@ -54,7 +54,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
     super.dispose();
   }
 
-  void _loadDevices(List<MediaDevice> devices) async {
+  Future<void> _loadDevices(List<MediaDevice> devices) async {
     _audioInputs = devices.where((d) => d.kind == 'audioinput').toList();
     _audioOutputs = devices.where((d) => d.kind == 'audiooutput').toList();
     _videoInputs = devices.where((d) => d.kind == 'videoinput').toList();
@@ -62,40 +62,40 @@ class _ControlsWidgetState extends State<ControlsWidget> {
     setState(() {});
   }
 
-  void _unpublishAll() async {
+  Future<void> _unpublishAll() async {
     final result = await context.showUnPublishDialog();
     if (result == true) await participant.unpublishAllTracks();
   }
 
   bool get isMuted => participant.isMuted;
 
-  void _disableAudio() async {
+  Future<void> _disableAudio() async {
     await participant.setMicrophoneEnabled(enabled: false);
   }
 
   Future<void> _enableAudio() async {
-    await participant.setMicrophoneEnabled(enabled: true);
+    await participant.setMicrophoneEnabled();
   }
 
-  void _disableVideo() async {
+  Future<void> _disableVideo() async {
     await participant.setCameraEnabled(enabled: false);
   }
 
-  void _enableVideo() async {
-    await participant.setCameraEnabled(enabled: true);
+  Future<void> _enableVideo() async {
+    await participant.setCameraEnabled();
   }
 
-  void _selectAudioOutput(MediaDevice device) async {
+  Future<void> _selectAudioOutput(MediaDevice device) async {
     await Hardware.instance.selectAudioOutput(device);
     setState(() {});
   }
 
-  void _selectAudioInput(MediaDevice device) async {
+  Future<void> _selectAudioInput(MediaDevice device) async {
     await Hardware.instance.selectAudioInput(device);
     setState(() {});
   }
 
-  void _selectVideoInput(MediaDevice device) async {
+  Future<void> _selectVideoInput(MediaDevice device) async {
     final track = participant.videoTracks.firstOrNull?.track;
     if (track == null) return;
     if (_selectedVideoInput?.deviceId != device.deviceId) {
@@ -105,7 +105,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
     }
   }
 
-  void _toggleCamera() async {
+  Future<void> _toggleCamera() async {
     //
     final track = participant.videoTracks.firstOrNull?.track;
     if (track == null) return;
@@ -122,7 +122,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
     }
   }
 
-  void _onTapDisconnect() async {
+  Future<void> _onTapDisconnect() async {
     final result = await context.showDisconnectDialog();
     if (result == true) await widget.call.disconnect();
   }
@@ -151,7 +151,6 @@ class _ControlsWidgetState extends State<ControlsWidget> {
               itemBuilder: (BuildContext context) {
                 return [
                   PopupMenuItem<MediaDevice>(
-                    value: null,
                     onTap: isMuted ? _enableAudio : _disableAudio,
                     child: const ListTile(
                       leading: Icon(
@@ -190,7 +189,6 @@ class _ControlsWidgetState extends State<ControlsWidget> {
             itemBuilder: (BuildContext context) {
               return [
                 const PopupMenuItem<MediaDevice>(
-                  value: null,
                   child: ListTile(
                     leading: Icon(Icons.volume_up_rounded),
                     title: Text('Select Audio Output'),
@@ -220,7 +218,6 @@ class _ControlsWidgetState extends State<ControlsWidget> {
               itemBuilder: (BuildContext context) {
                 return [
                   PopupMenuItem<MediaDevice>(
-                    value: null,
                     onTap: _disableVideo,
                     child: const ListTile(
                       leading: Icon(Icons.videocam_off_rounded),
@@ -256,7 +253,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
                   ? Icons.camera_rear_rounded
                   : Icons.camera_front_rounded,
             ),
-            onPressed: () => _toggleCamera(),
+            onPressed: _toggleCamera,
             tooltip: 'toggle camera',
           ),
           IconButton(

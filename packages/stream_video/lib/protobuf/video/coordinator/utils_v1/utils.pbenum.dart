@@ -10,19 +10,31 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class Direction extends $pb.ProtobufEnum {
-  static const Direction DIRECTION_UNSPECIFIED = Direction._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DIRECTION_UNSPECIFIED');
-  static const Direction DIRECTION_DESC = Direction._(-1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DIRECTION_DESC');
-  static const Direction DIRECTION_ASC = Direction._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DIRECTION_ASC');
+  static const Direction DIRECTION_UNSPECIFIED = Direction._(
+      0,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'DIRECTION_UNSPECIFIED');
+  static const Direction DIRECTION_DESC = Direction._(
+      -1,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'DIRECTION_DESC');
+  static const Direction DIRECTION_ASC = Direction._(
+      1,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'DIRECTION_ASC');
 
-  static const $core.List<Direction> values = <Direction> [
+  static const $core.List<Direction> values = <Direction>[
     DIRECTION_UNSPECIFIED,
     DIRECTION_DESC,
     DIRECTION_ASC,
   ];
 
-  static final $core.Map<$core.int, Direction> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static final $core.Map<$core.int, Direction> _byValue =
+      $pb.ProtobufEnum.initByValue(values);
   static Direction? valueOf($core.int value) => _byValue[value];
 
   const Direction._($core.int v, $core.String n) : super(v, n);
 }
-

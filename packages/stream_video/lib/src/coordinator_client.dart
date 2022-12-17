@@ -1,10 +1,11 @@
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pbtwirp.dart';
-import 'package:stream_video/src/core/video_error.dart';
-import 'package:stream_video/src/event_emitter.dart';
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/token/token_manager.dart';
 import 'package:tart/tart.dart';
+
+import '../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
+import '../protobuf/video/coordinator/client_v1_rpc/client_rpc.pbtwirp.dart';
+import 'core/video_error.dart';
+import 'event_emitter.dart';
+import 'events.dart';
+import 'token/token_manager.dart';
 
 class CoordinatorClient with EventEmittable<CoordinatorEvent> {
   CoordinatorClient({

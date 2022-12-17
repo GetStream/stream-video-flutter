@@ -1,17 +1,15 @@
 import 'dart:async';
 
-import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
-    as sfu_events;
-import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
-    as sfu_models;
-import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
-    as signal;
-import 'package:stream_video/src/event_emitter.dart';
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/sfu-client/rpc/signal_client.dart';
-import 'package:stream_video/src/sfu-client/rpc/signal_ws.dart';
-import 'package:stream_video/src/types/other.dart';
 import 'package:uuid/uuid.dart';
+
+import '../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
+import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as signal;
+import '../event_emitter.dart';
+import '../events.dart';
+import '../types/other.dart';
+import 'rpc/signal_client.dart';
+import 'rpc/signal_ws.dart';
 
 const _localUrl = 'http://192.168.1.7:3031/twirp';
 

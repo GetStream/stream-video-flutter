@@ -1,16 +1,16 @@
 import 'dart:convert';
 
-import 'package:dogfooding/main.dart';
-import 'package:dogfooding/src/utils/assets.dart';
-import 'package:dogfooding/src/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:stream_video/stream_video.dart';
 import 'package:http/http.dart' as http;
+import 'package:stream_video/stream_video.dart';
+
+import 'home_screen.dart';
+import 'utils/assets.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   static const routeName = '/login';
 
@@ -50,19 +50,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _onLoginSuccess(UserInfo user) async {
     final userId = user.id;
-    final response = await http.get(Uri.parse(
-      'https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$userId',
-    ));
+    final response = await http.get(
+      Uri.parse(
+        'https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$userId',
+      ),
+    );
 
     final token = json.decode(response.body)['token'];
 
-    var streamVideoClient = StreamVideo.instance;
+    final streamVideoClient = StreamVideo.instance;
     await streamVideoClient.connectUser(
       user,
       token: Token(token),
     );
 
-    Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+    await Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
   }
 
   final _emailController = TextEditingController();
@@ -91,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 48),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(
@@ -108,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 48),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 children: [
                   Expanded(
@@ -118,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    padding: EdgeInsets.symmetric(horizontal: 8),
                     child: Text('OR'),
                   ),
                   Expanded(
@@ -132,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 48),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: GoogleLoginButton(
                 onPressed: _loginWithGoogle,
               ),
@@ -146,10 +148,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
 class GoogleLoginButton extends StatelessWidget {
   const GoogleLoginButton({
-    Key? key,
+    super.key,
     this.label = 'Login with Google',
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final String label;
   final VoidCallback? onPressed;
@@ -158,28 +160,28 @@ class GoogleLoginButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        elevation: 1.0,
-        fixedSize: const Size.fromHeight(56.0),
+        elevation: 1,
+        fixedSize: const Size.fromHeight(56),
         backgroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(36.0),
+          borderRadius: BorderRadius.circular(36),
         ),
       ),
       onPressed: onPressed,
       child: Padding(
-        padding: const EdgeInsets.all(18.0),
+        padding: const EdgeInsets.all(18),
         child: Row(
           children: [
             SvgPicture.asset(
               googleLogoAsset,
               semanticsLabel: 'Google Logo',
             ),
-            const SizedBox(width: 24.0),
+            const SizedBox(width: 24),
             Text(
               label,
               style: const TextStyle(
-                fontSize: 16.0,
+                fontSize: 16,
                 color: Colors.black87,
                 fontWeight: FontWeight.bold,
               ),

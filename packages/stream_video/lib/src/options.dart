@@ -1,9 +1,9 @@
-import 'package:stream_video/src/track/local/audio.dart';
-import 'package:stream_video/src/track/local/video.dart';
-import 'package:stream_video/src/track/options.dart';
-import 'package:stream_video/src/track/track.dart';
-import 'package:stream_video/src/types/video_encoding.dart';
-import 'package:stream_video/src/types/video_parameters.dart';
+import 'track/local/audio.dart';
+import 'track/local/video.dart';
+import 'track/options.dart';
+import 'track/track.dart';
+import 'types/video_encoding.dart';
+import 'types/video_parameters.dart';
 
 class TrackOption<T extends Track> {
   const TrackOption({
@@ -18,9 +18,9 @@ class TrackOption<T extends Track> {
 /// Options used when connecting to the server.
 class ConnectOptions {
   const ConnectOptions({
-    this.camera = const TrackOption(enabled: false),
-    this.microphone = const TrackOption(enabled: false),
-    this.screenShare = const TrackOption(enabled: false),
+    this.camera = const TrackOption(),
+    this.microphone = const TrackOption(),
+    this.screenShare = const TrackOption(),
   });
 
   final TrackOption<LocalVideoTrack> camera;
@@ -104,7 +104,7 @@ class VideoPublishOptions with PublishOptions {
 
   @override
   String toString() =>
-      '${runtimeType}(videoEncoding: ${videoEncoding}, simulcast: ${simulcast})';
+      '$runtimeType(videoEncoding: $videoEncoding, simulcast: $simulcast)';
 }
 
 /// Options used when publishing audio.
@@ -123,7 +123,7 @@ class AudioPublishOptions with PublishOptions {
   final int audioBitrate;
 
   @override
-  String toString() => '${runtimeType}(dtx: ${dtx})';
+  String toString() => '$runtimeType(dtx: $dtx)';
 }
 
 mixin AudioPreset {

@@ -1,11 +1,10 @@
-import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
-    as sfu_models;
-import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
-    as signal;
-import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart'
-    as signal_twirp;
-import 'package:stream_video/src/core/video_error.dart';
 import 'package:tart/tart.dart';
+
+import '../../../protobuf/video/sfu/models/models.pbserver.dart' as sfu_models;
+import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as signal;
+import '../../../protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart'
+    as signal_twirp;
+import '../../core/video_error.dart';
 
 class SignalClient {
   SignalClient({

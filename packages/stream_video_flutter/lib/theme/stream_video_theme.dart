@@ -67,9 +67,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   static StreamVideoTheme of(BuildContext context) {
     final theme = Theme.of(context);
     final streamVideoTheme = theme.extension<StreamVideoTheme>();
-    
-    if(streamVideoTheme != null) return streamVideoTheme;
-    if(theme.brightness == Brightness.light) return _kLightFallbackTheme;
+
+    if (streamVideoTheme != null) return streamVideoTheme;
+    if (theme.brightness == Brightness.light) return _kLightFallbackTheme;
     return _kDarkFallbackTheme;
   }
 
@@ -102,7 +102,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
 
   @override
   ThemeExtension<StreamVideoTheme> lerp(
-      ThemeExtension<StreamVideoTheme>? other, double t) {
+    ThemeExtension<StreamVideoTheme>? other,
+    double t,
+  ) {
     if (other is! StreamVideoTheme) {
       return this;
     }

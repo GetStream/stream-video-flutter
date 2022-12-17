@@ -1,10 +1,10 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:meta/meta.dart';
-import 'package:stream_video/src/exceptions.dart';
-import 'package:stream_video/src/internal/events.dart';
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/track/options.dart';
-import 'package:stream_video/src/track/track.dart';
+import '../../exceptions.dart';
+import '../../internal/events.dart';
+import '../../logger/logger.dart';
+import '../options.dart';
+import '../track.dart';
 
 /// Base class for [LocalAudioTrack] and [LocalVideoTrack].
 abstract class LocalTrack extends Track {
@@ -78,10 +78,12 @@ abstract class LocalTrack extends Track {
     await start();
 
     // notify so VideoView can re-compute mirror mode if necessary
-    events.emit(LocalTrackOptionsUpdatedEvent(
-      track: this,
-      options: currentOptions,
-    ));
+    events.emit(
+      LocalTrackOptionsUpdatedEvent(
+        track: this,
+        options: currentOptions,
+      ),
+    );
   }
 
   @override

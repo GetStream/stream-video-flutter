@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:stream_video/src/platform_detector/platform_detector.dart';
+import 'platform_detector.dart';
 
 /// Version running on native systems
 PlatformType get currentPlatform {

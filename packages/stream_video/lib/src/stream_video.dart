@@ -1,23 +1,24 @@
 import 'dart:async';
 
 import 'package:logging/logging.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
-import 'package:stream_video/src/call/call.dart';
-import 'package:stream_video/src/coordinator_client.dart';
-import 'package:stream_video/src/coordinator_ws.dart';
-import 'package:stream_video/src/core/rx_controller.dart';
-import 'package:stream_video/src/core/video_error.dart';
-import 'package:stream_video/src/event_emitter.dart';
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/latency_service/latency.dart';
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/models/user_info.dart';
-import 'package:stream_video/src/options.dart';
-import 'package:stream_video/src/token/token.dart';
-import 'package:stream_video/src/token/token_manager.dart';
 import 'package:synchronized/synchronized.dart';
+
+import '../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
+import '../protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
+import '../protobuf/video/coordinator/edge_v1/edge.pb.dart';
+import 'call/call.dart';
+import 'coordinator_client.dart';
+import 'coordinator_ws.dart';
+import 'core/rx_controller.dart';
+import 'core/video_error.dart';
+import 'event_emitter.dart';
+import 'events.dart';
+import 'latency_service/latency.dart';
+import 'logger/logger.dart';
+import 'models/user_info.dart';
+import 'options.dart';
+import 'token/token.dart';
+import 'token/token_manager.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -44,6 +45,26 @@ const _defaultCoordinatorWsUrl =
 
 /// The client responsible for handling config and maintaining calls
 class StreamVideo with EventEmittable<CoordinatorEvent> {
+  /// Creates a new Stream Video client unassociated with the
+  /// Stream Video singleton instance
+  factory StreamVideo(
+    String apiKey, {
+    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
+    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
+    int latencyMeasurementRounds = 3,
+    Level logLevel = Level.ALL,
+    LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
+  }) {
+    return StreamVideo._(
+      apiKey,
+      coordinatorRpcUrl: coordinatorRpcUrl,
+      coordinatorWsUrl: coordinatorWsUrl,
+      latencyMeasurementRounds: latencyMeasurementRounds,
+      logLevel: logLevel,
+      logHandlerFunction: logHandlerFunction,
+    );
+  }
+
   /// Initialises the Stream Video SDK and creates the singleton instance of the client.
   StreamVideo.init(
     this.apiKey, {
@@ -61,26 +82,6 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
         ''');
     }
     _instance = StreamVideo._(
-      apiKey,
-      coordinatorRpcUrl: coordinatorRpcUrl,
-      coordinatorWsUrl: coordinatorWsUrl,
-      latencyMeasurementRounds: latencyMeasurementRounds,
-      logLevel: logLevel,
-      logHandlerFunction: logHandlerFunction,
-    );
-  }
-
-  /// Creates a new Stream Video client unassociated with the
-  /// Stream Video singleton instance
-  factory StreamVideo.new(
-    String apiKey, {
-    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
-    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
-    int latencyMeasurementRounds = 3,
-    Level logLevel = Level.ALL,
-    LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
-  }) {
-    return StreamVideo._(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
@@ -127,10 +128,10 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
   ///
   /// This is useful if you want to re-initialise the SDK with a different
   /// API key.
-  static void reset({bool disconnectUser = false}) async {
+  static Future<void> reset({bool disconnectUser = false}) async {
     if (disconnectUser) {
-      _instance?.activeCall?.disconnect();
-      _instance?.disconnectUser();
+      await _instance?.activeCall?.disconnect();
+      await _instance?.disconnectUser();
     }
     _instance = null;
   }
@@ -177,7 +178,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     logger.info('setting user : ${user.id}');
 
     _state.currentUser.value = user;
-    _tokenManager.setTokenOrProvider(
+    await _tokenManager.setTokenOrProvider(
       user.id,
       token: token,
       provider: provider,

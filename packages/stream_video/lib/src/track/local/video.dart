@@ -1,10 +1,9 @@
-import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
-    as sfu;
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/track/local/audio.dart';
-import 'package:stream_video/src/track/local/local.dart';
-import 'package:stream_video/src/track/options.dart';
-import 'package:stream_video/src/track/track.dart';
+import '../../../protobuf/video/sfu/models/models.pbserver.dart' as sfu;
+import '../../logger/logger.dart';
+import '../options.dart';
+import '../track.dart';
+import 'audio.dart';
+import 'local.dart';
 
 /// A video track from the local device. Use static methods in this class to create
 /// video tracks.
@@ -74,12 +73,14 @@ class LocalVideoTrack extends LocalTrack with VideoTrack {
     ];
 
     if (stream.getAudioTracks().isNotEmpty) {
-      tracks.add(LocalAudioTrack(
-        type: sfu.TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO,
-        mediaStream: stream,
-        mediaStreamTrack: stream.getAudioTracks().first,
-        currentOptions: const AudioCaptureOptions(),
-      ));
+      tracks.add(
+        LocalAudioTrack(
+          type: sfu.TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO,
+          mediaStream: stream,
+          mediaStreamTrack: stream.getAudioTracks().first,
+          currentOptions: const AudioCaptureOptions(),
+        ),
+      );
     }
     return tracks;
   }

@@ -1,19 +1,19 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
-    as sfu;
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/exceptions.dart';
-import 'package:stream_video/src/extensions.dart';
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/participant/participant.dart';
-import 'package:stream_video/src/participant/participant_info.dart';
-import 'package:stream_video/src/publication/remote.dart';
-import 'package:stream_video/src/publication/track_info.dart';
-import 'package:stream_video/src/track/remote/audio.dart';
-import 'package:stream_video/src/track/remote/remote.dart';
-import 'package:stream_video/src/track/remote/video.dart';
-import 'package:stream_video/src/types/other.dart';
-import 'package:stream_video/src/types/video_dimensions.dart';
+
+import '../../protobuf/video/sfu/models/models.pbserver.dart' as sfu;
+import '../events.dart';
+import '../exceptions.dart';
+import '../extensions.dart';
+import '../logger/logger.dart';
+import '../publication/remote.dart';
+import '../publication/track_info.dart';
+import '../track/remote/audio.dart';
+import '../track/remote/remote.dart';
+import '../track/remote/video.dart';
+import '../types/other.dart';
+import '../types/video_dimensions.dart';
+import 'participant.dart';
+import 'participant_info.dart';
 
 const _kTrackPublishTimeout = Duration(seconds: 10);
 
@@ -134,11 +134,13 @@ class RemoteParticipant extends Participant<RemoteTrackPublication> {
     await pub.updateTrack(track);
     addTrackPublication(pub);
 
-    [events, call.events].emit(TrackSubscribedEvent(
-      participant: this,
-      track: track,
-      publication: pub,
-    ));
+    [events, call.events].emit(
+      TrackSubscribedEvent(
+        participant: this,
+        track: track,
+        publication: pub,
+      ),
+    );
   }
 
   @override
@@ -233,18 +235,22 @@ class RemoteParticipant extends Participant<RemoteTrackPublication> {
     // if has track
     if (track != null) {
       await track.stop();
-      [events, call.events].emit(TrackUnsubscribedEvent(
-        participant: this,
-        track: track,
-        publication: pub,
-      ));
+      [events, call.events].emit(
+        TrackUnsubscribedEvent(
+          participant: this,
+          track: track,
+          publication: pub,
+        ),
+      );
     }
 
     if (notify) {
-      [events, call.events].emit(TrackUnpublishedEvent(
-        participant: this,
-        publication: pub,
-      ));
+      [events, call.events].emit(
+        TrackUnpublishedEvent(
+          participant: this,
+          publication: pub,
+        ),
+      );
     }
 
     await pub.dispose();

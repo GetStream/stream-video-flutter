@@ -4,33 +4,30 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:meta/meta.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart'
+
+import '../../protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart'
     as rpc;
-import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart'
-    as edge;
-import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
-    as sfu_events;
-import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
-    as sfu_models;
-import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
-    as signal;
-import 'package:stream_video/src/call/transport.dart';
-import 'package:stream_video/src/core/utils.dart';
-import 'package:stream_video/src/event_emitter.dart';
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/extensions.dart';
-import 'package:stream_video/src/internal/events.dart';
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/models/call_configuration.dart';
-import 'package:stream_video/src/options.dart';
-import 'package:stream_video/src/participant/local.dart';
-import 'package:stream_video/src/participant/participant.dart';
-import 'package:stream_video/src/participant/participant_info.dart';
-import 'package:stream_video/src/participant/remote.dart';
-import 'package:stream_video/src/sfu-client/rtc/codecs.dart' as codecs;
-import 'package:stream_video/src/sfu-client/sfu_client.dart';
-import 'package:stream_video/src/stream_video.dart';
-import 'package:stream_video/src/types/other.dart';
+import '../../protobuf/video/coordinator/edge_v1/edge.pb.dart' as edge;
+import '../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
+import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as signal;
+import '../core/utils.dart';
+import '../event_emitter.dart';
+import '../events.dart';
+import '../extensions.dart';
+import '../internal/events.dart';
+import '../logger/logger.dart';
+import '../models/call_configuration.dart';
+import '../options.dart';
+import '../participant/local.dart';
+import '../participant/participant.dart';
+import '../participant/participant_info.dart';
+import '../participant/remote.dart';
+import '../sfu-client/rtc/codecs.dart' as codecs;
+import '../sfu-client/sfu_client.dart';
+import '../stream_video.dart';
+import '../types/other.dart';
+import 'transport.dart';
 
 const _timeoutDuration = Duration(seconds: 30);
 
@@ -401,7 +398,7 @@ class Call with EventEmittable<CallEvent> {
     return sfuClient.updateSubscriptions(tracks: [...tracks.values]);
   }
 
-  void _onSubscriberTrack(rtc.RTCTrackEvent event) async {
+  Future<void> _onSubscriberTrack(rtc.RTCTrackEvent event) async {
     logger.fine('[WebRTC] pc.onTrack');
 
     final stream = event.streams.firstOrNull;
@@ -449,7 +446,7 @@ class Call with EventEmittable<CallEvent> {
     );
   }
 
-  void _onSubscriberTrackAdded({
+  Future<void> _onSubscriberTrackAdded({
     required rtc.MediaStreamTrack track,
     required rtc.MediaStream stream,
     rtc.RTCRtpReceiver? receiver,
@@ -477,7 +474,7 @@ class Call with EventEmittable<CallEvent> {
         receiver: receiver,
       );
     } on TrackSubscriptionExceptionEvent catch (event) {
-      logger.severe('addSubscribedMediaTrack() throwed ${event}');
+      logger.severe('addSubscribedMediaTrack() throwed $event');
       [participant?.call.events, participant?.events].emit(event);
     } catch (exception) {
       // We don't want to pass up any exception so catch everything here.
@@ -487,7 +484,7 @@ class Call with EventEmittable<CallEvent> {
     }
   }
 
-  void _onPublisherNegotiationNeeded() async {
+  Future<void> _onPublisherNegotiationNeeded() async {
     logger.info('Publisher onRenegotiationNeeded');
 
     final offer = await publisher!.createOffer();
@@ -531,11 +528,12 @@ class Call with EventEmittable<CallEvent> {
           final iceTrickle = event.iceTrickle;
           logger.info('Received iceTrickle: $iceTrickle');
 
-          final iceCandidateJson = json.decode(iceTrickle.iceCandidate);
+          final iceCandidateJson =
+              json.decode(iceTrickle.iceCandidate) as Map<String, Object?>;
           final iceCandidate = rtc.RTCIceCandidate(
-            iceCandidateJson['candidate'],
-            iceCandidateJson['sdpMid'],
-            iceCandidateJson['sdpMLineIndex'],
+            iceCandidateJson['candidate'] as String?,
+            iceCandidateJson['sdpMid'] as String?,
+            iceCandidateJson['sdpMLineIndex'] as int?,
           );
 
           final peerType = iceTrickle.peerType;
@@ -594,14 +592,16 @@ class Call with EventEmittable<CallEvent> {
 
         print('Participant: ${participant.runtimeType}');
 
-        participant.updateInfo(participant.info.copyWith(
-          publishedTracks: [
-            ...{
-              ...participant.info.publishedTracks,
-              publishedTrack.type,
-            },
-          ],
-        ));
+        participant.updateInfo(
+          participant.info.copyWith(
+            publishedTracks: [
+              ...{
+                ...participant.info.publishedTracks,
+                publishedTrack.type,
+              },
+            ],
+          ),
+        );
       })
       ..on<SFUTrackUnpublishedEvent>((event) {
         print('Track unpublished: ${event.trackUnpublished}');
@@ -623,13 +623,15 @@ class Call with EventEmittable<CallEvent> {
           );
         }
 
-        participant.updateInfo(participant.info.copyWith(
-          publishedTracks: [
-            ...participant.info.publishedTracks.where((it) {
-              return it != unpublishedTrack.type;
-            }),
-          ],
-        ));
+        participant.updateInfo(
+          participant.info.copyWith(
+            publishedTracks: [
+              ...participant.info.publishedTracks.where((it) {
+                return it != unpublishedTrack.type;
+              }),
+            ],
+          ),
+        );
       })
       ..on<SFUDominantSpeakerChangedEvent>((event) {
         final dominantSpeaker = event.dominantSpeakerChanged;

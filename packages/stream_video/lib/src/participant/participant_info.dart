@@ -1,5 +1,4 @@
-import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
-    as sfu;
+import '../../protobuf/video/sfu/models/models.pbserver.dart' as sfu;
 
 class ParticipantInfo {
   const ParticipantInfo({

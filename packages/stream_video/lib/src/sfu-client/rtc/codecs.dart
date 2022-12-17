@@ -2,12 +2,11 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
-    as sfu_models;
-import 'package:stream_video/src/options.dart';
-import 'package:stream_video/src/types/video_dimensions.dart';
-import 'package:stream_video/src/types/video_encoding.dart';
-import 'package:stream_video/src/types/video_parameters.dart';
+import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import '../../options.dart';
+import '../../types/video_dimensions.dart';
+import '../../types/video_encoding.dart';
+import '../../types/video_parameters.dart';
 
 /// Returns a generic sdp for the given [direction].
 Future<String> getGenericSdp({
@@ -132,10 +131,12 @@ List<rtc.RTCRtpEncoding> encodingsFromPresets(
     final size = dimensions.min();
     final rid = videoRids[i];
 
-    result.add(e.encoding.toRTCRtpEncoding(
-      rid: rid,
-      scaleResolutionDownBy: math.max(1, size / e.dimensions.min()),
-    ));
+    result.add(
+      e.encoding.toRTCRtpEncoding(
+        rid: rid,
+        scaleResolutionDownBy: math.max(1, size / e.dimensions.min()),
+      ),
+    );
   });
   return result;
 }

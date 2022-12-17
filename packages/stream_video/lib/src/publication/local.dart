@@ -1,11 +1,11 @@
 import 'package:collection/collection.dart';
-import 'package:stream_video/protobuf/video/sfu/event/events.pbserver.dart'
-    as sfu;
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/options.dart';
-import 'package:stream_video/src/participant/local.dart';
-import 'package:stream_video/src/publication/track_publication.dart';
-import 'package:stream_video/src/track/local/local.dart';
+
+import '../../protobuf/video/sfu/event/events.pbserver.dart' as sfu;
+import '../logger/logger.dart';
+import '../options.dart';
+import '../participant/local.dart';
+import '../track/local/local.dart';
+import 'track_publication.dart';
 
 /// A [TrackPublication] which belongs to the [LocalParticipant].
 class LocalTrackPublication<T extends LocalTrack> extends TrackPublication<T> {
@@ -30,7 +30,7 @@ class LocalTrackPublication<T extends LocalTrack> extends TrackPublication<T> {
   Future<void> unmute() async => await track?.unmute();
 
   /// Updates the publishing layers.
-  void updatePublishingLayers({
+  Future<void> updatePublishingLayers({
     required Iterable<sfu.VideoLayerSetting> layers,
   }) async {
     //

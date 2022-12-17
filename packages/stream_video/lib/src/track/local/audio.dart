@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
-    as sfu;
-import 'package:stream_video/src/track/local/local.dart';
-import 'package:stream_video/src/track/options.dart';
-import 'package:stream_video/src/track/track.dart';
+import '../../../protobuf/video/sfu/models/models.pbserver.dart' as sfu;
+import '../options.dart';
+import '../track.dart';
+import 'local.dart';
 
 class LocalAudioTrack extends LocalTrack with AudioTrack {
   LocalAudioTrack({

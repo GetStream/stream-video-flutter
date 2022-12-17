@@ -2,16 +2,15 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
-    as sfu_events;
-import 'package:stream_video/src/core/video_error.dart';
-import 'package:stream_video/src/event_emitter.dart';
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/internal/events.dart';
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/types/other.dart';
-import 'package:stream_video/src/ws/keep_alive.dart';
-import 'package:stream_video/src/ws/ws.dart';
+import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
+import '../../core/video_error.dart';
+import '../../event_emitter.dart';
+import '../../events.dart';
+import '../../internal/events.dart';
+import '../../logger/logger.dart';
+import '../../types/other.dart';
+import '../../ws/keep_alive.dart';
+import '../../ws/ws.dart';
 
 class SignalWebSocket extends StreamWebSocket
     with KeepAlive, ConnectionStateMixin, EventEmittable<SfuEvent> {
@@ -27,7 +26,7 @@ class SignalWebSocket extends StreamWebSocket
 
   @override
   OnConnectionStateUpdated get onConnectionStateUpdated {
-    void _onConnectionStateUpdated(ConnectionStateUpdatedEvent state) {
+    void onConnectionStateUpdated(ConnectionStateUpdatedEvent state) {
       if (state.didConnected) {
         _sendQueuedRequests();
       }
@@ -35,7 +34,7 @@ class SignalWebSocket extends StreamWebSocket
       events.emit(state);
     }
 
-    return _onConnectionStateUpdated;
+    return onConnectionStateUpdated;
   }
 
   @override
@@ -163,14 +162,16 @@ class SignalWebSocket extends StreamWebSocket
   void sendPing() {
     final healthCheck =
         sfu_events.HealthCheckRequest(/* sessionId: sessionId */);
-    return send(sfu_events.SfuRequest(
-      healthCheckRequest: healthCheck,
-    ));
+    return send(
+      sfu_events.SfuRequest(
+        healthCheckRequest: healthCheck,
+      ),
+    );
   }
 
   int _reconnectAttempt = 0;
 
-  void _reconnect() async {
+  Future<void> _reconnect() async {
     if (isConnecting || isReconnecting) return;
 
     logger.info('Signal reconnecting: $_reconnectAttempt');
@@ -218,50 +219,66 @@ extension on EventEmitter<SfuEvent> {
         return emit(SFUPublisherAnswerEvent(answer: publisherAnswer));
       case sfu_events.SfuEvent_EventPayload.connectionQualityChanged:
         final connectionQualityChanged = event.connectionQualityChanged;
-        return emit(SFUConnectionQualityChangedEvent(
-          connectionQualityChanged: connectionQualityChanged,
-        ));
+        return emit(
+          SFUConnectionQualityChangedEvent(
+            connectionQualityChanged: connectionQualityChanged,
+          ),
+        );
       case sfu_events.SfuEvent_EventPayload.audioLevelChanged:
         final audioLevelChanged = event.audioLevelChanged;
-        return emit(SFUAudioLevelChangedEvent(
-          audioLevelChanged: audioLevelChanged,
-        ));
+        return emit(
+          SFUAudioLevelChangedEvent(
+            audioLevelChanged: audioLevelChanged,
+          ),
+        );
       case sfu_events.SfuEvent_EventPayload.iceTrickle:
         final iceTrickle = event.iceTrickle;
         return emit(SFUIceTrickleEvent(iceTrickle: iceTrickle));
       case sfu_events.SfuEvent_EventPayload.changePublishQuality:
         final changePublishQuality = event.changePublishQuality;
-        return emit(SFUChangePublishQualityEvent(
-          changePublishQuality: changePublishQuality,
-        ));
+        return emit(
+          SFUChangePublishQualityEvent(
+            changePublishQuality: changePublishQuality,
+          ),
+        );
       case sfu_events.SfuEvent_EventPayload.participantJoined:
         final participantJoined = event.participantJoined;
-        return emit(SFUParticipantJoinedEvent(
-          participantJoined: participantJoined,
-        ));
+        return emit(
+          SFUParticipantJoinedEvent(
+            participantJoined: participantJoined,
+          ),
+        );
       case sfu_events.SfuEvent_EventPayload.participantLeft:
         final participantLeft = event.participantLeft;
-        return emit(SFUParticipantLeftEvent(
-          participantLeft: participantLeft,
-        ));
+        return emit(
+          SFUParticipantLeftEvent(
+            participantLeft: participantLeft,
+          ),
+        );
       case sfu_events.SfuEvent_EventPayload.dominantSpeakerChanged:
         final dominantSpeakerChanged = event.dominantSpeakerChanged;
-        return emit(SFUDominantSpeakerChangedEvent(
-          dominantSpeakerChanged: dominantSpeakerChanged,
-        ));
+        return emit(
+          SFUDominantSpeakerChangedEvent(
+            dominantSpeakerChanged: dominantSpeakerChanged,
+          ),
+        );
       case sfu_events.SfuEvent_EventPayload.trackPublished:
         final trackPublished = event.trackPublished;
         return emit(SFUTrackPublishedEvent(trackPublished: trackPublished));
       case sfu_events.SfuEvent_EventPayload.trackUnpublished:
         final trackUnpublished = event.trackUnpublished;
-        return emit(SFUTrackUnpublishedEvent(
-          trackUnpublished: trackUnpublished,
-        ));
+        return emit(
+          SFUTrackUnpublishedEvent(
+            trackUnpublished: trackUnpublished,
+          ),
+        );
       case sfu_events.SfuEvent_EventPayload.healthCheckResponse:
         final healthCheckResponse = event.healthCheckResponse;
-        return emit(SFUHealthCheckResponseEvent(
-          healthCheckResponse: healthCheckResponse,
-        ));
+        return emit(
+          SFUHealthCheckResponseEvent(
+            healthCheckResponse: healthCheckResponse,
+          ),
+        );
       case sfu_events.SfuEvent_EventPayload.error:
         final error = event.error;
         return emit(SFUErrorEvent(error: error));

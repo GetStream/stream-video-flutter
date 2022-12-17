@@ -13,14 +13,14 @@ abstract class StreamCallException implements Exception {
 /// - Network condition is not good
 /// - Server not set up correctly (not responding)
 class ConnectException extends StreamCallException {
-  ConnectException([String msg = 'Failed to connect to server']) : super._(msg);
+  ConnectException([super.msg = 'Failed to connect to server']) : super._();
 }
 
 /// An internal state of the SDK is not correct and can not continue to execute.
 /// This should not occur frequently.
 class UnexpectedStateException extends StreamCallException {
-  UnexpectedStateException([String msg = 'Unexpected connection state'])
-      : super._(msg);
+  UnexpectedStateException([super.msg = 'Unexpected connection state'])
+      : super._();
 }
 
 /// Failed to create a local track.
@@ -28,7 +28,7 @@ class UnexpectedStateException extends StreamCallException {
 /// - Required permissions not yet granted to the platform.
 /// - Constraints(Capture options) rejected by the platform.
 class TrackCreateException extends StreamCallException {
-  TrackCreateException([String msg = 'Failed to create track']) : super._(msg);
+  TrackCreateException([super.msg = 'Failed to create track']) : super._();
 }
 
 /// Failed to publish a local track.
@@ -36,11 +36,10 @@ class TrackCreateException extends StreamCallException {
 /// - Token does not have track publish permission.
 /// - Network condition is not good.
 class TrackPublishException extends StreamCallException {
-  TrackPublishException([String msg = 'Failed to publish track'])
-      : super._(msg);
+  TrackPublishException([super.msg = 'Failed to publish track']) : super._();
 }
 
 /// A certain time has passed while attempting to execute an operation.
 class TimeoutException extends StreamCallException {
-  TimeoutException([String msg = 'Timeout']) : super._(msg);
+  TimeoutException([super.msg = 'Timeout']) : super._();
 }

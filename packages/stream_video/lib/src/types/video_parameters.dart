@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:stream_video/src/types/video_dimensions.dart';
-import 'package:stream_video/src/types/video_encoding.dart';
+import 'video_dimensions.dart';
+import 'video_encoding.dart';
 
 class VideoParameters
     with EquatableMixin

@@ -1,11 +1,13 @@
 import 'dart:async';
 
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/ws/connect/connect.dart'
+import 'package:web_socket_channel/web_socket_channel.dart';
+
+import '../logger/logger.dart';
+import 'connect/connect.dart'
     if (dart.library.html) 'package:stream_video/src/ws/connect/connect_html.dart'
     if (dart.library.io) 'package:stream_video/src/ws/connect/connect_io.dart'
     as platform;
-import 'package:web_socket_channel/web_socket_channel.dart';
+
 export 'package:web_socket_channel/web_socket_channel.dart';
 
 /// A simple wrapper around [WebSocketChannel] to make it easier to use.

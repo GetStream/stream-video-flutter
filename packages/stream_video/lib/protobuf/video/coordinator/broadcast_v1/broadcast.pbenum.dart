@@ -10,19 +10,31 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class Codec extends $pb.ProtobufEnum {
-  static const Codec CODEC_H264_UNSPECIFIED = Codec._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CODEC_H264_UNSPECIFIED');
-  static const Codec CODEC_VP8 = Codec._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CODEC_VP8');
-  static const Codec CODEC_VP9 = Codec._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CODEC_VP9');
+  static const Codec CODEC_H264_UNSPECIFIED = Codec._(
+      0,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'CODEC_H264_UNSPECIFIED');
+  static const Codec CODEC_VP8 = Codec._(
+      1,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'CODEC_VP8');
+  static const Codec CODEC_VP9 = Codec._(
+      2,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'CODEC_VP9');
 
-  static const $core.List<Codec> values = <Codec> [
+  static const $core.List<Codec> values = <Codec>[
     CODEC_H264_UNSPECIFIED,
     CODEC_VP8,
     CODEC_VP9,
   ];
 
-  static final $core.Map<$core.int, Codec> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static final $core.Map<$core.int, Codec> _byValue =
+      $pb.ProtobufEnum.initByValue(values);
   static Codec? valueOf($core.int value) => _byValue[value];
 
   const Codec._($core.int v, $core.String n) : super(v, n);
 }
-

@@ -10,21 +10,43 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class VideoLayerSetting_Priority extends $pb.ProtobufEnum {
-  static const VideoLayerSetting_Priority PRIORITY_HIGH_UNSPECIFIED = VideoLayerSetting_Priority._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'PRIORITY_HIGH_UNSPECIFIED');
-  static const VideoLayerSetting_Priority PRIORITY_LOW = VideoLayerSetting_Priority._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'PRIORITY_LOW');
-  static const VideoLayerSetting_Priority PRIORITY_MEDIUM = VideoLayerSetting_Priority._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'PRIORITY_MEDIUM');
-  static const VideoLayerSetting_Priority PRIORITY_VERY_LOW = VideoLayerSetting_Priority._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'PRIORITY_VERY_LOW');
+  static const VideoLayerSetting_Priority PRIORITY_HIGH_UNSPECIFIED =
+      VideoLayerSetting_Priority._(
+          0,
+          const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+              ? ''
+              : 'PRIORITY_HIGH_UNSPECIFIED');
+  static const VideoLayerSetting_Priority PRIORITY_LOW =
+      VideoLayerSetting_Priority._(
+          1,
+          const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+              ? ''
+              : 'PRIORITY_LOW');
+  static const VideoLayerSetting_Priority PRIORITY_MEDIUM =
+      VideoLayerSetting_Priority._(
+          2,
+          const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+              ? ''
+              : 'PRIORITY_MEDIUM');
+  static const VideoLayerSetting_Priority PRIORITY_VERY_LOW =
+      VideoLayerSetting_Priority._(
+          3,
+          const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+              ? ''
+              : 'PRIORITY_VERY_LOW');
 
-  static const $core.List<VideoLayerSetting_Priority> values = <VideoLayerSetting_Priority> [
+  static const $core.List<VideoLayerSetting_Priority> values =
+      <VideoLayerSetting_Priority>[
     PRIORITY_HIGH_UNSPECIFIED,
     PRIORITY_LOW,
     PRIORITY_MEDIUM,
     PRIORITY_VERY_LOW,
   ];
 
-  static final $core.Map<$core.int, VideoLayerSetting_Priority> _byValue = $pb.ProtobufEnum.initByValue(values);
-  static VideoLayerSetting_Priority? valueOf($core.int value) => _byValue[value];
+  static final $core.Map<$core.int, VideoLayerSetting_Priority> _byValue =
+      $pb.ProtobufEnum.initByValue(values);
+  static VideoLayerSetting_Priority? valueOf($core.int value) =>
+      _byValue[value];
 
   const VideoLayerSetting_Priority._($core.int v, $core.String n) : super(v, n);
 }
-

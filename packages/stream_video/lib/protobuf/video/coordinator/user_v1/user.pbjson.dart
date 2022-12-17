@@ -8,6 +8,7 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
+
 @$core.Deprecated('Use userDescriptor instead')
 const User$json = const {
   '1': 'User',
@@ -18,13 +19,28 @@ const User$json = const {
     const {'1': 'custom_json', '3': 4, '4': 1, '5': 12, '10': 'customJson'},
     const {'1': 'name', '3': 5, '4': 1, '5': 9, '10': 'name'},
     const {'1': 'image_url', '3': 6, '4': 1, '5': 9, '10': 'imageUrl'},
-    const {'1': 'created_at', '3': 7, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'createdAt'},
-    const {'1': 'updated_at', '3': 8, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
+    const {
+      '1': 'created_at',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'createdAt'
+    },
+    const {
+      '1': 'updated_at',
+      '3': 8,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'updatedAt'
+    },
   ],
 };
 
 /// Descriptor for `User`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List userDescriptor = $convert.base64Decode('CgRVc2VyEhcKAmlkGAEgASgJQgf6QgRyAhABUgJpZBIUCgV0ZWFtcxgCIAMoCVIFdGVhbXMSEgoEcm9sZRgDIAEoCVIEcm9sZRIfCgtjdXN0b21fanNvbhgEIAEoDFIKY3VzdG9tSnNvbhISCgRuYW1lGAUgASgJUgRuYW1lEhsKCWltYWdlX3VybBgGIAEoCVIIaW1hZ2VVcmwSOQoKY3JlYXRlZF9hdBgHIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCWNyZWF0ZWRBdBI5Cgp1cGRhdGVkX2F0GAggASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJdXBkYXRlZEF0');
+final $typed_data.Uint8List userDescriptor = $convert.base64Decode(
+    'CgRVc2VyEhcKAmlkGAEgASgJQgf6QgRyAhABUgJpZBIUCgV0ZWFtcxgCIAMoCVIFdGVhbXMSEgoEcm9sZRgDIAEoCVIEcm9sZRIfCgtjdXN0b21fanNvbhgEIAEoDFIKY3VzdG9tSnNvbhISCgRuYW1lGAUgASgJUgRuYW1lEhsKCWltYWdlX3VybBgGIAEoCVIIaW1hZ2VVcmwSOQoKY3JlYXRlZF9hdBgHIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBSCWNyZWF0ZWRBdBI5Cgp1cGRhdGVkX2F0GAggASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJdXBkYXRlZEF0');
 @$core.Deprecated('Use userInputDescriptor instead')
 const UserInput$json = const {
   '1': 'UserInput',
@@ -39,4 +55,5 @@ const UserInput$json = const {
 };
 
 /// Descriptor for `UserInput`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List userInputDescriptor = $convert.base64Decode('CglVc2VySW5wdXQSDgoCaWQYASABKAlSAmlkEhIKBG5hbWUYAiABKAlSBG5hbWUSEgoEcm9sZRgDIAEoCVIEcm9sZRIUCgV0ZWFtcxgEIAMoCVIFdGVhbXMSGwoJaW1hZ2VfdXJsGAUgASgJUghpbWFnZVVybBIfCgtjdXN0b21fanNvbhgGIAEoDFIKY3VzdG9tSnNvbg==');
+final $typed_data.Uint8List userInputDescriptor = $convert.base64Decode(
+    'CglVc2VySW5wdXQSDgoCaWQYASABKAlSAmlkEhIKBG5hbWUYAiABKAlSBG5hbWUSEgoEcm9sZRgDIAEoCVIEcm9sZRIUCgV0ZWFtcxgEIAMoCVIFdGVhbXMSGwoJaW1hZ2VfdXJsGAUgASgJUghpbWFnZVVybBIfCgtjdXN0b21fanNvbhgGIAEoDFIKY3VzdG9tSnNvbg==');

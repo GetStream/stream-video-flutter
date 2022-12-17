@@ -8,13 +8,6 @@ class UserInfo {
     this.extraData,
   });
 
-  final String id;
-  final String name;
-  final String role;
-  final String? imageUrl;
-  final Iterable<String>? teams;
-  final Map<String, Object?>? extraData;
-
   factory UserInfo.fromJson(Map<String, Object?> json) {
     return UserInfo(
       id: json['id'] as String,
@@ -25,6 +18,13 @@ class UserInfo {
       extraData: json['extra_data'] as Map<String, Object?>?,
     );
   }
+
+  final String id;
+  final String name;
+  final String role;
+  final String? imageUrl;
+  final Iterable<String>? teams;
+  final Map<String, Object?>? extraData;
 
   Map<String, Object?> toJson() {
     return {

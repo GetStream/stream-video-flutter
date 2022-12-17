@@ -3,20 +3,19 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:rate_limiter/rate_limiter.dart';
-import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
-    as sfu;
-import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pbserver.dart'
-    as signal;
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/extensions.dart';
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/options.dart';
-import 'package:stream_video/src/participant/remote.dart';
-import 'package:stream_video/src/publication/track_publication.dart';
-import 'package:stream_video/src/track/remote/remote.dart';
-import 'package:stream_video/src/track/remote/video.dart';
-import 'package:stream_video/src/track/track.dart';
-import 'package:stream_video/src/types/video_dimensions.dart';
+
+import '../../protobuf/video/sfu/models/models.pbserver.dart' as sfu;
+import '../../protobuf/video/sfu/signal_rpc/signal.pbserver.dart' as signal;
+import '../events.dart';
+import '../extensions.dart';
+import '../logger/logger.dart';
+import '../options.dart';
+import '../participant/remote.dart';
+import '../track/remote/remote.dart';
+import '../track/remote/video.dart';
+import '../track/track.dart';
+import '../types/video_dimensions.dart';
+import 'track_publication.dart';
 
 /// Represents a track publication from a RemoteParticipant. Provides methods to
 /// control if we should subscribe to the track, and its quality (for video).
@@ -80,7 +79,7 @@ class RemoteTrackPublication<T extends RemoteTrack>
     }
 
     print('newVideoDimension: $newVideoDimension');
-    print('previousVideoDimension: ${videoDimension}');
+    print('previousVideoDimension: $videoDimension');
 
     // Only update track subscription if the dimensions changed.
     if (videoDimension != newVideoDimension) {
@@ -124,7 +123,7 @@ class RemoteTrackPublication<T extends RemoteTrack>
     print(
       'RemoteTrackPublication.setVideoDimension dimension: ${info.videoDimension}',
     );
-    _updateSubscription(subscribe: true);
+    await _updateSubscription(subscribe: true);
   }
 
   /// Updates the video quality of the published track.
@@ -140,7 +139,7 @@ class RemoteTrackPublication<T extends RemoteTrack>
     if (super.subscribed) {
       return logger.fine('ignoring subscribe() request...');
     }
-    _updateSubscription(subscribe: true);
+    await _updateSubscription(subscribe: true);
   }
 
   /// Unsubscribes from the track.
@@ -148,16 +147,18 @@ class RemoteTrackPublication<T extends RemoteTrack>
     if (!super.subscribed) {
       return logger.fine('ignoring unsubscribe() request...');
     }
-    _updateSubscription(subscribe: false);
+    await _updateSubscription(subscribe: false);
     if (track != null) {
       // Ideally, we should wait for WebRTC's onRemoveTrack event
       // but it does not work reliably across platforms.
       // So for now we will assume remove track succeeded.
-      [participant.events, participant.call.events].emit(TrackUnsubscribedEvent(
-        participant: participant,
-        track: track!,
-        publication: this,
-      ));
+      [participant.events, participant.call.events].emit(
+        TrackUnsubscribedEvent(
+          participant: participant,
+          track: track!,
+          publication: this,
+        ),
+      );
       // Simply set to null for now
       await updateTrack(null);
     }

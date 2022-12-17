@@ -1,4 +1,4 @@
-import 'package:meta/meta.dart';
+import 'package:flutter/cupertino.dart';
 
 /// A convenience class to represent a disposable object.
 class Disposable {

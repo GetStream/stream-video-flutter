@@ -1,9 +1,10 @@
-import 'package:example/src/call_screen.dart';
-import 'package:example/src/home_screen.dart';
-import 'package:example/src/login_screen.dart';
-import 'package:example/src/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
+
+import 'src/call_screen.dart';
+import 'src/home_screen.dart';
+import 'src/login_screen.dart';
+import 'src/splash_screen.dart';
 
 mixin Routes {
   /// Add entry for new route here

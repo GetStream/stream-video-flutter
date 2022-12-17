@@ -1,26 +1,27 @@
 import 'package:collection/collection.dart';
-import 'package:dogfooding/src/widgets/participant_info.dart'
-    show ParticipantInfoWidget, ParticipantTrack;
-import 'package:dogfooding/src/widgets/video_track_renderer.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'no_video.dart';
+import 'participant_info.dart' show ParticipantInfoWidget, ParticipantTrack;
+import 'video_track_renderer.dart';
 
 abstract class ParticipantWidget extends StatefulWidget {
+  const ParticipantWidget({super.key});
   // Convenience method to return relevant widget for participant
   static ParticipantWidget widgetFor(ParticipantTrack participantTrack) {
     if (participantTrack.participant is LocalParticipant) {
       return LocalParticipantWidget(
-          participantTrack.participant as LocalParticipant,
-          participantTrack.videoTrack,
-          participantTrack.isScreenShare);
+        participantTrack.participant as LocalParticipant,
+        participantTrack.videoTrack,
+        participantTrack.isScreenShare,
+      );
     } else if (participantTrack.participant is RemoteParticipant) {
       return RemoteParticipantWidget(
-          participantTrack.participant as RemoteParticipant,
-          participantTrack.videoTrack,
-          participantTrack.isScreenShare);
+        participantTrack.participant as RemoteParticipant,
+        participantTrack.videoTrack,
+        participantTrack.isScreenShare,
+      );
     }
     throw UnimplementedError('Unknown participant type');
   }
@@ -29,11 +30,15 @@ abstract class ParticipantWidget extends StatefulWidget {
   abstract final Participant participant;
   abstract final VideoTrack? videoTrack;
   abstract final bool isScreenShare;
-
-  const ParticipantWidget({Key? key}) : super(key: key);
 }
 
 class LocalParticipantWidget extends ParticipantWidget {
+  const LocalParticipantWidget(
+    this.participant,
+    this.videoTrack,
+    this.isScreenShare, {
+    super.key,
+  });
   @override
   final LocalParticipant participant;
   @override
@@ -41,31 +46,23 @@ class LocalParticipantWidget extends ParticipantWidget {
   @override
   final bool isScreenShare;
 
-  const LocalParticipantWidget(
-    this.participant,
-    this.videoTrack,
-    this.isScreenShare, {
-    Key? key,
-  }) : super(key: key);
-
   @override
   State<StatefulWidget> createState() => _LocalParticipantWidgetState();
 }
 
 class RemoteParticipantWidget extends ParticipantWidget {
+  const RemoteParticipantWidget(
+    this.participant,
+    this.videoTrack,
+    this.isScreenShare, {
+    super.key,
+  });
   @override
   final RemoteParticipant participant;
   @override
   final VideoTrack? videoTrack;
   @override
   final bool isScreenShare;
-
-  const RemoteParticipantWidget(
-    this.participant,
-    this.videoTrack,
-    this.isScreenShare, {
-    Key? key,
-  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _RemoteParticipantWidgetState();
@@ -122,14 +119,14 @@ abstract class _ParticipantWidgetState<T extends ParticipantWidget>
         child: Stack(
           children: [
             // Video
-            activeVideoTrack != null && !activeVideoTrack!.muted
-                ? VideoTrackRenderer(
-                    activeVideoTrack!,
-                    fit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
-                  )
-                : NoVideoWidget(
-                    participant: widget.participant,
-                  ),
+            if (activeVideoTrack != null && !activeVideoTrack!.muted)
+              VideoTrackRenderer(
+                activeVideoTrack!,
+              )
+            else
+              NoVideoWidget(
+                participant: widget.participant,
+              ),
 
             // Bottom bar
             Align(

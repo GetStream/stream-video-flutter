@@ -1,4 +1,4 @@
-import 'package:stream_video/src/track/track.dart';
+import '../track.dart';
 
 abstract class RemoteTrack extends Track {
   RemoteTrack({

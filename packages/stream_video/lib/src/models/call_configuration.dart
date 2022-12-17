@@ -1,4 +1,4 @@
-import 'package:stream_video/stream_video.dart';
+import '../../stream_video.dart';
 
 class CallConfiguration {
   const CallConfiguration({

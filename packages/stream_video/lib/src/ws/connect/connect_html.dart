@@ -9,11 +9,11 @@ Future<WebSocketChannel> connect(Uri uri, {Iterable<String>? protocols}) async {
   final webSocket = WebSocket(uri.toString())
     ..binaryType = BinaryType.list.value;
 
-  webSocket.onOpen.first.then((value) {
+  await webSocket.onOpen.first.then((value) {
     completer.complete(HtmlWebSocketChannel(webSocket));
   });
 
-  webSocket.onError.first.then((err) {
+  await webSocket.onError.first.then((err) {
     completer.completeError(WebSocketChannelException.from(err));
   });
 

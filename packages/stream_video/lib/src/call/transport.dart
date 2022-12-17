@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import 'package:stream_video/src/disposable.dart';
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/types/other.dart';
+import '../disposable.dart';
+import '../logger/logger.dart';
+import '../types/other.dart';
 
 /// a wrapper around PeerConnection
 class Transport with Disposable {

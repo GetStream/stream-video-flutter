@@ -1,7 +1,6 @@
-import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
-    as sfu_models;
-import 'package:stream_video/src/event_emitter.dart';
-import 'package:stream_video/src/types/other.dart';
+import '../protobuf/video/sfu/models/models.pbserver.dart' as sfu_models;
+import 'event_emitter.dart';
+import 'types/other.dart';
 
 import 'types/video_dimensions.dart';
 

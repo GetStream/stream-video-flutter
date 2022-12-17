@@ -1,12 +1,13 @@
-import 'package:example/src/widgets/controls.dart';
-import 'package:example/src/widgets/participant_widget.dart';
-import 'package:example/src/widgets/participant_info.dart';
-import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
+import 'widgets/controls.dart';
+import 'widgets/participant_info.dart';
+import 'widgets/participant_widget.dart';
+
 class CallScreen extends StatefulWidget {
-  const CallScreen({Key? key, required this.call}) : super(key: key);
+  const CallScreen({super.key, required this.call});
 
   final Call call;
 
@@ -35,15 +36,17 @@ class _CallScreenState extends State<CallScreen> {
 
     setState(() {});
 
-    List<ParticipantTrack> userMediaTracks = [];
-    List<ParticipantTrack> screenTracks = [];
-    for (var participant in widget.call.participants.values) {
-      for (var t in participant.videoTracks) {
-        screenTracks.add(ParticipantTrack(
-          participant: participant,
-          videoTrack: t.track,
-          isScreenShare: t.isScreenShare,
-        ));
+    final userMediaTracks = <ParticipantTrack>[];
+    final screenTracks = <ParticipantTrack>[];
+    for (final participant in widget.call.participants.values) {
+      for (final t in participant.videoTracks) {
+        screenTracks.add(
+          ParticipantTrack(
+            participant: participant,
+            videoTrack: t.track,
+            isScreenShare: t.isScreenShare,
+          ),
+        );
       }
     }
     // sort speakers for the grid
@@ -77,12 +80,14 @@ class _CallScreenState extends State<CallScreen> {
 
     final localParticipantTracks = widget.call.localParticipant?.videoTracks;
     if (localParticipantTracks != null) {
-      for (var t in localParticipantTracks) {
-        screenTracks.add(ParticipantTrack(
-          participant: widget.call.localParticipant!,
-          videoTrack: t.track,
-          isScreenShare: t.isScreenShare,
-        ));
+      for (final t in localParticipantTracks) {
+        screenTracks.add(
+          ParticipantTrack(
+            participant: widget.call.localParticipant!,
+            videoTrack: t.track,
+            isScreenShare: t.isScreenShare,
+          ),
+        );
       }
     }
     setState(() {
@@ -94,15 +99,14 @@ class _CallScreenState extends State<CallScreen> {
   void initState() {
     super.initState();
     _onParticipantUpdate();
-    widget.call.events
-      ..listen((_) {
-        _onParticipantUpdate();
-      });
+    widget.call.events.listen((_) {
+      _onParticipantUpdate();
+    });
     // widget.call.addListener(SfuEvent_EventPayload.callEnded.name, _onCallEnded);
   }
 
   @override
-  void dispose() async {
+  Future<void> dispose() async {
     // widget.call.removeListener(
     //   SfuEvent_EventPayload.callEnded.name,
     //   _onCallEnded,
@@ -125,7 +129,8 @@ class _CallScreenState extends State<CallScreen> {
         if (participant is RemoteParticipant) {
           print('All tracks: ${participant.videoTracks.length}');
           print(
-              'Track: ${participant.videoTracks.map((e) => e.track?.mediaStreamTrack)}');
+            'Track: ${participant.videoTracks.map((e) => e.track?.mediaStreamTrack)}',
+          );
         }
         final participantTrack = ParticipantTrack(
           participant: participant,
