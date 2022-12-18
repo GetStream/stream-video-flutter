@@ -20,9 +20,7 @@ abstract class SignalServer {
   // UpdateSubscribers is used to notify the SFU about the list of video subscriptions// TODO: sync subscriptions based on this + update tracks using the dimension info sent by the user
   Future<UpdateSubscriptionsResponse> updateSubscriptions(twirp.Context ctx, UpdateSubscriptionsRequest req);
   
-  Future<UpdateMuteStateResponse> updateMuteState(twirp.Context ctx, UpdateMuteStateRequest req);
-  
-  Future<UpdateVideoQualityResponse> requestVideoQuality(twirp.Context ctx, UpdateVideoQualityRequest req);
+  Future<UpdateMuteStatesResponse> updateMuteStates(twirp.Context ctx, UpdateMuteStatesRequest req);
 }
 
 
@@ -130,42 +128,20 @@ class SignalServerJSONClient implements SignalServer {
   }
 
   @override
-  Future<UpdateMuteStateResponse> updateMuteState(twirp.Context ctx, UpdateMuteStateRequest req) async {
+  Future<UpdateMuteStatesResponse> updateMuteStates(twirp.Context ctx, UpdateMuteStatesRequest req) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
-    ctx = twirp.withMethodName(ctx, 'UpdateMuteState');
+    ctx = twirp.withMethodName(ctx, 'UpdateMuteStates');
     return interceptor((ctx, req) {
-      return callUpdateMuteState(ctx, req);
+      return callUpdateMuteStates(ctx, req);
     })(ctx, req);
   }
 
-  Future<UpdateMuteStateResponse> callUpdateMuteState(twirp.Context ctx, UpdateMuteStateRequest req) async {
+  Future<UpdateMuteStatesResponse> callUpdateMuteStates(twirp.Context ctx, UpdateMuteStatesRequest req) async {
     try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/UpdateMuteState');
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/UpdateMuteStates');
       final data = await doJSONRequest(ctx, url, hooks, req);
-      final UpdateMuteStateResponse res = UpdateMuteStateResponse.create();
-      res.mergeFromProto3Json(json.decode(data));
-      return Future.value(res);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<UpdateVideoQualityResponse> requestVideoQuality(twirp.Context ctx, UpdateVideoQualityRequest req) async {
-    ctx = twirp.withPackageName(ctx, 'signal');
-    ctx = twirp.withServiceName(ctx, 'SignalServer');
-    ctx = twirp.withMethodName(ctx, 'RequestVideoQuality');
-    return interceptor((ctx, req) {
-      return callRequestVideoQuality(ctx, req);
-    })(ctx, req);
-  }
-
-  Future<UpdateVideoQualityResponse> callRequestVideoQuality(twirp.Context ctx, UpdateVideoQualityRequest req) async {
-    try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/RequestVideoQuality');
-      final data = await doJSONRequest(ctx, url, hooks, req);
-      final UpdateVideoQualityResponse res = UpdateVideoQualityResponse.create();
+      final UpdateMuteStatesResponse res = UpdateMuteStatesResponse.create();
       res.mergeFromProto3Json(json.decode(data));
       return Future.value(res);
     } catch (e) {
@@ -279,42 +255,20 @@ class SignalServerProtobufClient implements SignalServer {
   }
 
   @override
-  Future<UpdateMuteStateResponse> updateMuteState(twirp.Context ctx, UpdateMuteStateRequest req) async {
+  Future<UpdateMuteStatesResponse> updateMuteStates(twirp.Context ctx, UpdateMuteStatesRequest req) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
-    ctx = twirp.withMethodName(ctx, 'UpdateMuteState');
+    ctx = twirp.withMethodName(ctx, 'UpdateMuteStates');
     return interceptor((ctx, req) {
-      return callUpdateMuteState(ctx, req);
+      return callUpdateMuteStates(ctx, req);
     })(ctx, req);
   }
 
-  Future<UpdateMuteStateResponse> callUpdateMuteState(twirp.Context ctx, UpdateMuteStateRequest req) async {
+  Future<UpdateMuteStatesResponse> callUpdateMuteStates(twirp.Context ctx, UpdateMuteStatesRequest req) async {
     try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/UpdateMuteState');
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/UpdateMuteStates');
       final data = await doProtobufRequest(ctx, url, hooks, req);
-      final UpdateMuteStateResponse res = UpdateMuteStateResponse.create();
-      res.mergeFromBuffer(data);
-      return Future.value(res);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<UpdateVideoQualityResponse> requestVideoQuality(twirp.Context ctx, UpdateVideoQualityRequest req) async {
-    ctx = twirp.withPackageName(ctx, 'signal');
-    ctx = twirp.withServiceName(ctx, 'SignalServer');
-    ctx = twirp.withMethodName(ctx, 'RequestVideoQuality');
-    return interceptor((ctx, req) {
-      return callRequestVideoQuality(ctx, req);
-    })(ctx, req);
-  }
-
-  Future<UpdateVideoQualityResponse> callRequestVideoQuality(twirp.Context ctx, UpdateVideoQualityRequest req) async {
-    try {
-      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/RequestVideoQuality');
-      final data = await doProtobufRequest(ctx, url, hooks, req);
-      final UpdateVideoQualityResponse res = UpdateVideoQualityResponse.create();
+      final UpdateMuteStatesResponse res = UpdateMuteStatesResponse.create();
       res.mergeFromBuffer(data);
       return Future.value(res);
     } catch (e) {

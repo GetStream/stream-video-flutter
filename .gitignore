@@ -28,4 +28,6 @@ doc/api/
 
 .env
 
-/.idea/*
+.idea/
+*.iml
+*.lock

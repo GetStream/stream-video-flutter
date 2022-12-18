@@ -1,4 +1,4 @@
-import 'package:stream_video/src/core/platform_detector/platform_detector.dart';
+import 'package:stream_video/src/platform_detector/platform_detector.dart';
 import 'package:stream_video/src/types/video_parameters.dart';
 
 /// A type that represents front or back of the camera.
@@ -61,7 +61,7 @@ class CameraCaptureOptions extends VideoCaptureOptions {
     return constraints;
   }
 
-  // Returns new options with updated properties
+  @override
   CameraCaptureOptions copyWith({
     VideoParameters? params,
     CameraPosition? cameraPosition,
@@ -78,12 +78,6 @@ class CameraCaptureOptions extends VideoCaptureOptions {
 
 /// Options used when creating a [LocalVideoTrack] that captures the screen.
 class ScreenShareCaptureOptions extends VideoCaptureOptions {
-  /// iOS only flag: Use Broadcast Extension for screen share capturing.
-  /// See instructions on how to setup your Broadcast Extension here:
-  /// https://github.com/flutter-webrtc/flutter-webrtc/wiki/iOS-Screen-Sharing#broadcast-extension-quick-setup
-  final bool useiOSBroadcastExtension;
-  final bool captureScreenAudio;
-
   const ScreenShareCaptureOptions({
     this.useiOSBroadcastExtension = false,
     this.captureScreenAudio = false,
@@ -97,6 +91,12 @@ class ScreenShareCaptureOptions extends VideoCaptureOptions {
     this.captureScreenAudio = false,
     required VideoCaptureOptions captureOptions,
   }) : super(params: captureOptions.params);
+
+  /// iOS only flag: Use Broadcast Extension for screen share capturing.
+  /// See instructions on how to setup your Broadcast Extension here:
+  /// https://github.com/flutter-webrtc/flutter-webrtc/wiki/iOS-Screen-Sharing#broadcast-extension-quick-setup
+  final bool useiOSBroadcastExtension;
+  final bool captureScreenAudio;
 
   @override
   Map<String, dynamic> toMediaConstraintsMap() {
@@ -114,10 +114,32 @@ class ScreenShareCaptureOptions extends VideoCaptureOptions {
     }
     return constraints;
   }
+
+  @override
+  ScreenShareCaptureOptions copyWith({
+    VideoParameters? params,
+    String? deviceId,
+    double? maxFrameRate,
+    bool? captureScreenAudio,
+    bool? useiOSBroadcastExtension,
+  }) =>
+      ScreenShareCaptureOptions(
+        params: params ?? this.params,
+        sourceId: deviceId ?? this.deviceId,
+        maxFrameRate: maxFrameRate ?? this.maxFrameRate,
+        captureScreenAudio: captureScreenAudio ?? this.captureScreenAudio,
+        useiOSBroadcastExtension:
+            useiOSBroadcastExtension ?? this.useiOSBroadcastExtension,
+      );
 }
 
 /// Base class for options when creating a [LocalVideoTrack].
 abstract class VideoCaptureOptions extends LocalTrackOptions {
+  const VideoCaptureOptions({
+    this.params = VideoParametersPresets.h540_169,
+    this.deviceId,
+    this.maxFrameRate,
+  });
   final VideoParameters params;
 
   /// The deviceId of the capture device to use.
@@ -131,14 +153,8 @@ abstract class VideoCaptureOptions extends LocalTrackOptions {
   /// </pre>
   final String? deviceId;
 
-  // Limit the maximum frameRate of the capture device.
+  /// Limit the maximum frameRate of the capture device.
   final double? maxFrameRate;
-
-  const VideoCaptureOptions({
-    this.params = VideoParametersPresets.h540_169,
-    this.deviceId,
-    this.maxFrameRate,
-  });
 
   @override
   Map<String, dynamic> toMediaConstraintsMap() {
@@ -148,6 +164,15 @@ abstract class VideoCaptureOptions extends LocalTrackOptions {
 
 /// Options used when creating a [LocalAudioTrack].
 class AudioCaptureOptions extends LocalTrackOptions {
+  const AudioCaptureOptions({
+    this.deviceId,
+    this.noiseSuppression = true,
+    this.echoCancellation = true,
+    this.autoGainControl = true,
+    this.highPassFilter = false,
+    this.typingNoiseDetection = true,
+  });
+
   /// The deviceId of the capture device to use.
   /// Available deviceIds can be obtained through `flutter_webrtc`:
   /// <pre>
@@ -179,15 +204,6 @@ class AudioCaptureOptions extends LocalTrackOptions {
   /// Attempt to use typingNoiseDetection option (if supported by the platform)
   /// Defaults to true.
   final bool typingNoiseDetection;
-
-  const AudioCaptureOptions({
-    this.deviceId,
-    this.noiseSuppression = true,
-    this.echoCancellation = true,
-    this.autoGainControl = true,
-    this.highPassFilter = false,
-    this.typingNoiseDetection = true,
-  });
 
   @override
   Map<String, dynamic> toMediaConstraintsMap() {
@@ -221,6 +237,24 @@ class AudioCaptureOptions extends LocalTrackOptions {
     }
     return constraints;
   }
+
+  @override
+  AudioCaptureOptions copyWith({
+    String? deviceId,
+    bool? noiseSuppression,
+    bool? echoCancellation,
+    bool? autoGainControl,
+    bool? highPassFilter,
+    bool? typingNoiseDetection,
+  }) =>
+      AudioCaptureOptions(
+        deviceId: deviceId ?? this.deviceId,
+        noiseSuppression: noiseSuppression ?? this.noiseSuppression,
+        echoCancellation: echoCancellation ?? this.echoCancellation,
+        autoGainControl: autoGainControl ?? this.autoGainControl,
+        highPassFilter: highPassFilter ?? this.highPassFilter,
+        typingNoiseDetection: typingNoiseDetection ?? this.typingNoiseDetection,
+      );
 }
 
 /// Base class for track options.
@@ -229,6 +263,8 @@ abstract class LocalTrackOptions {
 
   // All subclasses must be able to report constraints
   Map<String, dynamic> toMediaConstraintsMap();
+
+  LocalTrackOptions copyWith();
 
   /// The [when] method is the equivalent to pattern matching.
   T when<T extends Object>({

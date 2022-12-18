@@ -7,6 +7,8 @@ environment:
   sdk: '>=2.17.0 <3.0.0'
 
 dependencies:
+  flutter:
+    sdk: flutter
   equatable: ^2.0.3
   http: ^0.13.4
   protobuf: ^2.1.0
@@ -16,12 +18,13 @@ dependencies:
   rxdart: ^0.27.5
   web_socket_channel: ^2.2.0
   collection: ^1.16.0
-  flutter_webrtc: ^0.9.8
+  flutter_webrtc: ^0.9.18
   meta: ^1.8.0
   sdp_transform: ^0.3.2
   synchronized: ^3.0.0+3
-  rate_limiter: ^0.1.1
+  rate_limiter: ^1.0.0
 
 dev_dependencies:
   dart_code_metrics: ^4.4.0
-  test: ^1.21.6
+  flutter_test:
+    sdk: flutter

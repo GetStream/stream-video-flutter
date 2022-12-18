@@ -156,16 +156,18 @@ class User extends $pb.GeneratedMessage {
 
 class UserInput extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserInput', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.user_v1'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'role')
-    ..pPS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'teams')
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'imageUrl')
-    ..a<$core.List<$core.int>>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'customJson', $pb.PbFieldType.OY)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'role')
+    ..pPS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'teams')
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'imageUrl')
+    ..a<$core.List<$core.int>>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'customJson', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
   UserInput._() : super();
   factory UserInput({
+    $core.String? id,
     $core.String? name,
     $core.String? role,
     $core.Iterable<$core.String>? teams,
@@ -173,6 +175,9 @@ class UserInput extends $pb.GeneratedMessage {
     $core.List<$core.int>? customJson,
   }) {
     final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
     if (name != null) {
       _result.name = name;
     }
@@ -212,42 +217,51 @@ class UserInput extends $pb.GeneratedMessage {
   static UserInput? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get name => $_getSZ(0);
+  $core.String get id => $_getSZ(0);
   @$pb.TagNumber(1)
-  set name($core.String v) { $_setString(0, v); }
+  set id($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasName() => $_has(0);
+  $core.bool hasId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearName() => clearField(1);
+  void clearId() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get role => $_getSZ(1);
+  $core.String get name => $_getSZ(1);
   @$pb.TagNumber(2)
-  set role($core.String v) { $_setString(1, v); }
+  set name($core.String v) { $_setString(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasRole() => $_has(1);
+  $core.bool hasName() => $_has(1);
   @$pb.TagNumber(2)
-  void clearRole() => clearField(2);
+  void clearName() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.List<$core.String> get teams => $_getList(2);
+  $core.String get role => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set role($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasRole() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearRole() => clearField(3);
 
   @$pb.TagNumber(4)
-  $core.String get imageUrl => $_getSZ(3);
-  @$pb.TagNumber(4)
-  set imageUrl($core.String v) { $_setString(3, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasImageUrl() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearImageUrl() => clearField(4);
+  $core.List<$core.String> get teams => $_getList(3);
 
   @$pb.TagNumber(5)
-  $core.List<$core.int> get customJson => $_getN(4);
+  $core.String get imageUrl => $_getSZ(4);
   @$pb.TagNumber(5)
-  set customJson($core.List<$core.int> v) { $_setBytes(4, v); }
+  set imageUrl($core.String v) { $_setString(4, v); }
   @$pb.TagNumber(5)
-  $core.bool hasCustomJson() => $_has(4);
+  $core.bool hasImageUrl() => $_has(4);
   @$pb.TagNumber(5)
-  void clearCustomJson() => clearField(5);
+  void clearImageUrl() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.List<$core.int> get customJson => $_getN(5);
+  @$pb.TagNumber(6)
+  set customJson($core.List<$core.int> v) { $_setBytes(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasCustomJson() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearCustomJson() => clearField(6);
 }
 

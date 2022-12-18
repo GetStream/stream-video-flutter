@@ -13,9 +13,9 @@ dependencies:
   google_fonts: ^3.0.1
   flutter:
     sdk: flutter
-  stream_video_flutter_core:
-    path: ../stream_video_flutter_core
- 
+  stream_video:
+    path: ../stream_video
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

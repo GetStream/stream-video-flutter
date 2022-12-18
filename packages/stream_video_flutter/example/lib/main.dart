@@ -1,42 +1,36 @@
-import 'package:example/views/home_view.dart';
-import 'package:example/views/staged_view.dart';
+import 'package:example/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-void main() {
+import 'package:google_fonts/google_fonts.dart';
+import 'package:stream_video/stream_video.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   StreamVideo.init(
     'key10', // see <video>/data/fixtures/apps.yaml for API secret
     coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
         'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
-    // 'http://192.168.1.6:26991/rpc',
+    // 'http://192.168.1.7:26991/rpc',
     coordinatorWsUrl: //replace host with your local ip address
         'wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
-    // 'ws://192.168.1.6:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
-    //replace host with your local ip address
-    // sfuUrl: 'http://192.168.1.10:3031/twirp',
+    // 'ws://192.168.1.7:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
   );
-  runApp(const MyApp());
+
+  runApp(const StreamUIExampleApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class StreamUIExampleApp extends StatelessWidget {
+  const StreamUIExampleApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    const title = 'Stream Video Flutter';
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Stream Video UI Example',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        textTheme: GoogleFonts.robotoMonoTextTheme(),
       ),
-      home: HomeView(title: title),
-      routes: {
-        HomeView.routeName: (context) => HomeView(title: title),
-        // StageView.routeName: (context) => StageView(
-        //       controller: client.participants,
-        //       trackController: client.tracks,
-        //     ),
-      },
+      onGenerateRoute: Routes.generateRoute,
     );
   }
 }

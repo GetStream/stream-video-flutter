@@ -36,6 +36,8 @@ abstract class ClientRPCServiceBase extends $pb.GeneratedService {
   $async.Future<$10.DeleteCallMembersResponse> deleteCallMembers($pb.ServerContext ctx, $10.DeleteCallMembersRequest request);
   $async.Future<$10.SendEventResponse> sendEvent($pb.ServerContext ctx, $10.SendEventRequest request);
   $async.Future<$10.SendCustomEventResponse> sendCustomEvent($pb.ServerContext ctx, $10.SendCustomEventRequest request);
+  $async.Future<$10.QueryUsersResponse> queryUsers($pb.ServerContext ctx, $10.QueryUsersRequest request);
+  $async.Future<$10.UpsertUsersResponse> upsertUsers($pb.ServerContext ctx, $10.UpsertUsersRequest request);
   $async.Future<$10.ReportCallStatsResponse> reportCallStats($pb.ServerContext ctx, $10.ReportCallStatsRequest request);
   $async.Future<$10.ReportCallStatEventResponse> reportCallStatEvent($pb.ServerContext ctx, $10.ReportCallStatEventRequest request);
   $async.Future<$10.ReviewCallResponse> reviewCall($pb.ServerContext ctx, $10.ReviewCallRequest request);
@@ -63,6 +65,8 @@ abstract class ClientRPCServiceBase extends $pb.GeneratedService {
       case 'DeleteCallMembers': return $10.DeleteCallMembersRequest();
       case 'SendEvent': return $10.SendEventRequest();
       case 'SendCustomEvent': return $10.SendCustomEventRequest();
+      case 'QueryUsers': return $10.QueryUsersRequest();
+      case 'UpsertUsers': return $10.UpsertUsersRequest();
       case 'ReportCallStats': return $10.ReportCallStatsRequest();
       case 'ReportCallStatEvent': return $10.ReportCallStatEventRequest();
       case 'ReviewCall': return $10.ReviewCallRequest();
@@ -93,6 +97,8 @@ abstract class ClientRPCServiceBase extends $pb.GeneratedService {
       case 'DeleteCallMembers': return this.deleteCallMembers(ctx, request as $10.DeleteCallMembersRequest);
       case 'SendEvent': return this.sendEvent(ctx, request as $10.SendEventRequest);
       case 'SendCustomEvent': return this.sendCustomEvent(ctx, request as $10.SendCustomEventRequest);
+      case 'QueryUsers': return this.queryUsers(ctx, request as $10.QueryUsersRequest);
+      case 'UpsertUsers': return this.upsertUsers(ctx, request as $10.UpsertUsersRequest);
       case 'ReportCallStats': return this.reportCallStats(ctx, request as $10.ReportCallStatsRequest);
       case 'ReportCallStatEvent': return this.reportCallStatEvent(ctx, request as $10.ReportCallStatEventRequest);
       case 'ReviewCall': return this.reviewCall(ctx, request as $10.ReviewCallRequest);

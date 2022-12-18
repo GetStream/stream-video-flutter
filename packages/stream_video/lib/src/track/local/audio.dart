@@ -1,19 +1,18 @@
 import 'dart:async';
 
+import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
+    as sfu;
 import 'package:stream_video/src/track/local/local.dart';
 import 'package:stream_video/src/track/options.dart';
 import 'package:stream_video/src/track/track.dart';
 
-import 'package:stream_video/src/types/other.dart';
-
 class LocalAudioTrack extends LocalTrack with AudioTrack {
   LocalAudioTrack({
-    required super.name,
-    required super.source,
+    required super.type,
     required super.mediaStream,
     required super.mediaStreamTrack,
     required this.currentOptions,
-  }) : super(kind: TrackType.audio);
+  });
 
   @override
   covariant AudioCaptureOptions currentOptions;
@@ -26,8 +25,7 @@ class LocalAudioTrack extends LocalTrack with AudioTrack {
     final stream = await LocalTrack.createStream(options);
 
     return LocalAudioTrack(
-      name: Track.microphoneName,
-      source: TrackSource.microphone,
+      type: sfu.TrackType.TRACK_TYPE_AUDIO,
       mediaStream: stream,
       mediaStreamTrack: stream.getAudioTracks().first,
       currentOptions: options,

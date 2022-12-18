@@ -1,42 +1,41 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
-import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart';
-import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart';
-import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart';
-import 'package:stream_video/src/call/participants_controller.dart';
-import 'package:stream_video/src/call/track_controller.dart';
-import 'package:stream_video/src/core/logger/logger.dart';
-import 'package:stream_video/src/core/platform_detector/platform_detector.dart';
-import 'package:stream_video/src/core/utils/event_emitter.dart';
-import 'package:stream_video/src/core/utils/utils.dart';
+import 'package:meta/meta.dart';
+import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart'
+    as rpc;
+import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart'
+    as edge;
+import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
+    as sfu_events;
+import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
+    as sfu_models;
+import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
+    as signal;
+import 'package:stream_video/src/call/transport.dart';
+import 'package:stream_video/src/core/utils.dart';
+import 'package:stream_video/src/event_emitter.dart';
+import 'package:stream_video/src/events.dart';
+import 'package:stream_video/src/extensions.dart';
+import 'package:stream_video/src/internal/events.dart';
+import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/models/call_configuration.dart';
-import 'package:stream_video/src/models/call_participant.dart';
 import 'package:stream_video/src/options.dart';
+import 'package:stream_video/src/participant/local.dart';
+import 'package:stream_video/src/participant/participant.dart';
+import 'package:stream_video/src/participant/participant_info.dart';
+import 'package:stream_video/src/participant/remote.dart';
 import 'package:stream_video/src/sfu-client/rtc/codecs.dart' as codecs;
-import 'package:stream_video/src/sfu-client/rtc/ice_trickle_buffer.dart';
-import 'package:stream_video/src/sfu-client/rtc/publisher.dart';
-import 'package:stream_video/src/sfu-client/rtc/subscriber.dart';
 import 'package:stream_video/src/sfu-client/sfu_client.dart';
 import 'package:stream_video/src/stream_video.dart';
-import 'package:stream_video/src/track/local/audio.dart';
-import 'package:stream_video/src/track/local/local.dart';
-import 'package:stream_video/src/track/local/video.dart';
-import 'package:stream_video/src/track/options.dart';
-import 'package:stream_video/src/track/remote/audio.dart';
-import 'package:stream_video/src/track/remote/remote.dart';
-import 'package:stream_video/src/track/remote/video.dart';
-import 'package:stream_video/src/track/track.dart';
 import 'package:stream_video/src/types/other.dart';
 
 const _timeoutDuration = Duration(seconds: 30);
 
-enum StatKind { sender, publisher }
-
-class Call with EventEmitterMixin<SfuEvent> {
+/// Represents a [Call] in which you can connect to.
+class Call with EventEmittable<CallEvent> {
   /// Creates a new [Call] instance from a [CallConfiguration].
   Call({
     required this.callConfiguration,
@@ -53,48 +52,21 @@ class Call with EventEmitterMixin<SfuEvent> {
     this.callOptions = const CallOptions(),
   }) : _streamVideoClient = client {
     _initialiseCall(credentials: credentials);
-    _initialised = true;
   }
 
   // Determines whether the call is initialised.
   bool _initialised = false;
-  void _initialiseCall({required Credentials credentials}) {
+  void _initialiseCall({required edge.Credentials credentials}) {
     final url = credentials.server.url;
     final token = credentials.token;
-    _client = SfuClient(
+    sfuClient = SfuClient(
       url: url,
       token: token,
-    )
-      ..listen((data) {
-        final event = data.whichEventPayload();
-        emitter.emit(event.name, data);
-      })
-      ..addListener(
-        SfuEvent_EventPayload.iceTrickle.name,
-        (payload) {
-          final iceTrickle = payload.iceTrickle;
-          logger.info('Received iceTrickle: $iceTrickle');
-          _iceTrickleBuffer.push(iceTrickle);
-        },
-      )
-      ..addListener(
-        SfuEvent_EventPayload.participantJoined.name,
-        (data) {
-          final payload = data.participantJoined;
-          final participant = CallParticipant.fromSfu(payload.participant);
-          return _controller.participants.upsert(participant);
-        },
-      )
-      ..addListener(
-        SfuEvent_EventPayload.participantLeft.name,
-        (data) {
-          final payload = data.participantJoined;
-          final participant = payload.participant;
-          return _controller.participants.removeBySessionId(
-            participant.sessionId,
-          );
-        },
-      );
+    );
+
+    _startListeningSfuEvents();
+
+    _initialised = true;
   }
 
   late final CallConfiguration callConfiguration;
@@ -103,34 +75,32 @@ class Call with EventEmitterMixin<SfuEvent> {
   late final String callId;
   late final String callType;
   String get callCid => '$callType:$callId';
-  late final Credentials credentials;
+  late final edge.Credentials credentials;
   final CallOptions callOptions;
 
-  late final SfuClient _client;
+  late final SfuClient sfuClient;
 
-  rtc.RTCPeerConnection? _publisher;
-  rtc.RTCPeerConnection? _subscriber;
-  final _iceTrickleBuffer = IceTrickleBuffer();
+  @internal
+  Transport? publisher;
 
-  final _controller = _CallController();
+  @internal
+  Transport? subscriber;
 
-  List<CallParticipant> get participants {
-    return _controller.participants.value;
-  }
+  ConnectionState get connectionState => sfuClient.connectionState;
 
-  Stream<List<CallParticipant>> get participantsStream {
-    return _controller.participants.stream;
-  }
+  /// map of SID to RemoteParticipant
+  Map<String, RemoteParticipant> get participants => _participants;
+  final _participants = <String, RemoteParticipant>{};
 
-  LocalCallParticipant? get localParticipant {
-    return _controller.participants.local;
-  }
+  /// The current local participant
+  LocalParticipant? get localParticipant => _localParticipant;
+  LocalParticipant? _localParticipant;
 
-  List<CallParticipant> get remoteParticipants {
-    return _controller.participants.remote;
-  }
+  /// The current dominant speaker in the call.
+  Participant? get dominantSpeaker => _dominantSpeaker;
+  Participant? _dominantSpeaker;
 
-  Future<CallEnvelope> create() {
+  Future<rpc.CallEnvelope> create() {
     return _streamVideoClient.createCall(
       type: callConfiguration.type,
       id: callConfiguration.id,
@@ -139,7 +109,7 @@ class Call with EventEmitterMixin<SfuEvent> {
     );
   }
 
-  Future<CallEnvelope> getOrCreate() {
+  Future<rpc.CallEnvelope> getOrCreate() {
     return _streamVideoClient.getOrCreateCall(
       type: callConfiguration.type,
       id: callConfiguration.id,
@@ -148,25 +118,30 @@ class Call with EventEmitterMixin<SfuEvent> {
     );
   }
 
-  Future<void> leave() async {
-    await _subscriber?.close();
-    _subscriber = null;
+  Future<void> disconnect() async {
+    // clean up RemoteParticipants
+    for (final participant in [...participants.values]) {
+      // RemoteParticipant is responsible for disposing resources
+      await participant.dispose();
+    }
+    _participants.clear();
 
-    // Un-publish all the local and remote participant tracks.
-    await Future.wait([
-      unpublishAllLocalTracks(),
-      for (final participant in remoteParticipants)
-        unpublishAllRemoteTracks(
-          participantSessionId: participant.sessionId,
-        ),
-    ]);
+    // clean up LocalParticipant
+    await localParticipant?.dispose();
 
-    await _publisher?.close();
-    _publisher = null;
+    // reset dominant speaker
+    _dominantSpeaker = null;
 
-    await _client.disconnect();
-    await _controller.dispose();
-    await _iceTrickleBuffer.dispose();
+    // dispose events
+    events.dispose();
+
+    await publisher?.dispose();
+    publisher = null;
+
+    await subscriber?.dispose();
+    subscriber = null;
+
+    await sfuClient.disconnect();
 
     _streamVideoClient.updateCallStateDisconnected(this);
   }
@@ -186,68 +161,33 @@ class Call with EventEmitterMixin<SfuEvent> {
       credentials = result.credentials;
 
       _initialiseCall(credentials: credentials);
-      _initialised = true;
     }
 
     logger.info('Joining call $callType:$callId');
 
-    await _client.connect();
+    await sfuClient.connect();
 
-    _subscriber = await createSubscriber(
-      sfuClient: _client,
-      configuration: _connectionConfig,
-      onIceCandidates: _iceTrickleBuffer.onSubscriberCandidates,
-      onTrack: _onTrack,
+    final genericSdp = await codecs.getGenericSdp(
+      direction: rtc.TransceiverDirection.RecvOnly,
     );
 
-    final results = await Future.wait([
-      // audio
-      codecs.getSenderCodecs(rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio),
-      codecs.getReceiverCodecs(
-        rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
-        _subscriber,
-      ),
-
-      // video
-      codecs.getSenderCodecs(rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo),
-      codecs.getReceiverCodecs(
-        rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
-        _subscriber,
-      ),
-    ]);
-
-    final audioEncodes = results[0];
-    final audioDecodes = results[1];
-    final videoEncodes = results[2];
-    final videoDecodes = results[3];
-
-    _client.send(
-      request: SfuRequest(
-        joinRequest: JoinRequest(
-          publish: true,
+    sfuClient.send(
+      request: sfu_events.SfuRequest(
+        joinRequest: sfu_events.JoinRequest(
           token: credentials.token,
-          sessionId: _client.sessionId,
-          codecSettings: CodecSettings(
-            audio: AudioCodecs(
-              encodes: audioEncodes,
-              decodes: audioDecodes,
-            ),
-            video: VideoCodecs(
-              encodes: videoEncodes,
-              decodes: videoDecodes,
-            ),
-          ),
+          sessionId: sfuClient.sessionId,
+          subscriberSdp: genericSdp,
         ),
       ),
     );
 
     // Waiting for the join response event.
-    final event = await _client.waitFor(
-      event: SfuEvent_EventPayload.joinResponse.name,
+    final joinResponseEvent =
+        await sfuClient.events.waitFor<SFUJoinResponseEvent>(
       duration: _timeoutDuration,
     );
 
-    final joinResponse = event.joinResponse;
+    final joinResponse = joinResponseEvent.response;
     await _handleConnected(response: joinResponse, options: options);
 
     logger.fine('Call Connect completed');
@@ -257,41 +197,102 @@ class Call with EventEmitterMixin<SfuEvent> {
     return this;
   }
 
+  Future<void> _createPeerConnections(RTCConfiguration configuration) async {
+    if (publisher != null || subscriber != null) {
+      logger.warning('Already configured');
+      return;
+    }
+
+    publisher = await Transport.create(configuration: configuration);
+    subscriber = await Transport.create(configuration: configuration);
+
+    publisher?.pc.onIceCandidate = (candidate) {
+      logger.fine('Publisher onIceCandidate: $candidate');
+
+      final iceCandidate = json.encode(candidate.toMap());
+      sfuClient.iceTrickle(
+        iceCandidate: iceCandidate,
+        peerType: sfu_models.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
+      );
+    };
+
+    publisher?.pc.onIceConnectionState = (state) {
+      logger.info('Publisher ICE connection state: $state');
+    };
+
+    subscriber?.pc.onIceCandidate = (candidate) {
+      logger.info('Subscriber onIceCandidate: $candidate');
+
+      final iceCandidate = json.encode(candidate.toMap());
+      sfuClient.iceTrickle(
+        iceCandidate: iceCandidate,
+        peerType: sfu_models.PeerType.PEER_TYPE_SUBSCRIBER,
+      );
+    };
+
+    subscriber?.pc.onIceConnectionState = (state) {
+      logger.info('Subscriber ICE connection state: $state');
+    };
+
+    publisher?.pc.onConnectionState = (state) {
+      logger.info('Publisher connection state: $state');
+    };
+
+    subscriber?.pc.onConnectionState = (state) {
+      logger.info('Subscriber connection state: $state');
+    };
+
+    subscriber?.pc.onTrack = _onSubscriberTrack;
+
+    publisher?.pc.onRenegotiationNeeded = _onPublisherNegotiationNeeded;
+
+    sfuClient.events.on<SFUSubscriberOfferEvent>((data) async {
+      final offer = data.offer;
+      logger.info('Subscriber offer: $offer');
+
+      await subscriber!.setRemoteDescription(
+        rtc.RTCSessionDescription(offer.sdp, 'offer'),
+      );
+
+      final answer = await subscriber!.createAnswer();
+      await sfuClient.sendAnswer(
+        sdp: answer.sdp!,
+        peerType: sfu_models.PeerType.PEER_TYPE_SUBSCRIBER,
+      );
+    });
+  }
+
   Future<void> _handleConnected({
-    required JoinResponse response,
+    required sfu_events.JoinResponse response,
     ConnectOptions options = const ConnectOptions(),
   }) async {
-    _publisher = await createPublisher(
-      sfuClient: _client,
-      configuration: _connectionConfig,
-      onIceCandidates: _iceTrickleBuffer.onPublisherCandidates,
-    );
+    // Creating the peer connections.
+    await _createPeerConnections(_connectionConfig);
 
-    final ownSessionId = response.ownSessionId;
     final callState = response.callState;
     final sfuParticipants = callState.participants;
 
-    // Updating all the participants first.
-    _controller.participants.value = [
-      ...sfuParticipants.map((it) {
-        CallParticipant participant;
-        if (it.sessionId == ownSessionId) {
-          participant = LocalCallParticipant.fromSfu(it);
-        } else {
-          participant = CallParticipant.fromSfu(it);
-        }
+    final localSfuParticipant = sfuParticipants.firstWhereOrNull(
+      (it) => it.sessionId == sfuClient.sessionId,
+    );
 
-        return participant;
-      }),
-    ];
+    if (localSfuParticipant == null) {
+      throw Exception('Local participant not found');
+    }
+
+    // Creating the local participant.
+    _localParticipant ??= LocalParticipant(
+      call: this,
+      info: ParticipantInfo.fromSfu(localSfuParticipant),
+    );
 
     final audio = options.microphone;
     if (audio.enabled) {
       final track = audio.track;
       if (track != null) {
-        await publishLocalAudioTrack(track);
+        await _localParticipant!.publishAudioTrack(track);
       } else {
-        await setMicrophoneEnabled();
+        await _localParticipant!.setMicrophoneEnabled();
       }
     }
 
@@ -299,9 +300,9 @@ class Call with EventEmitterMixin<SfuEvent> {
     if (video.enabled) {
       final track = video.track;
       if (track != null) {
-        await publishLocalVideoTrack(track);
+        await _localParticipant!.publishVideoTrack(track);
       } else {
-        await setCameraEnabled();
+        await _localParticipant!.setCameraEnabled();
       }
     }
 
@@ -309,199 +310,102 @@ class Call with EventEmitterMixin<SfuEvent> {
     if (screen.enabled) {
       final track = screen.track;
       if (track != null) {
-        await publishLocalVideoTrack(track);
+        await _localParticipant!.publishVideoTrack(track);
       } else {
-        await setScreenShareEnabled();
+        await _localParticipant!.setScreenShareEnabled();
       }
     }
 
-    // Updating local participant tracks.
-    _controller.participants.value = [
-      ...participants.map((it) {
-        if (it.isLocal) {
-          return (it as LocalCallParticipant).copyWith(
-            tracks: [
-              ...?_controller.localTracks
-                  .getTracksForSession(ownSessionId)
-                  ?.values,
-            ],
-          );
-        }
-        return it;
-      }),
-    ];
-  }
-
-  Future<rtc.MediaStream> changeInputDevice({
-    required rtc.RTCRtpMediaType kind,
-    required String deviceId,
-    Map<String, dynamic> extras = const {},
-  }) async {
-    if (_publisher == null) {
-      throw StateError('Call must be joined before changing input device');
-    }
-
-    logger.info('Changing input device for $kind to $deviceId');
-
-    final constraints = {...extras};
-    if (kind == rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio) {
-      constraints['audio'] = {
-        'deviceId': deviceId,
-      };
-    } else if (kind == rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo) {
-      constraints['video'] = {
-        'deviceId': deviceId,
-      };
-    }
-
-    final mediaStream =
-        await rtc.navigator.mediaDevices.getUserMedia(constraints);
-    final newTrack = kind == rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio
-        ? mediaStream.getAudioTracks().first
-        : mediaStream.getVideoTracks().first;
-
-    final senders = await _publisher!.getSenders();
-    final sender = senders.firstWhereOrNull(
-      (it) => it.track?.kind == newTrack.kind,
+    final otherParticipants = sfuParticipants.where(
+      (it) => it.sessionId != sfuClient.sessionId,
     );
 
-    if (sender == null || sender.track == null) {
-      throw "Can't find a sender for $newTrack with $kind";
+    // Adding the remote participants.
+    for (final sfuParticipant in otherParticipants) {
+      final info = ParticipantInfo.fromSfu(sfuParticipant);
+      logger.fine(
+        'Creating RemoteParticipant: ${info.sessionId}(${info.userId}) '
+        'tracks:${info.publishedTracks}',
+      );
+      _getOrCreateRemoteParticipant(sessionId: info.sessionId, info: info);
     }
-
-    await sender.track!.stop(); // release old track
-    await sender.replaceTrack(newTrack);
-
-    return mediaStream;
   }
 
-  /// Update track subscription configuration for one or more participants.
-  ///
-  /// You have to create a subscription for each participant you want to receive
-  /// any kind of track.
-  Future<UpdateSubscriptionsResponse> updateSubscriptionsPartial(
-    Map<String, TrackSize?> changes,
-  ) {
-    logger.info('Updating subscriptions for $changes');
+  RemoteParticipant _getOrCreateRemoteParticipant({
+    required String sessionId,
+    ParticipantInfo? info,
+  }) {
+    print('PublishedTracks: ${info?.publishedTracks.length}');
 
-    _controller.participants.value = [
-      ...participants.map((it) {
-        final change = changes[it.sessionId];
-
-        if (change == null) return it;
-        return it.copyWith(trackSize: change);
-      }),
-    ];
-
-    return updateSubscriptions(participants);
+    return _participants.update(
+      sessionId,
+      (participant) {
+        if (info != null) {
+          participant.updateInfo(info);
+        }
+        return participant;
+      },
+      ifAbsent: () {
+        if (info == null) {
+          throw Exception(
+            'Participant info is required in order to create a new participant',
+          );
+        }
+        return RemoteParticipant(
+          call: this,
+          info: info,
+        );
+      },
+    );
   }
 
-  Future<UpdateSubscriptionsResponse> updateSubscriptions(
-    List<CallParticipant> participants,
-  ) {
-    final subscriptions = <String, TrackSize>{};
-    for (final participant in participants) {
-      // TODO: Don't update for current user.
-      if (participant.trackSize != null) {
-        subscriptions[participant.id] = participant.trackSize!;
+  Future<signal.UpdateSubscriptionsResponse> updateTrackSubscription({
+    required signal.TrackSubscriptionDetails track,
+    required bool subscribe,
+  }) {
+    final tracks = <String, signal.TrackSubscriptionDetails>{};
+    for (final participant in [...participants.values]) {
+      final subscribedTracks = participant.subscribedTracks;
+      print('SubscribedTracks: ${subscribedTracks.length}');
+      for (final track in subscribedTracks) {
+        final detail = signal.TrackSubscriptionDetails(
+          userId: participant.userId,
+          sessionId: participant.sessionId,
+          trackType: track.type,
+        );
+
+        final videoDimension = track.videoDimension;
+        if (videoDimension != null) {
+          detail.dimension = sfu_models.VideoDimension(
+            width: videoDimension.width,
+            height: videoDimension.height,
+          );
+        }
+
+        tracks[detail.trackDetailId] = detail;
       }
     }
 
-    return _client.updateSubscriptions(subscriptions: subscriptions);
+    print(
+      'Before Updating Tracks subscription: ${tracks.values.map((e) => e)}',
+    );
+
+    if (subscribe) {
+      tracks[track.trackDetailId] = track;
+    } else {
+      tracks.remove(track.trackDetailId);
+    }
+
+    print('Updating Tracks subscription: ${tracks.values.map((e) => e)}');
+
+    return sfuClient.updateSubscriptions(tracks: [...tracks.values]);
   }
 
-  Future<String?> getActiveInputDeviceId({
-    required TrackType kind,
-  }) async {
-    if (_publisher == null) {
-      throw StateError('Call must be joined before getting input device id');
-    }
-
-    logger.info('Getting active input device id for $kind');
-
-    final senders = await _publisher!.getSenders();
-    final sender = senders.firstWhereOrNull((it) {
-      return it.track?.kind == kind.toRtcTrackKind();
-    });
-
-    final deviceId = sender?.track?.getSettings()['deviceId'] as String?;
-    return deviceId;
-  }
-
-  Future<List<rtc.StatsReport>?> getStats({
-    required StatKind kind,
-    rtc.MediaStreamTrack? selector,
-  }) async {
-    logger.info('Getting stats for $kind');
-
-    switch (kind) {
-      case StatKind.sender:
-        return _subscriber?.getStats(selector);
-      case StatKind.publisher:
-        return _publisher?.getStats(selector);
-    }
-  }
-
-  Future<UpdateMuteStateResponse> updateMuteState({
-    required TrackType trackType,
-    required bool muted,
-  }) async {
-    if (_publisher == null) {
-      throw StateError('Call must be joined before updating mute state');
-    }
-
-    logger.info('Updating mute state for $trackType to $muted');
-
-    final senders = await _publisher!.getSenders();
-    final sender = senders.firstWhereOrNull((it) {
-      return it.track?.kind == trackType.toRtcTrackKind();
-    });
-
-    if (sender == null || sender.track == null) {
-      throw "Can't find a sender for $trackType";
-    }
-
-    sender.track!.enabled = !muted;
-
-    switch (trackType) {
-      case TrackType.audio:
-        return _client.updateAudioMuteState(muted: muted);
-      case TrackType.video:
-        return _client.updateVideoMuteState(muted: muted);
-    }
-  }
-
-  Future<bool> updatePublishQuality({required List<String> enabledRids}) async {
-    logger.info('Updating publish quality for $enabledRids');
-
-    final senders = await _publisher?.getSenders();
-    final videoSender = senders?.firstWhere((s) => s.track?.kind == 'video');
-
-    if (videoSender == null) throw 'No video sender found';
-
-    final params = videoSender.parameters;
-
-    var changed = false;
-    for (final encoding in params.encodings!) {
-      // flip 'active' flag only when necessary
-      final shouldEnable = enabledRids.contains(encoding.rid);
-      if (shouldEnable != encoding.active) {
-        encoding.active = shouldEnable;
-        changed = true;
-      }
-    }
-
-    if (changed) {
-      return videoSender.setParameters(params);
-    }
-
-    return false;
-  }
-
-  void _onTrack(rtc.RTCTrackEvent event) async {
+  void _onSubscriberTrack(rtc.RTCTrackEvent event) async {
     logger.fine('[WebRTC] pc.onTrack');
 
     final stream = event.streams.firstOrNull;
+    logger.shout('onTrack: ${stream?.id}');
     if (stream == null) {
       // we need the stream to get the track's id
       logger.severe('received track without mediaStream');
@@ -518,485 +422,281 @@ class Call with EventEmitterMixin<SfuEvent> {
       logger.fine('[WebRTC] stream.onRemoveTrack');
     };
 
-    await Future.delayed(const Duration(seconds: 6));
-
-    // if (_client.connectionState == ConnectionState.reconnecting ||
-    //     _client.connectionState == ConnectionState.connecting) {
-    //   final track = event.track;
-    //   final receiver = event.receiver;
-    //
-    //   events.on<EngineConnectionStateUpdatedEvent>((event) async {
-    //     Timer(const Duration(milliseconds: 10), () {
-    //       events.emit(EngineTrackAddedEvent(
-    //         track: track,
-    //         stream: stream,
-    //         receiver: receiver,
-    //       ));
-    //     });
-    //   });
-    //   return;
-    // }
-
-    if (_client.connectionState == ConnectionState.disconnected) {
-      logger.warning('skipping incoming track after Room disconnected');
+    if (connectionState == ConnectionState.reconnecting ||
+        connectionState == ConnectionState.connecting) {
+      final track = event.track;
+      final receiver = event.receiver;
+      sfuClient.events.on<ConnectionStateUpdatedEvent>((event) async {
+        Timer(const Duration(milliseconds: 10), () {
+          _onSubscriberTrackAdded(
+            track: track,
+            stream: stream,
+            receiver: receiver,
+          );
+        });
+      });
       return;
     }
 
-    logger.fine('EngineTrackAddedEvent trackSid:${event.track.id}');
-
-    final track = event.track;
-    final idParts = stream.id.split(':');
-    final trackLookupId = idParts.first;
-
-    final participantToUpdate = participants.firstWhereOrNull((it) {
-      return it.trackLookupPrefix == trackLookupId;
-    });
-
-    if (participantToUpdate == null) {
-      return logger.warning('Participant not found for track $track');
+    if (connectionState == ConnectionState.disconnected) {
+      return logger.warning('skipping incoming track after Call disconnected');
     }
 
+    return _onSubscriberTrackAdded(
+      track: event.track,
+      stream: stream,
+      receiver: event.receiver,
+    );
+  }
+
+  void _onSubscriberTrackAdded({
+    required rtc.MediaStreamTrack track,
+    required rtc.MediaStream stream,
+    rtc.RTCRtpReceiver? receiver,
+  }) async {
+    logger.fine('OnTrackAdded trackSid:${track.id}');
+
+    final idParts = stream.id.split(':');
+    final trackId = idParts[0];
+    final trackKind = idParts[1];
+    final trackSid = '$trackId:$trackKind';
+
+    final participant = participants.values.firstWhereOrNull((it) {
+      return it.trackLookupPrefix == trackId;
+    });
+
     try {
-      if (trackLookupId.isEmpty) {
-        return logger.warning('Track session id is empty');
+      if (participant == null) {
+        throw Exception('Participant not found for trackSid: $trackSid');
       }
 
-      await addSubscribedRemoteMediaTrack(
-        track,
-        stream,
-        trackLookupId,
-        participantToUpdate.sessionId,
+      await participant.addSubscribedMediaTrack(
+        mediaTrack: track,
+        stream: stream,
+        trackSid: trackSid,
+        receiver: receiver,
       );
-
-      _controller.participants.update(
-        participantToUpdate.copyWith(
-          tracks: [
-            ...?_controller.remoteTracks
-                .getTracksForSession(participantToUpdate.sessionId)
-                ?.values,
-          ],
-        ),
-      );
+    } on TrackSubscriptionExceptionEvent catch (event) {
+      logger.severe('addSubscribedMediaTrack() throwed ${event}');
+      [participant?.call.events, participant?.events].emit(event);
     } catch (exception) {
       // We don't want to pass up any exception so catch everything here.
-      return logger.warning(
+      logger.warning(
         'Unknown exception on addSubscribedMediaTrack() $exception',
       );
     }
+  }
+
+  void _onPublisherNegotiationNeeded() async {
+    logger.info('Publisher onRenegotiationNeeded');
+
+    final offer = await publisher!.createOffer();
+
+    final tracks = [
+      ...localParticipant!.trackPublications.values.map((it) {
+        final info = it.info;
+        final track = it.track?.mediaStreamTrack;
+        final transceiver = it.track?.transceiver;
+        return sfu_models.TrackInfo(
+          trackId: track?.id,
+          trackType: info.type,
+          mid: transceiver?.mid,
+          layers: info.videoLayers,
+        );
+      }),
+    ];
+
+    print('Publishing tracks: ${tracks.map((it) => it)}');
+
+    final response = await sfuClient.setPublisher(
+      sdp: offer.sdp!,
+      tracks: tracks,
+    );
+
+    await publisher!.setRemoteDescription(
+      rtc.RTCSessionDescription(response.sdp, 'answer'),
+    );
   }
 
   RTCConfiguration get _connectionConfig {
     final config = rtcConfigurationFromICEServers(credentials.iceServers);
     return config ?? defaultRtcConfiguration(credentials.server.url);
   }
-}
 
-class _CallController {
-  final participants = CallParticipantsController();
-  final localTracks = PublishedTracksController<LocalTrack>();
-  final remoteTracks = PublishedTracksController<RemoteTrack>();
+  void _startListeningSfuEvents() {
+    sfuClient.events
+      ..on<ConnectionStateUpdatedEvent>(events.emit)
+      ..on<SFUIceTrickleEvent>(
+        (event) {
+          final iceTrickle = event.iceTrickle;
+          logger.info('Received iceTrickle: $iceTrickle');
 
-  Future<void> dispose() async {
-    await participants.dispose();
-    await localTracks.dispose();
-    await remoteTracks.dispose();
-  }
-}
-
-///
-extension LocalTrackHandler on Call {
-  /// Shortcut for publishing a [TrackSource.camera].
-  Future<LocalTrack?> setCameraEnabled({bool enabled = true}) {
-    return setSourceEnabled(source: TrackSource.camera, enabled: enabled);
-  }
-
-  /// Shortcut for publishing a [TrackSource.microphone].
-  Future<LocalTrack?> setMicrophoneEnabled({bool enabled = true}) {
-    return setSourceEnabled(source: TrackSource.microphone, enabled: enabled);
-  }
-
-  /// Shortcut for publishing a [TrackSource.screenShareVideo].
-  Future<LocalTrack?> setScreenShareEnabled({
-    bool enabled = true,
-    bool? captureScreenAudio,
-  }) {
-    return setSourceEnabled(
-      source: TrackSource.screenShareVideo,
-      enabled: enabled,
-      captureScreenAudio: captureScreenAudio,
-    );
-  }
-
-  /// A convenience method to publish a track for a specific [TrackSource].
-  /// This is the recommended method to publish tracks.
-  Future<LocalTrack?> setSourceEnabled({
-    required TrackSource source,
-    required bool enabled,
-    bool? captureScreenAudio,
-  }) async {
-    logger.fine('setSourceEnabled(source: $source, enabled: $enabled)');
-    final track = getPublishedLocalTrackBySource(source);
-    if (track != null) {
-      if (enabled) {
-        await track.mute(muted: false);
-      } else {
-        if (source == TrackSource.screenShareVideo) {
-          final trackSid = track.sid;
-          if (trackSid != null) {
-            await unpublishLocalTrack(trackSid: trackSid);
-          }
-        } else {
-          await track.mute();
-        }
-      }
-      return track;
-    } else if (enabled) {
-      if (source == TrackSource.camera) {
-        final track = await LocalVideoTrack.createCameraTrack(
-          callOptions.defaultCameraCaptureOptions,
-        );
-        return publishLocalVideoTrack(track);
-      } else if (source == TrackSource.microphone) {
-        final track = await LocalAudioTrack.create(
-          callOptions.defaultAudioCaptureOptions,
-        );
-        return publishLocalAudioTrack(track);
-      } else if (source == TrackSource.screenShareVideo) {
-        // When capturing chrome table audio, we can't capture audio/video
-        // track separately, it has to be returned once in getDisplayMedia,
-        // so we publish it twice here, but only return videoTrack to user.
-        if (captureScreenAudio != null) {
-          final tracks = await LocalVideoTrack.createScreenShareTracksWithAudio(
-            ScreenShareCaptureOptions(captureScreenAudio: captureScreenAudio),
+          final iceCandidateJson = json.decode(iceTrickle.iceCandidate);
+          final iceCandidate = rtc.RTCIceCandidate(
+            iceCandidateJson['candidate'],
+            iceCandidateJson['sdpMid'],
+            iceCandidateJson['sdpMLineIndex'],
           );
-          LocalVideoTrack? videoTrack;
-          for (final track in tracks) {
-            if (track is LocalVideoTrack) {
-              videoTrack = await publishLocalVideoTrack(track);
-            } else if (track is LocalAudioTrack) {
-              await publishLocalAudioTrack(track);
-            }
+
+          final peerType = iceTrickle.peerType;
+          switch (peerType) {
+            case sfu_models.PeerType.PEER_TYPE_SUBSCRIBER:
+              subscriber?.addIceCandidate(iceCandidate);
+              break;
+            case sfu_models.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED:
+              publisher?.addIceCandidate(iceCandidate);
+              break;
+          }
+        },
+      )
+      ..on<SFUParticipantJoinedEvent>((event) {
+        final joinedParticipant = event.participantJoined.participant;
+        final participant = _getOrCreateRemoteParticipant(
+          sessionId: joinedParticipant.sessionId,
+          info: ParticipantInfo.fromSfu(joinedParticipant),
+        );
+        events.emit(ParticipantJoinedEvent(participant: participant));
+      })
+      ..on<SFUParticipantLeftEvent>((event) {
+        final leftParticipant = event.participantLeft.participant;
+        final participant = participants[leftParticipant.sessionId];
+
+        if (participant == null) {
+          return logger.warning(
+            'Participant not found for sessionId: ${leftParticipant.sessionId}',
+          );
+        }
+
+        participant.dispose();
+        participants.remove(leftParticipant.sessionId);
+
+        events.emit(ParticipantLeftEvent(participant: participant));
+      })
+      ..on<SFUTrackPublishedEvent>((event) {
+        print('Track published: ${event.trackPublished}');
+
+        final publishedTrack = event.trackPublished;
+
+        // localParticipant & remote participants
+        final allParticipants = <String, Participant>{
+          if (localParticipant != null)
+            localParticipant!.sessionId: localParticipant!,
+          ...participants,
+        };
+
+        final participant = allParticipants[publishedTrack.sessionId];
+
+        if (participant == null) {
+          return logger.warning(
+            'Participant not found for sessionId: ${publishedTrack.sessionId}',
+          );
+        }
+
+        print('Participant: ${participant.runtimeType}');
+
+        participant.updateInfo(participant.info.copyWith(
+          publishedTracks: [
+            ...{
+              ...participant.info.publishedTracks,
+              publishedTrack.type,
+            },
+          ],
+        ));
+      })
+      ..on<SFUTrackUnpublishedEvent>((event) {
+        print('Track unpublished: ${event.trackUnpublished}');
+
+        final unpublishedTrack = event.trackUnpublished;
+
+        // localParticipant & remote participants
+        final allParticipants = <String, Participant>{
+          if (localParticipant != null)
+            localParticipant!.sessionId: localParticipant!,
+          ...participants,
+        };
+
+        final participant = allParticipants[unpublishedTrack.sessionId];
+
+        if (participant == null) {
+          return logger.warning(
+            'Participant not found for sessionId: ${unpublishedTrack.sessionId}',
+          );
+        }
+
+        participant.updateInfo(participant.info.copyWith(
+          publishedTracks: [
+            ...participant.info.publishedTracks.where((it) {
+              return it != unpublishedTrack.type;
+            }),
+          ],
+        ));
+      })
+      ..on<SFUDominantSpeakerChangedEvent>((event) {
+        final dominantSpeaker = event.dominantSpeakerChanged;
+
+        // localParticipant & remote participants
+        final allParticipants = <String, Participant>{
+          if (localParticipant != null)
+            localParticipant!.sessionId: localParticipant!,
+          ...participants,
+        };
+
+        final participant = allParticipants[dominantSpeaker.sessionId];
+
+        if (participant == null) {
+          return logger.warning(
+            'Participant not found for sessionId: ${dominantSpeaker.sessionId}',
+          );
+        }
+
+        _dominantSpeaker = participant;
+        events.emit(DominantSpeakerChangedEvent(speaker: participant));
+      })
+      ..on<SFUAudioLevelChangedEvent>((event) {
+        final audioLevels = event.audioLevelChanged.audioLevels;
+
+        // localParticipant & remote participants
+        final allParticipants = <String, Participant>{
+          if (localParticipant != null)
+            localParticipant!.sessionId: localParticipant!,
+          ...participants,
+        };
+
+        for (final audioLevel in audioLevels) {
+          final participant = allParticipants[audioLevel.sessionId];
+
+          if (participant == null) {
+            logger.warning(
+              'Participant not found for sessionId: ${audioLevel.sessionId}',
+            );
+            continue;
           }
 
-          // just return the video track.
-          return videoTrack;
+          participant.audioLevel = audioLevel.level;
         }
-        final track = await LocalVideoTrack.createScreenShareTrack(
-          callOptions.defaultScreenShareCaptureOptions,
-        );
-        return publishLocalVideoTrack(track);
-      }
-    }
-    return null;
-  }
+      })
+      ..on<SFUChangePublishQualityEvent>((event) {
+        // TODO: Implement this
+      })
+      ..on<SFUConnectionQualityChangedEvent>((event) {
+        final connectionQualityChanged = event.connectionQualityChanged;
+        final participant = participants[connectionQualityChanged.sessionId];
 
-  Future<LocalVideoTrack> publishLocalVideoTrack(
-    LocalVideoTrack track, {
-    VideoPublishOptions? publishOptions,
-  }) async {
-    if (localVideoTracks.any((it) {
-      return it.mediaStreamTrack.id == track.mediaStreamTrack.id;
-    })) {
-      throw Exception('Track already published');
-    }
-
-    // Use defaultPublishOptions if options is null
-    publishOptions ??= callOptions.defaultVideoPublishOptions;
-
-    // use constraints passed to getUserMedia by default
-    var dimensions = track.currentOptions.params.dimensions;
-
-    if (CurrentPlatform.isWeb) {
-      // getSettings() is only implemented for Web
-      try {
-        // try to use getSettings for more accurate resolution
-        final settings = track.mediaStreamTrack.getSettings();
-        if (settings['width'] is int) {
-          dimensions = dimensions.copyWith(width: settings['width'] as int);
+        if (participant == null) {
+          return logger.warning(
+            'Participant not found for sessionId: ${connectionQualityChanged.sessionId}',
+          );
         }
-        if (settings['height'] is int) {
-          dimensions = dimensions.copyWith(height: settings['height'] as int);
-        }
-      } catch (_) {
-        logger.warning('Failed to call `mediaStreamTrack.getSettings()`');
-      }
-    }
 
-    // Video encodings and simulcasts
-    final encodings = codecs.computeVideoEncodings(
-      isScreenShare: track.source == TrackSource.screenShareVideo,
-      dimensions: dimensions,
-      options: publishOptions,
-    );
-
-    // TODO: Publish layers to Signal
-    final layers = codecs.computeVideoLayers(dimensions, encodings);
-
-    await track.start();
-
-    final transceiverInit = rtc.RTCRtpTransceiverInit(
-      direction: rtc.TransceiverDirection.SendOnly,
-      sendEncodings: encodings,
-      streams: [track.mediaStream],
-    );
-
-    track.transceiver = await _publisher?.addTransceiver(
-      track: track.mediaStreamTrack,
-      kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
-      init: transceiverInit,
-    );
-
-    final sessionId = _client.sessionId;
-    final trackLookupId = localParticipant!.trackLookupPrefix;
-    track.sid = 'video:$trackLookupId';
-    _controller.localTracks.add(sessionId, track);
-
-    return track;
-  }
-
-  Future<LocalAudioTrack> publishLocalAudioTrack(
-    LocalAudioTrack track, {
-    AudioPublishOptions? publishOptions,
-  }) async {
-    if (localAudioTracks.any((it) {
-      return it.mediaStreamTrack.id == track.mediaStreamTrack.id;
-    })) {
-      throw Exception('Track already published');
-    }
-
-    // Use defaultPublishOptions if options is null
-    publishOptions ??= callOptions.defaultAudioPublishOptions;
-
-    await track.start();
-
-    final transceiverInit = rtc.RTCRtpTransceiverInit(
-      direction: rtc.TransceiverDirection.SendOnly,
-      sendEncodings: [
-        if (publishOptions.audioBitrate > 0)
-          rtc.RTCRtpEncoding(maxBitrate: publishOptions.audioBitrate),
-      ],
-    );
-
-    // addTransceiver cannot pass in a kind parameter due to a bug in
-    // flutter-webrtc (web)
-    track.transceiver = await _publisher?.addTransceiver(
-      track: track.mediaStreamTrack,
-      kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
-      init: transceiverInit,
-    );
-
-    final sessionId = _client.sessionId;
-    final trackLookupId = localParticipant!.trackLookupPrefix;
-    track.sid = 'audio:$trackLookupId';
-    _controller.localTracks.add(sessionId, track);
-
-    return track;
-  }
-
-  Future<void> unpublishLocalTrack({required String trackSid}) async {
-    logger.finer('Unpublish track sessionId: $trackSid');
-
-    final track = _controller.localTracks.remove(_client.sessionId, trackSid);
-
-    if (track == null) return;
-
-    if (callOptions.stopLocalTrackOnUnpublish) {
-      await track.stop();
-    }
-
-    final sender = track.sender;
-    if (sender != null) {
-      try {
-        await _publisher?.removeTrack(sender);
-      } catch (_) {
-        logger.warning('[$runtimeType] rtc.removeTrack() did throw $_');
-      }
-    }
-  }
-
-  /// Convenience method to unpublish all local tracks.
-  Future<void> unpublishAllLocalTracks() async {
-    final localTracks = _controller.localTracks.all(_client.sessionId);
-    final trackSids = localTracks.keys.toSet();
-    for (final sid in trackSids) {
-      await unpublishLocalTrack(trackSid: sid);
-    }
-  }
-
-  /// Convenience method to rePublish all local tracks.
-  Future<void> rePublishAllLocalTracks() async {
-    final tracks = [...localTracks];
-    _controller.localTracks.clear();
-    for (final track in tracks) {
-      if (track is LocalAudioTrack) {
-        await publishLocalAudioTrack(track);
-      } else if (track is LocalVideoTrack) {
-        await publishLocalVideoTrack(track);
-      }
-    }
-  }
-
-  /// A convenience property to get all local tracks.
-  List<LocalTrack> get localTracks {
-    return [..._controller.localTracks.all(_client.sessionId).values];
-  }
-
-  /// A convenience property to get all local video tracks.
-  List<LocalVideoTrack> get localVideoTracks {
-    return [..._controller.localTracks.video(_client.sessionId).values];
-  }
-
-  /// A convenience property to get all local audio tracks.
-  List<LocalAudioTrack> get localAudioTracks {
-    return [..._controller.localTracks.audio(_client.sessionId).values];
-  }
-
-  /// Tries to find a [TrackPublication] by its [TrackSource]. Otherwise, will
-  /// return a compatible type of [TrackPublication] for the [TrackSource] specified.
-  /// returns null when not found.
-  LocalTrack? getPublishedLocalTrackBySource(TrackSource source) {
-    if (source == TrackSource.unknown) return null;
-
-    final publishedTracks = [...localTracks];
-    // try to find by source
-    final result = publishedTracks.firstWhereOrNull((e) => e.source == source);
-    if (result != null) return result;
-    // try to find by compatibility
-    return publishedTracks
-        .where((e) => e.source == TrackSource.unknown)
-        .firstWhereOrNull((e) =>
-            (source == TrackSource.microphone && e.kind == TrackType.audio) ||
-            (source == TrackSource.camera &&
-                e.kind == TrackType.video &&
-                e.name != Track.screenShareName) ||
-            (source == TrackSource.screenShareVideo &&
-                e.kind == TrackType.video &&
-                e.name == Track.screenShareName) ||
-            (source == TrackSource.screenShareAudio &&
-                e.kind == TrackType.audio &&
-                e.name == Track.screenShareName));
+        final quality = connectionQualityChanged.connectionQuality;
+        participant.connectionQuality = quality.toStreamConnectionQuality();
+      });
   }
 }
 
-///
-extension RemoteTrackHandler on Call {
-  /// A convenience property to get all remote tracks.
-  List<RemoteTrack> get localTracks {
-    return [..._controller.remoteTracks.all(_client.sessionId).values];
-  }
-
-  /// A convenience property to get all remote video tracks.
-  List<RemoteVideoTrack> get localVideoTracks {
-    return [..._controller.remoteTracks.video(_client.sessionId).values];
-  }
-
-  /// A convenience property to get all remote audio tracks.
-  List<RemoteAudioTrack> get localAudioTracks {
-    return [..._controller.remoteTracks.audio(_client.sessionId).values];
-  }
-
-  Future<void> addSubscribedRemoteMediaTrack(
-    rtc.MediaStreamTrack mediaTrack,
-    rtc.MediaStream stream,
-    String trackLookupId,
-    String participantSessionId, {
-    rtc.RTCRtpReceiver? receiver,
-  }) async {
-    logger.fine('addSubscribedMediaTrack()');
-
-    final trackKind = TrackType.fromRtcTrackKind(mediaTrack.kind);
-
-    // Check if track type is supported, throw if not.
-    if (![TrackType.audio, TrackType.video].contains(trackKind)) {
-      throw Exception('Unsupported track kind: $trackKind');
-    }
-
-    // create Track
-    final RemoteTrack track;
-    if (trackKind == TrackType.video) {
-      // video track
-      track = RemoteVideoTrack(
-        // TODO: Save and use the source from the SFU
-        name: Track.cameraName,
-        source: TrackSource.camera,
-        mediaStream: stream,
-        mediaStreamTrack: mediaTrack,
-        receiver: receiver,
-      );
-    } else if (trackKind == TrackType.audio) {
-      // audio track
-      track = RemoteAudioTrack(
-        // TODO: Save and use the source from the SFU
-        name: Track.microphoneName,
-        source: TrackSource.microphone,
-        mediaStream: stream,
-        mediaStreamTrack: mediaTrack,
-        receiver: receiver,
-      );
-    } else {
-      throw Exception('Unsupported track kind: $trackKind');
-    }
-
-    await track.start();
-    track.sid = '${mediaTrack.kind}:$trackLookupId';
-    _controller.remoteTracks.add(participantSessionId, track);
-  }
-
-  Future<void> removePublishedRemoteTrack({
-    required String trackSid,
-    required String participantSessionId,
-  }) async {
-    logger.finer('removePublishedTrack track sid: $trackSid');
-    final track = _controller.remoteTracks.remove(
-      participantSessionId,
-      trackSid,
-    );
-
-    if (track == null) {
-      return logger.warning('Track not found $trackSid');
-    }
-
-    await track.stop();
-  }
-
-  /// Convenience method to unpublish a remote track.
-  Future<void> unpublishRemoteTrack({
-    required String trackSessionId,
-    required String participantSessionId,
-  }) async {
-    logger.finer('Unpublish remote track sessionId: $trackSessionId');
-    final track = _controller.remoteTracks.remove(
-      participantSessionId,
-      trackSessionId,
-    );
-
-    if (track == null) return;
-
-    if (callOptions.stopLocalTrackOnUnpublish) {
-      await track.stop();
-    }
-
-    final sender = track.sender;
-    if (sender != null) {
-      try {
-        await _publisher?.removeTrack(sender);
-      } catch (_) {
-        logger.warning('[$runtimeType] rtc.removeTrack() did throw $_');
-      }
-    }
-  }
-
-  /// Convenience method to unpublish all remote tracks.
-  Future<void> unpublishAllRemoteTracks({
-    required String participantSessionId,
-  }) async {
-    final tracks = _controller.remoteTracks.all(participantSessionId);
-    final trackSids = tracks.keys.toSet();
-    for (final sid in trackSids) {
-      await unpublishRemoteTrack(
-        trackSessionId: sid,
-        participantSessionId: participantSessionId,
-      );
-    }
+extension on signal.TrackSubscriptionDetails {
+  /// Returns a unique string to identify this detail from the other details.
+  String get trackDetailId {
+    return '$userId-$sessionId-$trackType';
   }
 }

@@ -1,6 +1,6 @@
 # example
 
-A new Flutter project.
+An example project for the stream_video_flutter package.
 
 ## Getting Started
 

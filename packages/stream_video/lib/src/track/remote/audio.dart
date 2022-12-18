@@ -2,16 +2,14 @@ import 'package:stream_video/src/track/remote/remote.dart';
 import 'package:stream_video/src/track/track.dart';
 import 'package:stream_video/src/track/web/audio_api.dart'
     if (dart.library.html) '../web/audio_html.dart' as audio;
-import 'package:stream_video/src/types/other.dart';
 
 class RemoteAudioTrack extends RemoteTrack with AudioTrack {
   RemoteAudioTrack({
-    required super.name,
-    required super.source,
+    required super.type,
     required super.mediaStream,
     required super.mediaStreamTrack,
     super.receiver,
-  }) : super(kind: TrackType.audio);
+  });
 
   @override
   Future<bool> start() async {
