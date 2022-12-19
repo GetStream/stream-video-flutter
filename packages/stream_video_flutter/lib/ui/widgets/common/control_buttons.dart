@@ -71,7 +71,7 @@ class ControlButton extends StatelessWidget {
 
   Widget button() {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         shape: const CircleBorder(),
         padding: const EdgeInsets.all(buttonPadding),

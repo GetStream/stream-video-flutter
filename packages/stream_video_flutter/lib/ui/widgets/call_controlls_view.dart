@@ -38,9 +38,9 @@ class _CallControlsViewState extends State<CallControlsView> {
   @override
   void initState() {
     super.initState();
-    // _deviceChangeSubscription =
-    //     Hardware.instance.onDeviceChange.stream.listen(_loadDevices);
-    // Hardware.instance.enumerateDevices().then(_loadDevices);
+    _deviceChangeSubscription =
+        Hardware.instance.onDeviceChange.stream.listen(_loadDevices);
+    Hardware.instance.enumerateDevices().then(_loadDevices);
   }
 
   void _loadDevices(List<MediaDevice> devices) async {
@@ -55,23 +55,17 @@ class _CallControlsViewState extends State<CallControlsView> {
   }
 
   void _toggleSound() async {
-    if (!participant.isMicrophoneEnabled) return;
-
-    await participant.setMicrophoneEnabled(enabled: !participant.isMuted);
+    await participant.setMicrophoneEnabled(enabled: true);
     setState(() {});
   }
 
   void _toggleVideo() async {
-    if (!participant.isCameraEnabled) return;
-
-    await participant.setCameraEnabled(enabled: !participant.hasVideo);
+    await participant.setCameraEnabled(enabled: true);
     setState(() {});
   }
 
   void _toggleMic() async {
-    if (!participant.isMicrophoneEnabled) return;
-
-    await participant.setMicrophoneEnabled(enabled: !participant.isMuted);
+    await participant.setMicrophoneEnabled(enabled: true);
     setState(() {});
   }
 
@@ -113,7 +107,25 @@ class _CallControlsViewState extends State<CallControlsView> {
   }
 
   void _disconnect() async {
-    await widget.call.disconnect();
+    final result = await context.showDisconnectDialog();
+    if (result == true) await widget.call.disconnect();
+  }
+
+  void _unpublishAll() async {
+    final result = await context.showUnPublishDialog();
+    // if (result == true) await participant.unpublishAllTracks();
+  }
+
+  void _onChange(_) {
+    // trigger refresh
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    participant.events.cancel(_onChange);
+    _deviceChangeSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -189,6 +201,45 @@ class _CallControlsViewState extends State<CallControlsView> {
       iconColor: Colors.white,
     );
   }
+}
 
-  void mock() async {}
+extension on BuildContext {
+  Future<bool?> showUnPublishDialog() => showDialog<bool>(
+    context: this,
+    builder: (ctx) => AlertDialog(
+      title: const Text('UnPublish'),
+      content:
+      const Text('Would you like to un-publish your Camera & Mic ?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: const Text('NO'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          child: const Text('YES'),
+        ),
+      ],
+    ),
+  );
+
+  Future<bool?> showDisconnectDialog() {
+    return showDialog<bool>(
+      context: this,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Disconnect'),
+        content: const Text('Are you sure to disconnect?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Disconnect'),
+          ),
+        ],
+      ),
+    );
+  }
 }
