@@ -26,10 +26,7 @@ class _CallControlsViewState extends State<CallControlsView> {
 
   CameraPosition position = CameraPosition.front;
 
-  List<MediaDevice>? _audioInputs;
   List<MediaDevice>? _audioOutputs;
-  List<MediaDevice>? _videoInputs;
-  MediaDevice? _selectedVideoInput;
 
   StreamSubscription? _deviceChangeSubscription;
 
@@ -44,19 +41,22 @@ class _CallControlsViewState extends State<CallControlsView> {
   }
 
   void _loadDevices(List<MediaDevice> devices) async {
-    _audioInputs =
-        devices.where((device) => device.kind == 'audioinput').toList();
     _audioOutputs =
         devices.where((device) => device.kind == 'audiooutput').toList();
-    _videoInputs =
-        devices.where((device) => device.kind == 'videoinput').toList();
-    _selectedVideoInput = _videoInputs?.first;
+
     setState(() {});
   }
 
-  void _toggleSound() async {
-    // await participant.setMicrophoneEnabled(enabled: true);
-    setState(() {});
+  void _toggleSpeaker() async {
+    var audioSelected = Hardware.instance.selectedAudioOutput?.deviceId;
+
+    var newAudio = _audioOutputs
+        ?.firstWhere((audioOut) => audioOut.deviceId != audioSelected);
+
+    if (newAudio != null) {
+      await Hardware.instance.selectAudioOutput(newAudio);
+      setState(() {});
+    }
   }
 
   void _toggleVideo() async {
@@ -71,24 +71,8 @@ class _CallControlsViewState extends State<CallControlsView> {
     setState(() {});
   }
 
-  void _selectAudioOutput(MediaDevice device) async {
-    await Hardware.instance.selectAudioOutput(device);
-    setState(() {});
-  }
-
-  void _selectAudioInput(MediaDevice device) async {
-    await Hardware.instance.selectAudioInput(device);
-    setState(() {});
-  }
-
-  void _selectVideoInput(MediaDevice device) async {
-    final track = participant.videoTracks.firstOrNull?.track;
-    if (track == null) return; //Log error here or make this state unclickable
-    if (_selectedVideoInput?.deviceId != device.deviceId) {
-      await track.switchCamera(device.deviceId);
-      _selectedVideoInput = device;
-      setState(() {});
-    }
+  bool isPhoneSpeakerSelected() {
+    return Hardware.instance.selectedAudioOutput?.deviceId == "speaker";
   }
 
   void _switchCamera() async {
@@ -103,7 +87,6 @@ class _CallControlsViewState extends State<CallControlsView> {
         position = newPosition;
       });
     } catch (error) {
-      // print('could not restart track: $error');
       return;
     }
   }
@@ -111,14 +94,9 @@ class _CallControlsViewState extends State<CallControlsView> {
   void _disconnect() async {
     final result = await context.showDisconnectDialog();
     if (result == true) {
-      Navigator.of(context).pop();
       await widget.call.disconnect();
+      Navigator.of(context).pop();
     }
-  }
-
-  void _unpublishAll() async {
-    final result = await context.showUnPublishDialog();
-    // if (result == true) await participant.unpublishAllTracks();
   }
 
   void _onChange(_) {
@@ -136,9 +114,9 @@ class _CallControlsViewState extends State<CallControlsView> {
   Widget toggleSoundButton() {
     return ControlToggleButton(
       Icons.volume_up,
-      Icons.volume_off,
-      participant.hasAudio,
-      _toggleSound,
+      Icons.volume_up_outlined,
+      isPhoneSpeakerSelected(),
+      _toggleSpeaker,
     );
   }
 
@@ -178,53 +156,57 @@ class _CallControlsViewState extends State<CallControlsView> {
     );
   }
 
+  List<Widget> getButtons() {
+    var widgetList = <Widget>[];
+
+    bool isMobile = Theme.of(context).platform == TargetPlatform.iOS ||
+        Theme.of(context).platform == TargetPlatform.android;
+
+    if (isMobile && _audioOutputs?.length == 2) {
+      widgetList.add(toggleSoundButton());
+    }
+
+    widgetList.add(toggleVideoButton());
+    widgetList.add(toggleMicButton());
+
+    if (isMobile) {
+      widgetList.add(switchCameraButton());
+    }
+
+    widgetList.add(hangUpButton());
+
+    return widgetList;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: 15,
-        horizontal: 15,
+    return Material(
+      elevation: 10,
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(borderRadiusTop),
+        topRight: Radius.circular(borderRadiusTop),
       ),
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(borderRadiusTop),
-          topRight: Radius.circular(borderRadiusTop),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          vertical: 15,
+          horizontal: 15,
         ),
-      ),
-      child: Wrap(
-        alignment: WrapAlignment.spaceEvenly,
-        children: [
-          toggleSoundButton(),
-          toggleVideoButton(),
-          toggleMicButton(),
-          switchCameraButton(),
-          hangUpButton(),
-        ],
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(borderRadiusTop),
+            topRight: Radius.circular(borderRadiusTop),
+          ),
+        ),
+        child: Wrap(
+          alignment: WrapAlignment.spaceEvenly,
+          children: getButtons(),
+        ),
       ),
     );
   }
 }
 
 extension on BuildContext {
-  Future<bool?> showUnPublishDialog() => showDialog<bool>(
-        context: this,
-        builder: (ctx) => AlertDialog(
-          title: const Text('UnPublish'),
-          content:
-              const Text('Would you like to un-publish your Camera & Mic ?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('NO'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('YES'),
-            ),
-          ],
-        ),
-      );
-
   Future<bool?> showDisconnectDialog() {
     return showDialog<bool>(
       context: this,
