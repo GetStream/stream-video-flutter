@@ -186,7 +186,7 @@ class _CallControlsViewState extends State<CallControlsView> {
 
   WrapAlignment getButtonsAlignment() {
     if (isMobile) {
-      return WrapAlignment.center;
+      return WrapAlignment.spaceEvenly;
     } else {
       return WrapAlignment.center;
     }
