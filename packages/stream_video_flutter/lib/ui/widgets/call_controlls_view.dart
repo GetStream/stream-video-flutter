@@ -55,17 +55,19 @@ class _CallControlsViewState extends State<CallControlsView> {
   }
 
   void _toggleSound() async {
-    await participant.setMicrophoneEnabled(enabled: true);
+    // await participant.setMicrophoneEnabled(enabled: true);
     setState(() {});
   }
 
   void _toggleVideo() async {
-    await participant.setCameraEnabled(enabled: true);
+    await participant.setCameraEnabled(enabled: !participant.isCameraEnabled);
     setState(() {});
   }
 
   void _toggleMic() async {
-    await participant.setMicrophoneEnabled(enabled: true);
+    await participant.setMicrophoneEnabled(
+      enabled: !participant.isMicrophoneEnabled,
+    );
     setState(() {});
   }
 
@@ -131,6 +133,51 @@ class _CallControlsViewState extends State<CallControlsView> {
     super.dispose();
   }
 
+  Widget toggleSoundButton() {
+    return ControlToggleButton(
+      Icons.volume_up,
+      Icons.volume_off,
+      participant.hasAudio,
+      _toggleSound,
+    );
+  }
+
+  Widget toggleVideoButton() {
+    return ControlToggleButton(
+      Icons.video_camera_front,
+      Icons.video_camera_front_outlined, //Find a icon from video cancellation
+      participant.isCameraEnabled,
+      _toggleVideo,
+    );
+  }
+
+  Widget toggleMicButton() {
+    return ControlToggleButton(
+      Icons.mic,
+      Icons.mic_off,
+      participant.isMicrophoneEnabled,
+      _toggleMic,
+    );
+  }
+
+  Widget switchCameraButton() {
+    return ControlButton(
+      Icons.flip_camera_ios,
+      _switchCamera,
+      backgroundColor: Colors.white,
+      iconColor: Colors.black,
+    );
+  }
+
+  Widget hangUpButton() {
+    return ControlButton(
+      Icons.phone,
+      _disconnect,
+      backgroundColor: Colors.red,
+      iconColor: Colors.white,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -156,75 +203,27 @@ class _CallControlsViewState extends State<CallControlsView> {
       ),
     );
   }
-
-  Widget toggleSoundButton() {
-    return ControlToggleButton(
-      Icons.volume_up,
-      Icons.volume_off,
-      participant.isMicrophoneEnabled,
-      participant.isMuted,
-      _toggleSound,
-    );
-  }
-
-  Widget toggleVideoButton() {
-    return ControlToggleButton(
-      Icons.video_camera_front,
-      Icons.video_camera_front_outlined, //Find a icon from video cancellation
-      participant.isMicrophoneEnabled,
-      participant.isMuted,
-      _toggleVideo,
-    );
-  }
-
-  Widget toggleMicButton() {
-    return ControlToggleButton(
-      Icons.mic,
-      Icons.mic_off,
-      participant.isMicrophoneEnabled,
-      participant.isMuted,
-      _toggleMic,
-    );
-  }
-
-  Widget switchCameraButton() {
-    return ControlButton(
-      Icons.flip_camera_ios,
-      _switchCamera,
-      backgroundColor: Colors.white,
-      iconColor: Colors.black,
-    );
-  }
-
-  Widget hangUpButton() {
-    return ControlButton(
-      Icons.phone,
-      _disconnect,
-      backgroundColor: Colors.red,
-      iconColor: Colors.white,
-    );
-  }
 }
 
 extension on BuildContext {
   Future<bool?> showUnPublishDialog() => showDialog<bool>(
-    context: this,
-    builder: (ctx) => AlertDialog(
-      title: const Text('UnPublish'),
-      content:
-      const Text('Would you like to un-publish your Camera & Mic ?'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('NO'),
+        context: this,
+        builder: (ctx) => AlertDialog(
+          title: const Text('UnPublish'),
+          content:
+              const Text('Would you like to un-publish your Camera & Mic ?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('NO'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('YES'),
+            ),
+          ],
         ),
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, true),
-          child: const Text('YES'),
-        ),
-      ],
-    ),
-  );
+      );
 
   Future<bool?> showDisconnectDialog() {
     return showDialog<bool>(

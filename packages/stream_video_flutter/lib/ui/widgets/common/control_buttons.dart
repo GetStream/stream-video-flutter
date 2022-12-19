@@ -3,12 +3,11 @@ import 'package:flutter/material.dart';
 const buttonPadding = 16.0;
 
 class ControlToggleButton extends StatefulWidget {
-  const ControlToggleButton(this.enabledIcon, this.disabledIcon,
-      this.permissionEnabled, this.enabled, this.onPressed,
+  const ControlToggleButton(
+      this.enabledIcon, this.disabledIcon, this.enabled, this.onPressed,
       {Key? key})
       : super(key: key);
 
-  final bool permissionEnabled;
   final bool enabled;
   final IconData enabledIcon;
   final IconData disabledIcon;
@@ -26,30 +25,26 @@ class _ControlToggleButtonState extends State<ControlToggleButton> {
 
   Widget button() {
     return ElevatedButton(
-      onPressed: widget.permissionEnabled ? widget.onPressed :  widget.onPressed,
+      onPressed: widget.onPressed,
       style: ElevatedButton.styleFrom(
         shape: const CircleBorder(),
         padding: const EdgeInsets.all(buttonPadding),
-        backgroundColor: backgroundColor(
-          widget.permissionEnabled,
-          widget.enabled,
-        ),
+        backgroundColor: backgroundColor(widget.enabled),
         // <-- Button color
         foregroundColor: Colors.grey, // <-- Splash color
       ),
-      child: icon(widget.permissionEnabled, widget.enabled),
+      child: icon(widget.enabled),
     );
   }
 
-  Color backgroundColor(bool permissionEnabled, bool enabled) {
-    return permissionEnabled && enabled ? Colors.white : Colors.white;
+  Color backgroundColor(bool enabled) {
+    return enabled ? Colors.white : Colors.white;
   }
 
-  Icon icon(bool permissionEnabled, bool enabled) {
-    var buttonEnabled = permissionEnabled && enabled;
+  Icon icon(bool enabled) {
     return Icon(
-      color: buttonEnabled ? Colors.black : Colors.grey,
-      buttonEnabled ? widget.enabledIcon : widget.disabledIcon,
+      color: enabled ? Colors.black : Colors.grey,
+      enabled ? widget.enabledIcon : widget.disabledIcon,
     );
   }
 }
