@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 /// {@template avatarThemeData}
 /// A style that overrides the default appearance of user avatar widget.
 /// {@endtemplate}
-class StreamAvatarThemeData with Diagnosticable {
+class StreamAvatarTheme with Diagnosticable {
   /// {@macro avatarThemeData}
-  const StreamAvatarThemeData({
+  const StreamAvatarTheme({
     BoxConstraints? constraints,
     BorderRadius? borderRadius,
     TextStyle? initialsTextStyle,
@@ -43,13 +43,13 @@ class StreamAvatarThemeData with Diagnosticable {
         color: Colors.white,
       );
 
-  /// Copy this [StreamAvatarThemeData] to another.
-  StreamAvatarThemeData copyWith({
+  /// Copy this [StreamAvatarTheme] to another.
+  StreamAvatarTheme copyWith({
     BoxConstraints? constraints,
     BorderRadius? borderRadius,
     TextStyle? initialsTextStyle,
   }) {
-    return StreamAvatarThemeData(
+    return StreamAvatarTheme(
       constraints: constraints ?? _constraints,
       borderRadius: borderRadius ?? _borderRadius,
       initialsTextStyle: initialsTextStyle ?? _initialsTextStyle,
@@ -59,23 +59,19 @@ class StreamAvatarThemeData with Diagnosticable {
   /// Linearly interpolate between two [UserAvatar] themes.
   ///
   /// All the properties must be non-null.
-  StreamAvatarThemeData lerp(
-    StreamAvatarThemeData a,
-    StreamAvatarThemeData b,
-    double t,
-  ) {
-    return StreamAvatarThemeData(
-      borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
-      constraints: BoxConstraints.lerp(a.constraints, b.constraints, t),
+  StreamAvatarTheme lerp(StreamAvatarTheme other, double t) {
+    return StreamAvatarTheme(
+      borderRadius: BorderRadius.lerp(borderRadius, other.borderRadius, t),
+      constraints: BoxConstraints.lerp(constraints, other.constraints, t),
       initialsTextStyle:
-          TextStyle.lerp(a.initialsTextStyle, b.initialsTextStyle, t),
+          TextStyle.lerp(initialsTextStyle, other.initialsTextStyle, t),
     );
   }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is StreamAvatarThemeData &&
+      other is StreamAvatarTheme &&
           runtimeType == other.runtimeType &&
           _constraints == other._constraints &&
           _borderRadius == other._borderRadius &&
@@ -84,8 +80,8 @@ class StreamAvatarThemeData with Diagnosticable {
   @override
   int get hashCode => _constraints.hashCode ^ _borderRadius.hashCode;
 
-  /// Merges one [StreamAvatarThemeData] with the another
-  StreamAvatarThemeData merge(StreamAvatarThemeData? other) {
+  /// Merges one [StreamAvatarTheme] with the another
+  StreamAvatarTheme merge(StreamAvatarTheme? other) {
     if (other == null) return this;
     return copyWith(
         constraints: other._constraints,

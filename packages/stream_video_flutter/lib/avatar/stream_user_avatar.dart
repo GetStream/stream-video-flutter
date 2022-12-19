@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/theme/stream_avatar_theme.dart';
 import 'package:stream_video_flutter/theme/stream_video_theme.dart';
 import 'package:stream_video_flutter/utils/extensions.dart';
 
@@ -56,53 +57,20 @@ class StreamUserAvatar extends StatelessWidget {
   const StreamUserAvatar({
     super.key,
     required this.user,
-    BoxConstraints? constraints,
-    BorderRadius? borderRadius,
-    TextStyle? initialsTextStyle,
     this.selected = false,
     this.selectionColor,
     this.selectionThickness = 4,
+    this.avatarTheme,
     this.onTap,
     this.onLongPress,
     this.imageBuilder,
     this.placeholderBuilder,
     this.errorBuilder,
     this.fallbackBuilder,
-  })  : _constraints = constraints,
-        _borderRadius = borderRadius,
-        _initialsTextStyle = initialsTextStyle;
-
-  /// Sizing constraints of the avatar.
-  final BoxConstraints? _constraints;
-
-  /// [BorderRadius] of the image.
-  final BorderRadius? _borderRadius;
-
-  /// [TextStyle] for the initials text.
-  final TextStyle? _initialsTextStyle;
+  });
 
   /// User whose avatar is to be displayed.
   final UserInfo user;
-
-  /// Get constraints for avatar
-  BoxConstraints get constraints =>
-      _constraints ??
-      const BoxConstraints.tightFor(
-        height: 40,
-        width: 40,
-      );
-
-  /// Get border radius
-  BorderRadius get borderRadius => _borderRadius ?? BorderRadius.circular(20);
-
-  /// Get initials text style.
-  TextStyle get initialsTextStyle =>
-      _initialsTextStyle ??
-      const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      );
 
   /// Flag for if avatar is selected. Defaults to `false`.
   final bool selected;
@@ -112,6 +80,9 @@ class StreamUserAvatar extends StatelessWidget {
 
   /// Selection thickness around the avatar. Defaults to `4`.
   final double selectionThickness;
+
+  /// Theme for tha avatar
+  final StreamAvatarTheme? avatarTheme;
 
   /// {@macro onUserAvatarTap}
   final OnUserAvatarTap? onTap;
@@ -136,11 +107,12 @@ class StreamUserAvatar extends StatelessWidget {
     final imageUrl = user.imageUrl;
     final hasImage = imageUrl != null && imageUrl.isNotEmpty;
     final streamChatTheme = StreamVideoTheme.of(context);
+    final avatarTheme = this.avatarTheme ?? streamChatTheme.avatarTheme;
 
     Widget avatar = FittedBox(
       fit: BoxFit.cover,
       child: Container(
-        constraints: constraints,
+        constraints: avatarTheme.constraints,
         child: hasImage
             ? CachedNetworkImage(
                 fit: BoxFit.cover,
@@ -148,23 +120,27 @@ class StreamUserAvatar extends StatelessWidget {
                 imageUrl: imageUrl,
                 errorWidget: (context, __, error) => errorBuilder != null
                     ? errorBuilder!(context, user, error)
-                    : _initialsAvatar(context),
+                    : _InitialsUserAvatar(user: user, avatarTheme: avatarTheme),
                 placeholder: placeholderBuilder != null
                     ? (context, __) => placeholderBuilder!(context, user)
                     : null,
-                imageBuilder: _imageBuilder,
+                imageBuilder: (context, imageProvider) => imageBuilder != null
+                    ? imageBuilder!(context, user, imageProvider)
+                    : _ImageUserAvatar(
+                        imageProvider: imageProvider, avatarTheme: avatarTheme),
               )
             : fallbackBuilder != null
                 ? fallbackBuilder!(context, user)
-                : _initialsAvatar(context),
+                : _InitialsUserAvatar(user: user, avatarTheme: avatarTheme),
       ),
     );
 
     if (selected) {
       avatar = ClipRRect(
-        borderRadius: borderRadius + BorderRadius.circular(selectionThickness),
+        borderRadius: avatarTheme.borderRadius +
+            BorderRadius.circular(selectionThickness),
         child: Container(
-          constraints: constraints,
+          constraints: avatarTheme.constraints,
           color: selectionColor ?? streamChatTheme.colorTheme.accentPrimary,
           child: Padding(
             padding: EdgeInsets.all(selectionThickness),
@@ -178,24 +154,56 @@ class StreamUserAvatar extends StatelessWidget {
         onLongPress: onLongPress != null ? () => onLongPress!(user) : null,
         child: avatar);
   }
+}
 
-  /// Builds an avatar with an image.
-  Widget _imageBuilder(BuildContext context, ImageProvider imageProvider) {
-    return imageBuilder != null
-        ? imageBuilder!(context, user, imageProvider)
-        : DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: borderRadius,
-              image: DecorationImage(
-                image: imageProvider,
-                fit: BoxFit.cover,
-              ),
-            ),
-          );
+/// {@template imageUserAvatar}
+/// Displays an avatar with the user picture.
+/// {@endtemplate}
+class _ImageUserAvatar extends StatelessWidget {
+  /// {@macro imageUserAvatar}
+  const _ImageUserAvatar({
+    required this.imageProvider,
+    required this.avatarTheme,
+  });
+
+  /// The image to be painted into the decoration.
+  final ImageProvider imageProvider;
+
+  /// Theme for tha avatar
+  final StreamAvatarTheme avatarTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: avatarTheme.borderRadius,
+        image: DecorationImage(
+          image: imageProvider,
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
   }
+}
 
-  /// Builds an avatar with a color background and initials text.
-  Widget _initialsAvatar(BuildContext context) {
+/// {@template initialsUserAvatar}
+/// Displays an avatar with a color background and initials text.
+/// {@endtemplate}
+class _InitialsUserAvatar extends StatelessWidget {
+  /// {@macro initialsUserAvatar}
+  const _InitialsUserAvatar({
+    required this.user,
+    required this.avatarTheme,
+  });
+
+  /// User whose avatar is to be displayed.
+  final UserInfo user;
+
+  /// Theme for tha avatar.
+  final StreamAvatarTheme avatarTheme;
+
+  @override
+  Widget build(BuildContext context) {
     final initials =
         user.name.isNotEmpty ? user.name.initials() : user.id.initials();
 
@@ -203,11 +211,12 @@ class StreamUserAvatar extends StatelessWidget {
     final avatarColor = avatarColors[avatarColorIndex];
 
     return DecoratedBox(
-      decoration: BoxDecoration(color: avatarColor, borderRadius: borderRadius),
+      decoration: BoxDecoration(
+          color: avatarColor, borderRadius: avatarTheme.borderRadius),
       child: Center(
         child: Text(
           initials,
-          style: initialsTextStyle,
+          style: avatarTheme.initialsTextStyle,
         ),
       ),
     );

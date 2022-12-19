@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/avatar/stream_user_avatar.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class NoVideoWidget extends StatelessWidget {
   const NoVideoWidget({
@@ -21,16 +20,18 @@ class NoVideoWidget extends StatelessWidget {
           role: "admin",
           name: userId,
         ),
-        initialsTextStyle: const TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
+        avatarTheme: StreamAvatarTheme(
+          initialsTextStyle: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+          constraints: const BoxConstraints.tightFor(
+            height: 96,
+            width: 96,
+          ),
+          borderRadius: BorderRadius.circular(48),
         ),
-        constraints: const BoxConstraints.tightFor(
-          height: 96,
-          width: 96,
-        ),
-        borderRadius: BorderRadius.circular(48),
       ),
     );
   }
