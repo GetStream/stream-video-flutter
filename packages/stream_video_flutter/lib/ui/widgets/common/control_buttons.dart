@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 const buttonPadding = 16.0;
 
+/// Common toggle button for CallControlsView.
 class ControlToggleButton extends StatefulWidget {
   const ControlToggleButton(
     this.enabledIcon,
