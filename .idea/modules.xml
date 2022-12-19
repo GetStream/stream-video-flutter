@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/packages/stream_video_flutter/example/melos_example.iml" filepath="$PROJECT_DIR$/packages/stream_video_flutter/example/melos_example.iml" />
       <module fileurl="file://$PROJECT_DIR$/packages/stream_video/melos_stream_video.iml" filepath="$PROJECT_DIR$/packages/stream_video/melos_stream_video.iml" />
       <module fileurl="file://$PROJECT_DIR$/packages/stream_video_flutter/melos_stream_video_flutter.iml" filepath="$PROJECT_DIR$/packages/stream_video_flutter/melos_stream_video_flutter.iml" />
-      <module fileurl="file://$PROJECT_DIR$/packages/stream_video_flutter_core/melos_stream_video_flutter_core.iml" filepath="$PROJECT_DIR$/packages/stream_video_flutter_core/melos_stream_video_flutter_core.iml" />
       <module fileurl="file://$PROJECT_DIR$/melos_stream_video_flutter.iml" filepath="$PROJECT_DIR$/melos_stream_video_flutter.iml" />
     </modules>
   </component>

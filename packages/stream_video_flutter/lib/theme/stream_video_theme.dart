@@ -61,6 +61,18 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     );
   }
 
+  static final StreamVideoTheme _kLightFallbackTheme = StreamVideoTheme.light();
+  static final StreamVideoTheme _kDarkFallbackTheme = StreamVideoTheme.dark();
+
+  static StreamVideoTheme of(BuildContext context) {
+    final theme = Theme.of(context);
+    final streamVideoTheme = theme.extension<StreamVideoTheme>();
+    
+    if(streamVideoTheme != null) return streamVideoTheme;
+    if(theme.brightness == Brightness.light) return _kLightFallbackTheme;
+    return _kDarkFallbackTheme;
+  }
+
   /// The text themes used in the widgets
   final StreamTextTheme textTheme;
 
