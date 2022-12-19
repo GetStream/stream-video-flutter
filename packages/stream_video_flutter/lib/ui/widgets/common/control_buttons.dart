@@ -4,14 +4,17 @@ const buttonPadding = 16.0;
 
 class ControlToggleButton extends StatefulWidget {
   const ControlToggleButton(
-      this.enabledIcon, this.disabledIcon, this.enabled, this.onPressed,
-      {Key? key})
-      : super(key: key);
+    this.enabledIcon,
+    this.disabledIcon,
+    this.enabled,
+    this.onPressed, {
+    Key? key,
+  }) : super(key: key);
 
   final bool enabled;
   final IconData enabledIcon;
   final IconData disabledIcon;
-  final Function() onPressed;
+  final VoidCallback onPressed;
 
   @override
   State<ControlToggleButton> createState() => _ControlToggleButtonState();
@@ -50,14 +53,18 @@ class _ControlToggleButtonState extends State<ControlToggleButton> {
 }
 
 class ControlButton extends StatelessWidget {
-  const ControlButton(this.iconData, this.onPressed,
-      {Key? key, required this.backgroundColor, required this.iconColor})
-      : super(key: key);
+  const ControlButton(
+    this.iconData,
+    this.onPressed, {
+    Key? key,
+    required this.backgroundColor,
+    required this.iconColor,
+  }) : super(key: key);
 
   final IconData iconData;
   final Color backgroundColor;
   final Color iconColor;
-  final Function() onPressed;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
