@@ -106,9 +106,10 @@ class _CallControlsViewState extends State<CallControlsView> {
 
   @override
   void dispose() {
+    super.dispose();
     participant.events.cancel(_onChange);
     _deviceChangeSubscription?.cancel();
-    super.dispose();
+    participant.unpublishAllTracks();
   }
 
   Widget toggleSoundButton() {
