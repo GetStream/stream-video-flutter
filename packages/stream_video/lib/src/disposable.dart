@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 /// A convenience class to represent a disposable object.
@@ -8,7 +10,7 @@ class Disposable {
 
   /// Disposes of this object.
   @mustCallSuper
-  Future<void> dispose() async {
+  FutureOr<void> dispose() async {
     if (_disposed) return;
     _disposed = true;
   }

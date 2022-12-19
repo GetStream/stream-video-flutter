@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:example/src/widgets/participant_info.dart'
     show ParticipantInfoWidget, ParticipantTrack;
-import 'package:example/src/widgets/video_track_renderer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:stream_video/stream_video.dart';
