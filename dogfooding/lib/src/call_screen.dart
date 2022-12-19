@@ -1,6 +1,7 @@
 import 'package:dogfooding/src/widgets/controls.dart';
 import 'package:dogfooding/src/widgets/participant_widget.dart';
 import 'package:dogfooding/src/widgets/participant_info.dart';
+import 'package:dogfooding/src/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:stream_video/stream_video.dart';
@@ -103,12 +104,12 @@ class _CallScreenState extends State<CallScreen> {
 
   @override
   void dispose() async {
+    super.dispose();
     // widget.call.removeListener(
     //   SfuEvent_EventPayload.callEnded.name,
     //   _onCallEnded,
     // );
     await widget.call.disconnect();
-    super.dispose();
   }
 
   @override
@@ -148,6 +149,10 @@ class _CallScreenState extends State<CallScreen> {
               child: ControlsWidget(
                 widget.call,
                 widget.call.localParticipant!,
+                onHangUp: () {
+                  Navigator.of(context)
+                      .pushReplacementNamed(HomeScreen.routeName);
+                },
               ),
             ),
           ),

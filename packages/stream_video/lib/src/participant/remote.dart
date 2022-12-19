@@ -233,11 +233,16 @@ class RemoteParticipant extends Participant<RemoteTrackPublication> {
     // if has track
     if (track != null) {
       await track.stop();
-      [events, call.events].emit(TrackUnsubscribedEvent(
-        participant: this,
-        track: track,
-        publication: pub,
-      ));
+      if (notify) {
+        // TODO circle dependency:
+        // Call knows about Participant
+        // Participant knows about Call
+        [events, call.events].emit(TrackUnsubscribedEvent(
+          participant: this,
+          track: track,
+          publication: pub,
+        ));
+      }
     }
 
     if (notify) {
