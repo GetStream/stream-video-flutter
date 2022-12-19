@@ -74,10 +74,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           height: 40,
           width: 40,
         ),
-        initialsTextStyle: const TextStyle(
+        initialsTextStyle: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          color: Colors.white,
+          color: colorTheme.barsBg,
         ),
         selectionColor: colorTheme.accentPrimary,
         selectionThickness: 4,
