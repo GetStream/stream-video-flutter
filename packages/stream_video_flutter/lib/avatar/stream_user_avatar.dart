@@ -152,7 +152,8 @@ class StreamUserAvatar extends StatelessWidget {
     return GestureDetector(
         onTap: onTap != null ? () => onTap!(user) : null,
         onLongPress: onLongPress != null ? () => onLongPress!(user) : null,
-        child: avatar);
+        child: avatar,
+    );
   }
 }
 
