@@ -134,7 +134,7 @@ class StreamUserAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = user.imageUrl;
-    final hasImage = imageUrl != null && imageUrl!.isNotEmpty;
+    final hasImage = imageUrl != null && imageUrl.isNotEmpty;
     final streamChatTheme = StreamVideoTheme.of(context);
 
     Widget avatar = FittedBox(
@@ -148,7 +148,7 @@ class StreamUserAvatar extends StatelessWidget {
                 imageUrl: imageUrl,
                 errorWidget: (context, __, error) => errorBuilder != null
                     ? errorBuilder!(context, user, error)
-                    : _gradientAvatar(context),
+                    : _initialsAvatar(context),
                 placeholder: placeholderBuilder != null
                     ? (context, __) => placeholderBuilder!(context, user)
                     : null,
@@ -156,7 +156,7 @@ class StreamUserAvatar extends StatelessWidget {
               )
             : fallbackBuilder != null
                 ? fallbackBuilder!(context, user)
-                : _gradientAvatar(context),
+                : _initialsAvatar(context),
       ),
     );
 
@@ -179,25 +179,23 @@ class StreamUserAvatar extends StatelessWidget {
         child: avatar);
   }
 
-  /// Build an avatar with an image.
+  /// Builds an avatar with an image.
   Widget _imageBuilder(BuildContext context, ImageProvider imageProvider) {
-    if (imageBuilder != null) {
-      return imageBuilder!(context, user, imageProvider);
-    } else {
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: borderRadius,
-          image: DecorationImage(
-            image: imageProvider,
-            fit: BoxFit.cover,
-          ),
-        ),
-      );
-    }
+    return imageBuilder != null
+        ? imageBuilder!(context, user, imageProvider)
+        : DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: borderRadius,
+              image: DecorationImage(
+                image: imageProvider,
+                fit: BoxFit.cover,
+              ),
+            ),
+          );
   }
 
-  /// Build an avatar with a color background and initials text.
-  Widget _gradientAvatar(BuildContext context) {
+  /// Builds an avatar with a color background and initials text.
+  Widget _initialsAvatar(BuildContext context) {
     final initials =
         user.name.isNotEmpty ? user.name.initials() : user.id.initials();
 
