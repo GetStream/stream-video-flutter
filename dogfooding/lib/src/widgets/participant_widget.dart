@@ -86,7 +86,9 @@ abstract class _ParticipantWidgetState<T extends ParticipantWidget>
 
   @override
   void dispose() {
-    widget.participant.events.cancel(_onParticipantChanged);
+    if (widget.participant.events.mounted) {
+      widget.participant.events.cancel(_onParticipantChanged);
+    }
     super.dispose();
   }
 
