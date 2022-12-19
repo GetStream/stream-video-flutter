@@ -108,7 +108,10 @@ class _CallControlsViewState extends State<CallControlsView> {
 
   void _disconnect() async {
     final result = await context.showDisconnectDialog();
-    if (result == true) await widget.call.disconnect();
+    if (result == true) {
+      Navigator.of(context).pop();
+      await widget.call.disconnect();
+    }
   }
 
   void _unpublishAll() async {
