@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -7,52 +9,48 @@ import 'package:flutter/material.dart';
 class StreamAvatarTheme with Diagnosticable {
   /// {@macro avatarThemeData}
   const StreamAvatarTheme({
-    BoxConstraints? constraints,
-    BorderRadius? borderRadius,
-    TextStyle? initialsTextStyle,
-  })  : _constraints = constraints,
-        _borderRadius = borderRadius,
-        _initialsTextStyle = initialsTextStyle;
+    this.constraints = const BoxConstraints.tightFor(
+      height: 40,
+      width: 40,
+    ),
+    this.borderRadius = const BorderRadius.all(Radius.circular(20)),
+    this.initialsTextStyle = const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    ),
+    this.selectionColor = const Color(0xff005FFF),
+    this.selectionThickness = 4,
+  });
 
   /// Sizing constraints of the avatar.
-  final BoxConstraints? _constraints;
+  final BoxConstraints constraints;
 
   /// [BorderRadius] of the image.
-  final BorderRadius? _borderRadius;
+  final BorderRadius borderRadius;
 
   /// [TextStyle] for the initials text.
-  final TextStyle? _initialsTextStyle;
+  final TextStyle initialsTextStyle;
 
-  /// Get constraints for avatar.
-  BoxConstraints get constraints =>
-      _constraints ??
-      const BoxConstraints.tightFor(
-        height: 40,
-        width: 40,
-      );
+  /// Color of the selection.
+  final Color selectionColor;
 
-  /// Get border radius.
-  BorderRadius get borderRadius => _borderRadius ?? BorderRadius.circular(20);
+  /// Selection thickness around the avatar.
+  final double selectionThickness;
 
-  /// Get initials text style.
-  TextStyle get initialsTextStyle =>
-      _initialsTextStyle ??
-      const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      );
-
-  /// Copy this [StreamAvatarTheme] to another.
-  StreamAvatarTheme copyWith({
+  copyWith({
     BoxConstraints? constraints,
     BorderRadius? borderRadius,
     TextStyle? initialsTextStyle,
+    Color? selectionColor,
+    double? selectionThickness,
   }) {
     return StreamAvatarTheme(
-      constraints: constraints ?? _constraints,
-      borderRadius: borderRadius ?? _borderRadius,
-      initialsTextStyle: initialsTextStyle ?? _initialsTextStyle,
+      constraints: constraints ?? this.constraints,
+      borderRadius: borderRadius ?? this.borderRadius,
+      initialsTextStyle: initialsTextStyle ?? this.initialsTextStyle,
+      selectionColor: selectionColor ?? this.selectionColor,
+      selectionThickness: selectionThickness ?? this.selectionThickness,
     );
   }
 
@@ -61,10 +59,13 @@ class StreamAvatarTheme with Diagnosticable {
   /// All the properties must be non-null.
   StreamAvatarTheme lerp(StreamAvatarTheme other, double t) {
     return StreamAvatarTheme(
-      borderRadius: BorderRadius.lerp(borderRadius, other.borderRadius, t),
-      constraints: BoxConstraints.lerp(constraints, other.constraints, t),
+      borderRadius: BorderRadius.lerp(borderRadius, other.borderRadius, t)!,
+      constraints: BoxConstraints.lerp(constraints, other.constraints, t)!,
       initialsTextStyle:
-          TextStyle.lerp(initialsTextStyle, other.initialsTextStyle, t),
+          TextStyle.lerp(initialsTextStyle, other.initialsTextStyle, t)!,
+      selectionColor: Color.lerp(selectionColor, other.selectionColor, t)!,
+      selectionThickness:
+          lerpDouble(selectionThickness, other.selectionThickness, t)!,
     );
   }
 
@@ -73,20 +74,30 @@ class StreamAvatarTheme with Diagnosticable {
       identical(this, other) ||
       other is StreamAvatarTheme &&
           runtimeType == other.runtimeType &&
-          _constraints == other._constraints &&
-          _borderRadius == other._borderRadius &&
-          _initialsTextStyle == other._initialsTextStyle;
+          constraints == other.constraints &&
+          borderRadius == other.borderRadius &&
+          initialsTextStyle == other.initialsTextStyle &&
+          selectionColor == other.selectionColor &&
+          selectionThickness == other.selectionThickness;
 
   @override
-  int get hashCode => _constraints.hashCode ^ _borderRadius.hashCode;
+  int get hashCode =>
+      constraints.hashCode ^
+      borderRadius.hashCode ^
+      initialsTextStyle.hashCode ^
+      selectionColor.hashCode ^
+      selectionThickness.hashCode;
 
   /// Merges one [StreamAvatarTheme] with the another
   StreamAvatarTheme merge(StreamAvatarTheme? other) {
     if (other == null) return this;
     return copyWith(
-        constraints: other._constraints,
-        borderRadius: other._borderRadius,
-        initialsTextStyle: other._initialsTextStyle);
+      constraints: other.constraints,
+      borderRadius: other.borderRadius,
+      initialsTextStyle: other.initialsTextStyle,
+      selectionColor: other.selectionColor,
+      selectionThickness: other.selectionThickness,
+    );
   }
 
   @override
@@ -95,6 +106,8 @@ class StreamAvatarTheme with Diagnosticable {
     properties
       ..add(DiagnosticsProperty('borderRadius', borderRadius))
       ..add(DiagnosticsProperty('constraints', constraints))
-      ..add(DiagnosticsProperty('initialsTextStyle', initialsTextStyle));
+      ..add(DiagnosticsProperty('initialsTextStyle', initialsTextStyle))
+      ..add(DiagnosticsProperty('selectionColor', selectionColor))
+      ..add(DiagnosticsProperty('selectionThickness', selectionThickness));
   }
 }

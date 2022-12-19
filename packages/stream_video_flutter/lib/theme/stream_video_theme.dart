@@ -79,6 +79,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
+        selectionColor: colorTheme.accentPrimary,
+        selectionThickness: 4,
       ),
     );
   }

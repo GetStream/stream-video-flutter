@@ -58,8 +58,6 @@ class StreamUserAvatar extends StatelessWidget {
     super.key,
     required this.user,
     this.selected = false,
-    this.selectionColor,
-    this.selectionThickness = 4,
     this.avatarTheme,
     this.onTap,
     this.onLongPress,
@@ -74,12 +72,6 @@ class StreamUserAvatar extends StatelessWidget {
 
   /// Flag for if avatar is selected. Defaults to `false`.
   final bool selected;
-
-  /// Color of the selection.
-  final Color? selectionColor;
-
-  /// Selection thickness around the avatar. Defaults to `4`.
-  final double selectionThickness;
 
   /// Theme for tha avatar
   final StreamAvatarTheme? avatarTheme;
@@ -138,21 +130,21 @@ class StreamUserAvatar extends StatelessWidget {
     if (selected) {
       avatar = ClipRRect(
         borderRadius: avatarTheme.borderRadius +
-            BorderRadius.circular(selectionThickness),
+            BorderRadius.circular(avatarTheme.selectionThickness),
         child: Container(
           constraints: avatarTheme.constraints,
-          color: selectionColor ?? streamChatTheme.colorTheme.accentPrimary,
+          color: avatarTheme.selectionColor,
           child: Padding(
-            padding: EdgeInsets.all(selectionThickness),
+            padding: EdgeInsets.all(avatarTheme.selectionThickness),
             child: avatar,
           ),
         ),
       );
     }
     return GestureDetector(
-        onTap: onTap != null ? () => onTap!(user) : null,
-        onLongPress: onLongPress != null ? () => onLongPress!(user) : null,
-        child: avatar,
+      onTap: onTap != null ? () => onTap!(user) : null,
+      onLongPress: onLongPress != null ? () => onLongPress!(user) : null,
+      child: avatar,
     );
   }
 }
