@@ -30,7 +30,6 @@ enum SfuEvent_EventPayload {
   healthCheckResponse, 
   trackPublished, 
   trackUnpublished, 
-  error, 
   notSet
 }
 
@@ -49,11 +48,10 @@ class SfuEvent extends $pb.GeneratedMessage {
     14 : SfuEvent_EventPayload.healthCheckResponse,
     16 : SfuEvent_EventPayload.trackPublished,
     17 : SfuEvent_EventPayload.trackUnpublished,
-    18 : SfuEvent_EventPayload.error,
     0 : SfuEvent_EventPayload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SfuEvent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17])
     ..aOM<SubscriberOffer>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscriberOffer', subBuilder: SubscriberOffer.create)
     ..aOM<PublisherAnswer>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'publisherAnswer', subBuilder: PublisherAnswer.create)
     ..aOM<ConnectionQualityChanged>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionQualityChanged', subBuilder: ConnectionQualityChanged.create)
@@ -67,7 +65,6 @@ class SfuEvent extends $pb.GeneratedMessage {
     ..aOM<HealthCheckResponse>(14, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'healthCheckResponse', subBuilder: HealthCheckResponse.create)
     ..aOM<TrackPublished>(16, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackPublished', subBuilder: TrackPublished.create)
     ..aOM<TrackUnpublished>(17, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackUnpublished', subBuilder: TrackUnpublished.create)
-    ..aOM<Error>(18, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error', subBuilder: Error.create)
     ..hasRequiredFields = false
   ;
 
@@ -86,7 +83,6 @@ class SfuEvent extends $pb.GeneratedMessage {
     HealthCheckResponse? healthCheckResponse,
     TrackPublished? trackPublished,
     TrackUnpublished? trackUnpublished,
-    Error? error,
   }) {
     final _result = create();
     if (subscriberOffer != null) {
@@ -127,9 +123,6 @@ class SfuEvent extends $pb.GeneratedMessage {
     }
     if (trackUnpublished != null) {
       _result.trackUnpublished = trackUnpublished;
-    }
-    if (error != null) {
-      _result.error = error;
     }
     return _result;
   }
@@ -299,66 +292,6 @@ class SfuEvent extends $pb.GeneratedMessage {
   void clearTrackUnpublished() => clearField(17);
   @$pb.TagNumber(17)
   TrackUnpublished ensureTrackUnpublished() => $_ensure(12);
-
-  @$pb.TagNumber(18)
-  Error get error => $_getN(13);
-  @$pb.TagNumber(18)
-  set error(Error v) { setField(18, v); }
-  @$pb.TagNumber(18)
-  $core.bool hasError() => $_has(13);
-  @$pb.TagNumber(18)
-  void clearError() => clearField(18);
-  @$pb.TagNumber(18)
-  Error ensureError() => $_ensure(13);
-}
-
-class Error extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Error', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOM<$0.Error>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error', subBuilder: $0.Error.create)
-    ..hasRequiredFields = false
-  ;
-
-  Error._() : super();
-  factory Error({
-    $0.Error? error,
-  }) {
-    final _result = create();
-    if (error != null) {
-      _result.error = error;
-    }
-    return _result;
-  }
-  factory Error.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory Error.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
-  Error clone() => Error()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  Error copyWith(void Function(Error) updates) => super.copyWith((message) => updates(message as Error)) as Error; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static Error create() => Error._();
-  Error createEmptyInstance() => create();
-  static $pb.PbList<Error> createRepeated() => $pb.PbList<Error>();
-  @$core.pragma('dart2js:noInline')
-  static Error getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Error>(create);
-  static Error? _defaultInstance;
-
-  @$pb.TagNumber(4)
-  $0.Error get error => $_getN(0);
-  @$pb.TagNumber(4)
-  set error($0.Error v) { setField(4, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasError() => $_has(0);
-  @$pb.TagNumber(4)
-  void clearError() => clearField(4);
-  @$pb.TagNumber(4)
-  $0.Error ensureError() => $_ensure(0);
 }
 
 class ICETrickle extends $pb.GeneratedMessage {

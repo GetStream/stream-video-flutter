@@ -257,8 +257,8 @@ class SFUHealthCheckResponseEvent with SfuEvent, InternalEvent {
   final sfu_events.HealthCheckResponse healthCheckResponse;
 }
 
-class SFUErrorEvent with SfuEvent, InternalEvent {
-  const SFUErrorEvent({required this.error});
+// class SFUErrorEvent with SfuEvent, InternalEvent {
+//   const SFUErrorEvent({required this.error});
 
-  final sfu_events.Error error;
-}
+//   final sfu_events.Error error;
+// }

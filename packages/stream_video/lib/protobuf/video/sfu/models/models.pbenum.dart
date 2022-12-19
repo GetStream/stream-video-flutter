@@ -26,13 +26,13 @@ class PeerType extends $pb.ProtobufEnum {
 
 class ConnectionQuality extends $pb.ProtobufEnum {
   static const ConnectionQuality CONNECTION_QUALITY_UNSPECIFIED = ConnectionQuality._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CONNECTION_QUALITY_UNSPECIFIED');
-  static const ConnectionQuality CONNECTION_QUALITY_BAD_UNSPECIFIED = ConnectionQuality._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CONNECTION_QUALITY_BAD_UNSPECIFIED');
+  static const ConnectionQuality CONNECTION_QUALITY_BAD = ConnectionQuality._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CONNECTION_QUALITY_BAD');
   static const ConnectionQuality CONNECTION_QUALITY_POOR = ConnectionQuality._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CONNECTION_QUALITY_POOR');
   static const ConnectionQuality CONNECTION_QUALITY_GOOD = ConnectionQuality._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CONNECTION_QUALITY_GOOD');
 
   static const $core.List<ConnectionQuality> values = <ConnectionQuality> [
     CONNECTION_QUALITY_UNSPECIFIED,
-    CONNECTION_QUALITY_BAD_UNSPECIFIED,
+    CONNECTION_QUALITY_BAD,
     CONNECTION_QUALITY_POOR,
     CONNECTION_QUALITY_GOOD,
   ];
@@ -44,16 +44,16 @@ class ConnectionQuality extends $pb.ProtobufEnum {
 }
 
 class VideoQuality extends $pb.ProtobufEnum {
-  static const VideoQuality VIDEO_QUALITY_UNSPECIFIED = VideoQuality._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VIDEO_QUALITY_UNSPECIFIED');
-  static const VideoQuality VIDEO_QUALITY_LOW_UNSPECIFIED = VideoQuality._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VIDEO_QUALITY_LOW_UNSPECIFIED');
-  static const VideoQuality VIDEO_QUALITY_MID = VideoQuality._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VIDEO_QUALITY_MID');
-  static const VideoQuality VIDEO_QUALITY_HIGH = VideoQuality._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VIDEO_QUALITY_HIGH');
+  static const VideoQuality VIDEO_QUALITY_LOW = VideoQuality._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VIDEO_QUALITY_LOW');
+  static const VideoQuality VIDEO_QUALITY_MID = VideoQuality._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VIDEO_QUALITY_MID');
+  static const VideoQuality VIDEO_QUALITY_HIGH = VideoQuality._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VIDEO_QUALITY_HIGH');
+  static const VideoQuality VIDEO_QUALITY_OFF = VideoQuality._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VIDEO_QUALITY_OFF');
 
   static const $core.List<VideoQuality> values = <VideoQuality> [
-    VIDEO_QUALITY_UNSPECIFIED,
-    VIDEO_QUALITY_LOW_UNSPECIFIED,
+    VIDEO_QUALITY_LOW,
     VIDEO_QUALITY_MID,
     VIDEO_QUALITY_HIGH,
+    VIDEO_QUALITY_OFF,
   ];
 
   static final $core.Map<$core.int, VideoQuality> _byValue = $pb.ProtobufEnum.initByValue(values);
@@ -85,11 +85,23 @@ class TrackType extends $pb.ProtobufEnum {
 
 class ErrorCode extends $pb.ProtobufEnum {
   static const ErrorCode ERROR_CODE_UNSPECIFIED = ErrorCode._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_UNSPECIFIED');
-  static const ErrorCode ERROR_CODE_PUBLISH_TRACK_MISMATCH = ErrorCode._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PUBLISH_TRACK_MISMATCH');
+  static const ErrorCode ERROR_CODE_PUBLISH_TRACK_NOT_FOUND = ErrorCode._(100, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PUBLISH_TRACK_NOT_FOUND');
+  static const ErrorCode ERROR_CODE_PUBLISH_TRACKS_MISMATCH = ErrorCode._(101, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PUBLISH_TRACKS_MISMATCH');
+  static const ErrorCode ERROR_CODE_PUBLISH_TRACK_OUT_OF_ORDER = ErrorCode._(102, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PUBLISH_TRACK_OUT_OF_ORDER');
+  static const ErrorCode ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND = ErrorCode._(103, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND');
+  static const ErrorCode ERROR_CODE_PARTICIPANT_NOT_FOUND = ErrorCode._(200, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PARTICIPANT_NOT_FOUND');
+  static const ErrorCode ERROR_CODE_CALL_NOT_FOUND = ErrorCode._(300, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_CALL_NOT_FOUND');
+  static const ErrorCode ERROR_CODE_INTERNAL_SERVER_ERROR = ErrorCode._(500, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_INTERNAL_SERVER_ERROR');
 
   static const $core.List<ErrorCode> values = <ErrorCode> [
     ERROR_CODE_UNSPECIFIED,
-    ERROR_CODE_PUBLISH_TRACK_MISMATCH,
+    ERROR_CODE_PUBLISH_TRACK_NOT_FOUND,
+    ERROR_CODE_PUBLISH_TRACKS_MISMATCH,
+    ERROR_CODE_PUBLISH_TRACK_OUT_OF_ORDER,
+    ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND,
+    ERROR_CODE_PARTICIPANT_NOT_FOUND,
+    ERROR_CODE_CALL_NOT_FOUND,
+    ERROR_CODE_INTERNAL_SERVER_ERROR,
   ];
 
   static final $core.Map<$core.int, ErrorCode> _byValue = $pb.ProtobufEnum.initByValue(values);

@@ -158,7 +158,7 @@ class Participant extends $pb.GeneratedMessage {
 
 class StreamQuality extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StreamQuality', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
-    ..e<VideoQuality>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'videoQuality', $pb.PbFieldType.OE, defaultOrMaker: VideoQuality.VIDEO_QUALITY_UNSPECIFIED, valueOf: VideoQuality.valueOf, enumValues: VideoQuality.values)
+    ..e<VideoQuality>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'videoQuality', $pb.PbFieldType.OE, defaultOrMaker: VideoQuality.VIDEO_QUALITY_LOW, valueOf: VideoQuality.valueOf, enumValues: VideoQuality.values)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
     ..hasRequiredFields = false
   ;
@@ -284,6 +284,7 @@ class VideoLayer extends $pb.GeneratedMessage {
     ..aOM<VideoDimension>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'videoDimension', subBuilder: VideoDimension.create)
     ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'bitrate', $pb.PbFieldType.OU3)
     ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fps', $pb.PbFieldType.OU3)
+    ..e<VideoQuality>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'quality', $pb.PbFieldType.OE, defaultOrMaker: VideoQuality.VIDEO_QUALITY_LOW, valueOf: VideoQuality.valueOf, enumValues: VideoQuality.values)
     ..hasRequiredFields = false
   ;
 
@@ -293,6 +294,7 @@ class VideoLayer extends $pb.GeneratedMessage {
     VideoDimension? videoDimension,
     $core.int? bitrate,
     $core.int? fps,
+    VideoQuality? quality,
   }) {
     final _result = create();
     if (rid != null) {
@@ -306,6 +308,9 @@ class VideoLayer extends $pb.GeneratedMessage {
     }
     if (fps != null) {
       _result.fps = fps;
+    }
+    if (quality != null) {
+      _result.quality = quality;
     }
     return _result;
   }
@@ -367,6 +372,15 @@ class VideoLayer extends $pb.GeneratedMessage {
   $core.bool hasFps() => $_has(3);
   @$pb.TagNumber(5)
   void clearFps() => clearField(5);
+
+  @$pb.TagNumber(6)
+  VideoQuality get quality => $_getN(4);
+  @$pb.TagNumber(6)
+  set quality(VideoQuality v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasQuality() => $_has(4);
+  @$pb.TagNumber(6)
+  void clearQuality() => clearField(6);
 }
 
 class Codec extends $pb.GeneratedMessage {

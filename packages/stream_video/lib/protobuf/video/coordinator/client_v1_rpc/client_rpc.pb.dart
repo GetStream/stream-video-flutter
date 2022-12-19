@@ -18,7 +18,9 @@ import '../utils_v1/utils.pb.dart' as $5;
 import '../push_v1/push.pb.dart' as $6;
 import '../../../google/protobuf/timestamp.pb.dart' as $7;
 import '../stat_v1/stat.pb.dart' as $8;
-import '../broadcast_v1/broadcast.pb.dart' as $9;
+import '../closed_caption_v1/closed_caption.pb.dart' as $9;
+import '../transcription_v1/transcription.pb.dart' as $10;
+import '../broadcast_v1/broadcast.pb.dart' as $11;
 
 import 'client_rpc.pbenum.dart';
 
@@ -2880,12 +2882,444 @@ class ReviewCallResponse extends $pb.GeneratedMessage {
   static ReviewCallResponse? _defaultInstance;
 }
 
+class StartClosedCaptionRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StartClosedCaptionRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..aOM<$9.ClosedCaptionSettings>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'option', subBuilder: $9.ClosedCaptionSettings.create)
+    ..hasRequiredFields = false
+  ;
+
+  StartClosedCaptionRequest._() : super();
+  factory StartClosedCaptionRequest({
+    $core.String? callType,
+    $core.String? callId,
+    $9.ClosedCaptionSettings? option,
+  }) {
+    final _result = create();
+    if (callType != null) {
+      _result.callType = callType;
+    }
+    if (callId != null) {
+      _result.callId = callId;
+    }
+    if (option != null) {
+      _result.option = option;
+    }
+    return _result;
+  }
+  factory StartClosedCaptionRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StartClosedCaptionRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  StartClosedCaptionRequest clone() => StartClosedCaptionRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  StartClosedCaptionRequest copyWith(void Function(StartClosedCaptionRequest) updates) => super.copyWith((message) => updates(message as StartClosedCaptionRequest)) as StartClosedCaptionRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static StartClosedCaptionRequest create() => StartClosedCaptionRequest._();
+  StartClosedCaptionRequest createEmptyInstance() => create();
+  static $pb.PbList<StartClosedCaptionRequest> createRepeated() => $pb.PbList<StartClosedCaptionRequest>();
+  @$core.pragma('dart2js:noInline')
+  static StartClosedCaptionRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StartClosedCaptionRequest>(create);
+  static StartClosedCaptionRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callType => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callType($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get callId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set callId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallId() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $9.ClosedCaptionSettings get option => $_getN(2);
+  @$pb.TagNumber(3)
+  set option($9.ClosedCaptionSettings v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasOption() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearOption() => clearField(3);
+  @$pb.TagNumber(3)
+  $9.ClosedCaptionSettings ensureOption() => $_ensure(2);
+}
+
+class StartClosedCaptionResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StartClosedCaptionResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..aOM<$9.ClosedCaption>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'closedCaption', subBuilder: $9.ClosedCaption.create)
+    ..hasRequiredFields = false
+  ;
+
+  StartClosedCaptionResponse._() : super();
+  factory StartClosedCaptionResponse({
+    $9.ClosedCaption? closedCaption,
+  }) {
+    final _result = create();
+    if (closedCaption != null) {
+      _result.closedCaption = closedCaption;
+    }
+    return _result;
+  }
+  factory StartClosedCaptionResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StartClosedCaptionResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  StartClosedCaptionResponse clone() => StartClosedCaptionResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  StartClosedCaptionResponse copyWith(void Function(StartClosedCaptionResponse) updates) => super.copyWith((message) => updates(message as StartClosedCaptionResponse)) as StartClosedCaptionResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static StartClosedCaptionResponse create() => StartClosedCaptionResponse._();
+  StartClosedCaptionResponse createEmptyInstance() => create();
+  static $pb.PbList<StartClosedCaptionResponse> createRepeated() => $pb.PbList<StartClosedCaptionResponse>();
+  @$core.pragma('dart2js:noInline')
+  static StartClosedCaptionResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StartClosedCaptionResponse>(create);
+  static StartClosedCaptionResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $9.ClosedCaption get closedCaption => $_getN(0);
+  @$pb.TagNumber(1)
+  set closedCaption($9.ClosedCaption v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasClosedCaption() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearClosedCaption() => clearField(1);
+  @$pb.TagNumber(1)
+  $9.ClosedCaption ensureClosedCaption() => $_ensure(0);
+}
+
+class StopClosedCaptionRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StopClosedCaptionRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..hasRequiredFields = false
+  ;
+
+  StopClosedCaptionRequest._() : super();
+  factory StopClosedCaptionRequest({
+    $core.String? callType,
+    $core.String? callId,
+  }) {
+    final _result = create();
+    if (callType != null) {
+      _result.callType = callType;
+    }
+    if (callId != null) {
+      _result.callId = callId;
+    }
+    return _result;
+  }
+  factory StopClosedCaptionRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StopClosedCaptionRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  StopClosedCaptionRequest clone() => StopClosedCaptionRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  StopClosedCaptionRequest copyWith(void Function(StopClosedCaptionRequest) updates) => super.copyWith((message) => updates(message as StopClosedCaptionRequest)) as StopClosedCaptionRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static StopClosedCaptionRequest create() => StopClosedCaptionRequest._();
+  StopClosedCaptionRequest createEmptyInstance() => create();
+  static $pb.PbList<StopClosedCaptionRequest> createRepeated() => $pb.PbList<StopClosedCaptionRequest>();
+  @$core.pragma('dart2js:noInline')
+  static StopClosedCaptionRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StopClosedCaptionRequest>(create);
+  static StopClosedCaptionRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callType => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callType($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get callId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set callId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallId() => clearField(2);
+}
+
+class StopClosedCaptionResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StopClosedCaptionResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  StopClosedCaptionResponse._() : super();
+  factory StopClosedCaptionResponse() => create();
+  factory StopClosedCaptionResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StopClosedCaptionResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  StopClosedCaptionResponse clone() => StopClosedCaptionResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  StopClosedCaptionResponse copyWith(void Function(StopClosedCaptionResponse) updates) => super.copyWith((message) => updates(message as StopClosedCaptionResponse)) as StopClosedCaptionResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static StopClosedCaptionResponse create() => StopClosedCaptionResponse._();
+  StopClosedCaptionResponse createEmptyInstance() => create();
+  static $pb.PbList<StopClosedCaptionResponse> createRepeated() => $pb.PbList<StopClosedCaptionResponse>();
+  @$core.pragma('dart2js:noInline')
+  static StopClosedCaptionResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StopClosedCaptionResponse>(create);
+  static StopClosedCaptionResponse? _defaultInstance;
+}
+
+class StartTranscriptionRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StartTranscriptionRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..aOM<$10.TranscriptionSettings>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'option', subBuilder: $10.TranscriptionSettings.create)
+    ..hasRequiredFields = false
+  ;
+
+  StartTranscriptionRequest._() : super();
+  factory StartTranscriptionRequest({
+    $core.String? callType,
+    $core.String? callId,
+    $10.TranscriptionSettings? option,
+  }) {
+    final _result = create();
+    if (callType != null) {
+      _result.callType = callType;
+    }
+    if (callId != null) {
+      _result.callId = callId;
+    }
+    if (option != null) {
+      _result.option = option;
+    }
+    return _result;
+  }
+  factory StartTranscriptionRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StartTranscriptionRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  StartTranscriptionRequest clone() => StartTranscriptionRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  StartTranscriptionRequest copyWith(void Function(StartTranscriptionRequest) updates) => super.copyWith((message) => updates(message as StartTranscriptionRequest)) as StartTranscriptionRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static StartTranscriptionRequest create() => StartTranscriptionRequest._();
+  StartTranscriptionRequest createEmptyInstance() => create();
+  static $pb.PbList<StartTranscriptionRequest> createRepeated() => $pb.PbList<StartTranscriptionRequest>();
+  @$core.pragma('dart2js:noInline')
+  static StartTranscriptionRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StartTranscriptionRequest>(create);
+  static StartTranscriptionRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callType => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callType($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get callId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set callId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallId() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $10.TranscriptionSettings get option => $_getN(2);
+  @$pb.TagNumber(3)
+  set option($10.TranscriptionSettings v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasOption() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearOption() => clearField(3);
+  @$pb.TagNumber(3)
+  $10.TranscriptionSettings ensureOption() => $_ensure(2);
+}
+
+class StartTranscriptionResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StartTranscriptionResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..aOM<$10.Transcription>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'closedCaption', subBuilder: $10.Transcription.create)
+    ..hasRequiredFields = false
+  ;
+
+  StartTranscriptionResponse._() : super();
+  factory StartTranscriptionResponse({
+    $10.Transcription? closedCaption,
+  }) {
+    final _result = create();
+    if (closedCaption != null) {
+      _result.closedCaption = closedCaption;
+    }
+    return _result;
+  }
+  factory StartTranscriptionResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StartTranscriptionResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  StartTranscriptionResponse clone() => StartTranscriptionResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  StartTranscriptionResponse copyWith(void Function(StartTranscriptionResponse) updates) => super.copyWith((message) => updates(message as StartTranscriptionResponse)) as StartTranscriptionResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static StartTranscriptionResponse create() => StartTranscriptionResponse._();
+  StartTranscriptionResponse createEmptyInstance() => create();
+  static $pb.PbList<StartTranscriptionResponse> createRepeated() => $pb.PbList<StartTranscriptionResponse>();
+  @$core.pragma('dart2js:noInline')
+  static StartTranscriptionResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StartTranscriptionResponse>(create);
+  static StartTranscriptionResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $10.Transcription get closedCaption => $_getN(0);
+  @$pb.TagNumber(1)
+  set closedCaption($10.Transcription v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasClosedCaption() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearClosedCaption() => clearField(1);
+  @$pb.TagNumber(1)
+  $10.Transcription ensureClosedCaption() => $_ensure(0);
+}
+
+class StopTranscriptionRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StopTranscriptionRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
+    ..hasRequiredFields = false
+  ;
+
+  StopTranscriptionRequest._() : super();
+  factory StopTranscriptionRequest({
+    $core.String? callType,
+    $core.String? callId,
+  }) {
+    final _result = create();
+    if (callType != null) {
+      _result.callType = callType;
+    }
+    if (callId != null) {
+      _result.callId = callId;
+    }
+    return _result;
+  }
+  factory StopTranscriptionRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StopTranscriptionRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  StopTranscriptionRequest clone() => StopTranscriptionRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  StopTranscriptionRequest copyWith(void Function(StopTranscriptionRequest) updates) => super.copyWith((message) => updates(message as StopTranscriptionRequest)) as StopTranscriptionRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static StopTranscriptionRequest create() => StopTranscriptionRequest._();
+  StopTranscriptionRequest createEmptyInstance() => create();
+  static $pb.PbList<StopTranscriptionRequest> createRepeated() => $pb.PbList<StopTranscriptionRequest>();
+  @$core.pragma('dart2js:noInline')
+  static StopTranscriptionRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StopTranscriptionRequest>(create);
+  static StopTranscriptionRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callType => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callType($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get callId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set callId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCallId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCallId() => clearField(2);
+}
+
+class StopTranscriptionResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StopTranscriptionResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  StopTranscriptionResponse._() : super();
+  factory StopTranscriptionResponse() => create();
+  factory StopTranscriptionResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory StopTranscriptionResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  StopTranscriptionResponse clone() => StopTranscriptionResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  StopTranscriptionResponse copyWith(void Function(StopTranscriptionResponse) updates) => super.copyWith((message) => updates(message as StopTranscriptionResponse)) as StopTranscriptionResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static StopTranscriptionResponse create() => StopTranscriptionResponse._();
+  StopTranscriptionResponse createEmptyInstance() => create();
+  static $pb.PbList<StopTranscriptionResponse> createRepeated() => $pb.PbList<StopTranscriptionResponse>();
+  @$core.pragma('dart2js:noInline')
+  static StopTranscriptionResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StopTranscriptionResponse>(create);
+  static StopTranscriptionResponse? _defaultInstance;
+}
+
 class StartBroadcastRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StartBroadcastRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callType')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callId')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'hlsBroadcast')
-    ..aOM<$9.RTMPOptions>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtmp', subBuilder: $9.RTMPOptions.create)
+    ..aOM<$11.RTMPOptions>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rtmp', subBuilder: $11.RTMPOptions.create)
     ..hasRequiredFields = false
   ;
 
@@ -2894,7 +3328,7 @@ class StartBroadcastRequest extends $pb.GeneratedMessage {
     $core.String? callType,
     $core.String? callId,
     $core.bool? hlsBroadcast,
-    $9.RTMPOptions? rtmp,
+    $11.RTMPOptions? rtmp,
   }) {
     final _result = create();
     if (callType != null) {
@@ -2960,26 +3394,26 @@ class StartBroadcastRequest extends $pb.GeneratedMessage {
   void clearHlsBroadcast() => clearField(3);
 
   @$pb.TagNumber(5)
-  $9.RTMPOptions get rtmp => $_getN(3);
+  $11.RTMPOptions get rtmp => $_getN(3);
   @$pb.TagNumber(5)
-  set rtmp($9.RTMPOptions v) { setField(5, v); }
+  set rtmp($11.RTMPOptions v) { setField(5, v); }
   @$pb.TagNumber(5)
   $core.bool hasRtmp() => $_has(3);
   @$pb.TagNumber(5)
   void clearRtmp() => clearField(5);
   @$pb.TagNumber(5)
-  $9.RTMPOptions ensureRtmp() => $_ensure(3);
+  $11.RTMPOptions ensureRtmp() => $_ensure(3);
 }
 
 class StartBroadcastResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StartBroadcastResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
-    ..aOM<$9.Broadcast>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcast', subBuilder: $9.Broadcast.create)
+    ..aOM<$11.Broadcast>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcast', subBuilder: $11.Broadcast.create)
     ..hasRequiredFields = false
   ;
 
   StartBroadcastResponse._() : super();
   factory StartBroadcastResponse({
-    $9.Broadcast? broadcast,
+    $11.Broadcast? broadcast,
   }) {
     final _result = create();
     if (broadcast != null) {
@@ -3009,15 +3443,15 @@ class StartBroadcastResponse extends $pb.GeneratedMessage {
   static StartBroadcastResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $9.Broadcast get broadcast => $_getN(0);
+  $11.Broadcast get broadcast => $_getN(0);
   @$pb.TagNumber(1)
-  set broadcast($9.Broadcast v) { setField(1, v); }
+  set broadcast($11.Broadcast v) { setField(1, v); }
   @$pb.TagNumber(1)
   $core.bool hasBroadcast() => $_has(0);
   @$pb.TagNumber(1)
   void clearBroadcast() => clearField(1);
   @$pb.TagNumber(1)
-  $9.Broadcast ensureBroadcast() => $_ensure(0);
+  $11.Broadcast ensureBroadcast() => $_ensure(0);
 }
 
 class StopBroadcastRequest extends $pb.GeneratedMessage {
@@ -3341,6 +3775,22 @@ class ClientRPCApi {
   $async.Future<QueryDevicesResponse> queryDevices($pb.ClientContext? ctx, QueryDevicesRequest request) {
     var emptyResponse = QueryDevicesResponse();
     return _client.invoke<QueryDevicesResponse>(ctx, 'ClientRPC', 'QueryDevices', request, emptyResponse);
+  }
+  $async.Future<StartTranscriptionResponse> startTranscription($pb.ClientContext? ctx, StartTranscriptionRequest request) {
+    var emptyResponse = StartTranscriptionResponse();
+    return _client.invoke<StartTranscriptionResponse>(ctx, 'ClientRPC', 'StartTranscription', request, emptyResponse);
+  }
+  $async.Future<StopTranscriptionResponse> stopTranscription($pb.ClientContext? ctx, StopTranscriptionRequest request) {
+    var emptyResponse = StopTranscriptionResponse();
+    return _client.invoke<StopTranscriptionResponse>(ctx, 'ClientRPC', 'StopTranscription', request, emptyResponse);
+  }
+  $async.Future<StartClosedCaptionResponse> startClosedCaption($pb.ClientContext? ctx, StartClosedCaptionRequest request) {
+    var emptyResponse = StartClosedCaptionResponse();
+    return _client.invoke<StartClosedCaptionResponse>(ctx, 'ClientRPC', 'StartClosedCaption', request, emptyResponse);
+  }
+  $async.Future<StopClosedCaptionResponse> stopClosedCaption($pb.ClientContext? ctx, StopClosedCaptionRequest request) {
+    var emptyResponse = StopClosedCaptionResponse();
+    return _client.invoke<StopClosedCaptionResponse>(ctx, 'ClientRPC', 'StopClosedCaption', request, emptyResponse);
   }
   $async.Future<StartBroadcastResponse> startBroadcast($pb.ClientContext? ctx, StartBroadcastRequest request) {
     var emptyResponse = StartBroadcastResponse();

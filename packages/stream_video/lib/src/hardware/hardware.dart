@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
@@ -25,7 +26,7 @@ class Hardware {
       selectedAudioInput ??=
           devices.where((element) => element.kind == 'audioinput').first;
       selectedAudioOutput ??=
-          devices.where((element) => element.kind == 'audiooutput').first;
+          devices.firstWhereOrNull((element) => element.kind == 'audiooutput');
       selectedVideoInput ??=
           devices.where((element) => element.kind == 'videoinput').first;
     });

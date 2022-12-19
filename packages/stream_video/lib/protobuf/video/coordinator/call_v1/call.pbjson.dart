@@ -67,16 +67,19 @@ final $typed_data.Uint8List callDetailsDescriptor = $convert.base64Decode('CgtDY
 const CallSettings$json = const {
   '1': 'CallSettings',
   '2': const [
-    const {'1': 'recording', '3': 1, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.RecordingOptions', '10': 'recording'},
-    const {'1': 'broadcasting', '3': 2, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.BroadcastingOptions', '10': 'broadcasting'},
+    const {'1': 'recording', '3': 1, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.RecordingSettings', '10': 'recording'},
+    const {'1': 'broadcasting', '3': 2, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.BroadcastingSettings', '10': 'broadcasting'},
+    const {'1': 'geofencing', '3': 3, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.GeofencingSettings', '10': 'geofencing'},
+    const {'1': 'transcription', '3': 4, '4': 1, '5': 11, '6': '.stream.video.coordinator.transcription_v1.TranscriptionSettings', '10': 'transcription'},
+    const {'1': 'closed_caption', '3': 5, '4': 1, '5': 11, '6': '.stream.video.coordinator.closed_caption_v1.ClosedCaptionSettings', '10': 'closedCaption'},
   ],
 };
 
 /// Descriptor for `CallSettings`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callSettingsDescriptor = $convert.base64Decode('CgxDYWxsU2V0dGluZ3MSUAoJcmVjb3JkaW5nGAEgASgLMjIuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNhbGxfdjEuUmVjb3JkaW5nT3B0aW9uc1IJcmVjb3JkaW5nElkKDGJyb2FkY2FzdGluZxgCIAEoCzI1LnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jYWxsX3YxLkJyb2FkY2FzdGluZ09wdGlvbnNSDGJyb2FkY2FzdGluZw==');
-@$core.Deprecated('Use recordingOptionsDescriptor instead')
-const RecordingOptions$json = const {
-  '1': 'RecordingOptions',
+final $typed_data.Uint8List callSettingsDescriptor = $convert.base64Decode('CgxDYWxsU2V0dGluZ3MSUQoJcmVjb3JkaW5nGAEgASgLMjMuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNhbGxfdjEuUmVjb3JkaW5nU2V0dGluZ3NSCXJlY29yZGluZxJaCgxicm9hZGNhc3RpbmcYAiABKAsyNi5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2FsbF92MS5Ccm9hZGNhc3RpbmdTZXR0aW5nc1IMYnJvYWRjYXN0aW5nElQKCmdlb2ZlbmNpbmcYAyABKAsyNC5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IuY2FsbF92MS5HZW9mZW5jaW5nU2V0dGluZ3NSCmdlb2ZlbmNpbmcSZgoNdHJhbnNjcmlwdGlvbhgEIAEoCzJALnN0cmVhbS52aWRlby5jb29yZGluYXRvci50cmFuc2NyaXB0aW9uX3YxLlRyYW5zY3JpcHRpb25TZXR0aW5nc1INdHJhbnNjcmlwdGlvbhJoCg5jbG9zZWRfY2FwdGlvbhgFIAEoCzJBLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbG9zZWRfY2FwdGlvbl92MS5DbG9zZWRDYXB0aW9uU2V0dGluZ3NSDWNsb3NlZENhcHRpb24=');
+@$core.Deprecated('Use recordingSettingsDescriptor instead')
+const RecordingSettings$json = const {
+  '1': 'RecordingSettings',
   '2': const [
     const {'1': 'enabled', '3': 1, '4': 1, '5': 8, '9': 0, '10': 'enabled', '17': true},
   ],
@@ -85,11 +88,11 @@ const RecordingOptions$json = const {
   ],
 };
 
-/// Descriptor for `RecordingOptions`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List recordingOptionsDescriptor = $convert.base64Decode('ChBSZWNvcmRpbmdPcHRpb25zEh0KB2VuYWJsZWQYASABKAhIAFIHZW5hYmxlZIgBAUIKCghfZW5hYmxlZA==');
-@$core.Deprecated('Use broadcastingOptionsDescriptor instead')
-const BroadcastingOptions$json = const {
-  '1': 'BroadcastingOptions',
+/// Descriptor for `RecordingSettings`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List recordingSettingsDescriptor = $convert.base64Decode('ChFSZWNvcmRpbmdTZXR0aW5ncxIdCgdlbmFibGVkGAEgASgISABSB2VuYWJsZWSIAQFCCgoIX2VuYWJsZWQ=');
+@$core.Deprecated('Use broadcastingSettingsDescriptor instead')
+const BroadcastingSettings$json = const {
+  '1': 'BroadcastingSettings',
   '2': const [
     const {'1': 'enabled', '3': 1, '4': 1, '5': 8, '9': 0, '10': 'enabled', '17': true},
   ],
@@ -98,5 +101,15 @@ const BroadcastingOptions$json = const {
   ],
 };
 
-/// Descriptor for `BroadcastingOptions`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List broadcastingOptionsDescriptor = $convert.base64Decode('ChNCcm9hZGNhc3RpbmdPcHRpb25zEh0KB2VuYWJsZWQYASABKAhIAFIHZW5hYmxlZIgBAUIKCghfZW5hYmxlZA==');
+/// Descriptor for `BroadcastingSettings`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List broadcastingSettingsDescriptor = $convert.base64Decode('ChRCcm9hZGNhc3RpbmdTZXR0aW5ncxIdCgdlbmFibGVkGAEgASgISABSB2VuYWJsZWSIAQFCCgoIX2VuYWJsZWQ=');
+@$core.Deprecated('Use geofencingSettingsDescriptor instead')
+const GeofencingSettings$json = const {
+  '1': 'GeofencingSettings',
+  '2': const [
+    const {'1': 'names', '3': 1, '4': 3, '5': 9, '10': 'names'},
+  ],
+};
+
+/// Descriptor for `GeofencingSettings`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List geofencingSettingsDescriptor = $convert.base64Decode('ChJHZW9mZW5jaW5nU2V0dGluZ3MSFAoFbmFtZXMYASADKAlSBW5hbWVz');

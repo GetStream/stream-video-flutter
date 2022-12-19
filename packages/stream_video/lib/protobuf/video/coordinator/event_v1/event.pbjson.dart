@@ -8,6 +8,28 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
+@$core.Deprecated('Use transcriptionStartedDescriptor instead')
+const TranscriptionStarted$json = const {
+  '1': 'TranscriptionStarted',
+  '2': const [
+    const {'1': 'call', '3': 1, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.Call', '8': const {}, '10': 'call'},
+    const {'1': 'call_details', '3': 2, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.CallDetails', '8': const {}, '10': 'callDetails'},
+  ],
+};
+
+/// Descriptor for `TranscriptionStarted`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List transcriptionStartedDescriptor = $convert.base64Decode('ChRUcmFuc2NyaXB0aW9uU3RhcnRlZBJECgRjYWxsGAEgASgLMiYuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNhbGxfdjEuQ2FsbEII+kIFigECEAFSBGNhbGwSWgoMY2FsbF9kZXRhaWxzGAIgASgLMi0uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNhbGxfdjEuQ2FsbERldGFpbHNCCPpCBYoBAhABUgtjYWxsRGV0YWlscw==');
+@$core.Deprecated('Use transcriptionStoppedDescriptor instead')
+const TranscriptionStopped$json = const {
+  '1': 'TranscriptionStopped',
+  '2': const [
+    const {'1': 'call', '3': 1, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.Call', '8': const {}, '10': 'call'},
+    const {'1': 'call_details', '3': 2, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.CallDetails', '8': const {}, '10': 'callDetails'},
+  ],
+};
+
+/// Descriptor for `TranscriptionStopped`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List transcriptionStoppedDescriptor = $convert.base64Decode('ChRUcmFuc2NyaXB0aW9uU3RvcHBlZBJECgRjYWxsGAEgASgLMiYuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNhbGxfdjEuQ2FsbEII+kIFigECEAFSBGNhbGwSWgoMY2FsbF9kZXRhaWxzGAIgASgLMi0uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNhbGxfdjEuQ2FsbERldGFpbHNCCPpCBYoBAhABUgtjYWxsRGV0YWlscw==');
 @$core.Deprecated('Use recordingStartedDescriptor instead')
 const RecordingStarted$json = const {
   '1': 'RecordingStarted',
@@ -40,6 +62,28 @@ const UserUpdated$json = const {
 
 /// Descriptor for `UserUpdated`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List userUpdatedDescriptor = $convert.base64Decode('CgtVc2VyVXBkYXRlZBIgCgd1c2VyX2lkGAEgASgJQgf6QgRyAhABUgZ1c2VySWQ=');
+@$core.Deprecated('Use closedCaptionStartedDescriptor instead')
+const ClosedCaptionStarted$json = const {
+  '1': 'ClosedCaptionStarted',
+  '2': const [
+    const {'1': 'call', '3': 1, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.Call', '8': const {}, '10': 'call'},
+    const {'1': 'call_details', '3': 2, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.CallDetails', '8': const {}, '10': 'callDetails'},
+  ],
+};
+
+/// Descriptor for `ClosedCaptionStarted`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List closedCaptionStartedDescriptor = $convert.base64Decode('ChRDbG9zZWRDYXB0aW9uU3RhcnRlZBJECgRjYWxsGAEgASgLMiYuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNhbGxfdjEuQ2FsbEII+kIFigECEAFSBGNhbGwSWgoMY2FsbF9kZXRhaWxzGAIgASgLMi0uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNhbGxfdjEuQ2FsbERldGFpbHNCCPpCBYoBAhABUgtjYWxsRGV0YWlscw==');
+@$core.Deprecated('Use closedCaptionEndedDescriptor instead')
+const ClosedCaptionEnded$json = const {
+  '1': 'ClosedCaptionEnded',
+  '2': const [
+    const {'1': 'call', '3': 1, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.Call', '8': const {}, '10': 'call'},
+    const {'1': 'call_details', '3': 2, '4': 1, '5': 11, '6': '.stream.video.coordinator.call_v1.CallDetails', '8': const {}, '10': 'callDetails'},
+  ],
+};
+
+/// Descriptor for `ClosedCaptionEnded`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List closedCaptionEndedDescriptor = $convert.base64Decode('ChJDbG9zZWRDYXB0aW9uRW5kZWQSRAoEY2FsbBgBIAEoCzImLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jYWxsX3YxLkNhbGxCCPpCBYoBAhABUgRjYWxsEloKDGNhbGxfZGV0YWlscxgCIAEoCzItLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jYWxsX3YxLkNhbGxEZXRhaWxzQgj6QgWKAQIQAVILY2FsbERldGFpbHM=');
 @$core.Deprecated('Use broadcastStartedDescriptor instead')
 const BroadcastStarted$json = const {
   '1': 'BroadcastStarted',

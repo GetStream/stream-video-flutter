@@ -24,27 +24,27 @@ const ConnectionQuality$json = const {
   '1': 'ConnectionQuality',
   '2': const [
     const {'1': 'CONNECTION_QUALITY_UNSPECIFIED', '2': 0},
-    const {'1': 'CONNECTION_QUALITY_BAD_UNSPECIFIED', '2': 1},
+    const {'1': 'CONNECTION_QUALITY_BAD', '2': 1},
     const {'1': 'CONNECTION_QUALITY_POOR', '2': 2},
     const {'1': 'CONNECTION_QUALITY_GOOD', '2': 3},
   ],
 };
 
 /// Descriptor for `ConnectionQuality`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List connectionQualityDescriptor = $convert.base64Decode('ChFDb25uZWN0aW9uUXVhbGl0eRIiCh5DT05ORUNUSU9OX1FVQUxJVFlfVU5TUEVDSUZJRUQQABImCiJDT05ORUNUSU9OX1FVQUxJVFlfQkFEX1VOU1BFQ0lGSUVEEAESGwoXQ09OTkVDVElPTl9RVUFMSVRZX1BPT1IQAhIbChdDT05ORUNUSU9OX1FVQUxJVFlfR09PRBAD');
+final $typed_data.Uint8List connectionQualityDescriptor = $convert.base64Decode('ChFDb25uZWN0aW9uUXVhbGl0eRIiCh5DT05ORUNUSU9OX1FVQUxJVFlfVU5TUEVDSUZJRUQQABIaChZDT05ORUNUSU9OX1FVQUxJVFlfQkFEEAESGwoXQ09OTkVDVElPTl9RVUFMSVRZX1BPT1IQAhIbChdDT05ORUNUSU9OX1FVQUxJVFlfR09PRBAD');
 @$core.Deprecated('Use videoQualityDescriptor instead')
 const VideoQuality$json = const {
   '1': 'VideoQuality',
   '2': const [
-    const {'1': 'VIDEO_QUALITY_UNSPECIFIED', '2': 0},
-    const {'1': 'VIDEO_QUALITY_LOW_UNSPECIFIED', '2': 1},
-    const {'1': 'VIDEO_QUALITY_MID', '2': 2},
-    const {'1': 'VIDEO_QUALITY_HIGH', '2': 3},
+    const {'1': 'VIDEO_QUALITY_LOW', '2': 0},
+    const {'1': 'VIDEO_QUALITY_MID', '2': 1},
+    const {'1': 'VIDEO_QUALITY_HIGH', '2': 2},
+    const {'1': 'VIDEO_QUALITY_OFF', '2': 3},
   ],
 };
 
 /// Descriptor for `VideoQuality`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List videoQualityDescriptor = $convert.base64Decode('CgxWaWRlb1F1YWxpdHkSHQoZVklERU9fUVVBTElUWV9VTlNQRUNJRklFRBAAEiEKHVZJREVPX1FVQUxJVFlfTE9XX1VOU1BFQ0lGSUVEEAESFQoRVklERU9fUVVBTElUWV9NSUQQAhIWChJWSURFT19RVUFMSVRZX0hJR0gQAw==');
+final $typed_data.Uint8List videoQualityDescriptor = $convert.base64Decode('CgxWaWRlb1F1YWxpdHkSFQoRVklERU9fUVVBTElUWV9MT1cQABIVChFWSURFT19RVUFMSVRZX01JRBABEhYKElZJREVPX1FVQUxJVFlfSElHSBACEhUKEVZJREVPX1FVQUxJVFlfT0ZGEAM=');
 @$core.Deprecated('Use trackTypeDescriptor instead')
 const TrackType$json = const {
   '1': 'TrackType',
@@ -64,12 +64,18 @@ const ErrorCode$json = const {
   '1': 'ErrorCode',
   '2': const [
     const {'1': 'ERROR_CODE_UNSPECIFIED', '2': 0},
-    const {'1': 'ERROR_CODE_PUBLISH_TRACK_MISMATCH', '2': 1},
+    const {'1': 'ERROR_CODE_PUBLISH_TRACK_NOT_FOUND', '2': 100},
+    const {'1': 'ERROR_CODE_PUBLISH_TRACKS_MISMATCH', '2': 101},
+    const {'1': 'ERROR_CODE_PUBLISH_TRACK_OUT_OF_ORDER', '2': 102},
+    const {'1': 'ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND', '2': 103},
+    const {'1': 'ERROR_CODE_PARTICIPANT_NOT_FOUND', '2': 200},
+    const {'1': 'ERROR_CODE_CALL_NOT_FOUND', '2': 300},
+    const {'1': 'ERROR_CODE_INTERNAL_SERVER_ERROR', '2': 500},
   ],
 };
 
 /// Descriptor for `ErrorCode`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List errorCodeDescriptor = $convert.base64Decode('CglFcnJvckNvZGUSGgoWRVJST1JfQ09ERV9VTlNQRUNJRklFRBAAEiUKIUVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19NSVNNQVRDSBAB');
+final $typed_data.Uint8List errorCodeDescriptor = $convert.base64Decode('CglFcnJvckNvZGUSGgoWRVJST1JfQ09ERV9VTlNQRUNJRklFRBAAEiYKIkVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19OT1RfRk9VTkQQZBImCiJFUlJPUl9DT0RFX1BVQkxJU0hfVFJBQ0tTX01JU01BVENIEGUSKQolRVJST1JfQ09ERV9QVUJMSVNIX1RSQUNLX09VVF9PRl9PUkRFUhBmEjIKLkVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19WSURFT19MQVlFUl9OT1RfRk9VTkQQZxIlCiBFUlJPUl9DT0RFX1BBUlRJQ0lQQU5UX05PVF9GT1VORBDIARIeChlFUlJPUl9DT0RFX0NBTExfTk9UX0ZPVU5EEKwCEiUKIEVSUk9SX0NPREVfSU5URVJOQUxfU0VSVkVSX0VSUk9SEPQD');
 @$core.Deprecated('Use callStateDescriptor instead')
 const CallState$json = const {
   '1': 'CallState',
@@ -124,11 +130,12 @@ const VideoLayer$json = const {
     const {'1': 'video_dimension', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.VideoDimension', '10': 'videoDimension'},
     const {'1': 'bitrate', '3': 4, '4': 1, '5': 13, '10': 'bitrate'},
     const {'1': 'fps', '3': 5, '4': 1, '5': 13, '10': 'fps'},
+    const {'1': 'quality', '3': 6, '4': 1, '5': 14, '6': '.stream.video.sfu.models.VideoQuality', '10': 'quality'},
   ],
 };
 
 /// Descriptor for `VideoLayer`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List videoLayerDescriptor = $convert.base64Decode('CgpWaWRlb0xheWVyEhAKA3JpZBgBIAEoCVIDcmlkElAKD3ZpZGVvX2RpbWVuc2lvbhgCIAEoCzInLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlZpZGVvRGltZW5zaW9uUg52aWRlb0RpbWVuc2lvbhIYCgdiaXRyYXRlGAQgASgNUgdiaXRyYXRlEhAKA2ZwcxgFIAEoDVIDZnBz');
+final $typed_data.Uint8List videoLayerDescriptor = $convert.base64Decode('CgpWaWRlb0xheWVyEhAKA3JpZBgBIAEoCVIDcmlkElAKD3ZpZGVvX2RpbWVuc2lvbhgCIAEoCzInLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlZpZGVvRGltZW5zaW9uUg52aWRlb0RpbWVuc2lvbhIYCgdiaXRyYXRlGAQgASgNUgdiaXRyYXRlEhAKA2ZwcxgFIAEoDVIDZnBzEj8KB3F1YWxpdHkYBiABKA4yJS5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5WaWRlb1F1YWxpdHlSB3F1YWxpdHk=');
 @$core.Deprecated('Use codecDescriptor instead')
 const Codec$json = const {
   '1': 'Codec',

@@ -148,6 +148,8 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
 
   var _state = _StreamVideoState();
 
+  Stream<List<ClosedCaptionEvent>?> get closedCaptionsStream => _state.closedCaptions.stream;
+
   UserInfo? get currentUser => _state.currentUser.valueOrNull;
 
   Stream<UserInfo?> get currentUserStream => _state.currentUser.stream;
@@ -209,8 +211,10 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
         final closedCaptionJson =
             json.decode(utf8.decode(callCustom.callCustom.dataJson));
         final closedCaption = ClosedCaption.fromJson(closedCaptionJson);
-        _state.activeCall.value!.events
-            .emit(ClosedCaptionEvent(closedCaption: closedCaption));
+        _state.closedCaptions
+            .add(ClosedCaptionEvent(closedCaption: closedCaption));
+        //         _state.activeCall.value!.events
+        // .emit(ClosedCaptionEvent(closedCaption: closedCaption));
         // events.emit(ClosedCaptionEvent(closedCaption: closedCaption));
       }
     });
@@ -253,6 +257,16 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     );
 
     return response.call;
+  }
+
+  Future<StartClosedCaptionResponse> startClosedCaptions({
+    required String type,
+    required String id,
+  }) async {
+    final response = await _client.startClosedCaptions(
+        StartClosedCaptionRequest(callId: id, callType: type));
+    _startListeningToClosedCaptionEvents();
+    return response;
   }
 
   Future<CallEnvelope> getOrCreateCall({
@@ -458,6 +472,7 @@ class _StreamVideoState {
   Future<void> dispose() async {
     await currentUser.dispose();
     await activeCall.dispose();
+    await closedCaptions.dispose();
     await pendingCalls.dispose();
   }
 }

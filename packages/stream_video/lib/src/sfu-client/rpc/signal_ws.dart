@@ -262,9 +262,9 @@ extension on EventEmitter<SfuEvent> {
         return emit(SFUHealthCheckResponseEvent(
           healthCheckResponse: healthCheckResponse,
         ));
-      case sfu_events.SfuEvent_EventPayload.error:
-        final error = event.error;
-        return emit(SFUErrorEvent(error: error));
+      // case sfu_events.SfuEvent_EventPayload.error:
+      //   final error = event.error;
+      //   return emit(SFUErrorEvent(error: error));
       case sfu_events.SfuEvent_EventPayload.notSet:
         logger.info('Received an signal event with no payload');
         break;

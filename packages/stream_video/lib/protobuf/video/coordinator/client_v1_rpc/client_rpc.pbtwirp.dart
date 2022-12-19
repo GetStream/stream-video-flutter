@@ -10,9 +10,11 @@ import 'package:stream_video/protobuf/google/protobuf/timestamp.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/broadcast_v1/broadcast.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/call_v1/call.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/closed_caption_v1/closed_caption.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/push_v1/push.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/stat_v1/stat.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/transcription_v1/transcription.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/user_v1/user.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/utils_v1/utils.pb.dart';
 
@@ -43,6 +45,14 @@ abstract class ClientRPC {
   Future<DeleteDeviceResponse> deleteDevice(twirp.Context ctx, DeleteDeviceRequest req);
   
   Future<QueryDevicesResponse> queryDevices(twirp.Context ctx, QueryDevicesRequest req);
+  
+  Future<StartTranscriptionResponse> startTranscription(twirp.Context ctx, StartTranscriptionRequest req);
+  // stops broadcasting to HLS and/or RTMP
+  Future<StopTranscriptionResponse> stopTranscription(twirp.Context ctx, StopTranscriptionRequest req);
+  
+  Future<StartClosedCaptionResponse> startClosedCaption(twirp.Context ctx, StartClosedCaptionRequest req);
+  
+  Future<StopClosedCaptionResponse> stopClosedCaption(twirp.Context ctx, StopClosedCaptionRequest req);
   // starts broadcast to HLS and/or RTMP, replaces existing settings if broadcasting is already started
   Future<StartBroadcastResponse> startBroadcast(twirp.Context ctx, StartBroadcastRequest req);
   // stops broadcasting to HLS and/or RTMP
@@ -346,6 +356,94 @@ class ClientRPCJSONClient implements ClientRPC {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/QueryDevices');
       final data = await doJSONRequest(ctx, url, hooks, req);
       final QueryDevicesResponse res = QueryDevicesResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StartTranscriptionResponse> startTranscription(twirp.Context ctx, StartTranscriptionRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'StartTranscription');
+    return interceptor((ctx, req) {
+      return callStartTranscription(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StartTranscriptionResponse> callStartTranscription(twirp.Context ctx, StartTranscriptionRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StartTranscription');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final StartTranscriptionResponse res = StartTranscriptionResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StopTranscriptionResponse> stopTranscription(twirp.Context ctx, StopTranscriptionRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'StopTranscription');
+    return interceptor((ctx, req) {
+      return callStopTranscription(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StopTranscriptionResponse> callStopTranscription(twirp.Context ctx, StopTranscriptionRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StopTranscription');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final StopTranscriptionResponse res = StopTranscriptionResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StartClosedCaptionResponse> startClosedCaption(twirp.Context ctx, StartClosedCaptionRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'StartClosedCaption');
+    return interceptor((ctx, req) {
+      return callStartClosedCaption(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StartClosedCaptionResponse> callStartClosedCaption(twirp.Context ctx, StartClosedCaptionRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StartClosedCaption');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final StartClosedCaptionResponse res = StartClosedCaptionResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StopClosedCaptionResponse> stopClosedCaption(twirp.Context ctx, StopClosedCaptionRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'StopClosedCaption');
+    return interceptor((ctx, req) {
+      return callStopClosedCaption(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StopClosedCaptionResponse> callStopClosedCaption(twirp.Context ctx, StopClosedCaptionRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StopClosedCaption');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final StopClosedCaptionResponse res = StopClosedCaptionResponse.create();
       res.mergeFromProto3Json(json.decode(data));
       return Future.value(res);
     } catch (e) {
@@ -935,6 +1033,94 @@ class ClientRPCProtobufClient implements ClientRPC {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/QueryDevices');
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final QueryDevicesResponse res = QueryDevicesResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StartTranscriptionResponse> startTranscription(twirp.Context ctx, StartTranscriptionRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'StartTranscription');
+    return interceptor((ctx, req) {
+      return callStartTranscription(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StartTranscriptionResponse> callStartTranscription(twirp.Context ctx, StartTranscriptionRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StartTranscription');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final StartTranscriptionResponse res = StartTranscriptionResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StopTranscriptionResponse> stopTranscription(twirp.Context ctx, StopTranscriptionRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'StopTranscription');
+    return interceptor((ctx, req) {
+      return callStopTranscription(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StopTranscriptionResponse> callStopTranscription(twirp.Context ctx, StopTranscriptionRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StopTranscription');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final StopTranscriptionResponse res = StopTranscriptionResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StartClosedCaptionResponse> startClosedCaption(twirp.Context ctx, StartClosedCaptionRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'StartClosedCaption');
+    return interceptor((ctx, req) {
+      return callStartClosedCaption(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StartClosedCaptionResponse> callStartClosedCaption(twirp.Context ctx, StartClosedCaptionRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StartClosedCaption');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final StartClosedCaptionResponse res = StartClosedCaptionResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StopClosedCaptionResponse> stopClosedCaption(twirp.Context ctx, StopClosedCaptionRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'client_v1_rpc');
+    ctx = twirp.withServiceName(ctx, 'ClientRPC');
+    ctx = twirp.withMethodName(ctx, 'StopClosedCaption');
+    return interceptor((ctx, req) {
+      return callStopClosedCaption(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StopClosedCaptionResponse> callStopClosedCaption(twirp.Context ctx, StopClosedCaptionRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.coordinator.client_v1_rpc.ClientRPC/StopClosedCaption');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final StopClosedCaptionResponse res = StopClosedCaptionResponse.create();
       res.mergeFromBuffer(data);
       return Future.value(res);
     } catch (e) {

@@ -375,18 +375,28 @@ class TimelineEvent extends $pb.GeneratedMessage {
 class CallParticipantTimeline extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallParticipantTimeline', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.stat_v1'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
-    ..pc<TimelineEvent>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'events', $pb.PbFieldType.PM, subBuilder: TimelineEvent.create)
+    ..aOM<$1.Timestamp>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'start', subBuilder: $1.Timestamp.create)
+    ..aOM<$1.Timestamp>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'end', subBuilder: $1.Timestamp.create)
+    ..pc<TimelineEvent>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'events', $pb.PbFieldType.PM, subBuilder: TimelineEvent.create)
     ..hasRequiredFields = false
   ;
 
   CallParticipantTimeline._() : super();
   factory CallParticipantTimeline({
     $core.String? userId,
+    $1.Timestamp? start,
+    $1.Timestamp? end,
     $core.Iterable<TimelineEvent>? events,
   }) {
     final _result = create();
     if (userId != null) {
       _result.userId = userId;
+    }
+    if (start != null) {
+      _result.start = start;
+    }
+    if (end != null) {
+      _result.end = end;
     }
     if (events != null) {
       _result.events.addAll(events);
@@ -424,7 +434,29 @@ class CallParticipantTimeline extends $pb.GeneratedMessage {
   void clearUserId() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.List<TimelineEvent> get events => $_getList(1);
+  $1.Timestamp get start => $_getN(1);
+  @$pb.TagNumber(2)
+  set start($1.Timestamp v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasStart() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearStart() => clearField(2);
+  @$pb.TagNumber(2)
+  $1.Timestamp ensureStart() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  $1.Timestamp get end => $_getN(2);
+  @$pb.TagNumber(3)
+  set end($1.Timestamp v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasEnd() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearEnd() => clearField(3);
+  @$pb.TagNumber(3)
+  $1.Timestamp ensureEnd() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $core.List<TimelineEvent> get events => $_getList(3);
 }
 
 class Session extends $pb.GeneratedMessage {

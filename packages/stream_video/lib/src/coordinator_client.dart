@@ -71,6 +71,24 @@ class CoordinatorClient with EventEmittable<CoordinatorEvent> {
     }
   }
 
+
+  Future<StartClosedCaptionResponse> startClosedCaptions(
+    StartClosedCaptionRequest req,
+  ) {
+    try {
+      return _withAuthHeaders().then((ctx) {
+        return _clientRPCProtobufClient.startClosedCaption(ctx, req);
+      });
+    } on TwirpError catch (e, stk) {
+      // TODO: Use StreamVideoError.fromTwirpError instead.
+      final error = StreamVideoError(e.getMsg);
+      Error.throwWithStackTrace(error, stk);
+    } catch (e, stk) {
+      final error = StreamVideoError('Unknown Exception Occurred: $e');
+      Error.throwWithStackTrace(error, stk);
+    }
+  }
+
   Future<GetCallEdgeServerResponse> getCallEdgeServer(
     GetCallEdgeServerRequest req,
   ) {

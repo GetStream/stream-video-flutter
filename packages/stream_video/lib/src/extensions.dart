@@ -18,7 +18,7 @@ extension ConnectionQualityX on sfu_models.ConnectionQuality {
     switch (this) {
       case sfu_models.ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED:
         return ConnectionQuality.unknown;
-      case sfu_models.ConnectionQuality.CONNECTION_QUALITY_BAD_UNSPECIFIED:
+      case sfu_models.ConnectionQuality.CONNECTION_QUALITY_BAD:
         return ConnectionQuality.poor;
       case sfu_models.ConnectionQuality.CONNECTION_QUALITY_POOR:
         return ConnectionQuality.good;
@@ -36,7 +36,7 @@ extension VideoQualityX on sfu_models.VideoQuality {
         return VideoDimensionPresets.h540_169;
       case sfu_models.VideoQuality.VIDEO_QUALITY_MID:
         return VideoDimensionPresets.h360_169;
-      case sfu_models.VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED:
+      case sfu_models.VideoQuality.VIDEO_QUALITY_LOW:
         return VideoDimensionPresets.h180_169;
       default:
         return null;
