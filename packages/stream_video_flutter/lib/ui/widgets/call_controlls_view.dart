@@ -32,6 +32,11 @@ class _CallControlsViewState extends State<CallControlsView> {
 
   LocalParticipant get participant => widget.participant;
 
+  bool get isMobile =>
+      Theme.of(context).platform == TargetPlatform.iOS ||
+      Theme.of(context).platform == TargetPlatform.android;
+
+
   @override
   void initState() {
     super.initState();
@@ -179,6 +184,14 @@ class _CallControlsViewState extends State<CallControlsView> {
     return widgetList;
   }
 
+  WrapAlignment getButtonsAlignment() {
+    if (isMobile) {
+      return WrapAlignment.center;
+    } else {
+      return WrapAlignment.center;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -199,7 +212,8 @@ class _CallControlsViewState extends State<CallControlsView> {
           ),
         ),
         child: Wrap(
-          alignment: WrapAlignment.spaceEvenly,
+          alignment: getButtonsAlignment(),
+          spacing: 16,
           children: getButtons(),
         ),
       ),
