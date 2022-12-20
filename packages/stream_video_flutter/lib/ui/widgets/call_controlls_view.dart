@@ -7,6 +7,9 @@ import 'package:stream_video_flutter/theme/stream_controls_theme.dart';
 import 'package:stream_video_flutter/theme/stream_video_theme.dart';
 import 'package:stream_video_flutter/ui/widgets/common/control_buttons.dart';
 
+const deviceIdSpeaker = "speaker";
+const deviceIdEarpiece = "earpiece";
+
 /// Widget with control commands for a Call. This Widget provide the UI and
 /// logic to change audio input/output, video output, switch camera and hang up
 /// accordingly with the platform using this Widget.
@@ -70,9 +73,15 @@ class _CallControlsViewState extends State<CallControlsView> {
   /// is using the smartphone speaker without headphones.
   void _toggleSpeaker() async {
     var audioSelected = Hardware.instance.selectedAudioOutput?.deviceId;
+    MediaDevice? newAudio;
 
-    var newAudio = _audioOutputs
-        ?.firstWhere((audioOut) => audioOut.deviceId != audioSelected);
+    if (audioSelected == deviceIdSpeaker) {
+      newAudio = _audioOutputs
+          ?.firstWhere((audioOut) => audioOut.deviceId == deviceIdEarpiece);
+    } else {
+      newAudio = _audioOutputs
+          ?.firstWhere((audioOut) => audioOut.deviceId == deviceIdSpeaker);
+    }
 
     if (newAudio != null) {
       await Hardware.instance.selectAudioOutput(newAudio);
@@ -93,7 +102,7 @@ class _CallControlsViewState extends State<CallControlsView> {
   }
 
   bool isPhoneSpeakerSelected() {
-    return Hardware.instance.selectedAudioOutput?.deviceId == "speaker";
+    return Hardware.instance.selectedAudioOutput?.deviceId == deviceIdSpeaker;
   }
 
   /// Switch between front and back camera. It should not be possible to call
@@ -191,14 +200,14 @@ class _CallControlsViewState extends State<CallControlsView> {
     bool isMobile = Theme.of(context).platform == TargetPlatform.iOS ||
         Theme.of(context).platform == TargetPlatform.android;
 
-    if (isMobile && _audioOutputs?.length == 2) {
+    if (isMobile) {
       widgetList.add(toggleSpeakerButton());
     }
 
     widgetList.add(toggleVideoButton());
     widgetList.add(toggleMicButton());
 
-    if (isMobile && _videoOutputs?.length == 2) {
+    if (isMobile) {
       widgetList.add(switchCameraButton());
     }
 
