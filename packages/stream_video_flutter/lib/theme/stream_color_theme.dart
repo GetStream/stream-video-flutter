@@ -327,7 +327,7 @@ class Effect {
       sigmaX: sigmaX ?? this.sigmaX,
       sigmaY: sigmaY ?? this.sigmaY,
       color: color ?? this.color,
-      opacity: this.opacity ?? color?.opacity,
+      opacity: opacity ?? this.opacity,
       blur: blur ?? this.blur,
     );
   }
@@ -337,8 +337,7 @@ class Effect {
       sigmaX: lerpDouble(sigmaX, other.sigmaX, t),
       sigmaY: lerpDouble(sigmaY, other.sigmaY, t),
       color: Color.lerp(color, other.color, t),
-      opacity: lerpDouble(
-          opacity ?? color?.opacity, other.opacity ?? other.color?.opacity, t),
+      opacity: lerpDouble(opacity, other.opacity, t),
       blur: lerpDouble(blur, other.blur, t),
     );
   }
