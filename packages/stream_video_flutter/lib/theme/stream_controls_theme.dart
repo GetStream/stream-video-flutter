@@ -193,4 +193,83 @@ class StreamControlsTheme with Diagnosticable {
     required this.buttonsAlignmentMobile,
     required this.buttonsSpacing,
   });
+
+  StreamControlsTheme copyWith(
+    bool? isLightTheme,
+    BorderRadius? borderRadius,
+    double? elevation,
+    EdgeInsets? padding,
+    ButtonStyle? toggleSpeakerStyle,
+    Icon? toggleSpeakerIconEnabled,
+    Icon? toggleSpeakerIconDisabled,
+    ButtonStyle? toggleVideoStyle,
+    Icon? toggleVideoIconEnabled,
+    Icon? toggleVideoIconDisabled,
+    ButtonStyle? toggleMicStyle,
+    Icon? toggleMicIconEnabled,
+    Icon? toggleMicIconDisabled,
+    ButtonStyle? switchCameraStyle,
+    Icon? switchCameraIcon,
+    ButtonStyle? hangUpStyle,
+    Icon? handUpCameraIcon,
+    WrapAlignment? buttonsAlignmentDesktop,
+    WrapAlignment? buttonsAlignmentMobile,
+    double? buttonsSpacing,
+  ) {
+    return StreamControlsTheme.raw(
+      isLightTheme: isLightTheme ?? this.isLightTheme,
+      borderRadius: borderRadius ?? this.borderRadius,
+      elevation: elevation ?? this.elevation,
+      padding: padding ?? this.padding,
+      toggleSpeakerStyle: toggleSpeakerStyle ?? this.toggleSpeakerStyle,
+      toggleSpeakerIconEnabled:
+          toggleSpeakerIconEnabled ?? this.toggleSpeakerIconEnabled,
+      toggleSpeakerIconDisabled:
+          toggleSpeakerIconDisabled ?? this.toggleSpeakerIconDisabled,
+      toggleVideoStyle: toggleVideoStyle ?? this.toggleVideoStyle,
+      toggleVideoIconEnabled:
+          toggleVideoIconEnabled ?? this.toggleVideoIconEnabled,
+      toggleVideoIconDisabled:
+          toggleVideoIconDisabled ?? this.toggleVideoIconDisabled,
+      toggleMicStyle: toggleMicStyle ?? this.toggleMicStyle,
+      toggleMicIconEnabled: toggleMicIconEnabled ?? this.toggleMicIconEnabled,
+      toggleMicIconDisabled:
+          toggleMicIconDisabled ?? this.toggleMicIconDisabled,
+      switchCameraStyle: switchCameraStyle ?? this.switchCameraStyle,
+      switchCameraIcon: switchCameraIcon ?? this.switchCameraIcon,
+      hangUpStyle: hangUpStyle ?? this.hangUpStyle,
+      handUpCameraIcon: handUpCameraIcon ?? this.handUpCameraIcon,
+      buttonsAlignmentDesktop:
+          buttonsAlignmentDesktop ?? this.buttonsAlignmentDesktop,
+      buttonsAlignmentMobile:
+          buttonsAlignmentMobile ?? this.buttonsAlignmentMobile,
+      buttonsSpacing: buttonsSpacing ?? this.buttonsSpacing,
+    );
+  }
+
+  StreamControlsTheme merge(StreamControlsTheme? controlsTheme) {
+    if (controlsTheme == null) return this;
+    return copyWith(
+      controlsTheme.isLightTheme,
+      controlsTheme.borderRadius,
+      controlsTheme.elevation,
+      controlsTheme.padding,
+      controlsTheme.toggleSpeakerStyle,
+      controlsTheme.toggleSpeakerIconEnabled,
+      controlsTheme.toggleSpeakerIconDisabled,
+      controlsTheme.toggleVideoStyle,
+      controlsTheme.toggleVideoIconEnabled,
+      controlsTheme.toggleVideoIconDisabled,
+      controlsTheme.toggleMicStyle,
+      controlsTheme.toggleMicIconEnabled,
+      controlsTheme.toggleMicIconDisabled,
+      controlsTheme.switchCameraStyle,
+      controlsTheme.switchCameraIcon,
+      controlsTheme.hangUpStyle,
+      controlsTheme.handUpCameraIcon,
+      controlsTheme.buttonsAlignmentDesktop,
+      controlsTheme.buttonsAlignmentMobile,
+      controlsTheme.buttonsSpacing,
+    );
+  }
 }

@@ -95,11 +95,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   StreamVideoTheme copyWith({
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
+    StreamControlsTheme? controlsTheme,
   }) =>
       StreamVideoTheme.raw(
         textTheme: this.textTheme.merge(textTheme),
         colorTheme: this.colorTheme.merge(colorTheme),
-        controlsTheme: StreamControlsTheme(), //todo: fix this
+        controlsTheme: this.controlsTheme.merge(controlsTheme),
       );
 
   /// Merge themes
@@ -120,7 +121,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return StreamVideoTheme.raw(
       textTheme: textTheme.lerp(other.textTheme, t),
       colorTheme: colorTheme.lerp(other.colorTheme, t),
-      controlsTheme: StreamControlsTheme(), //todo: fix this
+      controlsTheme: controlsTheme,
     );
   }
 }
