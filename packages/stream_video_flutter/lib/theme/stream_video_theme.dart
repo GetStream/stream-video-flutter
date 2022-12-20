@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide TextTheme;
+import 'package:stream_video_flutter/theme/stream_controls_theme.dart';
 
 import 'themes.dart';
 
@@ -11,16 +12,19 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required Brightness brightness,
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
+    StreamControlsTheme? controlsTheme,
   }) {
     final isDark = brightness == Brightness.dark;
     textTheme ??=
         isDark ? const StreamTextTheme.dark() : const StreamTextTheme.light();
     colorTheme ??=
         isDark ? const StreamColorTheme.dark() : const StreamColorTheme.light();
+    controlsTheme ??= isDark ? StreamControlsTheme() : StreamControlsTheme();
 
     return StreamVideoTheme.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
+      controlsTheme: controlsTheme,
     );
   }
 
@@ -36,6 +40,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   const StreamVideoTheme.raw({
     required this.textTheme,
     required this.colorTheme,
+    required this.controlsTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -58,6 +63,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return StreamVideoTheme.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
+      controlsTheme: StreamControlsTheme(),
     );
   }
 
@@ -79,6 +85,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// The color themes used in the widgets
   final StreamColorTheme colorTheme;
 
+  final StreamControlsTheme controlsTheme;
+
   /// Creates a copy of [StreamVideoTheme] with specified attributes
   /// overridden.
   @override
@@ -89,6 +97,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       StreamVideoTheme.raw(
         textTheme: this.textTheme.merge(textTheme),
         colorTheme: this.colorTheme.merge(colorTheme),
+        controlsTheme: StreamControlsTheme(), //todo: fix this
       );
 
   /// Merge themes
@@ -109,6 +118,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return StreamVideoTheme.raw(
       textTheme: textTheme.lerp(other.textTheme, t),
       colorTheme: colorTheme.lerp(other.colorTheme, t),
+      controlsTheme: StreamControlsTheme(), //todo: fix this
     );
   }
 }
