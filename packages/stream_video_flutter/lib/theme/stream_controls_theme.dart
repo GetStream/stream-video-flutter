@@ -116,8 +116,8 @@ class StreamControlsTheme with Diagnosticable {
       color: Colors.white,
       Icons.phone,
     ),
-    this.buttonsAlignmentDesktop = WrapAlignment.spaceEvenly,
-    this.buttonsAlignmentMobile = WrapAlignment.center,
+    this.buttonsAlignmentDesktop = WrapAlignment.center,
+    this.buttonsAlignmentMobile = WrapAlignment.spaceEvenly,
     this.buttonsSpacing = defaultButtonsSpacing,
   });
 
