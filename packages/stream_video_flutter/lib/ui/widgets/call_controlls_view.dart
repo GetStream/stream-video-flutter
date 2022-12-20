@@ -3,22 +3,25 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/theme/stream_controls_theme.dart';
+import 'package:stream_video_flutter/theme/stream_video_theme.dart';
 import 'package:stream_video_flutter/ui/widgets/common/control_buttons.dart';
-
-const _borderRadiusTop = 20.0;
 
 /// Widget with control commands for a Call. This Widget provide the UI and
 /// logic to change audio input/output, video output, switch camera and hang up
 /// accordingly with the platform using this Widget.
 class CallControlsView extends StatefulWidget {
-  const CallControlsView(
-    this.call,
-    this.participant, {
+  const CallControlsView({
     Key? key,
+    required this.call,
+    required this.participant,
+    this.theme,
   }) : super(key: key);
 
   final Call call;
   final LocalParticipant participant;
+
+  final StreamControlsTheme? theme;
 
   @override
   State<CallControlsView> createState() => _CallControlsViewState();
@@ -40,13 +43,17 @@ class _CallControlsViewState extends State<CallControlsView> {
       Theme.of(context).platform == TargetPlatform.iOS ||
       Theme.of(context).platform == TargetPlatform.android;
 
-
   @override
   void initState() {
     super.initState();
     _deviceChangeSubscription =
         Hardware.instance.onDeviceChange.stream.listen(_loadDevices);
     Hardware.instance.enumerateDevices().then(_loadDevices);
+  }
+
+  StreamControlsTheme getTheme() {
+    final streamChatTheme = StreamVideoTheme.of(context);
+    return widget.theme ?? streamChatTheme.controlsTheme;
   }
 
   void _loadDevices(List<MediaDevice> devices) async {
@@ -129,48 +136,49 @@ class _CallControlsViewState extends State<CallControlsView> {
     participant.unpublishAllTracks();
   }
 
-  Widget toggleSoundButton() {
+  Widget toggleSpeakerButton() {
     return ControlToggleButton(
-      Icons.volume_up,
-      Icons.volume_up_outlined,
+      getTheme().toggleSpeakerIconEnabled,
+      getTheme().toggleSpeakerIconDisabled,
       isPhoneSpeakerSelected(),
+      getTheme().getToggleSpeakerStyle(),
       _toggleSpeaker,
     );
   }
 
   Widget toggleVideoButton() {
     return ControlToggleButton(
-      Icons.video_camera_front,
-      Icons.video_camera_front_outlined, //Find a icon from video cancellation
+      getTheme().toggleVideoIconEnabled,
+      getTheme().toggleVideoIconDisabled,
       participant.isCameraEnabled,
+      getTheme().getToggleVideoStyle(),
       _toggleVideo,
     );
   }
 
   Widget toggleMicButton() {
     return ControlToggleButton(
-      Icons.mic,
-      Icons.mic_off,
+      getTheme().toggleMicIconEnabled,
+      getTheme().toggleMicIconDisabled,
       participant.isMicrophoneEnabled,
+      getTheme().getToggleMicStyle(),
       _toggleMic,
     );
   }
 
   Widget switchCameraButton() {
     return ControlButton(
-      Icons.flip_camera_ios,
+      getTheme().switchCameraIcon,
+      getTheme().getSwitchCameraStyle(),
       _switchCamera,
-      backgroundColor: Colors.white,
-      iconColor: Colors.black,
     );
   }
 
   Widget hangUpButton() {
     return ControlButton(
-      Icons.phone,
+      getTheme().handUpCameraIcon,
+      getTheme().getHangUpStyle(),
       _hangUp,
-      backgroundColor: Colors.red,
-      iconColor: Colors.white,
     );
   }
 
@@ -184,7 +192,7 @@ class _CallControlsViewState extends State<CallControlsView> {
         Theme.of(context).platform == TargetPlatform.android;
 
     if (isMobile && _audioOutputs?.length == 2) {
-      widgetList.add(toggleSoundButton());
+      widgetList.add(toggleSpeakerButton());
     }
 
     widgetList.add(toggleVideoButton());
@@ -204,34 +212,23 @@ class _CallControlsViewState extends State<CallControlsView> {
   /// UIs.
   WrapAlignment getButtonsAlignment() {
     if (isMobile) {
-      return WrapAlignment.spaceEvenly;
+      return getTheme().buttonsAlignmentMobile;
     } else {
-      return WrapAlignment.center;
+      return getTheme().buttonsAlignmentDesktop;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 10,
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(_borderRadiusTop),
-        topRight: Radius.circular(_borderRadiusTop),
-      ),
+      elevation: getTheme().elevation,
+      borderRadius: getTheme().borderRadius,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          vertical: 15,
-          horizontal: 15,
-        ),
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(_borderRadiusTop),
-            topRight: Radius.circular(_borderRadiusTop),
-          ),
-        ),
+        padding: getTheme().padding,
+        decoration: BoxDecoration(borderRadius: getTheme().borderRadius),
         child: Wrap(
           alignment: getButtonsAlignment(),
-          spacing: 16,
+          spacing: getTheme().buttonsSpacing,
           children: getButtons(),
         ),
       ),
