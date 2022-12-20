@@ -19,7 +19,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         isDark ? const StreamTextTheme.dark() : const StreamTextTheme.light();
     colorTheme ??=
         isDark ? const StreamColorTheme.dark() : const StreamColorTheme.light();
-    controlsTheme ??= isDark ? StreamControlsTheme() : StreamControlsTheme();
+    controlsTheme ??= isDark
+        ? const StreamControlsTheme.dark()
+        : const StreamControlsTheme.light();
 
     return StreamVideoTheme.raw(
       textTheme: textTheme,
@@ -63,7 +65,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return StreamVideoTheme.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
-      controlsTheme: StreamControlsTheme(),
+      controlsTheme: const StreamControlsTheme.light(),
     );
   }
 

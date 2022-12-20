@@ -38,8 +38,7 @@ class StreamControlsTheme with Diagnosticable {
   final WrapAlignment buttonsAlignmentMobile;
   final double buttonsSpacing;
 
-  get defaultButtonStyle =>
-      ElevatedButton.styleFrom(
+  get defaultButtonStyle => ElevatedButton.styleFrom(
         shape: const CircleBorder(),
         padding: const EdgeInsets.all(buttonPadding),
         backgroundColor: isLightTheme ? Colors.white : Colors.black54,
@@ -72,7 +71,7 @@ class StreamControlsTheme with Diagnosticable {
         );
   }
 
-  StreamControlsTheme.light({
+  const StreamControlsTheme.light({
     this.isLightTheme = true,
     this.elevation = defaultElevation,
     this.borderRadius = const BorderRadius.only(
@@ -122,7 +121,7 @@ class StreamControlsTheme with Diagnosticable {
     this.buttonsSpacing = defaultButtonsSpacing,
   });
 
-  StreamControlsTheme.dark({
+  const StreamControlsTheme.dark({
     this.isLightTheme = false,
     this.elevation = defaultElevation,
     this.borderRadius = const BorderRadius.only(
@@ -170,5 +169,28 @@ class StreamControlsTheme with Diagnosticable {
     this.buttonsAlignmentDesktop = WrapAlignment.spaceEvenly,
     this.buttonsAlignmentMobile = WrapAlignment.center,
     this.buttonsSpacing = defaultButtonsSpacing,
+  });
+
+  StreamControlsTheme.raw({
+    required this.isLightTheme,
+    required this.borderRadius,
+    required this.elevation,
+    required this.padding,
+    required this.toggleSpeakerStyle,
+    required this.toggleSpeakerIconEnabled,
+    required this.toggleSpeakerIconDisabled,
+    required this.toggleVideoStyle,
+    required this.toggleVideoIconEnabled,
+    required this.toggleVideoIconDisabled,
+    required this.toggleMicStyle,
+    required this.toggleMicIconEnabled,
+    required this.toggleMicIconDisabled,
+    required this.switchCameraStyle,
+    required this.switchCameraIcon,
+    required this.hangUpStyle,
+    required this.handUpCameraIcon,
+    required this.buttonsAlignmentDesktop,
+    required this.buttonsAlignmentMobile,
+    required this.buttonsSpacing,
   });
 }
