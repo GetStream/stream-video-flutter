@@ -25,4 +25,4 @@ export 'src/track/remote/remote.dart';
 export 'src/track/remote/video.dart';
 export 'src/track/track.dart';
 export 'src/types/other.dart';
-export 'src/video_track_renderer.dart';
+export 'src/ui/stream_video_renderer.dart';
