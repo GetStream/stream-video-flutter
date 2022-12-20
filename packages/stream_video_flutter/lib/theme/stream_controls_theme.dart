@@ -6,9 +6,11 @@ const buttonPadding = 16.0;
 const defaultElevation = 10.0;
 const defaultPadding = 15.0;
 const defaultButtonsSpacing = 16.0;
+const Color defaultIconColorEnabledLight = Colors.black;
+const Color defaultIconColorEnabledDark = Colors.white;
 
 class StreamControlsTheme with Diagnosticable {
-  static const Color defaultIconColorEnabledLight = Colors.black;
+  final bool isLightTheme;
 
   final BorderRadius borderRadius;
   final double elevation;
@@ -40,7 +42,7 @@ class StreamControlsTheme with Diagnosticable {
       ElevatedButton.styleFrom(
         shape: const CircleBorder(),
         padding: const EdgeInsets.all(buttonPadding),
-        backgroundColor: Colors.white,
+        backgroundColor: isLightTheme ? Colors.white : Colors.black54,
         foregroundColor: Colors.grey, // <-- Splash color
       );
 
@@ -70,7 +72,8 @@ class StreamControlsTheme with Diagnosticable {
         );
   }
 
-  StreamControlsTheme({
+  StreamControlsTheme.light({
+    this.isLightTheme = true,
     this.elevation = defaultElevation,
     this.borderRadius = const BorderRadius.only(
       topLeft: Radius.circular(_borderRadiusTop),
@@ -116,6 +119,56 @@ class StreamControlsTheme with Diagnosticable {
     ),
     this.buttonsAlignmentDesktop = WrapAlignment.spaceEvenly,
     this.buttonsAlignmentMobile = WrapAlignment.center,
-    this.buttonsSpacing = defaultButtonsSpacing
+    this.buttonsSpacing = defaultButtonsSpacing,
+  });
+
+  StreamControlsTheme.dark({
+    this.isLightTheme = false,
+    this.elevation = defaultElevation,
+    this.borderRadius = const BorderRadius.only(
+      topLeft: Radius.circular(_borderRadiusTop),
+      topRight: Radius.circular(_borderRadiusTop),
+    ),
+    this.padding = const EdgeInsets.all(defaultPadding),
+    this.toggleSpeakerStyle,
+    this.toggleSpeakerIconEnabled = const Icon(
+      color: defaultIconColorEnabledDark,
+      Icons.volume_up,
+    ),
+    this.toggleSpeakerIconDisabled = const Icon(
+      color: Colors.grey,
+      Icons.volume_up_outlined,
+    ),
+    this.toggleVideoStyle,
+    this.toggleVideoIconEnabled = const Icon(
+      color: defaultIconColorEnabledDark,
+      Icons.video_camera_front,
+    ),
+    this.toggleVideoIconDisabled = const Icon(
+      color: Colors.grey,
+      Icons.video_camera_front_outlined,
+    ),
+    this.toggleMicStyle,
+    this.toggleMicIconEnabled = const Icon(
+      color: defaultIconColorEnabledDark,
+      Icons.mic,
+    ),
+    this.toggleMicIconDisabled = const Icon(
+      color: Colors.grey,
+      Icons.mic_off,
+    ),
+    this.switchCameraStyle,
+    this.switchCameraIcon = const Icon(
+      color: defaultIconColorEnabledDark,
+      Icons.flip_camera_ios,
+    ),
+    this.hangUpStyle,
+    this.handUpCameraIcon = const Icon(
+      color: Colors.white,
+      Icons.phone,
+    ),
+    this.buttonsAlignmentDesktop = WrapAlignment.spaceEvenly,
+    this.buttonsAlignmentMobile = WrapAlignment.center,
+    this.buttonsSpacing = defaultButtonsSpacing,
   });
 }
