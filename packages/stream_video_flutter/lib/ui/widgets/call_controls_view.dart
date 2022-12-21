@@ -54,8 +54,8 @@ class _CallControlsViewState extends State<CallControlsView> {
   }
 
   StreamControlsTheme getTheme() {
-    final streamChatTheme = StreamVideoTheme.of(context);
-    return widget.theme ?? streamChatTheme.controlsTheme;
+    final streamVideoTheme = StreamVideoTheme.of(context);
+    return widget.theme ?? streamVideoTheme.controlsTheme;
   }
 
   void _loadDevices(List<MediaDevice> devices) async {
