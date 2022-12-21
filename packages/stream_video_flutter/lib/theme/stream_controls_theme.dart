@@ -10,8 +10,6 @@ class StreamControlsTheme with Diagnosticable {
   static const Color defaultIconColorEnabledLight = Colors.black;
   static const Color defaultIconColorEnabledDark = Colors.white;
 
-  final bool isLightTheme;
-
   final BorderRadius borderRadius;
   final double elevation;
   final EdgeInsets padding;
@@ -38,16 +36,16 @@ class StreamControlsTheme with Diagnosticable {
   final WrapAlignment buttonsAlignmentMobile;
   final double buttonsSpacing;
 
-  static ButtonStyle defaultButtonStyle(bool isLightTheme) {
+  static ButtonStyle defaultButtonStyle(Color backgroundColor) {
     return ElevatedButton.styleFrom(
       shape: const CircleBorder(),
       padding: const EdgeInsets.all(buttonPadding),
-      backgroundColor: isLightTheme ? Colors.white : Colors.black54,
+      backgroundColor: backgroundColor,
       foregroundColor: Colors.grey, // <-- Splash color
     );
   }
 
-  static ButtonStyle defaultHangUpButtonStyle(bool isLightTheme) {
+  static ButtonStyle defaultHangUpButtonStyle() {
     return ElevatedButton.styleFrom(
       shape: const CircleBorder(),
       padding: const EdgeInsets.all(buttonPadding),
@@ -97,30 +95,34 @@ class StreamControlsTheme with Diagnosticable {
     ),
     ButtonStyle? hangUpStyle,
     Icon handUpCameraIcon = const Icon(
-      color: Colors.white,
+      color: Color(0xfffcfcfc),
       Icons.phone,
     ),
     WrapAlignment buttonsAlignmentDesktop = WrapAlignment.center,
     WrapAlignment buttonsAlignmentMobile = WrapAlignment.spaceEvenly,
     double buttonsSpacing = defaultButtonsSpacing,
   ]) {
+    const Color buttonsBackground = Color(0xfffcfcfc);
+
     return StreamControlsTheme.raw(
-      isLightTheme: true,
       borderRadius: borderRadius,
       elevation: elevation,
       padding: padding,
-      toggleSpeakerStyle: toggleSpeakerStyle ?? defaultButtonStyle(true),
+      toggleSpeakerStyle:
+          toggleSpeakerStyle ?? defaultButtonStyle(buttonsBackground),
       toggleSpeakerIconEnabled: toggleSpeakerIconEnabled,
       toggleSpeakerIconDisabled: toggleSpeakerIconDisabled,
-      toggleVideoStyle: toggleVideoStyle ?? defaultButtonStyle(true),
+      toggleVideoStyle:
+          toggleVideoStyle ?? defaultButtonStyle(buttonsBackground),
       toggleVideoIconEnabled: toggleVideoIconEnabled,
       toggleVideoIconDisabled: toggleVideoIconDisabled,
-      toggleMicStyle: toggleMicStyle ?? defaultButtonStyle(true),
+      toggleMicStyle: toggleMicStyle ?? defaultButtonStyle(buttonsBackground),
       toggleMicIconEnabled: toggleMicIconEnabled,
       toggleMicIconDisabled: toggleMicIconDisabled,
-      switchCameraStyle: switchCameraStyle ?? defaultButtonStyle(true),
+      switchCameraStyle:
+          switchCameraStyle ?? defaultButtonStyle(buttonsBackground),
       switchCameraIcon: switchCameraIcon,
-      hangUpStyle: hangUpStyle ?? defaultHangUpButtonStyle(true),
+      hangUpStyle: hangUpStyle ?? defaultHangUpButtonStyle(),
       handUpCameraIcon: handUpCameraIcon,
       buttonsAlignmentDesktop: buttonsAlignmentDesktop,
       buttonsAlignmentMobile: buttonsAlignmentMobile,
@@ -169,30 +171,34 @@ class StreamControlsTheme with Diagnosticable {
     ),
     ButtonStyle? hangUpStyle,
     Icon handUpCameraIcon = const Icon(
-      color: Colors.white,
+      color: Color(0xfffcfcfc),
       Icons.phone,
     ),
     WrapAlignment buttonsAlignmentDesktop = WrapAlignment.spaceEvenly,
     WrapAlignment buttonsAlignmentMobile = WrapAlignment.center,
     double buttonsSpacing = defaultButtonsSpacing,
   ]) {
+    const Color buttonsBackground = Color(0xff070A0D);
+
     return StreamControlsTheme.raw(
-      isLightTheme: false,
       borderRadius: borderRadius,
       elevation: elevation,
       padding: padding,
-      toggleSpeakerStyle: toggleSpeakerStyle ?? defaultButtonStyle(true),
+      toggleSpeakerStyle:
+          toggleSpeakerStyle ?? defaultButtonStyle(buttonsBackground),
       toggleSpeakerIconEnabled: toggleSpeakerIconEnabled,
       toggleSpeakerIconDisabled: toggleSpeakerIconDisabled,
-      toggleVideoStyle: toggleVideoStyle ?? defaultButtonStyle(true),
+      toggleVideoStyle:
+          toggleVideoStyle ?? defaultButtonStyle(buttonsBackground),
       toggleVideoIconEnabled: toggleVideoIconEnabled,
       toggleVideoIconDisabled: toggleVideoIconDisabled,
-      toggleMicStyle: toggleMicStyle ?? defaultButtonStyle(true),
+      toggleMicStyle: toggleMicStyle ?? defaultButtonStyle(buttonsBackground),
       toggleMicIconEnabled: toggleMicIconEnabled,
       toggleMicIconDisabled: toggleMicIconDisabled,
-      switchCameraStyle: switchCameraStyle ?? defaultButtonStyle(true),
+      switchCameraStyle:
+          switchCameraStyle ?? defaultButtonStyle(buttonsBackground),
       switchCameraIcon: switchCameraIcon,
-      hangUpStyle: hangUpStyle ?? defaultHangUpButtonStyle(true),
+      hangUpStyle: hangUpStyle ?? defaultHangUpButtonStyle(),
       handUpCameraIcon: handUpCameraIcon,
       buttonsAlignmentDesktop: buttonsAlignmentDesktop,
       buttonsAlignmentMobile: buttonsAlignmentMobile,
@@ -201,7 +207,6 @@ class StreamControlsTheme with Diagnosticable {
   }
 
   StreamControlsTheme.raw({
-    required this.isLightTheme,
     required this.borderRadius,
     required this.elevation,
     required this.padding,
@@ -224,7 +229,6 @@ class StreamControlsTheme with Diagnosticable {
   });
 
   StreamControlsTheme copyWith(
-    bool? isLightTheme,
     BorderRadius? borderRadius,
     double? elevation,
     EdgeInsets? padding,
@@ -246,7 +250,6 @@ class StreamControlsTheme with Diagnosticable {
     double? buttonsSpacing,
   ) {
     return StreamControlsTheme.raw(
-      isLightTheme: isLightTheme ?? this.isLightTheme,
       borderRadius: borderRadius ?? this.borderRadius,
       elevation: elevation ?? this.elevation,
       padding: padding ?? this.padding,
@@ -279,7 +282,6 @@ class StreamControlsTheme with Diagnosticable {
   StreamControlsTheme merge(StreamControlsTheme? controlsTheme) {
     if (controlsTheme == null) return this;
     return copyWith(
-      controlsTheme.isLightTheme,
       controlsTheme.borderRadius,
       controlsTheme.elevation,
       controlsTheme.padding,
