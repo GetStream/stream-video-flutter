@@ -111,6 +111,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// The color themes used in the widgets
   final StreamColorTheme colorTheme;
 
+  /// The color themes used in CallControlsView
   final StreamControlsTheme controlsTheme;
 
   /// Theme for the user avatar widget.
