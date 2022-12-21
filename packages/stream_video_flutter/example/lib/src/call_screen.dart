@@ -1,9 +1,9 @@
-import 'package:example/src/widgets/controls.dart';
-import 'package:example/src/widgets/participant_widget.dart';
-import 'package:example/src/widgets/participant_info.dart';
-import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
+import 'package:example/src/widgets/controls.dart';
+import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/participant/participant_info.dart';
+import 'package:stream_video_flutter/participant/participant_widget.dart';
 
 class CallScreen extends StatefulWidget {
   const CallScreen({Key? key, required this.call}) : super(key: key);
