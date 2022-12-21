@@ -378,4 +378,49 @@ class StreamControlsTheme with Diagnosticable {
       controlsTheme.buttonsSpacing,
     );
   }
+
+  StreamControlsTheme lerp(StreamControlsTheme other, double t) {
+    return StreamControlsTheme.raw(
+      borderRadius: BorderRadius.lerp(borderRadius, other.borderRadius, t)!,
+      elevation: elevation,
+      bgColor: Color.lerp(bgColor, other.bgColor, t)!,
+      padding: padding,
+      toggleSpeakerStyle: ButtonStyle.lerp(
+        toggleSpeakerStyle,
+        other.toggleSpeakerStyle,
+        t,
+      )!,
+      toggleSpeakerIconEnabled: toggleSpeakerIconEnabled,
+      toggleSpeakerIconDisabled: toggleSpeakerIconDisabled,
+      toggleVideoStyle: ButtonStyle.lerp(
+        toggleVideoStyle,
+        other.toggleVideoStyle,
+        t,
+      )!,
+      toggleVideoIconEnabled: toggleVideoIconEnabled,
+      toggleVideoIconDisabled: toggleVideoIconDisabled,
+      toggleMicStyle: ButtonStyle.lerp(
+        toggleMicStyle,
+        other.toggleMicStyle,
+        t,
+      )!,
+      toggleMicIconEnabled: toggleMicIconEnabled,
+      toggleMicIconDisabled: toggleMicIconDisabled,
+      switchCameraStyle: ButtonStyle.lerp(
+        switchCameraStyle,
+        other.switchCameraStyle,
+        t,
+      )!,
+      switchCameraIcon: switchCameraIcon,
+      hangUpStyle: ButtonStyle.lerp(
+        hangUpStyle,
+        other.hangUpStyle,
+        t,
+      )!,
+      handUpCameraIcon: handUpCameraIcon,
+      buttonsAlignmentDesktop: buttonsAlignmentDesktop,
+      buttonsAlignmentMobile: buttonsAlignmentMobile,
+      buttonsSpacing: buttonsSpacing,
+    );
+  }
 }

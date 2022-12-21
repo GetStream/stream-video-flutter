@@ -154,7 +154,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return StreamVideoTheme.raw(
       textTheme: textTheme.lerp(other.textTheme, t),
       colorTheme: colorTheme.lerp(other.colorTheme, t),
-      controlsTheme: controlsTheme,
+      controlsTheme: controlsTheme.lerp(other.controlsTheme, t),
       avatarTheme: avatarTheme.lerp(avatarTheme, t),
     );
   }
