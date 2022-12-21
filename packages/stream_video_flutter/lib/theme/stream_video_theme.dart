@@ -13,6 +13,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
     StreamControlsTheme? controlsTheme,
+    StreamAvatarTheme? avatarTheme,
   }) {
     final isDark = brightness == Brightness.dark;
     textTheme ??=
@@ -23,11 +24,19 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         ? const StreamControlsTheme.dark()
         : const StreamControlsTheme.light();
 
-    return StreamVideoTheme.raw(
+    final defaultTheme = StreamVideoTheme.fromColorAndTextTheme(
+      colorTheme,
+      textTheme,
+    );
+
+    final customizedTheme = defaultTheme.copyWith(
       textTheme: textTheme,
       colorTheme: colorTheme,
       controlsTheme: controlsTheme,
+      avatarTheme: avatarTheme,
     );
+
+    return defaultTheme.merge(customizedTheme);
   }
 
   /// Theme initialized with light
@@ -43,6 +52,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.textTheme,
     required this.colorTheme,
     required this.controlsTheme,
+    required this.avatarTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -66,6 +76,20 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       textTheme: textTheme,
       colorTheme: colorTheme,
       controlsTheme: const StreamControlsTheme.light(),
+      avatarTheme: StreamAvatarTheme(
+        borderRadius: BorderRadius.circular(20),
+        constraints: const BoxConstraints.tightFor(
+          height: 40,
+          width: 40,
+        ),
+        initialsTextStyle: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: colorTheme.barsBg,
+        ),
+        selectionColor: colorTheme.accentPrimary,
+        selectionThickness: 4,
+      ),
     );
   }
 
@@ -89,6 +113,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
 
   final StreamControlsTheme controlsTheme;
 
+  /// Theme for the user avatar widget.
+  final StreamAvatarTheme avatarTheme;
+
   /// Creates a copy of [StreamVideoTheme] with specified attributes
   /// overridden.
   @override
@@ -96,11 +123,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
     StreamControlsTheme? controlsTheme,
+    StreamAvatarTheme? avatarTheme,
   }) =>
       StreamVideoTheme.raw(
         textTheme: this.textTheme.merge(textTheme),
         colorTheme: this.colorTheme.merge(colorTheme),
         controlsTheme: this.controlsTheme.merge(controlsTheme),
+        avatarTheme: this.avatarTheme.merge(avatarTheme),
       );
 
   /// Merge themes
@@ -109,6 +138,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return copyWith(
       textTheme: textTheme.merge(other.textTheme),
       colorTheme: colorTheme.merge(other.colorTheme),
+      avatarTheme: avatarTheme.merge(other.avatarTheme),
     );
   }
 
@@ -122,6 +152,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       textTheme: textTheme.lerp(other.textTheme, t),
       colorTheme: colorTheme.lerp(other.colorTheme, t),
       controlsTheme: controlsTheme,
+      avatarTheme: avatarTheme.lerp(avatarTheme, t),
     );
   }
 }
