@@ -121,7 +121,7 @@ class ControlToggleButton extends StatefulWidget {
       theme.toggleSpeakerIconEnabled,
       theme.toggleSpeakerIconDisabled,
       isPhoneSpeakerSelected,
-      theme.getToggleSpeakerStyle(),
+      theme.toggleSpeakerStyle,
       onPressed,
     );
   }
@@ -136,7 +136,7 @@ class ControlToggleButton extends StatefulWidget {
       theme.toggleVideoIconEnabled,
       theme.toggleVideoIconDisabled,
       participant.isCameraEnabled,
-      theme.getToggleVideoStyle(),
+      theme.toggleVideoStyle,
       onPressed,
     );
   }
@@ -151,7 +151,7 @@ class ControlToggleButton extends StatefulWidget {
       theme.toggleMicIconEnabled,
       theme.toggleMicIconDisabled,
       participant.isMicrophoneEnabled,
-      theme.getToggleMicStyle(),
+      theme.toggleMicStyle,
       onPressed,
     );
   }
@@ -192,7 +192,7 @@ class ControlButton extends StatelessWidget {
       StreamControlsTheme theme, VoidCallback onPressed) {
     return ControlButton(
       theme.switchCameraIcon,
-      theme.getSwitchCameraStyle(),
+      theme.switchCameraStyle,
       onPressed,
     );
   }
@@ -202,7 +202,7 @@ class ControlButton extends StatelessWidget {
       StreamControlsTheme theme, VoidCallback onPressed) {
     return ControlButton(
       theme.handUpCameraIcon,
-      theme.getHangUpStyle(),
+      theme.hangUpStyle,
       onPressed,
     );
   }
