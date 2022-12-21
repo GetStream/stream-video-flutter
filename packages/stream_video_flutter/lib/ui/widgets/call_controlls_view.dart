@@ -36,7 +36,6 @@ class _CallControlsViewState extends State<CallControlsView> {
   CameraPosition position = CameraPosition.front;
 
   List<MediaDevice>? _audioOutputs;
-  List<MediaDevice>? _videoOutputs;
 
   StreamSubscription? _deviceChangeSubscription;
 
@@ -62,10 +61,12 @@ class _CallControlsViewState extends State<CallControlsView> {
   void _loadDevices(List<MediaDevice> devices) async {
     _audioOutputs =
         devices.where((device) => device.kind == 'audiooutput').toList();
-    _videoOutputs =
-        devices.where((device) => device.kind == 'videooutput').toList();
 
     setState(() {});
+  }
+
+  bool isPhoneSpeakerSelected() {
+    return Hardware.instance.selectedAudioOutput?.deviceId == deviceIdSpeaker;
   }
 
   /// Toggles speaker if another option is available. It should not be possible
@@ -99,10 +100,6 @@ class _CallControlsViewState extends State<CallControlsView> {
       enabled: !participant.isMicrophoneEnabled,
     );
     setState(() {});
-  }
-
-  bool isPhoneSpeakerSelected() {
-    return Hardware.instance.selectedAudioOutput?.deviceId == deviceIdSpeaker;
   }
 
   /// Switch between front and back camera. It should not be possible to call
@@ -145,77 +142,6 @@ class _CallControlsViewState extends State<CallControlsView> {
     participant.unpublishAllTracks();
   }
 
-  Widget toggleSpeakerButton() {
-    return ControlToggleButton(
-      getTheme().toggleSpeakerIconEnabled,
-      getTheme().toggleSpeakerIconDisabled,
-      isPhoneSpeakerSelected(),
-      getTheme().getToggleSpeakerStyle(),
-      _toggleSpeaker,
-    );
-  }
-
-  Widget toggleVideoButton() {
-    return ControlToggleButton(
-      getTheme().toggleVideoIconEnabled,
-      getTheme().toggleVideoIconDisabled,
-      participant.isCameraEnabled,
-      getTheme().getToggleVideoStyle(),
-      _toggleVideo,
-    );
-  }
-
-  Widget toggleMicButton() {
-    return ControlToggleButton(
-      getTheme().toggleMicIconEnabled,
-      getTheme().toggleMicIconDisabled,
-      participant.isMicrophoneEnabled,
-      getTheme().getToggleMicStyle(),
-      _toggleMic,
-    );
-  }
-
-  Widget switchCameraButton() {
-    return ControlButton(
-      getTheme().switchCameraIcon,
-      getTheme().getSwitchCameraStyle(),
-      _switchCamera,
-    );
-  }
-
-  Widget hangUpButton() {
-    return ControlButton(
-      getTheme().handUpCameraIcon,
-      getTheme().getHangUpStyle(),
-      _hangUp,
-    );
-  }
-
-  ///Gets all the buttons. The buttons may change accordingly with the platform
-  ///and resources available. Example: There's no swtich camera button for
-  ///a chrome user.
-  List<Widget> getButtons() {
-    var widgetList = <Widget>[];
-
-    bool isMobile = Theme.of(context).platform == TargetPlatform.iOS ||
-        Theme.of(context).platform == TargetPlatform.android;
-
-    if (isMobile) {
-      widgetList.add(toggleSpeakerButton());
-    }
-
-    widgetList.add(toggleVideoButton());
-    widgetList.add(toggleMicButton());
-
-    if (isMobile) {
-      widgetList.add(switchCameraButton());
-    }
-
-    widgetList.add(hangUpButton());
-
-    return widgetList;
-  }
-
   /// Buttons take all the space when in mobile, but in other platforms they
   /// take only a small space and don't expand without limit to avoid ungly
   /// UIs.
@@ -229,16 +155,23 @@ class _CallControlsViewState extends State<CallControlsView> {
 
   @override
   Widget build(BuildContext context) {
+    var theme = getTheme();
+
     return Material(
-      elevation: getTheme().elevation,
-      borderRadius: getTheme().borderRadius,
+      elevation: theme.elevation,
+      borderRadius: theme.borderRadius,
       child: Container(
-        padding: getTheme().padding,
-        decoration: BoxDecoration(borderRadius: getTheme().borderRadius),
-        child: Wrap(
-          alignment: getButtonsAlignment(),
-          spacing: getTheme().buttonsSpacing,
-          children: getButtons(),
+        padding: theme.padding,
+        decoration: BoxDecoration(borderRadius: theme.borderRadius),
+        child: ControlButtonWrapper(
+          theme: theme,
+          isPhoneSpeakerSelected: isPhoneSpeakerSelected(),
+          toggleSpeaker: _toggleSpeaker,
+          toggleVideo: _toggleVideo,
+          toggleMic: _toggleMic,
+          switchCamera: _switchCamera,
+          hangUp: _hangUp,
+          participant: participant,
         ),
       ),
     );

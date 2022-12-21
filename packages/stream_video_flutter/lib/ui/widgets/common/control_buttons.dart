@@ -1,4 +1,98 @@
 import 'package:flutter/material.dart';
+import 'package:stream_video_flutter/theme/stream_controls_theme.dart';
+import 'package:stream_video/stream_video.dart';
+
+///Container of all buttons of control for Call.
+///The buttons may change accordingly with the platform
+///and resources available. Example: There's no switch camera button for
+///a chrome user.
+class ControlButtonWrapper extends StatefulWidget {
+  const ControlButtonWrapper({
+    Key? key,
+    required this.theme,
+    required this.isPhoneSpeakerSelected,
+    required this.toggleSpeaker,
+    required this.toggleVideo,
+    required this.toggleMic,
+    required this.switchCamera,
+    required this.hangUp,
+    required this.participant,
+  }) : super(key: key);
+
+  final StreamControlsTheme theme;
+  final bool isPhoneSpeakerSelected;
+  final Participant participant;
+  final VoidCallback toggleSpeaker;
+  final VoidCallback toggleVideo;
+  final VoidCallback toggleMic;
+  final VoidCallback switchCamera;
+  final VoidCallback hangUp;
+
+  @override
+  State<ControlButtonWrapper> createState() => _ControlButtonWrapperState();
+}
+
+class _ControlButtonWrapperState extends State<ControlButtonWrapper> {
+  bool get isMobile =>
+      Theme.of(context).platform == TargetPlatform.iOS ||
+      Theme.of(context).platform == TargetPlatform.android;
+
+  WrapAlignment getButtonsAlignment() {
+    if (isMobile) {
+      return widget.theme.buttonsAlignmentMobile;
+    } else {
+      return widget.theme.buttonsAlignmentDesktop;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var widgetList = <Widget>[];
+
+    if (isMobile) {
+      widgetList.add(
+        ControlToggleButton.speaker(
+          widget.theme,
+          widget.isPhoneSpeakerSelected,
+          widget.toggleSpeaker,
+        ),
+      );
+    }
+
+    widgetList.add(
+      ControlToggleButton.video(
+        widget.theme,
+        widget.participant,
+        widget.toggleVideo,
+      ),
+    );
+
+    widgetList.add(
+      ControlToggleButton.microphone(
+        widget.theme,
+        widget.participant,
+        widget.toggleMic,
+      ),
+    );
+
+    if (isMobile) {
+      widgetList.add(
+        ControlButton.switchCamera(
+          widget.theme,
+          widget.switchCamera,
+        ),
+      );
+    }
+
+    widgetList.add(ControlButton.handUp(widget.theme, widget.hangUp));
+
+    return Wrap(
+      alignment: getButtonsAlignment(),
+      spacing: widget.theme.buttonsSpacing,
+      children: widgetList,
+    );
+  }
+}
 
 /// Common toggle button for CallControlsView.
 class ControlToggleButton extends StatefulWidget {
@@ -16,6 +110,51 @@ class ControlToggleButton extends StatefulWidget {
   final Icon disabledIcon;
   final VoidCallback onPressed;
   final ButtonStyle buttonStyle;
+
+  // Creates the button to toggle speakers.
+  factory ControlToggleButton.speaker(
+    StreamControlsTheme theme,
+    bool isPhoneSpeakerSelected,
+    VoidCallback onPressed,
+  ) {
+    return ControlToggleButton(
+      theme.toggleSpeakerIconEnabled,
+      theme.toggleSpeakerIconDisabled,
+      isPhoneSpeakerSelected,
+      theme.getToggleSpeakerStyle(),
+      onPressed,
+    );
+  }
+
+  // Creates the button to enable/disable video camera.
+  factory ControlToggleButton.video(
+    StreamControlsTheme theme,
+    Participant participant,
+    VoidCallback onPressed,
+  ) {
+    return ControlToggleButton(
+      theme.toggleVideoIconEnabled,
+      theme.toggleVideoIconDisabled,
+      participant.isCameraEnabled,
+      theme.getToggleVideoStyle(),
+      onPressed,
+    );
+  }
+
+  // Creates the button to enable/disable video microphone.
+  factory ControlToggleButton.microphone(
+    StreamControlsTheme theme,
+    Participant participant,
+    VoidCallback onPressed,
+  ) {
+    return ControlToggleButton(
+      theme.toggleMicIconEnabled,
+      theme.toggleMicIconDisabled,
+      participant.isMicrophoneEnabled,
+      theme.getToggleMicStyle(),
+      onPressed,
+    );
+  }
 
   @override
   State<ControlToggleButton> createState() => _ControlToggleButtonState();
@@ -47,6 +186,26 @@ class ControlButton extends StatelessWidget {
   final Icon icon;
   final VoidCallback onPressed;
   final ButtonStyle buttonStyle;
+
+  // Creates the button to switch camera.
+  factory ControlButton.switchCamera(
+      StreamControlsTheme theme, VoidCallback onPressed) {
+    return ControlButton(
+      theme.switchCameraIcon,
+      theme.getSwitchCameraStyle(),
+      onPressed,
+    );
+  }
+
+  // Creates the button to hang up the call.
+  factory ControlButton.handUp(
+      StreamControlsTheme theme, VoidCallback onPressed) {
+    return ControlButton(
+      theme.handUpCameraIcon,
+      theme.getHangUpStyle(),
+      onPressed,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
