@@ -103,7 +103,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// The color themes used in the widgets
   final StreamColorTheme colorTheme;
 
-  /// Theme for the user avatar widget
+  /// Theme for the user avatar widget.
   final StreamAvatarTheme avatarTheme;
 
   /// Creates a copy of [StreamVideoTheme] with specified attributes
