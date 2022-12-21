@@ -1,12 +1,11 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
-import 'package:dogfooding/main.dart';
 import 'package:dogfooding/src/call_screen.dart';
 import 'package:dogfooding/src/login_screen.dart';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
-
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -60,19 +59,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final name = currentUser.name;
-    final imageUrl = currentUser.imageUrl;
-
-    final avatar = imageUrl != null
-        ? CircleAvatar(
-            backgroundColor: Colors.white,
-            backgroundImage: NetworkImage(imageUrl))
-        : CircleAvatar(child: Text(name[0].toUpperCase()));
 
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: avatar,
+          child: StreamUserAvatar(user: currentUser),
         ),
         title: const Text('Stream Dog Fooding'),
         actions: [
