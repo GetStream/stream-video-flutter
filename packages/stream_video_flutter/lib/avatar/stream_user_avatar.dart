@@ -192,7 +192,7 @@ class _InitialsUserAvatar extends StatelessWidget {
   /// User whose avatar is to be displayed.
   final UserInfo user;
 
-  /// Theme for tha avatar.
+  /// Theme for the avatar.
   final StreamAvatarTheme avatarTheme;
 
   @override
