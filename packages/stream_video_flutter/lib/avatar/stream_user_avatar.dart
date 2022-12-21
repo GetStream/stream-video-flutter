@@ -162,7 +162,7 @@ class _ImageUserAvatar extends StatelessWidget {
   /// The image to be painted into the decoration.
   final ImageProvider imageProvider;
 
-  /// Theme for tha avatar
+  /// Theme for the avatar.
   final StreamAvatarTheme avatarTheme;
 
   @override
