@@ -38,7 +38,7 @@ class StreamAvatarTheme with Diagnosticable {
   /// Selection thickness around the avatar.
   final double selectionThickness;
 
-  copyWith({
+  StreamAvatarTheme copyWith({
     BoxConstraints? constraints,
     BorderRadius? borderRadius,
     TextStyle? initialsTextStyle,
