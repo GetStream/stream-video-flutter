@@ -18,7 +18,6 @@ import '../member_v1/member.pbjson.dart' as $2;
 import '../edge_v1/edge.pbjson.dart' as $4;
 import '../utils_v1/utils.pbjson.dart' as $5;
 import '../push_v1/push.pbjson.dart' as $6;
-import '../../../google/protobuf/any.pbjson.dart' as $12;
 import '../broadcast_v1/broadcast.pbjson.dart' as $11;
 import '../stat_v1/stat.pbjson.dart' as $8;
 
@@ -859,8 +858,6 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ClientRPCS
   '.stream.video.coordinator.client_v1_rpc.StartClosedCaptionResponse': StartClosedCaptionResponse$json,
   '.stream.video.coordinator.closed_caption_v1.ClosedCaption': $9.ClosedCaption$json,
   '.stream.video.coordinator.closed_caption_v1.Monologuewords': $9.Monologuewords$json,
-  '.stream.video.coordinator.closed_caption_v1.Speaker': $9.Speaker$json,
-  '.google.protobuf.Any': $12.Any$json,
   '.stream.video.coordinator.closed_caption_v1.Terms': $9.Terms$json,
   '.stream.video.coordinator.client_v1_rpc.StopClosedCaptionRequest': StopClosedCaptionRequest$json,
   '.stream.video.coordinator.client_v1_rpc.StopClosedCaptionResponse': StopClosedCaptionResponse$json,

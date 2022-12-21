@@ -28,6 +28,12 @@ class _CallScreenState extends State<CallScreen> {
   //   Navigator.of(context).pop();
   // }
 
+void _onClodedCaptions(){
+    StreamVideo.instance.closedCaptionsStream.listen((event) {
+      print(event);
+    });
+
+}
   void _onParticipantUpdate() {
     allParticipants = [
       ...widget.call.participants.values,
@@ -95,6 +101,7 @@ class _CallScreenState extends State<CallScreen> {
   void initState() {
     super.initState();
     _onParticipantUpdate();
+    _onClodedCaptions();
     widget.call.events
       ..listen((_) {
         _onParticipantUpdate();
@@ -138,6 +145,21 @@ class _CallScreenState extends State<CallScreen> {
     );
 
     return Scaffold(
+      //appbar with closed caption button
+      appBar: AppBar(
+        title: const Text('Dogfooding'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.closed_caption),
+            onPressed: () async {
+              print("show closed caption");
+              await StreamVideo.instance.startClosedCaptions(
+                  type: StreamVideo.instance.activeCall!.callType,
+                  id: StreamVideo.instance.activeCall!.callId);
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(child: grid),

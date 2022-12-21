@@ -148,7 +148,12 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
 
   var _state = _StreamVideoState();
 
-  Stream<List<ClosedCaptionEvent>?> get closedCaptionsStream => _state.closedCaptions.stream;
+  Stream<List<ClosedCaptionEvent>?> get closedCaptionsStream =>
+      _state.closedCaptions.stream;
+
+//not working as expected
+  Stream<List<ClosedCaptionEvent>?> get recentClosedCaptions =>
+      _state.closedCaptions.recentCaptions(3);
 
   UserInfo? get currentUser => _state.currentUser.valueOrNull;
 
@@ -208,6 +213,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     _ws!.events.on<CoordinatorCallCustomEvent>((callCustom) {
       final type = callCustom.callCustom.type;
       if (type == 'closed_caption') {
+        print("received closedCaptions");
         final closedCaptionJson =
             json.decode(utf8.decode(callCustom.callCustom.dataJson));
         final closedCaption = ClosedCaption.fromJson(closedCaptionJson);
@@ -216,6 +222,8 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
         //         _state.activeCall.value!.events
         // .emit(ClosedCaptionEvent(closedCaption: closedCaption));
         // events.emit(ClosedCaptionEvent(closedCaption: closedCaption));
+      } else {
+        print("received custom event");
       }
     });
   }
@@ -259,14 +267,14 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     return response.call;
   }
 
-  Future<StartClosedCaptionResponse> startClosedCaptions({
+  Future<void> startClosedCaptions({
     required String type,
     required String id,
   }) async {
-    final response = await _client.startClosedCaptions(
-        StartClosedCaptionRequest(callId: id, callType: type));
+    // final response = await _client.startClosedCaptions(
+    //     StartClosedCaptionRequest(callId: id, callType: type));
     _startListeningToClosedCaptionEvents();
-    return response;
+    // return response;
   }
 
   Future<CallEnvelope> getOrCreateCall({

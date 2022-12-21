@@ -1,20 +1,28 @@
 class ClosedCaption {
-  final String userId;
-  final int start;
-  final int end;
+  // final String userId;
+  final int startTime;
+  final int endTime;
   final String text;
   ClosedCaption({
-    required this.userId,
-    required this.start,
-    required this.end,
+    // required this.userId,
+    required this.startTime,
+    required this.endTime,
     required this.text,
   });
   factory ClosedCaption.fromJson(Map<String, dynamic> json) => ClosedCaption(
-      userId: json["user_id"],
-      start: json["start"],
-      end: json["end"],
+      // userId: json["user_id"],
+      startTime: json["start_time"],
+      endTime: json["end_time"],
       text: json["text"]);
 
-  Map<String, dynamic> toJson() =>
-      {"user_id": userId, "start": start, "end": end, "text": text};
+  Map<String, dynamic> toJson() => {
+        // "user_id": userId,
+        "start": startTime, "end": endTime, "text": text
+      };
+
+      //to string
+  @override
+  String toString() {
+    return 'ClosedCaption{startTime: $startTime, endTime: $endTime, text: $text}';
+  }
 }
