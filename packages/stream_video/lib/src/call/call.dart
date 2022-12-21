@@ -134,7 +134,9 @@ class Call with EventEmittable<CallEvent> {
     _dominantSpeaker = null;
 
     // dispose events
-    events.dispose();
+    if (events.mounted) {
+      events.dispose();
+    }
 
     await publisher?.dispose();
     publisher = null;

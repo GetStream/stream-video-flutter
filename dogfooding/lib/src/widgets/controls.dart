@@ -9,10 +9,12 @@ class ControlsWidget extends StatefulWidget {
     this.call,
     this.participant, {
     Key? key,
+    this.onHangUp,
   }) : super(key: key);
 
   final Call call;
   final LocalParticipant participant;
+  final VoidCallback? onHangUp;
 
   @override
   State<StatefulWidget> createState() => _ControlsWidgetState();
@@ -49,7 +51,9 @@ class _ControlsWidgetState extends State<ControlsWidget> {
 
   @override
   void dispose() {
-    participant.events.cancel(_onChange);
+    if (participant.events.mounted) {
+      participant.events.cancel(_onChange);
+    }
     _deviceChangeSubscription?.cancel();
     super.dispose();
   }
@@ -123,8 +127,11 @@ class _ControlsWidgetState extends State<ControlsWidget> {
   }
 
   void _onTapDisconnect() async {
-    final result = await context.showDisconnectDialog();
-    if (result == true) await widget.call.disconnect();
+    final disconnectionConfirmed = await context.showDisconnectDialog();
+    if (disconnectionConfirmed == true) {
+      await widget.call.disconnect();
+      widget.onHangUp?.call();
+    }
   }
 
   @override
