@@ -423,4 +423,109 @@ class StreamControlsTheme with Diagnosticable {
       buttonsSpacing: buttonsSpacing,
     );
   }
+
+  @override
+  int get hashCode =>
+      borderRadius.hashCode ^
+      bgColor.hashCode ^
+      elevation.hashCode ^
+      padding.hashCode ^
+      toggleSpeakerStyle.hashCode ^
+      toggleSpeakerIconEnabled.hashCode ^
+      toggleSpeakerIconDisabled.hashCode ^
+      toggleVideoStyle.hashCode ^
+      toggleVideoIconEnabled.hashCode ^
+      toggleVideoIconDisabled.hashCode ^
+      toggleMicStyle.hashCode ^
+      toggleMicIconEnabled.hashCode ^
+      toggleMicIconDisabled.hashCode ^
+      switchCameraStyle.hashCode ^
+      hangUpStyle.hashCode ^
+      handUpCameraIcon.hashCode ^
+      buttonsAlignmentDesktop.hashCode ^
+      buttonsAlignmentMobile.hashCode ^
+      buttonsSpacing.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StreamControlsTheme &&
+          borderRadius == other.borderRadius &&
+          bgColor == other.bgColor &&
+          elevation == other.elevation &&
+          padding == other.padding &&
+          toggleSpeakerStyle == other.toggleSpeakerStyle &&
+          toggleSpeakerIconEnabled == other.toggleSpeakerIconEnabled &&
+          toggleSpeakerIconDisabled == other.toggleSpeakerIconDisabled &&
+          toggleVideoStyle == other.toggleVideoStyle &&
+          toggleVideoIconEnabled == other.toggleVideoIconEnabled &&
+          toggleVideoIconDisabled == other.toggleVideoIconDisabled &&
+          toggleMicStyle == other.toggleMicStyle &&
+          toggleMicIconEnabled == other.toggleMicIconEnabled &&
+          toggleMicIconDisabled == other.toggleMicIconDisabled &&
+          switchCameraStyle == other.switchCameraStyle &&
+          hangUpStyle == other.hangUpStyle &&
+          handUpCameraIcon == other.handUpCameraIcon &&
+          buttonsAlignmentDesktop == other.buttonsAlignmentDesktop &&
+          buttonsAlignmentMobile == other.buttonsAlignmentMobile &&
+          buttonsSpacing == other.buttonsSpacing;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+
+    properties
+      ..add(DiagnosticsProperty("borderRadius", borderRadius))
+      ..add(DiagnosticsProperty("bgColor", bgColor))
+      ..add(DiagnosticsProperty("elevation", elevation))
+      ..add(DiagnosticsProperty("padding", padding))
+      ..add(DiagnosticsProperty("toggleSpeakerStyle", toggleSpeakerStyle))
+      ..add(
+        DiagnosticsProperty(
+          "toggleSpeakerIconEnabled",
+          toggleSpeakerIconEnabled,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          "toggleSpeakerIconDisabled",
+          toggleSpeakerIconDisabled,
+        ),
+      )
+      ..add(DiagnosticsProperty("toggleVideoStyle", toggleVideoStyle))
+      ..add(
+        DiagnosticsProperty(
+          "toggleVideoIconEnabled",
+          toggleVideoIconEnabled,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          "toggleVideoIconDisabled",
+          toggleVideoIconDisabled,
+        ),
+      )
+      ..add(DiagnosticsProperty("toggleMicStyle", toggleMicStyle))
+      ..add(DiagnosticsProperty("toggleMicIconEnabled", toggleMicIconEnabled))
+      ..add(DiagnosticsProperty("toggleMicIconEnabled", toggleMicIconEnabled))
+      ..add(DiagnosticsProperty("toggleMicIconDisabled", toggleMicIconDisabled))
+      ..add(DiagnosticsProperty("toggleMicIconDisabled", toggleMicIconDisabled))
+      ..add(DiagnosticsProperty("switchCameraStyle", switchCameraStyle))
+      ..add(DiagnosticsProperty("switchCameraIcon", switchCameraIcon))
+      ..add(DiagnosticsProperty("hangUpStyle", hangUpStyle))
+      ..add(DiagnosticsProperty("handUpCameraIcon", handUpCameraIcon))
+      ..add(
+        DiagnosticsProperty(
+          "buttonsAlignmentDesktop",
+          buttonsAlignmentDesktop,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          "buttonsAlignmentMobile",
+          buttonsAlignmentMobile,
+        ),
+      )
+      ..add(DiagnosticsProperty("buttonsSpacing", buttonsSpacing));
+  }
 }
