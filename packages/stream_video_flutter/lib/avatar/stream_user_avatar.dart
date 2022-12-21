@@ -205,7 +205,9 @@ class _InitialsUserAvatar extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-          color: avatarColor, borderRadius: avatarTheme.borderRadius),
+        color: avatarColor, 
+        borderRadius: avatarTheme.borderRadius,
+      ),
       child: Center(
         child: Text(
           initials,
