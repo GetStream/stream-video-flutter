@@ -73,7 +73,7 @@ class StreamUserAvatar extends StatelessWidget {
   /// Flag for if avatar is selected. Defaults to `false`.
   final bool selected;
 
-  /// Theme for tha avatar
+  /// Theme for the avatar.
   final StreamAvatarTheme? avatarTheme;
 
   /// {@macro onUserAvatarTap}
