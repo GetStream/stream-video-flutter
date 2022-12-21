@@ -20,9 +20,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         isDark ? const StreamTextTheme.dark() : const StreamTextTheme.light();
     colorTheme ??=
         isDark ? const StreamColorTheme.dark() : const StreamColorTheme.light();
-    controlsTheme ??= isDark
-        ? StreamControlsTheme.dark()
-        : StreamControlsTheme.light();
+    controlsTheme ??=
+        isDark ? StreamControlsTheme.dark() : StreamControlsTheme.light();
 
     final defaultTheme = StreamVideoTheme.fromColorAndTextTheme(
       colorTheme,
@@ -75,7 +74,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return StreamVideoTheme.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
-      controlsTheme: StreamControlsTheme.light(),
+      controlsTheme: StreamControlsTheme.fromColorAndTextTheme(
+        colorTheme,
+        textTheme,
+      ),
       avatarTheme: StreamAvatarTheme(
         borderRadius: BorderRadius.circular(20),
         constraints: const BoxConstraints.tightFor(

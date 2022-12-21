@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_video_flutter/theme/stream_color_theme.dart';
+import 'package:stream_video_flutter/theme/stream_text_theme.dart';
 
 class StreamControlsTheme with Diagnosticable {
   static const double _borderRadiusTop = 20.0;
@@ -10,7 +12,25 @@ class StreamControlsTheme with Diagnosticable {
   static const Color defaultIconColorEnabledLight = Colors.black;
   static const Color defaultIconColorEnabledDark = Colors.white;
 
+  static const defaultEnabledSpeakerIcon = Icons.volume_up;
+  static const defaultDisabledSpeakerIcon = Icons.volume_up_outlined;
+
+  static const defaultEnabledVideoIcon = Icons.video_camera_front;
+  static const defaultDisabledVideoIcon = Icons.video_camera_front_outlined;
+
+  static const defaultEnabledMicIcon = Icons.mic;
+  static const defaultDisabledMicIcon = Icons.mic_off;
+
+  static const defaultFlipCameraIcon = Icons.flip_camera_ios;
+
+  static const defaultPhoneIcon = Icons.phone;
+
+  static const defaultButtonsAlignmentDesktop = WrapAlignment.center;
+
+  static const defaultButtonsAlignmentMobile = WrapAlignment.spaceEvenly;
+
   final BorderRadius borderRadius;
+  final Color bgColor;
   final double elevation;
   final EdgeInsets padding;
 
@@ -36,6 +56,11 @@ class StreamControlsTheme with Diagnosticable {
   final WrapAlignment buttonsAlignmentMobile;
   final double buttonsSpacing;
 
+  static const BorderRadius defaultBorderRadius = BorderRadius.only(
+    topLeft: Radius.circular(_borderRadiusTop),
+    topRight: Radius.circular(_borderRadiusTop),
+  );
+
   static ButtonStyle defaultButtonStyle(Color backgroundColor) {
     return ElevatedButton.styleFrom(
       shape: const CircleBorder(),
@@ -56,50 +81,46 @@ class StreamControlsTheme with Diagnosticable {
 
   factory StreamControlsTheme.light([
     double elevation = defaultElevation,
-    BorderRadius borderRadius = const BorderRadius.only(
-      topLeft: Radius.circular(_borderRadiusTop),
-      topRight: Radius.circular(_borderRadiusTop),
-    ),
+    BorderRadius borderRadius = defaultBorderRadius,
+    Color bgColor = Colors.white,
     EdgeInsets padding = const EdgeInsets.all(defaultPadding),
     ButtonStyle? toggleSpeakerStyle,
     Icon toggleSpeakerIconEnabled = const Icon(
-      color: defaultIconColorEnabledLight,
-      Icons.volume_up,
-    ),
+        color: defaultIconColorEnabledLight, defaultEnabledSpeakerIcon),
     Icon toggleSpeakerIconDisabled = const Icon(
       color: Colors.grey,
-      Icons.volume_up_outlined,
+      defaultDisabledSpeakerIcon,
     ),
     ButtonStyle? toggleVideoStyle,
     Icon toggleVideoIconEnabled = const Icon(
       color: defaultIconColorEnabledLight,
-      Icons.video_camera_front,
+      defaultEnabledVideoIcon,
     ),
     Icon toggleVideoIconDisabled = const Icon(
       color: Colors.grey,
-      Icons.video_camera_front_outlined,
+      defaultDisabledVideoIcon,
     ),
     ButtonStyle? toggleMicStyle,
     Icon toggleMicIconEnabled = const Icon(
       color: defaultIconColorEnabledLight,
-      Icons.mic,
+      defaultEnabledMicIcon,
     ),
     Icon toggleMicIconDisabled = const Icon(
       color: Colors.grey,
-      Icons.mic_off,
+      defaultDisabledMicIcon,
     ),
     ButtonStyle? switchCameraStyle,
     Icon switchCameraIcon = const Icon(
       color: defaultIconColorEnabledLight,
-      Icons.flip_camera_ios,
+      defaultFlipCameraIcon,
     ),
     ButtonStyle? hangUpStyle,
     Icon handUpCameraIcon = const Icon(
       color: Color(0xfffcfcfc),
-      Icons.phone,
+      defaultPhoneIcon,
     ),
-    WrapAlignment buttonsAlignmentDesktop = WrapAlignment.center,
-    WrapAlignment buttonsAlignmentMobile = WrapAlignment.spaceEvenly,
+    WrapAlignment buttonsAlignmentDesktop = defaultButtonsAlignmentDesktop,
+    WrapAlignment buttonsAlignmentMobile = defaultButtonsAlignmentMobile,
     double buttonsSpacing = defaultButtonsSpacing,
   ]) {
     const Color buttonsBackground = Color(0xfffcfcfc);
@@ -107,6 +128,7 @@ class StreamControlsTheme with Diagnosticable {
     return StreamControlsTheme.raw(
       borderRadius: borderRadius,
       elevation: elevation,
+      bgColor: bgColor,
       padding: padding,
       toggleSpeakerStyle:
           toggleSpeakerStyle ?? defaultButtonStyle(buttonsBackground),
@@ -132,19 +154,15 @@ class StreamControlsTheme with Diagnosticable {
 
   factory StreamControlsTheme.dark([
     double elevation = defaultElevation,
-    BorderRadius borderRadius = const BorderRadius.only(
-      topLeft: Radius.circular(_borderRadiusTop),
-      topRight: Radius.circular(_borderRadiusTop),
-    ),
+    BorderRadius borderRadius = defaultBorderRadius,
+    Color bgColor = const Color(0xff101418),
     EdgeInsets padding = const EdgeInsets.all(defaultPadding),
     ButtonStyle? toggleSpeakerStyle,
     Icon toggleSpeakerIconEnabled = const Icon(
-      color: defaultIconColorEnabledDark,
-      Icons.volume_up,
-    ),
+        color: defaultIconColorEnabledDark, defaultEnabledSpeakerIcon),
     Icon toggleSpeakerIconDisabled = const Icon(
       color: Colors.grey,
-      Icons.volume_up_outlined,
+      defaultDisabledSpeakerIcon,
     ),
     ButtonStyle? toggleVideoStyle,
     Icon toggleVideoIconEnabled = const Icon(
@@ -183,6 +201,7 @@ class StreamControlsTheme with Diagnosticable {
     return StreamControlsTheme.raw(
       borderRadius: borderRadius,
       elevation: elevation,
+      bgColor: bgColor,
       padding: padding,
       toggleSpeakerStyle:
           toggleSpeakerStyle ?? defaultButtonStyle(buttonsBackground),
@@ -209,6 +228,7 @@ class StreamControlsTheme with Diagnosticable {
   StreamControlsTheme.raw({
     required this.borderRadius,
     required this.elevation,
+    required this.bgColor,
     required this.padding,
     required this.toggleSpeakerStyle,
     required this.toggleSpeakerIconEnabled,
@@ -228,9 +248,62 @@ class StreamControlsTheme with Diagnosticable {
     required this.buttonsSpacing,
   });
 
+  factory StreamControlsTheme.fromColorAndTextTheme(
+    StreamColorTheme colorTheme,
+    StreamTextTheme textTheme,
+  ) {
+    return StreamControlsTheme.raw(
+      borderRadius: defaultBorderRadius,
+      elevation: defaultElevation,
+      bgColor: colorTheme.barsBg,
+      padding: const EdgeInsets.all(defaultPadding),
+      toggleSpeakerStyle: defaultButtonStyle(colorTheme.appBg),
+      toggleSpeakerIconEnabled: Icon(
+        color: colorTheme.overlayDark,
+        defaultEnabledSpeakerIcon,
+      ),
+      toggleSpeakerIconDisabled: Icon(
+        color: colorTheme.disabled,
+        defaultDisabledSpeakerIcon,
+      ),
+      toggleVideoStyle: defaultButtonStyle(colorTheme.appBg),
+      toggleVideoIconEnabled: Icon(
+        color: colorTheme.overlayDark,
+        defaultEnabledVideoIcon,
+      ),
+      toggleVideoIconDisabled: Icon(
+        color: colorTheme.disabled,
+        defaultDisabledVideoIcon,
+      ),
+      toggleMicStyle: defaultButtonStyle(colorTheme.appBg),
+      toggleMicIconEnabled: Icon(
+        color: colorTheme.overlayDark,
+        defaultEnabledMicIcon,
+      ),
+      toggleMicIconDisabled: Icon(
+        color: colorTheme.disabled,
+        defaultDisabledMicIcon,
+      ),
+      switchCameraStyle: defaultButtonStyle(colorTheme.appBg),
+      switchCameraIcon: Icon(
+        color: colorTheme.overlayDark,
+        defaultFlipCameraIcon,
+      ),
+      hangUpStyle: defaultHangUpButtonStyle(),
+      handUpCameraIcon: Icon(
+        color: colorTheme.highlight,
+        defaultPhoneIcon,
+      ),
+      buttonsAlignmentDesktop: defaultButtonsAlignmentDesktop,
+      buttonsAlignmentMobile: defaultButtonsAlignmentMobile,
+      buttonsSpacing: defaultButtonsSpacing,
+    );
+  }
+
   StreamControlsTheme copyWith(
     BorderRadius? borderRadius,
     double? elevation,
+    Color? bgColor,
     EdgeInsets? padding,
     ButtonStyle? toggleSpeakerStyle,
     Icon? toggleSpeakerIconEnabled,
@@ -252,6 +325,7 @@ class StreamControlsTheme with Diagnosticable {
     return StreamControlsTheme.raw(
       borderRadius: borderRadius ?? this.borderRadius,
       elevation: elevation ?? this.elevation,
+      bgColor: bgColor ?? this.bgColor,
       padding: padding ?? this.padding,
       toggleSpeakerStyle: toggleSpeakerStyle ?? this.toggleSpeakerStyle,
       toggleSpeakerIconEnabled:
@@ -284,6 +358,7 @@ class StreamControlsTheme with Diagnosticable {
     return copyWith(
       controlsTheme.borderRadius,
       controlsTheme.elevation,
+      controlsTheme.bgColor,
       controlsTheme.padding,
       controlsTheme.toggleSpeakerStyle,
       controlsTheme.toggleSpeakerIconEnabled,

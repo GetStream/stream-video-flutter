@@ -160,6 +160,7 @@ class _CallControlsViewState extends State<CallControlsView> {
     return Material(
       elevation: theme.elevation,
       borderRadius: theme.borderRadius,
+      color: theme.bgColor,
       child: Container(
         padding: theme.padding,
         decoration: BoxDecoration(borderRadius: theme.borderRadius),
