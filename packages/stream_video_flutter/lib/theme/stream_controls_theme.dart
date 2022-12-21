@@ -1,15 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-const _borderRadiusTop = 20.0;
-const buttonPadding = 16.0;
-const defaultElevation = 10.0;
-const defaultPadding = 15.0;
-const defaultButtonsSpacing = 16.0;
-const Color defaultIconColorEnabledLight = Colors.black;
-const Color defaultIconColorEnabledDark = Colors.white;
 
 class StreamControlsTheme with Diagnosticable {
+  static const double _borderRadiusTop = 20.0;
+  static const double buttonPadding = 16.0;
+  static const double defaultElevation = 10.0;
+  static const double defaultPadding = 15.0;
+  static const double defaultButtonsSpacing = 16.0;
+  static const Color defaultIconColorEnabledLight = Colors.black;
+  static const Color defaultIconColorEnabledDark = Colors.white;
+
   final bool isLightTheme;
 
   final BorderRadius borderRadius;
