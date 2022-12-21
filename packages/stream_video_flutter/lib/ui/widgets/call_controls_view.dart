@@ -126,7 +126,7 @@ class _CallControlsViewState extends State<CallControlsView> {
 
   /// Confirms disconnection. If result is true, disconnects and navigates back.
   void _hangUp() async {
-    final result = await context.showDisconnectDialog();
+    final result = await showDisconnectDialog(context);
     if (result == true) {
       await widget.call.disconnect();
       Navigator.of(context).pop();
@@ -170,12 +170,10 @@ class _CallControlsViewState extends State<CallControlsView> {
       ),
     );
   }
-}
 
-extension on BuildContext {
-  Future<bool?> showDisconnectDialog() {
+  Future<bool?> showDisconnectDialog(BuildContext context) {
     return showDialog<bool>(
-      context: this,
+      context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Disconnect'),
         content: const Text('Are you sure to disconnect?'),
