@@ -133,7 +133,7 @@ class _CallScreenState extends State<CallScreen> {
           videoTrack: participant.videoTracks.firstOrNull?.track as VideoTrack?,
           isScreenShare: false,
         );
-        return ParticipantWidget.widgetFor(participantTrack);
+        return StreamCallParticipant(participantTrack);
       },
     );
 

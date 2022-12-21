@@ -5,6 +5,27 @@ import 'package:stream_video_flutter/participant/participant_info.dart';
 
 import 'no_video.dart';
 
+class StreamCallParticipant extends StatefulWidget {
+  final ParticipantTrack participantTrack;
+
+  const StreamCallParticipant(
+    this.participantTrack, {
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return StreamCallParticipantState();
+  }
+}
+
+class StreamCallParticipantState extends State<StreamCallParticipant> {
+  @override
+  Widget build(BuildContext context) {
+    return ParticipantWidget.widgetFor(widget.participantTrack);
+  }
+}
+
 abstract class ParticipantWidget extends StatefulWidget {
   // Convenience method to return relevant widget for participant
   static ParticipantWidget widgetFor(ParticipantTrack participantTrack) {
