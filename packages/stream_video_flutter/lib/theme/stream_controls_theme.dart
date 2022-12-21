@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/theme/stream_color_theme.dart';
 import 'package:stream_video_flutter/theme/stream_text_theme.dart';
 
+/// {@template controlsThemeData}
+/// A style that overrides the default appearance of call controls widget.
+/// {@endtemplate}
 class StreamControlsTheme with Diagnosticable {
   static const double _borderRadiusTop = 20.0;
   static const double buttonPadding = 16.0;
@@ -29,30 +32,60 @@ class StreamControlsTheme with Diagnosticable {
 
   static const defaultButtonsAlignmentMobile = WrapAlignment.spaceEvenly;
 
+  /// Style of borders of container bar.
   final BorderRadius borderRadius;
+
+  /// Color of the background of the bar/
   final Color bgColor;
+
+  /// Elevation effect of the bar. This changes the top shadow in the Widget.
   final double elevation;
+
+  ///Paging of the container Widget. You can use to increase/decrease the padding
+  ///of the bar and its inner buttons.
   final EdgeInsets padding;
 
+  /// The style of speaker toggle button.
   final ButtonStyle toggleSpeakerStyle;
+
+  /// Icon for the speaker toggle button.
   final Icon toggleSpeakerIconEnabled;
   final Icon toggleSpeakerIconDisabled;
 
+  /// The style of video toggle button.
   final ButtonStyle toggleVideoStyle;
+
+  /// Icon of video toggle button.
   final Icon toggleVideoIconEnabled;
+
+  /// Icon of video toggle button.
   final Icon toggleVideoIconDisabled;
 
+  /// The style of microphone toggle button.
   final ButtonStyle toggleMicStyle;
+
+  /// Icon of microphone toggle button.
   final Icon toggleMicIconEnabled;
+
+  /// Icon of microphone toggle button.
   final Icon toggleMicIconDisabled;
 
+  /// The style of camera switch button.
   final ButtonStyle switchCameraStyle;
+
+  /// Icon of camera switch button.
   final Icon switchCameraIcon;
 
+  /// The style of hand up button.
   final ButtonStyle hangUpStyle;
+
+  /// Icon of hand up button.
   final Icon handUpCameraIcon;
 
+  /// Alignment of buttons when is desktop mode. Default: center
   final WrapAlignment buttonsAlignmentDesktop;
+
+  /// Alignment of buttons when is mobile mode. Default: space evenly
   final WrapAlignment buttonsAlignmentMobile;
   final double buttonsSpacing;
 
@@ -79,6 +112,7 @@ class StreamControlsTheme with Diagnosticable {
     );
   }
 
+  /// Version of StreamControlsTheme with colors of light theme.
   factory StreamControlsTheme.light([
     double elevation = defaultElevation,
     BorderRadius borderRadius = defaultBorderRadius,
@@ -86,7 +120,9 @@ class StreamControlsTheme with Diagnosticable {
     EdgeInsets padding = const EdgeInsets.all(defaultPadding),
     ButtonStyle? toggleSpeakerStyle,
     Icon toggleSpeakerIconEnabled = const Icon(
-        color: defaultIconColorEnabledLight, defaultEnabledSpeakerIcon),
+      color: defaultIconColorEnabledLight,
+      defaultEnabledSpeakerIcon,
+    ),
     Icon toggleSpeakerIconDisabled = const Icon(
       color: Colors.grey,
       defaultDisabledSpeakerIcon,
@@ -152,6 +188,7 @@ class StreamControlsTheme with Diagnosticable {
     );
   }
 
+  /// Version of StreamControlsTheme with colors of dark theme.
   factory StreamControlsTheme.dark([
     double elevation = defaultElevation,
     BorderRadius borderRadius = defaultBorderRadius,
@@ -225,6 +262,7 @@ class StreamControlsTheme with Diagnosticable {
     );
   }
 
+  /// {@macro avatarThemeData}
   StreamControlsTheme.raw({
     required this.borderRadius,
     required this.elevation,
@@ -248,9 +286,9 @@ class StreamControlsTheme with Diagnosticable {
     required this.buttonsSpacing,
   });
 
-  factory StreamControlsTheme.fromColorAndTextTheme(
+  /// Constructor of StreamControlsTheme which pics colors from StreamColorTheme.
+  factory StreamControlsTheme.fromColorTheme(
     StreamColorTheme colorTheme,
-    StreamTextTheme textTheme,
   ) {
     return StreamControlsTheme.raw(
       borderRadius: defaultBorderRadius,

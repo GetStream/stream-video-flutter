@@ -53,7 +53,8 @@ class _CallControlsViewState extends State<CallControlsView> {
     Hardware.instance.enumerateDevices().then(_loadDevices);
   }
 
-  StreamControlsTheme getTheme() {
+  ///
+  StreamControlsTheme _getTheme() {
     final streamVideoTheme = StreamVideoTheme.of(context);
     return widget.theme ?? streamVideoTheme.controlsTheme;
   }
@@ -65,7 +66,8 @@ class _CallControlsViewState extends State<CallControlsView> {
     setState(() {});
   }
 
-  bool isPhoneSpeakerSelected() {
+  /// Returns if the the speaker being used is the internal one.
+  bool _isPhoneSpeakerSelected() {
     return Hardware.instance.selectedAudioOutput?.deviceId == deviceIdSpeaker;
   }
 
@@ -90,11 +92,13 @@ class _CallControlsViewState extends State<CallControlsView> {
     }
   }
 
+  ///Enables/Disables video
   void _toggleVideo() async {
     await participant.setCameraEnabled(enabled: !participant.isCameraEnabled);
     setState(() {});
   }
 
+  ///Enables/Disables microfone
   void _toggleMic() async {
     await participant.setMicrophoneEnabled(
       enabled: !participant.isMicrophoneEnabled,
@@ -129,8 +133,8 @@ class _CallControlsViewState extends State<CallControlsView> {
     }
   }
 
+  /// Triggers refresh
   void _onChange(_) {
-    // trigger refresh
     setState(() {});
   }
 
@@ -142,20 +146,9 @@ class _CallControlsViewState extends State<CallControlsView> {
     participant.unpublishAllTracks();
   }
 
-  /// Buttons take all the space when in mobile, but in other platforms they
-  /// take only a small space and don't expand without limit to avoid ungly
-  /// UIs.
-  WrapAlignment getButtonsAlignment() {
-    if (isMobile) {
-      return getTheme().buttonsAlignmentMobile;
-    } else {
-      return getTheme().buttonsAlignmentDesktop;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    var theme = getTheme();
+    var theme = _getTheme();
 
     return Material(
       elevation: theme.elevation,
@@ -166,7 +159,7 @@ class _CallControlsViewState extends State<CallControlsView> {
         decoration: BoxDecoration(borderRadius: theme.borderRadius),
         child: ControlButtonWrapper(
           theme: theme,
-          isPhoneSpeakerSelected: isPhoneSpeakerSelected(),
+          isPhoneSpeakerSelected: _isPhoneSpeakerSelected(),
           toggleSpeaker: _toggleSpeaker,
           toggleVideo: _toggleVideo,
           toggleMic: _toggleMic,

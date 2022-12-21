@@ -74,10 +74,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return StreamVideoTheme.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
-      controlsTheme: StreamControlsTheme.fromColorAndTextTheme(
-        colorTheme,
-        textTheme,
-      ),
+      controlsTheme: StreamControlsTheme.fromColorTheme(colorTheme),
       avatarTheme: StreamAvatarTheme(
         borderRadius: BorderRadius.circular(20),
         constraints: const BoxConstraints.tightFor(
