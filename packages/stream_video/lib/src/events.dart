@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:stream_video/src/models/closed_caption.dart';
 import 'package:stream_video/src/participant/local.dart';
 import 'package:stream_video/src/participant/participant.dart';
@@ -60,7 +61,7 @@ class ParticipantJoinedEvent with CallEvent {
   String toString() => '${runtimeType}(participant: ${participant})';
 }
 
-class ClosedCaptionEvent with CallEvent {
+class ClosedCaptionEvent with CallEvent, EquatableMixin {
   final ClosedCaption closedCaption;
 
   const ClosedCaptionEvent({
@@ -69,6 +70,9 @@ class ClosedCaptionEvent with CallEvent {
 
   @override
   String toString() => '${runtimeType}(closedCaption: ${closedCaption})';
+  
+  @override
+  List<Object?> get props => [closedCaption];
 }
 
 /// When a [RemoteParticipant] leaves the call.

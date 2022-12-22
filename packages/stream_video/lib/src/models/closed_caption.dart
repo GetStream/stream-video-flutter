@@ -1,4 +1,6 @@
-class ClosedCaption {
+import 'package:equatable/equatable.dart';
+
+class ClosedCaption with EquatableMixin {
   // final String userId;
   final int startTime;
   final int endTime;
@@ -25,4 +27,7 @@ class ClosedCaption {
   String toString() {
     return 'ClosedCaption{startTime: $startTime, endTime: $endTime, text: $text}';
   }
+  
+  @override
+  List<Object?> get props => [startTime, endTime, text];
 }
