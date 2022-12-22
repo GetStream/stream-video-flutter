@@ -147,13 +147,12 @@ class _CallScreenState extends State<CallScreen> {
               elevation: 4,
               // color: ,
               child: CallControlsView(
-                widget.call,
-                widget.call.localParticipant!,
-                  onHangUp: () {
-                    Navigator.of(context)
-                        .pushReplacementNamed(CallScreen.routeName);
-                  }
-              ),
+                  widget.call, widget.call.localParticipant!, onHangUp: () {
+                Navigator.of(context).pushReplacementNamed(
+                  CallScreen.routeName,
+                  arguments: widget.call,
+                );
+              }),
             ),
           ),
         ],
