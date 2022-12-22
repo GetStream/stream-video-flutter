@@ -5,6 +5,7 @@ import 'package:dogfooding/src/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/participant_info/call_participants_info.dart';
 
 class CallScreen extends StatefulWidget {
   const CallScreen({Key? key, required this.call}) : super(key: key);
@@ -136,26 +137,47 @@ class _CallScreenState extends State<CallScreen> {
         return ParticipantWidget.widgetFor(participantTrack);
       },
     );
-
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(child: grid),
-          SizedBox(
-            width: double.infinity,
-            child: Material(
-              elevation: 4,
-              // color: ,
-              child: ControlsWidget(
-                widget.call,
-                widget.call.localParticipant!,
-                onHangUp: () {
-                  Navigator.of(context)
-                      .pushReplacementNamed(HomeScreen.routeName);
-                },
+          Column(
+            children: [
+              Expanded(child: grid),
+              SizedBox(
+                width: double.infinity,
+                child: Material(
+                  elevation: 4,
+                  // color: ,
+                  child: ControlsWidget(
+                    widget.call,
+                    widget.call.localParticipant!,
+                    onHangUp: () {
+                      Navigator.of(context)
+                          .pushReplacementNamed(HomeScreen.routeName);
+                    },
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
+          SafeArea(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.group_rounded,
+                    color: Colors.black,
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => StreamCallParticipantsInfoWidget(
+                            call: widget.call)));
+                  },
+                ),
+              ],
+            ),
+          )
         ],
       ),
     );

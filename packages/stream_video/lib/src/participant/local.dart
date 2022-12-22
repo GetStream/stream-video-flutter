@@ -265,6 +265,14 @@ class LocalParticipant extends Participant<LocalTrackPublication> {
     );
   }
 
+  /// Shortcut for muting/unmuting a [TrackSource.microphone].
+  Future<LocalTrackPublication?> toggleMicrophone() {
+    return setTrackTypeEnabled(
+      trackType: sfu_models.TrackType.TRACK_TYPE_AUDIO,
+      enabled: !isMicrophoneEnabled,
+    );
+  }
+
   /// Shortcut for publishing a [TrackSource.screenShareVideo].
   Future<LocalTrackPublication?> setScreenShareEnabled({
     bool enabled = true,

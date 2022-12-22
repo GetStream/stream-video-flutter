@@ -26,6 +26,18 @@ class ParticipantInfo {
   final DateTime? joinedAt;
   final String trackLookupPrefix;
 
+  bool hasPublishedAudioTrack() {
+    return publishedTracks.contains(sfu.TrackType.TRACK_TYPE_AUDIO);
+  }
+
+  bool hasPublishedVideoTrack() {
+    return publishedTracks.contains(sfu.TrackType.TRACK_TYPE_VIDEO);
+  }
+
+  bool hasPublishedScreenShareTrack() {
+    return publishedTracks.contains(sfu.TrackType.TRACK_TYPE_SCREEN_SHARE);
+  }
+
   /// Returns a copy of this object with the given fields replaced with the new
   /// values.
   ParticipantInfo copyWith({
