@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/theme/stream_controls_theme.dart';
+import 'package:stream_video_flutter/theme/themes.dart';
 import 'package:stream_video/stream_video.dart';
 
 ///Container of all buttons of control for Call.
@@ -160,11 +160,11 @@ class _ControlToggleButtonState extends State<ControlToggleButton> {
 }
 
 class ControlButton extends StatelessWidget {
-  const ControlButton(
-    this.icon,
-    this.buttonStyle,
-    this.onPressed, {
+  const ControlButton({
     Key? key,
+    required this.icon,
+    required this.buttonStyle,
+    required this.onPressed,
   }) : super(key: key);
 
   final Icon icon;
@@ -177,9 +177,9 @@ class ControlButton extends StatelessWidget {
     required VoidCallback onPressed,
   }) {
     return ControlButton(
-      theme.switchCameraIcon,
-      theme.switchCameraStyle,
-      onPressed,
+      icon: theme.switchCameraIcon,
+      buttonStyle: theme.switchCameraStyle,
+      onPressed: onPressed,
     );
   }
 
@@ -189,9 +189,9 @@ class ControlButton extends StatelessWidget {
     required VoidCallback onPressed,
   }) {
     return ControlButton(
-      theme.handUpCameraIcon,
-      theme.hangUpStyle,
-      onPressed,
+      icon: theme.handUpCameraIcon,
+      buttonStyle: theme.hangUpStyle,
+      onPressed: onPressed,
     );
   }
 
