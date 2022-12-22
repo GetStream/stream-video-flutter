@@ -12,10 +12,10 @@ class StreamCallParticipant extends StatefulWidget {
     Key? key,
   }) : super(key: key);
 
-  /// The participant to render.
+  /// The participant to display.
   final Participant participant;
 
-  /// Theme for tha call participant.
+  /// Theme for the call participant.
   final StreamCallParticipantTheme? theme;
 
   @override
@@ -25,14 +25,14 @@ class StreamCallParticipant extends StatefulWidget {
 }
 
 class _StreamCallParticipantState extends State<StreamCallParticipant> {
-  /// The participant to render.
+  /// The participant to display.
   Participant get participant => widget.participant;
 
-  /// The video track to display.
+  /// The video track to render.
   VideoTrack? get videoTrack =>
       participant.videoTracks.firstOrNull?.track as VideoTrack?;
 
-  /// Theme for tha call participant.
+  /// Theme for the call participant.
   StreamCallParticipantTheme? get theme => widget.theme;
 
   @override
@@ -92,7 +92,6 @@ class _StreamCallParticipantState extends State<StreamCallParticipant> {
                     avatarTheme: theme.avatarTheme,
                   ),
                 ),
-          // Bottom bar
           Align(
             alignment: Alignment.bottomLeft,
             child: Column(

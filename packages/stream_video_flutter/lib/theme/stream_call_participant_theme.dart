@@ -2,11 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/theme/stream_avatar_theme.dart';
 
-/// {@template streamCallParticipantTheme}
 /// A style of a single participant on a call.
-/// {@endtemplate}
 class StreamCallParticipantTheme with Diagnosticable {
-  /// {@macro streamCallParticipantTheme}
+  /// Constructor for creating [StreamCallParticipantTheme].
   const StreamCallParticipantTheme({
     this.focusedColor = const Color(0xff005FFF),
     this.backgroundColor = const Color(0xFF272A30),
@@ -33,13 +31,13 @@ class StreamCallParticipantTheme with Diagnosticable {
     this.disabledMicrophoneColor = const Color(0xffFF3842),
   });
 
-  /// The color if in the focused state.
+  /// The color in the focused state.
   final Color focusedColor;
 
   /// The color of the background behind avatar.
   final Color backgroundColor;
 
-  /// Theme for avatar.
+  /// Theme for the avatar.
   final StreamAvatarTheme avatarTheme;
 
   /// The color of an active audio level.
