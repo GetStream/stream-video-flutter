@@ -1,6 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/theme/stream_color_theme.dart';
+import 'themes.dart';
 
 /// {@template controlsThemeData}
 /// A style that overrides the default appearance of call controls widget.
@@ -419,45 +421,45 @@ class StreamControlsTheme with Diagnosticable {
   StreamControlsTheme lerp(StreamControlsTheme other, double t) {
     return StreamControlsTheme.raw(
       borderRadius: BorderRadius.lerp(borderRadius, other.borderRadius, t)!,
-      elevation: elevation,
+      elevation: lerpDouble(elevation, other.elevation, t)!,
       bgColor: Color.lerp(bgColor, other.bgColor, t)!,
-      padding: padding,
+      padding: EdgeInsets.lerp(padding, other.padding, t)!,
       toggleSpeakerStyle: ButtonStyle.lerp(
         toggleSpeakerStyle,
         other.toggleSpeakerStyle,
         t,
       )!,
-      toggleSpeakerIconEnabled: toggleSpeakerIconEnabled,
-      toggleSpeakerIconDisabled: toggleSpeakerIconDisabled,
+      toggleSpeakerIconEnabled: other.toggleSpeakerIconEnabled,
+      toggleSpeakerIconDisabled: other.toggleSpeakerIconDisabled,
       toggleVideoStyle: ButtonStyle.lerp(
         toggleVideoStyle,
         other.toggleVideoStyle,
         t,
       )!,
-      toggleVideoIconEnabled: toggleVideoIconEnabled,
-      toggleVideoIconDisabled: toggleVideoIconDisabled,
+      toggleVideoIconEnabled: other.toggleVideoIconEnabled,
+      toggleVideoIconDisabled: other.toggleVideoIconDisabled,
       toggleMicStyle: ButtonStyle.lerp(
         toggleMicStyle,
         other.toggleMicStyle,
         t,
       )!,
-      toggleMicIconEnabled: toggleMicIconEnabled,
-      toggleMicIconDisabled: toggleMicIconDisabled,
+      toggleMicIconEnabled: other.toggleMicIconEnabled,
+      toggleMicIconDisabled: other.toggleMicIconDisabled,
       switchCameraStyle: ButtonStyle.lerp(
         switchCameraStyle,
         other.switchCameraStyle,
         t,
       )!,
-      switchCameraIcon: switchCameraIcon,
+      switchCameraIcon: other.switchCameraIcon,
       hangUpStyle: ButtonStyle.lerp(
         hangUpStyle,
         other.hangUpStyle,
         t,
       )!,
-      handUpCameraIcon: handUpCameraIcon,
-      buttonsAlignmentDesktop: buttonsAlignmentDesktop,
-      buttonsAlignmentMobile: buttonsAlignmentMobile,
-      buttonsSpacing: buttonsSpacing,
+      handUpCameraIcon: other.handUpCameraIcon,
+      buttonsAlignmentDesktop: other.buttonsAlignmentDesktop,
+      buttonsAlignmentMobile: other.buttonsAlignmentMobile,
+      buttonsSpacing: lerpDouble(buttonsSpacing, other.buttonsSpacing, t)!,
     );
   }
 
