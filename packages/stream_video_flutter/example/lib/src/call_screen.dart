@@ -1,4 +1,3 @@
-import 'package:example/src/widgets/controls.dart';
 import 'package:example/src/widgets/participant_widget.dart';
 import 'package:example/src/widgets/participant_info.dart';
 import 'package:flutter/material.dart';

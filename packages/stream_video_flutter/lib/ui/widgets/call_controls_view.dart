@@ -18,6 +18,10 @@ class CallControlsView extends StatefulWidget {
     required this.call,
     required this.participant,
     this.theme,
+    this.onToggleSpeaker,
+    this.onToggleVideo,
+    this.onToggleMic,
+    this.onSwitchCamera,
     required this.onHangUp,
   }) : super(key: key);
 
@@ -26,6 +30,10 @@ class CallControlsView extends StatefulWidget {
 
   final StreamControlsTheme? theme;
 
+  final VoidCallback? onToggleSpeaker;
+  final VoidCallback? onToggleVideo;
+  final VoidCallback? onToggleMic;
+  final VoidCallback? onSwitchCamera;
   final VoidCallback onHangUp;
 
   @override
@@ -151,10 +159,10 @@ class _CallControlsViewState extends State<CallControlsView> {
         child: ControlButtonWrapper(
           theme: theme,
           isPhoneSpeakerSelected: _isPhoneSpeakerSelected(),
-          toggleSpeaker: _toggleSpeaker,
-          toggleVideo: _toggleVideo,
-          toggleMic: _toggleMic,
-          switchCamera: _switchCamera,
+          toggleSpeaker: widget.onToggleSpeaker ?? _toggleSpeaker,
+          toggleVideo: widget.onToggleVideo ?? _toggleVideo,
+          toggleMic: widget.onToggleMic ?? _toggleMic,
+          switchCamera: widget.onSwitchCamera ?? _switchCamera,
           hangUp: widget.onHangUp,
           participant: participant,
         ),
