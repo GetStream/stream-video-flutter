@@ -17,3 +17,12 @@ extension StringExtension on String {
     return result;
   }
 }
+
+/// Useful extension for [List].
+extension ListAt<T extends Object> on List<T> {
+  /// Returns an element at the specified [index] or null.
+  T? at(int index) {
+    if (index < 0 || index >= length) return null;
+    return this[index];
+  }
+}

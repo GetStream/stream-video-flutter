@@ -1,3 +1,4 @@
+import 'package:dogfooding/src/participants_info_screen.dart';
 import 'package:dogfooding/src/widgets/controls.dart';
 import 'package:dogfooding/src/widgets/participant_widget.dart';
 import 'package:dogfooding/src/widgets/participant_info.dart';
@@ -5,7 +6,6 @@ import 'package:dogfooding/src/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/participant_info/call_participants_info.dart';
 
 class CallScreen extends StatefulWidget {
   const CallScreen({Key? key, required this.call}) : super(key: key);
@@ -171,7 +171,7 @@ class _CallScreenState extends State<CallScreen> {
                   ),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => StreamCallParticipantsInfoWidget(
+                        builder: (context) => StreamCallParticipantsInfoScreen(
                             call: widget.call)));
                   },
                 ),

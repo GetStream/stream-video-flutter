@@ -3,32 +3,28 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/participant_info/model/call_participant_state.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-class StreamCallParticipantInviteWidget extends StatelessWidget {
-  final UserInfo user;
-  final bool selected;
-  final Function() onTap;
+class StreamCallParticipantInfoView extends StatelessWidget {
+  final CallParticipantState participant;
 
-  const StreamCallParticipantInviteWidget(
-      {super.key,
-      required this.user,
-      required this.selected,
-      required this.onTap});
+  const StreamCallParticipantInfoView({
+    super.key,
+    required this.participant,
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        onTap.call();
-      },
+      onTap: () {},
       child: Container(
         padding: const EdgeInsets.all(16),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             StreamUserAvatar(
-              user: user,
+              user: participant.user,
               avatarTheme: const StreamAvatarTheme(
                   initialsTextStyle: TextStyle(
                     fontSize: 28,
@@ -45,23 +41,30 @@ class StreamCallParticipantInviteWidget extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
-                  user.name,
+                  participant.user.name,
                   style: const TextStyle(fontSize: 18),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
-            Visibility(
-              visible: selected,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.blue,
-                  size: 32,
-                ),
+            Container(
+              padding: const EdgeInsets.all(8),
+              child: Icon(
+                participant.videoAvailable
+                    ? Icons.videocam_rounded
+                    : Icons.videocam_off_rounded,
+                color: participant.videoAvailable ? Colors.black54 : Colors.red,
+                size: 32,
               ),
             ),
+            Container(
+              padding: const EdgeInsets.all(8),
+              child: Icon(
+                participant.audioAvailable ? Icons.mic : Icons.mic_off,
+                color: participant.audioAvailable ? Colors.black54 : Colors.red,
+                size: 32,
+              ),
+            )
           ],
         ),
       ),
