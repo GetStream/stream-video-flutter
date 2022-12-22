@@ -148,8 +148,8 @@ class _CallScreenState extends State<CallScreen> {
               elevation: 4,
               // color: ,
               child: CallControlsView(
-                widget.call,
-                widget.call.localParticipant!,
+                call: widget.call,
+                participant: widget.call.localParticipant!,
                 onHangUp: () {
                   Navigator.of(context)
                       .pushReplacementNamed(HomeScreen.routeName);

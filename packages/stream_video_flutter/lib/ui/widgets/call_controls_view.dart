@@ -13,12 +13,12 @@ const deviceIdEarpiece = "earpiece";
 /// logic to change audio input/output, video output, switch camera and hang up
 /// accordingly with the platform using this Widget.
 class CallControlsView extends StatefulWidget {
-  const CallControlsView(
-    this.call,
-    this.participant, {
+  const CallControlsView({
     Key? key,
+    required this.call,
+    required this.participant,
     this.theme,
-    this.onHangUp,
+    required this.onHangUp,
   }) : super(key: key);
 
   final Call call;
@@ -26,7 +26,7 @@ class CallControlsView extends StatefulWidget {
 
   final StreamControlsTheme? theme;
 
-  final VoidCallback? onHangUp;
+  final VoidCallback onHangUp;
 
   @override
   State<CallControlsView> createState() => _CallControlsViewState();
@@ -126,15 +126,6 @@ class _CallControlsViewState extends State<CallControlsView> {
     }
   }
 
-  /// Confirms disconnection. If result is true, disconnects and navigates back.
-  void _hangUp() async {
-    final result = await showDisconnectDialog(context);
-    if (result == true) {
-      await widget.call.disconnect();
-      Navigator.of(context).pop();
-    }
-  }
-
   /// Triggers refresh
   void _onChange(_) {
     setState(() {});
@@ -143,9 +134,7 @@ class _CallControlsViewState extends State<CallControlsView> {
   @override
   void dispose() {
     super.dispose();
-    participant.events.cancel(_onChange);
     _deviceChangeSubscription?.cancel();
-    participant.unpublishAllTracks();
   }
 
   @override
@@ -166,29 +155,9 @@ class _CallControlsViewState extends State<CallControlsView> {
           toggleVideo: _toggleVideo,
           toggleMic: _toggleMic,
           switchCamera: _switchCamera,
-          hangUp: widget.onHangUp ?? _hangUp,
+          hangUp: widget.onHangUp,
           participant: participant,
         ),
-      ),
-    );
-  }
-
-  Future<bool?> showDisconnectDialog(BuildContext context) {
-    return showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Disconnect'),
-        content: const Text('Are you sure to disconnect?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Disconnect'),
-          ),
-        ],
       ),
     );
   }
