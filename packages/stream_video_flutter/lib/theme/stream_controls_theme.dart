@@ -12,7 +12,7 @@ class StreamControlsTheme with Diagnosticable {
   static const double buttonPadding = 16.0;
   static const double defaultElevation = 10.0;
   static const double defaultPadding = 15.0;
-  static const double defaultButtonsSpacing = 16.0;
+  static const double defaultButtonsSpacing = 0;
   static const Color defaultIconColorEnabledLight = Colors.black;
   static const Color defaultIconColorEnabledDark = Colors.white;
 
@@ -113,158 +113,8 @@ class StreamControlsTheme with Diagnosticable {
     );
   }
 
-  /// Version of StreamControlsTheme with colors of light theme.
-  factory StreamControlsTheme.light([
-    double elevation = defaultElevation,
-    BorderRadius borderRadius = defaultBorderRadius,
-    Color bgColor = Colors.white,
-    EdgeInsets padding = const EdgeInsets.all(defaultPadding),
-    ButtonStyle? toggleSpeakerStyle,
-    Icon toggleSpeakerIconEnabled = const Icon(
-      color: defaultIconColorEnabledLight,
-      defaultEnabledSpeakerIcon,
-    ),
-    Icon toggleSpeakerIconDisabled = const Icon(
-      color: Colors.grey,
-      defaultDisabledSpeakerIcon,
-    ),
-    ButtonStyle? toggleVideoStyle,
-    Icon toggleVideoIconEnabled = const Icon(
-      color: defaultIconColorEnabledLight,
-      defaultEnabledVideoIcon,
-    ),
-    Icon toggleVideoIconDisabled = const Icon(
-      color: Colors.grey,
-      defaultDisabledVideoIcon,
-    ),
-    ButtonStyle? toggleMicStyle,
-    Icon toggleMicIconEnabled = const Icon(
-      color: defaultIconColorEnabledLight,
-      defaultEnabledMicIcon,
-    ),
-    Icon toggleMicIconDisabled = const Icon(
-      color: Colors.grey,
-      defaultDisabledMicIcon,
-    ),
-    ButtonStyle? switchCameraStyle,
-    Icon switchCameraIcon = const Icon(
-      color: defaultIconColorEnabledLight,
-      defaultFlipCameraIcon,
-    ),
-    ButtonStyle? hangUpStyle,
-    Icon handUpCameraIcon = const Icon(
-      color: Color(0xfffcfcfc),
-      defaultPhoneIcon,
-    ),
-    WrapAlignment buttonsAlignmentDesktop = defaultButtonsAlignmentDesktop,
-    WrapAlignment buttonsAlignmentMobile = defaultButtonsAlignmentMobile,
-    double buttonsSpacing = defaultButtonsSpacing,
-  ]) {
-    const Color buttonsBackground = Color(0xfffcfcfc);
-
-    return StreamControlsTheme.raw(
-      borderRadius: borderRadius,
-      elevation: elevation,
-      bgColor: bgColor,
-      padding: padding,
-      toggleSpeakerStyle:
-          toggleSpeakerStyle ?? defaultButtonStyle(buttonsBackground),
-      toggleSpeakerIconEnabled: toggleSpeakerIconEnabled,
-      toggleSpeakerIconDisabled: toggleSpeakerIconDisabled,
-      toggleVideoStyle:
-          toggleVideoStyle ?? defaultButtonStyle(buttonsBackground),
-      toggleVideoIconEnabled: toggleVideoIconEnabled,
-      toggleVideoIconDisabled: toggleVideoIconDisabled,
-      toggleMicStyle: toggleMicStyle ?? defaultButtonStyle(buttonsBackground),
-      toggleMicIconEnabled: toggleMicIconEnabled,
-      toggleMicIconDisabled: toggleMicIconDisabled,
-      switchCameraStyle:
-          switchCameraStyle ?? defaultButtonStyle(buttonsBackground),
-      switchCameraIcon: switchCameraIcon,
-      hangUpStyle: hangUpStyle ?? defaultHangUpButtonStyle(),
-      handUpCameraIcon: handUpCameraIcon,
-      buttonsAlignmentDesktop: buttonsAlignmentDesktop,
-      buttonsAlignmentMobile: buttonsAlignmentMobile,
-      buttonsSpacing: buttonsSpacing,
-    );
-  }
-
-  /// Version of StreamControlsTheme with colors of dark theme.
-  factory StreamControlsTheme.dark([
-    double elevation = defaultElevation,
-    BorderRadius borderRadius = defaultBorderRadius,
-    Color bgColor = const Color(0xff101418),
-    EdgeInsets padding = const EdgeInsets.all(defaultPadding),
-    ButtonStyle? toggleSpeakerStyle,
-    Icon toggleSpeakerIconEnabled = const Icon(
-        color: defaultIconColorEnabledDark, defaultEnabledSpeakerIcon),
-    Icon toggleSpeakerIconDisabled = const Icon(
-      color: Colors.grey,
-      defaultDisabledSpeakerIcon,
-    ),
-    ButtonStyle? toggleVideoStyle,
-    Icon toggleVideoIconEnabled = const Icon(
-      color: defaultIconColorEnabledDark,
-      Icons.video_camera_front,
-    ),
-    Icon toggleVideoIconDisabled = const Icon(
-      color: Colors.grey,
-      Icons.video_camera_front_outlined,
-    ),
-    ButtonStyle? toggleMicStyle,
-    Icon toggleMicIconEnabled = const Icon(
-      color: defaultIconColorEnabledDark,
-      Icons.mic,
-    ),
-    Icon toggleMicIconDisabled = const Icon(
-      color: Colors.grey,
-      Icons.mic_off,
-    ),
-    ButtonStyle? switchCameraStyle,
-    Icon switchCameraIcon = const Icon(
-      color: defaultIconColorEnabledDark,
-      Icons.flip_camera_ios,
-    ),
-    ButtonStyle? hangUpStyle,
-    Icon handUpCameraIcon = const Icon(
-      color: Color(0xfffcfcfc),
-      Icons.phone,
-    ),
-    WrapAlignment buttonsAlignmentDesktop = WrapAlignment.spaceEvenly,
-    WrapAlignment buttonsAlignmentMobile = WrapAlignment.center,
-    double buttonsSpacing = defaultButtonsSpacing,
-  ]) {
-    const Color buttonsBackground = Color(0xff070A0D);
-
-    return StreamControlsTheme.raw(
-      borderRadius: borderRadius,
-      elevation: elevation,
-      bgColor: bgColor,
-      padding: padding,
-      toggleSpeakerStyle:
-          toggleSpeakerStyle ?? defaultButtonStyle(buttonsBackground),
-      toggleSpeakerIconEnabled: toggleSpeakerIconEnabled,
-      toggleSpeakerIconDisabled: toggleSpeakerIconDisabled,
-      toggleVideoStyle:
-          toggleVideoStyle ?? defaultButtonStyle(buttonsBackground),
-      toggleVideoIconEnabled: toggleVideoIconEnabled,
-      toggleVideoIconDisabled: toggleVideoIconDisabled,
-      toggleMicStyle: toggleMicStyle ?? defaultButtonStyle(buttonsBackground),
-      toggleMicIconEnabled: toggleMicIconEnabled,
-      toggleMicIconDisabled: toggleMicIconDisabled,
-      switchCameraStyle:
-          switchCameraStyle ?? defaultButtonStyle(buttonsBackground),
-      switchCameraIcon: switchCameraIcon,
-      hangUpStyle: hangUpStyle ?? defaultHangUpButtonStyle(),
-      handUpCameraIcon: handUpCameraIcon,
-      buttonsAlignmentDesktop: buttonsAlignmentDesktop,
-      buttonsAlignmentMobile: buttonsAlignmentMobile,
-      buttonsSpacing: buttonsSpacing,
-    );
-  }
-
   /// {@macro avatarThemeData}
-  StreamControlsTheme.raw({
+  const StreamControlsTheme.raw({
     required this.borderRadius,
     required this.elevation,
     required this.bgColor,
@@ -288,9 +138,7 @@ class StreamControlsTheme with Diagnosticable {
   });
 
   /// Constructor of StreamControlsTheme which pics colors from StreamColorTheme.
-  factory StreamControlsTheme.fromColorTheme(
-    StreamColorTheme colorTheme,
-  ) {
+  factory StreamControlsTheme.fromColorTheme(StreamColorTheme colorTheme) {
     return StreamControlsTheme.raw(
       borderRadius: defaultBorderRadius,
       elevation: defaultElevation,

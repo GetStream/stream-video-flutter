@@ -18,8 +18,6 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         isDark ? const StreamTextTheme.dark() : const StreamTextTheme.light();
     colorTheme ??=
         isDark ? const StreamColorTheme.dark() : const StreamColorTheme.light();
-    controlsTheme ??=
-        isDark ? StreamControlsTheme.dark() : StreamControlsTheme.light();
 
     final defaultTheme = StreamVideoTheme.fromColorAndTextTheme(
       colorTheme,
