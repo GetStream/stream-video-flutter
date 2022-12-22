@@ -81,7 +81,7 @@ class StreamControlsTheme with Diagnosticable {
   final ButtonStyle hangUpStyle;
 
   /// Icon of hand up button.
-  final Icon handUpCameraIcon;
+  final Icon handUpIcon;
 
   /// Alignment of buttons when is desktop mode. Default: center
   final WrapAlignment buttonsAlignmentDesktop;
@@ -131,7 +131,7 @@ class StreamControlsTheme with Diagnosticable {
     required this.switchCameraStyle,
     required this.switchCameraIcon,
     required this.hangUpStyle,
-    required this.handUpCameraIcon,
+    required this.handUpIcon,
     required this.buttonsAlignmentDesktop,
     required this.buttonsAlignmentMobile,
     required this.buttonsSpacing,
@@ -177,7 +177,7 @@ class StreamControlsTheme with Diagnosticable {
         defaultFlipCameraIcon,
       ),
       hangUpStyle: defaultHangUpButtonStyle(),
-      handUpCameraIcon: Icon(
+      handUpIcon: Icon(
         color: colorTheme.highlight,
         defaultPhoneIcon,
       ),
@@ -231,7 +231,7 @@ class StreamControlsTheme with Diagnosticable {
       switchCameraStyle: switchCameraStyle ?? this.switchCameraStyle,
       switchCameraIcon: switchCameraIcon ?? this.switchCameraIcon,
       hangUpStyle: hangUpStyle ?? this.hangUpStyle,
-      handUpCameraIcon: handUpCameraIcon ?? this.handUpCameraIcon,
+      handUpIcon: handUpCameraIcon ?? this.handUpIcon,
       buttonsAlignmentDesktop:
           buttonsAlignmentDesktop ?? this.buttonsAlignmentDesktop,
       buttonsAlignmentMobile:
@@ -259,7 +259,7 @@ class StreamControlsTheme with Diagnosticable {
       controlsTheme.switchCameraStyle,
       controlsTheme.switchCameraIcon,
       controlsTheme.hangUpStyle,
-      controlsTheme.handUpCameraIcon,
+      controlsTheme.handUpIcon,
       controlsTheme.buttonsAlignmentDesktop,
       controlsTheme.buttonsAlignmentMobile,
       controlsTheme.buttonsSpacing,
@@ -304,7 +304,7 @@ class StreamControlsTheme with Diagnosticable {
         other.hangUpStyle,
         t,
       )!,
-      handUpCameraIcon: other.handUpCameraIcon,
+      handUpIcon: other.handUpIcon,
       buttonsAlignmentDesktop: other.buttonsAlignmentDesktop,
       buttonsAlignmentMobile: other.buttonsAlignmentMobile,
       buttonsSpacing: lerpDouble(buttonsSpacing, other.buttonsSpacing, t)!,
@@ -328,7 +328,7 @@ class StreamControlsTheme with Diagnosticable {
       toggleMicIconDisabled.hashCode ^
       switchCameraStyle.hashCode ^
       hangUpStyle.hashCode ^
-      handUpCameraIcon.hashCode ^
+      handUpIcon.hashCode ^
       buttonsAlignmentDesktop.hashCode ^
       buttonsAlignmentMobile.hashCode ^
       buttonsSpacing.hashCode;
@@ -352,7 +352,7 @@ class StreamControlsTheme with Diagnosticable {
           toggleMicIconDisabled == other.toggleMicIconDisabled &&
           switchCameraStyle == other.switchCameraStyle &&
           hangUpStyle == other.hangUpStyle &&
-          handUpCameraIcon == other.handUpCameraIcon &&
+          handUpIcon == other.handUpIcon &&
           buttonsAlignmentDesktop == other.buttonsAlignmentDesktop &&
           buttonsAlignmentMobile == other.buttonsAlignmentMobile &&
           buttonsSpacing == other.buttonsSpacing;
@@ -400,7 +400,7 @@ class StreamControlsTheme with Diagnosticable {
       ..add(DiagnosticsProperty("switchCameraStyle", switchCameraStyle))
       ..add(DiagnosticsProperty("switchCameraIcon", switchCameraIcon))
       ..add(DiagnosticsProperty("hangUpStyle", hangUpStyle))
-      ..add(DiagnosticsProperty("handUpCameraIcon", handUpCameraIcon))
+      ..add(DiagnosticsProperty("handUpIcon", handUpIcon))
       ..add(
         DiagnosticsProperty(
           "buttonsAlignmentDesktop",

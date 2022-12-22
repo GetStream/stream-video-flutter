@@ -17,11 +17,64 @@ class ControlButtonWrapper extends StatefulWidget {
     required this.switchCamera,
     required this.hangUp,
     required this.participant,
+    this.buttonsAlignmentMobile,
+    this.buttonsAlignmentDesktop,
+    this.buttonsSpacing,
+    this.toggleSpeakerIconEnabled,
+    this.toggleSpeakerIconDisabled,
+    this.toggleVideoStyle,
+    this.toggleVideoIconEnabled,
+    this.toggleVideoIconDisabled,
+    this.toggleMicStyle,
+    this.toggleMicIconEnabled,
+    this.toggleMicIconDisabled,
+    this.switchCameraStyle,
+    this.switchCameraIcon,
+    this.hangUpStyle,
+    this.handUpIcon,
   }) : super(key: key);
 
   final StreamControlsTheme theme;
   final bool isPhoneSpeakerSelected;
   final Participant participant;
+
+  /// Icon for the speaker toggle button.
+  final Icon? toggleSpeakerIconEnabled;
+  final Icon? toggleSpeakerIconDisabled;
+
+  /// The style of video toggle button.
+  final ButtonStyle? toggleVideoStyle;
+
+  /// Icon of video toggle button.
+  final Icon? toggleVideoIconEnabled;
+
+  /// Icon of video toggle button.
+  final Icon? toggleVideoIconDisabled;
+
+  /// The style of microphone toggle button.
+  final ButtonStyle? toggleMicStyle;
+
+  /// Icon of microphone toggle button.
+  final Icon? toggleMicIconEnabled;
+
+  /// Icon of microphone toggle button.
+  final Icon? toggleMicIconDisabled;
+
+  /// The style of camera switch button.
+  final ButtonStyle? switchCameraStyle;
+
+  /// Icon of camera switch button.
+  final Icon? switchCameraIcon;
+
+  /// The style of hand up button.
+  final ButtonStyle? hangUpStyle;
+
+  /// Icon of hand up button.
+  final Icon? handUpIcon;
+
+  final WrapAlignment? buttonsAlignmentMobile;
+  final WrapAlignment? buttonsAlignmentDesktop;
+  final double? buttonsSpacing;
   final VoidCallback toggleSpeaker;
   final VoidCallback toggleVideo;
   final VoidCallback toggleMic;
@@ -33,15 +86,17 @@ class ControlButtonWrapper extends StatefulWidget {
 }
 
 class _ControlButtonWrapperState extends State<ControlButtonWrapper> {
+  StreamControlsTheme get theme => widget.theme;
+
   bool get isMobile =>
       Theme.of(context).platform == TargetPlatform.iOS ||
       Theme.of(context).platform == TargetPlatform.android;
 
   WrapAlignment getButtonsAlignment() {
     if (isMobile) {
-      return widget.theme.buttonsAlignmentMobile;
+      return widget.buttonsAlignmentMobile ?? theme.buttonsAlignmentMobile;
     } else {
-      return widget.theme.buttonsAlignmentDesktop;
+      return widget.buttonsAlignmentMobile ?? theme.buttonsAlignmentDesktop;
     }
   }
 
@@ -49,30 +104,34 @@ class _ControlButtonWrapperState extends State<ControlButtonWrapper> {
   Widget build(BuildContext context) {
     return Wrap(
       alignment: getButtonsAlignment(),
-      spacing: widget.theme.buttonsSpacing,
+      spacing: widget.buttonsSpacing ?? theme.buttonsSpacing,
       children: [
         if (isMobile)
           ControlToggleButton.speaker(
-            theme: widget.theme,
+            theme: theme,
             isPhoneSpeakerSelected: widget.isPhoneSpeakerSelected,
             onPressed: widget.toggleSpeaker,
           ),
         ControlToggleButton.video(
-          theme: widget.theme,
+          theme: theme,
           participant: widget.participant,
           onPressed: widget.toggleVideo,
         ),
         ControlToggleButton.microphone(
-          theme: widget.theme,
+          theme: theme,
           participant: widget.participant,
           onPressed: widget.toggleMic,
         ),
         if (isMobile)
           ControlButton.switchCamera(
-            theme: widget.theme,
+            theme: theme,
             onPressed: widget.switchCamera,
           ),
-        ControlButton.handUp(theme: widget.theme, onPressed: widget.hangUp)
+        ControlButton.handUp(
+          theme: theme,
+          icon: widget.handUpIcon,
+          onPressed: widget.hangUp,
+        )
       ],
     );
   }
@@ -99,13 +158,16 @@ class ControlToggleButton extends StatefulWidget {
   factory ControlToggleButton.speaker({
     required StreamControlsTheme theme,
     required bool isPhoneSpeakerSelected,
+    Icon? iconEnabled,
+    Icon? iconDisabled,
+    ButtonStyle? buttonStyle,
     required VoidCallback onPressed,
   }) {
     return ControlToggleButton(
-      theme.toggleSpeakerIconEnabled,
-      theme.toggleSpeakerIconDisabled,
+      iconEnabled ?? theme.toggleSpeakerIconEnabled,
+      iconDisabled ?? theme.toggleSpeakerIconDisabled,
       isPhoneSpeakerSelected,
-      theme.toggleSpeakerStyle,
+      buttonStyle ?? theme.toggleSpeakerStyle,
       onPressed,
     );
   }
@@ -114,13 +176,16 @@ class ControlToggleButton extends StatefulWidget {
   factory ControlToggleButton.video({
     required StreamControlsTheme theme,
     required Participant participant,
+    Icon? iconEnabled,
+    Icon? iconDisabled,
+    ButtonStyle? buttonStyle,
     required VoidCallback onPressed,
   }) {
     return ControlToggleButton(
-      theme.toggleVideoIconEnabled,
-      theme.toggleVideoIconDisabled,
+      iconEnabled ?? theme.toggleVideoIconEnabled,
+      iconDisabled ?? theme.toggleVideoIconDisabled,
       participant.isCameraEnabled,
-      theme.toggleVideoStyle,
+      buttonStyle ?? theme.toggleVideoStyle,
       onPressed,
     );
   }
@@ -129,13 +194,16 @@ class ControlToggleButton extends StatefulWidget {
   factory ControlToggleButton.microphone({
     required StreamControlsTheme theme,
     required Participant participant,
+    Icon? iconEnabled,
+    Icon? iconDisabled,
+    ButtonStyle? buttonStyle,
     required VoidCallback onPressed,
   }) {
     return ControlToggleButton(
-      theme.toggleMicIconEnabled,
-      theme.toggleMicIconDisabled,
+      iconEnabled ?? theme.toggleMicIconEnabled,
+      iconDisabled ?? theme.toggleMicIconDisabled,
       participant.isMicrophoneEnabled,
-      theme.toggleMicStyle,
+      buttonStyle ?? theme.toggleMicStyle,
       onPressed,
     );
   }
@@ -174,11 +242,13 @@ class ControlButton extends StatelessWidget {
   // Creates the button to switch camera.
   factory ControlButton.switchCamera({
     required StreamControlsTheme theme,
+    Icon? icon,
+    ButtonStyle? buttonStyle,
     required VoidCallback onPressed,
   }) {
     return ControlButton(
-      icon: theme.switchCameraIcon,
-      buttonStyle: theme.switchCameraStyle,
+      icon: icon ?? theme.switchCameraIcon,
+      buttonStyle: buttonStyle ?? theme.switchCameraStyle,
       onPressed: onPressed,
     );
   }
@@ -186,11 +256,13 @@ class ControlButton extends StatelessWidget {
   // Creates the button to hang up the call.
   factory ControlButton.handUp({
     required StreamControlsTheme theme,
+    Icon? icon,
+    ButtonStyle? buttonStyle,
     required VoidCallback onPressed,
   }) {
     return ControlButton(
-      icon: theme.handUpCameraIcon,
-      buttonStyle: theme.hangUpStyle,
+      icon: icon ?? theme.handUpIcon,
+      buttonStyle: buttonStyle ?? theme.hangUpStyle,
       onPressed: onPressed,
     );
   }
