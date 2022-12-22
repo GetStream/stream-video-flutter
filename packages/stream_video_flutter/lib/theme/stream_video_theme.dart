@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart' hide TextTheme;
-import 'package:stream_video_flutter/theme/stream_controls_theme.dart';
-
 import 'themes.dart';
 
 /// {@template streamVideoThemeData}

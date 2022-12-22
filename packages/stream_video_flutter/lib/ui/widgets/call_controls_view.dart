@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/theme/stream_controls_theme.dart';
-import 'package:stream_video_flutter/theme/stream_video_theme.dart';
+import 'package:stream_video_flutter/theme/themes.dart';
 import 'package:stream_video_flutter/ui/widgets/common/control_buttons.dart';
 
 const deviceIdSpeaker = "speaker";
