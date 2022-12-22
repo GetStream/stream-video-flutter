@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/theme/stream_color_theme.dart';
-import 'package:stream_video_flutter/theme/stream_text_theme.dart';
 
 /// {@template controlsThemeData}
 /// A style that overrides the default appearance of call controls widget.
