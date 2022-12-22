@@ -13,17 +13,20 @@ const deviceIdEarpiece = "earpiece";
 /// logic to change audio input/output, video output, switch camera and hang up
 /// accordingly with the platform using this Widget.
 class CallControlsView extends StatefulWidget {
-  const CallControlsView({
+  const CallControlsView(
+    this.call,
+    this.participant, {
     Key? key,
-    required this.call,
-    required this.participant,
     this.theme,
+    this.onHangUp,
   }) : super(key: key);
 
   final Call call;
   final LocalParticipant participant;
 
   final StreamControlsTheme? theme;
+
+  final VoidCallback? onHangUp;
 
   @override
   State<CallControlsView> createState() => _CallControlsViewState();
@@ -163,7 +166,7 @@ class _CallControlsViewState extends State<CallControlsView> {
           toggleVideo: _toggleVideo,
           toggleMic: _toggleMic,
           switchCamera: _switchCamera,
-          hangUp: _hangUp,
+          hangUp: widget.onHangUp ?? _hangUp,
           participant: participant,
         ),
       ),

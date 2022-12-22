@@ -7,7 +7,6 @@ import 'package:collection/collection.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_flutter/ui/widgets/call_controls_view.dart';
 
-
 class CallScreen extends StatefulWidget {
   const CallScreen({Key? key, required this.call}) : super(key: key);
 
@@ -149,8 +148,12 @@ class _CallScreenState extends State<CallScreen> {
               elevation: 4,
               // color: ,
               child: CallControlsView(
-                call: widget.call,
-                participant: widget.call.localParticipant!,
+                widget.call,
+                widget.call.localParticipant!,
+                onHangUp: () {
+                  Navigator.of(context)
+                      .pushReplacementNamed(HomeScreen.routeName);
+                },
               ),
             ),
           ),

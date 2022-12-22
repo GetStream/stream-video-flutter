@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       await call.connect();
 
-      Navigator.of(context).pushNamed(
+      Navigator.of(context).pushReplacementNamed(
         CallScreen.routeName,
         arguments: call,
       );
