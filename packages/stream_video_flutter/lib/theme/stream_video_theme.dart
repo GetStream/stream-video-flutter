@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide TextTheme;
+import 'package:stream_video_flutter/theme/stream_call_participant_theme.dart';
 
 import 'themes.dart';
 
@@ -12,6 +13,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
     StreamAvatarTheme? avatarTheme,
+    StreamCallParticipantTheme? callParticipantTheme,
   }) {
     final isDark = brightness == Brightness.dark;
     textTheme ??=
@@ -28,6 +30,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       textTheme: textTheme,
       colorTheme: colorTheme,
       avatarTheme: avatarTheme,
+      callParticipantTheme: callParticipantTheme,
     );
 
     return defaultTheme.merge(customizedTheme);
@@ -46,6 +49,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.textTheme,
     required this.colorTheme,
     required this.avatarTheme,
+    required this.callParticipantTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -82,6 +86,25 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         selectionColor: colorTheme.accentPrimary,
         selectionThickness: 4,
       ),
+      callParticipantTheme: StreamCallParticipantTheme(
+        focusedColor: colorTheme.accentPrimary,
+        backgroundColor: const Color(0xFF272A30),
+        avatarTheme: StreamAvatarTheme(
+          constraints: const BoxConstraints.tightFor(
+            height: 100,
+            width: 100,
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(50)),
+          initialsTextStyle: textTheme.title.copyWith(color: Colors.white),
+          selectionColor: colorTheme.accentPrimary,
+          selectionThickness: 4,
+        ),
+        audioLevelActiveColor: colorTheme.accentPrimary,
+        audioLevelInactiveColor: Colors.white,
+        participantLabelTextStyle:
+            textTheme.footnote.copyWith(color: Colors.white),
+        disabledMicrophoneColor: colorTheme.accentError,
+      ),
     );
   }
 
@@ -97,14 +120,17 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return _kDarkFallbackTheme;
   }
 
-  /// The text themes used in the widgets
+  /// The text themes used in the widgets.
   final StreamTextTheme textTheme;
 
-  /// The color themes used in the widgets
+  /// The color themes used in the widgets.
   final StreamColorTheme colorTheme;
 
-  /// Theme for the user avatar widget
+  /// Theme for the user avatar widget.
   final StreamAvatarTheme avatarTheme;
+
+  /// Theme for the call participant widget.
+  final StreamCallParticipantTheme callParticipantTheme;
 
   /// Creates a copy of [StreamVideoTheme] with specified attributes
   /// overridden.
@@ -113,11 +139,14 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
     StreamAvatarTheme? avatarTheme,
+    StreamCallParticipantTheme? callParticipantTheme,
   }) =>
       StreamVideoTheme.raw(
         textTheme: this.textTheme.merge(textTheme),
         colorTheme: this.colorTheme.merge(colorTheme),
         avatarTheme: this.avatarTheme.merge(avatarTheme),
+        callParticipantTheme:
+            this.callParticipantTheme.merge(callParticipantTheme),
       );
 
   /// Merge themes
@@ -127,6 +156,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       textTheme: textTheme.merge(other.textTheme),
       colorTheme: colorTheme.merge(other.colorTheme),
       avatarTheme: avatarTheme.merge(other.avatarTheme),
+      callParticipantTheme:
+          callParticipantTheme.merge(other.callParticipantTheme),
     );
   }
 
@@ -140,6 +171,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       textTheme: textTheme.lerp(other.textTheme, t),
       colorTheme: colorTheme.lerp(other.colorTheme, t),
       avatarTheme: avatarTheme.lerp(avatarTheme, t),
+      callParticipantTheme: callParticipantTheme.lerp(callParticipantTheme, t),
     );
   }
 }

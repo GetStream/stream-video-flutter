@@ -1,10 +1,9 @@
-import 'package:collection/collection.dart';
 import 'package:dogfooding/src/home_screen.dart';
+import 'package:dogfooding/src/participant_track.dart';
 import 'package:dogfooding/src/widgets/controls.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/participant/participant_info.dart';
-import 'package:stream_video_flutter/participant/participant_widget.dart';
+import 'package:stream_video_flutter/participant/call_participant.dart';
 
 class CallScreen extends StatefulWidget {
   const CallScreen({Key? key, required this.call}) : super(key: key);
@@ -43,7 +42,6 @@ class _CallScreenState extends State<CallScreen> {
         screenTracks.add(ParticipantTrack(
           participant: participant,
           videoTrack: t.track,
-          isScreenShare: t.isScreenShare,
         ));
       }
     }
@@ -82,7 +80,6 @@ class _CallScreenState extends State<CallScreen> {
         screenTracks.add(ParticipantTrack(
           participant: widget.call.localParticipant!,
           videoTrack: t.track,
-          isScreenShare: t.isScreenShare,
         ));
       }
     }
@@ -128,12 +125,7 @@ class _CallScreenState extends State<CallScreen> {
           print(
               'Track: ${participant.videoTracks.map((e) => e.track?.mediaStreamTrack)}');
         }
-        final participantTrack = ParticipantTrack(
-          participant: participant,
-          videoTrack: participant.videoTracks.firstOrNull?.track as VideoTrack?,
-          isScreenShare: false,
-        );
-        return StreamCallParticipant(participantTrack);
+        return StreamCallParticipant(participant: participant);
       },
     );
 
