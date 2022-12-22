@@ -53,26 +53,26 @@ class _ControlButtonWrapperState extends State<ControlButtonWrapper> {
       children: [
         if (isMobile)
           ControlToggleButton.speaker(
-            widget.theme,
-            widget.isPhoneSpeakerSelected,
-            widget.toggleSpeaker,
+            theme: widget.theme,
+            isPhoneSpeakerSelected: widget.isPhoneSpeakerSelected,
+            onPressed: widget.toggleSpeaker,
           ),
         ControlToggleButton.video(
-          widget.theme,
-          widget.participant,
-          widget.toggleVideo,
+          theme: widget.theme,
+          participant: widget.participant,
+          onPressed: widget.toggleVideo,
         ),
         ControlToggleButton.microphone(
-          widget.theme,
-          widget.participant,
-          widget.toggleMic,
+          theme: widget.theme,
+          participant: widget.participant,
+          onPressed: widget.toggleMic,
         ),
         if (isMobile)
           ControlButton.switchCamera(
-            widget.theme,
-            widget.switchCamera,
+            theme: widget.theme,
+            onPressed: widget.switchCamera,
           ),
-        ControlButton.handUp(widget.theme, widget.hangUp)
+        ControlButton.handUp(theme: widget.theme, onPressed: widget.hangUp)
       ],
     );
   }
@@ -96,11 +96,11 @@ class ControlToggleButton extends StatefulWidget {
   final ButtonStyle buttonStyle;
 
   // Creates the button to toggle speakers.
-  factory ControlToggleButton.speaker(
-    StreamControlsTheme theme,
-    bool isPhoneSpeakerSelected,
-    VoidCallback onPressed,
-  ) {
+  factory ControlToggleButton.speaker({
+    required StreamControlsTheme theme,
+    required bool isPhoneSpeakerSelected,
+    required VoidCallback onPressed,
+  }) {
     return ControlToggleButton(
       theme.toggleSpeakerIconEnabled,
       theme.toggleSpeakerIconDisabled,
@@ -111,11 +111,11 @@ class ControlToggleButton extends StatefulWidget {
   }
 
   // Creates the button to enable/disable video camera.
-  factory ControlToggleButton.video(
-    StreamControlsTheme theme,
-    Participant participant,
-    VoidCallback onPressed,
-  ) {
+  factory ControlToggleButton.video({
+    required StreamControlsTheme theme,
+    required Participant participant,
+    required VoidCallback onPressed,
+  }) {
     return ControlToggleButton(
       theme.toggleVideoIconEnabled,
       theme.toggleVideoIconDisabled,
@@ -126,11 +126,11 @@ class ControlToggleButton extends StatefulWidget {
   }
 
   // Creates the button to enable/disable video microphone.
-  factory ControlToggleButton.microphone(
-    StreamControlsTheme theme,
-    Participant participant,
-    VoidCallback onPressed,
-  ) {
+  factory ControlToggleButton.microphone({
+    required StreamControlsTheme theme,
+    required Participant participant,
+    required VoidCallback onPressed,
+  }) {
     return ControlToggleButton(
       theme.toggleMicIconEnabled,
       theme.toggleMicIconDisabled,
@@ -172,8 +172,10 @@ class ControlButton extends StatelessWidget {
   final ButtonStyle buttonStyle;
 
   // Creates the button to switch camera.
-  factory ControlButton.switchCamera(
-      StreamControlsTheme theme, VoidCallback onPressed) {
+  factory ControlButton.switchCamera({
+    required StreamControlsTheme theme,
+    required VoidCallback onPressed,
+  }) {
     return ControlButton(
       theme.switchCameraIcon,
       theme.switchCameraStyle,
@@ -182,8 +184,10 @@ class ControlButton extends StatelessWidget {
   }
 
   // Creates the button to hang up the call.
-  factory ControlButton.handUp(
-      StreamControlsTheme theme, VoidCallback onPressed) {
+  factory ControlButton.handUp({
+    required StreamControlsTheme theme,
+    required VoidCallback onPressed,
+  }) {
     return ControlButton(
       theme.handUpCameraIcon,
       theme.hangUpStyle,
