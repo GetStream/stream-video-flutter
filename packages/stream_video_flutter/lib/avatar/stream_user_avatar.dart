@@ -73,7 +73,7 @@ class StreamUserAvatar extends StatelessWidget {
   /// Flag for if avatar is selected. Defaults to `false`.
   final bool selected;
 
-  /// Theme for tha avatar
+  /// Theme for the avatar.
   final StreamAvatarTheme? avatarTheme;
 
   /// {@macro onUserAvatarTap}
@@ -162,7 +162,7 @@ class _ImageUserAvatar extends StatelessWidget {
   /// The image to be painted into the decoration.
   final ImageProvider imageProvider;
 
-  /// Theme for tha avatar
+  /// Theme for the avatar.
   final StreamAvatarTheme avatarTheme;
 
   @override
@@ -192,7 +192,7 @@ class _InitialsUserAvatar extends StatelessWidget {
   /// User whose avatar is to be displayed.
   final UserInfo user;
 
-  /// Theme for tha avatar.
+  /// Theme for the avatar.
   final StreamAvatarTheme avatarTheme;
 
   @override
@@ -205,7 +205,9 @@ class _InitialsUserAvatar extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-          color: avatarColor, borderRadius: avatarTheme.borderRadius),
+        color: avatarColor, 
+        borderRadius: avatarTheme.borderRadius,
+      ),
       child: Center(
         child: Text(
           initials,
