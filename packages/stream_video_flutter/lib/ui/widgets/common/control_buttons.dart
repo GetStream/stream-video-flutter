@@ -47,49 +47,33 @@ class _ControlButtonWrapperState extends State<ControlButtonWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    var widgetList = <Widget>[];
-
-    if (isMobile) {
-      widgetList.add(
-        ControlToggleButton.speaker(
-          widget.theme,
-          widget.isPhoneSpeakerSelected,
-          widget.toggleSpeaker,
-        ),
-      );
-    }
-
-    widgetList.add(
-      ControlToggleButton.video(
-        widget.theme,
-        widget.participant,
-        widget.toggleVideo,
-      ),
-    );
-
-    widgetList.add(
-      ControlToggleButton.microphone(
-        widget.theme,
-        widget.participant,
-        widget.toggleMic,
-      ),
-    );
-
-    if (isMobile) {
-      widgetList.add(
-        ControlButton.switchCamera(
-          widget.theme,
-          widget.switchCamera,
-        ),
-      );
-    }
-
-    widgetList.add(ControlButton.handUp(widget.theme, widget.hangUp));
-
     return Wrap(
       alignment: getButtonsAlignment(),
       spacing: widget.theme.buttonsSpacing,
-      children: widgetList,
+      children: [
+        if (isMobile)
+          ControlToggleButton.speaker(
+            widget.theme,
+            widget.isPhoneSpeakerSelected,
+            widget.toggleSpeaker,
+          ),
+        ControlToggleButton.video(
+          widget.theme,
+          widget.participant,
+          widget.toggleVideo,
+        ),
+        ControlToggleButton.microphone(
+          widget.theme,
+          widget.participant,
+          widget.toggleMic,
+        ),
+        if (isMobile)
+          ControlButton.switchCamera(
+            widget.theme,
+            widget.switchCamera,
+          ),
+        ControlButton.handUp(widget.theme, widget.hangUp)
+      ],
     );
   }
 }
