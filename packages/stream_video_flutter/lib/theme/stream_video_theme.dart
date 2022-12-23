@@ -95,7 +95,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             width: 100,
           ),
           borderRadius: const BorderRadius.all(Radius.circular(50)),
-          initialsTextStyle: textTheme.title.copyWith(color: Colors.white),
+          initialsTextStyle: textTheme.title1.copyWith(color: Colors.white),
           selectionColor: colorTheme.accentPrimary,
           selectionThickness: 4,
         ),
