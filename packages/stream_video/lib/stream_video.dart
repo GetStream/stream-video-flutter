@@ -1,6 +1,7 @@
 library stream_video;
 
 export 'src/call/call.dart';
+export 'src/event_emitter.dart';
 export 'src/events.dart';
 export 'src/hardware/hardware.dart';
 export 'src/models/call_configuration.dart';
