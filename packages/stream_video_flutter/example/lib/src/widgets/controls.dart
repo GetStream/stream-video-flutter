@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -9,10 +8,12 @@ class ControlsWidget extends StatefulWidget {
     this.call,
     this.participant, {
     Key? key,
+    this.onHangUp,
   }) : super(key: key);
 
   final Call call;
   final LocalParticipant participant;
+  final VoidCallback? onHangUp;
 
   @override
   State<StatefulWidget> createState() => _ControlsWidgetState();
@@ -49,7 +50,9 @@ class _ControlsWidgetState extends State<ControlsWidget> {
 
   @override
   void dispose() {
-    participant.events.cancel(_onChange);
+    if (participant.events.mounted) {
+      participant.events.cancel(_onChange);
+    }
     _deviceChangeSubscription?.cancel();
     super.dispose();
   }
@@ -66,8 +69,6 @@ class _ControlsWidgetState extends State<ControlsWidget> {
     final result = await context.showUnPublishDialog();
     if (result == true) await participant.unpublishAllTracks();
   }
-
-  bool get isMuted => participant.isMuted;
 
   void _disableAudio() async {
     await participant.setMicrophoneEnabled(enabled: false);
@@ -96,7 +97,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
   }
 
   void _selectVideoInput(MediaDevice device) async {
-    final track = participant.videoTracks.firstOrNull?.track;
+    final track = participant.videoTrack?.track;
     if (track == null) return;
     if (_selectedVideoInput?.deviceId != device.deviceId) {
       await track.switchCamera(device.deviceId);
@@ -107,7 +108,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
 
   void _toggleCamera() async {
     //
-    final track = participant.videoTracks.firstOrNull?.track;
+    final track = participant.videoTrack?.track;
     if (track == null) return;
 
     try {
@@ -123,8 +124,11 @@ class _ControlsWidgetState extends State<ControlsWidget> {
   }
 
   void _onTapDisconnect() async {
-    final result = await context.showDisconnectDialog();
-    if (result == true) await widget.call.disconnect();
+    final disconnectionConfirmed = await context.showDisconnectDialog();
+    if (disconnectionConfirmed == true) {
+      await widget.call.disconnect();
+      widget.onHangUp?.call();
+    }
   }
 
   @override
@@ -144,7 +148,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
             icon: const Icon(Icons.close_rounded),
             tooltip: 'Unpublish all',
           ),
-          if (participant.isMicrophoneEnabled)
+          if (participant.isAudioEnabled)
             PopupMenuButton<MediaDevice>(
               constraints: const BoxConstraints(minWidth: 200),
               icon: const Icon(Icons.settings_voice),
@@ -152,7 +156,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
                 return [
                   PopupMenuItem<MediaDevice>(
                     value: null,
-                    onTap: isMuted ? _enableAudio : _disableAudio,
+                    onTap: _disableAudio,
                     child: const ListTile(
                       leading: Icon(
                         Icons.mic_off,
@@ -213,7 +217,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
               ];
             },
           ),
-          if (participant.isCameraEnabled)
+          if (participant.isVideoEnabled)
             PopupMenuButton<MediaDevice>(
               constraints: const BoxConstraints(minWidth: 200),
               icon: const Icon(Icons.videocam_rounded),
