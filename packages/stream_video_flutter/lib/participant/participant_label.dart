@@ -51,7 +51,7 @@ class ParticipantLabel extends StatelessWidget {
           ),
           const SizedBox(width: 4.0),
           AudioIndicator(
-            hasAudio: !participant.isMuted,
+            hasAudio: participant.isAudioEnabled,
             audioLevel: participant.audioLevel,
             audioLevelActiveColor: audioLevelActiveColor,
             audioLevelInactiveColor: audioLevelInactiveColor,
