@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
     as sfu_models;
@@ -220,6 +221,34 @@ class LocalParticipant extends Participant<LocalTrackPublication> {
           .whereType<LocalTrackPublication<LocalAudioTrack>>()
           .toList();
 
+  @override
+  LocalTrackPublication<LocalAudioTrack>? get audioTrack {
+    return audioTracks.firstWhereOrNull(
+      (it) => it.type == sfu_models.TrackType.TRACK_TYPE_AUDIO,
+    );
+  }
+
+  @override
+  LocalTrackPublication<LocalVideoTrack>? get videoTrack {
+    return videoTracks.firstWhereOrNull(
+      (it) => it.type == sfu_models.TrackType.TRACK_TYPE_VIDEO,
+    );
+  }
+
+  @override
+  LocalTrackPublication<LocalVideoTrack>? get screenShareTrack {
+    return videoTracks.firstWhereOrNull(
+      (it) => it.type == sfu_models.TrackType.TRACK_TYPE_SCREEN_SHARE,
+    );
+  }
+
+  @override
+  LocalTrackPublication<LocalAudioTrack>? get screenShareAudioTrack {
+    return audioTracks.firstWhereOrNull(
+      (it) => it.type == sfu_models.TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO,
+    );
+  }
+
   /// Shortcut for publishing a [TrackSource.camera].
   Future<LocalTrackPublication?> setCameraEnabled({bool enabled = true}) {
     return setTrackTypeEnabled(
@@ -266,9 +295,7 @@ class LocalParticipant extends Participant<LocalTrackPublication> {
           await unpublishTrack(publication.sid);
 
           // Also un-publish the audio track if it was published
-          final screenShareAudioTrack = getTrackPublicationByType(
-            sfu_models.TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO,
-          );
+          final screenShareAudioTrack = this.screenShareAudioTrack;
           if (screenShareAudioTrack != null) {
             await unpublishTrack(screenShareAudioTrack.sid);
           }

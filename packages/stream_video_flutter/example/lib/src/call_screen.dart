@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_flutter/participant/call_participant.dart';
 
+import 'home_screen.dart';
+
 class CallScreen extends StatefulWidget {
   const CallScreen({Key? key, required this.call}) : super(key: key);
 
@@ -140,6 +142,10 @@ class _CallScreenState extends State<CallScreen> {
               child: ControlsWidget(
                 widget.call,
                 widget.call.localParticipant!,
+                onHangUp: () {
+                  Navigator.of(context)
+                      .pushReplacementNamed(HomeScreen.routeName);
+                },
               ),
             ),
           ),
