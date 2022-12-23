@@ -104,6 +104,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         participantLabelTextStyle:
             textTheme.footnote.copyWith(color: Colors.white),
         disabledMicrophoneColor: colorTheme.accentError,
+        connectionLevelActiveColor: colorTheme.accentPrimary,
+        connectionLevelInactiveColor: Colors.white,
       ),
     );
   }
