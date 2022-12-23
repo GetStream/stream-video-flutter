@@ -2,11 +2,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
     as sfu;
-import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/disposable.dart';
 import 'package:stream_video/src/event_emitter.dart';
 import 'package:stream_video/src/events.dart';
 import 'package:stream_video/src/internal/events.dart';
+import 'package:stream_video/src/logger/logger.dart';
 import 'package:uuid/uuid.dart';
 
 /// Used to group [LocalAudioTrack] and [RemoteAudioTrack].
