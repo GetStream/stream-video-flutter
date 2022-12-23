@@ -34,8 +34,6 @@ class ParticipantLabel extends StatelessWidget {
     final theme = StreamVideoTheme.of(context).callParticipantTheme;
 
     return Container(
-      margin: const EdgeInsets.all(8),
-      padding: const EdgeInsets.only(left: 8, right: 4),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.85),
         borderRadius: BorderRadius.circular(6),
@@ -45,11 +43,13 @@ class ParticipantLabel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
+          const SizedBox(width: 8.0),
           Text(
             participant.userId,
             style: participantLabelTextStyle ?? theme.participantLabelTextStyle,
             overflow: TextOverflow.ellipsis,
           ),
+          const SizedBox(width: 4.0),
           AudioIndicator(
             hasAudio: !participant.isMuted,
             audioLevel: participant.audioLevel,
@@ -57,6 +57,7 @@ class ParticipantLabel extends StatelessWidget {
             audioLevelInactiveColor: audioLevelInactiveColor,
             disabledMicrophoneColor: disabledMicrophoneColor,
           ),
+          const SizedBox(width: 2.0),
         ],
       ),
     );

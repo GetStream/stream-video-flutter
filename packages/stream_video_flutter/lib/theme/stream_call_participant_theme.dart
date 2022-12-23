@@ -29,6 +29,8 @@ class StreamCallParticipantTheme with Diagnosticable {
       color: Colors.white,
     ),
     this.disabledMicrophoneColor = const Color(0xffFF3842),
+    this.connectionLevelActiveColor = const Color(0xff005FFF),
+    this.connectionLevelInactiveColor = Colors.white,
   });
 
   /// The color in the focused state.
@@ -52,6 +54,12 @@ class StreamCallParticipantTheme with Diagnosticable {
   /// The color of disabled microphone icon.
   final Color disabledMicrophoneColor;
 
+  /// The color of an active connection quality level.
+  final Color connectionLevelActiveColor;
+
+  /// The color of an inactive connection quality level.
+  final Color connectionLevelInactiveColor;
+
   copyWith({
     Color? focusedColor,
     Color? backgroundColor,
@@ -60,6 +68,8 @@ class StreamCallParticipantTheme with Diagnosticable {
     Color? audioLevelInactiveColor,
     TextStyle? participantLabelTextStyle,
     Color? disabledMicrophoneColor,
+    Color? connectionLevelActiveColor,
+    Color? connectionLevelInactiveColor,
   }) {
     return StreamCallParticipantTheme(
       focusedColor: focusedColor ?? this.focusedColor,
@@ -73,6 +83,10 @@ class StreamCallParticipantTheme with Diagnosticable {
           participantLabelTextStyle ?? this.participantLabelTextStyle,
       disabledMicrophoneColor:
           disabledMicrophoneColor ?? this.disabledMicrophoneColor,
+      connectionLevelActiveColor:
+          connectionLevelActiveColor ?? this.connectionLevelActiveColor,
+      connectionLevelInactiveColor:
+          connectionLevelInactiveColor ?? this.connectionLevelInactiveColor,
     );
   }
 
@@ -92,6 +106,10 @@ class StreamCallParticipantTheme with Diagnosticable {
           participantLabelTextStyle, other.participantLabelTextStyle, t)!,
       disabledMicrophoneColor: Color.lerp(
           disabledMicrophoneColor, other.disabledMicrophoneColor, t)!,
+      connectionLevelActiveColor: Color.lerp(
+          connectionLevelActiveColor, other.connectionLevelActiveColor, t)!,
+      connectionLevelInactiveColor: Color.lerp(
+          connectionLevelInactiveColor, other.connectionLevelInactiveColor, t)!,
     );
   }
 
@@ -106,7 +124,9 @@ class StreamCallParticipantTheme with Diagnosticable {
           audioLevelActiveColor == other.audioLevelActiveColor &&
           audioLevelInactiveColor == other.audioLevelInactiveColor &&
           participantLabelTextStyle == other.participantLabelTextStyle &&
-          disabledMicrophoneColor == other.disabledMicrophoneColor;
+          disabledMicrophoneColor == other.disabledMicrophoneColor &&
+          connectionLevelActiveColor == other.connectionLevelActiveColor &&
+          connectionLevelInactiveColor == other.connectionLevelInactiveColor;
 
   @override
   int get hashCode =>
@@ -116,7 +136,9 @@ class StreamCallParticipantTheme with Diagnosticable {
       audioLevelActiveColor.hashCode ^
       audioLevelInactiveColor.hashCode ^
       participantLabelTextStyle.hashCode ^
-      disabledMicrophoneColor.hashCode;
+      disabledMicrophoneColor.hashCode ^
+      connectionLevelActiveColor.hashCode ^
+      connectionLevelInactiveColor.hashCode;
 
   /// Merges one [StreamCallParticipantTheme] with the another.
   StreamCallParticipantTheme merge(StreamCallParticipantTheme? other) {
@@ -129,6 +151,8 @@ class StreamCallParticipantTheme with Diagnosticable {
       audioLevelInactiveColor: other.audioLevelInactiveColor,
       participantLabelTextStyle: other.participantLabelTextStyle,
       disabledMicrophoneColor: other.disabledMicrophoneColor,
+      connectionLevelActiveColor: other.connectionLevelActiveColor,
+      connectionLevelInactiveColor: other.connectionLevelInactiveColor,
     );
   }
 
@@ -145,6 +169,10 @@ class StreamCallParticipantTheme with Diagnosticable {
       ..add(DiagnosticsProperty(
           'participantLabelTextStyle', participantLabelTextStyle))
       ..add(DiagnosticsProperty(
-          'disabledMicrophoneColor', disabledMicrophoneColor));
+          'disabledMicrophoneColor', disabledMicrophoneColor))
+      ..add(DiagnosticsProperty(
+          'connectionLevelActiveColor', connectionLevelActiveColor))
+      ..add(DiagnosticsProperty(
+          'connectionLevelInactiveColor', connectionLevelInactiveColor));
   }
 }

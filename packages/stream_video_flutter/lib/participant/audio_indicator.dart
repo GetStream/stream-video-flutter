@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/participant/audio_levels.dart';
+import 'package:stream_video_flutter/participant/audio_level_indicator.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Widget used to indicate the audio state of a given participant.
@@ -34,18 +34,18 @@ class AudioIndicator extends StatelessWidget {
     final theme = StreamVideoTheme.of(context).callParticipantTheme;
 
     if (hasAudio) {
-      return AudioLevels(
+      return AudioLevelIndicator(
         audioLevel: audioLevel,
-        audioLevelActiveColor: audioLevelActiveColor,
-        audioLevelInactiveColor: audioLevelInactiveColor,
+        activeColor: audioLevelActiveColor,
+        inactiveColor: audioLevelInactiveColor,
       );
     } else {
       return Padding(
         padding: const EdgeInsets.all(4),
         child: Icon(
           Icons.mic_off,
+          size: 16.0,
           color: disabledMicrophoneColor ?? theme.disabledMicrophoneColor,
-          size: 16,
         ),
       );
     }
