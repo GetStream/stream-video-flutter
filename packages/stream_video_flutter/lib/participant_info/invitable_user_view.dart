@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/participant_info/theme/invitable_user_theme.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// {@template onInvitableUserTap}
@@ -15,16 +16,27 @@ class StreamInvitableUserView extends StatelessWidget {
       {super.key,
       required this.user,
       required this.selected,
+      required this.selectedIcon,
+      this.invitableUserTheme,
       this.onInvitableUserTap});
 
   final UserInfo user;
   final bool selected;
+  final IconData selectedIcon;
+
+  /// Theme for the invitable user list.
+  final StreamInvitableUserTheme? invitableUserTheme;
 
   /// {@macro onInvitableUserTap}
   final OnInvitableUserTap? onInvitableUserTap;
 
   @override
   Widget build(BuildContext context) {
+    final streamChatTheme = StreamVideoTheme.of(context);
+    final invitableUserTheme = this.invitableUserTheme ??
+        streamChatTheme.invitableUserListTheme.invitableUserTheme;
+    final avatarTheme =
+        invitableUserTheme.avatarTheme ?? streamChatTheme.avatarTheme;
     return InkWell(
       onTap: () => onInvitableUserTap?.call(user),
       child: Container(
@@ -34,24 +46,14 @@ class StreamInvitableUserView extends StatelessWidget {
           children: [
             StreamUserAvatar(
               user: user,
-              avatarTheme: const StreamAvatarTheme(
-                  initialsTextStyle: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  constraints: BoxConstraints(
-                    minHeight: 56,
-                    minWidth: 56,
-                  ),
-                  borderRadius: BorderRadius.all(Radius.circular(32))),
+              avatarTheme: avatarTheme,
             ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
                   user.name,
-                  style: const TextStyle(fontSize: 18),
+                  style: invitableUserTheme.usernameTextStyle,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -60,9 +62,9 @@ class StreamInvitableUserView extends StatelessWidget {
               visible: selected,
               child: Container(
                 padding: const EdgeInsets.all(8),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.blue,
+                child: Icon(
+                  selectedIcon,
+                  color: invitableUserTheme.selectedIconColor,
                   size: 32,
                 ),
               ),

@@ -20,6 +20,7 @@ class StreamColorTheme {
     this.accentError = const Color(0xffFF3842),
     this.accentInfo = const Color(0xff20E070),
     this.highlight = const Color(0xfffbf4dd),
+    this.highlightDark = const Color(0xff302d22),
     this.overlay = const Color.fromRGBO(0, 0, 0, 0.2),
     this.overlayDark = const Color.fromRGBO(0, 0, 0, 0.6),
     this.bgGradient = const LinearGradient(
@@ -99,7 +100,8 @@ class StreamColorTheme {
       blur: 8,
     ),
     this.highlight = const Color(0xff302d22),
-    this.overlay = const Color.fromRGBO(0, 0, 0, 0.4),
+    this.highlightDark = const Color(0xfffbf4dd),
+    this.overlay = const Color.fromRGBO(255, 255, 255, 0.2),
     this.overlayDark = const Color.fromRGBO(255, 255, 255, 0.6),
     this.bgGradient = const LinearGradient(
       begin: Alignment.topCenter,
@@ -130,6 +132,7 @@ class StreamColorTheme {
     required this.shadowIconButton,
     required this.modalShadow,
     required this.highlight,
+    required this.highlightDark,
     required this.overlay,
     required this.overlayDark,
     required this.bgGradient,
@@ -184,6 +187,9 @@ class StreamColorTheme {
   final Color highlight;
 
   ///
+  final Color highlightDark;
+
+  ///
   final Color overlay;
 
   ///
@@ -210,6 +216,7 @@ class StreamColorTheme {
     Effect? shadowIconButton,
     Effect? modalShadow,
     Color? highlight,
+    Color? invertedHighlight,
     Color? overlay,
     Color? overlayDark,
     Gradient? bgGradient,
@@ -231,6 +238,7 @@ class StreamColorTheme {
       shadowIconButton: shadowIconButton ?? this.shadowIconButton,
       modalShadow: modalShadow ?? this.modalShadow,
       highlight: highlight ?? this.highlight,
+      highlightDark: invertedHighlight ?? this.highlightDark,
       overlay: overlay ?? this.overlay,
       overlayDark: overlayDark ?? this.overlayDark,
       bgGradient: bgGradient ?? this.bgGradient,
@@ -253,6 +261,7 @@ class StreamColorTheme {
       accentError: other.accentError,
       accentInfo: other.accentInfo,
       highlight: other.highlight,
+      invertedHighlight: other.highlightDark,
       overlay: other.overlay,
       overlayDark: other.overlayDark,
       bgGradient: other.bgGradient,
@@ -278,6 +287,7 @@ class StreamColorTheme {
       accentError: Color.lerp(accentError, other.accentError, t),
       accentInfo: Color.lerp(accentInfo, other.accentInfo, t),
       highlight: Color.lerp(highlight, other.highlight, t),
+      invertedHighlight: Color.lerp(highlightDark, other.highlightDark, t),
       overlay: Color.lerp(overlay, other.overlay, t),
       overlayDark: Color.lerp(overlayDark, other.overlayDark, t),
       bgGradient: Gradient.lerp(bgGradient, other.bgGradient, t),

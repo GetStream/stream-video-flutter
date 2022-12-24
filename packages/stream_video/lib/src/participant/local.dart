@@ -269,7 +269,7 @@ class LocalParticipant extends Participant<LocalTrackPublication> {
   Future<LocalTrackPublication?> toggleMicrophone() {
     return setTrackTypeEnabled(
       trackType: sfu_models.TrackType.TRACK_TYPE_AUDIO,
-      enabled: !isMicrophoneEnabled,
+      enabled: !isAudioEnabled,
     );
   }
 

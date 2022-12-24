@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/icon/icon_toggle.dart';
+import 'package:stream_video_flutter/participant_info/call_participants_info_options.dart';
 import 'package:stream_video_flutter/participant_info/model/mute_toggle_titles.dart';
 import 'package:stream_video_flutter/participant_info/model/call_participant_state.dart';
+import 'package:stream_video_flutter/participant_info/theme/call_participants_info_theme.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'call_participant_info_view.dart';
 
@@ -17,30 +20,35 @@ typedef ParticipantInfoViewBuilder = Widget Function(
 typedef ParticipantInfoDividerBuilder = Widget Function(
     BuildContext context, int index);
 
-/// {@template onInviteButtonPress}
-/// The action to perform when the Invite button is pressed.
+/// {@template streamCallParticipantsInfoView}
+/// Displays call participants info.
 /// {@endtemplate}
-typedef OnInviteButtonPress = void Function();
-
 class StreamCallParticipantsInfoView extends StatefulWidget {
+  /// {@macro streamCallParticipantsInfoView}
   const StreamCallParticipantsInfoView({
     super.key,
     required this.call,
-    required this.inviteButtonTitle,
-    required this.muteToggleTitles,
-    this.onInviteButtonPress,
+    this.videoIcon = const StreamIconToggle(
+      active: Icons.videocam_rounded,
+      inactive: Icons.videocam_off_rounded,
+    ),
+    this.audioIcon = const StreamIconToggle(
+      active: Icons.mic,
+      inactive: Icons.mic_off,
+    ),
+    this.participantsInfoTheme,
     this.participantInfoViewBuilder,
     this.participantInfoDividerBuilder,
   });
 
+  /// Reference to [Call].
   final Call call;
 
-  final String inviteButtonTitle;
+  final StreamIconToggle videoIcon;
+  final StreamIconToggle audioIcon;
 
-  final MuteToggleTitles muteToggleTitles;
-
-  /// {@macro onInviteButtonPress}
-  final OnInviteButtonPress? onInviteButtonPress;
+  /// Theme for the participants info.
+  final StreamParticipantsInfoTheme? participantsInfoTheme;
 
   /// {@macro participantsInfoViewBuilder}
   final ParticipantInfoViewBuilder? participantInfoViewBuilder;
@@ -95,45 +103,29 @@ class _StreamCallParticipantsInfoViewState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-            child: ListView.separated(
-                padding: const EdgeInsets.only(bottom: 16),
-                itemBuilder: (context, index) {
-                  final participant = participants[index];
-                  return widget.participantInfoViewBuilder
-                          ?.call(context, index, participant) ??
-                      StreamCallParticipantInfoView(
-                        participant: participant,
-                      );
-                },
-                separatorBuilder: (context, index) =>
-                    widget.participantInfoDividerBuilder
-                        ?.call(context, index) ??
-                    const Divider(
-                      indent: 16,
-                      height: 0,
-                      color: Colors.grey,
-                    ),
-                itemCount: participants.length)),
-        Material(
-          elevation: 8,
-          child: SafeArea(
-            child: ButtonBar(
-              buttonPadding: const EdgeInsets.all(16),
-              alignment: MainAxisAlignment.center,
-              children: [
-                _InviteButton(
-                    title: widget.inviteButtonTitle,
-                    onInviteButtonPress: widget.onInviteButtonPress),
-                _MuteToggle(titles: widget.muteToggleTitles, call: widget.call)
-              ],
+    final streamChatTheme = StreamVideoTheme.of(context);
+    final participantsInfoTheme =
+        widget.participantsInfoTheme ?? streamChatTheme.participantsInfoTheme;
+    return ListView.separated(
+        padding: const EdgeInsets.only(bottom: 16),
+        itemBuilder: (context, index) {
+          final participant = participants[index];
+          return widget.participantInfoViewBuilder
+                  ?.call(context, index, participant) ??
+              StreamCallParticipantInfoView(
+                participant: participant,
+                videoIcon: widget.videoIcon,
+                audioIcon: widget.audioIcon,
+              );
+        },
+        separatorBuilder: (context, index) =>
+            widget.participantInfoDividerBuilder?.call(context, index) ??
+            Divider(
+              indent: participantsInfoTheme.dividerIndent,
+              height: participantsInfoTheme.dividerHeight,
+              color: participantsInfoTheme.dividerColor,
             ),
-          ),
-        )
-      ],
-    );
+        itemCount: participants.length);
   }
 
   CallParticipantState _mapToState(ParticipantInfo info, bool self) {
@@ -143,58 +135,5 @@ class _StreamCallParticipantsInfoViewState
         user: UserInfo(id: info.userId, role: "member", name: info.userId),
         audioAvailable: info.hasPublishedAudioTrack(),
         videoAvailable: info.hasPublishedVideoTrack());
-  }
-}
-
-class _InviteButton extends StatelessWidget {
-  const _InviteButton(
-      {super.key, required this.title, this.onInviteButtonPress});
-
-  final String title;
-  final OnInviteButtonPress? onInviteButtonPress;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        onInviteButtonPress?.call();
-      },
-      style: ElevatedButton.styleFrom(
-        elevation: 3,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0)),
-        minimumSize: const Size(144, 48),
-      ),
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 16),
-      ),
-    );
-  }
-}
-
-class _MuteToggle extends StatelessWidget {
-  const _MuteToggle({super.key, required this.titles, required this.call});
-
-  final MuteToggleTitles titles;
-  final Call call;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(
-        style: ElevatedButton.styleFrom(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0)),
-          minimumSize: const Size(144, 48),
-        ),
-        onPressed: () async {
-          await call.localParticipant?.toggleMicrophone();
-        },
-        child: Text(
-          call.localParticipant?.info.hasPublishedAudioTrack() == true
-              ? titles.muteTitle
-              : titles.unmuteTitle,
-          style: const TextStyle(fontSize: 16),
-        ));
   }
 }
