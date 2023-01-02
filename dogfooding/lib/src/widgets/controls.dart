@@ -71,8 +71,6 @@ class _ControlsWidgetState extends State<ControlsWidget> {
     if (result == true) await participant.unpublishAllTracks();
   }
 
-  bool get isMuted => participant.isMuted;
-
   void _disableAudio() async {
     await participant.setMicrophoneEnabled(enabled: false);
   }
@@ -100,7 +98,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
   }
 
   void _selectVideoInput(MediaDevice device) async {
-    final track = participant.videoTracks.firstOrNull?.track;
+    final track = participant.videoTrack?.track;
     if (track == null) return;
     if (_selectedVideoInput?.deviceId != device.deviceId) {
       await track.switchCamera(device.deviceId);
@@ -111,7 +109,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
 
   void _toggleCamera() async {
     //
-    final track = participant.videoTracks.firstOrNull?.track;
+    final track = participant.videoTrack?.track;
     if (track == null) return;
 
     try {
@@ -151,7 +149,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
             icon: const Icon(Icons.close_rounded),
             tooltip: 'Unpublish all',
           ),
-          if (participant.isMicrophoneEnabled)
+          if (participant.isAudioEnabled)
             PopupMenuButton<MediaDevice>(
               constraints: const BoxConstraints(minWidth: 200),
               icon: const Icon(Icons.settings_voice),
@@ -159,7 +157,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
                 return [
                   PopupMenuItem<MediaDevice>(
                     value: null,
-                    onTap: isMuted ? _enableAudio : _disableAudio,
+                    onTap: _disableAudio,
                     child: const ListTile(
                       leading: Icon(
                         Icons.mic_off,
@@ -220,7 +218,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
               ];
             },
           ),
-          if (participant.isCameraEnabled)
+          if (participant.isVideoEnabled)
             PopupMenuButton<MediaDevice>(
               constraints: const BoxConstraints(minWidth: 200),
               icon: const Icon(Icons.videocam_rounded),

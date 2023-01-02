@@ -39,7 +39,7 @@ mixin EventEmittable<T> {
 class EventListener<T> {
   /// Creates a new [EventListener] instance.
   EventListener(this._emitter) {
-    _emitter.listen(_onData);
+    if (_emitter.mounted) _emitter.listen(_onData);
   }
 
   final EventEmitter<T> _emitter;
@@ -92,7 +92,7 @@ class EventListener<T> {
 
   /// Disposes the [EventListener] instance.
   void dispose() {
-    _emitter.cancel(_onData);
+    if (_emitter.mounted) _emitter.cancel(_onData);
     _listener.dispose();
   }
 }
@@ -264,14 +264,6 @@ class EventEmitter<T> {
   /// besides [mounted] inaccessible.
   @mustCallSuper
   void dispose() {
-    //TODO
-    // It seems like the check below is redundant.
-    //
-    // This function is called from multiple places and
-    // it is unlikely to get into unexpected state because
-    // of multiple `dispose` calls.
-    //
-    // Can we wrap this by IF statement using [mounted] flag?
     assert(_debugIsMounted(), '');
     _listeners.clear();
     _mounted = false;
