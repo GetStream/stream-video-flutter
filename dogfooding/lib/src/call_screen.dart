@@ -4,6 +4,7 @@ import 'package:dogfooding/src/widgets/participant_info.dart';
 import 'package:dogfooding/src/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
+// import 'package:stream_video/protobuf/video/coordinator/closed_caption_v1/closed_caption.pbserver.dart';
 import 'package:stream_video/stream_video.dart';
 
 class CallScreen extends StatefulWidget {
@@ -22,18 +23,6 @@ class _CallScreenState extends State<CallScreen> {
 
   List<Participant> allParticipants = [];
 
-  // void _onCallEnded(SfuEvent event) {
-  //   final payload = event.callEnded;
-  //   debugPrint('Call Ended: ${payload.message}');
-  //   Navigator.of(context).pop();
-  // }
-
-void _onClodedCaptions(){
-    StreamVideo.instance.closedCaptionsStream.listen((event) {
-      print(event);
-    });
-
-}
   void _onParticipantUpdate() {
     allParticipants = [
       ...widget.call.participants.values,
@@ -101,7 +90,7 @@ void _onClodedCaptions(){
   void initState() {
     super.initState();
     _onParticipantUpdate();
-    _onClodedCaptions();
+
     widget.call.events
       ..listen((_) {
         _onParticipantUpdate();
@@ -162,7 +151,46 @@ void _onClodedCaptions(){
       ),
       body: Column(
         children: [
-          Expanded(child: grid),
+          Expanded(
+              child: Stack(
+            children: [
+              grid,
+              
+              StreamBuilder(
+                  stream: StreamVideo.instance.latestCCStream,
+                  builder: (context, snapshot) {
+                    return snapshot.hasData
+                        ? Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                                color: Colors.black.withOpacity(0.5),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text.rich(
+                                    TextSpan(children: [
+                                      TextSpan(
+                                          text:
+                                              '${snapshot.data!.first.closedCaption.userId}: ',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white)),
+                                      ...snapshot.data!.map((e) => TextSpan(
+                                            text: e.closedCaption.text,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ))
+                                    ]),
+                                    // style: TextStyle(color: Colors.white),
+                                  ),
+                                )),
+                          )
+                        : Container();
+                  }),
+            ],
+          )),
           SizedBox(
             width: double.infinity,
             child: Material(

@@ -4,6 +4,7 @@ export 'src/call/call.dart';
 export 'src/events.dart';
 export 'src/hardware/hardware.dart';
 export 'src/models/call_configuration.dart';
+export 'src/models/closed_caption.dart';
 export 'src/models/user_info.dart';
 export 'src/options.dart';
 export 'src/participant/local.dart';

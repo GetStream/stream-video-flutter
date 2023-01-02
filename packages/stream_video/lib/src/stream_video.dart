@@ -148,12 +148,15 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
 
   var _state = _StreamVideoState();
 
-  Stream<List<ClosedCaptionEvent>?> get closedCaptionsStream =>
+  Stream<Map<CCKey, List<ClosedCaptionEvent>>> get closedCaptionsStream =>
       _state.closedCaptions.stream;
 
-//not working as expected
-  Stream<List<ClosedCaptionEvent>?> get recentClosedCaptions =>
-      _state.closedCaptions.recentCaptions(3);
+  Stream<ClosedCaptionEvent> get recentCCStream =>
+      _state.closedCaptions.recentCCStream;
+
+  Stream<List<ClosedCaptionEvent>> get latestCCStream =>
+      _state.closedCaptions.latestCCStream;
+
 
   UserInfo? get currentUser => _state.currentUser.valueOrNull;
 
@@ -489,15 +492,48 @@ typedef UserInfoController = RxController<UserInfo>;
 
 typedef ActiveCallController = RxController<Call?>;
 
-//TODO: group captions by users
-class ClosedCaptionsController extends RxController<List<ClosedCaptionEvent>> {
-  ClosedCaptionsController() : super(seedValue: const []);
+class ClosedCaptionsController
+    extends RxController<Map<CCKey, List<ClosedCaptionEvent>>> {
+  ClosedCaptionsController() : super(seedValue: const {});
 
-  Stream<List<ClosedCaptionEvent>> recentCaptions(int n) => take(n);
+  List<ClosedCaptionEvent> get recentCC => value.entries.last.value;
+
+  Stream<ClosedCaptionEvent> get recentCCStream =>
+      stream.map((event) => event.entries.last.value.last);
+
+  Stream<List<ClosedCaptionEvent>> get latestCCStream =>
+      stream.map((event) => event.entries.last.value);
 
   void add(ClosedCaptionEvent event) {
-    final closedCaptions = [...value];
-    value = [...closedCaptions, event];
+    final key = CCKey(
+        startTime: event.closedCaption.startTime,
+        userId: event.closedCaption.userId);
+
+    if (value.isEmpty) {
+      value = {
+        ...value,
+        key: [event]
+      };
+    } else {
+      final foundEntry = value.entries.lastWhere(
+        (entry) => entry.key.userId == key.userId,
+        orElse: () {
+          return MapEntry(key, [event]);
+        },
+      );
+      if (value.keys.last.startTime < foundEntry.key.startTime) {
+        value = {...value, foundEntry.key: foundEntry.value};
+      } else {
+        if (foundEntry.key == value.keys.last) {
+          value = {...value, foundEntry.key: foundEntry.value..add(event)};
+        } else {
+          value = {
+            ...value,
+            key: [event]
+          };
+        }
+      }
+    }
   }
 }
 
