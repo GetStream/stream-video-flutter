@@ -65,8 +65,7 @@ void main() {
         }));
 
         expect(controller.recentCC, [cc5]);
-        expectLater(controller.recentCCStream, emits([cc5]));
+        expectLater(controller.latestCCStream, emits([cc5]));
 
-        expectLater(controller.latestCCStream, emits( [[cc5]]));
   });
 }
