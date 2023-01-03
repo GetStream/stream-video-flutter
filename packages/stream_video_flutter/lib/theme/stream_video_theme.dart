@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart' hide TextTheme;
-import 'package:stream_video_flutter/participant_info/theme/call_participant_info_theme.dart';
-import 'package:stream_video_flutter/participant_info/theme/call_participants_info_theme.dart';
-import 'package:stream_video_flutter/participant_info/theme/invitable_user_list_theme.dart';
-import 'package:stream_video_flutter/participant_info/theme/invitable_user_theme.dart';
+import 'package:stream_video_flutter/theme/stream_avatar_theme.dart';
 
 import 'themes.dart';
 

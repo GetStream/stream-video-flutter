@@ -1,17 +1,16 @@
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_video_flutter/theme/stream_avatar_theme.dart';
 
-/// {@template invitableUserTheme}
-/// A style that overrides the default appearance of invitable user widget.
+/// {@template participantInfoTheme}
+/// A style that overrides the default appearance of participants info widget.
 /// {@endtemplate}
-class StreamInvitableUserTheme with Diagnosticable {
-  /// {@macro invitableUserTheme}
-  const StreamInvitableUserTheme({
+class StreamParticipantInfoTheme with Diagnosticable {
+  /// {@macro participantInfoTheme}
+  const StreamParticipantInfoTheme({
     this.usernameTextStyle = const TextStyle(fontSize: 18.0),
-    this.selectedIconColor = Colors.blue,
+    this.iconActiveColor = Colors.black54,
+    this.iconInactiveColor = Colors.red,
     this.avatarTheme = const StreamAvatarTheme(
         initialsTextStyle: TextStyle(
           fontSize: 28,
@@ -28,20 +27,27 @@ class StreamInvitableUserTheme with Diagnosticable {
   /// [TextStyle] for the user name.
   final TextStyle usernameTextStyle;
 
-  /// Color of the selected icon.
-  final Color selectedIconColor;
+  /// Color of the active icon.
+  final Color iconActiveColor;
+
+  /// Color of the inactive icon.
+  final Color iconInactiveColor;
 
   /// Theme for the user avatar widget.
   final StreamAvatarTheme? avatarTheme;
 
-  StreamInvitableUserTheme copyWith({
+  /// Returns a new [StreamParticipantInfoTheme] replacing some of its
+  /// properties
+  StreamParticipantInfoTheme copyWith({
     TextStyle? usernameTextStyle,
-    Color? selectedIconColor,
+    Color? iconActiveColor,
+    Color? iconInactiveColor,
     StreamAvatarTheme? avatarTheme,
   }) {
-    return StreamInvitableUserTheme(
+    return StreamParticipantInfoTheme(
       usernameTextStyle: usernameTextStyle ?? this.usernameTextStyle,
-      selectedIconColor: selectedIconColor ?? this.selectedIconColor,
+      iconActiveColor: iconActiveColor ?? this.iconActiveColor,
+      iconInactiveColor: iconInactiveColor ?? this.iconInactiveColor,
       avatarTheme: avatarTheme ?? this.avatarTheme,
     );
   }
@@ -49,12 +55,13 @@ class StreamInvitableUserTheme with Diagnosticable {
   /// Linearly interpolate between two [StreamCallParticipantsInfoView] themes.
   ///
   /// All the properties must be non-null.
-  StreamInvitableUserTheme lerp(StreamInvitableUserTheme other, double t) {
-    return StreamInvitableUserTheme(
+  StreamParticipantInfoTheme lerp(StreamParticipantInfoTheme other, double t) {
+    return StreamParticipantInfoTheme(
         usernameTextStyle:
             TextStyle.lerp(usernameTextStyle, other.usernameTextStyle, t)!,
-        selectedIconColor:
-            Color.lerp(selectedIconColor, other.selectedIconColor, t)!,
+        iconActiveColor: Color.lerp(iconActiveColor, other.iconActiveColor, t)!,
+        iconInactiveColor:
+            Color.lerp(iconInactiveColor, other.iconInactiveColor, t)!,
         avatarTheme: avatarTheme != null && other.avatarTheme != null
             ? avatarTheme!.lerp(other.avatarTheme!, t)
             : other.avatarTheme ?? avatarTheme);
@@ -63,24 +70,27 @@ class StreamInvitableUserTheme with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is StreamInvitableUserTheme &&
+      other is StreamParticipantInfoTheme &&
           runtimeType == other.runtimeType &&
           usernameTextStyle == other.usernameTextStyle &&
-          selectedIconColor == other.selectedIconColor &&
+          iconActiveColor == other.iconActiveColor &&
+          iconInactiveColor == other.iconInactiveColor &&
           avatarTheme == other.avatarTheme;
 
   @override
   int get hashCode =>
       usernameTextStyle.hashCode ^
-      selectedIconColor.hashCode ^
+      iconActiveColor.hashCode ^
+      iconInactiveColor.hashCode ^
       avatarTheme.hashCode;
 
-  /// Merges one [StreamInvitableUserTheme] with the another.
-  StreamInvitableUserTheme merge(StreamInvitableUserTheme? other) {
+  /// Merges one [StreamParticipantInfoTheme] with the another
+  StreamParticipantInfoTheme merge(StreamParticipantInfoTheme? other) {
     if (other == null) return this;
     return copyWith(
       usernameTextStyle: other.usernameTextStyle,
-      selectedIconColor: other.selectedIconColor,
+      iconActiveColor: other.iconActiveColor,
+      iconInactiveColor: other.iconInactiveColor,
       avatarTheme: other.avatarTheme,
     );
   }
@@ -90,7 +100,8 @@ class StreamInvitableUserTheme with Diagnosticable {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('usernameTextStyle', usernameTextStyle))
-      ..add(DiagnosticsProperty('selectedIconColor', selectedIconColor))
+      ..add(DiagnosticsProperty('iconActiveColor', iconActiveColor))
+      ..add(DiagnosticsProperty('iconInactiveColor', iconInactiveColor))
       ..add(DiagnosticsProperty('avatarTheme', avatarTheme));
   }
 }

@@ -2,19 +2,34 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/participant_info/theme/call_participant_info_theme.dart';
-import 'package:stream_video_flutter/participant_info/theme/invitable_user_theme.dart';
+import 'package:stream_video_flutter/theme/stream_avatar_theme.dart';
+import 'package:stream_video_flutter/theme/stream_participant_info_theme.dart';
 
 /// {@template participantsInfoTheme}
 /// A style that overrides the default appearance of participants info widget.
 /// {@endtemplate}
-class StreamInvitableUserListTheme with Diagnosticable {
+class StreamParticipantsInfoTheme with Diagnosticable {
   /// {@macro participantsInfoTheme}
-  const StreamInvitableUserListTheme({
+  const StreamParticipantsInfoTheme({
     this.dividerColor = Colors.grey,
     this.dividerIndent = 16.0,
     this.dividerHeight = 0.0,
-    this.invitableUserTheme = const StreamInvitableUserTheme(),
+    this.participantInfoTheme = const StreamParticipantInfoTheme(
+      usernameTextStyle: TextStyle(fontSize: 18.0),
+      iconActiveColor: Colors.black54,
+      iconInactiveColor: Colors.red,
+      avatarTheme: StreamAvatarTheme(
+          initialsTextStyle: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+          constraints: BoxConstraints(
+            minHeight: 56,
+            minWidth: 56,
+          ),
+          borderRadius: BorderRadius.all(Radius.circular(32))),
+    ),
   });
 
   /// List divider color.
@@ -27,60 +42,63 @@ class StreamInvitableUserListTheme with Diagnosticable {
   final double dividerHeight;
 
   /// Theme for the participant info.
-  final StreamInvitableUserTheme invitableUserTheme;
+  final StreamParticipantInfoTheme participantInfoTheme;
 
-  StreamInvitableUserListTheme copyWith({
+  /// Returns a new [StreamParticipantsInfoTheme] replacing some of its
+  /// properties
+  StreamParticipantsInfoTheme copyWith({
     Color? dividerColor,
     double? dividerIndent,
     double? dividerHeight,
-    StreamInvitableUserTheme? invitableUserTheme,
+    StreamParticipantInfoTheme? participantInfoTheme,
   }) {
-    return StreamInvitableUserListTheme(
+    return StreamParticipantsInfoTheme(
       dividerColor: dividerColor ?? this.dividerColor,
       dividerIndent: dividerIndent ?? this.dividerIndent,
       dividerHeight: dividerHeight ?? this.dividerHeight,
-      invitableUserTheme: invitableUserTheme ?? this.invitableUserTheme,
+      participantInfoTheme: participantInfoTheme ?? this.participantInfoTheme,
     );
   }
 
   /// Linearly interpolate between two [StreamCallParticipantsInfoView] themes.
   ///
   /// All the properties must be non-null.
-  StreamInvitableUserListTheme lerp(
-      StreamInvitableUserListTheme other, double t) {
-    return StreamInvitableUserListTheme(
+  StreamParticipantsInfoTheme lerp(
+      StreamParticipantsInfoTheme other, double t) {
+    return StreamParticipantsInfoTheme(
       dividerColor: Color.lerp(dividerColor, other.dividerColor, t)!,
       dividerIndent: lerpDouble(dividerIndent, other.dividerIndent, t)!,
       dividerHeight: lerpDouble(dividerHeight, other.dividerHeight, t)!,
-      invitableUserTheme: invitableUserTheme.lerp(other.invitableUserTheme, t),
+      participantInfoTheme:
+          participantInfoTheme.lerp(other.participantInfoTheme, t),
     );
   }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is StreamInvitableUserListTheme &&
+      other is StreamParticipantsInfoTheme &&
           runtimeType == other.runtimeType &&
           dividerColor == other.dividerColor &&
           dividerIndent == other.dividerIndent &&
           dividerHeight == other.dividerHeight &&
-          invitableUserTheme == other.invitableUserTheme;
+          participantInfoTheme == other.participantInfoTheme;
 
   @override
   int get hashCode =>
       dividerColor.hashCode ^
       dividerIndent.hashCode ^
       dividerHeight.hashCode ^
-      invitableUserTheme.hashCode;
+      participantInfoTheme.hashCode;
 
-  /// Merges one [StreamInvitableUserListTheme] with the another
-  StreamInvitableUserListTheme merge(StreamInvitableUserListTheme? other) {
+  /// Merges one [StreamParticipantsInfoTheme] with the another
+  StreamParticipantsInfoTheme merge(StreamParticipantsInfoTheme? other) {
     if (other == null) return this;
     return copyWith(
       dividerColor: other.dividerColor,
       dividerIndent: other.dividerIndent,
       dividerHeight: other.dividerHeight,
-      invitableUserTheme: other.invitableUserTheme,
+      participantInfoTheme: other.participantInfoTheme,
     );
   }
 
@@ -91,6 +109,6 @@ class StreamInvitableUserListTheme with Diagnosticable {
       ..add(DiagnosticsProperty('dividerColor', dividerColor))
       ..add(DiagnosticsProperty('dividerIndent', dividerIndent))
       ..add(DiagnosticsProperty('dividerHeight', dividerHeight))
-      ..add(DiagnosticsProperty('invitableUserTheme', invitableUserTheme));
+      ..add(DiagnosticsProperty('participantInfoTheme', participantInfoTheme));
   }
 }

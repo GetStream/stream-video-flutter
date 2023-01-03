@@ -31,7 +31,7 @@ class StreamCallParticipantsInfoScreen extends StatelessWidget {
             child: StreamCallParticipantsInfoOptions(
                 call: call,
                 inviteButtonTitle: 'Invite',
-                muteToggleTitles: MuteToggleTitles(
+                muteToggleTitles: const MuteToggleTitles(
                   muteTitle: 'Mute Me',
                   unmuteTitle: 'Unmute Me',
                 ),

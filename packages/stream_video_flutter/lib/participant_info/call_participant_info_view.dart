@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/icon/icon_toggle.dart';
-import 'package:stream_video_flutter/participant_info/model/call_participant_state.dart';
-import 'package:stream_video_flutter/participant_info/theme/call_participant_info_theme.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+/// {@template streamCallParticipantInfoView}
+/// Displays call participant info view.
+/// {@endtemplate}
 class StreamCallParticipantInfoView extends StatelessWidget {
+  /// {@macro streamCallParticipantInfoView}
   const StreamCallParticipantInfoView({
     super.key,
     required this.participant,
@@ -13,8 +14,13 @@ class StreamCallParticipantInfoView extends StatelessWidget {
     this.participantInfoTheme,
   });
 
+  /// Represents current participant state.
   final CallParticipantState participant;
+
+  /// Active/Inactive icons for the video button.
   final StreamIconToggle videoIcon;
+
+  /// Active/Inactive icons for the audio button.
   final StreamIconToggle audioIcon;
 
   /// Theme for the participants info.
@@ -72,7 +78,7 @@ class StreamCallParticipantInfoView extends StatelessWidget {
 }
 
 class _MediaIcon extends StatelessWidget {
-  const _MediaIcon({super.key, required this.icon, required this.color});
+  const _MediaIcon({required this.icon, required this.color});
   final IconData icon;
   final Color color;
   @override

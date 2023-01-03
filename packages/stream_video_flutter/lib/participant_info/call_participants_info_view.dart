@@ -1,12 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/icon/icon_toggle.dart';
-import 'package:stream_video_flutter/participant_info/call_participants_info_options.dart';
-import 'package:stream_video_flutter/participant_info/model/mute_toggle_titles.dart';
-import 'package:stream_video_flutter/participant_info/model/call_participant_state.dart';
-import 'package:stream_video_flutter/participant_info/theme/call_participants_info_theme.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-import 'call_participant_info_view.dart';
 
 /// {@template participantsInfoViewBuilder}
 /// Builder function used to build a participant info view.
@@ -44,7 +37,10 @@ class StreamCallParticipantsInfoView extends StatefulWidget {
   /// Reference to [Call].
   final Call call;
 
+  /// Toggle container for the "video" icons.
   final StreamIconToggle videoIcon;
+
+  /// Toggle container for the "audio" icons.
   final StreamIconToggle audioIcon;
 
   /// Theme for the participants info.
@@ -87,17 +83,18 @@ class _StreamCallParticipantsInfoViewState
     _cancelListener?.call();
   }
 
+  /// Applies participants from the given [widget.call].
   void _setParticipants() {
     participants.clear();
     final localParticipant = widget.call.localParticipant;
     final localState = localParticipant != null
-        ? _mapToState(localParticipant.info, true)
+        ? _mapToState(localParticipant.info, self: true)
         : null;
     if (localState != null) {
       participants.add(localState);
     }
     participants.addAll(widget.call.participants.values.map((participant) {
-      return _mapToState(participant.info, false);
+      return _mapToState(participant.info, self: false);
     }));
   }
 
@@ -128,7 +125,8 @@ class _StreamCallParticipantsInfoViewState
         itemCount: participants.length);
   }
 
-  CallParticipantState _mapToState(ParticipantInfo info, bool self) {
+  /// Creates [CallParticipantState] from [ParticipantInfo] and [self] flag.
+  CallParticipantState _mapToState(ParticipantInfo info, {required bool self}) {
     //TODO grab role from coordinator User
     return CallParticipantState(
         self: self,

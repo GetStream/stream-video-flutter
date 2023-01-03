@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/participant_info/model/mute_toggle_titles.dart';
-import 'package:stream_video_flutter/participant_info/model/call_participant_state.dart';
-import 'package:stream_video_flutter/participant_info/theme/call_participants_info_theme.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-import 'call_participant_info_view.dart';
 
 /// {@template onInviteButtonPress}
 /// The action to perform when the Invite button is pressed.
