@@ -29,18 +29,23 @@ class StreamCallParticipantsInfoScreen extends StatelessWidget {
             elevation: 8,
             color: streamChatTheme.colorTheme.appBg,
             child: StreamCallParticipantsInfoOptions(
-                call: call,
-                inviteButtonTitle: 'Invite',
-                muteToggleTitles: const MuteToggleTitles(
-                  muteTitle: 'Mute Me',
-                  unmuteTitle: 'Unmute Me',
-                ),
-                onInviteButtonPress: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) =>
-                          CallParticipantsInviteScreen(call: call)));
-                }),
-          )
+              call: call,
+              inviteButtonTitle: 'Invite',
+              muteToggleTitles: const MuteToggleTitles(
+                muteTitle: 'Mute Me',
+                unmuteTitle: 'Unmute Me',
+              ),
+              onInviteButtonPress: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => CallParticipantsInviteScreen(
+                      call: call,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

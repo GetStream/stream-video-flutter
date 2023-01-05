@@ -14,7 +14,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamColorTheme? colorTheme,
     StreamAvatarTheme? avatarTheme,
     StreamParticipantsInfoTheme? participantsInfoTheme,
+    StreamParticipantInfoTheme? participantInfoTheme,
     StreamInvitableUserListTheme? invitableUserListTheme,
+    StreamInvitableUserTheme? invitableUserTheme,
   }) {
     final isDark = brightness == Brightness.dark;
     textTheme ??=
@@ -52,7 +54,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.colorTheme,
     required this.avatarTheme,
     required this.participantsInfoTheme,
+    required this.participantInfoTheme,
     required this.invitableUserListTheme,
+    required this.invitableUserTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -73,65 +77,74 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamTextTheme textTheme,
   ) {
     return StreamVideoTheme.raw(
-        textTheme: textTheme,
-        colorTheme: colorTheme,
+      textTheme: textTheme,
+      colorTheme: colorTheme,
+      avatarTheme: StreamAvatarTheme(
+        borderRadius: BorderRadius.circular(20),
+        constraints: const BoxConstraints.tightFor(
+          height: 40,
+          width: 40,
+        ),
+        initialsTextStyle: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: colorTheme.barsBg,
+        ),
+        selectionColor: colorTheme.accentPrimary,
+        selectionThickness: 4,
+      ),
+      participantsInfoTheme: StreamParticipantsInfoTheme(
+        dividerColor: colorTheme.overlayDark,
+        dividerIndent: 0.0,
+        dividerHeight: 0.0,
+      ),
+      participantInfoTheme: StreamParticipantInfoTheme(
+        usernameTextStyle: TextStyle(
+          color: colorTheme.textHighEmphasis,
+          fontSize: 17.0,
+        ),
+        iconActiveColor: colorTheme.textHighEmphasis,
+        iconInactiveColor: colorTheme.accentError,
         avatarTheme: StreamAvatarTheme(
-          borderRadius: BorderRadius.circular(20),
-          constraints: const BoxConstraints.tightFor(
-            height: 40,
-            width: 40,
-          ),
           initialsTextStyle: TextStyle(
-            fontSize: 16,
+            fontSize: 28,
             fontWeight: FontWeight.bold,
             color: colorTheme.barsBg,
           ),
-          selectionColor: colorTheme.accentPrimary,
-          selectionThickness: 4,
-        ),
-        participantsInfoTheme: StreamParticipantsInfoTheme(
-          dividerColor: colorTheme.overlayDark,
-          dividerIndent: 16.0,
-          dividerHeight: 0.0,
-          participantInfoTheme: StreamParticipantInfoTheme(
-            usernameTextStyle:
-                TextStyle(color: colorTheme.textHighEmphasis, fontSize: 18.0),
-            iconActiveColor: colorTheme.highlightDark,
-            iconInactiveColor: colorTheme.accentError,
-            avatarTheme: StreamAvatarTheme(
-                initialsTextStyle: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: colorTheme.barsBg,
-                ),
-                constraints: const BoxConstraints(
-                  minHeight: 56,
-                  minWidth: 56,
-                ),
-                borderRadius: const BorderRadius.all(Radius.circular(32))),
+          constraints: const BoxConstraints(
+            minHeight: 56,
+            minWidth: 56,
+          ),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(32),
           ),
         ),
-        invitableUserListTheme: StreamInvitableUserListTheme(
-          dividerColor: colorTheme.overlayDark,
-          dividerIndent: 16.0,
-          dividerHeight: 0.0,
-          invitableUserTheme: StreamInvitableUserTheme(
-            usernameTextStyle:
-                TextStyle(color: colorTheme.textHighEmphasis, fontSize: 18.0),
-            selectedIconColor: colorTheme.accentPrimary,
-            avatarTheme: StreamAvatarTheme(
-                initialsTextStyle: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: colorTheme.barsBg,
-                ),
-                constraints: const BoxConstraints(
-                  minHeight: 56,
-                  minWidth: 56,
-                ),
-                borderRadius: const BorderRadius.all(Radius.circular(32))),
+      ),
+      invitableUserListTheme: StreamInvitableUserListTheme(
+        dividerColor: colorTheme.overlayDark,
+        dividerIndent: 16.0,
+        dividerHeight: 0.0,
+      ),
+      invitableUserTheme: StreamInvitableUserTheme(
+        usernameTextStyle:
+            TextStyle(color: colorTheme.textHighEmphasis, fontSize: 18.0),
+        selectedIconColor: colorTheme.accentPrimary,
+        avatarTheme: StreamAvatarTheme(
+          initialsTextStyle: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: colorTheme.barsBg,
           ),
-        ));
+          constraints: const BoxConstraints(
+            minHeight: 56,
+            minWidth: 56,
+          ),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(32),
+          ),
+        ),
+      ),
+    );
   }
 
   static final StreamVideoTheme _kLightFallbackTheme = StreamVideoTheme.light();
@@ -158,8 +171,14 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the participants info widget.
   final StreamParticipantsInfoTheme participantsInfoTheme;
 
+  /// Theme for the participant info widget.
+  final StreamParticipantInfoTheme participantInfoTheme;
+
   /// Theme for the invitable user list widget.
   final StreamInvitableUserListTheme invitableUserListTheme;
+
+  /// Theme for the invitable user widget.
+  final StreamInvitableUserTheme invitableUserTheme;
 
   /// Creates a copy of [StreamVideoTheme] with specified attributes
   /// overridden.
@@ -169,7 +188,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamColorTheme? colorTheme,
     StreamAvatarTheme? avatarTheme,
     StreamParticipantsInfoTheme? participantsInfoTheme,
+    StreamParticipantInfoTheme? participantInfoTheme,
     StreamInvitableUserListTheme? invitableUserListTheme,
+    StreamInvitableUserTheme? invitableUserTheme,
   }) =>
       StreamVideoTheme.raw(
         textTheme: this.textTheme.merge(textTheme),
@@ -177,8 +198,11 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         avatarTheme: this.avatarTheme.merge(avatarTheme),
         participantsInfoTheme:
             this.participantsInfoTheme.merge(participantsInfoTheme),
+        participantInfoTheme:
+            this.participantInfoTheme.merge(participantInfoTheme),
         invitableUserListTheme:
             this.invitableUserListTheme.merge(invitableUserListTheme),
+        invitableUserTheme: this.invitableUserTheme.merge(invitableUserTheme),
       );
 
   /// Merge themes
@@ -203,8 +227,11 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       avatarTheme: avatarTheme.lerp(other.avatarTheme, t),
       participantsInfoTheme:
           participantsInfoTheme.lerp(other.participantsInfoTheme, t),
+      participantInfoTheme:
+          participantInfoTheme.lerp(other.participantInfoTheme, t),
       invitableUserListTheme:
           invitableUserListTheme.lerp(other.invitableUserListTheme, t),
+      invitableUserTheme: invitableUserTheme.lerp(other.invitableUserTheme, t),
     );
   }
 }

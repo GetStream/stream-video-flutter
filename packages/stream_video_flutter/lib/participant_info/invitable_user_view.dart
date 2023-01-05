@@ -1,15 +1,5 @@
-import 'dart:convert';
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/theme/stream_invitable_user_theme.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-
-/// {@template onInvitableUserTap}
-/// The action to perform when the user is tapped.
-/// {@endtemplate}
-typedef OnInvitableUserTap = void Function(UserInfo);
 
 /// {@template streamInvitableUserView}
 /// Displays invitable user.
@@ -36,16 +26,17 @@ class StreamInvitableUserView extends StatelessWidget {
   /// Theme for the invitable user list.
   final StreamInvitableUserTheme? invitableUserTheme;
 
-  /// {@macro onInvitableUserTap}
-  final OnInvitableUserTap? onInvitableUserTap;
+  /// The action to perform when a user is tapped.
+  final ValueChanged<UserInfo>? onInvitableUserTap;
 
   @override
   Widget build(BuildContext context) {
     final streamChatTheme = StreamVideoTheme.of(context);
-    final invitableUserTheme = this.invitableUserTheme ??
-        streamChatTheme.invitableUserListTheme.invitableUserTheme;
+    final invitableUserTheme =
+        this.invitableUserTheme ?? streamChatTheme.invitableUserTheme;
     final avatarTheme =
         invitableUserTheme.avatarTheme ?? streamChatTheme.avatarTheme;
+
     return InkWell(
       onTap: () => onInvitableUserTap?.call(user),
       child: Container(

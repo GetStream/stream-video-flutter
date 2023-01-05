@@ -93,9 +93,11 @@ class _StreamCallParticipantsInfoViewState
     if (localState != null) {
       participants.add(localState);
     }
-    participants.addAll(widget.call.participants.values.map((participant) {
-      return _mapToState(participant.info, self: false);
-    }));
+    participants.addAll(
+      widget.call.participants.values.map((participant) {
+        return _mapToState(participant.info, self: false);
+      }),
+    );
   }
 
   @override
@@ -104,34 +106,38 @@ class _StreamCallParticipantsInfoViewState
     final participantsInfoTheme =
         widget.participantsInfoTheme ?? streamChatTheme.participantsInfoTheme;
     return ListView.separated(
-        padding: const EdgeInsets.only(bottom: 16),
-        itemBuilder: (context, index) {
-          final participant = participants[index];
-          return widget.participantInfoViewBuilder
-                  ?.call(context, index, participant) ??
-              StreamCallParticipantInfoView(
-                participant: participant,
-                videoIcon: widget.videoIcon,
-                audioIcon: widget.audioIcon,
-              );
-        },
-        separatorBuilder: (context, index) =>
-            widget.participantInfoDividerBuilder?.call(context, index) ??
-            Divider(
-              indent: participantsInfoTheme.dividerIndent,
-              height: participantsInfoTheme.dividerHeight,
-              color: participantsInfoTheme.dividerColor,
-            ),
-        itemCount: participants.length);
+      padding: const EdgeInsets.only(bottom: 16),
+      itemBuilder: (context, index) {
+        final participant = participants[index];
+        final builder = widget.participantInfoViewBuilder;
+        if (builder != null) {
+          return builder.call(context, index, participant);
+        }
+        return StreamCallParticipantInfoView(
+          participant: participant,
+          videoIcon: widget.videoIcon,
+          audioIcon: widget.audioIcon,
+        );
+      },
+      separatorBuilder: (context, index) =>
+          widget.participantInfoDividerBuilder?.call(context, index) ??
+          Divider(
+            indent: participantsInfoTheme.dividerIndent,
+            height: participantsInfoTheme.dividerHeight,
+            color: participantsInfoTheme.dividerColor,
+          ),
+      itemCount: participants.length,
+    );
   }
 
   /// Creates [CallParticipantState] from [ParticipantInfo] and [self] flag.
   CallParticipantState _mapToState(ParticipantInfo info, {required bool self}) {
     //TODO grab role from coordinator User
     return CallParticipantState(
-        self: self,
-        user: UserInfo(id: info.userId, role: "member", name: info.userId),
-        audioAvailable: info.hasPublishedAudioTrack(),
-        videoAvailable: info.hasPublishedVideoTrack());
+      self: self,
+      user: UserInfo(id: info.userId, role: "member", name: info.userId),
+      audioAvailable: info.hasPublishedAudioTrack(),
+      videoAvailable: info.hasPublishedVideoTrack(),
+    );
   }
 }

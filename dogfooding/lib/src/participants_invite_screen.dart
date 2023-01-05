@@ -1,8 +1,5 @@
-import 'package:dogfooding/src/users_provider.dart';
+import 'package:dogfooding/src/utils/users_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/participant_info/invitable_user_list_controller.dart';
-import 'package:stream_video_flutter/participant_info/invitable_user_list_view.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class CallParticipantsInviteScreen extends StatefulWidget {
@@ -44,19 +41,6 @@ class _CallParticipantsInviteScreenState
         ],
       ),
       body: StreamInvitableUserListView(controller: _controller),
-    );
-  }
-
-  static List<UserInfo> _generateUserInfo() {
-    return List<UserInfo>.generate(
-      20,
-      (index) => UserInfo(
-        id: "user$index",
-        role: "admin",
-        name: "John $index",
-        imageUrl:
-            "https://ca.slack-edge.com/T02RM6X6B-U034NG4FPNG-688fab30cc42-192",
-      ),
     );
   }
 }
