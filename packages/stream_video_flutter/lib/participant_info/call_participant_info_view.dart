@@ -33,6 +33,7 @@ class StreamCallParticipantInfoView extends StatelessWidget {
         streamChatTheme.participantsInfoTheme.participantInfoTheme;
     final avatarTheme =
         participantInfoTheme.avatarTheme ?? streamChatTheme.avatarTheme;
+    
     return InkWell(
       onTap: () {},
       child: Container(
@@ -78,9 +79,12 @@ class StreamCallParticipantInfoView extends StatelessWidget {
 }
 
 class _MediaIcon extends StatelessWidget {
+
   const _MediaIcon({required this.icon, required this.color});
+  
   final IconData icon;
   final Color color;
+  
   @override
   Widget build(BuildContext context) {
     return Container(

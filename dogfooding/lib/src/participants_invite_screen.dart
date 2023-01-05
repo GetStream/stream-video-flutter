@@ -49,12 +49,14 @@ class _CallParticipantsInviteScreenState
 
   static List<UserInfo> _generateUserInfo() {
     return List<UserInfo>.generate(
-        20,
-        (index) => UserInfo(
-            id: "user$index",
-            role: "admin",
-            name: "John $index",
-            imageUrl:
-                "https://ca.slack-edge.com/T02RM6X6B-U034NG4FPNG-688fab30cc42-192"));
+      20,
+      (index) => UserInfo(
+        id: "user$index",
+        role: "admin",
+        name: "John $index",
+        imageUrl:
+            "https://ca.slack-edge.com/T02RM6X6B-U034NG4FPNG-688fab30cc42-192",
+      ),
+    );
   }
 }
