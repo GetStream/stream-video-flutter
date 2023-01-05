@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Widget used to indicate the connection quality of a given participant.
-class ConnectionQualityIndicator extends StatelessWidget {
-  const ConnectionQualityIndicator({
+class StreamConnectionQualityIndicator extends StatelessWidget {
+  const StreamConnectionQualityIndicator({
     super.key,
     required this.connectionQuality,
     this.activeColor,

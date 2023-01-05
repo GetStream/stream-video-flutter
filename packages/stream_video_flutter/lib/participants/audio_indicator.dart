@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/participant/audio_level_indicator.dart';
+import 'package:stream_video_flutter/participants/audio_level_indicator.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Widget used to indicate the audio state of a given participant.
 /// Either shows a mute icon or audio levels.
-class AudioIndicator extends StatelessWidget {
-  const AudioIndicator({
+class StreamAudioIndicator extends StatelessWidget {
+  const StreamAudioIndicator({
     super.key,
     required this.hasAudio,
     required this.audioLevel,
@@ -34,7 +34,7 @@ class AudioIndicator extends StatelessWidget {
     final theme = StreamVideoTheme.of(context).callParticipantTheme;
 
     if (hasAudio) {
-      return AudioLevelIndicator(
+      return StreamAudioLevelIndicator(
         audioLevel: audioLevel,
         activeColor: audioLevelActiveColor,
         inactiveColor: audioLevelInactiveColor,

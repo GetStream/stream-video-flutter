@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/participant/audio_indicator.dart';
+import 'package:stream_video_flutter/participants/audio_indicator.dart';
 import 'package:stream_video_flutter/theme/stream_video_theme.dart';
 
 /// Widget used to display participant name and mute status on a call.
-class ParticipantLabel extends StatelessWidget {
-  const ParticipantLabel({
+class StreamParticipantLabel extends StatelessWidget {
+  const StreamParticipantLabel({
     required this.participant,
     this.audioLevelActiveColor,
     this.audioLevelInactiveColor,
@@ -50,7 +50,7 @@ class ParticipantLabel extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(width: 4.0),
-          AudioIndicator(
+          StreamAudioIndicator(
             hasAudio: participant.isAudioEnabled,
             audioLevel: participant.audioLevel,
             audioLevelActiveColor: audioLevelActiveColor,

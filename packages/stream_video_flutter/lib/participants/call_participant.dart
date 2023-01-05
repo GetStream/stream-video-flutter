@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/participant/connection_quality_indicator.dart';
-import 'package:stream_video_flutter/participant/participant_label.dart';
+import 'package:stream_video_flutter/participants/connection_quality_indicator.dart';
+import 'package:stream_video_flutter/participants/participant_label.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/theme/stream_call_participant_theme.dart';
 
@@ -101,7 +101,7 @@ class _StreamCallParticipantState extends State<StreamCallParticipant> {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: ParticipantLabel(
+                  child: StreamParticipantLabel(
                     participant: participant,
                     audioLevelInactiveColor: theme.audioLevelInactiveColor,
                     audioLevelActiveColor: theme.audioLevelActiveColor,
@@ -115,7 +115,7 @@ class _StreamCallParticipantState extends State<StreamCallParticipant> {
             alignment: Alignment.bottomRight,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: ConnectionQualityIndicator(
+              child: StreamConnectionQualityIndicator(
                 connectionQuality: participant.connectionQuality,
                 activeColor: theme.connectionLevelActiveColor,
                 inactiveColor: theme.connectionLevelInactiveColor,
