@@ -34,7 +34,7 @@ class Success<T> extends Result<T> {
 }
 
 /// Represents failed result.
-class Failure<T> extends Result<T> {
+class Failure extends Result<Never> {
   Failure(this.error);
 
   /// The [VideoError] associated with the result.

@@ -35,7 +35,7 @@ extension ResultExtensions<T> on Result<T> {
   /// Returns the original instance of the [Result].
   Result<T> onFailure<K>(Function(VideoError) errorSideEffect) {
     if (this is Failure) {
-      final failure = this as Failure<T>;
+      final failure = this as Failure;
       errorSideEffect.call(failure.error);
     }
     return this;
@@ -49,7 +49,7 @@ extension ResultExtensions<T> on Result<T> {
     Future<void> Function(VideoError) errorSideEffect,
   ) async {
     if (this is Failure) {
-      final failure = this as Failure<T>;
+      final failure = this as Failure;
       await errorSideEffect.call(failure.error);
     }
     return this;
@@ -74,8 +74,8 @@ extension ResultExtensions<T> on Result<T> {
       final success = this as Success<T>;
       return Success(await mapper.call(success.data));
     } else if (this is Failure) {
-      final failure = this as Failure<T>;
-      return Failure<K>(failure.error);
+      final failure = this as Failure;
+      return Failure(failure.error);
     } else {
       throw ArgumentError('unexpected result type: $this');
     }
@@ -90,8 +90,8 @@ extension ResultExtensions<T> on Result<T> {
       final success = this as Success<T>;
       return mapper.call(success.data);
     } else if (this is Failure) {
-      final failure = this as Failure<T>;
-      return Failure<K>(failure.error);
+      final failure = this as Failure;
+      return Failure(failure.error);
     } else {
       throw ArgumentError('unexpected result type: $this');
     }
@@ -108,8 +108,8 @@ extension ResultExtensions<T> on Result<T> {
       final success = this as Success<T>;
       return mapper.call(success.data);
     } else if (this is Failure) {
-      final failure = this as Failure<T>;
-      return Failure<K>(failure.error);
+      final failure = this as Failure;
+      return Failure(failure.error);
     } else {
       throw ArgumentError('unexpected result type: $this');
     }
