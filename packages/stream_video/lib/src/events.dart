@@ -274,18 +274,20 @@ class ParticipantConnectionQualityUpdatedEvent
       '(participant: ${participant}, connectionQuality: ${connectionQuality})';
 }
 
-/// The participant's isSpeaking property has changed
+/// The participant's audio level has been updated.
 /// Emitted by [Participant].
-class SpeakingChangedEvent with ParticipantEvent {
+class AudioLevelUpdatedEvent with ParticipantEvent {
   final Participant participant;
-  final bool speaking;
+  final double audioLevel;
+  final bool isSpeaking;
 
-  const SpeakingChangedEvent({
+  const AudioLevelUpdatedEvent({
     required this.participant,
-    required this.speaking,
+    required this.audioLevel,
+    required this.isSpeaking,
   });
 
   @override
   String toString() => '${runtimeType}'
-      '(participant: ${participant}, speaking: ${speaking})';
+      '(participant: ${participant}, audioLevel: ${audioLevel}, isSpeaking: ${isSpeaking})';
 }
