@@ -1,4 +1,4 @@
-import 'package:stream_video/src/v2/coordinator/models/video_models.dart';
+import 'package:stream_video/src/v2/coordinator/models/coordinator_models.dart';
 
 // TODO: Should we call it VideoEvent or CoordinatorEvent?
 

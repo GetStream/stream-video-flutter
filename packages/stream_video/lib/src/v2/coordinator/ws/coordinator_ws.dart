@@ -11,7 +11,7 @@ import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/token/token_manager.dart';
 import 'package:stream_video/src/types/other.dart';
 import 'package:stream_video/src/v2/coordinator/ws/mapper_extensions.dart';
-import 'package:stream_video/src/v2/coordinator/ws/video_socket_listener.dart';
+import 'package:stream_video/src/v2/coordinator/ws/coordinator_socket_listener.dart';
 import 'package:stream_video/src/ws/keep_alive.dart';
 import 'package:stream_video/src/ws/ws.dart';
 
@@ -36,7 +36,7 @@ class CoordinatorWebSocket extends StreamWebSocket
   /// The token manager used to fetch or refresh token.
   final TokenManager tokenManager;
 
-  final Set<VideoEventListener> _eventListeners = {};
+  final Set<CoordinatorEventListener> _eventListeners = {};
 
   String? _userId;
   String? _clientId;
@@ -48,11 +48,11 @@ class CoordinatorWebSocket extends StreamWebSocket
   // @override
   // OnConnectionStateUpdated get onConnectionStateUpdated => events.emit;
 
-  void addEventListener(VideoEventListener listener) {
+  void addEventListener(CoordinatorEventListener listener) {
     _eventListeners.add(listener);
   }
 
-  void removeEventListener(VideoEventListener listener) {
+  void removeEventListener(CoordinatorEventListener listener) {
     _eventListeners.remove(listener);
   }
 

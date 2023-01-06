@@ -4,7 +4,7 @@ import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/websocket.
     as coordinator;
 import 'package:stream_video/protobuf/video/coordinator/member_v1/member.pb.dart';
 import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/v2/coordinator/models/video_models.dart';
+import 'package:stream_video/src/v2/coordinator/models/coordinator_models.dart';
 import 'package:stream_video/src/v2/coordinator/ws/coordinator_events.dart';
 
 /// Converts [coordinator.WebsocketEvent] into [CoordinatorEvent].
