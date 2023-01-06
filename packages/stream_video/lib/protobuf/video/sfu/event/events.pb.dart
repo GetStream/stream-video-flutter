@@ -1070,27 +1070,17 @@ class PublisherAnswer extends $pb.GeneratedMessage {
 
 class ConnectionQualityChanged extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConnectionQualityChanged', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
-    ..e<$0.ConnectionQuality>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionQuality', $pb.PbFieldType.OE, defaultOrMaker: $0.ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED, valueOf: $0.ConnectionQuality.valueOf, enumValues: $0.ConnectionQuality.values)
+    ..pc<ConnectionQualityInfo>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionQualityUpdates', $pb.PbFieldType.PM, subBuilder: ConnectionQualityInfo.create)
     ..hasRequiredFields = false
   ;
 
   ConnectionQualityChanged._() : super();
   factory ConnectionQualityChanged({
-    $core.String? userId,
-    $core.String? sessionId,
-    $0.ConnectionQuality? connectionQuality,
+    $core.Iterable<ConnectionQualityInfo>? connectionQualityUpdates,
   }) {
     final _result = create();
-    if (userId != null) {
-      _result.userId = userId;
-    }
-    if (sessionId != null) {
-      _result.sessionId = sessionId;
-    }
-    if (connectionQuality != null) {
-      _result.connectionQuality = connectionQuality;
+    if (connectionQualityUpdates != null) {
+      _result.connectionQualityUpdates.addAll(connectionQualityUpdates);
     }
     return _result;
   }
@@ -1114,6 +1104,57 @@ class ConnectionQualityChanged extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static ConnectionQualityChanged getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ConnectionQualityChanged>(create);
   static ConnectionQualityChanged? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<ConnectionQualityInfo> get connectionQualityUpdates => $_getList(0);
+}
+
+class ConnectionQualityInfo extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConnectionQualityInfo', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
+    ..e<$0.ConnectionQuality>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionQuality', $pb.PbFieldType.OE, defaultOrMaker: $0.ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED, valueOf: $0.ConnectionQuality.valueOf, enumValues: $0.ConnectionQuality.values)
+    ..hasRequiredFields = false
+  ;
+
+  ConnectionQualityInfo._() : super();
+  factory ConnectionQualityInfo({
+    $core.String? userId,
+    $core.String? sessionId,
+    $0.ConnectionQuality? connectionQuality,
+  }) {
+    final _result = create();
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    if (sessionId != null) {
+      _result.sessionId = sessionId;
+    }
+    if (connectionQuality != null) {
+      _result.connectionQuality = connectionQuality;
+    }
+    return _result;
+  }
+  factory ConnectionQualityInfo.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ConnectionQualityInfo.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ConnectionQualityInfo clone() => ConnectionQualityInfo()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ConnectionQualityInfo copyWith(void Function(ConnectionQualityInfo) updates) => super.copyWith((message) => updates(message as ConnectionQualityInfo)) as ConnectionQualityInfo; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ConnectionQualityInfo create() => ConnectionQualityInfo._();
+  ConnectionQualityInfo createEmptyInstance() => create();
+  static $pb.PbList<ConnectionQualityInfo> createRepeated() => $pb.PbList<ConnectionQualityInfo>();
+  @$core.pragma('dart2js:noInline')
+  static ConnectionQualityInfo getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ConnectionQualityInfo>(create);
+  static ConnectionQualityInfo? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get userId => $_getSZ(0);
@@ -1209,6 +1250,7 @@ class AudioLevel extends $pb.GeneratedMessage {
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
     ..a<$core.double>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'level', $pb.PbFieldType.OF)
+    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isSpeaking')
     ..hasRequiredFields = false
   ;
 
@@ -1217,6 +1259,7 @@ class AudioLevel extends $pb.GeneratedMessage {
     $core.String? userId,
     $core.String? sessionId,
     $core.double? level,
+    $core.bool? isSpeaking,
   }) {
     final _result = create();
     if (userId != null) {
@@ -1227,6 +1270,9 @@ class AudioLevel extends $pb.GeneratedMessage {
     }
     if (level != null) {
       _result.level = level;
+    }
+    if (isSpeaking != null) {
+      _result.isSpeaking = isSpeaking;
     }
     return _result;
   }
@@ -1277,6 +1323,15 @@ class AudioLevel extends $pb.GeneratedMessage {
   $core.bool hasLevel() => $_has(2);
   @$pb.TagNumber(3)
   void clearLevel() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.bool get isSpeaking => $_getBF(3);
+  @$pb.TagNumber(4)
+  set isSpeaking($core.bool v) { $_setBool(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasIsSpeaking() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearIsSpeaking() => clearField(4);
 }
 
 class AudioLevelChanged extends $pb.GeneratedMessage {
