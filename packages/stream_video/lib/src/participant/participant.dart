@@ -94,6 +94,7 @@ abstract class Participant<T extends TrackPublication>
   /// Info related to this participant.
   ParticipantInfo get info => _info;
   late ParticipantInfo _info;
+
   void updateInfo(ParticipantInfo info) {
     _info = info;
     [events, call.events].emit(ParticipantInfoUpdatedEvent(
@@ -104,9 +105,15 @@ abstract class Participant<T extends TrackPublication>
   /// Audio level between 0-1, 1 being the loudest.
   double get audioLevel => _audioLevel;
   double _audioLevel = 0;
+
   set audioLevel(double level) {
     if (_audioLevel != level) {
       _audioLevel = level;
+
+      events.emit(AudioLevelChangedEvent(
+        participant: this,
+        audioLevel: level,
+      ));
 
       // This is a heuristic that is not 100% accurate.
       // We use a threshold of 0.3 to determine if the participant is speaking.
@@ -119,6 +126,7 @@ abstract class Participant<T extends TrackPublication>
   /// if [Participant] is currently speaking.
   bool get isSpeaking => _isSpeaking;
   bool _isSpeaking = false;
+
   set isSpeaking(bool speaking) {
     if (_isSpeaking == speaking) return;
     _isSpeaking = speaking;
@@ -135,6 +143,7 @@ abstract class Participant<T extends TrackPublication>
   /// Connection quality between the [Participant] and the Server.
   ConnectionQuality get connectionQuality => _connectionQuality;
   ConnectionQuality _connectionQuality = ConnectionQuality.unknown;
+
   set connectionQuality(ConnectionQuality quality) {
     if (_connectionQuality == quality) return;
     _connectionQuality = quality;
