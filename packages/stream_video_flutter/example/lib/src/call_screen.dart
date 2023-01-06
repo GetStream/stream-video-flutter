@@ -1,9 +1,8 @@
+import 'package:example/src/participant_track.dart';
 import 'package:example/src/widgets/controls.dart';
-import 'package:example/src/widgets/participant_widget.dart';
-import 'package:example/src/widgets/participant_info.dart';
 import 'package:flutter/material.dart';
-import 'package:collection/collection.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'home_screen.dart';
 
@@ -44,7 +43,6 @@ class _CallScreenState extends State<CallScreen> {
         screenTracks.add(ParticipantTrack(
           participant: participant,
           videoTrack: t.track,
-          isScreenShare: t.isScreenShare,
         ));
       }
     }
@@ -83,7 +81,6 @@ class _CallScreenState extends State<CallScreen> {
         screenTracks.add(ParticipantTrack(
           participant: widget.call.localParticipant!,
           videoTrack: t.track,
-          isScreenShare: t.isScreenShare,
         ));
       }
     }
@@ -115,33 +112,12 @@ class _CallScreenState extends State<CallScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final grid = GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 1,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-      ),
-      itemCount: allParticipants.length,
-      itemBuilder: (context, index) {
-        final participant = allParticipants[index];
-        if (participant is RemoteParticipant) {
-          print('All tracks: ${participant.videoTracks.length}');
-          print(
-              'Track: ${participant.videoTracks.map((e) => e.track?.mediaStreamTrack)}');
-        }
-        final participantTrack = ParticipantTrack(
-          participant: participant,
-          videoTrack: participant.videoTracks.firstOrNull?.track as VideoTrack?,
-          isScreenShare: false,
-        );
-        return ParticipantWidget.widgetFor(participantTrack);
-      },
-    );
-
     return Scaffold(
       body: Column(
         children: [
-          Expanded(child: grid),
+          Expanded(
+            child: StreamCallParticipants(participants: allParticipants),
+          ),
           SizedBox(
             width: double.infinity,
             child: Material(

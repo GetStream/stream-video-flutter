@@ -176,14 +176,24 @@ final $typed_data.Uint8List publisherAnswerDescriptor = $convert.base64Decode('C
 const ConnectionQualityChanged$json = const {
   '1': 'ConnectionQualityChanged',
   '2': const [
+    const {'1': 'connection_quality_updates', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.event.ConnectionQualityInfo', '10': 'connectionQualityUpdates'},
+  ],
+};
+
+/// Descriptor for `ConnectionQualityChanged`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List connectionQualityChangedDescriptor = $convert.base64Decode('ChhDb25uZWN0aW9uUXVhbGl0eUNoYW5nZWQSawoaY29ubmVjdGlvbl9xdWFsaXR5X3VwZGF0ZXMYASADKAsyLS5zdHJlYW0udmlkZW8uc2Z1LmV2ZW50LkNvbm5lY3Rpb25RdWFsaXR5SW5mb1IYY29ubmVjdGlvblF1YWxpdHlVcGRhdGVz');
+@$core.Deprecated('Use connectionQualityInfoDescriptor instead')
+const ConnectionQualityInfo$json = const {
+  '1': 'ConnectionQualityInfo',
+  '2': const [
     const {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
     const {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
     const {'1': 'connection_quality', '3': 3, '4': 1, '5': 14, '6': '.stream.video.sfu.models.ConnectionQuality', '10': 'connectionQuality'},
   ],
 };
 
-/// Descriptor for `ConnectionQualityChanged`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List connectionQualityChangedDescriptor = $convert.base64Decode('ChhDb25uZWN0aW9uUXVhbGl0eUNoYW5nZWQSFwoHdXNlcl9pZBgBIAEoCVIGdXNlcklkEh0KCnNlc3Npb25faWQYAiABKAlSCXNlc3Npb25JZBJZChJjb25uZWN0aW9uX3F1YWxpdHkYAyABKA4yKi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Db25uZWN0aW9uUXVhbGl0eVIRY29ubmVjdGlvblF1YWxpdHk=');
+/// Descriptor for `ConnectionQualityInfo`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List connectionQualityInfoDescriptor = $convert.base64Decode('ChVDb25uZWN0aW9uUXVhbGl0eUluZm8SFwoHdXNlcl9pZBgBIAEoCVIGdXNlcklkEh0KCnNlc3Npb25faWQYAiABKAlSCXNlc3Npb25JZBJZChJjb25uZWN0aW9uX3F1YWxpdHkYAyABKA4yKi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Db25uZWN0aW9uUXVhbGl0eVIRY29ubmVjdGlvblF1YWxpdHk=');
 @$core.Deprecated('Use dominantSpeakerChangedDescriptor instead')
 const DominantSpeakerChanged$json = const {
   '1': 'DominantSpeakerChanged',
@@ -202,11 +212,12 @@ const AudioLevel$json = const {
     const {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
     const {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
     const {'1': 'level', '3': 3, '4': 1, '5': 2, '10': 'level'},
+    const {'1': 'is_speaking', '3': 4, '4': 1, '5': 8, '10': 'isSpeaking'},
   ],
 };
 
 /// Descriptor for `AudioLevel`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List audioLevelDescriptor = $convert.base64Decode('CgpBdWRpb0xldmVsEhcKB3VzZXJfaWQYASABKAlSBnVzZXJJZBIdCgpzZXNzaW9uX2lkGAIgASgJUglzZXNzaW9uSWQSFAoFbGV2ZWwYAyABKAJSBWxldmVs');
+final $typed_data.Uint8List audioLevelDescriptor = $convert.base64Decode('CgpBdWRpb0xldmVsEhcKB3VzZXJfaWQYASABKAlSBnVzZXJJZBIdCgpzZXNzaW9uX2lkGAIgASgJUglzZXNzaW9uSWQSFAoFbGV2ZWwYAyABKAJSBWxldmVsEh8KC2lzX3NwZWFraW5nGAQgASgIUgppc1NwZWFraW5n');
 @$core.Deprecated('Use audioLevelChangedDescriptor instead')
 const AudioLevelChanged$json = const {
   '1': 'AudioLevelChanged',

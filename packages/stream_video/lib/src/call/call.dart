@@ -682,16 +682,26 @@ class Call with EventEmittable<CallEvent> {
       })
       ..on<SFUConnectionQualityChangedEvent>((event) {
         final connectionQualityChanged = event.connectionQualityChanged;
-        final participant = participants[connectionQualityChanged.sessionId];
 
-        if (participant == null) {
-          return logger.warning(
-            'Participant not found for sessionId: ${connectionQualityChanged.sessionId}',
-          );
-        }
+        // localParticipant & remote participants
+        final allParticipants = <String, Participant>{
+          if (localParticipant != null)
+            localParticipant!.sessionId: localParticipant!,
+          ...participants,
+        };
 
-        final quality = connectionQualityChanged.connectionQuality;
-        participant.connectionQuality = quality.toStreamConnectionQuality();
+        connectionQualityChanged.connectionQualityUpdates.forEach((update) {
+          final participant = allParticipants[update.sessionId];
+
+          if (participant == null) {
+            return logger.warning(
+              'Participant not found for sessionId: ${update.sessionId}',
+            );
+          }
+
+          final quality = update.connectionQuality;
+          participant.connectionQuality = quality.toStreamConnectionQuality();
+        });
       });
   }
 }
