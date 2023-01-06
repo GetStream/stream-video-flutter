@@ -1,8 +1,8 @@
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pbtwirp.dart';
 import 'package:stream_video/src/token/token_manager.dart';
-import 'package:stream_video/src/v2/errors/video_error.dart';
 import 'package:stream_video/src/v2/utils/result.dart';
+import 'package:stream_video/src/v2/utils/result_converters.dart';
 import 'package:tart/tart.dart';
 
 /// An accessor that allows us to communicate with the API around video calls.
@@ -30,12 +30,8 @@ class CoordinatorClient {
             .createDevice(ctx, request)
             .then(Success.new);
       });
-    } on TwirpError catch (e) {
-      return VideoErrorWithCause(message: e.getMsg, cause: e)
-          .asFutureFailureResult();
-    } catch (e) {
-      return VideoError(message: 'Unknown Exception Occurred: $e')
-          .asFutureFailureResult();
+    } catch (e, stk) {
+      return e.asFailure(stk).asFuture();
     }
   }
 
@@ -47,12 +43,8 @@ class CoordinatorClient {
             .deleteDevice(ctx, request)
             .then(Success.new);
       });
-    } on TwirpError catch (e) {
-      return VideoErrorWithCause(message: e.getMsg, cause: e)
-          .asFutureFailureResult();
-    } catch (e) {
-      return VideoError(message: 'Unknown Exception Occurred: $e')
-          .asFutureFailureResult();
+    } catch (e, stk) {
+      return e.asFailure(stk).asFuture();
     }
   }
 
@@ -64,12 +56,8 @@ class CoordinatorClient {
             .createCall(ctx, request)
             .then(Success.new);
       });
-    } on TwirpError catch (e) {
-      return VideoErrorWithCause(message: e.getMsg, cause: e)
-          .asFutureFailureResult();
-    } catch (e) {
-      return VideoError(message: 'Unknown Exception Occurred: $e')
-          .asFutureFailureResult();
+    } catch (e, stk) {
+      return e.asFailure(stk).asFuture();
     }
   }
 
@@ -83,12 +71,8 @@ class CoordinatorClient {
             .getOrCreateCall(ctx, request)
             .then(Success.new);
       });
-    } on TwirpError catch (e) {
-      return VideoErrorWithCause(message: e.getMsg, cause: e)
-          .asFutureFailureResult();
-    } catch (e) {
-      return VideoError(message: 'Unknown Exception Occurred: $e')
-          .asFutureFailureResult();
+    } catch (e, stk) {
+      return e.asFailure(stk).asFuture();
     }
   }
 
@@ -101,12 +85,8 @@ class CoordinatorClient {
             .joinCall(ctx, request)
             .then(Success.new);
       });
-    } on TwirpError catch (e) {
-      return VideoErrorWithCause(message: e.getMsg, cause: e)
-          .asFutureFailureResult();
-    } catch (e) {
-      return VideoError(message: 'Unknown Exception Occurred: $e')
-          .asFutureFailureResult();
+    } catch (e, stk) {
+      return e.asFailure(stk).asFuture();
     }
   }
 
@@ -120,12 +100,8 @@ class CoordinatorClient {
             .getCallEdgeServer(ctx, request)
             .then(Success.new);
       });
-    } on TwirpError catch (e) {
-      return VideoErrorWithCause(message: e.getMsg, cause: e)
-          .asFutureFailureResult();
-    } catch (e) {
-      return VideoError(message: 'Unknown Exception Occurred: $e')
-          .asFutureFailureResult();
+    } catch (e, stk) {
+      return e.asFailure(stk).asFuture();
     }
   }
 
@@ -138,12 +114,8 @@ class CoordinatorClient {
             .sendEvent(ctx, request)
             .then(Success.new);
       });
-    } on TwirpError catch (e) {
-      return VideoErrorWithCause(message: e.getMsg, cause: e)
-          .asFutureFailureResult();
-    } catch (e) {
-      return VideoError(message: 'Unknown Exception Occurred: $e')
-          .asFutureFailureResult();
+    } catch (e, stk) {
+      return e.asFailure(stk).asFuture();
     }
   }
 
@@ -157,12 +129,8 @@ class CoordinatorClient {
             .sendCustomEvent(ctx, request)
             .then(Success.new);
       });
-    } on TwirpError catch (e) {
-      return VideoErrorWithCause(message: e.getMsg, cause: e)
-          .asFutureFailureResult();
-    } catch (e) {
-      return VideoError(message: 'Unknown Exception Occurred: $e')
-          .asFutureFailureResult();
+    } catch (e, stk) {
+      return e.asFailure(stk).asFuture();
     }
   }
 
@@ -174,12 +142,8 @@ class CoordinatorClient {
             .upsertCallMembers(ctx, request)
             .then(Success.new);
       });
-    } on TwirpError catch (e) {
-      return VideoErrorWithCause(message: e.getMsg, cause: e)
-          .asFutureFailureResult();
-    } catch (e) {
-      return VideoError(message: 'Unknown Exception Occurred: $e')
-          .asFutureFailureResult();
+    } catch (e, stk) {
+      return e.asFailure(stk).asFuture();
     }
   }
 
@@ -191,12 +155,8 @@ class CoordinatorClient {
             .queryUsers(ctx, request)
             .then(Success.new);
       });
-    } on TwirpError catch (e) {
-      return VideoErrorWithCause(message: e.getMsg, cause: e)
-          .asFutureFailureResult();
-    } catch (e) {
-      return VideoError(message: 'Unknown Exception Occurred: $e')
-          .asFutureFailureResult();
+    } catch (e, stk) {
+      return e.asFailure(stk).asFuture();
     }
   }
 

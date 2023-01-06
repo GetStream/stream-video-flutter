@@ -1,7 +1,7 @@
-import 'package:stream_video/src/v2/coordinator/ws/video_events.dart';
+import 'package:stream_video/src/v2/coordinator/ws/coordinator_events.dart';
 
 class VideoEventListener {
-  /// Used for passing down all [VideoEvent]s coming from
+  /// Used for passing down all [CoordinatorEvent]s coming from
   /// the WebSocket connection, after parse.
-  void onEvent(VideoEvent event) {}
+  void onEvent(CoordinatorEvent event) {}
 }

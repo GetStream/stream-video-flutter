@@ -1,22 +1,60 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_video/src/logger/stream_logger.dart';
 import 'package:stream_video/src/v2/errors/video_error.dart';
+import 'package:stream_video/src/v2/errors/video_error_composer.dart';
 import 'package:stream_video/src/v2/utils/result.dart';
 import 'package:stream_video/src/v2/webrtc/peer_type.dart';
 
+/// {@template onStreamAdded}
+/// Handler when a new [MediaStream] gets added.
+/// {@endtemplate}
+typedef OnStreamAdded = void Function(StreamPeerConnection, rtc.MediaStream);
+
+/// {@template onNegotiationNeeded}
+/// Handler when there's a new negotiation.
+/// {@endtemplate}
+typedef OnNegotiationNeeded = void Function(StreamPeerConnection);
+
+/// {@template onIceCandidate}
+/// Handler whenever we receive [rtc.RTCIceCandidate]s.
+/// {@endtemplate}
+typedef OnIceCandidate = void Function(
+  StreamPeerConnection,
+  rtc.RTCIceCandidate,
+);
+
 /// Wrapper around the WebRTC connection that contains tracks.
 class StreamPeerConnection {
+  /// Creates [StreamPeerConnection] instance.
   StreamPeerConnection({
     required this.sessionId,
     required this.callCid,
     required this.type,
     required this.pc,
+    required this.mediaConstraints,
+    this.onStreamAdded,
+    this.onNegotiationNeeded,
+    this.onIceCandidate,
   }) {
     _initRtcCallbacks();
   }
+
+  final _logger = taggedLogger(tag: 'SV:PeerConnection');
+
   final String sessionId;
   final String callCid;
   final StreamPeerType type;
   final rtc.RTCPeerConnection pc;
+  final Map<String, dynamic> mediaConstraints;
+
+  /// {@macro onStreamAdded}
+  final OnStreamAdded? onStreamAdded;
+
+  /// {@macro onNegotiationNeeded}
+  final OnNegotiationNeeded? onNegotiationNeeded;
+
+  /// {@macro onIceCandidate}
+  final OnIceCandidate? onIceCandidate;
 
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
   late rtc.RTCRtpTransceiver audioTransceiver;
@@ -25,11 +63,11 @@ class StreamPeerConnection {
   /// Creates an offer and sets it as the local description.
   Future<Result<rtc.RTCSessionDescription>> createOffer() async {
     try {
-      final offer = await pc.createOffer();
+      final offer = await pc.createOffer(mediaConstraints);
       await pc.setLocalDescription(offer);
       return Success(offer);
-    } catch (e) {
-      return Failure(VideoError.from(e));
+    } catch (e, stk) {
+      return Failure(VideoErrors.compose(e, stk));
     }
   }
 
@@ -38,11 +76,11 @@ class StreamPeerConnection {
   /// The remote description must be set before calling this method.
   Future<Result<rtc.RTCSessionDescription>> createAnswer() async {
     try {
-      final answer = await pc.createAnswer();
+      final answer = await pc.createAnswer(mediaConstraints);
       await pc.setLocalDescription(answer);
       return Success(answer);
-    } catch (e) {
-      return Failure(VideoError.from(e));
+    } catch (e, stk) {
+      return Failure(VideoErrors.compose(e, stk));
     }
   }
 
@@ -57,8 +95,8 @@ class StreamPeerConnection {
       }
       _pendingCandidates.clear();
       return Success(result);
-    } catch (e) {
-      return Failure(VideoError.from(e));
+    } catch (e, stk) {
+      return Failure(VideoErrors.compose(e, stk));
     }
   }
 
@@ -75,8 +113,8 @@ class StreamPeerConnection {
       }
       final result = await pc.addCandidate(candidate);
       return Success(result);
-    } catch (e) {
-      return Failure(VideoError.from(e));
+    } catch (e, stk) {
+      return Failure(VideoErrors.compose(e, stk));
     }
   }
 
@@ -160,30 +198,38 @@ class StreamPeerConnection {
   }
 
   void _onAddStream(rtc.MediaStream stream) {
-    //TODO
+    _logger.v(() => '[onAddStream] stream.id: ${stream.id}');
+    onStreamAdded?.call(this, stream);
   }
 
   void _onRemoveStream(rtc.MediaStream stream) {
-    //TODO
+    _logger.v(() => '[onRemoveStream] stream.id: ${stream.id}');
   }
 
   void _onAddTrack(rtc.MediaStream stream, rtc.MediaStreamTrack track) {
-    //TODO
+    _logger.v(
+      () => '[onAddTrack] stream.id: ${stream.id}, track.id: ${track.id}, '
+          'track.kind: ${track.kind}',
+    );
   }
 
   void _onRemoveTrack(rtc.MediaStream stream, rtc.MediaStreamTrack track) {
-    //TODO
+    _logger.v(
+      () => '[onRemoveTrack] stream.id: ${stream.id}, track.id: ${track.id}, '
+          'track.kind: ${track.kind}',
+    );
   }
 
-  void _onIceCandidate(rtc.RTCIceCandidate stream) {
-    //TODO
+  void _onIceCandidate(rtc.RTCIceCandidate iceCandidate) {
+    onIceCandidate?.call(this, iceCandidate);
   }
 
   void _onIceConnectionState(rtc.RTCIceConnectionState state) {
-    //TODO
+    _logger.v(() => '[onIceConnectionState] state: $state');
   }
 
   void _onRenegotiationNeeded() {
-    //TODO
+    _logger.i(() => '[onRenegotiationNeeded] no args');
+    onNegotiationNeeded?.call(this);
   }
 }

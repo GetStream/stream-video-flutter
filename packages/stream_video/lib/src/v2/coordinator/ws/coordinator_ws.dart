@@ -17,9 +17,9 @@ import 'package:stream_video/src/ws/ws.dart';
 
 // TODO: The class needs further refactor. Some parts can be abstracted.
 
-class VideoWebSocket extends StreamWebSocket
+class CoordinatorWebSocket extends StreamWebSocket
     with KeepAlive, ConnectionStateMixin {
-  VideoWebSocket(
+  CoordinatorWebSocket(
     super.url, {
     super.protocols,
     required this.apiKey,
