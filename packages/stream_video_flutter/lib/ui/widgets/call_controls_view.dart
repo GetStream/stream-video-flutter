@@ -185,14 +185,14 @@ class _CallControlsViewState extends State<CallControlsView> {
 
   ///Enables/Disables video
   void _toggleVideo() async {
-    await participant.setCameraEnabled(enabled: !participant.isCameraEnabled);
+    await participant.setCameraEnabled(enabled: !participant.isVideoEnabled);
     setState(() {});
   }
 
   ///Enables/Disables microfone
   void _toggleMic() async {
     await participant.setMicrophoneEnabled(
-      enabled: !participant.isMicrophoneEnabled,
+      enabled: !participant.isAudioEnabled,
     );
     setState(() {});
   }

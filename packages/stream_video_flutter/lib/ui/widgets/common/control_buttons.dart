@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/theme/themes.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/theme/themes.dart';
 
 ///Container of all buttons of control for Call.
 ///The buttons may change accordingly with the platform
@@ -184,7 +184,7 @@ class ControlToggleButton extends StatefulWidget {
     return ControlToggleButton(
       iconEnabled ?? theme.toggleVideoIconEnabled,
       iconDisabled ?? theme.toggleVideoIconDisabled,
-      participant.isCameraEnabled,
+      participant.isVideoEnabled,
       buttonStyle ?? theme.toggleVideoStyle,
       onPressed,
     );
@@ -202,7 +202,7 @@ class ControlToggleButton extends StatefulWidget {
     return ControlToggleButton(
       iconEnabled ?? theme.toggleMicIconEnabled,
       iconDisabled ?? theme.toggleMicIconDisabled,
-      participant.isMicrophoneEnabled,
+      participant.isAudioEnabled,
       buttonStyle ?? theme.toggleMicStyle,
       onPressed,
     );
