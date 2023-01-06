@@ -145,11 +145,13 @@ class _CallScreenState extends State<CallScreen> {
                     Icons.group_rounded,
                     color: Colors.black,
                   ),
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => StreamCallParticipantsInfoScreen(
-                            call: widget.call)));
-                  },
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => StreamCallParticipantsInfoScreen(
+                        call: widget.call,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
