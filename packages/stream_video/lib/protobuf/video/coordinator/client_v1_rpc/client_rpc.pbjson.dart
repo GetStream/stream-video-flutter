@@ -108,15 +108,18 @@ const CreateCallInput$json = const {
   '2': const [
     const {'1': 'call', '3': 1, '4': 1, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.CallInput', '10': 'call'},
     const {'1': 'members', '3': 2, '4': 3, '5': 11, '6': '.stream.video.coordinator.client_v1_rpc.MemberInput', '10': 'members'},
-    const {'1': 'ring', '3': 3, '4': 1, '5': 8, '9': 0, '10': 'ring', '17': true},
+    const {'1': 'ring', '3': 3, '4': 1, '5': 8, '9': 1, '10': 'ring', '17': true},
+    const {'1': 'user_id', '3': 4, '4': 1, '5': 9, '9': 0, '10': 'userId'},
+    const {'1': 'user', '3': 5, '4': 1, '5': 11, '6': '.stream.video.coordinator.user_v1.UserInput', '9': 0, '10': 'user'},
   ],
   '8': const [
+    const {'1': 'created_by'},
     const {'1': '_ring'},
   ],
 };
 
 /// Descriptor for `CreateCallInput`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List createCallInputDescriptor = $convert.base64Decode('Cg9DcmVhdGVDYWxsSW5wdXQSRQoEY2FsbBgBIAEoCzIxLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkNhbGxJbnB1dFIEY2FsbBJNCgdtZW1iZXJzGAIgAygLMjMuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuTWVtYmVySW5wdXRSB21lbWJlcnMSFwoEcmluZxgDIAEoCEgAUgRyaW5niAEBQgcKBV9yaW5n');
+final $typed_data.Uint8List createCallInputDescriptor = $convert.base64Decode('Cg9DcmVhdGVDYWxsSW5wdXQSRQoEY2FsbBgBIAEoCzIxLnN0cmVhbS52aWRlby5jb29yZGluYXRvci5jbGllbnRfdjFfcnBjLkNhbGxJbnB1dFIEY2FsbBJNCgdtZW1iZXJzGAIgAygLMjMuc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLmNsaWVudF92MV9ycGMuTWVtYmVySW5wdXRSB21lbWJlcnMSFwoEcmluZxgDIAEoCEgBUgRyaW5niAEBEhkKB3VzZXJfaWQYBCABKAlIAFIGdXNlcklkEkEKBHVzZXIYBSABKAsyKy5zdHJlYW0udmlkZW8uY29vcmRpbmF0b3IudXNlcl92MS5Vc2VySW5wdXRIAFIEdXNlckIMCgpjcmVhdGVkX2J5QgcKBV9yaW5n');
 @$core.Deprecated('Use createCallRequestDescriptor instead')
 const CreateCallRequest$json = const {
   '1': 'CreateCallRequest',
@@ -700,8 +703,9 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> ClientRPCS
   '.stream.video.coordinator.client_v1_rpc.CreateCallInput': CreateCallInput$json,
   '.stream.video.coordinator.client_v1_rpc.CallInput': CallInput$json,
   '.stream.video.coordinator.call_v1.CallSettings': $0.CallSettings$json,
-  '.stream.video.coordinator.call_v1.RecordingOptions': $0.RecordingOptions$json,
-  '.stream.video.coordinator.call_v1.BroadcastingOptions': $0.BroadcastingOptions$json,
+  '.stream.video.coordinator.call_v1.RecordingSettings': $0.RecordingSettings$json,
+  '.stream.video.coordinator.call_v1.BroadcastingSettings': $0.BroadcastingSettings$json,
+  '.stream.video.coordinator.call_v1.GeofencingSettings': $0.GeofencingSettings$json,
   '.stream.video.coordinator.client_v1_rpc.MemberInput': MemberInput$json,
   '.stream.video.coordinator.user_v1.UserInput': $1.UserInput$json,
   '.stream.video.coordinator.client_v1_rpc.CreateCallResponse': CreateCallResponse$json,

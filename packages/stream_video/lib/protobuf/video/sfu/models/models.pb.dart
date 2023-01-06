@@ -64,6 +64,10 @@ class Participant extends $pb.GeneratedMessage {
     ..pc<TrackType>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'publishedTracks', $pb.PbFieldType.KE, valueOf: TrackType.valueOf, enumValues: TrackType.values, defaultEnumValue: TrackType.TRACK_TYPE_UNSPECIFIED)
     ..aOM<$0.Timestamp>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'joinedAt', subBuilder: $0.Timestamp.create)
     ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackLookupPrefix')
+    ..e<ConnectionQuality>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionQuality', $pb.PbFieldType.OE, defaultOrMaker: ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED, valueOf: ConnectionQuality.valueOf, enumValues: ConnectionQuality.values)
+    ..aOB(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isSpeaking')
+    ..aOB(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isDominantSpeaker')
+    ..a<$core.double>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audioLevel', $pb.PbFieldType.OF)
     ..hasRequiredFields = false
   ;
 
@@ -74,6 +78,10 @@ class Participant extends $pb.GeneratedMessage {
     $core.Iterable<TrackType>? publishedTracks,
     $0.Timestamp? joinedAt,
     $core.String? trackLookupPrefix,
+    ConnectionQuality? connectionQuality,
+    $core.bool? isSpeaking,
+    $core.bool? isDominantSpeaker,
+    $core.double? audioLevel,
   }) {
     final _result = create();
     if (userId != null) {
@@ -90,6 +98,18 @@ class Participant extends $pb.GeneratedMessage {
     }
     if (trackLookupPrefix != null) {
       _result.trackLookupPrefix = trackLookupPrefix;
+    }
+    if (connectionQuality != null) {
+      _result.connectionQuality = connectionQuality;
+    }
+    if (isSpeaking != null) {
+      _result.isSpeaking = isSpeaking;
+    }
+    if (isDominantSpeaker != null) {
+      _result.isDominantSpeaker = isDominantSpeaker;
+    }
+    if (audioLevel != null) {
+      _result.audioLevel = audioLevel;
     }
     return _result;
   }
@@ -154,11 +174,47 @@ class Participant extends $pb.GeneratedMessage {
   $core.bool hasTrackLookupPrefix() => $_has(4);
   @$pb.TagNumber(5)
   void clearTrackLookupPrefix() => clearField(5);
+
+  @$pb.TagNumber(6)
+  ConnectionQuality get connectionQuality => $_getN(5);
+  @$pb.TagNumber(6)
+  set connectionQuality(ConnectionQuality v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasConnectionQuality() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearConnectionQuality() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.bool get isSpeaking => $_getBF(6);
+  @$pb.TagNumber(7)
+  set isSpeaking($core.bool v) { $_setBool(6, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasIsSpeaking() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearIsSpeaking() => clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.bool get isDominantSpeaker => $_getBF(7);
+  @$pb.TagNumber(8)
+  set isDominantSpeaker($core.bool v) { $_setBool(7, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasIsDominantSpeaker() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearIsDominantSpeaker() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.double get audioLevel => $_getN(8);
+  @$pb.TagNumber(9)
+  set audioLevel($core.double v) { $_setFloat(8, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasAudioLevel() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearAudioLevel() => clearField(9);
 }
 
 class StreamQuality extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'StreamQuality', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
-    ..e<VideoQuality>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'videoQuality', $pb.PbFieldType.OE, defaultOrMaker: VideoQuality.VIDEO_QUALITY_UNSPECIFIED, valueOf: VideoQuality.valueOf, enumValues: VideoQuality.values)
+    ..e<VideoQuality>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'videoQuality', $pb.PbFieldType.OE, defaultOrMaker: VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED, valueOf: VideoQuality.valueOf, enumValues: VideoQuality.values)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
     ..hasRequiredFields = false
   ;
@@ -284,6 +340,7 @@ class VideoLayer extends $pb.GeneratedMessage {
     ..aOM<VideoDimension>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'videoDimension', subBuilder: VideoDimension.create)
     ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'bitrate', $pb.PbFieldType.OU3)
     ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fps', $pb.PbFieldType.OU3)
+    ..e<VideoQuality>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'quality', $pb.PbFieldType.OE, defaultOrMaker: VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED, valueOf: VideoQuality.valueOf, enumValues: VideoQuality.values)
     ..hasRequiredFields = false
   ;
 
@@ -293,6 +350,7 @@ class VideoLayer extends $pb.GeneratedMessage {
     VideoDimension? videoDimension,
     $core.int? bitrate,
     $core.int? fps,
+    VideoQuality? quality,
   }) {
     final _result = create();
     if (rid != null) {
@@ -306,6 +364,9 @@ class VideoLayer extends $pb.GeneratedMessage {
     }
     if (fps != null) {
       _result.fps = fps;
+    }
+    if (quality != null) {
+      _result.quality = quality;
     }
     return _result;
   }
@@ -367,6 +428,15 @@ class VideoLayer extends $pb.GeneratedMessage {
   $core.bool hasFps() => $_has(3);
   @$pb.TagNumber(5)
   void clearFps() => clearField(5);
+
+  @$pb.TagNumber(6)
+  VideoQuality get quality => $_getN(4);
+  @$pb.TagNumber(6)
+  set quality(VideoQuality v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasQuality() => $_has(4);
+  @$pb.TagNumber(6)
+  void clearQuality() => clearField(6);
 }
 
 class Codec extends $pb.GeneratedMessage {

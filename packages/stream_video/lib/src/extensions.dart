@@ -18,11 +18,11 @@ extension ConnectionQualityX on sfu_models.ConnectionQuality {
     switch (this) {
       case sfu_models.ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED:
         return ConnectionQuality.unknown;
-      case sfu_models.ConnectionQuality.CONNECTION_QUALITY_BAD_UNSPECIFIED:
-        return ConnectionQuality.poor;
       case sfu_models.ConnectionQuality.CONNECTION_QUALITY_POOR:
-        return ConnectionQuality.good;
+        return ConnectionQuality.poor;
       case sfu_models.ConnectionQuality.CONNECTION_QUALITY_GOOD:
+        return ConnectionQuality.good;
+      case sfu_models.ConnectionQuality.CONNECTION_QUALITY_EXCELLENT:
         return ConnectionQuality.excellent;
     }
     return ConnectionQuality.unknown;
