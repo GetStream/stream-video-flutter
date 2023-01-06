@@ -61,7 +61,7 @@ class TrackInfo {
   /// The video quality of the track based on the [videoDimension].
   sfu.VideoQuality get videoQuality {
     if (videoDimension == null) {
-      return sfu.VideoQuality.VIDEO_QUALITY_UNSPECIFIED;
+      return sfu.VideoQuality.VIDEO_QUALITY_OFF;
     }
 
     final width = videoDimension!.width;
@@ -75,6 +75,6 @@ class TrackInfo {
       return sfu.VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED;
     }
 
-    return sfu.VideoQuality.VIDEO_QUALITY_UNSPECIFIED;
+    return sfu.VideoQuality.VIDEO_QUALITY_OFF;
   }
 }
