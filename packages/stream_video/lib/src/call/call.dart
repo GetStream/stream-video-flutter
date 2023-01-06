@@ -683,8 +683,15 @@ class Call with EventEmittable<CallEvent> {
       ..on<SFUConnectionQualityChangedEvent>((event) {
         final connectionQualityChanged = event.connectionQualityChanged;
 
+        // localParticipant & remote participants
+        final allParticipants = <String, Participant>{
+          if (localParticipant != null)
+            localParticipant!.sessionId: localParticipant!,
+          ...participants,
+        };
+
         connectionQualityChanged.connectionQualityUpdates.forEach((update) {
-          final participant = participants[update.sessionId];
+          final participant = allParticipants[update.sessionId];
 
           if (participant == null) {
             return logger.warning(
