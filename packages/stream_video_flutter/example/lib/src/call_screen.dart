@@ -1,7 +1,5 @@
 import 'package:example/src/participant_track.dart';
-import 'package:example/src/widgets/controls.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'home_screen.dart';
