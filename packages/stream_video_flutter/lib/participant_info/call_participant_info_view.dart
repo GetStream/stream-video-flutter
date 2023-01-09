@@ -85,7 +85,10 @@ class StreamCallParticipantInfoView extends StatelessWidget {
 }
 
 class _MediaIcon extends StatelessWidget {
-  const _MediaIcon({required this.icon, required this.color});
+  const _MediaIcon({
+    required this.icon,
+    required this.color,
+  });
 
   final IconData icon;
   final Color color;

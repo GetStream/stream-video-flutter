@@ -92,8 +92,11 @@ class StreamInvitableUserListView extends StatelessWidget {
 /// {@endtemplate}
 class StreamInviteButton extends StatelessWidget {
   /// {@macro streamInviteButton}
-  const StreamInviteButton(
-      {super.key, required this.controller, this.icon = Icons.group_add});
+  const StreamInviteButton({
+    super.key,
+    required this.controller,
+    this.icon = Icons.group_add,
+  });
 
   /// Controller used to control the list of users.
   final StreamInvitableUserListController controller;

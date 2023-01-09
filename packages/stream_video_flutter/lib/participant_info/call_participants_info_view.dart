@@ -136,7 +136,10 @@ class _StreamCallParticipantsInfoViewState
   }
 
   /// Creates [CallParticipantState] from [ParticipantInfo] and [self] flag.
-  CallParticipantState _mapToState(ParticipantInfo info, {required bool self}) {
+  CallParticipantState _mapToState(
+    ParticipantInfo info, {
+    required bool self,
+  }) {
     //TODO grab role from coordinator User
     return CallParticipantState(
       self: self,
