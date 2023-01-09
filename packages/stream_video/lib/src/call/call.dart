@@ -57,6 +57,7 @@ class Call with EventEmittable<CallEvent> {
 
   // Determines whether the call is initialised.
   bool _initialised = false;
+
   void _initialiseCall({required edge.Credentials credentials}) {
     final url = credentials.server.url;
     final token = credentials.token;
@@ -75,6 +76,7 @@ class Call with EventEmittable<CallEvent> {
 
   late final String callId;
   late final String callType;
+
   String get callCid => '$callType:$callId';
   late final edge.Credentials credentials;
   final CallOptions callOptions;
@@ -679,7 +681,10 @@ class Call with EventEmittable<CallEvent> {
             continue;
           }
 
-          participant.audioLevel = audioLevel.level;
+          participant.updateAudioLevel(
+            audioLevel.level,
+            isSpeaking: audioLevel.isSpeaking,
+          );
         }
       })
       ..on<SFUChangePublishQualityEvent>((event) {

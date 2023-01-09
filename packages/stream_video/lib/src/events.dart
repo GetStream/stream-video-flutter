@@ -288,36 +288,20 @@ class ParticipantConnectionQualityUpdatedEvent
       '(participant: $participant, connectionQuality: $connectionQuality)';
 }
 
-/// The participant's isSpeaking property has changed.
+/// The participant's audio level has been updated.
 /// Emitted by [Participant].
-class SpeakingChangedEvent with ParticipantEvent {
-  /// Constructor for creating [SpeakingChangedEvent].
-  const SpeakingChangedEvent({
-    required this.participant,
-    required this.speaking,
-  });
-
-  final Participant participant;
-  final bool speaking;
-
-  @override
-  String toString() => '$runtimeType'
-      '(participant: $participant, speaking: $speaking)';
-}
-
-/// The participant's audioLevel property has changed.
-/// Emitted by [Participant].
-class AudioLevelChangedEvent with ParticipantEvent {
-  /// Constructor for creating [AudioLevelChangedEvent].
-  AudioLevelChangedEvent({
-    required this.participant,
-    required this.audioLevel,
-  });
-
+class AudioLevelUpdatedEvent with ParticipantEvent {
   final Participant participant;
   final double audioLevel;
+  final bool isSpeaking;
+
+  const AudioLevelUpdatedEvent({
+    required this.participant,
+    required this.audioLevel,
+    required this.isSpeaking,
+  });
 
   @override
-  String toString() => '$runtimeType'
-      '(participant: $participant, audioLevel: $audioLevel)';
+  String toString() => '${runtimeType}'
+      '(participant: ${participant}, audioLevel: ${audioLevel}, isSpeaking: ${isSpeaking})';
 }
