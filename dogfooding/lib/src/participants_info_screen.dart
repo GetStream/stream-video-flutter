@@ -7,7 +7,10 @@ import 'package:stream_video_flutter/participant_info/model/mute_toggle_titles.d
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class StreamCallParticipantsInfoScreen extends StatelessWidget {
-  const StreamCallParticipantsInfoScreen({super.key, required this.call});
+  const StreamCallParticipantsInfoScreen({
+    super.key,
+    required this.call,
+  });
 
   final Call call;
 

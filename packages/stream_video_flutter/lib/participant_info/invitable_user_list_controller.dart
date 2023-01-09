@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/participant_info/invitable_user_view.dart';
-import 'package:stream_video_flutter/participant_info/model/call_invite_state.dart';
-import 'package:stream_video_flutter/participant_info/users_provider.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/utils/extensions.dart';
-
-import 'call_participant_info_view.dart';
 
 /// A controller for an invitable user list.
 ///
@@ -19,9 +13,10 @@ import 'call_participant_info_view.dart';
 /// * Provide user count info using [userCount].
 class StreamInvitableUserListController extends ValueNotifier<CallInviteState> {
   /// Creates a Stream invitable user list controller.
-  StreamInvitableUserListController(
-      {required this.call, required this.usersProvider})
-      : super(const CallInviteState(users: [], selectedUsers: {}));
+  StreamInvitableUserListController({
+    required this.call,
+    required this.usersProvider,
+  }) : super(const CallInviteState(users: [], selectedUsers: {}));
 
   /// Reference to [Call].
   final Call call;

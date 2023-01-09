@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class CallParticipantsInviteScreen extends StatefulWidget {
-  const CallParticipantsInviteScreen({super.key, required this.call});
+  const CallParticipantsInviteScreen({
+    super.key,
+    required this.call,
+  });
 
   static const routeName = '/call/participants/invite';
 

@@ -12,16 +12,19 @@ class StreamParticipantInfoTheme with Diagnosticable {
     this.iconActiveColor = Colors.black54,
     this.iconInactiveColor = Colors.red,
     this.avatarTheme = const StreamAvatarTheme(
-        initialsTextStyle: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-        constraints: BoxConstraints(
-          minHeight: 56,
-          minWidth: 56,
-        ),
-        borderRadius: BorderRadius.all(Radius.circular(32))),
+      initialsTextStyle: TextStyle(
+        fontSize: 28,
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+      ),
+      constraints: BoxConstraints(
+        minHeight: 56,
+        minWidth: 56,
+      ),
+      borderRadius: BorderRadius.all(
+        Radius.circular(32),
+      ),
+    ),
   });
 
   /// [TextStyle] for the user name.

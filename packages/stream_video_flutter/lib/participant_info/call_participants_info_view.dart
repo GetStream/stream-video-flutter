@@ -5,13 +5,18 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 /// Builder function used to build a participant info view.
 /// {@endtemplate}
 typedef ParticipantInfoViewBuilder = Widget Function(
-    BuildContext context, int index, CallParticipantState participant);
+  BuildContext context,
+  int index,
+  CallParticipantState participant,
+);
 
 /// {@template participantInfoDividerBuilder}
 /// Builder function used to build a participant info divider.
 /// {@endtemplate}
 typedef ParticipantInfoDividerBuilder = Widget Function(
-    BuildContext context, int index);
+  BuildContext context,
+  int index,
+);
 
 /// {@template streamCallParticipantsInfoView}
 /// Displays call participants info.

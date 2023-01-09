@@ -6,13 +6,14 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 /// {@endtemplate}
 class StreamInvitableUserView extends StatelessWidget {
   /// {@macro streamInvitableUserView}
-  const StreamInvitableUserView(
-      {super.key,
-      required this.user,
-      required this.selected,
-      required this.selectedIcon,
-      this.invitableUserTheme,
-      this.onInvitableUserTap});
+  const StreamInvitableUserView({
+    super.key,
+    required this.user,
+    required this.selected,
+    required this.selectedIcon,
+    this.invitableUserTheme,
+    this.onInvitableUserTap,
+  });
 
   /// Represents invitable user.
   final UserInfo user;

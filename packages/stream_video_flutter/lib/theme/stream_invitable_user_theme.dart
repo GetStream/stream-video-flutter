@@ -11,16 +11,19 @@ class StreamInvitableUserTheme with Diagnosticable {
     this.usernameTextStyle = const TextStyle(fontSize: 18.0),
     this.selectedIconColor = Colors.blue,
     this.avatarTheme = const StreamAvatarTheme(
-        initialsTextStyle: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-        constraints: BoxConstraints(
-          minHeight: 56,
-          minWidth: 56,
-        ),
-        borderRadius: BorderRadius.all(Radius.circular(32))),
+      initialsTextStyle: TextStyle(
+        fontSize: 28,
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+      ),
+      constraints: BoxConstraints(
+        minHeight: 56,
+        minWidth: 56,
+      ),
+      borderRadius: BorderRadius.all(
+        Radius.circular(32),
+      ),
+    ),
   });
 
   /// [TextStyle] for the user name.

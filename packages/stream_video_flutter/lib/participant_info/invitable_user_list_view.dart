@@ -4,27 +4,33 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 /// {@template invitableUserViewBuilder}
 /// Builder function used to build an invitable user view.
 /// {@endtemplate}
-typedef InvitableUserViewBuilder = Widget Function(BuildContext context,
-    StreamInvitableUserListController controller, int index);
+typedef InvitableUserViewBuilder = Widget Function(
+  BuildContext context,
+  StreamInvitableUserListController controller,
+  int index,
+);
 
 /// {@template separatorWidgetBuilder}
 /// Builder function used to build a separator widget.
 /// {@endtemplate}
 typedef SeparatorWidgetBuilder = Widget Function(
-    BuildContext context, int index);
+  BuildContext context,
+  int index,
+);
 
 /// {@template streamInvitableUserListView}
 /// Displays invitable users.
 /// {@endtemplate}
 class StreamInvitableUserListView extends StatelessWidget {
   /// {@macro streamInvitableUserListView}
-  const StreamInvitableUserListView(
-      {super.key,
-      required this.controller,
-      this.selectedIcon = Icons.check,
-      this.invitableUserListTheme,
-      this.invitableUserViewBuilder,
-      this.separatorWidgetBuilder});
+  const StreamInvitableUserListView({
+    super.key,
+    required this.controller,
+    this.selectedIcon = Icons.check,
+    this.invitableUserListTheme,
+    this.invitableUserViewBuilder,
+    this.separatorWidgetBuilder,
+  });
 
   /// Controller used to control the list of users.
   final StreamInvitableUserListController controller;
