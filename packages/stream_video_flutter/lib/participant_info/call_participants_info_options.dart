@@ -44,7 +44,10 @@ class StreamCallParticipantsInfoOptions extends StatelessWidget {
 }
 
 class _InviteButton extends StatelessWidget {
-  const _InviteButton({required this.title, this.onInviteButtonPress});
+  const _InviteButton({
+    required this.title,
+    this.onInviteButtonPress,
+  });
 
   final String title;
   final VoidCallback? onInviteButtonPress;
