@@ -353,15 +353,17 @@ class CallDetails extends $pb.GeneratedMessage {
 
 class CallSettings extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallSettings', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.call_v1'), createEmptyInstance: create)
-    ..aOM<RecordingOptions>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recording', subBuilder: RecordingOptions.create)
-    ..aOM<BroadcastingOptions>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcasting', subBuilder: BroadcastingOptions.create)
+    ..aOM<RecordingSettings>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'recording', subBuilder: RecordingSettings.create)
+    ..aOM<BroadcastingSettings>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'broadcasting', subBuilder: BroadcastingSettings.create)
+    ..aOM<GeofencingSettings>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'geofencing', subBuilder: GeofencingSettings.create)
     ..hasRequiredFields = false
   ;
 
   CallSettings._() : super();
   factory CallSettings({
-    RecordingOptions? recording,
-    BroadcastingOptions? broadcasting,
+    RecordingSettings? recording,
+    BroadcastingSettings? broadcasting,
+    GeofencingSettings? geofencing,
   }) {
     final _result = create();
     if (recording != null) {
@@ -369,6 +371,9 @@ class CallSettings extends $pb.GeneratedMessage {
     }
     if (broadcasting != null) {
       _result.broadcasting = broadcasting;
+    }
+    if (geofencing != null) {
+      _result.geofencing = geofencing;
     }
     return _result;
   }
@@ -394,36 +399,47 @@ class CallSettings extends $pb.GeneratedMessage {
   static CallSettings? _defaultInstance;
 
   @$pb.TagNumber(1)
-  RecordingOptions get recording => $_getN(0);
+  RecordingSettings get recording => $_getN(0);
   @$pb.TagNumber(1)
-  set recording(RecordingOptions v) { setField(1, v); }
+  set recording(RecordingSettings v) { setField(1, v); }
   @$pb.TagNumber(1)
   $core.bool hasRecording() => $_has(0);
   @$pb.TagNumber(1)
   void clearRecording() => clearField(1);
   @$pb.TagNumber(1)
-  RecordingOptions ensureRecording() => $_ensure(0);
+  RecordingSettings ensureRecording() => $_ensure(0);
 
   @$pb.TagNumber(2)
-  BroadcastingOptions get broadcasting => $_getN(1);
+  BroadcastingSettings get broadcasting => $_getN(1);
   @$pb.TagNumber(2)
-  set broadcasting(BroadcastingOptions v) { setField(2, v); }
+  set broadcasting(BroadcastingSettings v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasBroadcasting() => $_has(1);
   @$pb.TagNumber(2)
   void clearBroadcasting() => clearField(2);
   @$pb.TagNumber(2)
-  BroadcastingOptions ensureBroadcasting() => $_ensure(1);
+  BroadcastingSettings ensureBroadcasting() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  GeofencingSettings get geofencing => $_getN(2);
+  @$pb.TagNumber(3)
+  set geofencing(GeofencingSettings v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasGeofencing() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearGeofencing() => clearField(3);
+  @$pb.TagNumber(3)
+  GeofencingSettings ensureGeofencing() => $_ensure(2);
 }
 
-class RecordingOptions extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RecordingOptions', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.call_v1'), createEmptyInstance: create)
+class RecordingSettings extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'RecordingSettings', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.call_v1'), createEmptyInstance: create)
     ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'enabled')
     ..hasRequiredFields = false
   ;
 
-  RecordingOptions._() : super();
-  factory RecordingOptions({
+  RecordingSettings._() : super();
+  factory RecordingSettings({
     $core.bool? enabled,
   }) {
     final _result = create();
@@ -432,26 +448,26 @@ class RecordingOptions extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory RecordingOptions.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory RecordingOptions.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory RecordingSettings.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RecordingSettings.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  RecordingOptions clone() => RecordingOptions()..mergeFromMessage(this);
+  RecordingSettings clone() => RecordingSettings()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  RecordingOptions copyWith(void Function(RecordingOptions) updates) => super.copyWith((message) => updates(message as RecordingOptions)) as RecordingOptions; // ignore: deprecated_member_use
+  RecordingSettings copyWith(void Function(RecordingSettings) updates) => super.copyWith((message) => updates(message as RecordingSettings)) as RecordingSettings; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static RecordingOptions create() => RecordingOptions._();
-  RecordingOptions createEmptyInstance() => create();
-  static $pb.PbList<RecordingOptions> createRepeated() => $pb.PbList<RecordingOptions>();
+  static RecordingSettings create() => RecordingSettings._();
+  RecordingSettings createEmptyInstance() => create();
+  static $pb.PbList<RecordingSettings> createRepeated() => $pb.PbList<RecordingSettings>();
   @$core.pragma('dart2js:noInline')
-  static RecordingOptions getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RecordingOptions>(create);
-  static RecordingOptions? _defaultInstance;
+  static RecordingSettings getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RecordingSettings>(create);
+  static RecordingSettings? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get enabled => $_getBF(0);
@@ -463,14 +479,14 @@ class RecordingOptions extends $pb.GeneratedMessage {
   void clearEnabled() => clearField(1);
 }
 
-class BroadcastingOptions extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BroadcastingOptions', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.call_v1'), createEmptyInstance: create)
+class BroadcastingSettings extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BroadcastingSettings', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.call_v1'), createEmptyInstance: create)
     ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'enabled')
     ..hasRequiredFields = false
   ;
 
-  BroadcastingOptions._() : super();
-  factory BroadcastingOptions({
+  BroadcastingSettings._() : super();
+  factory BroadcastingSettings({
     $core.bool? enabled,
   }) {
     final _result = create();
@@ -479,26 +495,26 @@ class BroadcastingOptions extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory BroadcastingOptions.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory BroadcastingOptions.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory BroadcastingSettings.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory BroadcastingSettings.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  BroadcastingOptions clone() => BroadcastingOptions()..mergeFromMessage(this);
+  BroadcastingSettings clone() => BroadcastingSettings()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  BroadcastingOptions copyWith(void Function(BroadcastingOptions) updates) => super.copyWith((message) => updates(message as BroadcastingOptions)) as BroadcastingOptions; // ignore: deprecated_member_use
+  BroadcastingSettings copyWith(void Function(BroadcastingSettings) updates) => super.copyWith((message) => updates(message as BroadcastingSettings)) as BroadcastingSettings; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static BroadcastingOptions create() => BroadcastingOptions._();
-  BroadcastingOptions createEmptyInstance() => create();
-  static $pb.PbList<BroadcastingOptions> createRepeated() => $pb.PbList<BroadcastingOptions>();
+  static BroadcastingSettings create() => BroadcastingSettings._();
+  BroadcastingSettings createEmptyInstance() => create();
+  static $pb.PbList<BroadcastingSettings> createRepeated() => $pb.PbList<BroadcastingSettings>();
   @$core.pragma('dart2js:noInline')
-  static BroadcastingOptions getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BroadcastingOptions>(create);
-  static BroadcastingOptions? _defaultInstance;
+  static BroadcastingSettings getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BroadcastingSettings>(create);
+  static BroadcastingSettings? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get enabled => $_getBF(0);
@@ -508,5 +524,46 @@ class BroadcastingOptions extends $pb.GeneratedMessage {
   $core.bool hasEnabled() => $_has(0);
   @$pb.TagNumber(1)
   void clearEnabled() => clearField(1);
+}
+
+class GeofencingSettings extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GeofencingSettings', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.call_v1'), createEmptyInstance: create)
+    ..pPS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'names')
+    ..hasRequiredFields = false
+  ;
+
+  GeofencingSettings._() : super();
+  factory GeofencingSettings({
+    $core.Iterable<$core.String>? names,
+  }) {
+    final _result = create();
+    if (names != null) {
+      _result.names.addAll(names);
+    }
+    return _result;
+  }
+  factory GeofencingSettings.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory GeofencingSettings.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  GeofencingSettings clone() => GeofencingSettings()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  GeofencingSettings copyWith(void Function(GeofencingSettings) updates) => super.copyWith((message) => updates(message as GeofencingSettings)) as GeofencingSettings; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static GeofencingSettings create() => GeofencingSettings._();
+  GeofencingSettings createEmptyInstance() => create();
+  static $pb.PbList<GeofencingSettings> createRepeated() => $pb.PbList<GeofencingSettings>();
+  @$core.pragma('dart2js:noInline')
+  static GeofencingSettings getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GeofencingSettings>(create);
+  static GeofencingSettings? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.String> get names => $_getList(0);
 }
 

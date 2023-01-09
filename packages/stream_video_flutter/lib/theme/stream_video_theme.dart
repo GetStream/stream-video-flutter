@@ -12,6 +12,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamColorTheme? colorTheme,
     StreamCallControlsBarTheme? callControlsBarTheme,
     StreamAvatarTheme? avatarTheme,
+    StreamCallParticipantTheme? callParticipantTheme,
   }) {
     final isDark = brightness == Brightness.dark;
     textTheme ??=
@@ -29,6 +30,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       colorTheme: colorTheme,
       callControlsBarTheme: callControlsBarTheme,
       avatarTheme: avatarTheme,
+      callParticipantTheme: callParticipantTheme,
     );
 
     return defaultTheme.merge(customizedTheme);
@@ -48,6 +50,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.colorTheme,
     required this.callControlsBarTheme,
     required this.avatarTheme,
+    required this.callParticipantTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -88,6 +91,27 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         selectionColor: colorTheme.accentPrimary,
         selectionThickness: 4,
       ),
+      callParticipantTheme: StreamCallParticipantTheme(
+        focusedColor: colorTheme.accentPrimary,
+        backgroundColor: const Color(0xFF272A30),
+        avatarTheme: StreamAvatarTheme(
+          constraints: const BoxConstraints.tightFor(
+            height: 100,
+            width: 100,
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(50)),
+          initialsTextStyle: textTheme.title1.copyWith(color: Colors.white),
+          selectionColor: colorTheme.accentPrimary,
+          selectionThickness: 4,
+        ),
+        audioLevelActiveColor: colorTheme.accentPrimary,
+        audioLevelInactiveColor: Colors.white,
+        participantLabelTextStyle:
+            textTheme.footnote.copyWith(color: Colors.white),
+        disabledMicrophoneColor: colorTheme.accentError,
+        connectionLevelActiveColor: colorTheme.accentPrimary,
+        connectionLevelInactiveColor: Colors.white,
+      ),
     );
   }
 
@@ -103,10 +127,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return _kDarkFallbackTheme;
   }
 
-  /// The text themes used in the widgets
+  /// The text themes used in the widgets.
   final StreamTextTheme textTheme;
 
-  /// The color themes used in the widgets
+  /// The color themes used in the widgets.
   final StreamColorTheme colorTheme;
 
   /// The color themes used in CallControlsView
@@ -114,6 +138,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
 
   /// Theme for the user avatar widget.
   final StreamAvatarTheme avatarTheme;
+
+  /// Theme for the call participant widget.
+  final StreamCallParticipantTheme callParticipantTheme;
 
   /// Creates a copy of [StreamVideoTheme] with specified attributes
   /// overridden.
@@ -123,6 +150,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamColorTheme? colorTheme,
     StreamCallControlsBarTheme? callControlsBarTheme,
     StreamAvatarTheme? avatarTheme,
+    StreamCallParticipantTheme? callParticipantTheme,
   }) =>
       StreamVideoTheme.raw(
         textTheme: this.textTheme.merge(textTheme),
@@ -130,6 +158,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         callControlsBarTheme:
             this.callControlsBarTheme.merge(callControlsBarTheme),
         avatarTheme: this.avatarTheme.merge(avatarTheme),
+        callParticipantTheme:
+            this.callParticipantTheme.merge(callParticipantTheme),
       );
 
   /// Merge themes
@@ -139,6 +169,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       textTheme: textTheme.merge(other.textTheme),
       colorTheme: colorTheme.merge(other.colorTheme),
       avatarTheme: avatarTheme.merge(other.avatarTheme),
+      callParticipantTheme:
+          callParticipantTheme.merge(other.callParticipantTheme),
     );
   }
 
@@ -154,6 +186,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callControlsBarTheme:
           callControlsBarTheme.lerp(other.callControlsBarTheme, t),
       avatarTheme: avatarTheme.lerp(avatarTheme, t),
+      callParticipantTheme: callParticipantTheme.lerp(callParticipantTheme, t),
     );
   }
 }

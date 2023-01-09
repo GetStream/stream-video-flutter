@@ -118,12 +118,14 @@ const CallParticipantTimeline$json = const {
   '1': 'CallParticipantTimeline',
   '2': const [
     const {'1': 'user_id', '3': 1, '4': 1, '5': 9, '8': const {}, '10': 'userId'},
-    const {'1': 'events', '3': 2, '4': 3, '5': 11, '6': '.stream.video.coordinator.stat_v1.TimelineEvent', '10': 'events'},
+    const {'1': 'start', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'start'},
+    const {'1': 'end', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'end'},
+    const {'1': 'events', '3': 4, '4': 3, '5': 11, '6': '.stream.video.coordinator.stat_v1.TimelineEvent', '10': 'events'},
   ],
 };
 
 /// Descriptor for `CallParticipantTimeline`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callParticipantTimelineDescriptor = $convert.base64Decode('ChdDYWxsUGFydGljaXBhbnRUaW1lbGluZRIgCgd1c2VyX2lkGAEgASgJQgf6QgRyAhABUgZ1c2VySWQSRwoGZXZlbnRzGAIgAygLMi8uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLnN0YXRfdjEuVGltZWxpbmVFdmVudFIGZXZlbnRz');
+final $typed_data.Uint8List callParticipantTimelineDescriptor = $convert.base64Decode('ChdDYWxsUGFydGljaXBhbnRUaW1lbGluZRIgCgd1c2VyX2lkGAEgASgJQgf6QgRyAhABUgZ1c2VySWQSMAoFc3RhcnQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUgVzdGFydBIsCgNlbmQYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUgNlbmQSRwoGZXZlbnRzGAQgAygLMi8uc3RyZWFtLnZpZGVvLmNvb3JkaW5hdG9yLnN0YXRfdjEuVGltZWxpbmVFdmVudFIGZXZlbnRz');
 @$core.Deprecated('Use sessionDescriptor instead')
 const Session$json = const {
   '1': 'Session',

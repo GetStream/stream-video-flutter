@@ -393,11 +393,25 @@ class DeleteCallMembersResponse extends $pb.GeneratedMessage {
   static DeleteCallMembersResponse? _defaultInstance;
 }
 
+enum CreateCallInput_CreatedBy {
+  userId, 
+  user, 
+  notSet
+}
+
 class CreateCallInput extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, CreateCallInput_CreatedBy> _CreateCallInput_CreatedByByTag = {
+    4 : CreateCallInput_CreatedBy.userId,
+    5 : CreateCallInput_CreatedBy.user,
+    0 : CreateCallInput_CreatedBy.notSet
+  };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateCallInput', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.coordinator.client_v1_rpc'), createEmptyInstance: create)
+    ..oo(0, [4, 5])
     ..aOM<CallInput>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'call', subBuilder: CallInput.create)
     ..pc<MemberInput>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'members', $pb.PbFieldType.PM, subBuilder: MemberInput.create)
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'ring')
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
+    ..aOM<$1.UserInput>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'user', subBuilder: $1.UserInput.create)
     ..hasRequiredFields = false
   ;
 
@@ -406,6 +420,8 @@ class CreateCallInput extends $pb.GeneratedMessage {
     CallInput? call,
     $core.Iterable<MemberInput>? members,
     $core.bool? ring,
+    $core.String? userId,
+    $1.UserInput? user,
   }) {
     final _result = create();
     if (call != null) {
@@ -416,6 +432,12 @@ class CreateCallInput extends $pb.GeneratedMessage {
     }
     if (ring != null) {
       _result.ring = ring;
+    }
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    if (user != null) {
+      _result.user = user;
     }
     return _result;
   }
@@ -440,6 +462,9 @@ class CreateCallInput extends $pb.GeneratedMessage {
   static CreateCallInput getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CreateCallInput>(create);
   static CreateCallInput? _defaultInstance;
 
+  CreateCallInput_CreatedBy whichCreatedBy() => _CreateCallInput_CreatedByByTag[$_whichOneof(0)]!;
+  void clearCreatedBy() => clearField($_whichOneof(0));
+
   @$pb.TagNumber(1)
   CallInput get call => $_getN(0);
   @$pb.TagNumber(1)
@@ -462,6 +487,26 @@ class CreateCallInput extends $pb.GeneratedMessage {
   $core.bool hasRing() => $_has(2);
   @$pb.TagNumber(3)
   void clearRing() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get userId => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set userId($core.String v) { $_setString(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasUserId() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearUserId() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $1.UserInput get user => $_getN(4);
+  @$pb.TagNumber(5)
+  set user($1.UserInput v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasUser() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearUser() => clearField(5);
+  @$pb.TagNumber(5)
+  $1.UserInput ensureUser() => $_ensure(4);
 }
 
 class CreateCallRequest extends $pb.GeneratedMessage {

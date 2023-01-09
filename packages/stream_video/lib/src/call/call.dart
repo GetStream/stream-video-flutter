@@ -56,6 +56,7 @@ class Call with EventEmittable<CallEvent> {
 
   // Determines whether the call is initialised.
   bool _initialised = false;
+
   void _initialiseCall({required edge.Credentials credentials}) {
     final url = credentials.server.url;
     final token = credentials.token;
@@ -74,6 +75,7 @@ class Call with EventEmittable<CallEvent> {
 
   late final String callId;
   late final String callType;
+
   String get callCid => '$callType:$callId';
   late final edge.Credentials credentials;
   final CallOptions callOptions;
@@ -674,7 +676,10 @@ class Call with EventEmittable<CallEvent> {
             continue;
           }
 
-          participant.audioLevel = audioLevel.level;
+          participant.updateAudioLevel(
+            audioLevel.level,
+            isSpeaking: audioLevel.isSpeaking,
+          );
         }
       })
       ..on<SFUChangePublishQualityEvent>((event) {
@@ -682,16 +687,26 @@ class Call with EventEmittable<CallEvent> {
       })
       ..on<SFUConnectionQualityChangedEvent>((event) {
         final connectionQualityChanged = event.connectionQualityChanged;
-        final participant = participants[connectionQualityChanged.sessionId];
 
-        if (participant == null) {
-          return logger.warning(
-            'Participant not found for sessionId: ${connectionQualityChanged.sessionId}',
-          );
-        }
+        // localParticipant & remote participants
+        final allParticipants = <String, Participant>{
+          if (localParticipant != null)
+            localParticipant!.sessionId: localParticipant!,
+          ...participants,
+        };
 
-        final quality = connectionQualityChanged.connectionQuality;
-        participant.connectionQuality = quality.toStreamConnectionQuality();
+        connectionQualityChanged.connectionQualityUpdates.forEach((update) {
+          final participant = allParticipants[update.sessionId];
+
+          if (participant == null) {
+            return logger.warning(
+              'Participant not found for sessionId: ${update.sessionId}',
+            );
+          }
+
+          final quality = update.connectionQuality;
+          participant.connectionQuality = quality.toStreamConnectionQuality();
+        });
       });
   }
 }
