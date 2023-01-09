@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
     as sfu_events;
-import 'package:stream_video/src/core/video_error.dart';
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/internal/events.dart';
-import 'package:stream_video/src/logger/logger.dart';
+import 'package:stream_video/src/logger/stream_logger.dart';
 import 'package:stream_video/src/types/other.dart';
+import 'package:stream_video/src/v2/errors/video_error.dart';
+import 'package:stream_video/src/v2/errors/video_error_composer.dart';
+import 'package:stream_video/src/v2/sfu/data/events/sfu_events.dart';
+import 'package:stream_video/src/v2/sfu/ws/sfu_event_listener.dart';
 import 'package:stream_video/src/v2/sfu/ws/sfu_mapper_extensions.dart';
 import 'package:stream_video/src/ws/keep_alive.dart';
 import 'package:stream_video/src/ws/ws.dart';
@@ -23,22 +23,19 @@ class SfuWebSocket extends StreamWebSocket
     required this.sessionId,
   });
 
+  final _logger = taggedLogger(tag: 'Sfu-WS');
+
   final String sessionId;
 
-  final _requestQueue = Queue<sfu_events.SfuRequest>();
+  final Set<SfuEventListener> _eventListeners = {};
+  bool _manuallyClosed = false;
 
-  @override
-  OnConnectionStateUpdated get onConnectionStateUpdated {
-    void _onConnectionStateUpdated(ConnectionStateUpdatedEvent state) {
-      if (state.didConnected) {
-        _sendQueuedRequests();
-      }
-      // Emit connection state updated event
-      /* TODO
-      events.emit(state);*/
-    }
+  void addEventListener(SfuEventListener listener) {
+    _eventListeners.add(listener);
+  }
 
-    return _onConnectionStateUpdated;
+  void removeEventListener(SfuEventListener listener) {
+    _eventListeners.remove(listener);
   }
 
   @override
@@ -52,34 +49,15 @@ class SfuWebSocket extends StreamWebSocket
 
   @override
   void onOpen() {
-    logger.info('Signal connection opened: $url');
-
-    // Mark connected once the connection is opened.
-    connectionState = ConnectionState.connected;
-
-    // Reset the reconnect attempts.
+    _logger.i(() => '[onOpen] url: $url');
     _reconnectAttempt = 0;
-
-    // Waiting for the join event to start the keep alive.
-    // This is to avoid sending keep alive messages before the connection is
-    // established.
-    /* TODO
-    events.on<SFUJoinResponseEvent>(limit: 1, (data) {
-      logger.info('Starting signal ping pong timer');
-      startPingPong();
-    });*/
   }
 
   @override
   void onError(Object error, [StackTrace? stackTrace]) {
-    logger.warning('Signal connection error occurred', error, stackTrace);
+    _logger.w(() => '[onError] error: $error, stackTrace: $stackTrace');
 
-    StreamVideoWebSocketError wsError;
-    if (error is WebSocketChannelException) {
-      wsError = StreamVideoWebSocketError.fromWebSocketChannelError(error);
-    } else {
-      wsError = StreamVideoWebSocketError(error.toString());
-    }
+    _notifyError(VideoErrors.compose(error, stackTrace));
 
     _reconnect();
   }
@@ -90,35 +68,35 @@ class SfuWebSocket extends StreamWebSocket
     try {
       rawEvent = sfu_events.SfuEvent.fromBuffer(message);
     } catch (e, stk) {
-      logger.warning('Error parsing an rawEvent: $e');
-      logger.warning('Stack trace: $stk');
+      _logger.w(() => '[onMessage] failed: $e, stacktrace: $stk');
     }
 
     if (rawEvent == null) return;
 
     final eventType = rawEvent.whichEventPayload();
-    logger.info('Signal rawEvent received: $eventType');
-
-    if (eventType == sfu_events.SfuEvent_EventPayload.healthCheckResponse) {
-      _handleHealthCheckEvent(rawEvent.healthCheckResponse);
-    }
+    _logger.v(() => '[onMessage] eventType: $eventType');
 
     final event = rawEvent.toDomain();
-    /* TODO
-    events.emitSignalEventFromSfu(event);*/
+    _handleEvent(event);
+    _notifyEvent(event);
   }
 
-  void _handleHealthCheckEvent(sfu_events.HealthCheckResponse event) {
-    ackPong(event);
+  void _handleEvent(SfuEvent2 event) {
+    if (event is SfuHealthCheckResponseEvent) {
+      if (!isKeepAliveStarted) {
+        connectionState = ConnectionState.connected;
+        startPingPong();
+      }
+      ackPong(event);
+    }
   }
-
-  bool _manuallyClosed = false;
 
   @override
   void onClose(int? closeCode, String? closeReason) {
-    logger.warning('Signal connection closed: $url');
+    _logger.i(
+      () => '[onClose] closeCode: $closeCode, closeReason: $closeReason',
+    );
 
-    // check if we manually closed the connection
     if (_manuallyClosed) {
       connectionState = ConnectionState.disconnected;
       return;
@@ -129,14 +107,14 @@ class SfuWebSocket extends StreamWebSocket
 
   @override
   Future<void> disconnect([int? closeCode, String? closeReason]) async {
+    _logger.i(
+      () => '[disconnect] closeCode: $closeCode, closeReason: $closeReason',
+    );
     // return if already disconnected.
     if (connectionState == ConnectionState.disconnected) return;
 
     // Stop sending keep alive messages.
     stopPingPong();
-
-    // Clear the request queue.
-    _requestQueue.clear();
 
     // If no close code is provided,
     // means we are manually closing the connection.
@@ -146,31 +124,16 @@ class SfuWebSocket extends StreamWebSocket
   }
 
   @override
-  void send(
-    sfu_events.SfuRequest request, {
-    bool enqueueIfConnecting = true,
-  }) {
-    if (isDisconnected) {
-      logger.warning('Cannot send signal message, connection is disconnected');
-      return;
-    }
-
-    if ((isConnecting || isReconnecting) && enqueueIfConnecting) {
-      logger.info('Signal connection is in progress, enqueuing the request');
-      _requestQueue.add(request);
-      return;
-    }
-
-    logger.info('Sending signal request: $request');
+  void send(sfu_events.SfuRequest request) {
+    _logger.d(() => '[send] request: $request');
     super.send(request.writeToBuffer());
   }
 
   @override
   void sendPing() {
-    final healthCheck =
-        sfu_events.HealthCheckRequest(/* sessionId: sessionId */);
-    return send(sfu_events.SfuRequest(
-      healthCheckRequest: healthCheck,
+    _logger.d(() => '[sendPing] no args');
+    send(sfu_events.SfuRequest(
+      healthCheckRequest: sfu_events.HealthCheckRequest(),
     ));
   }
 
@@ -178,8 +141,7 @@ class SfuWebSocket extends StreamWebSocket
 
   void _reconnect() async {
     if (isConnecting || isReconnecting) return;
-
-    logger.info('Signal reconnecting: $_reconnectAttempt');
+    _logger.d(() => '[_reconnect] _reconnectAttempt: $_reconnectAttempt');
     _reconnectAttempt += 1;
 
     final delay = _getReconnectInterval(_reconnectAttempt);
@@ -199,12 +161,11 @@ class SfuWebSocket extends StreamWebSocket
     return (math.Random().nextDouble() * (max - min) + min).floor();
   }
 
-  void _sendQueuedRequests() {
-    logger.info('Sending all queued signal requests');
+  void _notifyEvent(SfuEvent2 event) {
+    _eventListeners.forEach((listener) => listener.onEvent(event));
+  }
 
-    while (_requestQueue.isNotEmpty) {
-      final request = _requestQueue.removeFirst();
-      send(request, enqueueIfConnecting: false);
-    }
+  void _notifyError(VideoError error) {
+    _eventListeners.forEach((listener) => listener.onError(error));
   }
 }
