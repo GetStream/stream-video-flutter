@@ -10,7 +10,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required Brightness brightness,
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
-    StreamControlsTheme? controlsTheme,
+    StreamCallControlsBarTheme? callControlsBarTheme,
     StreamAvatarTheme? avatarTheme,
   }) {
     final isDark = brightness == Brightness.dark;
@@ -27,7 +27,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     final customizedTheme = defaultTheme.copyWith(
       textTheme: textTheme,
       colorTheme: colorTheme,
-      controlsTheme: controlsTheme,
+      callControlsBarTheme: callControlsBarTheme,
       avatarTheme: avatarTheme,
     );
 
@@ -46,7 +46,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   const StreamVideoTheme.raw({
     required this.textTheme,
     required this.colorTheme,
-    required this.controlsTheme,
+    required this.callControlsBarTheme,
     required this.avatarTheme,
   });
 
@@ -70,7 +70,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return StreamVideoTheme.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
-      controlsTheme: StreamControlsTheme.fromColorTheme(colorTheme),
+      callControlsBarTheme: StreamCallControlsBarTheme.fromColorAndTextTheme(
+        colorTheme,
+        textTheme,
+      ),
       avatarTheme: StreamAvatarTheme(
         borderRadius: BorderRadius.circular(20),
         constraints: const BoxConstraints.tightFor(
@@ -107,7 +110,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   final StreamColorTheme colorTheme;
 
   /// The color themes used in CallControlsView
-  final StreamControlsTheme controlsTheme;
+  final StreamCallControlsBarTheme callControlsBarTheme;
 
   /// Theme for the user avatar widget.
   final StreamAvatarTheme avatarTheme;
@@ -118,13 +121,14 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   StreamVideoTheme copyWith({
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
-    StreamControlsTheme? controlsTheme,
+    StreamCallControlsBarTheme? callControlsBarTheme,
     StreamAvatarTheme? avatarTheme,
   }) =>
       StreamVideoTheme.raw(
         textTheme: this.textTheme.merge(textTheme),
         colorTheme: this.colorTheme.merge(colorTheme),
-        controlsTheme: this.controlsTheme.merge(controlsTheme),
+        callControlsBarTheme:
+            this.callControlsBarTheme.merge(callControlsBarTheme),
         avatarTheme: this.avatarTheme.merge(avatarTheme),
       );
 
@@ -147,7 +151,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return StreamVideoTheme.raw(
       textTheme: textTheme.lerp(other.textTheme, t),
       colorTheme: colorTheme.lerp(other.colorTheme, t),
-      controlsTheme: controlsTheme.lerp(other.controlsTheme, t),
+      callControlsBarTheme:
+          callControlsBarTheme.lerp(other.callControlsBarTheme, t),
       avatarTheme: avatarTheme.lerp(avatarTheme, t),
     );
   }

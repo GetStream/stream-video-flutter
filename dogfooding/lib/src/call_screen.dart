@@ -3,8 +3,7 @@ import 'package:dogfooding/src/home_screen.dart';
 import 'package:dogfooding/src/widgets/participant_info.dart';
 import 'package:dogfooding/src/widgets/participant_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/ui/widgets/call_controls_view.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class CallScreen extends StatefulWidget {
   const CallScreen({Key? key, required this.call}) : super(key: key);
@@ -141,20 +140,17 @@ class _CallScreenState extends State<CallScreen> {
       body: Column(
         children: [
           Expanded(child: grid),
-          SizedBox(
-            width: double.infinity,
-            child: Material(
-              elevation: 4,
-              // color: ,
-              child: CallControlsView(
-                call: widget.call,
+          StreamCallControlsBar(
+            options: [
+              ...defaultCallControlOptions(
                 participant: widget.call.localParticipant!,
-                onHangUp: () {
+                onHangup: () async {
+                  await widget.call.disconnect();
                   Navigator.of(context)
                       .pushReplacementNamed(HomeScreen.routeName);
                 },
               ),
-            ),
+            ],
           ),
         ],
       ),
