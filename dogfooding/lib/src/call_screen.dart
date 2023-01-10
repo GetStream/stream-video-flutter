@@ -117,7 +117,10 @@ class _CallScreenState extends State<CallScreen> {
           Column(
             children: [
               Expanded(
-                child: StreamCallParticipants(participants: allParticipants),
+                child: StreamCallParticipants(
+                  participants: allParticipants,
+                  enablePip: true,
+                ),
               ),
               SizedBox(
                 width: double.infinity,
