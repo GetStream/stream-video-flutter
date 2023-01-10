@@ -3,22 +3,38 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_video_flutter/theme/stream_video_theme.dart';
 
 /// Widget used to indicate the audio levels of a given participant.
-class StreamAudioLevelIndicator extends StatelessWidget {
+class StreamAudioLevelIndicator extends StatefulWidget {
   const StreamAudioLevelIndicator({
     super.key,
-    required this.audioLevel,
-    this.activeColor,
-    this.inactiveColor,
+    this.color,
   });
 
-  /// The audio level of the participant.
-  final double audioLevel;
+  /// The color of an audio level.
+  final Color? color;
 
-  /// The color of an active audio level.
-  final Color? activeColor;
+  @override
+  State<StreamAudioLevelIndicator> createState() =>
+      _StreamAudioLevelIndicatorState();
+}
 
-  /// The color of an inactive audio level.
-  final Color? inactiveColor;
+class _StreamAudioLevelIndicatorState extends State<StreamAudioLevelIndicator>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +43,17 @@ class StreamAudioLevelIndicator extends StatelessWidget {
     return SizedBox(
       width: 24.0,
       height: 24.0,
-      child: CustomPaint(
-        size: const Size.square(24.0),
-        painter: _AudioLevelIndicatorPainter(
-          audioLevel: audioLevel,
-          activeColor: activeColor ?? theme.audioLevelActiveColor,
-          inactiveColor: inactiveColor ?? theme.audioLevelInactiveColor,
-        ),
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (_, child) {
+          return CustomPaint(
+            size: const Size.square(24.0),
+            painter: _AudioLevelIndicatorPainter(
+              animationValue: _controller.value,
+              color: widget.color ?? theme.audioLevelIndicatorColor,
+            ),
+          );
+        },
       ),
     );
   }
@@ -43,53 +63,40 @@ class StreamAudioLevelIndicator extends StatelessWidget {
 class _AudioLevelIndicatorPainter extends CustomPainter {
   /// Constructor for creating a [_AudioLevelIndicatorPainter].
   const _AudioLevelIndicatorPainter({
-    required this.audioLevel,
-    required this.activeColor,
-    required this.inactiveColor,
+    required this.animationValue,
+    required this.color,
   });
 
-  /// The active level of audio of the participant.
-  final double audioLevel;
+  /// The current value of the animation.
+  final double animationValue;
 
-  /// The color of an active audio level.
-  final Color activeColor;
-
-  /// The color of an inactive audio level.
-  final Color inactiveColor;
+  /// The color of an audio level.
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = _geAudioLevelPaint();
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+
+    final offset = 4 * animationValue;
 
     canvas.drawLine(
-      const Offset(7, 10),
+      Offset(7, 10 - offset),
       const Offset(7, 16),
       paint,
     );
     canvas.drawLine(
-      const Offset(12, 6),
+      Offset(12, 6 + offset),
       const Offset(12, 16),
       paint,
     );
     canvas.drawLine(
-      const Offset(17, 10),
+      Offset(17, 10 - offset),
       const Offset(17, 16),
       paint,
     );
-  }
-
-  Paint _geAudioLevelPaint() {
-    final inactivePaint = Paint()
-      ..color = inactiveColor
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-
-    final activePaint = Paint()
-      ..color = activeColor
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-
-    return audioLevel <= 0 ? inactivePaint : activePaint;
   }
 
   @override

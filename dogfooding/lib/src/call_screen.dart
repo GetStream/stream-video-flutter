@@ -1,4 +1,5 @@
 import 'package:dogfooding/src/home_screen.dart';
+import 'package:dogfooding/src/participants_info_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -19,7 +20,13 @@ class CallScreen extends StatelessWidget {
       call: call,
       onBackPressed: navigateHome,
       onHangUp: navigateHome,
-      onParticipantsTap: () {},
+      onParticipantsTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => StreamCallParticipantsInfoScreen(call: call),
+          ),
+        );
+      },
     );
   }
 }

@@ -6,6 +6,8 @@ export 'active_call/active_call.dart';
 export 'active_call/call_app_bar.dart';
 export 'avatar/stream_user_avatar.dart';
 export 'call_controls/call_controls.dart';
+export 'icon/stream_icon_toggle.dart';
+export 'participant_info/stream_participant_info.dart';
 export 'participants/call_participant.dart';
 export 'participants/call_participants.dart';
 export 'theme/themes.dart';

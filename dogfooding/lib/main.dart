@@ -31,12 +31,14 @@ class StreamDogFoodingApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = StreamVideoTheme.light();
     return MaterialApp(
       title: 'Stream Dog Fooding',
       theme: ThemeData(
         textTheme: GoogleFonts.robotoMonoTextTheme(),
+        scaffoldBackgroundColor: appTheme.colorTheme.appBg,
         extensions: <ThemeExtension<dynamic>>[
-          StreamVideoTheme.light(),
+          appTheme,
         ],
       ),
       onGenerateRoute: Routes.generateRoute,

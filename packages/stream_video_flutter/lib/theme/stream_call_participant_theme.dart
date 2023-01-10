@@ -22,12 +22,12 @@ class StreamCallParticipantTheme with Diagnosticable {
       selectionColor: Color(0xff005FFF),
       selectionThickness: 4,
     ),
-    this.audioLevelActiveColor = const Color(0xff005FFF),
-    this.audioLevelInactiveColor = Colors.white,
+    this.audioLevelIndicatorColor = const Color(0xff005FFF),
     this.participantLabelTextStyle = const TextStyle(
       fontSize: 12,
       color: Colors.white,
     ),
+    this.enabledMicrophoneColor = Colors.white,
     this.disabledMicrophoneColor = const Color(0xffFF3842),
     this.connectionLevelActiveColor = const Color(0xff005FFF),
     this.connectionLevelInactiveColor = Colors.white,
@@ -42,16 +42,16 @@ class StreamCallParticipantTheme with Diagnosticable {
   /// Theme for the avatar.
   final StreamAvatarTheme avatarTheme;
 
-  /// The color of an active audio level.
-  final Color audioLevelActiveColor;
-
-  /// The color of an inactive audio level.
-  final Color audioLevelInactiveColor;
+  /// The color of an audio level indicator.
+  final Color audioLevelIndicatorColor;
 
   /// Text style for the participant label.
   final TextStyle participantLabelTextStyle;
 
-  /// The color of disabled microphone icon.
+  /// The color of an enabled microphone icon.
+  final Color enabledMicrophoneColor;
+
+  /// The color of a disabled microphone icon.
   final Color disabledMicrophoneColor;
 
   /// The color of an active connection quality level.
@@ -64,9 +64,9 @@ class StreamCallParticipantTheme with Diagnosticable {
     Color? focusedColor,
     Color? backgroundColor,
     StreamAvatarTheme? avatarTheme,
-    Color? audioLevelActiveColor,
-    Color? audioLevelInactiveColor,
+    Color? audioLevelIndicatorColor,
     TextStyle? participantLabelTextStyle,
+    Color? enabledMicrophoneColor,
     Color? disabledMicrophoneColor,
     Color? connectionLevelActiveColor,
     Color? connectionLevelInactiveColor,
@@ -75,12 +75,12 @@ class StreamCallParticipantTheme with Diagnosticable {
       focusedColor: focusedColor ?? this.focusedColor,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       avatarTheme: avatarTheme ?? this.avatarTheme,
-      audioLevelActiveColor:
-          audioLevelActiveColor ?? this.audioLevelActiveColor,
-      audioLevelInactiveColor:
-          audioLevelInactiveColor ?? this.audioLevelInactiveColor,
+      audioLevelIndicatorColor:
+          audioLevelIndicatorColor ?? this.audioLevelIndicatorColor,
       participantLabelTextStyle:
           participantLabelTextStyle ?? this.participantLabelTextStyle,
+      enabledMicrophoneColor:
+          enabledMicrophoneColor ?? this.enabledMicrophoneColor,
       disabledMicrophoneColor:
           disabledMicrophoneColor ?? this.disabledMicrophoneColor,
       connectionLevelActiveColor:
@@ -98,12 +98,12 @@ class StreamCallParticipantTheme with Diagnosticable {
       focusedColor: Color.lerp(focusedColor, other.focusedColor, t)!,
       backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t)!,
       avatarTheme: avatarTheme.lerp(other.avatarTheme, t),
-      audioLevelActiveColor:
-          Color.lerp(audioLevelActiveColor, other.audioLevelActiveColor, t)!,
-      audioLevelInactiveColor: Color.lerp(
-          audioLevelInactiveColor, other.audioLevelInactiveColor, t)!,
+      audioLevelIndicatorColor: Color.lerp(
+          audioLevelIndicatorColor, other.audioLevelIndicatorColor, t)!,
       participantLabelTextStyle: TextStyle.lerp(
           participantLabelTextStyle, other.participantLabelTextStyle, t)!,
+      enabledMicrophoneColor:
+          Color.lerp(enabledMicrophoneColor, other.enabledMicrophoneColor, t)!,
       disabledMicrophoneColor: Color.lerp(
           disabledMicrophoneColor, other.disabledMicrophoneColor, t)!,
       connectionLevelActiveColor: Color.lerp(
@@ -121,9 +121,9 @@ class StreamCallParticipantTheme with Diagnosticable {
           focusedColor == other.focusedColor &&
           backgroundColor == other.backgroundColor &&
           avatarTheme == other.avatarTheme &&
-          audioLevelActiveColor == other.audioLevelActiveColor &&
-          audioLevelInactiveColor == other.audioLevelInactiveColor &&
+          audioLevelIndicatorColor == other.audioLevelIndicatorColor &&
           participantLabelTextStyle == other.participantLabelTextStyle &&
+          enabledMicrophoneColor == other.enabledMicrophoneColor &&
           disabledMicrophoneColor == other.disabledMicrophoneColor &&
           connectionLevelActiveColor == other.connectionLevelActiveColor &&
           connectionLevelInactiveColor == other.connectionLevelInactiveColor;
@@ -133,9 +133,9 @@ class StreamCallParticipantTheme with Diagnosticable {
       focusedColor.hashCode ^
       backgroundColor.hashCode ^
       avatarTheme.hashCode ^
-      audioLevelActiveColor.hashCode ^
-      audioLevelInactiveColor.hashCode ^
+      audioLevelIndicatorColor.hashCode ^
       participantLabelTextStyle.hashCode ^
+      enabledMicrophoneColor.hashCode ^
       disabledMicrophoneColor.hashCode ^
       connectionLevelActiveColor.hashCode ^
       connectionLevelInactiveColor.hashCode;
@@ -147,9 +147,9 @@ class StreamCallParticipantTheme with Diagnosticable {
       focusedColor: other.focusedColor,
       backgroundColor: other.backgroundColor,
       avatarTheme: other.avatarTheme,
-      audioLevelActiveColor: other.audioLevelActiveColor,
-      audioLevelInactiveColor: other.audioLevelInactiveColor,
+      audioLevelIndicatorColor: other.audioLevelIndicatorColor,
       participantLabelTextStyle: other.participantLabelTextStyle,
+      enabledMicrophoneColor: other.enabledMicrophoneColor,
       disabledMicrophoneColor: other.disabledMicrophoneColor,
       connectionLevelActiveColor: other.connectionLevelActiveColor,
       connectionLevelInactiveColor: other.connectionLevelInactiveColor,
@@ -163,11 +163,12 @@ class StreamCallParticipantTheme with Diagnosticable {
       ..add(DiagnosticsProperty('focusedColor', focusedColor))
       ..add(DiagnosticsProperty('backgroundColor', backgroundColor))
       ..add(DiagnosticsProperty('avatarTheme', avatarTheme))
-      ..add(DiagnosticsProperty('audioLevelActiveColor', audioLevelActiveColor))
       ..add(DiagnosticsProperty(
-          'audioLevelInactiveColor', audioLevelInactiveColor))
+          'audioLevelIndicatorColor', audioLevelIndicatorColor))
       ..add(DiagnosticsProperty(
           'participantLabelTextStyle', participantLabelTextStyle))
+      ..add(
+          DiagnosticsProperty('enabledMicrophoneColor', enabledMicrophoneColor))
       ..add(DiagnosticsProperty(
           'disabledMicrophoneColor', disabledMicrophoneColor))
       ..add(DiagnosticsProperty(
