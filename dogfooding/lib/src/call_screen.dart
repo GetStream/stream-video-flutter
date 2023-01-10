@@ -115,17 +115,12 @@ class _CallScreenState extends State<CallScreen> {
           Expanded(
             child: StreamCallParticipants(participants: allParticipants),
           ),
-          StreamCallControlsBar(
-            options: [
-              ...defaultCallControlOptions(
-                participant: widget.call.localParticipant!,
-                onHangup: () async {
-                  await widget.call.disconnect();
-                  Navigator.of(context)
-                      .pushReplacementNamed(HomeScreen.routeName);
-                },
-              ),
-            ],
+          StreamCallControlsBar.withDefaultOptions(
+            call: widget.call,
+            onHangup: () async {
+              await widget.call.disconnect();
+              Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+            },
           ),
         ],
       ),
