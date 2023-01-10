@@ -81,7 +81,7 @@ class SfuWebSocket extends StreamWebSocket
     _notifyEvent(event);
   }
 
-  void _handleEvent(SfuEvent2 event) {
+  void _handleEvent(SfuEvent event) {
     if (event is SfuHealthCheckResponseEvent) {
       if (!isKeepAliveStarted) {
         connectionState = ConnectionState.connected;
@@ -161,7 +161,7 @@ class SfuWebSocket extends StreamWebSocket
     return (math.Random().nextDouble() * (max - min) + min).floor();
   }
 
-  void _notifyEvent(SfuEvent2 event) {
+  void _notifyEvent(SfuEvent event) {
     _eventListeners.forEach((listener) => listener.onEvent(event));
   }
 
