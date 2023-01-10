@@ -1,5 +1,6 @@
 import 'package:stream_video/src/v2/errors/video_error.dart';
 import 'package:tart/tart.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 /// TODO
 class VideoErrors {
@@ -12,6 +13,12 @@ class VideoErrors {
     } else if (exception is TwirpError) {
       return VideoErrorWithCause(
         message: exception.getMsg,
+        cause: exception,
+        stackTrace: stackTrace,
+      );
+    } else if (exception is WebSocketChannelException) {
+      return VideoErrorWithCause(
+        message: exception.message ?? exception.inner?.toString() ?? '',
         cause: exception,
         stackTrace: stackTrace,
       );

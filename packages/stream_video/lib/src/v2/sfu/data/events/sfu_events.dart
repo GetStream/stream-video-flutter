@@ -1,18 +1,12 @@
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:meta/meta.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart'
-    as coordinator;
-import 'package:stream_video/protobuf/video/coordinator/event_v1/event.pb.dart'
-    as coordinator_event;
-import 'package:stream_video/protobuf/video/sfu/event/events.pbserver.dart'
-    as sfu_events;
-import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
-    as sfu_models;
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/track/local/local.dart';
-import 'package:stream_video/src/track/options.dart';
-import 'package:stream_video/src/track/track.dart';
-import 'package:stream_video/src/v2/sfu/models/sfu_models.dart';
+import 'package:stream_video/src/v2/sfu/data/models/sfu_audio_level.dart';
+import 'package:stream_video/src/v2/sfu/data/models/sfu_audio_sender.dart';
+import 'package:stream_video/src/v2/sfu/data/models/sfu_call_state.dart';
+import 'package:stream_video/src/v2/sfu/data/models/sfu_error.dart';
+import 'package:stream_video/src/v2/sfu/data/models/sfu_models.dart';
+import 'package:stream_video/src/v2/sfu/data/models/sfu_participant.dart';
+import 'package:stream_video/src/v2/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/v2/sfu/data/models/sfu_video_sender.dart';
 
 abstract class SfuEvent {
   const SfuEvent();
@@ -25,9 +19,9 @@ class SfuUnknownEvent extends SfuEvent {
 
 @internal
 class SfuJoinResponseEvent extends SfuEvent {
-  const SfuJoinResponseEvent({required this.response});
+  const SfuJoinResponseEvent({required this.callState});
 
-  final sfu_events.JoinResponse response;
+  final SfuCallState callState;
 }
 
 @internal
@@ -79,55 +73,73 @@ class SfuChangePublishQualityEvent extends SfuEvent {
     required this.videoSenders,
   });
 
-  final List<sfu_events.AudioSender> audioSenders;
-  final List<sfu_events.VideoSender> videoSenders;
+  final List<SfuAudioSender> audioSenders;
+  final List<SfuVideoSender> videoSenders;
 }
 
 @internal
 class SfuParticipantJoinedEvent extends SfuEvent {
-  const SfuParticipantJoinedEvent({required this.participantJoined});
+  const SfuParticipantJoinedEvent({
+    required this.callCid,
+    required this.participant,
+  });
 
-  final sfu_events.ParticipantJoined participantJoined;
+  final String callCid;
+  final SfuParticipant participant;
 }
 
 @internal
 class SfuParticipantLeftEvent extends SfuEvent {
-  const SfuParticipantLeftEvent({required this.participantLeft});
+  const SfuParticipantLeftEvent({
+    required this.callCid,
+    required this.participant,
+  });
 
-  final sfu_events.ParticipantLeft participantLeft;
+  final String callCid;
+  final SfuParticipant participant;
 }
 
 @internal
 class SfuDominantSpeakerChangedEvent extends SfuEvent {
   const SfuDominantSpeakerChangedEvent({
-    required this.dominantSpeakerChanged,
+    required this.userId,
+    required this.sessionId,
   });
 
-  final sfu_events.DominantSpeakerChanged dominantSpeakerChanged;
+  final String userId;
+  final String sessionId;
 }
 
 @internal
 class SfuTrackPublishedEvent extends SfuEvent {
-  const SfuTrackPublishedEvent({required this.trackPublished});
+  const SfuTrackPublishedEvent({
+    required this.userId,
+    required this.sessionId,
+    required this.trackType,
+  });
 
-  final sfu_events.TrackPublished trackPublished;
+  final String userId;
+  final String sessionId;
+  final SfuTrackType trackType;
 }
 
 @internal
 class SfuTrackUnpublishedEvent extends SfuEvent {
-  const SfuTrackUnpublishedEvent({required this.trackUnpublished});
+  const SfuTrackUnpublishedEvent({
+    required this.userId,
+    required this.sessionId,
+    required this.trackType,
+  });
 
-  final sfu_events.TrackUnpublished trackUnpublished;
+  final String userId;
+  final String sessionId;
+  final SfuTrackType trackType;
 }
 
-class SfuHealthCheckResponseEvent extends SfuEvent {
-  const SfuHealthCheckResponseEvent({required this.healthCheckResponse});
-
-  final sfu_events.HealthCheckResponse healthCheckResponse;
-}
+class SfuHealthCheckResponseEvent extends SfuEvent {}
 
 class SfuErrorEvent extends SfuEvent {
   const SfuErrorEvent({required this.error});
 
-  final sfu_events.Error error;
+  final SfuError error;
 }

@@ -21,7 +21,14 @@ class StateEmitter<T> {
   StreamSubscription<T> listen(
     void onData(T value)?, {
     Function? onError,
+    void onDone()?,
+    bool? cancelOnError,
   }) {
-    return _state.listen(onData, onError: onError);
+    return _state.listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
   }
 }
