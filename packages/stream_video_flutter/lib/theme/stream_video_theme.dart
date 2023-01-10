@@ -220,7 +220,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the call participant widget.
   final StreamCallParticipantTheme callParticipantTheme;
 
-  /// Theme for the call participant widget.
+  /// Theme for the floating pip call participant widget.
   final StreamFloatingCallParticipantTheme floatingCallParticipantTheme;
 
   /// Theme for the participants info widget.
