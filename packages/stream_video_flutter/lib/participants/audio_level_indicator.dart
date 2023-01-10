@@ -56,8 +56,6 @@ class _StreamAudioLevelIndicatorState extends State<StreamAudioLevelIndicator>
         },
       ),
     );
-
-    // return ;
   }
 }
 
