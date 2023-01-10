@@ -2,8 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-import 'package:stream_video_flutter/theme/stream_call_participant_theme.dart';
-import 'package:stream_video_flutter/theme/stream_floating_call_participant_theme.dart';
 
 /// {@template callParticipantWidgetBuilder}
 /// Builder function used to build a participant grid item.
@@ -148,7 +146,7 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
                       max(0, min(offset.dy - dy, maxTop)),
                     );
                   },
-                  child: FloatingParticipant(
+                  child: StreamFloatingCallParticipant(
                     participant: local.first,
                   ),
                 ),
@@ -167,55 +165,5 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
 
     return widget.itemBuilder?.call(context, index, participant) ??
         StreamCallParticipant(participant: participant);
-  }
-}
-
-class FloatingParticipant extends StatelessWidget {
-  const FloatingParticipant({
-    Key? key,
-    required this.participant,
-    this.theme,
-  }) : super(key: key);
-
-  /// The participant to display.
-  final Participant participant;
-
-  final StreamFloatingCallParticipantTheme? theme;
-
-  @override
-  Widget build(BuildContext context) {
-    var theme = StreamVideoTheme.of(context).floatingCallParticipantTheme;
-    var height = theme.height;
-    var width = theme.width;
-    var avatarSize = theme.avatarSize ?? min(height, width) / 2.5;
-    var avatarBorderRadius =
-        theme.avatarBorderRadius ?? BorderRadius.circular(avatarSize);
-
-    return SafeArea(
-      child: Container(
-        margin: const EdgeInsets.all(8),
-        width: width,
-        height: height,
-        child: Material(
-          elevation: 4.0,
-          borderRadius: BorderRadius.circular(8),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: StreamCallParticipant(
-              participant: participant,
-              theme: StreamCallParticipantTheme(
-                avatarTheme: StreamAvatarTheme(
-                  constraints: BoxConstraints.tightFor(
-                    height: avatarSize,
-                    width: avatarSize,
-                  ),
-                  borderRadius: avatarBorderRadius,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

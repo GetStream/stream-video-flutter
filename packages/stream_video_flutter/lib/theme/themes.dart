@@ -1,3 +1,5 @@
+export 'stream_floating_call_participant_theme.dart';
+export 'stream_call_participant_theme.dart';
 export 'stream_participants_info_theme.dart';
 export 'stream_participant_info_theme.dart';
 export 'stream_invitable_user_list_theme.dart';

@@ -23,14 +23,14 @@ class StreamFloatingCallParticipantTheme with Diagnosticable {
   /// List divider height.
   final double width;
 
-  /// Sets the avatar size in the floating participant
+  /// Sets the avatar size in the floating participant.
   final double? avatarSize;
 
-  /// Sets the avatar border radius
+  /// Sets the avatar border radius.
   final BorderRadius? avatarBorderRadius;
 
   /// Returns a new [StreamFloatingCallParticipantTheme] replacing some of its
-  /// properties
+  /// properties.
   StreamFloatingCallParticipantTheme copyWith({
     StreamCallParticipantTheme? streamCallParticipantTheme,
     double? height,
@@ -86,7 +86,7 @@ class StreamFloatingCallParticipantTheme with Diagnosticable {
       avatarSize.hashCode ^
       avatarBorderRadius.hashCode;
 
-  /// Merges one [StreamFloatingCallParticipantTheme] with the another
+  /// Merges one [StreamFloatingCallParticipantTheme] with the another.
   StreamFloatingCallParticipantTheme merge(
       StreamFloatingCallParticipantTheme? other) {
     if (other == null) return this;
