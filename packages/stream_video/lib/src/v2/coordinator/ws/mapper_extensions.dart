@@ -14,65 +14,65 @@ extension WebsocketEventMapperExt on coordinator.WebsocketEvent {
     final eventType = whichEvent();
     switch (eventType) {
       case coordinator.WebsocketEvent_Event.healthcheck:
-        return VideoHealthCheckEvent(
+        return CoordinatorHealthCheckEvent(
           clientId: healthcheck.clientId,
           userId: healthcheck.userId,
         );
       case coordinator.WebsocketEvent_Event.callCreated:
-        return VideoCallCreatedEvent(
+        return CoordinatorCallCreatedEvent(
           callCid: callCreated.call.callCid,
           ringing: callCreated.ringing,
           info: callCreated.call.toCallInfo(),
           details: callCreated.callDetails.toCallDetails(),
         );
       case coordinator.WebsocketEvent_Event.callUpdated:
-        return VideoCallUpdatedEvent(
+        return CoordinatorCallUpdatedEvent(
           callCid: callUpdated.call.callCid,
           info: callUpdated.call.toCallInfo(),
           details: callUpdated.callDetails.toCallDetails(),
         );
       case coordinator.WebsocketEvent_Event.callEnded:
-        return VideoCallEndedEvent(
+        return CoordinatorCallEndedEvent(
           callCid: callEnded.call.callCid,
           info: callEnded.call.toCallInfo(),
           details: callEnded.callDetails.toCallDetails(),
         );
       case coordinator.WebsocketEvent_Event.callAccepted:
-        return VideoCallAcceptedEvent(
+        return CoordinatorCallAcceptedEvent(
           callCid: callAccepted.call.callCid,
           sentByUserId: callAccepted.senderUserId,
           info: callAccepted.call.toCallInfo(),
           details: callAccepted.callDetails.toCallDetails(),
         );
       case coordinator.WebsocketEvent_Event.callRejected:
-        return VideoCallRejectedEvent(
+        return CoordinatorCallRejectedEvent(
           callCid: callRejected.call.callCid,
           sentByUserId: callRejected.senderUserId,
           info: callRejected.call.toCallInfo(),
           details: callRejected.callDetails.toCallDetails(),
         );
       case coordinator.WebsocketEvent_Event.callCancelled:
-        return VideoCallCancelledEvent(
+        return CoordinatorCallCancelledEvent(
           callCid: callCancelled.call.callCid,
           sentByUserId: callCancelled.senderUserId,
           info: callCancelled.call.toCallInfo(),
           details: callCancelled.callDetails.toCallDetails(),
         );
       case coordinator.WebsocketEvent_Event.callMembersUpdated:
-        return VideoCallMembersUpdatedEvent(
+        return CoordinatorCallMembersUpdatedEvent(
           callCid: callMembersUpdated.call.callCid,
           info: callMembersUpdated.call.toCallInfo(),
           details: callMembersUpdated.callDetails.toCallDetails(),
         );
       case coordinator.WebsocketEvent_Event.callMembersDeleted:
-        return VideoCallMembersDeletedEvent(
+        return CoordinatorCallMembersDeletedEvent(
           callCid: callMembersDeleted.call.callCid,
           info: callMembersDeleted.call.toCallInfo(),
           details: callMembersDeleted.callDetails.toCallDetails(),
         );
       default:
         logger.warning('Unknown Video Event $eventType');
-        return const VideoUnknownEvent();
+        return const CoordinatorUnknownEvent();
     }
   }
 }
