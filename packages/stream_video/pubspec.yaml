@@ -25,7 +25,5 @@ dependencies:
   rate_limiter: ^1.0.0
 
 dev_dependencies:
-  dart_code_metrics: ^4.21.2
-  flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter

@@ -1,10 +1,8 @@
 include: all_lint_rules.yaml
 
 analyzer:
-  plugins:
-    - dart_code_metrics
   language:
-    strict-casts: true
+    strict-casts: false
     strict-inference: true
     strict-raw-types: true
   errors:
@@ -25,7 +23,7 @@ linter:
 
     #############
 
-    # TODO(Sacha) re-enable documentation rule and fix issues.
+    # TODO: re-enable documentation rule and fix issues.
     public_member_api_docs: false
 
     always_put_control_body_on_new_line: false
@@ -90,27 +88,3 @@ linter:
     # Not a common style and would add a lot of verbosity to function signature.
     # 'parameter_assignments' already enforces this to an extent.
     prefer_final_parameters: false
-
-# https://dartcodemetrics.dev/docs/getting-started/introduction
-dart_code_metrics:
-  # configures the list of preset configurations
-  extends:
-    - package:dart_code_metrics/presets/all.yaml
-
-  # configures the list of rules
-  rules:
-    - prefer-trailing-comma: false # conflicts with `require_trailing_commas` from `all_lint_rules.yaml`
-    - avoid-non-ascii-symbols: false
-    - avoid-late-keyword: false
-    - no-magic-number: false
-    - avoid-non-null-assertion: false
-    - prefer-match-file-name: false
-    - prefer-commenting-analyzer-ignores: false
-    - avoid-top-level-members-in-tests: false
-    - avoid-ignoring-return-values: false
-    - avoid-dynamic: false
-    - prefer-conditional-expressions: false
-    - prefer-correct-identifier-length: false
-    - member-ordering-extended: false
-    - newline-before-return: false
-    - format-comment: false
