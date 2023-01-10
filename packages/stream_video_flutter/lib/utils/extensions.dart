@@ -18,6 +18,15 @@ extension StringExtension on String {
   }
 }
 
+/// Useful extension for [List].
+extension ListAt<T extends Object> on List<T> {
+  /// Returns an element at the specified [index] or null.
+  T? at(int index) {
+    if (index < 0 || index >= length) return null;
+    return this[index];
+  }
+}
+
 /// List extension
 extension IterableExtension<T> on Iterable<T> {
   /// Insert any item<T> inBetween the list items

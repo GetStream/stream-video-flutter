@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide TextTheme;
+
 import 'themes.dart';
 
 /// {@template streamVideoThemeData}
@@ -13,6 +14,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallControlsBarTheme? callControlsBarTheme,
     StreamAvatarTheme? avatarTheme,
     StreamCallParticipantTheme? callParticipantTheme,
+    StreamParticipantsInfoTheme? participantsInfoTheme,
+    StreamParticipantInfoTheme? participantInfoTheme,
+    StreamInvitableUserListTheme? invitableUserListTheme,
+    StreamInvitableUserTheme? invitableUserTheme,
   }) {
     final isDark = brightness == Brightness.dark;
     textTheme ??=
@@ -31,6 +36,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callControlsBarTheme: callControlsBarTheme,
       avatarTheme: avatarTheme,
       callParticipantTheme: callParticipantTheme,
+      participantsInfoTheme: participantsInfoTheme,
+      invitableUserListTheme: invitableUserListTheme,
     );
 
     return defaultTheme.merge(customizedTheme);
@@ -51,6 +58,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.callControlsBarTheme,
     required this.avatarTheme,
     required this.callParticipantTheme,
+    required this.participantsInfoTheme,
+    required this.participantInfoTheme,
+    required this.invitableUserListTheme,
+    required this.invitableUserTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -112,6 +123,57 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         connectionLevelActiveColor: colorTheme.accentPrimary,
         connectionLevelInactiveColor: Colors.white,
       ),
+      participantsInfoTheme: StreamParticipantsInfoTheme(
+        dividerColor: colorTheme.overlayDark,
+        dividerIndent: 0.0,
+        dividerHeight: 0.0,
+      ),
+      participantInfoTheme: StreamParticipantInfoTheme(
+        usernameTextStyle: TextStyle(
+          color: colorTheme.textHighEmphasis,
+          fontSize: 17.0,
+        ),
+        iconActiveColor: colorTheme.textHighEmphasis,
+        iconInactiveColor: colorTheme.accentError,
+        avatarTheme: StreamAvatarTheme(
+          initialsTextStyle: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: colorTheme.barsBg,
+          ),
+          constraints: const BoxConstraints(
+            minHeight: 56,
+            minWidth: 56,
+          ),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(32),
+          ),
+        ),
+      ),
+      invitableUserListTheme: StreamInvitableUserListTheme(
+        dividerColor: colorTheme.overlayDark,
+        dividerIndent: 16.0,
+        dividerHeight: 0.0,
+      ),
+      invitableUserTheme: StreamInvitableUserTheme(
+        usernameTextStyle:
+            TextStyle(color: colorTheme.textHighEmphasis, fontSize: 18.0),
+        selectedIconColor: colorTheme.accentPrimary,
+        avatarTheme: StreamAvatarTheme(
+          initialsTextStyle: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: colorTheme.barsBg,
+          ),
+          constraints: const BoxConstraints(
+            minHeight: 56,
+            minWidth: 56,
+          ),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(32),
+          ),
+        ),
+      ),
     );
   }
 
@@ -142,6 +204,18 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the call participant widget.
   final StreamCallParticipantTheme callParticipantTheme;
 
+  /// Theme for the participants info widget.
+  final StreamParticipantsInfoTheme participantsInfoTheme;
+
+  /// Theme for the participant info widget.
+  final StreamParticipantInfoTheme participantInfoTheme;
+
+  /// Theme for the invitable user list widget.
+  final StreamInvitableUserListTheme invitableUserListTheme;
+
+  /// Theme for the invitable user widget.
+  final StreamInvitableUserTheme invitableUserTheme;
+
   /// Creates a copy of [StreamVideoTheme] with specified attributes
   /// overridden.
   @override
@@ -151,6 +225,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallControlsBarTheme? callControlsBarTheme,
     StreamAvatarTheme? avatarTheme,
     StreamCallParticipantTheme? callParticipantTheme,
+    StreamParticipantsInfoTheme? participantsInfoTheme,
+    StreamParticipantInfoTheme? participantInfoTheme,
+    StreamInvitableUserListTheme? invitableUserListTheme,
+    StreamInvitableUserTheme? invitableUserTheme,
   }) =>
       StreamVideoTheme.raw(
         textTheme: this.textTheme.merge(textTheme),
@@ -160,6 +238,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         avatarTheme: this.avatarTheme.merge(avatarTheme),
         callParticipantTheme:
             this.callParticipantTheme.merge(callParticipantTheme),
+        participantsInfoTheme:
+            this.participantsInfoTheme.merge(participantsInfoTheme),
+        participantInfoTheme:
+            this.participantInfoTheme.merge(participantInfoTheme),
+        invitableUserListTheme:
+            this.invitableUserListTheme.merge(invitableUserListTheme),
+        invitableUserTheme: this.invitableUserTheme.merge(invitableUserTheme),
       );
 
   /// Merge themes
@@ -183,10 +268,17 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return StreamVideoTheme.raw(
       textTheme: textTheme.lerp(other.textTheme, t),
       colorTheme: colorTheme.lerp(other.colorTheme, t),
+      avatarTheme: avatarTheme.lerp(other.avatarTheme, t),
       callControlsBarTheme:
           callControlsBarTheme.lerp(other.callControlsBarTheme, t),
-      avatarTheme: avatarTheme.lerp(avatarTheme, t),
       callParticipantTheme: callParticipantTheme.lerp(callParticipantTheme, t),
+      participantsInfoTheme:
+          participantsInfoTheme.lerp(other.participantsInfoTheme, t),
+      participantInfoTheme:
+          participantInfoTheme.lerp(other.participantInfoTheme, t),
+      invitableUserListTheme:
+          invitableUserListTheme.lerp(other.invitableUserListTheme, t),
+      invitableUserTheme: invitableUserTheme.lerp(other.invitableUserTheme, t),
     );
   }
 }
