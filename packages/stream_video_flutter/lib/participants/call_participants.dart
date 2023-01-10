@@ -57,7 +57,9 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
       participantsToDisplay.addAll(remote.take(4).toList());
     } else {
       participantsToDisplay.addAll(remote.take(3).toList());
-      participantsToDisplay.add(local.first);
+      if (!widget.enablePip) {
+        participantsToDisplay.add(local.first);
+      }
     }
 
     Widget? backgroundWidget;
@@ -116,8 +118,9 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
         backgroundWidget = Container();
     }
 
-    if (widget.enablePip) {
-      final streamChatTheme = StreamVideoTheme.of(context).floatingCallParticipantTheme;
+    if (widget.enablePip && local.isNotEmpty) {
+      final streamChatTheme =
+          StreamVideoTheme.of(context).floatingCallParticipantTheme;
       final floatingTheme = widget.floatingParticipantTheme ?? streamChatTheme;
 
       return Stack(
@@ -146,7 +149,7 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
                     );
                   },
                   child: FloatingParticipant(
-                    participant: local[0],
+                    participant: local.first,
                   ),
                 ),
               );
