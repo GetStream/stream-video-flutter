@@ -55,7 +55,7 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
       participantsToDisplay.addAll(remote.take(4).toList());
     } else {
       participantsToDisplay.addAll(remote.take(3).toList());
-      if (!widget.enablePip) {
+      if (!widget.enablePip || participantsToDisplay.isEmpty) {
         participantsToDisplay.add(local.first);
       }
     }
@@ -116,7 +116,7 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
         backgroundWidget = Container();
     }
 
-    if (widget.enablePip && local.isNotEmpty) {
+    if (widget.enablePip && local.isNotEmpty && remote.isNotEmpty) {
       final streamChatTheme =
           StreamVideoTheme.of(context).floatingCallParticipantTheme;
       final floatingTheme = widget.floatingParticipantTheme ?? streamChatTheme;

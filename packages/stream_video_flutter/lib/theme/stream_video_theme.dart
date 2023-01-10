@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart' hide TextTheme;
-import 'package:stream_video_flutter/theme/stream_call_participant_theme.dart';
-import 'package:stream_video_flutter/theme/stream_floating_call_participant_theme.dart';
 
 import 'themes.dart';
 
