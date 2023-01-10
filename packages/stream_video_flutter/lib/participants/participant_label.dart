@@ -7,27 +7,27 @@ import 'package:stream_video_flutter/theme/stream_video_theme.dart';
 class StreamParticipantLabel extends StatelessWidget {
   const StreamParticipantLabel({
     required this.participant,
-    this.audioLevelActiveColor,
-    this.audioLevelInactiveColor,
-    this.participantLabelTextStyle,
+    this.audioLevelIndicatorColor,
+    this.enabledMicrophoneColor,
     this.disabledMicrophoneColor,
+    this.participantLabelTextStyle,
     Key? key,
   }) : super(key: key);
 
   /// The participant to display.
   final Participant participant;
 
-  /// The color of an active audio level.
-  final Color? audioLevelActiveColor;
+  /// The color of an audio level indicator.
+  final Color? audioLevelIndicatorColor;
 
-  /// The color of an inactive audio level.
-  final Color? audioLevelInactiveColor;
+  /// The color of an enabled microphone icon.
+  final Color? enabledMicrophoneColor;
+
+  /// The color of a disabled microphone icon.
+  final Color? disabledMicrophoneColor;
 
   /// Text style for the participant label.
   final TextStyle? participantLabelTextStyle;
-
-  /// The color of disabled microphone icon.
-  final Color? disabledMicrophoneColor;
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +52,9 @@ class StreamParticipantLabel extends StatelessWidget {
           const SizedBox(width: 4.0),
           StreamAudioIndicator(
             hasAudio: participant.isAudioEnabled,
-            audioLevel: participant.audioLevel,
-            audioLevelActiveColor: audioLevelActiveColor,
-            audioLevelInactiveColor: audioLevelInactiveColor,
+            isSpeaking: participant.isSpeaking,
+            audioLevelIndicatorColor: audioLevelIndicatorColor,
+            enabledMicrophoneColor: enabledMicrophoneColor,
             disabledMicrophoneColor: disabledMicrophoneColor,
           ),
           const SizedBox(width: 2.0),

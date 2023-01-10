@@ -104,11 +104,11 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           selectionColor: colorTheme.accentPrimary,
           selectionThickness: 4,
         ),
-        audioLevelActiveColor: colorTheme.accentPrimary,
-        audioLevelInactiveColor: Colors.white,
+        audioLevelIndicatorColor: colorTheme.accentPrimary,
         participantLabelTextStyle:
             textTheme.footnote.copyWith(color: Colors.white),
         disabledMicrophoneColor: colorTheme.accentError,
+        enabledMicrophoneColor: Colors.white,
         connectionLevelActiveColor: colorTheme.accentPrimary,
         connectionLevelInactiveColor: Colors.white,
       ),
