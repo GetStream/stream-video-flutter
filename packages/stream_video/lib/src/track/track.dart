@@ -1,13 +1,13 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
+    as sfu;
+import 'package:stream_video/src/disposable.dart';
+import 'package:stream_video/src/event_emitter.dart';
+import 'package:stream_video/src/events.dart';
+import 'package:stream_video/src/internal/events.dart';
+import 'package:stream_video/src/logger/logger.dart';
 import 'package:uuid/uuid.dart';
-
-import '../../protobuf/video/sfu/models/models.pbserver.dart' as sfu;
-import '../disposable.dart';
-import '../event_emitter.dart';
-import '../events.dart';
-import '../internal/events.dart';
-import '../logger/logger.dart';
 
 /// Used to group [LocalAudioTrack] and [RemoteAudioTrack].
 mixin AudioTrack on Track {}
@@ -72,13 +72,11 @@ abstract class Track with Disposable, EventEmittable<TrackEvent> {
   }) {
     if (_muted == muted) return;
     _muted = muted;
-    events.emit(
-      InternalTrackMuteUpdatedEvent(
-        track: this,
-        muted: muted,
-        notifyServer: notifyServer,
-      ),
-    );
+    events.emit(InternalTrackMuteUpdatedEvent(
+      track: this,
+      muted: muted,
+      notifyServer: notifyServer,
+    ));
   }
 
   rtc.RTCRtpTransceiver? transceiver;
@@ -157,12 +155,10 @@ abstract class Track with Disposable, EventEmittable<TrackEvent> {
   }) {
     _mediaStream = stream;
     _mediaStreamTrack = track;
-    events.emit(
-      TrackStreamUpdatedEvent(
-        track: this,
-        stream: stream,
-      ),
-    );
+    events.emit(TrackStreamUpdatedEvent(
+      track: this,
+      stream: stream,
+    ));
   }
 
   @override

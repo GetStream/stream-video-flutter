@@ -1,12 +1,12 @@
-import 'participant/local.dart';
-import 'participant/participant.dart';
-import 'participant/remote.dart';
-import 'publication/local.dart';
-import 'publication/remote.dart';
-import 'publication/track_publication.dart';
-import 'sfu-client/sfu_client.dart';
-import 'track/track.dart';
-import 'types/other.dart';
+import 'package:stream_video/src/participant/local.dart';
+import 'package:stream_video/src/participant/participant.dart';
+import 'package:stream_video/src/participant/remote.dart';
+import 'package:stream_video/src/publication/local.dart';
+import 'package:stream_video/src/publication/remote.dart';
+import 'package:stream_video/src/publication/track_publication.dart';
+import 'package:stream_video/src/sfu-client/sfu_client.dart';
+import 'package:stream_video/src/track/track.dart';
+import 'package:stream_video/src/types/other.dart';
 
 /// Base type for all StreamCallEvent events.
 mixin StreamCallEvent {}
@@ -45,13 +45,15 @@ class ConnectionStateUpdatedEvent with SfuEvent, CoordinatorEvent, CallEvent {
   final bool didConnected;
 }
 
-/// When a new [RemoteParticipant] joins *after* the current participant has connected
-/// It will not fire for participants that are already in the call
+/// When a new [RemoteParticipant] joins *after* the current participant has
+/// connected. It will not fire for participants that are already in the call.
 /// Emitted by [Call].
 class ParticipantJoinedEvent with CallEvent {
+  /// Constructor for creating [ParticipantJoinedEvent].
   const ParticipantJoinedEvent({
     required this.participant,
   });
+
   final RemoteParticipant participant;
 
   @override
@@ -61,9 +63,11 @@ class ParticipantJoinedEvent with CallEvent {
 /// When a [RemoteParticipant] leaves the call.
 /// Emitted by [Call].
 class ParticipantLeftEvent with CallEvent {
+  /// Constructor for creating [ParticipantLeftEvent].
   const ParticipantLeftEvent({
     required this.participant,
   });
+
   final RemoteParticipant participant;
 
   @override
@@ -73,9 +77,11 @@ class ParticipantLeftEvent with CallEvent {
 /// When a [RemoteParticipant] or [LocalParticipant] becomes the loudest speaker
 /// in the call.
 class DominantSpeakerChangedEvent with CallEvent {
+  /// Constructor for creating [DominantSpeakerChangedEvent].
   const DominantSpeakerChangedEvent({
     required this.speaker,
   });
+
   final Participant speaker;
 
   @override
@@ -86,10 +92,12 @@ class DominantSpeakerChangedEvent with CallEvent {
 /// joined. It will not fire for tracks that are already published.
 /// Emitted by [Call] and [RemoteParticipant].
 class TrackPublishedEvent with CallEvent, ParticipantEvent {
+  /// Constructor for creating [TrackPublishedEvent].
   const TrackPublishedEvent({
     required this.participant,
     required this.publication,
   });
+
   final RemoteParticipant participant;
   final RemoteTrackPublication publication;
 
@@ -101,10 +109,12 @@ class TrackPublishedEvent with CallEvent, ParticipantEvent {
 /// The participant has unpublished one of their [Track].
 /// Emitted by [Call] and [RemoteParticipant].
 class TrackUnpublishedEvent with CallEvent, ParticipantEvent {
+  /// Constructor for creating [TrackUnpublishedEvent].
   const TrackUnpublishedEvent({
     required this.participant,
     required this.publication,
   });
+
   final RemoteParticipant participant;
   final RemoteTrackPublication publication;
 
@@ -116,10 +126,12 @@ class TrackUnpublishedEvent with CallEvent, ParticipantEvent {
 /// When the local participant publishes a new [Track] to the Call.
 /// Emitted by [Call] and [LocalParticipant].
 class LocalTrackPublishedEvent with CallEvent, ParticipantEvent {
+  /// Constructor for creating [LocalTrackPublishedEvent].
   const LocalTrackPublishedEvent({
     required this.participant,
     required this.publication,
   });
+
   final LocalParticipant participant;
   final LocalTrackPublication publication;
 
@@ -131,10 +143,12 @@ class LocalTrackPublishedEvent with CallEvent, ParticipantEvent {
 /// The local participant has unpublished one of their [Track].
 /// Emitted by [Call] and [LocalParticipant].
 class LocalTrackUnpublishedEvent with CallEvent, ParticipantEvent {
+  /// Constructor for creating [LocalTrackUnpublishedEvent].
   const LocalTrackUnpublishedEvent({
     required this.participant,
     required this.publication,
   });
+
   final LocalParticipant participant;
   final LocalTrackPublication publication;
 
@@ -147,11 +161,13 @@ class LocalTrackUnpublishedEvent with CallEvent, ParticipantEvent {
 /// [RemoteParticipant].
 /// Emitted by [Call] and [RemoteParticipant].
 class TrackSubscribedEvent with CallEvent, ParticipantEvent {
+  /// Constructor for creating [TrackSubscribedEvent].
   const TrackSubscribedEvent({
     required this.participant,
     required this.publication,
     required this.track,
   });
+
   final RemoteParticipant participant;
   final RemoteTrackPublication publication;
   final Track track;
@@ -165,11 +181,13 @@ class TrackSubscribedEvent with CallEvent, ParticipantEvent {
 /// An error has occured during track subscription.
 /// Emitted by [Call] and [RemoteParticipant].
 class TrackSubscriptionExceptionEvent with CallEvent, ParticipantEvent {
+  /// Constructor for creating [TrackSubscriptionExceptionEvent].
   const TrackSubscriptionExceptionEvent({
     required this.participant,
     this.sid,
     required this.reason,
   });
+
   final RemoteParticipant participant;
   final String? sid;
   final TrackSubscribeFailReason reason;
@@ -179,11 +197,13 @@ class TrackSubscriptionExceptionEvent with CallEvent, ParticipantEvent {
 /// [RemoteParticipant]. This event is fired when the track was unpublished.
 /// Emitted by [Call] and [RemoteParticipant].
 class TrackUnsubscribedEvent with CallEvent, ParticipantEvent {
+  /// Constructor for creating [TrackUnsubscribedEvent].
   const TrackUnsubscribedEvent({
     required this.participant,
     required this.publication,
     required this.track,
   });
+
   final RemoteParticipant participant;
   final RemoteTrackPublication publication;
   final Track track;
@@ -197,10 +217,12 @@ class TrackUnsubscribedEvent with CallEvent, ParticipantEvent {
 /// A Participant has muted one of the track.
 /// Emitted by [RemoteParticipant] and [LocalParticipant].
 class TrackMutedEvent with CallEvent, ParticipantEvent {
+  /// Constructor for creating [TrackMutedEvent].
   const TrackMutedEvent({
     required this.participant,
     required this.publication,
   });
+
   final Participant participant;
   final TrackPublication publication;
 
@@ -215,10 +237,12 @@ class TrackMutedEvent with CallEvent, ParticipantEvent {
 /// This participant has unmuted one of their tracks
 /// Emitted by [RemoteParticipant] and [LocalParticipant].
 class TrackUnmutedEvent with CallEvent, ParticipantEvent {
+  /// Constructor for creating [TrackUnmutedEvent].
   const TrackUnmutedEvent({
     required this.participant,
     required this.publication,
   });
+
   final Participant participant;
   final TrackPublication publication;
 
@@ -235,23 +259,27 @@ class TrackUnmutedEvent with CallEvent, ParticipantEvent {
 /// [Participant]'s state, *all* [Participant]s in the Call will fire this event.
 /// Emitted by [Call] and [Participant].
 class ParticipantInfoUpdatedEvent with CallEvent, ParticipantEvent {
+  /// Constructor for creating [ParticipantInfoUpdatedEvent].
   const ParticipantInfoUpdatedEvent({
     required this.participant,
   });
+
   final Participant participant;
 
   @override
   String toString() => '$runtimeType(participant: $participant)';
 }
 
-/// [Pariticpant]'s [ConnectionQuality] has updated.
+/// [Participant]'s [ConnectionQuality] has updated.
 /// Emitted by [Call] and [Participant].
 class ParticipantConnectionQualityUpdatedEvent
     with CallEvent, ParticipantEvent {
+  /// Constructor for creating [ParticipantConnectionQualityUpdatedEvent].
   const ParticipantConnectionQualityUpdatedEvent({
     required this.participant,
     required this.connectionQuality,
   });
+
   final Participant participant;
   final ConnectionQuality connectionQuality;
 
@@ -260,17 +288,20 @@ class ParticipantConnectionQualityUpdatedEvent
       '(participant: $participant, connectionQuality: $connectionQuality)';
 }
 
-/// The participant's isSpeaking property has changed
+/// The participant's audio level has been updated.
 /// Emitted by [Participant].
-class SpeakingChangedEvent with ParticipantEvent {
-  const SpeakingChangedEvent({
-    required this.participant,
-    required this.speaking,
-  });
+class AudioLevelUpdatedEvent with ParticipantEvent {
   final Participant participant;
-  final bool speaking;
+  final double audioLevel;
+  final bool isSpeaking;
+
+  const AudioLevelUpdatedEvent({
+    required this.participant,
+    required this.audioLevel,
+    required this.isSpeaking,
+  });
 
   @override
-  String toString() => '$runtimeType'
-      '(participant: $participant, speaking: $speaking)';
+  String toString() => '${runtimeType}'
+      '(participant: ${participant}, audioLevel: ${audioLevel}, isSpeaking: ${isSpeaking})';
 }

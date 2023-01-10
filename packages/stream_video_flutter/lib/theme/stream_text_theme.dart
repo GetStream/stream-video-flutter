@@ -1,170 +1,238 @@
 import 'package:flutter/material.dart';
 
-/// {@template text_theme}
-/// Class for holding text theme
-/// {@endtemplate}
+/// Contains definitions for the various text styles.
 class StreamTextTheme {
-  /// Initialise light text theme
+  /// Initialise light text theme.
   const StreamTextTheme.light({
-    this.title = const TextStyle(
-      fontSize: 22,
-      fontWeight: FontWeight.bold,
-      color: Colors.black,
-    ),
-    this.headlineBold = const TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.bold,
-      color: Colors.black,
-    ),
-    this.headline = const TextStyle(
-      fontSize: 16,
+    this.title1 = const TextStyle(
+      fontSize: 24,
       fontWeight: FontWeight.w500,
       color: Colors.black,
     ),
-    this.bodyBold = const TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.bold,
+    this.title3 = const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      color: Colors.black,
+    ),
+    this.title3Bold = const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
       color: Colors.black,
     ),
     this.body = const TextStyle(
       fontSize: 14,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w400,
       color: Colors.black,
     ),
-    this.footnoteBold = const TextStyle(
-      fontSize: 12,
+    this.bodyItalic = const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      color: Colors.black,
+      fontStyle: FontStyle.italic,
+    ),
+    this.bodyBold = const TextStyle(
+      fontSize: 14,
       fontWeight: FontWeight.w500,
       color: Colors.black,
     ),
     this.footnote = const TextStyle(
       fontSize: 12,
       color: Colors.black,
+      fontWeight: FontWeight.w400,
+    ),
+    this.footnoteItalic = const TextStyle(
+      fontSize: 12,
+      color: Colors.black,
+      fontStyle: FontStyle.italic,
+      fontWeight: FontWeight.w400,
+    ),
+    this.footnoteBold = const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      color: Colors.black,
     ),
     this.captionBold = const TextStyle(
       fontSize: 10,
-      fontWeight: FontWeight.bold,
+      fontWeight: FontWeight.w700,
+      color: Colors.black,
+    ),
+    this.tabBar = const TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.w400,
       color: Colors.black,
     ),
   });
 
-  /// Initialise with dark theme
+  /// Initialise with dark theme.
   const StreamTextTheme.dark({
-    this.title = const TextStyle(
-      fontSize: 22,
-      fontWeight: FontWeight.bold,
-      color: Colors.white,
-    ),
-    this.headlineBold = const TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.bold,
-      color: Colors.white,
-    ),
-    this.headline = const TextStyle(
-      fontSize: 16,
+    this.title1 = const TextStyle(
+      fontSize: 24,
       fontWeight: FontWeight.w500,
       color: Colors.white,
     ),
-    this.bodyBold = const TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.bold,
+    this.title3 = const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      color: Colors.white,
+    ),
+    this.title3Bold = const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
       color: Colors.white,
     ),
     this.body = const TextStyle(
       fontSize: 14,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w400,
       color: Colors.white,
     ),
-    this.footnoteBold = const TextStyle(
-      fontSize: 12,
+    this.bodyItalic = const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      color: Colors.white,
+      fontStyle: FontStyle.italic,
+    ),
+    this.bodyBold = const TextStyle(
+      fontSize: 14,
       fontWeight: FontWeight.w500,
       color: Colors.white,
     ),
     this.footnote = const TextStyle(
       fontSize: 12,
       color: Colors.white,
+      fontWeight: FontWeight.w400,
+    ),
+    this.footnoteItalic = const TextStyle(
+      fontSize: 12,
+      color: Colors.white,
+      fontStyle: FontStyle.italic,
+      fontWeight: FontWeight.w400,
+    ),
+    this.footnoteBold = const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      color: Colors.white,
     ),
     this.captionBold = const TextStyle(
       fontSize: 10,
-      fontWeight: FontWeight.bold,
+      fontWeight: FontWeight.w700,
+      color: Colors.white,
+    ),
+    this.tabBar = const TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.w400,
       color: Colors.white,
     ),
   });
 
-  /// Raw theme initialization
+  /// Raw text theme initialization.
   const StreamTextTheme.raw({
-    required this.title,
-    required this.headlineBold,
-    required this.headline,
-    required this.bodyBold,
+    required this.title1,
+    required this.title3,
+    required this.title3Bold,
     required this.body,
-    required this.footnoteBold,
+    required this.bodyItalic,
+    required this.bodyBold,
     required this.footnote,
+    required this.footnoteItalic,
+    required this.footnoteBold,
     required this.captionBold,
+    required this.tabBar,
   });
 
-  /// Text theme for title
-  final TextStyle title;
+  /// Text style for title1 text.
+  final TextStyle title1;
 
-  /// Body Text theme for headline
-  final TextStyle headlineBold;
+  /// Text style for title3 text.
+  final TextStyle title3;
 
-  /// Text theme for headline
-  final TextStyle headline;
+  /// Bold text style for title3 text.
+  final TextStyle title3Bold;
 
-  /// Bold Text theme for body
-  final TextStyle bodyBold;
-
-  /// Text theme body
+  /// Text style for body text.
   final TextStyle body;
 
-  /// Bold Text theme for footnote
-  final TextStyle footnoteBold;
+  /// Italic text theme for body text.
+  final TextStyle bodyItalic;
 
-  /// Text theme for footnote
+  /// Bold text style for body text.
+  final TextStyle bodyBold;
+
+  /// Text style for footnote text.
   final TextStyle footnote;
 
-  /// Bold Text theme for caption
+  /// Italic text style for footnote text.
+  final TextStyle footnoteItalic;
+
+  /// Bold text style for footnote text.
+  final TextStyle footnoteBold;
+
+  /// Bold text style for caption text.
   final TextStyle captionBold;
+
+  /// Text style for tab bar text.
+  final TextStyle tabBar;
 
   /// Copy with theme
   StreamTextTheme copyWith({
+    TextStyle? title1,
+    TextStyle? title3,
+    TextStyle? title3Bold,
     TextStyle? body,
-    TextStyle? title,
-    TextStyle? headlineBold,
-    TextStyle? headline,
+    TextStyle? bodyItalic,
     TextStyle? bodyBold,
-    TextStyle? footnoteBold,
     TextStyle? footnote,
+    TextStyle? footnoteItalic,
+    TextStyle? footnoteBold,
     TextStyle? captionBold,
+    TextStyle? tabBar,
   }) =>
       StreamTextTheme.raw(
+        title1: title1 ?? this.title1,
+        title3: title3 ?? this.title3,
+        title3Bold: title3Bold ?? this.title3Bold,
         body: body ?? this.body,
-        title: title ?? this.title,
-        headlineBold: headlineBold ?? this.headlineBold,
-        headline: headline ?? this.headline,
+        bodyItalic: bodyItalic ?? this.bodyItalic,
         bodyBold: bodyBold ?? this.bodyBold,
-        footnoteBold: footnoteBold ?? this.footnoteBold,
         footnote: footnote ?? this.footnote,
+        footnoteItalic: footnoteItalic ?? this.footnoteItalic,
+        footnoteBold: footnoteBold ?? this.footnoteBold,
         captionBold: captionBold ?? this.captionBold,
+        tabBar: tabBar ?? this.tabBar,
       );
 
-  /// Merge text theme
+  /// Merge text themes.
   StreamTextTheme merge(StreamTextTheme? other) {
     if (other == null) return this;
     return copyWith(
+      title1: title1.merge(other.title1),
+      title3: title3.merge(other.title3),
+      title3Bold: title3Bold.merge(other.title3Bold),
       body: body.merge(other.body),
-      title: title.merge(other.title),
-      headlineBold: headlineBold.merge(other.headlineBold),
-      headline: headline.merge(other.headline),
+      bodyItalic: bodyItalic.merge(other.bodyItalic),
       bodyBold: bodyBold.merge(other.bodyBold),
-      footnoteBold: footnoteBold.merge(other.footnoteBold),
       footnote: footnote.merge(other.footnote),
+      footnoteItalic: footnoteItalic.merge(other.footnoteItalic),
+      footnoteBold: footnoteBold.merge(other.footnoteBold),
       captionBold: captionBold.merge(other.captionBold),
+      tabBar: tabBar.merge(other.tabBar),
     );
   }
 
-  StreamTextTheme lerp(StreamTextTheme other, double t) {
-    if (t == 0.0) return this;
-    return other;
+  /// Linearly interpolate between two text themes.
+  StreamTextTheme lerp(StreamTextTheme? other, double t) {
+    if (other == null) return this;
+    return copyWith(
+      title1: TextStyle.lerp(title1, other.title1, t)!,
+      title3: TextStyle.lerp(title3, other.title3, t)!,
+      title3Bold: TextStyle.lerp(title3Bold, other.title3Bold, t)!,
+      body: TextStyle.lerp(body, other.body, t)!,
+      bodyItalic: TextStyle.lerp(bodyItalic, other.bodyItalic, t)!,
+      bodyBold: TextStyle.lerp(bodyBold, other.bodyBold, t)!,
+      footnote: TextStyle.lerp(footnote, other.footnote, t)!,
+      footnoteItalic: TextStyle.lerp(footnoteItalic, other.footnoteItalic, t)!,
+      footnoteBold: TextStyle.lerp(footnoteBold, other.footnoteBold, t)!,
+      captionBold: TextStyle.lerp(captionBold, other.captionBold, t)!,
+      tabBar: TextStyle.lerp(tabBar, other.tabBar, t)!,
+    );
   }
 }

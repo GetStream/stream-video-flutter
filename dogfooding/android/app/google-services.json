@@ -22,6 +22,58 @@
           }
         },
         {
+          "client_id": "248009810755-olc7j3k4gd27a1vsid6paod155khop3l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.getstream.video.flutter.dogfooding.dogfooding",
+            "certificate_hash": "c3188b0a93adae431af73d407565f38f284cbb4e"
+          }
+        },
+        {
+          "client_id": "248009810755-8k5328q32caj1l3ihjc5l5v4l5dfdinj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXy4FMxcRErB8VW9CvPGG5spLVSUQzhc4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "248009810755-8k5328q32caj1l3ihjc5l5v4l5dfdinj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "248009810755-7cdrjg8rl5rppt69ftcpds4200nvvekg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "io.getstream.video.flutter.dogfooding.dogfooding"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:248009810755:android:08acd3efc67fee4c7585f6",
+        "android_client_info": {
+          "package_name": "io.getstream.video.flutter.dogfooding.dogfooding.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "248009810755-sqgnutu18d29thbr043o5t55asg6e7tk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.getstream.video.flutter.dogfooding.dogfooding.debug",
+            "certificate_hash": "c3188b0a93adae431af73d407565f38f284cbb4e"
+          }
+        },
+        {
           "client_id": "248009810755-8k5328q32caj1l3ihjc5l5v4l5dfdinj.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -34,6 +34,75 @@ mixin EventEmittable<T> {
   final _events = EventEmitter<T>();
 }
 
+/// A simple event listener which can be used to listen to events emitted by
+/// [EventEmitter].
+class EventListener<T> {
+  /// Creates a new [EventListener] instance.
+  EventListener(this._emitter) {
+    if (_emitter.mounted) _emitter.listen(_onData);
+  }
+
+  final EventEmitter<T> _emitter;
+  final _listener = EventEmitter<T>();
+
+  void _onData(T data) {
+    if (!_listener.mounted) return;
+    _listener.emit(data);
+  }
+
+  /// Binds the [listener] to any event to be invoked at most [limit].
+  CancelListener listen(Listener<T> listener, {int? limit}) {
+    return _listener.listen(listener, limit: limit);
+  }
+
+  CancelListener on<E extends T>(
+    Listener<E> then, {
+    bool Function(E)? filter,
+    int? limit,
+  }) {
+    return _listener.on(
+      then,
+      filter: filter,
+      limit: limit,
+    );
+  }
+
+  /// waits for a specific event type
+  Future<E> waitFor<E extends T>({
+    required Duration duration,
+    bool Function(E)? filter,
+    FutureOr<E> Function()? onTimeout,
+  }) {
+    return _listener.waitFor<E>(
+      duration: duration,
+      filter: filter,
+      onTimeout: onTimeout,
+    );
+  }
+
+  /// Unbinds the [listener] from any event.
+  void cancel(Listener<T> listener) => _listener.cancel(listener);
+
+  /// Unbinds all the handlers from all the events.
+  void cancelAll() => _listener.cancelAll();
+
+  /// If a listener has been added using [bind] for a particular event
+  /// and hasn't been removed yet.
+  bool hasListeners(String event) => _listener.hasListeners(event);
+
+  /// Disposes the [EventListener] instance.
+  void dispose() {
+    if (_emitter.mounted) _emitter.cancel(_onData);
+    _listener.dispose();
+  }
+}
+
+/// EventListener extension for [EventEmitter].
+extension EventListenerX<T> on EventEmitter<T> {
+  /// Creates a new [EventListener] instance.
+  EventListener<T> createListener() => EventListener(this);
+}
+
 /// A simple event emitter.
 class EventEmitter<T> {
   late final _listeners = LinkedList<_ListenerEntry<T>>();

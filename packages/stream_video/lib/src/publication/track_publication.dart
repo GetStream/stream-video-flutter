@@ -37,7 +37,7 @@ abstract class TrackPublication<T extends Track> with Disposable {
   PublishOptions? _publishOptions;
 
   /// Returns true if the track is muted.
-  bool get muted => track?.muted ?? false;
+  bool get muted => track?.muted ?? true;
 
   /// If the [Track] is published with simulcast, only for video. (readonly)
   bool get simulcasted => _simulcasted == true;

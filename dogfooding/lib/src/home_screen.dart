@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:dogfooding/src/call_screen.dart';
+import 'package:dogfooding/src/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
-
-import 'call_screen.dart';
-import 'login_screen.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   static const routeName = '/home';
 
@@ -17,7 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  StreamVideo streamVideoClient = StreamVideo.instance;
+  var streamVideoClient = StreamVideo.instance;
   late final currentUser = streamVideoClient.currentUser!;
 
   final _callIdController = TextEditingController();
@@ -38,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       await call.connect();
 
-      await Navigator.of(context).pushReplacementNamed(
+      Navigator.of(context).pushReplacementNamed(
         CallScreen.routeName,
         arguments: call,
       );
@@ -59,20 +59,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final name = currentUser.name;
-    final imageUrl = currentUser.imageUrl;
-
-    final avatar = imageUrl != null
-        ? CircleAvatar(
-            backgroundColor: Colors.white,
-            backgroundImage: NetworkImage(imageUrl),
-          )
-        : CircleAvatar(child: Text(name[0].toUpperCase()));
 
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
-          padding: const EdgeInsets.all(8),
-          child: avatar,
+          padding: const EdgeInsets.all(8.0),
+          child: StreamUserAvatar(user: currentUser),
         ),
         title: const Text('Stream Dog Fooding'),
         actions: [
@@ -80,8 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await streamVideoClient.disconnectUser();
-              await Navigator.of(context)
-                  .pushReplacementNamed(LoginScreen.routeName);
+              Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
             },
           ),
         ],

@@ -1,10 +1,11 @@
 library stream_video;
 
 export 'src/call/call.dart';
+export 'src/event_emitter.dart';
 export 'src/events.dart';
 export 'src/hardware/hardware.dart';
-export 'src/internal/events.dart';
 export 'src/models/call_configuration.dart';
+export 'src/models/call_participant_state.dart';
 export 'src/models/user_info.dart';
 export 'src/options.dart';
 export 'src/participant/local.dart';
@@ -15,6 +16,7 @@ export 'src/publication/local.dart';
 export 'src/publication/remote.dart';
 export 'src/publication/track_info.dart';
 export 'src/publication/track_publication.dart';
+export 'src/renderer/stream_video_renderer.dart';
 export 'src/stream_video.dart';
 export 'src/token/token.dart';
 export 'src/track/local/audio.dart';

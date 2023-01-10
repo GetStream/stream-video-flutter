@@ -8,11 +8,13 @@ class ControlsWidget extends StatefulWidget {
   const ControlsWidget(
     this.call,
     this.participant, {
-    super.key,
-  });
+    Key? key,
+    this.onHangUp,
+  }) : super(key: key);
 
   final Call call;
   final LocalParticipant participant;
+  final VoidCallback? onHangUp;
 
   @override
   State<StatefulWidget> createState() => _ControlsWidgetState();
@@ -42,19 +44,21 @@ class _ControlsWidgetState extends State<ControlsWidget> {
     super.initState();
     participant.events.listen(_onChange);
     _deviceChangeSubscription = Hardware.instance.onDeviceChange.stream.listen(
-      _loadDevices,
+      (devices) => _loadDevices(devices),
     );
     Hardware.instance.enumerateDevices().then(_loadDevices);
   }
 
   @override
   void dispose() {
-    participant.events.cancel(_onChange);
+    if (participant.events.mounted) {
+      participant.events.cancel(_onChange);
+    }
     _deviceChangeSubscription?.cancel();
     super.dispose();
   }
 
-  Future<void> _loadDevices(List<MediaDevice> devices) async {
+  void _loadDevices(List<MediaDevice> devices) async {
     _audioInputs = devices.where((d) => d.kind == 'audioinput').toList();
     _audioOutputs = devices.where((d) => d.kind == 'audiooutput').toList();
     _videoInputs = devices.where((d) => d.kind == 'videoinput').toList();
@@ -62,41 +66,39 @@ class _ControlsWidgetState extends State<ControlsWidget> {
     setState(() {});
   }
 
-  Future<void> _unpublishAll() async {
+  void _unpublishAll() async {
     final result = await context.showUnPublishDialog();
     if (result == true) await participant.unpublishAllTracks();
   }
 
-  bool get isMuted => participant.isMuted;
-
-  Future<void> _disableAudio() async {
+  void _disableAudio() async {
     await participant.setMicrophoneEnabled(enabled: false);
   }
 
   Future<void> _enableAudio() async {
-    await participant.setMicrophoneEnabled();
+    await participant.setMicrophoneEnabled(enabled: true);
   }
 
-  Future<void> _disableVideo() async {
+  void _disableVideo() async {
     await participant.setCameraEnabled(enabled: false);
   }
 
-  Future<void> _enableVideo() async {
-    await participant.setCameraEnabled();
+  void _enableVideo() async {
+    await participant.setCameraEnabled(enabled: true);
   }
 
-  Future<void> _selectAudioOutput(MediaDevice device) async {
+  void _selectAudioOutput(MediaDevice device) async {
     await Hardware.instance.selectAudioOutput(device);
     setState(() {});
   }
 
-  Future<void> _selectAudioInput(MediaDevice device) async {
+  void _selectAudioInput(MediaDevice device) async {
     await Hardware.instance.selectAudioInput(device);
     setState(() {});
   }
 
-  Future<void> _selectVideoInput(MediaDevice device) async {
-    final track = participant.videoTracks.firstOrNull?.track;
+  void _selectVideoInput(MediaDevice device) async {
+    final track = participant.videoTrack?.track;
     if (track == null) return;
     if (_selectedVideoInput?.deviceId != device.deviceId) {
       await track.switchCamera(device.deviceId);
@@ -105,9 +107,9 @@ class _ControlsWidgetState extends State<ControlsWidget> {
     }
   }
 
-  Future<void> _toggleCamera() async {
+  void _toggleCamera() async {
     //
-    final track = participant.videoTracks.firstOrNull?.track;
+    final track = participant.videoTrack?.track;
     if (track == null) return;
 
     try {
@@ -122,9 +124,12 @@ class _ControlsWidgetState extends State<ControlsWidget> {
     }
   }
 
-  Future<void> _onTapDisconnect() async {
-    final result = await context.showDisconnectDialog();
-    if (result == true) await widget.call.disconnect();
+  void _onTapDisconnect() async {
+    final disconnectionConfirmed = await context.showDisconnectDialog();
+    if (disconnectionConfirmed == true) {
+      await widget.call.disconnect();
+      widget.onHangUp?.call();
+    }
   }
 
   @override
@@ -144,14 +149,15 @@ class _ControlsWidgetState extends State<ControlsWidget> {
             icon: const Icon(Icons.close_rounded),
             tooltip: 'Unpublish all',
           ),
-          if (participant.isMicrophoneEnabled)
+          if (participant.isAudioEnabled)
             PopupMenuButton<MediaDevice>(
               constraints: const BoxConstraints(minWidth: 200),
               icon: const Icon(Icons.settings_voice),
               itemBuilder: (BuildContext context) {
                 return [
                   PopupMenuItem<MediaDevice>(
-                    onTap: isMuted ? _enableAudio : _disableAudio,
+                    value: null,
+                    onTap: _disableAudio,
                     child: const ListTile(
                       leading: Icon(
                         Icons.mic_off,
@@ -189,6 +195,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
             itemBuilder: (BuildContext context) {
               return [
                 const PopupMenuItem<MediaDevice>(
+                  value: null,
                   child: ListTile(
                     leading: Icon(Icons.volume_up_rounded),
                     title: Text('Select Audio Output'),
@@ -211,13 +218,14 @@ class _ControlsWidgetState extends State<ControlsWidget> {
               ];
             },
           ),
-          if (participant.isCameraEnabled)
+          if (participant.isVideoEnabled)
             PopupMenuButton<MediaDevice>(
               constraints: const BoxConstraints(minWidth: 200),
               icon: const Icon(Icons.videocam_rounded),
               itemBuilder: (BuildContext context) {
                 return [
                   PopupMenuItem<MediaDevice>(
+                    value: null,
                     onTap: _disableVideo,
                     child: const ListTile(
                       leading: Icon(Icons.videocam_off_rounded),
@@ -253,7 +261,7 @@ class _ControlsWidgetState extends State<ControlsWidget> {
                   ? Icons.camera_rear_rounded
                   : Icons.camera_front_rounded,
             ),
-            onPressed: _toggleCamera,
+            onPressed: () => _toggleCamera(),
             tooltip: 'toggle camera',
           ),
           IconButton(

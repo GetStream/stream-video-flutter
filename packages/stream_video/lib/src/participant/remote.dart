@@ -1,19 +1,20 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-
-import '../../protobuf/video/sfu/models/models.pbserver.dart' as sfu;
-import '../events.dart';
-import '../exceptions.dart';
-import '../extensions.dart';
-import '../logger/logger.dart';
-import '../publication/remote.dart';
-import '../publication/track_info.dart';
-import '../track/remote/audio.dart';
-import '../track/remote/remote.dart';
-import '../track/remote/video.dart';
-import '../types/other.dart';
-import '../types/video_dimensions.dart';
-import 'participant.dart';
-import 'participant_info.dart';
+import 'package:stream_video/protobuf/video/sfu/models/models.pbserver.dart'
+    as sfu;
+import 'package:stream_video/src/events.dart';
+import 'package:stream_video/src/exceptions.dart';
+import 'package:stream_video/src/extensions.dart';
+import 'package:stream_video/src/logger/logger.dart';
+import 'package:stream_video/src/participant/participant.dart';
+import 'package:stream_video/src/participant/participant_info.dart';
+import 'package:stream_video/src/publication/remote.dart';
+import 'package:stream_video/src/publication/track_info.dart';
+import 'package:stream_video/src/track/remote/audio.dart';
+import 'package:stream_video/src/track/remote/remote.dart';
+import 'package:stream_video/src/track/remote/video.dart';
+import 'package:stream_video/src/types/other.dart';
+import 'package:stream_video/src/types/video_dimensions.dart';
 
 const _kTrackPublishTimeout = Duration(seconds: 10);
 
@@ -39,6 +40,34 @@ class RemoteParticipant extends Participant<RemoteTrackPublication> {
       trackPublications.values
           .whereType<RemoteTrackPublication<RemoteAudioTrack>>()
           .toList();
+
+  @override
+  RemoteTrackPublication<RemoteAudioTrack>? get audioTrack {
+    return audioTracks.firstWhereOrNull(
+      (it) => it.type == sfu.TrackType.TRACK_TYPE_AUDIO,
+    );
+  }
+
+  @override
+  RemoteTrackPublication<RemoteVideoTrack>? get videoTrack {
+    return videoTracks.firstWhereOrNull(
+      (it) => it.type == sfu.TrackType.TRACK_TYPE_VIDEO,
+    );
+  }
+
+  @override
+  RemoteTrackPublication<RemoteVideoTrack>? get screenShareTrack {
+    return videoTracks.firstWhereOrNull(
+      (it) => it.type == sfu.TrackType.TRACK_TYPE_SCREEN_SHARE,
+    );
+  }
+
+  @override
+  RemoteTrackPublication<RemoteAudioTrack>? get screenShareAudioTrack {
+    return audioTracks.firstWhereOrNull(
+      (it) => it.type == sfu.TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO,
+    );
+  }
 
   /// A convenience property to get all subscribed tracks.
   List<RemoteTrackPublication> get subscribedTracks => trackPublications.values
@@ -134,13 +163,11 @@ class RemoteParticipant extends Participant<RemoteTrackPublication> {
     await pub.updateTrack(track);
     addTrackPublication(pub);
 
-    [events, call.events].emit(
-      TrackSubscribedEvent(
-        participant: this,
-        track: track,
-        publication: pub,
-      ),
-    );
+    [events, call.events].emit(TrackSubscribedEvent(
+      participant: this,
+      track: track,
+      publication: pub,
+    ));
   }
 
   @override
@@ -207,15 +234,20 @@ class RemoteParticipant extends Participant<RemoteTrackPublication> {
       }
     }
 
-    // mute any published track that is not in the info
-    final validSids = tracks.map((it) => it.sid);
-    final removeSids = {
-      ...trackPublications.keys.where((e) => !validSids.contains(e)),
-    };
+    // Un-publish/Mute tracks that are not in the list anymore
+    final invalidTracks = trackPublications.values
+        .where((pub) => !tracks.any((it) => it.sid == pub.sid));
 
-    for (final sid in removeSids) {
-      final pub = trackPublications[sid];
-      pub?.track?.updateMuted(muted: true);
+    for (final track in invalidTracks) {
+      // Un-publish if track is a screen share
+      if (track.type == sfu.TrackType.TRACK_TYPE_SCREEN_SHARE ||
+          track.type == sfu.TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO) {
+        unpublishTrack(track.sid);
+        continue;
+      }
+
+      // Mute if track is a video or audio
+      track.track?.updateMuted(muted: true);
     }
   }
 
@@ -225,7 +257,7 @@ class RemoteParticipant extends Participant<RemoteTrackPublication> {
     bool notify = true,
   }) async {
     logger.finer('removePublishedTrack track sid: $trackSid, notify: $notify');
-    final pub = trackPublications[trackSid];
+    final pub = trackPublications.remove(trackSid);
     if (pub == null) {
       logger.warning('Publication not found $trackSid');
       return;
@@ -235,22 +267,23 @@ class RemoteParticipant extends Participant<RemoteTrackPublication> {
     // if has track
     if (track != null) {
       await track.stop();
-      [events, call.events].emit(
-        TrackUnsubscribedEvent(
+      if (notify) {
+        // TODO circle dependency:
+        // Call knows about Participant
+        // Participant knows about Call
+        [events, call.events].emit(TrackUnsubscribedEvent(
           participant: this,
           track: track,
           publication: pub,
-        ),
-      );
+        ));
+      }
     }
 
     if (notify) {
-      [events, call.events].emit(
-        TrackUnpublishedEvent(
-          participant: this,
-          publication: pub,
-        ),
-      );
+      [events, call.events].emit(TrackUnpublishedEvent(
+        participant: this,
+        publication: pub,
+      ));
     }
 
     await pub.dispose();

@@ -1,13 +1,13 @@
-import 'package:collection/collection.dart';
+import 'package:example/src/participant_track.dart';
+import 'package:example/src/widgets/controls.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import 'widgets/controls.dart';
-import 'widgets/participant_info.dart';
-import 'widgets/participant_widget.dart';
+import 'home_screen.dart';
 
 class CallScreen extends StatefulWidget {
-  const CallScreen({super.key, required this.call});
+  const CallScreen({Key? key, required this.call}) : super(key: key);
 
   final Call call;
 
@@ -36,17 +36,14 @@ class _CallScreenState extends State<CallScreen> {
 
     setState(() {});
 
-    final userMediaTracks = <ParticipantTrack>[];
-    final screenTracks = <ParticipantTrack>[];
-    for (final participant in widget.call.participants.values) {
-      for (final t in participant.videoTracks) {
-        screenTracks.add(
-          ParticipantTrack(
-            participant: participant,
-            videoTrack: t.track,
-            isScreenShare: t.isScreenShare,
-          ),
-        );
+    List<ParticipantTrack> userMediaTracks = [];
+    List<ParticipantTrack> screenTracks = [];
+    for (var participant in widget.call.participants.values) {
+      for (var t in participant.videoTracks) {
+        screenTracks.add(ParticipantTrack(
+          participant: participant,
+          videoTrack: t.track,
+        ));
       }
     }
     // sort speakers for the grid
@@ -80,14 +77,11 @@ class _CallScreenState extends State<CallScreen> {
 
     final localParticipantTracks = widget.call.localParticipant?.videoTracks;
     if (localParticipantTracks != null) {
-      for (final t in localParticipantTracks) {
-        screenTracks.add(
-          ParticipantTrack(
-            participant: widget.call.localParticipant!,
-            videoTrack: t.track,
-            isScreenShare: t.isScreenShare,
-          ),
-        );
+      for (var t in localParticipantTracks) {
+        screenTracks.add(ParticipantTrack(
+          participant: widget.call.localParticipant!,
+          videoTrack: t.track,
+        ));
       }
     }
     setState(() {
@@ -99,14 +93,15 @@ class _CallScreenState extends State<CallScreen> {
   void initState() {
     super.initState();
     _onParticipantUpdate();
-    widget.call.events.listen((_) {
-      _onParticipantUpdate();
-    });
+    widget.call.events
+      ..listen((_) {
+        _onParticipantUpdate();
+      });
     // widget.call.addListener(SfuEvent_EventPayload.callEnded.name, _onCallEnded);
   }
 
   @override
-  Future<void> dispose() async {
+  void dispose() async {
     // widget.call.removeListener(
     //   SfuEvent_EventPayload.callEnded.name,
     //   _onCallEnded,
@@ -117,34 +112,12 @@ class _CallScreenState extends State<CallScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final grid = GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 1,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-      ),
-      itemCount: allParticipants.length,
-      itemBuilder: (context, index) {
-        final participant = allParticipants[index];
-        if (participant is RemoteParticipant) {
-          print('All tracks: ${participant.videoTracks.length}');
-          print(
-            'Track: ${participant.videoTracks.map((e) => e.track?.mediaStreamTrack)}',
-          );
-        }
-        final participantTrack = ParticipantTrack(
-          participant: participant,
-          videoTrack: participant.videoTracks.firstOrNull?.track as VideoTrack?,
-          isScreenShare: false,
-        );
-        return ParticipantWidget.widgetFor(participantTrack);
-      },
-    );
-
     return Scaffold(
       body: Column(
         children: [
-          Expanded(child: grid),
+          Expanded(
+            child: StreamCallParticipants(participants: allParticipants),
+          ),
           SizedBox(
             width: double.infinity,
             child: Material(
@@ -153,6 +126,10 @@ class _CallScreenState extends State<CallScreen> {
               child: ControlsWidget(
                 widget.call,
                 widget.call.localParticipant!,
+                onHangUp: () {
+                  Navigator.of(context)
+                      .pushReplacementNamed(HomeScreen.routeName);
+                },
               ),
             ),
           ),

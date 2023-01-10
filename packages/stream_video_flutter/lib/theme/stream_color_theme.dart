@@ -33,27 +33,27 @@ class StreamColorTheme {
       sigmaY: -1,
       color: Color(0xff000000),
       blur: 0,
-      alpha: 0.08,
+      opacity: 0.08,
     ),
     this.borderBottom = const Effect(
       sigmaX: 0,
       sigmaY: 1,
       color: Color(0xff000000),
       blur: 0,
-      alpha: 0.08,
+      opacity: 0.08,
     ),
     this.shadowIconButton = const Effect(
       sigmaX: 0,
       sigmaY: 2,
       color: Color(0xff000000),
-      alpha: 0.5,
+      opacity: 0.5,
       blur: 4,
     ),
     this.modalShadow = const Effect(
       sigmaX: 0,
       sigmaY: 0,
       color: Color(0xff000000),
-      alpha: 1,
+      opacity: 1,
       blur: 8,
     ),
   });
@@ -82,20 +82,20 @@ class StreamColorTheme {
       sigmaY: 1,
       color: Color(0xff141924),
       blur: 0,
-      alpha: 1,
+      opacity: 1,
     ),
     this.shadowIconButton = const Effect(
       sigmaX: 0,
       sigmaY: 2,
       color: Color(0xff000000),
-      alpha: 0.5,
+      opacity: 0.5,
       blur: 4,
     ),
     this.modalShadow = const Effect(
       sigmaX: 0,
       sigmaY: 0,
       color: Color(0xff000000),
-      alpha: 1,
+      opacity: 1,
       blur: 8,
     ),
     this.highlight = const Color(0xff302d22),
@@ -296,7 +296,7 @@ class Effect {
     this.sigmaX,
     this.sigmaY,
     this.color,
-    this.alpha,
+    this.opacity,
     this.blur,
   });
 
@@ -310,7 +310,7 @@ class Effect {
   final Color? color;
 
   ///
-  final double? alpha;
+  final double? opacity;
 
   ///
   final double? blur;
@@ -320,14 +320,14 @@ class Effect {
     double? sigmaX,
     double? sigmaY,
     Color? color,
-    double? alpha,
+    double? opacity,
     double? blur,
   }) {
     return Effect(
       sigmaX: sigmaX ?? this.sigmaX,
       sigmaY: sigmaY ?? this.sigmaY,
       color: color ?? this.color,
-      alpha: alpha ?? this.alpha,
+      opacity: opacity ?? this.opacity,
       blur: blur ?? this.blur,
     );
   }
@@ -337,11 +337,7 @@ class Effect {
       sigmaX: lerpDouble(sigmaX, other.sigmaX, t),
       sigmaY: lerpDouble(sigmaY, other.sigmaY, t),
       color: Color.lerp(color, other.color, t),
-      alpha: lerpDouble(
-        color as double? ?? alpha,
-        other.color as double? ?? other.alpha,
-        t,
-      ),
+      opacity: lerpDouble(opacity, other.opacity, t),
       blur: lerpDouble(blur, other.blur, t),
     );
   }

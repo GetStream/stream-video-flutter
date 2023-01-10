@@ -1,13 +1,12 @@
-import 'package:collection/collection.dart';
+import 'package:dogfooding/src/home_screen.dart';
+import 'package:dogfooding/src/participant_track.dart';
+import 'package:dogfooding/src/participants_info_screen.dart';
+import 'package:dogfooding/src/widgets/controls.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
-
-import 'widgets/controls.dart';
-import 'widgets/participant_info.dart';
-import 'widgets/participant_widget.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class CallScreen extends StatefulWidget {
-  const CallScreen({super.key, required this.call});
+  const CallScreen({Key? key, required this.call}) : super(key: key);
 
   final Call call;
 
@@ -36,17 +35,14 @@ class _CallScreenState extends State<CallScreen> {
 
     setState(() {});
 
-    final userMediaTracks = <ParticipantTrack>[];
-    final screenTracks = <ParticipantTrack>[];
-    for (final participant in widget.call.participants.values) {
-      for (final t in participant.videoTracks) {
-        screenTracks.add(
-          ParticipantTrack(
-            participant: participant,
-            videoTrack: t.track,
-            isScreenShare: t.isScreenShare,
-          ),
-        );
+    List<ParticipantTrack> userMediaTracks = [];
+    List<ParticipantTrack> screenTracks = [];
+    for (var participant in widget.call.participants.values) {
+      for (var t in participant.videoTracks) {
+        screenTracks.add(ParticipantTrack(
+          participant: participant,
+          videoTrack: t.track,
+        ));
       }
     }
     // sort speakers for the grid
@@ -80,14 +76,11 @@ class _CallScreenState extends State<CallScreen> {
 
     final localParticipantTracks = widget.call.localParticipant?.videoTracks;
     if (localParticipantTracks != null) {
-      for (final t in localParticipantTracks) {
-        screenTracks.add(
-          ParticipantTrack(
-            participant: widget.call.localParticipant!,
-            videoTrack: t.track,
-            isScreenShare: t.isScreenShare,
-          ),
-        );
+      for (var t in localParticipantTracks) {
+        screenTracks.add(ParticipantTrack(
+          participant: widget.call.localParticipant!,
+          videoTrack: t.track,
+        ));
       }
     }
     setState(() {
@@ -99,61 +92,68 @@ class _CallScreenState extends State<CallScreen> {
   void initState() {
     super.initState();
     _onParticipantUpdate();
-    widget.call.events.listen((_) {
-      _onParticipantUpdate();
-    });
+    widget.call.events
+      ..listen((_) {
+        _onParticipantUpdate();
+      });
     // widget.call.addListener(SfuEvent_EventPayload.callEnded.name, _onCallEnded);
   }
 
   @override
-  Future<void> dispose() async {
+  void dispose() async {
+    super.dispose();
     // widget.call.removeListener(
     //   SfuEvent_EventPayload.callEnded.name,
     //   _onCallEnded,
     // );
     await widget.call.disconnect();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final grid = GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 1,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-      ),
-      itemCount: allParticipants.length,
-      itemBuilder: (context, index) {
-        final participant = allParticipants[index];
-        if (participant is RemoteParticipant) {
-          print('All tracks: ${participant.videoTracks.length}');
-          print(
-            'Track: ${participant.videoTracks.map((e) => e.track?.mediaStreamTrack)}',
-          );
-        }
-        final participantTrack = ParticipantTrack(
-          participant: participant,
-          videoTrack: participant.videoTracks.firstOrNull?.track as VideoTrack?,
-          isScreenShare: false,
-        );
-        return ParticipantWidget.widgetFor(participantTrack);
-      },
-    );
-
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(child: grid),
-          SizedBox(
-            width: double.infinity,
-            child: Material(
-              elevation: 4,
-              // color: ,
-              child: ControlsWidget(
-                widget.call,
-                widget.call.localParticipant!,
+          Column(
+            children: [
+              Expanded(
+                child: StreamCallParticipants(participants: allParticipants),
               ),
+              SizedBox(
+                width: double.infinity,
+                child: Material(
+                  elevation: 4,
+                  // color: ,
+                  child: ControlsWidget(
+                    widget.call,
+                    widget.call.localParticipant!,
+                    onHangUp: () {
+                      Navigator.of(context)
+                          .pushReplacementNamed(HomeScreen.routeName);
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SafeArea(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.group_rounded,
+                    color: Colors.black,
+                  ),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => StreamCallParticipantsInfoScreen(
+                        call: widget.call,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

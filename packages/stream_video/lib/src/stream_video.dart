@@ -416,6 +416,21 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     return response;
   }
 
+  Future<void> inviteUsers({
+    required String callCid,
+    required List<UserInfo> users,
+  }) async {
+    final res = await _client.upsertCallMembers(
+      UpsertCallMembersRequest(
+        callCid: callCid,
+        members: users.map((user) {
+          return MemberInput(userId: user.id, role: user.role);
+        }),
+      ),
+    );
+    print('[inviteUsers] res: $res');
+  }
+
   Future<Map<String, Latency>> _measureLatencies({
     required List<Edge> edges,
     int rounds = 3,
