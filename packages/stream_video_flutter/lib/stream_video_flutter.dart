@@ -8,3 +8,4 @@ export 'icon/stream_icon_toggle.dart';
 export 'participants/call_participant.dart';
 export 'participants/call_participants.dart';
 export 'theme/themes.dart';
+export 'call_controls/call_controls.dart';
