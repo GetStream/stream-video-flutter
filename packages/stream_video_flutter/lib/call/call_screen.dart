@@ -43,7 +43,7 @@ class CallScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) =>
                     participantsInfoWidgetBuilder?.call(context, call) ??
-                    MockStreamCallParticipantsInfoScreen(call: call),
+                        StreamCallParticipantsInfoView(call: call),
               ),
             );
           },
@@ -73,20 +73,6 @@ class MockOutgoingCallView extends StatelessWidget {
 
 class MockIncomingCallView extends StatelessWidget {
   const MockIncomingCallView({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Text("This screen is not implemented yet.");
-  }
-}
-
-class MockStreamCallParticipantsInfoScreen extends StatelessWidget {
-  const MockStreamCallParticipantsInfoScreen({
-    Key? key,
-    required this.call,
-  }) : super(key: key);
-
-  final Call call;
 
   @override
   Widget build(BuildContext context) {
