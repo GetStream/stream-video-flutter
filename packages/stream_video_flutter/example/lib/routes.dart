@@ -1,5 +1,6 @@
 import 'package:example/src/home_screen.dart';
 import 'package:example/src/login_screen.dart';
+import 'package:example/src/participants_info_screen.dart';
 import 'package:example/src/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
@@ -38,6 +39,8 @@ mixin Routes {
               call: call,
               onBackPressed: navigateHome,
               onHangUp: navigateHome,
+              participantsInfoWidgetBuilder: (context, call) =>
+                  StreamCallParticipantsInfoScreen(call: call),
             );
           },
         );
