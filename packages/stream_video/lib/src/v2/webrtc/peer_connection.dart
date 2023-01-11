@@ -1,19 +1,21 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_video/src/disposable.dart';
 import 'package:stream_video/src/logger/stream_logger.dart';
 import 'package:stream_video/src/v2/errors/video_error.dart';
 import 'package:stream_video/src/v2/errors/video_error_composer.dart';
 import 'package:stream_video/src/v2/utils/result.dart';
 import 'package:stream_video/src/v2/webrtc/peer_type.dart';
+import 'package:stream_video/stream_video.dart';
 
 /// {@template onStreamAdded}
 /// Handler when a new [MediaStream] gets added.
 /// {@endtemplate}
 typedef OnStreamAdded = void Function(StreamPeerConnection, rtc.MediaStream);
 
-/// {@template onNegotiationNeeded}
+/// {@template onRenegotiationNeeded}
 /// Handler when there's a new negotiation.
 /// {@endtemplate}
-typedef OnNegotiationNeeded = void Function(StreamPeerConnection);
+typedef OnRenegotiationNeeded = void Function(StreamPeerConnection);
 
 /// {@template onIceCandidate}
 /// Handler whenever we receive [rtc.RTCIceCandidate]s.
@@ -23,18 +25,22 @@ typedef OnIceCandidate = void Function(
   rtc.RTCIceCandidate,
 );
 
+/// {@template onTrack}
+/// Handler whenever we receive [rtc.RTCTrackEvent]s.
+/// {@endtemplate}
+typedef OnTrack = void Function(
+  StreamPeerConnection,
+  rtc.RTCTrackEvent,
+);
+
 /// Wrapper around the WebRTC connection that contains tracks.
-class StreamPeerConnection {
+class StreamPeerConnection extends Disposable {
   /// Creates [StreamPeerConnection] instance.
   StreamPeerConnection({
     required this.sessionId,
     required this.callCid,
     required this.type,
     required this.pc,
-    required this.mediaConstraints,
-    this.onStreamAdded,
-    this.onNegotiationNeeded,
-    this.onIceCandidate,
   }) {
     _initRtcCallbacks();
   }
@@ -45,23 +51,27 @@ class StreamPeerConnection {
   final String callCid;
   final StreamPeerType type;
   final rtc.RTCPeerConnection pc;
-  final Map<String, dynamic> mediaConstraints;
 
   /// {@macro onStreamAdded}
-  final OnStreamAdded? onStreamAdded;
+  OnStreamAdded? onStreamAdded;
 
-  /// {@macro onNegotiationNeeded}
-  final OnNegotiationNeeded? onNegotiationNeeded;
+  /// {@macro onRenegotiationNeeded}
+  OnRenegotiationNeeded? onRenegotiationNeeded;
 
   /// {@macro onIceCandidate}
-  final OnIceCandidate? onIceCandidate;
+  OnIceCandidate? onIceCandidate;
+
+  /// {@macro onTrack}
+  OnTrack? onTrack;
 
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
   late rtc.RTCRtpTransceiver audioTransceiver;
   late rtc.RTCRtpTransceiver videoTransceiver;
 
   /// Creates an offer and sets it as the local description.
-  Future<Result<rtc.RTCSessionDescription>> createOffer() async {
+  Future<Result<rtc.RTCSessionDescription>> createOffer([
+    Map<String, dynamic> mediaConstraints = const {},
+  ]) async {
     try {
       final offer = await pc.createOffer(mediaConstraints);
       await pc.setLocalDescription(offer);
@@ -74,7 +84,9 @@ class StreamPeerConnection {
   /// Creates an answer and sets it as the local description.
   ///
   /// The remote description must be set before calling this method.
-  Future<Result<rtc.RTCSessionDescription>> createAnswer() async {
+  Future<Result<rtc.RTCSessionDescription>> createAnswer([
+    Map<String, dynamic> mediaConstraints = const {},
+  ]) async {
     try {
       final answer = await pc.createAnswer(mediaConstraints);
       await pc.setLocalDescription(answer);
@@ -82,6 +94,24 @@ class StreamPeerConnection {
     } catch (e, stk) {
       return Failure(VideoErrors.compose(e, stk));
     }
+  }
+
+  /// Sets the offer session description.
+  Future<Result<void>> setRemoteOffer(
+    String offerSdp,
+  ) async {
+    return setRemoteDescription(
+      rtc.RTCSessionDescription(offerSdp, 'offer'),
+    );
+  }
+
+  /// Sets the answer session description.
+  Future<Result<void>> setRemoteAnswer(
+    String answerSdp,
+  ) async {
+    return setRemoteDescription(
+      rtc.RTCSessionDescription(answerSdp, 'answer'),
+    );
   }
 
   /// Sets the remote description and adds any pending ice candidates.
@@ -191,10 +221,22 @@ class StreamPeerConnection {
       ..onAddStream = _onAddStream
       ..onRemoveStream = _onRemoveStream
       ..onAddTrack = _onAddTrack
+      ..onTrack = _onTrack
       ..onRemoveTrack = _onRemoveTrack
       ..onIceCandidate = _onIceCandidate
       ..onIceConnectionState = _onIceConnectionState
       ..onRenegotiationNeeded = _onRenegotiationNeeded;
+  }
+
+  void _dropRtcCallbacks() {
+    pc
+      ..onAddStream = null
+      ..onRemoveStream = null
+      ..onAddTrack = null
+      ..onRemoveTrack = null
+      ..onIceCandidate = null
+      ..onIceConnectionState = null
+      ..onRenegotiationNeeded = null;
   }
 
   void _onAddStream(rtc.MediaStream stream) {
@@ -211,6 +253,13 @@ class StreamPeerConnection {
       () => '[onAddTrack] stream.id: ${stream.id}, track.id: ${track.id}, '
           'track.kind: ${track.kind}',
     );
+  }
+
+  void _onTrack(rtc.RTCTrackEvent event) {
+    _logger.v(
+      () => '[onTrack] event: $event',
+    );
+    onTrack?.call(this, event);
   }
 
   void _onRemoveTrack(rtc.MediaStream stream, rtc.MediaStreamTrack track) {
@@ -230,6 +279,13 @@ class StreamPeerConnection {
 
   void _onRenegotiationNeeded() {
     _logger.i(() => '[onRenegotiationNeeded] no args');
-    onNegotiationNeeded?.call(this);
+    onRenegotiationNeeded?.call(this);
+  }
+
+  @override
+  Future<void> dispose() async {
+    _dropRtcCallbacks();
+    await pc.dispose();
+    return await super.dispose();
   }
 }

@@ -8,24 +8,25 @@ import 'package:stream_video/src/v2/sfu/data/models/sfu_participant.dart';
 import 'package:stream_video/src/v2/sfu/data/models/sfu_track_type.dart';
 import 'package:stream_video/src/v2/sfu/data/models/sfu_video_sender.dart';
 
-abstract class SfuEvent {
-  const SfuEvent();
+/// TODO remove V2 suffix after finishing refactoring.
+abstract class SfuEventV2 {
+  const SfuEventV2();
 }
 
 @internal
-class SfuUnknownEvent extends SfuEvent {
+class SfuUnknownEvent extends SfuEventV2 {
   const SfuUnknownEvent();
 }
 
 @internal
-class SfuJoinResponseEvent extends SfuEvent {
+class SfuJoinResponseEvent extends SfuEventV2 {
   const SfuJoinResponseEvent({required this.callState});
 
   final SfuCallState callState;
 }
 
 @internal
-class SfuSubscriberOfferEvent extends SfuEvent {
+class SfuSubscriberOfferEvent extends SfuEventV2 {
   const SfuSubscriberOfferEvent({required this.sdp, required this.iceRestart});
 
   final String sdp;
@@ -33,14 +34,14 @@ class SfuSubscriberOfferEvent extends SfuEvent {
 }
 
 @internal
-class SfuPublisherAnswerEvent extends SfuEvent {
+class SfuPublisherAnswerEvent extends SfuEventV2 {
   const SfuPublisherAnswerEvent({required this.sdp});
 
   final String sdp;
 }
 
 @internal
-class SfuConnectionQualityChangedEvent extends SfuEvent {
+class SfuConnectionQualityChangedEvent extends SfuEventV2 {
   const SfuConnectionQualityChangedEvent({
     required this.connectionQualityUpdates,
   });
@@ -49,14 +50,14 @@ class SfuConnectionQualityChangedEvent extends SfuEvent {
 }
 
 @internal
-class SfuAudioLevelChangedEvent extends SfuEvent {
+class SfuAudioLevelChangedEvent extends SfuEventV2 {
   const SfuAudioLevelChangedEvent({required this.audioLevels});
 
   final List<SfuAudioLevel> audioLevels;
 }
 
 @internal
-class SfuIceTrickleEvent extends SfuEvent {
+class SfuIceTrickleEvent extends SfuEventV2 {
   const SfuIceTrickleEvent({
     required this.sessionId,
     required this.iceCandidate,
@@ -67,7 +68,7 @@ class SfuIceTrickleEvent extends SfuEvent {
 }
 
 @internal
-class SfuChangePublishQualityEvent extends SfuEvent {
+class SfuChangePublishQualityEvent extends SfuEventV2 {
   const SfuChangePublishQualityEvent({
     required this.audioSenders,
     required this.videoSenders,
@@ -78,7 +79,7 @@ class SfuChangePublishQualityEvent extends SfuEvent {
 }
 
 @internal
-class SfuParticipantJoinedEvent extends SfuEvent {
+class SfuParticipantJoinedEvent extends SfuEventV2 {
   const SfuParticipantJoinedEvent({
     required this.callCid,
     required this.participant,
@@ -89,7 +90,7 @@ class SfuParticipantJoinedEvent extends SfuEvent {
 }
 
 @internal
-class SfuParticipantLeftEvent extends SfuEvent {
+class SfuParticipantLeftEvent extends SfuEventV2 {
   const SfuParticipantLeftEvent({
     required this.callCid,
     required this.participant,
@@ -100,7 +101,7 @@ class SfuParticipantLeftEvent extends SfuEvent {
 }
 
 @internal
-class SfuDominantSpeakerChangedEvent extends SfuEvent {
+class SfuDominantSpeakerChangedEvent extends SfuEventV2 {
   const SfuDominantSpeakerChangedEvent({
     required this.userId,
     required this.sessionId,
@@ -111,7 +112,7 @@ class SfuDominantSpeakerChangedEvent extends SfuEvent {
 }
 
 @internal
-class SfuTrackPublishedEvent extends SfuEvent {
+class SfuTrackPublishedEvent extends SfuEventV2 {
   const SfuTrackPublishedEvent({
     required this.userId,
     required this.sessionId,
@@ -124,7 +125,7 @@ class SfuTrackPublishedEvent extends SfuEvent {
 }
 
 @internal
-class SfuTrackUnpublishedEvent extends SfuEvent {
+class SfuTrackUnpublishedEvent extends SfuEventV2 {
   const SfuTrackUnpublishedEvent({
     required this.userId,
     required this.sessionId,
@@ -136,9 +137,9 @@ class SfuTrackUnpublishedEvent extends SfuEvent {
   final SfuTrackType trackType;
 }
 
-class SfuHealthCheckResponseEvent extends SfuEvent {}
+class SfuHealthCheckResponseEvent extends SfuEventV2 {}
 
-class SfuErrorEvent extends SfuEvent {
+class SfuErrorEvent extends SfuEventV2 {
   const SfuErrorEvent({required this.error});
 
   final SfuError error;
