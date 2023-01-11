@@ -17,7 +17,7 @@ import 'package:stream_video/src/v2/sfu/data/models/sfu_video_sender.dart';
 /// TODO
 extension SfuEventMapper on sfu_events.SfuEvent {
   /// TODO
-  SfuEvent toDomain() {
+  SfuEventV2 toDomain() {
     final eventType = whichEventPayload();
     switch (eventType) {
       case sfu_events.SfuEvent_EventPayload.subscriberOffer:

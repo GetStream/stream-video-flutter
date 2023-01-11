@@ -1,3 +1,4 @@
+import 'package:stream_video/src/v2/sfu/data/models/sfu_connection_quality.dart';
 import 'package:stream_video/stream_video.dart';
 
 class CallParticipantState {
@@ -10,10 +11,8 @@ class CallParticipantState {
     required this.sessionId,
     required this.idPrefix,
     this.isLocal = false,
-    this.connectionQuality = ConnectionQuality.unknown,
+    this.connectionQuality = SfuConnectionQuality.unspecified,
     this.isOnline = false,
-    this.videoTrack,
-    this.screenSharingTrack,
     this.audioLevel = 0,
   });
 
@@ -24,9 +23,16 @@ class CallParticipantState {
   final String sessionId;
   final String idPrefix;
   final bool isLocal;
-  final ConnectionQuality connectionQuality;
+  final SfuConnectionQuality connectionQuality;
   final bool isOnline;
+  double audioLevel;
+}
+
+class CallParticipantRTC {
+  CallParticipantRTC({
+    this.videoTrack,
+    this.screenSharingTrack,
+  });
   VideoTrack? videoTrack;
   VideoTrack? screenSharingTrack;
-  double audioLevel;
 }
