@@ -112,6 +112,21 @@ class _CallScreenState extends State<CallScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.call.callCid),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.group_rounded),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => StreamCallParticipantsInfoScreen(
+                  call: widget.call,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: Stack(
         children: [
           Column(
@@ -138,26 +153,6 @@ class _CallScreenState extends State<CallScreen> {
                 ),
               ),
             ],
-          ),
-          SafeArea(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.group_rounded,
-                    color: Colors.black,
-                  ),
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => StreamCallParticipantsInfoScreen(
-                        call: widget.call,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
