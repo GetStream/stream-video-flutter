@@ -10,7 +10,7 @@ typedef CallParticipantsInfoWidgetBuilder = Widget Function(
 );
 
 /// This class holds the widgets for the three possible states of a call: on call,
-/// incoming call, outgoing call and present the correct screen accordingly with
+/// incoming call, outgoing call and presents the correct screen accordingly with
 /// the state.
 class CallScreen extends StatelessWidget {
   const CallScreen({
@@ -25,6 +25,7 @@ class CallScreen extends StatelessWidget {
 
   static const routeName = '/call';
 
+  // Hardcoded state. This should some from StreamVideo. 
   final CallState callState = CallState.onCall;
   final VoidCallback onBackPressed;
   final VoidCallback onHangUp;
@@ -62,6 +63,7 @@ enum CallState {
   outgoing,
 }
 
+/// Delete this class one the final implementation if done.
 class MockOutgoingCallView extends StatelessWidget {
   const MockOutgoingCallView({Key? key}) : super(key: key);
 
@@ -71,6 +73,7 @@ class MockOutgoingCallView extends StatelessWidget {
   }
 }
 
+/// Delete this class one the final implementation if done.
 class MockIncomingCallView extends StatelessWidget {
   const MockIncomingCallView({Key? key}) : super(key: key);
 
