@@ -8,16 +8,17 @@ class CoordinatorEvent {
 }
 
 /// Sent periodically by the server to keep the connection alive.
-class VideoHealthCheckEvent extends CoordinatorEvent {
-  const VideoHealthCheckEvent({required this.clientId, required this.userId});
+class CoordinatorHealthCheckEvent extends CoordinatorEvent {
+  const CoordinatorHealthCheckEvent(
+      {required this.clientId, required this.userId});
 
   final String clientId;
   final String userId;
 }
 
 /// Sent when someone creates a call and invites another person to participate.
-class VideoCallCreatedEvent extends CoordinatorEvent {
-  const VideoCallCreatedEvent({
+class CoordinatorCallCreatedEvent extends CoordinatorEvent {
+  const CoordinatorCallCreatedEvent({
     required this.callCid,
     required this.ringing,
     required this.info,
@@ -31,8 +32,8 @@ class VideoCallCreatedEvent extends CoordinatorEvent {
 }
 
 /// Sent when a call gets updated.
-class VideoCallUpdatedEvent extends CoordinatorEvent {
-  const VideoCallUpdatedEvent({
+class CoordinatorCallUpdatedEvent extends CoordinatorEvent {
+  const CoordinatorCallUpdatedEvent({
     required this.callCid,
     required this.info,
     required this.details,
@@ -44,8 +45,8 @@ class VideoCallUpdatedEvent extends CoordinatorEvent {
 }
 
 /// Sent when a calls gets ended.
-class VideoCallEndedEvent extends CoordinatorEvent {
-  const VideoCallEndedEvent({
+class CoordinatorCallEndedEvent extends CoordinatorEvent {
+  const CoordinatorCallEndedEvent({
     required this.callCid,
     required this.info,
     required this.details,
@@ -57,8 +58,8 @@ class VideoCallEndedEvent extends CoordinatorEvent {
 }
 
 /// Sent when a user accepts the call.
-class VideoCallAcceptedEvent extends CoordinatorEvent {
-  const VideoCallAcceptedEvent({
+class CoordinatorCallAcceptedEvent extends CoordinatorEvent {
+  const CoordinatorCallAcceptedEvent({
     required this.callCid,
     required this.sentByUserId,
     required this.info,
@@ -72,8 +73,8 @@ class VideoCallAcceptedEvent extends CoordinatorEvent {
 }
 
 /// Sent when a user rejects the call.
-class VideoCallRejectedEvent extends CoordinatorEvent {
-  const VideoCallRejectedEvent({
+class CoordinatorCallRejectedEvent extends CoordinatorEvent {
+  const CoordinatorCallRejectedEvent({
     required this.callCid,
     required this.sentByUserId,
     required this.info,
@@ -87,8 +88,8 @@ class VideoCallRejectedEvent extends CoordinatorEvent {
 }
 
 /// Sent when a user cancels the call.
-class VideoCallCancelledEvent extends CoordinatorEvent {
-  const VideoCallCancelledEvent({
+class CoordinatorCallCancelledEvent extends CoordinatorEvent {
+  const CoordinatorCallCancelledEvent({
     required this.callCid,
     required this.sentByUserId,
     required this.info,
@@ -102,8 +103,8 @@ class VideoCallCancelledEvent extends CoordinatorEvent {
 }
 
 /// Sent when call members are updated.
-class VideoCallMembersUpdatedEvent extends CoordinatorEvent {
-  const VideoCallMembersUpdatedEvent({
+class CoordinatorCallMembersUpdatedEvent extends CoordinatorEvent {
+  const CoordinatorCallMembersUpdatedEvent({
     required this.callCid,
     required this.info,
     required this.details,
@@ -115,8 +116,8 @@ class VideoCallMembersUpdatedEvent extends CoordinatorEvent {
 }
 
 /// Sent when call members are deleted.
-class VideoCallMembersDeletedEvent extends CoordinatorEvent {
-  const VideoCallMembersDeletedEvent({
+class CoordinatorCallMembersDeletedEvent extends CoordinatorEvent {
+  const CoordinatorCallMembersDeletedEvent({
     required this.callCid,
     required this.info,
     required this.details,
@@ -128,6 +129,6 @@ class VideoCallMembersDeletedEvent extends CoordinatorEvent {
 }
 
 // Unknown event.
-class VideoUnknownEvent extends CoordinatorEvent {
-  const VideoUnknownEvent();
+class CoordinatorUnknownEvent extends CoordinatorEvent {
+  const CoordinatorUnknownEvent();
 }
