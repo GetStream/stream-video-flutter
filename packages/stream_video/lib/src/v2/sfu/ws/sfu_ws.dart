@@ -9,7 +9,7 @@ import 'package:stream_video/src/v2/errors/video_error.dart';
 import 'package:stream_video/src/v2/errors/video_error_composer.dart';
 import 'package:stream_video/src/v2/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/v2/sfu/ws/sfu_event_listener.dart';
-import 'package:stream_video/src/v2/sfu/ws/sfu_mapper_extensions.dart';
+import 'package:stream_video/src/v2/sfu/data/events/sfu_event_mapper_extensions.dart';
 import 'package:stream_video/src/ws/keep_alive.dart';
 import 'package:stream_video/src/ws/ws.dart';
 

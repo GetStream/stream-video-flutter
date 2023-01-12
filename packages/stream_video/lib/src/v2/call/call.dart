@@ -40,21 +40,22 @@ import 'package:stream_video/src/v2/utils/result_operators.dart';
 import 'package:stream_video/src/v2/webrtc/peer_connection.dart';
 import 'package:stream_video/src/v2/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/v2/webrtc/peer_type.dart';
+import 'package:stream_video/src/v2/webrtc/rtc_parser.dart';
 import 'package:uuid/uuid.dart';
 
 const _timeoutDuration = Duration(seconds: 30);
 
-/// Represents a [Call] in which you can connect to.
-class Call with EventEmittable<CallEvent> {
-  /// Creates a new [Call] instance from a [CallConfiguration].
-  Call({
+/// Represents a [CallV2] in which you can connect to.
+class CallV2 with EventEmittable<CallEvent> {
+  /// Creates a new [CallV2] instance from a [CallConfiguration].
+  CallV2({
     required this.callConfiguration,
     StreamVideo? client,
   })  : callOptions = callConfiguration.callOptions,
         _streamVideoClient = client ?? StreamVideo.instance;
 
-  /// Creates a new [Call] instance if the call already created.
-  Call.fromDetails({
+  /// Creates a new [CallV2] instance if the call already created.
+  CallV2.fromDetails({
     required this.callId,
     required this.callType,
     required this.credentials,
@@ -175,7 +176,7 @@ class Call with EventEmittable<CallEvent> {
     //_streamVideoClient.updateCallStateDisconnected(this);
   }
 
-  Future<Call> connect({
+  Future<CallV2> connect({
     ConnectOptions options = const ConnectOptions(),
   }) async {
     if (!_initialised) {
@@ -553,14 +554,9 @@ class Call with EventEmittable<CallEvent> {
         (event) {
           final iceTrickle = event.iceTrickle;
           logger.info('Received iceTrickle: $iceTrickle');
-
-          final iceCandidateJson = json.decode(iceTrickle.iceCandidate);
-          final iceCandidate = rtc.RTCIceCandidate(
-            iceCandidateJson['candidate'],
-            iceCandidateJson['sdpMid'],
-            iceCandidateJson['sdpMLineIndex'],
+          final iceCandidate = RtcIceCandidateParser.fromJsonString(
+            iceTrickle.iceCandidate,
           );
-
           final peerType = iceTrickle.peerType;
           switch (peerType) {
             case sfu_models.PeerType.PEER_TYPE_SUBSCRIBER:

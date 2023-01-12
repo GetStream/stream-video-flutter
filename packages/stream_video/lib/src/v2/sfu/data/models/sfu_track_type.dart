@@ -3,5 +3,5 @@ enum SfuTrackType {
   audio,
   video,
   screenShare,
-  screenShareAudio,
+  screenShareAudio;
 }

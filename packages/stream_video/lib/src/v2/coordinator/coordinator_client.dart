@@ -31,7 +31,7 @@ class CoordinatorClient {
             .then(Success.new);
       });
     } catch (e, stk) {
-      return e.asFailure(stk).asFuture();
+      return e.toFailure(stk).toFuture();
     }
   }
 
@@ -44,7 +44,7 @@ class CoordinatorClient {
             .then(Success.new);
       });
     } catch (e, stk) {
-      return e.asFailure(stk).asFuture();
+      return e.toFailure(stk).toFuture();
     }
   }
 
@@ -57,7 +57,7 @@ class CoordinatorClient {
             .then(Success.new);
       });
     } catch (e, stk) {
-      return e.asFailure(stk).asFuture();
+      return e.toFailure(stk).toFuture();
     }
   }
 
@@ -72,7 +72,7 @@ class CoordinatorClient {
             .then(Success.new);
       });
     } catch (e, stk) {
-      return e.asFailure(stk).asFuture();
+      return e.toFailure(stk).toFuture();
     }
   }
 
@@ -86,7 +86,7 @@ class CoordinatorClient {
             .then(Success.new);
       });
     } catch (e, stk) {
-      return e.asFailure(stk).asFuture();
+      return e.toFailure(stk).toFuture();
     }
   }
 
@@ -101,7 +101,7 @@ class CoordinatorClient {
             .then(Success.new);
       });
     } catch (e, stk) {
-      return e.asFailure(stk).asFuture();
+      return e.toFailure(stk).toFuture();
     }
   }
 
@@ -115,7 +115,7 @@ class CoordinatorClient {
             .then(Success.new);
       });
     } catch (e, stk) {
-      return e.asFailure(stk).asFuture();
+      return e.toFailure(stk).toFuture();
     }
   }
 
@@ -130,7 +130,7 @@ class CoordinatorClient {
             .then(Success.new);
       });
     } catch (e, stk) {
-      return e.asFailure(stk).asFuture();
+      return e.toFailure(stk).toFuture();
     }
   }
 
@@ -143,7 +143,7 @@ class CoordinatorClient {
             .then(Success.new);
       });
     } catch (e, stk) {
-      return e.asFailure(stk).asFuture();
+      return e.toFailure(stk).toFuture();
     }
   }
 
@@ -156,7 +156,7 @@ class CoordinatorClient {
             .then(Success.new);
       });
     } catch (e, stk) {
-      return e.asFailure(stk).asFuture();
+      return e.toFailure(stk).toFuture();
     }
   }
 
