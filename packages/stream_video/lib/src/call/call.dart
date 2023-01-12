@@ -31,6 +31,7 @@ import 'package:stream_video/src/sfu-client/rtc/codecs.dart' as codecs;
 import 'package:stream_video/src/sfu-client/sfu_client.dart';
 import 'package:stream_video/src/stream_video.dart';
 import 'package:stream_video/src/types/other.dart';
+import 'package:stream_video/stream_video.dart';
 
 const _timeoutDuration = Duration(seconds: 30);
 
@@ -56,6 +57,7 @@ class Call with EventEmittable<CallEvent> {
 
   // Determines whether the call is initialised.
   bool _initialised = false;
+
   void _initialiseCall({required edge.Credentials credentials}) {
     final url = credentials.server.url;
     final token = credentials.token;
@@ -74,6 +76,7 @@ class Call with EventEmittable<CallEvent> {
 
   late final String callId;
   late final String callType;
+
   String get callCid => '$callType:$callId';
   late final edge.Credentials credentials;
   final CallOptions callOptions;
@@ -116,6 +119,10 @@ class Call with EventEmittable<CallEvent> {
       participantIds: callConfiguration.participantIds,
       ringing: callConfiguration.ringing,
     );
+  }
+
+  Future<void> inviteUsers(List<UserInfo> users) async {
+    return _streamVideoClient.inviteUsers(callCid: callCid, users: users);
   }
 
   Future<void> disconnect() async {
@@ -674,7 +681,10 @@ class Call with EventEmittable<CallEvent> {
             continue;
           }
 
-          participant.audioLevel = audioLevel.level;
+          participant.updateAudioLevel(
+            audioLevel.level,
+            isSpeaking: audioLevel.isSpeaking,
+          );
         }
       })
       ..on<SFUChangePublishQualityEvent>((event) {

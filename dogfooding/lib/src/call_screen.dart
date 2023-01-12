@@ -1,6 +1,6 @@
 import 'package:dogfooding/src/home_screen.dart';
 import 'package:dogfooding/src/participant_track.dart';
-import 'package:dogfooding/src/widgets/controls.dart';
+import 'package:dogfooding/src/participants_info_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -111,24 +111,40 @@ class _CallScreenState extends State<CallScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: StreamCallParticipants(participants: allParticipants),
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: Material(
-              elevation: 4,
-              // color: ,
-              child: ControlsWidget(
-                widget.call,
-                widget.call.localParticipant!,
-                onHangUp: () {
-                  Navigator.of(context)
-                      .pushReplacementNamed(HomeScreen.routeName);
+          Column(
+            children: [
+              Expanded(
+                child: StreamCallParticipants(participants: allParticipants),
+              ),
+              StreamCallControlsBar.withDefaultOptions(
+                call: widget.call,
+                onHangup: () async {
+                  await widget.call.disconnect();
+                  Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
                 },
               ),
+            ],
+          ),
+          SafeArea(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.group_rounded,
+                    color: Colors.black,
+                  ),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => StreamCallParticipantsInfoScreen(
+                        call: widget.call,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

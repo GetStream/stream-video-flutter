@@ -1,7 +1,5 @@
 import 'package:example/src/participant_track.dart';
-import 'package:example/src/widgets/controls.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'home_screen.dart';
@@ -118,20 +116,12 @@ class _CallScreenState extends State<CallScreen> {
           Expanded(
             child: StreamCallParticipants(participants: allParticipants),
           ),
-          SizedBox(
-            width: double.infinity,
-            child: Material(
-              elevation: 4,
-              // color: ,
-              child: ControlsWidget(
-                widget.call,
-                widget.call.localParticipant!,
-                onHangUp: () {
-                  Navigator.of(context)
-                      .pushReplacementNamed(HomeScreen.routeName);
-                },
-              ),
-            ),
+          StreamCallControlsBar.withDefaultOptions(
+            call: widget.call,
+            onHangup: () async {
+              await widget.call.disconnect();
+              Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+            },
           ),
         ],
       ),

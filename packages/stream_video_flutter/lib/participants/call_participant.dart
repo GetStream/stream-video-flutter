@@ -103,8 +103,9 @@ class _StreamCallParticipantState extends State<StreamCallParticipant> {
                   padding: const EdgeInsets.all(8.0),
                   child: StreamParticipantLabel(
                     participant: participant,
-                    audioLevelInactiveColor: theme.audioLevelInactiveColor,
-                    audioLevelActiveColor: theme.audioLevelActiveColor,
+                    audioLevelIndicatorColor: theme.audioLevelIndicatorColor,
+                    disabledMicrophoneColor: theme.disabledMicrophoneColor,
+                    enabledMicrophoneColor: theme.enabledMicrophoneColor,
                     participantLabelTextStyle: theme.participantLabelTextStyle,
                   ),
                 ),

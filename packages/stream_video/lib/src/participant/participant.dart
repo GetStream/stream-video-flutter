@@ -11,8 +11,6 @@ import 'package:stream_video/src/participant/participant_info.dart';
 import 'package:stream_video/src/publication/track_publication.dart';
 import 'package:stream_video/src/types/other.dart';
 
-const _kDefaultSpeakingThreshold = 0.3;
-
 /// Represents a Participant in the call, notifies changes via delegates as
 /// well as ChangeNotifier/providers.
 /// A change notification is triggered when
@@ -66,6 +64,12 @@ abstract class Participant<T extends TrackPublication>
   /// track.
   bool get hasScreenShareAudio => screenShareAudioTrack != null;
 
+  /// Audio level between 0-1, 1 being the loudest.
+  double get audioLevel => _audioLevel;
+
+  /// If [Participant] is currently speaking.
+  bool get isSpeaking => _isSpeaking;
+
   /// A convenience property to get all video tracks. This includes both video
   /// and screen share tracks.
   List<T> get videoTracks;
@@ -94,7 +98,6 @@ abstract class Participant<T extends TrackPublication>
   /// Info related to this participant.
   ParticipantInfo get info => _info;
   late ParticipantInfo _info;
-
   void updateInfo(ParticipantInfo info) {
     _info = info;
     [events, call.events].emit(ParticipantInfoUpdatedEvent(
@@ -102,41 +105,23 @@ abstract class Participant<T extends TrackPublication>
     ));
   }
 
-  /// Audio level between 0-1, 1 being the loudest.
-  double get audioLevel => _audioLevel;
   double _audioLevel = 0;
-
-  set audioLevel(double level) {
-    if (_audioLevel != level) {
-      _audioLevel = level;
-
-      events.emit(AudioLevelChangedEvent(
-        participant: this,
-        audioLevel: level,
-      ));
-
-      // This is a heuristic that is not 100% accurate.
-      // We use a threshold of 0.3 to determine if the participant is speaking.
-      // This is because the audio level is not always 0 when the participant
-      // is not speaking.
-      isSpeaking = level > _kDefaultSpeakingThreshold;
-    }
-  }
-
-  /// if [Participant] is currently speaking.
-  bool get isSpeaking => _isSpeaking;
   bool _isSpeaking = false;
 
-  set isSpeaking(bool speaking) {
-    if (_isSpeaking == speaking) return;
-    _isSpeaking = speaking;
-    if (speaking) {
+  void updateAudioLevel(double level, {required bool isSpeaking}) {
+    if (_audioLevel == level && _isSpeaking == isSpeaking) return;
+
+    _audioLevel = audioLevel;
+    _isSpeaking = isSpeaking;
+
+    if (isSpeaking) {
       lastSpokeAt = DateTime.now();
     }
 
-    events.emit(SpeakingChangedEvent(
+    events.emit(AudioLevelUpdatedEvent(
       participant: this,
-      speaking: speaking,
+      audioLevel: audioLevel,
+      isSpeaking: isSpeaking,
     ));
   }
 

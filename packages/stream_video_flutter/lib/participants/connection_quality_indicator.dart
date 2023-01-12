@@ -35,8 +35,8 @@ class StreamConnectionQualityIndicator extends StatelessWidget {
           size: const Size.square(24.0),
           painter: _ConnectionQualityIndicatorPainter(
             connectionQuality: connectionQuality,
-            activeColor: activeColor ?? theme.audioLevelActiveColor,
-            inactiveColor: inactiveColor ?? theme.audioLevelInactiveColor,
+            activeColor: activeColor ?? theme.connectionLevelActiveColor,
+            inactiveColor: inactiveColor ?? theme.connectionLevelInactiveColor,
           ),
         ),
       ),
