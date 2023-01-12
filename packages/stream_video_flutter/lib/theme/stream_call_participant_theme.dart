@@ -2,12 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/theme/stream_avatar_theme.dart';
 
+import '../stream_video_flutter.dart';
+
 /// A style of a single participant on a call.
 class StreamCallParticipantTheme with Diagnosticable {
   /// Constructor for creating [StreamCallParticipantTheme].
   const StreamCallParticipantTheme({
     this.focusedColor = const Color(0xff005FFF),
     this.backgroundColor = const Color(0xFF272A30),
+    this.borderRadius = BorderRadius.zero,
     this.avatarTheme = const StreamAvatarTheme(
       constraints: BoxConstraints.tightFor(
         height: 100,
@@ -27,10 +30,12 @@ class StreamCallParticipantTheme with Diagnosticable {
       fontSize: 12,
       color: Colors.white,
     ),
+    this.participantLabelAlignment = Alignment.bottomLeft,
     this.enabledMicrophoneColor = Colors.white,
     this.disabledMicrophoneColor = const Color(0xffFF3842),
     this.connectionLevelActiveColor = const Color(0xff005FFF),
     this.connectionLevelInactiveColor = Colors.white,
+    this.connectionLevelAlignment = Alignment.bottomRight,
   });
 
   /// The color in the focused state.
@@ -38,6 +43,9 @@ class StreamCallParticipantTheme with Diagnosticable {
 
   /// The color of the background behind avatar.
   final Color backgroundColor;
+
+  /// The border radius of the call participant.
+  final BorderRadius borderRadius;
 
   /// Theme for the avatar.
   final StreamAvatarTheme avatarTheme;
@@ -47,6 +55,9 @@ class StreamCallParticipantTheme with Diagnosticable {
 
   /// Text style for the participant label.
   final TextStyle participantLabelTextStyle;
+
+  /// Alignment for the participant label.
+  final AlignmentGeometry participantLabelAlignment;
 
   /// The color of an enabled microphone icon.
   final Color enabledMicrophoneColor;
@@ -60,25 +71,34 @@ class StreamCallParticipantTheme with Diagnosticable {
   /// The color of an inactive connection quality level.
   final Color connectionLevelInactiveColor;
 
-  copyWith({
+  /// Alignment for the connection level.
+  final AlignmentGeometry connectionLevelAlignment;
+
+  StreamCallParticipantTheme copyWith({
     Color? focusedColor,
     Color? backgroundColor,
+    BorderRadius? borderRadius,
     StreamAvatarTheme? avatarTheme,
     Color? audioLevelIndicatorColor,
     TextStyle? participantLabelTextStyle,
+    AlignmentGeometry? participantLabelAlignment,
     Color? enabledMicrophoneColor,
     Color? disabledMicrophoneColor,
     Color? connectionLevelActiveColor,
     Color? connectionLevelInactiveColor,
+    AlignmentGeometry? connectionLevelAlignment,
   }) {
     return StreamCallParticipantTheme(
       focusedColor: focusedColor ?? this.focusedColor,
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      borderRadius: borderRadius ?? this.borderRadius,
       avatarTheme: avatarTheme ?? this.avatarTheme,
       audioLevelIndicatorColor:
           audioLevelIndicatorColor ?? this.audioLevelIndicatorColor,
       participantLabelTextStyle:
           participantLabelTextStyle ?? this.participantLabelTextStyle,
+      participantLabelAlignment:
+          participantLabelAlignment ?? this.participantLabelAlignment,
       enabledMicrophoneColor:
           enabledMicrophoneColor ?? this.enabledMicrophoneColor,
       disabledMicrophoneColor:
@@ -87,6 +107,8 @@ class StreamCallParticipantTheme with Diagnosticable {
           connectionLevelActiveColor ?? this.connectionLevelActiveColor,
       connectionLevelInactiveColor:
           connectionLevelInactiveColor ?? this.connectionLevelInactiveColor,
+      connectionLevelAlignment:
+          connectionLevelAlignment ?? this.connectionLevelAlignment,
     );
   }
 
@@ -97,11 +119,14 @@ class StreamCallParticipantTheme with Diagnosticable {
     return StreamCallParticipantTheme(
       focusedColor: Color.lerp(focusedColor, other.focusedColor, t)!,
       backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t)!,
+      borderRadius: BorderRadius.lerp(borderRadius, other.borderRadius, t)!,
       avatarTheme: avatarTheme.lerp(other.avatarTheme, t),
       audioLevelIndicatorColor: Color.lerp(
           audioLevelIndicatorColor, other.audioLevelIndicatorColor, t)!,
       participantLabelTextStyle: TextStyle.lerp(
           participantLabelTextStyle, other.participantLabelTextStyle, t)!,
+      participantLabelAlignment: AlignmentGeometry.lerp(
+          participantLabelAlignment, other.participantLabelAlignment, t)!,
       enabledMicrophoneColor:
           Color.lerp(enabledMicrophoneColor, other.enabledMicrophoneColor, t)!,
       disabledMicrophoneColor: Color.lerp(
@@ -110,6 +135,8 @@ class StreamCallParticipantTheme with Diagnosticable {
           connectionLevelActiveColor, other.connectionLevelActiveColor, t)!,
       connectionLevelInactiveColor: Color.lerp(
           connectionLevelInactiveColor, other.connectionLevelInactiveColor, t)!,
+      connectionLevelAlignment: AlignmentGeometry.lerp(
+          connectionLevelAlignment, other.connectionLevelAlignment, t)!,
     );
   }
 
@@ -120,25 +147,31 @@ class StreamCallParticipantTheme with Diagnosticable {
           runtimeType == other.runtimeType &&
           focusedColor == other.focusedColor &&
           backgroundColor == other.backgroundColor &&
+          borderRadius == other.borderRadius &&
           avatarTheme == other.avatarTheme &&
           audioLevelIndicatorColor == other.audioLevelIndicatorColor &&
           participantLabelTextStyle == other.participantLabelTextStyle &&
+          participantLabelAlignment == other.participantLabelAlignment &&
           enabledMicrophoneColor == other.enabledMicrophoneColor &&
           disabledMicrophoneColor == other.disabledMicrophoneColor &&
           connectionLevelActiveColor == other.connectionLevelActiveColor &&
-          connectionLevelInactiveColor == other.connectionLevelInactiveColor;
+          connectionLevelInactiveColor == other.connectionLevelInactiveColor &&
+          connectionLevelAlignment == other.connectionLevelAlignment;
 
   @override
   int get hashCode =>
       focusedColor.hashCode ^
       backgroundColor.hashCode ^
+      borderRadius.hashCode ^
       avatarTheme.hashCode ^
       audioLevelIndicatorColor.hashCode ^
       participantLabelTextStyle.hashCode ^
+      participantLabelAlignment.hashCode ^
       enabledMicrophoneColor.hashCode ^
       disabledMicrophoneColor.hashCode ^
       connectionLevelActiveColor.hashCode ^
-      connectionLevelInactiveColor.hashCode;
+      connectionLevelInactiveColor.hashCode ^
+      connectionLevelAlignment.hashCode;
 
   /// Merges one [StreamCallParticipantTheme] with the another.
   StreamCallParticipantTheme merge(StreamCallParticipantTheme? other) {
@@ -146,13 +179,16 @@ class StreamCallParticipantTheme with Diagnosticable {
     return copyWith(
       focusedColor: other.focusedColor,
       backgroundColor: other.backgroundColor,
+      borderRadius: other.borderRadius,
       avatarTheme: other.avatarTheme,
       audioLevelIndicatorColor: other.audioLevelIndicatorColor,
       participantLabelTextStyle: other.participantLabelTextStyle,
+      participantLabelAlignment: other.participantLabelAlignment,
       enabledMicrophoneColor: other.enabledMicrophoneColor,
       disabledMicrophoneColor: other.disabledMicrophoneColor,
       connectionLevelActiveColor: other.connectionLevelActiveColor,
       connectionLevelInactiveColor: other.connectionLevelInactiveColor,
+      connectionLevelAlignment: other.connectionLevelAlignment,
     );
   }
 
@@ -162,11 +198,14 @@ class StreamCallParticipantTheme with Diagnosticable {
     properties
       ..add(DiagnosticsProperty('focusedColor', focusedColor))
       ..add(DiagnosticsProperty('backgroundColor', backgroundColor))
+      ..add(DiagnosticsProperty('borderRadius', borderRadius))
       ..add(DiagnosticsProperty('avatarTheme', avatarTheme))
       ..add(DiagnosticsProperty(
           'audioLevelIndicatorColor', audioLevelIndicatorColor))
       ..add(DiagnosticsProperty(
           'participantLabelTextStyle', participantLabelTextStyle))
+      ..add(DiagnosticsProperty(
+          'participantLabelAlignment', participantLabelAlignment))
       ..add(
           DiagnosticsProperty('enabledMicrophoneColor', enabledMicrophoneColor))
       ..add(DiagnosticsProperty(
@@ -174,6 +213,8 @@ class StreamCallParticipantTheme with Diagnosticable {
       ..add(DiagnosticsProperty(
           'connectionLevelActiveColor', connectionLevelActiveColor))
       ..add(DiagnosticsProperty(
-          'connectionLevelInactiveColor', connectionLevelInactiveColor));
+          'connectionLevelInactiveColor', connectionLevelInactiveColor))
+      ..add(DiagnosticsProperty(
+          'connectionLevelAlignment', connectionLevelAlignment));
   }
 }
