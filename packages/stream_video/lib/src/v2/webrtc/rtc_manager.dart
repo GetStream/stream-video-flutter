@@ -1,14 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import 'package:stream_video/src/logger/stream_logger.dart';
 import 'package:stream_video/src/types/other.dart';
 import 'package:stream_video/src/v2/errors/video_error.dart';
-import 'package:stream_video/src/v2/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/v2/sfu/data/models/sfu_model_parser.dart';
-import 'package:stream_video/src/v2/sfu/data/models/sfu_track_type.dart';
 import 'package:stream_video/src/v2/utils/result.dart';
 import 'package:stream_video/src/v2/utils/result_converters.dart';
-import 'package:stream_video/src/v2/utils/result_operators.dart';
 import 'package:stream_video/src/v2/webrtc/peer_connection.dart';
 import 'package:stream_video/src/v2/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/v2/webrtc/peer_type.dart';
@@ -16,25 +12,52 @@ import 'package:stream_video/src/v2/webrtc/rtc_parser.dart';
 import 'package:stream_video/src/v2/webrtc/rtc_track.dart';
 import 'package:webrtc_interface/src/rtc_session_description.dart';
 
-class RtcManager {
-  RtcManager(this.configuration);
+import '../../disposable.dart';
+import '../../logger/stream_logger.dart';
+import 'media/media_constraints.dart';
+
+class RtcManager extends Disposable {
+  RtcManager._({
+    required this.sessionId,
+    required this.callCid,
+    required this.configuration,
+  }) : pcFactory = StreamPeerConnectionFactory(
+          sessionId: sessionId,
+          callCid: callCid,
+        );
+
+  static Future<RtcManager> create({
+    required String sessionId,
+    required String callCid,
+    required RTCConfiguration configuration,
+  }) async {
+    // Call the private constructor
+    final instance = RtcManager._(
+      sessionId: sessionId,
+      callCid: callCid,
+      configuration: configuration,
+    );
+    await instance._init();
+    return instance;
+  }
 
   final _logger = taggedLogger(tag: 'SV:RtcManager');
 
+  final String sessionId;
+  final String callCid;
   final RTCConfiguration configuration;
+  final StreamPeerConnectionFactory pcFactory;
 
-  late final StreamPeerConnectionFactory pcFactory;
+  late final StreamPeerConnection publisher;
+  late final StreamPeerConnection subscriber;
 
-  late StreamPeerConnection publisher;
+  final publishedTracks = <String, List<RtcTrack>>{};
 
-  late StreamPeerConnection subscriber;
-
-  final tracks = <String, List<RtcTrack>>{};
-
-  Future<void> init(RTCConfiguration configuration) async {
+  Future<RtcManager> _init() async {
     publisher = await pcFactory.makePublisher(configuration);
     subscriber = await pcFactory.makeSubscriber(configuration)
       ..onTrack = _onSubscriberTrack;
+    return this;
   }
 
   Future<Result<String>> onSubscriberOffer(String offerSdp) async {
@@ -55,11 +78,31 @@ class RtcManager {
     return answerSdp.toSuccess();
   }
 
-  void onRemoteIceCandidate(
-    StreamPeerType peerType,
-    String jsonIceCandidate,
-  ) {
-    final candidate = RtcIceCandidateParser.fromJsonString(jsonIceCandidate);
+  Future<void> publishTrack({
+    required MediaConstraints mediaConstraints,
+  }) async {
+    final stream = await rtc.navigator.mediaDevices.getMedia(mediaConstraints);
+    final videoTrack = stream.getVideoTracks().firstOrNull;
+    if (videoTrack != null) {
+      await publisher.addVideoTransceiver(
+        stream: stream,
+        track: videoTrack,
+      );
+    }
+    final audioTrack = stream.getAudioTracks().firstOrNull;
+    if (audioTrack != null) {
+      await publisher.addAudioTransceiver(
+        stream: stream,
+        track: audioTrack,
+      );
+    }
+  }
+
+  void onRemoteIceCandidate({
+    required StreamPeerType peerType,
+    required String iceCandidate,
+  }) {
+    final candidate = RtcIceCandidateParser.fromJsonString(iceCandidate);
     if (peerType == StreamPeerType.publisher) {
       publisher.addIceCandidate(candidate);
     } else if (peerType == StreamPeerType.subscriber) {
@@ -101,7 +144,14 @@ class RtcManager {
       transceiver: transceiver,
     );
 
-    final participantTracks = (tracks[trackId] ?? [])..add(remoteTrack);
-    tracks[trackId] = participantTracks;
+    final participantTracks = (publishedTracks[trackId] ?? [])
+      ..add(remoteTrack);
+    publishedTracks[trackId] = participantTracks;
+  }
+
+  Future<void> dispose() async {
+    await publisher.dispose();
+    await subscriber.dispose();
+    return await super.dispose();
   }
 }

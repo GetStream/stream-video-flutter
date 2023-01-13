@@ -148,11 +148,10 @@ class StreamPeerConnection extends Disposable {
     }
   }
 
-  /// Adds a local [MediaStreamTrack] with audio to a given [connection],
-  /// with its [streamIds].
+  /// Adds a local [MediaStreamTrack] with audio to a given [connection].
   Future<void> addAudioTransceiver({
+    required rtc.MediaStream stream,
     required rtc.MediaStreamTrack track,
-    required List<String> streamIds,
   }) async {
     final fullQuality = rtc.RTCRtpEncoding(
       rid: 'a',
@@ -160,7 +159,7 @@ class StreamPeerConnection extends Disposable {
 
     final transceiverInit = rtc.RTCRtpTransceiverInit(
       direction: rtc.TransceiverDirection.SendOnly,
-      //streams: streamIds,
+      streams: [stream],
       sendEncodings: [fullQuality],
     );
 
@@ -173,24 +172,23 @@ class StreamPeerConnection extends Disposable {
     audioTransceiver = transceiver;
   }
 
-  /// Adds a local [MediaStreamTrack] with video to a given [connection],
-  /// with its [streamIds].
+  /// Adds a local [MediaStreamTrack] with video to a given [connection].
   ///
   /// The video is then sent in three different resolutions using simulcast.
   Future<void> addVideoTransceiver({
+    required rtc.MediaStream stream,
     required rtc.MediaStreamTrack track,
-    required List<String> streamIds,
     List<rtc.RTCRtpEncoding>? encodings,
   }) async {
     final transceiverInit = rtc.RTCRtpTransceiverInit(
       direction: rtc.TransceiverDirection.SendOnly,
-      //streams: streamIds,
+      streams: [stream],
       sendEncodings: _buildVideoEncodings(),
     );
 
     final transceiver = await pc.addTransceiver(
       track: track,
-      kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
+      kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
       init: transceiverInit,
     );
 
