@@ -39,9 +39,9 @@ class SfuClientImpl extends SfuClient {
   ) async {
     try {
       final result = await _client.sendAnswer(_withAuthHeaders(), request);
-      return result.asSuccess();
+      return result.toSuccess();
     } catch (e, stk) {
-      return e.asFailure(stk);
+      return e.toFailure(stk);
     }
   }
 
@@ -51,9 +51,9 @@ class SfuClientImpl extends SfuClient {
   ) async {
     try {
       final result = await _client.iceTrickle(_withAuthHeaders(), request);
-      return result.asSuccess();
+      return result.toSuccess();
     } catch (e, stk) {
-      return e.asFailure(stk);
+      return e.toFailure(stk);
     }
   }
 
@@ -63,9 +63,9 @@ class SfuClientImpl extends SfuClient {
   ) async {
     try {
       final result = await _client.setPublisher(_withAuthHeaders(), request);
-      return result.asSuccess();
+      return result.toSuccess();
     } catch (e, stk) {
-      return e.asFailure(stk);
+      return e.toFailure(stk);
     }
   }
 
@@ -78,9 +78,9 @@ class SfuClientImpl extends SfuClient {
         _withAuthHeaders(),
         request,
       );
-      return result.asSuccess();
+      return result.toSuccess();
     } catch (e, stk) {
-      return e.asFailure(stk);
+      return e.toFailure(stk);
     }
   }
 
@@ -93,9 +93,9 @@ class SfuClientImpl extends SfuClient {
         _withAuthHeaders(),
         request,
       );
-      return result.asSuccess();
+      return result.toSuccess();
     } catch (e, stk) {
-      return e.asFailure(stk);
+      return e.toFailure(stk);
     }
   }
 

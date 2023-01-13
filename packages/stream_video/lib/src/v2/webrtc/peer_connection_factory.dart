@@ -4,7 +4,7 @@ import 'package:stream_video/src/v2/webrtc/peer_connection.dart';
 import 'package:stream_video/src/v2/webrtc/peer_type.dart';
 
 class StreamPeerConnectionFactory {
-  StreamPeerConnectionFactory({
+  const StreamPeerConnectionFactory({
     required this.sessionId,
     required this.callCid,
   });

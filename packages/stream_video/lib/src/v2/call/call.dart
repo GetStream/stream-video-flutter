@@ -40,21 +40,25 @@ import 'package:stream_video/src/v2/utils/result_operators.dart';
 import 'package:stream_video/src/v2/webrtc/peer_connection.dart';
 import 'package:stream_video/src/v2/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/v2/webrtc/peer_type.dart';
+import 'package:stream_video/src/v2/webrtc/rtc_parser.dart';
 import 'package:uuid/uuid.dart';
+
+import '../sfu/data/models/sfu_model_mapper_extensions.dart';
+import '../webrtc/rtc_manager.dart';
 
 const _timeoutDuration = Duration(seconds: 30);
 
-/// Represents a [Call] in which you can connect to.
-class Call with EventEmittable<CallEvent> {
-  /// Creates a new [Call] instance from a [CallConfiguration].
-  Call({
+/// Represents a [CallV2] in which you can connect to.
+class CallV2 with EventEmittable<CallEvent> {
+  /// Creates a new [CallV2] instance from a [CallConfiguration].
+  CallV2({
     required this.callConfiguration,
     StreamVideo? client,
   })  : callOptions = callConfiguration.callOptions,
         _streamVideoClient = client ?? StreamVideo.instance;
 
-  /// Creates a new [Call] instance if the call already created.
-  Call.fromDetails({
+  /// Creates a new [CallV2] instance if the call already created.
+  CallV2.fromDetails({
     required this.callId,
     required this.callType,
     required this.credentials,
@@ -71,11 +75,6 @@ class Call with EventEmittable<CallEvent> {
     final url = credentials.server.url;
     final token = credentials.token;
 
-    pcFactory = StreamPeerConnectionFactory(
-      callCid: '$callType:$callId',
-      sessionId: sessionId,
-    );
-
     sfuClient = SfuClient(
       sessionId: sessionId,
       url: url,
@@ -84,6 +83,7 @@ class Call with EventEmittable<CallEvent> {
 
     _startListeningSfuEvents();
 
+    this.sessionId = sessionId;
     _initialised = true;
   }
 
@@ -102,18 +102,12 @@ class Call with EventEmittable<CallEvent> {
   late final edge.Credentials credentials;
   final CallOptions callOptions;
 
-  late final SfuClient sfuClient;
+  String sessionId = '';
+  SfuClient? sfuClient;
+  RtcManager? rtcManager;
 
-  @internal
-  late final StreamPeerConnectionFactory pcFactory;
-
-  @internal
-  StreamPeerConnection? publisher;
-
-  @internal
-  StreamPeerConnection? subscriber;
-
-  ConnectionState get connectionState => sfuClient.connectionState;
+  ConnectionState get connectionState =>
+      sfuClient?.connectionState ?? ConnectionState.disconnected;
 
   /// map of SID to RemoteParticipant
   Map<String, RemoteParticipant> get participants => _participants;
@@ -164,18 +158,16 @@ class Call with EventEmittable<CallEvent> {
       events.dispose();
     }
 
-    await publisher?.dispose();
-    publisher = null;
+    await rtcManager?.dispose();
+    rtcManager = null;
 
-    await subscriber?.dispose();
-    subscriber = null;
-
-    await sfuClient.disconnect();
+    await sfuClient?.disconnect();
+    sfuClient = null;
 
     //_streamVideoClient.updateCallStateDisconnected(this);
   }
 
-  Future<Call> connect({
+  Future<void> connect({
     ConnectOptions options = const ConnectOptions(),
   }) async {
     if (!_initialised) {
@@ -194,6 +186,11 @@ class Call with EventEmittable<CallEvent> {
 
     logger.info('Joining call $callType:$callId');
 
+    final sfuClient = this.sfuClient;
+    if (sfuClient == null) {
+      return;
+    }
+
     await sfuClient.connect();
 
     final genericSdp = await codecs.getGenericSdp(
@@ -204,7 +201,7 @@ class Call with EventEmittable<CallEvent> {
       request: sfu_events.SfuRequest(
         joinRequest: sfu_events.JoinRequest(
           token: credentials.token,
-          sessionId: sfuClient.sessionId,
+          sessionId: sessionId,
           subscriberSdp: genericSdp,
         ),
       ),
@@ -223,45 +220,43 @@ class Call with EventEmittable<CallEvent> {
 
     // TODO _streamVideoClient.updateCallStateConnected(this);
 
-    return this;
+    return;
   }
 
   Future<void> _createPeerConnections(RTCConfiguration configuration) async {
-    if (publisher != null || subscriber != null) {
-      logger.warning('Already configured');
+    final sfuClient = this.sfuClient;
+    if (sfuClient == null) {
       return;
     }
 
-    await _makePublisher(configuration);
+    rtcManager = await RtcManager.create(
+      sessionId: sessionId,
+      callCid: callCid,
+      configuration: configuration,
+    );
+
+    /* TODO
+    publisher = await pcFactory.makePublisher(configuration)
+      ..onIceCandidate = _onIceCandidate
+      ..onRenegotiationNeeded = _onPublisherNegotiationNeeded;
 
     subscriber = await pcFactory.makeSubscriber(configuration);
     subscriber?.onIceCandidate = _onIceCandidate;
-    subscriber?.onTrack = _onSubscriberTrack;
+    subscriber?.onTrack = _onSubscriberTrack;*/
 
     sfuClient.events.on<SFUSubscriberOfferEvent>((data) async {
       final offer = data.offer;
       logger.info('Subscriber offer: $offer');
-
-      final subscriber = this.subscriber;
-      if (subscriber == null) return;
-
-      await subscriber.setRemoteOffer(offer.sdp);
-
-      final answer = await subscriber.createAnswer();
-      if (answer is! Success<rtc.RTCSessionDescription>) {
+      final result = await rtcManager?.onSubscriberOffer(data.offer.sdp);
+      if (result is! Success<String>) {
         return;
       }
+      final answerSdp = result.data;
       await sfuClient.sendAnswer(
-        sdp: answer.data.sdp!,
+        sdp: answerSdp,
         peerType: sfu_models.PeerType.PEER_TYPE_SUBSCRIBER,
       );
     });
-  }
-
-  Future<void> _makePublisher(RTCConfiguration configuration) async {
-    publisher = await pcFactory.makePublisher(configuration)
-      ..onIceCandidate = _onIceCandidate
-      ..onRenegotiationNeeded = _onPublisherNegotiationNeeded;
   }
 
   void _onIceCandidate(
@@ -269,6 +264,10 @@ class Call with EventEmittable<CallEvent> {
     rtc.RTCIceCandidate candidate,
   ) {
     _logger.d(() => '[onIceCandidate] type: ${pc.type}, candidate: $candidate');
+    final sfuClient = this.sfuClient;
+    if (sfuClient == null) {
+      return;
+    }
 
     final encodedIceCandidate = json.encode(candidate.toMap());
     final peerType = pc.type == StreamPeerType.publisher
@@ -284,7 +283,11 @@ class Call with EventEmittable<CallEvent> {
     required sfu_events.JoinResponse response,
     ConnectOptions options = const ConnectOptions(),
   }) async {
-    // Creating the peer connections.
+    final sfuClient = this.sfuClient;
+    if (sfuClient == null) {
+      return;
+    }
+
     await _createPeerConnections(_connectionConfig);
 
     final callState = response.callState;
@@ -380,7 +383,7 @@ class Call with EventEmittable<CallEvent> {
     );
   }
 
-  Future<signal.UpdateSubscriptionsResponse> updateTrackSubscription({
+  Future<signal.UpdateSubscriptionsResponse?> updateTrackSubscription({
     required signal.TrackSubscriptionDetails track,
     required bool subscribe,
   }) {
@@ -419,7 +422,7 @@ class Call with EventEmittable<CallEvent> {
 
     print('Updating Tracks subscription: ${tracks.values.map((e) => e)}');
 
-    return sfuClient.updateSubscriptions(tracks: [...tracks.values]);
+    return sfuClient!.updateSubscriptions(tracks: [...tracks.values]);
   }
 
   void _onSubscriberTrack(
@@ -450,7 +453,7 @@ class Call with EventEmittable<CallEvent> {
         connectionState == ConnectionState.connecting) {
       final track = event.track;
       final receiver = event.receiver;
-      sfuClient.events.on<ConnectionStateUpdatedEvent>((event) async {
+      sfuClient!.events.on<ConnectionStateUpdatedEvent>((event) async {
         Timer(const Duration(milliseconds: 10), () {
           _onSubscriberTrackAdded(
             track: track,
@@ -533,7 +536,7 @@ class Call with EventEmittable<CallEvent> {
 
     print('Publishing tracks: ${tracks.map((it) => it)}');
 
-    final response = await sfuClient.setPublisher(
+    final response = await sfuClient!.setPublisher(
       sdp: offer.data.sdp!,
       tracks: tracks,
     );
@@ -547,29 +550,16 @@ class Call with EventEmittable<CallEvent> {
   }
 
   void _startListeningSfuEvents() {
-    sfuClient.events
+    sfuClient!.events
       ..on<ConnectionStateUpdatedEvent>(events.emit)
       ..on<SFUIceTrickleEvent>(
         (event) {
           final iceTrickle = event.iceTrickle;
           logger.info('Received iceTrickle: $iceTrickle');
-
-          final iceCandidateJson = json.decode(iceTrickle.iceCandidate);
-          final iceCandidate = rtc.RTCIceCandidate(
-            iceCandidateJson['candidate'],
-            iceCandidateJson['sdpMid'],
-            iceCandidateJson['sdpMLineIndex'],
+          rtcManager?.onRemoteIceCandidate(
+            peerType: iceTrickle.peerType.toDomain(),
+            iceCandidate: iceTrickle.iceCandidate,
           );
-
-          final peerType = iceTrickle.peerType;
-          switch (peerType) {
-            case sfu_models.PeerType.PEER_TYPE_SUBSCRIBER:
-              subscriber?.addIceCandidate(iceCandidate);
-              break;
-            case sfu_models.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED:
-              publisher?.addIceCandidate(iceCandidate);
-              break;
-          }
         },
       )
       ..on<SFUParticipantJoinedEvent>((event) {
@@ -695,7 +685,10 @@ class Call with EventEmittable<CallEvent> {
             continue;
           }
 
-          participant.audioLevel = audioLevel.level;
+          participant.updateAudioLevel(
+            audioLevel.level,
+            isSpeaking: audioLevel.isSpeaking,
+          );
         }
       })
       ..on<SFUChangePublishQualityEvent>((event) {
