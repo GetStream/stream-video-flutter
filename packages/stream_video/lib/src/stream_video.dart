@@ -110,6 +110,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
       tokenManager: _tokenManager,
       baseUrl: coordinatorRpcUrl,
     );
+    _pushNotificationManager = PushNotificationManager(client: this);
   }
 
   static StreamVideo? _instance;
@@ -151,6 +152,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
 
   final _tokenManager = TokenManager();
   late final CoordinatorClient _client;
+  late final PushNotificationManager _pushNotificationManager;
 
   var _state = _StreamVideoState();
 
@@ -186,7 +188,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     logger.info('setting user : ${user.id}');
 
     _state.currentUser.value = user;
-    _tokenManager.setTokenOrProvider(
+    await _tokenManager.setTokenOrProvider(
       user.id,
       token: token,
       provider: provider,
@@ -200,7 +202,8 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
         tokenManager: _tokenManager,
       )..events.listen(events.emit);
 
-      return _ws!.connect();
+      await _ws!.connect();
+      return _pushNotificationManager.onUserLoggedIn();
     } catch (e, stk) {
       logger.severe('error connecting user : ${user.id}', e, stk);
       rethrow;
