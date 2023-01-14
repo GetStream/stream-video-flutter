@@ -11,7 +11,7 @@ import 'package:stream_video/src/v2/utils/result_converters.dart';
 import 'package:tart/tart.dart';
 
 /// TODO
-class SfuClientImpl extends SfuClient {
+class SfuClientImpl extends SfuClientV2 {
   /// TODO
   SfuClientImpl({
     required String baseUrl,

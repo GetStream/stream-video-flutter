@@ -8,6 +8,8 @@ import 'package:stream_video/src/v2/sfu/data/models/sfu_participant.dart';
 import 'package:stream_video/src/v2/sfu/data/models/sfu_track_type.dart';
 import 'package:stream_video/src/v2/sfu/data/models/sfu_video_sender.dart';
 
+import '../../../webrtc/peer_type.dart';
+
 /// TODO remove V2 suffix after finishing refactoring.
 abstract class SfuEventV2 {
   const SfuEventV2();
@@ -60,10 +62,12 @@ class SfuAudioLevelChangedEvent extends SfuEventV2 {
 class SfuIceTrickleEvent extends SfuEventV2 {
   const SfuIceTrickleEvent({
     required this.sessionId,
+    required this.peerType,
     required this.iceCandidate,
   });
 
   final String sessionId;
+  final StreamPeerType peerType;
   final String iceCandidate;
 }
 

@@ -1,6 +1,19 @@
 import 'package:http/http.dart' as http;
 import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
 
+Future<Map<String, Latency>> measureEdgeLatencies({
+  required List<Edge> edges,
+  int rounds = 3,
+}) async {
+  return {
+    for (final edge in edges)
+      edge.name: await measureEdgeLatency(
+        edge: edge,
+        rounds: rounds,
+      ),
+  };
+}
+
 /// A service that provides the latency of a given [edge] server in seconds.
 ///
 /// [rounds] is the number of times to ping the server to get an average

@@ -3,12 +3,12 @@ import 'package:stream_video/src/v2/coordinator/models/coordinator_models.dart';
 // TODO: Should we call it VideoEvent or CoordinatorEvent?
 
 /// Represents the events coming in from the socket.
-class CoordinatorEvent {
-  const CoordinatorEvent();
+abstract class CoordinatorEventV2 {
+  const CoordinatorEventV2();
 }
 
 /// Sent periodically by the server to keep the connection alive.
-class CoordinatorHealthCheckEvent extends CoordinatorEvent {
+class CoordinatorHealthCheckEvent extends CoordinatorEventV2 {
   const CoordinatorHealthCheckEvent(
       {required this.clientId, required this.userId});
 
@@ -17,7 +17,7 @@ class CoordinatorHealthCheckEvent extends CoordinatorEvent {
 }
 
 /// Sent when someone creates a call and invites another person to participate.
-class CoordinatorCallCreatedEvent extends CoordinatorEvent {
+class CoordinatorCallCreatedEvent extends CoordinatorEventV2 {
   const CoordinatorCallCreatedEvent({
     required this.callCid,
     required this.ringing,
@@ -32,7 +32,7 @@ class CoordinatorCallCreatedEvent extends CoordinatorEvent {
 }
 
 /// Sent when a call gets updated.
-class CoordinatorCallUpdatedEvent extends CoordinatorEvent {
+class CoordinatorCallUpdatedEvent extends CoordinatorEventV2 {
   const CoordinatorCallUpdatedEvent({
     required this.callCid,
     required this.info,
@@ -45,7 +45,7 @@ class CoordinatorCallUpdatedEvent extends CoordinatorEvent {
 }
 
 /// Sent when a calls gets ended.
-class CoordinatorCallEndedEvent extends CoordinatorEvent {
+class CoordinatorCallEndedEvent extends CoordinatorEventV2 {
   const CoordinatorCallEndedEvent({
     required this.callCid,
     required this.info,
@@ -58,7 +58,7 @@ class CoordinatorCallEndedEvent extends CoordinatorEvent {
 }
 
 /// Sent when a user accepts the call.
-class CoordinatorCallAcceptedEvent extends CoordinatorEvent {
+class CoordinatorCallAcceptedEvent extends CoordinatorEventV2 {
   const CoordinatorCallAcceptedEvent({
     required this.callCid,
     required this.sentByUserId,
@@ -73,7 +73,7 @@ class CoordinatorCallAcceptedEvent extends CoordinatorEvent {
 }
 
 /// Sent when a user rejects the call.
-class CoordinatorCallRejectedEvent extends CoordinatorEvent {
+class CoordinatorCallRejectedEvent extends CoordinatorEventV2 {
   const CoordinatorCallRejectedEvent({
     required this.callCid,
     required this.sentByUserId,
@@ -88,7 +88,7 @@ class CoordinatorCallRejectedEvent extends CoordinatorEvent {
 }
 
 /// Sent when a user cancels the call.
-class CoordinatorCallCancelledEvent extends CoordinatorEvent {
+class CoordinatorCallCancelledEvent extends CoordinatorEventV2 {
   const CoordinatorCallCancelledEvent({
     required this.callCid,
     required this.sentByUserId,
@@ -103,7 +103,7 @@ class CoordinatorCallCancelledEvent extends CoordinatorEvent {
 }
 
 /// Sent when call members are updated.
-class CoordinatorCallMembersUpdatedEvent extends CoordinatorEvent {
+class CoordinatorCallMembersUpdatedEvent extends CoordinatorEventV2 {
   const CoordinatorCallMembersUpdatedEvent({
     required this.callCid,
     required this.info,
@@ -116,7 +116,7 @@ class CoordinatorCallMembersUpdatedEvent extends CoordinatorEvent {
 }
 
 /// Sent when call members are deleted.
-class CoordinatorCallMembersDeletedEvent extends CoordinatorEvent {
+class CoordinatorCallMembersDeletedEvent extends CoordinatorEventV2 {
   const CoordinatorCallMembersDeletedEvent({
     required this.callCid,
     required this.info,
@@ -129,6 +129,6 @@ class CoordinatorCallMembersDeletedEvent extends CoordinatorEvent {
 }
 
 // Unknown event.
-class CoordinatorUnknownEvent extends CoordinatorEvent {
+class CoordinatorUnknownEvent extends CoordinatorEventV2 {
   const CoordinatorUnknownEvent();
 }

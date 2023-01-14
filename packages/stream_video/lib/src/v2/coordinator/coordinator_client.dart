@@ -5,9 +5,12 @@ import 'package:stream_video/src/v2/utils/result.dart';
 import 'package:stream_video/src/v2/utils/result_converters.dart';
 import 'package:tart/tart.dart';
 
+import '../../../protobuf/video/coordinator/edge_v1/edge.pb.dart';
+import '../../latency_service/latency.dart';
+
 /// An accessor that allows us to communicate with the API around video calls.
-class CoordinatorClient {
-  CoordinatorClient({
+class CoordinatorClientV2 {
+  CoordinatorClientV2({
     required String baseUrl,
     required this.apiKey,
     required this.tokenManager,
@@ -88,6 +91,23 @@ class CoordinatorClient {
     } catch (e, stk) {
       return e.toFailure(stk).toFuture();
     }
+  }
+
+  Future<Result<GetCallEdgeServerResponse>> findBestCallEdgeServer({
+    required String callCid,
+    required List<Edge> edges,
+  }) async {
+    final latencyByEdge = await measureEdgeLatencies(edges: edges);
+    final response = await selectCallEdgeServer(
+      GetCallEdgeServerRequest(
+        callCid: callCid,
+        measurements: LatencyMeasurements(
+          measurements: latencyByEdge,
+        ),
+      ),
+    );
+
+    return response;
   }
 
   /// Finds the correct server to connect to for given user and [request].

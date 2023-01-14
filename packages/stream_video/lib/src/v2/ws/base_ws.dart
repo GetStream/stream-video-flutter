@@ -29,9 +29,7 @@ abstract class AbstractWebSocket {
   int _reconnectAttempt = 0;
 
   /// TODO
-  final StateEmitter<SocketConnectionState> _state = StateEmitter(
-    SocketConnectionState.disconnected,
-  );
+  final _state = MutableStateEmitterImpl(SocketConnectionState.disconnected);
 
   WebSocketChannel? _ws;
   StreamSubscription? _wsSubscription;

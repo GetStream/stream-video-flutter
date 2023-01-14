@@ -6,7 +6,7 @@ import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart'
     as signal_twirp;
 import 'package:stream_video/src/v2/utils/result.dart';
 
-abstract class SfuClient {
+abstract class SfuClientV2 {
   Future<Result<sfu.SendAnswerResponse>> sendAnswer(
     sfu.SendAnswerRequest request,
   );

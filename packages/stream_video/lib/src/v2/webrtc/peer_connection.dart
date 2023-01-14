@@ -7,6 +7,9 @@ import 'package:stream_video/src/v2/utils/result.dart';
 import 'package:stream_video/src/v2/webrtc/peer_type.dart';
 import 'package:stream_video/stream_video.dart';
 
+import 'model/rtc_tracks_info.dart';
+import 'model/rtc_video_options.dart';
+
 /// {@template onStreamAdded}
 /// Handler when a new [MediaStream] gets added.
 /// {@endtemplate}
@@ -34,13 +37,14 @@ typedef OnTrack = void Function(
 );
 
 /// Wrapper around the WebRTC connection that contains tracks.
-class StreamPeerConnection extends Disposable {
+class StreamPeerConnection with Disposable {
   /// Creates [StreamPeerConnection] instance.
   StreamPeerConnection({
     required this.sessionId,
     required this.callCid,
     required this.type,
     required this.pc,
+    this.videoOptions = const RtcVideoOptions(),
   }) {
     _initRtcCallbacks();
   }
@@ -51,6 +55,7 @@ class StreamPeerConnection extends Disposable {
   final String callCid;
   final StreamPeerType type;
   final rtc.RTCPeerConnection pc;
+  final RtcVideoOptions videoOptions;
 
   /// {@macro onStreamAdded}
   OnStreamAdded? onStreamAdded;
@@ -65,8 +70,9 @@ class StreamPeerConnection extends Disposable {
   OnTrack? onTrack;
 
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
-  late rtc.RTCRtpTransceiver audioTransceiver;
-  late rtc.RTCRtpTransceiver videoTransceiver;
+
+  rtc.RTCRtpTransceiver? audioTransceiver;
+  rtc.RTCRtpTransceiver? videoTransceiver;
 
   /// Creates an offer and sets it as the local description.
   Future<Result<rtc.RTCSessionDescription>> createOffer([
@@ -178,12 +184,18 @@ class StreamPeerConnection extends Disposable {
   Future<void> addVideoTransceiver({
     required rtc.MediaStream stream,
     required rtc.MediaStreamTrack track,
-    List<rtc.RTCRtpEncoding>? encodings,
   }) async {
     final transceiverInit = rtc.RTCRtpTransceiverInit(
       direction: rtc.TransceiverDirection.SendOnly,
       streams: [stream],
-      sendEncodings: _buildVideoEncodings(),
+      sendEncodings: videoOptions.supportedCodecs.values
+          .map(
+            (codec) => rtc.RTCRtpEncoding(
+              rid: codec.quality,
+              maxBitrate: codec.maxBitrate,
+            ),
+          )
+          .toList(),
     );
 
     final transceiver = await pc.addTransceiver(
@@ -195,23 +207,32 @@ class StreamPeerConnection extends Disposable {
     videoTransceiver = transceiver;
   }
 
-  List<rtc.RTCRtpEncoding> _buildVideoEncodings() {
-    final fullQuality = rtc.RTCRtpEncoding(
-      rid: 'f',
-      maxBitrate: 1200000,
+  Future<RtcTracksInfo> getTracksInfo() async {
+    final transceivers = await pc.getTransceivers();
+    return RtcTracksInfo(
+      trackInfoList: transceivers
+          .where((it) => it.sender.track != null && it.sender.track?.id != null)
+          .map((it) {
+        final trackId = it.sender.track!.id!;
+        final trackType = it.sender.track!.kind ?? '';
+        final encodings = it.sender.parameters.encodings ?? List.empty();
+        final videoLayers = encodings.map((encoding) {
+          final rid = encoding.rid;
+          final maxBitrate = encoding.maxBitrate;
+          final codec = videoOptions.supportedCodecs[encoding.rid];
+          return RtcVideoLayer(
+            rid: rid,
+            videoDimension: codec?.dimension,
+            bitrate: maxBitrate,
+          );
+        }).toList();
+        return RtcTrackInfo(
+          trackId: trackId,
+          trackType: trackType,
+          layers: videoLayers,
+        );
+      }).toList(),
     );
-    final halfQuality = rtc.RTCRtpEncoding(
-      rid: 'h',
-      scaleResolutionDownBy: 2,
-      maxBitrate: 500000,
-    );
-
-    final quarterQuality = rtc.RTCRtpEncoding(
-      rid: 'q',
-      scaleResolutionDownBy: 4,
-      maxBitrate: 125000,
-    );
-    return [fullQuality, halfQuality, quarterQuality];
   }
 
   void _initRtcCallbacks() {

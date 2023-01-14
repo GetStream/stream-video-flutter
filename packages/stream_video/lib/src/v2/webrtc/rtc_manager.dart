@@ -15,57 +15,70 @@ import 'package:webrtc_interface/src/rtc_session_description.dart';
 import '../../disposable.dart';
 import '../../logger/stream_logger.dart';
 import 'media/media_constraints.dart';
+import 'model/rtc_tracks_info.dart';
+import 'model/rtc_video_codec.dart';
 
-class RtcManager extends Disposable {
-  RtcManager._({
+class RtcManager with Disposable {
+  RtcManager({
     required this.sessionId,
     required this.callCid,
-    required this.configuration,
-  }) : pcFactory = StreamPeerConnectionFactory(
-          sessionId: sessionId,
-          callCid: callCid,
-        );
-
-  static Future<RtcManager> create({
-    required String sessionId,
-    required String callCid,
-    required RTCConfiguration configuration,
-  }) async {
-    // Call the private constructor
-    final instance = RtcManager._(
-      sessionId: sessionId,
-      callCid: callCid,
-      configuration: configuration,
-    );
-    await instance._init();
-    return instance;
+    required StreamPeerConnection publisher,
+    required StreamPeerConnection subscriber,
+  })  : _publisher = publisher,
+        _subscriber = subscriber {
+    _publisher
+      ..onIceCandidate = onLocalIceCandidate
+      ..onRenegotiationNeeded = onPublisherNegotiationNeeded;
+    _subscriber
+      ..onIceCandidate = onLocalIceCandidate
+      ..onTrack = _onSubscriberTrack;
   }
 
   final _logger = taggedLogger(tag: 'SV:RtcManager');
 
   final String sessionId;
   final String callCid;
-  final RTCConfiguration configuration;
-  final StreamPeerConnectionFactory pcFactory;
-
-  late final StreamPeerConnection publisher;
-  late final StreamPeerConnection subscriber;
+  final StreamPeerConnection _publisher;
+  final StreamPeerConnection _subscriber;
 
   final publishedTracks = <String, List<RtcTrack>>{};
 
-  Future<RtcManager> _init() async {
-    publisher = await pcFactory.makePublisher(configuration);
-    subscriber = await pcFactory.makeSubscriber(configuration)
-      ..onTrack = _onSubscriberTrack;
-    return this;
+  OnIceCandidate? onLocalIceCandidate;
+  OnRenegotiationNeeded? onPublisherNegotiationNeeded;
+
+  /// Returns a generic sdp.
+  static Future<String> getGenericSdp() async {
+    const direction = rtc.TransceiverDirection.RecvOnly;
+    final tempPC = await rtc.createPeerConnection({});
+
+    await tempPC.addTransceiver(
+      kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
+      init: rtc.RTCRtpTransceiverInit(direction: direction),
+    );
+
+    await tempPC.addTransceiver(
+      kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
+      init: rtc.RTCRtpTransceiverInit(direction: direction),
+    );
+
+    final offer = await tempPC.createOffer();
+    final sdp = offer.sdp;
+
+    await tempPC.close();
+
+    return sdp!;
+  }
+
+  Future<RtcTracksInfo> getPublisherTracks() async {
+    return _publisher.getTracksInfo();
   }
 
   Future<Result<String>> onSubscriberOffer(String offerSdp) async {
-    final result = subscriber.setRemoteOffer(offerSdp);
+    final result = _subscriber.setRemoteOffer(offerSdp);
     if (result is Failure) {
       return result as Failure;
     }
-    final rtcAnswer = await subscriber.createAnswer();
+    final rtcAnswer = await _subscriber.createAnswer();
     if (rtcAnswer is! Success<RTCSessionDescription>) {
       return rtcAnswer as Failure;
     }
@@ -84,14 +97,14 @@ class RtcManager extends Disposable {
     final stream = await rtc.navigator.mediaDevices.getMedia(mediaConstraints);
     final videoTrack = stream.getVideoTracks().firstOrNull;
     if (videoTrack != null) {
-      await publisher.addVideoTransceiver(
+      await _publisher.addVideoTransceiver(
         stream: stream,
         track: videoTrack,
       );
     }
     final audioTrack = stream.getAudioTracks().firstOrNull;
     if (audioTrack != null) {
-      await publisher.addAudioTransceiver(
+      await _publisher.addAudioTransceiver(
         stream: stream,
         track: audioTrack,
       );
@@ -104,9 +117,9 @@ class RtcManager extends Disposable {
   }) {
     final candidate = RtcIceCandidateParser.fromJsonString(iceCandidate);
     if (peerType == StreamPeerType.publisher) {
-      publisher.addIceCandidate(candidate);
+      _publisher.addIceCandidate(candidate);
     } else if (peerType == StreamPeerType.subscriber) {
-      subscriber.addIceCandidate(candidate);
+      _subscriber.addIceCandidate(candidate);
     }
   }
 
@@ -137,7 +150,7 @@ class RtcManager extends Disposable {
 
     final remoteTrack = RtcRemoteTrack(
       trackId: trackId,
-      trackType: SfuTrackTypeParser.parse(trackType),
+      trackType: SfuTrackTypeParser.parseSfuName(trackType),
       track: track,
       stream: stream,
       receiver: receiver,
@@ -150,8 +163,9 @@ class RtcManager extends Disposable {
   }
 
   Future<void> dispose() async {
-    await publisher.dispose();
-    await subscriber.dispose();
+    publishedTracks.clear();
+    await _publisher.dispose();
+    await _subscriber.dispose();
     return await super.dispose();
   }
 }

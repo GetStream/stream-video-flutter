@@ -17,7 +17,20 @@ import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/options.dart';
 import 'package:stream_video/src/token/token.dart';
 import 'package:stream_video/src/token/token_manager.dart';
+import 'package:stream_video/src/v2/coordinator/ws/coordinator_ws.dart';
+import 'package:stream_video/src/v2/shared_emitter.dart';
 import 'package:synchronized/synchronized.dart';
+import 'package:stream_video/src/v2/coordinator/ws/mapper_extensions.dart';
+
+import '../../protobuf/video/coordinator/event_v1/event.pb.dart';
+import 'call/call.dart';
+import 'call/call_impl.dart';
+import 'coordinator/coordinator_client.dart';
+import 'coordinator/ws/coordinator_events.dart';
+import 'coordinator/ws/coordinator_socket_listener.dart';
+import 'stream_video_v2.dart';
+import 'utils/result.dart';
+import 'utils/result_converters.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -43,44 +56,18 @@ const _defaultCoordinatorWsUrl =
     'wss://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
 
 /// The client responsible for handling config and maintaining calls
-class StreamVideo with EventEmittable<CoordinatorEvent> {
-  /// Initialises the Stream Video SDK and creates the singleton instance of the client.
-  StreamVideo.init(
-    this.apiKey, {
-    this.coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
-    this.coordinatorWsUrl = _defaultCoordinatorWsUrl,
-    this.latencyMeasurementRounds = 3,
-    Level logLevel = Level.ALL,
-    LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
-  }) {
-    if (_instance != null) {
-      throw Exception('''
-        StreamVideo has already been initialised, use StreamVideo.instance to access the singleton instance.
-        If you want to re-initialise the SDK, call StreamVideo.reset() first.
-        If you want to use multiple instances of the SDK, use StreamVideo.new() instead.
-        ''');
-    }
-    _instance = StreamVideo._(
-      apiKey,
-      coordinatorRpcUrl: coordinatorRpcUrl,
-      coordinatorWsUrl: coordinatorWsUrl,
-      latencyMeasurementRounds: latencyMeasurementRounds,
-      logLevel: logLevel,
-      logHandlerFunction: logHandlerFunction,
-    );
-  }
-
+class StreamVideoV2Impl implements StreamVideoV2 {
   /// Creates a new Stream Video client unassociated with the
   /// Stream Video singleton instance
-  factory StreamVideo.new(
+  factory StreamVideoV2Impl(
     String apiKey, {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
     Level logLevel = Level.ALL,
-    LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
+    LogHandlerFunction logHandlerFunction = StreamVideoV2Impl.defaultLogHandler,
   }) {
-    return StreamVideo._(
+    return StreamVideoV2Impl._(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
@@ -90,7 +77,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     );
   }
 
-  StreamVideo._(
+  StreamVideoV2Impl._(
     this.apiKey, {
     required this.coordinatorRpcUrl,
     required this.coordinatorWsUrl,
@@ -102,37 +89,11 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     setLogLevel(logLevel);
     setLogHandler(logHandlerFunction);
 
-    _client = CoordinatorClient(
+    _client = CoordinatorClientV2(
       apiKey: apiKey,
       tokenManager: _tokenManager,
       baseUrl: coordinatorRpcUrl,
     );
-  }
-
-  static StreamVideo? _instance;
-
-  /// The singleton instance of the Stream Video client.
-  static StreamVideo get instance {
-    final instance = _instance;
-    if (instance == null) {
-      throw Exception(
-        'Please initialise Stream Video by calling StreamVideo.init()',
-      );
-    }
-
-    return instance;
-  }
-
-  /// Resets the singleton instance of the Stream Video client.
-  ///
-  /// This is useful if you want to re-initialise the SDK with a different
-  /// API key.
-  static void reset({bool disconnectUser = false}) async {
-    if (disconnectUser) {
-      _instance?.activeCall?.disconnect();
-      _instance?.disconnectUser();
-    }
-    _instance = null;
   }
 
   final String apiKey;
@@ -141,7 +102,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
   final int latencyMeasurementRounds;
 
   final _tokenManager = TokenManager();
-  late final CoordinatorClient _client;
+  late final CoordinatorClientV2 _client;
 
   var _state = _StreamVideoState();
 
@@ -153,9 +114,15 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
 
   Stream<Call?> get activeCallStream => _state.activeCall.stream;
 
-  CoordinatorWebSocket? _ws;
+  CoordinatorWebSocketV2? _ws;
+  StreamSubscription<CoordinatorEventV2>? _wsSubscription;
 
-  /// Default log handler function for the [StreamVideo] logger.
+  SharedEmitter<CoordinatorEventV2> get events => _events;
+  final _events = MutableSharedEmitterImpl<CoordinatorEventV2>();
+
+  Function(CallV2)? onCallCreated;
+
+  /// Default log handler function for the [StreamVideoV2Impl] logger.
   static void defaultLogHandler(LogRecord record) {
     print(
       '${record.time} '
@@ -184,12 +151,24 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     );
 
     try {
-      _ws = CoordinatorWebSocket(
+      _ws = CoordinatorWebSocketV2(
         coordinatorWsUrl,
         apiKey: apiKey,
         userInfo: user,
         tokenManager: _tokenManager,
-      )..events.listen(events.emit);
+      );
+      _wsSubscription = _ws?.events.listen((event) {
+        if (event is CoordinatorCallCreatedEvent) {
+          onCallCreated?.call(
+            CallV2Impl(
+              callCid: event.callCid,
+              coordinatorClient: _client,
+              coordinatorWS: _ws!,
+            ),
+          );
+          _events.emit(event);
+        }
+      });
 
       return _ws!.connect();
     } catch (e, stk) {
@@ -205,6 +184,8 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     if (_ws == null) return;
     await _ws?.disconnect();
     _ws = null;
+    await _wsSubscription?.cancel();
+    _wsSubscription = null;
     _tokenManager.reset();
 
     // Resetting the state.
@@ -212,13 +193,13 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     _state = _StreamVideoState();
   }
 
-  Future<CallEnvelope> createCall({
+  Future<Result<CallV2>> createCall({
     required String type,
     required String id,
     List<String> participantIds = const [],
     bool ringing = false,
   }) async {
-    final response = await _client.createCall(
+    final result = await _client.createCall(
       CreateCallRequest(
         id: id,
         type: type,
@@ -233,17 +214,25 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
         ),
       ),
     );
+    if (result is! Success<CreateCallResponse>) {
+      return result as Failure;
+    }
+    final call = result.data.call;
 
-    return response.call;
+    return CallV2Impl(
+      callCid: call.call.callCid,
+      coordinatorClient: _client,
+      coordinatorWS: _ws!,
+    ).toSuccess();
   }
 
-  Future<CallEnvelope> getOrCreateCall({
+  Future<Result<CallV2>> getOrCreateCall({
     required String type,
     required String id,
     List<String> participantIds = const [],
     bool ringing = false,
   }) async {
-    final response = await _client.getOrCreateCall(
+    final result = await _client.getOrCreateCall(
       GetOrCreateCallRequest(
         id: id,
         type: type,
@@ -258,112 +247,51 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
         ),
       ),
     );
-    return response.call;
+    if (result is! Success<GetOrCreateCallResponse>) {
+      return result as Failure;
+    }
+    final call = result.data.call;
+    call.users;
+    call.details;
+    call.call;
+
+    return CallV2Impl(
+      callCid: call.call.callCid,
+      coordinatorClient: _client,
+      coordinatorWS: _ws!,
+    ).toSuccess();
   }
 
-  Future<Call> joinCall({
-    required String type,
-    required String id,
-    CallOptions callOptions = const CallOptions(),
-  }) async {
-    final response = await _client.joinCall(
-      JoinCallRequest(id: id, type: type),
-    );
-
-    final edges = response.edges;
-    final callId = response.call.call.id;
-    final callType = response.call.call.type;
-    final callCid = response.call.call.callCid;
-
-    if (edges.isEmpty) {
-      throw StreamVideoError('No edges found for call $callCid');
-    }
-
-    final edgeServer = await _getCallEdgeServer(
-      callCid: callCid,
-      edges: edges,
-    );
-
-    if (!edgeServer.hasCredentials() || !edgeServer.credentials.hasServer()) {
-      throw StreamVideoError('No credentials found for call $callCid');
-    }
-
-    final credentials = edgeServer.credentials;
-
-    final call = Call.fromDetails(
-      callId: callId,
-      callType: callType,
-      credentials: credentials,
-      callOptions: callOptions,
-      client: this,
-    );
-
-    _state.pendingCalls.add(call);
-
-    return call;
-  }
-
-  void updateCallStateConnected(Call call) {
+  /*void updateCallStateConnected(Call call) {
     _state.activeCall.value = call;
 
     // Updating ws about the current call.
     final callInfo = CallInfo(callId: call.callId, callType: call.callType);
     _ws?.callInfo = callInfo;
-  }
+  }*/
 
-  void updateCallStateDisconnected(Call call) {
+  /*void updateCallStateDisconnected(Call call) {
     _state.activeCall.value = null;
 
     // Updating ws about the current call.
     _ws?.callInfo = null;
-  }
+  }*/
 
-  Future<ReportCallStatsResponse> reportCallStats({
-    required String callCid,
-    required List<int> stats,
-  }) async {
-    final response = await _client.reportCallStats(
-      ReportCallStatsRequest(
-        callCid: callCid,
-        statsJson: stats,
-      ),
-    );
-
-    return response;
-  }
-
-  Future<GetCallEdgeServerResponse> _getCallEdgeServer({
-    required String callCid,
-    required List<Edge> edges,
-  }) async {
-    final latencyByEdge = await measureEdgeLatencies(edges: edges);
-    final response = await _client.getCallEdgeServer(
-      GetCallEdgeServerRequest(
-        callCid: callCid,
-        measurements: LatencyMeasurements(
-          measurements: latencyByEdge,
-        ),
-      ),
-    );
-
-    return response;
-  }
-
-  Future<SendEventResponse> sendEvent({
+  Future<Result<SendEventResponse>> sendEvent({
     required String callCid,
     required UserEventType eventType,
   }) async {
-    final response = _client.sendEvent(
+    final result = _client.sendUserEvent(
       SendEventRequest(
         callCid: callCid,
         eventType: eventType,
       ),
     );
 
-    return response;
+    return result;
   }
 
-  Future<Future<SendCustomEventResponse>> sendCustomEvent({
+  Future<Result<SendCustomEventResponse>> sendCustomEvent({
     required String callCid,
     required List<int> dataJson,
     String? eventType,
@@ -377,57 +305,6 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     );
 
     return response;
-  }
-
-  Future<Call> acceptCall({
-    required String type,
-    required String id,
-  }) async {
-    final call = await joinCall(type: type, id: id);
-
-    await sendEvent(
-      callCid: call.callCid,
-      eventType: UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL,
-    );
-
-    return call;
-  }
-
-  Future<SendEventResponse> rejectCall({
-    required String callCid,
-  }) async {
-    final response = await sendEvent(
-      callCid: callCid,
-      eventType: UserEventType.USER_EVENT_TYPE_REJECTED_CALL,
-    );
-
-    return response;
-  }
-
-  Future<SendEventResponse> cancelCall({
-    required String callCid,
-  }) async {
-    final response = await sendEvent(
-      callCid: callCid,
-      eventType: UserEventType.USER_EVENT_TYPE_CANCELLED_CALL,
-    );
-
-    return response;
-  }
-
-  Future<void> inviteUsers({
-    required String callCid,
-    required List<UserInfo> users,
-  }) async {
-    final res = await _client.upsertCallMembers(
-      UpsertCallMembersRequest(
-        callCid: callCid,
-        members: users.map((user) {
-          return MemberInput(userId: user.id, role: user.role);
-        }),
-      ),
-    );
-    print('[inviteUsers] res: $res');
   }
 }
 

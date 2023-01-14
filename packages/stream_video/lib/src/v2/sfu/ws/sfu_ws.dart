@@ -17,7 +17,30 @@ import 'package:stream_video/src/ws/ws.dart';
 class SfuWebSocket extends StreamWebSocket
     with KeepAlive, ConnectionStateMixin {
   /// TODO
-  SfuWebSocket(
+  factory SfuWebSocket({
+    required String sessionId,
+    required String sfuUrl,
+    Iterable<String>? protocols,
+  }) {
+    var wsEndpoint = 'ws://$sfuUrl:3031/ws';
+    if (!['localhost', '127.0.0.1'].contains(sfuUrl)) {
+      final wsUrl = Uri.parse(sfuUrl);
+      wsEndpoint = wsUrl
+          .replace(
+            scheme: 'wss',
+            path: '/ws',
+          )
+          .toString();
+    }
+    return SfuWebSocket._(
+      wsEndpoint,
+      protocols: protocols,
+      sessionId: sessionId,
+    );
+  }
+
+  /// TODO
+  SfuWebSocket._(
     super.url, {
     super.protocols,
     required this.sessionId,
@@ -162,10 +185,10 @@ class SfuWebSocket extends StreamWebSocket
   }
 
   void _notifyEvent(SfuEventV2 event) {
-    _eventListeners.forEach((listener) => listener.onEvent(event));
+    _eventListeners.forEach((listener) => listener.onSfuEvent(event));
   }
 
   void _notifyError(VideoError error) {
-    _eventListeners.forEach((listener) => listener.onError(error));
+    _eventListeners.forEach((listener) => listener.onSfuError(error));
   }
 }
