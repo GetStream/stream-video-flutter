@@ -38,6 +38,7 @@ import '../../webrtc/peer_connection.dart';
 import '../../webrtc/peer_type.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
+import '../../webrtc/rtc_track.dart';
 import 'call_session_config.dart';
 
 class CallSession extends SfuEventListener with Disposable {
@@ -220,6 +221,10 @@ class CallSession extends SfuEventListener with Disposable {
         () => '[onPubNegotiationNeeded] #setRemoteAnswer; failed: $ansResult',
       );
     }
+  }
+
+  RtcTrack? getTrack(String trackId) {
+    return rtcManager.getTrack(trackId);
   }
 }
 

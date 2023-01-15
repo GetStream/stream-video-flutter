@@ -15,6 +15,7 @@ import '../action/user_action.dart';
 import '../call_state_reducer.dart';
 import '../coordinator/coordinator_client.dart';
 import '../utils/none.dart';
+import '../webrtc/rtc_track.dart';
 import 'call_settings.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
@@ -30,4 +31,6 @@ abstract class CallV2 {
   });
 
   Future<Result<None>> disconnect();
+
+  RtcTrack? getTrack(String trackId);
 }

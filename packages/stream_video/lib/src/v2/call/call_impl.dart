@@ -17,6 +17,7 @@ import '../coordinator/coordinator_client.dart';
 import '../coordinator/ws/coordinator_ws.dart';
 import '../utils/none.dart';
 import '../utils/result_converters.dart';
+import '../webrtc/rtc_track.dart';
 import 'call.dart';
 import 'call_settings.dart';
 import 'session/call_session.dart';
@@ -88,5 +89,10 @@ class CallV2Impl extends CallV2 {
   Future<Result<None>> apply(UserAction action) async {
     // TODO: implement apply
     return None().toSuccess();
+  }
+
+  @override
+  RtcTrack? getTrack(String trackId) {
+    return session?.getTrack(trackId);
   }
 }

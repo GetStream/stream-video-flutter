@@ -168,4 +168,11 @@ class RtcManager with Disposable {
     await _subscriber.dispose();
     return await super.dispose();
   }
+
+  RtcTrack? getTrack(String trackId) {
+    // TODO
+    // publishedTracks
+
+    return null;
+  }
 }
