@@ -15,11 +15,14 @@ import 'package:stream_video/src/v2/coordinator/ws/coordinator_socket_listener.d
 import 'package:stream_video/src/ws/keep_alive.dart';
 import 'package:stream_video/src/ws/ws.dart';
 
+import '../../shared_emitter.dart';
+import 'coordinator_events.dart';
+
 // TODO: The class needs further refactor. Some parts can be abstracted.
 
-class CoordinatorWebSocket extends StreamWebSocket
+class CoordinatorWebSocketV2 extends StreamWebSocket
     with KeepAlive, ConnectionStateMixin {
-  CoordinatorWebSocket(
+  CoordinatorWebSocketV2(
     super.url, {
     super.protocols,
     required this.apiKey,
@@ -36,7 +39,8 @@ class CoordinatorWebSocket extends StreamWebSocket
   /// The token manager used to fetch or refresh token.
   final TokenManager tokenManager;
 
-  final Set<CoordinatorEventListener> _eventListeners = {};
+  SharedEmitter<CoordinatorEventV2> get events => _events;
+  final _events = MutableSharedEmitterImpl<CoordinatorEventV2>();
 
   String? _userId;
   String? _clientId;
@@ -47,14 +51,6 @@ class CoordinatorWebSocket extends StreamWebSocket
   // Do we need that? Cannot we just pass events to the listeners?
   // @override
   // OnConnectionStateUpdated get onConnectionStateUpdated => events.emit;
-
-  void addEventListener(CoordinatorEventListener listener) {
-    _eventListeners.add(listener);
-  }
-
-  void removeEventListener(CoordinatorEventListener listener) {
-    _eventListeners.remove(listener);
-  }
 
   @override
   Future<void> connect({bool reconnect = false}) {
@@ -159,10 +155,7 @@ class CoordinatorWebSocket extends StreamWebSocket
     }
 
     // Parsing
-
-    _eventListeners.forEach((eventListener) {
-      eventListener.onEvent(event!.toEvent());
-    });
+    _events.emit(event.toEvent());
   }
 
   void _handleHealthCheckEvent(coordinator.WebsocketHealthcheck event) {
@@ -181,7 +174,7 @@ class CoordinatorWebSocket extends StreamWebSocket
   Future<void> disconnect([int? closeCode, String? closeReason]) async {
     // return if already disconnected.
     if (connectionState == ConnectionState.disconnected) return;
-
+    await _events.close();
     // Stop sending keep alive messages.
     stopPingPong();
 

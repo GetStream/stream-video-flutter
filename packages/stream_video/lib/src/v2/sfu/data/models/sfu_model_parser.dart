@@ -3,16 +3,27 @@ import 'package:stream_video/protobuf/video/sfu/models/models.pbenum.dart'
 import 'package:stream_video/src/v2/sfu/data/models/sfu_track_type.dart';
 
 class SfuTrackTypeParser {
-  static SfuTrackType parse(String text) {
-    if (text == sfu_models.TrackType.TRACK_TYPE_AUDIO.name) {
+  static SfuTrackType parseSfuName(String name) {
+    if (name == sfu_models.TrackType.TRACK_TYPE_AUDIO.name) {
       return SfuTrackType.audio;
-    } else if (text == sfu_models.TrackType.TRACK_TYPE_VIDEO.name) {
+    } else if (name == sfu_models.TrackType.TRACK_TYPE_VIDEO.name) {
       return SfuTrackType.video;
-    } else if (text == sfu_models.TrackType.TRACK_TYPE_SCREEN_SHARE.name) {
+    } else if (name == sfu_models.TrackType.TRACK_TYPE_SCREEN_SHARE.name) {
       return SfuTrackType.screenShare;
-    } else if (text ==
+    } else if (name ==
         sfu_models.TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO.name) {
       return SfuTrackType.screenShareAudio;
+    }
+    return SfuTrackType.unspecified;
+  }
+
+  static SfuTrackType parseRtcName(String? name) {
+    if (name == 'audio') {
+      return SfuTrackType.audio;
+    } else if (name == 'video') {
+      return SfuTrackType.video;
+    } else if (name == 'screen') {
+      return SfuTrackType.screenShare;
     }
     return SfuTrackType.unspecified;
   }

@@ -7,10 +7,10 @@ import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/v2/coordinator/models/coordinator_models.dart';
 import 'package:stream_video/src/v2/coordinator/ws/coordinator_events.dart';
 
-/// Converts [coordinator.WebsocketEvent] into [CoordinatorEvent].
+/// Converts [coordinator.WebsocketEvent] into [CoordinatorEventV2].
 extension WebsocketEventMapperExt on coordinator.WebsocketEvent {
-  /// Returns [CoordinatorEvent].
-  CoordinatorEvent toEvent() {
+  /// Returns [CoordinatorEventV2].
+  CoordinatorEventV2 toEvent() {
     final eventType = whichEvent();
     switch (eventType) {
       case coordinator.WebsocketEvent_Event.healthcheck:

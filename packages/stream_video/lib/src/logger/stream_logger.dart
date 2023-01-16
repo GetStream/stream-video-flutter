@@ -30,5 +30,9 @@ class TaggedLogger {
     print('(W/$tag): ${message()}');
   }
 
+  void e(MessageBuilder message) {
+    print('(E/$tag): ${message()}');
+  }
+
   void _log(Priority priority, String Function() messageBuilder) {}
 }
