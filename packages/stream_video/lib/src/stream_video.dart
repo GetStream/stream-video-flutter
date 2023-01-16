@@ -19,6 +19,9 @@ import 'package:stream_video/src/token/token.dart';
 import 'package:stream_video/src/token/token_manager.dart';
 import 'package:synchronized/synchronized.dart';
 
+import '../protobuf/video/coordinator/push_v1/push.pb.dart';
+import 'push_notification/push_notification_manager.dart';
+
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
 typedef LogHandlerFunction = void Function(LogRecord record);
@@ -241,6 +244,19 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     );
 
     return response.call;
+  }
+
+  Future<Device> createDevice({required String token}) async {
+    final response = await _client.createDevice(
+      CreateDeviceRequest(
+        input: DeviceInput(
+          id: token,
+          pushProviderId: 'firebase',
+        ),
+      ),
+    );
+
+    return response.device;
   }
 
   Future<CallEnvelope> getOrCreateCall({
