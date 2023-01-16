@@ -132,6 +132,28 @@ class StreamCallControlsBar extends StatefulWidget {
     this.borderRadius,
   });
 
+  factory StreamCallControlsBar.withDefaultOptions({
+    required Call call,
+    required VoidCallback onHangup,
+    BorderRadius? borderRadius,
+    Color? backgroundColor,
+    double? elevation,
+    EdgeInsets? padding,
+    double? spacing,
+  }) {
+    return StreamCallControlsBar(
+      backgroundColor: backgroundColor,
+      elevation: elevation,
+      padding: padding,
+      spacing: spacing,
+      borderRadius: borderRadius,
+      options: defaultCallControlOptions(
+        call: call,
+        onHangup: onHangup,
+      ),
+    );
+  }
+
   final List<Widget> options;
 
   /// Style of borders of container bar.

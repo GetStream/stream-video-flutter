@@ -8,12 +8,15 @@ export 'toggle_camera.dart';
 export 'call_hangup.dart';
 
 List<Widget> defaultCallControlOptions({
-  required LocalParticipant participant,
+  required Call call,
   required VoidCallback onHangup,
 }) {
+  final participant = call.localParticipant;
+  assert(participant != null, 'The local participant is null.');
+
   return [
     const ToggleSpeaker(),
-    ToggleMic(participant: participant),
+    ToggleMic(participant: participant!),
     ToggleCamera(participant: participant),
     SwitchCamera(participant: participant),
     CallHangup(onHangup: onHangup),
