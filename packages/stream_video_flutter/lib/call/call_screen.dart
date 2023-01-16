@@ -25,7 +25,7 @@ class CallScreen extends StatelessWidget {
 
   static const routeName = '/call';
 
-  // Hardcoded state. This should some from StreamVideo. 
+  // Hardcoded state. This should some from StreamVideo.
   final CallState callState = CallState.onCall;
   final VoidCallback onBackPressed;
   final VoidCallback onHangUp;
