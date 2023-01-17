@@ -116,7 +116,7 @@ class _StreamActiveCallState extends State<StreamActiveCall> {
       bottomNavigationBar: StreamCallControlsBar(
         options: [
           ...defaultCallControlOptions(
-            participant: widget.call.localParticipant!,
+            call: widget.call,
             onHangup: () async {
               await widget.call.disconnect();
               widget.onHangUp?.call();
