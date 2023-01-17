@@ -102,7 +102,8 @@ class _RegularCallParticipantsContentState
   @override
   Widget build(BuildContext context) {
     final participants = widget.participants;
-
+    participants.sort(_participantComparator);
+    final remote = participants.whereType<RemoteParticipant>().toList();
     final local = participants.whereType<LocalParticipant>().toList();
     assert(local.isNotEmpty, 'Local participant is required');
 
@@ -215,6 +216,18 @@ class _RegularCallParticipantsContentState
 
     return widget.itemBuilder?.call(context, index, participant) ??
         StreamCallParticipant(participant: participant);
+  }
+
+  int _participantComparator(Participant a, Participant b) {
+    final aLastSpokeAt = a.lastSpokeAt?.millisecondsSinceEpoch ?? 0;
+    final bLastSpokeAt = b.lastSpokeAt?.millisecondsSinceEpoch ?? 0;
+
+    if (aLastSpokeAt != bLastSpokeAt) {
+      return aLastSpokeAt > bLastSpokeAt ? -1 : 1;
+    }
+
+    return a.joinedAt.millisecondsSinceEpoch -
+        b.joinedAt.millisecondsSinceEpoch;
   }
 }
 
