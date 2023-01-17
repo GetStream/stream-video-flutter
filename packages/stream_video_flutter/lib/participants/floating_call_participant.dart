@@ -1,15 +1,15 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+import '../stream_video_flutter.dart';
 
 /// PIP participant floating on top of the participants grid.
 class StreamFloatingCallParticipant extends StatelessWidget {
   const StreamFloatingCallParticipant({
-    Key? key,
+    super.key,
     required this.participant,
     this.theme,
-  }) : super(key: key);
+  });
 
   /// The participant to display.
   final Participant participant;
@@ -19,11 +19,11 @@ class StreamFloatingCallParticipant extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var theme = StreamVideoTheme.of(context).floatingCallParticipantTheme;
-    var height = theme.height;
-    var width = theme.width;
-    var avatarSize = theme.avatarSize ?? min(height, width) / 2.5;
-    var avatarBorderRadius =
+    final theme = StreamVideoTheme.of(context).floatingCallParticipantTheme;
+    final height = theme.height;
+    final width = theme.width;
+    final avatarSize = theme.avatarSize ?? min(height, width) / 2.5;
+    final avatarBorderRadius =
         theme.avatarBorderRadius ?? BorderRadius.circular(avatarSize);
 
     return SafeArea(
@@ -32,7 +32,7 @@ class StreamFloatingCallParticipant extends StatelessWidget {
         width: width,
         height: height,
         child: Material(
-          elevation: 4.0,
+          elevation: 4,
           borderRadius: BorderRadius.circular(8),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),

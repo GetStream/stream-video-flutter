@@ -26,7 +26,7 @@ class StreamCallParticipants extends StatelessWidget {
     required this.participants,
     this.screenShareItemBuilder,
     this.itemBuilder,
-    this.enablePip = false,
+    this.enableFloatingView = false,
     this.floatingParticipantTheme,
     super.key,
   });
@@ -40,7 +40,7 @@ class StreamCallParticipants extends StatelessWidget {
   final CallParticipantWidgetBuilder? itemBuilder;
 
   /// Enable picture-in-picture for current participant
-  final bool enablePip;
+  final bool enableFloatingView;
 
   /// Theme for participant pip window
   final StreamFloatingCallParticipantTheme? floatingParticipantTheme;
@@ -63,7 +63,7 @@ class StreamCallParticipants extends StatelessWidget {
     return RegularCallParticipantsContent(
       participants: participants,
       itemBuilder: itemBuilder,
-      enablePip: enablePip,
+      enablePip: enableFloatingView,
       floatingParticipantTheme: floatingParticipantTheme,
     );
   }
