@@ -97,7 +97,7 @@ class RegularCallParticipantsContent extends StatefulWidget {
 
 class _RegularCallParticipantsContentState
     extends State<RegularCallParticipantsContent> {
-  var floatingBottomRightDiff = ValueNotifier<Offset>(const Offset(8, 8));
+  final floatingBottomRightDiff = ValueNotifier<Offset>(const Offset(8, 8));
 
   @override
   Widget build(BuildContext context) {
