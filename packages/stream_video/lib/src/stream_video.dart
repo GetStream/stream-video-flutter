@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
@@ -402,6 +403,10 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     );
 
     return response;
+  }
+
+  Future<bool> handlePushNotification(RemoteMessage remoteMessage) {
+    return _pushNotificationManager.handlePushNotification(remoteMessage);
   }
 
   Future<Call> acceptCall({
