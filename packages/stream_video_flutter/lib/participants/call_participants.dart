@@ -107,8 +107,6 @@ class _RegularCallParticipantsContentState
     final local = participants.whereType<LocalParticipant>().toList();
     assert(local.isNotEmpty, 'Local participant is required');
 
-    final remote = participants.whereType<RemoteParticipant>().toList();
-
     final participantsToDisplay = <Participant>[
       // We are only able to show max 3 remote participants in the grid.
       ...remote.take(3),
@@ -175,39 +173,51 @@ class _RegularCallParticipantsContentState
     final streamChatTheme =
         StreamVideoTheme.of(context).floatingCallParticipantTheme;
     final floatingTheme = widget.floatingParticipantTheme ?? streamChatTheme;
-    return Stack(
-      children: [
-        backgroundWidget,
-        ValueListenableBuilder(
-          valueListenable: floatingBottomRightDiff,
-          builder: (context, val, child) {
-            final offset = floatingBottomRightDiff.value;
 
-            return Positioned(
-              right: offset.dx,
-              bottom: offset.dy,
-              child: GestureDetector(
-                onPanUpdate: (drag) {
-                  final dx = drag.delta.dx;
-                  final dy = drag.delta.dy;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final parentSize = constraints.biggest;
+        final maxRight = parentSize.width - floatingTheme.width;
+        final maxTop = parentSize.height - floatingTheme.height;
 
-                  final size = MediaQuery.of(context).size;
-                  final maxRight = size.width - floatingTheme.width;
-                  final maxTop = size.height - floatingTheme.height;
+        // If window is resized, this resets the floating window
+        floatingBottomRightDiff.value = Offset(
+          min(floatingBottomRightDiff.value.dx, maxRight),
+          min(floatingBottomRightDiff.value.dy, maxTop),
+        );
 
-                  floatingBottomRightDiff.value = Offset(
-                    max(0, min(offset.dx - dx, maxRight)),
-                    max(0, min(offset.dy - dy, maxTop)),
-                  );
-                },
-                child: StreamFloatingCallParticipant(
-                  participant: local.first,
-                ),
+        return Stack(
+          children: [
+            backgroundWidget,
+            ValueListenableBuilder(
+              valueListenable: floatingBottomRightDiff,
+              builder: (context, val, child) {
+                final offset = floatingBottomRightDiff.value;
+
+                return Positioned(
+                  right: offset.dx,
+                  bottom: offset.dy,
+                  child: GestureDetector(
+                    onPanUpdate: (drag) {
+                      final dx = drag.delta.dx;
+                      final dy = drag.delta.dy;
+
+                      floatingBottomRightDiff.value = Offset(
+                        max(0, min(offset.dx - dx, maxRight)),
+                        max(0, min(offset.dy - dy, maxTop)),
+                      );
+                    },
+                    child: child,
+                  ),
+                );
+              },
+              child: StreamFloatingCallParticipant(
+                participant: local.first,
               ),
-            );
-          },
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 
