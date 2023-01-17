@@ -15,6 +15,7 @@ class ScreenShareItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenShareTrack = participant.screenShareTrack;
+    final theme = StreamVideoTheme.of(context);
     assert(screenShareTrack != null, 'Participant has no screen share track');
 
     return ColoredBox(
@@ -23,9 +24,9 @@ class ScreenShareItem extends StatelessWidget {
         final track = screenShareTrack?.track;
 
         if (track == null) {
-          return const Center(
+          return Center(
             child: CircularProgressIndicator(
-              color: Color(0xff005FFF),
+              color: theme.colorTheme.accentPrimary,
             ),
           );
         }
