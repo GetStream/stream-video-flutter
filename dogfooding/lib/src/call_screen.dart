@@ -27,6 +27,7 @@ class CallScreen extends StatelessWidget {
           ),
         );
       },
+      enableFloatingView: true,
     );
   }
 }

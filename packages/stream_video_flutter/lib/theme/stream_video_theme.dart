@@ -14,6 +14,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallControlsBarTheme? callControlsBarTheme,
     StreamAvatarTheme? avatarTheme,
     StreamCallParticipantTheme? callParticipantTheme,
+    StreamFloatingCallParticipantTheme? floatingCallParticipantTheme,
     StreamParticipantsInfoTheme? participantsInfoTheme,
     StreamParticipantInfoTheme? participantInfoTheme,
     StreamInvitableUserListTheme? invitableUserListTheme,
@@ -36,6 +37,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callControlsBarTheme: callControlsBarTheme,
       avatarTheme: avatarTheme,
       callParticipantTheme: callParticipantTheme,
+      floatingCallParticipantTheme: floatingCallParticipantTheme,
       participantsInfoTheme: participantsInfoTheme,
       invitableUserListTheme: invitableUserListTheme,
     );
@@ -58,6 +60,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.callControlsBarTheme,
     required this.avatarTheme,
     required this.callParticipantTheme,
+    required this.floatingCallParticipantTheme,
     required this.participantsInfoTheme,
     required this.participantInfoTheme,
     required this.invitableUserListTheme,
@@ -122,6 +125,29 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         enabledMicrophoneColor: Colors.white,
         connectionLevelActiveColor: colorTheme.accentPrimary,
         connectionLevelInactiveColor: Colors.white,
+      ),
+      floatingCallParticipantTheme: StreamFloatingCallParticipantTheme(
+        streamCallParticipantTheme: StreamCallParticipantTheme(
+          focusedColor: colorTheme.accentPrimary,
+          backgroundColor: const Color(0xFF272A30),
+          avatarTheme: StreamAvatarTheme(
+            constraints: const BoxConstraints.tightFor(
+              height: 100,
+              width: 100,
+            ),
+            borderRadius: const BorderRadius.all(Radius.circular(50)),
+            initialsTextStyle: textTheme.title1.copyWith(color: Colors.white),
+            selectionColor: colorTheme.accentPrimary,
+            selectionThickness: 4,
+          ),
+          audioLevelIndicatorColor: colorTheme.accentPrimary,
+          participantLabelTextStyle:
+              textTheme.footnote.copyWith(color: Colors.white),
+          disabledMicrophoneColor: colorTheme.accentError,
+          enabledMicrophoneColor: Colors.white,
+          connectionLevelActiveColor: colorTheme.accentPrimary,
+          connectionLevelInactiveColor: Colors.white,
+        ),
       ),
       participantsInfoTheme: StreamParticipantsInfoTheme(
         dividerColor: colorTheme.overlayDark,
@@ -204,6 +230,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the call participant widget.
   final StreamCallParticipantTheme callParticipantTheme;
 
+  /// Theme for the floating pip call participant widget.
+  final StreamFloatingCallParticipantTheme floatingCallParticipantTheme;
+
   /// Theme for the participants info widget.
   final StreamParticipantsInfoTheme participantsInfoTheme;
 
@@ -225,8 +254,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallControlsBarTheme? callControlsBarTheme,
     StreamAvatarTheme? avatarTheme,
     StreamCallParticipantTheme? callParticipantTheme,
-    StreamParticipantsInfoTheme? participantsInfoTheme,
+    StreamFloatingCallParticipantTheme? floatingCallParticipantTheme,
     StreamParticipantInfoTheme? participantInfoTheme,
+    StreamParticipantsInfoTheme? participantsInfoTheme,
     StreamInvitableUserListTheme? invitableUserListTheme,
     StreamInvitableUserTheme? invitableUserTheme,
   }) =>
@@ -240,6 +270,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             this.callParticipantTheme.merge(callParticipantTheme),
         participantsInfoTheme:
             this.participantsInfoTheme.merge(participantsInfoTheme),
+        floatingCallParticipantTheme: this
+            .floatingCallParticipantTheme
+            .merge(floatingCallParticipantTheme),
         participantInfoTheme:
             this.participantInfoTheme.merge(participantInfoTheme),
         invitableUserListTheme:
@@ -269,9 +302,14 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       textTheme: textTheme.lerp(other.textTheme, t),
       colorTheme: colorTheme.lerp(other.colorTheme, t),
       avatarTheme: avatarTheme.lerp(other.avatarTheme, t),
+      callParticipantTheme:
+          callParticipantTheme.lerp(other.callParticipantTheme, t),
+      floatingCallParticipantTheme: floatingCallParticipantTheme.lerp(
+        other.floatingCallParticipantTheme,
+        t,
+      ),
       callControlsBarTheme:
           callControlsBarTheme.lerp(other.callControlsBarTheme, t),
-      callParticipantTheme: callParticipantTheme.lerp(callParticipantTheme, t),
       participantsInfoTheme:
           participantsInfoTheme.lerp(other.participantsInfoTheme, t),
       participantInfoTheme:
