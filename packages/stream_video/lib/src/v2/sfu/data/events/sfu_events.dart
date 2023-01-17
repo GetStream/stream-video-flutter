@@ -48,14 +48,14 @@ class SfuConnectionQualityChangedEvent extends SfuEventV2 {
     required this.connectionQualityUpdates,
   });
 
-  final List<SfuConnectionQualityInfo> connectionQualityUpdates;
+  final Map<String, SfuConnectionQualityInfo> connectionQualityUpdates;
 }
 
 @internal
 class SfuAudioLevelChangedEvent extends SfuEventV2 {
   const SfuAudioLevelChangedEvent({required this.audioLevels});
 
-  final List<SfuAudioLevel> audioLevels;
+  final Map<String, SfuAudioLevel> audioLevels;
 }
 
 @internal

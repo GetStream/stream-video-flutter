@@ -1,3 +1,17 @@
+class CallMetadata {
+  CallMetadata({
+    required this.details,
+    required this.info,
+  });
+  final CallDetails details;
+  final CallInfo info;
+
+  @override
+  String toString() {
+    return 'CallMetadata{details: $details, info: $info}';
+  }
+}
+
 class CallInfo {
   CallInfo({
     required this.cid,
@@ -14,6 +28,13 @@ class CallInfo {
   final String createdByUserId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+
+  @override
+  String toString() {
+    return 'CallInfo{cid: $cid, id: $id, type: $type, '
+        'createdByUserId: $createdByUserId, createdAt: $createdAt, '
+        'updatedAt: $updatedAt}';
+  }
 }
 
 class CallDetails {
@@ -28,6 +49,13 @@ class CallDetails {
   final Map<String, CallMember> members;
   final bool isBroadcastingEnabled;
   final bool isRecordingEnabled;
+
+  @override
+  String toString() {
+    return 'CallDetails{memberUserIds: $memberUserIds, members: $members, '
+        'isBroadcastingEnabled: $isBroadcastingEnabled, '
+        'isRecordingEnabled: $isRecordingEnabled}';
+  }
 }
 
 class CallMember {
@@ -42,6 +70,26 @@ class CallMember {
   final String callCid;
   final String userId;
   final String role;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+}
+
+class CallUser {
+  CallUser({
+    required this.id,
+    required this.name,
+    required this.role,
+    required this.imageUrl,
+    required this.teams,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  final String id;
+  final String name;
+  final String role;
+  final String imageUrl;
+  final List<String> teams;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 }

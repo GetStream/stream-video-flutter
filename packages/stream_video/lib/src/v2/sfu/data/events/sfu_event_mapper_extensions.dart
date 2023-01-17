@@ -35,27 +35,33 @@ extension SfuEventMapper on sfu_events.SfuEvent {
 
       case sfu_events.SfuEvent_EventPayload.connectionQualityChanged:
         final payload = connectionQualityChanged;
+        final updates = payload.connectionQualityUpdates.map((it) {
+          return SfuConnectionQualityInfo(
+            userId: it.userId,
+            sessionId: it.sessionId,
+            connectionQuality: it.connectionQuality.toDomain(),
+          );
+        });
         return SfuConnectionQualityChangedEvent(
-          connectionQualityUpdates: payload.connectionQualityUpdates.map((it) {
-            return SfuConnectionQualityInfo(
-              userId: it.userId,
-              sessionId: it.sessionId,
-              connectionQuality: it.connectionQuality.toDomain(),
-            );
-          }).toList(),
+          connectionQualityUpdates: <String, SfuConnectionQualityInfo>{
+            for (var it in updates) it.userId: it
+          },
         );
 
       case sfu_events.SfuEvent_EventPayload.audioLevelChanged:
         final payload = audioLevelChanged;
+        final levels = payload.audioLevels.map((it) {
+          return SfuAudioLevel(
+            userId: it.userId,
+            sessionId: it.sessionId,
+            level: it.level,
+            isSpeaking: it.isSpeaking,
+          );
+        });
         return SfuAudioLevelChangedEvent(
-          audioLevels: payload.audioLevels.map((it) {
-            return SfuAudioLevel(
-              userId: it.userId,
-              sessionId: it.sessionId,
-              level: it.level,
-              isSpeaking: it.isSpeaking,
-            );
-          }).toList(),
+          audioLevels: <String, SfuAudioLevel>{
+            for (var it in levels) it.userId: it
+          },
         );
 
       case sfu_events.SfuEvent_EventPayload.iceTrickle:
