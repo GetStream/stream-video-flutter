@@ -24,6 +24,7 @@ dependencies:
   synchronized: ^3.0.0+3
   rate_limiter: ^1.0.0
   firebase_messaging: ^14.2.1
+  flutter_callkit_incoming: ^1.0.3+3
 
 dev_dependencies:
   flutter_test:
