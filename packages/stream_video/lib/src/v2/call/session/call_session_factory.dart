@@ -26,6 +26,7 @@ import '../../../disposable.dart';
 import '../../../latency_service/latency.dart';
 import '../../../logger/stream_logger.dart';
 import '../../../sfu-client/sfu_client.dart';
+import '../../call_state_manager.dart';
 import '../../coordinator/coordinator_client.dart';
 import '../../coordinator/ws/coordinator_ws.dart';
 import '../../errors/video_error.dart';
@@ -60,6 +61,7 @@ class CallSessionFactory {
   Future<CallSession> makeCallSession({
     required edge.Credentials credentials,
     required CallSettings callSettings,
+    required CallStateManager stateManager,
   }) async {
     final sessionId = const Uuid().v4();
 
@@ -80,6 +82,7 @@ class CallSessionFactory {
       callCid: callCid,
       sessionId: sessionId,
       config: sessionConfig,
+      stateManager: stateManager,
     );
   }
 }

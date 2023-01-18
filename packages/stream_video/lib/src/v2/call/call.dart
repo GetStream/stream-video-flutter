@@ -12,7 +12,7 @@ import 'package:stream_video/src/v2/utils/result.dart';
 import '../../../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
     as rpc;
 import '../action/user_action.dart';
-import '../call_state_reducer.dart';
+import '../reducer/call_state_reducer.dart';
 import '../coordinator/coordinator_client.dart';
 import '../utils/none.dart';
 import '../webrtc/rtc_track.dart';

@@ -15,6 +15,7 @@ import '../../../disposable.dart';
 import '../../../latency_service/latency.dart';
 import '../../../logger/stream_logger.dart';
 import '../../../sfu-client/sfu_client.dart';
+import '../../call_state_manager.dart';
 import '../../coordinator/coordinator_client.dart';
 import '../../coordinator/ws/coordinator_ws.dart';
 import '../../errors/video_error.dart';
@@ -46,6 +47,7 @@ class CallSession extends SfuEventListener with Disposable {
     required this.callCid,
     required this.sessionId,
     required this.config,
+    required this.stateManager,
   })  : sfuClient = SfuClientImpl(
           baseUrl: config.sfuUrl,
           authToken: config.sfuToken,
@@ -67,6 +69,7 @@ class CallSession extends SfuEventListener with Disposable {
   final String callCid;
   final String sessionId;
   final CallSessionConfig config;
+  final CallStateManager stateManager;
   final SfuClientV2 sfuClient;
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
@@ -136,6 +139,7 @@ class CallSession extends SfuEventListener with Disposable {
 
   @override
   void onSfuEvent(SfuEventV2 event) async {
+    await stateManager.onSfuEvent(event);
     _events.emit(event);
 
     if (event is SfuSubscriberOfferEvent) {
