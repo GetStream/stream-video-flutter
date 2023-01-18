@@ -64,66 +64,67 @@ class _StreamCallParticipantState extends State<StreamCallParticipant> {
     final streamVideoTheme = StreamVideoTheme.of(context);
     final theme = this.theme ?? streamVideoTheme.callParticipantTheme;
 
-    return Container(
-      foregroundDecoration: BoxDecoration(
-        border: participant.isSpeaking
-            ? Border.all(
-                width: 4,
-                color: theme.focusedColor,
-              )
-            : null,
-      ),
-      decoration: BoxDecoration(
-        color: theme.backgroundColor,
-      ),
-      child: Stack(
-        children: [
-          videoTrack != null && !videoTrack!.muted
-              ? StreamVideoRenderer(
-                  videoTrack: videoTrack!,
-                  videoFit: VideoFit.cover,
+    return ClipRRect(
+      borderRadius: theme.borderRadius,
+      child: Container(
+        foregroundDecoration: BoxDecoration(
+          border: participant.isSpeaking
+              ? Border.all(
+                  width: 4,
+                  color: theme.focusedColor,
                 )
-              : Center(
-                  child: StreamUserAvatar(
-                    user: UserInfo(
-                      id: participant.userId,
-                      role: 'admin',
-                      name: participant.userId,
+              : null,
+        ),
+        decoration: BoxDecoration(color: theme.backgroundColor),
+        child: Stack(
+          children: [
+            videoTrack != null && !videoTrack!.muted
+                ? StreamVideoRenderer(
+                    videoTrack: videoTrack!,
+                    videoFit: VideoFit.cover,
+                  )
+                : Center(
+                    child: StreamUserAvatar(
+                      user: UserInfo(
+                        id: participant.userId,
+                        role: 'admin',
+                        name: participant.userId,
+                      ),
+                      avatarTheme: theme.avatarTheme,
                     ),
-                    avatarTheme: theme.avatarTheme,
                   ),
-                ),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: StreamParticipantLabel(
-                    participant: participant,
-                    audioLevelIndicatorColor: theme.audioLevelIndicatorColor,
-                    disabledMicrophoneColor: theme.disabledMicrophoneColor,
-                    enabledMicrophoneColor: theme.enabledMicrophoneColor,
-                    participantLabelTextStyle: theme.participantLabelTextStyle,
+            Align(
+              alignment: theme.participantLabelAlignment,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: StreamParticipantLabel(
+                      participant: participant,
+                      audioLevelIndicatorColor: theme.audioLevelIndicatorColor,
+                      disabledMicrophoneColor: theme.disabledMicrophoneColor,
+                      enabledMicrophoneColor: theme.enabledMicrophoneColor,
+                      participantLabelTextStyle: theme.participantLabelTextStyle,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: StreamConnectionQualityIndicator(
-                connectionQuality: participant.connectionQuality,
-                activeColor: theme.connectionLevelActiveColor,
-                inactiveColor: theme.connectionLevelInactiveColor,
+                ],
               ),
             ),
-          ),
-        ],
+            Align(
+              alignment: theme.connectionLevelAlignment,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: StreamConnectionQualityIndicator(
+                  connectionQuality: participant.connectionQuality,
+                  activeColor: theme.connectionLevelActiveColor,
+                  inactiveColor: theme.connectionLevelInactiveColor,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
