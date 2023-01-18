@@ -59,7 +59,6 @@ class CallSessionFactory {
 
   Future<CallSession> makeCallSession({
     required edge.Credentials credentials,
-    required CallSettings callSettings,
   }) async {
     final sessionId = const Uuid().v4();
 
@@ -73,7 +72,6 @@ class CallSessionFactory {
       sfuUrl: sfuUrl,
       sfuToken: sfuToken,
       rtcConfig: rtcConfig,
-      callSettings: callSettings,
     );
 
     return CallSession(

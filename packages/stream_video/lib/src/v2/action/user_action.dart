@@ -1,4 +1,6 @@
-abstract class UserAction {}
+abstract class UserAction {
+  const UserAction();
+}
 
 class AcceptCall extends UserAction {}
 
@@ -8,8 +10,17 @@ class RejectCall extends UserAction {}
 
 class SwitchCamera extends UserAction {}
 
-class UpdateMuted extends UserAction {
-  UpdateMuted({required this.muted});
+class SetCameraEnabled extends UserAction {
+  const SetCameraEnabled({required this.enabled});
+  final bool enabled;
+}
 
-  final bool muted;
+class SetMicrophoneEnabled extends UserAction {
+  const SetMicrophoneEnabled({required this.enabled});
+  final bool enabled;
+}
+
+class SetScreenShareEnabled extends UserAction {
+  const SetScreenShareEnabled({required this.enabled});
+  final bool enabled;
 }

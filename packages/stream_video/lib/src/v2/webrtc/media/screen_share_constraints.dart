@@ -1,32 +1,28 @@
 import '../../../platform_detector/platform_detector.dart';
 import '../../../track/options.dart';
 import '../../../types/video_parameters.dart';
-import 'media_constraints.dart';
+import '../model/rtc_video_parameters.dart';
+import 'video_constraints.dart';
 
 /// Options used when creating a video track that captures the screen.
-class ScreenShareConstraints extends MediaConstraints {
+class ScreenShareConstraints extends VideoConstraints {
   const ScreenShareConstraints({
     this.useiOSBroadcastExtension = false,
     this.captureScreenAudio = false,
     String? sourceId,
-    this.maxFrameRate,
-    this.params = VideoParametersPresets.screenShareH720FPS15,
+    super.maxFrameRate,
+    super.params = RtcVideoParametersPresets.screenShareH720FPS15,
   }) : super(deviceId: sourceId);
 
   ScreenShareConstraints.from({
     this.useiOSBroadcastExtension = false,
     this.captureScreenAudio = false,
-    required VideoCaptureOptions captureOptions,
-  })  : params = captureOptions.params,
-        maxFrameRate = captureOptions.maxFrameRate,
-        super(
-          deviceId: captureOptions.deviceId,
+    required VideoConstraints constraints,
+  }) : super(
+          deviceId: constraints.deviceId,
+          maxFrameRate: constraints.maxFrameRate,
+          params: constraints.params,
         );
-
-  final VideoParameters params;
-
-  /// Limit the maximum frameRate of the capture device.
-  final double? maxFrameRate;
 
   /// iOS only flag: Use Broadcast Extension for screen share capturing.
   /// See instructions on how to setup your Broadcast Extension here:
@@ -56,7 +52,7 @@ class ScreenShareConstraints extends MediaConstraints {
 
   @override
   ScreenShareConstraints copyWith({
-    VideoParameters? params,
+    RtcVideoParameters? params,
     String? deviceId,
     double? maxFrameRate,
     bool? captureScreenAudio,

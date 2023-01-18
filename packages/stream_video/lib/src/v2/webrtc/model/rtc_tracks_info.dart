@@ -1,26 +1,17 @@
+import '../../sfu/data/models/sfu_track_type.dart';
 import 'rtc_video_dimension.dart';
-
-class RtcTracksInfo {
-  RtcTracksInfo({
-    required this.trackInfoList,
-  });
-  final List<RtcTrackInfo> trackInfoList;
-
-  @override
-  String toString() {
-    return 'RtcTracksInfo{trackInfoList: $trackInfoList}';
-  }
-}
 
 class RtcTrackInfo {
   RtcTrackInfo({
     required this.trackId,
     required this.trackType,
+    required this.mid,
     required this.layers,
   });
 
   final String? trackId;
-  final String? trackType;
+  final SfuTrackType? trackType;
+  final String? mid;
   final List<RtcVideoLayer>? layers;
 
   @override

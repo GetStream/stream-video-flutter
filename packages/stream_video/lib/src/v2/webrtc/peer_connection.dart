@@ -1,14 +1,12 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import 'package:stream_video/src/disposable.dart';
-import 'package:stream_video/src/logger/stream_logger.dart';
-import 'package:stream_video/src/v2/errors/video_error.dart';
-import 'package:stream_video/src/v2/errors/video_error_composer.dart';
-import 'package:stream_video/src/v2/utils/result.dart';
-import 'package:stream_video/src/v2/webrtc/peer_type.dart';
-import 'package:stream_video/stream_video.dart';
 
+import '../../disposable.dart';
+import '../../logger/stream_logger.dart';
+import '../errors/video_error.dart';
+import '../errors/video_error_composer.dart';
+import '../utils/result.dart';
 import 'model/rtc_tracks_info.dart';
-import 'model/rtc_video_options.dart';
+import 'peer_type.dart';
 
 /// {@template onStreamAdded}
 /// Handler when a new [MediaStream] gets added.
@@ -37,14 +35,13 @@ typedef OnTrack = void Function(
 );
 
 /// Wrapper around the WebRTC connection that contains tracks.
-class StreamPeerConnection with Disposable {
+class StreamPeerConnection extends Disposable {
   /// Creates [StreamPeerConnection] instance.
   StreamPeerConnection({
     required this.sessionId,
     required this.callCid,
     required this.type,
     required this.pc,
-    this.videoOptions = const RtcVideoOptions(),
   }) {
     _initRtcCallbacks();
   }
@@ -55,7 +52,6 @@ class StreamPeerConnection with Disposable {
   final String callCid;
   final StreamPeerType type;
   final rtc.RTCPeerConnection pc;
-  final RtcVideoOptions videoOptions;
 
   /// {@macro onStreamAdded}
   OnStreamAdded? onStreamAdded;
@@ -70,9 +66,6 @@ class StreamPeerConnection with Disposable {
   OnTrack? onTrack;
 
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
-
-  rtc.RTCRtpTransceiver? audioTransceiver;
-  rtc.RTCRtpTransceiver? videoTransceiver;
 
   /// Creates an offer and sets it as the local description.
   Future<Result<rtc.RTCSessionDescription>> createOffer([
@@ -155,84 +148,43 @@ class StreamPeerConnection with Disposable {
   }
 
   /// Adds a local [MediaStreamTrack] with audio to a given [connection].
-  Future<void> addAudioTransceiver({
+  Future<rtc.RTCRtpTransceiver> addAudioTransceiver({
     required rtc.MediaStream stream,
     required rtc.MediaStreamTrack track,
+    List<rtc.RTCRtpEncoding>? encodings,
   }) async {
-    final fullQuality = rtc.RTCRtpEncoding(
-      rid: 'a',
-    );
-
-    final transceiverInit = rtc.RTCRtpTransceiverInit(
-      direction: rtc.TransceiverDirection.SendOnly,
-      streams: [stream],
-      sendEncodings: [fullQuality],
-    );
-
     final transceiver = await pc.addTransceiver(
       track: track,
       kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
-      init: transceiverInit,
+      init: rtc.RTCRtpTransceiverInit(
+        direction: rtc.TransceiverDirection.SendOnly,
+        streams: [stream],
+        sendEncodings: encodings,
+      ),
     );
 
-    audioTransceiver = transceiver;
+    return transceiver;
   }
 
   /// Adds a local [MediaStreamTrack] with video to a given [connection].
   ///
   /// The video is then sent in three different resolutions using simulcast.
-  Future<void> addVideoTransceiver({
+  Future<rtc.RTCRtpTransceiver> addVideoTransceiver({
     required rtc.MediaStream stream,
     required rtc.MediaStreamTrack track,
+    List<rtc.RTCRtpEncoding>? encodings,
   }) async {
-    final transceiverInit = rtc.RTCRtpTransceiverInit(
-      direction: rtc.TransceiverDirection.SendOnly,
-      streams: [stream],
-      sendEncodings: videoOptions.supportedCodecs.values
-          .map(
-            (codec) => rtc.RTCRtpEncoding(
-              rid: codec.quality,
-              maxBitrate: codec.maxBitrate,
-            ),
-          )
-          .toList(),
-    );
-
     final transceiver = await pc.addTransceiver(
       track: track,
       kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
-      init: transceiverInit,
+      init: rtc.RTCRtpTransceiverInit(
+        streams: [stream],
+        direction: rtc.TransceiverDirection.SendOnly,
+        sendEncodings: encodings,
+      ),
     );
 
-    videoTransceiver = transceiver;
-  }
-
-  Future<RtcTracksInfo> getTracksInfo() async {
-    final transceivers = await pc.getTransceivers();
-    return RtcTracksInfo(
-      trackInfoList: transceivers
-          .where((it) => it.sender.track != null && it.sender.track?.id != null)
-          .map((it) {
-        final trackId = it.sender.track!.id!;
-        final trackType = it.sender.track!.kind ?? '';
-        final encodings = it.sender.parameters.encodings ?? List.empty();
-        final videoLayers = encodings.map((encoding) {
-          final rid = encoding.rid;
-          final maxBitrate = encoding.maxBitrate;
-          final codec = videoOptions.supportedCodecs[encoding.rid];
-          return RtcVideoLayer(
-            rid: rid,
-            videoDimension: codec?.dimension,
-            bitrate: maxBitrate,
-          );
-        }).toList();
-        return RtcTrackInfo(
-          trackId: trackId,
-          trackType: trackType,
-          layers: videoLayers,
-        );
-      }).toList(),
-    );
+    return transceiver;
   }
 
   void _initRtcCallbacks() {

@@ -1,10 +1,10 @@
-import 'package:stream_video/src/v2/errors/video_error.dart';
+import '../errors/video_error.dart';
 
 ///  A class which encapsulates a successful outcome with a value of type [T]
 ///  or a failure with [VideoError].
 abstract class Result<T> {
   /// Checks if the result is a [Success].
-  bool get isSuccess => this is Success;
+  bool get isSuccess => this is Success<T>;
 
   /// Check if the result is a [Failure].
   bool get isFailure => this is Failure;

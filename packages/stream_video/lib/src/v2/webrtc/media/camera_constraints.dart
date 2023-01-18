@@ -1,29 +1,25 @@
 import '../../../../stream_video.dart';
 import '../../../platform_detector/platform_detector.dart';
 import '../../../types/video_parameters.dart';
-import 'media_constraints.dart';
+import '../model/rtc_video_parameters.dart';
+import 'video_constraints.dart';
 
 /// Options used when creating a video track that captures the camera.
-class CameraConstraints extends MediaConstraints {
+class CameraConstraints extends VideoConstraints {
   const CameraConstraints({
     super.deviceId,
     this.cameraPosition = CameraPosition.front,
-    this.maxFrameRate,
-    this.params = VideoParametersPresets.h540_169,
+    super.maxFrameRate,
+    super.params = RtcVideoParametersPresets.h540_169,
   });
 
-  CameraConstraints.from({required VideoCaptureOptions captureOptions})
+  CameraConstraints.from({required VideoConstraints constraints})
       : cameraPosition = CameraPosition.front,
-        params = captureOptions.params,
-        maxFrameRate = captureOptions.maxFrameRate,
         super(
-          deviceId: captureOptions.deviceId,
+          deviceId: constraints.deviceId,
+          maxFrameRate: constraints.maxFrameRate,
+          params: constraints.params,
         );
-
-  final VideoParameters params;
-
-  /// Limit the maximum frameRate of the capture device.
-  final double? maxFrameRate;
 
   final CameraPosition cameraPosition;
 
@@ -47,14 +43,14 @@ class CameraConstraints extends MediaConstraints {
       constraints['frameRate'] = {'max': maxFrameRate};
     }
     return {
-      'audio': constraints,
-      'video': false,
+      'audio': false,
+      'video': constraints,
     };
   }
 
   @override
   CameraConstraints copyWith({
-    VideoParameters? params,
+    RtcVideoParameters? params,
     CameraPosition? cameraPosition,
     String? deviceId,
     double? maxFrameRate,

@@ -25,7 +25,7 @@ class CallParticipantState {
   final bool isLocal;
   final SfuConnectionQuality connectionQuality;
   final bool isOnline;
-  double audioLevel;
+  final double audioLevel;
 }
 
 class CallParticipantRTC {

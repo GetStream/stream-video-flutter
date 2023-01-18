@@ -3,6 +3,11 @@ import 'package:webrtc_interface/webrtc_interface.dart' as rtc_interface;
 
 import 'screen_share_constraints.dart';
 
+export 'audio_constraints.dart';
+export 'camera_constraints.dart';
+export 'screen_share_constraints.dart';
+export 'video_constraints.dart';
+
 abstract class MediaConstraints {
   const MediaConstraints({this.deviceId});
 

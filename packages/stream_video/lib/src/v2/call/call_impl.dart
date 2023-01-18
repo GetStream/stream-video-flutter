@@ -1,21 +1,18 @@
 import 'dart:async';
 
-import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart'
-    as edge;
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/logger/stream_logger.dart';
-import 'package:stream_video/src/options.dart';
-import 'package:stream_video/src/v2/call_state.dart';
-import 'package:stream_video/src/v2/state_emitter.dart';
-import 'package:stream_video/src/v2/utils/result.dart';
-
 import '../../../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
     as rpc;
+import '../../logger/logger.dart';
+import '../../logger/stream_logger.dart';
 import '../action/user_action.dart';
+import '../call_state.dart';
 import '../call_state_reducer.dart';
 import '../coordinator/coordinator_client.dart';
 import '../coordinator/ws/coordinator_ws.dart';
+import '../errors/video_error.dart';
+import '../state_emitter.dart';
 import '../utils/none.dart';
+import '../utils/result.dart';
 import '../utils/result_converters.dart';
 import '../webrtc/rtc_track.dart';
 import 'call.dart';
@@ -68,10 +65,22 @@ class CallV2Impl extends CallV2 {
 
     session = await sessionFactory.makeCallSession(
       credentials: edgeResult.data.credentials,
-      callSettings: settings,
     );
 
-    await session?.start();
+    final sessionStartedResult = await session!.start();
+    if (sessionStartedResult is! Success<bool>) {
+      return sessionStartedResult as Failure;
+    }
+
+    if (settings.cameraEnabled) {
+      await apply(const SetCameraEnabled(enabled: true));
+    }
+    if (settings.microphoneEnabled) {
+      await apply(const SetMicrophoneEnabled(enabled: true));
+    }
+    if (settings.screenShareEnabled) {
+      await apply(const SetScreenShareEnabled(enabled: true));
+    }
 
     logger.fine('Call Connect completed');
 
@@ -87,8 +96,12 @@ class CallV2Impl extends CallV2 {
 
   @override
   Future<Result<None>> apply(UserAction action) async {
-    // TODO: implement apply
-    return None().toSuccess();
+    if (session == null) {
+      return Failure(const VideoError(message: 'Call session is not started'));
+    }
+
+    final result = await session!.apply(action);
+    return result;
   }
 
   @override
