@@ -1,4 +1,6 @@
-abstract class UserAction {
+import 'action.dart';
+
+abstract class UserAction extends StreamAction {
   const UserAction();
 }
 

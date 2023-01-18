@@ -161,6 +161,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
         if (event is CoordinatorCallCreatedEvent) {
           onCallCreated?.call(
             CallV2Impl(
+              getCurrentUserId: () => _state.currentUser.value.id,
               callCid: event.callCid,
               coordinatorClient: _client,
               coordinatorWS: _ws!,
@@ -218,8 +219,10 @@ class StreamVideoV2Impl implements StreamVideoV2 {
       return result as Failure;
     }
     final call = result.data.call;
+    final metadata = call.toCallMetadata();
 
     return CallV2Impl(
+      getCurrentUserId: () => _state.currentUser.value.id,
       callCid: call.call.callCid,
       coordinatorClient: _client,
       coordinatorWS: _ws!,
@@ -256,6 +259,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     call.call;
 
     return CallV2Impl(
+      getCurrentUserId: () => _state.currentUser.value.id,
       callCid: call.call.callCid,
       coordinatorClient: _client,
       coordinatorWS: _ws!,

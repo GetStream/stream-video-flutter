@@ -168,7 +168,7 @@ class CoordinatorClientV2 {
   }
 
   /// Queries users based on the given [request].
-  Future<Result<void>> queryUsers(QueryUsersRequest request) {
+  Future<Result<QueryUsersResponse>> queryUsers(QueryUsersRequest request) {
     try {
       return _withAuthHeaders().then((ctx) {
         return _clientRPCProtobufClient

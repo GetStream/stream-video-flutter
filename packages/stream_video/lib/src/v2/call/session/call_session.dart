@@ -8,7 +8,10 @@ import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../disposable.dart';
 import '../../../logger/stream_logger.dart';
-import '../../action/user_action.dart';
+import '../../../sfu-client/sfu_client.dart';
+import '../../call_state_manager.dart';
+import '../../coordinator/coordinator_client.dart';
+import '../../coordinator/ws/coordinator_ws.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
@@ -37,6 +40,7 @@ class CallSession extends Disposable with SfuEventListener {
     required this.callCid,
     required this.sessionId,
     required this.config,
+    required this.stateManager,
   })  : sfuClient = SfuClientImpl(
           baseUrl: config.sfuUrl,
           authToken: config.sfuToken,
@@ -56,6 +60,7 @@ class CallSession extends Disposable with SfuEventListener {
   final String callCid;
   final String sessionId;
   final CallSessionConfig config;
+  final CallStateManager stateManager;
   final SfuClientV2 sfuClient;
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
@@ -126,6 +131,7 @@ class CallSession extends Disposable with SfuEventListener {
 
   @override
   void onSfuEvent(SfuEventV2 event) async {
+    await stateManager.onSfuEvent(event);
     _events.emit(event);
 
     if (event is SfuSubscriberOfferEvent) {
