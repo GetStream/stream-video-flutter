@@ -41,6 +41,7 @@ class StreamActiveCall extends StatefulWidget {
     this.onBackPressed,
     this.onHangUp,
     this.onParticipantsTap,
+    this.enableFloatingView,
   });
 
   /// Represents a call.
@@ -63,6 +64,9 @@ class StreamActiveCall extends StatefulWidget {
 
   /// The action to perform when the participants button is tapped.
   final VoidCallback? onParticipantsTap;
+
+  /// Enable floating participant in the call
+  final bool? enableFloatingView;
 
   @override
   State<StreamActiveCall> createState() => _StreamActiveCallState();
@@ -112,7 +116,10 @@ class _StreamActiveCallState extends State<StreamActiveCall> {
             onParticipantsTap: widget.onParticipantsTap,
           ),
       body: widget.callParticipantsBuilder?.call(context, participants) ??
-          StreamCallParticipants(participants: participants),
+          StreamCallParticipants(
+            participants: participants,
+            enableFloatingView: widget.enableFloatingView ?? false,
+          ),
       bottomNavigationBar: StreamCallControlsBar(
         options: [
           ...defaultCallControlOptions(

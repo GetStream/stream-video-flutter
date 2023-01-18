@@ -11,4 +11,5 @@ export 'outgoing_call/outgoing_call.dart';
 export 'participant_info/stream_participant_info.dart';
 export 'participants/call_participant.dart';
 export 'participants/call_participants.dart';
+export 'participants/floating_call_participant.dart';
 export 'theme/themes.dart';
