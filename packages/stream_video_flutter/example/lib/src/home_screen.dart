@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:example/main.dart';
-import 'package:example/src/call_screen.dart';
 import 'package:example/src/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/call/call_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);

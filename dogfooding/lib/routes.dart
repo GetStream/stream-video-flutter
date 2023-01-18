@@ -1,9 +1,11 @@
-import 'package:dogfooding/src/call_screen.dart';
+
 import 'package:dogfooding/src/home_screen.dart';
 import 'package:dogfooding/src/login_screen.dart';
+import 'package:dogfooding/src/participants_info_screen.dart';
 import 'package:dogfooding/src/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/call/call_screen.dart';
 
 mixin Routes {
   /// Add entry for new route here
@@ -27,9 +29,20 @@ mixin Routes {
       case CallScreen.routeName:
         return MaterialPageRoute(
           settings: const RouteSettings(name: CallScreen.routeName),
-          builder: (_) {
+          builder: (context) {
             final call = settings.arguments as Call;
-            return CallScreen(call: call);
+
+            navigateHome() {
+              Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+            }
+
+            return CallScreen(
+              call: call,
+              onBackPressed: navigateHome,
+              onHangUp: navigateHome,
+              participantsInfoWidgetBuilder: (context, call) =>
+                  StreamCallParticipantsInfoScreen(call: call),
+            );
           },
         );
       default:

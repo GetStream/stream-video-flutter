@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:dogfooding/src/call_screen.dart';
 import 'package:dogfooding/src/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/call/call_screen.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
