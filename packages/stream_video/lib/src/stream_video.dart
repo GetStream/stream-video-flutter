@@ -135,6 +135,12 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     _instance = null;
   }
 
+  /// Return if the singleton instance of the Stream Video Client has already
+  /// been initialized.
+  static bool isInitialized() {
+    return _instance != null;
+  }
+
   final String apiKey;
   final String coordinatorRpcUrl;
   final String coordinatorWsUrl;
