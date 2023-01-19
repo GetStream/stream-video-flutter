@@ -13,13 +13,13 @@ typedef CallParticipantsInfoWidgetBuilder = Widget Function(
 /// incoming call, outgoing call and presents the correct screen accordingly with
 /// the state.
 class CallScreen extends StatelessWidget {
-  const CallScreen({
-    Key? key,
+  CallScreen({
+    super.key,
     required this.call,
     required this.onBackPressed,
     required this.onHangUp,
     this.participantsInfoWidgetBuilder,
-  }) : super(key: key);
+  });
 
   final Call call;
 
@@ -30,6 +30,7 @@ class CallScreen extends StatelessWidget {
   final VoidCallback onBackPressed;
   final VoidCallback onHangUp;
   final CallParticipantsInfoWidgetBuilder? participantsInfoWidgetBuilder;
+  final List<UserInfo> outgoingCallUsers = [];
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +45,7 @@ class CallScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) =>
                     participantsInfoWidgetBuilder?.call(context, call) ??
-                        StreamCallParticipantsInfoView(call: call),
+                    StreamCallParticipantsInfoView(call: call),
               ),
             );
           },
@@ -52,7 +53,7 @@ class CallScreen extends StatelessWidget {
       case CallState.incoming:
         return const MockIncomingCallView();
       case CallState.outgoing:
-        return const MockOutgoingCallView();
+        return StreamOutgoingCall(users: outgoingCallUsers);
     }
   }
 }
@@ -61,16 +62,6 @@ enum CallState {
   onCall,
   incoming,
   outgoing,
-}
-
-/// Delete this class one the final implementation if done.
-class MockOutgoingCallView extends StatelessWidget {
-  const MockOutgoingCallView({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Text("This screen is not implemented yet.");
-  }
 }
 
 /// Delete this class one the final implementation if done.
