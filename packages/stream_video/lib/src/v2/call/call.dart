@@ -11,7 +11,10 @@ import 'package:stream_video/src/v2/utils/result.dart';
 
 import '../../../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
     as rpc;
-import '../action/user_action.dart';
+import '../action/update_call_action.dart';
+import '../model/call_cid.dart';
+import '../model/call_created.dart';
+import '../model/call_received_created.dart';
 import '../reducer/call_state_reducer.dart';
 import '../coordinator/coordinator_client.dart';
 import '../utils/none.dart';
@@ -22,9 +25,29 @@ import 'session/call_session_factory.dart';
 
 /// Represents a [CallV2] in which you can connect to.
 abstract class CallV2 {
-  String get callCid;
+  StreamCallCid get cid;
 
   StateEmitter<CallStateV2> get state;
+
+  Future<Result<CallCreated>> dial({
+    required List<String> participantIds,
+  });
+
+  Future<Result<CallReceivedOrCreated>> getOrCreate({
+    List<String> participantIds = const [],
+    bool ringing = false,
+  });
+
+  Future<Result<CallCreated>> create({
+    List<String> participantIds = const [],
+    bool ringing = false,
+  });
+
+  Future<Result<None>> acceptCall();
+
+  Future<Result<None>> rejectCall();
+
+  Future<Result<None>> cancelCall();
 
   Future<Result<None>> connect({
     CallSettings settings = const CallSettings(),
@@ -34,5 +57,5 @@ abstract class CallV2 {
 
   RtcTrack? getTrack(String trackId);
 
-  Future<Result<None>> apply(UserAction action);
+  Future<Result<None>> apply(UpdateCallAction action);
 }

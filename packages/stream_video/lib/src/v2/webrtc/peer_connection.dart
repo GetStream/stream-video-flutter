@@ -7,6 +7,7 @@ import 'package:stream_video/src/v2/utils/result.dart';
 import 'package:stream_video/src/v2/webrtc/peer_type.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../model/call_cid.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_options.dart';
 
@@ -52,7 +53,7 @@ class StreamPeerConnection with Disposable {
   final _logger = taggedLogger(tag: 'SV:PeerConnection');
 
   final String sessionId;
-  final String callCid;
+  final StreamCallCid callCid;
   final StreamPeerType type;
   final rtc.RTCPeerConnection pc;
   final RtcVideoOptions videoOptions;

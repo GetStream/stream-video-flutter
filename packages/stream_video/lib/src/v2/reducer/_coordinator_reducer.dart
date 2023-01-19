@@ -42,13 +42,13 @@ class CoordinatorReducer {
     CoordinatorCallAcceptedEvent event,
   ) {
     // TODO implement
-    return state.copyWith(status: CallStatus.joining);
+    return state.copyWith(status: CallStatus.connecting());
   }
 
   CallStateV2 _reduceCallCancelled(
     CallStateV2 state,
     CoordinatorCallCancelledEvent event,
   ) {
-    return state.copyWith(status: CallStatus.idle);
+    return state.copyWith(status: CallStatus.idle());
   }
 }

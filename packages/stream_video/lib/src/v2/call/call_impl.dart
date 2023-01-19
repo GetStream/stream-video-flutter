@@ -1,22 +1,19 @@
 import 'dart:async';
 
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/logger/stream_logger.dart';
-import 'package:stream_video/src/v2/call_state.dart';
-import 'package:stream_video/src/v2/state_emitter.dart';
-import 'package:stream_video/src/v2/utils/result.dart';
-
-import '../../../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
-    as rpc;
-import '../../internal/events.dart';
-import '../action/user_action.dart';
+import '../../logger/stream_logger.dart';
+import '../action/update_call_action.dart';
+import '../call_state.dart';
 import '../call_state_manager.dart';
-import '../coordinator/coordinator_client.dart';
-import '../coordinator/models/coordinator_models.dart';
-import '../coordinator/ws/coordinator_ws.dart';
 import '../errors/video_error.dart';
+import '../model/call_cid.dart';
+import '../model/call_created.dart';
+import '../model/call_joined.dart';
+import '../model/call_received_created.dart';
 import '../model/call_status.dart';
+import '../state_emitter.dart';
+import '../stream_video_v2.dart';
 import '../utils/none.dart';
+import '../utils/result.dart';
 import '../utils/result_converters.dart';
 import '../webrtc/rtc_track.dart';
 import 'call.dart';
@@ -28,49 +25,62 @@ import 'session/call_session_factory.dart';
 class CallV2Impl extends CallV2 {
   factory CallV2Impl({
     required String currentUserId,
-    required String callCid,
-    required CoordinatorClientV2 coordinatorClient,
-    required CoordinatorWebSocketV2 coordinatorWS,
-    required CallMetadata metadata,
+    required StreamCallCid callCid,
+    StreamVideoV2? streamVideo,
   }) {
     return CallV2Impl._(
       currentUserId: currentUserId,
-      callCid: callCid,
-      coordinatorClient: coordinatorClient,
-      coordinatorWS: coordinatorWS,
+      cid: callCid,
+      streamVideo: streamVideo ?? StreamVideoV2.instance,
       initialState: CallStateV2(
         currentUserId: currentUserId,
         callCid: callCid,
-        metadata: metadata,
+      ),
+    );
+  }
+  factory CallV2Impl.from({
+    required String currentUserId,
+    required StreamCallCid callCid,
+    required CallCreated data,
+    StreamVideoV2? streamVideo,
+  }) {
+    return CallV2Impl._(
+      currentUserId: currentUserId,
+      cid: callCid,
+      streamVideo: streamVideo ?? StreamVideoV2.instance,
+      initialState: CallStateV2.fromMetadata(
+        currentUserId: currentUserId,
+        callCid: callCid,
+        ringing: data.ringing,
+        metadata: data.metadata,
       ),
     );
   }
 
   CallV2Impl._({
     required this.currentUserId,
-    required this.callCid,
-    required CoordinatorClientV2 coordinatorClient,
-    required CoordinatorWebSocketV2 coordinatorWS,
+    required this.cid,
+    required StreamVideoV2 streamVideo,
     required CallStateV2 initialState,
-  })  : _coordinatorClient = coordinatorClient,
-        _coordinatorWS = coordinatorWS,
-        _sessionFactory = CallSessionFactory(
+  })  : _sessionFactory = CallSessionFactory(
           currentUserId: currentUserId,
-          callCid: callCid,
+          callCid: cid,
         ),
         _stateManager = CallStateManagerImpl(
           currentUserId: currentUserId,
           initialState: initialState,
-          coordinatorClient: coordinatorClient,
-        );
+          streamVideo: streamVideo,
+        ),
+        _streamVideo = streamVideo {
+    streamVideo.events.listen(_stateManager.onCoordinatorEvent);
+  }
 
-  late final _logger = taggedLogger(tag: 'SV:Call:$callCid');
+  late final _logger = taggedLogger(tag: 'SV:Call:$cid');
 
   final String currentUserId;
   @override
-  final String callCid;
-  final CoordinatorClientV2 _coordinatorClient;
-  final CoordinatorWebSocketV2 _coordinatorWS;
+  final StreamCallCid cid;
+  final StreamVideoV2 _streamVideo;
   final CallSessionFactory _sessionFactory;
   late final CallStateManager _stateManager;
 
@@ -80,59 +90,147 @@ class CallV2Impl extends CallV2 {
   CallSession? _session;
 
   @override
+  Future<Result<CallCreated>> dial({
+    required List<String> participantIds,
+  }) async {
+    return create(
+      participantIds: participantIds,
+      ringing: true,
+    );
+  }
+
+  @override
+  Future<Result<None>> acceptCall() async {
+    final state = _stateManager.state.value;
+    final status = state.status;
+    if (status is! CallStatusIncoming || status.acceptedByMe) {
+      _logger.w(() => '[acceptCall] rejected (invalid status): $status');
+      return Failure(VideoError(message: 'invalid status: $status'));
+    }
+    final result = await _streamVideo.acceptCall(
+      cid: cid,
+    );
+    if (result is Success<None>) {
+      await _stateManager.onCallAccepted();
+    }
+    return result;
+  }
+
+  @override
+  Future<Result<None>> rejectCall() async {
+    final state = _stateManager.state.value;
+    final status = state.status;
+    if (status is! CallStatusIncoming || status.acceptedByMe) {
+      _logger.w(() => '[rejectCall] rejected (invalid status): $status');
+      return Failure(VideoError(message: 'invalid status: $status'));
+    }
+    final result = await _streamVideo.rejectCall(
+      cid: cid,
+    );
+    if (result is Success<None>) {
+      await _stateManager.onCallRejected();
+    }
+    return result;
+  }
+
+  @override
+  Future<Result<None>> cancelCall() async {
+    final state = _stateManager.state.value;
+    final status = state.status;
+    if (status is! CallStatusIncoming || status.acceptedByMe) {
+      _logger.w(() => '[cancelCall] rejected (invalid status): $status');
+      return Failure(VideoError(message: 'invalid status: $status'));
+    }
+    final result = await _streamVideo.rejectCall(
+      cid: cid,
+    );
+    if (result is Success<None>) {
+      await _stateManager.onCallRejected();
+    }
+    return result;
+  }
+
+  @override
+  Future<Result<CallReceivedOrCreated>> getOrCreate({
+    List<String> participantIds = const [],
+    bool ringing = false,
+  }) async {
+    final result = await _streamVideo.getOrCreateCall(
+      cid: cid,
+      participantIds: participantIds,
+      ringing: ringing,
+    );
+    if (result is Success<CallReceivedOrCreated>) {
+      await _stateManager.onCallReceivedOrCreated(result.data);
+    }
+    return result;
+  }
+
+  @override
+  Future<Result<CallCreated>> create({
+    List<String> participantIds = const [],
+    bool ringing = false,
+  }) async {
+    final result = await _streamVideo.createCall(
+      cid: cid,
+      participantIds: participantIds,
+      ringing: ringing,
+    );
+    if (result is Success<CallCreated>) {
+      await _stateManager.onCallCreated(result.data);
+    }
+    return result;
+  }
+
+  @override
   Future<Result<None>> connect({
     CallSettings settings = const CallSettings(),
   }) async {
-    final result = await _awaitAcceptedIfNeeded(settings.dropTimeout);
+    final state = _stateManager.state.value;
+    final status = state.status;
+    if (!status.isJoinable) {
+      _logger.w(() => '[connect] rejected (status not Joinable): $status');
+      return Failure(VideoError(message: 'invalid status: $status'));
+    }
+    final result = await _awaitIfNeeded(settings.dropTimeout);
     if (result is Failure) {
+      _logger.e(() => '[connect] waiting failed: $result');
       return result;
     }
     await _stateManager.onConnect();
-    final typeAndId = callCid.split(':');
-
-    final joinResult = await _coordinatorClient.joinCall(
-      rpc.JoinCallRequest(id: typeAndId[1], type: typeAndId[0]),
-    );
-    if (joinResult is! Success<rpc.JoinCallResponse>) {
-      return joinResult as Failure;
-    }
-    final edgeResult = await _coordinatorClient.findBestCallEdgeServer(
-      callCid: callCid,
-      edges: joinResult.data.edges,
-    );
-    if (edgeResult is! Success<rpc.GetCallEdgeServerResponse>) {
+    final joinedResult = await _streamVideo.joinCall(cid: cid);
+    if (joinedResult is! Success<CallJoined>) {
       _logger.w(() => '[connect] completed');
-      return edgeResult as Failure;
+      return joinedResult as Failure;
     }
-
-    _session = await _sessionFactory.makeCallSession(
-      credentials: edgeResult.data.credentials,
+    await _stateManager.onConnected(joinedResult.data);
+    final session = await _sessionFactory.makeCallSession(
+      credentials: joinedResult.data.credentials,
       stateManager: _stateManager,
     );
-
-    await _session?.start();
-
+    _session = session;
+    await _stateManager.onSessionStart(session.sessionId);
+    await session.start();
+    await _stateManager.onSessionStarted(session.sessionId);
     await _applySettings(settings);
-
     _logger.v(() => '[connect] completed');
-
     return None().toSuccess();
   }
 
-  Future<Result<None>> _awaitAcceptedIfNeeded(Duration timeLimit) async {
-    final curState = _stateManager.state.value;
-    if (curState.status != CallStatus.outgoing) {
-      return None().toSuccess();
-    }
+  Future<Result<None>> _awaitIfNeeded(Duration timeLimit) async {
     try {
-      await _stateManager.state.firstWhere(
-        (state) => state.status == CallStatus.joining,
-        timeLimit: timeLimit,
-      );
-      return None().toSuccess();
+      final state = _stateManager.state.value;
+      final status = state.status;
+      if (status is CallStatusOutgoing && !status.acceptedByOther) {
+        await _awaitOutgoingToBeAccepted(timeLimit);
+      }
+      if (status is CallStatusIncoming && !status.acceptedByMe) {
+        await _awaitIncomingToBeAccepted(timeLimit);
+      }
     } catch (e, stk) {
       return e.toFailure(stk);
     }
+    return None().toSuccess();
   }
 
   @override
@@ -149,41 +247,19 @@ class CallV2Impl extends CallV2 {
   }
 
   @override
-  Future<Result<None>> apply(UserAction action) async {
+  Future<Result<None>> apply(UpdateCallAction action) async {
     _logger.d(() => '[apply] action: $action');
-    final Result<None> result;
-    if (action is EstablishCall) {
-      result = await _establishCall(action);
-    } else if (action is UpdateCall) {
-      result = await _updateCall(action);
-    } else {
-      result = Failure(VideoError(message: 'unexpected action: $action'));
+    final session = _session;
+    if (session == null) {
+      _logger.w(() => '[apply] rejected (session is null);');
+      return Failure(const VideoError(message: 'no call session'));
     }
-    _logger.v(() => '[apply] result: $result');
+    final result = await session.apply(action);
+    _logger.v(() => '[apply] completed: $result');
     if (result is Success<None>) {
       await _stateManager.onUserAction(action);
     }
     return result;
-  }
-
-  Future<Result<None>> _updateCall(UpdateCall action) async {
-    final session = _session;
-    if (session == null) {
-      _logger.w(() => '[updateCall] rejected (session is null);');
-      return Failure(const VideoError(message: 'no call session'));
-    }
-    return session.apply(action);
-  }
-
-  Future<Result<None>> _establishCall(EstablishCall action) async {
-    if (action is AcceptCall) {
-      return _acceptCall();
-    } else if (action is RejectCall) {
-      return _rejectCall();
-    } else if (action is CancelCall) {
-      return _cancelCall();
-    }
-    return None().toSuccess();
   }
 
   Future<void> _applySettings(CallSettings settings) async {
@@ -198,28 +274,23 @@ class CallV2Impl extends CallV2 {
     }
   }
 
-  Future<Result<None>> _acceptCall() async {
-    return _sendUserEvent(rpc.UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL);
-  }
-
-  Future<Result<None>> _rejectCall() async {
-    return _sendUserEvent(rpc.UserEventType.USER_EVENT_TYPE_REJECTED_CALL);
-  }
-
-  Future<Result<None>> _cancelCall() async {
-    return _sendUserEvent(rpc.UserEventType.USER_EVENT_TYPE_CANCELLED_CALL);
-  }
-
-  Future<Result<None>> _sendUserEvent(rpc.UserEventType userEvent) async {
-    final result = await _coordinatorClient.sendUserEvent(
-      rpc.SendEventRequest(
-        callCid: callCid,
-        eventType: userEvent,
-      ),
+  Future<void> _awaitIncomingToBeAccepted(Duration timeLimit) async {
+    await _stateManager.state.firstWhere(
+      (state) {
+        final status = state.status;
+        return status is CallStatusIncoming && status.acceptedByMe;
+      },
+      timeLimit: timeLimit,
     );
-    if (result is Failure) {
-      return result;
-    }
-    return None().toSuccess();
+  }
+
+  Future<void> _awaitOutgoingToBeAccepted(Duration timeLimit) async {
+    await _stateManager.state.firstWhere(
+      (state) {
+        final status = state.status;
+        return status is CallStatusOutgoing && status.acceptedByOther;
+      },
+      timeLimit: timeLimit,
+    );
   }
 }
