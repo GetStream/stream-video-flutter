@@ -98,7 +98,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     required Level logLevel,
     required LogHandlerFunction logHandlerFunction,
   }) {
-// Preparing logger
+    // Preparing logger
     setLogLevel(logLevel);
     setLogHandler(logHandlerFunction);
 
