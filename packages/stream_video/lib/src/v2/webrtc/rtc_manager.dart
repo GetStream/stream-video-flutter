@@ -502,3 +502,91 @@ extension SubscriberRtcManager on RtcManager {
     // TODO: implement unsubscribeTrack
   }
 }
+
+extension RtcManagerTrackHelper on RtcManager {
+  Future<RtcLocalTrack?> setCameraEnabled({bool enabled = true}) {
+    return setTrackEnabled(
+      trackType: SfuTrackType.video,
+      enabled: enabled,
+    );
+  }
+
+  Future<RtcLocalTrack?> setMicrophoneEnabled({bool enabled = true}) {
+    return setTrackEnabled(
+      trackType: SfuTrackType.audio,
+      enabled: enabled,
+    );
+  }
+
+  Future<RtcLocalTrack?> setScreenShareEnabled({bool enabled = true}) {
+    return setTrackEnabled(
+      trackType: SfuTrackType.screenShare,
+      enabled: enabled,
+    );
+  }
+
+  Future<RtcLocalTrack?> setTrackEnabled({
+    required SfuTrackType trackType,
+    required bool enabled,
+  }) async {
+    final track = getPublisherTracks().firstWhereOrNull(
+      (track) => track.trackType == trackType,
+    );
+
+    // Track found, mute/unmute it.
+    if (track != null) {
+      return _toggleTrackMuteState(track: track, muted: !enabled);
+    }
+
+    // Track not found, create a new one and publish it if enabled is true.
+    if (enabled) {
+      return _createAndPublishTrack(trackType: trackType);
+    }
+
+    return null;
+  }
+
+  Future<RtcLocalTrack> _toggleTrackMuteState({
+    required RtcLocalTrack track,
+    required bool muted,
+  }) async {
+    if (muted) {
+      // ScreenShare cannot be muted, Un-publish instead
+      if (track.trackType == SfuTrackType.screenShare) {
+        await unpublishTrack(trackSid: track.trackSid);
+
+        // Also un-publish the audio track if it was published
+        final screenShareAudioTrack = getPublisherTracks().firstWhereOrNull(
+          (track) => track.trackType == SfuTrackType.screenShareAudio,
+        );
+        if (screenShareAudioTrack != null) {
+          await unpublishTrack(trackSid: screenShareAudioTrack.trackSid);
+        }
+      } else {
+        await muteTrack(trackSid: track.trackSid);
+      }
+    } else {
+      await unmuteTrack(trackSid: track.trackSid);
+    }
+
+    return track;
+  }
+
+  Future<RtcLocalTrack?> _createAndPublishTrack({
+    required SfuTrackType trackType,
+  }) async {
+    if (trackType == SfuTrackType.video) {
+      final videoTrack = await createCameraTrack();
+      return publishVideoTrack(track: videoTrack!);
+    } else if (trackType == SfuTrackType.audio) {
+      final audioTrack = await createAudioTrack();
+      return publishAudioTrack(track: audioTrack!);
+    } else if (trackType == SfuTrackType.screenShare) {
+      final screenShareTrack = await createScreenShareTrack();
+      return publishVideoTrack(track: screenShareTrack!);
+    }
+
+    _logger.i(() => 'Unsupported trackType $trackType');
+    return null;
+  }
+}
