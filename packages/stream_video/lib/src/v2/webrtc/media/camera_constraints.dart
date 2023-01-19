@@ -1,38 +1,32 @@
-import '../../../../stream_video.dart';
 import '../../../platform_detector/platform_detector.dart';
-import '../../../types/video_parameters.dart';
+import 'constraints/facing_mode.dart';
 import 'media_constraints.dart';
 
 /// Options used when creating a video track that captures the camera.
 class CameraConstraints extends MediaConstraints {
   const CameraConstraints({
     super.deviceId,
-    this.cameraPosition = CameraPosition.front,
-    this.maxFrameRate,
-    this.params = VideoParametersPresets.h540_169,
+    this.facingMode = FacingMode.user,
+    this.maxFrameRate = 30,
+    this.width = 960,
+    this.height = 540,
   });
-
-  CameraConstraints.from({required VideoCaptureOptions captureOptions})
-      : cameraPosition = CameraPosition.front,
-        params = captureOptions.params,
-        maxFrameRate = captureOptions.maxFrameRate,
-        super(
-          deviceId: captureOptions.deviceId,
-        );
-
-  final VideoParameters params;
 
   /// Limit the maximum frameRate of the capture device.
   final double? maxFrameRate;
 
-  final CameraPosition cameraPosition;
+  final int? width;
+  final int? height;
+
+  final FacingMode facingMode;
 
   @override
   Map<String, dynamic> toMap() {
     final constraints = <String, dynamic>{
-      ...params.toMediaConstraintsMap(),
-      'facingMode':
-          cameraPosition == CameraPosition.front ? 'user' : 'environment',
+      'width': width,
+      'height': height,
+      'frameRate': maxFrameRate,
+      'facingMode': facingMode.name,
     };
     if (deviceId != null) {
       if (CurrentPlatform.isWeb) {
@@ -47,21 +41,23 @@ class CameraConstraints extends MediaConstraints {
       constraints['frameRate'] = {'max': maxFrameRate};
     }
     return {
-      'audio': constraints,
-      'video': false,
+      'audio': false,
+      'video': constraints,
     };
   }
 
   @override
   CameraConstraints copyWith({
-    VideoParameters? params,
-    CameraPosition? cameraPosition,
+    int? height,
+    int? width,
+    FacingMode? facingMode,
     String? deviceId,
     double? maxFrameRate,
   }) =>
       CameraConstraints(
-        params: params ?? this.params,
-        cameraPosition: cameraPosition ?? this.cameraPosition,
+        height: height ?? this.height,
+        width: width ?? this.width,
+        facingMode: facingMode ?? this.facingMode,
         deviceId: deviceId ?? this.deviceId,
         maxFrameRate: maxFrameRate ?? this.maxFrameRate,
       );

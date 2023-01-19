@@ -5,11 +5,21 @@ import 'package:rxdart/rxdart.dart';
 
 abstract class StateEmitter<T> {
   T get value;
+
   StreamSubscription<T> listen(
     void Function(T value)? onData, {
     Function? onError,
     void Function()? onDone,
     bool? cancelOnError,
+  });
+
+  Future<E> waitFor<E extends T>({
+    required Duration timeLimit,
+  });
+
+  Future<T> firstWhere(
+    bool Function(T element) test, {
+    required Duration timeLimit,
   });
 }
 
@@ -33,6 +43,21 @@ class MutableStateEmitterImpl<T> extends MutableStateEmitter<T> {
   /// Set and emit the new value.
   @override
   set value(T newValue) => _state.value = newValue;
+
+  @override
+  Future<E> waitFor<E extends T>({
+    required Duration timeLimit,
+  }) {
+    return _state.takeWhile((it) => it is E).cast<E>().first.timeout(timeLimit);
+  }
+
+  @override
+  Future<T> firstWhere(
+    bool Function(T element) test, {
+    required Duration timeLimit,
+  }) {
+    return _state.firstWhere(test).timeout(timeLimit);
+  }
 
   @override
   Future<dynamic> close() {

@@ -26,8 +26,11 @@ import '../../protobuf/video/coordinator/event_v1/event.pb.dart';
 import 'call/call.dart';
 import 'call/call_impl.dart';
 import 'coordinator/coordinator_client.dart';
+import 'coordinator/models/coordinator_models.dart';
 import 'coordinator/ws/coordinator_events.dart';
 import 'coordinator/ws/coordinator_socket_listener.dart';
+import 'errors/video_error.dart';
+import 'state_emitter.dart';
 import 'stream_video_v2.dart';
 import 'utils/result.dart';
 import 'utils/result_converters.dart';
@@ -104,19 +107,18 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   final _tokenManager = TokenManager();
   late final CoordinatorClientV2 _client;
 
-  var _state = _StreamVideoState();
+  var _state = _StreamVideoStateV2();
 
-  UserInfo? get currentUser => _state.currentUser.valueOrNull;
+  @override
+  UserInfo? get currentUser => _state.currentUser.value;
 
-  Stream<UserInfo?> get currentUserStream => _state.currentUser.stream;
-
-  Call? get activeCall => _state.activeCall.valueOrNull;
-
-  Stream<Call?> get activeCallStream => _state.activeCall.stream;
+  @override
+  CallV2? get activeCall => _state.activeCall;
 
   CoordinatorWebSocketV2? _ws;
   StreamSubscription<CoordinatorEventV2>? _wsSubscription;
 
+  @override
   SharedEmitter<CoordinatorEventV2> get events => _events;
   final _events = MutableSharedEmitterImpl<CoordinatorEventV2>();
 
@@ -134,6 +136,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   }
 
   /// Connects the [user] to the Stream Video service.
+  @override
   Future<void> connectUser(
     UserInfo user, {
     Token? token,
@@ -159,15 +162,37 @@ class StreamVideoV2Impl implements StreamVideoV2 {
       );
       _wsSubscription = _ws?.events.listen((event) {
         if (event is CoordinatorCallCreatedEvent) {
-          onCallCreated?.call(
-            CallV2Impl(
-              getCurrentUserId: () => _state.currentUser.value.id,
-              callCid: event.callCid,
-              coordinatorClient: _client,
-              coordinatorWS: _ws!,
-            ),
+          final currentUserId = _state.currentUser.value?.id;
+          if (currentUserId == null) {
+            return;
+          }
+          final metadata = CallMetadata(
+            createdByMe: event.info.createdByUserId == currentUserId,
+            ringing: event.ringing,
+            details: event.details,
+            info: event.info,
           );
+          final call = CallV2Impl(
+            currentUserId: currentUserId,
+            callCid: event.callCid,
+            coordinatorClient: _client,
+            coordinatorWS: _ws!,
+            metadata: metadata,
+          );
+          onCallCreated?.call(call);
+          if (event.ringing) {
+            _state.activeCall = call;
+          }
           _events.emit(event);
+        } else if (event is CoordinatorCallAcceptedEvent) {
+          // TODO implement
+          final call = _state.activeCall;
+        } else if (event is CoordinatorCallRejectedEvent) {
+          // TODO implement
+          final call = _state.activeCall;
+        } else if (event is CoordinatorCallCancelledEvent) {
+          // TODO implement
+          final call = _state.activeCall;
         }
       });
 
@@ -179,6 +204,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   }
 
   /// Disconnects the [user] from the Stream Video service.
+  @override
   Future<void> disconnectUser() async {
     logger.info('disconnecting user : ${currentUser?.id}');
 
@@ -190,16 +216,23 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     _tokenManager.reset();
 
     // Resetting the state.
-    await _state.dispose();
-    _state = _StreamVideoState();
+    await _state.close();
+    _state = _StreamVideoStateV2();
   }
 
+  @override
   Future<Result<CallV2>> createCall({
     required String type,
     required String id,
     List<String> participantIds = const [],
     bool ringing = false,
   }) async {
+    final currentUserId = _state.currentUser.value?.id;
+    if (currentUserId == null) {
+      return Failure(
+        const VideoError(message: '[createCall] failed; no user_id found'),
+      );
+    }
     final result = await _client.createCall(
       CreateCallRequest(
         id: id,
@@ -218,23 +251,35 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     if (result is! Success<CreateCallResponse>) {
       return result as Failure;
     }
-    final call = result.data.call;
-    final metadata = call.toCallMetadata();
+    final coordCall = result.data.call;
+    final metadata = coordCall.toCallMetadata(ringing: ringing, created: true);
 
-    return CallV2Impl(
-      getCurrentUserId: () => _state.currentUser.value.id,
-      callCid: call.call.callCid,
+    final call = CallV2Impl(
+      currentUserId: currentUserId,
+      callCid: coordCall.call.callCid,
       coordinatorClient: _client,
       coordinatorWS: _ws!,
-    ).toSuccess();
+      metadata: metadata,
+    );
+    if (ringing) {
+      _state.activeCall = call;
+    }
+    return call.toSuccess();
   }
 
+  @override
   Future<Result<CallV2>> getOrCreateCall({
     required String type,
     required String id,
     List<String> participantIds = const [],
     bool ringing = false,
   }) async {
+    final currentUserId = _state.currentUser.value?.id;
+    if (currentUserId == null) {
+      return Failure(
+        const VideoError(message: '[createCall] failed; no user_id found'),
+      );
+    }
     final result = await _client.getOrCreateCall(
       GetOrCreateCallRequest(
         id: id,
@@ -253,17 +298,25 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     if (result is! Success<GetOrCreateCallResponse>) {
       return result as Failure;
     }
-    final call = result.data.call;
-    call.users;
-    call.details;
-    call.call;
+    final coordCall = result.data.call;
+    final created = result.data.created;
+    final metadata = coordCall.toCallMetadata(
+      ringing: ringing,
+      created: created,
+    );
 
-    return CallV2Impl(
-      getCurrentUserId: () => _state.currentUser.value.id,
-      callCid: call.call.callCid,
+    final call = CallV2Impl(
+      currentUserId: currentUserId,
+      callCid: coordCall.call.callCid,
       coordinatorClient: _client,
       coordinatorWS: _ws!,
-    ).toSuccess();
+      metadata: metadata,
+    );
+    if (ringing) {
+      _state.activeCall = call;
+    }
+
+    return call.toSuccess();
   }
 
   /*void updateCallStateConnected(Call call) {
@@ -312,34 +365,30 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   }
 }
 
-class _StreamVideoState {
-  final _lock = Lock();
+class _StreamVideoStateV2 {
+  final MutableStateEmitter<UserInfo?> currentUser = MutableStateEmitterImpl(
+    null,
+  );
 
-  final currentUser = UserInfoController();
-  final activeCall = ActiveCallController();
-  final pendingCalls = PendingCallsController();
+  final MutableStateEmitter<CallV2?> _activeCall = MutableStateEmitterImpl(
+    null,
+  );
 
-  Future<void> dispose() async {
-    await currentUser.dispose();
-    await activeCall.dispose();
-    await pendingCalls.dispose();
-  }
-}
-
-typedef UserInfoController = RxController<UserInfo>;
-
-typedef ActiveCallController = RxController<Call?>;
-
-class PendingCallsController extends RxController<List<Call>> {
-  PendingCallsController() : super(seedValue: const []);
-
-  void add(Call call) {
-    final calls = [...value];
-    value = [...calls, call];
+  CallV2? get activeCall {
+    return _activeCall.value;
   }
 
-  void remove(Call call) {
-    final calls = [...value];
-    value = calls.where((it) => it.callCid != call.callCid).toList();
+  set activeCall(CallV2? value) {
+    if (value != null) {
+      value.state.listen((value) {
+        activeCall = null;
+      });
+    }
+    _activeCall.value = value;
+  }
+
+  Future<void> close() async {
+    await currentUser.close();
+    await _activeCall.close();
   }
 }

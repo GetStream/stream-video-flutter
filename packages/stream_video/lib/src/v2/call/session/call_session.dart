@@ -15,6 +15,7 @@ import '../../../disposable.dart';
 import '../../../latency_service/latency.dart';
 import '../../../logger/stream_logger.dart';
 import '../../../sfu-client/sfu_client.dart';
+import '../../action/user_action.dart';
 import '../../call_state_manager.dart';
 import '../../coordinator/coordinator_client.dart';
 import '../../coordinator/ws/coordinator_ws.dart';
@@ -29,6 +30,7 @@ import '../../sfu/sfu_client_impl.dart';
 import '../../sfu/ws/sfu_event_listener.dart';
 import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
+import '../../utils/none.dart';
 import '../../utils/result.dart';
 import '../../utils/result_converters.dart';
 import '../../webrtc/media/audio_constraints.dart';
@@ -44,6 +46,7 @@ import 'call_session_config.dart';
 
 class CallSession extends SfuEventListener with Disposable {
   CallSession({
+    required this.currentUserId,
     required this.callCid,
     required this.sessionId,
     required this.config,
@@ -66,6 +69,7 @@ class CallSession extends SfuEventListener with Disposable {
 
   bool _established = false;
 
+  final String currentUserId;
   final String callCid;
   final String sessionId;
   final CallSessionConfig config;
@@ -75,10 +79,9 @@ class CallSession extends SfuEventListener with Disposable {
   final RtcManagerFactory rtcManagerFactory;
   late RtcManager rtcManager;
 
-  SharedEmitter<SfuEventV2> get events => _events;
-  final _events = MutableSharedEmitterImpl<SfuEventV2>();
+  SharedEmitter<SfuEventV2> get events => sfuWS.events;
 
-  Future<Result<bool>> start() async {
+  Future<Result<None>> start() async {
     try {
       sfuWS.addEventListener(this);
       await sfuWS.connect();
@@ -94,31 +97,19 @@ class CallSession extends SfuEventListener with Disposable {
         ),
       );
 
-      await _events.waitFor<SfuJoinResponseEvent>(
+      final event = await sfuWS.events.waitFor<SfuJoinResponseEvent>(
         timeLimit: const Duration(seconds: 30),
       );
+      final localParticipant = event.callState.participants.firstWhere(
+        (it) => it.userId == currentUserId,
+      );
+      final localTrackId = localParticipant.trackLookupPrefix;
 
-      rtcManager = await rtcManagerFactory.makeRtcManager()
+      rtcManager = await rtcManagerFactory.makeRtcManager(localTrackId)
         ..onLocalIceCandidate = _onLocalIceCandidate
         ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded;
 
-      if (config.callSettings.cameraEnabled) {
-        await rtcManager.publishTrack(
-          mediaConstraints: const CameraConstraints(),
-        );
-      }
-      if (config.callSettings.microphoneEnabled) {
-        await rtcManager.publishTrack(
-          mediaConstraints: const AudioConstraints(),
-        );
-      }
-      if (config.callSettings.screenShareEnabled) {
-        await rtcManager.publishTrack(
-          mediaConstraints: const ScreenShareConstraints(),
-        );
-      }
-
-      return true.toSuccess();
+      return None().toSuccess();
     } catch (e, stk) {
       _logger.e(() => '[establish] failed: $e');
       return VideoErrors.compose(e, stk).toFailure();
@@ -140,8 +131,6 @@ class CallSession extends SfuEventListener with Disposable {
   @override
   void onSfuEvent(SfuEventV2 event) async {
     await stateManager.onSfuEvent(event);
-    _events.emit(event);
-
     if (event is SfuSubscriberOfferEvent) {
       await _onSubscriberOffer(event);
     } else if (event is SfuIceTrickleEvent) {
@@ -229,6 +218,11 @@ class CallSession extends SfuEventListener with Disposable {
 
   RtcTrack? getTrack(String trackId) {
     return rtcManager.getTrack(trackId);
+  }
+
+  @override
+  Future<Result<None>> apply(UpdateCall action) async {
+    return None().toSuccess();
   }
 }
 
