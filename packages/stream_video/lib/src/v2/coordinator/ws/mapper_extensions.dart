@@ -9,6 +9,11 @@ import 'package:stream_video/src/v2/coordinator/ws/coordinator_events.dart';
 
 import '../../../../protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart'
     as coordinator_envelopes;
+import '../../../../protobuf/video/coordinator/edge_v1/edge.pb.dart'
+    as coord_edge;
+import '../../../../protobuf/video/coordinator/user_v1/user.pb.dart'
+    as coord_users;
+import '../../model/call_cid.dart';
 
 /// Converts [coordinator_ws.WebsocketEvent] into [CoordinatorEventV2].
 extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
@@ -84,9 +89,7 @@ extension on coordinator_call.Call {
   CallInfo toCallInfo() {
     // TODO users map is missing in proto model
     return CallInfo(
-      cid: '$type:$id',
-      id: id,
-      type: type,
+      cid: StreamCallCid.from(type: type, id: id),
       createdByUserId: createdByUserId,
       createdAt: createdAt.toDateTime(),
       updatedAt: updatedAt.toDateTime(),
@@ -105,19 +108,69 @@ extension on coordinator_call.CallDetails {
   }
 }
 
-extension on Member {
+extension MemberExt on Member {
   CallMember toCallMember() {
     return CallMember(callCid: callCid, userId: userId, role: role);
   }
 }
 
-extension Envelope on coordinator_envelopes.CallEnvelope {
-  CallMetadata toCallMetadata({required bool ringing, required bool created}) {
-    return CallMetadata(
+extension EnvelopeExt on coordinator_envelopes.CallEnvelope {
+  CallMetadataOld toCallMetadataOld(
+      {required bool ringing, required bool created}) {
+    return CallMetadataOld(
       createdByMe: created,
       ringing: ringing,
       details: details.toCallDetails(),
       info: call.toCallInfo(),
     );
+  }
+
+  CallMetadata toCallMetadata() {
+    return CallMetadata(
+      details: details.toCallDetails(),
+      info: call.toCallInfo(),
+    );
+  }
+}
+
+extension CredentialsExt on coord_edge.Credentials {
+  CallCredentials toCallCredentials() {
+    return CallCredentials(
+      sfuToken: token,
+      sfuServer: CallSfuServer(
+        url: server.edgeName,
+        name: server.url,
+      ),
+      iceServers: iceServers
+          .map(
+            (it) => CallIceServer(
+              username: it.username,
+              password: it.password,
+              urls: it.urls,
+            ),
+          )
+          .toList(),
+    );
+  }
+}
+
+extension UserExt on coord_users.User {
+  CallUser toCallUser() {
+    return CallUser(
+      id: id,
+      teams: teams,
+      role: role,
+      name: id, // TODO
+      imageUrl: imageUrl,
+      createdAt: createdAt.toDateTime(),
+      updatedAt: updatedAt.toDateTime(),
+      customJson: '', // TODO
+    );
+  }
+}
+
+extension UserListExt on List<coord_users.User> {
+  List<CallUser> toCallUsers() {
+    return map((it) => it.toCallUser()).toList();
   }
 }

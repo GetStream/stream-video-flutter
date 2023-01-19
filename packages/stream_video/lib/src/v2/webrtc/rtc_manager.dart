@@ -14,6 +14,7 @@ import 'package:webrtc_interface/src/rtc_session_description.dart';
 
 import '../../disposable.dart';
 import '../../logger/stream_logger.dart';
+import '../model/call_cid.dart';
 import 'media/media_constraints.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_codec.dart';
@@ -38,7 +39,7 @@ class RtcManager with Disposable {
   final _logger = taggedLogger(tag: 'SV:RtcManager');
 
   final String sessionId;
-  final String callCid;
+  final StreamCallCid callCid;
   final String localTrackId;
   final StreamPeerConnection _publisher;
   final StreamPeerConnection _subscriber;

@@ -1,7 +1,7 @@
 import '../action/action.dart';
 import '../action/coordinator_action.dart';
 import '../action/sfu_action.dart';
-import '../action/user_action.dart';
+import '../action/update_call_action.dart';
 import '../call_participant_state.dart';
 import '../call_state.dart';
 import '../coordinator/ws/coordinator_events.dart';
@@ -24,7 +24,7 @@ class CallStateReducer {
       return coordinatorReducer.reduce(state, action);
     } else if (action is SfuAction) {
       return sfuReducer.reduce(state, action);
-    } else if (action is UserAction) {
+    } else if (action is UpdateCallAction) {
       return userReducer.reduce(state, action);
     }
     return state;

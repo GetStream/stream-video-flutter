@@ -1,41 +1,49 @@
 import 'package:collection/collection.dart';
-import 'package:rxdart/rxdart.dart';
 
-import '../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
-    as rpc;
-import '../../protobuf/video/coordinator/user_v1/user.pb.dart' as coord_users;
 import 'action/action.dart';
 import 'action/coordinator_action.dart';
 import 'action/sfu_action.dart';
-import 'action/user_action.dart';
+import 'action/update_call_action.dart';
 import 'call_state.dart';
-import 'coordinator/coordinator_client.dart';
+import 'coordinator/models/coordinator_models.dart';
 import 'coordinator/ws/coordinator_events.dart';
+import 'model/call_created.dart';
+import 'model/call_joined.dart';
+import 'model/call_received_created.dart';
 import 'reducer/call_state_reducer.dart';
 import 'sfu/data/events/sfu_events.dart';
 import 'state_emitter.dart';
+import 'stream_video_v2.dart';
 import 'utils/result.dart';
 
 abstract class CallStateManager {
   const CallStateManager();
   StateEmitter<CallStateV2> get state;
   Future<void> onConnect();
+  Future<void> onConnected(CallJoined data);
+  Future<void> onSessionStart(String sessionId);
+  Future<void> onSessionStarted(String sessionId);
   Future<void> onDisconnect();
-  Future<void> onUserAction(UserAction action);
+  Future<void> onUserAction(UpdateCallAction action);
   Future<void> onSfuEvent(SfuEventV2 event);
   Future<void> onCoordinatorEvent(CoordinatorEventV2 event);
+  Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data);
+  Future<void> onCallCreated(CallCreated data);
+  Future<void> onCallAccepted();
+  Future<void> onCallRejected();
+  Future<void> onCallCancelled();
 }
 
 class CallStateManagerImpl extends CallStateManager {
   CallStateManagerImpl({
     required String currentUserId,
     required CallStateV2 initialState,
-    required CoordinatorClientV2 coordinatorClient,
-  })  : _coordinatorClient = coordinatorClient,
+    required StreamVideoV2 streamVideo,
+  })  : _streamVideo = streamVideo,
         _state = MutableStateEmitterImpl(initialState),
         _stateReducer = CallStateReducer(currentUserId);
 
-  final CoordinatorClientV2 _coordinatorClient;
+  final StreamVideoV2 _streamVideo;
   final CallStateReducer _stateReducer;
   final MutableStateEmitter<CallStateV2> _state;
 
@@ -43,7 +51,7 @@ class CallStateManagerImpl extends CallStateManager {
   StateEmitter<CallStateV2> get state => _state;
 
   @override
-  Future<void> onUserAction(UserAction action) async {
+  Future<void> onUserAction(UpdateCallAction action) async {
     // TODO implement
   }
 
@@ -79,9 +87,8 @@ class CallStateManagerImpl extends CallStateManager {
       SfuJoinedAction(
         participants: event.callState.participants,
         users: await _queryUsersByIds(
-              event.callState.participants.map((it) => it.userId).toSet(),
-            ) ??
-            List.empty(),
+          event.callState.participants.map((it) => it.userId).toSet(),
+        ),
       ),
     );
   }
@@ -112,21 +119,64 @@ class CallStateManagerImpl extends CallStateManager {
     _state.value = _stateReducer.reduce(_state.value, action);
   }
 
-  Future<coord_users.User?> _queryUserById(String userId) async {
+  Future<CallUser?> _queryUserById(String userId) async {
     final result = await _queryUsersByIds({userId});
-    return result?.firstOrNull;
+    return result.firstOrNull;
   }
 
-  Future<List<coord_users.User>?> _queryUsersByIds(Set<String> userIds) async {
-    final mqJson = {'id': userIds};
-    final request = rpc.QueryUsersRequest(
-      // TODO
-      mqJson: [1],
-    );
-    final usersResult = await _coordinatorClient.queryUsers(request);
-    if (usersResult is! Success<rpc.QueryUsersResponse>) {
-      return null;
+  Future<List<CallUser>> _queryUsersByIds(Set<String> userIds) async {
+    final usersResult = await _streamVideo.queryUsers(userIds: userIds);
+    if (usersResult is! Success<List<CallUser>>) {
+      return List.empty();
     }
-    return usersResult.data.users;
+    return usersResult.data;
+  }
+
+  @override
+  Future<void> onCallCreated(CallCreated data) {
+    // TODO: implement onCallCreated
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data) {
+    // TODO: implement onCallReceivedOrCreated
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> onCallAccepted() {
+    // TODO: implement onCallAccepted
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> onCallCancelled() {
+    // TODO: implement onCallCancelled
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> onCallRejected() {
+    // TODO: implement onCallRejected
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> onConnected(CallJoined data) {
+    // TODO: implement onConnected
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> onSessionStart(String sessionId) {
+    // TODO: implement onStarted
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> onSessionStarted(String sessionId) {
+    // TODO: implement onStarted
+    throw UnimplementedError();
   }
 }

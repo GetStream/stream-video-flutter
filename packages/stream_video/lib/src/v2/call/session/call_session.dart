@@ -15,12 +15,13 @@ import '../../../disposable.dart';
 import '../../../latency_service/latency.dart';
 import '../../../logger/stream_logger.dart';
 import '../../../sfu-client/sfu_client.dart';
-import '../../action/user_action.dart';
+import '../../action/update_call_action.dart';
 import '../../call_state_manager.dart';
 import '../../coordinator/coordinator_client.dart';
 import '../../coordinator/ws/coordinator_ws.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
+import '../../model/call_cid.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_call_state.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
@@ -70,7 +71,7 @@ class CallSession extends SfuEventListener with Disposable {
   bool _established = false;
 
   final String currentUserId;
-  final String callCid;
+  final StreamCallCid callCid;
   final String sessionId;
   final CallSessionConfig config;
   final CallStateManager stateManager;
@@ -220,9 +221,9 @@ class CallSession extends SfuEventListener with Disposable {
     return rtcManager.getTrack(trackId);
   }
 
-  @override
-  Future<Result<None>> apply(UpdateCall action) async {
-    return None().toSuccess();
+  Future<Result<None>> apply(UpdateCallAction action) async {
+    // TODO implement
+    throw UnimplementedError('');
   }
 }
 

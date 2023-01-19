@@ -26,11 +26,14 @@ import '../../../disposable.dart';
 import '../../../latency_service/latency.dart';
 import '../../../logger/stream_logger.dart';
 import '../../../sfu-client/sfu_client.dart';
+import '../../../types/other.dart';
 import '../../call_state_manager.dart';
 import '../../coordinator/coordinator_client.dart';
+import '../../coordinator/models/coordinator_models.dart';
 import '../../coordinator/ws/coordinator_ws.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
+import '../../model/call_cid.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_call_state.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
@@ -58,23 +61,19 @@ class CallSessionFactory {
   });
 
   final String currentUserId;
-  final String callCid;
+  final StreamCallCid callCid;
 
   Future<CallSession> makeCallSession({
-    required edge.Credentials credentials,
+    required CallCredentials credentials,
     required CallStateManager stateManager,
   }) async {
     final sessionId = const Uuid().v4();
 
-    final sfuUrl = credentials.server.url;
-    final sfuToken = credentials.token;
-    final iceServers = credentials.iceServers;
-
-    final rtcConfig = rtcConfigurationFromICEServers(iceServers) ??
-        defaultRtcConfiguration(sfuUrl);
+    final rtcConfig = _makeRtcConfig(credentials.iceServers) ??
+        defaultRtcConfiguration(credentials.sfuServer.url);
     final sessionConfig = CallSessionConfig(
-      sfuUrl: sfuUrl,
-      sfuToken: sfuToken,
+      sfuUrl: credentials.sfuServer.url,
+      sfuToken: credentials.sfuToken,
       rtcConfig: rtcConfig,
     );
     return CallSession(
@@ -83,6 +82,23 @@ class CallSessionFactory {
       sessionId: sessionId,
       config: sessionConfig,
       stateManager: stateManager,
+    );
+  }
+
+  RTCConfiguration? _makeRtcConfig(
+    Iterable<CallIceServer>? config,
+  ) {
+    if (config == null || config.isEmpty) return null;
+    return RTCConfiguration(
+      iceServers: [
+        ...config.map(
+          (it) => RTCIceServer(
+            urls: it.urls,
+            username: it.username,
+            credential: it.password,
+          ),
+        ),
+      ],
     );
   }
 }
