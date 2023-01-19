@@ -1,6 +1,5 @@
 import '../../../../stream_video.dart';
 import '../../../platform_detector/platform_detector.dart';
-import '../../../types/video_parameters.dart';
 import '../model/rtc_video_parameters.dart';
 import 'video_constraints.dart';
 
@@ -10,7 +9,7 @@ class CameraConstraints extends VideoConstraints {
     super.deviceId,
     this.cameraPosition = CameraPosition.front,
     super.maxFrameRate,
-    super.params = RtcVideoParametersPresets.h540_169,
+    super.params = RtcVideoParametersPresets.h720_169,
   });
 
   CameraConstraints.from({required VideoConstraints constraints})

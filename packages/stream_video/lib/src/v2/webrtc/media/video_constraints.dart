@@ -6,7 +6,7 @@ abstract class VideoConstraints extends MediaConstraints {
   const VideoConstraints({
     super.deviceId,
     this.maxFrameRate,
-    this.params = RtcVideoParametersPresets.h540_169,
+    this.params = RtcVideoParametersPresets.h720_169,
   });
 
   /// Limit the maximum frameRate of the capture device.

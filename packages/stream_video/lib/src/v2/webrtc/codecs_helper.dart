@@ -17,7 +17,7 @@ List<rtc.RTCRtpEncoding> computeVideoEncodings({
   RtcVideoDimension? dimension,
   VideoTrackPublishOptions options = const VideoTrackPublishOptions(),
 }) {
-  var videoEncoding = options.videoEncoding;
+  final videoEncoding = options.videoEncoding;
 
   if ((videoEncoding == null && !options.simulcast) || dimension == null) {
     // don't set encoding when we are not simulcasting and user isn't
@@ -25,104 +25,23 @@ List<rtc.RTCRtpEncoding> computeVideoEncodings({
     return [rtc.RTCRtpEncoding()];
   }
 
-  final presets = _presetsForDimensions(
+  final presets = _presetsForDimension(
     isScreenShare: isScreenShare,
-    dimensions: dimension,
-  );
-
-  videoEncoding ??= _findAppropriateEncoding(
-    isScreenShare: isScreenShare,
-    dimensions: dimension,
-    presets: presets,
-  );
-
-  if (!options.simulcast) {
-    // not using simulcast
-    return [videoEncoding.toRTCRtpEncoding()];
-  }
-
-  final original = RtcVideoParameters(
     dimension: dimension,
-    encoding: videoEncoding,
   );
 
-  final userParams = isScreenShare
-      ? options.screenShareSimulcastLayers
-      : options.videoSimulcastLayers;
-
-  final params = (userParams.isNotEmpty
-          ? userParams
-          : _computeDefaultSimulcastParams(
-              isScreenShare: isScreenShare,
-              original: original,
-            ))
-      .sorted();
-
-  final lowPreset = params.first;
-  RtcVideoParameters? midPreset;
-  if (params.length > 1) {
-    midPreset = params[1];
-  }
-
-  final size = dimension.max();
-  var computedParams = <RtcVideoParameters>[original];
-
-  if (size >= 960 && midPreset != null) {
-    computedParams = [lowPreset, midPreset, original];
-  } else if (size >= 480) {
-    computedParams = [lowPreset, original];
-  }
-
-  return _encodingsFromPresets(
-    dimension,
-    presets: computedParams,
-  );
+  return _encodingsFromPresets(dimension, presets: presets);
 }
 
-List<RtcVideoParameters> _presetsForDimensions({
+List<RtcVideoParameters> _presetsForDimension({
   required bool isScreenShare,
-  required RtcVideoDimension dimensions,
+  required RtcVideoDimension dimension,
 }) {
   if (isScreenShare) {
-    return RtcVideoParametersPresets.allScreenShare;
+    return RtcVideoParametersPresets.defaultSimulcastScreenShare;
   }
 
-  final a = dimensions.aspect();
-  if ((a - RtcVideoDimensionHelpers.aspect169).abs() <
-      (a - RtcVideoDimensionHelpers.aspect43).abs()) {
-    return RtcVideoParametersPresets.all169;
-  }
-
-  return RtcVideoParametersPresets.all43;
-}
-
-RtcVideoEncoding _findAppropriateEncoding({
-  required bool isScreenShare,
-  required RtcVideoDimension dimensions,
-  required List<RtcVideoParameters> presets,
-}) {
-  assert(presets.isNotEmpty, 'presets should not be empty');
-  var result = presets.first.encoding;
-
-  // handle portrait by swapping dimensions
-  final size = dimensions.max();
-
-  for (final preset in presets) {
-    result = preset.encoding;
-    if (preset.dimension.width >= size) break;
-  }
-
-  return result;
-}
-
-List<RtcVideoParameters> _computeDefaultSimulcastParams({
-  required bool isScreenShare,
-  required RtcVideoParameters original,
-}) {
-  if (isScreenShare) {
-    return _computeDefaultScreenShareSimulcastParams(original: original);
-  }
-  final a = original.dimension.aspect();
+  final a = dimension.aspect();
   if ((a - RtcVideoDimensionHelpers.aspect169).abs() <
       (a - RtcVideoDimensionHelpers.aspect43).abs()) {
     return RtcVideoParametersPresets.defaultSimulcast169;
@@ -149,32 +68,4 @@ List<rtc.RTCRtpEncoding> _encodingsFromPresets(
     ));
   });
   return result;
-}
-
-List<RtcVideoParameters> _computeDefaultScreenShareSimulcastParams({
-  required RtcVideoParameters original,
-}) {
-  final layers = [
-    rtc.RTCRtpEncoding(scaleResolutionDownBy: 2, maxFramerate: 3),
-  ];
-  return layers.map((e) {
-    final scale = e.scaleResolutionDownBy ?? 1;
-    final fps = e.maxFramerate ?? 3;
-
-    return RtcVideoParameters(
-      dimension: RtcVideoDimension(
-        width: (original.dimension.width / scale).floor(),
-        height: (original.dimension.height / scale).floor(),
-      ),
-      encoding: RtcVideoEncoding(
-        maxBitrate: math.max(
-          150 * 1000,
-          (original.encoding.maxBitrate /
-                  (math.pow(scale, 2) * (original.encoding.maxFramerate / fps)))
-              .floor(),
-        ),
-        maxFramerate: fps,
-      ),
-    );
-  }).toList();
 }

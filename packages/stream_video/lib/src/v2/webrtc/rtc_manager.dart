@@ -140,7 +140,7 @@ class RtcManager with Disposable {
       transceiver: transceiver,
     );
 
-    publishedTracks[remoteTrack.trackId] = remoteTrack;
+    publishedTracks[remoteTrack.trackSid] = remoteTrack;
   }
 
   Future<void> unpublishTrack({required String trackSid}) async {
@@ -166,6 +166,7 @@ class RtcManager with Disposable {
     }
   }
 
+  @override
   Future<void> dispose() async {
     for (final trackSid in publishedTracks.keys) {
       await unpublishTrack(trackSid: trackSid);

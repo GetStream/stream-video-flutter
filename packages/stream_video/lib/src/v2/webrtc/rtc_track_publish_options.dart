@@ -36,7 +36,7 @@ class VideoTrackPublishOptions extends TrackPublishOptions {
 /// Options used when publishing audio.
 class AudioTrackPublishOptions extends TrackPublishOptions {
   const AudioTrackPublishOptions({
-    this.audioBitrate = AudioPreset.music,
+    this.audioBitrate = AudioTrackPreset.music,
   });
 
   /// max audio bitrate
@@ -46,7 +46,7 @@ class AudioTrackPublishOptions extends TrackPublishOptions {
   String toString() => '$runtimeType(audioBitrate: $audioBitrate)';
 }
 
-mixin AudioPreset {
+mixin AudioTrackPreset {
   static const telephone = 12000;
   static const speech = 20000;
   static const music = 32000;
