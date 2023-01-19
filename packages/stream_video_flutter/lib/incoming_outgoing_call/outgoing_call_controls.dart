@@ -36,7 +36,7 @@ class OutgoingCallControls extends StatelessWidget {
       child: Column(
         children: [
           CallControlOption(
-            icon: const Icon(Icons.call_rounded),
+            icon: const Icon(Icons.call_end_rounded),
             iconColor: Colors.white,
             backgroundColor: Colors.red,
             onPressed: onHangup,

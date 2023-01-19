@@ -30,6 +30,7 @@ class CallScreen extends StatelessWidget {
   final VoidCallback onBackPressed;
   final VoidCallback onHangUp;
   final CallParticipantsInfoWidgetBuilder? participantsInfoWidgetBuilder;
+  final List<UserInfo> incomingCallUsers = [];
   final List<UserInfo> outgoingCallUsers = [];
 
   @override
@@ -52,7 +53,7 @@ class CallScreen extends StatelessWidget {
         );
       case CallState.incoming:
         return StreamIncomingCall(
-          users: outgoingCallUsers,
+          users: incomingCallUsers,
           onAccept: () {
             // TODO: Handle the action
           },

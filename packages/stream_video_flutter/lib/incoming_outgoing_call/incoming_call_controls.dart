@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../stream_video_flutter.dart';
 
 /// Represents a set of controls the user can use on the calling screen
-/// to cancel the call, toggle their audio and video state.
+/// to accept/cancel the call, toggle their audio and video state.
 class IncomingCallControls extends StatelessWidget {
   const IncomingCallControls({
     super.key,
@@ -15,7 +15,7 @@ class IncomingCallControls extends StatelessWidget {
     this.isCameraEnabled = false,
   });
 
-  /// The action to perform when the hang up button is tapped.
+  /// The action to perform when the accept call button is tapped.
   final VoidCallback onAccept;
 
   /// The action to perform when the hang up button is tapped.
@@ -43,14 +43,14 @@ class IncomingCallControls extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               CallControlOption(
-                icon: const Icon(Icons.call_rounded),
+                icon: const Icon(Icons.call_end_rounded),
                 iconColor: Colors.white,
                 backgroundColor: Colors.red,
                 onPressed: onHangup,
                 padding: const EdgeInsets.all(24),
               ),
               CallControlOption(
-                icon: const Icon(Icons.check),
+                icon: const Icon(Icons.call_rounded),
                 iconColor: Colors.white,
                 backgroundColor: Colors.green,
                 onPressed: onHangup,

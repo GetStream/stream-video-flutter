@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'stream_avatar_theme.dart';
 
 /// {@template participantsInfoTheme}
-/// A style that overrides the default appearance of the outgoing call widget.
+/// A style that overrides the default appearance of the incoming and outgoing call widget.
 /// {@endtemplate}
 class StreamIncomingOutgoingCallTheme with Diagnosticable {
   /// {@macro outgoingCallTheme}

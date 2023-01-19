@@ -8,7 +8,7 @@ import 'calling_participants.dart';
 import 'incoming_call_controls.dart';
 import 'participant_avatars.dart';
 
-/// Represents the Outgoing Call state and UI, when the user is calling
+/// Represents the Incoming Call state and UI, when the user is called by
 /// other people.
 class StreamIncomingCall extends StatelessWidget {
   const StreamIncomingCall({
@@ -24,7 +24,7 @@ class StreamIncomingCall extends StatelessWidget {
   /// The participant to display.
   final List<UserInfo> users;
 
-  /// The action to perform when the hang up button is tapped.
+  /// The action to perform when the accept call button is tapped.
   final VoidCallback onAccept;
 
   /// The action to perform when the hang up button is tapped.
@@ -36,7 +36,7 @@ class StreamIncomingCall extends StatelessWidget {
   /// The action to perform when the camera button is tapped.
   final VoidCallback onCameraTap;
 
-  /// Theme for the outgoing call widget.
+  /// Theme for the incoming call widget.
   final StreamIncomingOutgoingCallTheme? theme;
 
   @override
