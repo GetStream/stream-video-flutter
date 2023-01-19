@@ -13,6 +13,8 @@ import 'package:stream_video/src/v2/sfu/data/events/sfu_event_mapper_extensions.
 import 'package:stream_video/src/ws/keep_alive.dart';
 import 'package:stream_video/src/ws/ws.dart';
 
+import '../../shared_emitter.dart';
+
 /// TODO
 class SfuWebSocket extends StreamWebSocket
     with KeepAlive, ConnectionStateMixin {
@@ -52,6 +54,9 @@ class SfuWebSocket extends StreamWebSocket
 
   final Set<SfuEventListener> _eventListeners = {};
   bool _manuallyClosed = false;
+
+  SharedEmitter<SfuEventV2> get events => _events;
+  final _events = MutableSharedEmitterImpl<SfuEventV2>();
 
   void addEventListener(SfuEventListener listener) {
     _eventListeners.add(listener);
@@ -185,6 +190,7 @@ class SfuWebSocket extends StreamWebSocket
   }
 
   void _notifyEvent(SfuEventV2 event) {
+    _events.emit(event);
     _eventListeners.forEach((listener) => listener.onSfuEvent(event));
   }
 

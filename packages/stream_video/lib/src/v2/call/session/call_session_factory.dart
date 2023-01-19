@@ -53,14 +53,15 @@ import 'call_session_config.dart';
 
 class CallSessionFactory {
   CallSessionFactory({
+    required this.currentUserId,
     required this.callCid,
   });
 
+  final String currentUserId;
   final String callCid;
 
   Future<CallSession> makeCallSession({
     required edge.Credentials credentials,
-    required CallSettings callSettings,
     required CallStateManager stateManager,
   }) async {
     final sessionId = const Uuid().v4();
@@ -75,10 +76,9 @@ class CallSessionFactory {
       sfuUrl: sfuUrl,
       sfuToken: sfuToken,
       rtcConfig: rtcConfig,
-      callSettings: callSettings,
     );
-
     return CallSession(
+      currentUserId: currentUserId,
       callCid: callCid,
       sessionId: sessionId,
       config: sessionConfig,

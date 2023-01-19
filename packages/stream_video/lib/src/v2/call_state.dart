@@ -1,47 +1,56 @@
 import 'package:meta/meta.dart';
 import 'call_participant_state.dart';
 
+import 'coordinator/models/coordinator_models.dart';
 import 'model/call_status.dart';
 
 /// TODO - Class that holds any information about the call, including participants
 @immutable
 class CallStateV2 {
   factory CallStateV2({
+    required String currentUserId,
     required String callCid,
-    String sessionId = '',
-    CallStatus status = CallStatus.idle,
-    Map<String, CallParticipantState> callParticipants = const {},
+    required CallMetadata metadata,
   }) {
     return CallStateV2._(
+      currentUserId: currentUserId,
       callCid: callCid,
-      sessionId: sessionId,
-      status: status,
-      callParticipants: Map.unmodifiable(callParticipants),
+      sessionId: '',
+      status: metadata.toCallStatus(),
+      callParticipants: Map.unmodifiable(
+        metadata.toCallParticipants(
+          currentUserId,
+        ),
+      ),
     );
   }
 
   /// TODO
   const CallStateV2._({
+    required this.currentUserId,
     required this.callCid,
     required this.sessionId,
     required this.status,
     required this.callParticipants,
   });
 
+  final String currentUserId;
   final String callCid;
   final String sessionId;
   final CallStatus status;
-  final Map<String, CallParticipantState> callParticipants;
+  final Map<String, CallParticipantStateV2> callParticipants;
 
   /// Returns a copy of this [CallStateV2] with the given fields replaced
   /// with the new values.
   CallStateV2 copyWith({
+    String? currentUserId,
     String? callCid,
     String? sessionId,
     CallStatus? status,
-    Map<String, CallParticipantState>? callParticipants,
+    Map<String, CallParticipantStateV2>? callParticipants,
   }) {
-    return CallStateV2(
+    return CallStateV2._(
+      currentUserId: currentUserId ?? this.currentUserId,
       callCid: callCid ?? this.callCid,
       sessionId: sessionId ?? this.sessionId,
       status: status ?? this.status,
@@ -73,16 +82,33 @@ class CallStateV2 {
       callParticipants.hashCode;
 }
 
-void main() {
-  final map1 = Map<String, int>.unmodifiable(const {
-    '1': 1,
-    '2': 2,
-    '3': 3,
-  });
-  final map2 = {
-    ...map1,
-    '4': 4,
-  }..remove('1');
+extension on CallMetadata {
+  CallStatus toCallStatus() {
+    if (createdByMe && ringing) {
+      return CallStatus.outgoing;
+    } else if (!createdByMe && ringing) {
+      return CallStatus.incoming;
+    } else {
+      return CallStatus.idle;
+    }
+  }
 
-  print(map2);
+  Map<String, CallParticipantStateV2> toCallParticipants(String currentUserId) {
+    final result = <String, CallParticipantStateV2>{};
+    for (final userId in details.memberUserIds) {
+      final member = details.members[userId];
+      final isLocal = currentUserId == userId;
+      result[userId] = CallParticipantStateV2(
+        userId: userId,
+        role: member?.role ?? '',
+        name: '',
+        profileImageURL: '',
+        sessionId: '',
+        trackIdPrefix: '',
+        isLocal: isLocal,
+        isOnline: !isLocal,
+      );
+    }
+    return result;
+  }
 }

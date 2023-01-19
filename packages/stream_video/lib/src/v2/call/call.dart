@@ -22,9 +22,9 @@ import 'session/call_session_factory.dart';
 
 /// Represents a [CallV2] in which you can connect to.
 abstract class CallV2 {
-  StateEmitter<CallStateV2> get state;
+  String get callCid;
 
-  Future<Result<None>> apply(UserAction action);
+  StateEmitter<CallStateV2> get state;
 
   Future<Result<None>> connect({
     CallSettings settings = const CallSettings(),
@@ -33,4 +33,6 @@ abstract class CallV2 {
   Future<Result<None>> disconnect();
 
   RtcTrack? getTrack(String trackId);
+
+  Future<Result<None>> apply(UserAction action);
 }

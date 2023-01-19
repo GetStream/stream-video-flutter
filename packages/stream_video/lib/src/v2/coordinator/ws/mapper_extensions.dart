@@ -112,8 +112,10 @@ extension on Member {
 }
 
 extension Envelope on coordinator_envelopes.CallEnvelope {
-  CallMetadata toCallMetadata() {
+  CallMetadata toCallMetadata({required bool ringing, required bool created}) {
     return CallMetadata(
+      createdByMe: created,
+      ringing: ringing,
       details: details.toCallDetails(),
       info: call.toCallInfo(),
     );

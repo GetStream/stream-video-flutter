@@ -22,6 +22,7 @@ class RtcManager with Disposable {
   RtcManager({
     required this.sessionId,
     required this.callCid,
+    required this.localTrackId,
     required StreamPeerConnection publisher,
     required StreamPeerConnection subscriber,
   })  : _publisher = publisher,
@@ -38,6 +39,7 @@ class RtcManager with Disposable {
 
   final String sessionId;
   final String callCid;
+  final String localTrackId;
   final StreamPeerConnection _publisher;
   final StreamPeerConnection _subscriber;
 
@@ -97,18 +99,34 @@ class RtcManager with Disposable {
     final stream = await rtc.navigator.mediaDevices.getMedia(mediaConstraints);
     final videoTrack = stream.getVideoTracks().firstOrNull;
     if (videoTrack != null) {
-      await _publisher.addVideoTransceiver(
+      final transceiver = await _publisher.addVideoTransceiver(
         stream: stream,
         track: videoTrack,
       );
+      save(stream, videoTrack, transceiver);
     }
     final audioTrack = stream.getAudioTracks().firstOrNull;
     if (audioTrack != null) {
-      await _publisher.addAudioTransceiver(
+      final transceiver = await _publisher.addAudioTransceiver(
         stream: stream,
         track: audioTrack,
       );
+      save(stream, audioTrack, transceiver);
     }
+  }
+
+  void save(
+    rtc.MediaStream stream,
+    rtc.MediaStreamTrack track,
+    rtc.RTCRtpTransceiver transceiver,
+  ) {
+    final remoteTrack = RtcRemoteTrack(
+      trackId: track.id ?? "",
+      trackType: SfuTrackTypeParser.parseRtcName(track.kind),
+      track: track,
+      stream: stream,
+      transceiver: transceiver,
+    );
   }
 
   void onRemoteIceCandidate({

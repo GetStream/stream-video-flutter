@@ -155,7 +155,7 @@ class StreamPeerConnection with Disposable {
   }
 
   /// Adds a local [MediaStreamTrack] with audio to a given [connection].
-  Future<void> addAudioTransceiver({
+  Future<rtc.RTCRtpTransceiver> addAudioTransceiver({
     required rtc.MediaStream stream,
     required rtc.MediaStreamTrack track,
   }) async {
@@ -176,12 +176,13 @@ class StreamPeerConnection with Disposable {
     );
 
     audioTransceiver = transceiver;
+    return transceiver;
   }
 
   /// Adds a local [MediaStreamTrack] with video to a given [connection].
   ///
   /// The video is then sent in three different resolutions using simulcast.
-  Future<void> addVideoTransceiver({
+  Future<rtc.RTCRtpTransceiver> addVideoTransceiver({
     required rtc.MediaStream stream,
     required rtc.MediaStreamTrack track,
   }) async {
@@ -205,6 +206,7 @@ class StreamPeerConnection with Disposable {
     );
 
     videoTransceiver = transceiver;
+    return transceiver;
   }
 
   Future<RtcTracksInfo> getTracksInfo() async {

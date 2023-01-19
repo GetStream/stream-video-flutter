@@ -5,8 +5,8 @@ import 'sfu/data/models/sfu_connection_quality.dart';
 import 'sfu/data/models/sfu_track_type.dart';
 
 @immutable
-class CallParticipantState {
-  factory CallParticipantState({
+class CallParticipantStateV2 {
+  factory CallParticipantStateV2({
     required String userId,
     required String role,
     required String name,
@@ -20,7 +20,7 @@ class CallParticipantState {
     double audioLevel = 0,
     bool isSpeaking = false,
   }) {
-    return CallParticipantState._(
+    return CallParticipantStateV2._(
       userId: userId,
       role: role,
       name: name,
@@ -37,7 +37,7 @@ class CallParticipantState {
   }
 
   /// TODO: Documentation
-  const CallParticipantState._({
+  const CallParticipantStateV2._({
     required this.userId,
     required this.role,
     required this.name,
@@ -65,9 +65,9 @@ class CallParticipantState {
   final double audioLevel;
   final bool isSpeaking;
 
-  /// Returns a copy of this [CallParticipantState] with the given fields
+  /// Returns a copy of this [CallParticipantStateV2] with the given fields
   /// replaced with the new values.
-  CallParticipantState copyWith({
+  CallParticipantStateV2 copyWith({
     String? userId,
     String? role,
     String? name,
@@ -81,7 +81,7 @@ class CallParticipantState {
     double? audioLevel,
     bool? isSpeaking,
   }) {
-    return CallParticipantState(
+    return CallParticipantStateV2(
       userId: userId ?? this.userId,
       role: role ?? this.role,
       name: name ?? this.name,
@@ -111,7 +111,7 @@ class CallParticipantState {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CallParticipantState &&
+      other is CallParticipantStateV2 &&
           runtimeType == other.runtimeType &&
           userId == other.userId &&
           role == other.role &&

@@ -1,6 +1,4 @@
 import '../../../platform_detector/platform_detector.dart';
-import '../../../track/options.dart';
-import '../../../types/video_parameters.dart';
 import 'media_constraints.dart';
 
 /// Options used when creating a video track that captures the screen.
@@ -9,21 +7,13 @@ class ScreenShareConstraints extends MediaConstraints {
     this.useiOSBroadcastExtension = false,
     this.captureScreenAudio = false,
     String? sourceId,
-    this.maxFrameRate,
-    this.params = VideoParametersPresets.screenShareH720FPS15,
+    this.maxFrameRate = 30,
+    this.width = 1280,
+    this.height = 720,
   }) : super(deviceId: sourceId);
 
-  ScreenShareConstraints.from({
-    this.useiOSBroadcastExtension = false,
-    this.captureScreenAudio = false,
-    required VideoCaptureOptions captureOptions,
-  })  : params = captureOptions.params,
-        maxFrameRate = captureOptions.maxFrameRate,
-        super(
-          deviceId: captureOptions.deviceId,
-        );
-
-  final VideoParameters params;
+  final int? width;
+  final int? height;
 
   /// Limit the maximum frameRate of the capture device.
   final double? maxFrameRate;
@@ -36,7 +26,11 @@ class ScreenShareConstraints extends MediaConstraints {
 
   @override
   Map<String, dynamic> toMap() {
-    final constraints = params.toMediaConstraintsMap();
+    final constraints = <String, dynamic>{
+      'width': width,
+      'height': height,
+      'frameRate': maxFrameRate,
+    };
     if (useiOSBroadcastExtension && CurrentPlatform.isIos) {
       constraints['deviceId'] = 'broadcast';
     }
@@ -56,16 +50,18 @@ class ScreenShareConstraints extends MediaConstraints {
 
   @override
   ScreenShareConstraints copyWith({
-    VideoParameters? params,
     String? deviceId,
+    int? width,
+    int? height,
     double? maxFrameRate,
     bool? captureScreenAudio,
     bool? useiOSBroadcastExtension,
   }) =>
       ScreenShareConstraints(
-        params: params ?? this.params,
         sourceId: deviceId ?? this.deviceId,
         maxFrameRate: maxFrameRate ?? this.maxFrameRate,
+        width: width ?? this.width,
+        height: height ?? this.height,
         captureScreenAudio: captureScreenAudio ?? this.captureScreenAudio,
         useiOSBroadcastExtension:
             useiOSBroadcastExtension ?? this.useiOSBroadcastExtension,

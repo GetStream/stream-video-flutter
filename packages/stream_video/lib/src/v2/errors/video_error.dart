@@ -4,7 +4,7 @@ import 'package:stream_video/src/v2/utils/result.dart';
 /// Represents an SDK error that contains a message.
 class VideoError {
   /// TODO
-  VideoError({required this.message, this.stackTrace});
+  const VideoError({required this.message, this.stackTrace});
 
   /// The message that represents the error.
   final String message;
@@ -31,7 +31,7 @@ class VideoError {
 /// Represents an SDK error that contains a message and the cause.
 class VideoErrorWithCause extends VideoError {
   /// TODO
-  VideoErrorWithCause({
+  const VideoErrorWithCause({
     super.message = '',
     super.stackTrace,
     required this.cause,
