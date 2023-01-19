@@ -14,11 +14,23 @@ class StreamOutgoingCall extends StatelessWidget {
   const StreamOutgoingCall({
     super.key,
     required this.users,
+    required this.onHangup,
+    required this.onMicrophoneTap,
+    required this.onCameraTap,
     this.theme,
   });
 
   /// The participant to display.
   final List<UserInfo> users;
+
+  /// The action to perform when the hang up button is tapped.
+  final VoidCallback onHangup;
+
+  /// The action to perform when the microphone button is tapped.
+  final VoidCallback onMicrophoneTap;
+
+  /// The action to perform when the camera button is tapped.
+  final VoidCallback onCameraTap;
 
   /// Theme for the outgoing call widget.
   final StreamOutgoingCallTheme? theme;
@@ -54,9 +66,9 @@ class StreamOutgoingCall extends StatelessWidget {
           ),
           const Spacer(),
           OutgoingCallControls(
-            onHangup: () {
-              // TODO: Hande the action
-            },
+            onHangup: onHangup,
+            onMicrophoneTap: onMicrophoneTap,
+            onCameraTap: onCameraTap,
           ),
         ],
       ),

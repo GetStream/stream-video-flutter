@@ -8,12 +8,20 @@ class OutgoingCallControls extends StatelessWidget {
   const OutgoingCallControls({
     super.key,
     required this.onHangup,
+    required this.onMicrophoneTap,
+    required this.onCameraTap,
     this.isMicrophoneEnabled = false,
     this.isCameraEnabled = false,
   });
 
   /// The action to perform when the hang up button is tapped.
   final VoidCallback onHangup;
+
+  /// The action to perform when the microphone button is tapped.
+  final VoidCallback onMicrophoneTap;
+
+  /// The action to perform when the camera button is tapped.
+  final VoidCallback onCameraTap;
 
   /// If camera is enabled.
   final bool isCameraEnabled;
@@ -45,18 +53,14 @@ class OutgoingCallControls extends StatelessWidget {
                     ? const Icon(Icons.mic_rounded)
                     : const Icon(Icons.mic_off_rounded),
                 padding: const EdgeInsets.all(16),
-                onPressed: () {
-                  // TODO: Hande the action
-                },
+                onPressed: onMicrophoneTap,
               ),
               CallControlOption(
                 icon: isCameraEnabled
                     ? const Icon(Icons.videocam_rounded)
                     : const Icon(Icons.videocam_off_rounded),
                 padding: const EdgeInsets.all(16),
-                onPressed: () {
-                  // TODO: Hande the action
-                },
+                onPressed: onCameraTap,
               ),
             ],
           )

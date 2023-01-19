@@ -53,7 +53,18 @@ class CallScreen extends StatelessWidget {
       case CallState.incoming:
         return const MockIncomingCallView();
       case CallState.outgoing:
-        return StreamOutgoingCall(users: outgoingCallUsers);
+        return StreamOutgoingCall(
+          users: outgoingCallUsers,
+          onHangup: () {
+            // TODO: Hande the action
+          },
+          onMicrophoneTap: () {
+            // TODO: Hande the action
+          },
+          onCameraTap: () {
+            // TODO: Hande the action
+          },
+        );
     }
   }
 }
