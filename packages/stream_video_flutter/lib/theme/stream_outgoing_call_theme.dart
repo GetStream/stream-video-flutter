@@ -68,7 +68,7 @@ class StreamOutgoingCallTheme with Diagnosticable {
   /// Text style for the calling label.
   final TextStyle callingLabelTextStyle;
 
-  copyWith({
+  StreamOutgoingCallTheme copyWith({
     StreamAvatarTheme? singleParticipantAvatarTheme,
     StreamAvatarTheme? multipleParticipantAvatarTheme,
     TextStyle? singleParticipantTextStyle,
