@@ -57,6 +57,8 @@ abstract class StreamVideoV2 {
 
   Function(CallV2)? onCallCreated;
 
+  CallV2? get activeCall;
+
   /// Connects the [user] to the Stream Video service.
   Future<void> connectUser(
     UserInfo user, {

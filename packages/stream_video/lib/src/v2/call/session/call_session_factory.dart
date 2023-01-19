@@ -8,9 +8,11 @@ import 'call_session_config.dart';
 
 class CallSessionFactory {
   CallSessionFactory({
+    required this.currentUserId,
     required this.callCid,
   });
 
+  final String currentUserId;
   final String callCid;
 
   Future<CallSession> makeCallSession({
@@ -30,8 +32,8 @@ class CallSessionFactory {
       sfuToken: sfuToken,
       rtcConfig: rtcConfig,
     );
-
     return CallSession(
+      currentUserId: currentUserId,
       callCid: callCid,
       sessionId: sessionId,
       config: sessionConfig,

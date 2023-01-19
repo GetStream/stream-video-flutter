@@ -4,25 +4,35 @@ abstract class UserAction extends StreamAction {
   const UserAction();
 }
 
-class AcceptCall extends UserAction {}
+abstract class EstablishCall extends UserAction {
+  const EstablishCall();
+}
 
-class WaitWhenAccepted extends UserAction {}
+class AcceptCall extends EstablishCall {}
 
-class RejectCall extends UserAction {}
+class RejectCall extends EstablishCall {}
 
-class SwitchCamera extends UserAction {}
+class WaitWhenAccepted extends EstablishCall {}
 
-class SetCameraEnabled extends UserAction {
+class CancelCall extends EstablishCall {}
+
+abstract class UpdateCall extends UserAction {
+  const UpdateCall();
+}
+
+class SwitchCamera extends UpdateCall {}
+
+class SetCameraEnabled extends UpdateCall {
   const SetCameraEnabled({required this.enabled});
   final bool enabled;
 }
 
-class SetMicrophoneEnabled extends UserAction {
+class SetMicrophoneEnabled extends UpdateCall {
   const SetMicrophoneEnabled({required this.enabled});
   final bool enabled;
 }
 
-class SetScreenShareEnabled extends UserAction {
+class SetScreenShareEnabled extends UpdateCall {
   const SetScreenShareEnabled({required this.enabled});
   final bool enabled;
 }

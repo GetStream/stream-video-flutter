@@ -9,6 +9,7 @@ import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../disposable.dart';
 import '../../../logger/stream_logger.dart';
 import '../../action/user_action.dart';
+import '../../action/user_action.dart';
 import '../../call_state_manager.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
@@ -33,6 +34,7 @@ import 'call_session_config.dart';
 
 class CallSession extends Disposable with SfuEventListener {
   CallSession({
+    required this.currentUserId,
     required this.callCid,
     required this.sessionId,
     required this.config,
@@ -53,6 +55,7 @@ class CallSession extends Disposable with SfuEventListener {
 
   final _logger = taggedLogger(tag: 'SV:CallSession');
 
+  final String currentUserId;
   final String callCid;
   final String sessionId;
   final CallSessionConfig config;
@@ -62,10 +65,9 @@ class CallSession extends Disposable with SfuEventListener {
   final RtcManagerFactory rtcManagerFactory;
   late final RtcManager rtcManager;
 
-  SharedEmitter<SfuEventV2> get events => _events;
-  final _events = MutableSharedEmitterImpl<SfuEventV2>();
+  SharedEmitter<SfuEventV2> get events => sfuWS.events;
 
-  Future<Result<bool>> start() async {
+  Future<Result<None>> start() async {
     try {
       sfuWS.addEventListener(this);
       await sfuWS.connect();
@@ -81,19 +83,21 @@ class CallSession extends Disposable with SfuEventListener {
         ),
       );
 
-      final event = await _events.waitFor<SfuJoinResponseEvent>(
+      final event = await sfuWS.events.waitFor<SfuJoinResponseEvent>(
         timeLimit: const Duration(seconds: 30),
       );
-
-      // TODO: Update participants from the event.callState
-
-      rtcManager = await rtcManagerFactory.makeRtcManager(publisherId: '')
+      final localParticipant = event.callState.participants.firstWhere(
+        (it) => it.userId == currentUserId,
+      );
+      final localTrackId = localParticipant.trackLookupPrefix;
+      
+      rtcManager = await rtcManagerFactory.makeRtcManager(publisherId: localTrackId)
         ..onPublisherIceCandidate = _onLocalIceCandidate
         ..onSubscriberIceCandidate = _onLocalIceCandidate
         ..onPublisherTrackMuted = _onPublisherTrackMuted
         ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded;
 
-      return true.toSuccess();
+      return None().toSuccess();
     } catch (e, stk) {
       _logger.e(() => '[establish] failed: $e');
       return VideoErrors.compose(e, stk).toFailure();
@@ -107,19 +111,7 @@ class CallSession extends Disposable with SfuEventListener {
     await rtcManager.dispose();
     return await super.dispose();
   }
-
-  Future<Result<None>> apply(UserAction action) async {
-    if (action is SetCameraEnabled) {
-      return _onSetCameraEnabled(action.enabled);
-    } else if (action is SetMicrophoneEnabled) {
-      return _onSetMicrophoneEnabled(action.enabled);
-    } else if (action is SetScreenShareEnabled) {
-      return _onSetScreenShareEnabled(action.enabled);
-    }
-
-    return None().toSuccess();
-  }
-
+  
   @override
   void onSfuError(VideoError error) {
     // TODO: implement onError
@@ -128,8 +120,6 @@ class CallSession extends Disposable with SfuEventListener {
   @override
   void onSfuEvent(SfuEventV2 event) async {
     await stateManager.onSfuEvent(event);
-    _events.emit(event);
-
     if (event is SfuSubscriberOfferEvent) {
       await _onSubscriberOffer(event);
     } else if (event is SfuIceTrickleEvent) {
@@ -231,6 +221,19 @@ class CallSession extends Disposable with SfuEventListener {
 
   RtcTrack? getTrack(String trackId) {
     return rtcManager.getTrack(trackId);
+  }
+
+  @override
+  Future<Result<None>> apply(UserAction action) async {
+    if (action is SetCameraEnabled) {
+      return _onSetCameraEnabled(action.enabled);
+    } else if (action is SetMicrophoneEnabled) {
+      return _onSetMicrophoneEnabled(action.enabled);
+    } else if (action is SetScreenShareEnabled) {
+      return _onSetScreenShareEnabled(action.enabled);
+    }
+
+    return None().toSuccess();
   }
 
   Future<Result<None>> _onSetCameraEnabled(bool enabled) async {

@@ -31,7 +31,7 @@ class VideoError {
 /// Represents an SDK error that contains a message and the cause.
 class VideoErrorWithCause extends VideoError {
   /// TODO
-  VideoErrorWithCause({
+  const VideoErrorWithCause({
     super.message = '',
     super.stackTrace,
     required this.cause,

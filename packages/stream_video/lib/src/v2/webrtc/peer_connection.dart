@@ -164,6 +164,7 @@ class StreamPeerConnection extends Disposable {
     );
 
     return transceiver;
+    return transceiver;
   }
 
   /// Adds a local [MediaStreamTrack] with video to a given [connection].

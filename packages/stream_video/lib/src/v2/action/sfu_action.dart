@@ -3,13 +3,17 @@ import '../sfu/data/events/sfu_events.dart';
 import '../sfu/data/models/sfu_participant.dart';
 import 'action.dart';
 
-class SfuAction extends StreamAction {
-  const SfuAction(this.event);
+abstract class SfuAction extends StreamAction {
+  const SfuAction();
+}
+
+class SfuEventAction extends SfuAction {
+  const SfuEventAction(this.event);
 
   final SfuEventV2 event;
 }
 
-class SfuParticipantJoinedAction extends StreamAction {
+class SfuParticipantJoinedAction extends SfuAction {
   const SfuParticipantJoinedAction({
     required this.participant,
     this.user,
@@ -21,7 +25,7 @@ class SfuParticipantJoinedAction extends StreamAction {
   final isLocalUser;
 }
 
-class SfuJoinedAction extends StreamAction {
+class SfuJoinedAction extends SfuAction {
   factory SfuJoinedAction({
     required List<SfuParticipant> participants,
     required List<coord.User> users,

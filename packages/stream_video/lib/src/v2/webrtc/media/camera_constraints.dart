@@ -1,33 +1,32 @@
-import '../../../../stream_video.dart';
 import '../../../platform_detector/platform_detector.dart';
 import '../model/rtc_video_parameters.dart';
+import 'constraints/facing_mode.dart';
 import 'video_constraints.dart';
 
 /// Options used when creating a video track that captures the camera.
 class CameraConstraints extends VideoConstraints {
   const CameraConstraints({
     super.deviceId,
-    this.cameraPosition = CameraPosition.front,
+    this.facingMode = FacingMode.user,
     super.maxFrameRate,
     super.params = RtcVideoParametersPresets.h720_169,
   });
 
   CameraConstraints.from({required VideoConstraints constraints})
-      : cameraPosition = CameraPosition.front,
+      : facingMode = FacingMode.user,
         super(
-          deviceId: constraints.deviceId,
-          maxFrameRate: constraints.maxFrameRate,
-          params: constraints.params,
-        );
+        deviceId: constraints.deviceId,
+        maxFrameRate: constraints.maxFrameRate,
+        params: constraints.params,
+      );
 
-  final CameraPosition cameraPosition;
+  final FacingMode facingMode;
 
   @override
   Map<String, dynamic> toMap() {
     final constraints = <String, dynamic>{
       ...params.toMediaConstraintsMap(),
-      'facingMode':
-          cameraPosition == CameraPosition.front ? 'user' : 'environment',
+      'facingMode': facingMode.name,
     };
     if (deviceId != null) {
       if (CurrentPlatform.isWeb) {
@@ -50,7 +49,7 @@ class CameraConstraints extends VideoConstraints {
   @override
   CameraConstraints copyWith({
     RtcVideoParameters? params,
-    CameraPosition? cameraPosition,
+    FacingMode? facingMode,
     String? deviceId,
     double? maxFrameRate,
   }) =>
