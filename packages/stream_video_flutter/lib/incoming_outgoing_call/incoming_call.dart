@@ -42,7 +42,7 @@ class StreamIncomingCall extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final streamChatTheme = StreamVideoTheme.of(context);
-    final theme = this.theme ?? streamChatTheme.outgoingCallTheme;
+    final theme = this.theme ?? streamChatTheme.incomingCallTheme;
 
     return CallBackground(
       participants: users,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../stream_video_flutter.dart';
 
 /// {@template callParticipantsBuilder}
 /// Builder used to create a custom participants info screen.
@@ -88,14 +89,4 @@ enum CallState {
   onCall,
   incoming,
   outgoing,
-}
-
-/// Delete this class one the final implementation if done.
-class MockIncomingCallView extends StatelessWidget {
-  const MockIncomingCallView({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Text("This screen is not implemented yet.");
-  }
 }
