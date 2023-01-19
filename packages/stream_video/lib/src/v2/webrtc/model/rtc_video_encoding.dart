@@ -35,7 +35,7 @@ class RtcVideoEncoding
 }
 
 /// Convenience extension for [RtcVideoEncoding].
-extension VideoEncodingExt on RtcVideoEncoding {
+extension RtcVideoEncodingExt on RtcVideoEncoding {
   rtc.RTCRtpEncoding toRTCRtpEncoding({
     String? rid,
     double? scaleResolutionDownBy = 1.0,
