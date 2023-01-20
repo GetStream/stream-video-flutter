@@ -52,6 +52,7 @@ import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
 import '../call_settings.dart';
 import 'call_session.dart';
+import 'call_session_impl.dart';
 import 'call_session_config.dart';
 
 class CallSessionFactory {
@@ -76,7 +77,7 @@ class CallSessionFactory {
       sfuToken: credentials.sfuToken,
       rtcConfig: rtcConfig,
     );
-    return CallSession(
+    return CallSessionImpl(
       currentUserId: currentUserId,
       callCid: callCid,
       sessionId: sessionId,

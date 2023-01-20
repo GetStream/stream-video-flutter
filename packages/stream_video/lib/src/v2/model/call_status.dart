@@ -1,3 +1,8 @@
+import 'package:flutter/cupertino.dart';
+
+import 'drop_reason.dart';
+
+@immutable
 abstract class CallStatus {
   const CallStatus();
 
@@ -10,9 +15,9 @@ abstract class CallStatus {
   }
 
   factory CallStatus.outgoing({
-    bool acceptedByOther = false,
+    bool acceptedByCallee = false,
   }) {
-    return CallStatusOutgoing(acceptedByOther: acceptedByOther);
+    return CallStatusOutgoing(acceptedByCallee: acceptedByCallee);
   }
 
   factory CallStatus.incoming({
@@ -22,21 +27,27 @@ abstract class CallStatus {
   }
 
   factory CallStatus.connecting() {
-    return const CallStatusConnecting();
+    return CallStatusConnecting();
   }
 
   factory CallStatus.connected() {
-    return const CallStatusConnected();
+    return CallStatusConnected();
   }
 
-  factory CallStatus.drop() {
-    return const CallStatusDrop();
+  factory CallStatus.drop(DropReason reason) {
+    return CallStatusDrop(reason: reason);
   }
+
+  bool get isIdle => this is CallStatusIdle;
+
+  bool get isActive => this is CallStatusActive;
 
   bool get isJoinable => this is CallStatusJoinable;
-}
 
-abstract class CallStatusJoinable implements CallStatus {}
+  bool get isConnecting => this is CallStatusConnecting;
+
+  bool get isConnected => this is CallStatusConnected;
+}
 
 class CallStatusIdle extends CallStatus {
   factory CallStatusIdle() {
@@ -50,7 +61,15 @@ class CallStatusIdle extends CallStatus {
   }
 }
 
-class CallStatusInitialized extends CallStatus implements CallStatusJoinable {
+abstract class CallStatusActive extends CallStatus {
+  const CallStatusActive();
+}
+
+abstract class CallStatusJoinable extends CallStatusActive {
+  const CallStatusJoinable();
+}
+
+class CallStatusInitialized extends CallStatusJoinable {
   factory CallStatusInitialized() {
     return _instance;
   }
@@ -63,18 +82,18 @@ class CallStatusInitialized extends CallStatus implements CallStatusJoinable {
   }
 }
 
-class CallStatusOutgoing extends CallStatus implements CallStatusJoinable {
-  const CallStatusOutgoing({required this.acceptedByOther});
+class CallStatusOutgoing extends CallStatusJoinable {
+  const CallStatusOutgoing({required this.acceptedByCallee});
 
-  final bool acceptedByOther;
+  final bool acceptedByCallee;
 
   @override
   String toString() {
-    return 'Outgoing{acceptedByOther: $acceptedByOther}';
+    return 'Outgoing{acceptedByCallee: $acceptedByCallee}';
   }
 }
 
-class CallStatusIncoming extends CallStatus with CallStatusJoinable {
+class CallStatusIncoming extends CallStatusJoinable {
   const CallStatusIncoming({required this.acceptedByMe});
 
   final bool acceptedByMe;
@@ -85,16 +104,26 @@ class CallStatusIncoming extends CallStatus with CallStatusJoinable {
   }
 }
 
-class CallStatusConnecting extends CallStatus {
-  const CallStatusConnecting();
+class CallStatusConnecting extends CallStatusActive {
+  factory CallStatusConnecting() {
+    return _instance;
+  }
+  const CallStatusConnecting._internal();
+  static const CallStatusConnecting _instance =
+      CallStatusConnecting._internal();
+
   @override
   String toString() {
     return 'Connecting';
   }
 }
 
-class CallStatusConnected extends CallStatus {
-  const CallStatusConnected();
+class CallStatusConnected extends CallStatusActive {
+  factory CallStatusConnected() {
+    return _instance;
+  }
+  const CallStatusConnected._internal();
+  static const CallStatusConnected _instance = CallStatusConnected._internal();
   @override
   String toString() {
     return 'Connected';
@@ -102,7 +131,9 @@ class CallStatusConnected extends CallStatus {
 }
 
 class CallStatusDrop extends CallStatus {
-  const CallStatusDrop();
+  const CallStatusDrop({required this.reason});
+
+  final DropReason reason;
   @override
   String toString() {
     return 'Drop';
