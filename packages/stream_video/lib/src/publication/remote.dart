@@ -89,7 +89,9 @@ class RemoteTrackPublication<T extends RemoteTrack>
         setVideoDimension(newVideoDimension);
       } else {
         // debounce sending to server
-        _setVideoDimensionDebounced([newVideoDimension]);
+        // TODO
+        // _setVideoDimensionDebounced([newVideoDimension]);
+        setVideoDimension(newVideoDimension);
       }
     }
   }

@@ -120,13 +120,15 @@ class _StreamActiveCallState extends State<StreamActiveCall> {
             participants: participants,
             enableFloatingView: widget.enableFloatingView ?? false,
           ),
-      bottomNavigationBar: StreamCallControlsBar.withDefaultOptions(
-        call: widget.call,
-        onHangup: () async {
-          await widget.call.disconnect();
-          widget.onHangUp?.call();
-        },
-      ),
+      bottomNavigationBar: widget.callControlsBuilder
+              ?.call(context, call, widget.call.localParticipant!) ??
+          StreamCallControlsBar.withDefaultOptions(
+            call: widget.call,
+            onHangup: () async {
+              await widget.call.disconnect();
+              widget.onHangUp?.call();
+            },
+          ),
     );
   }
 }
