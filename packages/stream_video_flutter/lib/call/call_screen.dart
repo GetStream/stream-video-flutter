@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../stream_video_flutter.dart';
 
 /// {@template callParticipantsBuilder}
 /// Builder used to create a custom participants info screen.
@@ -30,6 +31,7 @@ class CallScreen extends StatelessWidget {
   final VoidCallback onBackPressed;
   final VoidCallback onHangUp;
   final CallParticipantsInfoWidgetBuilder? participantsInfoWidgetBuilder;
+  final List<UserInfo> incomingCallUsers = [];
   final List<UserInfo> outgoingCallUsers = [];
 
   @override
@@ -51,18 +53,32 @@ class CallScreen extends StatelessWidget {
           },
         );
       case CallState.incoming:
-        return const MockIncomingCallView();
+        return StreamIncomingCall(
+          users: incomingCallUsers,
+          onAccept: () {
+            // TODO: Handle the action
+          },
+          onHangup: () {
+            // TODO: Handle the action
+          },
+          onMicrophoneTap: () {
+            // TODO: Handle the action
+          },
+          onCameraTap: () {
+            // TODO: Handle the action
+          },
+        );
       case CallState.outgoing:
         return StreamOutgoingCall(
           users: outgoingCallUsers,
           onHangup: () {
-            // TODO: Hande the action
+            // TODO: Handle the action
           },
           onMicrophoneTap: () {
-            // TODO: Hande the action
+            // TODO: Handle the action
           },
           onCameraTap: () {
-            // TODO: Hande the action
+            // TODO: Handle the action
           },
         );
     }
@@ -73,14 +89,4 @@ enum CallState {
   onCall,
   incoming,
   outgoing,
-}
-
-/// Delete this class one the final implementation if done.
-class MockIncomingCallView extends StatelessWidget {
-  const MockIncomingCallView({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Text("This screen is not implemented yet.");
-  }
 }

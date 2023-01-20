@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'stream_avatar_theme.dart';
 
 /// {@template participantsInfoTheme}
-/// A style that overrides the default appearance of the outgoing call widget.
+/// A style that overrides the default appearance of the incoming and outgoing call widget.
 /// {@endtemplate}
-class StreamOutgoingCallTheme with Diagnosticable {
+class StreamIncomingOutgoingCallTheme with Diagnosticable {
   /// {@macro outgoingCallTheme}
-  const StreamOutgoingCallTheme({
+  const StreamIncomingOutgoingCallTheme({
     this.singleParticipantAvatarTheme = const StreamAvatarTheme(
       initialsTextStyle: TextStyle(
         fontSize: 32,
@@ -68,14 +68,14 @@ class StreamOutgoingCallTheme with Diagnosticable {
   /// Text style for the calling label.
   final TextStyle callingLabelTextStyle;
 
-  StreamOutgoingCallTheme copyWith({
+  StreamIncomingOutgoingCallTheme copyWith({
     StreamAvatarTheme? singleParticipantAvatarTheme,
     StreamAvatarTheme? multipleParticipantAvatarTheme,
     TextStyle? singleParticipantTextStyle,
     TextStyle? multipleParticipantTextStyle,
     TextStyle? callingLabelTextStyle,
   }) {
-    return StreamOutgoingCallTheme(
+    return StreamIncomingOutgoingCallTheme(
       singleParticipantAvatarTheme:
           singleParticipantAvatarTheme ?? this.singleParticipantAvatarTheme,
       multipleParticipantAvatarTheme:
@@ -89,11 +89,11 @@ class StreamOutgoingCallTheme with Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two [StreamOutgoingCallTheme] themes.
+  /// Linearly interpolate between two [StreamIncomingOutgoingCallTheme] themes.
   ///
   /// All the properties must be non-null.
-  StreamOutgoingCallTheme lerp(StreamOutgoingCallTheme other, double t) {
-    return StreamOutgoingCallTheme(
+  StreamIncomingOutgoingCallTheme lerp(StreamIncomingOutgoingCallTheme other, double t) {
+    return StreamIncomingOutgoingCallTheme(
       singleParticipantAvatarTheme: singleParticipantAvatarTheme.lerp(
           other.singleParticipantAvatarTheme, t),
       multipleParticipantAvatarTheme: multipleParticipantAvatarTheme.lerp(
@@ -110,7 +110,7 @@ class StreamOutgoingCallTheme with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is StreamOutgoingCallTheme &&
+      other is StreamIncomingOutgoingCallTheme &&
           runtimeType == other.runtimeType &&
           singleParticipantAvatarTheme == other.singleParticipantAvatarTheme &&
           multipleParticipantAvatarTheme ==
@@ -127,8 +127,8 @@ class StreamOutgoingCallTheme with Diagnosticable {
       multipleParticipantTextStyle.hashCode ^
       callingLabelTextStyle.hashCode;
 
-  /// Merges one [StreamOutgoingCallTheme] with the another.
-  StreamOutgoingCallTheme merge(StreamOutgoingCallTheme? other) {
+  /// Merges one [StreamIncomingOutgoingCallTheme] with the another.
+  StreamIncomingOutgoingCallTheme merge(StreamIncomingOutgoingCallTheme? other) {
     if (other == null) return this;
     return copyWith(
       singleParticipantAvatarTheme: other.singleParticipantAvatarTheme,

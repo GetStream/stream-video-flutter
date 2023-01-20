@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart' hide TextTheme;
 
-import 'stream_outgoing_call_theme.dart';
+import 'stream_incoming_outgoing_call_theme.dart';
 import 'themes.dart';
 
 /// {@template streamVideoThemeData}
@@ -20,7 +20,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamParticipantInfoTheme? participantInfoTheme,
     StreamInvitableUserListTheme? invitableUserListTheme,
     StreamInvitableUserTheme? invitableUserTheme,
-    StreamOutgoingCallTheme? outgoingCallTheme,
+    StreamIncomingOutgoingCallTheme? incomingCallTheme,
+    StreamIncomingOutgoingCallTheme? outgoingCallTheme,
   }) {
     final isDark = brightness == Brightness.dark;
     textTheme ??=
@@ -44,6 +45,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       participantInfoTheme: participantInfoTheme,
       invitableUserListTheme: invitableUserListTheme,
       invitableUserTheme: invitableUserTheme,
+      incomingCallTheme: incomingCallTheme,
       outgoingCallTheme: outgoingCallTheme,
     );
 
@@ -70,6 +72,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.participantInfoTheme,
     required this.invitableUserListTheme,
     required this.invitableUserTheme,
+    required this.incomingCallTheme,
     required this.outgoingCallTheme,
   });
 
@@ -206,7 +209,51 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           ),
         ),
       ),
-      outgoingCallTheme: StreamOutgoingCallTheme(
+      incomingCallTheme: StreamIncomingOutgoingCallTheme(
+        singleParticipantAvatarTheme: StreamAvatarTheme(
+          initialsTextStyle: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: colorTheme.barsBg,
+          ),
+          constraints: const BoxConstraints(
+            minHeight: 160,
+            minWidth: 160,
+          ),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(80),
+          ),
+        ),
+        multipleParticipantAvatarTheme: StreamAvatarTheme(
+          initialsTextStyle: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: colorTheme.barsBg,
+          ),
+          constraints: const BoxConstraints(
+            minHeight: 80,
+            minWidth: 80,
+          ),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(40),
+          ),
+        ),
+        singleParticipantTextStyle: TextStyle(
+          fontSize: 28,
+          color: colorTheme.barsBg,
+          fontWeight: FontWeight.bold,
+        ),
+        multipleParticipantTextStyle: TextStyle(
+          fontSize: 20,
+          color: colorTheme.barsBg,
+        ),
+        callingLabelTextStyle: TextStyle(
+          fontSize: 20,
+          color: colorTheme.barsBg.withOpacity(0.6),
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      outgoingCallTheme: StreamIncomingOutgoingCallTheme(
         singleParticipantAvatarTheme: StreamAvatarTheme(
           initialsTextStyle: TextStyle(
             fontSize: 32,
@@ -296,7 +343,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   final StreamInvitableUserTheme invitableUserTheme;
 
   /// Theme for the outgoing call widget.
-  final StreamOutgoingCallTheme outgoingCallTheme;
+  final StreamIncomingOutgoingCallTheme incomingCallTheme;
+
+  /// Theme for the outgoing call widget.
+  final StreamIncomingOutgoingCallTheme outgoingCallTheme;
 
   /// Creates a copy of [StreamVideoTheme] with specified attributes
   /// overridden.
@@ -312,7 +362,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamParticipantsInfoTheme? participantsInfoTheme,
     StreamInvitableUserListTheme? invitableUserListTheme,
     StreamInvitableUserTheme? invitableUserTheme,
-    StreamOutgoingCallTheme? outgoingCallTheme,
+    StreamIncomingOutgoingCallTheme? incomingCallTheme,
+    StreamIncomingOutgoingCallTheme? outgoingCallTheme,
   }) =>
       StreamVideoTheme.raw(
         textTheme: this.textTheme.merge(textTheme),
@@ -332,6 +383,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         invitableUserListTheme:
             this.invitableUserListTheme.merge(invitableUserListTheme),
         invitableUserTheme: this.invitableUserTheme.merge(invitableUserTheme),
+        incomingCallTheme: this.incomingCallTheme.merge(incomingCallTheme),
         outgoingCallTheme: this.outgoingCallTheme.merge(outgoingCallTheme),
       );
 
@@ -352,6 +404,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       invitableUserListTheme:
           invitableUserListTheme.merge(other.invitableUserListTheme),
       invitableUserTheme: invitableUserTheme.merge(other.invitableUserTheme),
+      incomingCallTheme: incomingCallTheme.merge(other.incomingCallTheme),
       outgoingCallTheme: outgoingCallTheme.merge(other.outgoingCallTheme),
     );
   }
@@ -381,6 +434,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       invitableUserListTheme:
           invitableUserListTheme.lerp(other.invitableUserListTheme, t),
       invitableUserTheme: invitableUserTheme.lerp(other.invitableUserTheme, t),
+      incomingCallTheme: incomingCallTheme.lerp(other.incomingCallTheme, t),
       outgoingCallTheme: outgoingCallTheme.lerp(other.outgoingCallTheme, t),
     );
   }

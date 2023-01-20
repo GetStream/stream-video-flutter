@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import '../stream_video_flutter.dart';
-import '../theme/stream_outgoing_call_theme.dart';
+import '../theme/stream_incoming_outgoing_call_theme.dart';
 import 'call_background.dart';
 import 'calling_participants.dart';
 import 'outgoing_call_controls.dart';
@@ -33,7 +33,7 @@ class StreamOutgoingCall extends StatelessWidget {
   final VoidCallback onCameraTap;
 
   /// Theme for the outgoing call widget.
-  final StreamOutgoingCallTheme? theme;
+  final StreamIncomingOutgoingCallTheme? theme;
 
   @override
   Widget build(BuildContext context) {
@@ -42,35 +42,38 @@ class StreamOutgoingCall extends StatelessWidget {
 
     return CallBackground(
       participants: users,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Spacer(),
-          ParticipantAvatars(
-            participants: users,
-            singleParticipantAvatarTheme: theme.singleParticipantAvatarTheme,
-            multipleParticipantAvatarTheme:
-                theme.multipleParticipantAvatarTheme,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
-            child: CallingParticipants(
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Spacer(),
+            ParticipantAvatars(
               participants: users,
-              singleParticipantTextStyle: theme.singleParticipantTextStyle,
-              multipleParticipantTextStyle: theme.multipleParticipantTextStyle,
+              singleParticipantAvatarTheme: theme.singleParticipantAvatarTheme,
+              multipleParticipantAvatarTheme:
+                  theme.multipleParticipantAvatarTheme,
             ),
-          ),
-          Text(
-            'Calling…',
-            style: theme.callingLabelTextStyle,
-          ),
-          const Spacer(),
-          OutgoingCallControls(
-            onHangup: onHangup,
-            onMicrophoneTap: onMicrophoneTap,
-            onCameraTap: onCameraTap,
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
+              child: CallingParticipants(
+                participants: users,
+                singleParticipantTextStyle: theme.singleParticipantTextStyle,
+                multipleParticipantTextStyle: theme.multipleParticipantTextStyle,
+              ),
+            ),
+            Text(
+              'Calling…',
+              style: theme.callingLabelTextStyle,
+            ),
+            const Spacer(),
+            OutgoingCallControls(
+              onHangup: onHangup,
+              onMicrophoneTap: onMicrophoneTap,
+              onCameraTap: onCameraTap,
+            ),
+          ],
+        ),
       ),
     );
   }
