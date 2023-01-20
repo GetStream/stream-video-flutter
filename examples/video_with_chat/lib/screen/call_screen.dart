@@ -19,7 +19,7 @@ class CallScreen extends StatelessWidget {
       call: call,
       onBackPressed: () => _finishCall(context),
       onHangUp: () => _finishCall(context),
-      callControlsBuilder: (context, call, participant) {
+      callControlsBuilder: (context, call, participants) {
         return StreamCallControlsBar(
           options: customCallControlOptions(
               call: call,
