@@ -156,7 +156,9 @@ class StreamVideoV2Impl implements StreamVideoV2 {
           if (currentUserId == null) {
             return;
           }
+
           final callCreated = CallCreated(
+            callCid: StreamCallCid(cid: event.callCid),
             ringing: event.ringing,
             metadata: CallMetadata(
               details: event.details,
@@ -229,6 +231,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
       return result as Failure;
     }
     final finalResult = CallCreated(
+      callCid: cid,
       ringing: ringing,
       metadata: result.data.call.toCallMetadata(),
     );
@@ -276,6 +279,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     final finalResult = CallReceivedOrCreated(
       wasCreated: result.data.created,
       data: CallCreated(
+        callCid: cid,
         ringing: ringing,
         metadata: result.data.call.toCallMetadata(),
       ),

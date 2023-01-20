@@ -15,6 +15,7 @@ import 'package:webrtc_interface/src/rtc_session_description.dart';
 import '../../disposable.dart';
 import '../../logger/stream_logger.dart';
 import '../model/call_cid.dart';
+import '../sfu/data/models/sfu_track_type.dart';
 import 'media/media_constraints.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_codec.dart';
@@ -188,10 +189,16 @@ class RtcManager with Disposable {
     return await super.dispose();
   }
 
-  RtcTrack? getTrack(String trackId) {
+  RtcTrack? getTrack(String trackId, SfuTrackType trackType) {
     // TODO
     // publishedTracks
 
     return null;
+  }
+
+  List<RtcTrack> getTracks(String trackId) {
+    // TODO
+    // publishedTracks
+    return List.empty();
   }
 }

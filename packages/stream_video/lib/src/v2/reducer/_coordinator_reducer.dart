@@ -1,10 +1,14 @@
+import '../../logger/stream_logger.dart';
 import '../action/coordinator_action.dart';
 import '../call_state.dart';
 import '../coordinator/ws/coordinator_events.dart';
 import '../model/call_status.dart';
+import '../model/drop_reason.dart';
 
 class CoordinatorReducer {
   CoordinatorReducer(this.currentUserId);
+
+  late final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
   final String currentUserId;
 
@@ -29,26 +33,67 @@ class CoordinatorReducer {
     return state;
   }
 
-  CallStateV2 _reduceCallRejected(
-    CallStateV2 state,
-    CoordinatorCallRejectedEvent event,
-  ) {
-    // TODO implement
-    return state;
-  }
-
   CallStateV2 _reduceCallAccepted(
     CallStateV2 state,
     CoordinatorCallAcceptedEvent event,
   ) {
-    // TODO implement
-    return state.copyWith(status: CallStatus.connecting());
+    final status = state.status;
+    if (status is! CallStatusOutgoing) {
+      _logger.w(() => '[reduceCallAccepted] rejected (status is not Outgoing)');
+      return state;
+    }
+    if (!state.callParticipants.containsKey(event.sentByUserId)) {
+      _logger.w(() => '[reduceCallAccepted] rejected (accepted by non-Member)');
+      return state;
+    }
+    return state.copyWith(
+      status: CallStatus.outgoing(acceptedByCallee: true),
+    );
+  }
+
+  CallStateV2 _reduceCallRejected(
+    CallStateV2 state,
+    CoordinatorCallRejectedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(() => '[reduceCallRejected] rejected (status is not Active)');
+      return state;
+    }
+    if (!state.callParticipants.containsKey(event.sentByUserId)) {
+      _logger.w(() => '[reduceCallAccepted] rejected (accepted by non-Member)');
+      return state;
+    }
+    return state.copyWith(
+      status: CallStatus.drop(
+        DropReason.rejected(
+          byUserId: event.sentByUserId,
+        ),
+      ),
+    );
   }
 
   CallStateV2 _reduceCallCancelled(
     CallStateV2 state,
     CoordinatorCallCancelledEvent event,
   ) {
-    return state.copyWith(status: CallStatus.idle());
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(() => '[reduceCallCancelled] rejected (status is not Active)');
+      return state;
+    }
+    if (!state.callParticipants.containsKey(event.sentByUserId)) {
+      _logger.w(
+        () => '[reduceCallCancelled] rejected (accepted by non-Member)',
+      );
+      return state;
+    }
+    return state.copyWith(
+      status: CallStatus.drop(
+        DropReason.cancelled(
+          byUserId: event.sentByUserId,
+        ),
+      ),
+    );
   }
 }

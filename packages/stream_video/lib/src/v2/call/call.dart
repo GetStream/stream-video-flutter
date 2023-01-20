@@ -11,16 +11,19 @@ import 'package:stream_video/src/v2/utils/result.dart';
 
 import '../../../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
     as rpc;
-import '../action/update_call_action.dart';
+import '../action/call_control_action.dart';
 import '../model/call_cid.dart';
 import '../model/call_created.dart';
 import '../model/call_received_created.dart';
 import '../reducer/call_state_reducer.dart';
 import '../coordinator/coordinator_client.dart';
+import '../sfu/data/events/sfu_events.dart';
+import '../sfu/data/models/sfu_track_type.dart';
+import '../shared_emitter.dart';
 import '../utils/none.dart';
 import '../webrtc/rtc_track.dart';
 import 'call_settings.dart';
-import 'session/call_session.dart';
+import 'session/call_session_impl.dart';
 import 'session/call_session_factory.dart';
 
 /// Represents a [CallV2] in which you can connect to.
@@ -28,6 +31,8 @@ abstract class CallV2 {
   StreamCallCid get cid;
 
   StateEmitter<CallStateV2> get state;
+
+  SharedEmitter<SfuEventV2> get events;
 
   Future<Result<CallCreated>> dial({
     required List<String> participantIds,
@@ -55,7 +60,9 @@ abstract class CallV2 {
 
   Future<Result<None>> disconnect();
 
-  RtcTrack? getTrack(String trackId);
+  List<RtcTrack> getTracks(String trackId);
 
-  Future<Result<None>> apply(UpdateCallAction action);
+  RtcTrack? getTrack(String trackId, SfuTrackType trackType);
+
+  Future<Result<None>> apply(CallControlAction action);
 }
