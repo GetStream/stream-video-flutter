@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_video/stream_video.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart'
+    hide StreamUserAvatar;
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:video_with_chat/sample_user.dart';
 import 'package:video_with_chat/screen/home_screen.dart';
 
@@ -22,10 +23,7 @@ class ChooseUserScreen extends StatelessWidget {
           itemBuilder: (context, position) {
             var user = users[position];
             return ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.white,
-                backgroundImage: NetworkImage(user.image),
-              ),
+              leading: StreamUserAvatar(user: user.toVideoUser()),
               title: Text(user.name),
               onTap: () async {
                 _onLogin(context, user);

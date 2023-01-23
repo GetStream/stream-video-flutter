@@ -1,8 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_video/stream_video.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart'
+    hide StreamUserAvatar;
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:video_with_chat/app_config.dart';
 import 'package:video_with_chat/screen/call_screen.dart';
 
@@ -24,18 +25,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     chatClient = StreamChat.of(context).client;
+    final currentUser = videoClient.currentUser;
 
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: CircleAvatar(
-            backgroundColor: Colors.white,
-            backgroundImage: NetworkImage(
-              videoClient.currentUser!.imageUrl!,
-            ),
-          ),
-        ),
+            padding: const EdgeInsets.all(8.0),
+            child: currentUser != null
+                ? StreamUserAvatar(user: currentUser)
+                : SizedBox()),
         title: Text("Video with Chat"),
         actions: [
           IconButton(
@@ -105,6 +103,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
   }
 
   Future<void> _joinOrCreateCall(String callId) async {
