@@ -40,7 +40,7 @@ final _levelEmojiMapper = {
 const _defaultCoordinatorRpcUrl =
     'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc';
 const _defaultCoordinatorWsUrl =
-    'wss://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
+    'wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
 
 /// The client responsible for handling config and maintaining calls
 class StreamVideo with EventEmittable<CoordinatorEvent> {
@@ -133,6 +133,12 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
       _instance?.disconnectUser();
     }
     _instance = null;
+  }
+
+  /// Return if the singleton instance of the Stream Video Client has already
+  /// been initialized.
+  static bool isInitialized() {
+    return _instance != null;
   }
 
   final String apiKey;

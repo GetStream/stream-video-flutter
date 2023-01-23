@@ -15,7 +15,7 @@ typedef CallAppBarWidgetBuilder = PreferredSizeWidget Function(
 /// {@endtemplate}
 typedef CallParticipantsWidgetBuilder = Widget Function(
   BuildContext context,
-  List<Participant> participant,
+  List<Participant> participants,
 );
 
 /// {@template callControlsBuilder}
@@ -24,7 +24,7 @@ typedef CallParticipantsWidgetBuilder = Widget Function(
 typedef CallControlsWidgetBuilder = Widget Function(
   BuildContext context,
   Call call,
-  Participant participant,
+  List<Participant> participants,
 );
 
 /// Represents the UI in an active call that shows participants and their video,
@@ -41,6 +41,7 @@ class StreamActiveCall extends StatefulWidget {
     this.onBackPressed,
     this.onHangUp,
     this.onParticipantsTap,
+    this.enableFloatingView,
   });
 
   /// Represents a call.
@@ -63,6 +64,9 @@ class StreamActiveCall extends StatefulWidget {
 
   /// The action to perform when the participants button is tapped.
   final VoidCallback? onParticipantsTap;
+
+  /// Enable floating participant in the call
+  final bool? enableFloatingView;
 
   @override
   State<StreamActiveCall> createState() => _StreamActiveCallState();
@@ -112,18 +116,19 @@ class _StreamActiveCallState extends State<StreamActiveCall> {
             onParticipantsTap: widget.onParticipantsTap,
           ),
       body: widget.callParticipantsBuilder?.call(context, participants) ??
-          StreamCallParticipants(participants: participants),
-      bottomNavigationBar: StreamCallControlsBar(
-        options: [
-          ...defaultCallControlOptions(
-            participant: widget.call.localParticipant!,
-            onHangup: () async {
-              await widget.call.disconnect();
-              widget.onHangUp?.call();
-            },
+          StreamCallParticipants(
+            participants: participants,
+            enableFloatingView: widget.enableFloatingView ?? true,
           ),
-        ],
-      ),
+      bottomNavigationBar:
+          widget.callControlsBuilder?.call(context, call, participants) ??
+              StreamCallControlsBar.withDefaultOptions(
+                call: widget.call,
+                onHangup: () async {
+                  await widget.call.disconnect();
+                  widget.onHangUp?.call();
+                },
+              ),
     );
   }
 }
