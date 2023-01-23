@@ -17,7 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  var streamVideoClient = StreamVideo.instance;
+  final streamVideoClient = StreamVideo.instance;
   late final currentUser = streamVideoClient.currentUser!;
 
   final _callIdController = TextEditingController();

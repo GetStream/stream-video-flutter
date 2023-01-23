@@ -1,13 +1,12 @@
 import 'dart:convert';
 
-import 'package:dogfooding/main.dart';
-import 'package:dogfooding/src/utils/assets.dart';
 import 'package:dogfooding/src/home_screen.dart';
+import 'package:dogfooding/src/utils/assets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:stream_video/stream_video.dart';
 import 'package:http/http.dart' as http;
+import 'package:stream_video/stream_video.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -56,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final token = json.decode(response.body)['token'];
 
-    var streamVideoClient = StreamVideo.instance;
+    final streamVideoClient = StreamVideo.instance;
     await streamVideoClient.connectUser(
       user,
       token: Token(token),

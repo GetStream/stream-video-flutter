@@ -1,10 +1,8 @@
 import 'dart:convert';
-
-import 'package:example/main.dart';
-import 'package:example/src/login_screen.dart';
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:example/src/login_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_flutter/call/call_screen.dart';
 
@@ -18,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  var streamVideoClient = StreamVideo.instance;
+  final streamVideoClient = StreamVideo.instance;
   late final currentUser = streamVideoClient.currentUser!;
 
   final _callIdController = TextEditingController();

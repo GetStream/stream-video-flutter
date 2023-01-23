@@ -1,14 +1,18 @@
+import 'package:chat_with_video/sample_user.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
     hide StreamUserAvatar;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-import 'package:video_with_chat/sample_user.dart';
-import 'package:video_with_chat/screen/home_screen.dart';
 
 import '../app_config.dart';
 import '../user_mapper.dart';
+import 'channel_list_screen.dart';
 
 class ChooseUserScreen extends StatelessWidget {
+  const ChooseUserScreen({
+    Key? key,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final users = defaultUsers;
@@ -25,9 +29,7 @@ class ChooseUserScreen extends StatelessWidget {
             return ListTile(
               leading: StreamUserAvatar(user: user.toVideoUser()),
               title: Text(user.name),
-              onTap: () async {
-                _login(context, user);
-              },
+              onTap: () async => _login(context, user),
             );
           },
         ),
@@ -43,7 +45,7 @@ class ChooseUserScreen extends StatelessWidget {
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => HomeScreen()),
+      MaterialPageRoute(builder: (context) => ChannelListScreen()),
     );
   }
 

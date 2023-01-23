@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:example/src/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:http/http.dart' as http;
 
 final List<LoginInfo> users = [
   LoginInfo(
@@ -35,7 +32,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   Future<void> _onLogin(LoginInfo info) async {
-    var streamVideoClient = StreamVideo.instance;
+    final streamVideoClient = StreamVideo.instance;
     await streamVideoClient.connectUser(
       info.userInfo,
       token: Token(info.token),
