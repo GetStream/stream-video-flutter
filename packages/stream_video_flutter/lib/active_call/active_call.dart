@@ -15,7 +15,7 @@ typedef CallAppBarWidgetBuilder = PreferredSizeWidget Function(
 /// {@endtemplate}
 typedef CallParticipantsWidgetBuilder = Widget Function(
   BuildContext context,
-  List<Participant> participant,
+  List<Participant> participants,
 );
 
 /// {@template callControlsBuilder}
@@ -24,7 +24,7 @@ typedef CallParticipantsWidgetBuilder = Widget Function(
 typedef CallControlsWidgetBuilder = Widget Function(
   BuildContext context,
   Call call,
-  Participant participant,
+  List<Participant> participants,
 );
 
 /// Represents the UI in an active call that shows participants and their video,
@@ -118,15 +118,17 @@ class _StreamActiveCallState extends State<StreamActiveCall> {
       body: widget.callParticipantsBuilder?.call(context, participants) ??
           StreamCallParticipants(
             participants: participants,
-            enableFloatingView: widget.enableFloatingView ?? false,
+            enableFloatingView: widget.enableFloatingView ?? true,
           ),
-      bottomNavigationBar: StreamCallControlsBar.withDefaultOptions(
-        call: widget.call,
-        onHangup: () async {
-          await widget.call.disconnect();
-          widget.onHangUp?.call();
-        },
-      ),
+      bottomNavigationBar:
+          widget.callControlsBuilder?.call(context, call, participants) ??
+              StreamCallControlsBar.withDefaultOptions(
+                call: widget.call,
+                onHangup: () async {
+                  await widget.call.disconnect();
+                  widget.onHangUp?.call();
+                },
+              ),
     );
   }
 }
