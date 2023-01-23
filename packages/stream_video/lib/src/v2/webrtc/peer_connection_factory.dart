@@ -3,6 +3,8 @@ import 'package:stream_video/src/types/other.dart';
 import 'package:stream_video/src/v2/webrtc/peer_connection.dart';
 import 'package:stream_video/src/v2/webrtc/peer_type.dart';
 
+import '../model/call_cid.dart';
+
 class StreamPeerConnectionFactory {
   const StreamPeerConnectionFactory({
     required this.sessionId,
@@ -10,7 +12,7 @@ class StreamPeerConnectionFactory {
   });
 
   final String sessionId;
-  final String callCid;
+  final StreamCallCid callCid;
 
   Future<StreamPeerConnection> makeSubscriber(
     RTCConfiguration configuration, [

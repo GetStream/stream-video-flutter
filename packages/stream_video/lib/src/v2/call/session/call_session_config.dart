@@ -2,7 +2,7 @@ import '../../../types/other.dart';
 import '../call_settings.dart';
 
 class CallSessionConfig {
-  CallSessionConfig({
+  const CallSessionConfig({
     required this.sfuToken,
     required this.sfuUrl,
     required this.rtcConfig,

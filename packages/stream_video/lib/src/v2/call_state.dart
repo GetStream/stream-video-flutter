@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 import 'call_participant_state.dart';
 
 import 'coordinator/models/coordinator_models.dart';
+import 'model/call_cid.dart';
 import 'model/call_status.dart';
 
 /// TODO - Class that holds any information about the call, including participants
@@ -9,14 +10,27 @@ import 'model/call_status.dart';
 class CallStateV2 {
   factory CallStateV2({
     required String currentUserId,
-    required String callCid,
+    required StreamCallCid callCid,
+  }) {
+    return CallStateV2._(
+      currentUserId: currentUserId,
+      callCid: callCid,
+      sessionId: '',
+      status: CallStatus.idle(),
+      callParticipants: Map.unmodifiable(const {}),
+    );
+  }
+  factory CallStateV2.fromMetadata({
+    required String currentUserId,
+    required StreamCallCid callCid,
+    required bool ringing,
     required CallMetadata metadata,
   }) {
     return CallStateV2._(
       currentUserId: currentUserId,
       callCid: callCid,
       sessionId: '',
-      status: metadata.toCallStatus(),
+      status: metadata.toCallStatus(currentUserId, ringing),
       callParticipants: Map.unmodifiable(
         metadata.toCallParticipants(
           currentUserId,
@@ -35,7 +49,7 @@ class CallStateV2 {
   });
 
   final String currentUserId;
-  final String callCid;
+  final StreamCallCid callCid;
   final String sessionId;
   final CallStatus status;
   final Map<String, CallParticipantStateV2> callParticipants;
@@ -44,7 +58,7 @@ class CallStateV2 {
   /// with the new values.
   CallStateV2 copyWith({
     String? currentUserId,
-    String? callCid,
+    StreamCallCid? callCid,
     String? sessionId,
     CallStatus? status,
     Map<String, CallParticipantStateV2>? callParticipants,
@@ -83,13 +97,14 @@ class CallStateV2 {
 }
 
 extension on CallMetadata {
-  CallStatus toCallStatus() {
+  CallStatus toCallStatus(String currentUserId, bool ringing) {
+    final createdByMe = currentUserId == info.createdByUserId;
     if (createdByMe && ringing) {
-      return CallStatus.outgoing;
+      return CallStatus.outgoing();
     } else if (!createdByMe && ringing) {
-      return CallStatus.incoming;
+      return CallStatus.incoming();
     } else {
-      return CallStatus.idle;
+      return CallStatus.idle();
     }
   }
 

@@ -1,4 +1,5 @@
 import '../../types/other.dart';
+import '../model/call_cid.dart';
 import 'peer_connection_factory.dart';
 import 'rtc_manager.dart';
 
@@ -14,7 +15,7 @@ class RtcManagerFactory {
         );
 
   final String sessionId;
-  final String callCid;
+  final StreamCallCid callCid;
   final RTCConfiguration configuration;
   final StreamPeerConnectionFactory pcFactory;
   final Map<String, dynamic> mediaConstraints;

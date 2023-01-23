@@ -1,37 +1,28 @@
 import 'dart:async';
 
 import 'package:logging/logging.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
-import 'package:stream_video/src/call/call.dart';
-import 'package:stream_video/src/coordinator_client.dart';
-import 'package:stream_video/src/coordinator_ws.dart';
-import 'package:stream_video/src/core/rx_controller.dart';
-import 'package:stream_video/src/core/video_error.dart';
-import 'package:stream_video/src/event_emitter.dart';
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/latency_service/latency.dart';
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/models/user_info.dart';
-import 'package:stream_video/src/options.dart';
-import 'package:stream_video/src/token/token.dart';
-import 'package:stream_video/src/token/token_manager.dart';
-import 'package:stream_video/src/v2/coordinator/ws/coordinator_ws.dart';
-import 'package:stream_video/src/v2/shared_emitter.dart';
-import 'package:synchronized/synchronized.dart';
-import 'package:stream_video/src/v2/coordinator/ws/mapper_extensions.dart';
 
-import '../../protobuf/video/coordinator/event_v1/event.pb.dart';
-import 'call/call.dart';
-import 'call/call_impl.dart';
+import '../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
+    as rpc;
+import '../logger/logger.dart';
+import '../logger/stream_logger.dart';
+import '../models/user_info.dart';
+import '../token/token.dart';
+import '../token/token_manager.dart';
 import 'coordinator/coordinator_client.dart';
 import 'coordinator/models/coordinator_models.dart';
 import 'coordinator/ws/coordinator_events.dart';
-import 'coordinator/ws/coordinator_socket_listener.dart';
+import 'coordinator/ws/coordinator_ws.dart';
+import 'coordinator/ws/mapper_extensions.dart';
 import 'errors/video_error.dart';
+import 'model/call_cid.dart';
+import 'model/call_created.dart';
+import 'model/call_joined.dart';
+import 'model/call_received_created.dart';
+import 'shared_emitter.dart';
 import 'state_emitter.dart';
 import 'stream_video_v2.dart';
+import 'utils/none.dart';
 import 'utils/result.dart';
 import 'utils/result_converters.dart';
 
@@ -99,6 +90,8 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     );
   }
 
+  final _logger = taggedLogger(tag: 'SV:Client');
+
   final String apiKey;
   final String coordinatorRpcUrl;
   final String coordinatorWsUrl;
@@ -112,9 +105,6 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   @override
   UserInfo? get currentUser => _state.currentUser.value;
 
-  @override
-  CallV2? get activeCall => _state.activeCall;
-
   CoordinatorWebSocketV2? _ws;
   StreamSubscription<CoordinatorEventV2>? _wsSubscription;
 
@@ -122,7 +112,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   SharedEmitter<CoordinatorEventV2> get events => _events;
   final _events = MutableSharedEmitterImpl<CoordinatorEventV2>();
 
-  Function(CallV2)? onCallCreated;
+  Function(CallCreated)? onCallCreated;
 
   /// Default log handler function for the [StreamVideoV2Impl] logger.
   static void defaultLogHandler(LogRecord record) {
@@ -147,7 +137,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     logger.info('setting user : ${user.id}');
 
     _state.currentUser.value = user;
-    _tokenManager.setTokenOrProvider(
+    await _tokenManager.setTokenOrProvider(
       user.id,
       token: token,
       provider: provider,
@@ -166,33 +156,17 @@ class StreamVideoV2Impl implements StreamVideoV2 {
           if (currentUserId == null) {
             return;
           }
-          final metadata = CallMetadata(
-            createdByMe: event.info.createdByUserId == currentUserId,
+
+          final callCreated = CallCreated(
+            callCid: StreamCallCid(cid: event.callCid),
             ringing: event.ringing,
-            details: event.details,
-            info: event.info,
+            metadata: CallMetadata(
+              details: event.details,
+              info: event.info,
+            ),
           );
-          final call = CallV2Impl(
-            currentUserId: currentUserId,
-            callCid: event.callCid,
-            coordinatorClient: _client,
-            coordinatorWS: _ws!,
-            metadata: metadata,
-          );
-          onCallCreated?.call(call);
-          if (event.ringing) {
-            _state.activeCall = call;
-          }
+          onCallCreated?.call(callCreated);
           _events.emit(event);
-        } else if (event is CoordinatorCallAcceptedEvent) {
-          // TODO implement
-          final call = _state.activeCall;
-        } else if (event is CoordinatorCallRejectedEvent) {
-          // TODO implement
-          final call = _state.activeCall;
-        } else if (event is CoordinatorCallCancelledEvent) {
-          // TODO implement
-          final call = _state.activeCall;
         }
       });
 
@@ -221,25 +195,29 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   }
 
   @override
-  Future<Result<CallV2>> createCall({
-    required String type,
-    required String id,
+  Future<Result<CallCreated>> createCall({
+    required StreamCallCid cid,
     List<String> participantIds = const [],
     bool ringing = false,
   }) async {
+    _logger.d(
+      () => '[createCall] cid: $cid, ringing: $ringing, '
+          'participantIds: $participantIds',
+    );
     final currentUserId = _state.currentUser.value?.id;
     if (currentUserId == null) {
+      _logger.e(() => '[createCall] failed (no userId)');
       return Failure(
         const VideoError(message: '[createCall] failed; no user_id found'),
       );
     }
     final result = await _client.createCall(
-      CreateCallRequest(
-        id: id,
-        type: type,
-        input: CreateCallInput(
+      rpc.CreateCallRequest(
+        type: cid.type,
+        id: cid.id,
+        input: rpc.CreateCallInput(
           members: participantIds.map((id) {
-            return MemberInput(
+            return rpc.MemberInput(
               userId: id,
               role: 'admin',
             );
@@ -248,45 +226,43 @@ class StreamVideoV2Impl implements StreamVideoV2 {
         ),
       ),
     );
-    if (result is! Success<CreateCallResponse>) {
+    if (result is! Success<rpc.CreateCallResponse>) {
+      _logger.e(() => '[createCall] failed: $result');
       return result as Failure;
     }
-    final coordCall = result.data.call;
-    final metadata = coordCall.toCallMetadata(ringing: ringing, created: true);
-
-    final call = CallV2Impl(
-      currentUserId: currentUserId,
-      callCid: coordCall.call.callCid,
-      coordinatorClient: _client,
-      coordinatorWS: _ws!,
-      metadata: metadata,
+    final finalResult = CallCreated(
+      callCid: cid,
+      ringing: ringing,
+      metadata: result.data.call.toCallMetadata(),
     );
-    if (ringing) {
-      _state.activeCall = call;
-    }
-    return call.toSuccess();
+    _logger.v(() => '[createCall] completed: $finalResult');
+    return finalResult.toSuccess();
   }
 
   @override
-  Future<Result<CallV2>> getOrCreateCall({
-    required String type,
-    required String id,
+  Future<Result<CallReceivedOrCreated>> getOrCreateCall({
+    required StreamCallCid cid,
     List<String> participantIds = const [],
     bool ringing = false,
   }) async {
+    _logger.d(
+      () => '[getOrCreateCall] cid: $cid, ringing: $ringing, '
+          'participantIds: $participantIds',
+    );
     final currentUserId = _state.currentUser.value?.id;
     if (currentUserId == null) {
+      _logger.e(() => '[getOrCreateCall] failed (no userId)');
       return Failure(
         const VideoError(message: '[createCall] failed; no user_id found'),
       );
     }
     final result = await _client.getOrCreateCall(
-      GetOrCreateCallRequest(
-        id: id,
-        type: type,
-        input: CreateCallInput(
+      rpc.GetOrCreateCallRequest(
+        id: cid.id,
+        type: cid.type,
+        input: rpc.CreateCallInput(
           members: participantIds.map((id) {
-            return MemberInput(
+            return rpc.MemberInput(
               userId: id,
               role: 'admin',
             );
@@ -295,73 +271,132 @@ class StreamVideoV2Impl implements StreamVideoV2 {
         ),
       ),
     );
-    if (result is! Success<GetOrCreateCallResponse>) {
+    if (result is! Success<rpc.GetOrCreateCallResponse>) {
+      _logger.e(() => '[getOrCreateCall] failed: $result');
       return result as Failure;
     }
-    final coordCall = result.data.call;
-    final created = result.data.created;
-    final metadata = coordCall.toCallMetadata(
-      ringing: ringing,
-      created: created,
-    );
 
-    final call = CallV2Impl(
-      currentUserId: currentUserId,
-      callCid: coordCall.call.callCid,
-      coordinatorClient: _client,
-      coordinatorWS: _ws!,
-      metadata: metadata,
+    final finalResult = CallReceivedOrCreated(
+      wasCreated: result.data.created,
+      data: CallCreated(
+        callCid: cid,
+        ringing: ringing,
+        metadata: result.data.call.toCallMetadata(),
+      ),
     );
-    if (ringing) {
-      _state.activeCall = call;
-    }
-
-    return call.toSuccess();
+    _logger.v(() => '[getOrCreateCall] completed: $finalResult');
+    return finalResult.toSuccess();
   }
 
-  /*void updateCallStateConnected(Call call) {
-    _state.activeCall.value = call;
-
-    // Updating ws about the current call.
-    final callInfo = CallInfo(callId: call.callId, callType: call.callType);
-    _ws?.callInfo = callInfo;
-  }*/
-
-  /*void updateCallStateDisconnected(Call call) {
-    _state.activeCall.value = null;
-
-    // Updating ws about the current call.
-    _ws?.callInfo = null;
-  }*/
-
-  Future<Result<SendEventResponse>> sendEvent({
-    required String callCid,
-    required UserEventType eventType,
+  @override
+  Future<Result<CallJoined>> joinCall({
+    required StreamCallCid cid,
   }) async {
-    final result = _client.sendUserEvent(
-      SendEventRequest(
-        callCid: callCid,
+    _logger.d(() => '[joinCall] cid: $cid');
+    final joinResult = await _client.joinCall(
+      rpc.JoinCallRequest(type: cid.type, id: cid.id),
+    );
+    if (joinResult is! Success<rpc.JoinCallResponse>) {
+      _logger.e(() => '[joinCall] join failed: $joinResult');
+      return joinResult as Failure;
+    }
+    final metadata = joinResult.data.call.toCallMetadata();
+    _logger.v(() => '[joinCall] joinedMetadata: $metadata');
+    final edgeResult = await _client.findBestCallEdgeServer(
+      callCid: cid.value,
+      edges: joinResult.data.edges,
+    );
+    if (edgeResult is! Success<rpc.GetCallEdgeServerResponse>) {
+      _logger.e(() => '[joinCall] edge finding failed: $joinResult');
+      return joinResult as Failure;
+    }
+    final result = CallJoined(
+      metadata: edgeResult.data.call.toCallMetadata(),
+      credentials: edgeResult.data.credentials.toCallCredentials(),
+    );
+    _logger.v(() => '[joinCall] completed: $result');
+    return result.toSuccess();
+  }
+
+  @override
+  Future<Result<None>> acceptCall({
+    required StreamCallCid cid,
+  }) async {
+    return _sendEvent(
+      cid: cid,
+      eventType: rpc.UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL,
+    );
+  }
+
+  @override
+  Future<Result<None>> rejectCall({
+    required StreamCallCid cid,
+  }) async {
+    return _sendEvent(
+      cid: cid,
+      eventType: rpc.UserEventType.USER_EVENT_TYPE_REJECTED_CALL,
+    );
+  }
+
+  @override
+  Future<Result<None>> cancelCall({
+    required StreamCallCid cid,
+  }) async {
+    return _sendEvent(
+      cid: cid,
+      eventType: rpc.UserEventType.USER_EVENT_TYPE_CANCELLED_CALL,
+    );
+  }
+
+  Future<Result<None>> _sendEvent({
+    required StreamCallCid cid,
+    required rpc.UserEventType eventType,
+  }) async {
+    final result = await _client.sendUserEvent(
+      rpc.SendEventRequest(
+        callCid: cid.value,
         eventType: eventType,
       ),
     );
-
-    return result;
+    if (result is Failure) {
+      return result;
+    }
+    return None().toSuccess();
   }
 
-  Future<Result<SendCustomEventResponse>> sendCustomEvent({
-    required String callCid,
+  @override
+  Future<Result<None>> sendCustomEvent({
+    required StreamCallCid cid,
     required List<int> dataJson,
     String? eventType,
   }) async {
-    final response = _client.sendCustomEvent(
-      SendCustomEventRequest(
-        callCid: callCid,
+    final result = await _client.sendCustomEvent(
+      rpc.SendCustomEventRequest(
+        callCid: cid.value,
         dataJson: dataJson,
         type: eventType,
       ),
     );
+    if (result is Failure) {
+      return result;
+    }
+    return None().toSuccess();
+  }
 
-    return response;
+  @override
+  Future<Result<List<CallUser>>> queryUsers({
+    required Set<String> userIds,
+  }) async {
+    final mqJson = {'id': userIds};
+    final request = rpc.QueryUsersRequest(
+      // TODO fix proto
+      mqJson: [1],
+    );
+    final usersResult = await _client.queryUsers(request);
+    if (usersResult is! Success<rpc.QueryUsersResponse>) {
+      return usersResult as Failure;
+    }
+    return usersResult.data.users.toCallUsers().toSuccess();
   }
 }
 
@@ -370,25 +405,7 @@ class _StreamVideoStateV2 {
     null,
   );
 
-  final MutableStateEmitter<CallV2?> _activeCall = MutableStateEmitterImpl(
-    null,
-  );
-
-  CallV2? get activeCall {
-    return _activeCall.value;
-  }
-
-  set activeCall(CallV2? value) {
-    if (value != null) {
-      value.state.listen((value) {
-        activeCall = null;
-      });
-    }
-    _activeCall.value = value;
-  }
-
   Future<void> close() async {
     await currentUser.close();
-    await _activeCall.close();
   }
 }

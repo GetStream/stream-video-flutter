@@ -191,10 +191,14 @@ class SfuWebSocket extends StreamWebSocket
 
   void _notifyEvent(SfuEventV2 event) {
     _events.emit(event);
-    _eventListeners.forEach((listener) => listener.onSfuEvent(event));
+    for (final listener in _eventListeners) {
+      listener.onSfuEvent(event);
+    }
   }
 
   void _notifyError(VideoError error) {
-    _eventListeners.forEach((listener) => listener.onSfuError(error));
+    for (final listener in _eventListeners) {
+      listener.onSfuError(error);
+    }
   }
 }

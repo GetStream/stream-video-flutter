@@ -1,10 +1,6 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
-import '../../disposable.dart';
-import '../../logger/stream_logger.dart';
-import '../errors/video_error.dart';
-import '../errors/video_error_composer.dart';
-import '../utils/result.dart';
+import '../model/call_cid.dart';
 import 'model/rtc_tracks_info.dart';
 import 'peer_type.dart';
 
@@ -49,7 +45,7 @@ class StreamPeerConnection extends Disposable {
   final _logger = taggedLogger(tag: 'SV:PeerConnection');
 
   final String sessionId;
-  final String callCid;
+  final StreamCallCid callCid;
   final StreamPeerType type;
   final rtc.RTCPeerConnection pc;
 

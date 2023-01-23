@@ -1,15 +1,15 @@
-import '../action/user_action.dart';
+import '../action/call_control_action.dart';
 import '../call_state.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 
-class UserReducer {
-  UserReducer(this.currentUserId);
+class CallControlReducer {
+  CallControlReducer(this.currentUserId);
 
   final String currentUserId;
 
   CallStateV2 reduce(
     CallStateV2 state,
-    UserAction action,
+    CallControlAction action,
   ) {
     if (action is SetCameraEnabled) {
       _reduceCameraEnabled(state, action);

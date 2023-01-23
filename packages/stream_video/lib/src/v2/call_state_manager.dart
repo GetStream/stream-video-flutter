@@ -1,41 +1,58 @@
 import 'package:collection/collection.dart';
-import 'package:rxdart/rxdart.dart';
 
-import '../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
-    as rpc;
-import '../../protobuf/video/coordinator/user_v1/user.pb.dart' as coord_users;
+import '../logger/stream_logger.dart';
 import 'action/action.dart';
+import 'action/call_control_action.dart';
 import 'action/coordinator_action.dart';
+import 'action/lifecycle_action.dart';
 import 'action/sfu_action.dart';
-import 'action/user_action.dart';
 import 'call_state.dart';
-import 'coordinator/coordinator_client.dart';
+import 'coordinator/models/coordinator_models.dart';
 import 'coordinator/ws/coordinator_events.dart';
+import 'errors/video_error.dart';
+import 'model/call_created.dart';
+import 'model/call_joined.dart';
+import 'model/call_received_created.dart';
 import 'reducer/call_state_reducer.dart';
 import 'sfu/data/events/sfu_events.dart';
 import 'state_emitter.dart';
+import 'stream_video_v2.dart';
 import 'utils/result.dart';
 
 abstract class CallStateManager {
   const CallStateManager();
   StateEmitter<CallStateV2> get state;
+  Future<void> onCallCreated(CallCreated data);
+  Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data);
+  Future<void> onCallAccepted();
+  Future<void> onCallRejected();
+  Future<void> onCallCancelled();
   Future<void> onConnect();
+  Future<void> onJoined(CallJoined data);
+  Future<void> onSessionStart(String sessionId);
+  Future<void> onConnected();
   Future<void> onDisconnect();
-  Future<void> onUserAction(UserAction action);
+  Future<void> onCallControlAction(CallControlAction action);
   Future<void> onSfuEvent(SfuEventV2 event);
   Future<void> onCoordinatorEvent(CoordinatorEventV2 event);
+
+  Future<void> onWaitingTimeout(Duration dropTimeout);
+
+  Future<void> onJoinFailed(VideoError error);
 }
 
 class CallStateManagerImpl extends CallStateManager {
   CallStateManagerImpl({
     required String currentUserId,
     required CallStateV2 initialState,
-    required CoordinatorClientV2 coordinatorClient,
-  })  : _coordinatorClient = coordinatorClient,
+    required StreamVideoV2 streamVideo,
+  })  : _streamVideo = streamVideo,
         _state = MutableStateEmitterImpl(initialState),
         _stateReducer = CallStateReducer(currentUserId);
 
-  final CoordinatorClientV2 _coordinatorClient;
+  late final _logger = taggedLogger(tag: 'SV:StateManager');
+
+  final StreamVideoV2 _streamVideo;
   final CallStateReducer _stateReducer;
   final MutableStateEmitter<CallStateV2> _state;
 
@@ -43,90 +60,136 @@ class CallStateManagerImpl extends CallStateManager {
   StateEmitter<CallStateV2> get state => _state;
 
   @override
-  Future<void> onUserAction(UserAction action) async {
-    // TODO implement
+  Future<void> onCallControlAction(CallControlAction action) async {
+    _logger.d(() => '[onUpdateCallAction] action: $action');
+    _postReduced(action);
+  }
+
+  @override
+  Future<void> onCallCreated(CallCreated data) async {
+    _logger.d(() => '[onCallCreated] data: $data');
+    _postReduced(CallCreatedAction(data: data));
+  }
+
+  @override
+  Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data) async {
+    _logger.d(() => '[onCallReceivedOrCreated] data: $data');
+    _postReduced(CallCreatedAction(data: data.data));
+  }
+
+  @override
+  Future<void> onCallAccepted() async {
+    _logger.d(() => '[onCallAccepted] no args');
+    _postReduced(const CallAcceptedAction());
+  }
+
+  @override
+  Future<void> onCallCancelled() async {
+    _logger.d(() => '[onCallCancelled] no args');
+    _postReduced(const CallCancelledAction());
+  }
+
+  @override
+  Future<void> onCallRejected() async {
+    _logger.d(() => '[onCallRejected] no args');
+    _postReduced(const CallRejectedAction());
+  }
+
+  @override
+  Future<void> onWaitingTimeout(Duration dropTimeout) async {
+    _logger.d(() => '[onWaitingTimeout] dropTimeout: $dropTimeout');
+    _postReduced(CallTimeoutAction(dropTimeout));
+  }
+
+  @override
+  Future<void> onJoinFailed(VideoError error) async {
+    _logger.e(() => '[onJoinFailed] error: $error');
+    _postReduced(CallJoinFailedAction(error));
   }
 
   @override
   Future<void> onConnect() async {
-    // TODO implement
+    _logger.d(() => '[onConnect] no args');
+    _postReduced(const CallConnectAction());
+  }
+
+  @override
+  Future<void> onJoined(CallJoined data) async {
+    _logger.d(() => '[onJoined] data: $data');
+    _postReduced(CallJoinedAction(data));
+  }
+
+  @override
+  Future<void> onSessionStart(String sessionId) async {
+    _logger.d(() => '[onSessionStart] sessionId: $sessionId');
+    _postReduced(CallSessionStartAction(sessionId: sessionId));
+  }
+
+  @override
+  Future<void> onConnected() async {
+    _logger.d(() => '[onConnected] no args');
+    _postReduced(const CallConnectedAction());
   }
 
   @override
   Future<void> onDisconnect() async {
-    // TODO implement
-    // drop state
+    _logger.d(() => '[onDisconnect] no args');
+    _postReduced(const CallDestroyedAction());
   }
 
   @override
   Future<void> onSfuEvent(SfuEventV2 event) async {
+    if (event is SfuHealthCheckResponseEvent) {
+      return;
+    }
+    _logger.d(() => '[onSfuEvent] event: $event');
     if (event is SfuJoinResponseEvent) {
-      await _dispatchSfuJoined(event);
+      final participants = event.callState.participants;
+      final users = await _queryUsersByIds(
+        participants.map((it) => it.userId).toSet(),
+      );
+      _postReduced(SfuJoinedAction(participants: participants, users: users));
     } else if (event is SfuParticipantJoinedEvent) {
-      await _dispatchSfuParticipantJoined(event);
+      final user = await _queryUserById(event.participant.userId);
+      _postReduced(
+        SfuParticipantJoinedAction(participant: event.participant, user: user),
+      );
     } else {
-      await _dispatchSfu(event);
+      _postReduced(SfuEventAction(event));
     }
   }
 
   @override
   Future<void> onCoordinatorEvent(CoordinatorEventV2 event) async {
-    await _dispatchCoordinator(event);
-  }
-
-  Future<void> _dispatchSfuJoined(SfuJoinResponseEvent event) async {
-    await _dispatch(
-      SfuJoinedAction(
-        participants: event.callState.participants,
-        users: await _queryUsersByIds(
-              event.callState.participants.map((it) => it.userId).toSet(),
-            ) ??
-            List.empty(),
-      ),
-    );
-  }
-
-  Future<void> _dispatchSfuParticipantJoined(
-    SfuParticipantJoinedEvent event,
-  ) async {
-    if (event.callCid != _state.value.callCid) {
+    if (event is CoordinatorHealthCheckEvent) {
       return;
     }
-    await _dispatch(
-      SfuParticipantJoinedAction(
-        participant: event.participant,
-        user: await _queryUserById(event.participant.userId),
-      ),
-    );
+    _logger.d(() => '[onCoordinatorEvent] event: $event');
+    _postReduced(CoordinatorAction(event));
   }
 
-  Future<void> _dispatchSfu(SfuEventV2 event) async {
-    await _dispatch(SfuEventAction(event));
-  }
-
-  Future<void> _dispatchCoordinator(CoordinatorEventV2 event) async {
-    await _dispatch(CoordinatorAction(event));
-  }
-
-  Future<void> _dispatch(StreamAction action) async {
-    _state.value = _stateReducer.reduce(_state.value, action);
-  }
-
-  Future<coord_users.User?> _queryUserById(String userId) async {
+  Future<CallUser?> _queryUserById(String userId) async {
     final result = await _queryUsersByIds({userId});
-    return result?.firstOrNull;
+    return result.firstOrNull;
   }
 
-  Future<List<coord_users.User>?> _queryUsersByIds(Set<String> userIds) async {
-    final mqJson = {'id': userIds};
-    final request = rpc.QueryUsersRequest(
-      // TODO
-      mqJson: [1],
-    );
-    final usersResult = await _coordinatorClient.queryUsers(request);
-    if (usersResult is! Success<rpc.QueryUsersResponse>) {
-      return null;
+  Future<List<CallUser>> _queryUsersByIds(Set<String> userIds) async {
+    final usersResult = await _streamVideo.queryUsers(userIds: userIds);
+    if (usersResult is! Success<List<CallUser>>) {
+      return List.empty();
     }
-    return usersResult.data.users;
+    return usersResult.data;
+  }
+
+  void _postReduced(StreamAction action) {
+    final reduced = _stateReducer.reduce(_state.value, action);
+    _post(state: reduced);
+  }
+
+  void _post({required CallStateV2 state}) {
+    if (state != _state.value) {
+      _logger.v(() => '[post] state: $state');
+      _state.value = state;
+    }
   }
 }
