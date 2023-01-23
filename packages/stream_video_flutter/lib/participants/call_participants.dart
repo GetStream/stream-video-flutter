@@ -26,7 +26,7 @@ class StreamCallParticipants extends StatelessWidget {
     required this.participants,
     this.screenShareItemBuilder,
     this.itemBuilder,
-    this.enableFloatingView = false,
+    this.enableFloatingView = true,
     this.floatingParticipantTheme,
     super.key,
   });
@@ -63,7 +63,7 @@ class StreamCallParticipants extends StatelessWidget {
     return RegularCallParticipantsContent(
       participants: participants,
       itemBuilder: itemBuilder,
-      enablePip: enableFloatingView,
+      enableFloatingView: enableFloatingView,
       floatingParticipantTheme: floatingParticipantTheme,
     );
   }
@@ -74,7 +74,7 @@ class RegularCallParticipantsContent extends StatefulWidget {
     super.key,
     required this.participants,
     this.itemBuilder,
-    this.enablePip = false,
+    this.enableFloatingView = true,
     this.floatingParticipantTheme,
   });
 
@@ -85,7 +85,7 @@ class RegularCallParticipantsContent extends StatefulWidget {
   final CallParticipantWidgetBuilder? itemBuilder;
 
   /// Enable picture-in-picture for current participant
-  final bool enablePip;
+  final bool enableFloatingView;
 
   /// Theme for participant pip window
   final StreamFloatingCallParticipantTheme? floatingParticipantTheme;
@@ -114,7 +114,7 @@ class _RegularCallParticipantsContentState
 
     // Only display the local participant in grid if pip is not enabled or there
     // are no remote participants.
-    if (!widget.enablePip || remote.isEmpty) {
+    if (!widget.enableFloatingView || remote.isEmpty) {
       participantsToDisplay.add(local.first);
     }
 
@@ -166,7 +166,7 @@ class _RegularCallParticipantsContentState
       );
     }
 
-    if (!widget.enablePip || remote.isEmpty) {
+    if (!widget.enableFloatingView || remote.isEmpty) {
       return backgroundWidget;
     }
 

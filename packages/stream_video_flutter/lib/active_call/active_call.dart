@@ -118,7 +118,7 @@ class _StreamActiveCallState extends State<StreamActiveCall> {
       body: widget.callParticipantsBuilder?.call(context, participants) ??
           StreamCallParticipants(
             participants: participants,
-            enableFloatingView: widget.enableFloatingView ?? false,
+            enableFloatingView: widget.enableFloatingView ?? true,
           ),
       bottomNavigationBar:
           widget.callControlsBuilder?.call(context, call, participants) ??
