@@ -2,15 +2,16 @@ library stream_video_flutter;
 
 export 'package:stream_video/stream_video.dart';
 
-export 'active_call/active_call.dart';
-export 'active_call/call_app_bar.dart';
-export 'avatar/stream_user_avatar.dart';
-export 'call_controls/call_controls.dart';
-export 'icon/stream_icon_toggle.dart';
-export 'incoming_outgoing_call/incoming_call.dart';
-export 'incoming_outgoing_call/outgoing_call.dart';
-export 'participant_info/stream_participant_info.dart';
-export 'participants/call_participant.dart';
-export 'participants/call_participants.dart';
-export 'participants/floating_call_participant.dart';
-export 'theme/themes.dart';
+export 'src/call_controls/call_controls.dart';
+export 'src/call_participants/call_participant.dart';
+export 'src/call_participants/call_participants.dart';
+export 'src/call_participants/floating_call_participant.dart';
+export 'src/call_screen/active_call/active_call.dart';
+export 'src/call_screen/active_call/active_call_app_bar.dart';
+export 'src/call_screen/call_screen.dart';
+export 'src/call_screen/incoming_call/incoming_call.dart';
+export 'src/call_screen/outgoing_call/outgoing_call.dart';
+export 'src/models/stream_icon_toggle.dart';
+export 'src/participants_info/stream_participant_info.dart';
+export 'src/theme/themes.dart';
+export 'src/widgets/stream_user_avatar.dart';
