@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              _onLogout(context);
+              _logout(context);
             },
           ),
         ],
@@ -176,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /// Disconnect the currently logged in user from both Video and Chat APIs.
-  Future<void> _onLogout(BuildContext context) async {
+  Future<void> _logout(BuildContext context) async {
     await videoClient.disconnectUser();
     await chatClient.disconnectUser();
 
