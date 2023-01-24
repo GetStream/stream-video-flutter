@@ -1,7 +1,11 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
+import '../../disposable.dart';
+import '../../logger/stream_logger.dart';
+import '../errors/video_error.dart';
+import '../errors/video_error_composer.dart';
 import '../model/call_cid.dart';
-import 'model/rtc_tracks_info.dart';
+import '../utils/result.dart';
 import 'peer_type.dart';
 
 /// {@template onStreamAdded}
@@ -134,7 +138,7 @@ class StreamPeerConnection extends Disposable {
       final remoteDescription = await pc.getRemoteDescription();
       if (remoteDescription == null) {
         _pendingCandidates.add(candidate);
-        return Failure(VideoError(message: 'no remoteDescription set'));
+        return Failure(const VideoError(message: 'no remoteDescription set'));
       }
       final result = await pc.addCandidate(candidate);
       return Success(result);
@@ -159,7 +163,6 @@ class StreamPeerConnection extends Disposable {
       ),
     );
 
-    return transceiver;
     return transceiver;
   }
 

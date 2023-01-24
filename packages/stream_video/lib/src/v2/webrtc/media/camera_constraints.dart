@@ -15,10 +15,10 @@ class CameraConstraints extends VideoConstraints {
   CameraConstraints.from({required VideoConstraints constraints})
       : facingMode = FacingMode.user,
         super(
-        deviceId: constraints.deviceId,
-        maxFrameRate: constraints.maxFrameRate,
-        params: constraints.params,
-      );
+          deviceId: constraints.deviceId,
+          maxFrameRate: constraints.maxFrameRate,
+          params: constraints.params,
+        );
 
   final FacingMode facingMode;
 
@@ -55,7 +55,7 @@ class CameraConstraints extends VideoConstraints {
   }) =>
       CameraConstraints(
         params: params ?? this.params,
-        cameraPosition: cameraPosition ?? this.cameraPosition,
+        facingMode: facingMode ?? this.facingMode,
         deviceId: deviceId ?? this.deviceId,
         maxFrameRate: maxFrameRate ?? this.maxFrameRate,
       );

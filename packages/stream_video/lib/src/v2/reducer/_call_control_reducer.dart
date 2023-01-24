@@ -3,7 +3,7 @@ import '../call_state.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 
 class CallControlReducer {
-  CallControlReducer(this.currentUserId);
+  const CallControlReducer(this.currentUserId);
 
   final String currentUserId;
 
@@ -12,10 +12,13 @@ class CallControlReducer {
     CallControlAction action,
   ) {
     if (action is SetCameraEnabled) {
-      _reduceCameraEnabled(state, action);
+      return _reduceCameraEnabled(state, action);
     } else if (action is SetMicrophoneEnabled) {
-      _reduceMicrophoneEnabled(state, action);
+      return _reduceMicrophoneEnabled(state, action);
+    } else if (action is SetScreenShareEnabled) {
+      return _reduceScreenShareEnabled(state, action);
     }
+
     return state;
   }
 
@@ -31,6 +34,13 @@ class CallControlReducer {
     SetMicrophoneEnabled action,
   ) {
     return _toggleTrackType(state, SfuTrackType.audio, action.enabled);
+  }
+
+  CallStateV2 _reduceScreenShareEnabled(
+    CallStateV2 state,
+    SetScreenShareEnabled action,
+  ) {
+    return _toggleTrackType(state, SfuTrackType.screenShare, action.enabled);
   }
 
   CallStateV2 _toggleTrackType(

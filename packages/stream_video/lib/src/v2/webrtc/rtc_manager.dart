@@ -1,17 +1,17 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import 'package:stream_video/src/v2/webrtc/codecs_helper.dart' as codecs;
-import 'package:webrtc_interface/src/rtc_session_description.dart';
+import "package:webrtc_interface/src/rtc_session_description.dart";
 
 import '../../disposable.dart';
 import '../../logger/stream_logger.dart';
 import '../../platform_detector/platform_detector.dart';
-import '../../track/options.dart';
-import '../errors/video_error.dart';
+import '../model/call_cid.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../utils/result.dart';
-import '../utils/result_converters.dart';
+import 'codecs_helper.dart' as codecs;
+import 'media/constraints/camera_position.dart';
+import 'media/constraints/facing_mode.dart';
 import 'media/media_constraints.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_dimension.dart';
@@ -26,7 +26,7 @@ import 'rtc_track_publish_options.dart';
 /// {@endtemplate}
 typedef OnPublisherTrackMuted = void Function(RtcLocalTrack track, bool muted);
 
-class RtcManager with Disposable {
+class RtcManager extends Disposable {
   RtcManager({
     required this.sessionId,
     required this.callCid,
@@ -46,7 +46,7 @@ class RtcManager with Disposable {
   final _logger = taggedLogger(tag: 'SV:RtcManager');
 
   final String sessionId;
-  final String callCid;
+  final StreamCallCid callCid;
   final String publisherId;
   final StreamPeerConnection _publisher;
   final StreamPeerConnection _subscriber;
@@ -205,6 +205,21 @@ class RtcManager with Disposable {
 extension PublisherRtcManager on RtcManager {
   List<RtcLocalTrack> getPublisherTracks() {
     return [...publishedTracks.values.whereType<RtcLocalTrack>()];
+  }
+
+  RtcLocalTrack? getPublisherTrackByType(SfuTrackType trackType) {
+    final audioTrack = getPublisherTracks().firstWhereOrNull((track) {
+      return track.trackType == trackType;
+    });
+
+    if (audioTrack == null) {
+      _logger.e(
+        () => 'getPublisherTrackByType: track with $trackType not found',
+      );
+      return null;
+    }
+
+    return audioTrack;
   }
 
   List<RtcTrackInfo> getPublisherTrackInfos() {
@@ -462,12 +477,12 @@ extension PublisherRtcManager on RtcManager {
     return tracks;
   }
 
-  Future<void> restartTrack({
+  Future<RtcLocalTrack?> restartTrack({
     required RtcLocalTrack track,
     MediaConstraints? mediaConstraints,
   }) async {
     final sender = track.transceiver?.sender;
-    if (sender == null) return;
+    if (sender == null) return null;
 
     final constraints = mediaConstraints ?? track.mediaConstraints;
 
@@ -486,9 +501,28 @@ extension PublisherRtcManager on RtcManager {
     }
 
     // Update new stream and track.
-    publishedTracks[track.trackSid] = track.copyWith(
+    return publishedTracks[track.trackSid] = track.copyWith(
       track: newTrack,
       stream: newStream,
+    );
+  }
+
+  Future<RtcLocalTrack?> setTrackFacingMode({
+    required FacingMode facingMode,
+  }) async {
+    final track = getPublisherTrackByType(SfuTrackType.video);
+    if (track == null) return null;
+
+    final constraints = track.mediaConstraints;
+    if (constraints is! CameraConstraints) {
+      _logger.e(() => 'Cannot set facingMode on non-camera track');
+      return null;
+    }
+
+    // restart with new constraints.
+    return restartTrack(
+      track: track,
+      mediaConstraints: constraints.copyWith(facingMode: facingMode),
     );
   }
 }
@@ -504,34 +538,42 @@ extension SubscriberRtcManager on RtcManager {
 }
 
 extension RtcManagerTrackHelper on RtcManager {
+  Future<RtcLocalTrack?> setCameraPosition({
+    required CameraPosition cameraPosition,
+  }) {
+    final facingMode = cameraPosition == CameraPosition.front
+        ? FacingMode.user
+        : FacingMode.environment;
+
+    return setTrackFacingMode(facingMode: facingMode);
+  }
+
   Future<RtcLocalTrack?> setCameraEnabled({bool enabled = true}) {
-    return setTrackEnabled(
+    return _setTrackEnabled(
       trackType: SfuTrackType.video,
       enabled: enabled,
     );
   }
 
   Future<RtcLocalTrack?> setMicrophoneEnabled({bool enabled = true}) {
-    return setTrackEnabled(
+    return _setTrackEnabled(
       trackType: SfuTrackType.audio,
       enabled: enabled,
     );
   }
 
   Future<RtcLocalTrack?> setScreenShareEnabled({bool enabled = true}) {
-    return setTrackEnabled(
+    return _setTrackEnabled(
       trackType: SfuTrackType.screenShare,
       enabled: enabled,
     );
   }
 
-  Future<RtcLocalTrack?> setTrackEnabled({
+  Future<RtcLocalTrack?> _setTrackEnabled({
     required SfuTrackType trackType,
     required bool enabled,
   }) async {
-    final track = getPublisherTracks().firstWhereOrNull(
-      (track) => track.trackType == trackType,
-    );
+    final track = getPublisherTrackByType(trackType);
 
     // Track found, mute/unmute it.
     if (track != null) {
@@ -556,8 +598,8 @@ extension RtcManagerTrackHelper on RtcManager {
         await unpublishTrack(trackSid: track.trackSid);
 
         // Also un-publish the audio track if it was published
-        final screenShareAudioTrack = getPublisherTracks().firstWhereOrNull(
-          (track) => track.trackType == SfuTrackType.screenShareAudio,
+        final screenShareAudioTrack = getPublisherTrackByType(
+          SfuTrackType.screenShareAudio,
         );
         if (screenShareAudioTrack != null) {
           await unpublishTrack(trackSid: screenShareAudioTrack.trackSid);
@@ -586,7 +628,7 @@ extension RtcManagerTrackHelper on RtcManager {
       return publishVideoTrack(track: screenShareTrack!);
     }
 
-    _logger.i(() => 'Unsupported trackType $trackType');
+    _logger.e(() => 'Unsupported trackType $trackType');
     return null;
   }
 }

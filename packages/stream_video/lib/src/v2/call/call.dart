@@ -62,7 +62,7 @@ abstract class CallV2 {
 
   List<RtcTrack> getTracks(String trackId);
 
-  RtcTrack? getTrack(String trackId, SfuTrackType trackType);
+  RtcTrack? getTrack(String trackSid);
 
   Future<Result<None>> apply(CallControlAction action);
 }

@@ -4,7 +4,7 @@ import '../call_state.dart';
 import '../sfu/data/events/sfu_events.dart';
 
 class SfuReducer {
-  SfuReducer(this.currentUserId);
+  const SfuReducer(this.currentUserId);
 
   final String currentUserId;
 

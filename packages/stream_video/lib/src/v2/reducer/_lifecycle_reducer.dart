@@ -6,10 +6,10 @@ import '../coordinator/models/coordinator_models.dart';
 import '../model/call_status.dart';
 import '../model/drop_reason.dart';
 
-class LifecycleReducer {
-  LifecycleReducer(this.currentUserId);
+final _logger = taggedLogger(tag: 'SV:Reducer-Lifecycle');
 
-  late final _logger = taggedLogger(tag: 'SV:Reducer-Lifecycle');
+class LifecycleReducer {
+  const LifecycleReducer(this.currentUserId);
 
   final String currentUserId;
 

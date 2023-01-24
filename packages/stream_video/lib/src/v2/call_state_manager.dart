@@ -35,9 +35,7 @@ abstract class CallStateManager {
   Future<void> onCallControlAction(CallControlAction action);
   Future<void> onSfuEvent(SfuEventV2 event);
   Future<void> onCoordinatorEvent(CoordinatorEventV2 event);
-
   Future<void> onWaitingTimeout(Duration dropTimeout);
-
   Future<void> onJoinFailed(VideoError error);
 }
 

@@ -18,12 +18,12 @@ class SfuParticipantJoinedAction extends SfuAction {
   const SfuParticipantJoinedAction({
     required this.participant,
     this.user,
-    this.isLocalUser,
+    this.isLocalUser = false,
   });
 
   final SfuParticipant participant;
   final CallUser? user;
-  final isLocalUser;
+  final bool isLocalUser;
 }
 
 class SfuJoinedAction extends SfuAction {

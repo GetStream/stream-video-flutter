@@ -1,6 +1,4 @@
 import '../../../platform_detector/platform_detector.dart';
-import '../../../track/options.dart';
-import '../../../types/video_parameters.dart';
 import '../model/rtc_video_parameters.dart';
 import 'video_constraints.dart';
 

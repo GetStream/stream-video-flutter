@@ -1,8 +1,7 @@
-import 'package:meta/meta.dart';
-import 'package:stream_video/src/v2/utils/result.dart';
+import 'package:equatable/equatable.dart';
 
 /// Represents an SDK error that contains a message.
-class VideoError {
+class VideoError extends Equatable {
   /// TODO
   const VideoError({required this.message, this.stackTrace});
 
@@ -13,19 +12,12 @@ class VideoError {
   final StackTrace? stackTrace;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is VideoError &&
-          runtimeType == other.runtimeType &&
-          message == other.message;
-
-  @override
-  int get hashCode => message.hashCode;
-
-  @override
   String toString() {
     return 'VideoError{message: $message, stackTrace: $stackTrace}';
   }
+
+  @override
+  List<Object?> get props => [message];
 }
 
 /// Represents an SDK error that contains a message and the cause.
@@ -41,19 +33,11 @@ class VideoErrorWithCause extends VideoError {
   final Exception cause;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is VideoErrorWithCause &&
-          runtimeType == other.runtimeType &&
-          message == other.message &&
-          cause == other.cause;
-
-  @override
-  int get hashCode => super.hashCode ^ cause.hashCode;
-
-  @override
   String toString() {
     return 'VideoErrorWithCause{message: $message, '
         'exception: $cause, stackTrace: $stackTrace}';
   }
+
+  @override
+  List<Object?> get props => [...super.props, cause];
 }
