@@ -44,10 +44,12 @@ class StreamParticipantLabel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(width: 8.0),
-          Text(
-            participant.userId,
-            style: participantLabelTextStyle ?? theme.participantLabelTextStyle,
-            overflow: TextOverflow.ellipsis,
+          Flexible(
+            child: Text(
+              participant.userId,
+              style: participantLabelTextStyle ?? theme.participantLabelTextStyle,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           const SizedBox(width: 4.0),
           StreamAudioIndicator(

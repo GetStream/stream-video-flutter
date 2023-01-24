@@ -22,6 +22,7 @@ import 'utils/result.dart';
 abstract class CallStateManager {
   const CallStateManager();
   StateEmitter<CallStateV2> get state;
+  Future<void> onUserIdSet(String userId);
   Future<void> onCallCreated(CallCreated data);
   Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data);
   Future<void> onCallAccepted();
@@ -36,17 +37,16 @@ abstract class CallStateManager {
   Future<void> onSfuEvent(SfuEventV2 event);
   Future<void> onCoordinatorEvent(CoordinatorEventV2 event);
   Future<void> onWaitingTimeout(Duration dropTimeout);
-  Future<void> onJoinFailed(VideoError error);
+  Future<void> onConnectFailed(VideoError error);
 }
 
 class CallStateManagerImpl extends CallStateManager {
   CallStateManagerImpl({
-    required String currentUserId,
     required CallStateV2 initialState,
     required StreamVideoV2 streamVideo,
   })  : _streamVideo = streamVideo,
         _state = MutableStateEmitterImpl(initialState),
-        _stateReducer = CallStateReducer(currentUserId);
+        _stateReducer = CallStateReducer();
 
   late final _logger = taggedLogger(tag: 'SV:StateManager');
 
@@ -56,6 +56,12 @@ class CallStateManagerImpl extends CallStateManager {
 
   @override
   StateEmitter<CallStateV2> get state => _state;
+
+  @override
+  Future<void> onUserIdSet(String userId) async {
+    _logger.d(() => '[onUserIdSet] userId: $userId');
+    _postReduced(CallUserIdAction(userId: userId));
+  }
 
   @override
   Future<void> onCallControlAction(CallControlAction action) async {
@@ -100,9 +106,9 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  Future<void> onJoinFailed(VideoError error) async {
-    _logger.e(() => '[onJoinFailed] error: $error');
-    _postReduced(CallJoinFailedAction(error));
+  Future<void> onConnectFailed(VideoError error) async {
+    _logger.e(() => '[onConnectFailed] error: $error');
+    _postReduced(CallConnectFailedAction(error));
   }
 
   @override

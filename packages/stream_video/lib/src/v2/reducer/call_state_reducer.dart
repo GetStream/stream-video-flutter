@@ -10,16 +10,12 @@ import '_lifecycle_reducer.dart';
 import '_sfu_reducer.dart';
 
 class CallStateReducer {
-  CallStateReducer(String currentUserId)
-      : lifecycleReducer = LifecycleReducer(currentUserId),
-        coordinatorReducer = CoordinatorReducer(currentUserId),
-        sfuReducer = SfuReducer(currentUserId),
-        callControlReducer = CallControlReducer(currentUserId);
+  CallStateReducer();
 
-  final LifecycleReducer lifecycleReducer;
-  final CoordinatorReducer coordinatorReducer;
-  final SfuReducer sfuReducer;
-  final CallControlReducer callControlReducer;
+  late final lifecycleReducer = LifecycleReducer();
+  late final coordinatorReducer = CoordinatorReducer();
+  late final sfuReducer = SfuReducer();
+  late final callControlReducer = CallControlReducer();
 
   CallStateV2 reduce(CallStateV2 state, StreamAction action) {
     if (action is LifecycleAction) {

@@ -33,7 +33,6 @@ import 'call_session_config.dart';
 
 class CallSessionImpl extends CallSession implements SfuEventListener {
   CallSessionImpl({
-    required this.currentUserId,
     required this.callCid,
     required this.sessionId,
     required this.config,
@@ -54,7 +53,6 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
 
   final _logger = taggedLogger(tag: 'SV:CallSession');
 
-  final String currentUserId;
   final StreamCallCid callCid;
   @override
   final String sessionId;
@@ -88,6 +86,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       final event = await sfuWS.events.waitFor<SfuJoinResponseEvent>(
         timeLimit: const Duration(seconds: 30),
       );
+      final currentUserId = stateManager.state.value.currentUserId;
       final localParticipant = event.callState.participants.firstWhere(
         (it) => it.userId == currentUserId,
       );

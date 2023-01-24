@@ -1,19 +1,21 @@
-import 'package:stream_video/protobuf/video/coordinator/call_v1/call.pb.dart'
-    as coordinator_call;
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart'
-    as coordinator_ws;
-import 'package:stream_video/protobuf/video/coordinator/member_v1/member.pb.dart';
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/v2/coordinator/models/coordinator_models.dart';
-import 'package:stream_video/src/v2/coordinator/ws/coordinator_events.dart';
+import 'dart:convert';
 
+import '../../../../protobuf/video/coordinator/call_v1/call.pb.dart'
+    as coordinator_call;
 import '../../../../protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart'
     as coordinator_envelopes;
+import '../../../../protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart'
+    as coordinator_ws;
 import '../../../../protobuf/video/coordinator/edge_v1/edge.pb.dart'
     as coord_edge;
+import '../../../../protobuf/video/coordinator/member_v1/member.pb.dart';
 import '../../../../protobuf/video/coordinator/user_v1/user.pb.dart'
     as coord_users;
+import '../../../logger/logger.dart';
 import '../../model/call_cid.dart';
+import '../../utils/result.dart';
+import '../models/coordinator_models.dart';
+import 'coordinator_events.dart';
 
 /// Converts [coordinator_ws.WebsocketEvent] into [CoordinatorEventV2].
 extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
@@ -160,11 +162,13 @@ extension UserExt on coord_users.User {
       id: id,
       teams: teams,
       role: role,
-      name: id, // TODO
+      name: name,
       imageUrl: imageUrl,
       createdAt: createdAt.toDateTime(),
       updatedAt: updatedAt.toDateTime(),
-      customJson: '', // TODO
+      customJson: json.decode(
+        utf8.decode(customJson),
+      ),
     );
   }
 }

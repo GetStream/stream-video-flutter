@@ -11,7 +11,7 @@ abstract class CallStatus {
   }
 
   factory CallStatus.initialized() {
-    return CallStatusIdle();
+    return CallStatusInitialized();
   }
 
   factory CallStatus.outgoing({

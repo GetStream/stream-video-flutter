@@ -7,6 +7,14 @@ abstract class LifecycleAction extends StreamAction {
   const LifecycleAction();
 }
 
+class CallUserIdAction extends LifecycleAction {
+  const CallUserIdAction({
+    required this.userId,
+  });
+
+  final String userId;
+}
+
 class CallDestroyedAction extends LifecycleAction {
   const CallDestroyedAction();
 }
@@ -56,7 +64,7 @@ class CallTimeoutAction extends LifecycleAction {
   final Duration timeLimit;
 }
 
-class CallJoinFailedAction extends LifecycleAction {
-  const CallJoinFailedAction(this.error);
+class CallConnectFailedAction extends LifecycleAction {
+  const CallConnectFailedAction(this.error);
   final VideoError error;
 }

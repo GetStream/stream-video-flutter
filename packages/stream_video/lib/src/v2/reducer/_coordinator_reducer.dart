@@ -8,9 +8,7 @@ import '../model/drop_reason.dart';
 final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
 class CoordinatorReducer {
-  const CoordinatorReducer(this.currentUserId);
-
-  final String currentUserId;
+  const CoordinatorReducer();
 
   CallStateV2 reduce(
     CallStateV2 state,

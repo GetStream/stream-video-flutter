@@ -1,9 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/theme/stream_avatar_theme.dart';
-import 'package:stream_video_flutter/theme/stream_video_theme.dart';
-import 'package:stream_video_flutter/utils/extensions.dart';
+
+import '../stream_video_flutter.dart';
+import '../utils/extensions.dart';
 
 /// {@template imageWidgetBuilder}
 /// Builder function used to build an image widget for the user avatar.
@@ -205,7 +204,7 @@ class _InitialsUserAvatar extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: avatarColor, 
+        color: avatarColor,
         borderRadius: avatarTheme.borderRadius,
       ),
       child: Center(
