@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../stream_video_flutter.dart';
+import 'call_participant_info_view.dart';
 
 /// {@template participantsInfoViewBuilder}
 /// Builder function used to build a participant info view.

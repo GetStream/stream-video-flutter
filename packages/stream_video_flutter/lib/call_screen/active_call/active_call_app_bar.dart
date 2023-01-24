@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart' hide ConnectionState;
 
-import '../stream_video_flutter.dart';
+import '../../stream_video_flutter.dart';
 
 /// Widget that represents the default app bar that's shown in calls.
-class StreamCallAppBar extends StatelessWidget implements PreferredSizeWidget {
-  /// Creates a new instance of [StreamCallAppBar].
-  const StreamCallAppBar({
+class ActiveCallAppBar extends StatelessWidget implements PreferredSizeWidget {
+  /// Creates a new instance of [ActiveCallAppBar].
+  const ActiveCallAppBar({
     super.key,
     required this.call,
     this.showBackButton = true,
@@ -24,10 +24,10 @@ class StreamCallAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// Whether to show the leading back button.
   final bool showBackButton;
 
-  /// The elevation for this [StreamCallAppBar].
+  /// The elevation for this [ActiveCallAppBar].
   final double elevation;
 
-  /// The background color for this [StreamCallAppBar].
+  /// The background color for this [ActiveCallAppBar].
   final Color? backgroundColor;
 
   /// The action to perform when the back button is pressed.
@@ -93,19 +93,19 @@ class StreamCallAppBar extends StatelessWidget implements PreferredSizeWidget {
     var connectionState = '';
     switch (call.connectionState) {
       case ConnectionState.disconnected:
-        connectionState = "Disconnected";
+        connectionState = 'Disconnected';
         break;
       case ConnectionState.connecting:
-        connectionState = "Connecting";
+        connectionState = 'Connecting';
         break;
       case ConnectionState.reconnecting:
-        connectionState = "reconnecting";
+        connectionState = 'reconnecting';
         break;
       case ConnectionState.connected:
-        connectionState = "Connected";
+        connectionState = 'Connected';
         break;
     }
 
-    return callId.isEmpty ? connectionState : "$connectionState: $callId";
+    return callId.isEmpty ? connectionState : '$connectionState: $callId';
   }
 }

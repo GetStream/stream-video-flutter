@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../stream_video_flutter.dart';
+import '../../stream_video_flutter.dart';
 
 /// Renders avatars of the participants on a call.
 class ParticipantAvatars extends StatelessWidget {

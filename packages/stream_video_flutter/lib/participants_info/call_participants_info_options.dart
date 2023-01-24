@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../models/mute_toggle_titles.dart';
+import '../stream_video_flutter.dart';
 
 /// {@template streamCallParticipantsInfoView}
 /// Displays call participants info.

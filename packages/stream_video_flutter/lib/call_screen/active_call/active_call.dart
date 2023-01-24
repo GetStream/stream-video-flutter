@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../stream_video_flutter.dart';
+import '../../stream_video_flutter.dart';
 
 /// {@template callAppBarBuilder}
 /// Builder used to create a custom call app bar.
@@ -110,7 +110,7 @@ class _StreamActiveCallState extends State<StreamActiveCall> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: widget.callAppBarBuilder?.call(context, call) ??
-          StreamCallAppBar(
+          ActiveCallAppBar(
             call: call,
             onBackPressed: widget.onBackPressed,
             onParticipantsTap: widget.onParticipantsTap,

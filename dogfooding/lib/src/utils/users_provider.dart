@@ -1,5 +1,5 @@
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/participant_info/users_provider.dart';
+import 'package:stream_video_flutter/participants_info/users_provider.dart';
 
 class MockUsersProvider extends StreamUsersProvider {
   @override
@@ -7,9 +7,9 @@ class MockUsersProvider extends StreamUsersProvider {
     return List<UserInfo>.generate(
       20,
       (index) => UserInfo(
-        id: "user$index",
-        role: "admin",
-        name: "John $index",
+        id: 'user$index',
+        role: 'admin',
+        name: 'John $index',
       ),
     );
   }

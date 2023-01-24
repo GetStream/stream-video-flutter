@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../stream_video_flutter.dart';
 
 /// {@template streamCallParticipantInfoView}
 /// Displays call participant info view.

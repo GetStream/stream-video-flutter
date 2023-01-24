@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/call_controls/call_controls.dart';
+
+import '../call_controls.dart';
 
 class SwitchCamera extends StatelessWidget {
   const SwitchCamera({
-    Key? key,
+    super.key,
     required this.participant,
     this.icon = Icons.flip_camera_ios_rounded,
     this.alternateIcon = Icons.flip_camera_ios_rounded,
-  }) : super(key: key);
+  });
 
   final IconData icon;
   final IconData alternateIcon;

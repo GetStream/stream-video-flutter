@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/utils/extensions.dart';
 
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+import '../stream_video_flutter.dart';
+import '../utils/extensions.dart';
 
 export 'controls/controls.dart';
 

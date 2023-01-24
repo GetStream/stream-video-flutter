@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../stream_video_flutter.dart';
+import 'invitable_user_list_controller.dart';
+import 'invitable_user_view.dart';
 
 /// {@template invitableUserViewBuilder}
 /// Builder function used to build an invitable user view.

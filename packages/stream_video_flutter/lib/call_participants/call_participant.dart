@@ -1,17 +1,17 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/participants/connection_quality_indicator.dart';
-import 'package:stream_video_flutter/participants/participant_label.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
-import 'package:stream_video_flutter/theme/stream_call_participant_theme.dart';
+
+import '../stream_video_flutter.dart';
+import 'indicators/connection_quality_indicator.dart';
+import 'participant_label.dart';
 
 /// Widget that represents a single participant in a call.
 class StreamCallParticipant extends StatefulWidget {
   const StreamCallParticipant({
     required this.participant,
     this.theme,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// The participant to display.
   final Participant participant;
@@ -78,21 +78,22 @@ class _StreamCallParticipantState extends State<StreamCallParticipant> {
         decoration: BoxDecoration(color: theme.backgroundColor),
         child: Stack(
           children: [
-            videoTrack != null && !videoTrack!.muted
-                ? StreamVideoRenderer(
-                    videoTrack: videoTrack!,
-                    videoFit: VideoFit.cover,
-                  )
-                : Center(
-                    child: StreamUserAvatar(
-                      user: UserInfo(
-                        id: participant.userId,
-                        role: 'admin',
-                        name: participant.userId,
-                      ),
-                      avatarTheme: theme.avatarTheme,
-                    ),
+            if (videoTrack != null && !videoTrack!.muted)
+              StreamVideoRenderer(
+                videoTrack: videoTrack!,
+                videoFit: VideoFit.cover,
+              )
+            else
+              Center(
+                child: StreamUserAvatar(
+                  user: UserInfo(
+                    id: participant.userId,
+                    role: 'admin',
+                    name: participant.userId,
                   ),
+                  avatarTheme: theme.avatarTheme,
+                ),
+              ),
             Align(
               alignment: theme.participantLabelAlignment,
               child: Column(
@@ -106,7 +107,8 @@ class _StreamCallParticipantState extends State<StreamCallParticipant> {
                       audioLevelIndicatorColor: theme.audioLevelIndicatorColor,
                       disabledMicrophoneColor: theme.disabledMicrophoneColor,
                       enabledMicrophoneColor: theme.enabledMicrophoneColor,
-                      participantLabelTextStyle: theme.participantLabelTextStyle,
+                      participantLabelTextStyle:
+                          theme.participantLabelTextStyle,
                     ),
                   ),
                 ],

@@ -13,8 +13,8 @@ typedef CallParticipantsInfoWidgetBuilder = Widget Function(
 /// This class holds the widgets for the three possible states of a call: on call,
 /// incoming call, outgoing call and presents the correct screen accordingly with
 /// the state.
-class CallScreen extends StatelessWidget {
-  CallScreen({
+class StreamCallScreen extends StatelessWidget {
+  StreamCallScreen({
     super.key,
     required this.call,
     required this.onBackPressed,

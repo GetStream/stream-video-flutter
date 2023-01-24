@@ -1,4 +1,4 @@
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+import '../stream_video_flutter.dart';
 
 /// Represents state for [StreamInvitableUserListController].
 class CallInviteState {

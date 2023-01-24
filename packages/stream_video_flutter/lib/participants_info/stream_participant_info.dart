@@ -1,5 +1,5 @@
-export 'model/call_invite_state.dart';
-export 'model/mute_toggle_titles.dart';
+export '../models/call_invite_state.dart';
+export '../models/mute_toggle_titles.dart';
 export 'call_participant_info_view.dart';
 export 'call_participants_info_options.dart';
 export 'call_participants_info_view.dart';

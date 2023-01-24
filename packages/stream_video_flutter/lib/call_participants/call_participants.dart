@@ -2,8 +2,9 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/participants/screen_share_item.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../stream_video_flutter.dart';
+import 'screen_share_item.dart';
 
 /// {@template callParticipantWidgetBuilder}
 /// Builder function used to build a participant grid item.

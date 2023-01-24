@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/theme/stream_avatar_theme.dart';
 
 import '../stream_video_flutter.dart';
+import 'stream_avatar_theme.dart';
 
 /// A style of a single participant on a call.
 class StreamCallParticipantTheme with Diagnosticable {

@@ -1,17 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-const deviceIdSpeaker = "speaker";
-const deviceIdEarpiece = "earpiece";
+import '../../stream_video_flutter.dart';
+
+const deviceIdSpeaker = 'speaker';
+const deviceIdEarpiece = 'earpiece';
 
 class ToggleSpeaker extends StatefulWidget {
   const ToggleSpeaker({
-    Key? key,
+    super.key,
     this.icon = Icons.volume_up_rounded,
     this.inactiveIcon = Icons.volume_off_rounded,
-  }) : super(key: key);
+  });
 
   final IconData icon;
   final IconData inactiveIcon;

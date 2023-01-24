@@ -1,12 +1,11 @@
 import 'dart:convert';
-
-import 'package:example/main.dart';
-import 'package:example/src/login_screen.dart';
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/call/call_screen.dart';
+import 'package:stream_video_flutter/call_screen/call_screen.dart';
+
+import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -40,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
       await call.connect();
 
       Navigator.of(context).pushReplacementNamed(
-        CallScreen.routeName,
+        StreamCallScreen.routeName,
         arguments: call,
       );
     } catch (e, stk) {

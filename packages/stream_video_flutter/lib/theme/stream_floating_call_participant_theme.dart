@@ -2,7 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/theme/stream_call_participant_theme.dart';
+
+import 'stream_call_participant_theme.dart';
 
 /// A style that overrides the default appearance of the floating pip widget in [StreamCallParticipants].
 class StreamFloatingCallParticipantTheme with Diagnosticable {

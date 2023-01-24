@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/theme/stream_avatar_theme.dart';
+
+import 'stream_avatar_theme.dart';
 
 /// {@template participantInfoTheme}
 /// A style that overrides the default appearance of participants info widget.
