@@ -105,7 +105,10 @@ class _CallAttachment extends StatelessWidget {
     final cid = attachment.extraData["callCid"] as String;
 
     return Container(
-      width: 300,
+      constraints: BoxConstraints(
+        maxWidth: 256,
+        minWidth: 256,
+      ),
       decoration: BoxDecoration(
         color: colorTheme.accentInfo,
         borderRadius: BorderRadius.circular(16),
@@ -117,8 +120,9 @@ class _CallAttachment extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                "Video Call Request",
-                style: textTheme.headlineBold,
+                "Video Call",
+                style: textTheme.bodyBold,
+                maxLines: 1,
               ),
             ),
             Material(
@@ -133,7 +137,7 @@ class _CallAttachment extends StatelessWidget {
                   ),
                   label: Text(
                     "Join",
-                    style: textTheme.headlineBold,
+                    style: textTheme.bodyBold,
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
