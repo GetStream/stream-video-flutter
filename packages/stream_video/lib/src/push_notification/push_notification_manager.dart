@@ -7,17 +7,18 @@ import 'call_notification_wrapper.dart';
 
 class PushNotificationManager {
   PushNotificationManager({
-    required this.client,
-    this.callNotification = const CallNotificationWrapper(),
-  });
+    required StreamVideo client,
+    CallNotificationWrapper callNotification = const CallNotificationWrapper(),
+  })  : _client = client,
+        _callNotification = callNotification;
 
-  final StreamVideo client;
-  final CallNotificationWrapper callNotification;
+  final StreamVideo _client;
+  final CallNotificationWrapper _callNotification;
 
   void onUserLoggedIn() {
     if (_isFirebaseInitialized()) {
       FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
-        await client.createDevice(token: token);
+        await _client.createDevice(token: token);
       });
     }
   }
@@ -27,8 +28,8 @@ class PushNotificationManager {
       final cid = remoteMessage.data['call_cid'] as String;
       final type = cid.substring(0, cid.indexOf(':'));
       final id = cid.substring(cid.indexOf(':') + 1);
-      final call = await client.getOrCreateCall(type: type, id: id);
-      await callNotification.showCallNotification(
+      final call = await _client.getOrCreateCall(type: type, id: id);
+      await _callNotification.showCallNotification(
         callId: cid,
         callers: call.users.values.map((e) => e.name).join(', '),
         isVideoCall: true,
@@ -42,14 +43,14 @@ class PushNotificationManager {
   }
 
   Future<void> onCallAccepted(String cid) async {
-    await client.acceptCall(
+    await _client.acceptCall(
       type: cid.substring(0, cid.indexOf(':')),
       id: cid.substring(cid.indexOf(':') + 1),
     );
   }
 
   Future<void> onCallRejected(String cid) async {
-    await client.rejectCall(callCid: cid);
+    await _client.rejectCall(callCid: cid);
   }
 
   bool _isValid(RemoteMessage remoteMessage) {
