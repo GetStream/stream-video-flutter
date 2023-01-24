@@ -3,9 +3,7 @@ import '../call_state.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 
 class CallControlReducer {
-  CallControlReducer(this.currentUserId);
-
-  final String currentUserId;
+  CallControlReducer();
 
   CallStateV2 reduce(
     CallStateV2 state,
