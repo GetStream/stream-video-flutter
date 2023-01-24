@@ -1,10 +1,11 @@
 import 'dart:async';
 
-import 'package:example/src/utils/after_layout.dart';
-import 'package:example/src/utils/assets.dart';
-import 'package:example/src/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import 'login_screen.dart';
+import 'utils/after_layout.dart';
+import 'utils/assets.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);

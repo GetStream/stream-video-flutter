@@ -1,10 +1,7 @@
-import 'package:dogfooding/src/participants_invite_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/participant_info/call_participants_info_options.dart';
-import 'package:stream_video_flutter/participant_info/call_participants_info_view.dart';
-import 'package:stream_video_flutter/participant_info/model/mute_toggle_titles.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import 'participants_invite_screen.dart';
 
 class StreamCallParticipantsInfoScreen extends StatelessWidget {
   const StreamCallParticipantsInfoScreen({
