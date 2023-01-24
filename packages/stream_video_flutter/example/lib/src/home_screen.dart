@@ -2,8 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/call_screen/call_screen.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'login_screen.dart';
 
