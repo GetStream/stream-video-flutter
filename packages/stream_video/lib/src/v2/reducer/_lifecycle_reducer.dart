@@ -6,10 +6,10 @@ import '../coordinator/models/coordinator_models.dart';
 import '../model/call_status.dart';
 import '../model/drop_reason.dart';
 
-class LifecycleReducer {
-  LifecycleReducer();
+final _logger = taggedLogger(tag: 'SV:Reducer-Lifecycle');
 
-  late final _logger = taggedLogger(tag: 'SV:Reducer-Lifecycle');
+class LifecycleReducer {
+  const LifecycleReducer();
 
   CallStateV2 reduce(
     CallStateV2 state,

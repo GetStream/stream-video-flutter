@@ -13,8 +13,6 @@ import '../../errors/video_error_composer.dart';
 import '../../model/call_cid.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
-import '../../sfu/data/models/sfu_model_parser.dart';
-import '../../sfu/data/models/sfu_track_type.dart';
 import '../../sfu/sfu_client.dart';
 import '../../sfu/sfu_client_impl.dart';
 import '../../sfu/ws/sfu_event_listener.dart';
@@ -23,6 +21,7 @@ import '../../shared_emitter.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
 import '../../utils/result_converters.dart';
+import '../../webrtc/media/constraints/camera_position.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/peer_type.dart';
@@ -53,8 +52,6 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         );
 
   final _logger = taggedLogger(tag: 'SV:CallSession');
-
-  bool _established = false;
 
   final StreamCallCid callCid;
   @override
@@ -95,9 +92,12 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       );
       final localTrackId = localParticipant.trackLookupPrefix;
 
-      rtcManager = await rtcManagerFactory.makeRtcManager(localTrackId)
-        ..onLocalIceCandidate = _onLocalIceCandidate
-        ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded;
+      rtcManager =
+          await rtcManagerFactory.makeRtcManager(publisherId: localTrackId)
+            ..onPublisherIceCandidate = _onLocalIceCandidate
+            ..onSubscriberIceCandidate = _onLocalIceCandidate
+            ..onPublisherTrackMuted = _onPublisherTrackMuted
+            ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded;
 
       return None().toSuccess();
     } catch (e, stk) {
@@ -132,16 +132,29 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {
     final offerSdp = event.sdp;
     _logger.i(() => '[onSfuSubscriberOfferEvent] event: $event');
-    final result = await rtcManager.onSubscriberOffer(offerSdp);
-    if (result is! Success<String>) {
-      return;
-    }
-    final answerSdp = result.data;
+    final answerSdp = await rtcManager.onSubscriberOffer(offerSdp);
+    if (answerSdp == null) return;
 
     await sfuClient.sendAnswer(
       sfu.SendAnswerRequest(
         sdp: answerSdp,
         peerType: sfu_models.PeerType.PEER_TYPE_SUBSCRIBER,
+      ),
+    );
+  }
+
+  void _onPublisherTrackMuted(RtcLocalTrack track, bool muted) {
+    _logger.d(() => '[onPublisherTrackMuted] track: $track');
+
+    sfuClient.updateMuteState(
+      sfu.UpdateMuteStatesRequest(
+        sessionId: sessionId,
+        muteStates: [
+          sfu.TrackMuteState(
+            trackType: track.trackType.toDTO(),
+            muted: muted,
+          )
+        ],
       ),
     );
   }
@@ -184,7 +197,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     final offer = await pc.createOffer();
     if (offer is! Success<rtc.RTCSessionDescription>) return;
 
-    final tracksInfo = await rtcManager.getPublisherTracks();
+    final tracksInfo = rtcManager.getPublisherTrackInfos();
+
     _logger.v(() => '[onPubNegotiationNeeded] tracksInfo: $tracksInfo');
 
     final pubResult = await sfuClient.setPublisher(
@@ -208,8 +222,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   }
 
   @override
-  RtcTrack? getTrack(String trackId, SfuTrackType trackType) {
-    return rtcManager.getTrack(trackId, trackType);
+  RtcTrack? getTrack(String trackSid) {
+    return rtcManager.getTrack(trackSid);
   }
 
   @override
@@ -217,19 +231,81 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     return rtcManager.getTracks(trackId);
   }
 
+  @override
   Future<Result<None>> apply(CallControlAction action) async {
-    // TODO implement
-    throw UnimplementedError('');
+    if (action is SetCameraEnabled) {
+      return _onSetCameraEnabled(action.enabled);
+    } else if (action is SetMicrophoneEnabled) {
+      return _onSetMicrophoneEnabled(action.enabled);
+    } else if (action is SetScreenShareEnabled) {
+      return _onSetScreenShareEnabled(action.enabled);
+    } else if (action is SetCameraPosition) {
+      return _onSetCameraPosition(action.cameraPosition);
+    }
+
+    return Result.failure(const VideoError(message: 'Action not supported'));
+  }
+
+  Future<Result<None>> _onSetCameraEnabled(bool enabled) async {
+    final track = await rtcManager.setCameraEnabled(enabled: enabled);
+    if (track == null) {
+      return Result.failure(
+        const VideoError(
+          message: 'Unable to enable/disable camera, Track not found',
+        ),
+      );
+    }
+
+    return Result.success(None());
+  }
+
+  Future<Result<None>> _onSetMicrophoneEnabled(bool enabled) async {
+    final track = await rtcManager.setMicrophoneEnabled(enabled: enabled);
+    if (track == null) {
+      return Result.failure(
+        const VideoError(
+          message: 'Unable to enable/disable microphone, Track not found',
+        ),
+      );
+    }
+
+    return Result.success(None());
+  }
+
+  Future<Result<None>> _onSetScreenShareEnabled(bool enabled) async {
+    final track = await rtcManager.setScreenShareEnabled(enabled: enabled);
+    if (track == null) {
+      return Result.failure(
+        const VideoError(
+          message: 'Unable to enable/disable screen-share, Track not found',
+        ),
+      );
+    }
+
+    return Result.success(None());
+  }
+
+  Future<Result<None>> _onSetCameraPosition(CameraPosition position) async {
+    final track = await rtcManager.setCameraPosition(cameraPosition: position);
+    if (track == null) {
+      return Result.failure(
+        const VideoError(
+          message: 'Unable to set camera position, Track not found',
+        ),
+      );
+    }
+
+    return Result.success(None());
   }
 }
 
-extension RtcTracksInfoMapper on RtcTracksInfo {
+extension RtcTracksInfoMapper on List<RtcTrackInfo> {
   List<sfu_models.TrackInfo> toDTO() {
-    return trackInfoList.map((info) {
-      final trackType = SfuTrackTypeParser.parseRtcName(info.trackType).toDTO();
+    return map((info) {
       return sfu_models.TrackInfo(
         trackId: info.trackId,
-        trackType: trackType,
+        trackType: info.trackType?.toDTO(),
+        mid: info.mid,
         layers: info.layers?.map((layer) {
           return sfu_models.VideoLayer(
             rid: layer.rid,
@@ -239,7 +315,7 @@ extension RtcTracksInfoMapper on RtcTracksInfo {
             ),
             bitrate: layer.bitrate,
           );
-        }).toList(),
+        }),
       );
     }).toList();
   }

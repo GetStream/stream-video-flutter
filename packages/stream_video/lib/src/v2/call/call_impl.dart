@@ -77,7 +77,7 @@ class CallV2Impl extends CallV2 {
 
   @override
   SharedEmitter<SfuEventV2> get events => _events;
-  final MutableSharedEmitter<SfuEventV2> _events = MutableSharedEmitterImpl();
+  final _events = MutableSharedEmitterImpl<SfuEventV2>();
 
   CallSession? _session;
 
@@ -256,8 +256,8 @@ class CallV2Impl extends CallV2 {
   }
 
   @override
-  RtcTrack? getTrack(String trackId, SfuTrackType trackType) {
-    return _session?.getTrack(trackId, trackType);
+  RtcTrack? getTrack(String trackSid) {
+    return _session?.getTrack(trackSid);
   }
 
   @override
@@ -271,7 +271,7 @@ class CallV2Impl extends CallV2 {
     final session = _session;
     if (session == null) {
       _logger.w(() => '[apply] rejected (session is null);');
-      return Failure(const VideoError(message: 'no call session'));
+      return Result.failure(const VideoError(message: 'no call session'));
     }
     final result = await session.apply(action);
     _logger.v(() => '[apply] completed: $result');

@@ -1,31 +1,31 @@
 import '../../../platform_detector/platform_detector.dart';
+import '../model/rtc_video_parameters.dart';
 import 'constraints/facing_mode.dart';
-import 'media_constraints.dart';
+import 'video_constraints.dart';
 
 /// Options used when creating a video track that captures the camera.
-class CameraConstraints extends MediaConstraints {
+class CameraConstraints extends VideoConstraints {
   const CameraConstraints({
     super.deviceId,
     this.facingMode = FacingMode.user,
-    this.maxFrameRate = 30,
-    this.width = 960,
-    this.height = 540,
+    super.maxFrameRate,
+    super.params = RtcVideoParametersPresets.h720_169,
   });
 
-  /// Limit the maximum frameRate of the capture device.
-  final double? maxFrameRate;
-
-  final int? width;
-  final int? height;
+  CameraConstraints.from({required VideoConstraints constraints})
+      : facingMode = FacingMode.user,
+        super(
+          deviceId: constraints.deviceId,
+          maxFrameRate: constraints.maxFrameRate,
+          params: constraints.params,
+        );
 
   final FacingMode facingMode;
 
   @override
   Map<String, dynamic> toMap() {
     final constraints = <String, dynamic>{
-      'width': width,
-      'height': height,
-      'frameRate': maxFrameRate,
+      ...params.toMediaConstraintsMap(),
       'facingMode': facingMode.name,
     };
     if (deviceId != null) {
@@ -48,15 +48,13 @@ class CameraConstraints extends MediaConstraints {
 
   @override
   CameraConstraints copyWith({
-    int? height,
-    int? width,
+    RtcVideoParameters? params,
     FacingMode? facingMode,
     String? deviceId,
     double? maxFrameRate,
   }) =>
       CameraConstraints(
-        height: height ?? this.height,
-        width: width ?? this.width,
+        params: params ?? this.params,
         facingMode: facingMode ?? this.facingMode,
         deviceId: deviceId ?? this.deviceId,
         maxFrameRate: maxFrameRate ?? this.maxFrameRate,

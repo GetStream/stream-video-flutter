@@ -20,7 +20,9 @@ class RtcManagerFactory {
   final StreamPeerConnectionFactory pcFactory;
   final Map<String, dynamic> mediaConstraints;
 
-  Future<RtcManager> makeRtcManager(String localTrackId) async {
+  Future<RtcManager> makeRtcManager({
+    required String publisherId,
+  }) async {
     final publisher = await pcFactory.makePublisher(
       configuration,
       mediaConstraints,
@@ -33,7 +35,7 @@ class RtcManagerFactory {
     return RtcManager(
       sessionId: sessionId,
       callCid: callCid,
-      localTrackId: localTrackId,
+      publisherId: publisherId,
       publisher: publisher,
       subscriber: subscriber,
     );

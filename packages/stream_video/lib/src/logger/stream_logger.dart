@@ -11,7 +11,7 @@ typedef MessageBuilder = String Function();
 enum Priority { VERBOSE, DEBUG, INFO, WARNING, ERROR }
 
 class TaggedLogger {
-  TaggedLogger(this.tag);
+  const TaggedLogger(this.tag);
   final String tag;
 
   void v(MessageBuilder message) {

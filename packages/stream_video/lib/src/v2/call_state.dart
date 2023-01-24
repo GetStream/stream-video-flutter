@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'call_participant_state.dart';
 
@@ -7,7 +8,7 @@ import 'model/call_status.dart';
 
 /// TODO - Class that holds any information about the call, including participants
 @immutable
-class CallStateV2 {
+class CallStateV2 extends Equatable {
   factory CallStateV2({
     required String currentUserId,
     required StreamCallCid callCid,
@@ -20,6 +21,7 @@ class CallStateV2 {
       callParticipants: Map.unmodifiable(const {}),
     );
   }
+
   factory CallStateV2.fromMetadata({
     required String currentUserId,
     required StreamCallCid callCid,
@@ -73,27 +75,15 @@ class CallStateV2 {
   }
 
   @override
-  String toString() {
-    return 'CallStateV2{callCid: $callCid, sessionId: $sessionId, '
-        'status: $status, callParticipants: $callParticipants}';
-  }
+  bool? get stringify => true;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallStateV2 &&
-          runtimeType == other.runtimeType &&
-          callCid == other.callCid &&
-          sessionId == other.sessionId &&
-          status == other.status &&
-          callParticipants == other.callParticipants;
-
-  @override
-  int get hashCode =>
-      callCid.hashCode ^
-      sessionId.hashCode ^
-      status.hashCode ^
-      callParticipants.hashCode;
+  List<Object?> get props => [
+        callCid,
+        sessionId,
+        status,
+        callParticipants,
+      ];
 }
 
 extension on CallMetadata {

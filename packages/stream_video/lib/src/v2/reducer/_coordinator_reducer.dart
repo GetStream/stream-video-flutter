@@ -5,10 +5,10 @@ import '../coordinator/ws/coordinator_events.dart';
 import '../model/call_status.dart';
 import '../model/drop_reason.dart';
 
-class CoordinatorReducer {
-  CoordinatorReducer();
+final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
-  late final _logger = taggedLogger(tag: 'SV:CoordReducer');
+class CoordinatorReducer {
+  const CoordinatorReducer();
 
   CallStateV2 reduce(
     CallStateV2 state,

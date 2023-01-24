@@ -1,10 +1,14 @@
+import '../webrtc/media/constraints/camera_position.dart';
 import 'action.dart';
 
 abstract class CallControlAction extends StreamAction {
   const CallControlAction();
 }
 
-class SwitchCamera extends CallControlAction {}
+class SetCameraPosition extends CallControlAction {
+  const SetCameraPosition({required this.cameraPosition});
+  final CameraPosition cameraPosition;
+}
 
 class SetCameraEnabled extends CallControlAction {
   const SetCameraEnabled({required this.enabled});

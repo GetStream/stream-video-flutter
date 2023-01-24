@@ -4,7 +4,7 @@ import '../call_state.dart';
 import '../sfu/data/events/sfu_events.dart';
 
 class SfuReducer {
-  SfuReducer();
+  const SfuReducer();
 
   CallStateV2 reduce(
     CallStateV2 state,
