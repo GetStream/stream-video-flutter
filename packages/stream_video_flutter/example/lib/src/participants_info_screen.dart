@@ -1,6 +1,7 @@
-import 'package:example/src/participants_invite_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import 'participants_invite_screen.dart';
 
 class StreamCallParticipantsInfoScreen extends StatelessWidget {
   const StreamCallParticipantsInfoScreen({

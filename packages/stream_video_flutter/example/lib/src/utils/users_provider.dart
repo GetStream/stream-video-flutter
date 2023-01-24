@@ -1,5 +1,5 @@
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/participant_info/users_provider.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class MockUsersProvider extends StreamUsersProvider {
   @override

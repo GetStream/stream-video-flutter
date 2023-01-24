@@ -1,10 +1,10 @@
-import 'package:example/src/home_screen.dart';
-import 'package:example/src/login_screen.dart';
-import 'package:example/src/participants_info_screen.dart';
-import 'package:example/src/splash_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/call/call_screen.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import 'src/home_screen.dart';
+import 'src/login_screen.dart';
+import 'src/participants_info_screen.dart';
+import 'src/splash_screen.dart';
 
 mixin Routes {
   /// Add entry for new route here
@@ -25,9 +25,9 @@ mixin Routes {
           settings: const RouteSettings(name: HomeScreen.routeName),
           builder: (_) => const HomeScreen(),
         );
-      case CallScreen.routeName:
+      case StreamCallScreen.routeName:
         return MaterialPageRoute(
-          settings: const RouteSettings(name: CallScreen.routeName),
+          settings: const RouteSettings(name: StreamCallScreen.routeName),
           builder: (context) {
             final call = settings.arguments as Call;
 
@@ -35,7 +35,7 @@ mixin Routes {
               Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
             }
 
-            return CallScreen(
+            return StreamCallScreen(
               call: call,
               onBackPressed: navigateHome,
               onHangUp: navigateHome,
