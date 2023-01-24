@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:logging/logging.dart';
 
@@ -389,8 +390,9 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   }) async {
     final mqJson = {'id': userIds};
     final request = rpc.QueryUsersRequest(
-      // TODO fix proto
-      mqJson: [1],
+      mqJson: utf8.encode(
+        json.encode(mqJson),
+      ),
     );
     final usersResult = await _client.queryUsers(request);
     if (usersResult is! Success<rpc.QueryUsersResponse>) {

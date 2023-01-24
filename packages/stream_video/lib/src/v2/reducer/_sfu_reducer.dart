@@ -4,9 +4,7 @@ import '../call_state.dart';
 import '../sfu/data/events/sfu_events.dart';
 
 class SfuReducer {
-  SfuReducer(this.currentUserId);
-
-  final String currentUserId;
+  SfuReducer();
 
   CallStateV2 reduce(
     CallStateV2 state,
@@ -43,7 +41,7 @@ class SfuReducer {
   ) {
     final states = action.participants.values.map((aParticipant) {
       final user = action.users[aParticipant.userId];
-      final isLocal = aParticipant.userId == currentUserId;
+      final isLocal = aParticipant.userId == state.currentUserId;
       return CallParticipantStateV2(
         userId: user?.id ?? aParticipant.userId,
         role: user?.role ?? '',

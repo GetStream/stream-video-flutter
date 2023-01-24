@@ -57,11 +57,9 @@ import 'call_session_config.dart';
 
 class CallSessionFactory {
   CallSessionFactory({
-    required this.currentUserId,
     required this.callCid,
   });
 
-  final String currentUserId;
   final StreamCallCid callCid;
 
   Future<CallSession> makeCallSession({
@@ -78,7 +76,6 @@ class CallSessionFactory {
       rtcConfig: rtcConfig,
     );
     return CallSessionImpl(
-      currentUserId: currentUserId,
       callCid: callCid,
       sessionId: sessionId,
       config: sessionConfig,

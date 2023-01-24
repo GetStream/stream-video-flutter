@@ -7,17 +7,17 @@ import '../model/call_status.dart';
 import '../model/drop_reason.dart';
 
 class LifecycleReducer {
-  LifecycleReducer(this.currentUserId);
+  LifecycleReducer();
 
   late final _logger = taggedLogger(tag: 'SV:Reducer-Lifecycle');
-
-  final String currentUserId;
 
   CallStateV2 reduce(
     CallStateV2 state,
     LifecycleAction action,
   ) {
-    if (action is CallCreatedAction) {
+    if (action is CallUserIdAction) {
+      return _reduceUserId(state, action);
+    } else if (action is CallCreatedAction) {
       return _reduceCallCreated(state, action);
     } else if (action is CallDestroyedAction) {
       return _reduceCallDestroyed(state, action);
@@ -29,8 +29,8 @@ class LifecycleReducer {
       return _reduceCallCancelled(state, action);
     } else if (action is CallTimeoutAction) {
       return _reduceCallTimeout(state, action);
-    } else if (action is CallJoinFailedAction) {
-      return _reduceCallJoinFailed(state, action);
+    } else if (action is CallConnectFailedAction) {
+      return _reduceCallConnectFailed(state, action);
     } else if (action is CallConnectAction) {
       return _reduceCallConnect(state, action);
     } else if (action is CallJoinedAction) {
@@ -43,17 +43,29 @@ class LifecycleReducer {
     return state;
   }
 
+  CallStateV2 _reduceUserId(
+    CallStateV2 state,
+    CallUserIdAction action,
+  ) {
+    return state.copyWith(
+      currentUserId: action.userId,
+      status: CallStatus.idle(),
+      sessionId: '',
+      callParticipants: const {},
+    );
+  }
+
   CallStateV2 _reduceCallCreated(
     CallStateV2 state,
     CallCreatedAction action,
   ) {
     return state.copyWith(
       status: action.data.metadata.toCallStatus(
-        currentUserId: currentUserId,
+        currentUserId: state.currentUserId,
         ringing: action.data.ringing,
       ),
       callParticipants: action.data.metadata.toCallParticipants(
-        currentUserId,
+        state.currentUserId,
       ),
     );
   }
@@ -104,7 +116,11 @@ class LifecycleReducer {
       return state;
     }
     return state.copyWith(
-      status: CallStatus.drop(DropReason.rejected(byUserId: currentUserId)),
+      status: CallStatus.drop(
+        DropReason.rejected(
+          byUserId: state.currentUserId,
+        ),
+      ),
     );
   }
 
@@ -120,7 +136,11 @@ class LifecycleReducer {
       return state;
     }
     return state.copyWith(
-      status: CallStatus.drop(DropReason.cancelled(byUserId: currentUserId)),
+      status: CallStatus.drop(
+        DropReason.cancelled(
+          byUserId: state.currentUserId,
+        ),
+      ),
     );
   }
 
@@ -140,14 +160,14 @@ class LifecycleReducer {
     );
   }
 
-  CallStateV2 _reduceCallJoinFailed(
+  CallStateV2 _reduceCallConnectFailed(
     CallStateV2 state,
-    CallJoinFailedAction action,
+    CallConnectFailedAction action,
   ) {
     final status = state.status;
     if (!status.isConnecting) {
       _logger.w(
-        () => '[reduceCallJoinFailed] rejected (not Connecting): $status',
+        () => '[reduceCallConnectFailed] rejected (not Connecting): $status',
       );
       return state;
     }
@@ -176,7 +196,7 @@ class LifecycleReducer {
   ) {
     return state.copyWith(
       callParticipants: action.data.metadata.toCallParticipants(
-        currentUserId,
+        state.currentUserId,
       ),
     );
   }
@@ -214,7 +234,7 @@ extension on CallMetadata {
     } else if (!createdByMe && ringing) {
       return CallStatus.incoming();
     } else {
-      return CallStatus.idle();
+      return CallStatus.initialized();
     }
   }
 

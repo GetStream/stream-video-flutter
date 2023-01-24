@@ -1,34 +1,39 @@
 import 'dart:async';
 
-import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart'
-    as edge;
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/logger/stream_logger.dart';
-import 'package:stream_video/src/options.dart';
-import 'package:stream_video/src/v2/call_state.dart';
-import 'package:stream_video/src/v2/state_emitter.dart';
-import 'package:stream_video/src/v2/utils/result.dart';
-
-import '../../../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
-    as rpc;
+import '../../../stream_video.dart';
 import '../action/call_control_action.dart';
-import '../model/call_cid.dart';
-import '../model/call_created.dart';
-import '../model/call_received_created.dart';
-import '../reducer/call_state_reducer.dart';
-import '../coordinator/coordinator_client.dart';
+import '../call_state.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../shared_emitter.dart';
+import '../state_emitter.dart';
 import '../utils/none.dart';
+import '../utils/result.dart';
 import '../webrtc/rtc_track.dart';
+import 'call_impl.dart';
 import 'call_settings.dart';
-import 'session/call_session_impl.dart';
-import 'session/call_session_factory.dart';
 
 /// Represents a [CallV2] in which you can connect to.
 abstract class CallV2 {
-  StreamCallCid get cid;
+  const CallV2();
+  factory CallV2.forCid({
+    required StreamCallCid callCid,
+    StreamVideoV2? streamVideo,
+  }) {
+    return CallV2Impl(
+      callCid: callCid,
+      streamVideo: streamVideo,
+    );
+  }
+  factory CallV2.forData({
+    required CallCreated data,
+    StreamVideoV2? streamVideo,
+  }) {
+    return CallV2Impl.from(
+      data: data,
+      streamVideo: streamVideo,
+    );
+  }
 
   StateEmitter<CallStateV2> get state;
 

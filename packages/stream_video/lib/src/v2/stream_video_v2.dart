@@ -1,13 +1,10 @@
 import 'dart:async';
 
 import 'package:logging/logging.dart';
-import 'package:stream_video/src/models/user_info.dart';
-import 'package:stream_video/src/token/token.dart';
-import 'package:stream_video/src/token/token_manager.dart';
-import 'package:stream_video/src/v2/shared_emitter.dart';
 
-import '../../protobuf/video/coordinator/user_v1/user.pb.dart' as coord_users;
-import 'call/call.dart';
+import '../models/user_info.dart';
+import '../token/token.dart';
+import '../token/token_manager.dart';
 import 'coordinator/models/coordinator_models.dart';
 import 'coordinator/ws/coordinator_events.dart';
 import 'internal/_instance_holder.dart';
@@ -15,6 +12,7 @@ import 'model/call_cid.dart';
 import 'model/call_created.dart';
 import 'model/call_joined.dart';
 import 'model/call_received_created.dart';
+import 'shared_emitter.dart';
 import 'stream_video_v2_impl.dart';
 import 'utils/none.dart';
 import 'utils/result.dart';
@@ -37,6 +35,23 @@ const _defaultCoordinatorWsUrl =
 
 /// The client responsible for handling config and maintaining calls
 abstract class StreamVideoV2 {
+  factory StreamVideoV2(
+    String apiKey, {
+    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
+    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
+    int latencyMeasurementRounds = 3,
+    Level logLevel = Level.ALL,
+    LogHandlerFunction logHandlerFunction = _defaultLogHandler,
+  }) {
+    return StreamVideoV2Impl(
+      apiKey,
+      coordinatorRpcUrl: coordinatorRpcUrl,
+      coordinatorWsUrl: coordinatorWsUrl,
+      latencyMeasurementRounds: latencyMeasurementRounds,
+      logLevel: logLevel,
+      logHandlerFunction: logHandlerFunction,
+    );
+  }
   static final InstanceHolder _instanceHolder = InstanceHolder();
 
   UserInfo? get currentUser;
@@ -122,7 +137,10 @@ abstract class StreamVideoV2 {
   /// This is useful if you want to re-initialise the SDK with a different
   /// API key.
   static Future<void> reset({bool disconnectUser = false}) async {
-    return _instanceHolder.reset(disconnectUser: disconnectUser);
+    if (disconnectUser) {
+      await _instanceHolder.instance.disconnectUser();
+    }
+    return _instanceHolder.reset();
   }
 
   /// Return if the singleton instance of the Stream Video Client has already

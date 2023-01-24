@@ -38,7 +38,7 @@ class InstanceHolder {
     final instance = _instance;
     if (instance == null) {
       throw Exception(
-        'Please initialise Stream Video by calling StreamVideo.init()',
+        'Please initialise Stream Video by calling StreamVideoV2.init()',
       );
     }
     return instance;
@@ -54,10 +54,7 @@ class InstanceHolder {
   ///
   /// This is useful if you want to re-initialise the SDK with a different
   /// API key.
-  Future<void> reset({bool disconnectUser = false}) async {
-    if (disconnectUser) {
-      await _instance?.disconnectUser();
-    }
+  void reset() {
     _instance = null;
   }
 }

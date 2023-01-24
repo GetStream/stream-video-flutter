@@ -6,11 +6,9 @@ import '../model/call_status.dart';
 import '../model/drop_reason.dart';
 
 class CoordinatorReducer {
-  CoordinatorReducer(this.currentUserId);
+  CoordinatorReducer();
 
   late final _logger = taggedLogger(tag: 'SV:CoordReducer');
-
-  final String currentUserId;
 
   CallStateV2 reduce(
     CallStateV2 state,
