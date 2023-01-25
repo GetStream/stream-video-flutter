@@ -117,26 +117,29 @@ class _RegularCallParticipantsContentState
       // We are only able to show max 3 remote participants in the grid.
       ...remote.take(3),
     ];
+    // Show floating local participant if the feature is enabled and there
+    // are one or two remote remote participants. Otherwise show local
+    // participant in the grid.
+    final showFloatingParticipant =
+        widget.enableFloatingView && remote.isNotEmpty && remote.length < 3;
 
-    // Only display the local participant in grid if pip is not enabled or there
-    // are no remote participants.
-    if (!widget.enableFloatingView || remote.isEmpty) {
+    if (!showFloatingParticipant) {
       participantsToDisplay.add(local.first);
     }
 
-    Widget backgroundWidget = Container();
+    Widget participantGrid = Container();
     final participantsCount = participantsToDisplay.length;
     if (participantsCount == 1) {
-      backgroundWidget = _buildParticipant(participantsToDisplay, 0);
+      participantGrid = _buildParticipant(participantsToDisplay, 0);
     } else if (participantsCount == 2) {
-      backgroundWidget = Column(
+      participantGrid = Column(
         children: [
           Expanded(child: _buildParticipant(participantsToDisplay, 0)),
           Expanded(child: _buildParticipant(participantsToDisplay, 1)),
         ],
       );
     } else if (participantsCount == 3) {
-      backgroundWidget = Column(
+      participantGrid = Column(
         children: [
           Expanded(child: _buildParticipant(participantsToDisplay, 0)),
           Expanded(
@@ -150,7 +153,7 @@ class _RegularCallParticipantsContentState
         ],
       );
     } else if (participantsCount == 4) {
-      backgroundWidget = Column(
+      participantGrid = Column(
         children: [
           Expanded(
             child: Row(
@@ -172,8 +175,8 @@ class _RegularCallParticipantsContentState
       );
     }
 
-    if (!widget.enableFloatingView || remote.isEmpty) {
-      return backgroundWidget;
+    if (!showFloatingParticipant) {
+      return participantGrid;
     }
 
     final streamChatTheme =
@@ -202,7 +205,7 @@ class _RegularCallParticipantsContentState
 
         return Stack(
           children: [
-            backgroundWidget,
+            participantGrid,
             ValueListenableBuilder(
               valueListenable: bottomRightOffset,
               builder: (context, val, child) {
