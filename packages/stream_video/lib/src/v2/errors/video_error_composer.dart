@@ -3,7 +3,7 @@ import 'package:tart/tart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 /// TODO
-class VideoErrors {
+mixin VideoErrors {
   /// Composes [VideoError] instance.
   static VideoError compose(Object? exception, [StackTrace? stackTrace]) {
     if (exception is String && stackTrace != null) {

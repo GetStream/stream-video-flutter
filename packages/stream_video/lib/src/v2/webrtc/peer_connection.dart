@@ -2,14 +2,13 @@ import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
 import '../../disposable.dart';
 import '../../logger/stream_logger.dart';
-import '../errors/video_error.dart';
 import '../errors/video_error_composer.dart';
 import '../model/call_cid.dart';
 import '../utils/result.dart';
 import 'peer_type.dart';
 
 /// {@template onStreamAdded}
-/// Handler when a new [MediaStream] gets added.
+/// Handler when a new [rtc.MediaStream] gets added.
 /// {@endtemplate}
 typedef OnStreamAdded = void Function(StreamPeerConnection, rtc.MediaStream);
 
@@ -74,9 +73,9 @@ class StreamPeerConnection extends Disposable {
     try {
       final offer = await pc.createOffer(mediaConstraints);
       await pc.setLocalDescription(offer);
-      return Success(offer);
+      return Result.success(offer);
     } catch (e, stk) {
-      return Failure(VideoErrors.compose(e, stk));
+      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
@@ -89,9 +88,9 @@ class StreamPeerConnection extends Disposable {
     try {
       final answer = await pc.createAnswer(mediaConstraints);
       await pc.setLocalDescription(answer);
-      return Success(answer);
+      return Result.success(answer);
     } catch (e, stk) {
-      return Failure(VideoErrors.compose(e, stk));
+      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
@@ -123,9 +122,9 @@ class StreamPeerConnection extends Disposable {
         await pc.addCandidate(candidate);
       }
       _pendingCandidates.clear();
-      return Success(result);
+      return Result.success(result);
     } catch (e, stk) {
-      return Failure(VideoErrors.compose(e, stk));
+      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
@@ -138,16 +137,16 @@ class StreamPeerConnection extends Disposable {
       final remoteDescription = await pc.getRemoteDescription();
       if (remoteDescription == null) {
         _pendingCandidates.add(candidate);
-        return Failure(const VideoError(message: 'no remoteDescription set'));
+        return Result.error('no remoteDescription set');
       }
       final result = await pc.addCandidate(candidate);
-      return Success(result);
+      return Result.success(result);
     } catch (e, stk) {
-      return Failure(VideoErrors.compose(e, stk));
+      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
-  /// Adds a local [MediaStreamTrack] with audio to a given [connection].
+  /// Adds a local [rtc.MediaStreamTrack] with audio to a given [connection].
   Future<rtc.RTCRtpTransceiver> addAudioTransceiver({
     required rtc.MediaStream stream,
     required rtc.MediaStreamTrack track,
@@ -166,7 +165,7 @@ class StreamPeerConnection extends Disposable {
     return transceiver;
   }
 
-  /// Adds a local [MediaStreamTrack] with video to a given [connection].
+  /// Adds a local [rtc.MediaStreamTrack] with video to a given [connection].
   ///
   /// The video is then sent in three different resolutions using simulcast.
   Future<rtc.RTCRtpTransceiver> addVideoTransceiver({

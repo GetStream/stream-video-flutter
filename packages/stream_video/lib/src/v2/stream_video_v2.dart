@@ -58,7 +58,7 @@ abstract class StreamVideoV2 {
 
   SharedEmitter<CoordinatorEventV2> get events;
 
-  Function(CallCreated)? onCallCreated;
+  void Function(CallCreated)? onCallCreated;
 
   /// Connects the [user] to the Stream Video service.
   Future<void> connectUser(

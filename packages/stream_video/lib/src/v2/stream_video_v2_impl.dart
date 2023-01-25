@@ -15,7 +15,6 @@ import 'coordinator/models/coordinator_models.dart';
 import 'coordinator/ws/coordinator_events.dart';
 import 'coordinator/ws/coordinator_ws.dart';
 import 'coordinator/ws/mapper_extensions.dart';
-import 'errors/video_error.dart';
 import 'model/call_cid.dart';
 import 'model/call_created.dart';
 import 'model/call_joined.dart';
@@ -25,7 +24,6 @@ import 'state_emitter.dart';
 import 'stream_video_v2.dart';
 import 'utils/none.dart';
 import 'utils/result.dart';
-import 'utils/result_converters.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -113,7 +111,8 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   SharedEmitter<CoordinatorEventV2> get events => _events;
   final _events = MutableSharedEmitterImpl<CoordinatorEventV2>();
 
-  Function(CallCreated)? onCallCreated;
+  @override
+  void Function(CallCreated)? onCallCreated;
 
   /// Default log handler function for the [StreamVideoV2Impl] logger.
   static void defaultLogHandler(LogRecord record) {
@@ -206,14 +205,14 @@ class StreamVideoV2Impl implements StreamVideoV2 {
       () => '[createCall] cid: $cid, ringing: $ringing, '
           'participantIds: $participantIds',
     );
+
     final currentUserId = _state.currentUser.value?.id;
     if (currentUserId == null) {
       _logger.e(() => '[createCall] failed (no userId)');
-      return Failure(
-        const VideoError(message: '[createCall] failed; no user_id found'),
-      );
+      return Result.error('[createCall] failed; no user_id found');
     }
-    final result = await _client.createCall(
+
+    final response = await _client.createCall(
       rpc.CreateCallRequest(
         type: cid.type,
         id: cid.id,
@@ -228,17 +227,23 @@ class StreamVideoV2Impl implements StreamVideoV2 {
         ),
       ),
     );
-    if (result is! Success<rpc.CreateCallResponse>) {
-      _logger.e(() => '[createCall] failed: $result');
-      return result as Failure;
-    }
-    final finalResult = CallCreated(
-      callCid: cid,
-      ringing: ringing,
-      metadata: result.data.call.toCallMetadata(),
+
+    return response.map(
+      success: (it) {
+        final finalResult = CallCreated(
+          callCid: cid,
+          ringing: ringing,
+          metadata: it.data.call.toCallMetadata(),
+        );
+
+        _logger.v(() => '[createCall] completed: $finalResult');
+        return Result.success(finalResult);
+      },
+      failure: (it) {
+        _logger.e(() => '[createCall] failed: ${it.error}');
+        return it;
+      },
     );
-    _logger.v(() => '[createCall] completed: $finalResult');
-    return finalResult.toSuccess();
   }
 
   @override
@@ -251,14 +256,14 @@ class StreamVideoV2Impl implements StreamVideoV2 {
       () => '[getOrCreateCall] cid: $cid, ringing: $ringing, '
           'participantIds: $participantIds',
     );
+
     final currentUserId = _state.currentUser.value?.id;
     if (currentUserId == null) {
       _logger.e(() => '[getOrCreateCall] failed (no userId)');
-      return Failure(
-        const VideoError(message: '[createCall] failed; no user_id found'),
-      );
+      return Result.error('[createCall] failed; no user_id found');
     }
-    final result = await _client.getOrCreateCall(
+
+    final response = await _client.getOrCreateCall(
       rpc.GetOrCreateCallRequest(
         id: cid.id,
         type: cid.type,
@@ -273,21 +278,26 @@ class StreamVideoV2Impl implements StreamVideoV2 {
         ),
       ),
     );
-    if (result is! Success<rpc.GetOrCreateCallResponse>) {
-      _logger.e(() => '[getOrCreateCall] failed: $result');
-      return result as Failure;
-    }
 
-    final finalResult = CallReceivedOrCreated(
-      wasCreated: result.data.created,
-      data: CallCreated(
-        callCid: cid,
-        ringing: ringing,
-        metadata: result.data.call.toCallMetadata(),
-      ),
+    return response.map(
+      success: (it) {
+        final finalResult = CallReceivedOrCreated(
+          wasCreated: it.data.created,
+          data: CallCreated(
+            callCid: cid,
+            ringing: ringing,
+            metadata: it.data.call.toCallMetadata(),
+          ),
+        );
+
+        _logger.v(() => '[getOrCreateCall] completed: $finalResult');
+        return Result.success(finalResult);
+      },
+      failure: (it) {
+        _logger.e(() => '[getOrCreateCall] failed: ${it.error}');
+        return it;
+      },
     );
-    _logger.v(() => '[getOrCreateCall] completed: $finalResult');
-    return finalResult.toSuccess();
   }
 
   @override
@@ -312,13 +322,13 @@ class StreamVideoV2Impl implements StreamVideoV2 {
       _logger.e(() => '[joinCall] edge finding failed: $joinResult');
       return joinResult as Failure;
     }
-    final result = CallJoined(
+    final call = CallJoined(
       callCid: cid,
       metadata: edgeResult.data.call.toCallMetadata(),
       credentials: edgeResult.data.credentials.toCallCredentials(),
     );
-    _logger.v(() => '[joinCall] completed: $result');
-    return result.toSuccess();
+    _logger.v(() => '[joinCall] completed: $call');
+    return Result.success(call);
   }
 
   @override
@@ -361,10 +371,11 @@ class StreamVideoV2Impl implements StreamVideoV2 {
         eventType: eventType,
       ),
     );
-    if (result is Failure) {
-      return result;
-    }
-    return None().toSuccess();
+
+    return result.map(
+      success: (_) => Result.success(None()),
+      failure: (it) => it,
+    );
   }
 
   @override
@@ -380,10 +391,11 @@ class StreamVideoV2Impl implements StreamVideoV2 {
         type: eventType,
       ),
     );
-    if (result is Failure) {
-      return result;
-    }
-    return None().toSuccess();
+
+    return result.map(
+      success: (_) => Result.success(None()),
+      failure: (it) => it,
+    );
   }
 
   @override
@@ -403,17 +415,20 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     );
     _logger.v(() => '[queryUsers] request: $request');
     final usersResult = await _client.queryUsers(request);
-    if (usersResult is! Success<rpc.QueryUsersResponse>) {
-      return usersResult as Failure;
-    }
-    return usersResult.data.users.toCallUsers().toSuccess();
+
+    return usersResult.map(
+      success: (it) {
+        final users = it.data.users.toCallUsers();
+        _logger.v(() => '[queryUsers] completed: $users');
+        return Result.success(users);
+      },
+      failure: (it) => it,
+    );
   }
 }
 
 class _StreamVideoStateV2 {
-  final MutableStateEmitter<UserInfo?> currentUser = MutableStateEmitterImpl(
-    null,
-  );
+  final MutableStateEmitter<UserInfo?> currentUser = MutableStateEmitterImpl();
 
   Future<void> close() async {
     await currentUser.close();
