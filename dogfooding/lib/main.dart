@@ -7,6 +7,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'firebase_options.dart';
 import 'src/routes/app_routes.dart';
 
+@pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   _initStreamVideo();
@@ -14,7 +15,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> _handleRemoteMessage(RemoteMessage message) async {
-  await StreamVideo.instance.handlePushNotification(message);
+  print('Handling Remote Message with payload: ${message.data}');
+  await StreamVideo.instance.handlePushNotification(message, (call) {
+    print('JcLog: on call accepted, ${message.messageId}');
+  });
 }
 
 Future<void> main() async {
