@@ -1,9 +1,10 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../errors/video_error.dart';
 
 @immutable
-abstract class DropReason {
+abstract class DropReason extends Equatable {
   const DropReason();
 
   factory DropReason.timeout(Duration timeLimit) {
@@ -29,6 +30,9 @@ abstract class DropReason {
   factory DropReason.ended() {
     return DropReasonEnded();
   }
+
+  @override
+  List<Object?> get props => [];
 }
 
 class DropReasonTimeout extends DropReason {
@@ -37,19 +41,12 @@ class DropReasonTimeout extends DropReason {
   final Duration timeLimit;
 
   @override
+  List<Object?> get props => [timeLimit];
+
+  @override
   String toString() {
     return 'Timeout{timeLimit: $timeLimit}';
   }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is DropReasonTimeout &&
-          runtimeType == other.runtimeType &&
-          timeLimit == other.timeLimit;
-
-  @override
-  int get hashCode => timeLimit.hashCode;
 }
 
 class DropReasonFailure extends DropReason {
@@ -58,19 +55,12 @@ class DropReasonFailure extends DropReason {
   final VideoError error;
 
   @override
+  List<Object?> get props => [error];
+
+  @override
   String toString() {
     return 'Failure{error: $error}';
   }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is DropReasonFailure &&
-          runtimeType == other.runtimeType &&
-          error == other.error;
-
-  @override
-  int get hashCode => error.hashCode;
 }
 
 class DropReasonRejected extends DropReason {
@@ -81,19 +71,12 @@ class DropReasonRejected extends DropReason {
   final String byUserId;
 
   @override
+  List<Object?> get props => [byUserId];
+
+  @override
   String toString() {
     return 'Rejected{byUserId: $byUserId}';
   }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is DropReasonRejected &&
-          runtimeType == other.runtimeType &&
-          byUserId == other.byUserId;
-
-  @override
-  int get hashCode => byUserId.hashCode;
 }
 
 class DropReasonCancelled extends DropReason {
@@ -102,6 +85,9 @@ class DropReasonCancelled extends DropReason {
   });
 
   final String byUserId;
+
+  @override
+  List<Object?> get props => [byUserId];
 
   @override
   String toString() {

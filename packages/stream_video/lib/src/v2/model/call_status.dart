@@ -1,17 +1,19 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../coordinator/models/coordinator_models.dart';
 import 'drop_reason.dart';
 
 @immutable
-abstract class CallStatus {
+abstract class CallStatus extends Equatable {
   const CallStatus();
 
   factory CallStatus.idle() {
     return CallStatusIdle();
   }
 
-  factory CallStatus.initialized() {
-    return CallStatusInitialized();
+  factory CallStatus.created() {
+    return CallStatusCreated();
   }
 
   factory CallStatus.outgoing({
@@ -26,8 +28,8 @@ abstract class CallStatus {
     return CallStatusIncoming(acceptedByMe: acceptedByMe);
   }
 
-  factory CallStatus.connecting() {
-    return CallStatusConnecting();
+  factory CallStatus.joined(CallCredentials credentials) {
+    return CallStatusJoined(credentials: credentials);
   }
 
   factory CallStatus.connected() {
@@ -38,13 +40,16 @@ abstract class CallStatus {
     return CallStatusDrop(reason: reason);
   }
 
+  @override
+  List<Object?> get props => [];
+
   bool get isIdle => this is CallStatusIdle;
 
   bool get isActive => this is CallStatusActive;
 
   bool get isJoinable => this is CallStatusJoinable;
 
-  bool get isConnecting => this is CallStatusConnecting;
+  bool get isJoined => this is CallStatusJoined;
 
   bool get isConnected => this is CallStatusConnected;
 }
@@ -69,16 +74,15 @@ abstract class CallStatusJoinable extends CallStatusActive {
   const CallStatusJoinable();
 }
 
-class CallStatusInitialized extends CallStatusJoinable {
-  factory CallStatusInitialized() {
+class CallStatusCreated extends CallStatusJoinable {
+  factory CallStatusCreated() {
     return _instance;
   }
-  const CallStatusInitialized._internal();
-  static const CallStatusInitialized _instance =
-      CallStatusInitialized._internal();
+  const CallStatusCreated._internal();
+  static const CallStatusCreated _instance = CallStatusCreated._internal();
   @override
   String toString() {
-    return 'Initialized';
+    return 'Created';
   }
 }
 
@@ -86,6 +90,9 @@ class CallStatusOutgoing extends CallStatusJoinable {
   const CallStatusOutgoing({required this.acceptedByCallee});
 
   final bool acceptedByCallee;
+
+  @override
+  List<Object?> get props => [acceptedByCallee];
 
   @override
   String toString() {
@@ -99,22 +106,25 @@ class CallStatusIncoming extends CallStatusJoinable {
   final bool acceptedByMe;
 
   @override
+  List<Object?> get props => [acceptedByMe];
+
+  @override
   String toString() {
     return 'Outgoing{acceptedByMe: $acceptedByMe}';
   }
 }
 
-class CallStatusConnecting extends CallStatusActive {
-  factory CallStatusConnecting() {
-    return _instance;
-  }
-  const CallStatusConnecting._internal();
-  static const CallStatusConnecting _instance =
-      CallStatusConnecting._internal();
+class CallStatusJoined extends CallStatusActive {
+  const CallStatusJoined({required this.credentials});
+
+  final CallCredentials credentials;
+
+  @override
+  List<Object?> get props => [credentials];
 
   @override
   String toString() {
-    return 'Connecting';
+    return 'Joined{credentials: $credentials}';
   }
 }
 
@@ -134,6 +144,10 @@ class CallStatusDrop extends CallStatus {
   const CallStatusDrop({required this.reason});
 
   final DropReason reason;
+
+  @override
+  List<Object?> get props => [reason];
+
   @override
   String toString() {
     return 'Drop';

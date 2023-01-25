@@ -23,12 +23,14 @@ class CoordinatorCallCreatedEvent extends CoordinatorEventV2 {
     required this.ringing,
     required this.info,
     required this.details,
+    required this.users,
   });
 
   final String callCid;
   final bool ringing;
   final CallInfo info;
   final CallDetails details;
+  final Map<String, CallUser> users;
 }
 
 /// Sent when a call gets updated.
@@ -37,11 +39,13 @@ class CoordinatorCallUpdatedEvent extends CoordinatorEventV2 {
     required this.callCid,
     required this.info,
     required this.details,
+    required this.users,
   });
 
   final String callCid;
   final CallInfo info;
   final CallDetails details;
+  final Map<String, CallUser> users;
 }
 
 /// Sent when a calls gets ended.
@@ -50,11 +54,13 @@ class CoordinatorCallEndedEvent extends CoordinatorEventV2 {
     required this.callCid,
     required this.info,
     required this.details,
+    required this.users,
   });
 
   final String callCid;
   final CallInfo info;
   final CallDetails details;
+  final Map<String, CallUser> users;
 }
 
 /// Sent when a user accepts the call.
@@ -64,12 +70,14 @@ class CoordinatorCallAcceptedEvent extends CoordinatorEventV2 {
     required this.sentByUserId,
     required this.info,
     required this.details,
+    required this.users,
   });
 
   final String callCid;
   final String sentByUserId;
   final CallInfo info;
   final CallDetails details;
+  final Map<String, CallUser> users;
 }
 
 /// Sent when a user rejects the call.
@@ -79,12 +87,14 @@ class CoordinatorCallRejectedEvent extends CoordinatorEventV2 {
     required this.sentByUserId,
     required this.info,
     required this.details,
+    required this.users,
   });
 
   final String callCid;
   final String sentByUserId;
   final CallInfo info;
   final CallDetails details;
+  final Map<String, CallUser> users;
 }
 
 /// Sent when a user cancels the call.
@@ -94,12 +104,14 @@ class CoordinatorCallCancelledEvent extends CoordinatorEventV2 {
     required this.sentByUserId,
     required this.info,
     required this.details,
+    required this.users,
   });
 
   final String callCid;
   final String sentByUserId;
   final CallInfo info;
   final CallDetails details;
+  final Map<String, CallUser> users;
 }
 
 /// Sent when call members are updated.
@@ -108,11 +120,13 @@ class CoordinatorCallMembersUpdatedEvent extends CoordinatorEventV2 {
     required this.callCid,
     required this.info,
     required this.details,
+    required this.users,
   });
 
   final String callCid;
   final CallInfo info;
   final CallDetails details;
+  final Map<String, CallUser> users;
 }
 
 /// Sent when call members are deleted.
@@ -121,11 +135,33 @@ class CoordinatorCallMembersDeletedEvent extends CoordinatorEventV2 {
     required this.callCid,
     required this.info,
     required this.details,
+    required this.users,
   });
 
   final String callCid;
   final CallInfo info;
   final CallDetails details;
+  final Map<String, CallUser> users;
+}
+
+class CoordinatorCallCustomEvent extends CoordinatorEventV2 {
+  const CoordinatorCallCustomEvent({
+    required this.callCid,
+    required this.type,
+    required this.senderUserId,
+    required this.info,
+    required this.details,
+    required this.users,
+    required this.customJson,
+  });
+
+  final String callCid;
+  final String type;
+  final String senderUserId;
+  final CallInfo info;
+  final CallDetails details;
+  final Map<String, CallUser> users;
+  final String? customJson;
 }
 
 // Unknown event.

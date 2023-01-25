@@ -1,39 +1,28 @@
+import 'package:equatable/equatable.dart';
+import 'package:meta/meta.dart';
+
 import '../../model/call_cid.dart';
 
-class CallMetadataOld {
-  const CallMetadataOld({
-    required this.createdByMe,
-    required this.ringing,
-    required this.details,
-    required this.info,
-  });
-  final bool ringing;
-  final bool createdByMe;
-  final CallDetails details;
-  final CallInfo info;
-
-  @override
-  String toString() {
-    return 'CallMetadataOld{ringing: $ringing, createdByMe: $createdByMe,'
-        ' details: $details, info: $info}';
-  }
-}
-
-class CallMetadata {
+class CallMetadata extends Equatable {
   const CallMetadata({
     required this.details,
     required this.info,
+    required this.users,
   });
   final CallDetails details;
   final CallInfo info;
+  final Map<String, CallUser> users;
+
+  @override
+  List<Object> get props => [details, info, users];
 
   @override
   String toString() {
-    return 'CallMetadata{details: $details, info: $info}';
+    return 'CallMetadata{details: $details, info: $info, users: $users}';
   }
 }
 
-class CallSfuServer {
+class CallSfuServer extends Equatable {
   const CallSfuServer({
     required this.name,
     required this.url,
@@ -42,12 +31,15 @@ class CallSfuServer {
   final String url;
 
   @override
+  List<Object> get props => [name, url];
+
+  @override
   String toString() {
     return 'CallEdgeServer{name: $name, url: $url}';
   }
 }
 
-class CallIceServer {
+class CallIceServer extends Equatable {
   const CallIceServer({
     required this.username,
     required this.password,
@@ -58,13 +50,17 @@ class CallIceServer {
   final List<String> urls;
 
   @override
+  List<Object> get props => [username, password, urls];
+
+  @override
   String toString() {
     return 'CallIceServer{username: $username, '
         'password: $password, urls: $urls}';
   }
 }
 
-class CallCredentials {
+@immutable
+class CallCredentials extends Equatable {
   const CallCredentials({
     required this.sfuServer,
     required this.sfuToken,
@@ -75,13 +71,17 @@ class CallCredentials {
   final List<CallIceServer> iceServers;
 
   @override
+  List<Object> get props => [sfuServer, sfuToken, iceServers];
+
+  @override
   String toString() {
-    return 'CallCredentials{sfuToken: $sfuToken, '
+    return 'CallCredentials{sfuToken.length: ${sfuToken.length}, '
         'edgeServer: $sfuServer, iceServers: $iceServers}';
   }
 }
 
-class CallInfo {
+@immutable
+class CallInfo extends Equatable {
   const CallInfo({
     required this.cid,
     required this.createdByUserId,
@@ -95,6 +95,14 @@ class CallInfo {
   final DateTime? updatedAt;
 
   @override
+  List<Object> get props => [
+        cid,
+        createdByUserId,
+        createdAt ?? 0,
+        updatedAt ?? 0,
+      ];
+
+  @override
   String toString() {
     return 'CallInfo{cid: $cid, '
         'createdByUserId: $createdByUserId, createdAt: $createdAt, '
@@ -102,7 +110,8 @@ class CallInfo {
   }
 }
 
-class CallDetails {
+@immutable
+class CallDetails extends Equatable {
   const CallDetails({
     required this.memberUserIds,
     required this.members,
@@ -116,6 +125,14 @@ class CallDetails {
   final bool isRecordingEnabled;
 
   @override
+  List<Object> get props => [
+        memberUserIds,
+        members,
+        isBroadcastingEnabled,
+        isRecordingEnabled,
+      ];
+
+  @override
   String toString() {
     return 'CallDetails{memberUserIds: $memberUserIds, members: $members, '
         'isBroadcastingEnabled: $isBroadcastingEnabled, '
@@ -123,7 +140,7 @@ class CallDetails {
   }
 }
 
-class CallMember {
+class CallMember extends Equatable {
   const CallMember({
     required this.callCid,
     required this.userId,
@@ -139,13 +156,22 @@ class CallMember {
   final DateTime? updatedAt;
 
   @override
+  List<Object> get props => [
+        callCid,
+        userId,
+        role,
+        createdAt ?? 0,
+        updatedAt ?? 0,
+      ];
+
+  @override
   String toString() {
     return 'CallMember{callCid: $callCid, userId: $userId, role: $role,'
         ' createdAt: $createdAt, updatedAt: $updatedAt}';
   }
 }
 
-class CallUser {
+class CallUser extends Equatable {
   const CallUser({
     required this.id,
     required this.name,
@@ -165,6 +191,18 @@ class CallUser {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String? customJson;
+
+  @override
+  List<Object> get props => [
+        id,
+        name,
+        role,
+        imageUrl,
+        teams,
+        createdAt ?? 0,
+        updatedAt ?? 0,
+        customJson ?? '',
+      ];
 
   @override
   String toString() {

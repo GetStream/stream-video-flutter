@@ -24,12 +24,11 @@ abstract class CallStateManager {
   StateEmitter<CallStateV2> get state;
   Future<void> onUserIdSet(String userId);
   Future<void> onCallCreated(CallCreated data);
+  Future<void> onCallJoined(CallJoined data);
   Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data);
   Future<void> onCallAccepted();
   Future<void> onCallRejected();
   Future<void> onCallCancelled();
-  Future<void> onConnect();
-  Future<void> onJoined(CallJoined data);
   Future<void> onSessionStart(String sessionId);
   Future<void> onConnected();
   Future<void> onDisconnect();
@@ -112,13 +111,7 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  Future<void> onConnect() async {
-    _logger.d(() => '[onConnect] no args');
-    _postReduced(const CallConnectAction());
-  }
-
-  @override
-  Future<void> onJoined(CallJoined data) async {
+  Future<void> onCallJoined(CallJoined data) async {
     _logger.d(() => '[onJoined] data: $data');
     _postReduced(CallJoinedAction(data));
   }

@@ -48,7 +48,7 @@ class SfuWebSocket extends StreamWebSocket
     required this.sessionId,
   });
 
-  final _logger = taggedLogger(tag: 'Sfu-WS');
+  final _logger = taggedLogger(tag: 'SV:Sfu-WS');
 
   final String sessionId;
 

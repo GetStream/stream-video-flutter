@@ -1,3 +1,6 @@
+import 'package:meta/meta.dart';
+
+@immutable
 class StreamCallCid {
   factory StreamCallCid({required String cid}) {
     final typeAndId = cid.split(':');

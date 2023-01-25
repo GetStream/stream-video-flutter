@@ -9,6 +9,9 @@ abstract class Result<T> extends Equatable {
 
   factory Result.success(T value) => Success(value);
   factory Result.failure(VideoError error) => Failure(error);
+  factory Result.error(String message, [StackTrace? stackTrace]) => Failure(
+        VideoError(message: message, stackTrace: stackTrace),
+      );
 
   /// Checks if the result is a [Success].
   bool get isSuccess => this is Success<T>;
