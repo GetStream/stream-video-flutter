@@ -5,24 +5,29 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
-/// A style that overrides the default appearance of the floating pip widget in [StreamCallParticipants].
+/// A style that overrides the default appearance of the floating
+/// participant widget in [StreamCallParticipants].
 class StreamFloatingCallParticipantTheme with Diagnosticable {
   const StreamFloatingCallParticipantTheme({
     this.streamCallParticipantTheme = const StreamCallParticipantTheme(),
-    this.height = 140.0,
-    this.width = 220.0,
+    this.floatingParticipantHeight = 140,
+    this.floatingParticipantWidth = 220,
+    this.floatingParticipantPadding = 16,
     this.avatarSize,
     this.avatarBorderRadius,
   });
 
-  /// List divider color.
+  /// The theme for the participant item.
   final StreamCallParticipantTheme streamCallParticipantTheme;
 
-  /// List divider indent.
-  final double height;
+  /// The height of the floating participant item.
+  final double floatingParticipantHeight;
 
-  /// List divider height.
-  final double width;
+  /// The width of the floating participant item.
+  final double floatingParticipantWidth;
+
+  /// The padding between floating participant item and [StreamCallParticipants].
+  final double floatingParticipantPadding;
 
   /// Sets the avatar size in the floating participant.
   final double? avatarSize;
@@ -34,16 +39,21 @@ class StreamFloatingCallParticipantTheme with Diagnosticable {
   /// properties.
   StreamFloatingCallParticipantTheme copyWith({
     StreamCallParticipantTheme? streamCallParticipantTheme,
-    double? height,
-    double? width,
+    double? floatingParticipantHeight,
+    double? floatingParticipantWidth,
+    double? floatingParticipantPadding,
     double? avatarSize,
     BorderRadius? avatarBorderRadius,
   }) {
     return StreamFloatingCallParticipantTheme(
       streamCallParticipantTheme:
           streamCallParticipantTheme ?? this.streamCallParticipantTheme,
-      height: height ?? this.height,
-      width: width ?? this.width,
+      floatingParticipantHeight:
+          floatingParticipantHeight ?? this.floatingParticipantHeight,
+      floatingParticipantWidth:
+          floatingParticipantWidth ?? this.floatingParticipantWidth,
+      floatingParticipantPadding:
+          floatingParticipantPadding ?? this.floatingParticipantPadding,
       avatarSize: avatarSize ?? this.avatarSize,
       avatarBorderRadius: avatarBorderRadius ?? this.avatarBorderRadius,
     );
@@ -57,8 +67,12 @@ class StreamFloatingCallParticipantTheme with Diagnosticable {
     return StreamFloatingCallParticipantTheme(
       streamCallParticipantTheme:
           streamCallParticipantTheme.lerp(other.streamCallParticipantTheme, t),
-      height: lerpDouble(height, other.height, t)!,
-      width: lerpDouble(width, other.width, t)!,
+      floatingParticipantHeight: lerpDouble(
+          floatingParticipantHeight, other.floatingParticipantHeight, t)!,
+      floatingParticipantWidth: lerpDouble(
+          floatingParticipantWidth, other.floatingParticipantWidth, t)!,
+      floatingParticipantPadding: lerpDouble(
+          floatingParticipantPadding, other.floatingParticipantPadding, t)!,
       avatarSize: lerpDouble(avatarSize ?? 0, other.avatarSize ?? 0, t)!,
       avatarBorderRadius: BorderRadius.lerp(
         avatarBorderRadius ?? BorderRadius.zero,
@@ -74,16 +88,18 @@ class StreamFloatingCallParticipantTheme with Diagnosticable {
       other is StreamFloatingCallParticipantTheme &&
           runtimeType == other.runtimeType &&
           streamCallParticipantTheme == other.streamCallParticipantTheme &&
-          height == other.height &&
-          width == other.width &&
+          floatingParticipantHeight == other.floatingParticipantHeight &&
+          floatingParticipantWidth == other.floatingParticipantWidth &&
+          floatingParticipantPadding == other.floatingParticipantPadding &&
           avatarSize == other.avatarSize &&
           avatarBorderRadius == other.avatarBorderRadius;
 
   @override
   int get hashCode =>
       streamCallParticipantTheme.hashCode ^
-      height.hashCode ^
-      width.hashCode ^
+      floatingParticipantHeight.hashCode ^
+      floatingParticipantWidth.hashCode ^
+      floatingParticipantPadding.hashCode ^
       avatarSize.hashCode ^
       avatarBorderRadius.hashCode;
 
@@ -93,8 +109,9 @@ class StreamFloatingCallParticipantTheme with Diagnosticable {
     if (other == null) return this;
     return copyWith(
       streamCallParticipantTheme: other.streamCallParticipantTheme,
-      height: other.height,
-      width: other.width,
+      floatingParticipantHeight: other.floatingParticipantHeight,
+      floatingParticipantWidth: other.floatingParticipantWidth,
+      floatingParticipantPadding: other.floatingParticipantPadding,
       avatarSize: other.avatarSize,
       avatarBorderRadius: other.avatarBorderRadius,
     );
@@ -106,8 +123,12 @@ class StreamFloatingCallParticipantTheme with Diagnosticable {
     properties
       ..add(DiagnosticsProperty(
           'streamCallParticipantTheme', streamCallParticipantTheme))
-      ..add(DiagnosticsProperty('height', height))
-      ..add(DiagnosticsProperty('width', width))
+      ..add(DiagnosticsProperty(
+          'floatingParticipantHeight', floatingParticipantHeight))
+      ..add(DiagnosticsProperty(
+          'floatingParticipantWidth', floatingParticipantWidth))
+      ..add(DiagnosticsProperty(
+          'floatingParticipantPadding', floatingParticipantPadding))
       ..add(DiagnosticsProperty('avatarSize', avatarSize))
       ..add(DiagnosticsProperty('avatarBorderRadius', avatarBorderRadius));
   }

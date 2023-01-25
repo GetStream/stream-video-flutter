@@ -21,31 +21,34 @@ class StreamFloatingCallParticipant extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context).floatingCallParticipantTheme;
-    final height = theme.height;
-    final width = theme.width;
+    final height = theme.floatingParticipantHeight;
+    final width = theme.floatingParticipantWidth;
+    final padding = theme.floatingParticipantPadding;
     final avatarSize = theme.avatarSize ?? min(height, width) / 2.5;
     final avatarBorderRadius =
         theme.avatarBorderRadius ?? BorderRadius.circular(avatarSize);
 
     return SafeArea(
-      child: Container(
-        margin: const EdgeInsets.all(8),
-        width: width,
-        height: height,
-        child: Material(
-          elevation: 4,
-          borderRadius: BorderRadius.circular(8),
-          child: ClipRRect(
+      child: Padding(
+        padding: EdgeInsets.all(padding),
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: Material(
+            elevation: 8,
             borderRadius: BorderRadius.circular(8),
-            child: StreamCallParticipant(
-              participant: participant,
-              theme: StreamCallParticipantTheme(
-                avatarTheme: StreamAvatarTheme(
-                  constraints: BoxConstraints.tightFor(
-                    height: avatarSize,
-                    width: avatarSize,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: StreamCallParticipant(
+                participant: participant,
+                theme: StreamCallParticipantTheme(
+                  avatarTheme: StreamAvatarTheme(
+                    constraints: BoxConstraints.tightFor(
+                      height: avatarSize,
+                      width: avatarSize,
+                    ),
+                    borderRadius: avatarBorderRadius,
                   ),
-                  borderRadius: avatarBorderRadius,
                 ),
               ),
             ),
