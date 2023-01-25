@@ -29,6 +29,8 @@ export 'src/track/remote/video.dart';
 export 'src/track/track.dart';
 export 'src/types/other.dart';
 export 'src/v2/call/call.dart';
+export 'src/v2/call_participant_state.dart';
+export 'src/v2/call_state.dart';
 export 'src/v2/model/call_cid.dart';
 export 'src/v2/model/call_created.dart';
 export 'src/v2/model/call_joined.dart';

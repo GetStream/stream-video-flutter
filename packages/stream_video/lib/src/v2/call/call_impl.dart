@@ -11,7 +11,6 @@ import '../model/call_joined.dart';
 import '../model/call_received_created.dart';
 import '../model/call_status.dart';
 import '../sfu/data/events/sfu_events.dart';
-import '../sfu/data/models/sfu_track_type.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../stream_video_v2.dart';
@@ -40,14 +39,25 @@ class CallV2Impl extends CallV2 {
       stateManager: stateManager,
     );
   }
-  factory CallV2Impl.from({
+  factory CallV2Impl.created({
     required CallCreated data,
     StreamVideoV2? streamVideo,
   }) {
     final finalStreamVideo = streamVideo ?? StreamVideoV2.instance;
     final stateManager = _makeCallStateManager(data.callCid, finalStreamVideo);
     stateManager.onCallCreated(data);
-
+    return CallV2Impl._(
+      streamVideo: finalStreamVideo,
+      stateManager: stateManager,
+    );
+  }
+  factory CallV2Impl.joined({
+    required CallJoined data,
+    StreamVideoV2? streamVideo,
+  }) {
+    final finalStreamVideo = streamVideo ?? StreamVideoV2.instance;
+    final stateManager = _makeCallStateManager(data.callCid, finalStreamVideo);
+    stateManager.onCallJoined(data);
     return CallV2Impl._(
       streamVideo: finalStreamVideo,
       stateManager: stateManager,
@@ -187,9 +197,9 @@ class CallV2Impl extends CallV2 {
     }
     final state = _stateManager.state.value;
     final status = state.status;
-    if (!status.isJoinable) {
-      _logger.w(() => '[connect] rejected (status not Joinable): $status');
-      return Failure(VideoError(message: 'invalid status: $status'));
+    if (!status.isJoinable && !status.isJoined) {
+      _logger.w(() => '[connect] rejected (not Joinable/Joined): $status');
+      return Result.error('invalid status: $status');
     }
     final result = await _awaitIfNeeded(settings.dropTimeout);
     if (result is Failure) {
@@ -197,14 +207,13 @@ class CallV2Impl extends CallV2 {
       await _stateManager.onWaitingTimeout(settings.dropTimeout);
       return result;
     }
-    await _stateManager.onConnect();
     final joinedResult = await _streamVideo.joinCall(cid: state.callCid);
     if (joinedResult is! Success<CallJoined>) {
       _logger.w(() => '[connect] join failed: $joinedResult');
       await _stateManager.onConnectFailed((joinedResult as Failure).error);
       return joinedResult;
     }
-    await _stateManager.onJoined(joinedResult.data);
+    await _stateManager.onCallJoined(joinedResult.data);
     final sessionResult = await _startSession(joinedResult.data);
     if (sessionResult is! Success<None>) {
       _logger.w(() => '[connect] session start failed: $sessionResult');
@@ -335,7 +344,7 @@ extension on CallStateManager {
     final stateUserId = state.value.currentUserId;
     final currentUserId = streamVideo.currentUser?.id ?? '';
     if (currentUserId.isEmpty) {
-      return Failure(const VideoError(message: 'no userId'));
+      return const Failure(VideoError(message: 'no userId'));
     }
     if (stateUserId.isEmpty) {
       await onUserIdSet(currentUserId);

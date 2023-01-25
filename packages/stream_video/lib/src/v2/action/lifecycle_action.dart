@@ -39,10 +39,6 @@ class CallCancelledAction extends LifecycleAction {
   const CallCancelledAction();
 }
 
-class CallConnectAction extends LifecycleAction {
-  const CallConnectAction();
-}
-
 class CallJoinedAction extends LifecycleAction {
   const CallJoinedAction(this.data);
 

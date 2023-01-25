@@ -63,12 +63,12 @@ class RtcManager extends Disposable {
     const direction = rtc.TransceiverDirection.RecvOnly;
     final tempPC = await rtc.createPeerConnection({});
 
-    final audio = await tempPC.addTransceiver(
+    await tempPC.addTransceiver(
       kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
       init: rtc.RTCRtpTransceiverInit(direction: direction),
     );
 
-    final video = await tempPC.addTransceiver(
+    await tempPC.addTransceiver(
       kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
       init: rtc.RTCRtpTransceiverInit(direction: direction),
     );
@@ -76,9 +76,7 @@ class RtcManager extends Disposable {
     final offer = await tempPC.createOffer();
     final sdp = offer.sdp;
 
-    await audio.stop();
-    await video.stop();
-    await tempPC.close();
+    await tempPC.dispose();
 
     return sdp!;
   }

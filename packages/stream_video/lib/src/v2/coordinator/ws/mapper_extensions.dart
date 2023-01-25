@@ -34,18 +34,21 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
           ringing: callCreated.ringing,
           info: callCreated.call.toCallInfo(),
           details: callCreated.callDetails.toCallDetails(),
+          users: users.toCallUsers(),
         );
       case coordinator_ws.WebsocketEvent_Event.callUpdated:
         return CoordinatorCallUpdatedEvent(
           callCid: callUpdated.call.callCid,
           info: callUpdated.call.toCallInfo(),
           details: callUpdated.callDetails.toCallDetails(),
+          users: users.toCallUsers(),
         );
       case coordinator_ws.WebsocketEvent_Event.callEnded:
         return CoordinatorCallEndedEvent(
           callCid: callEnded.call.callCid,
           info: callEnded.call.toCallInfo(),
           details: callEnded.callDetails.toCallDetails(),
+          users: users.toCallUsers(),
         );
       case coordinator_ws.WebsocketEvent_Event.callAccepted:
         return CoordinatorCallAcceptedEvent(
@@ -53,6 +56,7 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
           sentByUserId: callAccepted.senderUserId,
           info: callAccepted.call.toCallInfo(),
           details: callAccepted.callDetails.toCallDetails(),
+          users: users.toCallUsers(),
         );
       case coordinator_ws.WebsocketEvent_Event.callRejected:
         return CoordinatorCallRejectedEvent(
@@ -60,6 +64,7 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
           sentByUserId: callRejected.senderUserId,
           info: callRejected.call.toCallInfo(),
           details: callRejected.callDetails.toCallDetails(),
+          users: users.toCallUsers(),
         );
       case coordinator_ws.WebsocketEvent_Event.callCancelled:
         return CoordinatorCallCancelledEvent(
@@ -67,18 +72,31 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
           sentByUserId: callCancelled.senderUserId,
           info: callCancelled.call.toCallInfo(),
           details: callCancelled.callDetails.toCallDetails(),
+          users: users.toCallUsers(),
         );
       case coordinator_ws.WebsocketEvent_Event.callMembersUpdated:
         return CoordinatorCallMembersUpdatedEvent(
           callCid: callMembersUpdated.call.callCid,
           info: callMembersUpdated.call.toCallInfo(),
           details: callMembersUpdated.callDetails.toCallDetails(),
+          users: users.toCallUsers(),
         );
       case coordinator_ws.WebsocketEvent_Event.callMembersDeleted:
         return CoordinatorCallMembersDeletedEvent(
           callCid: callMembersDeleted.call.callCid,
           info: callMembersDeleted.call.toCallInfo(),
           details: callMembersDeleted.callDetails.toCallDetails(),
+          users: users.toCallUsers(),
+        );
+      case coordinator_ws.WebsocketEvent_Event.callCustom:
+        return CoordinatorCallCustomEvent(
+          callCid: callCustom.call.callCid,
+          type: callCustom.type,
+          senderUserId: callCustom.senderUserId,
+          info: callCustom.call.toCallInfo(),
+          details: callCustom.callDetails.toCallDetails(),
+          users: users.toCallUsers(),
+          customJson: utf8.decode(callCustom.dataJson),
         );
       default:
         logger.warning('Unknown Video Event $eventType');
@@ -117,20 +135,11 @@ extension MemberExt on Member {
 }
 
 extension EnvelopeExt on coordinator_envelopes.CallEnvelope {
-  CallMetadataOld toCallMetadataOld(
-      {required bool ringing, required bool created}) {
-    return CallMetadataOld(
-      createdByMe: created,
-      ringing: ringing,
-      details: details.toCallDetails(),
-      info: call.toCallInfo(),
-    );
-  }
-
   CallMetadata toCallMetadata() {
     return CallMetadata(
       details: details.toCallDetails(),
       info: call.toCallInfo(),
+      users: users.map((key, value) => MapEntry(key, value.toCallUser())),
     );
   }
 }
@@ -140,8 +149,8 @@ extension CredentialsExt on coord_edge.Credentials {
     return CallCredentials(
       sfuToken: token,
       sfuServer: CallSfuServer(
-        url: server.edgeName,
-        name: server.url,
+        url: server.url,
+        name: server.edgeName,
       ),
       iceServers: iceServers
           .map(
@@ -166,9 +175,7 @@ extension UserExt on coord_users.User {
       imageUrl: imageUrl,
       createdAt: createdAt.toDateTime(),
       updatedAt: updatedAt.toDateTime(),
-      customJson: json.decode(
-        utf8.decode(customJson),
-      ),
+      customJson: utf8.decode(customJson),
     );
   }
 }
@@ -176,5 +183,11 @@ extension UserExt on coord_users.User {
 extension UserListExt on List<coord_users.User> {
   List<CallUser> toCallUsers() {
     return map((it) => it.toCallUser()).toList();
+  }
+}
+
+extension UserMapExt on Map<String, coord_users.User> {
+  Map<String, CallUser> toCallUsers() {
+    return map((key, value) => MapEntry(key, value.toCallUser()));
   }
 }

@@ -19,6 +19,8 @@ class LifecycleReducer {
       return _reduceUserId(state, action);
     } else if (action is CallCreatedAction) {
       return _reduceCallCreated(state, action);
+    } else if (action is CallJoinedAction) {
+      return _reduceCallJoined(state, action);
     } else if (action is CallDestroyedAction) {
       return _reduceCallDestroyed(state, action);
     } else if (action is CallAcceptedAction) {
@@ -31,10 +33,6 @@ class LifecycleReducer {
       return _reduceCallTimeout(state, action);
     } else if (action is CallConnectFailedAction) {
       return _reduceCallConnectFailed(state, action);
-    } else if (action is CallConnectAction) {
-      return _reduceCallConnect(state, action);
-    } else if (action is CallJoinedAction) {
-      return _reduceCallJoined(state, action);
     } else if (action is CallSessionStartAction) {
       return _reduceCallSessionStart(state, action);
     } else if (action is CallConnectedAction) {
@@ -64,6 +62,18 @@ class LifecycleReducer {
         currentUserId: state.currentUserId,
         ringing: action.data.ringing,
       ),
+      callParticipants: action.data.metadata.toCallParticipants(
+        state.currentUserId,
+      ),
+    );
+  }
+
+  CallStateV2 _reduceCallJoined(
+    CallStateV2 state,
+    CallJoinedAction action,
+  ) {
+    return state.copyWith(
+      status: CallStatus.joined(action.data.credentials),
       callParticipants: action.data.metadata.toCallParticipants(
         state.currentUserId,
       ),
@@ -148,13 +158,6 @@ class LifecycleReducer {
     CallStateV2 state,
     CallTimeoutAction action,
   ) {
-    final status = state.status;
-    if (!status.isJoinable) {
-      _logger.w(
-        () => '[reduceCallTimeout] rejected (not Joinable): $status',
-      );
-      return state;
-    }
     return state.copyWith(
       status: CallStatus.drop(DropReason.timeout(action.timeLimit)),
     );
@@ -164,40 +167,8 @@ class LifecycleReducer {
     CallStateV2 state,
     CallConnectFailedAction action,
   ) {
-    final status = state.status;
-    if (!status.isConnecting) {
-      _logger.w(
-        () => '[reduceCallConnectFailed] rejected (not Connecting): $status',
-      );
-      return state;
-    }
     return state.copyWith(
       status: CallStatus.drop(DropReason.failure(action.error)),
-    );
-  }
-
-  CallStateV2 _reduceCallConnect(
-    CallStateV2 state,
-    CallConnectAction action,
-  ) {
-    final status = state.status;
-    if (!status.isJoinable) {
-      _logger.w(() => '[reduceCallConnect] rejected (not Joinable): $status');
-      return state;
-    }
-    return state.copyWith(
-      status: CallStatus.connecting(),
-    );
-  }
-
-  CallStateV2 _reduceCallJoined(
-    CallStateV2 state,
-    CallJoinedAction action,
-  ) {
-    return state.copyWith(
-      callParticipants: action.data.metadata.toCallParticipants(
-        state.currentUserId,
-      ),
     );
   }
 
@@ -212,11 +183,6 @@ class LifecycleReducer {
     CallStateV2 state,
     CallConnectedAction action,
   ) {
-    final status = state.status;
-    if (!status.isConnecting) {
-      _logger.w(() => '[reduceCallConnected] rejected (not Joinable): $status');
-      return state;
-    }
     return state.copyWith(
       status: CallStatus.connected(),
     );
@@ -234,7 +200,7 @@ extension on CallMetadata {
     } else if (!createdByMe && ringing) {
       return CallStatus.incoming();
     } else {
-      return CallStatus.initialized();
+      return CallStatus.created();
     }
   }
 
@@ -242,12 +208,13 @@ extension on CallMetadata {
     final result = <String, CallParticipantStateV2>{};
     for (final userId in details.memberUserIds) {
       final member = details.members[userId];
+      final user = users[userId];
       final isLocal = currentUserId == userId;
       result[userId] = CallParticipantStateV2(
         userId: userId,
-        role: member?.role ?? '',
-        name: '',
-        profileImageURL: '',
+        role: member?.role ?? user?.role ?? '',
+        name: user?.name ?? '',
+        profileImageURL: user?.imageUrl ?? '',
         sessionId: '',
         trackIdPrefix: '',
         isLocal: isLocal,

@@ -3,11 +3,24 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'routes.dart';
+import 'src/v2/routes_v2.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  /* TODO
   StreamVideo.init(
+    'key10', // see <video>/data/fixtures/apps.yaml for API secret
+    coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
+        'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
+    // 'http://192.168.1.7:26991/rpc',
+    coordinatorWsUrl: //replace host with your local ip address
+        'wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
+    // 'ws://192.168.1.7:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
+  );
+  */
+
+  StreamVideoV2.init(
     'key10', // see <video>/data/fixtures/apps.yaml for API secret
     coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
         'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
@@ -21,7 +34,7 @@ Future<void> main() async {
 }
 
 class StreamUIExampleApp extends StatelessWidget {
-  const StreamUIExampleApp({Key? key}) : super(key: key);
+  const StreamUIExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +43,8 @@ class StreamUIExampleApp extends StatelessWidget {
       theme: ThemeData(
         textTheme: GoogleFonts.robotoMonoTextTheme(),
       ),
-      onGenerateRoute: Routes.generateRoute,
+      // onGenerateRoute: Routes.generateRoute,
+      onGenerateRoute: RoutesV2.generateRoute,
     );
   }
 }

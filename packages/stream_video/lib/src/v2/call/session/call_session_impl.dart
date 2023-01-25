@@ -69,10 +69,12 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   @override
   Future<Result<None>> start() async {
     try {
+      _logger.d(() => '[start] no args');
       sfuWS.addEventListener(this);
       await sfuWS.connect();
+      _logger.v(() => '[start] sfu connected');
       final genericSdp = await RtcManager.getGenericSdp();
-
+      _logger.v(() => '[start] genericSdp.len: ${genericSdp.length}');
       sfuWS.send(
         sfu_events.SfuRequest(
           joinRequest: sfu_events.JoinRequest(
@@ -82,32 +84,34 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
           ),
         ),
       );
-
+      _logger.v(() => '[start] wait for SfuJoinResponseEvent');
       final event = await sfuWS.events.waitFor<SfuJoinResponseEvent>(
         timeLimit: const Duration(seconds: 30),
       );
+      _logger.v(() => '[start] event: $event');
       final currentUserId = stateManager.state.value.currentUserId;
       final localParticipant = event.callState.participants.firstWhere(
         (it) => it.userId == currentUserId,
       );
       final localTrackId = localParticipant.trackLookupPrefix;
-
+      _logger.v(() => '[start] localTrackId: $localTrackId');
       rtcManager =
           await rtcManagerFactory.makeRtcManager(publisherId: localTrackId)
             ..onPublisherIceCandidate = _onLocalIceCandidate
             ..onSubscriberIceCandidate = _onLocalIceCandidate
             ..onPublisherTrackMuted = _onPublisherTrackMuted
             ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded;
-
+      _logger.v(() => '[start] completed');
       return None().toSuccess();
     } catch (e, stk) {
-      _logger.e(() => '[establish] failed: $e');
+      _logger.e(() => '[start] failed: $e');
       return VideoErrors.compose(e, stk).toFailure();
     }
   }
 
   @override
   Future<void> dispose() async {
+    _logger.d(() => '[dispose] no args');
     sfuWS.removeEventListener(this);
     await sfuWS.disconnect();
     await rtcManager.dispose();
@@ -116,11 +120,13 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
 
   @override
   Future<void> onSfuError(VideoError error) async {
+    _logger.e(() => '[onSfuError] error: $error');
     // TODO: implement onError
   }
 
   @override
   Future<void> onSfuEvent(SfuEventV2 event) async {
+    _logger.v(() => '[onSfuEvent] event: $event');
     await stateManager.onSfuEvent(event);
     if (event is SfuSubscriberOfferEvent) {
       await _onSubscriberOffer(event);

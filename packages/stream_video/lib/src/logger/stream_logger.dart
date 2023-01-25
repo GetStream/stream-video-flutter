@@ -15,23 +15,23 @@ class TaggedLogger {
   final String tag;
 
   void v(MessageBuilder message) {
-    print('(V/$tag): ${message()}');
+    print('🔍 (V/$tag): ${message()}');
   }
 
   void d(MessageBuilder message) {
-    print('(D/$tag): ${message()}');
+    print('🔧 (D/$tag): ${message()}');
   }
 
   void i(MessageBuilder message) {
-    print('(I/$tag): ${message()}');
+    print('ℹ️ (I/$tag): ${message()}');
   }
 
   void w(MessageBuilder message) {
-    print('(W/$tag): ${message()}');
+    print('⚠️ (W/$tag): ${message()}');
   }
 
   void e(MessageBuilder message) {
-    print('(E/$tag): ${message()}');
+    print('🚨 (E/$tag): ${message()}');
   }
 
   void _log(Priority priority, String Function() messageBuilder) {}

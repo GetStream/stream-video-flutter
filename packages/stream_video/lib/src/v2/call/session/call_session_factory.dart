@@ -60,6 +60,8 @@ class CallSessionFactory {
     required this.callCid,
   });
 
+  late final _logger = taggedLogger(tag: 'SV:CallSessionFactory');
+
   final StreamCallCid callCid;
 
   Future<CallSession> makeCallSession({
@@ -67,7 +69,7 @@ class CallSessionFactory {
     required CallStateManager stateManager,
   }) async {
     final sessionId = const Uuid().v4();
-
+    _logger.d(() => '[makeCallSession] sessionId: $sessionId');
     final rtcConfig = _makeRtcConfig(credentials.iceServers) ??
         defaultRtcConfiguration(credentials.sfuServer.url);
     final sessionConfig = CallSessionConfig(
@@ -75,6 +77,7 @@ class CallSessionFactory {
       sfuToken: credentials.sfuToken,
       rtcConfig: rtcConfig,
     );
+    _logger.v(() => '[makeCallSession] sfuUrl: ${sessionConfig.sfuUrl}');
     return CallSessionImpl(
       callCid: callCid,
       sessionId: sessionId,

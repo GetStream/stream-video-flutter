@@ -164,6 +164,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
             metadata: CallMetadata(
               details: event.details,
               info: event.info,
+              users: event.users,
             ),
           );
           onCallCreated?.call(callCreated);
@@ -312,6 +313,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
       return joinResult as Failure;
     }
     final result = CallJoined(
+      callCid: cid,
       metadata: edgeResult.data.call.toCallMetadata(),
       credentials: edgeResult.data.credentials.toCallCredentials(),
     );
@@ -388,12 +390,18 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   Future<Result<List<CallUser>>> queryUsers({
     required Set<String> userIds,
   }) async {
-    final mqJson = {'id': userIds};
+    final mqJson = {
+      'id': {
+        r'$in': userIds.toList(),
+      },
+    };
+    _logger.d(() => '[queryUsers] mqJson: $mqJson');
     final request = rpc.QueryUsersRequest(
       mqJson: utf8.encode(
         json.encode(mqJson),
       ),
     );
+    _logger.v(() => '[queryUsers] request: $request');
     final usersResult = await _client.queryUsers(request);
     if (usersResult is! Success<rpc.QueryUsersResponse>) {
       return usersResult as Failure;

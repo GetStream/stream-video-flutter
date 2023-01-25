@@ -1,3 +1,4 @@
+import '../../logger/stream_logger.dart';
 import '../../types/other.dart';
 import '../model/call_cid.dart';
 import 'peer_connection_factory.dart';
@@ -14,6 +15,8 @@ class RtcManagerFactory {
           callCid: callCid,
         );
 
+  final _logger = taggedLogger(tag: 'SV:RtcManagerFactory');
+
   final String sessionId;
   final StreamCallCid callCid;
   final RTCConfiguration configuration;
@@ -23,6 +26,7 @@ class RtcManagerFactory {
   Future<RtcManager> makeRtcManager({
     required String publisherId,
   }) async {
+    _logger.d(() => '[makeRtcManager] publisherId: $publisherId');
     final publisher = await pcFactory.makePublisher(
       configuration,
       mediaConstraints,
@@ -31,7 +35,6 @@ class RtcManagerFactory {
       configuration,
       mediaConstraints,
     );
-
     return RtcManager(
       sessionId: sessionId,
       callCid: callCid,
