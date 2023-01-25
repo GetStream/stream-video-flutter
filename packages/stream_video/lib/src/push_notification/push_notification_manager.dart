@@ -1,8 +1,8 @@
-import 'package:collection/collection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../call/call.dart';
+import '../models/call_configuration.dart';
 import '../stream_video.dart';
 import 'call_notification_wrapper.dart';
 
@@ -44,14 +44,22 @@ class PushNotificationManager {
       final cid = remoteMessage.data['call_cid'] as String;
       final type = cid.substring(0, cid.indexOf(':'));
       final id = cid.substring(cid.indexOf(':') + 1);
-      final call = await _client.getOrCreateCall(type: type, id: id);
+      // final call = await _client.getOrCreateCall(type: type, id: id);
       await _callNotification.showCallNotification(
         callId: cid,
-        callers: call.users.values.map((e) => e.name).join(', '),
+        callers: 'Jc, Isa', //call.users.values.map((e) => e.name).join(', '),
         isVideoCall: true,
-        avatarUrl: call.users.values.firstOrNull?.imageUrl,
+        avatarUrl: '', //call.users.values.firstOrNull?.imageUrl,
         onCallAccepted: (cid) async {
-          onCallAccepted(await _acceptCall(cid));
+          onCallAccepted(
+            Call(
+              callConfiguration: const CallConfiguration(
+                type: 'type',
+                id: 'id',
+                participantIds: ['jc', 'isa'],
+              ),
+            ),
+          );
         },
         onCallRejected: _rejectCall,
       );
