@@ -31,8 +31,10 @@ abstract class MutableStateEmitter<T> extends StateEmitter<T> {
 /// TODO
 class MutableStateEmitterImpl<T> extends MutableStateEmitter<T> {
   /// Creates a new instance with given [initialValue].
-  MutableStateEmitterImpl(T initialValue)
-      : _state = BehaviorSubject.seeded(initialValue);
+  MutableStateEmitterImpl([T? initialValue])
+      : _state = initialValue == null
+            ? BehaviorSubject()
+            : BehaviorSubject.seeded(initialValue);
 
   final BehaviorSubject<T> _state;
 

@@ -20,7 +20,6 @@ import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
-import '../../utils/result_converters.dart';
 import '../../webrtc/media/constraints/camera_position.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
 import '../../webrtc/peer_connection.dart';
@@ -102,10 +101,10 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
             ..onPublisherTrackMuted = _onPublisherTrackMuted
             ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded;
       _logger.v(() => '[start] completed');
-      return None().toSuccess();
+      return Result.success(None());
     } catch (e, stk) {
       _logger.e(() => '[start] failed: $e');
-      return VideoErrors.compose(e, stk).toFailure();
+      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
@@ -249,17 +248,13 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return _onSetCameraPosition(action.cameraPosition);
     }
 
-    return Result.failure(const VideoError(message: 'Action not supported'));
+    return Result.error('Action not supported');
   }
 
   Future<Result<None>> _onSetCameraEnabled(bool enabled) async {
     final track = await rtcManager.setCameraEnabled(enabled: enabled);
     if (track == null) {
-      return Result.failure(
-        const VideoError(
-          message: 'Unable to enable/disable camera, Track not found',
-        ),
-      );
+      return Result.error('Unable to enable/disable camera, Track not found');
     }
 
     return Result.success(None());
@@ -268,10 +263,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   Future<Result<None>> _onSetMicrophoneEnabled(bool enabled) async {
     final track = await rtcManager.setMicrophoneEnabled(enabled: enabled);
     if (track == null) {
-      return Result.failure(
-        const VideoError(
-          message: 'Unable to enable/disable microphone, Track not found',
-        ),
+      return Result.error(
+        'Unable to enable/disable microphone, Track not found',
       );
     }
 
@@ -281,10 +274,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   Future<Result<None>> _onSetScreenShareEnabled(bool enabled) async {
     final track = await rtcManager.setScreenShareEnabled(enabled: enabled);
     if (track == null) {
-      return Result.failure(
-        const VideoError(
-          message: 'Unable to enable/disable screen-share, Track not found',
-        ),
+      return Result.error(
+        'Unable to enable/disable screen-share, Track not found',
       );
     }
 
@@ -294,11 +285,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   Future<Result<None>> _onSetCameraPosition(CameraPosition position) async {
     final track = await rtcManager.setCameraPosition(cameraPosition: position);
     if (track == null) {
-      return Result.failure(
-        const VideoError(
-          message: 'Unable to set camera position, Track not found',
-        ),
-      );
+      return Result.error('Unable to set camera position, Track not found');
     }
 
     return Result.success(None());

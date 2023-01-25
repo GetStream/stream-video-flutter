@@ -1,14 +1,13 @@
-import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
-    as sfu_models;
-import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
-    as sfu;
-import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart'
-    as signal_twirp;
-import 'package:stream_video/src/logger/stream_logger.dart';
-import 'package:stream_video/src/v2/sfu/sfu_client.dart';
-import 'package:stream_video/src/v2/utils/result.dart';
-import 'package:stream_video/src/v2/utils/result_converters.dart';
 import 'package:tart/tart.dart';
+
+import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
+import '../../../protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart'
+    as signal_twirp;
+import '../../logger/stream_logger.dart';
+import '../errors/video_error_composer.dart';
+import '../utils/result.dart';
+import 'sfu_client.dart';
 
 /// TODO
 class SfuClientImpl extends SfuClientV2 {
@@ -38,10 +37,10 @@ class SfuClientImpl extends SfuClientV2 {
     sfu.SendAnswerRequest request,
   ) async {
     try {
-      final result = await _client.sendAnswer(_withAuthHeaders(), request);
-      return result.toSuccess();
+      final response = await _client.sendAnswer(_withAuthHeaders(), request);
+      return Result.success(response);
     } catch (e, stk) {
-      return e.toFailure(stk);
+      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
@@ -50,10 +49,10 @@ class SfuClientImpl extends SfuClientV2 {
     sfu_models.ICETrickle request,
   ) async {
     try {
-      final result = await _client.iceTrickle(_withAuthHeaders(), request);
-      return result.toSuccess();
+      final response = await _client.iceTrickle(_withAuthHeaders(), request);
+      return Result.success(response);
     } catch (e, stk) {
-      return e.toFailure(stk);
+      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
@@ -62,10 +61,10 @@ class SfuClientImpl extends SfuClientV2 {
     sfu.SetPublisherRequest request,
   ) async {
     try {
-      final result = await _client.setPublisher(_withAuthHeaders(), request);
-      return result.toSuccess();
+      final response = await _client.setPublisher(_withAuthHeaders(), request);
+      return Result.success(response);
     } catch (e, stk) {
-      return e.toFailure(stk);
+      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
@@ -74,13 +73,13 @@ class SfuClientImpl extends SfuClientV2 {
     sfu.UpdateMuteStatesRequest request,
   ) async {
     try {
-      final result = await _client.updateMuteStates(
+      final response = await _client.updateMuteStates(
         _withAuthHeaders(),
         request,
       );
-      return result.toSuccess();
+      return Result.success(response);
     } catch (e, stk) {
-      return e.toFailure(stk);
+      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
@@ -89,13 +88,13 @@ class SfuClientImpl extends SfuClientV2 {
     sfu.UpdateSubscriptionsRequest request,
   ) async {
     try {
-      final result = await _client.updateSubscriptions(
+      final response = await _client.updateSubscriptions(
         _withAuthHeaders(),
         request,
       );
-      return result.toSuccess();
+      return Result.success(response);
     } catch (e, stk) {
-      return e.toFailure(stk);
+      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
