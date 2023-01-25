@@ -27,14 +27,13 @@ Future<void> _handleRemoteMessage(RemoteMessage message) async {
 }
 
 Future<void> main() async {
+  print('JcLog: Initializing main app');
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   _initStreamVideo();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
-  runApp(const StreamDogFoodingApp());
+  runApp(StreamDogFoodingApp());
 }
 
 void _initStreamVideo() {
@@ -61,10 +60,46 @@ class StreamDogFoodingApp extends StatefulWidget {
 class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late StreamSubscription<Uri?> _subscription;
+  // It is assumed that all messages contain a data field with the key 'type'
+  Future<void> setupInteractedMessage() async {
+    // Get any messages which caused the application to open from
+    // a terminated state.
+    final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+
+    print('JcLog: initialMessage: $initialMessage');
+
+    // If the message also contains a data property with a "type" of "chat",
+    // navigate to a chat screen
+    if (initialMessage != null) {
+      _handleMessage(initialMessage);
+    }
+
+    // Also handle any interaction when the app is in the background via a
+    // Stream listener
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+  }
+
+  void _handleMessage(RemoteMessage message) {
+    print('JcLog: handling opened PN');
+    // if (message.data['type'] == 'chat') {
+    //   Navigator.pushNamed(
+    //     context,
+    //     CallScreen.routeName,
+    //     arguments: ChatArguments(message),
+    //   );
+    // }
+  }
 
   @override
   void initState() {
     super.initState();
+    print('JcLog: [initState]');
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
+    // Run code required to handle interacted messages in an async function
+    // as initState() must not be async
+    setupInteractedMessage();
     _observeDeepLinks();
   }
 
@@ -99,6 +134,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
 
   @override
   Widget build(BuildContext context) {
+    print('JcLog: Building StreamDogFoodingApp widget');
     final appTheme = StreamVideoTheme.light();
     return MaterialApp(
       navigatorKey: _navigatorKey,
