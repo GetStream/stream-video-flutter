@@ -405,8 +405,14 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     return response;
   }
 
-  Future<bool> handlePushNotification(RemoteMessage remoteMessage) {
-    return _pushNotificationManager.handlePushNotification(remoteMessage);
+  Future<bool> handlePushNotification(
+    RemoteMessage remoteMessage,
+    void Function(Call call) onCallAccepted,
+  ) {
+    return _pushNotificationManager.handlePushNotification(
+      remoteMessage,
+      onCallAccepted,
+    );
   }
 
   Future<Call> acceptCall({

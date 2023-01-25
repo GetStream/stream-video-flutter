@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+import '../call/call.dart';
 import '../stream_video.dart';
 import 'call_notification_wrapper.dart';
 
@@ -35,7 +36,10 @@ class PushNotificationManager {
     await _client.createDevice(token: token);
   }
 
-  Future<bool> handlePushNotification(RemoteMessage remoteMessage) async {
+  Future<bool> handlePushNotification(
+    RemoteMessage remoteMessage,
+    void Function(Call call) onCallAccepted,
+  ) async {
     if (_isValid(remoteMessage)) {
       final cid = remoteMessage.data['call_cid'] as String;
       final type = cid.substring(0, cid.indexOf(':'));
@@ -46,22 +50,24 @@ class PushNotificationManager {
         callers: call.users.values.map((e) => e.name).join(', '),
         isVideoCall: true,
         avatarUrl: call.users.values.firstOrNull?.imageUrl,
-        onCallAccepted: onCallAccepted,
-        onCallRejected: onCallRejected,
+        onCallAccepted: (cid) async {
+          onCallAccepted(await _acceptCall(cid));
+        },
+        onCallRejected: _rejectCall,
       );
       return true;
     }
     return false;
   }
 
-  Future<void> onCallAccepted(String cid) async {
-    await _client.acceptCall(
+  Future<Call> _acceptCall(String cid) {
+    return _client.acceptCall(
       type: cid.substring(0, cid.indexOf(':')),
       id: cid.substring(cid.indexOf(':') + 1),
     );
   }
 
-  Future<void> onCallRejected(String cid) async {
+  Future<void> _rejectCall(String cid) async {
     await _client.rejectCall(callCid: cid);
   }
 
