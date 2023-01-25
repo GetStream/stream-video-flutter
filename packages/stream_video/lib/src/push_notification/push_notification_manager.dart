@@ -15,12 +15,24 @@ class PushNotificationManager {
   final StreamVideo _client;
   final CallNotificationWrapper _callNotification;
 
-  void onUserLoggedIn() {
+  Future<void> onUserLoggedIn() async {
+    print('JcLog: [onUserLoggedIn]');
     if (_isFirebaseInitialized()) {
       FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
-        await _client.createDevice(token: token);
+        await _registerFirebaseToken(token);
       });
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token != null) {
+        await _registerFirebaseToken(token);
+      } else {
+        print('JcLog: Firebase Token was null');
+      }
     }
+  }
+
+  Future<void> _registerFirebaseToken(String token) async {
+    print('JcLog: New Firebase Token: $token');
+    await _client.createDevice(token: token);
   }
 
   Future<bool> handlePushNotification(RemoteMessage remoteMessage) async {
