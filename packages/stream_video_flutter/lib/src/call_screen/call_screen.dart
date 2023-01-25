@@ -42,15 +42,7 @@ class StreamCallScreen extends StatelessWidget {
           call: call,
           onBackPressed: onBackPressed,
           onHangUp: onHangUp,
-          onParticipantsTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) =>
-                    participantsInfoWidgetBuilder?.call(context, call) ??
-                    StreamCallParticipantsInfoView(call: call),
-              ),
-            );
-          },
+          participantsInfoWidgetBuilder: participantsInfoWidgetBuilder,
         );
       case CallState.incoming:
         return StreamIncomingCall(

@@ -112,28 +112,30 @@ class _StreamCallParticipantsInfoViewState
     final streamChatTheme = StreamVideoTheme.of(context);
     final participantsInfoTheme =
         widget.participantsInfoTheme ?? streamChatTheme.participantsInfoTheme;
-    return ListView.separated(
-      padding: const EdgeInsets.only(bottom: 16),
-      itemBuilder: (context, index) {
-        final participant = participants[index];
-        final builder = widget.participantInfoViewBuilder;
-        if (builder != null) {
-          return builder.call(context, index, participant);
-        }
-        return StreamCallParticipantInfoView(
-          participant: participant,
-          videoIcon: widget.videoIcon,
-          audioIcon: widget.audioIcon,
-        );
-      },
-      separatorBuilder: (context, index) =>
-          widget.participantInfoDividerBuilder?.call(context, index) ??
-          Divider(
-            indent: participantsInfoTheme.dividerIndent,
-            height: participantsInfoTheme.dividerHeight,
-            color: participantsInfoTheme.dividerColor,
-          ),
-      itemCount: participants.length,
+    return Material(
+      child: ListView.separated(
+        padding: const EdgeInsets.only(bottom: 16),
+        itemBuilder: (context, index) {
+          final participant = participants[index];
+          final builder = widget.participantInfoViewBuilder;
+          if (builder != null) {
+            return builder.call(context, index, participant);
+          }
+          return StreamCallParticipantInfoView(
+            participant: participant,
+            videoIcon: widget.videoIcon,
+            audioIcon: widget.audioIcon,
+          );
+        },
+        separatorBuilder: (context, index) =>
+            widget.participantInfoDividerBuilder?.call(context, index) ??
+            Divider(
+              indent: participantsInfoTheme.dividerIndent,
+              height: participantsInfoTheme.dividerHeight,
+              color: participantsInfoTheme.dividerColor,
+            ),
+        itemCount: participants.length,
+      ),
     );
   }
 
