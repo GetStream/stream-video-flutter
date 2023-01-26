@@ -74,9 +74,16 @@ abstract class CallV2 {
 
   Future<Result<None>> disconnect();
 
-  List<RtcTrack> getTracks(String trackId);
+  List<RtcTrack> getTracks(String userId);
 
-  RtcTrack? getTrack(String trackSid);
+  RtcTrack? getTrack(String userId, SfuTrackType trackType);
+
+  void updateTrackSize({
+    required String userId,
+    required SfuTrackType trackType,
+    required double width,
+    required double height,
+  });
 
   Future<Result<None>> apply(CallControlAction action);
 }

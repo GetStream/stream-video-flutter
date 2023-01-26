@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import "package:webrtc_interface/src/rtc_session_description.dart";
+import 'package:webrtc_interface/src/rtc_session_description.dart';
 
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../disposable.dart';

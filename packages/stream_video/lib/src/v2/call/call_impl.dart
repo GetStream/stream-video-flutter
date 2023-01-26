@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:rxdart/rxdart.dart';
-
+import '../../../stream_video.dart';
 import '../../logger/stream_logger.dart';
 import '../action/call_control_action.dart';
 import '../call_state.dart';
@@ -18,11 +17,14 @@ import '../state_emitter.dart';
 import '../stream_video_v2.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
+import '../utils/subscriptions.dart';
 import '../webrtc/rtc_track.dart';
 import 'call.dart';
 import 'call_settings.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
+
+const _idSessionEvents = 1;
 
 /// Represents a [CallV2Impl] in which you can connect to.
 class CallV2Impl extends CallV2 {
@@ -74,7 +76,7 @@ class CallV2Impl extends CallV2 {
   }
 
   late final _logger = taggedLogger(tag: 'SV:Call:${state.value.callCid}');
-  late final _subscriptions = CompositeSubscription();
+  late final _subscriptions = Subscriptions();
 
   final StreamVideoV2 _streamVideo;
   final CallSessionFactory _sessionFactory;
@@ -234,7 +236,7 @@ class CallV2Impl extends CallV2 {
       stateManager: _stateManager,
     );
     _session = session;
-    _subscriptions.add(session.events.listen(_events.emit));
+    _subscriptions.add(_idSessionEvents, session.events.listen(_events.emit));
     await _stateManager.onSessionStart(session.sessionId);
     return session.start();
   }
@@ -260,20 +262,35 @@ class CallV2Impl extends CallV2 {
     final state = _stateManager.state.value;
     _logger.d(() => '[disconnect] state: $state');
     await _stateManager.onDisconnect();
-    await _subscriptions.cancel();
+    await _subscriptions.cancelAll();
     await _session?.dispose();
     _session = null;
     return Result.success(None());
   }
 
   @override
-  RtcTrack? getTrack(String trackSid) {
-    return _session?.getTrack(trackSid);
+  void updateTrackSize({
+    required String userId,
+    required SfuTrackType trackType,
+    required double width,
+    required double height,
+  }) {
+    _session?.updateTrackSize(
+      userId: userId,
+      trackType: trackType,
+      width: width,
+      height: height,
+    );
   }
 
   @override
-  List<RtcTrack> getTracks(String trackId) {
-    return [...?_session?.getTracks(trackId)];
+  RtcTrack? getTrack(String userId, SfuTrackType trackType) {
+    return _session?.getTrack(userId, trackType);
+  }
+
+  @override
+  List<RtcTrack> getTracks(String userId) {
+    return [...?_session?.getTracks(userId)];
   }
 
   @override

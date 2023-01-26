@@ -3,6 +3,7 @@ import 'package:rxdart/subjects.dart';
 
 import 'sfu/data/models/sfu_connection_quality.dart';
 import 'sfu/data/models/sfu_track_type.dart';
+import 'utils/pair.dart';
 
 @immutable
 class CallParticipantStateV2 {
@@ -12,8 +13,8 @@ class CallParticipantStateV2 {
     required String name,
     String? profileImageURL,
     required String sessionId,
-    required String trackIdPrefix,
-    List<SfuTrackType> publishedTrackTypes = const [],
+    required String trackId,
+    Set<SfuTrackType> publishedTrackTypes = const {},
     bool isLocal = false,
     SfuConnectionQuality connectionQuality = SfuConnectionQuality.unspecified,
     bool isOnline = false,
@@ -26,8 +27,8 @@ class CallParticipantStateV2 {
       name: name,
       profileImageURL: profileImageURL,
       sessionId: sessionId,
-      trackIdPrefix: trackIdPrefix,
-      publishedTrackTypes: List.unmodifiable(publishedTrackTypes),
+      trackId: trackId,
+      publishedTrackTypes: Set.unmodifiable(publishedTrackTypes),
       isLocal: isLocal,
       connectionQuality: connectionQuality,
       isOnline: isOnline,
@@ -43,7 +44,7 @@ class CallParticipantStateV2 {
     required this.name,
     this.profileImageURL,
     required this.sessionId,
-    required this.trackIdPrefix,
+    required this.trackId,
     required this.publishedTrackTypes,
     this.isLocal = false,
     this.connectionQuality = SfuConnectionQuality.unspecified,
@@ -57,8 +58,8 @@ class CallParticipantStateV2 {
   final String name;
   final String? profileImageURL;
   final String sessionId;
-  final String trackIdPrefix;
-  final List<SfuTrackType> publishedTrackTypes;
+  final String trackId;
+  final Set<SfuTrackType> publishedTrackTypes;
   final bool isLocal;
   final SfuConnectionQuality connectionQuality;
   final bool isOnline;
@@ -74,7 +75,7 @@ class CallParticipantStateV2 {
     String? profileImageURL,
     String? sessionId,
     String? trackIdPrefix,
-    List<SfuTrackType>? publishedTrackTypes,
+    Set<SfuTrackType>? publishedTrackTypes,
     bool? isLocal,
     SfuConnectionQuality? connectionQuality,
     bool? isOnline,
@@ -87,7 +88,7 @@ class CallParticipantStateV2 {
       name: name ?? this.name,
       profileImageURL: profileImageURL ?? this.profileImageURL,
       sessionId: sessionId ?? this.sessionId,
-      trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
+      trackId: trackIdPrefix ?? this.trackId,
       publishedTrackTypes: publishedTrackTypes ?? this.publishedTrackTypes,
       isLocal: isLocal ?? this.isLocal,
       connectionQuality: connectionQuality ?? this.connectionQuality,
@@ -101,7 +102,7 @@ class CallParticipantStateV2 {
   String toString() {
     return 'CallParticipantState{userId: $userId, role: $role, name: $name, '
         'profileImageURL: $profileImageURL, sessionId: $sessionId, '
-        'trackIdPrefix: $trackIdPrefix, '
+        'trackId: $trackId, '
         'publishedTrackTypes: $publishedTrackTypes, '
         'isLocal: $isLocal, '
         'connectionQuality: $connectionQuality, isOnline: $isOnline, '
@@ -118,7 +119,7 @@ class CallParticipantStateV2 {
           name == other.name &&
           profileImageURL == other.profileImageURL &&
           sessionId == other.sessionId &&
-          trackIdPrefix == other.trackIdPrefix &&
+          trackId == other.trackId &&
           publishedTrackTypes == other.publishedTrackTypes &&
           isLocal == other.isLocal &&
           connectionQuality == other.connectionQuality &&
@@ -133,45 +134,11 @@ class CallParticipantStateV2 {
       name.hashCode ^
       profileImageURL.hashCode ^
       sessionId.hashCode ^
-      trackIdPrefix.hashCode ^
+      trackId.hashCode ^
       publishedTrackTypes.hashCode ^
       isLocal.hashCode ^
       connectionQuality.hashCode ^
       isOnline.hashCode ^
       audioLevel.hashCode ^
       isSpeaking.hashCode;
-}
-
-int startTime = 0;
-
-void main() {
-  startTime = DateTime.now().millisecondsSinceEpoch;
-  final events = PublishSubject<int>();
-  Stream<int>.periodic(const Duration(milliseconds: 100), (count) => 7 - count)
-      .take(7)
-      //.map((value) => 'event$value')
-      .listen(events.add);
-
-  events.listen((value) async {
-    final delay = 50 * value;
-    final event = 'event$value';
-    log('${DateTime.now()} [onEvent] event: $event, delay: $delay');
-    final result = await doSomeJob(event, delay);
-    log('[onEvent] <<< result: $result');
-  });
-}
-
-void log(String msg) {
-  final elapsed = DateTime.now().millisecondsSinceEpoch - startTime;
-  print('$elapsed - $msg');
-}
-
-Future<String> doSomeJob(String event, int delay) async {
-  log('[doSomeJob1] event: $event');
-  final result = await Future.delayed(
-    Duration(milliseconds: delay),
-    () => event,
-  );
-  //log('[doSomeJob1] finished($event)');
-  return result;
 }

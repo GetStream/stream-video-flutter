@@ -51,9 +51,9 @@ class CallControlReducer {
         ...state.callParticipants,
       }..updateAll((userId, participant) {
           if (participant.isLocal) {
-            final publishedTrackTypes = [
+            final publishedTrackTypes = {
               ...participant.publishedTrackTypes,
-            ];
+            };
             if (enabled) {
               publishedTrackTypes.add(trackType);
             } else {

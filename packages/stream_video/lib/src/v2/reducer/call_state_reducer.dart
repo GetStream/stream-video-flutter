@@ -7,6 +7,7 @@ import '../call_state.dart';
 import '_call_control_reducer.dart';
 import '_coordinator_reducer.dart';
 import '_lifecycle_reducer.dart';
+import '_rtc_reducer.dart';
 import '_sfu_reducer.dart';
 
 class CallStateReducer {
@@ -15,6 +16,7 @@ class CallStateReducer {
   late final lifecycleReducer = const LifecycleReducer();
   late final coordinatorReducer = const CoordinatorReducer();
   late final sfuReducer = const SfuReducer();
+  late final rtcReducer = const RtcReducer();
   late final callControlReducer = const CallControlReducer();
 
   CallStateV2 reduce(CallStateV2 state, StreamAction action) {

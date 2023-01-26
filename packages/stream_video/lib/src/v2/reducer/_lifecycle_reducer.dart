@@ -209,7 +209,7 @@ extension on CallMetadata {
         name: user?.name ?? '',
         profileImageURL: user?.imageUrl ?? '',
         sessionId: '',
-        trackIdPrefix: '',
+        trackId: '',
         isLocal: isLocal,
         isOnline: !isLocal,
       );

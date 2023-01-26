@@ -54,7 +54,7 @@ class SfuReducer {
         name: user?.name ?? aParticipant.userId,
         profileImageURL: user?.imageUrl,
         sessionId: aParticipant.sessionId,
-        trackIdPrefix: aParticipant.trackLookupPrefix,
+        trackId: aParticipant.trackLookupPrefix,
         isLocal: isLocal,
         isOnline: !isLocal,
       );
@@ -81,9 +81,9 @@ class SfuReducer {
           if (userId == event.userId &&
               participant.sessionId == event.sessionId) {
             return participant.copyWith(
-              publishedTrackTypes: [
+              publishedTrackTypes: {
                 ...participant.publishedTrackTypes,
-              ]..removeWhere((trackType) => trackType == event.trackType),
+              }..removeWhere((trackType) => trackType == event.trackType),
             );
           } else {
             return participant;
@@ -105,10 +105,10 @@ class SfuReducer {
               participant.sessionId == event.sessionId) {
             _logger.v(() => '[reduceTrackPublished] pFound: $participant');
             return participant.copyWith(
-              publishedTrackTypes: [
+              publishedTrackTypes: {
                 ...participant.publishedTrackTypes,
                 event.trackType,
-              ],
+              },
             );
           } else {
             _logger.v(() => '[reduceTrackPublished] pSame: $participant');
@@ -179,7 +179,7 @@ class SfuReducer {
       name: action.user?.name ?? action.participant.userId,
       profileImageURL: action.user?.imageUrl,
       sessionId: action.participant.sessionId,
-      trackIdPrefix: action.participant.trackLookupPrefix,
+      trackId: action.participant.trackLookupPrefix,
       isLocal: action.isLocalUser,
       isOnline: !action.isLocalUser,
     );

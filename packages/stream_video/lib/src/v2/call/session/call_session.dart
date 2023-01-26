@@ -1,10 +1,10 @@
+import '../../../../stream_video.dart';
 import '../../../disposable.dart';
 import '../../action/call_control_action.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../shared_emitter.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
-import '../../webrtc/rtc_track.dart';
 
 abstract class CallSession extends Disposable {
   String get sessionId;
@@ -15,7 +15,14 @@ abstract class CallSession extends Disposable {
 
   Future<Result<None>> apply(CallControlAction action);
 
-  List<RtcTrack> getTracks(String trackId);
+  List<RtcTrack> getTracks(String userId);
 
-  RtcTrack? getTrack(String trackSid);
+  RtcTrack? getTrack(String userId, SfuTrackType trackType);
+
+  void updateTrackSize({
+    required String userId,
+    required SfuTrackType trackType,
+    required double width,
+    required double height,
+  });
 }

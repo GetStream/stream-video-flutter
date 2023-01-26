@@ -5,6 +5,7 @@ import 'action/action.dart';
 import 'action/call_control_action.dart';
 import 'action/coordinator_action.dart';
 import 'action/lifecycle_action.dart';
+import 'action/rtc_action.dart';
 import 'action/sfu_action.dart';
 import 'call_state.dart';
 import 'coordinator/models/coordinator_models.dart';
@@ -15,6 +16,7 @@ import 'model/call_joined.dart';
 import 'model/call_received_created.dart';
 import 'reducer/call_state_reducer.dart';
 import 'sfu/data/events/sfu_events.dart';
+import 'sfu/data/models/sfu_track_type.dart';
 import 'state_emitter.dart';
 import 'stream_video_v2.dart';
 import 'utils/result.dart';
@@ -37,6 +39,8 @@ abstract class CallStateManager {
   Future<void> onCoordinatorEvent(CoordinatorEventV2 event);
   Future<void> onWaitingTimeout(Duration dropTimeout);
   Future<void> onConnectFailed(VideoError error);
+
+  void onRtcRemoteTrackPublished(String trackId, SfuTrackType trackType);
 }
 
 class CallStateManagerImpl extends CallStateManager {
@@ -165,6 +169,20 @@ class CallStateManagerImpl extends CallStateManager {
     }
     _logger.d(() => '[onCoordinatorEvent] event: $event');
     _postReduced(CoordinatorAction(event));
+  }
+
+  @override
+  void onRtcRemoteTrackPublished(String trackId, SfuTrackType trackType) {
+    _logger.d(
+      () => '[onRtcRemoteTrackPublished] trackId: $trackId,'
+          ' trackType: $trackType',
+    );
+    _postReduced(
+      RtcRemoteTrackPublishedAction(
+        trackId: trackId,
+        trackType: trackType,
+      ),
+    );
   }
 
   Future<CallUser?> _queryUserById(String userId) async {

@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'view/call_participant.dart';
@@ -28,7 +27,7 @@ class _CallScreenV2State extends State<CallScreenV2> {
   late final CallV2 _call = widget.call;
   late CallStateV2 _state;
 
-  final _renderers = <String, rtc.RTCVideoRenderer>{};
+  final _renderers = <String, ParticipantRenderer>{};
 
   @override
   void initState() {
@@ -41,17 +40,15 @@ class _CallScreenV2State extends State<CallScreenV2> {
   Future<void> _setState(CallStateV2 state) async {
     for (final participantState in state.callParticipants.values) {
       final userId = participantState.userId;
-      final trackSid =
-          '${participantState.trackIdPrefix}:${SfuTrackType.video}';
-      final track = _call.getTrack(trackSid);
+      final track = _call.getTrack(userId, SfuTrackType.video);
       print('(SV:CallScreenState): [setState] userId: $userId, track: $track');
       if (track == null) {
         await _renderers[userId]?.dispose();
         _renderers.remove(userId);
       } else {
-        final renderer = _renderers[userId] ?? rtc.RTCVideoRenderer();
+        final renderer = _renderers[userId] ?? ParticipantRenderer();
         await renderer.initialize();
-        renderer.srcObject = track.stream;
+        renderer.srcObject = track;
         _renderers[userId] = renderer;
       }
     }

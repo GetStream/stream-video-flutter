@@ -8,5 +8,23 @@ class CallParticipantV2 {
   });
 
   final CallParticipantStateV2 state;
-  final rtc.RTCVideoRenderer? renderer;
+  final ParticipantRenderer? renderer;
+}
+
+class ParticipantRenderer {
+  final rtc.RTCVideoRenderer videoRenderer = rtc.RTCVideoRenderer();
+  late final SfuTrackType trackType;
+
+  set srcObject(RtcTrack srcObject) {
+    trackType = srcObject.trackType;
+    videoRenderer.srcObject = srcObject.stream;
+  }
+
+  Future<void> initialize() async {
+    await videoRenderer.initialize();
+  }
+
+  Future<void> dispose() async {
+    await videoRenderer.dispose();
+  }
 }
