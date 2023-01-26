@@ -13,6 +13,7 @@ import '../../errors/video_error_composer.dart';
 import '../../model/call_cid.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
+import '../../sfu/data/models/sfu_track_type.dart';
 import '../../sfu/sfu_client.dart';
 import '../../sfu/sfu_client_impl.dart';
 import '../../sfu/ws/sfu_event_listener.dart';
@@ -21,7 +22,9 @@ import '../../shared_emitter.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
 import '../../webrtc/media/constraints/camera_position.dart';
+import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
+import '../../webrtc/model/rtc_video_dimension.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/peer_type.dart';
 import '../../webrtc/rtc_manager.dart';
@@ -87,6 +90,9 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       final event = await sfuWS.events.waitFor<SfuJoinResponseEvent>(
         timeLimit: const Duration(seconds: 30),
       );
+
+      // TODO: Start listening participants.
+
       _logger.v(() => '[start] event: $event');
       final currentUserId = stateManager.state.value.currentUserId;
       final localParticipant = event.callState.participants.firstWhere(
@@ -94,13 +100,17 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       );
       final localTrackId = localParticipant.trackLookupPrefix;
       _logger.v(() => '[start] localTrackId: $localTrackId');
-      rtcManager =
-          await rtcManagerFactory.makeRtcManager(publisherId: localTrackId)
-            ..onPublisherIceCandidate = _onLocalIceCandidate
-            ..onSubscriberIceCandidate = _onLocalIceCandidate
-            ..onPublisherTrackMuted = _onPublisherTrackMuted
-            ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded
-            ..onSubscriberTrackPublished = _onSubscriberTrackPublished;
+      rtcManager = await rtcManagerFactory.makeRtcManager(
+        publisherId: localTrackId,
+      )
+        ..onPublisherIceCandidate = _onLocalIceCandidate
+        ..onSubscriberIceCandidate = _onLocalIceCandidate
+        ..onPublisherTrackMuted = _onPublisherTrackMuted
+        ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded
+        ..onSubscriberTrackPublished = _onSubscriberTrackPublished
+        ..onSubscriberTrackSubscriptionUpdate =
+            _onSubscriberTrackSubscriptionUpdate;
+
       _logger.v(() => '[start] completed');
       return Result.success(None());
     } catch (e, stk) {
@@ -243,6 +253,43 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     // );
   }
 
+  void _onSubscriberTrackSubscriptionUpdate({
+    required sfu.TrackSubscriptionDetails track,
+    required bool subscribe,
+  }) async {
+    final participants = stateManager.state.value.callParticipants;
+    final subscribedTracks = <String, sfu.TrackSubscriptionDetails>{};
+    for (final participant in [...participants.values]) {
+      // skip local participant
+      if (participant.isLocal) continue;
+
+      final tracks = getTracks(participant.trackIdPrefix);
+      for (final track in tracks) {
+        final detail = sfu.TrackSubscriptionDetails(
+          userId: participant.userId,
+          sessionId: participant.sessionId,
+          trackType: track.trackType.toDTO(),
+          dimension: track.videoDimension?.toDTO(),
+        );
+
+        subscribedTracks[detail.trackDetailId] = detail;
+      }
+    }
+
+    if (subscribe) {
+      subscribedTracks[track.trackDetailId] = track;
+    } else {
+      subscribedTracks.remove(track.trackDetailId);
+    }
+
+    await sfuClient.updateSubscriptions(
+      sfu.UpdateSubscriptionsRequest(
+        sessionId: sessionId,
+        tracks: subscribedTracks.values,
+      ),
+    );
+  }
+
   @override
   RtcTrack? getTrack(String trackSid) {
     return rtcManager?.getTrack(trackSid);
@@ -250,7 +297,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
 
   @override
   List<RtcTrack> getTracks(String trackId) {
-    return rtcManager?.getTracks(trackId) ?? List.empty();
+    return [...?rtcManager?.getTracks(trackId)];
   }
 
   @override
@@ -263,6 +310,18 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return _onSetScreenShareEnabled(action.enabled);
     } else if (action is SetCameraPosition) {
       return _onSetCameraPosition(action.cameraPosition);
+    } else if (action is SubscribeCameraTrack) {
+      return _onSubscribeVideoTrack(
+        action.userId,
+        SfuTrackType.video,
+        action.videoDimension,
+      );
+    } else if (action is SubscribeScreenShareTrack) {
+      return _onSubscribeVideoTrack(
+        action.userId,
+        SfuTrackType.screenShare,
+        action.videoDimension,
+      );
     }
 
     return Result.error('Action not supported');
@@ -307,6 +366,29 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
 
     return Result.success(None());
   }
+
+  Future<Result<None>> _onSubscribeVideoTrack(
+    String userId,
+    SfuTrackType trackType,
+    RtcVideoDimension dimension,
+  ) async {
+    final participant = stateManager.state.value.callParticipants[userId];
+
+    if (participant == null) {
+      return Result.error('Unable to subscribe track, Participant not found');
+    }
+
+    final result = await rtcManager?.subscribeTrack(
+      userId: participant.userId,
+      sessionId: participant.sessionId,
+      trackType: trackType,
+      dimension: dimension,
+    );
+
+    // TODO: Check for failure
+
+    return Result.success(None());
+  }
 }
 
 extension RtcTracksInfoMapper on List<RtcTrackInfo> {
@@ -328,5 +410,12 @@ extension RtcTracksInfoMapper on List<RtcTrackInfo> {
         }),
       );
     }).toList();
+  }
+}
+
+extension on sfu.TrackSubscriptionDetails {
+  /// Returns a unique string to identify this detail from the other details.
+  String get trackDetailId {
+    return '$userId-$sessionId-$trackType';
   }
 }

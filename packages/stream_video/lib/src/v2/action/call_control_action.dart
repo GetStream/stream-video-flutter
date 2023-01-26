@@ -1,9 +1,12 @@
 import '../webrtc/media/constraints/camera_position.dart';
+import '../webrtc/model/rtc_video_dimension.dart';
 import 'action.dart';
 
 abstract class CallControlAction extends StreamAction {
   const CallControlAction();
 }
+
+// Publisher actions
 
 class SetCameraPosition extends CallControlAction {
   const SetCameraPosition({required this.cameraPosition});
@@ -23,4 +26,26 @@ class SetMicrophoneEnabled extends CallControlAction {
 class SetScreenShareEnabled extends CallControlAction {
   const SetScreenShareEnabled({required this.enabled});
   final bool enabled;
+}
+
+// Subscriber actions
+
+class SubscribeCameraTrack extends CallControlAction {
+  const SubscribeCameraTrack({
+    required this.userId,
+    required this.videoDimension,
+  });
+
+  final String userId;
+  final RtcVideoDimension videoDimension;
+}
+
+class SubscribeScreenShareTrack extends CallControlAction {
+  const SubscribeScreenShareTrack({
+    required this.userId,
+    required this.videoDimension,
+  });
+
+  final String userId;
+  final RtcVideoDimension videoDimension;
 }

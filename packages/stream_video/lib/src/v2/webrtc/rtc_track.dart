@@ -3,7 +3,6 @@ import 'package:meta/meta.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 
 import 'media/media_constraints.dart';
-import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_dimension.dart';
 
 @immutable
@@ -13,6 +12,7 @@ abstract class RtcTrack {
     required this.trackType,
     required this.stream,
     required this.track,
+    this.videoDimension,
     this.receiver,
     this.transceiver,
     this.muted = false,
@@ -25,6 +25,9 @@ abstract class RtcTrack {
   final rtc.RTCRtpReceiver? receiver;
   final rtc.RTCRtpTransceiver? transceiver;
   final bool muted;
+
+  /// The video dimension of the track in case it is a video track.
+  final RtcVideoDimension? videoDimension;
 
   String get trackSid => '$trackId:$trackType';
 
@@ -42,6 +45,7 @@ class RtcRemoteTrack extends RtcTrack {
     required super.trackType,
     required super.stream,
     required super.track,
+    super.videoDimension,
     super.receiver,
     super.transceiver,
     super.muted,
@@ -53,6 +57,7 @@ class RtcRemoteTrack extends RtcTrack {
     SfuTrackType? trackType,
     rtc.MediaStream? stream,
     rtc.MediaStreamTrack? track,
+    RtcVideoDimension? videoDimension,
     rtc.RTCRtpReceiver? receiver,
     rtc.RTCRtpTransceiver? transceiver,
     bool? muted,
@@ -62,6 +67,7 @@ class RtcRemoteTrack extends RtcTrack {
       trackType: trackType ?? this.trackType,
       stream: stream ?? this.stream,
       track: track ?? this.track,
+      videoDimension: videoDimension ?? this.videoDimension,
       receiver: receiver ?? this.receiver,
       transceiver: transceiver ?? this.transceiver,
       muted: muted ?? this.muted,
@@ -82,7 +88,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     required super.stream,
     required super.track,
     required this.mediaConstraints,
-    this.videoDimension,
+    super.videoDimension,
     super.receiver,
     super.transceiver,
     super.muted,
@@ -93,9 +99,6 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   /// This is used to recreate the track if needed.
   /// For example, if the user changes the camera.
   final T mediaConstraints;
-
-  /// The video dimension of the track in case it is a video track.
-  final RtcVideoDimension? videoDimension;
 
   @override
   RtcLocalTrack<T> copyWith({
