@@ -109,7 +109,7 @@ extension on CallMetadata {
         name: '',
         profileImageURL: '',
         sessionId: '',
-        trackIdPrefix: '',
+        trackId: '',
         isLocal: isLocal,
         isOnline: !isLocal,
       );

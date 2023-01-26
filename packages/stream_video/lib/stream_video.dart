@@ -28,6 +28,7 @@ export 'src/track/remote/remote.dart';
 export 'src/track/remote/video.dart';
 export 'src/track/track.dart';
 export 'src/types/other.dart';
+export 'src/v2/action/call_control_action.dart';
 export 'src/v2/call/call.dart';
 export 'src/v2/call_participant_state.dart';
 export 'src/v2/call_state.dart';

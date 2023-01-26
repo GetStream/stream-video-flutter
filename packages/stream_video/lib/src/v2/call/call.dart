@@ -62,21 +62,22 @@ abstract class CallV2 {
     bool ringing = false,
   });
 
-  Future<Result<None>> acceptCall();
-
-  Future<Result<None>> rejectCall();
-
-  Future<Result<None>> cancelCall();
-
   Future<Result<None>> connect({
     CallSettings settings = const CallSettings(),
   });
 
   Future<Result<None>> disconnect();
 
-  List<RtcTrack> getTracks(String trackId);
+  List<RtcTrack> getTracks(String userId);
 
-  RtcTrack? getTrack(String trackSid);
+  RtcTrack? getTrack(String userId, SfuTrackType trackType);
+
+  void updateTrackSize({
+    required String userId,
+    required SfuTrackType trackType,
+    required double width,
+    required double height,
+  });
 
   Future<Result<None>> apply(CallControlAction action);
 }

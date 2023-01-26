@@ -6,46 +6,38 @@ abstract class CallControlAction extends StreamAction {
   const CallControlAction();
 }
 
-// Publisher actions
+class AcceptCall extends CallControlAction {
+  const AcceptCall();
+}
 
-class SetCameraPosition extends CallControlAction {
+class RejectCall extends CallControlAction {
+  const RejectCall();
+}
+
+class CancelCall extends CallControlAction {
+  const CancelCall();
+}
+
+abstract class SessionControlAction extends CallControlAction {
+  const SessionControlAction();
+}
+
+class SetCameraPosition extends SessionControlAction {
   const SetCameraPosition({required this.cameraPosition});
   final CameraPosition cameraPosition;
 }
 
-class SetCameraEnabled extends CallControlAction {
+class SetCameraEnabled extends SessionControlAction {
   const SetCameraEnabled({required this.enabled});
   final bool enabled;
 }
 
-class SetMicrophoneEnabled extends CallControlAction {
+class SetMicrophoneEnabled extends SessionControlAction {
   const SetMicrophoneEnabled({required this.enabled});
   final bool enabled;
 }
 
-class SetScreenShareEnabled extends CallControlAction {
+class SetScreenShareEnabled extends SessionControlAction {
   const SetScreenShareEnabled({required this.enabled});
   final bool enabled;
-}
-
-// Subscriber actions
-
-class SubscribeCameraTrack extends CallControlAction {
-  const SubscribeCameraTrack({
-    required this.userId,
-    required this.videoDimension,
-  });
-
-  final String userId;
-  final RtcVideoDimension videoDimension;
-}
-
-class SubscribeScreenShareTrack extends CallControlAction {
-  const SubscribeScreenShareTrack({
-    required this.userId,
-    required this.videoDimension,
-  });
-
-  final String userId;
-  final RtcVideoDimension videoDimension;
 }

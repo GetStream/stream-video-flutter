@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -23,20 +24,30 @@ class CallParticipantView extends StatelessWidget {
         child: const Text('Mock Participant'),
       );
     }
-    final rtcRenderer = participant.renderer;
-    final Widget rtcView;
-    if (rtcRenderer != null) {
-      rtcView = rtc.RTCVideoView(
-        rtcRenderer,
-        mirror: participant.state.isLocal,
+    final renderer = participant.renderer;
+    final Widget videoView;
+    if (renderer != null) {
+      videoView = MeasureSize(
+        onChange: (Size size) {
+          call.updateTrackSize(
+            userId: participant.state.userId,
+            trackType: renderer.trackType,
+            width: size.width,
+            height: size.height,
+          );
+        },
+        child: rtc.RTCVideoView(
+          renderer.videoRenderer,
+          mirror: participant.state.isLocal,
+        ),
       );
     } else {
-      rtcView = Container();
+      videoView = Container();
     }
     return Stack(
       alignment: Alignment.center,
       children: [
-        rtcView,
+        videoView,
         StreamUserAvatar(
           avatarTheme: const StreamAvatarTheme(
             constraints: BoxConstraints.tightFor(
@@ -54,5 +65,46 @@ class CallParticipantView extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+typedef OnWidgetSizeChange = void Function(Size size);
+
+class MeasureSize extends SingleChildRenderObjectWidget {
+  const MeasureSize({
+    super.key,
+    required this.onChange,
+    required Widget super.child,
+  });
+  final OnWidgetSizeChange onChange;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return MeasureSizeRenderObject(onChange);
+  }
+
+  @override
+  void updateRenderObject(
+      BuildContext context, covariant MeasureSizeRenderObject renderObject) {
+    renderObject.onChange = onChange;
+  }
+}
+
+class MeasureSizeRenderObject extends RenderProxyBox {
+  MeasureSizeRenderObject(this.onChange);
+  Size? oldSize;
+  OnWidgetSizeChange onChange;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+
+    var newSize = child!.size;
+    if (oldSize == newSize) return;
+
+    oldSize = newSize;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      onChange(newSize);
+    });
   }
 }

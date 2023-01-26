@@ -21,6 +21,7 @@ import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
+import '../../utils/subscriptions.dart';
 import '../../webrtc/media/constraints/camera_position.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
@@ -32,6 +33,8 @@ import '../../webrtc/rtc_manager_factory.dart';
 import '../../webrtc/rtc_track.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
+
+const _idParticipants = 1;
 
 class CallSessionImpl extends CallSession implements SfuEventListener {
   CallSessionImpl({
@@ -54,6 +57,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         );
 
   final _logger = taggedLogger(tag: 'SV:CallSession');
+  final _subscriptions = Subscriptions();
 
   final StreamCallCid callCid;
   @override
@@ -91,7 +95,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         timeLimit: const Duration(seconds: 30),
       );
 
-      // TODO: Start listening participants.
+      _listenParticipantsChanges();
 
       _logger.v(() => '[start] event: $event');
       final currentUserId = stateManager.state.value.currentUserId;
@@ -130,6 +134,72 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   }
 
   @override
+  Future<void> updateTrackSize({
+    required String userId,
+    required SfuTrackType trackType,
+    required double width,
+    required double height,
+  }) async {
+    if (trackType != SfuTrackType.video &&
+        trackType != SfuTrackType.screenShare) {
+      return;
+    }
+    final participant = stateManager.state.value.callParticipants[userId];
+    if (participant == null || participant.isLocal) {
+      return;
+    }
+    final track = sfu.TrackSubscriptionDetails(
+      userId: userId,
+      sessionId: participant.sessionId,
+      trackType: trackType.toDTO(),
+      dimension: sfu_models.VideoDimension(
+        width: width.toInt(),
+        height: height.toInt(),
+      ),
+    );
+
+    await sfuClient.updateSubscriptions(
+      sfu.UpdateSubscriptionsRequest(
+        sessionId: sessionId,
+        tracks: [track],
+      ),
+    );
+  }
+
+  @override
+  RtcTrack? getTrack(String userId, SfuTrackType trackType) {
+    final participantState = stateManager.state.value.callParticipants[userId];
+    if (participantState == null) {
+      return null;
+    }
+    final trackSid = '${participantState.trackId}:$trackType';
+    return rtcManager?.getTrack(trackSid);
+  }
+
+  @override
+  List<RtcTrack> getTracks(String userId) {
+    final participantState = stateManager.state.value.callParticipants[userId];
+    if (participantState == null) {
+      return List.empty();
+    }
+    return [...?rtcManager?.getTracks(participantState.trackId)];
+  }
+
+  @override
+  Future<Result<None>> apply(SessionControlAction action) async {
+    if (action is SetCameraEnabled) {
+      return _onSetCameraEnabled(action.enabled);
+    } else if (action is SetMicrophoneEnabled) {
+      return _onSetMicrophoneEnabled(action.enabled);
+    } else if (action is SetScreenShareEnabled) {
+      return _onSetScreenShareEnabled(action.enabled);
+    } else if (action is SetCameraPosition) {
+      return _onSetCameraPosition(action.cameraPosition);
+    }
+    return Result.error('Action not supported: $action');
+  }
+
+  @override
   Future<void> onSfuError(VideoError error) async {
     _logger.e(() => '[onSfuError] error: $error');
     // TODO: implement onError
@@ -144,6 +214,17 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     } else if (event is SfuIceTrickleEvent) {
       await _onRemoteIceCandidate(event);
     }
+  }
+
+  void _listenParticipantsChanges() {
+    _subscriptions.add(
+      _idParticipants,
+      stateManager.state.listen((state) {
+        for (var participant in state.callParticipants.values) {
+          // TODO do we need this?
+        }
+      }),
+    );
   }
 
   Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {
@@ -244,16 +325,15 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     RtcRemoteTrack remoteTrack,
   ) async {
     _logger.d(
-      () => '[onSubscriberTrackPublished] remoteTrack: ${remoteTrack}',
+      () => '[onSubscriberTrackPublished] remoteTrack: $remoteTrack',
     );
-    // TODO
-    // stateManager.onSubscriberTrackPublished(
-    //   remoteTrack.trackId,
-    //   remoteTrack.trackType,
-    // );
+    stateManager.onRtcRemoteTrackPublished(
+      remoteTrack.trackId,
+      remoteTrack.trackType,
+    );
   }
 
-  void _onSubscriberTrackSubscriptionUpdate({
+  Future<void> _onSubscriberTrackSubscriptionUpdate({
     required sfu.TrackSubscriptionDetails track,
     required bool subscribe,
   }) async {
@@ -263,7 +343,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       // skip local participant
       if (participant.isLocal) continue;
 
-      final tracks = getTracks(participant.trackIdPrefix);
+      final tracks = getTracks(participant.trackId);
       for (final track in tracks) {
         final detail = sfu.TrackSubscriptionDetails(
           userId: participant.userId,
@@ -288,43 +368,6 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         tracks: subscribedTracks.values,
       ),
     );
-  }
-
-  @override
-  RtcTrack? getTrack(String trackSid) {
-    return rtcManager?.getTrack(trackSid);
-  }
-
-  @override
-  List<RtcTrack> getTracks(String trackId) {
-    return [...?rtcManager?.getTracks(trackId)];
-  }
-
-  @override
-  Future<Result<None>> apply(CallControlAction action) async {
-    if (action is SetCameraEnabled) {
-      return _onSetCameraEnabled(action.enabled);
-    } else if (action is SetMicrophoneEnabled) {
-      return _onSetMicrophoneEnabled(action.enabled);
-    } else if (action is SetScreenShareEnabled) {
-      return _onSetScreenShareEnabled(action.enabled);
-    } else if (action is SetCameraPosition) {
-      return _onSetCameraPosition(action.cameraPosition);
-    } else if (action is SubscribeCameraTrack) {
-      return _onSubscribeVideoTrack(
-        action.userId,
-        SfuTrackType.video,
-        action.videoDimension,
-      );
-    } else if (action is SubscribeScreenShareTrack) {
-      return _onSubscribeVideoTrack(
-        action.userId,
-        SfuTrackType.screenShare,
-        action.videoDimension,
-      );
-    }
-
-    return Result.error('Action not supported');
   }
 
   Future<Result<None>> _onSetCameraEnabled(bool enabled) async {
@@ -363,29 +406,6 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     if (track == null) {
       return Result.error('Unable to set camera position, Track not found');
     }
-
-    return Result.success(None());
-  }
-
-  Future<Result<None>> _onSubscribeVideoTrack(
-    String userId,
-    SfuTrackType trackType,
-    RtcVideoDimension dimension,
-  ) async {
-    final participant = stateManager.state.value.callParticipants[userId];
-
-    if (participant == null) {
-      return Result.error('Unable to subscribe track, Participant not found');
-    }
-
-    final result = await rtcManager?.subscribeTrack(
-      userId: participant.userId,
-      sessionId: participant.sessionId,
-      trackType: trackType,
-      dimension: dimension,
-    );
-
-    // TODO: Check for failure
 
     return Result.success(None());
   }
