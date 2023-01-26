@@ -1,7 +1,10 @@
-import 'package:stream_video/src/v2/sfu/data/models/sfu_participant.dart';
+import 'package:meta/meta.dart';
 
+import 'sfu_participant.dart';
+
+@immutable
 class SfuCallState {
-  SfuCallState({
+  const SfuCallState({
     required this.participants,
   });
 

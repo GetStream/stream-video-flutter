@@ -67,6 +67,12 @@ class RtcRemoteTrack extends RtcTrack {
       muted: muted ?? this.muted,
     );
   }
+
+  @override
+  String toString() {
+    return 'RtcRemoteTrack{trackId: $trackId, trackType: $trackType, '
+        'muted: $muted, stream.id: ${stream.id}';
+  }
 }
 
 class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
@@ -114,5 +120,11 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       transceiver: transceiver ?? this.transceiver,
       muted: muted ?? this.muted,
     );
+  }
+
+  @override
+  String toString() {
+    return 'RtcLocalTrack{trackId: $trackId, trackType: $trackType, '
+        'muted: $muted, stream.id: ${stream.id}';
   }
 }

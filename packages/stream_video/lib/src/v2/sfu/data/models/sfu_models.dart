@@ -1,7 +1,10 @@
-import 'package:stream_video/src/v2/sfu/data/models/sfu_connection_quality.dart';
+import 'package:meta/meta.dart';
 
+import 'sfu_connection_quality.dart';
+
+@immutable
 class SfuConnectionQualityInfo {
-  SfuConnectionQualityInfo({
+  const SfuConnectionQualityInfo({
     required this.userId,
     required this.sessionId,
     required this.connectionQuality,

@@ -26,6 +26,14 @@ import 'rtc_track_publish_options.dart';
 /// {@endtemplate}
 typedef OnPublisherTrackMuted = void Function(RtcLocalTrack track, bool muted);
 
+/// {@template OnSubscriberTrackPublished}
+/// Called when a subscriber track is published.
+/// {@endtemplate}
+typedef OnSubscriberTrackPublished = void Function(
+  StreamPeerConnection pc,
+  RtcRemoteTrack track,
+);
+
 class RtcManager extends Disposable {
   RtcManager({
     required this.sessionId,
@@ -57,6 +65,7 @@ class RtcManager extends Disposable {
   OnIceCandidate? onSubscriberIceCandidate;
   OnRenegotiationNeeded? onPublisherNegotiationNeeded;
   OnPublisherTrackMuted? onPublisherTrackMuted;
+  OnSubscriberTrackPublished? onSubscriberTrackPublished;
 
   /// Returns a generic sdp.
   static Future<String> getGenericSdp() async {
@@ -105,7 +114,9 @@ class RtcManager extends Disposable {
   }
 
   void _onSubscriberTrack(StreamPeerConnection pc, rtc.RTCTrackEvent event) {
-    _logger.d(() => '[onSubscriberTrack] event: $event');
+    _logger.d(
+      () => '[onSubscriberTrack] event.streams.length: ${event.streams.length}',
+    );
 
     final stream = event.streams.firstOrNull;
     if (stream == null) {
@@ -139,6 +150,8 @@ class RtcManager extends Disposable {
     );
 
     publishedTracks[remoteTrack.trackSid] = remoteTrack;
+    _logger.v(() => '[onSubscriberTrack] published: ${remoteTrack.trackSid}');
+    onSubscriberTrackPublished?.call(pc, remoteTrack);
   }
 
   Future<void> unpublishTrack({required String trackSid}) async {
@@ -188,6 +201,8 @@ class RtcManager extends Disposable {
   }
 
   RtcTrack? getTrack(String trackSid) {
+    _logger.d(() => '[getTrack] trackSid: $trackSid');
+    _logger.v(() => '[getTrack] publishedTracks: ${publishedTracks.keys}');
     return publishedTracks[trackSid];
   }
 

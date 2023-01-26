@@ -21,7 +21,7 @@ Future<void> main() async {
   */
 
   StreamVideoV2.init(
-    'key10', // see <video>/data/fixtures/apps.yaml for API secret
+    'us83cfwuhy8n', // see <video>/data/fixtures/apps.yaml for API secret
     coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
         'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
     // 'http://192.168.1.7:26991/rpc',

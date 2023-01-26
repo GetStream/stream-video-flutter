@@ -60,7 +60,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   final SfuClientV2 sfuClient;
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
-  late RtcManager rtcManager;
+  RtcManager? rtcManager;
 
   @override
   SharedEmitter<SfuEventV2> get events => sfuWS.events;
@@ -99,7 +99,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
             ..onPublisherIceCandidate = _onLocalIceCandidate
             ..onSubscriberIceCandidate = _onLocalIceCandidate
             ..onPublisherTrackMuted = _onPublisherTrackMuted
-            ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded;
+            ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded
+            ..onSubscriberTrackPublished = _onSubscriberTrackPublished;
       _logger.v(() => '[start] completed');
       return Result.success(None());
     } catch (e, stk) {
@@ -113,7 +114,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     _logger.d(() => '[dispose] no args');
     sfuWS.removeEventListener(this);
     await sfuWS.disconnect();
-    await rtcManager.dispose();
+    await rtcManager?.dispose();
+    rtcManager = null;
     return await super.dispose();
   }
 
@@ -137,7 +139,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {
     final offerSdp = event.sdp;
     _logger.i(() => '[onSfuSubscriberOfferEvent] event: $event');
-    final answerSdp = await rtcManager.onSubscriberOffer(offerSdp);
+    final answerSdp = await rtcManager?.onSubscriberOffer(offerSdp);
     if (answerSdp == null) return;
 
     await sfuClient.sendAnswer(
@@ -166,7 +168,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
 
   Future<void> _onRemoteIceCandidate(SfuIceTrickleEvent event) async {
     _logger.d(() => '[onRemoteIceCandidate] event: $event');
-    rtcManager.onRemoteIceCandidate(
+    rtcManager?.onRemoteIceCandidate(
       peerType: event.peerType,
       iceCandidate: event.iceCandidate,
     );
@@ -202,7 +204,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     final offer = await pc.createOffer();
     if (offer is! Success<rtc.RTCSessionDescription>) return;
 
-    final tracksInfo = rtcManager.getPublisherTrackInfos();
+    final tracksInfo = rtcManager?.getPublisherTrackInfos();
+    if (tracksInfo == null) return;
 
     _logger.v(() => '[onPubNegotiationNeeded] tracksInfo: $tracksInfo');
 
@@ -226,14 +229,28 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     }
   }
 
+  Future<void> _onSubscriberTrackPublished(
+    StreamPeerConnection pc,
+    RtcRemoteTrack remoteTrack,
+  ) async {
+    _logger.d(
+      () => '[onSubscriberTrackPublished] remoteTrack: ${remoteTrack}',
+    );
+    // TODO
+    // stateManager.onSubscriberTrackPublished(
+    //   remoteTrack.trackId,
+    //   remoteTrack.trackType,
+    // );
+  }
+
   @override
   RtcTrack? getTrack(String trackSid) {
-    return rtcManager.getTrack(trackSid);
+    return rtcManager?.getTrack(trackSid);
   }
 
   @override
   List<RtcTrack> getTracks(String trackId) {
-    return rtcManager.getTracks(trackId);
+    return rtcManager?.getTracks(trackId) ?? List.empty();
   }
 
   @override
@@ -252,7 +269,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   }
 
   Future<Result<None>> _onSetCameraEnabled(bool enabled) async {
-    final track = await rtcManager.setCameraEnabled(enabled: enabled);
+    final track = await rtcManager?.setCameraEnabled(enabled: enabled);
     if (track == null) {
       return Result.error('Unable to enable/disable camera, Track not found');
     }
@@ -261,7 +278,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   }
 
   Future<Result<None>> _onSetMicrophoneEnabled(bool enabled) async {
-    final track = await rtcManager.setMicrophoneEnabled(enabled: enabled);
+    final track = await rtcManager?.setMicrophoneEnabled(enabled: enabled);
     if (track == null) {
       return Result.error(
         'Unable to enable/disable microphone, Track not found',
@@ -272,7 +289,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   }
 
   Future<Result<None>> _onSetScreenShareEnabled(bool enabled) async {
-    final track = await rtcManager.setScreenShareEnabled(enabled: enabled);
+    final track = await rtcManager?.setScreenShareEnabled(enabled: enabled);
     if (track == null) {
       return Result.error(
         'Unable to enable/disable screen-share, Track not found',
@@ -283,7 +300,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   }
 
   Future<Result<None>> _onSetCameraPosition(CameraPosition position) async {
-    final track = await rtcManager.setCameraPosition(cameraPosition: position);
+    final track = await rtcManager?.setCameraPosition(cameraPosition: position);
     if (track == null) {
       return Result.error('Unable to set camera position, Track not found');
     }
