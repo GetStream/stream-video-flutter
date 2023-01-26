@@ -101,8 +101,7 @@ class CallV2Impl extends CallV2 {
     );
   }
 
-  @override
-  Future<Result<None>> acceptCall() async {
+  Future<Result<None>> _acceptCall() async {
     final state = _stateManager.state.value;
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
@@ -118,8 +117,7 @@ class CallV2Impl extends CallV2 {
     return result;
   }
 
-  @override
-  Future<Result<None>> rejectCall() async {
+  Future<Result<None>> _rejectCall() async {
     final state = _stateManager.state.value;
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
@@ -135,8 +133,7 @@ class CallV2Impl extends CallV2 {
     return result;
   }
 
-  @override
-  Future<Result<None>> cancelCall() async {
+  Future<Result<None>> _cancelCall() async {
     final state = _stateManager.state.value;
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
@@ -295,6 +292,22 @@ class CallV2Impl extends CallV2 {
 
   @override
   Future<Result<None>> apply(CallControlAction action) async {
+    if (action is SessionControlAction) {
+      return _applyPublisherAction(action);
+    } else if (action is CancelCall) {
+      return _cancelCall();
+    } else if (action is AcceptCall) {
+      return _acceptCall();
+    } else if (action is RejectCall) {
+      return _rejectCall();
+    }
+    return Result.error('Action not supported: $action');
+  }
+
+  @override
+  Future<Result<None>> _applyPublisherAction(
+    SessionControlAction action,
+  ) async {
     _logger.d(() => '[apply] action: $action');
     final session = _session;
     if (session == null) {

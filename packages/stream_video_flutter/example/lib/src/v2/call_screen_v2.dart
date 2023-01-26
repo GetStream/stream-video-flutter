@@ -152,7 +152,7 @@ class _CallScreenV2State extends State<CallScreenV2> {
   }
 
   Future<void> _hangUp() async {
-    await widget.call.cancelCall();
+    await widget.call.apply(CancelCall());
     await widget.call.disconnect();
   }
 }

@@ -62,12 +62,6 @@ abstract class CallV2 {
     bool ringing = false,
   });
 
-  Future<Result<None>> acceptCall();
-
-  Future<Result<None>> rejectCall();
-
-  Future<Result<None>> cancelCall();
-
   Future<Result<None>> connect({
     CallSettings settings = const CallSettings(),
   });

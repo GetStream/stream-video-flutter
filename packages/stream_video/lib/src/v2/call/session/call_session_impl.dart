@@ -186,7 +186,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   }
 
   @override
-  Future<Result<None>> apply(CallControlAction action) async {
+  Future<Result<None>> apply(SessionControlAction action) async {
     if (action is SetCameraEnabled) {
       return _onSetCameraEnabled(action.enabled);
     } else if (action is SetMicrophoneEnabled) {

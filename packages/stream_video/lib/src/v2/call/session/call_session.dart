@@ -13,7 +13,7 @@ abstract class CallSession extends Disposable {
 
   Future<Result<None>> start();
 
-  Future<Result<None>> apply(CallControlAction action);
+  Future<Result<None>> apply(SessionControlAction action);
 
   List<RtcTrack> getTracks(String userId);
 
