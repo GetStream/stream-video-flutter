@@ -1,10 +1,6 @@
-import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
-    as sfu_models;
-import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
-    as sfu;
-import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart'
-    as signal_twirp;
-import 'package:stream_video/src/v2/utils/result.dart';
+import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
+import '../utils/result.dart';
 
 abstract class SfuClientV2 {
   Future<Result<sfu.SendAnswerResponse>> sendAnswer(

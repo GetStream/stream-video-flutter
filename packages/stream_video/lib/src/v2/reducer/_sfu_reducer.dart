@@ -78,7 +78,8 @@ class SfuReducer {
       callParticipants: {
         ...state.callParticipants,
       }..updateAll((userId, participant) {
-          if (userId == event.userId && state.sessionId == event.sessionId) {
+          if (userId == event.userId &&
+              participant.sessionId == event.sessionId) {
             return participant.copyWith(
               publishedTrackTypes: [
                 ...participant.publishedTrackTypes,

@@ -2,10 +2,12 @@ import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import "package:webrtc_interface/src/rtc_session_description.dart";
 
+import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../disposable.dart';
 import '../../logger/stream_logger.dart';
 import '../../platform_detector/platform_detector.dart';
 import '../model/call_cid.dart';
+import '../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../utils/result.dart';
@@ -13,6 +15,7 @@ import 'codecs_helper.dart' as codecs;
 import 'media/constraints/camera_position.dart';
 import 'media/constraints/facing_mode.dart';
 import 'media/media_constraints.dart';
+import 'model/rtc_model_mapper_extensions.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_dimension.dart';
 import 'peer_connection.dart';
@@ -33,6 +36,11 @@ typedef OnSubscriberTrackPublished = void Function(
   StreamPeerConnection pc,
   RtcRemoteTrack track,
 );
+
+typedef OnSubscriberTrackSubscriptionUpdate = void Function({
+  required sfu.TrackSubscriptionDetails track,
+  required bool subscribe,
+});
 
 class RtcManager extends Disposable {
   RtcManager({
@@ -66,6 +74,7 @@ class RtcManager extends Disposable {
   OnRenegotiationNeeded? onPublisherNegotiationNeeded;
   OnPublisherTrackMuted? onPublisherTrackMuted;
   OnSubscriberTrackPublished? onSubscriberTrackPublished;
+  OnSubscriberTrackSubscriptionUpdate? onSubscriberTrackSubscriptionUpdate;
 
   /// Returns a generic sdp.
   static Future<String> getGenericSdp() async {
@@ -541,12 +550,52 @@ extension PublisherRtcManager on RtcManager {
 }
 
 extension SubscriberRtcManager on RtcManager {
-  void subscribeTrack() {
-    // TODO: implement subscribeTrack
+  Future<void> subscribeTrack({
+    required String userId,
+    required String sessionId,
+    required SfuTrackType trackType,
+    RtcVideoDimension dimension = RtcVideoDimensionPresets.h720_169,
+  }) {
+    return _updateSubscription(
+      userId,
+      sessionId,
+      trackType,
+      subscribe: true,
+      dimension: dimension,
+    );
   }
 
-  void unsubscribeTrack() {
-    // TODO: implement unsubscribeTrack
+  Future<void> unsubscribeTrack({
+    required String userId,
+    required String sessionId,
+    required SfuTrackType trackType,
+  }) {
+    return _updateSubscription(
+      userId,
+      sessionId,
+      trackType,
+      subscribe: false,
+    );
+  }
+
+  Future<void> _updateSubscription(
+    String userId,
+    String sessionId,
+    SfuTrackType trackType, {
+    required bool subscribe,
+    RtcVideoDimension? dimension,
+  }) async {
+    final track = sfu.TrackSubscriptionDetails(
+      userId: userId,
+      sessionId: sessionId,
+      trackType: trackType.toDTO(),
+      dimension: dimension?.toDTO(),
+    );
+
+    return onSubscriberTrackSubscriptionUpdate?.call(
+      track: track,
+      subscribe: subscribe,
+    );
   }
 }
 
