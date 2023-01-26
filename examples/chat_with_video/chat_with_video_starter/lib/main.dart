@@ -1,19 +1,18 @@
-import 'package:chat_with_video_starter/app_config.dart';
 import 'package:chat_with_video_starter/screen/choose_user_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-Future<void> main() async {
+void main() {
   /// Initialize Stream Video SDK.
   StreamVideo.init(
-    videoApiKey,
+    "us83cfwuhy8n",
     logLevel: Level.INFO,
   );
 
   /// Initialize Stream Chat SDK.
   final client = StreamChatClient(
-    chatApiKey,
+    "tp8sef43xcpc",
     logLevel: Level.INFO,
   );
 

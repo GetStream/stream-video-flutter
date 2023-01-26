@@ -1,12 +1,11 @@
 import 'package:chat_with_video_final/screen/channel_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class ChannelListScreen extends StatefulWidget {
-  const ChannelListScreen({
-    Key? key,
-  }) : super(key: key);
+  const ChannelListScreen({Key? key, required this.onLogout}) : super(key: key);
+
+  final VoidCallback onLogout;
 
   @override
   State<ChannelListScreen> createState() => _ChannelListScreenState();
@@ -30,15 +29,12 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final chatTheme = StreamChatTheme.of(context);
-    final textTheme = chatTheme.textTheme;
-
     return Scaffold(
       appBar: StreamChannelListHeader(
         titleBuilder: (context, status, client) {
           return Text(
             "Chat with Video",
-            style: textTheme.headlineBold,
+            style: StreamChatTheme.of(context).textTheme.headlineBold,
           );
         },
         actions: [
@@ -47,7 +43,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
               color: Colors.black,
               Icons.logout,
             ),
-            onPressed: () async => _logout(context),
+            onPressed: () async => widget.onLogout.call(),
           ),
         ],
       ),
@@ -67,16 +63,5 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
         },
       ),
     );
-  }
-
-  /// Disconnect the currently logged in user from both Video and Chat APIs.
-  Future<void> _logout(BuildContext context) async {
-    final chatClient = StreamChat.of(context).client;
-    await chatClient.disconnectUser();
-
-    final videoClient = StreamVideo.instance;
-    await videoClient.disconnectUser();
-
-    Navigator.of(context).pop();
   }
 }

@@ -45,7 +45,12 @@ class ChooseUserScreen extends StatelessWidget {
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => ChannelListScreen()),
+      MaterialPageRoute(
+          builder: (context) => ChannelListScreen(
+                onLogout: () {
+                  _logout(context);
+                },
+              )),
     );
   }
 
@@ -67,5 +72,28 @@ class ChooseUserScreen extends StatelessWidget {
       user.toChatUser(),
       user.chatToken,
     );
+  }
+
+  /// Disconnects the currently logged in user from both Video and Chat APIs
+  /// and navigates back to the previous screen.
+  Future<void> _logout(BuildContext context) async {
+    _disconnectChatUser(context);
+    _disconnectVideoUser();
+
+    Navigator.of(context).pop();
+  }
+
+  /// Disconnects the currently logged in user from the Chat API.
+  Future<void> _disconnectChatUser(BuildContext context) async {
+    final chatClient = StreamChat.of(context).client;
+
+    await chatClient.disconnectUser();
+  }
+
+  /// Disconnects the currently logged in user from the Video API.
+  Future<void> _disconnectVideoUser() async {
+    final videoClient = StreamVideo.instance;
+
+    await videoClient.disconnectUser();
   }
 }
