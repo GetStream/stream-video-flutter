@@ -1,7 +1,11 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
 import 'package:stream_video/stream_video.dart';
 
-import 'login_screen_v2.dart';
+import 'view/call_participant.dart';
+import 'view/call_participant_view.dart';
 
 class CallScreenV2 extends StatefulWidget {
   const CallScreenV2({
@@ -21,38 +25,57 @@ class CallScreenV2 extends StatefulWidget {
 }
 
 class _CallScreenV2State extends State<CallScreenV2> {
-  late final CallV2 call = widget.call;
-  late CallStateV2 state;
+  late final CallV2 _call = widget.call;
+  late CallStateV2 _state;
+
+  final _renderers = <String, rtc.RTCVideoRenderer>{};
 
   @override
   void initState() {
     super.initState();
-    widget.call.state.listen((value) {
-      setState(() {
-        state = widget.call.state.value;
-      });
-    });
-    setState(() {
-      state = widget.call.state.value;
-    });
+    widget.call.state.listen(_setState);
+    _setState(widget.call.state.value);
     _start();
+  }
+
+  Future<void> _setState(CallStateV2 state) async {
+    for (final participantState in state.callParticipants.values) {
+      final userId = participantState.userId;
+      final trackSid =
+          '${participantState.trackIdPrefix}:${SfuTrackType.video}';
+      final track = _call.getTrack(trackSid);
+      print('(SV:CallScreenState): [setState] userId: $userId, track: $track');
+      if (track == null) {
+        await _renderers[userId]?.dispose();
+        _renderers.remove(userId);
+      } else {
+        final renderer = _renderers[userId] ?? rtc.RTCVideoRenderer();
+        await renderer.initialize();
+        renderer.srcObject = track.stream;
+        _renderers[userId] = renderer;
+      }
+    }
+    setState(() {
+      _state = state;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // final call = CallV2.fromCid(callCid: callCid);
-    // await call.getOrCreate();
-    // final result = await call.connect();
-    // if (result.isFailure) {
-    //   return;
-    // }
+    final participants = _state.callParticipants.values.take(4).map((pState) {
+      return CallParticipantV2(
+        state: pState,
+        renderer: _renderers[pState.userId],
+      );
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(
         elevation: 4,
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(Icons.close),
             onPressed: () async {
               await _hangUp();
               widget.onBackPressed();
@@ -63,20 +86,39 @@ class _CallScreenV2State extends State<CallScreenV2> {
       ),
       body: Column(
         children: [
+          const SizedBox(height: 10),
           Text(
-            'Status: ${state.status.runtimeType}',
+            'Status: ${_state.status.runtimeType}',
           ),
+          const SizedBox(height: 10),
           Text(
-            'Users: ${state.callParticipants.values.map(
+            'Users: ${_state.callParticipants.values.map(
                   (it) => it.userId,
                 ).toList()}',
+          ),
+          const SizedBox(height: 50),
+          Expanded(
+            child: GridView.count(
+              crossAxisCount: 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              padding: const EdgeInsets.all(8),
+              children: [
+                _buildParticipant(participants, 0),
+                _buildParticipant(participants, 1),
+                _buildParticipant(participants, 2),
+                _buildParticipant(participants, 3),
+              ],
+            ),
           )
         ],
       ),
       bottomNavigationBar: SafeArea(
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextButton(
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               onPressed: () async {
                 await _hangUp();
                 widget.onBackPressed();
@@ -89,11 +131,27 @@ class _CallScreenV2State extends State<CallScreenV2> {
     );
   }
 
+  Widget _buildParticipant(List<CallParticipantV2> participants, int pIndex) {
+    final participant =
+        participants.firstWhereIndexedOrNull((index, _) => index == pIndex);
+
+    return Container(
+      color: Colors.yellow,
+      child: CallParticipantView(
+        call: _call,
+        participant: participant,
+      ),
+    );
+  }
+
   Future<void> _start() async {
-    if (state.status.isIdle) {
+    if (_state.status.isIdle) {
       await widget.call.getOrCreate();
     }
-    await widget.call.connect();
+    final result = await widget.call.connect();
+    if (result.isFailure) {
+      await _hangUp();
+    }
   }
 
   Future<void> _hangUp() async {

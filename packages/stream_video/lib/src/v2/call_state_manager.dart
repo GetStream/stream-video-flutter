@@ -145,9 +145,11 @@ class CallStateManagerImpl extends CallStateManager {
       final users = await _queryUsersByIds(
         participants.map((it) => it.userId).toSet(),
       );
+      _logger.v(() => '[onSfuEvent] received users: $users');
       _postReduced(SfuJoinedAction(participants: participants, users: users));
     } else if (event is SfuParticipantJoinedEvent) {
       final user = await _queryUserById(event.participant.userId);
+      _logger.v(() => '[onSfuEvent] received user: $user');
       _postReduced(
         SfuParticipantJoinedAction(participant: event.participant, user: user),
       );

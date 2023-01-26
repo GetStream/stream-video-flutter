@@ -9,20 +9,24 @@ import 'home_screen_v2.dart';
 
 final List<LoginInfo> users = [
   LoginInfo(
-    UserInfo(
-      id: 'sahil',
+    const UserInfo(
+      id: 'tommaso',
       role: 'admin',
-      name: 'Sahil2',
+      name: 'Tomasso',
+      imageUrl:
+          'https://getstream.io/static/712bb5c0bd5ed8d3fa6e5842f6cfbeed/c59de/tommaso.webp',
     ),
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9zYWhpbCIsImlhdCI6MTY2OTcyNjkxNSwidXNlcl9pZCI6InNhaGlsIn0.aOOWXDmX-8hG57N7R3w320XZzxAj256Lm2YZj_sqCuQ",
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90b21tYXNvIiwiaWF0IjoxNjcwMzM5NDQwLCJ1c2VyX2lkIjoidG9tbWFzbyJ9.t5YFZFqm-XjDFJV_z_y-UdT8HjZpOunAm-6L_h_mW7A',
   ),
   LoginInfo(
-    UserInfo(
-      id: 'deven',
+    const UserInfo(
+      id: 'thierry',
       role: 'admin',
-      name: 'Deven2',
+      name: 'Thierry',
+      imageUrl:
+          'https://getstream.io/static/237f45f28690696ad8fff92726f45106/c59de/thierry.webp',
     ),
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9kZXZlbiIsImlhdCI6MTY2OTcyNjk1MSwidXNlcl9pZCI6ImRldmVuIn0.u5c-MHdpV2UNKYpD0fkc5cML66Bifx_Q2hV9ueRMjpI",
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90aGllcnJ5IiwiaWF0IjoxNjcwMzM5NTAwLCJ1c2VyX2lkIjoidGhpZXJyeSJ9.q8dy763W-ZVOA_1VbNhz0VozuxAI1Ko42HlVl-9mnG8',
   ),
 ];
 

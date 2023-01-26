@@ -1,7 +1,10 @@
+import '../../logger/stream_logger.dart';
 import '../action/sfu_action.dart';
 import '../call_participant_state.dart';
 import '../call_state.dart';
 import '../sfu/data/events/sfu_events.dart';
+
+final _logger = taggedLogger(tag: 'SV:Reducer-SFU');
 
 class SfuReducer {
   const SfuReducer();
@@ -39,6 +42,9 @@ class SfuReducer {
     CallStateV2 state,
     SfuJoinedAction action,
   ) {
+    _logger.d(
+      () => '[reduceJoined] ${state.sessionId}; action: $action',
+    );
     final states = action.participants.values.map((aParticipant) {
       final user = action.users[aParticipant.userId];
       final isLocal = aParticipant.userId == state.currentUserId;
@@ -65,6 +71,9 @@ class SfuReducer {
     CallStateV2 state,
     SfuTrackUnpublishedEvent event,
   ) {
+    _logger.d(
+      () => '[reduceTrackUnpublished] ${state.sessionId}; event: $event',
+    );
     return state.copyWith(
       callParticipants: {
         ...state.callParticipants,
@@ -86,11 +95,14 @@ class SfuReducer {
     CallStateV2 state,
     SfuTrackPublishedEvent event,
   ) {
+    _logger.d(() => '[reduceTrackPublished] ${state.sessionId}; event: $event');
     return state.copyWith(
       callParticipants: {
         ...state.callParticipants,
       }..updateAll((userId, participant) {
-          if (userId == event.userId && state.sessionId == event.sessionId) {
+          if (userId == event.userId &&
+              participant.sessionId == event.sessionId) {
+            _logger.v(() => '[reduceTrackPublished] pFound: $participant');
             return participant.copyWith(
               publishedTrackTypes: [
                 ...participant.publishedTrackTypes,
@@ -98,6 +110,7 @@ class SfuReducer {
               ],
             );
           } else {
+            _logger.v(() => '[reduceTrackPublished] pSame: $participant');
             return participant;
           }
         }),

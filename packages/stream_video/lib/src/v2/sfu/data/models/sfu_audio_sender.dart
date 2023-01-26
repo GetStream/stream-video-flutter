@@ -1,7 +1,10 @@
-import 'package:stream_video/src/v2/sfu/data/models/sfu_codec.dart';
+import 'package:meta/meta.dart';
 
+import 'sfu_codec.dart';
+
+@immutable
 class SfuAudioSender {
-  SfuAudioSender({
+  const SfuAudioSender({
     required this.mediaRequest,
     required this.codec,
   });

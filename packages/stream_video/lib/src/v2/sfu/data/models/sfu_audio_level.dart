@@ -1,5 +1,8 @@
+import 'package:meta/meta.dart';
+
+@immutable
 class SfuAudioLevel {
-  SfuAudioLevel({
+  const SfuAudioLevel({
     required this.userId,
     required this.sessionId,
     required this.level,

@@ -37,4 +37,6 @@ export 'src/v2/model/call_joined.dart';
 export 'src/v2/model/call_received_created.dart';
 export 'src/v2/model/call_status.dart';
 export 'src/v2/model/drop_reason.dart';
+export 'src/v2/sfu/data/models/sfu_track_type.dart';
 export 'src/v2/stream_video_v2.dart';
+export 'src/v2/webrtc/rtc_track.dart';

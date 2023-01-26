@@ -138,13 +138,6 @@ class LifecycleReducer {
     CallStateV2 state,
     CallCancelledAction action,
   ) {
-    final status = state.status;
-    if (status is! CallStatusActive) {
-      _logger.w(
-        () => '[reduceCallRejected] rejected (invalid status): $status',
-      );
-      return state;
-    }
     return state.copyWith(
       status: CallStatus.drop(
         DropReason.cancelled(
