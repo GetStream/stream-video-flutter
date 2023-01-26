@@ -53,6 +53,7 @@ class CallNotificationWrapper {
       ),
     );
     await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
+    // TODO: Cancel the listener after an event is fired.
     FlutterCallkitIncoming.onEvent.listen((event) {
       if (event?.event == Event.ACTION_CALL_ACCEPT) {
         onCallAccepted(callId);

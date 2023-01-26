@@ -7,6 +7,9 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'firebase_options.dart';
 import 'src/routes/app_routes.dart';
 
+final GlobalKey<NavigatorState> navState = GlobalKey<NavigatorState>();
+Call? initialCall;
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -15,9 +18,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> _handleRemoteMessage(RemoteMessage message) async {
-  print('Handling Remote Message with payload: ${message.data}');
+  print('JcLog: Handling Remote Message with payload: ${message.data}');
   await StreamVideo.instance.handlePushNotification(message, (call) {
-    print('JcLog: on call accepted, ${message.messageId}');
+    print('JcLog: on call ($call) accepted, ${message.messageId}');
+    initialCall = call;
   });
 }
 
@@ -68,13 +72,16 @@ class _StreamDogFoodingApp extends State<StreamDogFoodingApp> {
     // Also handle any interaction when the app is in the background via a
     // Stream listener
     FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+    if (initialCall != null) {
+      print('JcLog: We can navigate to the call screen');
+    }
   }
 
   void _handleMessage(RemoteMessage message) {
     print('JcLog: handling opened PN');
     // if (message.data['type'] == 'chat') {
     //   Navigator.pushNamed(
-    //     context,
+    //     navState.currentContext,
     //     CallScreen.routeName,
     //     arguments: ChatArguments(message),
     //   );
@@ -107,6 +114,7 @@ class _StreamDogFoodingApp extends State<StreamDogFoodingApp> {
         ],
       ),
       onGenerateRoute: AppRoutes.generateRoute,
+      navigatorKey: navState,
     );
   }
 }
