@@ -1,9 +1,7 @@
 import 'package:chat_with_video_starter/sample_user.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app_config.dart';
-import '../user_mapper.dart';
 import 'channel_list_screen.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -25,7 +23,9 @@ class LoginScreen extends StatelessWidget {
           itemBuilder: (context, position) {
             var user = users[position];
             return ListTile(
-              leading: StreamUserAvatar(user: user.toVideoUser()),
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(user.image),
+              ),
               title: Text(user.name),
               onTap: () async => _login(context, user),
             );
