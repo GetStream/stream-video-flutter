@@ -31,20 +31,7 @@ class ChannelScreen extends StatelessWidget {
             child: StreamMessageListView(
               messageBuilder: (context, details, messages, defaultMessage) {
                 return defaultMessage.copyWith(
-                  customAttachmentBuilders: {
-                    'custom': (context, message, attachments) {
-                      return WrapAttachmentWidget(
-                        attachmentWidget: CallAttachment(
-                          message: message,
-                          attachment: attachments.first,
-                        ),
-                        attachmentShape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      );
-                    }
-                  },
-                );
+                    customAttachmentBuilders: _customAttachmentBuilders());
               },
             ),
           ),
@@ -52,6 +39,22 @@ class ChannelScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Map<String, AttachmentBuilder> _customAttachmentBuilders() {
+    return {
+      'custom': (context, message, attachments) {
+        return WrapAttachmentWidget(
+          attachmentWidget: CallAttachment(
+            message: message,
+            attachment: attachments.first,
+          ),
+          attachmentShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        );
+      }
+    };
   }
 
   /// Creates a new call and sends a message with its metadata to the chat.
