@@ -438,40 +438,51 @@ Firstly, you need to initialize the Video client, aptly called `StreamVideo`.
 
 ### Initializing StreamVideo
 
-Open `main.dart`. To initialize the client, there's already a predefined function that you need to fill, using the user credentials. Find and replace the `initializeStreamVideo` code with the following:
+Open `main.dart`. To initialize the client, you need to add the following code:
 
-```dart
-/// Initialize Stream Video SDK.
+```dart title="/lib/main.dart"
 StreamVideo.init(
-"us83cfwuhy8n",
-logLevel: Level.INFO,
+  "us83cfwuhy8n",
+  logLevel: Level.INFO,
 );
 ```
 
-To further integrate the client into the app, replace the `logOut` function code with the following:
-
+You're now ready to log in the user and connect to a call when tapping on the custom attachment or header action.
 
 ### Logging in a User
 
 For the login aspect of `StreamVideo`, there's not much to think about. The `StreamVideo` client is tied to a user instance. You cannot access any potential Calls or join an audio/video call, unless you're logged in. It's a server requirement and it makes things easy to think about.
 
-To log into `StreamVideo`, you create the `StreamVideo` instance with a user construct. As long as the instance persists, we consider the user to be logged in.
+Open the `login_screen.dart` file and replace the `_connectVideoUser` code with the following:
 
-Open the `choose_user_screen.dart` file and replace the `logInToVideo` code with the following:
-
-```dart
-/// Connects the current user to the Video API.
+```dart title="/lib/screen/login_screen.dart"
 Future<void> _connectVideoUser(SampleUser user) async {
-    final videoClient = StreamVideo.instance;
+  final videoClient = StreamVideo.instance;
 
-    await videoClient.connectUser(
-            user.toVideoUser(),
+  await videoClient.connectUser(
+    user.toVideoUser(),
     token: Token(user.videoToken),
-    );
+  );
 }
 ```
 
-With all of this, your attachments will be able to hit the Video API endpoints to join a call, but there are two small steps to show the appropriate UI and logic. Declaring the Android inputs in the `AndroidManifest.xml` file and allowing users to start new Calls.
+It's very simple in what it does:
+
+1. You obtain a singleton instance of `StreamVideo`.
+2. You call the `connectUser()` function, with a sample user mapped to a user from the Video SDK.
+4. You pass in a `Token` to make API calls.
+
+With all of this, your attachments will be able to hit the Video API endpoints to join a call.
+
+To finish up, you can add the logging out counterpart, by replacing `_disconnectVideoUser` with the following:
+
+```dart title="/lib/screen/login_screen.dart"
+Future<void> _disconnectVideoUser() async {
+  final videoClient = StreamVideo.instance;
+
+  await videoClient.disconnectUser();
+}
+```
 
 ### Allowing Users To Start Calls
 
