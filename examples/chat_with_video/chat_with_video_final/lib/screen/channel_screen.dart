@@ -32,7 +32,7 @@ class ChannelScreen extends StatelessWidget {
               messageBuilder: (context, details, messages, defaultMessage) {
                 return defaultMessage.copyWith(
                   customAttachmentBuilders: {
-                    'call': (context, message, attachments) {
+                    'custom': (context, message, attachments) {
                       return WrapAttachmentWidget(
                         attachmentWidget: CallAttachment(
                           message: message,
@@ -63,21 +63,20 @@ class ChannelScreen extends StatelessWidget {
       id: 'call${Random().nextInt(10000)}',
       type: "default",
       ringing: false,
+      participantIds: [],
     );
 
     final call = createCallResult.call;
-    final users = createCallResult.users;
 
     channel.sendMessage(
       Message(
         attachments: [
           Attachment(
-            type: "call",
+            type: "custom",
             authorName: currentUser?.name ?? "",
             uploadState: UploadState.success(),
             extraData: {
               "callCid": call.callCid,
-              "members": users.values.map((e) => e.name).toList(),
             },
           )
         ],

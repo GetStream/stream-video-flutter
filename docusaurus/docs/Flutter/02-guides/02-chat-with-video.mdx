@@ -1,4 +1,4 @@
-## Building Chat Apps With Video Support
+# Building Chat Apps With Video Support
 
 One of the most common chat app use cases is having a chat feature in your app that allows users to engage in audio and video communication. This direct integration allows for simple transition between text and images to more complex media.
 
@@ -11,7 +11,8 @@ Stream supports this use case, out-of-the-box. In this guide, you'll walk throug
 
 By the end of this guide, your app will look like this:
 
-![Message List Example]()
+|![Final Result](../assets/chat_with_video_final_result.png)|
+|---|
 
 You'll have the ability to create messaging conversations, in which you can start calls as a custom attachment. Anyone in the chat will then be notified accordingly and can join the call.
 
@@ -42,9 +43,9 @@ You'll be integrating two SDKs - Video and Chat. The file contains corresponding
 
 The project already has a few screens set up for you with TODO items that you'll fill in later. Run the project and you should see the Login screen, followed by a blank Home screen after you select a user.
 
-| Login Screen | Home Screen |
-| ------------ | ----------- |
-| ![Login Screen]() | ![Home Screen]() |
+| Login Screen                                                | Home Screen                                                            |
+|-------------------------------------------------------------|------------------------------------------------------------------------|
+| ![Login Screen](../assets/chat_with_video_login_screen.png) | ![Empty Channels Screen](../assets/chat_with_video_empty_channels.png) |
 
 The pre-baked code contains all the logic that is not related to Stream, so that you can focus solely on integrating our two SDKs. We recommend exploring the project to learn how to navigate it and what each part of the predefined code does. Some of the notable functionality in the starter kit contains:
 
@@ -202,7 +203,8 @@ There are only a few lines of code here that let you set up an entire screen and
 
 Build and run the app and you should be able to log in or out with a user, as well as see and open the `Channel`s they're a part of.
 
-![Screenshot_1673592655]()
+| ![Channels Screen](../assets/chat_with_video_final_channels.png) |
+|------------------------------------------------------------------|
 
 The next step to integrating the Chat SDK to replicate a chat-first-app which allows video calls, is to display the selected conversations and integrate custom attachments that render created calls.
 
@@ -521,7 +523,8 @@ You could've approached this logic differently and shown special dialogs to the 
 
 Now, you're fully ready to start and enjoy the Chat + Video experience. Build and run the app, log in and join any call attachment, or create a new call and join like that.
 
-![call](https://user-images.githubusercontent.com/17215808/212706833-56e7f564-ea74-42f6-85dd-a0c174199773.png)
+|![Call Screen](../assets/chat_with_video_call_screen.png)|
+|---|
 
 And much more. You've implemented everything you need to achieve a good Chat + Video use case. Now you can focus on exploring more resources to add features to the project.
 
