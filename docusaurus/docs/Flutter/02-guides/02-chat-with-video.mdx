@@ -336,221 +336,53 @@ The next step to integrating the Chat SDK to replicate a chat-first-app which al
 
 ### Adding Messaging Functionality
 
-You're able to open the `ChannelScreen`, but it's fully empty at the moment. Let's change that. Open `ChannelScreen` and at the very top of the class, add the following code:
+You're able to open the `ChannelScreen`, but it's fully empty at the moment. Let's change that. Open `ChannelScreen` and at the very top of the class, add the UI code:
 
-Copy
-
-```dart
-import 'dart:math';
-
-import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
-
-class ChannelScreen extends StatelessWidget {
-  const ChannelScreen({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: StreamChannelHeader(
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(
-              Icons.call_rounded,
-              color: Colors.black,
-            ),
-            onPressed: () async => _startCall(context),
+```dart title="/lib/screen/channel_screen.dart"
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: StreamChannelHeader(
+      actions: <Widget>[
+        IconButton(
+          icon: const Icon(
+            Icons.call_rounded,
+            color: Colors.black,
           ),
-        ],
-      ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: StreamMessageListView(
-              messageBuilder: (context, details, messages, defaultMessage) {
-                return defaultMessage.copyWith(
-                  customAttachmentBuilders: {
-                    'call': (context, message, attachments) {
-                      return WrapAttachmentWidget(
-                        attachmentWidget: _CallAttachment(
-                          message: message,
-                          attachment: attachments.first,
-                        ),
-                        attachmentShape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      );
-                    }
-                  },
-                );
-              },
-            ),
-          ),
-          StreamMessageInput(),
-        ],
-      ),
-    );
-  }
-
-  Map<String, AttachmentBuilder>? _customAttachmentBuilders() {
-    return null;
-
-    return {
-      'call': (context, message, attachments) {
-        return WrapAttachmentWidget(
-          attachmentWidget: _CallAttachment(
-            message: message,
-            attachment: attachments.first,
-          ),
-          attachmentShape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        );
-      }
-    };
-  }
-
-  /// Creates a new call and sends a message with its metadata to the chat.
-  void _startCall(BuildContext context) async {
-    final currentUser = StreamChat.of(context).currentUser;
-    final channel = StreamChannel.of(context).channel;
-
-    final createCallResult = await StreamVideo.instance.createCall(
-      id: 'call${Random().nextInt(10000)}',
-      type: "default",
-      ringing: false,
-    );
-
-    final call = createCallResult.call;
-    final users = createCallResult.users;
-
-    channel.sendMessage(
-      Message(
-        attachments: [
-          Attachment(
-            type: "call",
-            authorName: currentUser?.name ?? "",
-            uploadState: UploadState.success(),
-            extraData: {
-              "callCid": call.callCid,
-              "members": users.values.map((e) => e.name).toList(),
-            },
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class _CallAttachment extends StatelessWidget {
-  const _CallAttachment({
-    required this.message,
-    required this.attachment,
-  });
-
-  /// The message that [attachment] is associated with.
-  final Message message;
-
-  /// The call attachment to display.
-  final Attachment attachment;
-
-  @override
-  Widget build(BuildContext context) {
-    final chatTheme = StreamChatTheme.of(context);
-    final colorTheme = chatTheme.colorTheme;
-    final textTheme = chatTheme.textTheme;
-
-    final cid = attachment.extraData["callCid"] as String;
-
-    return Container(
-      constraints: BoxConstraints(
-        maxWidth: 256,
-        minWidth: 256,
-      ),
-      decoration: BoxDecoration(
-        color: colorTheme.accentInfo,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Text(
-                "Video Call",
-                style: textTheme.bodyBold,
-                maxLines: 1,
-              ),
-            ),
-            Material(
-              type: MaterialType.transparency,
-              child: SizedBox(
-                width: 110,
-                height: 44,
-                child: ElevatedButton.icon(
-                  icon: const Icon(
-                    Icons.videocam_rounded,
-                    color: Colors.black,
-                  ),
-                  label: Text(
-                    "Join",
-                    style: textTheme.bodyBold,
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(22),
-                    ),
-                  ),
-                  onPressed: () async {
-                    final call = await _joinCall(context, cid);
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        fullscreenDialog: true,
-                        builder: (context) {
-                          return StreamActiveCall(
-                            call: call,
-                            onBackPressed: () => _finishCall(context, call),
-                            onHangUp: () => _finishCall(context, call),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
+          onPressed: () async => _startCall(context),
         ),
-      ),
-    );
-  }
-
-  /// Joins the call with the give cid.
-  Future<Call> _joinCall(BuildContext context, String cid) async {
-    final parts = cid.split(':');
-    final type = parts[0];
-    final id = parts[1];
-
-    final call = await StreamVideo.instance.joinCall(type: type, id: id);
-    await call.connect();
-    return call;
-  }
-
-  Future<void> _finishCall(BuildContext context, Call call) async {
-    await call.disconnect();
-
-    Navigator.of(context).pop();
-  }
+      ],
+    ),
+    body: Column(
+      children: <Widget>[
+        Expanded(
+          child: StreamMessageListView(
+            messageBuilder: (context, details, messages, defaultMessage) {
+              return defaultMessage.copyWith(
+                  customAttachmentBuilders: _customAttachmentBuilders());
+            },
+          ),
+        ),
+        StreamMessageInput(),
+      ],
+    ),
+  );
 }
 ```
 
+The block of code here is mostly straightforward, as you're just composing a `ChannelScreen`, with some custom UI. Let's go over it:
+
+1. You add a `topBar` to the `Scaffold`, using `StreamChannelHeader`. Overriding the `actions` allows you to set custom UI and behavior when the user interacts with that UI component, such as creating a Call.
+2. You add `StreamMessageListView`, with a list of `customAttachmentBuilders`. This will be important, as you'll serve the `Channel` with custom Call attachments that let users join a video call.
+3. Finally, you add `StreamMessageInput` with no special customization.
+
+Build and run the app now and try opening a channel. You should see something like this:
+
+![Channel Screen](../assets/chat_with_video_channel_screen.png)
+
+You have a full integration of chat features in your app now. You can see channels, open them, send messages and attachments, start threads and much more. If you notice that some of the messages appear to be missing, that's because our SDK is trying to render custom Call attachments, but it doesn't yet know how.
+
+For that to work, you need to add custom attachment builders to the SDK. There is already a custom attachment builder prepared for you, you just need to pass it to `StreamMessageListView`.
 
 ### Supporting Custom Attachments
 
