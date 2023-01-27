@@ -8,14 +8,14 @@ import '../app_config.dart';
 import '../user_mapper.dart';
 import 'channel_list_screen.dart';
 
-class ChooseUserScreen extends StatelessWidget {
-  const ChooseUserScreen({
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final users = defaultUsers;
+    final users = sampleUsers;
 
     return Scaffold(
       appBar: AppBar(

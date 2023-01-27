@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'channel_screen.dart';
+
 class ChannelListScreen extends StatefulWidget {
   const ChannelListScreen({Key? key, required this.onLogout}) : super(key: key);
 

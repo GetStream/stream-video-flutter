@@ -1,4 +1,4 @@
-import 'package:chat_with_video_starter/screen/choose_user_screen.dart';
+import 'package:chat_with_video_starter/screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
         client: client,
         child: child,
       ),
-      home: ChooseUserScreen(),
+      home: LoginScreen(),
     );
   }
 }

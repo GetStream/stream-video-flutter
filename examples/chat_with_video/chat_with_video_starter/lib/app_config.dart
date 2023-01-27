@@ -1,12 +1,6 @@
 import 'package:chat_with_video_starter/sample_user.dart';
 
-/// Stream Video API key.
-const videoApiKey = 'us83cfwuhy8n';
-
-/// Stream Chat API key.
-const chatApiKey = 'tp8sef43xcpc';
-
-final defaultUsers = <SampleUser>[
+final sampleUsers = <SampleUser>[
   const SampleUser(
     id: 'vasil',
     name: 'Willard Hessel',
