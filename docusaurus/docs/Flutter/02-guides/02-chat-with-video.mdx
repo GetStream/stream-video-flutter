@@ -144,36 +144,34 @@ With this client initialization, you can proceed to log in a user when you choos
 
 ### Logging in a User
 
-Open `choose_user_screen.dart` and replace `_connectChatUser` with the following:
+Open `login_screen.dart` and replace `_connectChatUser` with the following:
 
-```dart title="/lib/screen/choose_user_screen.dart"
+```dart title="/lib/screen/login_screen.dart"
 Future<void> _connectChatUser(BuildContext context, SampleUser user) async {
   final chatClient = StreamChat.of(context).client;
-
+    
   await chatClient.connectUser(
     user.toChatUser(),
     user.chatToken,
   );
 }
-
-On the choose user screen, when you select a user, you call `_connectChatUser`. This lets you set up the user for both Chat and Video SDK. In this case, you're doing the following:
-
-1. You create a `User` object that holds the important information, such as the user ID, name and their image.
-2. You pass in the `user` to `chatClient.connectUser()`. Aside from that, you provide the `ChatClient` with the user token, that's stored in the `extraData` map of properties. This will initialize the Chat SDK with the provided user and you can proceed to fetch their `Channel`s, `Message`s and more.
-
-To finish up, you can add the logging out counterpart, by going back to `ChatWithVideoApp` and adding the following code to `logOut()`:
-
-```dart
-fun logOut() {
-    val preferences = UserCredentialsManager.initialize(this)
-
-    // TODO log out of clients
-    chatClient.disconnect(true).enqueue() // here
-    preferences.clear()
-}
 ```
 
-Using `chatClient.disconnect(flushPersistence = true)`, you prepare a call to disconnect from the SDK and flush any cache. Our functions are wrapped as asynchronous call constructs, so calling `enqueue()` is necessary to start the operation.
+On the choose user screen, when you select a user, you call `_connectChatUser`. This lets you set up the user for Chat SDK. In this case, you're doing the following:
+
+1. You obtain the currently logged in user from `StreamChat`.
+2. You map a `SampleUser` into a `User` object from the Chat SDK.
+3. You pass in the `user` to `chatClient.connectUser()`.
+
+To finish up, you can add the logging out counterpart, by replacing `_disconnectChatUser` with the following:
+
+```dart
+Future<void> _disconnectChatUser(BuildContext context) async {
+  final chatClient = StreamChat.of(context).client;
+
+  await chatClient.disconnectUser();
+}
+```
 
 With all this, you'll be able to log in and log out any user from our predefined data set. The next step is to display their conversations.
 

@@ -1,7 +1,5 @@
 import 'package:chat_with_video_starter/sample_user.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart'
-    hide StreamUserAvatar;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app_config.dart';
@@ -56,22 +54,12 @@ class LoginScreen extends StatelessWidget {
 
   /// Connects the current user to the Video API.
   Future<void> _connectVideoUser(SampleUser user) async {
-    final videoClient = StreamVideo.instance;
-
-    await videoClient.connectUser(
-      user.toVideoUser(),
-      token: Token(user.videoToken),
-    );
+    /// TODO: Connect to the Video API.
   }
 
   /// Connects the current user to the Chat API.
   Future<void> _connectChatUser(BuildContext context, SampleUser user) async {
-    final chatClient = StreamChat.of(context).client;
-
-    await chatClient.connectUser(
-      user.toChatUser(),
-      user.chatToken,
-    );
+    /// TODO: Connect to the Chat API.
   }
 
   /// Disconnects the currently logged in user from both Video and Chat APIs
@@ -85,15 +73,11 @@ class LoginScreen extends StatelessWidget {
 
   /// Disconnects the currently logged in user from the Chat API.
   Future<void> _disconnectChatUser(BuildContext context) async {
-    final chatClient = StreamChat.of(context).client;
-
-    await chatClient.disconnectUser();
+    /// TODO: Disconnect from the Chat API.
   }
 
   /// Disconnects the currently logged in user from the Video API.
   Future<void> _disconnectVideoUser() async {
-    final videoClient = StreamVideo.instance;
-
-    await videoClient.disconnectUser();
+    /// TODO: Disconnect from the Video API.
   }
 }
