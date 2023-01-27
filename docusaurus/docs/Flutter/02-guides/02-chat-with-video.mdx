@@ -66,12 +66,81 @@ Open the `main.dart` file and replace the `StreamChatClient` initialization with
 
 ```dart title="/lib/main.dart"
 final client = StreamChatClient(
-  chatApiKey,
+  "tp8sef43xcpc",
   logLevel: Level.INFO,
 );
 ```
 
-With this client initialization, you can proceed to log in a user when you choose them on the Login screen.
+Then, you need to pass the client to `MyApp` widget and wrap it into `StreamChat` widget:
+
+```dart
+class MyApp extends StatelessWidget {
+  const MyApp({
+    Key? key,
+    required this.client,
+  }) : super(key: key);
+
+  final StreamChatClient client;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      builder: (context, child) => StreamChat(
+        client: client,
+        child: child,
+      ),
+      home: LoginScreen(),
+    );
+  }
+}
+```
+
+The final result should look like this:
+
+```dart
+import 'package:chat_with_video_starter/screen/login_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+void main() {
+  /// TODO: Initialize Stream Video SDK.
+
+  /// Initialize Stream Chat SDK.
+  final client = StreamChatClient(
+    "tp8sef43xcpc",
+    logLevel: Level.INFO,
+  );
+
+  runApp(MyApp(client: client));
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({
+    Key? key,
+    required this.client,
+  }) : super(key: key);
+
+  final StreamChatClient client;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      builder: (context, child) => StreamChat(
+        client: client,
+        child: child,
+      ),
+      home: LoginScreen(),
+    );
+  }
+}
+```
+
+There are several important things to notice here:
+
+- The Stream Chat API client is initialized with your API Key.
+- The client is then passed to the top-level `StreamChat` inherited widget that will provide the client to all the child widgets.
+
+With this client initialization, you can proceed to log in a user when you choose them on the login screen.
 
 ### Logging in a User
 
