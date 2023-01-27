@@ -488,46 +488,43 @@ Future<void> _disconnectVideoUser() async {
 
 Open the `channel_screen.dart` and find `_startCall()`. Within it, add the following code:
 
-```dart
-  /// Creates a new call and sends a message with its metadata to the chat.
-  void _startCall(BuildContext context) async {
-    final currentUser = StreamChat.of(context).currentUser;
-    final channel = StreamChannel.of(context).channel;
+```dart title="/lib/screen/channel_screen.dart"
+void _startCall(BuildContext context) async {
+  final currentUser = StreamChat.of(context).currentUser;
+  final channel = StreamChannel.of(context).channel;
 
-    final createCallResult = await StreamVideo.instance.createCall(
-      id: 'call${Random().nextInt(10000)}',
-      type: "default",
-      ringing: false,
-    );
+  final createCallResult = await StreamVideo.instance.createCall(
+    id: 'call${Random().nextInt(10000)}',
+    type: "default",
+    ringing: false,
+    participantIds: [],
+  );
 
-    final call = createCallResult.call;
-    final users = createCallResult.users;
+  final call = createCallResult.call;
 
-    channel.sendMessage(
-      Message(
-        attachments: [
-          Attachment(
-            type: "call",
-            authorName: currentUser?.name ?? "",
-            uploadState: UploadState.success(),
-            extraData: {
-              "callCid": call.callCid,
-              "members": users.values.map((e) => e.name).toList(),
-            },
-          )
-        ],
-      ),
-    );
-  }
+  channel.sendMessage(
+    Message(
+      attachments: [
+        Attachment(
+          type: "custom",
+          authorName: currentUser?.name ?? "",
+          uploadState: UploadState.success(),
+          extraData: {
+            "callCid": call.callCid,
+          },
+        )
+      ],
+    ),
+  );
 }
 ```
 
 This snippet is larger than the previous integration steps, but it packs a few things to keep in mind when creating a Call:
 
-1. Using coroutines, you're able to `createCall()` by passing in a Call ID, its `type`, if you want to ring anyone in the Call and its `participantIds`. For simplicity, you'll create **meeting calls**, which don't require any initial Participants or ringing.
+1. You're able to `createCall()` by passing in a Call ID, its `type`, if you want to ring anyone in the Call and its `participantIds`. For simplicity, you'll create **meeting calls**, which don't require any initial Participants or ringing.
 2. If the API call is successful, you can proceed to build the Call attachment. If the API call fails, you can show custom UI to the user, but in this case we'll just ignore that case.
-3. To build the `Attachment`, you use its constructor, which lets you define the type of the `Attachment`, its author and any `extraData` you might need to render the UI. In this case, you pass in the `call.cid`, list of members if you define any and the `callName` used to show the UI in the list.
-4. Finally, when the attachment is ready, you can build a new `Message` using the `composerViewModel` and pass in your `customAttachment`. By calling `composerViewModel.sendMessage(newMessage)`, you create a new message in the channel, with the details required to join the Call.
+3. To build the `Attachment`, you use its constructor, which lets you define the type of the `Attachment`, its author and any `extraData` you might need to render the UI. In this case, you pass in the `call.callCid` used to show the UI in the list.
+4. Finally, when the attachment is ready, you can build a new `Message` and pass in your `customAttachment`. By calling `channel.sendMessage()`, you create a new message in the channel, with the details required to join the Call.
 
 You could've approached this logic differently and shown special dialogs to the user for the call creation, give them more options for customization, like who to invite and similar. But for this basic use case of Chat + Video, you'll just create a simple call that's public in the Channel.
 
@@ -535,6 +532,14 @@ Now, you're fully ready to start and enjoy the Chat + Video experience. Build an
 
 |![Call Screen](../assets/chat_with_video_call_screen.png)|
 |---|
+
+Play around with the controls, the default `StreamActiveCall` and the SDK offer the following options:
+
+* Enable or disable audio and video
+* Switch to speakerphone
+* Flip your camera
+* Leave the call
+* Observe participants and invite new people to the call
 
 And much more. You've implemented everything you need to achieve a good Chat + Video use case. Now you can focus on exploring more resources to add features to the project.
 
