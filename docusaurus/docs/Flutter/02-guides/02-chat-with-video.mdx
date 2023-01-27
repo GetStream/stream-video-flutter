@@ -73,7 +73,7 @@ final client = StreamChatClient(
 
 Then, you need to pass the client to `MyApp` widget and wrap it into `StreamChat` widget:
 
-```dart
+```dart title="/lib/main.dart"
 class MyApp extends StatelessWidget {
   const MyApp({
     Key? key,
@@ -97,7 +97,7 @@ class MyApp extends StatelessWidget {
 
 The final result should look like this:
 
-```dart
+```dart title="/lib/main.dart"
 import 'package:chat_with_video_starter/screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -165,7 +165,7 @@ On the choose user screen, when you select a user, you call `_connectChatUser`. 
 
 To finish up, you can add the logging out counterpart, by replacing `_disconnectChatUser` with the following:
 
-```dart
+```dart title="/lib/screen/login_screen.dart"
 Future<void> _disconnectChatUser(BuildContext context) async {
   final chatClient = StreamChat.of(context).client;
 
@@ -183,7 +183,7 @@ Most of the navigation functionality, like opening a `Channel` and logging out i
 
 Open `channel_list_screen.dart`. Add the following code to `_ChannelListScreenState`, to initialize the `StreamChannelListController`, that'll help you load, fetch and display the required data:
 
-```dart
+```dart title="/lib/screen/channel_list_screen.dart"
 late final _listController = StreamChannelListController(
   client: StreamChat.of(context).client,
   filter: Filter.in_(
@@ -208,7 +208,7 @@ While this is a simple piece of code, there are a few steps to analyze:
 
 With the `StreamChannelListController` ready, add the following code to the `build()` method. Specifically, you'll add a header that will allow the user to log out and a component that shows a list of channels and lets you open the `ChannelScreen`.
 
-```dart
+```dart title="/lib/screen/channel_list_screen.dart"
 @override
 Widget build(BuildContext context) {
   return Scaffold(
@@ -250,7 +250,7 @@ Widget build(BuildContext context) {
 
 The final result should look like this:
 
-```dart
+```dart title="/lib/screen/channel_list_screen.dart"
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
