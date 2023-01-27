@@ -404,9 +404,9 @@ Future<Call> _joinCall(BuildContext context, String cid) async {
 
 It consumes the data stored in the custom attachment to join a call. Right now, the `StreamVideo` instance is not yet set up, as you'll do that in the final step of the guide.
 
-To add the custom attachment builder, open the `ChatWithVideoApp.kt` file and replace the `_customAttachmentBuilders` method with the following:
+To add the custom attachment builder, open the `channel_screen.dart` file and replace the `_customAttachmentBuilders` method with the following:
 
-```dart
+```dart title="/lib/screen/channel_screen.dart"
 Map<String, AttachmentBuilder> _customAttachmentBuilders() {
   return {
     'custom': (context, message, attachments) {
