@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-import 'package:video_with_chat/screen/chat_screen.dart';
+import 'package:video_with_chat/screen/channel_screen.dart';
 
 class CallScreen extends StatelessWidget {
   const CallScreen({

@@ -26,7 +26,7 @@ class ChooseUserScreen extends StatelessWidget {
               leading: StreamUserAvatar(user: user.toVideoUser()),
               title: Text(user.name),
               onTap: () async {
-                _onLogin(context, user);
+                _login(context, user);
               },
             );
           },
@@ -37,7 +37,7 @@ class ChooseUserScreen extends StatelessWidget {
 
   /// Connects the current user to both Video and Chat APIs and
   /// navigates the user to the home screen.
-  Future<void> _onLogin(BuildContext context, SampleUser user) async {
+  Future<void> _login(BuildContext context, SampleUser user) async {
     _connectVideoUser(user);
     _connectChatUser(context, user);
 
@@ -49,7 +49,7 @@ class ChooseUserScreen extends StatelessWidget {
 
   /// Connects the current user to the Video API.
   Future<void> _connectVideoUser(SampleUser user) async {
-    var videoClient = StreamVideo.instance;
+    final videoClient = StreamVideo.instance;
 
     await videoClient.connectUser(
       user.toVideoUser(),

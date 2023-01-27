@@ -15,6 +15,9 @@ typedef CallParticipantWidgetBuilder = Widget Function(
   Participant participant,
 );
 
+/// {@template screenShareItemBuilder}
+/// Builder function used to build a screen sharing item.
+/// {@endtemplate}
 typedef ScreenShareItemBuilder = Widget Function(
   BuildContext context,
   Participant participant,
@@ -35,6 +38,7 @@ class StreamCallParticipants extends StatelessWidget {
   /// The list of participants to display.
   final List<Participant> participants;
 
+  /// {@macro screenShareItemBuilder}
   final ScreenShareItemBuilder? screenShareItemBuilder;
 
   /// {@macro callParticipantWidgetBuilder}
@@ -98,7 +102,8 @@ class RegularCallParticipantsContent extends StatefulWidget {
 
 class _RegularCallParticipantsContentState
     extends State<RegularCallParticipantsContent> {
-  final floatingBottomRightDiff = ValueNotifier<Offset>(const Offset(8, 8));
+  final bottomRightOffset =
+      ValueNotifier<Offset>(const Offset(0, double.infinity));
 
   @override
   Widget build(BuildContext context) {
@@ -112,26 +117,29 @@ class _RegularCallParticipantsContentState
       // We are only able to show max 3 remote participants in the grid.
       ...remote.take(3),
     ];
+    // Show floating local participant if the feature is enabled and there
+    // are one or two remote remote participants. Otherwise show local
+    // participant in the grid.
+    final showFloatingParticipant =
+        widget.enableFloatingView && remote.isNotEmpty && remote.length < 3;
 
-    // Only display the local participant in grid if pip is not enabled or there
-    // are no remote participants.
-    if (!widget.enableFloatingView || remote.isEmpty) {
+    if (!showFloatingParticipant) {
       participantsToDisplay.add(local.first);
     }
 
-    Widget backgroundWidget = Container();
+    Widget participantGrid = Container();
     final participantsCount = participantsToDisplay.length;
     if (participantsCount == 1) {
-      backgroundWidget = _buildParticipant(participantsToDisplay, 0);
+      participantGrid = _buildParticipant(participantsToDisplay, 0);
     } else if (participantsCount == 2) {
-      backgroundWidget = Column(
+      participantGrid = Column(
         children: [
           Expanded(child: _buildParticipant(participantsToDisplay, 0)),
           Expanded(child: _buildParticipant(participantsToDisplay, 1)),
         ],
       );
     } else if (participantsCount == 3) {
-      backgroundWidget = Column(
+      participantGrid = Column(
         children: [
           Expanded(child: _buildParticipant(participantsToDisplay, 0)),
           Expanded(
@@ -145,7 +153,7 @@ class _RegularCallParticipantsContentState
         ],
       );
     } else if (participantsCount == 4) {
-      backgroundWidget = Column(
+      participantGrid = Column(
         children: [
           Expanded(
             child: Row(
@@ -167,33 +175,41 @@ class _RegularCallParticipantsContentState
       );
     }
 
-    if (!widget.enableFloatingView || remote.isEmpty) {
-      return backgroundWidget;
+    if (!showFloatingParticipant) {
+      return participantGrid;
     }
 
     final streamChatTheme =
         StreamVideoTheme.of(context).floatingCallParticipantTheme;
     final floatingTheme = widget.floatingParticipantTheme ?? streamChatTheme;
+    final floatingParticipantWidth = floatingTheme.floatingParticipantWidth;
+    final floatingParticipantHeight = floatingTheme.floatingParticipantHeight;
+    final floatingParticipantPadding = floatingTheme.floatingParticipantPadding;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final parentSize = constraints.biggest;
-        final maxRight = parentSize.width - floatingTheme.width;
-        final maxTop = parentSize.height - floatingTheme.height;
 
-        // If window is resized, this resets the floating window
-        floatingBottomRightDiff.value = Offset(
-          min(floatingBottomRightDiff.value.dx, maxRight),
-          min(floatingBottomRightDiff.value.dy, maxTop),
+        final maxRightOffset = parentSize.width -
+            floatingParticipantWidth -
+            2 * floatingParticipantPadding;
+        final maxBottomOffset = parentSize.height -
+            floatingParticipantHeight -
+            2 * floatingParticipantPadding;
+
+        // If window is resized, this resets the floating window.
+        bottomRightOffset.value = Offset(
+          min(bottomRightOffset.value.dx, maxRightOffset),
+          min(bottomRightOffset.value.dy, maxBottomOffset),
         );
 
         return Stack(
           children: [
-            backgroundWidget,
+            participantGrid,
             ValueListenableBuilder(
-              valueListenable: floatingBottomRightDiff,
+              valueListenable: bottomRightOffset,
               builder: (context, val, child) {
-                final offset = floatingBottomRightDiff.value;
+                final offset = bottomRightOffset.value;
 
                 return Positioned(
                   right: offset.dx,
@@ -203,9 +219,9 @@ class _RegularCallParticipantsContentState
                       final dx = drag.delta.dx;
                       final dy = drag.delta.dy;
 
-                      floatingBottomRightDiff.value = Offset(
-                        max(0, min(offset.dx - dx, maxRight)),
-                        max(0, min(offset.dy - dy, maxTop)),
+                      bottomRightOffset.value = Offset(
+                        max(0, min(offset.dx - dx, maxRightOffset)),
+                        max(0, min(offset.dy - dy, maxBottomOffset)),
                       );
                     },
                     child: child,

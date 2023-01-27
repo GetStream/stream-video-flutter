@@ -32,7 +32,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   Future<void> _onLogin(LoginInfo info) async {
-    var streamVideoClient = StreamVideo.instance;
+    final streamVideoClient = StreamVideo.instance;
     await streamVideoClient.connectUser(
       info.userInfo,
       token: Token(info.token),
