@@ -156,7 +156,7 @@ Future<void> _connectChatUser(BuildContext context, SampleUser user) async {
 }
 ```
 
-On the choose user screen, when you select a user, you call `_connectChatUser`. This lets you set up the user for Chat SDK. In this case, you're doing the following:
+On the login screen, when you select a user, you call `_connectChatUser`. This lets you set up the user for Chat SDK. In this case, you're doing the following:
 
 1. You obtain the `StreamChatClient` instance from `StreamChat`.
 2. You map a `SampleUser` into a `User` object from the Chat SDK.
@@ -386,9 +386,7 @@ For that to work, you need to add custom attachment builders to the SDK. There i
 
 ### Supporting Custom Attachments
 
-Open the `call_attachment.dart` file. Explore it to familiarize yourself with the logic behind the UI it shows and the way it allows users to join the call.
-
-Using the following snippet:
+Open the `call_attachment.dart` file. Explore it to familiarize yourself with the logic behind the UI it shows and the way it allows users to join the call using the following snippet:
 
 ```dart title="/lib/screen/attachment/call_attachment.dart"
 Future<Call> _joinCall(BuildContext context, String cid) async {
@@ -428,7 +426,7 @@ Build and run the app now and your custom Call attachments should render properl
 
 ![Final Result](../assets/chat_with_video_final_result.png)
 
-Great, you're ready to join calls. But for that, you need to integrate the Stream Video Android SDK.
+Great, you're ready to join calls. But for that, you need to integrate the Stream Video Flutter SDK.
 
 ## Integrating the Video SDK
 
@@ -438,7 +436,7 @@ Firstly, you need to initialize the Video client, aptly called `StreamVideo`.
 
 ### Initializing StreamVideo
 
-Open `main.dart`. To initialize the client, you need to add the following code:
+Open `main.dart`. To initialize the client, you need to add the following lines:
 
 ```dart title="/lib/main.dart"
 StreamVideo.init(
@@ -486,7 +484,7 @@ Future<void> _disconnectVideoUser() async {
 
 ### Allowing Users To Start Calls
 
-Open the `channel_screen.dart` and find `_startCall()`. Within it, add the following code:
+Open the `channel_screen.dart` file and find `_startCall()`. Within it, add the following code:
 
 ```dart title="/lib/screen/channel_screen.dart"
 void _startCall(BuildContext context) async {
@@ -541,6 +539,4 @@ Play around with the controls, the default `StreamActiveCall` and the SDK offer 
 * Leave the call
 * Observe participants and invite new people to the call
 
-And much more. You've implemented everything you need to achieve a good Chat + Video use case. Now you can focus on exploring more resources to add features to the project.
-
-
+And much more. You've implemented everything you need to achieve a good Chat + Video use case.
