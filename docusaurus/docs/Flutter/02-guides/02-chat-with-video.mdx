@@ -62,7 +62,7 @@ The first step of integrating our [Stream Chat SDK](https://getstream.io/chat/fl
 
 ### Creating the Client
 
-Open the `main.dart` file and replace the `StreamChatClient` initialization with the following:
+Open the `main.dart` file and replace the  Stream Chat SDK initialization section with the following:
 
 ```dart title="/lib/main.dart"
 final client = StreamChatClient(
@@ -71,7 +71,7 @@ final client = StreamChatClient(
 );
 ```
 
-Then, you need to pass the client to `MyApp` widget and wrap it into `StreamChat` widget:
+Then, you need to pass the client to `MyApp` widget and wrap the client into `StreamChat` widget:
 
 ```dart title="/lib/main.dart"
 class MyApp extends StatelessWidget {
@@ -103,13 +103,12 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {
-  /// TODO: Initialize Stream Video SDK.
-
-  /// Initialize Stream Chat SDK.
   final client = StreamChatClient(
     "tp8sef43xcpc",
     logLevel: Level.INFO,
   );
+
+  /// TODO: Initialize Stream Video SDK.
 
   runApp(MyApp(client: client));
 }
