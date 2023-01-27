@@ -40,8 +40,8 @@ class LoginScreen extends StatelessWidget {
   /// Connects the current user to both Video and Chat APIs and
   /// navigates the user to the home screen.
   Future<void> _login(BuildContext context, SampleUser user) async {
-    _connectVideoUser(user);
     _connectChatUser(context, user);
+    _connectVideoUser(user);
 
     Navigator.push(
       context,
@@ -54,16 +54,6 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  /// Connects the current user to the Video API.
-  Future<void> _connectVideoUser(SampleUser user) async {
-    final videoClient = StreamVideo.instance;
-
-    await videoClient.connectUser(
-      user.toVideoUser(),
-      token: Token(user.videoToken),
-    );
-  }
-
   /// Connects the current user to the Chat API.
   Future<void> _connectChatUser(BuildContext context, SampleUser user) async {
     final chatClient = StreamChat.of(context).client;
@@ -71,6 +61,16 @@ class LoginScreen extends StatelessWidget {
     await chatClient.connectUser(
       user.toChatUser(),
       user.chatToken,
+    );
+  }
+
+  /// Connects the current user to the Video API.
+  Future<void> _connectVideoUser(SampleUser user) async {
+    final videoClient = StreamVideo.instance;
+
+    await videoClient.connectUser(
+      user.toVideoUser(),
+      token: Token(user.videoToken),
     );
   }
 
