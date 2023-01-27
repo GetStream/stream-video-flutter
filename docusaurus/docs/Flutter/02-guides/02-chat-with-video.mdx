@@ -159,7 +159,7 @@ Future<void> _connectChatUser(BuildContext context, SampleUser user) async {
 
 On the choose user screen, when you select a user, you call `_connectChatUser`. This lets you set up the user for Chat SDK. In this case, you're doing the following:
 
-1. You obtain the currently logged in user from `StreamChat`.
+1. You obtain the `StreamChatClient` instance from `StreamChat`.
 2. You map a `SampleUser` into a `User` object from the Chat SDK.
 3. You pass in the `user` to `chatClient.connectUser()`.
 
@@ -177,22 +177,89 @@ With all this, you'll be able to log in and log out any user from our predefined
 
 ### Implementing Channel List Screen
 
-There isn't much to the `ChannelsActivity` - it'll show a list of `Channel`s the user is a member of and let them open those `Channel`s. It'll also feature a custom header to allow the user to log out at will.
+There isn't much to the channel list screen - it'll show a list of `Channel`s the user is a member of and let them open those `Channel`s. It'll also feature a custom header to allow the user to log out at will.
 
-Most of the navigation functionality, like opening a `Channel` and logging out is already there, you just need to use our Compose UI Components to implement the UI.
+Most of the navigation functionality, like opening a `Channel` and logging out is already there, you just need to use our Flutter UI Components to implement the UI.
 
-Open `channel_list_screen.dart`. Add the following code, to initialize the `ChannelListViewModel`, that'll help you load, fetch and display the required data:
+Open `channel_list_screen.dart`. Add the following code to `_ChannelListScreenState`, to initialize the `StreamChannelListController`, that'll help you load, fetch and display the required data:
 
 ```dart
-import 'package:chat_with_video_starter/screen/channel_screen.dart';
+late final _listController = StreamChannelListController(
+  client: StreamChat.of(context).client,
+  filter: Filter.in_(
+    'members',
+    [StreamChat.of(context).currentUser!.id],
+  ),
+  channelStateSort: const [SortOption('last_message_at')],
+);
+
+@override
+void dispose() {
+  _listController.dispose();
+  super.dispose();
+}
+```
+
+While this is a simple piece of code, there are a few steps to analyze:
+
+1. You obtain the `StreamChatClient` instance from `StreamChat`.
+2. The controller requires the `StreamChatClient` instance to communicate with the API, a `channelStateSort` to define the order of the `Channel`s and `filter` to specify which `Channel`s we want to fetch.
+3. Finally, we need to dispose the controller in the `dispose()` method.
+
+With the `StreamChannelListController` ready, add the following code to the `build()` method. Specifically, you'll add a header that will allow the user to log out and a component that shows a list of channels and lets you open the `ChannelScreen`.
+
+```dart
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: StreamChannelListHeader(
+      titleBuilder: (context, status, client) {
+        return Text(
+          "Chat with Video",
+          style: StreamChatTheme.of(context).textTheme.headlineBold,
+        );
+      },
+      actions: [
+        IconButton(
+          icon: const Icon(
+            color: Colors.black,
+            Icons.logout,
+          ),
+          onPressed: () async => widget.onLogout.call(),
+        ),
+      ],
+    ),
+    body: StreamChannelListView(
+      controller: _listController,
+      onChannelTap: (channel) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) {
+              return StreamChannel(
+                channel: channel,
+                child: ChannelScreen(),
+              );
+            },
+          ),
+        );
+      },
+    ),
+  );
+}
+```
+
+The final result should look like this:
+
+```dart
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import 'channel_screen.dart';
 
 class ChannelListScreen extends StatefulWidget {
-  const ChannelListScreen({
-    Key? key,
-  }) : super(key: key);
+  const ChannelListScreen({Key? key, required this.onLogout}) : super(key: key);
+
+  final VoidCallback onLogout;
 
   @override
   State<ChannelListScreen> createState() => _ChannelListScreenState();
@@ -216,15 +283,12 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final chatTheme = StreamChatTheme.of(context);
-    final textTheme = chatTheme.textTheme;
-
     return Scaffold(
       appBar: StreamChannelListHeader(
         titleBuilder: (context, status, client) {
           return Text(
             "Chat with Video",
-            style: textTheme.headlineBold,
+            style: StreamChatTheme.of(context).textTheme.headlineBold,
           );
         },
         actions: [
@@ -233,7 +297,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
               color: Colors.black,
               Icons.logout,
             ),
-            onPressed: () async => _logout(context),
+            onPressed: () async => widget.onLogout.call(),
           ),
         ],
       ),
@@ -254,22 +318,14 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
       ),
     );
   }
-
-  /// Disconnect the currently logged in user from both Video and Chat APIs.
-  Future<void> _logout(BuildContext context) async {
-    final chatClient = StreamChat.of(context).client;
-    await chatClient.disconnectUser();
-
-    final videoClient = StreamVideo.instance;
-    await videoClient.disconnectUser();
-
-    Navigator.of(context).pop();
-  }
 }
 ```
 
 There are only a few lines of code here that let you set up an entire screen and lots of functionality:
-...
+
+1. You add the `StreamChannelListHeader` component that displays a title and allows for a few handlers and widget builders. In this case, you override the `actions` section to show a button used to log out the user from the app.
+2. Using the `_listController`, you render a `StreamChannelListView`, which shows a list of `Channel`s. Overriding `onChannelTap`, lets you set up functionality when a user selects any `Channel`. In your case, you navigate to `ChannelScreen`.
+3. Notice how the selected channel is provided to `ChannelScreen` via the `StreamChannel` inherited widget.
 
 Build and run the app and you should be able to log in or out with a user, as well as see and open the `Channel`s they're a part of.
 
