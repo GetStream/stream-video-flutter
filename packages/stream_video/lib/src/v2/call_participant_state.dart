@@ -1,10 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../../protobuf/video/sfu/models/models.pb.dart';
 import 'sfu/data/models/sfu_connection_quality.dart';
 import 'sfu/data/models/sfu_track_type.dart';
-import 'webrtc/model/rtc_video_dimension.dart';
 
 @immutable
 class CallParticipantStateV2 with EquatableMixin {
@@ -15,9 +13,7 @@ class CallParticipantStateV2 with EquatableMixin {
     String? profileImageURL,
     required String sessionId,
     required String trackIdPrefix,
-    Set<SfuTrackType> published = const {},
-    Map<SfuTrackTypeVideo, RtcVideoDimension> subscribed = const {},
-    Set<SfuTrackTypeVideo> received = const {},
+    Map<SfuTrackType, CallTrackStatus> published = const {},
     bool isLocal = false,
     SfuConnectionQuality connectionQuality = SfuConnectionQuality.unspecified,
     bool isOnline = false,
@@ -32,9 +28,7 @@ class CallParticipantStateV2 with EquatableMixin {
       profileImageURL: profileImageURL,
       sessionId: sessionId,
       trackIdPrefix: trackIdPrefix,
-      published: Set.unmodifiable(published),
-      subscribed: Map.unmodifiable(subscribed),
-      received: Set.unmodifiable(received),
+      published: Map.unmodifiable(published),
       isLocal: isLocal,
       connectionQuality: connectionQuality,
       isOnline: isOnline,
@@ -53,8 +47,6 @@ class CallParticipantStateV2 with EquatableMixin {
     required this.sessionId,
     required this.trackIdPrefix,
     required this.published,
-    required this.subscribed,
-    required this.received,
     this.isLocal = false,
     this.connectionQuality = SfuConnectionQuality.unspecified,
     this.isOnline = false,
@@ -69,9 +61,7 @@ class CallParticipantStateV2 with EquatableMixin {
   final String? profileImageURL;
   final String sessionId;
   final String trackIdPrefix;
-  final Set<SfuTrackType> published;
-  final Map<SfuTrackTypeVideo, RtcVideoDimension> subscribed;
-  final Set<SfuTrackTypeVideo> received;
+  final Map<SfuTrackType, CallTrackStatus> published;
   final bool isLocal;
   final SfuConnectionQuality connectionQuality;
   final bool isOnline;
@@ -88,9 +78,7 @@ class CallParticipantStateV2 with EquatableMixin {
     String? profileImageURL,
     String? sessionId,
     String? trackIdPrefix,
-    Set<SfuTrackType>? published,
-    Map<SfuTrackTypeVideo, RtcVideoDimension>? subscribed,
-    Set<SfuTrackTypeVideo>? received,
+    Map<SfuTrackType, CallTrackStatus>? published,
     bool? isLocal,
     SfuConnectionQuality? connectionQuality,
     bool? isOnline,
@@ -106,8 +94,6 @@ class CallParticipantStateV2 with EquatableMixin {
       sessionId: sessionId ?? this.sessionId,
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
       published: published ?? this.published,
-      subscribed: subscribed ?? this.subscribed,
-      received: received ?? this.received,
       isLocal: isLocal ?? this.isLocal,
       connectionQuality: connectionQuality ?? this.connectionQuality,
       isOnline: isOnline ?? this.isOnline,
@@ -122,7 +108,7 @@ class CallParticipantStateV2 with EquatableMixin {
     return 'CallParticipantState{userId: $userId, role: $role, name: $name, '
         'profileImageURL: $profileImageURL, sessionId: $sessionId, '
         'trackId: $trackIdPrefix, '
-        'published: $published, subscribed: $subscribed, received: $received, '
+        'published: $published, '
         'isLocal: $isLocal, '
         'connectionQuality: $connectionQuality, isOnline: $isOnline, '
         'audioLevel: $audioLevel, isSpeaking: $isSpeaking, '
@@ -138,8 +124,6 @@ class CallParticipantStateV2 with EquatableMixin {
         sessionId,
         trackIdPrefix,
         published,
-        subscribed,
-        received,
         isLocal,
         connectionQuality,
         isOnline,
@@ -147,4 +131,13 @@ class CallParticipantStateV2 with EquatableMixin {
         isSpeaking,
         isDominantSpeaker
       ];
+}
+
+enum CallTrackStatus {
+  published,
+  subscribed,
+  received;
+
+  @override
+  String toString() => name;
 }

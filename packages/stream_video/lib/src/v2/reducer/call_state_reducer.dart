@@ -2,6 +2,7 @@ import '../action/action.dart';
 import '../action/call_control_action.dart';
 import '../action/coordinator_action.dart';
 import '../action/lifecycle_action.dart';
+import '../action/rtc_action.dart';
 import '../action/sfu_action.dart';
 import '../call_state.dart';
 import '_call_control_reducer.dart';
@@ -28,6 +29,8 @@ class CallStateReducer {
       return sfuReducer.reduce(state, action);
     } else if (action is CallControlAction) {
       return callControlReducer.reduce(state, action);
+    } else if (action is RtcAction) {
+      return rtcReducer.reduce(state, action);
     }
     return state;
   }

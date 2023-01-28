@@ -28,10 +28,6 @@ class RtcReducer {
     _logger.d(
       () => '[reduceSubTrackReceived] ${state.sessionId}; action: $action',
     );
-    final trackType = action.trackType;
-    if (trackType is! SfuTrackTypeVideo) {
-      return state;
-    }
     return state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         if (participant.trackIdPrefix == action.trackId) {
@@ -39,9 +35,9 @@ class RtcReducer {
             () => '[reduceSubTrackReceived] pFound: $participant',
           );
           return participant.copyWith(
-            received: {
-              ...participant.received,
-              trackType,
+            published: {
+              ...participant.published,
+              action.trackType: CallTrackStatus.received
             },
           );
         } else {

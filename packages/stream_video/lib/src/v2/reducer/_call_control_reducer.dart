@@ -60,9 +60,9 @@ class CallControlReducer {
             participant.sessionId == action.sessionId) {
           _logger.v(() => '[reduceSubscribe] pFound: $participant');
           return participant.copyWith(
-            subscribed: {
-              ...participant.subscribed,
-              action.trackType: action.videoDimension,
+            published: {
+              ...participant.published,
+              action.trackType: CallTrackStatus.subscribed,
             },
           );
         } else {
@@ -81,12 +81,10 @@ class CallControlReducer {
       callParticipants: state.callParticipants.map((participant) {
         if (participant.sessionId == action.sessionId) {
           return participant.copyWith(
-            subscribed: {
-              ...participant.subscribed,
-            }..removeWhere((trackType, _) => trackType == action.trackType),
-            received: {
-              ...participant.received,
-            }..removeWhere((trackType) => trackType == action.trackType),
+            published: {
+              ...participant.published,
+              action.trackType: CallTrackStatus.published,
+            },
           );
         } else {
           return participant;
@@ -177,9 +175,9 @@ class CallControlReducer {
             ...participant.published,
           };
           if (enabled) {
-            publishedTrackTypes.add(trackType);
+            publishedTrackTypes[trackType] = CallTrackStatus.published;
           } else {
-            publishedTrackTypes.removeWhere((it) => it == trackType);
+            publishedTrackTypes.removeWhere((it, _) => it == trackType);
           }
           return participant.copyWith(
             published: publishedTrackTypes,

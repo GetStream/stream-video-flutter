@@ -57,7 +57,10 @@ class SfuReducer {
         profileImageURL: user?.imageUrl,
         sessionId: aParticipant.sessionId,
         trackIdPrefix: aParticipant.trackLookupPrefix,
-        published: aParticipant.publishedTracks.toSet(),
+        published: {
+          for (var track in aParticipant.publishedTracks)
+            track: CallTrackStatus.published
+        },
         isLocal: isLocal,
         isOnline: !isLocal,
         isSpeaking: aParticipant.isSpeaking,
@@ -85,13 +88,7 @@ class SfuReducer {
           return participant.copyWith(
             published: {
               ...participant.published,
-            }..removeWhere((trackType) => trackType == event.trackType),
-            subscribed: {
-              ...participant.subscribed,
             }..removeWhere((trackType, _) => trackType == event.trackType),
-            received: {
-              ...participant.received,
-            }..removeWhere((trackType) => trackType == event.trackType),
           );
         } else {
           return participant;
@@ -114,7 +111,7 @@ class SfuReducer {
           return participant.copyWith(
             published: {
               ...participant.published,
-              event.trackType,
+              event.trackType: CallTrackStatus.published,
             },
           );
         } else {
