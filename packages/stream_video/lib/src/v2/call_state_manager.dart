@@ -28,9 +28,6 @@ abstract class CallStateManager {
   Future<void> onCallCreated(CallCreated data);
   Future<void> onCallJoined(CallJoined data);
   Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data);
-  Future<void> onCallAccepted();
-  Future<void> onCallRejected();
-  Future<void> onCallCancelled();
   Future<void> onSessionStart(String sessionId);
   Future<void> onConnected();
   Future<void> onDisconnect();
@@ -40,7 +37,7 @@ abstract class CallStateManager {
   Future<void> onWaitingTimeout(Duration dropTimeout);
   Future<void> onConnectFailed(VideoError error);
 
-  void onRtcRemoteTrackPublished(String trackId, SfuTrackType trackType);
+  void onSubscriberTrackReceived(String trackId, SfuTrackType trackType);
 }
 
 class CallStateManagerImpl extends CallStateManager {
@@ -68,7 +65,7 @@ class CallStateManagerImpl extends CallStateManager {
 
   @override
   Future<void> onCallControlAction(CallControlAction action) async {
-    _logger.d(() => '[onUpdateCallAction] action: $action');
+    _logger.d(() => '[onCallControlAction] action: $action');
     _postReduced(action);
   }
 
@@ -82,24 +79,6 @@ class CallStateManagerImpl extends CallStateManager {
   Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data) async {
     _logger.d(() => '[onCallReceivedOrCreated] data: $data');
     _postReduced(CallCreatedAction(data: data.data));
-  }
-
-  @override
-  Future<void> onCallAccepted() async {
-    _logger.d(() => '[onCallAccepted] no args');
-    _postReduced(const CallAcceptedAction());
-  }
-
-  @override
-  Future<void> onCallCancelled() async {
-    _logger.d(() => '[onCallCancelled] no args');
-    _postReduced(const CallCancelledAction());
-  }
-
-  @override
-  Future<void> onCallRejected() async {
-    _logger.d(() => '[onCallRejected] no args');
-    _postReduced(const CallRejectedAction());
   }
 
   @override
@@ -135,7 +114,7 @@ class CallStateManagerImpl extends CallStateManager {
   @override
   Future<void> onDisconnect() async {
     _logger.d(() => '[onDisconnect] no args');
-    _postReduced(const CallDestroyedAction());
+    _postReduced(const CallDisconnectedAction());
   }
 
   @override
@@ -172,13 +151,13 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  void onRtcRemoteTrackPublished(String trackId, SfuTrackType trackType) {
+  void onSubscriberTrackReceived(String trackId, SfuTrackType trackType) {
     _logger.d(
-      () => '[onRtcRemoteTrackPublished] trackId: $trackId,'
+      () => '[onSubscriberTrackReceived] trackId: $trackId,'
           ' trackType: $trackType',
     );
     _postReduced(
-      RtcRemoteTrackPublishedAction(
+      SubscriberTrackReceivedAction(
         trackId: trackId,
         trackType: trackType,
       ),

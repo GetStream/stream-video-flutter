@@ -6,8 +6,8 @@ import 'action.dart';
 @internal
 abstract class RtcAction extends StreamAction {}
 
-class RtcRemoteTrackPublishedAction extends RtcAction {
-  RtcRemoteTrackPublishedAction({
+class SubscriberTrackReceivedAction extends RtcAction {
+  SubscriberTrackReceivedAction({
     required this.trackId,
     required this.trackType,
   });

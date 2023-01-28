@@ -21,14 +21,8 @@ class LifecycleReducer {
       return _reduceCallCreated(state, action);
     } else if (action is CallJoinedAction) {
       return _reduceCallJoined(state, action);
-    } else if (action is CallDestroyedAction) {
-      return _reduceCallDestroyed(state, action);
-    } else if (action is CallAcceptedAction) {
-      return _reduceCallAccepted(state, action);
-    } else if (action is CallRejectedAction) {
-      return _reduceCallRejected(state, action);
-    } else if (action is CallCancelledAction) {
-      return _reduceCallCancelled(state, action);
+    } else if (action is CallDisconnectedAction) {
+      return _reduceCallDisconnected(state, action);
     } else if (action is CallTimeoutAction) {
       return _reduceCallTimeout(state, action);
     } else if (action is CallConnectFailedAction) {
@@ -49,7 +43,7 @@ class LifecycleReducer {
       currentUserId: action.userId,
       status: CallStatus.idle(),
       sessionId: '',
-      callParticipants: const {},
+      callParticipants: const [],
     );
   }
 
@@ -80,9 +74,9 @@ class LifecycleReducer {
     );
   }
 
-  CallStateV2 _reduceCallDestroyed(
+  CallStateV2 _reduceCallDisconnected(
     CallStateV2 state,
-    CallDestroyedAction action,
+    CallDisconnectedAction action,
   ) {
     final status = state.status;
     if (status is! CallStatusDrop) {
@@ -94,56 +88,7 @@ class LifecycleReducer {
     return state.copyWith(
       status: CallStatus.idle(),
       sessionId: '',
-      callParticipants: const {},
-    );
-  }
-
-  CallStateV2 _reduceCallAccepted(
-    CallStateV2 state,
-    CallAcceptedAction action,
-  ) {
-    final status = state.status;
-    if (status is! CallStatusIncoming || status.acceptedByMe) {
-      _logger.w(
-        () => '[reduceCallAccepted] rejected (invalid status): $status',
-      );
-      return state;
-    }
-    return state.copyWith(
-      status: CallStatus.incoming(acceptedByMe: true),
-    );
-  }
-
-  CallStateV2 _reduceCallRejected(
-    CallStateV2 state,
-    CallRejectedAction action,
-  ) {
-    final status = state.status;
-    if (status is! CallStatusIncoming || status.acceptedByMe) {
-      _logger.w(
-        () => '[reduceCallRejected] rejected (invalid status): $status',
-      );
-      return state;
-    }
-    return state.copyWith(
-      status: CallStatus.drop(
-        DropReason.rejected(
-          byUserId: state.currentUserId,
-        ),
-      ),
-    );
-  }
-
-  CallStateV2 _reduceCallCancelled(
-    CallStateV2 state,
-    CallCancelledAction action,
-  ) {
-    return state.copyWith(
-      status: CallStatus.drop(
-        DropReason.cancelled(
-          byUserId: state.currentUserId,
-        ),
-      ),
+      callParticipants: const [],
     );
   }
 
@@ -197,21 +142,23 @@ extension on CallMetadata {
     }
   }
 
-  Map<String, CallParticipantStateV2> toCallParticipants(String currentUserId) {
-    final result = <String, CallParticipantStateV2>{};
+  List<CallParticipantStateV2> toCallParticipants(String currentUserId) {
+    final result = <CallParticipantStateV2>[];
     for (final userId in details.memberUserIds) {
       final member = details.members[userId];
       final user = users[userId];
       final isLocal = currentUserId == userId;
-      result[userId] = CallParticipantStateV2(
-        userId: userId,
-        role: member?.role ?? user?.role ?? '',
-        name: user?.name ?? '',
-        profileImageURL: user?.imageUrl ?? '',
-        sessionId: '',
-        trackId: '',
-        isLocal: isLocal,
-        isOnline: !isLocal,
+      result.add(
+        CallParticipantStateV2(
+          userId: userId,
+          role: member?.role ?? user?.role ?? '',
+          name: user?.name ?? '',
+          profileImageURL: user?.imageUrl ?? '',
+          sessionId: '',
+          trackIdPrefix: '',
+          isLocal: isLocal,
+          isOnline: !isLocal,
+        ),
       );
     }
     return result;

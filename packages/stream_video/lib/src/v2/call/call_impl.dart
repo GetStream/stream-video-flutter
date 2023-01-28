@@ -101,7 +101,7 @@ class CallV2Impl extends CallV2 {
     );
   }
 
-  Future<Result<None>> _acceptCall() async {
+  Future<Result<None>> _acceptCall(AcceptCall action) async {
     final state = _stateManager.state.value;
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
@@ -112,12 +112,12 @@ class CallV2Impl extends CallV2 {
       cid: state.callCid,
     );
     if (result is Success<None>) {
-      await _stateManager.onCallAccepted();
+      await _stateManager.onCallControlAction(action);
     }
     return result;
   }
 
-  Future<Result<None>> _rejectCall() async {
+  Future<Result<None>> _rejectCall(RejectCall action) async {
     final state = _stateManager.state.value;
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
@@ -128,12 +128,12 @@ class CallV2Impl extends CallV2 {
       cid: state.callCid,
     );
     if (result is Success<None>) {
-      await _stateManager.onCallRejected();
+      await _stateManager.onCallControlAction(action);
     }
     return result;
   }
 
-  Future<Result<None>> _cancelCall() async {
+  Future<Result<None>> _cancelCall(CancelCall action) async {
     final state = _stateManager.state.value;
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
@@ -142,7 +142,7 @@ class CallV2Impl extends CallV2 {
     }
     final result = await _streamVideo.cancelCall(cid: state.callCid);
     if (result is Success<None>) {
-      await _stateManager.onCallCancelled();
+      await _stateManager.onCallControlAction(action);
     }
     return result;
   }
@@ -266,28 +266,13 @@ class CallV2Impl extends CallV2 {
   }
 
   @override
-  void updateTrackSize({
-    required String userId,
-    required SfuTrackType trackType,
-    required double width,
-    required double height,
-  }) {
-    _session?.updateTrackSize(
-      userId: userId,
-      trackType: trackType,
-      width: width,
-      height: height,
-    );
+  RtcTrack? getTrack(String trackIdPrefix, SfuTrackType trackType) {
+    return _session?.getTrack(trackIdPrefix, trackType);
   }
 
   @override
-  RtcTrack? getTrack(String userId, SfuTrackType trackType) {
-    return _session?.getTrack(userId, trackType);
-  }
-
-  @override
-  List<RtcTrack> getTracks(String userId) {
-    return [...?_session?.getTracks(userId)];
+  List<RtcTrack> getTracks(String trackIdPrefix) {
+    return [...?_session?.getTracks(trackIdPrefix)];
   }
 
   @override
@@ -295,16 +280,15 @@ class CallV2Impl extends CallV2 {
     if (action is SessionControlAction) {
       return _applyPublisherAction(action);
     } else if (action is CancelCall) {
-      return _cancelCall();
+      return _cancelCall(action);
     } else if (action is AcceptCall) {
-      return _acceptCall();
+      return _acceptCall(action);
     } else if (action is RejectCall) {
-      return _rejectCall();
+      return _rejectCall(action);
     }
     return Result.error('Action not supported: $action');
   }
 
-  @override
   Future<Result<None>> _applyPublisherAction(
     SessionControlAction action,
   ) async {

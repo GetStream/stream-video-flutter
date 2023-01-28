@@ -41,11 +41,9 @@ extension SfuEventMapper on sfu_events.SfuEvent {
             sessionId: it.sessionId,
             connectionQuality: it.connectionQuality.toDomain(),
           );
-        });
+        }).toList();
         return SfuConnectionQualityChangedEvent(
-          connectionQualityUpdates: <String, SfuConnectionQualityInfo>{
-            for (var it in updates) it.userId: it
-          },
+          connectionQualityUpdates: updates,
         );
 
       case sfu_events.SfuEvent_EventPayload.audioLevelChanged:
@@ -57,11 +55,9 @@ extension SfuEventMapper on sfu_events.SfuEvent {
             level: it.level,
             isSpeaking: it.isSpeaking,
           );
-        });
+        }).toList();
         return SfuAudioLevelChangedEvent(
-          audioLevels: <String, SfuAudioLevel>{
-            for (var it in levels) it.userId: it
-          },
+          audioLevels: levels,
         );
 
       case sfu_events.SfuEvent_EventPayload.iceTrickle:

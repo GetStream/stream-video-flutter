@@ -8,7 +8,7 @@ import 'model/rtc_video_dimension.dart';
 @immutable
 abstract class RtcTrack {
   const RtcTrack({
-    required this.trackId,
+    required this.trackIdPrefix,
     required this.trackType,
     required this.stream,
     required this.track,
@@ -18,7 +18,7 @@ abstract class RtcTrack {
     this.muted = false,
   });
 
-  final String trackId;
+  final String trackIdPrefix;
   final SfuTrackType trackType;
   final rtc.MediaStream stream;
   final rtc.MediaStreamTrack track;
@@ -29,7 +29,7 @@ abstract class RtcTrack {
   /// The video dimension of the track in case it is a video track.
   final RtcVideoDimension? videoDimension;
 
-  String get trackSid => '$trackId:$trackType';
+  String get trackId => '$trackIdPrefix:$trackType';
 
   bool get isVideoTrack {
     return trackType == SfuTrackType.video ||
@@ -41,7 +41,7 @@ abstract class RtcTrack {
 
 class RtcRemoteTrack extends RtcTrack {
   const RtcRemoteTrack({
-    required super.trackId,
+    required super.trackIdPrefix,
     required super.trackType,
     required super.stream,
     required super.track,
@@ -53,7 +53,7 @@ class RtcRemoteTrack extends RtcTrack {
 
   @override
   RtcRemoteTrack copyWith({
-    String? trackId,
+    String? trackIdPrefix,
     SfuTrackType? trackType,
     rtc.MediaStream? stream,
     rtc.MediaStreamTrack? track,
@@ -63,7 +63,7 @@ class RtcRemoteTrack extends RtcTrack {
     bool? muted,
   }) {
     return RtcRemoteTrack(
-      trackId: trackId ?? this.trackId,
+      trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
       trackType: trackType ?? this.trackType,
       stream: stream ?? this.stream,
       track: track ?? this.track,
@@ -76,14 +76,14 @@ class RtcRemoteTrack extends RtcTrack {
 
   @override
   String toString() {
-    return 'RtcRemoteTrack{trackId: $trackId, trackType: $trackType, '
-        'muted: $muted, stream.id: ${stream.id}';
+    return 'RtcRemoteTrack{trackIdPrefix: $trackIdPrefix, trackType: $trackType, '
+        'muted: $muted, stream.id: ${stream?.id}';
   }
 }
 
 class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   const RtcLocalTrack({
-    required super.trackId,
+    required super.trackIdPrefix,
     required super.trackType,
     required super.stream,
     required super.track,
@@ -102,7 +102,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
 
   @override
   RtcLocalTrack<T> copyWith({
-    String? trackId,
+    String? trackIdPrefix,
     SfuTrackType? trackType,
     rtc.MediaStream? stream,
     rtc.MediaStreamTrack? track,
@@ -113,7 +113,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     bool? muted,
   }) {
     return RtcLocalTrack(
-      trackId: trackId ?? this.trackId,
+      trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
       trackType: trackType ?? this.trackType,
       stream: stream ?? this.stream,
       track: track ?? this.track,
@@ -127,7 +127,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
 
   @override
   String toString() {
-    return 'RtcLocalTrack{trackId: $trackId, trackType: $trackType, '
+    return 'RtcLocalTrack{trackIdPrefix: $trackIdPrefix, trackType: $trackType, '
         'muted: $muted, stream.id: ${stream.id}';
   }
 }

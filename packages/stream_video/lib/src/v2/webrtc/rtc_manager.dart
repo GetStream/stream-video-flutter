@@ -6,6 +6,7 @@ import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../disposable.dart';
 import '../../logger/stream_logger.dart';
 import '../../platform_detector/platform_detector.dart';
+import '../action/call_control_action.dart';
 import '../model/call_cid.dart';
 import '../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
@@ -30,17 +31,12 @@ import 'rtc_track_publish_options.dart';
 typedef OnPublisherTrackMuted = void Function(RtcLocalTrack track, bool muted);
 
 /// {@template OnSubscriberTrackPublished}
-/// Called when a subscriber track is published.
+/// Called when a subscriber track is received.
 /// {@endtemplate}
-typedef OnSubscriberTrackPublished = void Function(
+typedef OnSubscriberTrackReceived = void Function(
   StreamPeerConnection pc,
   RtcRemoteTrack track,
 );
-
-typedef OnSubscriberTrackSubscriptionUpdate = void Function({
-  required sfu.TrackSubscriptionDetails track,
-  required bool subscribe,
-});
 
 class RtcManager extends Disposable {
   RtcManager({
@@ -67,14 +63,13 @@ class RtcManager extends Disposable {
   final StreamPeerConnection _publisher;
   final StreamPeerConnection _subscriber;
 
-  final publishedTracks = < /*trackSid*/ String, RtcTrack>{};
+  final publishedTracks = < /*trackId*/ String, RtcTrack>{};
 
   OnIceCandidate? onPublisherIceCandidate;
   OnIceCandidate? onSubscriberIceCandidate;
   OnRenegotiationNeeded? onPublisherNegotiationNeeded;
   OnPublisherTrackMuted? onPublisherTrackMuted;
-  OnSubscriberTrackPublished? onSubscriberTrackPublished;
-  OnSubscriberTrackSubscriptionUpdate? onSubscriberTrackSubscriptionUpdate;
+  OnSubscriberTrackReceived? onSubscriberTrackReceived;
 
   /// Returns a generic sdp.
   static Future<String> getGenericSdp() async {
@@ -150,7 +145,7 @@ class RtcManager extends Disposable {
     final trackType = idParts[1];
 
     final remoteTrack = RtcRemoteTrack(
-      trackId: trackId,
+      trackIdPrefix: trackId,
       trackType: SfuTrackTypeParser.parseSfuName(trackType),
       track: track,
       stream: stream,
@@ -158,9 +153,9 @@ class RtcManager extends Disposable {
       transceiver: transceiver,
     );
 
-    publishedTracks[remoteTrack.trackSid] = remoteTrack;
-    _logger.v(() => '[onSubscriberTrack] published: ${remoteTrack.trackSid}');
-    onSubscriberTrackPublished?.call(pc, remoteTrack);
+    publishedTracks[remoteTrack.trackId] = remoteTrack;
+    _logger.v(() => '[onSubscriberTrack] published: ${remoteTrack.trackId}');
+    onSubscriberTrackReceived?.call(pc, remoteTrack);
   }
 
   Future<void> unpublishTrack({required String trackSid}) async {
@@ -170,10 +165,10 @@ class RtcManager extends Disposable {
       return;
     }
 
-    publishedTrack.track.enabled = false;
+    publishedTrack.track?.enabled = false;
     if (publishedTrack is RtcLocalTrack) {
-      await publishedTrack.track.stop();
-      await publishedTrack.stream.dispose();
+      await publishedTrack.track?.stop();
+      await publishedTrack.stream?.dispose();
     }
 
     final sender = publishedTrack.transceiver?.sender;
@@ -209,16 +204,16 @@ class RtcManager extends Disposable {
     return super.dispose();
   }
 
-  RtcTrack? getTrack(String trackSid) {
-    _logger.d(() => '[getTrack] trackSid: $trackSid');
+  RtcTrack? getTrack(String trackId) {
+    _logger.d(() => '[getTrack] trackSid: $trackId');
     _logger.v(() => '[getTrack] publishedTracks: ${publishedTracks.keys}');
-    return publishedTracks[trackSid];
+    return publishedTracks[trackId];
   }
 
-  List<RtcTrack> getTracks(String trackId) {
+  List<RtcTrack> getTracks(String trackIdPrefix) {
     return [
       ...publishedTracks.values.where((track) {
-        return track.trackId == trackId;
+        return track.trackIdPrefix == trackIdPrefix;
       }),
     ];
   }
@@ -307,7 +302,7 @@ extension PublisherRtcManager on RtcManager {
       transceiver: transceiver,
     );
 
-    publishedTracks[publishedTrack.trackSid] = publishedTrack;
+    publishedTracks[publishedTrack.trackId] = publishedTrack;
 
     return publishedTrack;
   }
@@ -358,7 +353,7 @@ extension PublisherRtcManager on RtcManager {
       videoDimension: dimension,
     );
 
-    publishedTracks[publishedTrack.trackSid] = publishedTrack;
+    publishedTracks[publishedTrack.trackId] = publishedTrack;
 
     return publishedTrack;
   }
@@ -415,7 +410,7 @@ extension PublisherRtcManager on RtcManager {
     if (audioTrack == null) return null;
 
     final track = RtcLocalTrack(
-      trackId: publisherId,
+      trackIdPrefix: publisherId,
       trackType: SfuTrackType.audio,
       stream: stream,
       track: audioTrack,
@@ -434,7 +429,7 @@ extension PublisherRtcManager on RtcManager {
     if (videoTrack == null) return null;
 
     final track = RtcLocalTrack(
-      trackId: publisherId,
+      trackIdPrefix: publisherId,
       trackType: SfuTrackType.video,
       stream: stream,
       track: videoTrack,
@@ -453,7 +448,7 @@ extension PublisherRtcManager on RtcManager {
     if (videoTrack == null) return null;
 
     final track = RtcLocalTrack(
-      trackId: publisherId,
+      trackIdPrefix: publisherId,
       trackType: SfuTrackType.screenShare,
       stream: stream,
       track: videoTrack,
@@ -475,7 +470,7 @@ extension PublisherRtcManager on RtcManager {
 
     tracks.add(
       RtcLocalTrack(
-        trackId: publisherId,
+        trackIdPrefix: publisherId,
         trackType: SfuTrackType.screenShare,
         stream: stream,
         track: videoTrack,
@@ -487,7 +482,7 @@ extension PublisherRtcManager on RtcManager {
     if (audioTrack != null) {
       tracks.add(
         RtcLocalTrack(
-          trackId: publisherId,
+          trackIdPrefix: publisherId,
           trackType: SfuTrackType.screenShareAudio,
           stream: stream,
           track: audioTrack,
@@ -523,7 +518,7 @@ extension PublisherRtcManager on RtcManager {
     }
 
     // Update new stream and track.
-    return publishedTracks[track.trackSid] = track.copyWith(
+    return publishedTracks[track.trackId] = track.copyWith(
       track: newTrack,
       stream: newStream,
     );
@@ -549,61 +544,11 @@ extension PublisherRtcManager on RtcManager {
   }
 }
 
-extension SubscriberRtcManager on RtcManager {
-  Future<void> subscribeTrack({
-    required String userId,
-    required String sessionId,
-    required SfuTrackType trackType,
-    RtcVideoDimension dimension = RtcVideoDimensionPresets.h720_169,
-  }) {
-    return _updateSubscription(
-      userId,
-      sessionId,
-      trackType,
-      subscribe: true,
-      dimension: dimension,
-    );
-  }
-
-  Future<void> unsubscribeTrack({
-    required String userId,
-    required String sessionId,
-    required SfuTrackType trackType,
-  }) {
-    return _updateSubscription(
-      userId,
-      sessionId,
-      trackType,
-      subscribe: false,
-    );
-  }
-
-  Future<void> _updateSubscription(
-    String userId,
-    String sessionId,
-    SfuTrackType trackType, {
-    required bool subscribe,
-    RtcVideoDimension? dimension,
-  }) async {
-    final track = sfu.TrackSubscriptionDetails(
-      userId: userId,
-      sessionId: sessionId,
-      trackType: trackType.toDTO(),
-      dimension: dimension?.toDTO(),
-    );
-
-    return onSubscriberTrackSubscriptionUpdate?.call(
-      track: track,
-      subscribe: subscribe,
-    );
-  }
-}
-
 extension RtcManagerTrackHelper on RtcManager {
   Future<RtcLocalTrack?> setCameraPosition({
-    required CameraPosition cameraPosition,
+    required CameraPositionV2 cameraPosition,
   }) {
-    final facingMode = cameraPosition == CameraPosition.front
+    final facingMode = cameraPosition == CameraPositionV2.front
         ? FacingMode.user
         : FacingMode.environment;
 
@@ -657,20 +602,20 @@ extension RtcManagerTrackHelper on RtcManager {
     if (muted) {
       // ScreenShare cannot be muted, Un-publish instead
       if (track.trackType == SfuTrackType.screenShare) {
-        await unpublishTrack(trackSid: track.trackSid);
+        await unpublishTrack(trackSid: track.trackId);
 
         // Also un-publish the audio track if it was published
         final screenShareAudioTrack = getPublisherTrackByType(
           SfuTrackType.screenShareAudio,
         );
         if (screenShareAudioTrack != null) {
-          await unpublishTrack(trackSid: screenShareAudioTrack.trackSid);
+          await unpublishTrack(trackSid: screenShareAudioTrack.trackId);
         }
       } else {
-        await muteTrack(trackSid: track.trackSid);
+        await muteTrack(trackSid: track.trackId);
       }
     } else {
-      await unmuteTrack(trackSid: track.trackSid);
+      await unmuteTrack(trackSid: track.trackId);
     }
 
     return track;

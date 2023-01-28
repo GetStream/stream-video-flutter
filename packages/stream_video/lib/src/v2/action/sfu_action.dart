@@ -32,11 +32,7 @@ class SfuJoinedAction extends SfuAction {
     required List<CallUser> users,
   }) {
     return SfuJoinedAction._(
-      participants: Map.unmodifiable(
-        <String, SfuParticipant>{
-          for (var it in participants) it.userId: it,
-        },
-      ),
+      participants: List.unmodifiable(participants),
       users: Map.unmodifiable(
         <String, CallUser>{
           for (var it in users) it.id: it,
@@ -48,6 +44,6 @@ class SfuJoinedAction extends SfuAction {
     required this.participants,
     required this.users,
   });
-  final Map<String, SfuParticipant> participants;
+  final List<SfuParticipant> participants;
   final Map<String, CallUser> users;
 }

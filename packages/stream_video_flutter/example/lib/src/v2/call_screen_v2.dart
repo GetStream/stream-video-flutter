@@ -38,18 +38,20 @@ class _CallScreenV2State extends State<CallScreenV2> {
   }
 
   Future<void> _setState(CallStateV2 state) async {
-    for (final participantState in state.callParticipants.values) {
+    for (final participantState in state.callParticipants) {
       final userId = participantState.userId;
-      final track = _call.getTrack(userId, SfuTrackType.video);
+      final sessionId = participantState.sessionId;
+      final trackId = participantState.trackIdPrefix;
+      final track = _call.getTrack(trackId, SfuTrackType.video);
       print('(SV:CallScreenState): [setState] userId: $userId, track: $track');
       if (track == null) {
-        await _renderers[userId]?.dispose();
-        _renderers.remove(userId);
+        await _renderers[sessionId]?.dispose();
+        _renderers.remove(sessionId);
       } else {
-        final renderer = _renderers[userId] ?? ParticipantRenderer();
+        final renderer = _renderers[sessionId] ?? ParticipantRenderer();
         await renderer.initialize();
-        renderer.srcObject = track;
-        _renderers[userId] = renderer;
+        renderer.srcObject(track, SfuTrackType.video);
+        _renderers[sessionId] = renderer;
       }
     }
     setState(() {
@@ -59,7 +61,7 @@ class _CallScreenV2State extends State<CallScreenV2> {
 
   @override
   Widget build(BuildContext context) {
-    final participants = _state.callParticipants.values.take(4).map((pState) {
+    final participants = _state.callParticipants.take(4).map((pState) {
       return CallParticipantV2(
         state: pState,
         renderer: _renderers[pState.userId],
@@ -89,7 +91,7 @@ class _CallScreenV2State extends State<CallScreenV2> {
           ),
           const SizedBox(height: 10),
           Text(
-            'Users: ${_state.callParticipants.values.map(
+            'Users: ${_state.callParticipants.map(
                   (it) => it.userId,
                 ).toList()}',
           ),
@@ -143,7 +145,11 @@ class _CallScreenV2State extends State<CallScreenV2> {
 
   Future<void> _start() async {
     if (_state.status.isIdle) {
-      await widget.call.getOrCreate();
+      final result = await widget.call.getOrCreate();
+      if (result.isFailure) {
+        await _hangUp();
+        return;
+      }
     }
     final result = await widget.call.connect();
     if (result.isFailure) {
@@ -152,7 +158,7 @@ class _CallScreenV2State extends State<CallScreenV2> {
   }
 
   Future<void> _hangUp() async {
-    await widget.call.apply(CancelCall());
+    await widget.call.apply(const CancelCall());
     await widget.call.disconnect();
   }
 }

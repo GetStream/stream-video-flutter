@@ -1,7 +1,8 @@
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-class StreamCallCid {
+class StreamCallCid with EquatableMixin {
   factory StreamCallCid({required String cid}) {
     final typeAndId = cid.split(':');
     if (typeAndId.length != 2) {
@@ -25,15 +26,15 @@ class StreamCallCid {
     );
   }
 
-  StreamCallCid._({
+  const StreamCallCid._({
     required this.value,
     required this.type,
     required this.id,
   });
 
-  final value;
-  final type;
-  final id;
+  final String value;
+  final String type;
+  final String id;
 
   @override
   String toString() {
@@ -41,12 +42,5 @@ class StreamCallCid {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is StreamCallCid &&
-          runtimeType == other.runtimeType &&
-          value == other.value;
-
-  @override
-  int get hashCode => value.hashCode;
+  List<Object?> get props => [value];
 }
