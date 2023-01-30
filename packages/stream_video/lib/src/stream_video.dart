@@ -422,6 +422,10 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     );
   }
 
+  Future<Call?> consumeIncomingCall() {
+    return _pushNotificationManager.consumeIncomingCall();
+  }
+
   Future<Call> acceptCall({
     required String type,
     required String id,

@@ -107,4 +107,29 @@ class PushNotificationManager {
   bool _isFirebaseInitialized() {
     return Firebase.apps.isNotEmpty;
   }
+
+  Future<Call?> consumeIncomingCall() async {
+    // We need to wait for a second to be sure sharedPreferences has been updated
+    await Future.delayed(const Duration(milliseconds: 1000));
+    await _sharedPreferences.reload();
+    final infomingCallCid = _sharedPreferences.getString('incomingCallCid');
+    await _sharedPreferences.remove('incomingCallCid');
+    print('JcLog: incomingCallCid from sharedPreferences: $infomingCallCid');
+    if (infomingCallCid != null) {
+      // return _client.acceptCall(
+      //   type: infomingCallCid.substring(0, infomingCallCid.indexOf(':')),
+      //   id: infomingCallCid.substring(infomingCallCid.indexOf(':') + 1),
+      // );
+      return Future.value(
+        Call(
+          callConfiguration: const CallConfiguration(
+            type: 'type',
+            id: 'id',
+            participantIds: ['jc', 'isa'],
+          ),
+        ),
+      );
+    }
+    return Future.value(null);
+  }
 }
