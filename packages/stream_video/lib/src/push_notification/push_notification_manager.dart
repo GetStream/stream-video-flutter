@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../call/call.dart';
 import '../models/call_configuration.dart';
@@ -9,12 +12,15 @@ import 'call_notification_wrapper.dart';
 class PushNotificationManager {
   PushNotificationManager({
     required StreamVideo client,
+    required SharedPreferences sharedPreferences,
     CallNotificationWrapper callNotification = const CallNotificationWrapper(),
   })  : _client = client,
-        _callNotification = callNotification;
+        _callNotification = callNotification,
+        _sharedPreferences = sharedPreferences;
 
   final StreamVideo _client;
   final CallNotificationWrapper _callNotification;
+  final SharedPreferences _sharedPreferences;
 
   Future<void> onUserLoggedIn() async {
     print('JcLog: [onUserLoggedIn]');
@@ -47,10 +53,15 @@ class PushNotificationManager {
       // final call = await _client.getOrCreateCall(type: type, id: id);
       await _callNotification.showCallNotification(
         callId: cid,
-        callers: 'Jc, Isa', //call.users.values.map((e) => e.name).join(', '),
+        callers: 'Jc, Isa',
+        //call.users.values.map((e) => e.name).join(', '),
         isVideoCall: true,
-        avatarUrl: '', //call.users.values.firstOrNull?.imageUrl,
+        avatarUrl: '',
+        //call.users.values.firstOrNull?.imageUrl,
         onCallAccepted: (cid) async {
+          print('JcLog: Storing incomingCallCid: $cid');
+          await _sharedPreferences.setString('incomingCallCid', cid);
+
           onCallAccepted(
             Call(
               callConfiguration: const CallConfiguration(
