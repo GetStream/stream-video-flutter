@@ -1,18 +1,16 @@
 import 'dart:convert';
 
+import 'package:dogfooding/src/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:stream_video/stream_video.dart';
 
-import 'home_screen.dart';
 import 'utils/assets.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
-
-  static const routeName = '/login';
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -62,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
       token: Token(token),
     );
 
-    Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+    Navigator.of(context).pushReplacementNamed(Routes.HOME);
   }
 
   final _emailController = TextEditingController();

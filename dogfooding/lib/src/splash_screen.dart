@@ -1,16 +1,14 @@
 import 'dart:async';
 
+import 'package:dogfooding/src/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import 'login_screen.dart';
 import 'utils/after_layout.dart';
 import 'utils/assets.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
-
-  static const routeName = '/';
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -22,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> with AfterLayoutMixin {
     // Show splash screen for 2 seconds.
     Future.delayed(const Duration(seconds: 2)).then(
       (_) async {
-        Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
+        Navigator.of(context).pushReplacementNamed(Routes.LOGIN);
       },
     );
   }

@@ -112,6 +112,8 @@ class _StreamActiveCallState extends State<StreamActiveCall> {
 
   @override
   Widget build(BuildContext context) {
+    final usersProvider = StreamUsersConfiguration.of(context);
+
     return Scaffold(
       appBar: widget.callAppBarBuilder?.call(context, call) ??
           ActiveCallAppBar(
@@ -124,7 +126,10 @@ class _StreamActiveCallState extends State<StreamActiveCall> {
                       builder: (context) =>
                           widget.participantsInfoWidgetBuilder
                               ?.call(context, call) ??
-                          StreamCallParticipantsInfoView(call: call),
+                          StreamCallParticipantsInfoView(
+                            call: call,
+                            usersProvider: usersProvider,
+                          ),
                     ),
                   );
                 },

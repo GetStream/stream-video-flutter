@@ -1,6 +1,6 @@
 import '../../stream_video_flutter.dart';
 
-/// Represents state for [StreamInvitableUserListController].
+/// Represents state for [StreamInviteUserListController].
 class CallInviteState {
   /// Creates a new instance of [CallInviteState].
   const CallInviteState({

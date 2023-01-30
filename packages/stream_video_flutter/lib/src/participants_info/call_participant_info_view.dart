@@ -5,9 +5,9 @@ import '../../stream_video_flutter.dart';
 /// {@template streamCallParticipantInfoView}
 /// Displays call participant info view.
 /// {@endtemplate}
-class StreamCallParticipantInfoView extends StatelessWidget {
+class CallParticipantInfoView extends StatelessWidget {
   /// {@macro streamCallParticipantInfoView}
-  const StreamCallParticipantInfoView({
+  const CallParticipantInfoView({
     super.key,
     required this.participant,
     required this.videoIcon,
@@ -46,7 +46,6 @@ class StreamCallParticipantInfoView extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             StreamUserAvatar(
               user: participant.user,

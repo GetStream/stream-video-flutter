@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../models/mute_toggle_titles.dart';
 
 /// {@template streamCallParticipantsInfoView}
 /// Displays call participants info.
 /// {@endtemplate}
-class StreamCallParticipantsInfoOptions extends StatelessWidget {
+class CallParticipantsInfoOptions extends StatelessWidget {
   /// {@macro streamCallParticipantsInfoView}
-  const StreamCallParticipantsInfoOptions({
+  const CallParticipantsInfoOptions({
     super.key,
     required this.call,
     required this.inviteButtonTitle,
