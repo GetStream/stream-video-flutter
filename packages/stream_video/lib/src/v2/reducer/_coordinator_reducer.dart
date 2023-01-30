@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+
 import '../../logger/stream_logger.dart';
 import '../action/coordinator_action.dart';
 import '../call_state.dart';
@@ -40,7 +42,10 @@ class CoordinatorReducer {
       _logger.w(() => '[reduceCallAccepted] rejected (status is not Outgoing)');
       return state;
     }
-    if (!state.callParticipants.containsKey(event.sentByUserId)) {
+    final participant = state.callParticipants.firstWhereOrNull((participant) {
+      return participant.userId == event.sentByUserId;
+    });
+    if (participant != null) {
       _logger.w(() => '[reduceCallAccepted] rejected (accepted by non-Member)');
       return state;
     }
@@ -58,7 +63,10 @@ class CoordinatorReducer {
       _logger.w(() => '[reduceCallRejected] rejected (status is not Active)');
       return state;
     }
-    if (!state.callParticipants.containsKey(event.sentByUserId)) {
+    final participant = state.callParticipants.firstWhereOrNull((participant) {
+      return participant.userId == event.sentByUserId;
+    });
+    if (participant != null) {
       _logger.w(() => '[reduceCallAccepted] rejected (accepted by non-Member)');
       return state;
     }
@@ -80,7 +88,10 @@ class CoordinatorReducer {
       _logger.w(() => '[reduceCallCancelled] rejected (status is not Active)');
       return state;
     }
-    if (!state.callParticipants.containsKey(event.sentByUserId)) {
+    final participant = state.callParticipants.firstWhereOrNull((participant) {
+      return participant.userId == event.sentByUserId;
+    });
+    if (participant != null) {
       _logger.w(
         () => '[reduceCallCancelled] rejected (accepted by non-Member)',
       );

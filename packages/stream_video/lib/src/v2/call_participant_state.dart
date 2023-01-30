@@ -1,25 +1,26 @@
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:rxdart/subjects.dart';
 
+import 'model/call_track_status.dart';
 import 'sfu/data/models/sfu_connection_quality.dart';
 import 'sfu/data/models/sfu_track_type.dart';
-import 'utils/pair.dart';
 
 @immutable
-class CallParticipantStateV2 {
+class CallParticipantStateV2 with EquatableMixin {
   factory CallParticipantStateV2({
     required String userId,
     required String role,
     required String name,
     String? profileImageURL,
     required String sessionId,
-    required String trackId,
-    Set<SfuTrackType> publishedTrackTypes = const {},
+    required String trackIdPrefix,
+    Map<SfuTrackType, CallTrackStatus> published = const {},
     bool isLocal = false,
     SfuConnectionQuality connectionQuality = SfuConnectionQuality.unspecified,
     bool isOnline = false,
     double audioLevel = 0,
     bool isSpeaking = false,
+    bool isDominantSpeaker = false,
   }) {
     return CallParticipantStateV2._(
       userId: userId,
@@ -27,13 +28,14 @@ class CallParticipantStateV2 {
       name: name,
       profileImageURL: profileImageURL,
       sessionId: sessionId,
-      trackId: trackId,
-      publishedTrackTypes: Set.unmodifiable(publishedTrackTypes),
+      trackIdPrefix: trackIdPrefix,
+      published: Map.unmodifiable(published),
       isLocal: isLocal,
       connectionQuality: connectionQuality,
       isOnline: isOnline,
       audioLevel: audioLevel,
       isSpeaking: isSpeaking,
+      isDominantSpeaker: isDominantSpeaker,
     );
   }
 
@@ -44,13 +46,14 @@ class CallParticipantStateV2 {
     required this.name,
     this.profileImageURL,
     required this.sessionId,
-    required this.trackId,
-    required this.publishedTrackTypes,
+    required this.trackIdPrefix,
+    required this.published,
     this.isLocal = false,
     this.connectionQuality = SfuConnectionQuality.unspecified,
     this.isOnline = false,
     this.audioLevel = 0,
     this.isSpeaking = false,
+    this.isDominantSpeaker = false,
   });
 
   final String userId;
@@ -58,13 +61,14 @@ class CallParticipantStateV2 {
   final String name;
   final String? profileImageURL;
   final String sessionId;
-  final String trackId;
-  final Set<SfuTrackType> publishedTrackTypes;
+  final String trackIdPrefix;
+  final Map<SfuTrackType, CallTrackStatus> published;
   final bool isLocal;
   final SfuConnectionQuality connectionQuality;
   final bool isOnline;
   final double audioLevel;
   final bool isSpeaking;
+  final bool isDominantSpeaker;
 
   /// Returns a copy of this [CallParticipantStateV2] with the given fields
   /// replaced with the new values.
@@ -75,12 +79,13 @@ class CallParticipantStateV2 {
     String? profileImageURL,
     String? sessionId,
     String? trackIdPrefix,
-    Set<SfuTrackType>? publishedTrackTypes,
+    Map<SfuTrackType, CallTrackStatus>? published,
     bool? isLocal,
     SfuConnectionQuality? connectionQuality,
     bool? isOnline,
     double? audioLevel,
     bool? isSpeaking,
+    bool? isDominantSpeaker,
   }) {
     return CallParticipantStateV2(
       userId: userId ?? this.userId,
@@ -88,13 +93,14 @@ class CallParticipantStateV2 {
       name: name ?? this.name,
       profileImageURL: profileImageURL ?? this.profileImageURL,
       sessionId: sessionId ?? this.sessionId,
-      trackId: trackIdPrefix ?? this.trackId,
-      publishedTrackTypes: publishedTrackTypes ?? this.publishedTrackTypes,
+      trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
+      published: published ?? this.published,
       isLocal: isLocal ?? this.isLocal,
       connectionQuality: connectionQuality ?? this.connectionQuality,
       isOnline: isOnline ?? this.isOnline,
       audioLevel: audioLevel ?? this.audioLevel,
       isSpeaking: isSpeaking ?? this.isSpeaking,
+      isDominantSpeaker: isDominantSpeaker ?? this.isDominantSpeaker,
     );
   }
 
@@ -102,43 +108,28 @@ class CallParticipantStateV2 {
   String toString() {
     return 'CallParticipantState{userId: $userId, role: $role, name: $name, '
         'profileImageURL: $profileImageURL, sessionId: $sessionId, '
-        'trackId: $trackId, '
-        'publishedTrackTypes: $publishedTrackTypes, '
+        'trackId: $trackIdPrefix, '
+        'published: $published, '
         'isLocal: $isLocal, '
         'connectionQuality: $connectionQuality, isOnline: $isOnline, '
-        'audioLevel: $audioLevel, isSpeaking: $isSpeaking}';
+        'audioLevel: $audioLevel, isSpeaking: $isSpeaking, '
+        'isDominantSpeaker: $isDominantSpeaker}';
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CallParticipantStateV2 &&
-          runtimeType == other.runtimeType &&
-          userId == other.userId &&
-          role == other.role &&
-          name == other.name &&
-          profileImageURL == other.profileImageURL &&
-          sessionId == other.sessionId &&
-          trackId == other.trackId &&
-          publishedTrackTypes == other.publishedTrackTypes &&
-          isLocal == other.isLocal &&
-          connectionQuality == other.connectionQuality &&
-          isOnline == other.isOnline &&
-          audioLevel == other.audioLevel &&
-          isSpeaking == other.isSpeaking;
-
-  @override
-  int get hashCode =>
-      userId.hashCode ^
-      role.hashCode ^
-      name.hashCode ^
-      profileImageURL.hashCode ^
-      sessionId.hashCode ^
-      trackId.hashCode ^
-      publishedTrackTypes.hashCode ^
-      isLocal.hashCode ^
-      connectionQuality.hashCode ^
-      isOnline.hashCode ^
-      audioLevel.hashCode ^
-      isSpeaking.hashCode;
+  List<Object?> get props => [
+        userId,
+        role,
+        name,
+        profileImageURL,
+        sessionId,
+        trackIdPrefix,
+        published,
+        isLocal,
+        connectionQuality,
+        isOnline,
+        audioLevel,
+        isSpeaking,
+        isDominantSpeaker
+      ];
 }

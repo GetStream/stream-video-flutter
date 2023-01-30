@@ -5,14 +5,17 @@ import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import '../../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
+import '../../../../stream_video.dart';
 import '../../../logger/stream_logger.dart';
 import '../../action/call_control_action.dart';
 import '../../call_state_manager.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../model/call_cid.dart';
+import '../../model/call_track_status.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
+import '../../sfu/data/models/sfu_subscription_details.dart';
 import '../../sfu/data/models/sfu_track_type.dart';
 import '../../sfu/sfu_client.dart';
 import '../../sfu/sfu_client_impl.dart';
@@ -25,7 +28,6 @@ import '../../utils/subscriptions.dart';
 import '../../webrtc/media/constraints/camera_position.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
-import '../../webrtc/model/rtc_video_dimension.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/peer_type.dart';
 import '../../webrtc/rtc_manager.dart';
@@ -95,8 +97,6 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         timeLimit: const Duration(seconds: 30),
       );
 
-      _listenParticipantsChanges();
-
       _logger.v(() => '[start] event: $event');
       final currentUserId = stateManager.state.value.currentUserId;
       final localParticipant = event.callState.participants.firstWhere(
@@ -111,9 +111,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         ..onSubscriberIceCandidate = _onLocalIceCandidate
         ..onPublisherTrackMuted = _onPublisherTrackMuted
         ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded
-        ..onSubscriberTrackPublished = _onSubscriberTrackPublished
-        ..onSubscriberTrackSubscriptionUpdate =
-            _onSubscriberTrackSubscriptionUpdate;
+        ..onSubscriberTrackReceived = _onSubscriberTrackReceived;
 
       _logger.v(() => '[start] completed');
       return Result.success(None());
@@ -134,55 +132,14 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   }
 
   @override
-  Future<void> updateTrackSize({
-    required String userId,
-    required SfuTrackType trackType,
-    required double width,
-    required double height,
-  }) async {
-    if (trackType != SfuTrackType.video &&
-        trackType != SfuTrackType.screenShare) {
-      return;
-    }
-    final participant = stateManager.state.value.callParticipants[userId];
-    if (participant == null || participant.isLocal) {
-      return;
-    }
-    final track = sfu.TrackSubscriptionDetails(
-      userId: userId,
-      sessionId: participant.sessionId,
-      trackType: trackType.toDTO(),
-      dimension: sfu_models.VideoDimension(
-        width: width.toInt(),
-        height: height.toInt(),
-      ),
-    );
-
-    await sfuClient.updateSubscriptions(
-      sfu.UpdateSubscriptionsRequest(
-        sessionId: sessionId,
-        tracks: [track],
-      ),
-    );
+  RtcTrack? getTrack(String trackIdPrefix, SfuTrackType trackType) {
+    final trackId = '$trackIdPrefix:$trackType';
+    return rtcManager?.getTrack(trackId);
   }
 
   @override
-  RtcTrack? getTrack(String userId, SfuTrackType trackType) {
-    final participantState = stateManager.state.value.callParticipants[userId];
-    if (participantState == null) {
-      return null;
-    }
-    final trackSid = '${participantState.trackId}:$trackType';
-    return rtcManager?.getTrack(trackSid);
-  }
-
-  @override
-  List<RtcTrack> getTracks(String userId) {
-    final participantState = stateManager.state.value.callParticipants[userId];
-    if (participantState == null) {
-      return List.empty();
-    }
-    return [...?rtcManager?.getTracks(participantState.trackId)];
+  List<RtcTrack> getTracks(String trackIdPrefix) {
+    return [...?rtcManager?.getTracks(trackIdPrefix)];
   }
 
   @override
@@ -195,6 +152,12 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return _onSetScreenShareEnabled(action.enabled);
     } else if (action is SetCameraPosition) {
       return _onSetCameraPosition(action.cameraPosition);
+    } else if (action is UpdateSubscriptions) {
+      return _onUpdateSubscriptions(action);
+    } else if (action is SubscribeVideoTrack) {
+      return _onSubscribeVideoTrack(action);
+    } else if (action is UnsubscribeVideoTrack) {
+      return _onUnsubscribeVideoTrack(action);
     }
     return Result.error('Action not supported: $action');
   }
@@ -214,17 +177,6 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     } else if (event is SfuIceTrickleEvent) {
       await _onRemoteIceCandidate(event);
     }
-  }
-
-  void _listenParticipantsChanges() {
-    _subscriptions.add(
-      _idParticipants,
-      stateManager.state.listen((state) {
-        for (var participant in state.callParticipants.values) {
-          // TODO do we need this?
-        }
-      }),
-    );
   }
 
   Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {
@@ -320,54 +272,85 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     }
   }
 
-  Future<void> _onSubscriberTrackPublished(
+  Future<void> _onSubscriberTrackReceived(
     StreamPeerConnection pc,
     RtcRemoteTrack remoteTrack,
   ) async {
     _logger.d(
-      () => '[onSubscriberTrackPublished] remoteTrack: $remoteTrack',
+      () => '[onSubscriberTrackReceived] remoteTrack: $remoteTrack',
     );
-    stateManager.onRtcRemoteTrackPublished(
-      remoteTrack.trackId,
+    stateManager.onSubscriberTrackReceived(
+      remoteTrack.trackIdPrefix,
       remoteTrack.trackType,
     );
   }
 
-  Future<void> _onSubscriberTrackSubscriptionUpdate({
-    required sfu.TrackSubscriptionDetails track,
-    required bool subscribe,
-  }) async {
-    final participants = stateManager.state.value.callParticipants;
-    final subscribedTracks = <String, sfu.TrackSubscriptionDetails>{};
-    for (final participant in [...participants.values]) {
-      // skip local participant
-      if (participant.isLocal) continue;
+  Future<Result<None>> _onSubscribeVideoTrack(
+    SubscribeVideoTrack action,
+  ) async {
+    final result = await _updateSubscriptions([action]);
+    // TODO create track?
+    return result;
+  }
 
-      final tracks = getTracks(participant.trackId);
-      for (final track in tracks) {
-        final detail = sfu.TrackSubscriptionDetails(
-          userId: participant.userId,
-          sessionId: participant.sessionId,
-          trackType: track.trackType.toDTO(),
-          dimension: track.videoDimension?.toDTO(),
+  Future<Result<None>> _onUnsubscribeVideoTrack(
+    UnsubscribeVideoTrack action,
+  ) async {
+    final result = await _updateSubscriptions([action]);
+    // TODO create track?
+    return result;
+  }
+
+  Future<Result<None>> _onUpdateSubscriptions(
+    UpdateSubscriptions action,
+  ) async {
+    final result = await _updateSubscriptions(action.actions);
+    // TODO create track?
+    return result;
+  }
+
+  Future<Result<None>> _updateSubscriptions(
+    List<SubscriptionAction> actions,
+  ) async {
+    final subscriptions = getParticipantsSubscriptions();
+    for (final action in actions) {
+      if (action is SubscribeVideoTrack) {
+        final subscription = SfuSubscriptionDetails(
+          userId: action.userId,
+          sessionId: action.sessionId,
+          trackIdPrefix: action.trackIdPrefix,
+          trackType: action.trackType,
+          dimension: action.videoDimension,
         );
-
-        subscribedTracks[detail.trackDetailId] = detail;
+        subscriptions[action.trackId] = subscription;
+      } else {
+        subscriptions.remove(action.trackDetailId);
       }
     }
-
-    if (subscribe) {
-      subscribedTracks[track.trackDetailId] = track;
-    } else {
-      subscribedTracks.remove(track.trackDetailId);
-    }
-
-    await sfuClient.updateSubscriptions(
-      sfu.UpdateSubscriptionsRequest(
-        sessionId: sessionId,
-        tracks: subscribedTracks.values,
-      ),
+    return sfuClient.update(
+      sessionId: sessionId,
+      subscriptions: subscriptions.values,
     );
+  }
+
+  Map<String, SfuSubscriptionDetails> getParticipantsSubscriptions() {
+    final participants = stateManager.state.value.callParticipants;
+
+    final subscriptions = <String, SfuSubscriptionDetails>{};
+    for (final participant in participants) {
+      if (participant.isLocal) continue;
+      participant.published.forEach((trackType, trackStatus) {
+        final detail = SfuSubscriptionDetails(
+          userId: participant.userId,
+          sessionId: participant.sessionId,
+          trackIdPrefix: participant.trackIdPrefix,
+          trackType: trackType,
+          dimension: trackStatus.dimensionOrNull,
+        );
+        subscriptions[detail.trackId] = detail;
+      });
+    }
+    return subscriptions;
   }
 
   Future<Result<None>> _onSetCameraEnabled(bool enabled) async {
@@ -397,11 +380,10 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         'Unable to enable/disable screen-share, Track not found',
       );
     }
-
     return Result.success(None());
   }
 
-  Future<Result<None>> _onSetCameraPosition(CameraPosition position) async {
+  Future<Result<None>> _onSetCameraPosition(CameraPositionV2 position) async {
     final track = await rtcManager?.setCameraPosition(cameraPosition: position);
     if (track == null) {
       return Result.error('Unable to set camera position, Track not found');
@@ -435,7 +417,52 @@ extension RtcTracksInfoMapper on List<RtcTrackInfo> {
 
 extension on sfu.TrackSubscriptionDetails {
   /// Returns a unique string to identify this detail from the other details.
-  String get trackDetailId {
-    return '$userId-$sessionId-$trackType';
+  String get trackDetailId => '$userId-$sessionId-$trackType';
+}
+
+extension on SubscriptionAction {
+  /// Returns a unique string to identify this detail from the other details.
+  String get trackDetailId => '$userId-$sessionId-$trackType';
+}
+
+extension on SfuClientV2 {
+  Future<Result<None>> update({
+    required String sessionId,
+    required Iterable<SfuSubscriptionDetails> subscriptions,
+  }) async {
+    final result = await updateSubscriptions(
+      sfu.UpdateSubscriptionsRequest(
+        sessionId: sessionId,
+        tracks: subscriptions.map(
+          (it) => sfu.TrackSubscriptionDetails(
+            userId: it.userId,
+            sessionId: it.sessionId,
+            trackType: it.trackType.toDTO(),
+            dimension: it.dimension?.toDTO(),
+          ),
+        ),
+      ),
+    );
+    if (result is Success<sfu.UpdateSubscriptionsResponse>) {
+      final error = result.data.error;
+      if (error != null) {
+        return Result.error('${error.code} - ${error.message}');
+      }
+    }
+    if (result is Failure) {
+      return result;
+    }
+    return Result.success(None());
   }
+}
+
+class _ParticipantTrack {
+  _ParticipantTrack(
+    this.participant,
+    this.track,
+  ) : trackDetailId = '';
+
+  final CallParticipantStateV2 participant;
+  final RtcTrack? track;
+  final trackDetailId;
 }

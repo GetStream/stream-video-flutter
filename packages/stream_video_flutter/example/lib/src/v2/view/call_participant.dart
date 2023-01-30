@@ -13,10 +13,10 @@ class CallParticipantV2 {
 
 class ParticipantRenderer {
   final rtc.RTCVideoRenderer videoRenderer = rtc.RTCVideoRenderer();
-  late final SfuTrackType trackType;
+  late final SfuTrackTypeVideo trackType;
 
-  set srcObject(RtcTrack srcObject) {
-    trackType = srcObject.trackType;
+  void srcObject(RtcTrack srcObject, SfuTrackTypeVideo trackType) {
+    this.trackType = trackType;
     videoRenderer.srcObject = srcObject.stream;
   }
 

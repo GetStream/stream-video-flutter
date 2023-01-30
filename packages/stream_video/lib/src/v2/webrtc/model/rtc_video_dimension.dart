@@ -1,9 +1,10 @@
 import 'dart:math' as math;
 
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-class RtcVideoDimension {
+class RtcVideoDimension with EquatableMixin {
   const RtcVideoDimension({
     required this.width,
     required this.height,
@@ -27,6 +28,9 @@ class RtcVideoDimension {
   String toString() {
     return 'RtcVideoDimension{width: $width, height: $height, area: $area}';
   }
+
+  @override
+  List<Object?> get props => [width, height];
 }
 
 extension RtcVideoDimensionHelpers on RtcVideoDimension {

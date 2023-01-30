@@ -18,22 +18,32 @@ class CallParticipantView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final participant = this.participant;
+    print('(D/SV:ParticipantView) [build] participant: $participant');
     if (participant == null) {
       return Container(
         alignment: Alignment.center,
         child: const Text('Mock Participant'),
       );
     }
+    final state = participant.state;
     final renderer = participant.renderer;
     final Widget videoView;
     if (renderer != null) {
+      print('(D/SV:ParticipantView) [build] renderer: $renderer');
       videoView = MeasureSize(
         onChange: (Size size) {
-          call.updateTrackSize(
-            userId: participant.state.userId,
-            trackType: renderer.trackType,
-            width: size.width,
-            height: size.height,
+          print('(V/SV:ParticipantView) [onChange] size: $size');
+          call.apply(
+            SubscribeVideoTrack(
+              userId: state.userId,
+              sessionId: state.sessionId,
+              trackIdPrefix: state.trackIdPrefix,
+              trackType: renderer.trackType,
+              videoDimension: RtcVideoDimension(
+                width: size.width.toInt(),
+                height: size.height.toInt(),
+              ),
+            ),
           );
         },
         child: rtc.RTCVideoView(

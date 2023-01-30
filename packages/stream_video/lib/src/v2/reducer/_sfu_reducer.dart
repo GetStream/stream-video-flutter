@@ -1,7 +1,10 @@
+import 'package:collection/collection.dart';
+
 import '../../logger/stream_logger.dart';
 import '../action/sfu_action.dart';
 import '../call_participant_state.dart';
 import '../call_state.dart';
+import '../model/call_track_status.dart';
 import '../sfu/data/events/sfu_events.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-SFU');
@@ -45,7 +48,7 @@ class SfuReducer {
     _logger.d(
       () => '[reduceJoined] ${state.sessionId}; action: $action',
     );
-    final states = action.participants.values.map((aParticipant) {
+    final participants = action.participants.map((aParticipant) {
       final user = action.users[aParticipant.userId];
       final isLocal = aParticipant.userId == state.currentUserId;
       return CallParticipantStateV2(
@@ -54,16 +57,21 @@ class SfuReducer {
         name: user?.name ?? aParticipant.userId,
         profileImageURL: user?.imageUrl,
         sessionId: aParticipant.sessionId,
-        trackId: aParticipant.trackLookupPrefix,
+        trackIdPrefix: aParticipant.trackLookupPrefix,
+        published: {
+          for (var track in aParticipant.publishedTracks)
+            track: CallTrackStatus.published()
+        },
         isLocal: isLocal,
         isOnline: !isLocal,
+        isSpeaking: aParticipant.isSpeaking,
+        audioLevel: aParticipant.audioLevel,
+        isDominantSpeaker: aParticipant.isDominantSpeaker,
       );
-    });
+    }).toList();
 
     return state.copyWith(
-      callParticipants: <String, CallParticipantStateV2>{
-        for (var it in states) it.userId: it,
-      },
+      callParticipants: participants,
     );
   }
 
@@ -75,20 +83,18 @@ class SfuReducer {
       () => '[reduceTrackUnpublished] ${state.sessionId}; event: $event',
     );
     return state.copyWith(
-      callParticipants: {
-        ...state.callParticipants,
-      }..updateAll((userId, participant) {
-          if (userId == event.userId &&
-              participant.sessionId == event.sessionId) {
-            return participant.copyWith(
-              publishedTrackTypes: {
-                ...participant.publishedTrackTypes,
-              }..removeWhere((trackType) => trackType == event.trackType),
-            );
-          } else {
-            return participant;
-          }
-        }),
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.userId == event.userId &&
+            participant.sessionId == event.sessionId) {
+          return participant.copyWith(
+            published: {
+              ...participant.published,
+            }..removeWhere((trackType, _) => trackType == event.trackType),
+          );
+        } else {
+          return participant;
+        }
+      }).toList(),
     );
   }
 
@@ -97,24 +103,23 @@ class SfuReducer {
     SfuTrackPublishedEvent event,
   ) {
     _logger.d(() => '[reduceTrackPublished] ${state.sessionId}; event: $event');
+
     return state.copyWith(
-      callParticipants: {
-        ...state.callParticipants,
-      }..updateAll((userId, participant) {
-          if (userId == event.userId &&
-              participant.sessionId == event.sessionId) {
-            _logger.v(() => '[reduceTrackPublished] pFound: $participant');
-            return participant.copyWith(
-              publishedTrackTypes: {
-                ...participant.publishedTrackTypes,
-                event.trackType,
-              },
-            );
-          } else {
-            _logger.v(() => '[reduceTrackPublished] pSame: $participant');
-            return participant;
-          }
-        }),
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.userId == event.userId &&
+            participant.sessionId == event.sessionId) {
+          _logger.v(() => '[reduceTrackPublished] pFound: $participant');
+          return participant.copyWith(
+            published: {
+              ...participant.published,
+              event.trackType: CallTrackStatus.published(),
+            },
+          );
+        } else {
+          _logger.v(() => '[reduceTrackPublished] pSame: $participant');
+          return participant;
+        }
+      }).toList(),
     );
   }
 
@@ -123,18 +128,19 @@ class SfuReducer {
     SfuAudioLevelChangedEvent event,
   ) {
     return state.copyWith(
-      callParticipants: {
-        ...state.callParticipants,
-      }..updateAll((userId, participant) {
-          final levelInfo = event.audioLevels[userId];
-          if (state.sessionId == levelInfo?.sessionId) {
-            return participant.copyWith(
-              audioLevel: levelInfo?.level,
-            );
-          } else {
-            return participant;
-          }
-        }),
+      callParticipants: state.callParticipants.map((participant) {
+        final levelInfo = event.audioLevels.firstWhereOrNull((level) {
+          return level.userId == participant.userId &&
+              level.sessionId == participant.sessionId;
+        });
+        if (levelInfo != null) {
+          return participant.copyWith(
+            audioLevel: levelInfo.level,
+          );
+        } else {
+          return participant;
+        }
+      }).toList(),
     );
   }
 
@@ -143,18 +149,19 @@ class SfuReducer {
     SfuConnectionQualityChangedEvent event,
   ) {
     return state.copyWith(
-      callParticipants: {
-        ...state.callParticipants,
-      }..updateAll((userId, participant) {
-          final update = event.connectionQualityUpdates[userId];
-          if (state.sessionId == update?.sessionId) {
-            return participant.copyWith(
-              connectionQuality: update?.connectionQuality,
-            );
-          } else {
-            return participant;
-          }
-        }),
+      callParticipants: state.callParticipants.map((participant) {
+        final update = event.connectionQualityUpdates.firstWhereOrNull((it) {
+          return it.userId == participant.userId &&
+              it.sessionId == participant.sessionId;
+        });
+        if (state.sessionId == update?.sessionId) {
+          return participant.copyWith(
+            connectionQuality: update?.connectionQuality,
+          );
+        } else {
+          return participant;
+        }
+      }).toList(),
     );
   }
 
@@ -163,9 +170,11 @@ class SfuReducer {
     SfuParticipantLeftEvent event,
   ) {
     return state.copyWith(
-      callParticipants: {
-        ...state.callParticipants,
-      }..remove(event.participant.userId),
+      callParticipants: [...state.callParticipants]..removeWhere(
+          (participant) =>
+              participant.userId == event.participant.userId &&
+              participant.sessionId == event.participant.sessionId,
+        ),
     );
   }
 
@@ -179,15 +188,15 @@ class SfuReducer {
       name: action.user?.name ?? action.participant.userId,
       profileImageURL: action.user?.imageUrl,
       sessionId: action.participant.sessionId,
-      trackId: action.participant.trackLookupPrefix,
+      trackIdPrefix: action.participant.trackLookupPrefix,
       isLocal: action.isLocalUser,
       isOnline: !action.isLocalUser,
     );
     return state.copyWith(
-      callParticipants: {
+      callParticipants: [
         ...state.callParticipants,
-        participant.userId: participant,
-      },
+        participant,
+      ],
     );
   }
 }

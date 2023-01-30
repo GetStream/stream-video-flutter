@@ -15,8 +15,8 @@ class CallUserIdAction extends LifecycleAction {
   final String userId;
 }
 
-class CallDestroyedAction extends LifecycleAction {
-  const CallDestroyedAction();
+class CallDisconnectedAction extends LifecycleAction {
+  const CallDisconnectedAction();
 }
 
 class CallCreatedAction extends LifecycleAction {
@@ -25,18 +25,6 @@ class CallCreatedAction extends LifecycleAction {
   });
 
   final CallCreated data;
-}
-
-class CallAcceptedAction extends LifecycleAction {
-  const CallAcceptedAction();
-}
-
-class CallRejectedAction extends LifecycleAction {
-  const CallRejectedAction();
-}
-
-class CallCancelledAction extends LifecycleAction {
-  const CallCancelledAction();
 }
 
 class CallJoinedAction extends LifecycleAction {

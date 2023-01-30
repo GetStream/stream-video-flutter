@@ -6,18 +6,18 @@ import 'action.dart';
 @internal
 abstract class RtcAction extends StreamAction {}
 
-class RtcRemoteTrackPublishedAction extends RtcAction {
-  RtcRemoteTrackPublishedAction({
-    required this.trackId,
+class SubscriberTrackReceivedAction extends RtcAction {
+  SubscriberTrackReceivedAction({
+    required this.trackIdPrefix,
     required this.trackType,
   });
 
-  final String trackId;
+  final String trackIdPrefix;
   final SfuTrackType trackType;
 
   @override
   String toString() {
     return 'RtcRemoteTrackPublishedAction{trackType: $trackType, '
-        'trackId: $trackId}';
+        'trackId: $trackIdPrefix}';
   }
 }

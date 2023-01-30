@@ -64,7 +64,7 @@ class SfuConnectionQualityChangedEvent extends SfuEventV2 {
     required this.connectionQualityUpdates,
   });
 
-  final Map<String, SfuConnectionQualityInfo> connectionQualityUpdates;
+  final List<SfuConnectionQualityInfo> connectionQualityUpdates;
 
   @override
   List<Object> get props => [connectionQualityUpdates];
@@ -74,7 +74,7 @@ class SfuConnectionQualityChangedEvent extends SfuEventV2 {
 class SfuAudioLevelChangedEvent extends SfuEventV2 {
   const SfuAudioLevelChangedEvent({required this.audioLevels});
 
-  final Map<String, SfuAudioLevel> audioLevels;
+  final List<SfuAudioLevel> audioLevels;
 
   @override
   List<Object> get props => [audioLevels];

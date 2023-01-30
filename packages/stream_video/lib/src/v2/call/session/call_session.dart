@@ -15,14 +15,7 @@ abstract class CallSession extends Disposable {
 
   Future<Result<None>> apply(SessionControlAction action);
 
-  List<RtcTrack> getTracks(String userId);
+  List<RtcTrack> getTracks(String trackIdPrefix);
 
-  RtcTrack? getTrack(String userId, SfuTrackType trackType);
-
-  void updateTrackSize({
-    required String userId,
-    required SfuTrackType trackType,
-    required double width,
-    required double height,
-  });
+  RtcTrack? getTrack(String trackIdPrefix, SfuTrackType trackType);
 }

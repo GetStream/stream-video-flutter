@@ -18,7 +18,7 @@ class CallStateV2 extends Equatable {
       callCid: callCid,
       sessionId: '',
       status: CallStatus.idle(),
-      callParticipants: Map.unmodifiable(const {}),
+      callParticipants: List.unmodifiable(const []),
     );
   }
 
@@ -33,7 +33,7 @@ class CallStateV2 extends Equatable {
       callCid: callCid,
       sessionId: '',
       status: metadata.toCallStatus(currentUserId, ringing),
-      callParticipants: Map.unmodifiable(
+      callParticipants: List.unmodifiable(
         metadata.toCallParticipants(
           currentUserId,
         ),
@@ -54,7 +54,7 @@ class CallStateV2 extends Equatable {
   final StreamCallCid callCid;
   final String sessionId;
   final CallStatus status;
-  final Map<String, CallParticipantStateV2> callParticipants;
+  final List<CallParticipantStateV2> callParticipants;
 
   /// Returns a copy of this [CallStateV2] with the given fields replaced
   /// with the new values.
@@ -63,7 +63,7 @@ class CallStateV2 extends Equatable {
     StreamCallCid? callCid,
     String? sessionId,
     CallStatus? status,
-    Map<String, CallParticipantStateV2>? callParticipants,
+    List<CallParticipantStateV2>? callParticipants,
   }) {
     return CallStateV2._(
       currentUserId: currentUserId ?? this.currentUserId,
@@ -79,6 +79,7 @@ class CallStateV2 extends Equatable {
 
   @override
   List<Object?> get props => [
+        currentUserId,
         callCid,
         sessionId,
         status,
@@ -98,20 +99,22 @@ extension on CallMetadata {
     }
   }
 
-  Map<String, CallParticipantStateV2> toCallParticipants(String currentUserId) {
-    final result = <String, CallParticipantStateV2>{};
+  List<CallParticipantStateV2> toCallParticipants(String currentUserId) {
+    final result = <CallParticipantStateV2>[];
     for (final userId in details.memberUserIds) {
       final member = details.members[userId];
       final isLocal = currentUserId == userId;
-      result[userId] = CallParticipantStateV2(
-        userId: userId,
-        role: member?.role ?? '',
-        name: '',
-        profileImageURL: '',
-        sessionId: '',
-        trackId: '',
-        isLocal: isLocal,
-        isOnline: !isLocal,
+      result.add(
+        CallParticipantStateV2(
+          userId: userId,
+          role: member?.role ?? '',
+          name: '',
+          profileImageURL: '',
+          sessionId: '',
+          trackIdPrefix: '',
+          isLocal: isLocal,
+          isOnline: !isLocal,
+        ),
       );
     }
     return result;
