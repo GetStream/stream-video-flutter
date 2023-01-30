@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_callkit_incoming/entities/android_params.dart';
 import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_callkit_incoming/entities/ios_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
+
+StreamSubscription<CallEvent?>? _streamSubscription;
 
 class CallNotificationWrapper {
   const CallNotificationWrapper();
@@ -53,12 +57,13 @@ class CallNotificationWrapper {
       ),
     );
     await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
-    // TODO: Cancel the listener after an event is fired.
-    FlutterCallkitIncoming.onEvent.listen((event) {
+    _streamSubscription = FlutterCallkitIncoming.onEvent.listen((event) {
       if (event?.event == Event.ACTION_CALL_ACCEPT) {
         onCallAccepted(callId);
+        _streamSubscription?.cancel();
       } else if (event?.event == Event.ACTION_CALL_DECLINE) {
         onCallRejected(callId);
+        _streamSubscription?.cancel();
       }
     });
   }
