@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:logging/logging.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
@@ -111,7 +112,13 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
       tokenManager: _tokenManager,
       baseUrl: coordinatorRpcUrl,
     );
-    _pushNotificationManager = PushNotificationManager(client: this);
+    _initPushNotification();
+  }
+
+  Future<void> _initPushNotification() async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    _pushNotificationManager = PushNotificationManager(
+        client: this, sharedPreferences: sharedPreferences);
   }
 
   static StreamVideo? _instance;
