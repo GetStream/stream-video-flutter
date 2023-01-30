@@ -6,7 +6,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:uni_links/uni_links.dart';
@@ -28,11 +27,12 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Future<void> _handleRemoteMessage(RemoteMessage message) async {
   print('JcLog: Handling Remote Message with payload: ${message.data}');
   await StreamVideo.instance.handlePushNotification(message, (call) async {
-    print('JcLog: on call ($call) accepted, ${message.messageId}');
+    print(
+        'JcLog: on call ($call) accepted, ${message.messageId}, navState.currentContext: ${navState.currentContext}');
 
     // 1. Application is terminated - storing something in shared preferences and handle in DogfoodingApp
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("callReceived", true);
+    // final SharedPreferences prefs = await SharedPreferences.getInstance();
+    // await prefs.setBool("callReceived", true);
     // StreamInstance.consumeActiveCall() - return and clean
 
     // 2. Application is in the foreground. Let's check if we need to store
@@ -77,7 +77,8 @@ class StreamDogFoodingApp extends StatefulWidget {
   State<StreamDogFoodingApp> createState() => _StreamDogFoodingAppState();
 }
 
-class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
+class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
+    with WidgetsBindingObserver {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late StreamSubscription<Uri?> _subscription;
   // It is assumed that all messages contain a data field with the key 'type'
@@ -125,11 +126,13 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
     super.initState();
     print('JcLog: [initState]');
 
+    WidgetsBinding.instance.addObserver(this);
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
     // Run code required to handle interacted messages in an async function
     // as initState() must not be async
     setupInteractedMessage();
+    _consumeIncomingCall();
     _observeDeepLinks();
   }
 
@@ -162,6 +165,52 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
     );
   }
 
+  Future<void> _consumeIncomingCall() async {
+    print('JcLog: Consuming call');
+    final incomingCall = await StreamVideo.instance.consumeIncomingCall();
+    if (incomingCall != null) {
+      print('JcLog: Call is not null');
+
+      // This navigation doesn't work :(
+      await Navigator.of(context).pushReplacementNamed(
+        Routes.CALL,
+        arguments: incomingCall,
+      );
+    } else {
+      print('JcLog: Call is null');
+    }
+
+    // This log is not printed
+    print('JcLog: Call Consumed');
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.resumed:
+        print('JcLog: AppLifecycleState.resumed');
+        _consumeIncomingCall();
+        break;
+      case AppLifecycleState.inactive:
+        // widget is inactive
+        break;
+      case AppLifecycleState.paused:
+        // widget is paused
+        break;
+      case AppLifecycleState.detached:
+        // widget is detached
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     print('JcLog: Building StreamDogFoodingApp widget');
@@ -177,13 +226,6 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
         ],
       ),
       onGenerateRoute: AppRoutes.generateRoute,
-      navigatorKey: navState,
     );
-  }
-
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
   }
 }
