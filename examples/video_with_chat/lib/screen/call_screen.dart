@@ -1,9 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:video_with_chat/screen/channel_screen.dart';
 
-class CallScreen extends StatelessWidget {
+class CallScreen extends StatefulWidget {
   const CallScreen({
     Key? key,
     required this.call,
@@ -14,49 +15,71 @@ class CallScreen extends StatelessWidget {
   final Channel channel;
 
   @override
+  State<CallScreen> createState() => _CallScreenState();
+}
+
+class _CallScreenState extends State<CallScreen> {
+  var isChatPaneVisible = false;
+
+  @override
   Widget build(BuildContext context) {
-    return StreamActiveCall(
-      call: call,
-      onBackPressed: () => _finishCall(context),
-      onHangUp: () => _finishCall(context),
-      callControlsBuilder: (context, call, participants) {
-        return StreamCallControlsBar(
-          options: customCallControlOptions(
-              call: call,
-              channel: channel,
-              onHangup: () => _finishCall(context),
-              onChatTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return StreamChannel(
-                        channel: channel,
-                        child: const ChatScreen(),
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: StreamActiveCall(
+            call: widget.call,
+            onBackPressed: () => _finishCall(context),
+            onHangUp: () => _finishCall(context),
+            callControlsBuilder: (context, call, participants) {
+              return StreamCallControlsBar(
+                options: customCallControlOptions(
+                  call: call,
+                  channel: widget.channel,
+                  onHangup: () => _finishCall(context),
+                  onChatTap: () {
+                    if (kIsWeb) {
+                      toggleChatPane();
+                    } else {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return StreamChannel(
+                              channel: widget.channel,
+                              child: const ChatScreen(),
+                            );
+                          },
+                          fullscreenDialog: true,
+                        ),
                       );
-                    },
-                    fullscreenDialog: true,
-                  ),
-                );
-              }),
-        );
-      },
-      onParticipantsTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) {
-              return Material(
-                child: StreamCallParticipantsInfoView(call: call),
+                    }
+                  },
+                ),
               );
             },
           ),
-        );
-      },
+        ),
+        isChatPaneVisible
+            ? Expanded(
+                flex: 1,
+                child: StreamChannel(
+                  channel: widget.channel,
+                  child: ChatScreen(onBackPressed: () => toggleChatPane()),
+                ),
+              )
+            : Container()
+      ],
     );
   }
 
+  void toggleChatPane() {
+    isChatPaneVisible = !isChatPaneVisible;
+    setState(() {});
+  }
+
   Future<void> _finishCall(BuildContext context) async {
-    await call.disconnect();
-    await channel.stopWatching();
+    await widget.call.disconnect();
+    await widget.channel.stopWatching();
 
     Navigator.of(context).pop();
   }
