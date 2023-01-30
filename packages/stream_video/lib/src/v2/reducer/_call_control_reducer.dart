@@ -1,5 +1,6 @@
 import '../../../stream_video.dart';
 import '../../logger/stream_logger.dart';
+import '../model/call_track_status.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-Control');
 
@@ -62,7 +63,9 @@ class CallControlReducer {
           return participant.copyWith(
             published: {
               ...participant.published,
-              action.trackType: CallTrackStatus.subscribed,
+              action.trackType: CallTrackStatus.subscribedVideo(
+                action.videoDimension,
+              ),
             },
           );
         } else {
@@ -83,7 +86,7 @@ class CallControlReducer {
           return participant.copyWith(
             published: {
               ...participant.published,
-              action.trackType: CallTrackStatus.published,
+              action.trackType: CallTrackStatus.published(),
             },
           );
         } else {
@@ -175,7 +178,7 @@ class CallControlReducer {
             ...participant.published,
           };
           if (enabled) {
-            publishedTrackTypes[trackType] = CallTrackStatus.published;
+            publishedTrackTypes[trackType] = CallTrackStatus.published();
           } else {
             publishedTrackTypes.removeWhere((it, _) => it == trackType);
           }

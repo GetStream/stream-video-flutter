@@ -77,7 +77,6 @@ class _CallScreenV2State extends State<CallScreenV2> {
             icon: const Icon(Icons.close),
             onPressed: () async {
               await _hangUp();
-              widget.onBackPressed();
             },
           ),
         ],
@@ -120,7 +119,6 @@ class _CallScreenV2State extends State<CallScreenV2> {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               onPressed: () async {
                 await _hangUp();
-                widget.onBackPressed();
               },
               child: const Text('Hang Up'),
             )
@@ -144,15 +142,19 @@ class _CallScreenV2State extends State<CallScreenV2> {
   }
 
   Future<void> _start() async {
-    if (_state.status.isIdle) {
-      final result = await widget.call.getOrCreate();
+    try {
+      if (_state.status.isIdle) {
+        final result = await widget.call.getOrCreate();
+        if (result.isFailure) {
+          await _hangUp();
+          return;
+        }
+      }
+      final result = await widget.call.connect();
       if (result.isFailure) {
         await _hangUp();
-        return;
       }
-    }
-    final result = await widget.call.connect();
-    if (result.isFailure) {
+    } catch (e, stk) {
       await _hangUp();
     }
   }
@@ -160,5 +162,6 @@ class _CallScreenV2State extends State<CallScreenV2> {
   Future<void> _hangUp() async {
     await widget.call.apply(const CancelCall());
     await widget.call.disconnect();
+    widget.onBackPressed();
   }
 }

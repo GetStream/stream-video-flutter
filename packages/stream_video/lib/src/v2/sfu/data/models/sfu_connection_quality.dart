@@ -2,5 +2,10 @@ enum SfuConnectionQuality {
   unspecified,
   poor,
   good,
-  excellent,
+  excellent;
+
+  @override
+  String toString() {
+    return name;
+  }
 }

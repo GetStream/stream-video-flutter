@@ -4,6 +4,7 @@ import '../../logger/stream_logger.dart';
 import '../action/sfu_action.dart';
 import '../call_participant_state.dart';
 import '../call_state.dart';
+import '../model/call_track_status.dart';
 import '../sfu/data/events/sfu_events.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-SFU');
@@ -59,7 +60,7 @@ class SfuReducer {
         trackIdPrefix: aParticipant.trackLookupPrefix,
         published: {
           for (var track in aParticipant.publishedTracks)
-            track: CallTrackStatus.published
+            track: CallTrackStatus.published()
         },
         isLocal: isLocal,
         isOnline: !isLocal,
@@ -111,7 +112,7 @@ class SfuReducer {
           return participant.copyWith(
             published: {
               ...participant.published,
-              event.trackType: CallTrackStatus.published,
+              event.trackType: CallTrackStatus.published(),
             },
           );
         } else {

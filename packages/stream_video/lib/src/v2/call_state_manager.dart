@@ -37,7 +37,7 @@ abstract class CallStateManager {
   Future<void> onWaitingTimeout(Duration dropTimeout);
   Future<void> onConnectFailed(VideoError error);
 
-  void onSubscriberTrackReceived(String trackId, SfuTrackType trackType);
+  void onSubscriberTrackReceived(String trackIdPrefix, SfuTrackType trackType);
 }
 
 class CallStateManagerImpl extends CallStateManager {
@@ -151,14 +151,14 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  void onSubscriberTrackReceived(String trackId, SfuTrackType trackType) {
+  void onSubscriberTrackReceived(String trackIdPrefix, SfuTrackType trackType) {
     _logger.d(
-      () => '[onSubscriberTrackReceived] trackId: $trackId,'
+      () => '[onSubscriberTrackReceived] trackIdPrefix: $trackIdPrefix,'
           ' trackType: $trackType',
     );
     _postReduced(
       SubscriberTrackReceivedAction(
-        trackId: trackId,
+        trackIdPrefix: trackIdPrefix,
         trackType: trackType,
       ),
     );

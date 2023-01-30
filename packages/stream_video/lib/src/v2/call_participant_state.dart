@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import 'model/call_track_status.dart';
 import 'sfu/data/models/sfu_connection_quality.dart';
 import 'sfu/data/models/sfu_track_type.dart';
 
@@ -131,13 +132,4 @@ class CallParticipantStateV2 with EquatableMixin {
         isSpeaking,
         isDominantSpeaker
       ];
-}
-
-enum CallTrackStatus {
-  published,
-  subscribed,
-  received;
-
-  @override
-  String toString() => name;
 }
