@@ -129,10 +129,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     WidgetsBinding.instance.addObserver(this);
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
-    // Run code required to handle interacted messages in an async function
-    // as initState() must not be async
-    setupInteractedMessage();
-    _consumeIncomingCall();
+    _tryConsumingIncomingCallFromTerminatedState();
     _observeDeepLinks();
   }
 
@@ -165,26 +162,35 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     );
   }
 
+  void _tryConsumingIncomingCallFromTerminatedState() {
+    print('JcLog: [_tryConsumingIncomingCallFromTerminatedState]');
+    if (_navigatorKey.currentContext == null) {
+      // App is not running yet. Postpone consuming after app is in the foreground
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        print('JcLog: Postponing consuming incoming call');
+        _consumeIncomingCall();
+      });
+    } else {
+      // no-op. If the app is already running we'll handle this in didChangeAppLifecycleState
+    }
+  }
+
   Future<void> _consumeIncomingCall() async {
+    if (_navigatorKey.currentContext == null) {
+      print('JcLog: _navigatorKey.currentContext is null!');
+      return;
+    }
     print('JcLog: Consuming call');
     final incomingCall = await StreamVideo.instance.consumeIncomingCall();
     if (incomingCall != null) {
       print('JcLog: Call is not null');
-
-      if (navState.currentContext != null) {
-        Navigator.of(navState.currentContext!).pushReplacementNamed(
-          Routes.CALL,
-          arguments: incomingCall,
-        );
-      } else {
-        print('JcLog: navState.currentContext was null');
-      }
+      Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
+        Routes.CALL,
+        arguments: incomingCall,
+      );
     } else {
       print('JcLog: Call is null');
     }
-
-    // This log is not printed
-    print('JcLog: Call Consumed');
   }
 
   @override
