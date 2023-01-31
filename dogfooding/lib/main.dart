@@ -92,11 +92,14 @@ class _StreamDogFoodingApp extends State<StreamDogFoodingApp>
     if (incomingCall != null) {
       print('JcLog: Call is not null');
 
-      // This navigation doesn't work :(
-      await Navigator.of(context).pushReplacementNamed(
-        Routes.CALL,
-        arguments: incomingCall,
-      );
+      if (navState.currentContext != null) {
+        Navigator.of(navState.currentContext!).pushReplacementNamed(
+          Routes.CALL,
+          arguments: incomingCall,
+        );
+      } else {
+        print('JcLog: navState.currentContext was null');
+      }
     } else {
       print('JcLog: Call is null');
     }
