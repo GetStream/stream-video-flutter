@@ -58,7 +58,7 @@ class SfuReducer {
         profileImageURL: user?.imageUrl,
         sessionId: aParticipant.sessionId,
         trackIdPrefix: aParticipant.trackLookupPrefix,
-        published: {
+        publishedTracks: {
           for (var track in aParticipant.publishedTracks)
             track: CallTrackStatus.published()
         },
@@ -87,8 +87,8 @@ class SfuReducer {
         if (participant.userId == event.userId &&
             participant.sessionId == event.sessionId) {
           return participant.copyWith(
-            published: {
-              ...participant.published,
+            publishedTracks: {
+              ...participant.publishedTracks,
             }..removeWhere((trackType, _) => trackType == event.trackType),
           );
         } else {
@@ -110,8 +110,8 @@ class SfuReducer {
             participant.sessionId == event.sessionId) {
           _logger.v(() => '[reduceTrackPublished] pFound: $participant');
           return participant.copyWith(
-            published: {
-              ...participant.published,
+            publishedTracks: {
+              ...participant.publishedTracks,
               event.trackType: CallTrackStatus.published(),
             },
           );

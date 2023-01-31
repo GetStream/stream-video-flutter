@@ -114,7 +114,7 @@ abstract class StreamVideoV2 {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
-    Level logLevel = Level.ALL,
+    Level logLevel = Level.OFF,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
   }) {
     _instanceHolder.init(

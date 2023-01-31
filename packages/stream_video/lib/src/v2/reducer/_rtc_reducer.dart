@@ -35,8 +35,8 @@ class RtcReducer {
             () => '[reduceSubTrackReceived] pFound: $participant',
           );
           return participant.copyWith(
-            published: {
-              ...participant.published,
+            publishedTracks: {
+              ...participant.publishedTracks,
               action.trackType: asReceived(participant, action)
             },
           );
@@ -58,8 +58,8 @@ class RtcReducer {
       return CallTrackStatus.received();
     }
     final userId = participant.userId;
-    final published = participant.published;
-    final trackStatus = participant.published[action.trackType];
+    final published = participant.publishedTracks;
+    final trackStatus = participant.publishedTracks[action.trackType];
     if (trackStatus == null) {
       _logger.w(() => '[asReceived] userId: $userId, published: $published');
     }

@@ -14,7 +14,7 @@ class CallParticipantStateV2 with EquatableMixin {
     String? profileImageURL,
     required String sessionId,
     required String trackIdPrefix,
-    Map<SfuTrackType, CallTrackStatus> published = const {},
+    Map<SfuTrackType, CallTrackStatus> publishedTracks = const {},
     bool isLocal = false,
     SfuConnectionQuality connectionQuality = SfuConnectionQuality.unspecified,
     bool isOnline = false,
@@ -29,7 +29,7 @@ class CallParticipantStateV2 with EquatableMixin {
       profileImageURL: profileImageURL,
       sessionId: sessionId,
       trackIdPrefix: trackIdPrefix,
-      published: Map.unmodifiable(published),
+      publishedTracks: Map.unmodifiable(publishedTracks),
       isLocal: isLocal,
       connectionQuality: connectionQuality,
       isOnline: isOnline,
@@ -47,7 +47,7 @@ class CallParticipantStateV2 with EquatableMixin {
     this.profileImageURL,
     required this.sessionId,
     required this.trackIdPrefix,
-    required this.published,
+    required this.publishedTracks,
     this.isLocal = false,
     this.connectionQuality = SfuConnectionQuality.unspecified,
     this.isOnline = false,
@@ -62,7 +62,7 @@ class CallParticipantStateV2 with EquatableMixin {
   final String? profileImageURL;
   final String sessionId;
   final String trackIdPrefix;
-  final Map<SfuTrackType, CallTrackStatus> published;
+  final Map<SfuTrackType, CallTrackStatus> publishedTracks;
   final bool isLocal;
   final SfuConnectionQuality connectionQuality;
   final bool isOnline;
@@ -79,7 +79,7 @@ class CallParticipantStateV2 with EquatableMixin {
     String? profileImageURL,
     String? sessionId,
     String? trackIdPrefix,
-    Map<SfuTrackType, CallTrackStatus>? published,
+    Map<SfuTrackType, CallTrackStatus>? publishedTracks,
     bool? isLocal,
     SfuConnectionQuality? connectionQuality,
     bool? isOnline,
@@ -94,7 +94,7 @@ class CallParticipantStateV2 with EquatableMixin {
       profileImageURL: profileImageURL ?? this.profileImageURL,
       sessionId: sessionId ?? this.sessionId,
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
-      published: published ?? this.published,
+      publishedTracks: publishedTracks ?? this.publishedTracks,
       isLocal: isLocal ?? this.isLocal,
       connectionQuality: connectionQuality ?? this.connectionQuality,
       isOnline: isOnline ?? this.isOnline,
@@ -109,7 +109,7 @@ class CallParticipantStateV2 with EquatableMixin {
     return 'CallParticipantState{userId: $userId, role: $role, name: $name, '
         'profileImageURL: $profileImageURL, sessionId: $sessionId, '
         'trackId: $trackIdPrefix, '
-        'published: $published, '
+        'publishedTracks: $publishedTracks, '
         'isLocal: $isLocal, '
         'connectionQuality: $connectionQuality, isOnline: $isOnline, '
         'audioLevel: $audioLevel, isSpeaking: $isSpeaking, '
@@ -124,7 +124,7 @@ class CallParticipantStateV2 with EquatableMixin {
         profileImageURL,
         sessionId,
         trackIdPrefix,
-        published,
+        publishedTracks,
         isLocal,
         connectionQuality,
         isOnline,
