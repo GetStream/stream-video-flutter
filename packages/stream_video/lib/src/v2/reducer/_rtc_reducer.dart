@@ -1,10 +1,7 @@
 import '../../logger/stream_logger.dart';
 import '../action/rtc_action.dart';
-import '../call_participant_state.dart';
 import '../call_state.dart';
-import '../model/call_track_status.dart';
-import '../sfu/data/models/sfu_track_type.dart';
-import '../webrtc/model/rtc_video_dimension.dart';
+import '../model/call_track_state.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-RTC');
 
@@ -37,7 +34,15 @@ class RtcReducer {
           return participant.copyWith(
             publishedTracks: {
               ...participant.publishedTracks,
-              action.trackType: asReceived(participant, action)
+              action.trackType:
+                  participant.publishedTracks[action.trackType]?.copyWith(
+                        subscribed: true,
+                        received: true,
+                      ) ??
+                      const CallTrackState(
+                        subscribed: true,
+                        received: true,
+                      )
             },
           );
         } else {
@@ -46,25 +51,5 @@ class RtcReducer {
         }
       }).toList(),
     );
-  }
-
-  CallTrackStatus asReceived(
-    CallParticipantStateV2 participant,
-    SubscriberTrackReceivedAction action,
-  ) {
-    if (action.trackType == SfuTrackType.audio ||
-        action.trackType == SfuTrackType.screenShareAudio ||
-        action.trackType == SfuTrackType.unspecified) {
-      return CallTrackStatus.received();
-    }
-    final userId = participant.userId;
-    final published = participant.publishedTracks;
-    final trackStatus = participant.publishedTracks[action.trackType];
-    if (trackStatus == null) {
-      _logger.w(() => '[asReceived] userId: $userId, published: $published');
-    }
-    final dimension =
-        trackStatus?.dimensionOrNull ?? RtcVideoDimensionPresets.h720_169;
-    return CallTrackStatus.received(dimension);
   }
 }

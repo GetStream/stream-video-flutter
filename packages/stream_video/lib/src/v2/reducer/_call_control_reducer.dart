@@ -1,6 +1,6 @@
 import '../../../stream_video.dart';
 import '../../logger/stream_logger.dart';
-import '../model/call_track_status.dart';
+import '../model/call_track_state.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-Control');
 
@@ -25,9 +25,9 @@ class CallControlReducer {
       return _reduceScreenShareEnabled(state, action);
     } else if (action is UpdateSubscriptions) {
       return _reduceUpdateSubscriptions(state, action);
-    } else if (action is SubscribeTrack) {
+    } else if (action is UpdateSubscription) {
       return _reduceSubscribeVideoTrack(state, action);
-    } else if (action is UnsubscribeTrack) {
+    } else if (action is RemoveSubscription) {
       return _reduceUnsubscribeVideoTrack(state, action);
     }
     return state;
@@ -41,9 +41,9 @@ class CallControlReducer {
     _logger.d(() => '[reduceSubscriptions] #$sessionId; action: $action');
     var newState = state;
     for (final child in action.actions) {
-      if (child is SubscribeTrack) {
+      if (child is UpdateSubscription) {
         newState = _reduceSubscribeVideoTrack(newState, child);
-      } else if (child is UnsubscribeTrack) {
+      } else if (child is RemoveSubscription) {
         newState = _reduceUnsubscribeVideoTrack(newState, child);
       }
     }
@@ -52,7 +52,7 @@ class CallControlReducer {
 
   CallStateV2 _reduceSubscribeVideoTrack(
     CallStateV2 state,
-    SubscribeTrack action,
+    UpdateSubscription action,
   ) {
     _logger.d(() => '[reduceSubscribe] #${state.sessionId}; action: $action');
     return state.copyWith(
@@ -60,13 +60,18 @@ class CallControlReducer {
         if (participant.userId == action.userId &&
             participant.sessionId == action.sessionId) {
           _logger.v(() => '[reduceSubscribe] pFound: $participant');
+          final publishedTracks = {
+            ...participant.publishedTracks,
+          };
+          final trackState = publishedTracks[action.trackType]?.copyWith(
+            subscribed: true,
+            videoDimension: action.videoDimension,
+          );
+          if (trackState != null) {
+            publishedTracks[action.trackType] = trackState;
+          }
           return participant.copyWith(
-            publishedTracks: {
-              ...participant.publishedTracks,
-              action.trackType: CallTrackStatus.subscribed(
-                action.videoDimension,
-              ),
-            },
+            publishedTracks: publishedTracks,
           );
         } else {
           _logger.v(() => '[reduceSubscribe] pSame: $participant');
@@ -78,16 +83,22 @@ class CallControlReducer {
 
   CallStateV2 _reduceUnsubscribeVideoTrack(
     CallStateV2 state,
-    UnsubscribeTrack action,
+    RemoveSubscription action,
   ) {
     return state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         if (participant.sessionId == action.sessionId) {
+          final publishedTracks = {
+            ...participant.publishedTracks,
+          };
+          final trackState = publishedTracks[action.trackType]?.copyWith(
+            subscribed: false,
+          );
+          if (trackState != null) {
+            publishedTracks[action.trackType] = trackState;
+          }
           return participant.copyWith(
-            publishedTracks: {
-              ...participant.publishedTracks,
-              action.trackType: CallTrackStatus.published(),
-            },
+            publishedTracks: publishedTracks,
           );
         } else {
           return participant;
@@ -174,16 +185,16 @@ class CallControlReducer {
     return state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
-          final publishedTrackTypes = {
+          final publishedTracks = {
             ...participant.publishedTracks,
           };
           if (enabled) {
-            publishedTrackTypes[trackType] = CallTrackStatus.published();
+            publishedTracks[trackType] = const CallTrackState();
           } else {
-            publishedTrackTypes.removeWhere((it, _) => it == trackType);
+            publishedTracks.removeWhere((it, _) => it == trackType);
           }
           return participant.copyWith(
-            publishedTracks: publishedTrackTypes,
+            publishedTracks: publishedTracks,
           );
         } else {
           return participant;

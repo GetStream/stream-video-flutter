@@ -4,7 +4,7 @@ import '../../logger/stream_logger.dart';
 import '../action/sfu_action.dart';
 import '../call_participant_state.dart';
 import '../call_state.dart';
-import '../model/call_track_status.dart';
+import '../model/call_track_state.dart';
 import '../sfu/data/events/sfu_events.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-SFU');
@@ -60,7 +60,7 @@ class SfuReducer {
         trackIdPrefix: aParticipant.trackLookupPrefix,
         publishedTracks: {
           for (var track in aParticipant.publishedTracks)
-            track: CallTrackStatus.published()
+            track: const CallTrackState()
         },
         isLocal: isLocal,
         isOnline: !isLocal,
@@ -86,10 +86,17 @@ class SfuReducer {
       callParticipants: state.callParticipants.map((participant) {
         if (participant.userId == event.userId &&
             participant.sessionId == event.sessionId) {
+          final trackState = participant.publishedTracks[event.trackType]
+              ?.copyWith(muted: true);
+
+          final publishedTracks = {
+            ...participant.publishedTracks,
+          };
+          if (trackState != null) {
+            publishedTracks[event.trackType] = trackState;
+          }
           return participant.copyWith(
-            publishedTracks: {
-              ...participant.publishedTracks,
-            }..removeWhere((trackType, _) => trackType == event.trackType),
+            publishedTracks: publishedTracks,
           );
         } else {
           return participant;
@@ -109,10 +116,14 @@ class SfuReducer {
         if (participant.userId == event.userId &&
             participant.sessionId == event.sessionId) {
           _logger.v(() => '[reduceTrackPublished] pFound: $participant');
+
+          final trackState = participant.publishedTracks[event.trackType]
+                  ?.copyWith(muted: false) ??
+              CallTrackState();
           return participant.copyWith(
             publishedTracks: {
               ...participant.publishedTracks,
-              event.trackType: CallTrackStatus.published(),
+              event.trackType: trackState,
             },
           );
         } else {

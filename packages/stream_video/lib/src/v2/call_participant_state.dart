@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import 'model/call_track_status.dart';
+import 'model/call_track_state.dart';
 import 'sfu/data/models/sfu_connection_quality.dart';
 import 'sfu/data/models/sfu_track_type.dart';
 
@@ -14,7 +14,7 @@ class CallParticipantStateV2 with EquatableMixin {
     String? profileImageURL,
     required String sessionId,
     required String trackIdPrefix,
-    Map<SfuTrackType, CallTrackStatus> publishedTracks = const {},
+    Map<SfuTrackType, CallTrackState> publishedTracks = const {},
     bool isLocal = false,
     SfuConnectionQuality connectionQuality = SfuConnectionQuality.unspecified,
     bool isOnline = false,
@@ -62,7 +62,7 @@ class CallParticipantStateV2 with EquatableMixin {
   final String? profileImageURL;
   final String sessionId;
   final String trackIdPrefix;
-  final Map<SfuTrackType, CallTrackStatus> publishedTracks;
+  final Map<SfuTrackType, CallTrackState> publishedTracks;
   final bool isLocal;
   final SfuConnectionQuality connectionQuality;
   final bool isOnline;
@@ -79,7 +79,7 @@ class CallParticipantStateV2 with EquatableMixin {
     String? profileImageURL,
     String? sessionId,
     String? trackIdPrefix,
-    Map<SfuTrackType, CallTrackStatus>? publishedTracks,
+    Map<SfuTrackType, CallTrackState>? publishedTracks,
     bool? isLocal,
     SfuConnectionQuality? connectionQuality,
     bool? isOnline,

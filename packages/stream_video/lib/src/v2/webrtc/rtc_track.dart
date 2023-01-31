@@ -15,7 +15,6 @@ abstract class RtcTrack {
     this.videoDimension,
     this.receiver,
     this.transceiver,
-    this.muted = false,
   });
 
   final String trackIdPrefix;
@@ -24,7 +23,6 @@ abstract class RtcTrack {
   final rtc.MediaStreamTrack track;
   final rtc.RTCRtpReceiver? receiver;
   final rtc.RTCRtpTransceiver? transceiver;
-  final bool muted;
 
   /// The video dimension of the track in case it is a video track.
   final RtcVideoDimension? videoDimension;
@@ -48,7 +46,6 @@ class RtcRemoteTrack extends RtcTrack {
     super.videoDimension,
     super.receiver,
     super.transceiver,
-    super.muted,
   });
 
   @override
@@ -70,14 +67,13 @@ class RtcRemoteTrack extends RtcTrack {
       videoDimension: videoDimension ?? this.videoDimension,
       receiver: receiver ?? this.receiver,
       transceiver: transceiver ?? this.transceiver,
-      muted: muted ?? this.muted,
     );
   }
 
   @override
   String toString() {
-    return 'RtcRemoteTrack{trackIdPrefix: $trackIdPrefix, trackType: $trackType, '
-        'muted: $muted, stream.id: ${stream.id}';
+    return 'RtcRemoteTrack{trackIdPrefix: $trackIdPrefix, '
+        'trackType: $trackType, stream.id: ${stream.id}';
   }
 }
 
@@ -91,7 +87,6 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     super.videoDimension,
     super.receiver,
     super.transceiver,
-    super.muted,
   });
 
   /// The media constraints used to create this track.
@@ -121,13 +116,12 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       videoDimension: videoDimension ?? this.videoDimension,
       receiver: receiver ?? this.receiver,
       transceiver: transceiver ?? this.transceiver,
-      muted: muted ?? this.muted,
     );
   }
 
   @override
   String toString() {
-    return 'RtcLocalTrack{trackIdPrefix: $trackIdPrefix, trackType: $trackType, '
-        'muted: $muted, stream.id: ${stream.id}';
+    return 'RtcLocalTrack{trackIdPrefix: $trackIdPrefix, '
+        'trackType: $trackType, stream.id: ${stream.id}';
   }
 }
