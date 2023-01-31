@@ -524,7 +524,7 @@ This snippet is larger than the previous integration steps, but it packs a few t
 3. To build the `Attachment`, you use its constructor, which lets you define the type of the `Attachment`, its author and any `extraData` you might need to render the UI. In this case, you pass in the `call.callCid` used to show the UI in the list.
 4. Finally, when the attachment is ready, you can build a new `Message` and pass in your `customAttachment`. By calling `channel.sendMessage()`, you create a new message in the channel, with the details required to join the Call.
 
-You could've approached this logic differently and shown special dialogs to the user for the call creation, give them more options for customization, like who to invite and similar. But for this basic use case of Chat + Video, you'll just create a simple call that's public in the Channel.
+You could've approached this logic differently and shown a special dialog to the user for the call creation, give them more options for customization, like who to invite and similar. But for this basic use case of Chat + Video, you'll just create a simple call that's public in the Channel.
 
 Now, you're fully ready to start and enjoy the Chat + Video experience. Build and run the app, log in and join any call attachment, or create a new call and join like that.
 
