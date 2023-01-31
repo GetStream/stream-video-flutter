@@ -4,6 +4,7 @@ import '../../disposable.dart';
 import '../../logger/stream_logger.dart';
 import '../errors/video_error_composer.dart';
 import '../model/call_cid.dart';
+import '../utils/none.dart';
 import '../utils/result.dart';
 import 'peer_type.dart';
 
@@ -132,15 +133,15 @@ class StreamPeerConnection extends Disposable {
   ///
   /// If the peer connection is not yet ready, the candidate is added to a list
   /// of pending candidates.
-  Future<Result<void>> addIceCandidate(rtc.RTCIceCandidate candidate) async {
+  Future<Result<None>> addIceCandidate(rtc.RTCIceCandidate candidate) async {
     try {
       final remoteDescription = await pc.getRemoteDescription();
       if (remoteDescription == null) {
         _pendingCandidates.add(candidate);
         return Result.error('no remoteDescription set');
       }
-      final result = await pc.addCandidate(candidate);
-      return Result.success(result);
+      await pc.addCandidate(candidate);
+      return Result.success(None());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }

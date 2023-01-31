@@ -9,11 +9,16 @@ class CallParticipantV2 {
 
   final CallParticipantStateV2 state;
   final ParticipantRenderer? renderer;
+
+  @override
+  String toString() {
+    return 'CallParticipantV2{renderer: $renderer, state: $state}';
+  }
 }
 
 class ParticipantRenderer {
   final rtc.RTCVideoRenderer videoRenderer = rtc.RTCVideoRenderer();
-  late final SfuTrackTypeVideo trackType;
+  late SfuTrackTypeVideo trackType;
 
   void srcObject(RtcTrack srcObject, SfuTrackTypeVideo trackType) {
     this.trackType = trackType;

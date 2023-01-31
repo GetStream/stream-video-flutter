@@ -65,6 +65,6 @@ class RtcReducer {
     }
     final dimension =
         trackStatus?.dimensionOrNull ?? RtcVideoDimensionPresets.h720_169;
-    return CallTrackStatus.receivedVideo(dimension);
+    return CallTrackStatus.received(dimension);
   }
 }

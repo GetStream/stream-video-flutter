@@ -2,21 +2,18 @@ import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:webrtc_interface/src/rtc_session_description.dart';
 
-import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../disposable.dart';
 import '../../logger/stream_logger.dart';
 import '../../platform_detector/platform_detector.dart';
-import '../action/call_control_action.dart';
 import '../model/call_cid.dart';
-import '../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
 import '../sfu/data/models/sfu_track_type.dart';
+import '../utils/none.dart';
 import '../utils/result.dart';
 import 'codecs_helper.dart' as codecs;
 import 'media/constraints/camera_position.dart';
 import 'media/constraints/facing_mode.dart';
 import 'media/media_constraints.dart';
-import 'model/rtc_model_mapper_extensions.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_dimension.dart';
 import 'peer_connection.dart';
@@ -105,16 +102,17 @@ class RtcManager extends Disposable {
     return answerSdp;
   }
 
-  void onRemoteIceCandidate({
+  Future<Result<None>> onRemoteIceCandidate({
     required StreamPeerType peerType,
     required String iceCandidate,
-  }) {
+  }) async {
     final candidate = RtcIceCandidateParser.fromJsonString(iceCandidate);
     if (peerType == StreamPeerType.publisher) {
-      _publisher.addIceCandidate(candidate);
+      return _publisher.addIceCandidate(candidate);
     } else if (peerType == StreamPeerType.subscriber) {
-      _subscriber.addIceCandidate(candidate);
+      return _subscriber.addIceCandidate(candidate);
     }
+    return Result.error('unexpected peerType: $peerType');
   }
 
   void _onSubscriberTrack(StreamPeerConnection pc, rtc.RTCTrackEvent event) {
@@ -158,33 +156,33 @@ class RtcManager extends Disposable {
     onSubscriberTrackReceived?.call(pc, remoteTrack);
   }
 
-  Future<void> unpublishTrack({required String trackSid}) async {
-    final publishedTrack = publishedTracks.remove(trackSid);
+  Future<void> unpublishTrack({required String trackId}) async {
+    final publishedTrack = publishedTracks.remove(trackId);
     if (publishedTrack == null) {
-      _logger.w(() => 'unpublishTrack: track not found');
+      _logger.w(() => '[unpublishTrack] rejected (track not found): $trackId');
       return;
     }
 
-    publishedTrack.track?.enabled = false;
+    publishedTrack.track.enabled = false;
     if (publishedTrack is RtcLocalTrack) {
-      await publishedTrack.track?.stop();
-      await publishedTrack.stream?.dispose();
+      await publishedTrack.track.stop();
+      await publishedTrack.stream.dispose();
     }
 
     final sender = publishedTrack.transceiver?.sender;
     if (sender != null) {
       try {
         await _publisher.pc.removeTrack(sender);
-      } catch (_) {
-        _logger.w(() => 'unpublishTrack: removeTrack failed');
+      } catch (e) {
+        _logger.w(() => '[unpublishTrack] removeTrack failed: $e');
       }
     }
   }
 
   @override
   Future<void> dispose() async {
-    for (final trackSid in publishedTracks.keys) {
-      await unpublishTrack(trackSid: trackSid);
+    for (final trackSid in [...publishedTracks.keys]) {
+      await unpublishTrack(trackId: trackSid);
     }
 
     publishedTracks.clear();
@@ -205,9 +203,11 @@ class RtcManager extends Disposable {
   }
 
   RtcTrack? getTrack(String trackId) {
-    _logger.d(() => '[getTrack] trackSid: $trackId');
+    _logger.d(() => '[getTrack] trackId: $trackId');
     _logger.v(() => '[getTrack] publishedTracks: ${publishedTracks.keys}');
-    return publishedTracks[trackId];
+    final result = publishedTracks[trackId];
+    _logger.v(() => '[getTrack] result: $result');
+    return result;
   }
 
   List<RtcTrack> getTracks(String trackIdPrefix) {
@@ -380,8 +380,8 @@ extension PublisherRtcManager on RtcManager {
     return onPublisherTrackMuted?.call(updatedTrack, true);
   }
 
-  Future<void> unmuteTrack({required String trackSid}) async {
-    final track = publishedTracks[trackSid];
+  Future<void> unmuteTrack({required String trackId}) async {
+    final track = publishedTracks[trackId];
     if (track == null) {
       _logger.w(() => 'unmuteTrack: track not found');
       return;
@@ -396,7 +396,7 @@ extension PublisherRtcManager on RtcManager {
     updatedTrack.track.enabled = true;
     await restartTrack(track: updatedTrack);
 
-    publishedTracks[trackSid] = updatedTrack;
+    publishedTracks[trackId] = updatedTrack;
 
     return onPublisherTrackMuted?.call(updatedTrack, false);
   }
@@ -602,20 +602,20 @@ extension RtcManagerTrackHelper on RtcManager {
     if (muted) {
       // ScreenShare cannot be muted, Un-publish instead
       if (track.trackType == SfuTrackType.screenShare) {
-        await unpublishTrack(trackSid: track.trackId);
+        await unpublishTrack(trackId: track.trackId);
 
         // Also un-publish the audio track if it was published
         final screenShareAudioTrack = getPublisherTrackByType(
           SfuTrackType.screenShareAudio,
         );
         if (screenShareAudioTrack != null) {
-          await unpublishTrack(trackSid: screenShareAudioTrack.trackId);
+          await unpublishTrack(trackId: screenShareAudioTrack.trackId);
         }
       } else {
         await muteTrack(trackSid: track.trackId);
       }
     } else {
-      await unmuteTrack(trackSid: track.trackId);
+      await unmuteTrack(trackId: track.trackId);
     }
 
     return track;

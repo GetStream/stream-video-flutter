@@ -1,28 +1,36 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-
-import '../../../stream_video.dart';
+import '../webrtc/model/rtc_video_dimension.dart';
 
 @immutable
-abstract class CallTrackStatus {
+abstract class CallTrackStatus implements Comparable<CallTrackStatus> {
   const CallTrackStatus();
   factory CallTrackStatus.published() => _TrackStatusPublished();
-  factory CallTrackStatus.subscribed() => _TrackStatusSubscribedImpl();
-  factory CallTrackStatus.subscribedVideo(RtcVideoDimension dimension) =>
-      _TrackStatusSubscribedVideo(
-        dimension,
-      );
-  factory CallTrackStatus.received() => _TrackStatusReceivedImpl();
-  factory CallTrackStatus.receivedVideo(RtcVideoDimension dimension) =>
-      _TrackStatusReceivedVideo(
-        dimension,
-      );
+  factory CallTrackStatus.subscribed([RtcVideoDimension? dimension]) =>
+      _TrackStatusSubscribed(dimension);
+  factory CallTrackStatus.received([RtcVideoDimension? dimension]) =>
+      _TrackStatusReceived(dimension);
+
+  int get order;
+
+  bool get isPublished => this is _TrackStatusPublished;
+  bool get isSubscribed => this is _TrackStatusSubscribed;
+  bool get isReceived => this is _TrackStatusReceived;
+
+  bool atLeast(CallTrackStatus status) {
+    return false;
+  }
+
+  @override
+  int compareTo(CallTrackStatus other) {
+    return order.compareTo(other.order);
+  }
 }
 
-abstract class _HasDimension extends CallTrackStatus {
+abstract class _HasDimension {
   const _HasDimension(this.dimension);
 
-  final RtcVideoDimension dimension;
+  final RtcVideoDimension? dimension;
 }
 
 class _TrackStatusPublished extends CallTrackStatus {
@@ -36,74 +44,57 @@ class _TrackStatusPublished extends CallTrackStatus {
   String toString() {
     return 'published';
   }
+
+  @override
+  int get order => 1;
 }
 
-abstract class _TrackStatusSubscribed extends CallTrackStatus {
-  const _TrackStatusSubscribed();
-}
+class _TrackStatusSubscribed extends CallTrackStatus
+    with EquatableMixin
+    implements _HasDimension {
+  const _TrackStatusSubscribed(this.dimension);
 
-class _TrackStatusSubscribedImpl extends _TrackStatusSubscribed {
-  factory _TrackStatusSubscribedImpl() {
-    return _instance;
-  }
-  const _TrackStatusSubscribedImpl._internal();
-  static const _TrackStatusSubscribedImpl _instance =
-      _TrackStatusSubscribedImpl._internal();
+  @override
+  final RtcVideoDimension? dimension;
+
   @override
   String toString() {
+    final dimension = this.dimension;
+    if (dimension != null) {
+      return 'subscribed(${dimension.width}-${dimension.height})';
+    }
     return 'subscribed';
   }
-}
-
-class _TrackStatusSubscribedVideo extends _TrackStatusSubscribed
-    with EquatableMixin
-    implements _HasDimension {
-  const _TrackStatusSubscribedVideo(this.dimension);
-
-  @override
-  final RtcVideoDimension dimension;
-
-  @override
-  String toString() {
-    return 'subscribed(${dimension.width}-${dimension.height})';
-  }
 
   @override
   List<Object?> get props => [dimension];
+
+  @override
+  int get order => 2;
 }
 
-abstract class _TrackStatusReceived extends CallTrackStatus {
-  const _TrackStatusReceived();
-}
+class _TrackStatusReceived extends CallTrackStatus
+    with EquatableMixin
+    implements _HasDimension {
+  const _TrackStatusReceived(this.dimension);
 
-class _TrackStatusReceivedImpl extends _TrackStatusReceived {
-  factory _TrackStatusReceivedImpl() {
-    return _instance;
-  }
-  const _TrackStatusReceivedImpl._internal();
-  static const _TrackStatusReceivedImpl _instance =
-      _TrackStatusReceivedImpl._internal();
+  @override
+  final RtcVideoDimension? dimension;
+
   @override
   String toString() {
+    final dimension = this.dimension;
+    if (dimension != null) {
+      return 'received(${dimension.width}-${dimension.height})';
+    }
     return 'received';
   }
-}
-
-class _TrackStatusReceivedVideo extends _TrackStatusReceived
-    with EquatableMixin
-    implements _HasDimension {
-  const _TrackStatusReceivedVideo(this.dimension);
-
-  @override
-  final RtcVideoDimension dimension;
-
-  @override
-  String toString() {
-    return 'received(${dimension.width}-${dimension.height})';
-  }
 
   @override
   List<Object?> get props => [dimension];
+
+  @override
+  int get order => 3;
 }
 
 extension DimensionExtension on CallTrackStatus {

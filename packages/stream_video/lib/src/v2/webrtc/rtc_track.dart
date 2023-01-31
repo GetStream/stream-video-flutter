@@ -77,7 +77,7 @@ class RtcRemoteTrack extends RtcTrack {
   @override
   String toString() {
     return 'RtcRemoteTrack{trackIdPrefix: $trackIdPrefix, trackType: $trackType, '
-        'muted: $muted, stream.id: ${stream?.id}';
+        'muted: $muted, stream.id: ${stream.id}';
   }
 }
 

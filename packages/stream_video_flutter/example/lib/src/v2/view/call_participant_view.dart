@@ -26,6 +26,19 @@ class CallParticipantView extends StatelessWidget {
       );
     }
     final state = participant.state;
+    final trackStatus = state.published[SfuTrackType.video];
+    if (trackStatus?.isPublished == true) {
+      print('(D/SV:ParticipantView) [build] subscribeTo: $trackStatus');
+      call.apply(
+        SubscribeTrack(
+          userId: state.userId,
+          sessionId: state.sessionId,
+          trackIdPrefix: state.trackIdPrefix,
+          trackType: SfuTrackType.video,
+          videoDimension: RtcVideoDimensionPresets.h720_43,
+        ),
+      );
+    }
     final renderer = participant.renderer;
     final Widget videoView;
     if (renderer != null) {
@@ -34,7 +47,7 @@ class CallParticipantView extends StatelessWidget {
         onChange: (Size size) {
           print('(V/SV:ParticipantView) [onChange] size: $size');
           call.apply(
-            SubscribeVideoTrack(
+            SubscribeTrack(
               userId: state.userId,
               sessionId: state.sessionId,
               trackIdPrefix: state.trackIdPrefix,
@@ -93,28 +106,28 @@ class MeasureSize extends SingleChildRenderObjectWidget {
     return MeasureSizeRenderObject(onChange);
   }
 
+  /* Do not need
   @override
   void updateRenderObject(
       BuildContext context, covariant MeasureSizeRenderObject renderObject) {
     renderObject.onChange = onChange;
-  }
+  }*/
 }
 
 class MeasureSizeRenderObject extends RenderProxyBox {
   MeasureSizeRenderObject(this.onChange);
+  final OnWidgetSizeChange onChange;
   Size? oldSize;
-  OnWidgetSizeChange onChange;
 
   @override
   void performLayout() {
     super.performLayout();
 
-    var newSize = child!.size;
-    if (oldSize == newSize) return;
-
+    final newSize = size;
+    if (oldSize == newSize) {
+      return;
+    }
     oldSize = newSize;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      onChange(newSize);
-    });
+    onChange(newSize);
   }
 }
