@@ -225,18 +225,18 @@ extension PublisherRtcManager on RtcManager {
   }
 
   RtcLocalTrack? getPublisherTrackByType(SfuTrackType trackType) {
-    final audioTrack = getPublisherTracks().firstWhereOrNull((track) {
+    final track = getPublisherTracks().firstWhereOrNull((track) {
       return track.trackType == trackType;
     });
 
-    if (audioTrack == null) {
+    if (track == null) {
       _logger.e(
         () => 'getPublisherTrackByType: track with $trackType not found',
       );
       return null;
     }
 
-    return audioTrack;
+    return track;
   }
 
   List<RtcTrackInfo> getPublisherTrackInfos() {
@@ -394,9 +394,8 @@ extension PublisherRtcManager on RtcManager {
 
     final updatedTrack = track.copyWith(muted: false);
     updatedTrack.track.enabled = true;
-    await restartTrack(track: updatedTrack);
 
-    publishedTracks[trackId] = updatedTrack;
+    await restartTrack(track: updatedTrack);
 
     return onPublisherTrackMuted?.call(updatedTrack, false);
   }

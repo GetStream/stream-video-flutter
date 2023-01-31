@@ -5,11 +5,27 @@ import '../webrtc/model/rtc_video_dimension.dart';
 @immutable
 abstract class CallTrackStatus implements Comparable<CallTrackStatus> {
   const CallTrackStatus();
-  factory CallTrackStatus.published() => _TrackStatusPublished();
-  factory CallTrackStatus.subscribed([RtcVideoDimension? dimension]) =>
-      _TrackStatusSubscribed(dimension);
-  factory CallTrackStatus.received([RtcVideoDimension? dimension]) =>
-      _TrackStatusReceived(dimension);
+  const factory CallTrackStatus.published() = _TrackStatusPublished;
+  const factory CallTrackStatus.subscribed([RtcVideoDimension? dimension]) =
+      _TrackStatusSubscribed;
+  const factory CallTrackStatus.received([RtcVideoDimension? dimension]) =
+      _TrackStatusReceived;
+
+  R when<R extends Object?>({
+    required R Function() published,
+    required R Function(RtcVideoDimension? dimension) subscribed,
+    required R Function(RtcVideoDimension? dimension) received,
+  }) {
+    if (this is _TrackStatusPublished) {
+      return published();
+    } else if (this is _TrackStatusSubscribed) {
+      return subscribed((this as _TrackStatusSubscribed).dimension);
+    } else if (this is _TrackStatusReceived) {
+      return received((this as _TrackStatusReceived).dimension);
+    } else {
+      throw StateError('Unknown CallTrackStatus');
+    }
+  }
 
   int get order;
 
@@ -34,12 +50,7 @@ abstract class _HasDimension {
 }
 
 class _TrackStatusPublished extends CallTrackStatus {
-  factory _TrackStatusPublished() {
-    return _instance;
-  }
-  const _TrackStatusPublished._internal();
-  static const _TrackStatusPublished _instance =
-      _TrackStatusPublished._internal();
+  const _TrackStatusPublished();
   @override
   String toString() {
     return 'published';
@@ -52,7 +63,7 @@ class _TrackStatusPublished extends CallTrackStatus {
 class _TrackStatusSubscribed extends CallTrackStatus
     with EquatableMixin
     implements _HasDimension {
-  const _TrackStatusSubscribed(this.dimension);
+  const _TrackStatusSubscribed([this.dimension]);
 
   @override
   final RtcVideoDimension? dimension;
@@ -76,7 +87,7 @@ class _TrackStatusSubscribed extends CallTrackStatus
 class _TrackStatusReceived extends CallTrackStatus
     with EquatableMixin
     implements _HasDimension {
-  const _TrackStatusReceived(this.dimension);
+  const _TrackStatusReceived([this.dimension]);
 
   @override
   final RtcVideoDimension? dimension;

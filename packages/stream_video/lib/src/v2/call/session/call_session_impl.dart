@@ -183,11 +183,12 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       await _onSubscriberOffer(event);
     } else if (event is SfuIceTrickleEvent) {
       await _onRemoteIceCandidate(event);
-    } else if (event is SfuTrackUnpublishedEvent) {
-      await _onTrackUnpublishedEvent(event);
-    } else if (event is SfuTrackPublishedEvent) {
-      await _onTrackPublishedEvent(event);
     }
+    // else if (event is SfuTrackUnpublishedEvent) {
+    //   await _onTrackUnpublishedEvent(event);
+    // } else if (event is SfuTrackPublishedEvent) {
+    //   await _onTrackPublishedEvent(event);
+    // }
     await stateManager.onSfuEvent(event);
   }
 
@@ -201,8 +202,14 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       _logger.w(() => '[onTrackPublishedEvent] rejected (no participant)');
       return;
     }
+
+    if(participant.isLocal){
+      return;
+    }
+
     final trackId = '${participant.trackIdPrefix}:${event.trackType}';
     _logger.v(() => '[onTrackPublishedEvent] trackId: $trackId');
+
     if (event.trackType.isAudio) {
       await _updateSubscriptions(
         [
@@ -529,7 +536,7 @@ extension on CallParticipantStateV2 {
     Map<String, SfuSubscriptionDetails> output, [
     Set<SfuTrackType>? exclude,
   ]) {
-    published.forEach((trackType, trackStatus) {
+    publishedTracks.forEach((trackType, trackStatus) {
       final atLeastSubscribed =
           trackStatus.isSubscribed || trackStatus.isReceived;
       final shouldExclude = exclude != null && exclude.contains(trackType);

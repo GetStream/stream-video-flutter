@@ -3,8 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import 'call_participant.dart';
-
 class CallParticipantView extends StatelessWidget {
   const CallParticipantView({
     super.key,
@@ -13,121 +11,145 @@ class CallParticipantView extends StatelessWidget {
   });
 
   final CallV2 call;
-  final CallParticipantV2? participant;
+  final CallParticipantStateV2? participant;
 
   @override
   Widget build(BuildContext context) {
     final participant = this.participant;
     print('(D/SV:ParticipantView) [build] participant: $participant');
+
     if (participant == null) {
       return Container(
         alignment: Alignment.center,
         child: const Text('Mock Participant'),
       );
     }
-    final state = participant.state;
-    final trackStatus = state.published[SfuTrackType.video];
-    if (trackStatus?.isPublished == true) {
-      print('(D/SV:ParticipantView) [build] subscribeTo: $trackStatus');
-      call.apply(
-        SubscribeTrack(
-          userId: state.userId,
-          sessionId: state.sessionId,
-          trackIdPrefix: state.trackIdPrefix,
-          trackType: SfuTrackType.video,
-          videoDimension: RtcVideoDimensionPresets.h720_43,
+
+    return VideoTrackRenderer(
+      call: call,
+      participant: participant,
+      placeholderBuilder: (context) => StreamUserAvatar(
+        user: UserInfo(
+          id: participant.userId,
+          role: participant.role,
+          name: participant.userId,
+          imageUrl: participant.profileImageURL,
         ),
-      );
-    }
-    final renderer = participant.renderer;
-    final Widget videoView;
-    if (renderer != null) {
-      print('(D/SV:ParticipantView) [build] renderer: $renderer');
-      videoView = MeasureSize(
-        onChange: (Size size) {
-          print('(V/SV:ParticipantView) [onChange] size: $size');
-          call.apply(
-            SubscribeTrack(
-              userId: state.userId,
-              sessionId: state.sessionId,
-              trackIdPrefix: state.trackIdPrefix,
-              trackType: renderer.trackType,
-              videoDimension: RtcVideoDimension(
-                width: size.width.toInt(),
-                height: size.height.toInt(),
-              ),
-            ),
-          );
-        },
-        child: rtc.RTCVideoView(
-          renderer.videoRenderer,
-          mirror: participant.state.isLocal,
-        ),
-      );
-    } else {
-      videoView = Container();
-    }
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        videoView,
-        StreamUserAvatar(
-          avatarTheme: const StreamAvatarTheme(
-            constraints: BoxConstraints.tightFor(
-              height: 100,
-              width: 100,
-            ),
-            borderRadius: BorderRadius.all(Radius.circular(50)),
-          ),
-          user: UserInfo(
-            id: participant.state.userId,
-            role: participant.state.role,
-            imageUrl: participant.state.profileImageURL,
-            name: participant.state.name,
-          ),
-        ),
-      ],
+      ),
     );
-  }
-}
+    // final participant = this.participant;
+    // print('(D/SV:ParticipantView) [build] participant: $participant');
+    //
+    // if (participant == null) {
+    //   return Container(
+    //     alignment: Alignment.center,
+    //     child: const Text('Mock Participant'),
+    //   );
+    // }
+    //
+    // final videoTrack = call.getTrack(
+    //   participant.trackIdPrefix,
+    //   SfuTrackType.video,
+    // );
+    //
+    // final view = SizeChangedLayoutNotifier(
+    //   onSizeChanged: (size){},
+    //   child: ,
+    // );
+    //
+    // final videoTrackStatus = participant.publishedTracks[SfuTrackType.video];
+    // Widget videoView;
+    // if (videoTrackStatus == null) {
+    //   videoView = StreamUserAvatar(
+    //     user: UserInfo(
+    //       id: participant.userId,
+    //       role: participant.role,
+    //       name: participant.userId,
+    //       imageUrl: participant.profileImageURL,
+    //     ),
+    //   );
+    // } else {
+    //   if (participant.isLocal) {
+    //     if (videoTrackStatus.isPublished) {
+    //       final publishedVideoTrack = call.getTrack(
+    //         participant.trackIdPrefix,
+    //         SfuTrackType.video,
+    //       );
+    //     }
+    //   } else {
+    //     if (videoTrackStatus.isPublished) {
+    //
+    //     } else if ()
+    //   }
+    // }
+    //
+    // return Stack(
+    //   alignment: Alignment.center,
+    //   children: [
+    //     videoView,
+    //     StreamUserAvatar(
+    //       user: UserInfo(
+    //         id: participant.userId,
+    //         role: participant.role,
+    //         name: participant.userId,
+    //         imageUrl: participant.profileImageURL,
+    //       ),
+    //     ),
+    //   ],
+    // );
 
-typedef OnWidgetSizeChange = void Function(Size size);
-
-class MeasureSize extends SingleChildRenderObjectWidget {
-  const MeasureSize({
-    super.key,
-    required this.onChange,
-    required Widget super.child,
-  });
-  final OnWidgetSizeChange onChange;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return MeasureSizeRenderObject(onChange);
-  }
-
-  /* Do not need
-  @override
-  void updateRenderObject(
-      BuildContext context, covariant MeasureSizeRenderObject renderObject) {
-    renderObject.onChange = onChange;
-  }*/
-}
-
-class MeasureSizeRenderObject extends RenderProxyBox {
-  MeasureSizeRenderObject(this.onChange);
-  final OnWidgetSizeChange onChange;
-  Size? oldSize;
-
-  @override
-  void performLayout() {
-    super.performLayout();
-
-    final newSize = size;
-    if (oldSize == newSize) {
-      return;
-    }
-    oldSize = newSize;
-    onChange(newSize);
+    // Widget videoView;
+    // if (publishedVideoTrack != null) {
+    //   videoView = rtc.RTCVideoView(
+    //     publishedVideoTrack,
+    //     mirror: participant.isLocal,
+    //   );
+    // } else {
+    //   videoView = Container();
+    // }
+    //
+    // // final state = participant.state;
+    // // final trackStatus = state.published[SfuTrackType.video];
+    // // if (trackStatus?.isPublished == true) {
+    // //   print('(D/SV:ParticipantView) [build] subscribeTo: $trackStatus');
+    // //   call.apply(
+    // //     SubscribeTrack(
+    // //       userId: state.userId,
+    // //       sessionId: state.sessionId,
+    // //       trackIdPrefix: state.trackIdPrefix,
+    // //       trackType: SfuTrackType.video,
+    // //       videoDimension: RtcVideoDimensionPresets.h720_43,
+    // //     ),
+    // //   );
+    // // }
+    //
+    // final renderer = participant.renderer;
+    // final Widget videoView;
+    // if (renderer != null) {
+    //   print('(D/SV:ParticipantView) [build] renderer: $renderer');
+    //   videoView = SizeChangedLayoutNotifier(
+    //     onSizeChanged: (Size size) {
+    //       print('(V/SV:ParticipantView) [onChange] size: $size');
+    //       call.apply(
+    //         SubscribeTrack(
+    //           userId: state.userId,
+    //           sessionId: state.sessionId,
+    //           trackIdPrefix: state.trackIdPrefix,
+    //           trackType: renderer.trackType,
+    //           videoDimension: RtcVideoDimension(
+    //             width: size.width.toInt(),
+    //             height: size.height.toInt(),
+    //           ),
+    //         ),
+    //       );
+    //     },
+    //     child: rtc.RTCVideoView(
+    //       renderer.videoRenderer,
+    //       mirror: participant.state.isLocal,
+    //     ),
+    //   );
+    // } else {
+    //   videoView = Container();
+    // }
   }
 }
