@@ -110,10 +110,9 @@ class PushNotificationManager {
 
   Future<Call?> consumeIncomingCall() async {
     // We need to wait for a second to be sure sharedPreferences has been updated
-    await Future.delayed(const Duration(milliseconds: 1000));
     await _sharedPreferences.reload();
     final infomingCallCid = _sharedPreferences.getString('incomingCallCid');
-    // await _sharedPreferences.remove('incomingCallCid');
+     await _sharedPreferences.remove('incomingCallCid');
     print('JcLog: incomingCallCid from sharedPreferences: $infomingCallCid');
     if (infomingCallCid != null) {
       // return _client.acceptCall(
