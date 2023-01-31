@@ -8,6 +8,9 @@ class SfuTrackType {
   static SfuTrackTypeVideo get video => _Video();
   static SfuTrackTypeVideo get screenShare => _ScreenShare();
   static SfuTrackTypeAudio get screenShareAudio => _ScreenShareAudio();
+
+  bool get isAudio => this is SfuTrackTypeAudio;
+  bool get isVideo => this is SfuTrackTypeVideo;
 }
 
 abstract class SfuTrackTypeAudio extends SfuTrackType {

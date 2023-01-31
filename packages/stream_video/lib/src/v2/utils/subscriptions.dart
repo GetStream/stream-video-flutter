@@ -4,6 +4,7 @@ class Subscriptions {
   final _subscriptions = <int, StreamSubscription<dynamic>>{};
 
   void add(int id, StreamSubscription<dynamic> subscription) {
+    _subscriptions[id]?.cancel();
     _subscriptions[id] = subscription;
   }
 

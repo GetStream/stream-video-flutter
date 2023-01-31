@@ -25,9 +25,9 @@ class CallControlReducer {
       return _reduceScreenShareEnabled(state, action);
     } else if (action is UpdateSubscriptions) {
       return _reduceUpdateSubscriptions(state, action);
-    } else if (action is SubscribeVideoTrack) {
+    } else if (action is SubscribeTrack) {
       return _reduceSubscribeVideoTrack(state, action);
-    } else if (action is UnsubscribeVideoTrack) {
+    } else if (action is UnsubscribeTrack) {
       return _reduceUnsubscribeVideoTrack(state, action);
     }
     return state;
@@ -41,9 +41,9 @@ class CallControlReducer {
     _logger.d(() => '[reduceSubscriptions] #$sessionId; action: $action');
     var newState = state;
     for (final child in action.actions) {
-      if (child is SubscribeVideoTrack) {
+      if (child is SubscribeTrack) {
         newState = _reduceSubscribeVideoTrack(newState, child);
-      } else if (child is UnsubscribeVideoTrack) {
+      } else if (child is UnsubscribeTrack) {
         newState = _reduceUnsubscribeVideoTrack(newState, child);
       }
     }
@@ -52,7 +52,7 @@ class CallControlReducer {
 
   CallStateV2 _reduceSubscribeVideoTrack(
     CallStateV2 state,
-    SubscribeVideoTrack action,
+    SubscribeTrack action,
   ) {
     _logger.d(() => '[reduceSubscribe] #${state.sessionId}; action: $action');
     return state.copyWith(
@@ -63,7 +63,7 @@ class CallControlReducer {
           return participant.copyWith(
             published: {
               ...participant.published,
-              action.trackType: CallTrackStatus.subscribedVideo(
+              action.trackType: CallTrackStatus.subscribed(
                 action.videoDimension,
               ),
             },
@@ -78,7 +78,7 @@ class CallControlReducer {
 
   CallStateV2 _reduceUnsubscribeVideoTrack(
     CallStateV2 state,
-    UnsubscribeVideoTrack action,
+    UnsubscribeTrack action,
   ) {
     return state.copyWith(
       callParticipants: state.callParticipants.map((participant) {

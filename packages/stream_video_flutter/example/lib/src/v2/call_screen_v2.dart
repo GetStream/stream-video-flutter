@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:stream_video/stream_video.dart';
 
 import 'view/call_participant.dart';
@@ -64,7 +63,7 @@ class _CallScreenV2State extends State<CallScreenV2> {
     final participants = _state.callParticipants.take(4).map((pState) {
       return CallParticipantV2(
         state: pState,
-        renderer: _renderers[pState.userId],
+        renderer: _renderers[pState.sessionId],
       );
     }).toList();
 

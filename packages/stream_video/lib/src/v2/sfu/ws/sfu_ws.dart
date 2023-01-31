@@ -78,6 +78,7 @@ class SfuWebSocket extends StreamWebSocket
   @override
   void onOpen() {
     _logger.i(() => '[onOpen] url: $url');
+    connectionState = ConnectionState.connected;
     _reconnectAttempt = 0;
   }
 
@@ -110,11 +111,13 @@ class SfuWebSocket extends StreamWebSocket
   }
 
   void _handleEvent(SfuEventV2 event) {
-    if (event is SfuHealthCheckResponseEvent) {
+    if (event is SfuJoinResponseEvent) {
       if (!isKeepAliveStarted) {
-        connectionState = ConnectionState.connected;
+        _logger.d(() => '[handleEvent] start PingPong');
         startPingPong();
       }
+    } else if (event is SfuHealthCheckResponseEvent) {
+      _logger.d(() => '[handleEvent] ack Pong');
       ackPong(event);
     }
   }
@@ -160,9 +163,11 @@ class SfuWebSocket extends StreamWebSocket
   @override
   void sendPing() {
     _logger.d(() => '[sendPing] no args');
-    send(sfu_events.SfuRequest(
-      healthCheckRequest: sfu_events.HealthCheckRequest(),
-    ));
+    send(
+      sfu_events.SfuRequest(
+        healthCheckRequest: sfu_events.HealthCheckRequest(),
+      ),
+    );
   }
 
   int _reconnectAttempt = 0;
