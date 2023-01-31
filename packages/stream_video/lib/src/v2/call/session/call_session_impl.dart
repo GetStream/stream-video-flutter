@@ -158,9 +158,9 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return _onSetCameraPosition(action.cameraPosition);
     } else if (action is UpdateSubscriptions) {
       return _updateSubscriptions(action.actions);
-    } else if (action is SubscribeTrack) {
+    } else if (action is UpdateSubscription) {
       return _updateSubscriptions([action]);
-    } else if (action is UnsubscribeTrack) {
+    } else if (action is RemoveSubscription) {
       return _updateSubscriptions([action]);
     } /* else if (action is SetSubscription) {
       return _setSubscriptions([action]);
@@ -184,59 +184,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     } else if (event is SfuIceTrickleEvent) {
       await _onRemoteIceCandidate(event);
     }
-    // else if (event is SfuTrackUnpublishedEvent) {
-    //   await _onTrackUnpublishedEvent(event);
-    // } else if (event is SfuTrackPublishedEvent) {
-    //   await _onTrackPublishedEvent(event);
-    // }
     await stateManager.onSfuEvent(event);
-  }
-
-  Future<void> _onTrackPublishedEvent(SfuTrackPublishedEvent event) async {
-    _logger.d(() => '[onTrackPublishedEvent] event: $event');
-    final state = stateManager.state.value;
-    final participant = state.callParticipants.firstWhereOrNull(
-      (it) => it.userId == event.userId && it.sessionId == event.sessionId,
-    );
-    if (participant == null) {
-      _logger.w(() => '[onTrackPublishedEvent] rejected (no participant)');
-      return;
-    }
-
-    if(participant.isLocal){
-      return;
-    }
-
-    final trackId = '${participant.trackIdPrefix}:${event.trackType}';
-    _logger.v(() => '[onTrackPublishedEvent] trackId: $trackId');
-
-    if (event.trackType.isAudio) {
-      await _updateSubscriptions(
-        [
-          SubscribeTrack(
-            userId: event.userId,
-            sessionId: event.sessionId,
-            trackIdPrefix: participant.trackIdPrefix,
-            trackType: event.trackType,
-          )
-        ],
-      );
-    }
-  }
-
-  Future<void> _onTrackUnpublishedEvent(SfuTrackUnpublishedEvent event) async {
-    _logger.d(() => '[onTrackUnpublishedEvent] event: $event');
-    final state = stateManager.state.value;
-    final participant = state.callParticipants.firstWhereOrNull(
-      (it) => it.userId == event.userId && it.sessionId == event.sessionId,
-    );
-    if (participant == null) {
-      _logger.w(() => '[onTrackUnpublishedEvent] rejected (no participant)');
-      return;
-    }
-    final trackId = '${participant.trackIdPrefix}:${event.trackType}';
-    _logger.v(() => '[onTrackUnpublishedEvent] trackId: $trackId');
-    await rtcManager?.unpublishTrack(trackId: trackId);
   }
 
   Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {
@@ -377,7 +325,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   }*/
 
   Future<Result<None>> _updateSubscriptions(
-    List<UpdateSubscriptionAction> actions,
+    List<SubscriptionAction> actions,
   ) async {
     _logger.d(() => '[updateSubscriptions] actions: $actions');
     final participants = stateManager.state.value.callParticipants;
@@ -385,9 +333,9 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     participants.getSubscriptions(subscriptions);
     _logger.v(() => '[updateSubscriptions] source: $subscriptions');
     for (final action in actions) {
-      if (action is SubscribeTrack) {
+      if (action is UpdateSubscription) {
         subscriptions[action.trackId] = action.toSubscription();
-      } else if (action is UnsubscribeTrack) {
+      } else if (action is RemoveSubscription) {
         subscriptions.remove(action.trackId);
       }
     }
@@ -493,7 +441,7 @@ extension on SfuClientV2 {
   }
 }
 
-extension on SubscribeTrack {
+extension on UpdateSubscription {
   SfuSubscriptionDetails toSubscription() {
     return SfuSubscriptionDetails(
       userId: userId,
@@ -536,9 +484,8 @@ extension on CallParticipantStateV2 {
     Map<String, SfuSubscriptionDetails> output, [
     Set<SfuTrackType>? exclude,
   ]) {
-    publishedTracks.forEach((trackType, trackStatus) {
-      final atLeastSubscribed =
-          trackStatus.isSubscribed || trackStatus.isReceived;
+    publishedTracks.forEach((trackType, trackState) {
+      final atLeastSubscribed = trackState.subscribed || trackState.received;
       final shouldExclude = exclude != null && exclude.contains(trackType);
       if (atLeastSubscribed && !shouldExclude) {
         final detail = SfuSubscriptionDetails(
@@ -546,7 +493,7 @@ extension on CallParticipantStateV2 {
           sessionId: sessionId,
           trackIdPrefix: trackIdPrefix,
           trackType: trackType,
-          dimension: trackStatus.dimensionOrNull,
+          dimension: trackState.videoDimension,
         );
         output[detail.trackId] = detail;
       }

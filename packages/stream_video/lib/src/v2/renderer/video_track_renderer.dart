@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import 'package:stream_video/src/v2/webrtc/rtc_track.dart';
+
 import '../../../stream_video.dart';
-import '../action/call_control_action.dart';
-import '../call/call.dart';
-import '../call_participant_state.dart';
-import '../sfu/data/models/sfu_track_type.dart';
 
 Widget _defaultPlaceholderBuilder(BuildContext context) => const Placeholder();
 
@@ -24,10 +20,13 @@ class VideoTrackRenderer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final videoTrackStatus = participant.publishedTracks[SfuTrackType.video];
+    final userId = participant.userId;
+    final trackState = participant.publishedTracks[SfuTrackType.video];
+    print('(D/SV:ParticipantView) [buildRtcVideoView] userId: $userId, '
+        'trackState: $trackState');
 
     // Haven't published video track yet.
-    if (videoTrackStatus == null) {
+    if (trackState == null) {
       return placeholderBuilder.call(context);
     }
 
@@ -37,7 +36,9 @@ class VideoTrackRenderer extends StatelessWidget {
         SfuTrackType.video,
       )!;
 
-      if (!track.muted) {
+      print('(D/SV:ParticipantView) [buildRtcVideoView] userId: $userId, '
+          'trackState.muted: ${trackState.muted}');
+      if (!trackState.muted) {
         return VideoRenderer(
           track: track,
           placeholderBuilder: placeholderBuilder,
@@ -49,25 +50,21 @@ class VideoTrackRenderer extends StatelessWidget {
 
     final isLocalParticipant = participant.isLocal;
     if (isLocalParticipant) {
-      if (videoTrackStatus.isPublished) {
-        return buildRtcVideoView();
-      }
-
-      return placeholderBuilder.call(context);
+      return buildRtcVideoView();
     }
 
-    final child = videoTrackStatus.when(
-      published: () => placeholderBuilder.call(context),
-      subscribed: (_) => placeholderBuilder.call(context),
-      received: (_) => buildRtcVideoView(),
-    );
-
+    final Widget child;
+    if (trackState.received && !trackState.muted) {
+      child = buildRtcVideoView();
+    } else {
+      child = placeholderBuilder.call(context);
+    }
     return _SizeChangedLayoutNotifier(
       onSizeChanged: (size) {
         print('(D/SV:VideoTrackRenderer) [build] size: $size');
         WidgetsBinding.instance.addPostFrameCallback((_) {
           call.apply(
-            SubscribeTrack(
+            UpdateSubscription(
               userId: participant.userId,
               sessionId: participant.sessionId,
               trackIdPrefix: participant.trackIdPrefix,
@@ -126,9 +123,9 @@ class _VideoRendererState extends State<VideoRenderer> {
 
   @override
   Future<void> dispose() async {
+    super.dispose();
     _videoRenderer.srcObject = null;
     await _videoRenderer.dispose();
-    super.dispose();
   }
 
   @override
@@ -136,7 +133,7 @@ class _VideoRendererState extends State<VideoRenderer> {
     return rtc.RTCVideoView(
       _videoRenderer,
       mirror: widget.mirror,
-      placeholderBuilder: widget.placeholderBuilder,
+      /*placeholderBuilder: widget.placeholderBuilder,*/
     );
   }
 }

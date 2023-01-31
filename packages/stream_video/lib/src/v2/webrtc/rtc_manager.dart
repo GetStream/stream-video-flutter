@@ -358,8 +358,8 @@ extension PublisherRtcManager on RtcManager {
     return publishedTrack;
   }
 
-  Future<void> muteTrack({required String trackSid}) async {
-    final track = publishedTracks[trackSid];
+  Future<void> muteTrack({required String trackId}) async {
+    final track = publishedTracks[trackId];
     if (track == null) {
       _logger.w(() => 'muteTrack: track not found');
       return;
@@ -375,7 +375,7 @@ extension PublisherRtcManager on RtcManager {
     await updatedTrack.track.stop();
     await updatedTrack.stream.dispose();
 
-    publishedTracks[trackSid] = updatedTrack;
+    publishedTracks[trackId] = updatedTrack;
 
     return onPublisherTrackMuted?.call(updatedTrack, true);
   }
@@ -611,7 +611,7 @@ extension RtcManagerTrackHelper on RtcManager {
           await unpublishTrack(trackId: screenShareAudioTrack.trackId);
         }
       } else {
-        await muteTrack(trackSid: track.trackId);
+        await muteTrack(trackId: track.trackId);
       }
     } else {
       await unmuteTrack(trackId: track.trackId);

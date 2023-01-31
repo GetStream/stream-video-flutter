@@ -92,14 +92,14 @@ class SetSubscriptions extends SessionControlAction {
 class UpdateSubscriptions extends SessionControlAction {
   const UpdateSubscriptions(this.actions);
 
-  final List<UpdateSubscriptionAction> actions;
+  final List<SubscriptionAction> actions;
 
   @override
   List<Object?> get props => [actions];
 }
 
-abstract class UpdateSubscriptionAction extends SessionControlAction {
-  const UpdateSubscriptionAction({
+abstract class SubscriptionAction extends SessionControlAction {
+  const SubscriptionAction({
     required this.userId,
     required this.sessionId,
     required this.trackIdPrefix,
@@ -109,13 +109,13 @@ abstract class UpdateSubscriptionAction extends SessionControlAction {
   final String userId;
   final String sessionId;
   final String trackIdPrefix;
-  final SfuTrackType trackType;
+  final SfuTrackTypeVideo trackType;
 
   final String trackId;
 }
 
-class SubscribeTrack extends UpdateSubscriptionAction {
-  const SubscribeTrack({
+class UpdateSubscription extends SubscriptionAction {
+  const UpdateSubscription({
     required super.userId,
     required super.sessionId,
     required super.trackIdPrefix,
@@ -135,8 +135,8 @@ class SubscribeTrack extends UpdateSubscriptionAction {
       ];
 }
 
-class UnsubscribeTrack extends UpdateSubscriptionAction {
-  const UnsubscribeTrack({
+class RemoveSubscription extends SubscriptionAction {
+  const RemoveSubscription({
     required super.userId,
     required super.sessionId,
     required super.trackIdPrefix,
