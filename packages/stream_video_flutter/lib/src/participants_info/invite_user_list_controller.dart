@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../stream_video_flutter.dart';
 import '../models/call_invite_state.dart';
 import '../utils/extensions.dart';
-import 'users_provider.dart';
+import 'users_configuration.dart';
 
 /// A controller for an invitable user list.
 ///
@@ -14,9 +14,9 @@ import 'users_provider.dart';
 /// * Provide user info using [getUser].
 /// * Provide selection info using [isSelected] and [hasSelected].
 /// * Provide user count info using [userCount].
-class StreamInvitableUserListController extends ValueNotifier<CallInviteState> {
+class StreamInviteUserListController extends ValueNotifier<CallInviteState> {
   /// Creates a Stream invitable user list controller.
-  StreamInvitableUserListController({
+  StreamInviteUserListController({
     required this.call,
     required this.usersProvider,
   }) : super(const CallInviteState(users: [], selectedUsers: {}));
@@ -65,7 +65,7 @@ class StreamInvitableUserListController extends ValueNotifier<CallInviteState> {
   /// Throws a [StateError] if no user found.
   UserInfo getUser(int index) {
     final user = value.users.at(index);
-    if (user == null) throw StateError("No user found at index: $index");
+    if (user == null) throw StateError('No user found at index: $index');
     return user;
   }
 

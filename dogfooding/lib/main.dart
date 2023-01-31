@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'firebase_options.dart';
-import 'routes.dart';
+import 'src/routes/app_routes.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +44,7 @@ class StreamDogFoodingApp extends StatelessWidget {
           appTheme,
         ],
       ),
-      onGenerateRoute: Routes.generateRoute,
+      onGenerateRoute: AppRoutes.generateRoute,
     );
   }
 }

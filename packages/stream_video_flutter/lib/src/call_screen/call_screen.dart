@@ -24,8 +24,6 @@ class StreamCallScreen extends StatelessWidget {
 
   final Call call;
 
-  static const routeName = '/call';
-
   // Hardcoded state. This should some from StreamVideo.
   final CallState callState = CallState.onCall;
   final VoidCallback onBackPressed;
@@ -36,13 +34,26 @@ class StreamCallScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final usersProvider = StreamUsersConfiguration.of(context);
+
     switch (callState) {
       case CallState.onCall:
         return StreamActiveCall(
           call: call,
           onBackPressed: onBackPressed,
           onHangUp: onHangUp,
-          participantsInfoWidgetBuilder: participantsInfoWidgetBuilder,
+          onParticipantsTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    participantsInfoWidgetBuilder?.call(context, call) ??
+                    StreamCallParticipantsInfoView(
+                      call: call,
+                      usersProvider: usersProvider,
+                    ),
+              ),
+            );
+          },
         );
       case CallState.incoming:
         return StreamIncomingCall(

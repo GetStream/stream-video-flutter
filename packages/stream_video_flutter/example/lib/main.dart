@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stream_video/stream_video.dart';
 
-import 'routes.dart';
+import 'src/routes/app_routes.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +30,7 @@ class StreamUIExampleApp extends StatelessWidget {
       theme: ThemeData(
         textTheme: GoogleFonts.robotoMonoTextTheme(),
       ),
-      onGenerateRoute: Routes.generateRoute,
+      onGenerateRoute: AppRoutes.generateRoute,
     );
   }
 }
