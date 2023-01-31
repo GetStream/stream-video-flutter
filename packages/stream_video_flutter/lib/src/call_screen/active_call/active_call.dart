@@ -38,6 +38,7 @@ class StreamActiveCall extends StatefulWidget {
     this.callAppBarBuilder,
     this.callParticipantsBuilder,
     this.callControlsBuilder,
+    this.participantsInfoWidgetBuilder,
     this.onBackPressed,
     this.onHangUp,
     this.onParticipantsTap,
@@ -55,6 +56,9 @@ class StreamActiveCall extends StatefulWidget {
 
   /// {@macro callParticipantWidgetBuilder}
   final CallControlsWidgetBuilder? callControlsBuilder;
+
+  /// {@macro callParticipantsBuilder}
+  final CallParticipantsInfoWidgetBuilder? participantsInfoWidgetBuilder;
 
   /// The action to perform when the back button is pressed.
   final VoidCallback? onBackPressed;
@@ -108,12 +112,27 @@ class _StreamActiveCallState extends State<StreamActiveCall> {
 
   @override
   Widget build(BuildContext context) {
+    final usersProvider = StreamUsersConfiguration.of(context);
+
     return Scaffold(
       appBar: widget.callAppBarBuilder?.call(context, call) ??
           ActiveCallAppBar(
             call: call,
             onBackPressed: widget.onBackPressed,
-            onParticipantsTap: widget.onParticipantsTap,
+            onParticipantsTap: widget.onParticipantsTap ??
+                () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          widget.participantsInfoWidgetBuilder
+                              ?.call(context, call) ??
+                          StreamCallParticipantsInfoView(
+                            call: call,
+                            usersProvider: usersProvider,
+                          ),
+                    ),
+                  );
+                },
           ),
       body: widget.callParticipantsBuilder?.call(context, participants) ??
           StreamCallParticipants(

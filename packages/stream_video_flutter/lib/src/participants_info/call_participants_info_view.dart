@@ -28,6 +28,7 @@ class StreamCallParticipantsInfoView extends StatefulWidget {
   const StreamCallParticipantsInfoView({
     super.key,
     required this.call,
+    required this.usersProvider,
     this.videoIcon = const StreamIconToggle(
       active: Icons.videocam_rounded,
       inactive: Icons.videocam_off_rounded,
@@ -43,6 +44,9 @@ class StreamCallParticipantsInfoView extends StatefulWidget {
 
   /// Reference to [Call].
   final Call call;
+
+  /// Provider for users that can be invited to the call.
+  final StreamUsersProvider usersProvider;
 
   /// Toggle container for the "video" icons.
   final StreamIconToggle videoIcon;
@@ -69,17 +73,22 @@ class _StreamCallParticipantsInfoViewState
   Function? _cancelListener;
   final participants = <CallParticipantState>[];
 
+  late StreamInviteUserListController _controller;
+
   @override
   void initState() {
     super.initState();
+    _controller = StreamInviteUserListController(
+      call: widget.call,
+      usersProvider: widget.usersProvider,
+    );
+
     _setParticipants();
     _cancelListener = widget.call.events.listen((event) {
       if (event is ParticipantJoinedEvent ||
           event is ParticipantLeftEvent ||
           event is ParticipantInfoUpdatedEvent) {
-        setState(() {
-          _setParticipants();
-        });
+        setState(_setParticipants);
       }
     });
   }
@@ -112,28 +121,60 @@ class _StreamCallParticipantsInfoViewState
     final streamChatTheme = StreamVideoTheme.of(context);
     final participantsInfoTheme =
         widget.participantsInfoTheme ?? streamChatTheme.participantsInfoTheme;
-    return ListView.separated(
-      padding: const EdgeInsets.only(bottom: 16),
-      itemBuilder: (context, index) {
-        final participant = participants[index];
-        final builder = widget.participantInfoViewBuilder;
-        if (builder != null) {
-          return builder.call(context, index, participant);
-        }
-        return StreamCallParticipantInfoView(
-          participant: participant,
-          videoIcon: widget.videoIcon,
-          audioIcon: widget.audioIcon,
-        );
-      },
-      separatorBuilder: (context, index) =>
-          widget.participantInfoDividerBuilder?.call(context, index) ??
-          Divider(
-            indent: participantsInfoTheme.dividerIndent,
-            height: participantsInfoTheme.dividerHeight,
-            color: participantsInfoTheme.dividerColor,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Participants (${widget.call.participants.length + 1})'),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.only(bottom: 16),
+              itemBuilder: (context, index) {
+                final participant = participants[index];
+                final builder = widget.participantInfoViewBuilder;
+                if (builder != null) {
+                  return builder.call(context, index, participant);
+                }
+                return CallParticipantInfoView(
+                  participant: participant,
+                  videoIcon: widget.videoIcon,
+                  audioIcon: widget.audioIcon,
+                );
+              },
+              separatorBuilder: (context, index) =>
+                  widget.participantInfoDividerBuilder?.call(context, index) ??
+                  Divider(
+                    indent: participantsInfoTheme.dividerIndent,
+                    height: participantsInfoTheme.dividerHeight,
+                    color: participantsInfoTheme.dividerColor,
+                  ),
+              itemCount: participants.length,
+            ),
           ),
-      itemCount: participants.length,
+          Material(
+            elevation: 8,
+            color: streamChatTheme.colorTheme.appBg,
+            child: CallParticipantsInfoOptions(
+              call: widget.call,
+              inviteButtonTitle: 'Invite',
+              muteToggleTitles: const MuteToggleTitles(
+                muteTitle: 'Mute Me',
+                unmuteTitle: 'Unmute Me',
+              ),
+              onInviteButtonPress: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => StreamInviteUserListView(
+                      controller: _controller,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -145,7 +186,7 @@ class _StreamCallParticipantsInfoViewState
     //TODO grab role from coordinator User
     return CallParticipantState(
       self: self,
-      user: UserInfo(id: info.userId, role: "member", name: info.userId),
+      user: UserInfo(id: info.userId, role: 'member', name: info.userId),
       audioAvailable: info.hasPublishedAudioTrack(),
       videoAvailable: info.hasPublishedVideoTrack(),
     );

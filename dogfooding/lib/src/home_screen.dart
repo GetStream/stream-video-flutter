@@ -1,15 +1,12 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:dogfooding/src/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import 'login_screen.dart';
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
-
-  static const routeName = '/home';
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -38,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
       await call.connect();
 
       Navigator.of(context).pushReplacementNamed(
-        StreamCallScreen.routeName,
+        Routes.CALL,
         arguments: call,
       );
     } catch (e, stk) {
@@ -71,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await streamVideoClient.disconnectUser();
-              Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
+              Navigator.of(context).pushReplacementNamed(Routes.LOGIN);
             },
           ),
         ],

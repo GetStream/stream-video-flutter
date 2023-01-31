@@ -1,0 +1,28 @@
+name: chat_with_video_starter
+description: Chat with video example.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.18.5 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Stream Chat SDK
+  stream_chat_flutter: 5.2.0
+
+  # Stream Video SDK
+  stream_video_flutter:
+    path: ../../../stream_video_flutter
+
+dependency_overrides:
+  rate_limiter: ^1.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
