@@ -30,7 +30,7 @@ class SfuClientImpl extends SfuClientV2 {
   /// TODO
   final String authToken;
 
-  final signal_twirp.SignalServerProtobufClient _client;
+  final signal_twirp.SignalServer _client;
 
   @override
   Future<Result<sfu.SendAnswerResponse>> sendAnswer(

@@ -44,12 +44,7 @@ class RtcManager extends Disposable {
     required StreamPeerConnection subscriber,
   })  : _publisher = publisher,
         _subscriber = subscriber {
-    _publisher
-      ..onIceCandidate = onPublisherIceCandidate
-      ..onRenegotiationNeeded = onPublisherNegotiationNeeded;
-    _subscriber
-      ..onIceCandidate = onSubscriberIceCandidate
-      ..onTrack = _onSubscriberTrack;
+    _subscriber.onTrack = _onSubscriberTrack;
   }
 
   final _logger = taggedLogger(tag: 'SV:RtcManager');
@@ -62,9 +57,18 @@ class RtcManager extends Disposable {
 
   final publishedTracks = < /*trackId*/ String, RtcTrack>{};
 
-  OnIceCandidate? onPublisherIceCandidate;
-  OnIceCandidate? onSubscriberIceCandidate;
-  OnRenegotiationNeeded? onPublisherNegotiationNeeded;
+  set onPublisherIceCandidate(OnIceCandidate? cb) {
+    _publisher.onIceCandidate = cb;
+  }
+
+  set onSubscriberIceCandidate(OnIceCandidate? cb) {
+    _subscriber.onIceCandidate = cb;
+  }
+
+  set onPublisherNegotiationNeeded(OnRenegotiationNeeded? cb) {
+    _publisher.onRenegotiationNeeded = cb;
+  }
+
   OnPublisherTrackMuted? onPublisherTrackMuted;
   OnSubscriberTrackReceived? onSubscriberTrackReceived;
 
@@ -188,15 +192,9 @@ class RtcManager extends Disposable {
     publishedTracks.clear();
 
     onPublisherTrackMuted = null;
+    onSubscriberTrackReceived = null;
 
-    _publisher
-      ..onIceCandidate = null
-      ..onRenegotiationNeeded = null;
     await _publisher.dispose();
-
-    _subscriber
-      ..onTrack = null
-      ..onIceCandidate = null;
     await _subscriber.dispose();
 
     return super.dispose();
@@ -288,6 +286,10 @@ extension PublisherRtcManager on RtcManager {
     required RtcLocalTrack<AudioConstraints> track,
     AudioTrackPublishOptions options = const AudioTrackPublishOptions(),
   }) async {
+    // Adding early as we need to access it in the onPublisherNegotiationNeeded
+    // callback.
+    publishedTracks[track.trackId] = track;
+
     final transceiver = await _publisher.addAudioTransceiver(
       stream: track.stream,
       track: track.track,
@@ -297,20 +299,21 @@ extension PublisherRtcManager on RtcManager {
       ],
     );
 
-    final publishedTrack = track.copyWith(
+    // Update track with the added transceiver.
+    return publishedTracks[track.trackId] = track.copyWith(
       receiver: transceiver.receiver,
       transceiver: transceiver,
     );
-
-    publishedTracks[publishedTrack.trackId] = publishedTrack;
-
-    return publishedTrack;
   }
 
   Future<RtcLocalTrack<VideoConstraints>> publishVideoTrack({
     required RtcLocalTrack<VideoConstraints> track,
     VideoTrackPublishOptions options = const VideoTrackPublishOptions(),
   }) async {
+    // Adding early as we need to access it in the onPublisherNegotiationNeeded
+    // callback.
+    publishedTracks[track.trackId] = track;
+
     // use constraints passed to getUserMedia by default
     var dimension = track.mediaConstraints.params.dimension;
 
@@ -347,15 +350,12 @@ extension PublisherRtcManager on RtcManager {
       encodings: encodings,
     );
 
-    final publishedTrack = track.copyWith(
+    // Update track with the added transceiver and dimension.
+    return publishedTracks[track.trackId] = track.copyWith(
       receiver: transceiver.receiver,
       transceiver: transceiver,
       videoDimension: dimension,
     );
-
-    publishedTracks[publishedTrack.trackId] = publishedTrack;
-
-    return publishedTrack;
   }
 
   Future<void> muteTrack({required String trackId}) async {

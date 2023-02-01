@@ -15,7 +15,6 @@ import '../../call_state_manager.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../model/call_cid.dart';
-import '../../model/call_track_status.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
@@ -270,6 +269,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     final pubResult = await sfuClient.setPublisher(
       sfu.SetPublisherRequest(
         sdp: offer.data.sdp,
+        sessionId: sessionId,
         tracks: tracksInfo.toDTO(),
       ),
     );

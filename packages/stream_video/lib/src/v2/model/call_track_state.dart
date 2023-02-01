@@ -3,6 +3,45 @@ import 'package:meta/meta.dart';
 
 import '../webrtc/model/rtc_video_dimension.dart';
 
+abstract class TrackState {
+  const TrackState({required this.muted});
+
+  const factory TrackState.local({required bool muted}) = LocalTrackState._;
+
+  factory TrackState.remote({
+    bool muted = false,
+    bool subscribed = false,
+    bool received = false,
+    RtcVideoDimension? videoDimension,
+  }) {
+    return RemoteTrackState._(
+      muted: muted,
+      subscribed: subscribed,
+      received: received,
+      videoDimension: videoDimension,
+    );
+  }
+
+  final bool muted;
+}
+
+class LocalTrackState extends TrackState {
+  const LocalTrackState._({required super.muted});
+}
+
+class RemoteTrackState extends TrackState {
+  RemoteTrackState._({
+    required super.muted,
+    this.subscribed = false,
+    this.received = false,
+    this.videoDimension,
+  });
+
+  final bool subscribed;
+  final bool received;
+  final RtcVideoDimension? videoDimension;
+}
+
 @immutable
 class CallTrackState with EquatableMixin {
   const CallTrackState({
