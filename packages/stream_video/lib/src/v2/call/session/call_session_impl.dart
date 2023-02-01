@@ -15,6 +15,7 @@ import '../../call_state_manager.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../model/call_cid.dart';
+import '../../model/call_track_state.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
@@ -99,7 +100,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         timeLimit: const Duration(seconds: 30),
       );
 
-      _logger.v(() => '[start] event: $event');
+      _logger.v(() => '[start] sfu joined: $event');
       final currentUserId = stateManager.state.value.currentUserId;
       final localParticipant = event.callState.participants.firstWhere(
         (it) => it.userId == currentUserId,
@@ -262,7 +263,11 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     if (offer is! Success<rtc.RTCSessionDescription>) return;
 
     final tracksInfo = rtcManager?.getPublisherTrackInfos();
-    if (tracksInfo == null) return;
+    if (tracksInfo == null || tracksInfo.isEmpty) {
+      _logger.w(() => '[onPubNegotiationNeeded] rejected(tracksInfo '
+          'is null/empty): $tracksInfo');
+      return;
+    }
 
     _logger.v(() => '[onPubNegotiationNeeded] tracksInfo: $tracksInfo');
 
@@ -485,7 +490,8 @@ extension on CallParticipantStateV2 {
     Set<SfuTrackType>? exclude,
   ]) {
     publishedTracks.forEach((trackType, trackState) {
-      final atLeastSubscribed = trackState.subscribed || trackState.received;
+      final atLeastSubscribed = trackState is RemoteTrackState &&
+          (trackState.subscribed || trackState.received);
       final shouldExclude = exclude != null && exclude.contains(trackType);
       if (atLeastSubscribed && !shouldExclude) {
         final detail = SfuSubscriptionDetails(

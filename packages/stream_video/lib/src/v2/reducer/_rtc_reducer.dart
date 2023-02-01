@@ -1,4 +1,4 @@
-import '../../logger/stream_logger.dart';
+import '../../logger/impl/tagged_logger.dart';
 import '../action/rtc_action.dart';
 import '../call_state.dart';
 import '../model/call_track_state.dart';
@@ -27,22 +27,19 @@ class RtcReducer {
     );
     return state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
-        if (participant.trackIdPrefix == action.trackIdPrefix) {
+        final trackState = participant.publishedTracks[action.trackType];
+        if (participant.trackIdPrefix == action.trackIdPrefix &&
+            trackState is RemoteTrackState) {
           _logger.v(
             () => '[reduceSubTrackReceived] pFound: $participant',
           );
           return participant.copyWith(
             publishedTracks: {
               ...participant.publishedTracks,
-              action.trackType:
-                  participant.publishedTracks[action.trackType]?.copyWith(
-                        subscribed: true,
-                        received: true,
-                      ) ??
-                      const CallTrackState(
-                        subscribed: true,
-                        received: true,
-                      )
+              action.trackType: trackState.copyWith(
+                subscribed: true,
+                received: true,
+              )
             },
           );
         } else {

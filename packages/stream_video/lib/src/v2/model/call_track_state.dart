@@ -3,10 +3,15 @@ import 'package:meta/meta.dart';
 
 import '../webrtc/model/rtc_video_dimension.dart';
 
-abstract class TrackState {
+@immutable
+abstract class TrackState with EquatableMixin {
   const TrackState({required this.muted});
 
-  const factory TrackState.local({required bool muted}) = LocalTrackState._;
+  factory TrackState.local({
+    bool muted = false,
+  }) {
+    return LocalTrackState._(muted: muted);
+  }
 
   factory TrackState.remote({
     bool muted = false,
@@ -22,15 +27,60 @@ abstract class TrackState {
     );
   }
 
+  factory TrackState.base({
+    required bool isLocal,
+  }) {
+    if (isLocal) {
+      return TrackState.local();
+    } else {
+      return TrackState.remote();
+    }
+  }
+
   final bool muted;
+
+  /// Returns a copy of this [TrackState] with the given fields
+  /// replaced with the new values.
+  TrackState copyWith({
+    bool? muted,
+  }) {
+    if (this is LocalTrackState) {
+      return (this as LocalTrackState).copyWith(muted: muted);
+    } else if (this is RemoteTrackState) {
+      return (this as RemoteTrackState).copyWith(muted: muted);
+    }
+    throw UnsupportedError('unexpected state: $runtimeType');
+  }
 }
 
 class LocalTrackState extends TrackState {
   const LocalTrackState._({required super.muted});
+
+  @override
+  List<Object?> get props => [muted];
+
+  @override
+  String toString() {
+    if (muted) {
+      return 'muted';
+    }
+    return 'published';
+  }
+
+  /// Returns a copy of this [LocalTrackState] with the given fields
+  /// replaced with the new values.
+  @override
+  LocalTrackState copyWith({
+    bool? muted,
+  }) {
+    return LocalTrackState._(
+      muted: muted ?? this.muted,
+    );
+  }
 }
 
 class RemoteTrackState extends TrackState {
-  RemoteTrackState._({
+  const RemoteTrackState._({
     required super.muted,
     this.subscribed = false,
     this.received = false,
@@ -39,21 +89,6 @@ class RemoteTrackState extends TrackState {
 
   final bool subscribed;
   final bool received;
-  final RtcVideoDimension? videoDimension;
-}
-
-@immutable
-class CallTrackState with EquatableMixin {
-  const CallTrackState({
-    this.subscribed = false,
-    this.received = false,
-    this.muted = false,
-    this.videoDimension,
-  });
-
-  final bool subscribed;
-  final bool received;
-  final bool muted;
   final RtcVideoDimension? videoDimension;
 
   @override
@@ -73,18 +108,22 @@ class CallTrackState with EquatableMixin {
       buffer.write(dimension.height);
       buffer.write(')');
     }
+    if (buffer.isEmpty) {
+      return 'published';
+    }
     return buffer.toString();
   }
 
-  /// Returns a copy of this [CallTrackState] with the given fields
+  /// Returns a copy of this [RemoteTrackState] with the given fields
   /// replaced with the new values.
-  CallTrackState copyWith({
+  @override
+  RemoteTrackState copyWith({
     bool? subscribed,
     bool? received,
     bool? muted,
     RtcVideoDimension? videoDimension,
   }) {
-    return CallTrackState(
+    return RemoteTrackState._(
       subscribed: subscribed ?? this.subscribed,
       received: received ?? this.received,
       muted: muted ?? this.muted,

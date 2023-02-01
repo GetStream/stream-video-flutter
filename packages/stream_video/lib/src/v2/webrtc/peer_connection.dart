@@ -1,7 +1,7 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
 import '../../disposable.dart';
-import '../../logger/stream_logger.dart';
+import '../../logger/impl/tagged_logger.dart';
 import '../errors/video_error_composer.dart';
 import '../model/call_cid.dart';
 import '../utils/none.dart';
@@ -256,6 +256,11 @@ class StreamPeerConnection extends Disposable {
   @override
   Future<void> dispose() async {
     _dropRtcCallbacks();
+    onStreamAdded = null;
+    onRenegotiationNeeded = null;
+    onIceCandidate = null;
+    onTrack = null;
+    _pendingCandidates.clear();
     await pc.dispose();
     return await super.dispose();
   }

@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 
-import '../../logger/stream_logger.dart';
+import '../../logger/impl/tagged_logger.dart';
 import '../action/coordinator_action.dart';
 import '../call_state.dart';
 import '../coordinator/ws/coordinator_events.dart';
@@ -16,7 +16,31 @@ class CoordinatorReducer {
     CallStateV2 state,
     CoordinatorAction action,
   ) {
-    return _reduceCoordinatorEvent(state, action.event);
+    if (action is CoordinatorUsersAction) {
+      return _reduceCoordinatorUsers(state, action);
+    } else if (action is CoordinatorEventAction) {
+      _reduceCoordinatorEvent(state, action.event);
+    }
+    return state;
+  }
+
+  CallStateV2 _reduceCoordinatorUsers(
+    CallStateV2 state,
+    CoordinatorUsersAction action,
+  ) {
+    return state.copyWith(
+      callParticipants: state.callParticipants.map(
+        (participant) {
+          final user = action.users[participant.userId];
+          if (user == null) return participant;
+          return participant.copyWith(
+            role: user.role,
+            name: user.name,
+            profileImageURL: user.imageUrl,
+          );
+        },
+      ).toList(),
+    );
   }
 
   CallStateV2 _reduceCoordinatorEvent(

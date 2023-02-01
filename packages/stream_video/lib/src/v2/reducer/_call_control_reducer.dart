@@ -26,7 +26,7 @@ class CallControlReducer {
     } else if (action is UpdateSubscriptions) {
       return _reduceUpdateSubscriptions(state, action);
     } else if (action is UpdateSubscription) {
-      return _reduceSubscribeVideoTrack(state, action);
+      return _reduceUpdateSubscription(state, action);
     } else if (action is RemoveSubscription) {
       return _reduceUnsubscribeVideoTrack(state, action);
     }
@@ -42,7 +42,7 @@ class CallControlReducer {
     var newState = state;
     for (final child in action.actions) {
       if (child is UpdateSubscription) {
-        newState = _reduceSubscribeVideoTrack(newState, child);
+        newState = _reduceUpdateSubscription(newState, child);
       } else if (child is RemoveSubscription) {
         newState = _reduceUnsubscribeVideoTrack(newState, child);
       }
@@ -50,31 +50,29 @@ class CallControlReducer {
     return newState;
   }
 
-  CallStateV2 _reduceSubscribeVideoTrack(
+  CallStateV2 _reduceUpdateSubscription(
     CallStateV2 state,
     UpdateSubscription action,
   ) {
-    _logger.d(() => '[reduceSubscribe] #${state.sessionId}; action: $action');
+    _logger.d(() => '[updateSub] #${state.sessionId}; action: $action');
     return state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
+        final trackState = participant.publishedTracks[action.trackType];
         if (participant.userId == action.userId &&
-            participant.sessionId == action.sessionId) {
-          _logger.v(() => '[reduceSubscribe] pFound: $participant');
-          final publishedTracks = {
-            ...participant.publishedTracks,
-          };
-          final trackState = publishedTracks[action.trackType]?.copyWith(
-            subscribed: true,
-            videoDimension: action.videoDimension,
-          );
-          if (trackState != null) {
-            publishedTracks[action.trackType] = trackState;
-          }
+            participant.sessionId == action.sessionId &&
+            trackState is RemoteTrackState) {
+          _logger.v(() => '[updateSub] pFound: $participant');
           return participant.copyWith(
-            publishedTracks: publishedTracks,
+            publishedTracks: {
+              ...participant.publishedTracks,
+              action.trackType: trackState.copyWith(
+                subscribed: true,
+                videoDimension: action.videoDimension,
+              ),
+            },
           );
         } else {
-          _logger.v(() => '[reduceSubscribe] pSame: $participant');
+          _logger.v(() => '[updateSub] pSame: $participant');
           return participant;
         }
       }).toList(),
@@ -87,18 +85,16 @@ class CallControlReducer {
   ) {
     return state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
-        if (participant.sessionId == action.sessionId) {
-          final publishedTracks = {
-            ...participant.publishedTracks,
-          };
-          final trackState = publishedTracks[action.trackType]?.copyWith(
-            subscribed: false,
-          );
-          if (trackState != null) {
-            publishedTracks[action.trackType] = trackState;
-          }
+        final trackState = participant.publishedTracks[action.trackType];
+        if (participant.sessionId == action.sessionId &&
+            trackState is RemoteTrackState) {
           return participant.copyWith(
-            publishedTracks: publishedTracks,
+            publishedTracks: {
+              ...participant.publishedTracks,
+              action.trackType: trackState.copyWith(
+                subscribed: false,
+              ),
+            },
           );
         } else {
           return participant;
@@ -185,16 +181,11 @@ class CallControlReducer {
     return state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
-          final publishedTracks = {
-            ...participant.publishedTracks,
-          };
-          if (enabled) {
-            publishedTracks[trackType] = const CallTrackState();
-          } else {
-            publishedTracks.removeWhere((it, _) => it == trackType);
-          }
           return participant.copyWith(
-            publishedTracks: publishedTracks,
+            publishedTracks: {
+              ...participant.publishedTracks,
+              trackType: TrackState.local(muted: !enabled)
+            },
           );
         } else {
           return participant;

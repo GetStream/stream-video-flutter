@@ -14,7 +14,7 @@ class CallParticipantStateV2 with EquatableMixin {
     String? profileImageURL,
     required String sessionId,
     required String trackIdPrefix,
-    Map<SfuTrackType, CallTrackState> publishedTracks = const {},
+    Map<SfuTrackType, TrackState> publishedTracks = const {},
     bool isLocal = false,
     SfuConnectionQuality connectionQuality = SfuConnectionQuality.unspecified,
     bool isOnline = false,
@@ -62,7 +62,7 @@ class CallParticipantStateV2 with EquatableMixin {
   final String? profileImageURL;
   final String sessionId;
   final String trackIdPrefix;
-  final Map<SfuTrackType, CallTrackState> publishedTracks;
+  final Map<SfuTrackType, TrackState> publishedTracks;
   final bool isLocal;
   final SfuConnectionQuality connectionQuality;
   final bool isOnline;
@@ -79,7 +79,7 @@ class CallParticipantStateV2 with EquatableMixin {
     String? profileImageURL,
     String? sessionId,
     String? trackIdPrefix,
-    Map<SfuTrackType, CallTrackState>? publishedTracks,
+    Map<SfuTrackType, TrackState>? publishedTracks,
     bool? isLocal,
     SfuConnectionQuality? connectionQuality,
     bool? isOnline,

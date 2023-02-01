@@ -4,7 +4,7 @@ import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart'
     as signal_twirp;
-import '../../logger/stream_logger.dart';
+import '../../logger/impl/tagged_logger.dart';
 import '../errors/video_error_composer.dart';
 import '../utils/result.dart';
 import 'sfu_client.dart';

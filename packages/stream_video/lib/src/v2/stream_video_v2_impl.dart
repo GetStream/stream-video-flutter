@@ -6,7 +6,7 @@ import 'package:logging/logging.dart';
 import '../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
     as rpc;
 import '../logger/logger.dart';
-import '../logger/stream_logger.dart';
+import '../logger/impl/tagged_logger.dart';
 import '../models/user_info.dart';
 import '../token/token.dart';
 import '../token/token_manager.dart';

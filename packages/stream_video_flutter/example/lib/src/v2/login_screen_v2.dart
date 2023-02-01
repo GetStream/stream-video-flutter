@@ -1,9 +1,5 @@
-import 'dart:convert';
-
-import 'package:example/src/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:http/http.dart' as http;
 
 import 'home_screen_v2.dart';
 
@@ -27,6 +23,36 @@ final List<LoginInfo> users = [
           'https://getstream.io/static/237f45f28690696ad8fff92726f45106/c59de/thierry.webp',
     ),
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90aGllcnJ5IiwiaWF0IjoxNjcwMzM5NTAwLCJ1c2VyX2lkIjoidGhpZXJyeSJ9.q8dy763W-ZVOA_1VbNhz0VozuxAI1Ko42HlVl-9mnG8',
+  ),
+  LoginInfo(
+    const UserInfo(
+      id: 'marcelo',
+      role: 'admin',
+      name: 'Marcelo',
+      imageUrl:
+          'https://getstream.io/static/aaf5fb17dcfd0a3dd885f62bd21b325a/802d2/marcelo-pires.webp',
+    ),
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9tYXJjZWxvIiwiaWF0IjoxNjcwMzM5NDU2LCJ1c2VyX2lkIjoibWFyY2VsbyJ9.-tBPUvyU-XTh04f9-Owv9tB6EG0lEIAyHTsZXYwOTqw',
+  ),
+  LoginInfo(
+    const UserInfo(
+      id: 'martin',
+      role: 'admin',
+      name: 'Martin',
+      imageUrl:
+          'https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/802d2/martin-mitrevski.webp',
+    ),
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9tYXJ0aW4iLCJpYXQiOjE2NzAzMzkzNDMsInVzZXJfaWQiOiJtYXJ0aW4ifQ.EGMuYyXti8IMCMX4oiLKTkVZe8ZqUJr93Kj214-jCHg',
+  ),
+  LoginInfo(
+    const UserInfo(
+      id: 'sam',
+      role: 'admin',
+      name: 'Sam',
+      imageUrl:
+          'https://getstream.io/static/379eda22663bae101892ad1d37778c3d/802d2/samuel-jeeves.webp',
+    ),
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9zYW0iLCJpYXQiOjE2NzAzMzk1MTUsInVzZXJfaWQiOiJzYW0ifQ.CDmyx9nQlWpqopuoQDP4p7caeGt_r51dLbg9uVO45OA',
   ),
 ];
 

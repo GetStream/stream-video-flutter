@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 
-import '../logger/stream_logger.dart';
+import '../logger/impl/tagged_logger.dart';
 import 'action/action.dart';
 import 'action/call_control_action.dart';
 import 'action/coordinator_action.dart';
@@ -123,21 +123,18 @@ class CallStateManagerImpl extends CallStateManager {
       return;
     }
     _logger.d(() => '[onSfuEvent] event: $event');
+    _postReduced(SfuEventAction(event));
     if (event is SfuJoinResponseEvent) {
       final participants = event.callState.participants;
       final users = await _queryUsersByIds(
         participants.map((it) => it.userId).toSet(),
       );
-      _logger.v(() => '[onSfuEvent] received users: $users');
-      _postReduced(SfuJoinedAction(participants: participants, users: users));
+      _logger.v(() => '[onSfuEvent] received coord users: $users');
+      _postReduced(CoordinatorUsersAction(users: users.toUnmodifiableMap()));
     } else if (event is SfuParticipantJoinedEvent) {
-      final user = await _queryUserById(event.participant.userId);
-      _logger.v(() => '[onSfuEvent] received user: $user');
-      _postReduced(
-        SfuParticipantJoinedAction(participant: event.participant, user: user),
-      );
-    } else {
-      _postReduced(SfuEventAction(event));
+      final users = await _queryUsersByIds({event.participant.userId});
+      _logger.v(() => '[onSfuEvent] received coord users: $users');
+      _postReduced(CoordinatorUsersAction(users: users.toUnmodifiableMap()));
     }
   }
 
@@ -147,7 +144,7 @@ class CallStateManagerImpl extends CallStateManager {
       return;
     }
     _logger.d(() => '[onCoordinatorEvent] event: $event');
-    _postReduced(CoordinatorAction(event));
+    _postReduced(CoordinatorEventAction(event));
   }
 
   @override
@@ -179,13 +176,23 @@ class CallStateManagerImpl extends CallStateManager {
 
   void _postReduced(StreamAction action) {
     final reduced = _stateReducer.reduce(_state.value, action);
-    _post(state: reduced);
+    _postState(state: reduced);
   }
 
-  void _post({required CallStateV2 state}) {
+  void _postState({required CallStateV2 state}) {
     if (state != _state.value) {
-      _logger.v(() => '[post] state: $state');
+      _logger.v(() => '[postState] state: $state');
       _state.value = state;
     }
+  }
+}
+
+extension on List<CallUser> {
+  Map<String, CallUser> toUnmodifiableMap() {
+    return Map.unmodifiable(
+      <String, CallUser>{
+        for (var it in this) it.id: it,
+      },
+    );
   }
 }
