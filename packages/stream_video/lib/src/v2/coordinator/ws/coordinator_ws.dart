@@ -6,7 +6,7 @@ import '../../../../protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart'
 import '../../../../protobuf/video/coordinator/user_v1/user.pb.dart'
     as coordinator_user;
 import '../../../core/video_error.dart';
-import '../../../logger/stream_logger.dart';
+import '../../../logger/impl/tagged_logger.dart';
 import '../../../models/user_info.dart';
 import '../../../token/token_manager.dart';
 import '../../../types/other.dart';

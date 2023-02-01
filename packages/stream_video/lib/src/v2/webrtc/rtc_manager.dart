@@ -3,7 +3,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:webrtc_interface/src/rtc_session_description.dart';
 
 import '../../disposable.dart';
-import '../../logger/stream_logger.dart';
+import '../../logger/impl/tagged_logger.dart';
 import '../../platform_detector/platform_detector.dart';
 import '../model/call_cid.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
@@ -288,6 +288,7 @@ extension PublisherRtcManager on RtcManager {
   }) async {
     // Adding early as we need to access it in the onPublisherNegotiationNeeded
     // callback.
+    _logger.d(() => '[publishAudioTrack] track: $track');
     publishedTracks[track.trackId] = track;
 
     final transceiver = await _publisher.addAudioTransceiver(
@@ -298,6 +299,7 @@ extension PublisherRtcManager on RtcManager {
           rtc.RTCRtpEncoding(maxBitrate: options.audioBitrate),
       ],
     );
+    _logger.v(() => '[publishAudioTrack] transceiver: $transceiver');
 
     // Update track with the added transceiver.
     return publishedTracks[track.trackId] = track.copyWith(
@@ -312,6 +314,7 @@ extension PublisherRtcManager on RtcManager {
   }) async {
     // Adding early as we need to access it in the onPublisherNegotiationNeeded
     // callback.
+    _logger.d(() => '[publishVideoTrack] track: $track');
     publishedTracks[track.trackId] = track;
 
     // use constraints passed to getUserMedia by default
@@ -349,6 +352,7 @@ extension PublisherRtcManager on RtcManager {
       track: track.track,
       encodings: encodings,
     );
+    _logger.v(() => '[publishVideoTrack] transceiver: $transceiver');
 
     // Update track with the added transceiver and dimension.
     return publishedTracks[track.trackId] = track.copyWith(

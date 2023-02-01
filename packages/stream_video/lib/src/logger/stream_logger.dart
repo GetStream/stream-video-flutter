@@ -1,38 +1,37 @@
-class StreamLog {}
+import 'impl/tagged_logger.dart';
 
-abstract class StreamLogger {}
+final _priorityEmojiMapper = {
+  Priority.error: '🚨',
+  Priority.warning: '⚠️',
+  Priority.info: 'ℹ️',
+  Priority.debug: '🔧',
+  Priority.verbose: '🔍',
+};
 
-TaggedLogger taggedLogger({required String tag}) {
-  return TaggedLogger(tag);
+final _priorityNameMapper = {
+  Priority.error: 'E',
+  Priority.warning: 'W',
+  Priority.info: 'I',
+  Priority.debug: 'D',
+  Priority.verbose: 'V',
+};
+
+abstract class StreamLogger {
+  String emoji(Priority priority) => _priorityEmojiMapper[priority] ?? '📣';
+
+  String name(Priority priority) => _priorityNameMapper[priority] ?? '*';
+
+  void log(
+    Priority priority,
+    String tag,
+    MessageBuilder message, [
+    Object? error,
+    StackTrace? stk,
+  ]);
 }
 
 typedef MessageBuilder = String Function();
+typedef Tag = String;
+typedef IsLoggableValidator = bool Function(Priority, Tag);
 
-enum Priority { VERBOSE, DEBUG, INFO, WARNING, ERROR }
-
-class TaggedLogger {
-  const TaggedLogger(this.tag);
-  final String tag;
-
-  void v(MessageBuilder message) {
-    print('🔍 (V/$tag): ${message()}');
-  }
-
-  void d(MessageBuilder message) {
-    print('🔧 (D/$tag): ${message()}');
-  }
-
-  void i(MessageBuilder message) {
-    print('ℹ️ (I/$tag): ${message()}');
-  }
-
-  void w(MessageBuilder message) {
-    print('⚠️ (W/$tag): ${message()}');
-  }
-
-  void e(MessageBuilder message) {
-    print('🚨 (E/$tag): ${message()}');
-  }
-
-  void _log(Priority priority, String Function() messageBuilder) {}
-}
+enum Priority { verbose, debug, info, warning, error }

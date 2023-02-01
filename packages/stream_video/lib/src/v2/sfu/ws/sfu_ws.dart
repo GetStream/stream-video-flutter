@@ -1,19 +1,17 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
-    as sfu_events;
-import 'package:stream_video/src/logger/stream_logger.dart';
-import 'package:stream_video/src/types/other.dart';
-import 'package:stream_video/src/v2/errors/video_error.dart';
-import 'package:stream_video/src/v2/errors/video_error_composer.dart';
-import 'package:stream_video/src/v2/sfu/data/events/sfu_events.dart';
-import 'package:stream_video/src/v2/sfu/ws/sfu_event_listener.dart';
-import 'package:stream_video/src/v2/sfu/data/events/sfu_event_mapper_extensions.dart';
-import 'package:stream_video/src/ws/keep_alive.dart';
-import 'package:stream_video/src/ws/ws.dart';
-
+import '../../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
+import '../../../logger/impl/tagged_logger.dart';
+import '../../../types/other.dart';
+import '../../../ws/keep_alive.dart';
+import '../../../ws/ws.dart';
+import '../../errors/video_error.dart';
+import '../../errors/video_error_composer.dart';
 import '../../shared_emitter.dart';
+import '../data/events/sfu_event_mapper_extensions.dart';
+import '../data/events/sfu_events.dart';
+import 'sfu_event_listener.dart';
 
 /// TODO
 class SfuWebSocket extends StreamWebSocket

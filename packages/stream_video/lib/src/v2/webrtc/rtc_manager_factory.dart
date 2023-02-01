@@ -1,4 +1,4 @@
-import '../../logger/stream_logger.dart';
+import '../../logger/impl/tagged_logger.dart';
 import '../../types/other.dart';
 import '../model/call_cid.dart';
 import 'peer_connection_factory.dart';

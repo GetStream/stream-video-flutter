@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
 import '../../../stream_video.dart';
+import '../model/call_track_state.dart';
 
 Widget _defaultPlaceholderBuilder(BuildContext context) => const Placeholder();
 
@@ -22,15 +23,13 @@ class VideoTrackRenderer extends StatelessWidget {
   Widget build(BuildContext context) {
     final userId = participant.userId;
     final trackState = participant.publishedTracks[SfuTrackType.video];
-    print('(D/SV:ParticipantView) [buildRtcVideoView] userId: $userId, '
+    print('(D/SV:ParticipantView) [build] userId: $userId, '
         'trackState: $trackState');
 
     // Haven't published video track yet.
     if (trackState == null) {
       return placeholderBuilder.call(context);
     }
-
-    final isLocalParticipant = participant.isLocal;
 
     Widget buildRtcVideoView() {
       final track = call.getTrack(
@@ -45,12 +44,12 @@ class VideoTrackRenderer extends StatelessWidget {
 
       return VideoRenderer(
         track: track,
-        mirror: isLocalParticipant,
+        mirror: participant.isLocal,
         placeholderBuilder: placeholderBuilder,
       );
     }
 
-    if (isLocalParticipant) {
+    if (trackState is! RemoteTrackState) {
       return buildRtcVideoView();
     }
 
@@ -134,7 +133,7 @@ class _VideoRendererState extends State<VideoRenderer> {
     return rtc.RTCVideoView(
       _videoRenderer,
       mirror: widget.mirror,
-      placeholderBuilder: widget.placeholderBuilder,
+      /*placeholderBuilder: widget.placeholderBuilder,*/
     );
   }
 }

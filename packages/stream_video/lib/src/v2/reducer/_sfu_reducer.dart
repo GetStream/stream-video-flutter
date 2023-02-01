@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 
-import '../../logger/stream_logger.dart';
+import '../../logger/impl/tagged_logger.dart';
 import '../action/sfu_action.dart';
 import '../call_participant_state.dart';
 import '../call_state.dart';
@@ -19,7 +19,7 @@ class SfuReducer {
     if (action is SfuJoinedAction) {
       return _reduceJoined(state, action);
     } else if (action is SfuParticipantJoinedAction) {
-      return _reduceParticipantJoined(state, action);
+      return _reduceParticipantJoined2(state, action);
     } else if (action is SfuEventAction) {
       return _reduceSfuEvent(state, action.event);
     }
@@ -27,7 +27,11 @@ class SfuReducer {
   }
 
   CallStateV2 _reduceSfuEvent(CallStateV2 state, SfuEventV2 event) {
-    if (event is SfuParticipantLeftEvent) {
+    if (event is SfuJoinResponseEvent) {
+      return _reduceJoinResponse(state, event);
+    } else if (event is SfuParticipantJoinedEvent) {
+      return _reduceParticipantJoined(state, event);
+    } else if (event is SfuParticipantLeftEvent) {
       return _reduceParticipantLeft(state, event);
     } else if (event is SfuConnectionQualityChangedEvent) {
       return _reduceConnectionQualityChanged(state, event);
@@ -39,6 +43,37 @@ class SfuReducer {
       return _reduceTrackUnpublished(state, event);
     }
     return state;
+  }
+
+  CallStateV2 _reduceJoinResponse(
+    CallStateV2 state,
+    SfuJoinResponseEvent event,
+  ) {
+    _logger.d(() => '[reduceJoinResponse] ${state.sessionId}; event: $event');
+    final participants = event.callState.participants.map((aParticipant) {
+      final isLocal = aParticipant.userId == state.currentUserId;
+      return CallParticipantStateV2(
+        userId: aParticipant.userId,
+        role: '',
+        name: aParticipant.userId,
+        profileImageURL: '',
+        sessionId: aParticipant.sessionId,
+        trackIdPrefix: aParticipant.trackLookupPrefix,
+        publishedTracks: {
+          for (var track in aParticipant.publishedTracks)
+            track: TrackState.base(isLocal: isLocal)
+        },
+        isLocal: isLocal,
+        isOnline: !isLocal,
+        isSpeaking: aParticipant.isSpeaking,
+        audioLevel: aParticipant.audioLevel,
+        isDominantSpeaker: aParticipant.isDominantSpeaker,
+      );
+    }).toList();
+
+    return state.copyWith(
+      callParticipants: participants,
+    );
   }
 
   CallStateV2 _reduceJoined(
@@ -60,7 +95,7 @@ class SfuReducer {
         trackIdPrefix: aParticipant.trackLookupPrefix,
         publishedTracks: {
           for (var track in aParticipant.publishedTracks)
-            track: const CallTrackState()
+            track: TrackState.base(isLocal: isLocal)
         },
         isLocal: isLocal,
         isOnline: !isLocal,
@@ -119,7 +154,7 @@ class SfuReducer {
 
           final trackState = participant.publishedTracks[event.trackType]
                   ?.copyWith(muted: false) ??
-              CallTrackState();
+              TrackState.base(isLocal: participant.isLocal);
           return participant.copyWith(
             publishedTracks: {
               ...participant.publishedTracks,
@@ -176,6 +211,28 @@ class SfuReducer {
     );
   }
 
+  CallStateV2 _reduceParticipantJoined(
+    CallStateV2 state,
+    SfuParticipantJoinedEvent event,
+  ) {
+    final isLocal = state.currentUserId == event.participant.userId;
+    final participant = CallParticipantStateV2(
+      userId: event.participant.userId,
+      role: '',
+      name: '',
+      sessionId: event.participant.sessionId,
+      trackIdPrefix: event.participant.trackLookupPrefix,
+      isLocal: isLocal,
+      isOnline: !isLocal,
+    );
+    return state.copyWith(
+      callParticipants: [
+        ...state.callParticipants,
+        participant,
+      ],
+    );
+  }
+
   CallStateV2 _reduceParticipantLeft(
     CallStateV2 state,
     SfuParticipantLeftEvent event,
@@ -189,7 +246,7 @@ class SfuReducer {
     );
   }
 
-  CallStateV2 _reduceParticipantJoined(
+  CallStateV2 _reduceParticipantJoined2(
     CallStateV2 state,
     SfuParticipantJoinedAction action,
   ) {

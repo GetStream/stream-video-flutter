@@ -173,18 +173,18 @@ class _CallScreenV2State extends State<CallScreenV2> {
 
 class ToggleMicrophoneButton extends StatelessWidget {
   const ToggleMicrophoneButton({
-    Key? key,
+    super.key,
     required this.call,
     required this.localParticipant,
-  }) : super(key: key);
+  });
 
   final CallV2 call;
   final CallParticipantStateV2 localParticipant;
 
   @override
   Widget build(BuildContext context) {
-    final isEnabled =
-        localParticipant.publishedTracks.containsKey(SfuTrackType.audio);
+    final trackState = localParticipant.publishedTracks[SfuTrackType.audio];
+    final isEnabled = trackState != null && !trackState.muted;
 
     return CallControlOption(
       icon: Icon(isEnabled ? Icons.mic_rounded : Icons.mic_off_rounded),
@@ -199,18 +199,18 @@ class ToggleMicrophoneButton extends StatelessWidget {
 
 class ToggleCameraButton extends StatelessWidget {
   const ToggleCameraButton({
-    Key? key,
+    super.key,
     required this.call,
     required this.localParticipant,
-  }) : super(key: key);
+  });
 
   final CallV2 call;
   final CallParticipantStateV2 localParticipant;
 
   @override
   Widget build(BuildContext context) {
-    final isEnabled =
-        localParticipant.publishedTracks.containsKey(SfuTrackType.video);
+    final trackState = localParticipant.publishedTracks[SfuTrackType.video];
+    final isEnabled = trackState != null && !trackState.muted;
 
     return CallControlOption(
       icon:

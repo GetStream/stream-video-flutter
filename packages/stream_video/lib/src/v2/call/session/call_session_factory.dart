@@ -1,7 +1,7 @@
 import 'package:uuid/uuid.dart';
 
 import '../../../core/utils.dart';
-import '../../../logger/stream_logger.dart';
+import '../../../logger/impl/tagged_logger.dart';
 import '../../../types/other.dart';
 import '../../call_state_manager.dart';
 import '../../coordinator/models/coordinator_models.dart';

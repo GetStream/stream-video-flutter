@@ -20,6 +20,8 @@ Future<void> main() async {
   );
   */
 
+  StreamLog().logger = ConsoleStreamLogger();
+  StreamLog().validator = (priority, tag) => true;
   StreamVideoV2.init(
     'us83cfwuhy8n', // see <video>/data/fixtures/apps.yaml for API secret
     coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
