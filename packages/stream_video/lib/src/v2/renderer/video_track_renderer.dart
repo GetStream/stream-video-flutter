@@ -30,6 +30,8 @@ class VideoTrackRenderer extends StatelessWidget {
       return placeholderBuilder.call(context);
     }
 
+    final isLocalParticipant = participant.isLocal;
+
     Widget buildRtcVideoView() {
       final track = call.getTrack(
         participant.trackIdPrefix,
@@ -38,17 +40,16 @@ class VideoTrackRenderer extends StatelessWidget {
 
       print('(D/SV:ParticipantView) [buildRtcVideoView] userId: $userId, '
           'trackState.muted: ${trackState.muted}');
-      if (!trackState.muted) {
-        return VideoRenderer(
-          track: track,
-          placeholderBuilder: placeholderBuilder,
-        );
-      }
 
-      return placeholderBuilder.call(context);
+      if (trackState.muted) return placeholderBuilder.call(context);
+
+      return VideoRenderer(
+        track: track,
+        mirror: isLocalParticipant,
+        placeholderBuilder: placeholderBuilder,
+      );
     }
 
-    final isLocalParticipant = participant.isLocal;
     if (isLocalParticipant) {
       return buildRtcVideoView();
     }
@@ -133,7 +134,7 @@ class _VideoRendererState extends State<VideoRenderer> {
     return rtc.RTCVideoView(
       _videoRenderer,
       mirror: widget.mirror,
-      /*placeholderBuilder: widget.placeholderBuilder,*/
+      placeholderBuilder: widget.placeholderBuilder,
     );
   }
 }
@@ -141,8 +142,6 @@ class _VideoRendererState extends State<VideoRenderer> {
 typedef OnSizeChanged = void Function(Size size);
 
 class _SizeChangedLayoutNotifier extends SingleChildRenderObjectWidget {
-  /// Creates a [_SizeChangedLayoutNotifier] that dispatches layout changed
-  /// notifications when [child] changes layout size.
   const _SizeChangedLayoutNotifier({
     super.key,
     super.child,
