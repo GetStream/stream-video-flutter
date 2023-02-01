@@ -1,9 +1,8 @@
-import 'dart:math';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import '../widgets/floating_view.dart';
 import 'screen_share_item.dart';
 
 /// {@template callParticipantWidgetBuilder}
@@ -179,62 +178,12 @@ class _RegularCallParticipantsContentState
       return participantGrid;
     }
 
-    final streamChatTheme =
-        StreamVideoTheme.of(context).floatingCallParticipantTheme;
-    final floatingTheme = widget.floatingParticipantTheme ?? streamChatTheme;
-    final floatingParticipantWidth = floatingTheme.floatingParticipantWidth;
-    final floatingParticipantHeight = floatingTheme.floatingParticipantHeight;
-    final floatingParticipantPadding = floatingTheme.floatingParticipantPadding;
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final parentSize = constraints.biggest;
-
-        final maxRightOffset = parentSize.width -
-            floatingParticipantWidth -
-            2 * floatingParticipantPadding;
-        final maxBottomOffset = parentSize.height -
-            floatingParticipantHeight -
-            2 * floatingParticipantPadding;
-
-        // If window is resized, this resets the floating window.
-        bottomRightOffset.value = Offset(
-          min(bottomRightOffset.value.dx, maxRightOffset),
-          min(bottomRightOffset.value.dy, maxBottomOffset),
-        );
-
-        return Stack(
-          children: [
-            participantGrid,
-            ValueListenableBuilder(
-              valueListenable: bottomRightOffset,
-              builder: (context, val, child) {
-                final offset = bottomRightOffset.value;
-
-                return Positioned(
-                  right: offset.dx,
-                  bottom: offset.dy,
-                  child: GestureDetector(
-                    onPanUpdate: (drag) {
-                      final dx = drag.delta.dx;
-                      final dy = drag.delta.dy;
-
-                      bottomRightOffset.value = Offset(
-                        max(0, min(offset.dx - dx, maxRightOffset)),
-                        max(0, min(offset.dy - dy, maxBottomOffset)),
-                      );
-                    },
-                    child: child,
-                  ),
-                );
-              },
-              child: StreamFloatingCallParticipant(
-                participant: local.first,
-              ),
-            ),
-          ],
-        );
-      },
+    return FloatingView(
+      topWidget: StreamFloatingCallParticipant(
+        participant: local.first,
+      ),
+      bottomWidget: participantGrid,
+      floatingParticipantTheme: widget.floatingParticipantTheme,
     );
   }
 
