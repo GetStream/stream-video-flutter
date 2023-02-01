@@ -23,7 +23,7 @@ class FloatingView extends StatefulWidget {
 }
 
 class _FloatingViewState extends State<FloatingView> {
-  Offset bottomRightOffset = const Offset(0, double.infinity);
+  Offset bottomRightOffset = const Offset(0, 0);
 
   @override
   Widget build(BuildContext context) {
@@ -45,20 +45,12 @@ class _FloatingViewState extends State<FloatingView> {
             floatingParticipantHeight -
             2 * floatingParticipantPadding;
 
-        // If window is resized, this resets the floating window.
-        bottomRightOffset = Offset(
-          min(bottomRightOffset.dx, maxRightOffset),
-          min(bottomRightOffset.dy, maxBottomOffset),
-        );
-
-        final offset = bottomRightOffset;
-
         return Stack(
           children: [
             widget.bottomWidget,
             Positioned(
-              right: offset.dx,
-              bottom: offset.dy,
+              right: bottomRightOffset.dx,
+              bottom: bottomRightOffset.dy,
               child: GestureDetector(
                 onPanUpdate: (drag) {
                   final dx = drag.delta.dx;
@@ -66,8 +58,8 @@ class _FloatingViewState extends State<FloatingView> {
 
                   setState(() {
                     bottomRightOffset = Offset(
-                      max(0, min(offset.dx - dx, maxRightOffset)),
-                      max(0, min(offset.dy - dy, maxBottomOffset)),
+                      max(0, min(bottomRightOffset.dx - dx, maxRightOffset)),
+                      max(0, min(bottomRightOffset.dy - dy, maxBottomOffset)),
                     );
                   });
                 },
