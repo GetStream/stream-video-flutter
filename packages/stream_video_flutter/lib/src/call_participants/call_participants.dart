@@ -1,9 +1,8 @@
-import 'dart:math';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import '../widgets/floating_view/floating_view_alignment.dart';
 import 'screen_share_item.dart';
 
 /// {@template callParticipantWidgetBuilder}
@@ -31,6 +30,7 @@ class StreamCallParticipants extends StatelessWidget {
     this.screenShareItemBuilder,
     this.itemBuilder,
     this.enableFloatingView = true,
+    this.isSnappingBehaviorEnabled = true,
     this.floatingParticipantTheme,
     super.key,
   });
@@ -46,6 +46,10 @@ class StreamCallParticipants extends StatelessWidget {
 
   /// Enable picture-in-picture for current participant
   final bool enableFloatingView;
+
+  /// If the floating view should be automatically anchored to one of the
+  /// corners.
+  final bool isSnappingBehaviorEnabled;
 
   /// Theme for participant pip window
   final StreamFloatingCallParticipantTheme? floatingParticipantTheme;
@@ -70,6 +74,7 @@ class StreamCallParticipants extends StatelessWidget {
       itemBuilder: itemBuilder,
       enableFloatingView: enableFloatingView,
       floatingParticipantTheme: floatingParticipantTheme,
+      isSnappingBehaviorEnabled: isSnappingBehaviorEnabled,
     );
   }
 }
@@ -80,6 +85,7 @@ class RegularCallParticipantsContent extends StatefulWidget {
     required this.participants,
     this.itemBuilder,
     this.enableFloatingView = true,
+    this.isSnappingBehaviorEnabled = true,
     this.floatingParticipantTheme,
   });
 
@@ -91,6 +97,10 @@ class RegularCallParticipantsContent extends StatefulWidget {
 
   /// Enable picture-in-picture for current participant
   final bool enableFloatingView;
+
+  /// If the floating view should be automatically anchored to one of the
+  /// corners.
+  final bool isSnappingBehaviorEnabled;
 
   /// Theme for participant pip window
   final StreamFloatingCallParticipantTheme? floatingParticipantTheme;
@@ -186,55 +196,16 @@ class _RegularCallParticipantsContentState
     final floatingParticipantHeight = floatingTheme.floatingParticipantHeight;
     final floatingParticipantPadding = floatingTheme.floatingParticipantPadding;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final parentSize = constraints.biggest;
-
-        final maxRightOffset = parentSize.width -
-            floatingParticipantWidth -
-            2 * floatingParticipantPadding;
-        final maxBottomOffset = parentSize.height -
-            floatingParticipantHeight -
-            2 * floatingParticipantPadding;
-
-        // If window is resized, this resets the floating window.
-        bottomRightOffset.value = Offset(
-          min(bottomRightOffset.value.dx, maxRightOffset),
-          min(bottomRightOffset.value.dy, maxBottomOffset),
-        );
-
-        return Stack(
-          children: [
-            participantGrid,
-            ValueListenableBuilder(
-              valueListenable: bottomRightOffset,
-              builder: (context, val, child) {
-                final offset = bottomRightOffset.value;
-
-                return Positioned(
-                  right: offset.dx,
-                  bottom: offset.dy,
-                  child: GestureDetector(
-                    onPanUpdate: (drag) {
-                      final dx = drag.delta.dx;
-                      final dy = drag.delta.dy;
-
-                      bottomRightOffset.value = Offset(
-                        max(0, min(offset.dx - dx, maxRightOffset)),
-                        max(0, min(offset.dy - dy, maxBottomOffset)),
-                      );
-                    },
-                    child: child,
-                  ),
-                );
-              },
-              child: StreamFloatingCallParticipant(
-                participant: local.first,
-              ),
-            ),
-          ],
-        );
-      },
+    return FloatingViewContainer(
+      floatingViewWidth: floatingParticipantWidth,
+      floatingViewHeight: floatingParticipantHeight,
+      isSnappingBehaviorEnabled: true,
+      floatingViewPadding: floatingParticipantPadding,
+      floatingViewAlignment: FloatingViewAlignment.topRight,
+      floatingView: StreamFloatingCallParticipant(
+        participant: local.first,
+      ),
+      child: participantGrid,
     );
   }
 
