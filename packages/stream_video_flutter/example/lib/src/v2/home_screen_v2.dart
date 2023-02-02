@@ -24,7 +24,7 @@ class _HomeScreenStateV2 extends State<HomeScreenV2> {
 
   var _isInProgress = false;
 
-  Future<void> _joinOrCreateCall() async {
+  void _joinOrCreateCall() {
     final callId = _callIdController.text;
     if (callId.isEmpty) return debugPrint('Call ID is empty');
 
@@ -32,10 +32,11 @@ class _HomeScreenStateV2 extends State<HomeScreenV2> {
 
     try {
       final callCid = StreamCallCid.from(type: 'default', id: callId);
+      final call = CallV2.fromCid(callCid: callCid);
 
       Navigator.of(context).pushReplacementNamed(
         CallScreenV2.routeName,
-        arguments: callCid,
+        arguments: call,
       );
     } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');

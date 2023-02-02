@@ -520,10 +520,11 @@ extension PublisherRtcManager on RtcManager {
       _logger.e(() => 'replaceTrack() did throw $error');
     }
 
-    // Update new stream and track.
+    // Update new stream, track and constraints.
     return publishedTracks[track.trackId] = track.copyWith(
       track: newTrack,
       stream: newStream,
+      mediaConstraints: constraints,
     );
   }
 

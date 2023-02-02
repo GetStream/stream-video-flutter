@@ -5,6 +5,8 @@ import 'screen_share_constraints.dart';
 
 export 'audio_constraints.dart';
 export 'camera_constraints.dart';
+export 'constraints/camera_position.dart';
+export 'constraints/facing_mode.dart';
 export 'screen_share_constraints.dart';
 export 'video_constraints.dart';
 

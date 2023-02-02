@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+import 'package:stream_video/src/v2/webrtc/media/constraints/camera_position.dart';
 
 import '../webrtc/model/rtc_video_dimension.dart';
 
@@ -9,8 +10,14 @@ abstract class TrackState with EquatableMixin {
 
   factory TrackState.local({
     bool muted = false,
+    String? deviceId,
+    CameraPositionV2 cameraPosition = CameraPositionV2.front,
   }) {
-    return LocalTrackState._(muted: muted);
+    return LocalTrackState._(
+      muted: muted,
+      deviceId: deviceId,
+      cameraPosition: cameraPosition,
+    );
   }
 
   factory TrackState.remote({
@@ -54,17 +61,28 @@ abstract class TrackState with EquatableMixin {
 }
 
 class LocalTrackState extends TrackState {
-  const LocalTrackState._({required super.muted});
+  const LocalTrackState._({
+    required super.muted,
+    this.deviceId,
+    this.cameraPosition = CameraPositionV2.front,
+  });
+
+  /// The deviceId of the capture device to use.
+  final String? deviceId;
+
+  /// The camera position of the track in case it is a video track.
+  final CameraPositionV2 cameraPosition;
 
   @override
-  List<Object?> get props => [muted];
+  List<Object?> get props => [muted, deviceId, cameraPosition];
 
   @override
   String toString() {
-    if (muted) {
-      return 'muted';
-    }
-    return 'published';
+    return [
+      if (muted) 'muted',
+      if (deviceId != null) 'deviceId($deviceId)',
+      'cameraPosition($cameraPosition)',
+    ].join(', ');
   }
 
   /// Returns a copy of this [LocalTrackState] with the given fields
@@ -72,9 +90,13 @@ class LocalTrackState extends TrackState {
   @override
   LocalTrackState copyWith({
     bool? muted,
+    String? deviceId,
+    CameraPositionV2? cameraPosition,
   }) {
     return LocalTrackState._(
       muted: muted ?? this.muted,
+      deviceId: deviceId ?? this.deviceId,
+      cameraPosition: cameraPosition ?? this.cameraPosition,
     );
   }
 }
@@ -96,22 +118,19 @@ class RemoteTrackState extends TrackState {
 
   @override
   String toString() {
-    final buffer = StringBuffer();
-    if (subscribed) buffer.write('subscribed');
-    if (received) buffer.write(', received');
-    if (muted) buffer.write(', muted');
-    final dimension = videoDimension;
-    if (dimension != null) {
-      buffer.write(', size(');
-      buffer.write(dimension.width);
-      buffer.write('-');
-      buffer.write(dimension.height);
-      buffer.write(')');
-    }
-    if (buffer.isEmpty) {
+    final fields = [
+      if (subscribed) 'subscribed',
+      if (received) 'received',
+      if (muted) 'muted',
+      if (videoDimension != null)
+        'videoDimension(width: ${videoDimension!.width}, height: ${videoDimension!.height})',
+    ];
+
+    if (fields.isEmpty) {
       return 'published';
     }
-    return buffer.toString();
+
+    return fields.join(', ');
   }
 
   /// Returns a copy of this [RemoteTrackState] with the given fields

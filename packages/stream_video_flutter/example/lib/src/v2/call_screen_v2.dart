@@ -119,6 +119,10 @@ class _CallScreenV2State extends State<CallScreenV2> {
               call: widget.call,
               localParticipant: localParticipant,
             ),
+            FlipCameraButton(
+              call: widget.call,
+              localParticipant: localParticipant,
+            ),
             CallHangup(onHangup: _hangUp),
           ],
         ),
@@ -221,5 +225,42 @@ class ToggleCameraButton extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class FlipCameraButton extends StatelessWidget {
+  const FlipCameraButton({
+    super.key,
+    required this.call,
+    required this.localParticipant,
+  });
+
+  final CallV2 call;
+  final CallParticipantStateV2 localParticipant;
+
+  @override
+  Widget build(BuildContext context) {
+    final position = getCurrentCameraPosition();
+    return CallControlOption(
+      icon: const Icon(Icons.flip_camera_ios_rounded),
+      onPressed: position != null
+          ? () {
+              final newPosition = position == CameraPositionV2.front
+                  ? CameraPositionV2.back
+                  : CameraPositionV2.front;
+
+              call.apply(
+                SetCameraPosition(cameraPosition: newPosition),
+              );
+            }
+          : null,
+    );
+  }
+
+  CameraPositionV2? getCurrentCameraPosition() {
+    final trackState = localParticipant.publishedTracks[SfuTrackType.video];
+    if (trackState is! LocalTrackState) return null;
+
+    return trackState.cameraPosition;
   }
 }
