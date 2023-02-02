@@ -14,4 +14,5 @@ export 'src/call_screen/outgoing_call/outgoing_call.dart';
 export 'src/models/stream_icon_toggle.dart';
 export 'src/participants_info/stream_participant_info.dart';
 export 'src/theme/themes.dart';
+export 'src/widgets/floating_view/floating_view_container.dart';
 export 'src/widgets/stream_user_avatar.dart';

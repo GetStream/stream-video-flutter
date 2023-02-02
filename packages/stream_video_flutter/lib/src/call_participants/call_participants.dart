@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../widgets/floating_view.dart';
+import '../widgets/floating_view/floating_view_alignment.dart';
 import 'screen_share_item.dart';
 
 /// {@template callParticipantWidgetBuilder}
@@ -178,12 +178,23 @@ class _RegularCallParticipantsContentState
       return participantGrid;
     }
 
-    return FloatingView(
-      topWidget: StreamFloatingCallParticipant(
+    final streamChatTheme =
+        StreamVideoTheme.of(context).floatingCallParticipantTheme;
+    final floatingTheme = widget.floatingParticipantTheme ?? streamChatTheme;
+    final floatingParticipantWidth = floatingTheme.floatingParticipantWidth;
+    final floatingParticipantHeight = floatingTheme.floatingParticipantHeight;
+    final floatingParticipantPadding = floatingTheme.floatingParticipantPadding;
+
+    return FloatingViewContainer(
+      floatingViewWidth: floatingParticipantWidth,
+      floatingViewHeight: floatingParticipantHeight,
+      isSnappingBehaviorEnabled: true,
+      floatingViewPadding: floatingParticipantPadding,
+      floatingViewAlignment: FloatingViewAlignment.topRight,
+      floatingView: StreamFloatingCallParticipant(
         participant: local.first,
       ),
-      bottomWidget: participantGrid,
-      floatingParticipantTheme: widget.floatingParticipantTheme,
+      child: participantGrid,
     );
   }
 

@@ -10,8 +10,8 @@ import '../../stream_video_flutter.dart';
 class StreamFloatingCallParticipantTheme with Diagnosticable {
   const StreamFloatingCallParticipantTheme({
     this.streamCallParticipantTheme = const StreamCallParticipantTheme(),
-    this.floatingParticipantHeight = 140,
-    this.floatingParticipantWidth = 220,
+    this.floatingParticipantHeight = 150,
+    this.floatingParticipantWidth = 125,
     this.floatingParticipantPadding = 16,
     this.avatarSize,
     this.avatarBorderRadius,
