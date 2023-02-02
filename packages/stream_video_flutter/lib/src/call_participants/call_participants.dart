@@ -30,6 +30,7 @@ class StreamCallParticipants extends StatelessWidget {
     this.screenShareItemBuilder,
     this.itemBuilder,
     this.enableFloatingView = true,
+    this.isSnappingBehaviorEnabled = true,
     this.floatingParticipantTheme,
     super.key,
   });
@@ -45,6 +46,10 @@ class StreamCallParticipants extends StatelessWidget {
 
   /// Enable picture-in-picture for current participant
   final bool enableFloatingView;
+
+  /// If the floating view should be automatically anchored to one of the
+  /// corners.
+  final bool isSnappingBehaviorEnabled;
 
   /// Theme for participant pip window
   final StreamFloatingCallParticipantTheme? floatingParticipantTheme;
@@ -69,6 +74,7 @@ class StreamCallParticipants extends StatelessWidget {
       itemBuilder: itemBuilder,
       enableFloatingView: enableFloatingView,
       floatingParticipantTheme: floatingParticipantTheme,
+      isSnappingBehaviorEnabled: isSnappingBehaviorEnabled,
     );
   }
 }
@@ -79,6 +85,7 @@ class RegularCallParticipantsContent extends StatefulWidget {
     required this.participants,
     this.itemBuilder,
     this.enableFloatingView = true,
+    this.isSnappingBehaviorEnabled = true,
     this.floatingParticipantTheme,
   });
 
@@ -90,6 +97,10 @@ class RegularCallParticipantsContent extends StatefulWidget {
 
   /// Enable picture-in-picture for current participant
   final bool enableFloatingView;
+
+  /// If the floating view should be automatically anchored to one of the
+  /// corners.
+  final bool isSnappingBehaviorEnabled;
 
   /// Theme for participant pip window
   final StreamFloatingCallParticipantTheme? floatingParticipantTheme;

@@ -75,6 +75,12 @@ class _SnappingFloatingViewState extends State<SnappingFloatingView>
   }
 
   @override
+  void dispose() {
+    _snapAnimationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
