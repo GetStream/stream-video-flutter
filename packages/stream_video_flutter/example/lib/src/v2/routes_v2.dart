@@ -29,15 +29,15 @@ mixin RoutesV2 {
         return MaterialPageRoute(
           settings: const RouteSettings(name: CallScreenV2.routeName),
           builder: (context) {
-            final callCid = settings.arguments as StreamCallCid;
+            final call = settings.arguments as CallV2;
 
-            navigateHome() {
+            void navigateHome() {
               Navigator.of(context)
                   .pushReplacementNamed(HomeScreenV2.routeName);
             }
 
             return CallScreenV2(
-              call: CallV2.fromCid(callCid: callCid),
+              call: call,
               onBackPressed: navigateHome,
               onHangUp: navigateHome,
             );

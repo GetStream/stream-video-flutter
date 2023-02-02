@@ -23,6 +23,8 @@ class CallControlReducer {
       return _reduceMicrophoneEnabled(state, action);
     } else if (action is SetScreenShareEnabled) {
       return _reduceScreenShareEnabled(state, action);
+    } else if (action is SetCameraPosition) {
+      return _reduceCameraPosition(state, action);
     } else if (action is UpdateSubscriptions) {
       return _reduceUpdateSubscriptions(state, action);
     } else if (action is UpdateSubscription) {
@@ -71,10 +73,9 @@ class CallControlReducer {
               ),
             },
           );
-        } else {
-          _logger.v(() => '[updateSub] pSame: $participant');
-          return participant;
         }
+        _logger.v(() => '[updateSub] pSame: $participant');
+        return participant;
       }).toList(),
     );
   }
@@ -85,20 +86,21 @@ class CallControlReducer {
   ) {
     return state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
-        final trackState = participant.publishedTracks[action.trackType];
-        if (participant.sessionId == action.sessionId &&
-            trackState is RemoteTrackState) {
-          return participant.copyWith(
-            publishedTracks: {
-              ...participant.publishedTracks,
-              action.trackType: trackState.copyWith(
-                subscribed: false,
-              ),
-            },
-          );
-        } else {
-          return participant;
+        if (participant.userId == action.userId &&
+            participant.sessionId == action.sessionId) {
+          final trackState = participant.publishedTracks[action.trackType];
+          if (trackState is RemoteTrackState) {
+            return participant.copyWith(
+              publishedTracks: {
+                ...participant.publishedTracks,
+                action.trackType: trackState.copyWith(
+                  subscribed: false,
+                ),
+              },
+            );
+          }
         }
+        return participant;
       }).toList(),
     );
   }
@@ -152,6 +154,30 @@ class CallControlReducer {
     );
   }
 
+  CallStateV2 _reduceCameraPosition(
+    CallStateV2 state,
+    SetCameraPosition action,
+  ) {
+    return state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.isLocal) {
+          final trackState = participant.publishedTracks[SfuTrackType.video];
+          if (trackState is LocalTrackState) {
+            return participant.copyWith(
+              publishedTracks: {
+                ...participant.publishedTracks,
+                SfuTrackType.video: trackState.copyWith(
+                  cameraPosition: action.cameraPosition,
+                ),
+              },
+            );
+          }
+        }
+        return participant;
+      }).toList(),
+    );
+  }
+
   CallStateV2 _reduceCameraEnabled(
     CallStateV2 state,
     SetCameraEnabled action,
@@ -181,15 +207,17 @@ class CallControlReducer {
     return state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
-          return participant.copyWith(
-            publishedTracks: {
-              ...participant.publishedTracks,
-              trackType: TrackState.local(muted: !enabled)
-            },
-          );
-        } else {
-          return participant;
+          final trackState = participant.publishedTracks[trackType];
+          if (trackState is LocalTrackState) {
+            return participant.copyWith(
+              publishedTracks: {
+                ...participant.publishedTracks,
+                trackType: trackState.copyWith(muted: !enabled),
+              },
+            );
+          }
         }
+        return participant;
       }).toList(),
     );
   }

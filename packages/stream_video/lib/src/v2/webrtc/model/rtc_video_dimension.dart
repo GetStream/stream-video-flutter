@@ -26,7 +26,7 @@ class RtcVideoDimension with EquatableMixin {
 
   @override
   String toString() {
-    return 'RtcVideoDimension{width: $width, height: $height, area: $area}';
+    return 'RtcVideoDimension{width: $width, height: $height}';
   }
 
   @override
