@@ -207,12 +207,20 @@ class CallControlReducer {
     return state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
-          final trackState = participant.publishedTracks[trackType];
+          final publishedTracks = participant.publishedTracks;
+          final trackState = publishedTracks[trackType] ?? TrackState.local();
           if (trackState is LocalTrackState) {
+            var cameraPosition = trackState.cameraPosition;
+            if (trackType == SfuTrackType.video && cameraPosition == null) {
+              cameraPosition = CameraPositionV2.front;
+            }
             return participant.copyWith(
               publishedTracks: {
-                ...participant.publishedTracks,
-                trackType: trackState.copyWith(muted: !enabled),
+                ...publishedTracks,
+                trackType: trackState.copyWith(
+                  muted: !enabled,
+                  cameraPosition: cameraPosition,
+                ),
               },
             );
           }

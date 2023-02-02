@@ -16,6 +16,7 @@ class CallStateV2 extends Equatable {
     return CallStateV2._(
       currentUserId: currentUserId,
       callCid: callCid,
+      createdByUserId: '',
       sessionId: '',
       status: CallStatus.idle(),
       callParticipants: List.unmodifiable(const []),
@@ -31,6 +32,7 @@ class CallStateV2 extends Equatable {
     return CallStateV2._(
       currentUserId: currentUserId,
       callCid: callCid,
+      createdByUserId: metadata.info.createdByUserId,
       sessionId: '',
       status: metadata.toCallStatus(currentUserId, ringing),
       callParticipants: List.unmodifiable(
@@ -45,6 +47,7 @@ class CallStateV2 extends Equatable {
   const CallStateV2._({
     required this.currentUserId,
     required this.callCid,
+    required this.createdByUserId,
     required this.sessionId,
     required this.status,
     required this.callParticipants,
@@ -52,6 +55,7 @@ class CallStateV2 extends Equatable {
 
   final String currentUserId;
   final StreamCallCid callCid;
+  final String createdByUserId;
   final String sessionId;
   final CallStatus status;
   final List<CallParticipantStateV2> callParticipants;
@@ -61,6 +65,7 @@ class CallStateV2 extends Equatable {
   CallStateV2 copyWith({
     String? currentUserId,
     StreamCallCid? callCid,
+    String? createdByUserId,
     String? sessionId,
     CallStatus? status,
     List<CallParticipantStateV2>? callParticipants,
@@ -68,6 +73,7 @@ class CallStateV2 extends Equatable {
     return CallStateV2._(
       currentUserId: currentUserId ?? this.currentUserId,
       callCid: callCid ?? this.callCid,
+      createdByUserId: createdByUserId ?? this.createdByUserId,
       sessionId: sessionId ?? this.sessionId,
       status: status ?? this.status,
       callParticipants: callParticipants ?? this.callParticipants,
@@ -75,16 +81,21 @@ class CallStateV2 extends Equatable {
   }
 
   @override
-  bool? get stringify => true;
-
-  @override
   List<Object?> get props => [
         currentUserId,
         callCid,
+        createdByUserId,
         sessionId,
         status,
         callParticipants,
       ];
+
+  @override
+  String toString() {
+    return 'CallStateV2{currentUserId: $currentUserId, callCid: $callCid, '
+        'createdByUserId: $createdByUserId, status: $status, '
+        'sessionId: $sessionId, callParticipants: $callParticipants}';
+  }
 }
 
 extension on CallMetadata {

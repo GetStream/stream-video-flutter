@@ -1,10 +1,19 @@
-import 'package:stream_video/src/v2/coordinator/models/coordinator_models.dart';
+import 'package:equatable/equatable.dart';
+import 'package:meta/meta.dart';
+import '../models/coordinator_models.dart';
 
 // TODO: Should we call it VideoEvent or CoordinatorEvent?
 
 /// Represents the events coming in from the socket.
-abstract class CoordinatorEventV2 {
+@immutable
+abstract class CoordinatorEventV2 with EquatableMixin {
   const CoordinatorEventV2();
+
+  @override
+  bool? get stringify => true;
+
+  @override
+  List<Object?> get props => [];
 }
 
 /// Sent periodically by the server to keep the connection alive.
@@ -14,6 +23,9 @@ class CoordinatorHealthCheckEvent extends CoordinatorEventV2 {
 
   final String clientId;
   final String userId;
+
+  @override
+  List<Object?> get props => [clientId, userId];
 }
 
 /// Sent when someone creates a call and invites another person to participate.
@@ -31,6 +43,9 @@ class CoordinatorCallCreatedEvent extends CoordinatorEventV2 {
   final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
+
+  @override
+  List<Object?> get props => [callCid, ringing, info, details, users];
 }
 
 /// Sent when a call gets updated.
@@ -46,6 +61,9 @@ class CoordinatorCallUpdatedEvent extends CoordinatorEventV2 {
   final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
+
+  @override
+  List<Object?> get props => [callCid, info, details, users];
 }
 
 /// Sent when a calls gets ended.
@@ -61,6 +79,9 @@ class CoordinatorCallEndedEvent extends CoordinatorEventV2 {
   final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
+
+  @override
+  List<Object?> get props => [callCid, info, details, users];
 }
 
 /// Sent when a user accepts the call.
@@ -78,6 +99,9 @@ class CoordinatorCallAcceptedEvent extends CoordinatorEventV2 {
   final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
+
+  @override
+  List<Object?> get props => [callCid, sentByUserId, info, details, users];
 }
 
 /// Sent when a user rejects the call.
@@ -95,6 +119,9 @@ class CoordinatorCallRejectedEvent extends CoordinatorEventV2 {
   final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
+
+  @override
+  List<Object?> get props => [callCid, sentByUserId, info, details, users];
 }
 
 /// Sent when a user cancels the call.
@@ -112,6 +139,9 @@ class CoordinatorCallCancelledEvent extends CoordinatorEventV2 {
   final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
+
+  @override
+  List<Object?> get props => [callCid, sentByUserId, info, details, users];
 }
 
 /// Sent when call members are updated.
@@ -127,6 +157,9 @@ class CoordinatorCallMembersUpdatedEvent extends CoordinatorEventV2 {
   final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
+
+  @override
+  List<Object?> get props => [callCid, info, details, users];
 }
 
 /// Sent when call members are deleted.
@@ -142,6 +175,9 @@ class CoordinatorCallMembersDeletedEvent extends CoordinatorEventV2 {
   final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
+
+  @override
+  List<Object?> get props => [callCid, info, details, users];
 }
 
 class CoordinatorCallCustomEvent extends CoordinatorEventV2 {
@@ -162,6 +198,17 @@ class CoordinatorCallCustomEvent extends CoordinatorEventV2 {
   final CallDetails details;
   final Map<String, CallUser> users;
   final String? customJson;
+
+  @override
+  List<Object?> get props => [
+        callCid,
+        type,
+        senderUserId,
+        info,
+        details,
+        users,
+        customJson,
+      ];
 }
 
 // Unknown event.

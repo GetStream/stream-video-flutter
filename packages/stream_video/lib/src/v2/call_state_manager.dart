@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 
 import '../logger/impl/tagged_logger.dart';
+import '../logger/stream_log.dart';
 import 'action/action.dart';
 import 'action/call_control_action.dart';
 import 'action/coordinator_action.dart';
@@ -20,6 +21,9 @@ import 'sfu/data/models/sfu_track_type.dart';
 import 'state_emitter.dart';
 import 'stream_video_v2.dart';
 import 'utils/result.dart';
+
+const _tag = 'SV:StateManager';
+int _stateSeq = 1;
 
 abstract class CallStateManager {
   const CallStateManager();
@@ -46,9 +50,11 @@ class CallStateManagerImpl extends CallStateManager {
     required StreamVideoV2 streamVideo,
   })  : _streamVideo = streamVideo,
         _state = MutableStateEmitterImpl(initialState),
-        _stateReducer = CallStateReducer();
+        _stateReducer = CallStateReducer() {
+    streamLog.i(_tag, () => '<init> initialState: $initialState');
+  }
 
-  late final _logger = taggedLogger(tag: 'SV:StateManager');
+  late final _logger = taggedLogger(tag: '$_tag-$_stateSeq');
 
   final StreamVideoV2 _streamVideo;
   final CallStateReducer _stateReducer;
@@ -175,7 +181,9 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   void _postReduced(StreamAction action) {
+    _logger.v(() => '[postReduced] state: ${_state.value}');
     final reduced = _stateReducer.reduce(_state.value, action);
+    _logger.v(() => '[postReduced] reduced: $reduced');
     _postState(state: reduced);
   }
 

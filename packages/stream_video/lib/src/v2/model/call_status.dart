@@ -49,9 +49,15 @@ abstract class CallStatus extends Equatable {
 
   bool get isJoinable => this is CallStatusJoinable;
 
+  bool get isOutgoing => this is CallStatusOutgoing;
+
+  bool get isIncoming => this is CallStatusIncoming;
+
   bool get isJoined => this is CallStatusJoined;
 
   bool get isConnected => this is CallStatusConnected;
+
+  bool get isDrop => this is CallStatusDrop;
 }
 
 class CallStatusIdle extends CallStatus {
@@ -110,7 +116,7 @@ class CallStatusIncoming extends CallStatusJoinable {
 
   @override
   String toString() {
-    return 'Outgoing{acceptedByMe: $acceptedByMe}';
+    return 'Incoming{acceptedByMe: $acceptedByMe}';
   }
 }
 
@@ -150,6 +156,6 @@ class CallStatusDrop extends CallStatus {
 
   @override
   String toString() {
-    return 'Drop';
+    return 'Drop{reason: $reason}';
   }
 }

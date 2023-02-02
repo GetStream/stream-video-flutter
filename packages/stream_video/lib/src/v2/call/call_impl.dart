@@ -26,12 +26,17 @@ import 'session/call_session_factory.dart';
 
 const _idSessionEvents = 1;
 
+const _tag = 'SV:Call';
+
+int _callSeq = 1;
+
 /// Represents a [CallV2Impl] in which you can connect to.
 class CallV2Impl extends CallV2 {
   factory CallV2Impl({
     required StreamCallCid callCid,
     StreamVideoV2? streamVideo,
   }) {
+    streamLog.i(_tag, () => '<factory> callCid: $callCid');
     final finalStreamVideo = streamVideo ?? StreamVideoV2.instance;
     final stateManager = _makeCallStateManager(callCid, finalStreamVideo);
     return CallV2Impl._(
@@ -43,6 +48,7 @@ class CallV2Impl extends CallV2 {
     required CallCreated data,
     StreamVideoV2? streamVideo,
   }) {
+    streamLog.i(_tag, () => '<factory> created: $data');
     final finalStreamVideo = streamVideo ?? StreamVideoV2.instance;
     final stateManager = _makeCallStateManager(data.callCid, finalStreamVideo);
     stateManager.onCallCreated(data);
@@ -55,6 +61,7 @@ class CallV2Impl extends CallV2 {
     required CallJoined data,
     StreamVideoV2? streamVideo,
   }) {
+    streamLog.i(_tag, () => '<factory> joined: $data');
     final finalStreamVideo = streamVideo ?? StreamVideoV2.instance;
     final stateManager = _makeCallStateManager(data.callCid, finalStreamVideo);
     stateManager.onCallJoined(data);
@@ -72,15 +79,20 @@ class CallV2Impl extends CallV2 {
         ),
         _stateManager = stateManager,
         _streamVideo = streamVideo {
-    streamVideo.events.listen(_stateManager.onCoordinatorEvent);
+    streamLog.i(_tag, () => '<init> state: ${stateManager.state.value}');
+    streamVideo.events.listen((event) {
+      _logger.v(() => '[onCallCoordEvent] event.type: ${event.runtimeType}');
+      _logger.v(() => '[onCallCoordEvent] calStatus: ${state.value.status}');
+      _stateManager.onCoordinatorEvent(event);
+    });
   }
 
-  late final _logger = taggedLogger(tag: 'SV:Call:${state.value.callCid}');
+  late final _logger = taggedLogger(tag: '$_tag-${_callSeq++}');
   late final _subscriptions = Subscriptions();
 
   final StreamVideoV2 _streamVideo;
   final CallSessionFactory _sessionFactory;
-  late final CallStateManager _stateManager;
+  final CallStateManager _stateManager;
 
   @override
   StateEmitter<CallStateV2> get state => _stateManager.state;

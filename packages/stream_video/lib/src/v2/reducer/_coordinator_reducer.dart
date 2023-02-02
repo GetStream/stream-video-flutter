@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 
 import '../../logger/impl/tagged_logger.dart';
 import '../action/coordinator_action.dart';
+import '../call_participant_state.dart';
 import '../call_state.dart';
 import '../coordinator/ws/coordinator_events.dart';
 import '../model/call_status.dart';
@@ -19,7 +20,7 @@ class CoordinatorReducer {
     if (action is CoordinatorUsersAction) {
       return _reduceCoordinatorUsers(state, action);
     } else if (action is CoordinatorEventAction) {
-      _reduceCoordinatorEvent(state, action.event);
+      return _reduceCoordinatorEvent(state, action.event);
     }
     return state;
   }
@@ -69,7 +70,7 @@ class CoordinatorReducer {
     final participant = state.callParticipants.firstWhereOrNull((participant) {
       return participant.userId == event.sentByUserId;
     });
-    if (participant != null) {
+    if (participant == null) {
       _logger.w(() => '[reduceCallAccepted] rejected (accepted by non-Member)');
       return state;
     }
@@ -83,23 +84,38 @@ class CoordinatorReducer {
     CoordinatorCallRejectedEvent event,
   ) {
     final status = state.status;
+    _logger.d(() => '[reduceCallRejected] state: $state');
     if (status is! CallStatusActive) {
-      _logger.w(() => '[reduceCallRejected] rejected (status is not Active)');
+      _logger.w(
+        () => '[reduceCallRejected] rejected (status is not Active): $status',
+      );
       return state;
     }
-    final participant = state.callParticipants.firstWhereOrNull((participant) {
+    final participantIndex = state.callParticipants.indexWhere((participant) {
       return participant.userId == event.sentByUserId;
     });
-    if (participant != null) {
-      _logger.w(() => '[reduceCallAccepted] rejected (accepted by non-Member)');
+    if (participantIndex == -1) {
+      _logger.w(
+        () => '[reduceCallRejected] rejected '
+            '(by unknown user): ${event.sentByUserId}',
+      );
       return state;
     }
-    return state.copyWith(
-      status: CallStatus.drop(
-        DropReason.rejected(
-          byUserId: event.sentByUserId,
+    final callParticipants = [...state.callParticipants];
+    final removed = callParticipants.removeAt(participantIndex);
+    if (removed.userId == state.currentUserId ||
+        callParticipants.hasSingle(state.currentUserId)) {
+      return state.copyWith(
+        status: CallStatus.drop(
+          DropReason.rejected(
+            byUserId: removed.userId,
+          ),
         ),
-      ),
+        callParticipants: callParticipants,
+      );
+    }
+    return state.copyWith(
+      callParticipants: callParticipants,
     );
   }
 
@@ -112,21 +128,37 @@ class CoordinatorReducer {
       _logger.w(() => '[reduceCallCancelled] rejected (status is not Active)');
       return state;
     }
-    final participant = state.callParticipants.firstWhereOrNull((participant) {
+    final participantIndex = state.callParticipants.indexWhere((participant) {
       return participant.userId == event.sentByUserId;
     });
-    if (participant != null) {
+    if (participantIndex == -1) {
       _logger.w(
-        () => '[reduceCallCancelled] rejected (accepted by non-Member)',
+        () => '[reduceCallCancelled] rejected '
+            '(by unknown user): ${event.sentByUserId}',
       );
       return state;
     }
-    return state.copyWith(
-      status: CallStatus.drop(
-        DropReason.cancelled(
-          byUserId: event.sentByUserId,
+    final callParticipants = [...state.callParticipants];
+    final removed = callParticipants.removeAt(participantIndex);
+    if (removed.userId == state.currentUserId ||
+        callParticipants.hasSingle(state.currentUserId)) {
+      return state.copyWith(
+        status: CallStatus.drop(
+          DropReason.cancelled(
+            byUserId: removed.userId,
+          ),
         ),
-      ),
+        callParticipants: callParticipants,
+      );
+    }
+    return state.copyWith(
+      callParticipants: callParticipants,
     );
+  }
+}
+
+extension on List<CallParticipantStateV2> {
+  bool hasSingle(String userId) {
+    return length == 1 && firstOrNull?.userId == userId;
   }
 }
