@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
@@ -17,33 +18,29 @@ class HomeScreenV2 extends StatefulWidget {
 }
 
 class _HomeScreenStateV2 extends State<HomeScreenV2> {
-  StreamVideoV2 streamVideo = StreamVideoV2.instance;
-  late final currentUser = streamVideo.currentUser!;
+  final _logger = taggedLogger(tag: 'HomeScreen');
+
+  final StreamVideoV2 _streamVideo = StreamVideoV2.instance;
+  late final currentUser = _streamVideo.currentUser!;
 
   final _callIdController = TextEditingController(text: 'call328');
+  final _callIdGenerator = Random();
 
   var _isInProgress = false;
 
-  void _joinOrCreateCall() {
-    final callId = _callIdController.text;
-    if (callId.isEmpty) return debugPrint('Call ID is empty');
-
-    setState(() => _isInProgress = true);
-
-    try {
-      final callCid = StreamCallCid.from(type: 'default', id: callId);
-      final call = CallV2.fromCid(callCid: callCid);
-
-      Navigator.of(context).pushReplacementNamed(
-        CallScreenV2.routeName,
-        arguments: call,
-      );
-    } catch (e, stk) {
-      debugPrint('Error joining or creating call: $e');
-      debugPrint(stk.toString());
-    } finally {
-      setState(() => _isInProgress = false);
-    }
+  @override
+  void initState() {
+    super.initState();
+    _streamVideo.onCallCreated = (data) {
+      _logger.d(() => '[onCallCreated] data: $data');
+      if (data.ringing) {
+        final call = CallV2.fromCreated(data: data);
+        Navigator.of(context).pushReplacementNamed(
+          CallScreenV2.routeName,
+          arguments: call,
+        );
+      }
+    };
   }
 
   @override
@@ -66,18 +63,14 @@ class _HomeScreenStateV2 extends State<HomeScreenV2> {
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: avatar,
         ),
         title: const Text('Stream Video UI Example'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await streamVideo.disconnectUser();
-              Navigator.of(context)
-                  .pushReplacementNamed(LoginScreenV2.routeName);
-            },
+            onPressed: _logout,
           ),
         ],
       ),
@@ -114,8 +107,12 @@ class _HomeScreenStateV2 extends State<HomeScreenV2> {
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: _joinOrCreateCall,
-            child: const Text('Join or Create call'),
+            onPressed: _join,
+            child: const Text('Join a call'),
+          ),
+          ElevatedButton(
+            onPressed: _dial,
+            child: const Text('Dial Tommaso'),
           ),
           // circular progress to show when joining a call
           if (_isInProgress) ...[
@@ -127,6 +124,65 @@ class _HomeScreenStateV2 extends State<HomeScreenV2> {
         ],
       ),
     );
+  }
+
+  Future<void> _logout() async {
+    await _streamVideo.disconnectUser();
+    Navigator.of(context).pushReplacementNamed(
+      LoginScreenV2.routeName,
+    );
+  }
+
+  Future<void> _join() async {
+    final callId = _callIdController.text;
+    if (callId.isEmpty) return debugPrint('Call ID is empty');
+
+    setState(() => _isInProgress = true);
+
+    try {
+      final callCid = StreamCallCid.from(type: 'default', id: callId);
+      final result = await _streamVideo.getOrCreateCall(cid: callCid);
+      if (result is Success<CallReceivedOrCreated>) {
+        final call = CallV2.fromCreated(data: result.data.data);
+
+        Navigator.of(context).pushReplacementNamed(
+          CallScreenV2.routeName,
+          arguments: call,
+        );
+      }
+    } catch (e, stk) {
+      debugPrint('Error joining or creating call: $e');
+      debugPrint(stk.toString());
+    } finally {
+      setState(() => _isInProgress = false);
+    }
+  }
+
+  Future<void> _dial() async {
+    final callId = _callIdGenerator.nextInt(1000000).toString();
+    setState(() => _isInProgress = true);
+
+    try {
+      final callCid = StreamCallCid.from(type: 'default', id: callId);
+      final result = await _streamVideo.createCall(
+        cid: callCid,
+        ringing: true,
+        participantIds: ['tommaso'],
+      );
+      if (result is Success<CallCreated>) {
+        final call = CallV2.fromCreated(data: result.data);
+
+        Navigator.of(context).pushReplacementNamed(
+          CallScreenV2.routeName,
+          arguments: call,
+        );
+      }
+    } catch (e, stk) {
+      debugPrint('Error joining or creating call: $e');
+      debugPrint(stk.toString());
+    } finally {
+      setState(() => _isInProgress = false);
+    }
   }
 }
 

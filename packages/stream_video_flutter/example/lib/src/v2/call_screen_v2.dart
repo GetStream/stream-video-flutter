@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import 'incoming_call_content.dart';
+import 'outgoing_call_content.dart';
 import 'view/call_participant_view.dart';
 
 class CallScreenV2 extends StatefulWidget {
@@ -23,10 +25,6 @@ class CallScreenV2 extends StatefulWidget {
 }
 
 class _CallScreenV2State extends State<CallScreenV2> {
-  // List<CallParticipantStateV2> participants = [];
-
-  // final _renderers = <String, ParticipantRenderer>{};
-
   @override
   void initState() {
     super.initState();
@@ -36,30 +34,30 @@ class _CallScreenV2State extends State<CallScreenV2> {
   }
 
   Future<void> _setState(CallStateV2 state) async {
-    // for (final participantState in state.callParticipants) {
-    //   final userId = participantState.userId;
-    //   final sessionId = participantState.sessionId;
-    //   final trackId = participantState.trackIdPrefix;
-    //   // final track = _call.getTrack(trackId, SfuTrackType.video);
-    //   print('(SV:CallScreenState): [setState] userId: $userId, track: $track');
-    //
-    //   if (track == null) {
-    //     await _renderers[sessionId]?.dispose();
-    //     _renderers.remove(sessionId);
-    //   } else {
-    //     final renderer = _renderers[sessionId] ?? ParticipantRenderer();
-    //     await renderer.initialize();
-    //     renderer.srcObject(track, SfuTrackType.video);
-    //     _renderers[sessionId] = renderer;
-    //   }
-    // }
-    setState(() {});
+    setState(() {
+      if (state.status.isDrop) {
+        _disconnect();
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final callState = widget.call.state.value;
     final status = callState.status;
+
+    if (status is CallStatusIncoming && !status.acceptedByMe) {
+      return IncomingCallContent(
+        call: widget.call,
+        onBackPressed: widget.onBackPressed,
+      );
+    }
+    if (status is CallStatusOutgoing && !status.acceptedByCallee) {
+      return OutgoingCallContent(
+        call: widget.call,
+        onBackPressed: widget.onBackPressed,
+      );
+    }
 
     if (status.isConnected) {
       final participants = callState.callParticipants.take(4).toList();
@@ -129,9 +127,24 @@ class _CallScreenV2State extends State<CallScreenV2> {
       );
     }
 
-    return Center(
-      child: Text(
-        'Status: ${status.runtimeType}',
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 4,
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () async {
+              await _hangUp();
+            },
+          ),
+        ],
+        title: Text('CallId: ${callState.callCid}'),
+      ),
+      body: Center(
+        child: Text(
+          'Status: ${status.runtimeType}',
+        ),
       ),
     );
   }
@@ -170,6 +183,10 @@ class _CallScreenV2State extends State<CallScreenV2> {
 
   Future<void> _hangUp() async {
     await widget.call.apply(const CancelCall());
+    await _disconnect();
+  }
+
+  Future<void> _disconnect() async {
     await widget.call.disconnect();
     widget.onBackPressed();
   }

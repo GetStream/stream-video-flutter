@@ -46,13 +46,13 @@ final List<LoginInfo> users = [
   ),
   LoginInfo(
     const UserInfo(
-      id: 'sam',
+      id: 'filip',
       role: 'admin',
-      name: 'Sam',
+      name: 'Filip',
       imageUrl:
-          'https://getstream.io/static/379eda22663bae101892ad1d37778c3d/802d2/samuel-jeeves.webp',
+          'https://getstream.io/static/76cda49669be38b92306cfc93ca742f1/802d2/filip-babi%C4%87.webp',
     ),
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9zYW0iLCJpYXQiOjE2NzAzMzk1MTUsInVzZXJfaWQiOiJzYW0ifQ.CDmyx9nQlWpqopuoQDP4p7caeGt_r51dLbg9uVO45OA',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9maWxpcCIsImlhdCI6MTY3MDMzOTQ4MSwidXNlcl9pZCI6ImZpbGlwIn0.rGK-twVawPRItb_xQigYuYVO8UDTCCNPYKM5xP6mpbo',
   ),
 ];
 

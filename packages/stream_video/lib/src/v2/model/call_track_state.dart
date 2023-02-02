@@ -11,7 +11,7 @@ abstract class TrackState with EquatableMixin {
   factory TrackState.local({
     bool muted = false,
     String? deviceId,
-    CameraPositionV2 cameraPosition = CameraPositionV2.front,
+    CameraPositionV2? cameraPosition,
   }) {
     return LocalTrackState._(
       muted: muted,
@@ -64,25 +64,29 @@ class LocalTrackState extends TrackState {
   const LocalTrackState._({
     required super.muted,
     this.deviceId,
-    this.cameraPosition = CameraPositionV2.front,
+    this.cameraPosition,
   });
 
   /// The deviceId of the capture device to use.
   final String? deviceId;
 
   /// The camera position of the track in case it is a video track.
-  final CameraPositionV2 cameraPosition;
+  final CameraPositionV2? cameraPosition;
 
   @override
   List<Object?> get props => [muted, deviceId, cameraPosition];
 
   @override
   String toString() {
-    return [
+    final fields = [
       if (muted) 'muted',
       if (deviceId != null) 'deviceId($deviceId)',
-      'cameraPosition($cameraPosition)',
-    ].join(', ');
+      if (cameraPosition != null) 'camera($cameraPosition)',
+    ];
+    if (fields.isEmpty) {
+      return 'published';
+    }
+    return fields.join(', ');
   }
 
   /// Returns a copy of this [LocalTrackState] with the given fields
