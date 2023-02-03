@@ -19,6 +19,8 @@ class LifecycleReducer {
       return _reduceUserId(state, action);
     } else if (action is CallCreatedAction) {
       return _reduceCallCreated(state, action);
+    } else if (action is CallJoiningAction) {
+      return _reduceCallJoining(state, action);
     } else if (action is CallJoinedAction) {
       return _reduceCallJoined(state, action);
     } else if (action is CallDisconnectedAction) {
@@ -60,6 +62,15 @@ class LifecycleReducer {
       callParticipants: action.data.metadata.toCallParticipants(
         state.currentUserId,
       ),
+    );
+  }
+
+  CallStateV2 _reduceCallJoining(
+    CallStateV2 state,
+    CallJoiningAction action,
+  ) {
+    return state.copyWith(
+      status: CallStatus.joining(),
     );
   }
 

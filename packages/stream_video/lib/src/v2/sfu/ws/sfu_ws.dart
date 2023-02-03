@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import '../../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../logger/impl/tagged_logger.dart';
+import '../../../logger/stream_log.dart';
 import '../../../types/other.dart';
 import '../../../ws/keep_alive.dart';
 import '../../../ws/ws.dart';
@@ -13,6 +14,9 @@ import '../data/events/sfu_event_mapper_extensions.dart';
 import '../data/events/sfu_events.dart';
 import 'sfu_event_listener.dart';
 
+const _tag = 'SV:Sfu-WS';
+int _sfuSeq = 1;
+
 /// TODO
 class SfuWebSocket extends StreamWebSocket
     with KeepAlive, ConnectionStateMixin {
@@ -22,6 +26,7 @@ class SfuWebSocket extends StreamWebSocket
     required String sfuUrl,
     Iterable<String>? protocols,
   }) {
+    streamLog.i(_tag, () => '<factory> sessionId: $sessionId');
     var wsEndpoint = 'ws://$sfuUrl:3031/ws';
     if (!['localhost', '127.0.0.1'].contains(sfuUrl)) {
       final wsUrl = Uri.parse(sfuUrl);
@@ -44,9 +49,11 @@ class SfuWebSocket extends StreamWebSocket
     super.url, {
     super.protocols,
     required this.sessionId,
-  });
+  }) {
+    _logger.i(() => '<init> sessionId: $sessionId');
+  }
 
-  final _logger = taggedLogger(tag: 'SV:Sfu-WS');
+  final _logger = taggedLogger(tag: '$_tag-${_sfuSeq++}');
 
   final String sessionId;
 
@@ -123,7 +130,8 @@ class SfuWebSocket extends StreamWebSocket
   @override
   void onClose(int? closeCode, String? closeReason) {
     _logger.i(
-      () => '[onClose] closeCode: $closeCode, closeReason: $closeReason',
+      () => '[onClose] closeCode: $closeCode, closeReason: $closeReason, '
+          'manuallyClosed: $_manuallyClosed',
     );
 
     if (_manuallyClosed) {
@@ -140,14 +148,20 @@ class SfuWebSocket extends StreamWebSocket
       () => '[disconnect] closeCode: $closeCode, closeReason: $closeReason',
     );
     // return if already disconnected.
-    if (connectionState == ConnectionState.disconnected) return;
+    if (connectionState == ConnectionState.disconnected) {
+      _logger.w(() => '[disconnect] rejected (already disconnected)');
+      return;
+    }
 
     // Stop sending keep alive messages.
     stopPingPong();
 
     // If no close code is provided,
     // means we are manually closing the connection.
-    if (closeCode == null) _manuallyClosed = true;
+    if (closeCode == null) {
+      _logger.v(() => '[disconnect] mark as "manuallyClosed"');
+      _manuallyClosed = true;
+    }
 
     return super.disconnect(closeCode, closeReason);
   }

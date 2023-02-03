@@ -30,8 +30,9 @@ abstract class CallStateManager {
   StateEmitter<CallStateV2> get state;
   Future<void> onUserIdSet(String userId);
   Future<void> onCallCreated(CallCreated data);
-  Future<void> onCallJoined(CallJoined data);
   Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data);
+  Future<void> onCallJoining();
+  Future<void> onCallJoined(CallJoined data);
   Future<void> onSessionStart(String sessionId);
   Future<void> onConnected();
   Future<void> onDisconnect();
@@ -97,6 +98,12 @@ class CallStateManagerImpl extends CallStateManager {
   Future<void> onConnectFailed(VideoError error) async {
     _logger.e(() => '[onConnectFailed] error: $error');
     _postReduced(CallConnectFailedAction(error));
+  }
+
+  @override
+  Future<void> onCallJoining() async {
+    _logger.d(() => '[onJoining] no args');
+    _postReduced(const CallJoiningAction());
   }
 
   @override

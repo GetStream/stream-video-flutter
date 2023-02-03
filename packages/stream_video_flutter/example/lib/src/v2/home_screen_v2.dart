@@ -28,6 +28,8 @@ void showSnackBar({
     );
 }
 
+int _homeSeq = 1;
+
 class HomeScreenV2 extends StatefulWidget {
   const HomeScreenV2({super.key});
 
@@ -41,11 +43,12 @@ class _HomeScreenState extends State<HomeScreenV2> {
   final StreamVideoV2 _streamVideo = StreamVideoV2.instance;
   late final currentUser = _streamVideo.currentUser!;
 
-  final _logger = taggedLogger(tag: 'HomeScreen');
+  final _logger = taggedLogger(tag: 'HomeScreen-${_homeSeq++}');
 
   @override
   void initState() {
     super.initState();
+    _logger.d(() => '[initState] no args');
     _streamVideo.onCallCreated = (data) {
       _logger.d(() => '[onCallCreated] data: $data');
       if (data.ringing) {
@@ -60,8 +63,9 @@ class _HomeScreenState extends State<HomeScreenV2> {
 
   @override
   void dispose() {
-    _streamVideo.onCallCreated = null;
     super.dispose();
+    _logger.d(() => '[dispose] no args');
+    _streamVideo.onCallCreated = null;
   }
 
   @override
@@ -127,6 +131,7 @@ class _StartCallScreenState extends State<StartCallScreen>
   final _selectedUsers = <UserInfo>{};
 
   bool _callInProgress = false;
+  bool _ringingCall = true;
 
   @override
   void dispose() {
@@ -162,16 +167,35 @@ class _StartCallScreenState extends State<StartCallScreen>
               },
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           if (_callInProgress)
             const CircularProgressIndicator(
               strokeWidth: 2,
             )
           else
-            ElevatedButton(
-              onPressed: _startCall,
-              child: const Text('Start call'),
-            ),
+            Column(
+              children: [
+                Row(
+                  children: [
+                    const Text('Ringing', style: TextStyle(fontSize: 16)),
+                    const SizedBox(width: 16),
+                    Switch(
+                      value: _ringingCall,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _ringingCall = !_ringingCall;
+                        });
+                      },
+                    )
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: _startCall,
+                  child: const Text('Start call'),
+                ),
+              ],
+            )
         ],
       ),
     );
@@ -193,7 +217,7 @@ class _StartCallScreenState extends State<StartCallScreen>
     final callCid = StreamCallCid.from(type: 'default', id: callId);
     final result = await widget.client.createCall(
       cid: callCid,
-      ringing: true,
+      ringing: _ringingCall,
       participantIds: [
         for (final user in _selectedUsers) user.id,
       ],
