@@ -8,25 +8,40 @@ import 'package:stream_video/stream_video.dart';
 import 'call_screen_v2.dart';
 import 'login_screen_v2.dart';
 
+void showSnackBar({
+  required BuildContext context,
+  required String message,
+}) {
+  ScaffoldMessenger.of(context)
+    ..removeCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(8),
+            topRight: Radius.circular(8),
+          ),
+        ),
+      ),
+    );
+}
+
 class HomeScreenV2 extends StatefulWidget {
   const HomeScreenV2({super.key});
 
   static const routeName = '/v2/home';
 
   @override
-  State<HomeScreenV2> createState() => _HomeScreenStateV2();
+  State<HomeScreenV2> createState() => _HomeScreenState();
 }
 
-class _HomeScreenStateV2 extends State<HomeScreenV2> {
-  final _logger = taggedLogger(tag: 'HomeScreen');
-
+class _HomeScreenState extends State<HomeScreenV2> {
   final StreamVideoV2 _streamVideo = StreamVideoV2.instance;
   late final currentUser = _streamVideo.currentUser!;
 
-  final _callIdController = TextEditingController(text: 'call328');
-  final _callIdGenerator = Random();
-
-  var _isInProgress = false;
+  final _logger = taggedLogger(tag: 'HomeScreen');
 
   @override
   void initState() {
@@ -45,83 +60,42 @@ class _HomeScreenStateV2 extends State<HomeScreenV2> {
 
   @override
   void dispose() {
-    _callIdController.dispose();
+    _streamVideo.onCallCreated = null;
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final name = currentUser.name;
-    final imageUrl = currentUser.imageUrl;
-
-    final avatar = imageUrl != null
-        ? CircleAvatar(
-            backgroundColor: Colors.white,
-            backgroundImage: NetworkImage(imageUrl))
-        : CircleAvatar(child: Text(name[0].toUpperCase()));
-
-    return Scaffold(
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8),
-          child: avatar,
-        ),
-        title: const Text('Stream Video UI Example'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _logout,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: Padding(
+            padding: const EdgeInsets.all(8),
+            child: avatarBuilder(context, currentUser),
           ),
-        ],
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Welcome: $name',
-            style: Theme.of(context).textTheme.headline5,
-          ),
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: TextField(
-              controller: _callIdController,
-              decoration: InputDecoration(
-                isDense: true,
-                border: const OutlineInputBorder(),
-                labelText: 'Enter call id',
-                // suffix button to generate a random call id
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: () {
-                    // generate a 10 character nanoId for call id
-                    final callId = nanoid(10);
-                    _callIdController.value = TextEditingValue(
-                      text: callId,
-                      selection: TextSelection.collapsed(offset: callId.length),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _join,
-            child: const Text('Join a call'),
-          ),
-          ElevatedButton(
-            onPressed: _dial,
-            child: const Text('Dial Tommaso'),
-          ),
-          // circular progress to show when joining a call
-          if (_isInProgress) ...[
-            const SizedBox(height: 16),
-            const CircularProgressIndicator(
-              strokeWidth: 2,
+          centerTitle: true,
+          title: const Text('Call Details'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: _logout,
             ),
           ],
-        ],
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Start a call'),
+              Tab(text: 'Join a call'),
+            ],
+            labelStyle: TextStyle(fontSize: 16),
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            StartCallScreen(client: _streamVideo),
+            JoinCallScreen(client: _streamVideo),
+          ],
+        ),
       ),
     );
   }
@@ -132,57 +106,312 @@ class _HomeScreenStateV2 extends State<HomeScreenV2> {
       LoginScreenV2.routeName,
     );
   }
+}
 
-  Future<void> _join() async {
-    final callId = _callIdController.text;
-    if (callId.isEmpty) return debugPrint('Call ID is empty');
+class StartCallScreen extends StatefulWidget {
+  const StartCallScreen({
+    super.key,
+    required this.client,
+  });
 
-    setState(() => _isInProgress = true);
+  final StreamVideoV2 client;
 
-    try {
-      final callCid = StreamCallCid.from(type: 'default', id: callId);
-      final result = await _streamVideo.getOrCreateCall(cid: callCid);
-      if (result is Success<CallReceivedOrCreated>) {
-        final call = CallV2.fromCreated(data: result.data.data);
+  @override
+  State<StartCallScreen> createState() => _StartCallScreenState();
+}
 
-        Navigator.of(context).pushReplacementNamed(
-          CallScreenV2.routeName,
-          arguments: call,
-        );
-      }
-    } catch (e, stk) {
-      debugPrint('Error joining or creating call: $e');
-      debugPrint(stk.toString());
-    } finally {
-      setState(() => _isInProgress = false);
-    }
+class _StartCallScreenState extends State<StartCallScreen>
+    with AutomaticKeepAliveClientMixin {
+  final _callIdController = TextEditingController();
+
+  final _selectedUsers = <UserInfo>{};
+
+  bool _callInProgress = false;
+
+  @override
+  void dispose() {
+    _callIdController.dispose();
+    super.dispose();
   }
 
-  Future<void> _dial() async {
-    final callId = _callIdGenerator.nextInt(1000000).toString();
-    setState(() => _isInProgress = true);
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: Column(
+        children: [
+          CallIdTextField(controller: _callIdController),
+          const SizedBox(height: 24),
+          const Text(
+            'Select participants',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Flexible(
+            child: ParticipantsList(
+              currentUserId: widget.client.currentUser!.id,
+              onSelectionChanged: (selectedUsers) {
+                setState(() {
+                  _selectedUsers.clear();
+                  _selectedUsers.addAll(selectedUsers);
+                });
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
+          if (_callInProgress)
+            const CircularProgressIndicator(
+              strokeWidth: 2,
+            )
+          else
+            ElevatedButton(
+              onPressed: _startCall,
+              child: const Text('Start call'),
+            ),
+        ],
+      ),
+    );
+  }
 
-    try {
-      final callCid = StreamCallCid.from(type: 'default', id: callId);
-      final result = await _streamVideo.createCall(
-        cid: callCid,
-        ringing: true,
-        participantIds: ['tommaso'],
+  Future<void> _startCall() async {
+    final callId = _callIdController.text;
+    if (callId.isEmpty) {
+      showSnackBar(
+        context: context,
+        message: 'Call ID is empty',
       );
-      if (result is Success<CallCreated>) {
-        final call = CallV2.fromCreated(data: result.data);
+
+      return debugPrint('Call ID is empty');
+    }
+
+    setState(() => _callInProgress = true);
+
+    final callCid = StreamCallCid.from(type: 'default', id: callId);
+    final result = await widget.client.createCall(
+      cid: callCid,
+      ringing: true,
+      participantIds: [
+        for (final user in _selectedUsers) user.id,
+      ],
+    );
+
+    result.when(
+      success: (data) {
+        setState(() => _callInProgress = false);
+
+        final call = CallV2.fromCreated(data: data);
+        Navigator.of(context).pushReplacementNamed(
+          CallScreenV2.routeName,
+          arguments: call,
+        );
+      },
+      failure: (error) {
+        setState(() => _callInProgress = false);
+
+        showSnackBar(
+          context: context,
+          message: error.message,
+        );
+
+        debugPrint('Error starting: ${error.message}');
+        if (error.stackTrace != null) debugPrint(error.stackTrace.toString());
+      },
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+
+class JoinCallScreen extends StatefulWidget {
+  const JoinCallScreen({
+    super.key,
+    required this.client,
+  });
+
+  final StreamVideoV2 client;
+
+  @override
+  State<JoinCallScreen> createState() => _JoinCallScreenState();
+}
+
+class _JoinCallScreenState extends State<JoinCallScreen> {
+  final _callIdController = TextEditingController();
+
+  bool _callInProgress = false;
+
+  @override
+  void dispose() {
+    _callIdController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: Column(
+        children: [
+          CallIdTextField(
+            controller: _callIdController,
+          ),
+          const SizedBox(height: 24),
+          if (_callInProgress)
+            const CircularProgressIndicator(
+              strokeWidth: 2,
+            )
+          else
+            ElevatedButton(
+              onPressed: _joinCall,
+              child: const Text('Join call'),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _joinCall() async {
+    final callId = _callIdController.text;
+    if (callId.isEmpty) {
+      showSnackBar(
+        context: context,
+        message: 'Call ID is empty',
+      );
+
+      return debugPrint('Call ID is empty');
+    }
+
+    setState(() => _callInProgress = true);
+
+    final callCid = StreamCallCid.from(type: 'default', id: callId);
+    final result = await widget.client.getOrCreateCall(cid: callCid);
+
+    result.when(
+      success: (data) {
+        final call = CallV2.fromCreated(data: data.data);
 
         Navigator.of(context).pushReplacementNamed(
           CallScreenV2.routeName,
           arguments: call,
         );
-      }
-    } catch (e, stk) {
-      debugPrint('Error joining or creating call: $e');
-      debugPrint(stk.toString());
-    } finally {
-      setState(() => _isInProgress = false);
-    }
+      },
+      failure: (error) {
+        setState(() => _callInProgress = false);
+
+        showSnackBar(
+          context: context,
+          message: error.message,
+        );
+
+        debugPrint('Error joining: ${error.message}');
+        if (error.stackTrace != null) debugPrint(error.stackTrace.toString());
+      },
+    );
+  }
+}
+
+class CallIdTextField extends StatelessWidget {
+  const CallIdTextField({
+    super.key,
+    required this.controller,
+    this.onChanged,
+  });
+
+  final TextEditingController controller;
+  final ValueChanged<String>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        isDense: true,
+        border: const OutlineInputBorder(),
+        labelText: 'Enter call id',
+        // suffix button to generate a random call id
+        suffixIcon: IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: () {
+            // generate a 10 character nanoId for call id
+            final callId = nanoid(10);
+            controller.value = TextEditingValue(
+              text: callId,
+              selection: TextSelection.collapsed(offset: callId.length),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class ParticipantsList extends StatefulWidget {
+  const ParticipantsList({
+    super.key,
+    required this.currentUserId,
+    this.onSelectionChanged,
+  });
+
+  final String currentUserId;
+  final void Function(Set<UserInfo>)? onSelectionChanged;
+
+  @override
+  State<ParticipantsList> createState() => _ParticipantsListState();
+}
+
+class _ParticipantsListState extends State<ParticipantsList> {
+  final _selectedUsers = <UserInfo>{};
+
+  @override
+  Widget build(BuildContext context) {
+    final remainingUsers = [
+      ...users.where(
+        (user) => user.userInfo.id != widget.currentUserId,
+      )
+    ];
+
+    return ListView.separated(
+      shrinkWrap: true,
+      itemCount: remainingUsers.length,
+      separatorBuilder: (context, index) => const Divider(),
+      itemBuilder: (context, index) {
+        final user = remainingUsers[index].userInfo;
+
+        final name = user.name;
+
+        final isSelected = _selectedUsers.contains(user);
+
+        void onChanged(bool? selected) {
+          if (selected == null) return;
+          setState(() {
+            if (selected) {
+              _selectedUsers.add(user);
+            } else {
+              _selectedUsers.remove(user);
+            }
+          });
+          widget.onSelectionChanged?.call(_selectedUsers);
+        }
+
+        return InkWell(
+          onTap: () => onChanged(!isSelected),
+          child: ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: avatarBuilder(context, user),
+            title: Text(name),
+            trailing: Checkbox(
+              value: isSelected,
+              onChanged: onChanged,
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 

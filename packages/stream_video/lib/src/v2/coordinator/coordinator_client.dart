@@ -14,21 +14,23 @@ class CoordinatorClientV2 {
     required String baseUrl,
     required this.apiKey,
     required this.tokenManager,
-  }) : _clientRPClient = ClientRPCProtobufClient(baseUrl, '');
+  }) : _rpclient = ClientRPCProtobufClient(baseUrl, '');
 
   final String apiKey;
   final TokenManager tokenManager;
 
-  final ClientRPC _clientRPClient;
+  final ClientRPC _rpclient;
 
   /// Create a new Device used to receive Push Notifications.
   Future<Result<CreateDeviceResponse>> createDevice(
     CreateDeviceRequest request,
   ) async {
     try {
-      return _withAuthHeaders().then((ctx) {
-        return _clientRPClient.createDevice(ctx, request).then(Result.success);
+      final result = await _withAuthHeaders().then((ctx) {
+        return _rpclient.createDevice(ctx, request).then(Result.success);
       });
+
+      return result;
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -37,9 +39,11 @@ class CoordinatorClientV2 {
   /// Deletes a Device used to receive Push Notifications.
   Future<Result<void>> deleteDevice(DeleteDeviceRequest request) async {
     try {
-      return _withAuthHeaders().then((ctx) {
-        return _clientRPClient.deleteDevice(ctx, request).then(Result.success);
+      final result = await _withAuthHeaders().then((ctx) {
+        return _rpclient.deleteDevice(ctx, request).then(Result.success);
       });
+
+      return result;
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -50,9 +54,11 @@ class CoordinatorClientV2 {
     CreateCallRequest request,
   ) async {
     try {
-      return _withAuthHeaders().then((ctx) {
-        return _clientRPClient.createCall(ctx, request).then(Result.success);
+      final result = await _withAuthHeaders().then((ctx) {
+        return _rpclient.createCall(ctx, request).then(Result.success);
       });
+
+      return result;
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -63,11 +69,11 @@ class CoordinatorClientV2 {
     GetOrCreateCallRequest request,
   ) async {
     try {
-      return _withAuthHeaders().then((ctx) {
-        return _clientRPClient
-            .getOrCreateCall(ctx, request)
-            .then(Result.success);
+      final result = await _withAuthHeaders().then((ctx) {
+        return _rpclient.getOrCreateCall(ctx, request).then(Result.success);
       });
+
+      return result;
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -77,9 +83,11 @@ class CoordinatorClientV2 {
   /// about the user and the call itself.
   Future<Result<JoinCallResponse>> joinCall(JoinCallRequest request) async {
     try {
-      return _withAuthHeaders().then((ctx) {
-        return _clientRPClient.joinCall(ctx, request).then(Result.success);
+      final result = await _withAuthHeaders().then((ctx) {
+        return _rpclient.joinCall(ctx, request).then(Result.success);
       });
+
+      return result;
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -107,11 +115,11 @@ class CoordinatorClientV2 {
     GetCallEdgeServerRequest request,
   ) async {
     try {
-      return _withAuthHeaders().then((ctx) {
-        return _clientRPClient
-            .getCallEdgeServer(ctx, request)
-            .then(Result.success);
+      final result = await _withAuthHeaders().then((ctx) {
+        return _rpclient.getCallEdgeServer(ctx, request).then(Result.success);
       });
+
+      return result;
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -123,9 +131,11 @@ class CoordinatorClientV2 {
     SendEventRequest request,
   ) async {
     try {
-      return _withAuthHeaders().then((ctx) {
-        return _clientRPClient.sendEvent(ctx, request).then(Result.success);
+      final result = await _withAuthHeaders().then((ctx) {
+        return _rpclient.sendEvent(ctx, request).then(Result.success);
       });
+
+      return result;
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -136,11 +146,11 @@ class CoordinatorClientV2 {
     SendCustomEventRequest request,
   ) async {
     try {
-      return _withAuthHeaders().then((ctx) {
-        return _clientRPClient
-            .sendCustomEvent(ctx, request)
-            .then(Result.success);
+      final result = await _withAuthHeaders().then((ctx) {
+        return _rpclient.sendCustomEvent(ctx, request).then(Result.success);
       });
+
+      return result;
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -149,11 +159,11 @@ class CoordinatorClientV2 {
   /// Sends invite to people for an existing call.
   Future<Result<void>> inviteUsers(UpsertCallMembersRequest request) async {
     try {
-      return _withAuthHeaders().then((ctx) {
-        return _clientRPClient
-            .upsertCallMembers(ctx, request)
-            .then(Result.success);
+      final result = await _withAuthHeaders().then((ctx) {
+        return _rpclient.upsertCallMembers(ctx, request).then(Result.success);
       });
+
+      return result;
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -164,9 +174,11 @@ class CoordinatorClientV2 {
     QueryUsersRequest request,
   ) async {
     try {
-      return _withAuthHeaders().then((ctx) {
-        return _clientRPClient.queryUsers(ctx, request).then(Result.success);
+      final result = await _withAuthHeaders().then((ctx) {
+        return _rpclient.queryUsers(ctx, request).then(Result.success);
       });
+
+      return result;
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }

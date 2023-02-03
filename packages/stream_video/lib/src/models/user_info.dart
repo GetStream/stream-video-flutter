@@ -1,4 +1,6 @@
-class UserInfo {
+import 'package:equatable/equatable.dart';
+
+class UserInfo extends Equatable {
   const UserInfo({
     required this.id,
     required this.role,
@@ -48,4 +50,14 @@ class UserInfo {
         'extraData: $extraData'
         '}';
   }
+
+  @override
+  List<Object?> get props => [
+        id,
+        name,
+        role,
+        imageUrl,
+        teams,
+        extraData,
+      ];
 }
