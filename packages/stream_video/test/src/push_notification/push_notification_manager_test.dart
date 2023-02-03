@@ -10,8 +10,12 @@ import '../mocks.dart';
 void main() {
   final streamVideo = StreamVideoMock();
   final callNotificationWrapper = CallNotificationWrapperMock();
+  final sharedPreferences = SharedPreferencesMock();
   var sut = PushNotificationManager(
-      client: streamVideo, callNotification: callNotificationWrapper);
+    client: streamVideo,
+    sharedPreferences: sharedPreferences,
+    callNotification: callNotificationWrapper,
+  );
   var call = CallEnvelope(users: {
     '0': User(id: '0', name: "Jc", imageUrl: 'https://domain.com/jc.jpg')
   });
@@ -34,7 +38,8 @@ void main() {
       'call_cid': 'call:123',
     });
 
-    final result = await sut.handlePushNotification(remoteMessage);
+    final result =
+        await sut.handlePushNotification(remoteMessage, (call) => {});
 
     expect(result, true);
     verify(() => streamVideo.getOrCreateCall(type: 'call', id: '123'))
@@ -57,7 +62,8 @@ void main() {
       'call_cid': 'call:123',
     });
 
-    final result = await sut.handlePushNotification(remoteMessage);
+    final result =
+        await sut.handlePushNotification(remoteMessage, (call) => {});
 
     expect(result, false);
   });
@@ -69,7 +75,8 @@ void main() {
       'call_cid': 'call:123',
     });
 
-    final result = await sut.handlePushNotification(remoteMessage);
+    final result =
+        await sut.handlePushNotification(remoteMessage, (call) => {});
 
     expect(result, false);
   });
@@ -81,7 +88,8 @@ void main() {
       'type': 'call_incoming',
     });
 
-    final result = await sut.handlePushNotification(remoteMessage);
+    final result =
+        await sut.handlePushNotification(remoteMessage, (call) => {});
 
     expect(result, false);
   });
