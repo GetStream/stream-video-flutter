@@ -42,36 +42,19 @@ class PushNotificationManager {
     await _client.createDevice(token: token);
   }
 
-  Future<bool> handlePushNotification(
-    RemoteMessage remoteMessage,
-    void Function(Call call) onCallAccepted,
-  ) async {
+  Future<bool> handlePushNotification(RemoteMessage remoteMessage) async {
     if (_isValid(remoteMessage)) {
       final cid = remoteMessage.data['call_cid'] as String;
       final type = cid.substring(0, cid.indexOf(':'));
       final id = cid.substring(cid.indexOf(':') + 1);
-      // final call = await _client.getOrCreateCall(type: type, id: id);
+      final call = await _client.getOrCreateCall(type: type, id: id);
       await _callNotification.showCallNotification(
         callId: cid,
-        callers: 'Jc, Isa',
-        //call.users.values.map((e) => e.name).join(', '),
+        callers: call.users.values.map((e) => e.name).join(', '),
         isVideoCall: true,
         avatarUrl: '',
         //call.users.values.firstOrNull?.imageUrl,
-        onCallAccepted: (cid) async {
-          print('JcLog: Storing incomingCallCid: $cid');
-          await _sharedPreferences.setString('incomingCallCid', cid);
-
-          onCallAccepted(
-            Call(
-              callConfiguration: const CallConfiguration(
-                type: 'type',
-                id: 'id',
-                participantIds: ['jc', 'isa'],
-              ),
-            ),
-          );
-        },
+        onCallAccepted: _acceptCall,
         onCallRejected: _rejectCall,
       );
       return true;
@@ -79,8 +62,10 @@ class PushNotificationManager {
     return false;
   }
 
-  Future<Call> _acceptCall(String cid) {
-    return _client.acceptCall(
+  Future<void> _acceptCall(String cid) async {
+    print('JcLog: Storing incomingCallCid: $cid');
+    await _sharedPreferences.setString('incomingCallCid', cid);
+    await _client.acceptCall(
       type: cid.substring(0, cid.indexOf(':')),
       id: cid.substring(cid.indexOf(':') + 1),
     );

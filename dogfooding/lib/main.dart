@@ -26,23 +26,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> _handleRemoteMessage(RemoteMessage message) async {
   print('JcLog: Handling Remote Message with payload: ${message.data}');
-  await StreamVideo.instance.handlePushNotification(message, (call) async {
-    print(
-        'JcLog: on call ($call) accepted, ${message.messageId}, navState.currentContext: ${navState.currentContext}');
-
-    // 1. Application is terminated - storing something in shared preferences and handle in DogfoodingApp
-    // final SharedPreferences prefs = await SharedPreferences.getInstance();
-    // await prefs.setBool("callReceived", true);
-    // StreamInstance.consumeActiveCall() - return and clean
-
-    // 2. Application is in the foreground. Let's check if we need to store
-    if (navState.currentContext != null) {
-      // We can know the app is alive
-      // Do navigation
-    }
-
-    // 3. Application is in the bg - simillar to 2.
-  });
+  await StreamVideo.instance.handlePushNotification(message);
 }
 
 Future<void> main() async {
