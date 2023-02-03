@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../../utils/device_segmentation.dart';
 
 /// {@template callAppBarBuilder}
 /// Builder used to create a custom call app bar.
@@ -139,7 +140,7 @@ class _StreamActiveCallState extends State<StreamActiveCall> {
       body: widget.callParticipantsBuilder?.call(context, participants) ??
           StreamCallParticipants(
             participants: participants,
-            enableFloatingView: widget.enableFloatingView ?? !kIsWeb,
+            enableFloatingView: widget.enableFloatingView ?? !isDesktopDevice,
           ),
       bottomNavigationBar:
           widget.callControlsBuilder?.call(context, call, participants) ??

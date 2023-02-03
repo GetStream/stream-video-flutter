@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import '../utils/device_segmentation.dart';
 import '../widgets/floating_view/floating_view_alignment.dart';
 import '../widgets/tile_view.dart';
 import 'screen_share_item.dart';
@@ -133,8 +134,8 @@ class _RegularCallParticipantsContentState
     final local = participants.whereType<LocalParticipant>().toList();
     assert(local.isNotEmpty, 'Local participant is required');
 
-    const maxRemoteParticipantCount =
-        kIsWeb ? maxParticipantCountWeb : maxParticipantCountMobile;
+    final maxRemoteParticipantCount =
+        isDesktopDevice ? maxParticipantCountWeb : maxParticipantCountMobile;
 
     final participantsToDisplay = <Participant>[
       // We are only able to show max 3 remote participants in the grid
@@ -160,8 +161,8 @@ class _RegularCallParticipantsContentState
       participantWidgets.add(participantWidget);
     }
 
-    final participantGrid = kIsWeb
-        ? WebParticipantGrid(participants: participantWidgets)
+    final participantGrid = isDesktopDevice
+        ? DesktopParticipantGrid(participants: participantWidgets)
         : MobileParticipantGrid(participants: participantWidgets);
 
     if (!showFloatingParticipant) {
@@ -275,10 +276,10 @@ class ScreenSharingCallParticipantsContent extends StatelessWidget {
   }
 }
 
-/// Represents the arrangement of participants on web.
-class WebParticipantGrid extends StatelessWidget {
-  /// Constructor for creating [WebParticipantGrid].
-  const WebParticipantGrid({
+/// Represents the arrangement of participants on desktop.
+class DesktopParticipantGrid extends StatelessWidget {
+  /// Constructor for creating [DesktopParticipantGrid].
+  const DesktopParticipantGrid({
     super.key,
     required this.participants,
   });
