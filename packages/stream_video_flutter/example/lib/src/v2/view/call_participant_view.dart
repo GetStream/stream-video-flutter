@@ -27,14 +27,24 @@ class CallParticipantView extends StatelessWidget {
     return VideoTrackRenderer(
       call: call,
       participant: participant,
-      placeholderBuilder: (context) => StreamUserAvatar(
-        user: UserInfo(
-          id: participant.userId,
-          role: participant.role,
-          name: participant.userId,
-          imageUrl: participant.profileImageURL,
-        ),
-      ),
+      placeholderBuilder: (context) {
+        return Center(
+          child: StreamUserAvatar(
+            avatarTheme: const StreamAvatarTheme(
+              constraints: BoxConstraints.tightFor(
+                width: 120,
+                height: 120,
+              ),
+            ),
+            user: UserInfo(
+              id: participant.userId,
+              role: participant.role,
+              name: participant.userId,
+              imageUrl: participant.profileImageURL,
+            ),
+          ),
+        );
+      },
     );
     // final participant = this.participant;
     // print('(D/SV:ParticipantView) [build] participant: $participant');
