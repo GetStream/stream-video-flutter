@@ -112,8 +112,6 @@ class _StreamDogFoodingApp extends State<StreamDogFoodingApp>
         Routes.CALL,
         arguments: incomingCall,
       );
-    } else {
-      print('JcLog: Call is null');
     }
   }
 
