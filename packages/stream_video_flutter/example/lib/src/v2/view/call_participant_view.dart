@@ -35,6 +35,9 @@ class CallParticipantView extends StatelessWidget {
                 width: 120,
                 height: 120,
               ),
+              borderRadius: BorderRadius.all(
+                Radius.circular(60),
+              ),
             ),
             user: UserInfo(
               id: participant.userId,

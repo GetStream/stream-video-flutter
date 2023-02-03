@@ -253,7 +253,7 @@ class _JoinCallScreenState extends State<JoinCallScreen> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: Column(
         children: [
           CallIdTextField(
