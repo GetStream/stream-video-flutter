@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import 'incoming_call_content.dart';
-import 'outgoing_call_content.dart';
+import 'call/incoming_call_content.dart';
+import 'call/outgoing_call_content.dart';
 import 'view/call_participant_view.dart';
+
+const int _idState = 2;
+int _callSeq = 1;
 
 class CallScreenV2 extends StatefulWidget {
   const CallScreenV2({
@@ -25,37 +28,49 @@ class CallScreenV2 extends StatefulWidget {
 }
 
 class _CallScreenV2State extends State<CallScreenV2> {
+  final _logger = taggedLogger(tag: 'CallScreen-${_callSeq++}');
+  final subscriptions = Subscriptions();
+
   @override
   void initState() {
     super.initState();
-    widget.call.state.listen(_setState);
+    _logger.d(() => '[initState] no args');
+    subscriptions.add(_idState, widget.call.state.listen(_setState));
     _setState(widget.call.state.value);
     _start();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    _logger.d(() => '[dispose] no args');
+    subscriptions.cancelAll();
+  }
+
   Future<void> _setState(CallStateV2 state) async {
-    setState(() {
-      if (state.status.isDrop) {
-        _disconnect();
-      }
-    });
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     final callState = widget.call.state.value;
     final status = callState.status;
+    _logger.d(() => '[build] status: $status');
+    if (status.isDrop) {
+      _disconnect();
+    }
 
     if (status is CallStatusIncoming && !status.acceptedByMe) {
       return IncomingCallContent(
-        call: widget.call,
-        onBackPressed: widget.onBackPressed,
+        state: callState,
+        onRejectPressed: _rejectCall,
+        onAcceptPressed: _acceptCall,
       );
     }
     if (status is CallStatusOutgoing && !status.acceptedByCallee) {
       return OutgoingCallContent(
-        call: widget.call,
-        onBackPressed: widget.onBackPressed,
+        state: callState,
+        onCancelPressed: _cancelCall,
       );
     }
 
@@ -71,9 +86,7 @@ class _CallScreenV2State extends State<CallScreenV2> {
           actions: [
             IconButton(
               icon: const Icon(Icons.close),
-              onPressed: () async {
-                await _hangUp();
-              },
+              onPressed: _cancelCall,
             ),
           ],
           title: Text('CallId: ${callState.callCid}'),
@@ -121,7 +134,7 @@ class _CallScreenV2State extends State<CallScreenV2> {
               call: widget.call,
               localParticipant: localParticipant,
             ),
-            CallHangup(onHangup: _hangUp),
+            CallHangup(onHangup: _cancelCall),
           ],
         ),
       );
@@ -134,9 +147,7 @@ class _CallScreenV2State extends State<CallScreenV2> {
         actions: [
           IconButton(
             icon: const Icon(Icons.close),
-            onPressed: () async {
-              await _hangUp();
-            },
+            onPressed: _cancelCall,
           ),
         ],
         title: Text('CallId: ${callState.callCid}'),
@@ -168,25 +179,37 @@ class _CallScreenV2State extends State<CallScreenV2> {
       if (widget.call.state.value.status.isIdle) {
         final result = await widget.call.getOrCreate();
         if (result.isFailure) {
-          await _hangUp();
+          await _cancelCall();
           return;
         }
       }
       final result = await widget.call.connect();
       if (result.isFailure) {
-        await _hangUp();
+        await _cancelCall();
       }
     } catch (e, stk) {
-      await _hangUp();
+      await _cancelCall();
     }
   }
 
-  Future<void> _hangUp() async {
+  Future<void> _rejectCall() async {
+    await widget.call.apply(const RejectCall());
+    await widget.call.disconnect();
+    widget.onBackPressed();
+  }
+
+  Future<void> _acceptCall() async {
+    await widget.call.apply(const AcceptCall());
+  }
+
+  Future<void> _cancelCall() async {
+    _logger.d(() => '[cancelCall] no args');
     await widget.call.apply(const CancelCall());
     await _disconnect();
   }
 
   Future<void> _disconnect() async {
+    _logger.d(() => '[disconnect] no args');
     await widget.call.disconnect();
     widget.onBackPressed();
   }

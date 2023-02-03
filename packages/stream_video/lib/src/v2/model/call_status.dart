@@ -28,6 +28,10 @@ abstract class CallStatus extends Equatable {
     return CallStatusIncoming(acceptedByMe: acceptedByMe);
   }
 
+  factory CallStatus.joining() {
+    return CallStatusJoining();
+  }
+
   factory CallStatus.joined(CallCredentials credentials) {
     return CallStatusJoined(credentials: credentials);
   }
@@ -52,6 +56,8 @@ abstract class CallStatus extends Equatable {
   bool get isOutgoing => this is CallStatusOutgoing;
 
   bool get isIncoming => this is CallStatusIncoming;
+
+  bool get isJoining => this is CallStatusJoining;
 
   bool get isJoined => this is CallStatusJoined;
 
@@ -117,6 +123,18 @@ class CallStatusIncoming extends CallStatusJoinable {
   @override
   String toString() {
     return 'Incoming{acceptedByMe: $acceptedByMe}';
+  }
+}
+
+class CallStatusJoining extends CallStatusActive {
+  factory CallStatusJoining() {
+    return _instance;
+  }
+  const CallStatusJoining._internal();
+  static const CallStatusJoining _instance = CallStatusJoining._internal();
+  @override
+  String toString() {
+    return 'Joining';
   }
 }
 

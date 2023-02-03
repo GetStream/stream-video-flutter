@@ -63,7 +63,7 @@ class SetScreenShareEnabled extends SessionControlAction {
   List<Object?> get props => [enabled];
 }
 
-/*class SetSubscription extends SessionControlAction {
+class SetSubscription extends SessionControlAction {
   const SetSubscription({
     required this.userId,
     required this.sessionId,
@@ -87,7 +87,7 @@ class SetSubscriptions extends SessionControlAction {
 
   @override
   List<Object?> get props => [actions];
-}*/
+}
 
 class UpdateSubscriptions extends SessionControlAction {
   const UpdateSubscriptions(this.actions);

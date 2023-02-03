@@ -5,17 +5,15 @@ import 'package:collection/collection.dart';
 class OutgoingCallContent extends StatelessWidget {
   const OutgoingCallContent({
     super.key,
-    required this.call,
-    required this.onBackPressed,
+    required this.state,
+    required this.onCancelPressed,
   });
 
-  final CallV2 call;
-  final VoidCallback onBackPressed;
+  final CallStateV2 state;
+  final VoidCallback onCancelPressed;
 
   @override
   Widget build(BuildContext context) {
-    final state = call.state.value;
-
     final callee = state.callParticipants
         .where((it) => it.userId != state.createdByUserId)
         .map((it) => it.name)
@@ -33,7 +31,7 @@ class OutgoingCallContent extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                onPressed: _cancelCall,
+                onPressed: onCancelPressed,
                 child: const Text('Cancel'),
               ),
             ],
@@ -41,11 +39,5 @@ class OutgoingCallContent extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Future<void> _cancelCall() async {
-    await call.apply(const CancelCall());
-    await call.disconnect();
-    onBackPressed();
   }
 }

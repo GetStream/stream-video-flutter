@@ -27,6 +27,10 @@ class CallCreatedAction extends LifecycleAction {
   final CallCreated data;
 }
 
+class CallJoiningAction extends LifecycleAction {
+  const CallJoiningAction();
+}
+
 class CallJoinedAction extends LifecycleAction {
   const CallJoinedAction(this.data);
 

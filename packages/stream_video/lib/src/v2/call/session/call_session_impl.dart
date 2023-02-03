@@ -39,7 +39,9 @@ import '../../webrtc/rtc_track.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
 
-const _idParticipants = 1;
+const _tag = 'SV:CallSession';
+
+int _sessionSeq = 1;
 
 class CallSessionImpl extends CallSession implements SfuEventListener {
   CallSessionImpl({
@@ -59,10 +61,11 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
           sessionId: sessionId,
           callCid: callCid,
           configuration: config.rtcConfig,
-        );
+        ) {
+    _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
+  }
 
-  final _logger = taggedLogger(tag: 'SV:CallSession');
-  final _subscriptions = Subscriptions();
+  final _logger = taggedLogger(tag: '$_tag-${_sessionSeq++}');
 
   final StreamCallCid callCid;
   @override
@@ -162,11 +165,11 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return _updateSubscriptions([action]);
     } else if (action is RemoveSubscription) {
       return _updateSubscriptions([action]);
-    } /* else if (action is SetSubscription) {
+    } else if (action is SetSubscription) {
       return _setSubscriptions([action]);
     } else if (action is SetSubscriptions) {
       return _setSubscriptions(action.actions);
-    }*/
+    }
     return Result.error('Action not supported: $action');
   }
 
@@ -305,29 +308,26 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     );
   }
 
-  /*Future<Result<None>> _setSubscriptions(
+  Future<Result<None>> _setSubscriptions(
     List<SetSubscription> actions,
   ) async {
     final participants = stateManager.state.value.callParticipants;
     _logger.d(() => '[setSubscriptions] actions: $actions');
     final subscriptions = <String, SfuSubscriptionDetails>{};
-    _logger.v(() => '[setSubscriptions] subscriptions(before): $subscriptions');
-    final exclude = {SfuTrackType.audio, SfuTrackType.screenShareAudio};
+    final exclude = {SfuTrackType.video, SfuTrackType.screenShare};
+    participants.getSubscriptions(subscriptions, exclude);
+    _logger.v(() => '[setSubscriptions] source: $subscriptions');
     for (final action in actions) {
-      final participant = participants.firstWhereOrNull(
-        (it) => it.userId == action.userId && it.sessionId == it.sessionId,
-      );
-      participant?.getSubscriptions(subscriptions, exclude);
       action.getSubscriptions(subscriptions);
     }
-    _logger.v(() => '[setSubscriptions] subscriptions(after): $subscriptions');
+    _logger.v(() => '[setSubscriptions] updated: $subscriptions');
     final result = await sfuClient.update(
       sessionId: sessionId,
       subscriptions: subscriptions.values,
     );
     _logger.v(() => '[setSubscriptions] result: $result');
     return result;
-  }*/
+  }
 
   Future<Result<None>> _updateSubscriptions(
     List<SubscriptionAction> actions,
@@ -458,7 +458,7 @@ extension on UpdateSubscription {
   }
 }
 
-/*extension on SetSubscription {
+extension on SetSubscription {
   void getSubscriptions(Map<String, SfuSubscriptionDetails> output) {
     trackTypes.forEach((trackType, videoDimension) {
       final trackId = '$trackIdPrefix:$trackType';
@@ -471,15 +471,21 @@ extension on UpdateSubscription {
       );
     });
   }
-}*/
+}
 
 extension on List<CallParticipantStateV2> {
   void getSubscriptions(
-    Map<String, SfuSubscriptionDetails> output,
-  ) {
+    Map<String, SfuSubscriptionDetails> output, [
+    Set<SfuTrackType>? exclude,
+  ]) {
     for (final participant in this) {
       if (participant.isLocal) continue;
-      participant.getSubscriptions(output);
+      streamLog.v(
+        _tag,
+        () => '[getSubscriptions] userId: ${participant.userId}, '
+            'published: ${participant.publishedTracks.keys}',
+      );
+      participant.getSubscriptions(output, exclude);
     }
   }
 }
@@ -492,6 +498,11 @@ extension on CallParticipantStateV2 {
     publishedTracks.forEach((trackType, trackState) {
       final atLeastSubscribed = trackState is RemoteTrackState &&
           (trackState.subscribed || trackState.received);
+      streamLog.v(
+        _tag,
+        () => '[getSubscriptions] trackType: $trackType, '
+            'trackState: $trackState',
+      );
       final shouldExclude = exclude != null && exclude.contains(trackType);
       if (atLeastSubscribed && !shouldExclude) {
         final detail = SfuSubscriptionDetails(

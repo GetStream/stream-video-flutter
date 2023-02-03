@@ -5,6 +5,7 @@ import '../../logger/stream_logger.dart';
 import '../action/call_control_action.dart';
 import '../call_state.dart';
 import '../call_state_manager.dart';
+import '../coordinator/models/coordinator_models.dart';
 import '../errors/video_error_composer.dart';
 import '../model/call_cid.dart';
 import '../model/call_created.dart';
@@ -25,6 +26,7 @@ import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 
 const _idSessionEvents = 1;
+const _idCoordEvents = 2;
 
 const _tag = 'SV:Call';
 
@@ -80,11 +82,11 @@ class CallV2Impl extends CallV2 {
         _stateManager = stateManager,
         _streamVideo = streamVideo {
     streamLog.i(_tag, () => '<init> state: ${stateManager.state.value}');
-    streamVideo.events.listen((event) {
+    _subscriptions.add(_idCoordEvents, streamVideo.events.listen((event) {
       _logger.v(() => '[onCallCoordEvent] event.type: ${event.runtimeType}');
       _logger.v(() => '[onCallCoordEvent] calStatus: ${state.value.status}');
       _stateManager.onCoordinatorEvent(event);
-    });
+    }));
   }
 
   late final _logger = taggedLogger(tag: '$_tag-${_callSeq++}');
@@ -93,6 +95,8 @@ class CallV2Impl extends CallV2 {
   final StreamVideoV2 _streamVideo;
   final CallSessionFactory _sessionFactory;
   final CallStateManager _stateManager;
+
+  bool _connected = false;
 
   @override
   StateEmitter<CallStateV2> get state => _stateManager.state;
@@ -148,11 +152,13 @@ class CallV2Impl extends CallV2 {
   Future<Result<None>> _cancelCall(CancelCall action) async {
     final state = _stateManager.state.value;
     final status = state.status;
-    if (status is! CallStatusIncoming || status.acceptedByMe) {
+    _logger.d(() => '[cancelCall] status: $status');
+    if (status is! CallStatusOutgoing || status.acceptedByCallee) {
       _logger.w(() => '[cancelCall] rejected (invalid status): $status');
       return Result.error('invalid status: $status');
     }
     final result = await _streamVideo.cancelCall(cid: state.callCid);
+    _logger.v(() => '[cancelCall] completed: $result');
     if (result is Success<None>) {
       await _stateManager.onCallControlAction(action);
     }
@@ -197,11 +203,26 @@ class CallV2Impl extends CallV2 {
   Future<Result<None>> connect({
     CallSettings settings = const CallSettings(),
   }) async {
+    if (_connected) {
+      _logger.w(() => '[connect] rejected (already connected)');
+      return Result.success(None());
+    }
+    _connected = true;
+    final result = await _connect(settings);
+    if (result.isFailure) {
+      _connected = false;
+    }
+    return result;
+  }
+
+  Future<Result<None>> _connect(CallSettings settings) async {
+    _logger.d(() => '[connect] settings: $settings');
     final validation = await _stateManager.validateUserId(_streamVideo);
     if (validation.isFailure) {
       _logger.w(() => '[connect] rejected (validation): $validation');
       return validation;
     }
+    _logger.v(() => '[connect] validated');
 
     final state = _stateManager.state.value;
     final status = state.status;
@@ -217,21 +238,22 @@ class CallV2Impl extends CallV2 {
       return result;
     }
 
-    final joinedResult = await _streamVideo.joinCall(cid: state.callCid);
-    if (joinedResult is! Success<CallJoined>) {
-      _logger.w(() => '[connect] join failed: $joinedResult');
+    _logger.v(() => '[connect] joining to coordinator');
+    final joinedResult = await _joinIfNeeded();
+    if (joinedResult is! Success<CallCredentials>) {
+      _logger.e(() => '[connect] joining failed: $result');
       await _stateManager.onConnectFailed((joinedResult as Failure).error);
-      return joinedResult;
+      return result;
     }
 
-    await _stateManager.onCallJoined(joinedResult.data);
+    _logger.v(() => '[connect] starting session');
     final sessionResult = await _startSession(joinedResult.data);
     if (sessionResult is! Success<None>) {
       _logger.w(() => '[connect] session start failed: $sessionResult');
       await _stateManager.onConnectFailed((sessionResult as Failure).error);
       return sessionResult;
     }
-
+    _logger.v(() => '[connect] started session');
     await _stateManager.onConnected();
     await _applySettings(settings);
 
@@ -239,9 +261,28 @@ class CallV2Impl extends CallV2 {
     return Result.success(None());
   }
 
-  Future<Result<void>> _startSession(CallJoined joined) async {
+  Future<Result<CallCredentials>> _joinIfNeeded() async {
+    final state = _stateManager.state.value;
+    final status = state.status;
+    if (status is CallStatusJoined) {
+      _logger.w(() => '[joinIfNeeded] rejected (already joined): $status');
+      return Result.success(status.credentials);
+    }
+    _logger.d(() => '[joinIfNeeded] no args');
+    await _stateManager.onCallJoining();
+    final joinedResult = await _streamVideo.joinCall(cid: state.callCid);
+    if (joinedResult is Success<CallJoined>) {
+      _logger.v(() => '[joinIfNeeded] completed');
+      await _stateManager.onCallJoined(joinedResult.data);
+      return Result.success(joinedResult.data.credentials);
+    }
+    _logger.e(() => '[joinIfNeeded] failed: $joinedResult');
+    return joinedResult as Failure;
+  }
+
+  Future<Result<void>> _startSession(CallCredentials credentials) async {
     final session = await _sessionFactory.makeCallSession(
-      credentials: joined.credentials,
+      credentials: credentials,
       stateManager: _stateManager,
     );
     _session = session;
@@ -274,6 +315,7 @@ class CallV2Impl extends CallV2 {
     await _subscriptions.cancelAll();
     await _session?.dispose();
     _session = null;
+    _connected = false;
     return Result.success(None());
   }
 

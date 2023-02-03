@@ -1,20 +1,21 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:collection/collection.dart';
 
 class IncomingCallContent extends StatelessWidget {
   const IncomingCallContent({
     super.key,
-    required this.call,
-    required this.onBackPressed,
+    required this.state,
+    required this.onRejectPressed,
+    required this.onAcceptPressed,
   });
 
-  final CallV2 call;
-  final VoidCallback onBackPressed;
+  final CallStateV2 state;
+  final VoidCallback onRejectPressed;
+  final VoidCallback onAcceptPressed;
 
   @override
   Widget build(BuildContext context) {
-    final state = call.state.value;
     final caller = state.callParticipants
         .firstWhereOrNull((it) => it.userId == state.createdByUserId);
     return Scaffold(
@@ -30,12 +31,12 @@ class IncomingCallContent extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                onPressed: _rejectCall,
+                onPressed: onRejectPressed,
                 child: const Text('Reject'),
               ),
               const SizedBox(width: 16),
               ElevatedButton(
-                onPressed: _acceptCall,
+                onPressed: onAcceptPressed,
                 child: const Text('Accept'),
               )
             ],
@@ -43,16 +44,5 @@ class IncomingCallContent extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Future<void> _rejectCall() async {
-    await call.apply(const RejectCall());
-    await call.disconnect();
-    onBackPressed();
-  }
-
-  Future<void> _acceptCall() async {
-    await call.apply(const AcceptCall());
-    await call.connect();
   }
 }

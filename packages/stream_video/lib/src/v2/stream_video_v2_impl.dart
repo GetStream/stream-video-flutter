@@ -151,10 +151,11 @@ class StreamVideoV2Impl implements StreamVideoV2 {
         tokenManager: _tokenManager,
       );
       _wsSubscription = _ws?.events.listen((event) {
-        _logger.v(() => '[onCoordEvent] event.type: ${event.runtimeType}');
+        _logger.v(() => '[onCoordWsEvent] event.type: ${event.runtimeType}');
         if (event is CoordinatorCallCreatedEvent) {
           final currentUserId = _state.currentUser.value?.id;
           if (currentUserId == null) {
+            _logger.v(() => '[onCoordWsEvent] rejected(no currentUserId)');
             return;
           }
           final callCreated = CallCreated(
@@ -166,6 +167,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
               users: event.users,
             ),
           );
+          _logger.v(() => '[onCoordWsEvent] onCallCreated: $onCallCreated');
           onCallCreated?.call(callCreated);
         }
         _events.emit(event);
