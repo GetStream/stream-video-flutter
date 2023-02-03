@@ -38,8 +38,7 @@ void main() {
       'call_cid': 'call:123',
     });
 
-    final result =
-        await sut.handlePushNotification(remoteMessage, (call) => {});
+    final result = await sut.handlePushNotification(remoteMessage);
 
     expect(result, true);
     verify(() => streamVideo.getOrCreateCall(type: 'call', id: '123'))
@@ -62,8 +61,7 @@ void main() {
       'call_cid': 'call:123',
     });
 
-    final result =
-        await sut.handlePushNotification(remoteMessage, (call) => {});
+    final result = await sut.handlePushNotification(remoteMessage);
 
     expect(result, false);
   });
@@ -75,8 +73,7 @@ void main() {
       'call_cid': 'call:123',
     });
 
-    final result =
-        await sut.handlePushNotification(remoteMessage, (call) => {});
+    final result = await sut.handlePushNotification(remoteMessage);
 
     expect(result, false);
   });
@@ -88,8 +85,7 @@ void main() {
       'type': 'call_incoming',
     });
 
-    final result =
-        await sut.handlePushNotification(remoteMessage, (call) => {});
+    final result = await sut.handlePushNotification(remoteMessage);
 
     expect(result, false);
   });
