@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dogfooding/src/routes/routes.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -154,6 +155,18 @@ class GoogleLoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Google SignIn plugin is only supported on Web, Android and iOS.
+    final isGoogleSignInSupported =
+        defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android ||
+            kIsWeb;
+
+    final currentPlatform = Theme.of(context).platform.name;
+
+    if (!isGoogleSignInSupported) {
+      return Text('Google SignIn is not supported on $currentPlatform.');
+    }
+
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         elevation: 1.0,

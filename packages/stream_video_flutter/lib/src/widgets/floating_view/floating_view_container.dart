@@ -14,7 +14,7 @@ class FloatingViewContainer extends StatelessWidget {
     required this.floatingView,
     required this.floatingViewWidth,
     required this.floatingViewHeight,
-    this.isSnappingBehaviorEnabled = true,
+    this.enableSnappingBehavior = true,
     this.floatingViewPadding = 16,
     this.floatingViewAlignment = FloatingViewAlignment.topRight,
   });
@@ -27,7 +27,7 @@ class FloatingViewContainer extends StatelessWidget {
 
   /// If the floating view should be automatically anchored to one of the
   /// corners.
-  final bool isSnappingBehaviorEnabled;
+  final bool enableSnappingBehavior;
 
   /// The width of the floating view.
   final double floatingViewWidth;
@@ -43,7 +43,7 @@ class FloatingViewContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isSnappingBehaviorEnabled) {
+    if (enableSnappingBehavior) {
       return SnappingFloatingView(
         floatingView: floatingView,
         floatingViewWidth: floatingViewWidth,

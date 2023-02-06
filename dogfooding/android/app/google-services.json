@@ -7,25 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:248009810755:android:bbfcbcd22d6da5387585f6",
+        "mobilesdk_app_id": "1:248009810755:android:c283c98642b179db7585f6",
         "android_client_info": {
-          "package_name": "io.getstream.video.flutter.dogfooding.dogfooding"
+          "package_name": "io.getstream.video.flutter.dogfooding"
         }
       },
       "oauth_client": [
         {
-          "client_id": "248009810755-9219gfpfi7fmksk6rbltbm6r6g861i08.apps.googleusercontent.com",
+          "client_id": "248009810755-u9gf4l4cndcqo33r8uq90o8it7l3rf6b.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "io.getstream.video.flutter.dogfooding.dogfooding",
-            "certificate_hash": "e34b7960260e0586f55d02a1d6b0a3a6d06c4876"
-          }
-        },
-        {
-          "client_id": "248009810755-olc7j3k4gd27a1vsid6paod155khop3l.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "io.getstream.video.flutter.dogfooding.dogfooding",
+            "package_name": "io.getstream.video.flutter.dogfooding",
             "certificate_hash": "c3188b0a93adae431af73d407565f38f284cbb4e"
           }
         },
@@ -59,17 +51,17 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:248009810755:android:08acd3efc67fee4c7585f6",
+        "mobilesdk_app_id": "1:248009810755:android:0b7ef9072bfeceba7585f6",
         "android_client_info": {
-          "package_name": "io.getstream.video.flutter.dogfooding.dogfooding.debug"
+          "package_name": "io.getstream.video.flutter.dogfooding.debug"
         }
       },
       "oauth_client": [
         {
-          "client_id": "248009810755-sqgnutu18d29thbr043o5t55asg6e7tk.apps.googleusercontent.com",
+          "client_id": "248009810755-ougsh8fcv3em0sko9n62un0sodvbd1q6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "io.getstream.video.flutter.dogfooding.dogfooding.debug",
+            "package_name": "io.getstream.video.flutter.dogfooding.debug",
             "certificate_hash": "c3188b0a93adae431af73d407565f38f284cbb4e"
           }
         },
