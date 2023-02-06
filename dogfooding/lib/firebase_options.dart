@@ -55,7 +55,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDXy4FMxcRErB8VW9CvPGG5spLVSUQzhc4',
-    appId: '1:248009810755:android:bbfcbcd22d6da5387585f6',
+    appId: '1:248009810755:android:0b7ef9072bfeceba7585f6',
     messagingSenderId: '248009810755',
     projectId: 'dogfooding-d769a',
     storageBucket: 'dogfooding-d769a.appspot.com',
@@ -63,23 +63,23 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCDkgIdxQNP-YB4XVKhvz39dGcDqPGcJTw',
-    appId: '1:248009810755:ios:0141d703f551710b7585f6',
+    appId: '1:248009810755:ios:f82e5e4f77548fd57585f6',
     messagingSenderId: '248009810755',
     projectId: 'dogfooding-d769a',
     storageBucket: 'dogfooding-d769a.appspot.com',
     iosClientId:
-        '248009810755-7cdrjg8rl5rppt69ftcpds4200nvvekg.apps.googleusercontent.com',
-    iosBundleId: 'io.getstream.video.flutter.dogfooding.dogfooding',
+        '248009810755-m0kiquvbvhaopveniq2elpph6at18tbj.apps.googleusercontent.com',
+    iosBundleId: 'io.getstream.video.flutter.dogfooding',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyCDkgIdxQNP-YB4XVKhvz39dGcDqPGcJTw',
-    appId: '1:248009810755:ios:0141d703f551710b7585f6',
+    appId: '1:248009810755:ios:f82e5e4f77548fd57585f6',
     messagingSenderId: '248009810755',
     projectId: 'dogfooding-d769a',
     storageBucket: 'dogfooding-d769a.appspot.com',
     iosClientId:
-        '248009810755-7cdrjg8rl5rppt69ftcpds4200nvvekg.apps.googleusercontent.com',
-    iosBundleId: 'io.getstream.video.flutter.dogfooding.dogfooding',
+        '248009810755-m0kiquvbvhaopveniq2elpph6at18tbj.apps.googleusercontent.com',
+    iosBundleId: 'io.getstream.video.flutter.dogfooding',
   );
 }
