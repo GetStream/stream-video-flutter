@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import '../utils/device_segmentation.dart';
 import 'indicators/connection_quality_indicator.dart';
 import 'participant_label.dart';
 
@@ -74,6 +75,9 @@ class _StreamCallParticipantState extends State<StreamCallParticipant> {
                   color: theme.focusedColor,
                 )
               : null,
+          borderRadius: BorderRadius.all(
+            Radius.circular(isDesktopDevice ? 12 : 0),
+          ),
         ),
         decoration: BoxDecoration(color: theme.backgroundColor),
         child: Stack(

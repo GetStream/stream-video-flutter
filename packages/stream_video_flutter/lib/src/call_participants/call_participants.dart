@@ -1,9 +1,20 @@
+import 'dart:math';
+
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import '../utils/device_segmentation.dart';
 import '../widgets/floating_view/floating_view_alignment.dart';
+import '../widgets/tile_view.dart';
 import 'screen_share_item.dart';
+
+/// The maximum number of participants displayed in a grid on mobile.
+const maxParticipantCountMobile = 4;
+
+/// The maximum number of participants displayed in a grid on web.
+const maxParticipantCountWeb = 24;
 
 /// {@template callParticipantWidgetBuilder}
 /// Builder function used to build a participant grid item.
@@ -30,7 +41,7 @@ class StreamCallParticipants extends StatelessWidget {
     this.screenShareItemBuilder,
     this.itemBuilder,
     this.enableFloatingView = true,
-    this.isSnappingBehaviorEnabled = true,
+    this.enableSnappingBehavior = true,
     this.floatingParticipantTheme,
     super.key,
   });
@@ -49,7 +60,7 @@ class StreamCallParticipants extends StatelessWidget {
 
   /// If the floating view should be automatically anchored to one of the
   /// corners.
-  final bool isSnappingBehaviorEnabled;
+  final bool enableSnappingBehavior;
 
   /// Theme for participant pip window
   final StreamFloatingCallParticipantTheme? floatingParticipantTheme;
@@ -74,7 +85,7 @@ class StreamCallParticipants extends StatelessWidget {
       itemBuilder: itemBuilder,
       enableFloatingView: enableFloatingView,
       floatingParticipantTheme: floatingParticipantTheme,
-      isSnappingBehaviorEnabled: isSnappingBehaviorEnabled,
+      enableSnappingBehavior: enableSnappingBehavior,
     );
   }
 }
@@ -85,7 +96,7 @@ class RegularCallParticipantsContent extends StatefulWidget {
     required this.participants,
     this.itemBuilder,
     this.enableFloatingView = true,
-    this.isSnappingBehaviorEnabled = true,
+    this.enableSnappingBehavior = true,
     this.floatingParticipantTheme,
   });
 
@@ -100,7 +111,7 @@ class RegularCallParticipantsContent extends StatefulWidget {
 
   /// If the floating view should be automatically anchored to one of the
   /// corners.
-  final bool isSnappingBehaviorEnabled;
+  final bool enableSnappingBehavior;
 
   /// Theme for participant pip window
   final StreamFloatingCallParticipantTheme? floatingParticipantTheme;
@@ -123,9 +134,13 @@ class _RegularCallParticipantsContentState
     final local = participants.whereType<LocalParticipant>().toList();
     assert(local.isNotEmpty, 'Local participant is required');
 
+    final maxRemoteParticipantCount =
+        isDesktopDevice ? maxParticipantCountWeb : maxParticipantCountMobile;
+
     final participantsToDisplay = <Participant>[
-      // We are only able to show max 3 remote participants in the grid.
-      ...remote.take(3),
+      // We are only able to show max 3 remote participants in the grid
+      // on mobile and 23 on web.
+      ...remote.take(maxRemoteParticipantCount - 1),
     ];
     // Show floating local participant if the feature is enabled and there
     // are one or two remote remote participants. Otherwise show local
@@ -137,53 +152,18 @@ class _RegularCallParticipantsContentState
       participantsToDisplay.add(local.first);
     }
 
-    Widget participantGrid = Container();
-    final participantsCount = participantsToDisplay.length;
-    if (participantsCount == 1) {
-      participantGrid = _buildParticipant(participantsToDisplay, 0);
-    } else if (participantsCount == 2) {
-      participantGrid = Column(
-        children: [
-          Expanded(child: _buildParticipant(participantsToDisplay, 0)),
-          Expanded(child: _buildParticipant(participantsToDisplay, 1)),
-        ],
-      );
-    } else if (participantsCount == 3) {
-      participantGrid = Column(
-        children: [
-          Expanded(child: _buildParticipant(participantsToDisplay, 0)),
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(child: _buildParticipant(participantsToDisplay, 1)),
-                Expanded(child: _buildParticipant(participantsToDisplay, 2)),
-              ],
-            ),
-          ),
-        ],
-      );
-    } else if (participantsCount == 4) {
-      participantGrid = Column(
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(child: _buildParticipant(participantsToDisplay, 0)),
-                Expanded(child: _buildParticipant(participantsToDisplay, 1)),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(child: _buildParticipant(participantsToDisplay, 2)),
-                Expanded(child: _buildParticipant(participantsToDisplay, 3)),
-              ],
-            ),
-          ),
-        ],
-      );
+    final participantWidgets = <Widget>[];
+    for (var i = 0; i < participantsToDisplay.length; i++) {
+      final participantWidget =
+          widget.itemBuilder?.call(context, i, participants[i]) ??
+              StreamCallParticipant(participant: participants[i]);
+
+      participantWidgets.add(participantWidget);
     }
+
+    final participantGrid = isDesktopDevice
+        ? DesktopParticipantGrid(participants: participantWidgets)
+        : MobileParticipantGrid(participants: participantWidgets);
 
     if (!showFloatingParticipant) {
       return participantGrid;
@@ -199,7 +179,7 @@ class _RegularCallParticipantsContentState
     return FloatingViewContainer(
       floatingViewWidth: floatingParticipantWidth,
       floatingViewHeight: floatingParticipantHeight,
-      isSnappingBehaviorEnabled: true,
+      enableSnappingBehavior: widget.enableSnappingBehavior,
       floatingViewPadding: floatingParticipantPadding,
       floatingViewAlignment: FloatingViewAlignment.topRight,
       floatingView: StreamFloatingCallParticipant(
@@ -207,13 +187,6 @@ class _RegularCallParticipantsContentState
       ),
       child: participantGrid,
     );
-  }
-
-  Widget _buildParticipant(List<Participant> participants, int index) {
-    final participant = participants[index];
-
-    return widget.itemBuilder?.call(context, index, participant) ??
-        StreamCallParticipant(participant: participant);
   }
 
   int _participantComparator(Participant a, Participant b) {
@@ -300,5 +273,102 @@ class ScreenSharingCallParticipantsContent extends StatelessWidget {
         const SizedBox(height: 8),
       ],
     );
+  }
+}
+
+/// Represents the arrangement of participants on desktop.
+class DesktopParticipantGrid extends StatelessWidget {
+  /// Constructor for creating [DesktopParticipantGrid].
+  const DesktopParticipantGrid({
+    super.key,
+    required this.participants,
+  });
+
+  /// The widgets to display.
+  final List<Widget> participants;
+
+  @override
+  Widget build(BuildContext context) {
+    final columnCount = sqrt(participants.length - 1).floor() + 1;
+
+    return TileView(
+      columnCount: columnCount,
+      itemSpacing: 16,
+      edgeInsets: const EdgeInsets.all(16),
+      children: participants
+          .map(
+            (participant) => ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: participant,
+            ),
+          )
+          .toList(),
+    );
+  }
+}
+
+/// Represents the arrangement of participants on phones.
+class MobileParticipantGrid extends StatelessWidget {
+  /// Constructor for creating [MobileParticipantGrid].
+  const MobileParticipantGrid({
+    super.key,
+    required this.participants,
+  });
+
+  /// The widgets to display.
+  final List<Widget> participants;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget participantGrid = Container();
+
+    final participantsCount = participants.length;
+    if (participantsCount == 1) {
+      participantGrid = participants[0];
+    } else if (participantsCount == 2) {
+      participantGrid = Column(
+        children: [
+          Expanded(child: participants[0]),
+          Expanded(child: participants[1]),
+        ],
+      );
+    } else if (participantsCount == 3) {
+      participantGrid = Column(
+        children: [
+          Expanded(child: participants[0]),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(child: participants[1]),
+                Expanded(child: participants[2]),
+              ],
+            ),
+          ),
+        ],
+      );
+    } else if (participantsCount == 4) {
+      participantGrid = Column(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(child: participants[0]),
+                Expanded(child: participants[1]),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(child: participants[2]),
+                Expanded(child: participants[3]),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    return participantGrid;
   }
 }
