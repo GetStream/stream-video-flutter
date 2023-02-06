@@ -8,7 +8,7 @@
 PRODUCT_NAME = dogfooding
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = io.getstream.video.flutter.dogfooding.dogfooding
+PRODUCT_BUNDLE_IDENTIFIER = io.getstream.video.flutter.dogfooding
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2022 io.getstream.video.flutter.dogfooding. All rights reserved.
