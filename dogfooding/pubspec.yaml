@@ -14,7 +14,7 @@ dependencies:
   firebase_core: ^2.4.1
   firebase_auth: ^4.2.5
   flutter_svg: ^1.1.6
-  google_sign_in: ^5.4.2
+  google_sign_in: ^5.4.4
   google_fonts: ^3.0.1
   stream_video:
     path: ../packages/stream_video
