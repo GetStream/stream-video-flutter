@@ -1,11 +1,11 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../call/call.dart';
-import '../models/call_configuration.dart';
 import '../stream_video.dart';
 import 'call_notification_wrapper.dart';
 
@@ -52,8 +52,7 @@ class PushNotificationManager {
         callId: cid,
         callers: call.users.values.map((e) => e.name).join(', '),
         isVideoCall: true,
-        avatarUrl: '',
-        //call.users.values.firstOrNull?.imageUrl,
+        avatarUrl: call.users.values.firstOrNull?.imageUrl,
         onCallAccepted: _acceptCall,
         onCallRejected: _rejectCall,
       );
@@ -96,24 +95,15 @@ class PushNotificationManager {
   Future<Call?> consumeIncomingCall() async {
     // We need to wait for a second to be sure sharedPreferences has been updated
     await _sharedPreferences.reload();
-    final infomingCallCid = _sharedPreferences.getString('incomingCallCid');
+    final incomingCallCid = _sharedPreferences.getString('incomingCallCid');
     await _sharedPreferences.remove('incomingCallCid');
-    print('JcLog: incomingCallCid from sharedPreferences: $infomingCallCid');
-    if (infomingCallCid != null) {
-      // return _client.acceptCall(
-      //   type: infomingCallCid.substring(0, infomingCallCid.indexOf(':')),
-      //   id: infomingCallCid.substring(infomingCallCid.indexOf(':') + 1),
-      // );
-      return Future.value(
-        Call(
-          callConfiguration: const CallConfiguration(
-            type: 'type',
-            id: 'id',
-            participantIds: ['jc', 'isa'],
-          ),
-        ),
+    print('JcLog: incomingCallCid from sharedPreferences: $incomingCallCid');
+    if (incomingCallCid != null) {
+      return _client.acceptCall(
+        type: incomingCallCid.substring(0, incomingCallCid.indexOf(':')),
+        id: incomingCallCid.substring(incomingCallCid.indexOf(':') + 1),
       );
     }
-    return Future.value(null);
+    return Future.value();
   }
 }
