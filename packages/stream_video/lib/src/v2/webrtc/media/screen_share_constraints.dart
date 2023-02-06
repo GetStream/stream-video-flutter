@@ -9,7 +9,7 @@ class ScreenShareConstraints extends VideoConstraints {
     this.captureScreenAudio = false,
     String? sourceId,
     super.maxFrameRate,
-    super.params = RtcVideoParametersPresets.screenShareH720FPS5,
+    super.params = RtcVideoParametersPresets.h720_16x9,
   }) : super(deviceId: sourceId);
 
   ScreenShareConstraints.from({
@@ -30,7 +30,7 @@ class ScreenShareConstraints extends VideoConstraints {
 
   @override
   Map<String, dynamic> toMap() {
-    final constraints = params.toMediaConstraintsMap();
+    final constraints = <String, dynamic>{...super.toMap()};
     if (useiOSBroadcastExtension && CurrentPlatform.isIos) {
       constraints['deviceId'] = 'broadcast';
     }

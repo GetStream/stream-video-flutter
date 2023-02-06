@@ -9,7 +9,7 @@ class CameraConstraints extends VideoConstraints {
     super.deviceId,
     this.facingMode = FacingMode.user,
     super.maxFrameRate,
-    super.params = RtcVideoParametersPresets.h720_169,
+    super.params = RtcVideoParametersPresets.h720_16x9,
   });
 
   CameraConstraints.from({required VideoConstraints constraints})
@@ -25,7 +25,7 @@ class CameraConstraints extends VideoConstraints {
   @override
   Map<String, dynamic> toMap() {
     final constraints = <String, dynamic>{
-      ...params.toMediaConstraintsMap(),
+      ...super.toMap(),
       'facingMode': facingMode.name,
     };
     if (deviceId != null) {

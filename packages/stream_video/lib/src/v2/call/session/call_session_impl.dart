@@ -267,8 +267,10 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
 
     final tracksInfo = rtcManager?.getPublisherTrackInfos();
     if (tracksInfo == null || tracksInfo.isEmpty) {
-      _logger.w(() => '[onPubNegotiationNeeded] rejected(tracksInfo '
-          'is null/empty): $tracksInfo');
+      _logger.w(
+        () => '[onPubNegotiationNeeded] rejected(tracksInfo '
+            'is null/empty): $tracksInfo',
+      );
       return;
     }
 

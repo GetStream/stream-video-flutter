@@ -4,6 +4,7 @@ import 'package:webrtc_interface/src/rtc_session_description.dart';
 
 import '../../disposable.dart';
 import '../../logger/impl/tagged_logger.dart';
+import '../../logger/stream_log.dart';
 import '../../platform_detector/platform_detector.dart';
 import '../model/call_cid.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
@@ -11,16 +12,15 @@ import '../sfu/data/models/sfu_track_type.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
 import 'codecs_helper.dart' as codecs;
-import 'media/constraints/camera_position.dart';
-import 'media/constraints/facing_mode.dart';
 import 'media/media_constraints.dart';
+
+import 'model/rtc_audio_bitrate_preset.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_dimension.dart';
 import 'peer_connection.dart';
 import 'peer_type.dart';
 import 'rtc_parser.dart';
 import 'rtc_track.dart';
-import 'rtc_track_publish_options.dart';
 
 /// {@template OnPublisherTrackMuted}
 /// Callback for when a publisher track is muted.
@@ -35,6 +35,8 @@ typedef OnSubscriberTrackReceived = void Function(
   RtcRemoteTrack track,
 );
 
+const _tag = 'SV:RtcManager';
+
 class RtcManager extends Disposable {
   RtcManager({
     required this.sessionId,
@@ -47,7 +49,7 @@ class RtcManager extends Disposable {
     _subscriber.onTrack = _onSubscriberTrack;
   }
 
-  final _logger = taggedLogger(tag: 'SV:RtcManager');
+  final _logger = taggedLogger(tag: _tag);
 
   final String sessionId;
   final StreamCallCid callCid;
@@ -245,7 +247,7 @@ extension PublisherRtcManager on RtcManager {
       if (it.isVideoTrack) {
         final dimension = it.videoDimension!;
         final encodings = it.transceiver?.sender.parameters.encodings;
-
+        _logger.i(() => '[getPublisherTrackInfos] dimension: $dimension');
         // default to a single layer, HQ
         if (encodings == null) {
           videoLayers = [
@@ -284,7 +286,6 @@ extension PublisherRtcManager on RtcManager {
 
   Future<RtcLocalTrack<AudioConstraints>> publishAudioTrack({
     required RtcLocalTrack<AudioConstraints> track,
-    AudioTrackPublishOptions options = const AudioTrackPublishOptions(),
   }) async {
     // Adding early as we need to access it in the onPublisherNegotiationNeeded
     // callback.
@@ -295,8 +296,7 @@ extension PublisherRtcManager on RtcManager {
       stream: track.stream,
       track: track.track,
       encodings: [
-        if (options.audioBitrate > 0)
-          rtc.RTCRtpEncoding(maxBitrate: options.audioBitrate),
+        rtc.RTCRtpEncoding(rid: 'a', maxBitrate: AudioBitrate.music),
       ],
     );
     _logger.v(() => '[publishAudioTrack] transceiver: $transceiver');
@@ -310,42 +310,25 @@ extension PublisherRtcManager on RtcManager {
 
   Future<RtcLocalTrack<VideoConstraints>> publishVideoTrack({
     required RtcLocalTrack<VideoConstraints> track,
-    VideoTrackPublishOptions options = const VideoTrackPublishOptions(),
   }) async {
     // Adding early as we need to access it in the onPublisherNegotiationNeeded
     // callback.
-    _logger.d(() => '[publishVideoTrack] track: $track');
+    _logger.i(() => '[publishVideoTrack] track: $track');
     publishedTracks[track.trackId] = track;
 
     // use constraints passed to getUserMedia by default
-    var dimension = track.mediaConstraints.params.dimension;
+    final dimension = track.getVideoDimension();
 
-    if (CurrentPlatform.isWeb) {
-      // getSettings() is only implemented for Web
-      try {
-        // try to use getSettings for more accurate resolution
-        final settings = track.track.getSettings();
-        if (settings['width'] is int) {
-          dimension = dimension.copyWith(width: settings['width'] as int);
-        }
-        if (settings['height'] is int) {
-          dimension = dimension.copyWith(height: settings['height'] as int);
-        }
-      } catch (_) {
-        _logger.w(() => 'Failed to call `mediaStreamTrack.getSettings()`');
-      }
-    }
+    _logger.v(() => '[publishVideoTrack] dimension: $dimension');
 
-    _logger.i(() {
-      return 'Compute encodings with resolution: $dimension, options: $options';
-    });
-
-    // Video encodings and simulcasts
     final encodings = codecs.computeVideoEncodings(
-      isScreenShare: track.trackType == SfuTrackType.screenShare,
       dimension: dimension,
-      options: options,
+      isScreenShare: track.trackType == SfuTrackType.screenShare,
     );
+
+    for (final encoding in encodings) {
+      _logger.v(() => '[publishVideoTrack] encoding: ${encoding.toMap()}');
+    }
 
     final transceiver = await _publisher.addVideoTransceiver(
       stream: track.stream,
@@ -407,10 +390,14 @@ extension PublisherRtcManager on RtcManager {
   Future<RtcLocalTrack<AudioConstraints>?> createAudioTrack({
     AudioConstraints constraints = const AudioConstraints(),
   }) async {
+    _logger.d(() => '[createAudioTrack] constraints: ${constraints.toMap()}');
     final stream = await rtc.navigator.mediaDevices.getMedia(constraints);
     final audioTrack = stream.getAudioTracks().firstOrNull;
 
-    if (audioTrack == null) return null;
+    if (audioTrack == null) {
+      _logger.w(() => '[createAudioTrack] rejected (track is null)');
+      return null;
+    }
 
     final track = RtcLocalTrack(
       trackIdPrefix: publisherId,
@@ -426,10 +413,14 @@ extension PublisherRtcManager on RtcManager {
   Future<RtcLocalTrack<CameraConstraints>?> createCameraTrack({
     CameraConstraints constraints = const CameraConstraints(),
   }) async {
+    _logger.d(() => '[createCameraTrack] constraints: ${constraints.toMap()}');
     final stream = await rtc.navigator.mediaDevices.getMedia(constraints);
     final videoTrack = stream.getVideoTracks().firstOrNull;
 
-    if (videoTrack == null) return null;
+    if (videoTrack == null) {
+      _logger.w(() => '[createCameraTrack] rejected (track is null)');
+      return null;
+    }
 
     final track = RtcLocalTrack(
       trackIdPrefix: publisherId,
@@ -445,10 +436,16 @@ extension PublisherRtcManager on RtcManager {
   Future<RtcLocalTrack<ScreenShareConstraints>?> createScreenShareTrack({
     ScreenShareConstraints constraints = const ScreenShareConstraints(),
   }) async {
+    _logger.d(
+      () => '[createScreenShareTrack] constraints: ${constraints.toMap()}',
+    );
     final stream = await rtc.navigator.mediaDevices.getMedia(constraints);
     final videoTrack = stream.getVideoTracks().firstOrNull;
 
-    if (videoTrack == null) return null;
+    if (videoTrack == null) {
+      _logger.w(() => '[createScreenShareTrack] rejected (track is null)');
+      return null;
+    }
 
     final track = RtcLocalTrack(
       trackIdPrefix: publisherId,
@@ -464,25 +461,30 @@ extension PublisherRtcManager on RtcManager {
   Future<List<RtcLocalTrack>> createScreenShareTrackWithAudio({
     ScreenShareConstraints constraints = const ScreenShareConstraints(),
   }) async {
-    final tracks = <RtcLocalTrack>[];
-
-    final stream = await rtc.navigator.mediaDevices.getMedia(constraints);
-    final videoTrack = stream.getVideoTracks().firstOrNull;
-
-    if (videoTrack == null) return tracks;
-
-    tracks.add(
-      RtcLocalTrack(
-        trackIdPrefix: publisherId,
-        trackType: SfuTrackType.screenShare,
-        stream: stream,
-        track: videoTrack,
-        mediaConstraints: constraints,
-      ),
+    _logger.d(
+      () => '[createScreenShareTrackWithAudio] '
+          'constraints: ${constraints.toMap()}',
     );
+    final stream = await rtc.navigator.mediaDevices.getMedia(constraints);
+
+    final tracks = <RtcLocalTrack>[];
+    final videoTrack = stream.getVideoTracks().firstOrNull;
+    if (videoTrack != null) {
+      _logger.v(() => '[createScreenShareTrackWithAudio] vTrack is created');
+      tracks.add(
+        RtcLocalTrack(
+          trackIdPrefix: publisherId,
+          trackType: SfuTrackType.screenShare,
+          stream: stream,
+          track: videoTrack,
+          mediaConstraints: constraints,
+        ),
+      );
+    }
 
     final audioTrack = stream.getAudioTracks().firstOrNull;
     if (audioTrack != null) {
+      _logger.v(() => '[createScreenShareTrackWithAudio] aTrack is created');
       tracks.add(
         RtcLocalTrack(
           trackIdPrefix: publisherId,
@@ -502,7 +504,10 @@ extension PublisherRtcManager on RtcManager {
     MediaConstraints? mediaConstraints,
   }) async {
     final sender = track.transceiver?.sender;
-    if (sender == null) return null;
+    if (sender == null) {
+      _logger.w(() => '[restartTrack] rejected (sender is null)');
+      return null;
+    }
 
     final constraints = mediaConstraints ?? track.mediaConstraints;
 
@@ -517,7 +522,7 @@ extension PublisherRtcManager on RtcManager {
     try {
       await sender.replaceTrack(newTrack);
     } catch (error) {
-      _logger.e(() => 'replaceTrack() did throw $error');
+      _logger.e(() => '[restartTrack] `replaceTrack(...)` failed: $error');
     }
 
     // Update new stream, track and constraints.
@@ -545,6 +550,34 @@ extension PublisherRtcManager on RtcManager {
       track: track,
       mediaConstraints: constraints.copyWith(facingMode: facingMode),
     );
+  }
+}
+
+extension on RtcLocalTrack<VideoConstraints> {
+  RtcVideoDimension getVideoDimension() {
+    // use constraints passed to getUserMedia by default
+    var dimension = mediaConstraints.params.dimension;
+
+    if (CurrentPlatform.isWeb) {
+      // getSettings() is only implemented for Web
+      try {
+        // try to use getSettings for more accurate resolution
+        final settings = track.getSettings();
+        streamLog.v(_tag, () => '[publishVideoTrack] settings: $settings');
+        if (settings['width'] is int) {
+          dimension = dimension.copyWith(width: settings['width'] as int);
+        }
+        if (settings['height'] is int) {
+          dimension = dimension.copyWith(height: settings['height'] as int);
+        }
+      } catch (_) {
+        streamLog.w(
+          _tag,
+          () => '[publishVideoTrack] `mediaStreamTrack.getSettings()` failed',
+        );
+      }
+    }
+    return dimension;
   }
 }
 

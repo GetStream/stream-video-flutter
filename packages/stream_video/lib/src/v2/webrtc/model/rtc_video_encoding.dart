@@ -18,35 +18,12 @@ class RtcVideoEncoding
   @override
   List<Object?> get props => [maxFramerate, maxBitrate];
 
-  // ----------------------------------------------------------------------
-  // Comparable
-
   @override
   int compareTo(RtcVideoEncoding other) {
-    // compare bitrates
     final result = maxBitrate.compareTo(other.maxBitrate);
-    // if bitrates are the same, compare by fps
     if (result == 0) {
       return maxFramerate.compareTo(other.maxFramerate);
     }
-
     return result;
-  }
-}
-
-/// Convenience extension for [RtcVideoEncoding].
-extension RtcVideoEncodingExt on RtcVideoEncoding {
-  rtc.RTCRtpEncoding toRTCRtpEncoding({
-    String? rid,
-    double? scaleResolutionDownBy = 1.0,
-    int? numTemporalLayers,
-  }) {
-    return rtc.RTCRtpEncoding(
-      rid: rid,
-      scaleResolutionDownBy: scaleResolutionDownBy,
-      maxFramerate: maxFramerate,
-      maxBitrate: maxBitrate,
-      numTemporalLayers: numTemporalLayers,
-    );
   }
 }

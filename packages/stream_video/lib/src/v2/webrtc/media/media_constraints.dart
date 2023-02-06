@@ -23,6 +23,7 @@ abstract class MediaConstraints {
   final String? deviceId;
 
   // All subclasses must be able to report constraints
+  // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
   Map<String, dynamic> toMap();
 
   MediaConstraints copyWith();

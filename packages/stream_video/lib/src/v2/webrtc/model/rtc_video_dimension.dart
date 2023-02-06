@@ -35,8 +35,8 @@ class RtcVideoDimension with EquatableMixin {
 
 extension RtcVideoDimensionHelpers on RtcVideoDimension {
   // aspect ratios
-  static const aspect169 = 16.0 / 9.0;
-  static const aspect43 = 4.0 / 3.0;
+  static const aspect_16x9 = 16.0 / 9.0;
+  static const aspect_4x3 = 4.0 / 3.0;
 
   double aspect() => width > height ? width / height : height / width;
 
