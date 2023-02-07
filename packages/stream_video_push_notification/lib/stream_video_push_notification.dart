@@ -9,20 +9,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'src/call_notification_wrapper.dart';
+import 'src/stream_video_push_notification_method_channel.dart';
 
 class StreamVideoPushNotificationManager implements PushNotificationManager {
   StreamVideoPushNotificationManager._create({
     required StreamVideo client,
     required SharedPreferences sharedPreferences,
-    CallNotificationWrapper callNotification = const CallNotificationWrapper(),
+    required CallNotificationWrapper callNotification,
+    required StreamVideoPushNotificationMethodChannel methodChannel,
   })  : _client = client,
         _callNotification = callNotification,
-        _sharedPreferences = sharedPreferences;
+        _sharedPreferences = sharedPreferences,
+        _methodChannel = methodChannel;
 
   final _logger = taggedLogger(tag: 'PNManager');
   final StreamVideo _client;
   final CallNotificationWrapper _callNotification;
   final SharedPreferences _sharedPreferences;
+  final StreamVideoPushNotificationMethodChannel _methodChannel;
 
   @override
   Future<void> onUserLoggedIn() async {
@@ -48,7 +52,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   Future<void> _registerIOSDevice() async {
-    final token = await StreamVideoPlatform.instance.getDevicePushTokenVoIP();
+    final token = await _methodChannel.getDevicePushTokenVoIP();
     _logger.d(() => 'New PushTokenVoIP: $token');
     if (token != null) {
       await _client.createDevice(token: token, pushProviderId: 'apn');
@@ -128,12 +132,14 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     StreamVideo client, {
     SharedPreferences? sharedPreferences,
     CallNotificationWrapper? callNotification,
+    StreamVideoPushNotificationMethodChannel? methodChannel,
   }) async {
     return StreamVideoPushNotificationManager._create(
-      client: client,
-      sharedPreferences:
-          sharedPreferences ?? await SharedPreferences.getInstance(),
-      callNotification: callNotification ?? const CallNotificationWrapper(),
-    );
+        client: client,
+        sharedPreferences:
+            sharedPreferences ?? await SharedPreferences.getInstance(),
+        callNotification: callNotification ?? const CallNotificationWrapper(),
+        methodChannel:
+            methodChannel ?? const StreamVideoPushNotificationMethodChannel());
   }
 }
