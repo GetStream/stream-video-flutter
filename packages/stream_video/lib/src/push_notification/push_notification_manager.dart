@@ -39,7 +39,7 @@ class PushNotificationManager {
 
   Future<void> _registerFirebaseToken(String token) async {
     print('JcLog: New Firebase Token: $token');
-    await _client.createDevice(token: token);
+    await _client.createDevice(token: token, pushProviderId: 'firebase');
   }
 
   Future<bool> handlePushNotification(RemoteMessage remoteMessage) async {

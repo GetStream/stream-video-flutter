@@ -261,12 +261,15 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     return response.call;
   }
 
-  Future<Device> createDevice({required String token}) async {
+  Future<Device> createDevice({
+    required String token,
+    required String pushProviderId,
+  }) async {
     final response = await _client.createDevice(
       CreateDeviceRequest(
         input: DeviceInput(
           id: token,
-          pushProviderId: 'firebase',
+          pushProviderId: pushProviderId,
         ),
       ),
     );
