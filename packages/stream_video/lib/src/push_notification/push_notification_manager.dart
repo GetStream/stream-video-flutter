@@ -5,7 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:stream_video/stream_video_platform_interface.dart';
+import 'package:stream_video/src/stream_video_method_channel.dart';
 
 import '../call/call.dart';
 import '../stream_video.dart';
@@ -15,14 +15,17 @@ class PushNotificationManager {
   PushNotificationManager({
     required StreamVideo client,
     required SharedPreferences sharedPreferences,
+    StreamVideoMethodChannel methodChannel = const StreamVideoMethodChannel(),
     CallNotificationWrapper callNotification = const CallNotificationWrapper(),
   })  : _client = client,
         _callNotification = callNotification,
-        _sharedPreferences = sharedPreferences;
+        _sharedPreferences = sharedPreferences,
+        _methodChannel = methodChannel;
 
   final StreamVideo _client;
   final CallNotificationWrapper _callNotification;
   final SharedPreferences _sharedPreferences;
+  final StreamVideoMethodChannel _methodChannel;
 
   Future<void> onUserLoggedIn() async {
     print('JcLog: [onUserLoggedIn]');
@@ -48,7 +51,7 @@ class PushNotificationManager {
   }
 
   Future<void> _registerIOSDevice() async {
-    final token = await StreamVideoPlatform.instance.getDevicePushTokenVoIP();
+    final token = await _methodChannel.getDevicePushTokenVoIP();
     if (token != null) {
       await _client.createDevice(token: token, pushProviderId: 'apn');
     }
