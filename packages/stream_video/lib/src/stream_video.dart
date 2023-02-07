@@ -19,7 +19,6 @@ import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/options.dart';
 import 'package:stream_video/src/token/token.dart';
 import 'package:stream_video/src/token/token_manager.dart';
-import 'package:stream_video/stream_video_platform_interface.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../protobuf/video/coordinator/push_v1/push.pb.dart';
@@ -114,9 +113,6 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
       baseUrl: coordinatorRpcUrl,
     );
     _initPushNotification();
-  }
-  Future<String?> getPlatformVersion() {
-    return StreamVideoPlatform.instance.getPlatformVersion();
   }
 
   Future<void> _initPushNotification() async {
