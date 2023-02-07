@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stream_video/stream_video_platform_interface.dart';
 
 import '../call/call.dart';
 import '../stream_video.dart';
@@ -24,6 +26,14 @@ class PushNotificationManager {
 
   Future<void> onUserLoggedIn() async {
     print('JcLog: [onUserLoggedIn]');
+    if (Platform.isAndroid) {
+      _registerAndroidDevice();
+    } else if (Platform.isIOS) {
+      _registerIOSDevice();
+    }
+  }
+
+  Future<void> _registerAndroidDevice() async {
     if (_isFirebaseInitialized()) {
       FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
         await _registerFirebaseToken(token);
@@ -34,6 +44,13 @@ class PushNotificationManager {
       } else {
         print('JcLog: Firebase Token was null');
       }
+    }
+  }
+
+  Future<void> _registerIOSDevice() async {
+    final token = await StreamVideoPlatform.instance.getDevicePushTokenVoIP();
+    if (token != null) {
+      await _client.createDevice(token: token, pushProviderId: 'apn');
     }
   }
 
