@@ -26,4 +26,9 @@ abstract class StreamVideoPlatform extends PlatformInterface {
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
+
+  Future<String?> getDevicePushTokenVoIP() {
+    throw UnimplementedError(
+        'getDevicePushTokenVoIP() has not been implemented.');
+  }
 }

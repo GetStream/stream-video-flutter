@@ -22,10 +22,10 @@ class StreamVideoPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
-    } else {
-      result.notImplemented()
+    when (call.method) {
+      "getPlatformVersion" -> result.success("Android ${android.os.Build.VERSION.RELEASE}")
+      "getDevicePushTokenVoIP" -> result.notImplemented()
+      else -> result.notImplemented()
     }
   }
 

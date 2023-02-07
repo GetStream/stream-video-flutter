@@ -11,7 +11,13 @@ class MethodChannelStreamVideo extends StreamVideoPlatform {
 
   @override
   Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version =
+        await methodChannel.invokeMethod<String>('getPlatformVersion');
     return version;
+  }
+
+  @override
+  Future<String?> getDevicePushTokenVoIP() async {
+    return await methodChannel.invokeMethod<String>('getDevicePushTokenVoIP');
   }
 }
