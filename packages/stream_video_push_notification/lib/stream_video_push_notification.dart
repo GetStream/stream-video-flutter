@@ -1,5 +1,7 @@
 library stream_video_push_notification;
 
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -24,6 +26,14 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   @override
   Future<void> onUserLoggedIn() async {
+    if (Platform.isAndroid) {
+      _registerAndroidDevice();
+    } else if (Platform.isIOS) {
+      _registerIOSDevice();
+    }
+  }
+
+  Future<void> _registerAndroidDevice() async {
     if (_isFirebaseInitialized()) {
       FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
         await _registerFirebaseToken(token);
@@ -34,6 +44,14 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       } else {
         _logger.w(() => 'Firebase Token was null');
       }
+    }
+  }
+
+  Future<void> _registerIOSDevice() async {
+    final token = await StreamVideoPlatform.instance.getDevicePushTokenVoIP();
+    _logger.d(() => 'New PushTokenVoIP: $token');
+    if (token != null) {
+      await _client.createDevice(token: token, pushProviderId: 'apn');
     }
   }
 
