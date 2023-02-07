@@ -44,6 +44,11 @@ abstract class CallV2 {
     );
   }
 
+  static CallV2? activeCall;
+  static void Function(CallV2?)? onActiveCall;
+
+  StreamCallCid get callCid;
+
   StateEmitter<CallStateV2> get state;
 
   SharedEmitter<SfuEventV2> get events;

@@ -96,7 +96,8 @@ class CallV2Impl extends CallV2 {
   final CallSessionFactory _sessionFactory;
   final CallStateManager _stateManager;
 
-  bool _connected = false;
+  @override
+  StreamCallCid get callCid => _stateManager.state.value.callCid;
 
   @override
   StateEmitter<CallStateV2> get state => _stateManager.state;
@@ -105,7 +106,16 @@ class CallV2Impl extends CallV2 {
   SharedEmitter<SfuEventV2> get events => _events;
   final _events = MutableSharedEmitterImpl<SfuEventV2>();
 
+  final _status = MutableStateEmitterImpl<_ConnectionStatus>(
+    _ConnectionStatus.disconnected,
+  );
+
   CallSession? _session;
+
+  @override
+  String toString() {
+    return 'Call{cid: $callCid}';
+  }
 
   @override
   Future<Result<CallCreated>> dial({
@@ -203,14 +213,31 @@ class CallV2Impl extends CallV2 {
   Future<Result<None>> connect({
     CallSettings settings = const CallSettings(),
   }) async {
-    if (_connected) {
-      _logger.w(() => '[connect] rejected (already connected)');
+    if (_status.value == _ConnectionStatus.connected) {
+      _logger.w(() => '[connect] rejected (connected)');
       return Result.success(None());
     }
-    _connected = true;
+    if (_status.value == _ConnectionStatus.connecting) {
+      _logger.v(() => '[connect] await "connecting" change');
+      final status = await _status.firstWhere(
+        (it) => it != _ConnectionStatus.connecting,
+        timeLimit: settings.dropTimeout,
+      );
+      if (status == _ConnectionStatus.connected) {
+        return Result.success(None());
+      } else {
+        return Result.error('original "connect" failed');
+      }
+    }
+    await CallV2.activeCall?.disconnect();
+    CallV2.activeCall = this;
+    CallV2.onActiveCall?.call(this);
+    _status.value = _ConnectionStatus.connecting;
     final result = await _connect(settings);
-    if (result.isFailure) {
-      _connected = false;
+    if (result.isSuccess) {
+      _status.value = _ConnectionStatus.connected;
+    } else {
+      await disconnect();
     }
     return result;
   }
@@ -315,7 +342,9 @@ class CallV2Impl extends CallV2 {
     await _subscriptions.cancelAll();
     await _session?.dispose();
     _session = null;
-    _connected = false;
+    _status.value = _ConnectionStatus.disconnected;
+    CallV2.activeCall = null;
+    CallV2.onActiveCall?.call(null);
     return Result.success(None());
   }
 
@@ -421,4 +450,10 @@ extension on CallStateManager {
     }
     return Result.success(None());
   }
+}
+
+enum _ConnectionStatus {
+  disconnected,
+  connecting,
+  connected;
 }
