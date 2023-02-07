@@ -17,9 +17,6 @@ public class SwiftStreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
       switch call.method {
-          case "getPlatformVersion":
-              result("iOS " + UIDevice.current.systemVersion)
-              break
           case "getDevicePushTokenVoIP":
               result(UserDefaults.standard.value(forKey: voipPushTokenKey) as? String)
               break
