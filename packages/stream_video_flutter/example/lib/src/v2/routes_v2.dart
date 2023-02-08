@@ -4,17 +4,11 @@ import 'package:stream_video/stream_video.dart';
 import 'call_screen_v2.dart';
 import 'home_screen_v2.dart';
 import 'login_screen_v2.dart';
-import 'splash_screen_v2.dart';
 
 mixin RoutesV2 {
   /// Add entry for new route here
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case SplashScreenV2.routeName:
-        return MaterialPageRoute(
-          settings: const RouteSettings(name: SplashScreenV2.routeName),
-          builder: (_) => const SplashScreenV2(),
-        );
       case LoginScreenV2.routeName:
         return MaterialPageRoute(
           settings: const RouteSettings(name: LoginScreenV2.routeName),

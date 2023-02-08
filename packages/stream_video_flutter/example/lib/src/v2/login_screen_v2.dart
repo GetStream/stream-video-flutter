@@ -75,7 +75,7 @@ final List<LoginInfo> users = [
 class LoginScreenV2 extends StatefulWidget {
   const LoginScreenV2({super.key});
 
-  static const routeName = '/v2/login';
+  static const routeName = '/';
 
   @override
   State<LoginScreenV2> createState() => _LoginScreenStateV2();
