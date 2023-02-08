@@ -14,6 +14,8 @@ mixin KeepAlive on StreamWebSocket {
   Timer? _pingTimer;
   Timer? _pongTimer;
 
+  bool isKeepAliveStarted = false;
+
   /// Sends a ping signal to the WS.
   void sendPing();
 
@@ -31,6 +33,7 @@ mixin KeepAlive on StreamWebSocket {
   /// If a pong message is not [ack] within [_pongTimeoutDuration], the
   /// connection is closed.
   void startPingPong() {
+    isKeepAliveStarted = true;
     _pingTimer?.cancel();
     _pingTimer = Timer.periodic(
       _pingDuration,
@@ -50,6 +53,7 @@ mixin KeepAlive on StreamWebSocket {
 
   /// Stops the ping pong timer.
   void stopPingPong() {
+    isKeepAliveStarted = false;
     _pingTimer?.cancel();
     _pingTimer = null;
     _pongTimer?.cancel();

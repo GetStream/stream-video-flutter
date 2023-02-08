@@ -342,7 +342,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     required String callCid,
     required List<Edge> edges,
   }) async {
-    final latencyByEdge = await _measureLatencies(edges: edges);
+    final latencyByEdge = await measureEdgeLatencies(edges: edges);
     final response = await _client.getCallEdgeServer(
       GetCallEdgeServerRequest(
         callCid: callCid,
@@ -434,19 +434,6 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
       ),
     );
     print('[inviteUsers] res: $res');
-  }
-
-  Future<Map<String, Latency>> _measureLatencies({
-    required List<Edge> edges,
-    int rounds = 3,
-  }) async {
-    return {
-      for (final edge in edges)
-        edge.name: await measureEdgeLatency(
-          edge: edge,
-          rounds: rounds,
-        ),
-    };
   }
 }
 
