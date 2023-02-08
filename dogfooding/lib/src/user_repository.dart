@@ -40,13 +40,14 @@ class UserRepository {
 
     if (id != null && name != null && role != null && token != null) {
       return UserCredentials(
-          user: UserInfo(
-            id: id,
-            name: name,
-            role: role,
-            imageUrl: image,
-          ),
-          token: token);
+        user: UserInfo(
+          id: id,
+          name: name,
+          role: role,
+          imageUrl: image,
+        ),
+        token: token,
+      );
     } else {
       return null;
     }
@@ -58,5 +59,6 @@ class UserRepository {
     await prefs.remove(keyUserName);
     await prefs.remove(keyUserRole);
     await prefs.remove(keyUserImage);
+    await prefs.remove(keyToken);
   }
 }

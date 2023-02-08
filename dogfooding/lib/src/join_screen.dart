@@ -23,8 +23,7 @@ class _JoinScreenState extends State<JoinScreen> {
   @override
   void initState() {
     super.initState();
-    _logIn();
-    _joinCall(widget.callId);
+    _initCall(widget.callId);
   }
 
   @override
@@ -41,6 +40,11 @@ class _JoinScreenState extends State<JoinScreen> {
             : const SizedBox(),
       ),
     );
+  }
+
+  Future<void> _initCall(String callId) async {
+    await _logIn();
+    await _joinCall(widget.callId);
   }
 
   Future<void> _logIn() async {
