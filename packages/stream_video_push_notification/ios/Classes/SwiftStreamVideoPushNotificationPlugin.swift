@@ -3,10 +3,24 @@ import UIKit
 
 public class SwiftStreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
   private static let voipPushTokenKey = "stream.video.voip.token"
+  @objc public static var sharedInstance: SwiftStreamVideoPushNotificationPlugin? = nil
+  private var channel: FlutterMethodChannel? = nil
+  private var eventChannel: FlutterEventChannel? = nil
+
+  public static func sharePluginWithRegister(with registrar: FlutterPluginRegistrar) -> SwiftStreamVideoPushNotificationPlugin {
+      if(sharedInstance == nil){
+          sharedInstance = SwiftStreamVideoPushNotificationPlugin()
+      }
+      sharedInstance!.channel = FlutterMethodChannel(name: "stream_video_push_notification", binaryMessenger: registrar.messenger())
+      sharedInstance!.eventChannel = FlutterEventChannel(name: "stream_video_push_notification_events", binaryMessenger: registrar.messenger())
+      return sharedInstance!
+  }
+
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "stream_video_push_notification", binaryMessenger: registrar.messenger())
-    let instance = SwiftStreamVideoPushNotificationPlugin()
-    registrar.addMethodCallDelegate(instance, channel: channel)
+    let instance = sharePluginWithRegister(with: registrar)
+    if let channel = instance.channel {
+        registrar.addMethodCallDelegate(instance, channel: channel)
+    }
   }
 
   public static func setDevicePushTokenVoIP(deviceToken: String) {
@@ -18,7 +32,7 @@ public class SwiftStreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
       switch call.method {
           case "getDevicePushTokenVoIP":
-              result(UserDefaults.standard.value(forKey: voipPushTokenKey) as? String)
+              result(UserDefaults.standard.value(forKey: SwiftStreamVideoPushNotificationPlugin.voipPushTokenKey) as? String)
               break
           default:
               result(FlutterMethodNotImplemented)
