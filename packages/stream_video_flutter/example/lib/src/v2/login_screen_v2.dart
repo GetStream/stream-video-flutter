@@ -3,22 +3,6 @@ import 'package:stream_video/stream_video.dart';
 
 import 'home_screen_v2.dart';
 
-Widget avatarBuilder(BuildContext context, UserInfo userInfo) {
-  final name = userInfo.name;
-  final imageUrl = userInfo.imageUrl;
-
-  final avatar = imageUrl != null
-      ? CircleAvatar(
-          backgroundColor: Colors.white,
-          backgroundImage: NetworkImage(imageUrl),
-        )
-      : CircleAvatar(
-          child: Text(name[0].toUpperCase()),
-        );
-
-  return avatar;
-}
-
 final List<LoginInfo> users = [
   LoginInfo(
     const UserInfo(
@@ -124,6 +108,22 @@ class _LoginScreenStateV2 extends State<LoginScreenV2> {
       ),
     );
   }
+}
+
+Widget avatarBuilder(BuildContext context, UserInfo userInfo) {
+  final name = userInfo.name;
+  final imageUrl = userInfo.imageUrl;
+
+  final avatar = imageUrl != null
+      ? CircleAvatar(
+          backgroundColor: Colors.white,
+          backgroundImage: NetworkImage(imageUrl),
+        )
+      : CircleAvatar(
+          child: Text(name[0].toUpperCase()),
+        );
+
+  return avatar;
 }
 
 class LoginInfo {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../home_screen.dart';
-import '../login_screen.dart';
 import '../utils/users_provider.dart';
+import '../v2/home_screen_v2.dart';
+import '../v2/login_screen_v2.dart';
 import 'routes.dart';
 
 mixin AppRoutes {
@@ -12,12 +12,12 @@ mixin AppRoutes {
       case Routes.LOGIN:
         return MaterialPageRoute(
           settings: const RouteSettings(name: Routes.LOGIN),
-          builder: (_) => const LoginScreen(),
+          builder: (_) => const LoginScreenV2(),
         );
       case Routes.HOME:
         return MaterialPageRoute(
           settings: const RouteSettings(name: Routes.HOME),
-          builder: (_) => const HomeScreen(),
+          builder: (_) => const HomeScreenV2(),
         );
       case Routes.CALL:
         return MaterialPageRoute(

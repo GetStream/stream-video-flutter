@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../routes/routes.dart';
 import 'call_screen_v2.dart';
 import 'home_screen_v2.dart';
 import 'login_screen_v2.dart';
@@ -9,7 +10,7 @@ mixin RoutesV2 {
   /// Add entry for new route here
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case LoginScreenV2.routeName:
+      case Routes.LOGIN:
         return MaterialPageRoute(
           settings: const RouteSettings(name: LoginScreenV2.routeName),
           builder: (_) => const LoginScreenV2(),
