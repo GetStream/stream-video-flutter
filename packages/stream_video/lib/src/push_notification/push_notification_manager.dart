@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stream_video/src/stream_video_event_channel.dart';
 import 'package:stream_video/src/stream_video_method_channel.dart';
 
 import '../call/call.dart';
@@ -16,16 +17,25 @@ class PushNotificationManager {
     required StreamVideo client,
     required SharedPreferences sharedPreferences,
     StreamVideoMethodChannel methodChannel = const StreamVideoMethodChannel(),
+    StreamVideoEventChannel eventChannel = const StreamVideoEventChannel(),
     CallNotificationWrapper callNotification = const CallNotificationWrapper(),
   })  : _client = client,
         _callNotification = callNotification,
         _sharedPreferences = sharedPreferences,
-        _methodChannel = methodChannel;
+        _methodChannel = methodChannel,
+        _eventChannel = eventChannel {
+    _eventChannel.onEvent.listen((event) {
+      if (event.type == NativeEventType.ACTION_INCOMING_CALL) {
+        _showCall(event.content['call_cid']);
+      }
+    });
+  }
 
   final StreamVideo _client;
   final CallNotificationWrapper _callNotification;
   final SharedPreferences _sharedPreferences;
   final StreamVideoMethodChannel _methodChannel;
+  final StreamVideoEventChannel _eventChannel;
 
   Future<void> onUserLoggedIn() async {
     print('JcLog: [onUserLoggedIn]');
@@ -62,20 +72,24 @@ class PushNotificationManager {
     await _client.createDevice(token: token, pushProviderId: 'firebase');
   }
 
+  Future<void> _showCall(String cid) async {
+    final type = cid.substring(0, cid.indexOf(':'));
+    final id = cid.substring(cid.indexOf(':') + 1);
+    final call = await _client.getOrCreateCall(type: type, id: id);
+    await _callNotification.showCallNotification(
+      callId: cid,
+      callers: call.users.values.map((e) => e.name).join(', '),
+      isVideoCall: true,
+      avatarUrl: call.users.values.firstOrNull?.imageUrl,
+      onCallAccepted: _acceptCall,
+      onCallRejected: _rejectCall,
+    );
+  }
+
   Future<bool> handlePushNotification(RemoteMessage remoteMessage) async {
     if (_isValid(remoteMessage)) {
       final cid = remoteMessage.data['call_cid'] as String;
-      final type = cid.substring(0, cid.indexOf(':'));
-      final id = cid.substring(cid.indexOf(':') + 1);
-      final call = await _client.getOrCreateCall(type: type, id: id);
-      await _callNotification.showCallNotification(
-        callId: cid,
-        callers: call.users.values.map((e) => e.name).join(', '),
-        isVideoCall: true,
-        avatarUrl: call.users.values.firstOrNull?.imageUrl,
-        onCallAccepted: _acceptCall,
-        onCallRejected: _rejectCall,
-      );
+      await _showCall(cid);
       return true;
     }
     return false;
