@@ -3,10 +3,22 @@ import UIKit
 
 public class SwiftStreamVideoPlugin: NSObject, FlutterPlugin {
   private static let voipPushTokenKey = "stream.video.voip.token"
+  @objc public static var sharedInstance: SwiftStreamVideoPlugin? = nil
+  private var channel: FlutterMethodChannel? = nil
+  private var eventChannel: FlutterEventChannel? = nil
+
+  public static func sharePluginWithRegister(with registrar: FlutterPluginRegistrar) -> SwiftStreamVideoPlugin {
+      if(sharedInstance == nil){
+          sharedInstance = SwiftStreamVideoPlugin()
+      }
+      sharedInstance!.channel = FlutterMethodChannel(name: "stream_video", binaryMessenger: registrar.messenger())
+      sharedInstance!.eventChannel = FlutterEventChannel(name: "stream_video_events", binaryMessenger: registrar.messenger())
+      return sharedInstance!
+  }
+
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "stream_video", binaryMessenger: registrar.messenger())
-    let instance = SwiftStreamVideoPlugin()
-    registrar.addMethodCallDelegate(instance, channel: channel)
+    let instance = sharePluginWithRegister(with: registrar)
+    registrar.addMethodCallDelegate(instance, channel: instance.channel!)
   }
 
   public static func setDevicePushTokenVoIP(deviceToken: String) {
