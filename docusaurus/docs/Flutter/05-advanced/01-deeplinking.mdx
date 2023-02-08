@@ -1,3 +1,281 @@
-## Implementing Call Deep Linking
+# Implementing Call Deep Linking
 
-// TODO Write the content
+It's common in mobile calling apps that a call can be started from a link, that should start the app and dial in immediately. This can be accomplished by [universal links on iOS](https://developer.apple.com/ios/universal-links/) and [App links on Android](https://developer.android.com/training/app-links).
+
+In this guide we'll show you how you can handle such deep links to navigate to the call screen provided by our SDK. For the sake of simplicity, we'll use the [uni_links](https://pub.dev/packages/uni_links) plugin that allows handling iOS and Android deep links in a similar way.
+
+To get started, you first need to do some platform-specific configuration.
+
+## Enabling deep links on Android
+
+To handle deep links in Android you need to declare an intent filter in `android/app/src/main/AndroidManifest.xml` like it is shown in the example below:
+
+```xml
+<activity
+    android:name=".MainActivity"
+    android:exported="true">
+    <intent-filter
+        android:autoVerify="true" 
+        android:label="Call Link">
+        <action android:name="android.intent.action.VIEW" />
+    
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data
+            android:host="[YOUR_HOST]"
+            android:pathPrefix="/join/"
+            android:scheme="https" />
+    </intent-filter>
+</activity>
+```
+
+You can learn more about this structure in the [official documentation](https://developer.android.com/training/app-links/deep-linking), but the gist of it is this:
+
+* Adding the `<intent-filter>` lets your `Activity` parse specific intents that come from inside or outside of your application.
+* By adding the appropriate `<action>` and `<category>` tags, you let your `Activity` open and consume data that's browsable, such as URLs.
+* The most important part is the `<data>` tag. It allows you to parse the link in the format of `https://[YOUR_HOST]/join/`. Any URL that has that structure will be consumable by your `Activity`.
+
+But to make your published app associate with a hosted and published website and to stop potential security issues, the website needs to know how to recognize your app.
+
+You have to take your application `package-id` and its `SHA-256` fingerprint and use it to generate an `assetlinks.json file`. You can find the full process and documentation on the [official Android deep linking page](https://developer.android.com/training/app-links/verify-android-applinks#web-assoc).
+
+Once you've generated these fingerprints - **we recommend doing it for debug and release** **keystores** and your CI if it uses a different keystore than local setup - you can create the `assetlinks.json` file:
+
+```json
+[{ // first application
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.my.application.debug",
+    "sha256_cert_fingerprints": ["sha-256-fingerprint"]
+  }
+  },
+  { // second application
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.my.application",
+    "sha256_cert_fingerprints": ["sha-256-fingerprint"]
+  }
+}]
+```
+
+Note that the `relation` and ` namespace` parts are not as important as the rest and how each object represents one application.
+
+Now that you have the file created, you need to upload it either to the root directory of your website, or to the `.well-known` directory.
+
+## Enabling deep links on iOS
+
+In order to support universal links, you need to have paid Apple developer account. On the Apple developer website, you will need to add the "associated domains" for your app id.
+
+Next, you need to enable the "Associated Domains" capability for your app in Xcode, and specify an app link, in the format `applinks:[YOUR_HOST]`. After that your `ios/Runner/Runner.entitlements` file should look like this:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>com.apple.developer.associated-domains</key>
+    <array>
+        <string>applinks:[YOUR_HOST]</string>
+    </array>
+</dict>
+</plist>
+```
+
+Next, you need to upload `apple-app-site-association` file, either to the root directory of your website, or to the `.well-known` directory. The AASA (short for apple-app-site-association) is a JSON file that lives on your website and associates your domain with your native app.
+
+In its simplest form, your AASA file should have the following format:
+
+```json
+{
+  "applinks": {
+    "apps": [],
+    "details": [{
+      "appID": "[YOUR_TEAM_ID].[YOUR_BUNDLE_ID]",
+      "paths": [
+        "*"
+      ]
+    }]
+  }
+}
+```
+
+You can also specify exact paths if you want to have stricter control over which ones can invoke your app. You can also specify several apps on the same domain.
+
+Before proceeding, please make sure that the uploaded file is a valid one, and it's deployed at the right place. For this, you can use Apple's [validation tool](https://search.developer.apple.com/appsearch-validation-tool).
+
+## Handling deep links
+
+To get started, you first need to add the [uni_links](https://pub.dev/packages/uni_links) plugin to your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  # Other dependencies
+  uni_links: <latest_version>
+```
+
+Next, use the snippet below to listen for incoming deep links and navigate to `JoinScreen` that we'll cover in the next step:
+
+```dart
+Future<void> _observeDeepLinks() async {
+  // 1
+  try {
+    final initialUri = await getInitialUri();
+    if (initialUri != null) {
+      await _handleDeepLink(initialUri);
+    }
+  } catch (e) {
+    debugPrint(e.toString());
+  }
+
+  // 2
+  if (!kIsWeb) {
+    _subscription = uriLinkStream.listen((Uri? uri) {
+      if (mounted && uri != null) {
+        _handleDeepLink(uri);
+      }
+    });
+  }
+}
+
+Future<void> _handleDeepLink(Uri uri) async {
+  // 3
+  final callId = uri.pathSegments.last;
+
+  // 4
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) {
+        return JoinScreen(
+          callId: callId,
+        );
+      },
+    ),
+  );
+}
+```
+
+In this snippet, you:
+
+1. Handle the case when the app was terminated and is now started by a deep link.
+2. Handle the case when the app was in the background and is now brought to the foreground by a deep link.
+3. Extract the call ID from the deep link URL.
+4. Navigate to a screen that will handle call initialization.
+
+Finally, add `JoinScreen` with the call initialization:
+
+```dart
+class JoinScreen extends StatefulWidget {
+  const JoinScreen({
+    super.key,
+    required this.callId,
+  });
+
+  final String callId;
+
+  @override
+  State<JoinScreen> createState() => _JoinScreenState();
+}
+
+class _JoinScreenState extends State<JoinScreen> {
+  var _isInProgress = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initCall(widget.callId);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Joining call'),
+      ),
+      body: Center(
+        child: _isInProgress
+            ? const CircularProgressIndicator(
+                strokeWidth: 2,
+              )
+            : const SizedBox(),
+      ),
+    );
+  }
+
+  Future<void> _initCall(String callId) async {
+    await _logIn();
+    await _joinCall(widget.callId);
+  }
+
+  // 1
+  Future<void> _logIn() async {
+    final userCredentials = await UserRepository.instance.getUserCredentials();
+
+    if (userCredentials != null) {
+      final user = userCredentials.user;
+      final token = userCredentials.token;
+      
+      await StreamVideo.instance.connectUser(
+        user,
+        token: Token(token),
+      );
+    }
+  }
+
+  // 2
+  Future<void> _joinCall(String callId) async {
+    setState(() => _isInProgress = true);
+
+    try {
+      final call = await StreamVideo.instance.joinCall(
+        id: callId,
+        type: 'default',
+      );
+
+      await call.connect();
+      
+      await _navigateToCall(call);
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      setState(() => _isInProgress = false);
+    }
+  }
+
+  // 3
+  Future<void> _navigateToCall(Call call) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return StreamCallScreen(
+            call: call,
+            onBackPressed: navigateHome,
+            onHangUp: navigateHome,
+          );
+        },
+      ),
+    );
+  }
+}
+```
+
+Here's what you're doing here, step-by-step:
+
+1. Connecting the user from your persistence storage to the Video API.
+2. Joining the call with the call ID from the deep link.
+3. Navigating to `StreamCallScreen` from our SDK.
+
+## Testing deep links
+
+Finally, run your application, generate a call link using the schema above, and try opening the link. It should automatically redirect to your app and open the call.
+
+Alternatively, you can run the following commands from the command line:
+
+```shell
+# Android
+adb shell 'am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "https://[YOUR_HOST]/join/call123"'
+
+# iOS
+/usr/bin/xcrun simctl openurl booted "https://[YOUR_HOST]/join/call123"
+```

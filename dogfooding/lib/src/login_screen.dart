@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:dogfooding/src/routes/routes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -8,6 +7,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:stream_video/stream_video.dart';
 
+import 'model/user_credentials.dart';
+import 'routes/routes.dart';
+import 'user_repository.dart';
 import 'utils/assets.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -55,11 +57,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final token = json.decode(response.body)['token'];
 
-    final streamVideoClient = StreamVideo.instance;
-    await streamVideoClient.connectUser(
+    await StreamVideo.instance.connectUser(
       user,
       token: Token(token),
     );
+
+    final userCredentials = UserCredentials(
+      user: user,
+      token: token,
+    );
+    await UserRepository.instance.saveUserCredentials(userCredentials);
 
     Navigator.of(context).pushReplacementNamed(Routes.HOME);
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../home_screen.dart';
+import '../join_screen.dart';
 import '../login_screen.dart';
 import '../splash_screen.dart';
 import '../utils/users_provider.dart';
@@ -43,6 +44,17 @@ mixin AppRoutes {
                 onBackPressed: navigateHome,
                 onHangUp: navigateHome,
               ),
+            );
+          },
+        );
+      case Routes.JOIN:
+        return MaterialPageRoute(
+          settings: const RouteSettings(name: Routes.JOIN),
+          builder: (context) {
+            final callId = settings.arguments as String;
+
+            return JoinScreen(
+              callId: callId,
             );
           },
         );
