@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import flutter_callkit_incoming
 
 public class SwiftStreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
   private static let voipPushTokenKey = "stream.video.voip.token"
@@ -28,8 +29,7 @@ public class SwiftStreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
 
   public static func setDevicePushTokenVoIP(deviceToken: String) {
       UserDefaults.standard.set(deviceToken, forKey: voipPushTokenKey)
-      // TODO: Store this device on SwiftFlutterCallkitIncomingPlugin
-      // SwiftFlutterCallkitIncomingPlugin.sharedInstance?.setDevicePushTokenVoIP(deviceToken)
+      SwiftFlutterCallkitIncomingPlugin.sharedInstance?.setDevicePushTokenVoIP(deviceToken)
     }
 
   public func handleIncomingCall(callCid: String) {
