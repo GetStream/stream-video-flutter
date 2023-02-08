@@ -3,8 +3,7 @@ import 'package:rxdart/rxdart.dart';
 
 class StreamVideoEventChannel {
   const StreamVideoEventChannel(
-      {EventChannel eventChannel =
-          const EventChannel('flutter_callkit_incoming_events')})
+      {EventChannel eventChannel = const EventChannel('stream_video_events')})
       : _eventChannel = eventChannel;
 
   final EventChannel _eventChannel;
@@ -16,7 +15,7 @@ class StreamVideoEventChannel {
     if (data is Map) {
       return NativeEvent(
         NativeEventType.values.firstWhere((e) => e.name == data['event']),
-        Map<String, dynamic>.from(data['content']),
+        Map<String, dynamic>.from(data['body']),
       );
     }
     return null;
