@@ -3,6 +3,7 @@ import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
 import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/src/utils/none.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_push_notification/src/stream_video_push_notification_event_channel.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:test/test.dart';
 
@@ -12,6 +13,9 @@ Future<void> main() async {
   final streamVideo = StreamVideoMock();
   final callNotificationWrapper = CallNotificationWrapperMock();
   final sharedPreferences = SharedPreferencesMock();
+  final eventChannelMock = EventChannelMock();
+  final streamVideoEventChannel =
+      StreamVideoPushNotificationEventChannel(eventChannel: eventChannelMock);
   final StreamCallCid streamCallCid = StreamCallCid(cid: 'call:123');
   final callCreatedData = CallCreated(
     callCid: streamCallCid,
@@ -47,10 +51,10 @@ Future<void> main() async {
     wasCreated: true,
     data: callCreatedData,
   );
+  when(() => eventChannelMock.receiveBroadcastStream())
+      .thenAnswer((_) => const Stream.empty());
   when(() => streamVideo.events)
       .thenAnswer((invocation) => MutableSharedEmitterImpl());
-  final call =
-      Call.fromCreated(data: callCreatedData, streamVideo: streamVideo);
   when(() => streamVideo.getOrCreateCall(cid: streamCallCid))
       .thenAnswer((_) => Future.value(Result.success(callReceivedOrCreated)));
   when(() => streamVideo.acceptCall(cid: streamCallCid))
@@ -76,6 +80,7 @@ Future<void> main() async {
     streamVideo,
     sharedPreferences: sharedPreferences,
     callNotification: callNotificationWrapper,
+    eventChannel: streamVideoEventChannel,
   );
 
   test('A valid RemoteMessage should be handled', () async {

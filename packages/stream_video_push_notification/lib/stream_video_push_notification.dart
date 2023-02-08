@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'src/call_notification_wrapper.dart';
+import 'src/stream_video_push_notification_event_channel.dart';
 import 'src/stream_video_push_notification_method_channel.dart';
 
 class StreamVideoPushNotificationManager implements PushNotificationManager {
@@ -17,16 +18,25 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required SharedPreferences sharedPreferences,
     required CallNotificationWrapper callNotification,
     required StreamVideoPushNotificationMethodChannel methodChannel,
+    required StreamVideoPushNotificationEventChannel eventChannel,
   })  : _client = client,
         _callNotification = callNotification,
         _sharedPreferences = sharedPreferences,
-        _methodChannel = methodChannel;
+        _methodChannel = methodChannel,
+        _eventChannel = eventChannel {
+    _eventChannel.onEvent.listen((event) {
+      if (event.type == NativeEventType.ACTION_INCOMING_CALL) {
+        _showCall(event.content['call_cid']);
+      }
+    });
+  }
 
   final _logger = taggedLogger(tag: 'PNManager');
   final StreamVideo _client;
   final CallNotificationWrapper _callNotification;
   final SharedPreferences _sharedPreferences;
   final StreamVideoPushNotificationMethodChannel _methodChannel;
+  final StreamVideoPushNotificationEventChannel _eventChannel;
 
   @override
   Future<void> onUserLoggedIn() async {
@@ -64,23 +74,27 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     await _client.createDevice(token: token, pushProviderId: 'firebase');
   }
 
+  Future<bool> _showCall(String cid) async {
+    final streamCallCid = StreamCallCid(cid: cid);
+    final call = await _from(streamCallCid);
+    if (call != null) {
+      await _callNotification.showCallNotification(
+        streamCallCid: streamCallCid,
+        callers: call.metadata.users.values.map((e) => e.name).join(', '),
+        isVideoCall: true,
+        avatarUrl: call.metadata.users.values.firstOrNull?.imageUrl,
+        onCallAccepted: _acceptCall,
+        onCallRejected: _rejectCall,
+      );
+      return true;
+    }
+    return false;
+  }
+
   @override
   Future<bool> handlePushNotification(Map<String, dynamic> payload) async {
     if (_isValid(payload)) {
-      final cid = payload['call_cid'] as String;
-      final streamCallCid = StreamCallCid(cid: cid);
-      final call = await _from(streamCallCid);
-      if (call != null) {
-        await _callNotification.showCallNotification(
-          streamCallCid: streamCallCid,
-          callers: call.metadata.users.values.map((e) => e.name).join(', '),
-          isVideoCall: true,
-          avatarUrl: call.metadata.users.values.firstOrNull?.imageUrl,
-          onCallAccepted: _acceptCall,
-          onCallRejected: _rejectCall,
-        );
-        return true;
-      }
+      return await _showCall(payload['call_cid'] as String);
     }
     return false;
   }
@@ -133,13 +147,17 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     SharedPreferences? sharedPreferences,
     CallNotificationWrapper? callNotification,
     StreamVideoPushNotificationMethodChannel? methodChannel,
+    StreamVideoPushNotificationEventChannel? eventChannel,
   }) async {
     return StreamVideoPushNotificationManager._create(
-        client: client,
-        sharedPreferences:
-            sharedPreferences ?? await SharedPreferences.getInstance(),
-        callNotification: callNotification ?? const CallNotificationWrapper(),
-        methodChannel:
-            methodChannel ?? const StreamVideoPushNotificationMethodChannel());
+      client: client,
+      sharedPreferences:
+          sharedPreferences ?? await SharedPreferences.getInstance(),
+      callNotification: callNotification ?? const CallNotificationWrapper(),
+      methodChannel:
+          methodChannel ?? const StreamVideoPushNotificationMethodChannel(),
+      eventChannel:
+          eventChannel ?? const StreamVideoPushNotificationEventChannel(),
+    );
   }
 }
