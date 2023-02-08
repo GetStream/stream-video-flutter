@@ -15,6 +15,7 @@ Official Dart Client for Stream Video.
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
+  s.dependency 'flutter_callkit_incoming'
   s.platform = :ios, '9.0'
 
   # Flutter.framework does not contain a i386 slice.

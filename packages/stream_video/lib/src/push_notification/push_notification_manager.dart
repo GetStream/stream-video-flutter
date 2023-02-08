@@ -62,6 +62,7 @@ class PushNotificationManager {
 
   Future<void> _registerIOSDevice() async {
     final token = await _methodChannel.getDevicePushTokenVoIP();
+    print('register device is called $token');
     if (token != null) {
       await _client.createDevice(token: token, pushProviderId: 'apn');
     }

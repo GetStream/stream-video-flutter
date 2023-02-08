@@ -19,8 +19,10 @@ public class SwiftStreamVideoPlugin: NSObject, FlutterPlugin {
   }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let instance = sharePluginWithRegister(with: registrar)
-    registrar.addMethodCallDelegate(instance, channel: instance.channel!)
+      let instance = sharePluginWithRegister(with: registrar)
+      if let channel = instance.channel {
+          registrar.addMethodCallDelegate(instance, channel: channel)
+      }
   }
 
   public static func setDevicePushTokenVoIP(deviceToken: String) {
@@ -32,7 +34,7 @@ public class SwiftStreamVideoPlugin: NSObject, FlutterPlugin {
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
         case "getDevicePushTokenVoIP":
-            result(UserDefaults.standard.value(forKey: voipPushTokenKey) as? String)
+        result(UserDefaults.standard.value(forKey: SwiftStreamVideoPlugin.voipPushTokenKey) as? String)
             break
         default:
             result(FlutterMethodNotImplemented)
