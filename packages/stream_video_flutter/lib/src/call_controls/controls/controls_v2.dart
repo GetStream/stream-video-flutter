@@ -7,12 +7,6 @@ import 'package:stream_video_flutter/src/call_controls/controls/toggle_speaker_v
 import '../../../stream_video_flutter.dart';
 import 'call_hangup_v2.dart';
 
-export 'call_hangup.dart';
-export 'switch_camera.dart';
-export 'toggle_camera.dart';
-export 'toggle_mic.dart';
-export 'toggle_speaker.dart';
-
 List<Widget> defaultCallControlOptionsV2({
   required CallV2 call,
   required VoidCallback onHangup,

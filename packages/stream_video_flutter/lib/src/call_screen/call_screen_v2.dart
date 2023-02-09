@@ -18,8 +18,8 @@ typedef CallParticipantsInfoWidgetBuilderV2 = Widget Function(
 const int _idState = 2;
 int _callSeq = 1;
 
-class CallScreenV2 extends StatefulWidget {
-  const CallScreenV2({
+class StreamCallScreenV2 extends StatefulWidget {
+  const StreamCallScreenV2({
     super.key,
     required this.call,
     required this.onBackPressed,
@@ -33,10 +33,10 @@ class CallScreenV2 extends StatefulWidget {
   final CallParticipantsInfoWidgetBuilderV2? participantsInfoWidgetBuilder;
 
   @override
-  State<CallScreenV2> createState() => _CallScreenV2State();
+  State<StreamCallScreenV2> createState() => _StreamCallScreenV2State();
 }
 
-class _CallScreenV2State extends State<CallScreenV2> {
+class _StreamCallScreenV2State extends State<StreamCallScreenV2> {
   final _logger = taggedLogger(tag: 'CallScreen-${_callSeq++}');
   final subscriptions = Subscriptions();
 

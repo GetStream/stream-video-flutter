@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../call_controls_v2.dart';
 
 const deviceIdSpeaker = 'speaker';
 const deviceIdEarpiece = 'earpiece';

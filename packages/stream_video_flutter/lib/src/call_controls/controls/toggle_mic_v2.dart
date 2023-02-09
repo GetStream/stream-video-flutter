@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../call_controls_v2.dart';
 
 class ToggleMicV2 extends StatelessWidget {
   const ToggleMicV2({

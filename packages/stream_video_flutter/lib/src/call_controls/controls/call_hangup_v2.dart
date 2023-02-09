@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../call_controls.dart';
+import '../call_controls_v2.dart';
 
 class CallHangupV2 extends StatelessWidget {
   const CallHangupV2({
