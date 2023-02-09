@@ -6,8 +6,8 @@ import '../../stream_video_flutter.dart';
 import '../utils/device_segmentation.dart';
 import 'indicators/connection_quality_indicator.dart';
 
-class CallParticipantV2 extends StatelessWidget {
-  const CallParticipantV2({
+class StreamCallParticipantV2 extends StatelessWidget {
+  const StreamCallParticipantV2({
     super.key,
     required this.call,
     required this.participant,

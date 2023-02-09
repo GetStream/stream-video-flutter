@@ -2,8 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../call_participants/call_participant_v2.dart';
 import '../participants_info/call_participants_info_view_v2.dart';
+import 'active_call/active_call_v2.dart';
 import 'incoming_call/incoming_call_v2.dart';
 import 'outgoing_call/outgoing_call_v2.dart';
 
@@ -94,9 +94,12 @@ class _CallScreenV2State extends State<CallScreenV2> {
 
       final usersProvider = StreamUsersConfiguration.of(context);
 
-      return GestureDetector(
-        // When the child is tapped, show a snackbar.
-        onTap: () {
+      return StreamActiveCallV2(
+        call: widget.call,
+        state: callState,
+        onBackPressed: widget.onBackPressed,
+        onHangUp: widget.onHangUp,
+        onParticipantsTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) =>
@@ -109,94 +112,7 @@ class _CallScreenV2State extends State<CallScreenV2> {
             ),
           );
         },
-        // The custom button
-        child: Container(
-          padding: const EdgeInsets.all(12.0),
-          decoration: BoxDecoration(
-            color: Colors.lightBlue,
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: const Text('My Button'),
-        ),
       );
-
-      // return StreamActiveCall(
-      //   call: widget.call,
-      //   onBackPressed: onBackPressed,
-      //   onHangUp: onHangUp,
-      //   onParticipantsTap: () {
-      //     Navigator.of(context).push(
-      //       MaterialPageRoute(
-      //         builder: (context) =>
-      //             widget.participantsInfoWidgetBuilder?.call(context, call) ??
-      //             StreamCallParticipantsInfoViewV2(
-      //               call: widget.call,
-      //               usersProvider: usersProvider,
-      //             ),
-      //       ),
-      //     );
-      //   },
-      // );
-
-      // return Scaffold(
-      //   appBar: AppBar(
-      //     elevation: 4,
-      //     centerTitle: false,
-      //     actions: [
-      //       IconButton(
-      //         icon: const Icon(Icons.close),
-      //         onPressed: _cancelCall,
-      //       ),
-      //     ],
-      //     title: Text('CallId: ${callState.callCid}'),
-      //   ),
-      //   body: Column(
-      //     children: [
-      //       const SizedBox(height: 10),
-      //       Text(
-      //         'Status: ${status.runtimeType}',
-      //       ),
-      //       const SizedBox(height: 10),
-      //       Text(
-      //         'Users: ${callState.callParticipants.map(
-      //               (it) => '${it.userId}(${it.publishedTracks})',
-      //             ).toList()}',
-      //       ),
-      //       const SizedBox(height: 50),
-      //       Expanded(
-      //         child: GridView.count(
-      //           crossAxisCount: 2,
-      //           crossAxisSpacing: 8,
-      //           mainAxisSpacing: 8,
-      //           padding: const EdgeInsets.all(8),
-      //           children: [
-      //             _buildParticipant(participants, 0),
-      //             _buildParticipant(participants, 1),
-      //             _buildParticipant(participants, 2),
-      //             _buildParticipant(participants, 3),
-      //           ],
-      //         ),
-      //       )
-      //     ],
-      //   ),
-      //   bottomNavigationBar: StreamCallControlsBar(
-      //     options: [
-      //       ToggleMicrophoneButton(
-      //         call: widget.call,
-      //         localParticipant: localParticipant,
-      //       ),
-      //       ToggleCameraButton(
-      //         call: widget.call,
-      //         localParticipant: localParticipant,
-      //       ),
-      //       FlipCameraButton(
-      //         call: widget.call,
-      //         localParticipant: localParticipant,
-      //       ),
-      //       CallHangup(onHangup: _cancelCall),
-      //     ],
-      //   ),
-      // );
     }
 
     return Scaffold(
@@ -215,20 +131,6 @@ class _CallScreenV2State extends State<CallScreenV2> {
         child: Text(
           'Status: ${status.runtimeType}',
         ),
-      ),
-    );
-  }
-
-  Widget _buildParticipant(
-      List<CallParticipantStateV2> participants, int pIndex) {
-    final participant =
-        participants.firstWhereIndexedOrNull((index, _) => index == pIndex);
-
-    return Container(
-      color: Colors.yellow,
-      child: CallParticipantV2(
-        call: widget.call,
-        participant: participant,
       ),
     );
   }
@@ -271,95 +173,5 @@ class _CallScreenV2State extends State<CallScreenV2> {
     _logger.d(() => '[disconnect] no args');
     await widget.call.disconnect();
     widget.onBackPressed();
-  }
-}
-
-class ToggleMicrophoneButton extends StatelessWidget {
-  const ToggleMicrophoneButton({
-    super.key,
-    required this.call,
-    required this.localParticipant,
-  });
-
-  final CallV2 call;
-  final CallParticipantStateV2 localParticipant;
-
-  @override
-  Widget build(BuildContext context) {
-    final trackState = localParticipant.publishedTracks[SfuTrackType.audio];
-    final isEnabled = trackState != null && !trackState.muted;
-
-    return CallControlOption(
-      icon: Icon(isEnabled ? Icons.mic_rounded : Icons.mic_off_rounded),
-      onPressed: () {
-        call.apply(
-          SetMicrophoneEnabled(enabled: !isEnabled),
-        );
-      },
-    );
-  }
-}
-
-class ToggleCameraButton extends StatelessWidget {
-  const ToggleCameraButton({
-    super.key,
-    required this.call,
-    required this.localParticipant,
-  });
-
-  final CallV2 call;
-  final CallParticipantStateV2 localParticipant;
-
-  @override
-  Widget build(BuildContext context) {
-    final trackState = localParticipant.publishedTracks[SfuTrackType.video];
-    final isEnabled = trackState != null && !trackState.muted;
-
-    return CallControlOption(
-      icon:
-          Icon(isEnabled ? Icons.videocam_rounded : Icons.videocam_off_rounded),
-      onPressed: () {
-        call.apply(
-          SetCameraEnabled(enabled: !isEnabled),
-        );
-      },
-    );
-  }
-}
-
-class FlipCameraButton extends StatelessWidget {
-  const FlipCameraButton({
-    super.key,
-    required this.call,
-    required this.localParticipant,
-  });
-
-  final CallV2 call;
-  final CallParticipantStateV2 localParticipant;
-
-  @override
-  Widget build(BuildContext context) {
-    final position = getCurrentCameraPosition();
-    return CallControlOption(
-      icon: const Icon(Icons.flip_camera_ios_rounded),
-      onPressed: position != null
-          ? () {
-              final newPosition = position == CameraPositionV2.front
-                  ? CameraPositionV2.back
-                  : CameraPositionV2.front;
-
-              call.apply(
-                SetCameraPosition(cameraPosition: newPosition),
-              );
-            }
-          : null,
-    );
-  }
-
-  CameraPositionV2? getCurrentCameraPosition() {
-    final trackState = localParticipant.publishedTracks[SfuTrackType.video];
-    if (trackState is! LocalTrackState) return null;
-
-    return trackState.cameraPosition;
   }
 }
