@@ -17,17 +17,14 @@ import 'src/routes/app_routes.dart';
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   _initStreamVideo();
-  print('JcLog: PN received in background');
   await _handleRemoteMessage(message);
 }
 
 Future<void> _handleRemoteMessage(RemoteMessage message) async {
-  print('JcLog: Handling Remote Message with payload: ${message.data}');
   await StreamVideo.instance.handlePushNotification(message);
 }
 
 Future<void> main() async {
-  print('JcLog: Initializing main app');
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -48,7 +45,6 @@ void _initStreamVideo() {
       // 'ws://192.168.1.7:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
     );
   }
-  print("JcLog: ${StreamVideo.instance.hashCode}");
 }
 
 class StreamDogFoodingApp extends StatefulWidget {
@@ -66,8 +62,6 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
   @override
   void initState() {
     super.initState();
-    print('JcLog: [initState]');
-
     WidgetsBinding.instance.addObserver(this);
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
@@ -105,11 +99,9 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
   }
 
   void _tryConsumingIncomingCallFromTerminatedState() {
-    print('JcLog: [_tryConsumingIncomingCallFromTerminatedState]');
     if (_navigatorKey.currentContext == null) {
       // App is not running yet. Postpone consuming after app is in the foreground
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        print('JcLog: Postponing consuming incoming call');
         _consumeIncomingCall();
       });
     } else {
@@ -119,13 +111,10 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
 
   Future<void> _consumeIncomingCall() async {
     if (_navigatorKey.currentContext == null) {
-      print('JcLog: _navigatorKey.currentContext is null!');
       return;
     }
-    print('JcLog: Consuming call');
     final incomingCall = await StreamVideo.instance.consumeIncomingCall();
     if (incomingCall != null) {
-      print('JcLog: Call is not null');
       Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
         Routes.CALL,
         arguments: incomingCall,
@@ -145,7 +134,6 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     super.didChangeAppLifecycleState(state);
     switch (state) {
       case AppLifecycleState.resumed:
-        print('JcLog: AppLifecycleState.resumed');
         _consumeIncomingCall();
         break;
       case AppLifecycleState.inactive:
@@ -162,7 +150,6 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
 
   @override
   Widget build(BuildContext context) {
-    print('JcLog: Building StreamDogFoodingApp widget');
     final appTheme = StreamVideoTheme.light();
     return MaterialApp(
       navigatorKey: _navigatorKey,

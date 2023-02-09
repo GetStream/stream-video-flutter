@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stream_video/stream_video.dart';
 
 import '../call/call.dart';
 import '../stream_video.dart';
@@ -18,12 +19,12 @@ class PushNotificationManager {
         _callNotification = callNotification,
         _sharedPreferences = sharedPreferences;
 
+  final _logger = taggedLogger(tag: 'PNManager');
   final StreamVideo _client;
   final CallNotificationWrapper _callNotification;
   final SharedPreferences _sharedPreferences;
 
   Future<void> onUserLoggedIn() async {
-    print('JcLog: [onUserLoggedIn]');
     if (_isFirebaseInitialized()) {
       FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
         await _registerFirebaseToken(token);
@@ -32,13 +33,13 @@ class PushNotificationManager {
       if (token != null) {
         await _registerFirebaseToken(token);
       } else {
-        print('JcLog: Firebase Token was null');
+        _logger.w(() => 'Firebase Token was null');
       }
     }
   }
 
   Future<void> _registerFirebaseToken(String token) async {
-    print('JcLog: New Firebase Token: $token');
+    _logger.d(() => 'New Firebase Token: $token');
     await _client.createDevice(token: token);
   }
 
@@ -62,7 +63,6 @@ class PushNotificationManager {
   }
 
   Future<void> _acceptCall(String cid) async {
-    print('JcLog: Storing incomingCallCid: $cid');
     await _sharedPreferences.setString('incomingCallCid', cid);
     await _client.acceptCall(
       type: cid.substring(0, cid.indexOf(':')),
@@ -97,7 +97,6 @@ class PushNotificationManager {
     await _sharedPreferences.reload();
     final incomingCallCid = _sharedPreferences.getString('incomingCallCid');
     await _sharedPreferences.remove('incomingCallCid');
-    print('JcLog: incomingCallCid from sharedPreferences: $incomingCallCid');
     if (incomingCallCid != null) {
       return _client.acceptCall(
         type: incomingCallCid.substring(0, incomingCallCid.indexOf(':')),
