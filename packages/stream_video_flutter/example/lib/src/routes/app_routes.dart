@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../screen/home_screen.dart';
+import '../screen/login_screen.dart';
 import '../utils/users_provider.dart';
-import '../v2/home_screen_v2.dart';
-import '../v2/login_screen_v2.dart';
+import '../v2/call_screen_v2.dart';
 import 'routes.dart';
 
 mixin AppRoutes {
@@ -12,18 +13,18 @@ mixin AppRoutes {
       case Routes.LOGIN:
         return MaterialPageRoute(
           settings: const RouteSettings(name: Routes.LOGIN),
-          builder: (_) => const LoginScreenV2(),
+          builder: (_) => const LoginScreen(),
         );
       case Routes.HOME:
         return MaterialPageRoute(
           settings: const RouteSettings(name: Routes.HOME),
-          builder: (_) => const HomeScreenV2(),
+          builder: (_) => const HomeScreen(),
         );
       case Routes.CALL:
         return MaterialPageRoute(
           settings: const RouteSettings(name: Routes.CALL),
           builder: (context) {
-            final call = settings.arguments as Call;
+            final call = settings.arguments as CallV2;
 
             void navigateHome() {
               Navigator.of(context).pushReplacementNamed(Routes.HOME);
@@ -31,7 +32,7 @@ mixin AppRoutes {
 
             return StreamUsersConfiguration(
               usersProvider: MockUsersProvider(),
-              child: StreamCallScreen(
+              child: CallScreenV2(
                 call: call,
                 onBackPressed: navigateHome,
                 onHangUp: navigateHome,

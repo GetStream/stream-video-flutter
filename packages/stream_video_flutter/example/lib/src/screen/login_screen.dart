@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
-import 'home_screen_v2.dart';
+import '../routes/routes.dart';
 
 final List<LoginInfo> users = [
   LoginInfo(
@@ -56,23 +56,21 @@ final List<LoginInfo> users = [
   ),
 ];
 
-class LoginScreenV2 extends StatefulWidget {
-  const LoginScreenV2({super.key});
-
-  static const routeName = '/';
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  State<LoginScreenV2> createState() => _LoginScreenStateV2();
+  State<LoginScreen> createState() => _LoginScreenStateV2();
 }
 
-class _LoginScreenStateV2 extends State<LoginScreenV2> {
+class _LoginScreenStateV2 extends State<LoginScreen> {
   Future<void> _onLogin(LoginInfo info) async {
     await StreamVideoV2.instance.connectUser(
       info.userInfo,
       token: Token(info.token),
     );
 
-    Navigator.of(context).pushReplacementNamed(HomeScreenV2.routeName);
+    Navigator.of(context).pushReplacementNamed(Routes.HOME);
   }
 
   final _emailController = TextEditingController();

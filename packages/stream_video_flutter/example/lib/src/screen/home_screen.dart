@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'dart:math' as math;
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
-import 'call_screen_v2.dart';
-import 'login_screen_v2.dart';
+import '../routes/routes.dart';
+import 'login_screen.dart';
 
 void showSnackBar({
   required BuildContext context,
@@ -30,16 +29,14 @@ void showSnackBar({
 
 int _homeSeq = 1;
 
-class HomeScreenV2 extends StatefulWidget {
-  const HomeScreenV2({super.key});
-
-  static const routeName = '/v2/home';
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<HomeScreenV2> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreenV2> {
+class _HomeScreenState extends State<HomeScreen> {
   final StreamVideoV2 _streamVideo = StreamVideoV2.instance;
   late final currentUser = _streamVideo.currentUser!;
 
@@ -54,7 +51,7 @@ class _HomeScreenState extends State<HomeScreenV2> {
       if (data.ringing) {
         final call = CallV2.fromCreated(data: data);
         Navigator.of(context).pushReplacementNamed(
-          CallScreenV2.routeName,
+          Routes.CALL,
           arguments: call,
         );
       }
@@ -107,7 +104,7 @@ class _HomeScreenState extends State<HomeScreenV2> {
   Future<void> _logout() async {
     await _streamVideo.disconnectUser();
     Navigator.of(context).pushReplacementNamed(
-      LoginScreenV2.routeName,
+      Routes.LOGIN,
     );
   }
 }
@@ -229,7 +226,7 @@ class _StartCallScreenState extends State<StartCallScreen>
 
         final call = CallV2.fromCreated(data: data);
         Navigator.of(context).pushReplacementNamed(
-          CallScreenV2.routeName,
+          Routes.CALL,
           arguments: call,
         );
       },
@@ -319,7 +316,7 @@ class _JoinCallScreenState extends State<JoinCallScreen> {
         final call = CallV2.fromCreated(data: data.data);
 
         Navigator.of(context).pushReplacementNamed(
-          CallScreenV2.routeName,
+          Routes.CALL,
           arguments: call,
         );
       },

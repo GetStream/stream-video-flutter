@@ -17,7 +17,6 @@ class CallScreenV2 extends StatefulWidget {
     required this.onBackPressed,
     required this.onHangUp,
   });
-  static const routeName = '/v2/call';
 
   final CallV2 call;
   final VoidCallback onBackPressed;

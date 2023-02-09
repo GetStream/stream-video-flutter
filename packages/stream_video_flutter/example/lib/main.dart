@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'src/routes/app_routes.dart';
-import 'src/v2/routes_v2.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +46,7 @@ class StreamUIExampleApp extends StatelessWidget {
         textTheme: GoogleFonts.robotoMonoTextTheme(),
       ),
       // onGenerateRoute: AppRoutes.generateRoute,
-      onGenerateRoute: RoutesV2.generateRoute,
+      onGenerateRoute: AppRoutes.generateRoute,
     );
   }
 }
