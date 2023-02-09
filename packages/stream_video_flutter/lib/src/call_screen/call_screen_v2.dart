@@ -71,6 +71,8 @@ class _CallScreenV2State extends State<CallScreenV2> {
       return OutgoingCallV2(
         state: callState,
         onCancelPressed: _cancelCall,
+        onMicrophoneTap: () {},
+        onCameraTap: () {},
       );
     }
 
