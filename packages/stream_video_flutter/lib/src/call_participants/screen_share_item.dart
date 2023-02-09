@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
-class ScreenShareItemV2 extends StatelessWidget {
-  const ScreenShareItemV2({
+class ScreenShareItem extends StatelessWidget {
+  const ScreenShareItem({
     super.key,
     required this.call,
     required this.participant,

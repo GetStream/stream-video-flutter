@@ -10,8 +10,8 @@ import 'outgoing_call_controls.dart';
 
 /// Represents the Outgoing Call state and UI, when the user is calling
 /// other people.
-class OutgoingCallV2 extends StatelessWidget {
-  const OutgoingCallV2({
+class OutgoingCall extends StatelessWidget {
+  const OutgoingCall({
     super.key,
     required this.state,
     required this.onCancelPressed,

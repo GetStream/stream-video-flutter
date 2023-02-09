@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'invite_user_list_controller_v2.dart';
+import 'invite_user_list_controller.dart';
 
 /// {@template invitableUserViewBuilder}
 /// Builder function used to build an invitable user view.
 /// {@endtemplate}
 typedef InvitableUserViewBuilder = Widget Function(
   BuildContext context,
-  StreamInviteUserListControllerV2 controller,
+  StreamInviteUserListController controller,
   int index,
 );
 
@@ -23,9 +23,9 @@ typedef SeparatorWidgetBuilder = Widget Function(
 /// {@template streamInvitableUserListView}
 /// Displays invitable users.
 /// {@endtemplate}
-class StreamInviteUserListViewV2 extends StatefulWidget {
+class StreamInviteUserListView extends StatefulWidget {
   /// {@macro streamInvitableUserListView}
-  const StreamInviteUserListViewV2({
+  const StreamInviteUserListView({
     super.key,
     required this.controller,
     this.selectedIcon = Icons.check,
@@ -35,7 +35,7 @@ class StreamInviteUserListViewV2 extends StatefulWidget {
   });
 
   /// Controller used to control the list of users.
-  final StreamInviteUserListControllerV2 controller;
+  final StreamInviteUserListController controller;
 
   /// Icon for selected user.
   final IconData selectedIcon;
@@ -50,13 +50,12 @@ class StreamInviteUserListViewV2 extends StatefulWidget {
   final SeparatorWidgetBuilder? separatorWidgetBuilder;
 
   @override
-  State<StreamInviteUserListViewV2> createState() =>
+  State<StreamInviteUserListView> createState() =>
       _StreamInviteUserListViewStateV2();
 }
 
-class _StreamInviteUserListViewStateV2
-    extends State<StreamInviteUserListViewV2> {
-  StreamInviteUserListControllerV2 get _controller => widget.controller;
+class _StreamInviteUserListViewStateV2 extends State<StreamInviteUserListView> {
+  StreamInviteUserListController get _controller => widget.controller;
 
   @override
   void initState() {
@@ -78,7 +77,7 @@ class _StreamInviteUserListViewStateV2
       appBar: AppBar(
         title: const Text('Add Participants'),
         actions: [
-          InviteButtonV2(
+          InviteButton(
             controller: widget.controller,
           )
         ],
@@ -121,16 +120,16 @@ class _StreamInviteUserListViewStateV2
 /// {@template streamInviteButton}
 /// Displays invite button.
 /// {@endtemplate}
-class InviteButtonV2 extends StatelessWidget {
+class InviteButton extends StatelessWidget {
   /// {@macro streamInviteButton}
-  const InviteButtonV2({
+  const InviteButton({
     super.key,
     required this.controller,
     this.icon = Icons.group_add,
   });
 
   /// Controller used to control the list of users.
-  final StreamInviteUserListControllerV2 controller;
+  final StreamInviteUserListController controller;
 
   /// Icon for this button.
   final IconData icon;

@@ -31,7 +31,7 @@ mixin AppRoutes {
 
             return StreamUsersConfiguration(
               usersProvider: MockUsersProvider(),
-              child: StreamCallScreenV2(
+              child: StreamCallScreen(
                 call: call,
                 onBackPressed: navigateHome,
                 onHangUp: navigateHome,

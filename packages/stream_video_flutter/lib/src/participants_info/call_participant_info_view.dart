@@ -5,9 +5,9 @@ import '../../stream_video_flutter.dart';
 /// {@template streamCallParticipantInfoView}
 /// Displays call participant info view.
 /// {@endtemplate}
-class CallParticipantInfoViewV2 extends StatelessWidget {
+class CallParticipantInfoView extends StatelessWidget {
   /// {@macro streamCallParticipantInfoView}
-  const CallParticipantInfoViewV2({
+  const CallParticipantInfoView({
     super.key,
     required this.participant,
     required this.videoIcon,

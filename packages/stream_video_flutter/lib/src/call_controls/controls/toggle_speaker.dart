@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../call_controls_v2.dart';
+import '../call_controls.dart';
 
 const deviceIdSpeaker = 'speaker';
 const deviceIdEarpiece = 'earpiece';
 
-class ToggleSpeakerV2 extends StatefulWidget {
-  const ToggleSpeakerV2({
+class ToggleSpeaker extends StatefulWidget {
+  const ToggleSpeaker({
     super.key,
     this.icon = Icons.volume_up_rounded,
     this.inactiveIcon = Icons.volume_off_rounded,
@@ -19,10 +19,10 @@ class ToggleSpeakerV2 extends StatefulWidget {
   final IconData inactiveIcon;
 
   @override
-  State<ToggleSpeakerV2> createState() => _ToggleSpeakerStateV2();
+  State<ToggleSpeaker> createState() => _ToggleSpeakerState();
 }
 
-class _ToggleSpeakerStateV2 extends State<ToggleSpeakerV2> {
+class _ToggleSpeakerState extends State<ToggleSpeaker> {
   Iterable<MediaDevice>? _audioOutputs;
 
   Future<void> _toggleSpeaker({bool enabled = false}) async {

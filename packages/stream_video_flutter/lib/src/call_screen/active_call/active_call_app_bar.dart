@@ -3,10 +3,9 @@ import 'package:flutter/material.dart' hide ConnectionState;
 import '../../../stream_video_flutter.dart';
 
 /// Widget that represents the default app bar that's shown in calls.
-class ActiveCallAppBarV2 extends StatelessWidget
-    implements PreferredSizeWidget {
+class ActiveCallAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a new instance of [ActiveCallAppBar].
-  const ActiveCallAppBarV2({
+  const ActiveCallAppBar({
     super.key,
     required this.call,
     this.showBackButton = true,

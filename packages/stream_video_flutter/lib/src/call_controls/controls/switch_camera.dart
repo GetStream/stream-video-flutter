@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
-import '../call_controls_v2.dart';
+import '../call_controls.dart';
 
-class SwitchCameraV2 extends StatelessWidget {
-  const SwitchCameraV2({
+class SwitchCamera extends StatelessWidget {
+  const SwitchCamera({
     super.key,
     required this.call,
     required this.localParticipant,

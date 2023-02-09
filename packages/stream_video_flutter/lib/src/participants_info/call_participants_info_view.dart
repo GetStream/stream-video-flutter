@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'call_participant_info_view_v2.dart';
-import 'call_participants_info_options_v2.dart';
-import 'invite_user_list_controller_v2.dart';
-import 'invite_user_list_view_v2.dart';
+import 'call_participant_info_view.dart';
+import 'call_participants_info_options.dart';
+import 'invite_user_list_controller.dart';
+import 'invite_user_list_view.dart';
 
 /// {@template participantsInfoViewBuilder}
 /// Builder function used to build a participant info view.
@@ -26,9 +26,9 @@ typedef ParticipantInfoDividerBuilder = Widget Function(
 /// {@template streamCallParticipantsInfoView}
 /// Displays call participants info.
 /// {@endtemplate}
-class StreamCallParticipantsInfoViewV2 extends StatefulWidget {
+class StreamCallParticipantsInfoView extends StatefulWidget {
   /// {@macro streamCallParticipantsInfoView}
-  const StreamCallParticipantsInfoViewV2({
+  const StreamCallParticipantsInfoView({
     super.key,
     required this.call,
     required this.usersProvider,
@@ -67,25 +67,25 @@ class StreamCallParticipantsInfoViewV2 extends StatefulWidget {
   final ParticipantInfoDividerBuilder? participantInfoDividerBuilder;
 
   @override
-  State<StreamCallParticipantsInfoViewV2> createState() =>
-      _StreamCallParticipantsInfoViewV2State();
+  State<StreamCallParticipantsInfoView> createState() =>
+      _StreamCallParticipantsInfoViewState();
 }
 
 const int _idState = 5;
 
-class _StreamCallParticipantsInfoViewV2State
-    extends State<StreamCallParticipantsInfoViewV2> {
+class _StreamCallParticipantsInfoViewState
+    extends State<StreamCallParticipantsInfoView> {
   Function? _cancelListener;
   // final participants = <CallParticipantState>[];
 
-  late StreamInviteUserListControllerV2 _controller;
+  late StreamInviteUserListController _controller;
 
   final subscriptions = Subscriptions();
 
   @override
   void initState() {
     super.initState();
-    _controller = StreamInviteUserListControllerV2(
+    _controller = StreamInviteUserListController(
       call: widget.call,
       usersProvider: widget.usersProvider,
     );
@@ -130,7 +130,7 @@ class _StreamCallParticipantsInfoViewV2State
                 if (builder != null) {
                   return builder.call(context, index, participant);
                 }
-                return CallParticipantInfoViewV2(
+                return CallParticipantInfoView(
                   participant: participant,
                   videoIcon: widget.videoIcon,
                   audioIcon: widget.audioIcon,
@@ -149,7 +149,7 @@ class _StreamCallParticipantsInfoViewV2State
           Material(
             elevation: 8,
             color: streamChatTheme.colorTheme.appBg,
-            child: CallParticipantsInfoOptionsV2(
+            child: CallParticipantsInfoOptions(
               localParticipant: localParticipant,
               call: widget.call,
               inviteButtonTitle: 'Invite',
@@ -160,7 +160,7 @@ class _StreamCallParticipantsInfoViewV2State
               onInviteButtonPress: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => StreamInviteUserListViewV2(
+                    builder: (context) => StreamInviteUserListView(
                       controller: _controller,
                     ),
                   ),

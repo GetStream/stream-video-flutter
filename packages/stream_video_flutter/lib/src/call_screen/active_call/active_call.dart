@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../../call_controls/call_controls_v2.dart';
-import '../../call_participants/call_participants_v2.dart';
-import '../../participants_info/call_participants_info_view_v2.dart';
+import '../../call_controls/call_controls.dart';
+import '../../call_participants/call_participants.dart';
+import '../../participants_info/call_participants_info_view.dart';
 import '../../utils/device_segmentation.dart';
-import 'active_call_app_bar_v2.dart';
+import 'active_call_app_bar.dart';
 
 /// {@template callAppBarBuilder}
 /// Builder used to create a custom call app bar.
 /// {@endtemplate}
-typedef CallAppBarWidgetBuilderV2 = PreferredSizeWidget Function(
+typedef CallAppBarWidgetBuilder = PreferredSizeWidget Function(
   BuildContext context,
   CallV2 call,
 );
@@ -20,7 +20,7 @@ typedef CallAppBarWidgetBuilderV2 = PreferredSizeWidget Function(
 /// {@template callParticipantsBuilder}
 /// Builder used to create a custom participants grid.
 /// {@endtemplate}
-typedef CallParticipantsWidgetBuilderV2 = Widget Function(
+typedef CallParticipantsWidgetBuilder = Widget Function(
   BuildContext context,
   List<CallParticipantStateV2> participants,
 );
@@ -28,7 +28,7 @@ typedef CallParticipantsWidgetBuilderV2 = Widget Function(
 /// {@template callControlsBuilder}
 /// Builder used to create a custom call controls panel.
 /// {@endtemplate}
-typedef CallControlsWidgetBuilderV2 = Widget Function(
+typedef CallControlsWidgetBuilder = Widget Function(
   BuildContext context,
   CallV2 call,
   List<CallParticipantStateV2> participants,
@@ -37,9 +37,9 @@ typedef CallControlsWidgetBuilderV2 = Widget Function(
 /// Represents the UI in an active call that shows participants and their video,
 /// as well as some extra UI features to control the call settings, browse
 /// participants and more.
-class StreamActiveCallV2 extends StatefulWidget {
+class StreamActiveCall extends StatefulWidget {
   /// Creates a new instance of [StreamActiveCall].
-  const StreamActiveCallV2({
+  const StreamActiveCall({
     super.key,
     required this.call,
     required this.state,
@@ -59,16 +59,16 @@ class StreamActiveCallV2 extends StatefulWidget {
   final CallStateV2 state;
 
   /// {@macro callParticipantWidgetBuilder}
-  final CallAppBarWidgetBuilderV2? callAppBarBuilder;
+  final CallAppBarWidgetBuilder? callAppBarBuilder;
 
   /// {@macro callParticipantWidgetBuilder}
-  final CallParticipantsWidgetBuilderV2? callParticipantsBuilder;
+  final CallParticipantsWidgetBuilder? callParticipantsBuilder;
 
   /// {@macro callParticipantWidgetBuilder}
-  final CallControlsWidgetBuilderV2? callControlsBuilder;
+  final CallControlsWidgetBuilder? callControlsBuilder;
 
   /// {@macro callParticipantsBuilder}
-  final CallParticipantsInfoWidgetBuilderV2? participantsInfoWidgetBuilder;
+  final CallParticipantsInfoWidgetBuilder? participantsInfoWidgetBuilder;
 
   /// The action to perform when the back button is pressed.
   final VoidCallback? onBackPressed;
@@ -83,10 +83,10 @@ class StreamActiveCallV2 extends StatefulWidget {
   final bool? enableFloatingView;
 
   @override
-  State<StreamActiveCallV2> createState() => _StreamActiveCallStateV2();
+  State<StreamActiveCall> createState() => _StreamActiveCallState();
 }
 
-class _StreamActiveCallStateV2 extends State<StreamActiveCallV2> {
+class _StreamActiveCallState extends State<StreamActiveCall> {
   /// Represents a call.
   CallV2 get call => widget.call;
 
@@ -104,7 +104,7 @@ class _StreamActiveCallStateV2 extends State<StreamActiveCallV2> {
 
     return Scaffold(
       appBar: widget.callAppBarBuilder?.call(context, call) ??
-          ActiveCallAppBarV2(
+          ActiveCallAppBar(
             call: call,
             onBackPressed: widget.onBackPressed,
             onParticipantsTap: widget.onParticipantsTap ??
@@ -114,7 +114,7 @@ class _StreamActiveCallStateV2 extends State<StreamActiveCallV2> {
                       builder: (context) =>
                           widget.participantsInfoWidgetBuilder
                               ?.call(context, call) ??
-                          StreamCallParticipantsInfoViewV2(
+                          StreamCallParticipantsInfoView(
                             call: call,
                             usersProvider: usersProvider,
                           ),
@@ -123,14 +123,14 @@ class _StreamActiveCallStateV2 extends State<StreamActiveCallV2> {
                 },
           ),
       body: widget.callParticipantsBuilder?.call(context, participants) ??
-          StreamCallParticipantsV2(
+          StreamCallParticipants(
             call: call,
             participants: participants,
             enableFloatingView: widget.enableFloatingView ?? !isDesktopDevice,
           ),
       bottomNavigationBar:
           widget.callControlsBuilder?.call(context, call, participants) ??
-              StreamCallControlsBarV2.withDefaultOptions(
+              StreamCallControlsBar.withDefaultOptions(
                 call: widget.call,
                 onHangup: () async {
                   await widget.call.disconnect();

@@ -3,12 +3,12 @@ import 'package:stream_video/stream_video.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/extensions.dart';
-import 'controls/controls_v2.dart';
+import 'controls/controls.dart';
 
 /// Widget which takes a list of [CallControlOption] such as microphone, video,
 /// switch camera, disconnect etc and displays them in a Wrap.
-class StreamCallControlsBarV2 extends StatefulWidget {
-  const StreamCallControlsBarV2({
+class StreamCallControlsBar extends StatefulWidget {
+  const StreamCallControlsBar({
     super.key,
     required this.options,
     this.backgroundColor,
@@ -18,7 +18,7 @@ class StreamCallControlsBarV2 extends StatefulWidget {
     this.borderRadius,
   });
 
-  factory StreamCallControlsBarV2.withDefaultOptions({
+  factory StreamCallControlsBar.withDefaultOptions({
     required CallV2 call,
     required VoidCallback onHangup,
     BorderRadius? borderRadius,
@@ -27,13 +27,13 @@ class StreamCallControlsBarV2 extends StatefulWidget {
     EdgeInsets? padding,
     double? spacing,
   }) {
-    return StreamCallControlsBarV2(
+    return StreamCallControlsBar(
       backgroundColor: backgroundColor,
       elevation: elevation,
       padding: padding,
       spacing: spacing,
       borderRadius: borderRadius,
-      options: defaultCallControlOptionsV2(
+      options: defaultCallControlOptions(
         call: call,
         onHangup: onHangup,
       ),
@@ -60,11 +60,10 @@ class StreamCallControlsBarV2 extends StatefulWidget {
   final BorderRadius? borderRadius;
 
   @override
-  State<StreamCallControlsBarV2> createState() =>
-      _StreamCallControlsBarStateV2();
+  State<StreamCallControlsBar> createState() => _StreamCallControlsBarState();
 }
 
-class _StreamCallControlsBarStateV2 extends State<StreamCallControlsBarV2> {
+class _StreamCallControlsBarState extends State<StreamCallControlsBar> {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);

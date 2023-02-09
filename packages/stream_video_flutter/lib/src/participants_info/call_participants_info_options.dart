@@ -5,9 +5,9 @@ import '../../stream_video_flutter.dart';
 /// {@template streamCallParticipantsInfoView}
 /// Displays call participants info.
 /// {@endtemplate}
-class CallParticipantsInfoOptionsV2 extends StatelessWidget {
+class CallParticipantsInfoOptions extends StatelessWidget {
   /// {@macro CallParticipantsInfoOptionsV2}
-  const CallParticipantsInfoOptionsV2({
+  const CallParticipantsInfoOptions({
     super.key,
     required this.call,
     required this.localParticipant,
@@ -40,7 +40,7 @@ class CallParticipantsInfoOptionsV2 extends StatelessWidget {
           _InviteButton(
               title: inviteButtonTitle,
               onInviteButtonPress: onInviteButtonPress),
-          _MuteToggleV2(
+          _MuteToggle(
             titles: muteToggleTitles,
             call: call,
             localParticipant: localParticipant,
@@ -83,8 +83,8 @@ class _InviteButton extends StatelessWidget {
   }
 }
 
-class _MuteToggleV2 extends StatefulWidget {
-  const _MuteToggleV2({
+class _MuteToggle extends StatefulWidget {
+  const _MuteToggle({
     required this.titles,
     required this.call,
     required this.localParticipant,
@@ -95,10 +95,10 @@ class _MuteToggleV2 extends StatefulWidget {
   final CallParticipantStateV2 localParticipant;
 
   @override
-  State<_MuteToggleV2> createState() => _MuteToggleStateV2();
+  State<_MuteToggle> createState() => _MuteToggleState();
 }
 
-class _MuteToggleStateV2 extends State<_MuteToggleV2> {
+class _MuteToggleState extends State<_MuteToggle> {
   @override
   Widget build(BuildContext context) {
     final trackState =

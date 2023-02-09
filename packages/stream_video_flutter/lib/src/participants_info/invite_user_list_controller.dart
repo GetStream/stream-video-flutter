@@ -14,9 +14,9 @@ import 'users_configuration.dart';
 /// * Provide user info using [getUser].
 /// * Provide selection info using [isSelected] and [hasSelected].
 /// * Provide user count info using [userCount].
-class StreamInviteUserListControllerV2 extends ValueNotifier<CallInviteState> {
+class StreamInviteUserListController extends ValueNotifier<CallInviteState> {
   /// Creates a Stream invitable user list controller.
-  StreamInviteUserListControllerV2({
+  StreamInviteUserListController({
     required this.call,
     required this.usersProvider,
   }) : super(const CallInviteState(users: [], selectedUsers: {}));

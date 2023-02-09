@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../call_controls_v2.dart';
+import '../call_controls.dart';
 
-class ToggleMicV2 extends StatelessWidget {
-  const ToggleMicV2({
+class ToggleMic extends StatelessWidget {
+  const ToggleMic({
     super.key,
     required this.call,
     required this.localParticipant,

@@ -3,14 +3,13 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/src/call_participants/screen_share_item_v2.dart';
+import 'package:stream_video_flutter/src/call_participants/screen_share_item.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/device_segmentation.dart';
 import '../widgets/floating_view/floating_view_alignment.dart';
 import '../widgets/tile_view.dart';
-import 'call_participant_v2.dart';
-import 'floating_call_participant_v2.dart';
+import 'call_participant.dart';
 
 /// The maximum number of participants displayed in a grid on mobile.
 const maxParticipantCountMobile = 4;
@@ -21,7 +20,7 @@ const maxParticipantCountWeb = 24;
 /// {@template callParticipantWidgetBuilder}
 /// Builder function used to build a participant grid item.
 /// {@endtemplate}
-typedef CallParticipantWidgetBuilderV2 = Widget Function(
+typedef CallParticipantWidgetBuilder = Widget Function(
   BuildContext context,
   int index,
   CallParticipantStateV2 participant,
@@ -30,15 +29,15 @@ typedef CallParticipantWidgetBuilderV2 = Widget Function(
 /// {@template screenShareItemBuilder}
 /// Builder function used to build a screen sharing item.
 /// {@endtemplate}
-typedef ScreenShareItemBuilderV2 = Widget Function(
+typedef ScreenShareItemBuilder = Widget Function(
   BuildContext context,
   CallParticipantStateV2 participant,
 );
 
 /// Widget that renders all the [StreamCallParticipant], based on the number
 /// of people in a call.
-class StreamCallParticipantsV2 extends StatelessWidget {
-  const StreamCallParticipantsV2({
+class StreamCallParticipants extends StatelessWidget {
+  const StreamCallParticipants({
     required this.call,
     required this.participants,
     this.screenShareItemBuilder,
@@ -55,10 +54,10 @@ class StreamCallParticipantsV2 extends StatelessWidget {
   final List<CallParticipantStateV2> participants;
 
   /// {@macro screenShareItemBuilder}
-  final ScreenShareItemBuilderV2? screenShareItemBuilder;
+  final ScreenShareItemBuilder? screenShareItemBuilder;
 
   /// {@macro callParticipantWidgetBuilder}
-  final CallParticipantWidgetBuilderV2? itemBuilder;
+  final CallParticipantWidgetBuilder? itemBuilder;
 
   /// Enable picture-in-picture for current participant
   final bool enableFloatingView;
@@ -77,7 +76,7 @@ class StreamCallParticipantsV2 extends StatelessWidget {
     );
 
     if (screenSharingParticipant != null) {
-      return ScreenSharingCallParticipantsContentV2(
+      return ScreenSharingCallParticipantsContent(
         call: call,
         participants: participants,
         screenSharingParticipant: screenSharingParticipant,
@@ -86,7 +85,7 @@ class StreamCallParticipantsV2 extends StatelessWidget {
       );
     }
 
-    return RegularCallParticipantsContentV2(
+    return RegularCallParticipantsContent(
       call: call,
       participants: participants,
       itemBuilder: itemBuilder,
@@ -97,8 +96,8 @@ class StreamCallParticipantsV2 extends StatelessWidget {
   }
 }
 
-class RegularCallParticipantsContentV2 extends StatefulWidget {
-  const RegularCallParticipantsContentV2({
+class RegularCallParticipantsContent extends StatefulWidget {
+  const RegularCallParticipantsContent({
     super.key,
     required this.call,
     required this.participants,
@@ -114,7 +113,7 @@ class RegularCallParticipantsContentV2 extends StatefulWidget {
   final List<CallParticipantStateV2> participants;
 
   /// {@macro callParticipantWidgetBuilder}
-  final CallParticipantWidgetBuilderV2? itemBuilder;
+  final CallParticipantWidgetBuilder? itemBuilder;
 
   /// Enable picture-in-picture for current participant
   final bool enableFloatingView;
@@ -127,12 +126,12 @@ class RegularCallParticipantsContentV2 extends StatefulWidget {
   final StreamFloatingCallParticipantTheme? floatingParticipantTheme;
 
   @override
-  State<RegularCallParticipantsContentV2> createState() =>
-      _RegularCallParticipantsContentStateV2();
+  State<RegularCallParticipantsContent> createState() =>
+      _RegularCallParticipantsContentState();
 }
 
-class _RegularCallParticipantsContentStateV2
-    extends State<RegularCallParticipantsContentV2> {
+class _RegularCallParticipantsContentState
+    extends State<RegularCallParticipantsContent> {
   final bottomRightOffset =
       ValueNotifier<Offset>(const Offset(0, double.infinity));
 
@@ -167,7 +166,7 @@ class _RegularCallParticipantsContentStateV2
     for (var i = 0; i < participantsToDisplay.length; i++) {
       final participantWidget =
           widget.itemBuilder?.call(context, i, participants[i]) ??
-              StreamCallParticipantV2(
+              StreamCallParticipant(
                   call: widget.call, participant: participants[i]);
 
       participantWidgets.add(participantWidget);
@@ -194,7 +193,7 @@ class _RegularCallParticipantsContentStateV2
       enableSnappingBehavior: widget.enableSnappingBehavior,
       floatingViewPadding: floatingParticipantPadding,
       floatingViewAlignment: FloatingViewAlignment.topRight,
-      floatingView: StreamFloatingCallParticipantV2(
+      floatingView: StreamFloatingCallParticipant(
         call: widget.call,
         participant: local.first,
       ),
@@ -215,8 +214,8 @@ class _RegularCallParticipantsContentStateV2
   // }
 }
 
-class ScreenSharingCallParticipantsContentV2 extends StatelessWidget {
-  const ScreenSharingCallParticipantsContentV2({
+class ScreenSharingCallParticipantsContent extends StatelessWidget {
+  const ScreenSharingCallParticipantsContent({
     super.key,
     required this.call,
     required this.screenSharingParticipant,
@@ -232,10 +231,10 @@ class ScreenSharingCallParticipantsContentV2 extends StatelessWidget {
   /// The list of participants to display.
   final List<CallParticipantStateV2> participants;
 
-  final ScreenShareItemBuilderV2? screenShareItemBuilder;
+  final ScreenShareItemBuilder? screenShareItemBuilder;
 
   /// {@macro callParticipantWidgetBuilder}
-  final CallParticipantWidgetBuilderV2? itemBuilder;
+  final CallParticipantWidgetBuilder? itemBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -258,7 +257,7 @@ class ScreenSharingCallParticipantsContentV2 extends StatelessWidget {
                 context,
                 screenSharingParticipant,
               ) ??
-              ScreenShareItemV2(
+              ScreenShareItem(
                 call: call,
                 participant: screenSharingParticipant,
               ),
@@ -276,7 +275,7 @@ class ScreenSharingCallParticipantsContentV2 extends StatelessWidget {
               return itemBuilder?.call(context, index, participant) ??
                   SizedBox(
                     width: 150,
-                    child: StreamCallParticipantV2(
+                    child: StreamCallParticipant(
                       call: call,
                       participant: participant,
                       theme: const StreamCallParticipantTheme(

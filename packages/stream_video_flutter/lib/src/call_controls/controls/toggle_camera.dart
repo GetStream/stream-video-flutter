@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../call_controls_v2.dart';
+import '../call_controls.dart';
 
-class ToggleCameraV2 extends StatelessWidget {
-  const ToggleCameraV2({
+class ToggleCamera extends StatelessWidget {
+  const ToggleCamera({
     super.key,
     required this.call,
     required this.localParticipant,

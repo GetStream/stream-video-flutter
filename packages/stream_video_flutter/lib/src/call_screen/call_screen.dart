@@ -2,15 +2,15 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../participants_info/call_participants_info_view_v2.dart';
-import 'active_call/active_call_v2.dart';
-import 'incoming_call/incoming_call_v2.dart';
-import 'outgoing_call/outgoing_call_v2.dart';
+import '../participants_info/call_participants_info_view.dart';
+import 'active_call/active_call.dart';
+import 'incoming_call/incoming_call.dart';
+import 'outgoing_call/outgoing_call.dart';
 
 /// {@template callParticipantsBuilder}
 /// Builder used to create a custom participants info screen.
 /// {@endtemplate}
-typedef CallParticipantsInfoWidgetBuilderV2 = Widget Function(
+typedef CallParticipantsInfoWidgetBuilder = Widget Function(
   BuildContext context,
   CallV2 call,
 );
@@ -18,8 +18,8 @@ typedef CallParticipantsInfoWidgetBuilderV2 = Widget Function(
 const int _idState = 2;
 int _callSeq = 1;
 
-class StreamCallScreenV2 extends StatefulWidget {
-  const StreamCallScreenV2({
+class StreamCallScreen extends StatefulWidget {
+  const StreamCallScreen({
     super.key,
     required this.call,
     required this.onBackPressed,
@@ -30,13 +30,13 @@ class StreamCallScreenV2 extends StatefulWidget {
   final CallV2 call;
   final VoidCallback onBackPressed;
   final VoidCallback onHangUp;
-  final CallParticipantsInfoWidgetBuilderV2? participantsInfoWidgetBuilder;
+  final CallParticipantsInfoWidgetBuilder? participantsInfoWidgetBuilder;
 
   @override
-  State<StreamCallScreenV2> createState() => _StreamCallScreenV2State();
+  State<StreamCallScreen> createState() => _StreamCallScreenState();
 }
 
-class _StreamCallScreenV2State extends State<StreamCallScreenV2> {
+class _StreamCallScreenState extends State<StreamCallScreen> {
   final _logger = taggedLogger(tag: 'CallScreen-${_callSeq++}');
   final subscriptions = Subscriptions();
 
@@ -70,7 +70,7 @@ class _StreamCallScreenV2State extends State<StreamCallScreenV2> {
     }
 
     if (status is CallStatusIncoming && !status.acceptedByMe) {
-      return IncomingCallV2(
+      return IncomingCall(
         state: callState,
         onRejectPressed: _rejectCall,
         onAcceptPressed: _acceptCall,
@@ -79,7 +79,7 @@ class _StreamCallScreenV2State extends State<StreamCallScreenV2> {
       );
     }
     if (status is CallStatusOutgoing && !status.acceptedByCallee) {
-      return OutgoingCallV2(
+      return OutgoingCall(
         state: callState,
         onCancelPressed: _cancelCall,
         onMicrophoneTap: () {},
@@ -94,7 +94,7 @@ class _StreamCallScreenV2State extends State<StreamCallScreenV2> {
 
       final usersProvider = StreamUsersConfiguration.of(context);
 
-      return StreamActiveCallV2(
+      return StreamActiveCall(
         call: widget.call,
         state: callState,
         onBackPressed: widget.onBackPressed,
@@ -105,7 +105,7 @@ class _StreamCallScreenV2State extends State<StreamCallScreenV2> {
               builder: (context) =>
                   widget.participantsInfoWidgetBuilder
                       ?.call(context, widget.call) ??
-                  StreamCallParticipantsInfoViewV2(
+                  StreamCallParticipantsInfoView(
                     call: widget.call,
                     usersProvider: usersProvider,
                   ),
