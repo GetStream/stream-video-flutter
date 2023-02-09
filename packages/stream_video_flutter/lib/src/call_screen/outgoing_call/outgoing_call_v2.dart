@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:collection/collection.dart';
 
-class OutgoingCallContent extends StatelessWidget {
-  const OutgoingCallContent({
+class OutgoingCallV2 extends StatelessWidget {
+  const OutgoingCallV2({
     super.key,
     required this.state,
     required this.onCancelPressed,

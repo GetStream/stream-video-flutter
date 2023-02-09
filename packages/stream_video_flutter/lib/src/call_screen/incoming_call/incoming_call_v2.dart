@@ -2,8 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
-class IncomingCallContent extends StatelessWidget {
-  const IncomingCallContent({
+class IncomingCallV2 extends StatelessWidget {
+  const IncomingCallV2({
     super.key,
     required this.state,
     required this.onRejectPressed,

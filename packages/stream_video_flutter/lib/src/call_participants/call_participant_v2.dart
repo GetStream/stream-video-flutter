@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-class CallParticipantView extends StatelessWidget {
-  const CallParticipantView({
+import '../../stream_video_flutter.dart';
+
+class CallParticipantV2 extends StatelessWidget {
+  const CallParticipantV2({
     super.key,
     required this.call,
     required this.participant,

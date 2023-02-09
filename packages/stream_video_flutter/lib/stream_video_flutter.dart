@@ -9,6 +9,7 @@ export 'src/call_participants/floating_call_participant.dart';
 export 'src/call_screen/active_call/active_call.dart';
 export 'src/call_screen/active_call/active_call_app_bar.dart';
 export 'src/call_screen/call_screen.dart';
+export 'src/call_screen/call_screen_v2.dart';
 export 'src/call_screen/incoming_call/incoming_call.dart';
 export 'src/call_screen/outgoing_call/outgoing_call.dart';
 export 'src/models/stream_icon_toggle.dart';

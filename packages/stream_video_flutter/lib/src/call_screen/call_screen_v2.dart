@@ -1,11 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import 'call/incoming_call_content.dart';
-import 'call/outgoing_call_content.dart';
-import 'view/call_participant_view.dart';
+import '../../stream_video_flutter.dart';
+import '../call_participants/call_participant_v2.dart';
+import 'incoming_call/incoming_call_v2.dart';
+import 'outgoing_call/outgoing_call_v2.dart';
 
 const int _idState = 2;
 int _callSeq = 1;
@@ -60,14 +59,14 @@ class _CallScreenV2State extends State<CallScreenV2> {
     }
 
     if (status is CallStatusIncoming && !status.acceptedByMe) {
-      return IncomingCallContent(
+      return IncomingCallV2(
         state: callState,
         onRejectPressed: _rejectCall,
         onAcceptPressed: _acceptCall,
       );
     }
     if (status is CallStatusOutgoing && !status.acceptedByCallee) {
-      return OutgoingCallContent(
+      return OutgoingCallV2(
         state: callState,
         onCancelPressed: _cancelCall,
       );
@@ -166,7 +165,7 @@ class _CallScreenV2State extends State<CallScreenV2> {
 
     return Container(
       color: Colors.yellow,
-      child: CallParticipantView(
+      child: CallParticipantV2(
         call: widget.call,
         participant: participant,
       ),

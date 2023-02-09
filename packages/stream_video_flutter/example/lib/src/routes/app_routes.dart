@@ -4,7 +4,6 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import '../screen/home_screen.dart';
 import '../screen/login_screen.dart';
 import '../utils/users_provider.dart';
-import '../v2/call_screen_v2.dart';
 import 'routes.dart';
 
 mixin AppRoutes {
