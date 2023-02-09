@@ -13,9 +13,6 @@ import 'package:uni_links/uni_links.dart';
 import 'firebase_options.dart';
 import 'src/routes/app_routes.dart';
 
-final GlobalKey<NavigatorState> navState = GlobalKey<NavigatorState>();
-Call? initialCall;
-
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -65,45 +62,6 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     with WidgetsBindingObserver {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late StreamSubscription<Uri?> _subscription;
-  // It is assumed that all messages contain a data field with the key 'type'
-  Future<void> setupInteractedMessage() async {
-    // Get any messages which caused the application to open from
-    // a terminated state.
-
-    //TODO: getInitialMessage() will always return null if not FCM notification is clicked. We cannot use it
-    // final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
-    // print('JcLog: initialMessage: $initialMessage');
-    //
-    // // If the message also contains a data property with a "type" of "chat",
-    // // navigate to a chat screen
-    // if (initialMessage != null) {
-    //   _handleMessage(initialMessage);
-
-    // 1.Application terminated - call StreamInstance.getAcceptedCAll, get a call and navigate
-    final prefs = await SharedPreferences.getInstance();
-    print('JcLog: callReceived: ${prefs.getBool("callReceived")}');
-    await prefs.remove("callReceived");
-
-    // Also handle any interaction when the app is in the background via a
-    // Stream listener
-    // https://pub.dev/documentation/firebase_messaging/latest/firebase_messaging/FirebaseMessaging/onMessageOpenedApp.html
-    // Only works with FCM notifications!!!!
-    // FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
-    // if (initialCall != null) {
-    //   print('JcLog: We can navigate to the call screen');
-    // }
-  }
-
-  void _handleMessage(RemoteMessage message) {
-    print('JcLog: handling opened PN');
-    // if (message.data['type'] == 'chat') {
-    //   Navigator.pushNamed(
-    //     navState.currentContext,
-    //     CallScreen.routeName,
-    //     arguments: ChatArguments(message),
-    //   );
-    // }
-  }
 
   @override
   void initState() {
