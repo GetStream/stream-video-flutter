@@ -11,7 +11,7 @@ class StreamConnectionQualityIndicator extends StatelessWidget {
   });
 
   /// The connection quality of the participant.
-  final ConnectionQuality connectionQuality;
+  final SfuConnectionQuality connectionQuality;
 
   /// The color of an active connection quality level.
   final Color? activeColor;
@@ -54,7 +54,7 @@ class _ConnectionQualityIndicatorPainter extends CustomPainter {
   });
 
   /// The connection quality of the participant.
-  final ConnectionQuality connectionQuality;
+  final SfuConnectionQuality connectionQuality;
 
   /// The color of an active connection quality level.
   final Color activeColor;
@@ -89,11 +89,11 @@ class _ConnectionQualityIndicatorPainter extends CustomPainter {
 
   int _getConnectionLevel() {
     switch (connectionQuality) {
-      case ConnectionQuality.poor:
+      case SfuConnectionQuality.poor:
         return 1;
-      case ConnectionQuality.good:
+      case SfuConnectionQuality.good:
         return 2;
-      case ConnectionQuality.excellent:
+      case SfuConnectionQuality.excellent:
         return 3;
       default:
         return 0;

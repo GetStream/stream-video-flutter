@@ -16,7 +16,7 @@ class StreamParticipantLabel extends StatelessWidget {
   });
 
   /// The participant to display.
-  final Participant participant;
+  final CallParticipantStateV2 participant;
 
   /// The color of an audio level indicator.
   final Color? audioLevelIndicatorColor;
@@ -33,6 +33,9 @@ class StreamParticipantLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context).callParticipantTheme;
+
+    final trackState = participant.publishedTracks[SfuTrackType.audio];
+    final muted = trackState != null && !trackState.muted;
 
     return Container(
       decoration: BoxDecoration(
@@ -55,7 +58,7 @@ class StreamParticipantLabel extends StatelessWidget {
           ),
           const SizedBox(width: 4.0),
           StreamAudioIndicator(
-            hasAudio: participant.isAudioEnabled,
+            hasAudio: muted,
             isSpeaking: participant.isSpeaking,
             audioLevelIndicatorColor: audioLevelIndicatorColor,
             enabledMicrophoneColor: enabledMicrophoneColor,

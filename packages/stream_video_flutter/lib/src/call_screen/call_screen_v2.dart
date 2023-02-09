@@ -63,6 +63,8 @@ class _CallScreenV2State extends State<CallScreenV2> {
         state: callState,
         onRejectPressed: _rejectCall,
         onAcceptPressed: _acceptCall,
+        onMicrophoneTap: () {},
+        onCameraTap: () {},
       );
     }
     if (status is CallStatusOutgoing && !status.acceptedByCallee) {

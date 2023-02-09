@@ -53,7 +53,7 @@ class IncomingCallControls extends StatelessWidget {
                 icon: const Icon(Icons.call_rounded),
                 iconColor: Colors.white,
                 backgroundColor: Colors.green,
-                onPressed: onHangup,
+                onPressed: onAccept,
                 padding: const EdgeInsets.all(24),
               ),
             ],

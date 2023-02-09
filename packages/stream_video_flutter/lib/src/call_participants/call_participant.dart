@@ -2,9 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../utils/device_segmentation.dart';
-import 'indicators/connection_quality_indicator.dart';
-import 'participant_label.dart';
 
 /// Widget that represents a single participant in a call.
 class StreamCallParticipant extends StatefulWidget {
@@ -62,76 +59,78 @@ class _StreamCallParticipantState extends State<StreamCallParticipant> {
 
   @override
   Widget build(BuildContext context) {
-    final streamVideoTheme = StreamVideoTheme.of(context);
-    final theme = this.theme ?? streamVideoTheme.callParticipantTheme;
+    return Container();
 
-    return ClipRRect(
-      borderRadius: theme.borderRadius,
-      child: Container(
-        foregroundDecoration: BoxDecoration(
-          border: participant.isSpeaking
-              ? Border.all(
-                  width: 4,
-                  color: theme.focusedColor,
-                )
-              : null,
-          borderRadius: BorderRadius.all(
-            Radius.circular(isDesktopDevice ? 12 : 0),
-          ),
-        ),
-        decoration: BoxDecoration(color: theme.backgroundColor),
-        child: Stack(
-          children: [
-            if (videoTrack != null && !videoTrack!.muted)
-              StreamVideoRenderer(
-                videoTrack: videoTrack!,
-                videoFit: VideoFit.cover,
-              )
-            else
-              Center(
-                child: StreamUserAvatar(
-                  user: UserInfo(
-                    id: participant.userId,
-                    role: 'admin',
-                    name: participant.userId,
-                  ),
-                  avatarTheme: theme.avatarTheme,
-                ),
-              ),
-            Align(
-              alignment: theme.participantLabelAlignment,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: StreamParticipantLabel(
-                      participant: participant,
-                      audioLevelIndicatorColor: theme.audioLevelIndicatorColor,
-                      disabledMicrophoneColor: theme.disabledMicrophoneColor,
-                      enabledMicrophoneColor: theme.enabledMicrophoneColor,
-                      participantLabelTextStyle:
-                          theme.participantLabelTextStyle,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Align(
-              alignment: theme.connectionLevelAlignment,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: StreamConnectionQualityIndicator(
-                  connectionQuality: participant.connectionQuality,
-                  activeColor: theme.connectionLevelActiveColor,
-                  inactiveColor: theme.connectionLevelInactiveColor,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    // final streamVideoTheme = StreamVideoTheme.of(context);
+    // final theme = this.theme ?? streamVideoTheme.callParticipantTheme;
+    //
+    // return ClipRRect(
+    //   borderRadius: theme.borderRadius,
+    //   child: Container(
+    //     foregroundDecoration: BoxDecoration(
+    //       border: participant.isSpeaking
+    //           ? Border.all(
+    //               width: 4,
+    //               color: theme.focusedColor,
+    //             )
+    //           : null,
+    //       borderRadius: BorderRadius.all(
+    //         Radius.circular(isDesktopDevice ? 12 : 0),
+    //       ),
+    //     ),
+    //     decoration: BoxDecoration(color: theme.backgroundColor),
+    //     child: Stack(
+    //       children: [
+    //         if (videoTrack != null && !videoTrack!.muted)
+    //           StreamVideoRenderer(
+    //             videoTrack: videoTrack!,
+    //             videoFit: VideoFit.cover,
+    //           )
+    //         else
+    //           Center(
+    //             child: StreamUserAvatar(
+    //               user: UserInfo(
+    //                 id: participant.userId,
+    //                 role: 'admin',
+    //                 name: participant.userId,
+    //               ),
+    //               avatarTheme: theme.avatarTheme,
+    //             ),
+    //           ),
+    //         Align(
+    //           alignment: theme.participantLabelAlignment,
+    //           child: Column(
+    //             crossAxisAlignment: CrossAxisAlignment.start,
+    //             mainAxisSize: MainAxisSize.min,
+    //             children: [
+    //               Padding(
+    //                 padding: const EdgeInsets.all(8.0),
+    //                 child: StreamParticipantLabel(
+    //                   participant: participant,
+    //                   audioLevelIndicatorColor: theme.audioLevelIndicatorColor,
+    //                   disabledMicrophoneColor: theme.disabledMicrophoneColor,
+    //                   enabledMicrophoneColor: theme.enabledMicrophoneColor,
+    //                   participantLabelTextStyle:
+    //                       theme.participantLabelTextStyle,
+    //                 ),
+    //               ),
+    //             ],
+    //           ),
+    //         ),
+    //         Align(
+    //           alignment: theme.connectionLevelAlignment,
+    //           child: Padding(
+    //             padding: const EdgeInsets.all(8.0),
+    //             child: StreamConnectionQualityIndicator(
+    //               connectionQuality: participant.connectionQuality,
+    //               activeColor: theme.connectionLevelActiveColor,
+    //               inactiveColor: theme.connectionLevelInactiveColor,
+    //             ),
+    //           ),
+    //         ),
+    //       ],
+    //     ),
+    //   ),
+    // );
   }
 }

@@ -43,6 +43,7 @@ export 'src/v2/model/call_status.dart';
 export 'src/v2/model/call_track_state.dart';
 export 'src/v2/model/drop_reason.dart';
 export 'src/v2/renderer/video_track_renderer.dart';
+export 'src/v2/sfu/data/models/sfu_connection_quality.dart';
 export 'src/v2/sfu/data/models/sfu_track_type.dart';
 export 'src/v2/stream_video_v2.dart';
 export 'src/v2/utils/result.dart';
