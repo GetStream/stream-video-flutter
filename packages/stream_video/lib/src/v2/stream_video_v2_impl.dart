@@ -5,8 +5,9 @@ import 'package:logging/logging.dart';
 
 import '../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
     as rpc;
-import '../logger/logger.dart';
+import '../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import '../logger/impl/tagged_logger.dart';
+import '../logger/logger.dart';
 import '../models/user_info.dart';
 import '../token/token.dart';
 import '../token/token_manager.dart';
@@ -425,6 +426,20 @@ class StreamVideoV2Impl implements StreamVideoV2 {
         return Result.success(users);
       },
       failure: (it) => it,
+    );
+  }
+
+  Future<void> inviteUsers({
+    required String callCid,
+    required List<UserInfo> users,
+  }) async {
+    await _client.inviteUsers(
+      UpsertCallMembersRequest(
+        callCid: callCid,
+        members: users.map((user) {
+          return MemberInput(userId: user.id, role: user.role);
+        }),
+      ),
     );
   }
 }

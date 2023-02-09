@@ -3,8 +3,17 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import '../call_participants/call_participant_v2.dart';
+import '../participants_info/call_participants_info_view_v2.dart';
 import 'incoming_call/incoming_call_v2.dart';
 import 'outgoing_call/outgoing_call_v2.dart';
+
+/// {@template callParticipantsBuilder}
+/// Builder used to create a custom participants info screen.
+/// {@endtemplate}
+typedef CallParticipantsInfoWidgetBuilderV2 = Widget Function(
+  BuildContext context,
+  CallV2 call,
+);
 
 const int _idState = 2;
 int _callSeq = 1;
@@ -15,11 +24,13 @@ class CallScreenV2 extends StatefulWidget {
     required this.call,
     required this.onBackPressed,
     required this.onHangUp,
+    this.participantsInfoWidgetBuilder,
   });
 
   final CallV2 call;
   final VoidCallback onBackPressed;
   final VoidCallback onHangUp;
+  final CallParticipantsInfoWidgetBuilderV2? participantsInfoWidgetBuilder;
 
   @override
   State<CallScreenV2> createState() => _CallScreenV2State();
@@ -81,65 +92,111 @@ class _CallScreenV2State extends State<CallScreenV2> {
       final localParticipant =
           participants.firstWhereOrNull((it) => it.isLocal)!;
 
-      return Scaffold(
-        appBar: AppBar(
-          elevation: 4,
-          centerTitle: false,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: _cancelCall,
+      final usersProvider = StreamUsersConfiguration.of(context);
+
+      return GestureDetector(
+        // When the child is tapped, show a snackbar.
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+                  widget.participantsInfoWidgetBuilder
+                      ?.call(context, widget.call) ??
+                  StreamCallParticipantsInfoViewV2(
+                    call: widget.call,
+                    usersProvider: usersProvider,
+                  ),
             ),
-          ],
-          title: Text('CallId: ${callState.callCid}'),
-        ),
-        body: Column(
-          children: [
-            const SizedBox(height: 10),
-            Text(
-              'Status: ${status.runtimeType}',
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Users: ${callState.callParticipants.map(
-                    (it) => '${it.userId}(${it.publishedTracks})',
-                  ).toList()}',
-            ),
-            const SizedBox(height: 50),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                padding: const EdgeInsets.all(8),
-                children: [
-                  _buildParticipant(participants, 0),
-                  _buildParticipant(participants, 1),
-                  _buildParticipant(participants, 2),
-                  _buildParticipant(participants, 3),
-                ],
-              ),
-            )
-          ],
-        ),
-        bottomNavigationBar: StreamCallControlsBar(
-          options: [
-            ToggleMicrophoneButton(
-              call: widget.call,
-              localParticipant: localParticipant,
-            ),
-            ToggleCameraButton(
-              call: widget.call,
-              localParticipant: localParticipant,
-            ),
-            FlipCameraButton(
-              call: widget.call,
-              localParticipant: localParticipant,
-            ),
-            CallHangup(onHangup: _cancelCall),
-          ],
+          );
+        },
+        // The custom button
+        child: Container(
+          padding: const EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+            color: Colors.lightBlue,
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: const Text('My Button'),
         ),
       );
+
+      // return StreamActiveCall(
+      //   call: widget.call,
+      //   onBackPressed: onBackPressed,
+      //   onHangUp: onHangUp,
+      //   onParticipantsTap: () {
+      //     Navigator.of(context).push(
+      //       MaterialPageRoute(
+      //         builder: (context) =>
+      //             widget.participantsInfoWidgetBuilder?.call(context, call) ??
+      //             StreamCallParticipantsInfoViewV2(
+      //               call: widget.call,
+      //               usersProvider: usersProvider,
+      //             ),
+      //       ),
+      //     );
+      //   },
+      // );
+
+      // return Scaffold(
+      //   appBar: AppBar(
+      //     elevation: 4,
+      //     centerTitle: false,
+      //     actions: [
+      //       IconButton(
+      //         icon: const Icon(Icons.close),
+      //         onPressed: _cancelCall,
+      //       ),
+      //     ],
+      //     title: Text('CallId: ${callState.callCid}'),
+      //   ),
+      //   body: Column(
+      //     children: [
+      //       const SizedBox(height: 10),
+      //       Text(
+      //         'Status: ${status.runtimeType}',
+      //       ),
+      //       const SizedBox(height: 10),
+      //       Text(
+      //         'Users: ${callState.callParticipants.map(
+      //               (it) => '${it.userId}(${it.publishedTracks})',
+      //             ).toList()}',
+      //       ),
+      //       const SizedBox(height: 50),
+      //       Expanded(
+      //         child: GridView.count(
+      //           crossAxisCount: 2,
+      //           crossAxisSpacing: 8,
+      //           mainAxisSpacing: 8,
+      //           padding: const EdgeInsets.all(8),
+      //           children: [
+      //             _buildParticipant(participants, 0),
+      //             _buildParticipant(participants, 1),
+      //             _buildParticipant(participants, 2),
+      //             _buildParticipant(participants, 3),
+      //           ],
+      //         ),
+      //       )
+      //     ],
+      //   ),
+      //   bottomNavigationBar: StreamCallControlsBar(
+      //     options: [
+      //       ToggleMicrophoneButton(
+      //         call: widget.call,
+      //         localParticipant: localParticipant,
+      //       ),
+      //       ToggleCameraButton(
+      //         call: widget.call,
+      //         localParticipant: localParticipant,
+      //       ),
+      //       FlipCameraButton(
+      //         call: widget.call,
+      //         localParticipant: localParticipant,
+      //       ),
+      //       CallHangup(onHangup: _cancelCall),
+      //     ],
+      //   ),
+      // );
     }
 
     return Scaffold(

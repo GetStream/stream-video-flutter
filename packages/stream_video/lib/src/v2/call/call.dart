@@ -16,6 +16,7 @@ import 'call_settings.dart';
 /// Represents a [CallV2] in which you can connect to.
 abstract class CallV2 {
   const CallV2();
+
   factory CallV2.fromCid({
     required StreamCallCid callCid,
     StreamVideoV2? streamVideo,
@@ -25,6 +26,7 @@ abstract class CallV2 {
       streamVideo: streamVideo,
     );
   }
+
   factory CallV2.fromCreated({
     required CallCreated data,
     StreamVideoV2? streamVideo,
@@ -34,6 +36,7 @@ abstract class CallV2 {
       streamVideo: streamVideo,
     );
   }
+
   factory CallV2.fromJoined({
     required CallJoined data,
     StreamVideoV2? streamVideo,
@@ -78,4 +81,6 @@ abstract class CallV2 {
   List<RtcTrack> getTracks(String trackIdPrefix);
 
   RtcTrack? getTrack(String trackIdPrefix, SfuTrackType trackType);
+
+  Future<void> inviteUsers(List<UserInfo> users);
 }

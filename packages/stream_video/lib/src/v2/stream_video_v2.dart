@@ -109,6 +109,11 @@ abstract class StreamVideoV2 {
     required Set<String> userIds,
   });
 
+  Future<void> inviteUsers({
+    required String callCid,
+    required List<UserInfo> users,
+  });
+
   static void init(
     String apiKey, {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,

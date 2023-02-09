@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import '../../../stream_video.dart';
-import '../../logger/stream_logger.dart';
 import '../action/call_control_action.dart';
 import '../call_state.dart';
 import '../call_state_manager.dart';
@@ -419,6 +418,11 @@ class CallV2Impl extends CallV2 {
       },
       timeLimit: timeLimit,
     );
+  }
+
+  @override
+  Future<void> inviteUsers(List<UserInfo> users) {
+    return _streamVideo.inviteUsers(callCid: callCid.value, users: users);
   }
 }
 
