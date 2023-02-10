@@ -104,6 +104,22 @@ class CallParticipantStateV2 with EquatableMixin {
     );
   }
 
+  TrackState? get videoTrack {
+    return publishedTracks[SfuTrackType.video];
+  }
+
+  TrackState? get audioTrack {
+    return publishedTracks[SfuTrackType.audio];
+  }
+
+  bool get isAudioEnabled {
+    return !(audioTrack?.muted ?? true);
+  }
+
+  bool get isVideoEnabled {
+    return !(videoTrack?.muted ?? true);
+  }
+
   @override
   String toString() {
     return 'CallParticipantState{userId: $userId, role: $role, name: $name, '

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/extensions.dart';
-import 'controls/controls.dart';
+import 'controls/default_control_options.dart';
 
-/// Widget which takes a list of [CallControlOption] such as microphone, video,
-/// switch camera, disconnect etc and displays them in a Wrap.
-class StreamCallControlsBar extends StatefulWidget {
-  const StreamCallControlsBar({
+/// Represents the set of controls the user can use to change their audio
+/// and video device state, or browse other types of settings, leave the call,
+/// or implement something custom.
+class StreamCallControls extends StatefulWidget {
+  /// Creates a new instance of [StreamCallControls].
+  const StreamCallControls({
     super.key,
     required this.options,
     this.backgroundColor,
@@ -18,16 +19,18 @@ class StreamCallControlsBar extends StatefulWidget {
     this.borderRadius,
   });
 
-  factory StreamCallControlsBar.withDefaultOptions({
+  /// Builds a call controls bar with the default set of call control options.
+  factory StreamCallControls.withDefaultOptions({
     required CallV2 call,
-    required VoidCallback onHangup,
+    required CallParticipantStateV2 localParticipant,
+    required VoidCallback onLeaveCall,
     BorderRadius? borderRadius,
     Color? backgroundColor,
     double? elevation,
     EdgeInsets? padding,
     double? spacing,
   }) {
-    return StreamCallControlsBar(
+    return StreamCallControls(
       backgroundColor: backgroundColor,
       elevation: elevation,
       padding: padding,
@@ -35,7 +38,8 @@ class StreamCallControlsBar extends StatefulWidget {
       borderRadius: borderRadius,
       options: defaultCallControlOptions(
         call: call,
-        onHangup: onHangup,
+        localParticipant: localParticipant,
+        onLeaveCall: onLeaveCall,
       ),
     );
   }
@@ -60,10 +64,10 @@ class StreamCallControlsBar extends StatefulWidget {
   final BorderRadius? borderRadius;
 
   @override
-  State<StreamCallControlsBar> createState() => _StreamCallControlsBarState();
+  State<StreamCallControls> createState() => _StreamCallControlsState();
 }
 
-class _StreamCallControlsBarState extends State<StreamCallControlsBar> {
+class _StreamCallControlsState extends State<StreamCallControls> {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
@@ -97,57 +101,6 @@ class _StreamCallControlsBarState extends State<StreamCallControlsBar> {
       borderRadius: widget.borderRadius ?? barTheme.borderRadius,
       color: widget.backgroundColor ?? barTheme.backgroundColor,
       child: callControlOptions,
-    );
-  }
-}
-
-/// Model class for the call control option.
-class CallControlOption extends StatelessWidget {
-  /// Creates a new instance of [CallControlOption].
-  const CallControlOption({
-    super.key,
-    required this.icon,
-    this.iconColor,
-    this.elevation,
-    this.backgroundColor,
-    this.shape,
-    this.padding,
-    this.onPressed,
-  });
-
-  /// The icon of the option.
-  final Widget icon;
-
-  /// The color of the icon.
-  final Color? iconColor;
-
-  final double? elevation;
-
-  final Color? backgroundColor;
-
-  final OutlinedBorder? shape;
-
-  final EdgeInsetsGeometry? padding;
-
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context);
-    final barTheme = theme.callControlsBarTheme;
-
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        elevation: elevation ?? barTheme.optionElevation,
-        backgroundColor: backgroundColor ?? barTheme.optionBackgroundColor,
-        shape: shape ?? barTheme.optionShape,
-        padding: padding ?? barTheme.optionPadding,
-      ),
-      onPressed: onPressed,
-      child: IconTheme.merge(
-        data: IconThemeData(color: iconColor ?? barTheme.optionIconColor),
-        child: icon,
-      ),
     );
   }
 }

@@ -99,6 +99,7 @@ class _StreamActiveCallState extends State<StreamActiveCall> {
   @override
   Widget build(BuildContext context) {
     final participants = widget.state.callParticipants;
+    final localParticipant = widget.state.localParticipant;
 
     final usersProvider = StreamUsersConfiguration.of(context);
 
@@ -130,9 +131,10 @@ class _StreamActiveCallState extends State<StreamActiveCall> {
           ),
       bottomNavigationBar:
           widget.callControlsBuilder?.call(context, call, participants) ??
-              StreamCallControlsBar.withDefaultOptions(
+              StreamCallControls.withDefaultOptions(
                 call: widget.call,
-                onHangup: () async {
+                localParticipant: localParticipant!,
+                onLeaveCall: () async {
                   await widget.call.disconnect();
                   widget.onHangUp?.call();
                 },

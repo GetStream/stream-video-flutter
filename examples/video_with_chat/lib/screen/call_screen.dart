@@ -32,7 +32,7 @@ class _CallScreenState extends State<CallScreen> {
             onBackPressed: () => _finishCall(context),
             onHangUp: () => _finishCall(context),
             callControlsBuilder: (context, call, participants) {
-              return StreamCallControlsBar(
+              return StreamCallControls(
                 options: customCallControlOptions(
                   call: call,
                   channel: widget.channel,
