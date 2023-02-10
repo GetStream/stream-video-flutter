@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/device_segmentation.dart';
+import '../utils/extensions.dart';
 import 'indicators/connection_quality_indicator.dart';
 import 'participant_label.dart';
 
@@ -54,12 +55,7 @@ class StreamCallParticipant extends StatelessWidget {
                 return Center(
                   child: StreamUserAvatar(
                     avatarTheme: theme.avatarTheme,
-                    user: UserInfo(
-                      id: participant.userId,
-                      role: participant.role,
-                      name: participant.userId,
-                      imageUrl: participant.profileImageURL,
-                    ),
+                    user: participant.toUserInfo(),
                   ),
                 );
               },

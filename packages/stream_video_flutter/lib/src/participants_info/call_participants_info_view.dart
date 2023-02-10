@@ -64,12 +64,10 @@ class StreamCallParticipantsInfoView extends StatefulWidget {
       _StreamCallParticipantsInfoViewState();
 }
 
-const int _idState = 5;
-
 class _StreamCallParticipantsInfoViewState
     extends State<StreamCallParticipantsInfoView> {
   late StreamInviteUserListController _controller;
-  final subscriptions = Subscriptions();
+  final _subscriptions = Subscriptions();
 
   @override
   void initState() {
@@ -79,14 +77,14 @@ class _StreamCallParticipantsInfoViewState
       usersProvider: widget.usersProvider,
     );
 
-    subscriptions.add(_idState, widget.call.state.listen(_setState));
+    _subscriptions.add(0, widget.call.state.listen(_setState));
     _setState(widget.call.state.value);
   }
 
   @override
   void dispose() {
     super.dispose();
-    subscriptions.cancelAll();
+    _subscriptions.cancelAll();
   }
 
   Future<void> _setState(CallStateV2 state) async {

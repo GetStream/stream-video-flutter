@@ -46,6 +46,7 @@ class StreamCallContent extends StatefulWidget {
   /// Represents a call.
   final CallV2 call;
 
+  /// Holds information about the call.
   final CallStateV2 state;
 
   /// Builder used to create a custom call app bar.

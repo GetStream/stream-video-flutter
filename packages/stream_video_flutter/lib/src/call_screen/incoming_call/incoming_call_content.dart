@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../../theme/stream_incoming_outgoing_call_theme.dart';
+import '../../utils/extensions.dart';
 import '../common/call_background.dart';
 import '../common/calling_participants.dart';
 import '../common/participant_avatars.dart';
@@ -43,15 +44,7 @@ class IncomingCallContent extends StatelessWidget {
     final streamChatTheme = StreamVideoTheme.of(context);
     final theme = this.theme ?? streamChatTheme.incomingCallTheme;
 
-    final users = state.callParticipants
-        .where((element) => element.userId != state.currentUserId)
-        .map((e) => UserInfo(
-              id: e.userId,
-              role: e.role,
-              name: e.userId,
-              imageUrl: e.profileImageURL,
-            ))
-        .toList();
+    final users = state.otherParticipants.map((e) => e.toUserInfo()).toList();
 
     return CallBackground(
       participants: users,

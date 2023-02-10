@@ -90,9 +90,14 @@ class _MuteToggle extends StatefulWidget {
     required this.localParticipant,
   });
 
-  final MuteToggleTitles titles;
+  /// Represents a call.
   final CallV2 call;
+
+  /// The current local participant.
   final CallParticipantStateV2 localParticipant;
+
+  /// Contains titles for muted and unmuted states.
+  final MuteToggleTitles titles;
 
   @override
   State<_MuteToggle> createState() => _MuteToggleState();
@@ -101,9 +106,7 @@ class _MuteToggle extends StatefulWidget {
 class _MuteToggleState extends State<_MuteToggle> {
   @override
   Widget build(BuildContext context) {
-    final trackState =
-        widget.localParticipant.publishedTracks[SfuTrackType.audio];
-    final isEnabled = trackState != null && !trackState.muted;
+    final enabled = widget.localParticipant.isAudioEnabled;
 
     final streamChatTheme = StreamVideoTheme.of(context);
     return OutlinedButton(
@@ -120,11 +123,11 @@ class _MuteToggleState extends State<_MuteToggle> {
       ),
       onPressed: () {
         widget.call.apply(
-          SetMicrophoneEnabled(enabled: !isEnabled),
+          SetMicrophoneEnabled(enabled: !enabled),
         );
       },
       child: Text(
-        isEnabled ? widget.titles.muteTitle : widget.titles.unmuteTitle,
+        enabled ? widget.titles.muteTitle : widget.titles.unmuteTitle,
         style: const TextStyle(fontSize: 16),
       ),
     );

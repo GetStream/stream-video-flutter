@@ -138,7 +138,6 @@ class _RegularCallParticipantsContentState
   @override
   Widget build(BuildContext context) {
     final participants = widget.participants;
-    // participants.sort(_participantComparator);
 
     final remote = participants.where((element) => !element.isLocal).toList();
     final local = participants.where((element) => element.isLocal).toList();

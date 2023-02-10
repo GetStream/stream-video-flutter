@@ -1,11 +1,7 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import '../participants_info/call_participants_info_view.dart';
-import 'call_content/call_content.dart';
-import 'incoming_call/incoming_call_content.dart';
-import 'outgoing_call/outgoing_call_content.dart';
 
 /// Builder used to create a custom participants info screen.
 typedef CallParticipantsInfoWidgetBuilder = Widget Function(
@@ -27,9 +23,13 @@ class StreamCallContainer extends StatefulWidget {
   /// Represents a call.
   final CallV2 call;
 
+  /// The action to perform when the back button is pressed.
   final VoidCallback onBackPressed;
 
+  /// The action to perform when the leave call button is pressed.
   final VoidCallback onLeaveCall;
+
+  /// Builder used to create a custom participants info screen.
   final CallParticipantsInfoWidgetBuilder? participantsInfoWidgetBuilder;
 
   @override
@@ -84,10 +84,6 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     }
 
     if (status.isConnected) {
-      final participants = callState.callParticipants.take(4).toList();
-      final localParticipant =
-          participants.firstWhereOrNull((it) => it.isLocal)!;
-
       final usersProvider = StreamUsersConfiguration.of(context);
 
       return StreamCallContent(
@@ -144,7 +140,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
       if (result.isFailure) {
         await _cancelCall();
       }
-    } catch (e, stk) {
+    } catch (e) {
       await _cancelCall();
     }
   }
