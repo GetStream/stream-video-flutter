@@ -305,6 +305,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   @override
   Future<Result<CallJoined>> joinCall({
     required StreamCallCid cid,
+    void Function(CallReceivedOrCreated)? onReceivedOrCreated,
   }) async {
     _logger.d(() => '[joinCall] cid: $cid');
     final joinResult = await _client.joinCall(
@@ -315,6 +316,16 @@ class StreamVideoV2Impl implements StreamVideoV2 {
       return joinResult as Failure;
     }
     final metadata = joinResult.data.call.toCallMetadata();
+    onReceivedOrCreated?.call(
+      CallReceivedOrCreated(
+        wasCreated: joinResult.data.created,
+        data: CallCreated(
+          callCid: cid,
+          ringing: false,
+          metadata: metadata,
+        ),
+      ),
+    );
     _logger.v(() => '[joinCall] joinedMetadata: $metadata');
     final edgeResult = await _client.findBestCallEdgeServer(
       callCid: cid.value,
@@ -326,6 +337,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     }
     final call = CallJoined(
       callCid: cid,
+      wasCreated: joinResult.data.created,
       metadata: edgeResult.data.call.toCallMetadata(),
       credentials: edgeResult.data.credentials.toCallCredentials(),
     );

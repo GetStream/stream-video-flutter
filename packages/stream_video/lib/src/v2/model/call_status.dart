@@ -66,7 +66,9 @@ abstract class CallStatus extends Equatable {
   bool get isDrop => this is CallStatusDrop;
 }
 
-class CallStatusIdle extends CallStatus {
+mixin CallStatusJoinable implements CallStatus {}
+
+class CallStatusIdle extends CallStatus with CallStatusJoinable {
   factory CallStatusIdle() {
     return _instance;
   }
@@ -82,11 +84,7 @@ abstract class CallStatusActive extends CallStatus {
   const CallStatusActive();
 }
 
-abstract class CallStatusJoinable extends CallStatusActive {
-  const CallStatusJoinable();
-}
-
-class CallStatusCreated extends CallStatusJoinable {
+class CallStatusCreated extends CallStatusActive with CallStatusJoinable {
   factory CallStatusCreated() {
     return _instance;
   }
@@ -98,7 +96,7 @@ class CallStatusCreated extends CallStatusJoinable {
   }
 }
 
-class CallStatusOutgoing extends CallStatusJoinable {
+class CallStatusOutgoing extends CallStatusActive with CallStatusJoinable {
   const CallStatusOutgoing({required this.acceptedByCallee});
 
   final bool acceptedByCallee;
@@ -112,7 +110,7 @@ class CallStatusOutgoing extends CallStatusJoinable {
   }
 }
 
-class CallStatusIncoming extends CallStatusJoinable {
+class CallStatusIncoming extends CallStatusActive with CallStatusJoinable {
   const CallStatusIncoming({required this.acceptedByMe});
 
   final bool acceptedByMe;
