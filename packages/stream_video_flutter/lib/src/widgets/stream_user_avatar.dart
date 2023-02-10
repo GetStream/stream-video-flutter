@@ -61,22 +61,22 @@ class StreamUserAvatar extends StatelessWidget {
   /// Theme for the avatar.
   final StreamAvatarTheme? avatarTheme;
 
-  /// {@macro onUserAvatarTap}
+  /// The action to perform when the user avatar is tapped.
   final OnUserAvatarTap? onTap;
 
-  /// {@macro onUserAvatarLongPress}
+  /// The action to perform when the user avatar is long-pressed.
   final OnUserAvatarLongPress? onLongPress;
 
-  /// {@macro imageWidgetBuilder}
+  /// Builder function used to build an image widget for the user avatar.
   final ImageWidgetBuilder? imageBuilder;
 
-  /// {@macro placeholderWidgetBuilder}
+  /// Builder function used to build a placeholder widget.
   final PlaceholderWidgetBuilder? placeholderBuilder;
 
-  /// {@macro errorWidgetBuilder}
+  /// Builder function used to build an error widget.
   final ErrorWidgetBuilder? errorBuilder;
 
-  /// {@macro fallbackWidgetBuilder}
+  /// Builder function used to build a widget with the user initials.
   final FallbackWidgetBuilder? fallbackBuilder;
 
   @override

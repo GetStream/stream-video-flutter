@@ -228,7 +228,7 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
   /// Builder function used to build a screen sharing item.
   final ScreenShareItemBuilder? screenShareItemBuilder;
 
-  /// {@macro callParticipantWidgetBuilder}
+  /// Builder function used to build a participant grid item.
   final CallParticipantWidgetBuilder? itemBuilder;
 
   @override

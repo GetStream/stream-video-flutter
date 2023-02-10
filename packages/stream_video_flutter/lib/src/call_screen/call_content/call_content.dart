@@ -138,21 +138,29 @@ class _StreamCallContentState extends State<StreamCallContent> {
                 ),
       );
     } else {
-      // TODO: Improve the design
+      final callCid = callState.callCid.value;
+      final theme = StreamVideoTheme.of(context);
+
       return Scaffold(
         appBar: AppBar(
-          elevation: 4,
-          centerTitle: false,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: widget.onCancelPressed,
+          elevation: 8,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: theme.colorTheme.textHighEmphasis,
             ),
-          ],
-          title: Text('CallId: ${callState.callCid.value}'),
+            onPressed: widget.onCancelPressed,
+          ),
+          backgroundColor: theme.colorTheme.barsBg,
+          centerTitle: false,
+          title: Text(
+            callCid,
+            style: theme.textTheme.title3Bold,
+            overflow: TextOverflow.visible,
+          ),
         ),
-        body: Center(
-          child: Text('Status: ${callState.status.runtimeType}'),
+        body: const Center(
+          child: Text('Connecting'),
         ),
       );
     }

@@ -51,6 +51,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
+    final callCid = call.state.value.callCid.value;
 
     final leadingWidget = leading ??
         (showBackButton
@@ -80,35 +81,10 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
           ],
       title: title ??
           Text(
-            _buildTitleText(),
+            callCid,
             style: theme.textTheme.title3Bold,
             overflow: TextOverflow.visible,
           ),
     );
-  }
-
-  String _buildTitleText() {
-    final callId = call.state.value.callCid.toString();
-
-    var connectionState = '';
-
-    // switch (call.state.value.status) {
-    //   case CallStatus.disconnected:
-    //     connectionState = 'Disconnected';
-    //     break;
-    //   case ConnectionState.connecting:
-    //     connectionState = 'Connecting';
-    //     break;
-    //   case ConnectionState.reconnecting:
-    //     connectionState = 'reconnecting';
-    //     break;
-    //   case ConnectionState.connected:
-    //     connectionState = 'Connected';
-    //     break;
-    // }
-
-    connectionState = call.state.value.status.runtimeType.toString();
-
-    return callId.isEmpty ? connectionState : '$connectionState: $callId';
   }
 }
