@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
-import '../routes/routes.dart';
+import 'sample_user.dart';
 
-final List<LoginInfo> users = [
-  LoginInfo(
+final sampleUsers = <SampleUser>[
+  SampleUser(
     const UserInfo(
       id: 'tommaso',
       role: 'admin',
@@ -14,7 +13,7 @@ final List<LoginInfo> users = [
     ),
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90b21tYXNvIiwiaWF0IjoxNjcwMzM5NDQwLCJ1c2VyX2lkIjoidG9tbWFzbyJ9.t5YFZFqm-XjDFJV_z_y-UdT8HjZpOunAm-6L_h_mW7A',
   ),
-  LoginInfo(
+  SampleUser(
     const UserInfo(
       id: 'thierry',
       role: 'admin',
@@ -24,7 +23,7 @@ final List<LoginInfo> users = [
     ),
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90aGllcnJ5IiwiaWF0IjoxNjcwMzM5NTAwLCJ1c2VyX2lkIjoidGhpZXJyeSJ9.q8dy763W-ZVOA_1VbNhz0VozuxAI1Ko42HlVl-9mnG8',
   ),
-  LoginInfo(
+  SampleUser(
     const UserInfo(
       id: 'marcelo',
       role: 'admin',
@@ -34,7 +33,7 @@ final List<LoginInfo> users = [
     ),
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9tYXJjZWxvIiwiaWF0IjoxNjcwMzM5NDU2LCJ1c2VyX2lkIjoibWFyY2VsbyJ9.-tBPUvyU-XTh04f9-Owv9tB6EG0lEIAyHTsZXYwOTqw',
   ),
-  LoginInfo(
+  SampleUser(
     const UserInfo(
       id: 'martin',
       role: 'admin',
@@ -44,7 +43,7 @@ final List<LoginInfo> users = [
     ),
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9tYXJ0aW4iLCJpYXQiOjE2NzAzMzkzNDMsInVzZXJfaWQiOiJtYXJ0aW4ifQ.EGMuYyXti8IMCMX4oiLKTkVZe8ZqUJr93Kj214-jCHg',
   ),
-  LoginInfo(
+  SampleUser(
     const UserInfo(
       id: 'filip',
       role: 'admin',
@@ -55,78 +54,3 @@ final List<LoginInfo> users = [
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9maWxpcCIsImlhdCI6MTY3MDMzOTQ4MSwidXNlcl9pZCI6ImZpbGlwIn0.rGK-twVawPRItb_xQigYuYVO8UDTCCNPYKM5xP6mpbo',
   ),
 ];
-
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
-
-  @override
-  State<LoginScreen> createState() => _LoginScreenStateV2();
-}
-
-class _LoginScreenStateV2 extends State<LoginScreen> {
-  Future<void> _onLogin(LoginInfo info) async {
-    await StreamVideoV2.instance.connectUser(
-      info.userInfo,
-      token: Token(info.token),
-    );
-
-    Navigator.of(context).pushReplacementNamed(Routes.HOME);
-  }
-
-  final _emailController = TextEditingController();
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select a user'),
-      ),
-      body: SafeArea(
-        child: ListView.builder(
-          itemCount: users.length,
-          itemBuilder: (context, position) {
-            final user = users[position];
-            return ListTile(
-              leading: avatarBuilder(context, user.userInfo),
-              title: Text(user.userInfo.name),
-              subtitle: Text('Role: ${user.userInfo.role}'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                _onLogin(user);
-              },
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-Widget avatarBuilder(BuildContext context, UserInfo userInfo) {
-  final name = userInfo.name;
-  final imageUrl = userInfo.imageUrl;
-
-  final avatar = imageUrl != null
-      ? CircleAvatar(
-          backgroundColor: Colors.white,
-          backgroundImage: NetworkImage(imageUrl),
-        )
-      : CircleAvatar(
-          child: Text(name[0].toUpperCase()),
-        );
-
-  return avatar;
-}
-
-class LoginInfo {
-  final UserInfo userInfo;
-  final String token;
-
-  LoginInfo(this.userInfo, this.token);
-}
