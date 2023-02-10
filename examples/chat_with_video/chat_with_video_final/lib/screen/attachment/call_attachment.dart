@@ -71,7 +71,7 @@ class CallAttachment extends StatelessWidget {
                       MaterialPageRoute(
                         fullscreenDialog: true,
                         builder: (context) {
-                          return StreamActiveCall(
+                          return StreamCallContent(
                             call: call,
                             onBackPressed: () => _finishCall(context, call),
                             onHangUp: () => _finishCall(context, call),

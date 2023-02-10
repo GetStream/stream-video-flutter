@@ -27,7 +27,7 @@ class _CallScreenState extends State<CallScreen> {
       children: [
         Expanded(
           flex: 2,
-          child: StreamActiveCall(
+          child: StreamCallContent(
             call: widget.call,
             onBackPressed: () => _finishCall(context),
             onHangUp: () => _finishCall(context),

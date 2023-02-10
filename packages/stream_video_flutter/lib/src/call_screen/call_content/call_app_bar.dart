@@ -3,9 +3,9 @@ import 'package:flutter/material.dart' hide ConnectionState;
 import '../../../stream_video_flutter.dart';
 
 /// Widget that represents the default app bar that's shown in calls.
-class ActiveCallAppBar extends StatelessWidget implements PreferredSizeWidget {
-  /// Creates a new instance of [ActiveCallAppBar].
-  const ActiveCallAppBar({
+class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
+  /// Creates a new instance of [CallAppBar].
+  const CallAppBar({
     super.key,
     required this.call,
     this.showBackButton = true,
@@ -24,10 +24,10 @@ class ActiveCallAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// Whether to show the leading back button.
   final bool showBackButton;
 
-  /// The elevation for this [ActiveCallAppBar].
+  /// The elevation for this [CallAppBar].
   final double elevation;
 
-  /// The background color for this [ActiveCallAppBar].
+  /// The background color for this [CallAppBar].
   final Color? backgroundColor;
 
   /// The action to perform when the back button is pressed.
@@ -50,8 +50,6 @@ class ActiveCallAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("ABCD HASH=" + call.hashCode.toString());
-
     final theme = StreamVideoTheme.of(context);
 
     final leadingWidget = leading ??

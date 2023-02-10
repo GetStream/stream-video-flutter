@@ -5,9 +5,9 @@ import 'simple_floating_view.dart';
 import 'snapping_floating_view.dart';
 
 /// A widget that uses either [SimpleFloatingView] or [SnappingFloatingView]
-/// depending on the [isSnappingBehaviorEnabled].
+/// depending on the [enableSnappingBehavior].
 class FloatingViewContainer extends StatelessWidget {
-  /// Constructor for creating [FloatingViewContainer].
+  /// Creates a new instance of [FloatingViewContainer].
   const FloatingViewContainer({
     super.key,
     required this.child,

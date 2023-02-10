@@ -3,6 +3,7 @@ import 'package:stream_video/stream_video.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../../theme/stream_incoming_outgoing_call_theme.dart';
+import '../../utils/extensions.dart';
 import '../common/call_background.dart';
 import '../common/calling_participants.dart';
 import '../common/participant_avatars.dart';
@@ -10,8 +11,9 @@ import 'outgoing_call_controls.dart';
 
 /// Represents the Outgoing Call state and UI, when the user is calling
 /// other people.
-class OutgoingCall extends StatelessWidget {
-  const OutgoingCall({
+class OutgoingCallContent extends StatelessWidget {
+  /// Creates a new instance of [OutgoingCallContent].
+  const OutgoingCallContent({
     super.key,
     required this.state,
     required this.onCancelPressed,
@@ -20,6 +22,7 @@ class OutgoingCall extends StatelessWidget {
     this.theme,
   });
 
+  /// Holds information about the call.
   final CallStateV2 state;
 
   /// The action to perform when the hang up button is tapped.
@@ -38,19 +41,11 @@ class OutgoingCall extends StatelessWidget {
   Widget build(BuildContext context) {
     final streamChatTheme = StreamVideoTheme.of(context);
     final theme = this.theme ?? streamChatTheme.outgoingCallTheme;
-
-    final users = state.callParticipants
-        .where((element) => element.userId != state.currentUserId)
-        .map((e) => UserInfo(
-              id: e.userId,
-              role: e.role,
-              name: e.userId,
-              imageUrl: e.profileImageURL,
-            ))
-        .toList();
+    final participants =
+        state.otherParticipants.map((e) => e.toUserInfo()).toList();
 
     return CallBackground(
-      participants: users,
+      participants: participants,
       child: Material(
         color: Colors.transparent,
         child: Column(
@@ -58,7 +53,7 @@ class OutgoingCall extends StatelessWidget {
           children: [
             const Spacer(),
             ParticipantAvatars(
-              participants: users,
+              participants: participants,
               singleParticipantAvatarTheme: theme.singleParticipantAvatarTheme,
               multipleParticipantAvatarTheme:
                   theme.multipleParticipantAvatarTheme,
@@ -66,7 +61,7 @@ class OutgoingCall extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
               child: CallingParticipants(
-                participants: users,
+                participants: participants,
                 singleParticipantTextStyle: theme.singleParticipantTextStyle,
                 multipleParticipantTextStyle:
                     theme.multipleParticipantTextStyle,

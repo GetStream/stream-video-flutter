@@ -3,28 +3,22 @@ import 'package:flutter/material.dart';
 import '../../stream_video_flutter.dart';
 import 'invite_user_list_controller.dart';
 
-/// {@template invitableUserViewBuilder}
 /// Builder function used to build an invitable user view.
-/// {@endtemplate}
 typedef InvitableUserViewBuilder = Widget Function(
   BuildContext context,
   StreamInviteUserListController controller,
   int index,
 );
 
-/// {@template separatorWidgetBuilder}
 /// Builder function used to build a separator widget.
-/// {@endtemplate}
 typedef SeparatorWidgetBuilder = Widget Function(
   BuildContext context,
   int index,
 );
 
-/// {@template streamInvitableUserListView}
 /// Displays invitable users.
-/// {@endtemplate}
 class StreamInviteUserListView extends StatefulWidget {
-  /// {@macro streamInvitableUserListView}
+  /// Creates a new instance of [StreamInviteUserListView].
   const StreamInviteUserListView({
     super.key,
     required this.controller,
@@ -70,8 +64,8 @@ class _StreamInviteUserListViewStateV2 extends State<StreamInviteUserListView> {
   @override
   Widget build(BuildContext context) {
     final streamChatTheme = StreamVideoTheme.of(context);
-    final invitableUserListTheme = this.widget.invitableUserListTheme ??
-        streamChatTheme.invitableUserListTheme;
+    final invitableUserListTheme =
+        widget.invitableUserListTheme ?? streamChatTheme.invitableUserListTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -117,11 +111,9 @@ class _StreamInviteUserListViewStateV2 extends State<StreamInviteUserListView> {
   }
 }
 
-/// {@template streamInviteButton}
 /// Displays invite button.
-/// {@endtemplate}
 class InviteButton extends StatelessWidget {
-  /// {@macro streamInviteButton}
+  /// Creates a new instance of [InviteButton].
   const InviteButton({
     super.key,
     required this.controller,
@@ -148,11 +140,9 @@ class InviteButton extends StatelessWidget {
   }
 }
 
-/// {@template streamInvitableUserView}
 /// Displays invitable user.
-/// {@endtemplate}
 class InviteUserItem extends StatelessWidget {
-  /// {@macro streamInvitableUserView}
+  /// Creates a new instance of [InviteUserItem].
   const InviteUserItem({
     super.key,
     required this.user,
@@ -197,7 +187,7 @@ class InviteUserItem extends StatelessWidget {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   user.name,
                   style: invitableUserTheme.usernameTextStyle,

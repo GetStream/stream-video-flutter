@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// A widget that places children in a two dimensional arrangement
 /// and stretches them evenly to occupy full width and full height.
 class TileView extends StatelessWidget {
-  /// Constructor for creating [TileView].
+  /// Creates a new instance of [TileView].
   const TileView({
     super.key,
     required this.columnCount,

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 
-/// Renders avatars of the participants on a call.
+/// Renders avatars of the participants on the outgoing call and incoming
+/// call screens.
 class ParticipantAvatars extends StatelessWidget {
+  /// Creates a new instance of [ParticipantAvatars].
   const ParticipantAvatars({
     super.key,
     required this.participants,
@@ -37,7 +39,7 @@ class ParticipantAvatars extends StatelessWidget {
     ),
   });
 
-  /// The participant to display.
+  /// The list of participants to display.
   final List<UserInfo> participants;
 
   /// Theme for the avatar in a call with one participant.

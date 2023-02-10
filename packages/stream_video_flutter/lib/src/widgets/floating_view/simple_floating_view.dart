@@ -5,7 +5,7 @@ import 'floating_view_alignment.dart';
 
 /// A simple draggable floating view that can be moved to any position.
 class SimpleFloatingView extends StatefulWidget {
-  /// Constructor for creating [SimpleFloatingView].
+  /// Creates a new instance of [SimpleFloatingView].
   const SimpleFloatingView({
     super.key,
     required this.child,
@@ -77,17 +77,18 @@ class _SimpleFloatingViewState extends State<SimpleFloatingView> {
           children: [
             widget.child,
             ValueListenableBuilder(
-                valueListenable: bottomRightOffset,
-                builder: (context, val, child) {
-                  return Positioned(
-                    right: bottomRightOffset.value.dx,
-                    bottom: bottomRightOffset.value.dy,
-                    child: GestureDetector(
-                      onPanUpdate: _onPanUpdate,
-                      child: widget.floatingView,
-                    ),
-                  );
-                }),
+              valueListenable: bottomRightOffset,
+              builder: (context, val, child) {
+                return Positioned(
+                  right: bottomRightOffset.value.dx,
+                  bottom: bottomRightOffset.value.dy,
+                  child: GestureDetector(
+                    onPanUpdate: _onPanUpdate,
+                    child: widget.floatingView,
+                  ),
+                );
+              },
+            ),
           ],
         );
       },

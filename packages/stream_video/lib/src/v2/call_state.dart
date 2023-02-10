@@ -65,6 +65,10 @@ class CallStateV2 extends Equatable {
     return callParticipants.where((element) => element.isLocal)?.firstOrNull;
   }
 
+  List<CallParticipantStateV2> get otherParticipants {
+    return callParticipants.where((element) => !element.isLocal).toList();
+  }
+
   /// Returns a copy of this [CallStateV2] with the given fields replaced
   /// with the new values.
   CallStateV2 copyWith({

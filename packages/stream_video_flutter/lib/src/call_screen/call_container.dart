@@ -3,48 +3,46 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import '../participants_info/call_participants_info_view.dart';
-import 'active_call/active_call.dart';
-import 'incoming_call/incoming_call.dart';
-import 'outgoing_call/outgoing_call.dart';
+import 'call_content/call_content.dart';
+import 'incoming_call/incoming_call_content.dart';
+import 'outgoing_call/outgoing_call_content.dart';
 
-/// {@template callParticipantsBuilder}
 /// Builder used to create a custom participants info screen.
-/// {@endtemplate}
 typedef CallParticipantsInfoWidgetBuilder = Widget Function(
   BuildContext context,
   CallV2 call,
 );
 
-const int _idState = 2;
-int _callSeq = 1;
-
-class StreamCallScreen extends StatefulWidget {
-  const StreamCallScreen({
+/// Represents different call content based on the call state.
+class StreamCallContainer extends StatefulWidget {
+  /// Creates a new instance of [StreamCallContainer].
+  const StreamCallContainer({
     super.key,
     required this.call,
     required this.onBackPressed,
-    required this.onHangUp,
+    required this.onLeaveCall,
     this.participantsInfoWidgetBuilder,
   });
 
+  /// Represents a call.
   final CallV2 call;
+
   final VoidCallback onBackPressed;
-  final VoidCallback onHangUp;
+
+  final VoidCallback onLeaveCall;
   final CallParticipantsInfoWidgetBuilder? participantsInfoWidgetBuilder;
 
   @override
-  State<StreamCallScreen> createState() => _StreamCallScreenState();
+  State<StreamCallContainer> createState() => _StreamCallContainerState();
 }
 
-class _StreamCallScreenState extends State<StreamCallScreen> {
-  final _logger = taggedLogger(tag: 'CallScreen-${_callSeq++}');
-  final subscriptions = Subscriptions();
+class _StreamCallContainerState extends State<StreamCallContainer> {
+  final _subscriptions = Subscriptions();
 
   @override
   void initState() {
     super.initState();
-    _logger.d(() => '[initState] no args');
-    subscriptions.add(_idState, widget.call.state.listen(_setState));
+    _subscriptions.add(0, widget.call.state.listen(_setState));
     _setState(widget.call.state.value);
     _start();
   }
@@ -52,8 +50,7 @@ class _StreamCallScreenState extends State<StreamCallScreen> {
   @override
   void dispose() {
     super.dispose();
-    _logger.d(() => '[dispose] no args');
-    subscriptions.cancelAll();
+    _subscriptions.cancelAll();
   }
 
   Future<void> _setState(CallStateV2 state) async {
@@ -64,13 +61,12 @@ class _StreamCallScreenState extends State<StreamCallScreen> {
   Widget build(BuildContext context) {
     final callState = widget.call.state.value;
     final status = callState.status;
-    _logger.d(() => '[build] status: $status');
     if (status.isDrop) {
       _disconnect();
     }
 
     if (status is CallStatusIncoming && !status.acceptedByMe) {
-      return IncomingCall(
+      return IncomingCallContent(
         state: callState,
         onRejectPressed: _rejectCall,
         onAcceptPressed: _acceptCall,
@@ -79,7 +75,7 @@ class _StreamCallScreenState extends State<StreamCallScreen> {
       );
     }
     if (status is CallStatusOutgoing && !status.acceptedByCallee) {
-      return OutgoingCall(
+      return OutgoingCallContent(
         state: callState,
         onCancelPressed: _cancelCall,
         onMicrophoneTap: () {},
@@ -94,11 +90,11 @@ class _StreamCallScreenState extends State<StreamCallScreen> {
 
       final usersProvider = StreamUsersConfiguration.of(context);
 
-      return StreamActiveCall(
+      return StreamCallContent(
         call: widget.call,
         state: callState,
         onBackPressed: widget.onBackPressed,
-        onHangUp: widget.onHangUp,
+        onLeaveCall: widget.onLeaveCall,
         onParticipantsTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -164,13 +160,11 @@ class _StreamCallScreenState extends State<StreamCallScreen> {
   }
 
   Future<void> _cancelCall() async {
-    _logger.d(() => '[cancelCall] no args');
     await widget.call.apply(const CancelCall());
     await _disconnect();
   }
 
   Future<void> _disconnect() async {
-    _logger.d(() => '[disconnect] no args');
     await widget.call.disconnect();
     widget.onBackPressed();
   }

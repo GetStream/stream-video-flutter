@@ -1,16 +1,12 @@
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
 import '../../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../../stream_video.dart';
-import '../../../internal/events.dart';
-import '../../../logger/stream_logger.dart';
 import '../../action/call_control_action.dart';
-import '../../action/sfu_action.dart';
 import '../../call_state_manager.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
@@ -27,7 +23,6 @@ import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
-import '../../utils/subscriptions.dart';
 import '../../webrtc/media/constraints/camera_position.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';

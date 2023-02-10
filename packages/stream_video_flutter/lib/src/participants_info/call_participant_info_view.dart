@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import '../utils/extensions.dart';
 
-/// {@template streamCallParticipantInfoView}
 /// Displays call participant info view.
-/// {@endtemplate}
 class CallParticipantInfoView extends StatelessWidget {
-  /// {@macro streamCallParticipantInfoView}
+  /// Creates a new instance of [CallParticipantInfoView].
   const CallParticipantInfoView({
     super.key,
     required this.participant,
@@ -39,18 +38,8 @@ class CallParticipantInfoView extends StatelessWidget {
     final avatarTheme =
         participantInfoTheme.avatarTheme ?? streamChatTheme.avatarTheme;
 
-    final user = UserInfo(
-      id: participant.userId,
-      role: participant.role,
-      name: participant.userId,
-      imageUrl: participant.profileImageURL,
-    );
-
-    final trackState = participant.publishedTracks[SfuTrackType.audio];
-    final audioAvailable = trackState != null && !trackState.muted;
-
-    final trackState2 = participant.publishedTracks[SfuTrackType.video];
-    final videoAvailable = trackState2 != null && !trackState2.muted;
+    final isAudioEnabled = participant.isAudioEnabled;
+    final isVideoEnabled = participant.isVideoEnabled;
 
     return InkWell(
       onTap: () {
@@ -61,12 +50,12 @@ class CallParticipantInfoView extends StatelessWidget {
         child: Row(
           children: [
             StreamUserAvatar(
-              user: user,
+              user: participant.toUserInfo(),
               avatarTheme: avatarTheme,
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   participant.name,
                   style: participantInfoTheme.usernameTextStyle,
@@ -75,14 +64,14 @@ class CallParticipantInfoView extends StatelessWidget {
               ),
             ),
             _MediaIcon(
-              icon: videoAvailable ? videoIcon.active : videoIcon.inactive,
-              color: videoAvailable
+              icon: isVideoEnabled ? videoIcon.active : videoIcon.inactive,
+              color: isVideoEnabled
                   ? participantInfoTheme.iconActiveColor
                   : participantInfoTheme.iconInactiveColor,
             ),
             _MediaIcon(
-              icon: audioAvailable ? audioIcon.active : audioIcon.inactive,
-              color: audioAvailable
+              icon: isAudioEnabled ? audioIcon.active : audioIcon.inactive,
+              color: isAudioEnabled
                   ? participantInfoTheme.iconActiveColor
                   : participantInfoTheme.iconInactiveColor,
             ),

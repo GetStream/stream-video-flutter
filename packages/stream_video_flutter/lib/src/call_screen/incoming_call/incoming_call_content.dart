@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../../theme/stream_incoming_outgoing_call_theme.dart';
@@ -10,8 +9,8 @@ import 'incoming_call_controls.dart';
 
 /// Represents the Incoming Call state and UI, when the user is called by
 /// other people.
-class IncomingCall extends StatelessWidget {
-  const IncomingCall({
+class IncomingCallContent extends StatelessWidget {
+  const IncomingCallContent({
     super.key,
     required this.state,
     required this.onRejectPressed,
@@ -21,6 +20,7 @@ class IncomingCall extends StatelessWidget {
     this.theme,
   });
 
+  /// Holds information about the call.
   final CallStateV2 state;
 
   /// The action to perform when the accept call button is tapped.

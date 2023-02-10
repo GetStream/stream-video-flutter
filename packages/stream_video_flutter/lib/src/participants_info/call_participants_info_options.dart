@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
-/// {@template streamCallParticipantsInfoView}
 /// Displays call participants info.
-/// {@endtemplate}
 class CallParticipantsInfoOptions extends StatelessWidget {
-  /// {@macro CallParticipantsInfoOptionsV2}
+  /// Creates a new instance of [CallParticipantsInfoOptions].
   const CallParticipantsInfoOptions({
     super.key,
     required this.call,
@@ -16,8 +14,11 @@ class CallParticipantsInfoOptions extends StatelessWidget {
     this.onInviteButtonPress,
   });
 
-  /// Reference to [Call].
+  /// Represents a call.
   final CallV2 call;
+
+  /// The current local participant.
+  final CallParticipantStateV2 localParticipant;
 
   /// Invite button title.
   final String inviteButtonTitle;
@@ -28,8 +29,6 @@ class CallParticipantsInfoOptions extends StatelessWidget {
   /// The action to perform when the Invite button is pressed.
   final VoidCallback? onInviteButtonPress;
 
-  final CallParticipantStateV2 localParticipant;
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -38,8 +37,9 @@ class CallParticipantsInfoOptions extends StatelessWidget {
         alignment: MainAxisAlignment.center,
         children: [
           _InviteButton(
-              title: inviteButtonTitle,
-              onInviteButtonPress: onInviteButtonPress),
+            title: inviteButtonTitle,
+            onInviteButtonPress: onInviteButtonPress,
+          ),
           _MuteToggle(
             titles: muteToggleTitles,
             call: call,
@@ -69,7 +69,7 @@ class _InviteButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         elevation: 3,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(32.0),
+          borderRadius: BorderRadius.circular(32),
         ),
         minimumSize: const Size(144, 48),
       ),
@@ -110,11 +110,10 @@ class _MuteToggleState extends State<_MuteToggle> {
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(
-            32.0,
+            32,
           ),
         ),
         side: BorderSide(
-          width: 1,
           color: streamChatTheme.colorTheme.overlay,
         ),
         minimumSize: const Size(144, 48),
