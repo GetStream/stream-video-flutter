@@ -18,6 +18,7 @@ class StreamCallContainer extends StatefulWidget {
     required this.onBackPressed,
     required this.onLeaveCall,
     this.participantsInfoWidgetBuilder,
+    this.callControlsBuilder,
   });
 
   /// Represents a call.
@@ -32,6 +33,9 @@ class StreamCallContainer extends StatefulWidget {
   /// Builder used to create a custom participants info screen.
   final CallParticipantsInfoWidgetBuilder? participantsInfoWidgetBuilder;
 
+  /// Builder used to create a custom call controls panel.
+  final CallControlsWidgetBuilder? callControlsBuilder;
+
   @override
   State<StreamCallContainer> createState() => _StreamCallContainerState();
 }
@@ -39,11 +43,17 @@ class StreamCallContainer extends StatefulWidget {
 class _StreamCallContainerState extends State<StreamCallContainer> {
   final _subscriptions = Subscriptions();
 
+  /// Represents a call.
+  CallV2 get call => widget.call;
+
+  /// Holds information about the call.
+  late CallStateV2 _callState;
+
   @override
   void initState() {
     super.initState();
-    _subscriptions.add(0, widget.call.state.listen(_setState));
-    _setState(widget.call.state.value);
+    _subscriptions.add(0, call.state.listen(_setState));
+    _callState = call.state.value;
     _start();
   }
 
@@ -53,44 +63,44 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     _subscriptions.cancelAll();
   }
 
-  Future<void> _setState(CallStateV2 state) async {
-    setState(() {});
+  Future<void> _setState(CallStateV2 callState) async {
+    setState(() {
+      _callState = callState;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final callState = widget.call.state.value;
-    final status = callState.status;
-    if (status.isDrop) {
-      _disconnect();
-    }
+    final status = _callState.status;
+
+    if (status.isDrop) _disconnect();
 
     if (status is CallStatusIncoming && !status.acceptedByMe) {
       return IncomingCallContent(
-        state: callState,
-        onRejectPressed: _rejectCall,
-        onAcceptPressed: _acceptCall,
+        call: call,
+        callState: _callState,
+        onRejectPressed: _onRejectCall,
+        onAcceptPressed: _onAcceptCall,
         onMicrophoneTap: () {},
         onCameraTap: () {},
       );
-    }
-    if (status is CallStatusOutgoing && !status.acceptedByCallee) {
+    } else if (status is CallStatusOutgoing && !status.acceptedByCallee) {
       return OutgoingCallContent(
-        state: callState,
-        onCancelPressed: _cancelCall,
+        call: call,
+        callState: _callState,
+        onCancelPressed: _onCancelCall,
         onMicrophoneTap: () {},
         onCameraTap: () {},
       );
-    }
-
-    if (status.isConnected) {
+    } else {
       final usersProvider = StreamUsersConfiguration.of(context);
 
       return StreamCallContent(
-        call: widget.call,
-        state: callState,
+        call: call,
+        callState: _callState,
         onBackPressed: widget.onBackPressed,
         onLeaveCall: widget.onLeaveCall,
+        callControlsBuilder: widget.callControlsBuilder,
         onParticipantsTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -106,57 +116,38 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
         },
       );
     }
-
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 4,
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: _cancelCall,
-          ),
-        ],
-        title: Text('CallId: ${callState.callCid}'),
-      ),
-      body: Center(
-        child: Text(
-          'Status: ${status.runtimeType}',
-        ),
-      ),
-    );
   }
 
   Future<void> _start() async {
     try {
-      if (widget.call.state.value.status.isIdle) {
-        final result = await widget.call.getOrCreate();
+      if (call.state.value.status.isIdle) {
+        final result = await call.getOrCreate();
         if (result.isFailure) {
-          await _cancelCall();
+          await _onCancelCall();
           return;
         }
       }
-      final result = await widget.call.connect();
+      final result = await call.connect();
       if (result.isFailure) {
-        await _cancelCall();
+        await _onCancelCall();
       }
     } catch (e) {
-      await _cancelCall();
+      await _onCancelCall();
     }
   }
 
-  Future<void> _rejectCall() async {
-    await widget.call.apply(const RejectCall());
-    await widget.call.disconnect();
+  Future<void> _onRejectCall() async {
+    await call.apply(const RejectCall());
+    await call.disconnect();
     widget.onBackPressed();
   }
 
-  Future<void> _acceptCall() async {
-    await widget.call.apply(const AcceptCall());
+  Future<void> _onAcceptCall() async {
+    await call.apply(const AcceptCall());
   }
 
-  Future<void> _cancelCall() async {
-    await widget.call.apply(const CancelCall());
+  Future<void> _onCancelCall() async {
+    await call.apply(const CancelCall());
     await _disconnect();
   }
 

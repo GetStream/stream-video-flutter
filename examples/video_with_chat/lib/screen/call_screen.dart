@@ -11,7 +11,7 @@ class CallScreen extends StatefulWidget {
     required this.channel,
   }) : super(key: key);
 
-  final Call call;
+  final CallV2 call;
   final Channel channel;
 
   @override
@@ -27,16 +27,16 @@ class _CallScreenState extends State<CallScreen> {
       children: [
         Expanded(
           flex: 2,
-          child: StreamCallContent(
+          child: StreamCallContainer(
             call: widget.call,
             onBackPressed: () => _finishCall(context),
-            onHangUp: () => _finishCall(context),
+            onLeaveCall: () => _finishCall(context),
             callControlsBuilder: (context, call, participants) {
               return StreamCallControls(
                 options: customCallControlOptions(
                   call: call,
                   channel: widget.channel,
-                  onHangup: () => _finishCall(context),
+                  onLeaveCall: () => _finishCall(context),
                   onChatTap: () {
                     if (kIsWeb) {
                       toggleChatPane();
@@ -86,23 +86,23 @@ class _CallScreenState extends State<CallScreen> {
 }
 
 List<Widget> customCallControlOptions({
-  required Call call,
+  required CallV2 call,
   required Channel channel,
-  required VoidCallback onHangup,
+  required VoidCallback onLeaveCall,
   required VoidCallback onChatTap,
 }) {
-  final participant = call.localParticipant;
-  assert(participant != null, 'The local participant is null.');
+  final localParticipant = call.state.value.localParticipant;
+  assert(localParticipant != null, 'The local participant is null.');
 
   final cid = channel.cid;
   assert(cid != null, 'The channel cid is null.');
 
   return [
     ToggleChat(cid: cid, onChatTap: onChatTap),
-    ToggleMic(participant: participant!),
-    ToggleCamera(participant: participant),
-    SwitchCamera(participant: participant),
-    CallHangup(onHangup: onHangup),
+    ToggleMicrophoneOption(call: call, localParticipant: localParticipant!),
+    ToggleCameraOption(call: call, localParticipant: localParticipant),
+    FlipCameraOption(call: call, localParticipant: localParticipant),
+    LeaveCallOption(onLeaveCall: onLeaveCall),
   ];
 }
 

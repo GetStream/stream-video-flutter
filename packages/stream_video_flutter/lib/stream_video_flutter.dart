@@ -2,7 +2,14 @@ library stream_video_flutter;
 
 export 'package:stream_video/stream_video.dart';
 
+export 'src/call_controls/call_control_option.dart';
 export 'src/call_controls/call_controls.dart';
+export 'src/call_controls/controls/default_control_options.dart';
+export 'src/call_controls/controls/flip_camera_option.dart';
+export 'src/call_controls/controls/leave_call_option.dart';
+export 'src/call_controls/controls/toggle_camera_option.dart';
+export 'src/call_controls/controls/toggle_microphone_option.dart';
+export 'src/call_controls/controls/toggle_speakerphone_option.dart';
 export 'src/call_participants/call_participant.dart';
 export 'src/call_participants/call_participants.dart';
 export 'src/call_participants/floating_call_participant.dart';

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:video_with_chat/app_config.dart';
-import 'package:video_with_chat/screen/choose_user_screen.dart';
+import 'package:video_with_chat/screen/login_screen.dart';
 
 Future<void> main() async {
   /// Initialize Stream Video SDK.
-  StreamVideo.init(
+  StreamVideoV2.init(
     videoApiKey,
     logLevel: Level.INFO,
   );
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
           child: widget,
         );
       },
-      home: ChooseUserScreen(),
+      home: LoginScreen(),
     );
   }
 }

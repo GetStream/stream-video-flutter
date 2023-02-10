@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../stream_video_flutter.dart';
 import '../../participants_info/call_participants_info_view.dart';
 import '../../utils/device_segmentation.dart';
-import 'call_app_bar.dart';
 
 /// Builder used to create a custom call app bar.
 typedef CallAppBarWidgetBuilder = PreferredSizeWidget Function(
@@ -32,12 +31,13 @@ class StreamCallContent extends StatefulWidget {
   const StreamCallContent({
     super.key,
     required this.call,
-    required this.state,
+    required this.callState,
     this.callAppBarBuilder,
     this.callParticipantsBuilder,
     this.callControlsBuilder,
     this.participantsInfoWidgetBuilder,
     this.onBackPressed,
+    this.onCancelPressed,
     this.onLeaveCall,
     this.onParticipantsTap,
     this.enableFloatingView,
@@ -47,7 +47,7 @@ class StreamCallContent extends StatefulWidget {
   final CallV2 call;
 
   /// Holds information about the call.
-  final CallStateV2 state;
+  final CallStateV2 callState;
 
   /// Builder used to create a custom call app bar.
   final CallAppBarWidgetBuilder? callAppBarBuilder;
@@ -63,6 +63,9 @@ class StreamCallContent extends StatefulWidget {
 
   /// The action to perform when the back button is pressed.
   final VoidCallback? onBackPressed;
+
+  /// The action to perform when the cancel button is tapped.
+  final VoidCallback? onCancelPressed;
 
   /// The action to perform when the leave call button is pressed.
   final VoidCallback? onLeaveCall;
@@ -81,6 +84,9 @@ class _StreamCallContentState extends State<StreamCallContent> {
   /// Represents a call.
   CallV2 get call => widget.call;
 
+  /// Holds information about the call.
+  CallStateV2 get callState => widget.callState;
+
   @override
   Future<void> dispose() async {
     await widget.call.disconnect();
@@ -89,46 +95,66 @@ class _StreamCallContentState extends State<StreamCallContent> {
 
   @override
   Widget build(BuildContext context) {
-    final participants = widget.state.callParticipants;
-    final localParticipant = widget.state.localParticipant;
     final usersProvider = StreamUsersConfiguration.of(context);
+    final participants = callState.callParticipants;
+    final localParticipant = callState.localParticipant;
 
-    return Scaffold(
-      appBar: widget.callAppBarBuilder?.call(context, call) ??
-          CallAppBar(
-            call: call,
-            onBackPressed: widget.onBackPressed,
-            onParticipantsTap: widget.onParticipantsTap ??
-                () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          widget.participantsInfoWidgetBuilder
-                              ?.call(context, call) ??
-                          StreamCallParticipantsInfoView(
-                            call: call,
-                            usersProvider: usersProvider,
-                          ),
-                    ),
-                  );
-                },
-          ),
-      body: widget.callParticipantsBuilder?.call(context, participants) ??
-          StreamCallParticipants(
-            call: call,
-            participants: participants,
-            enableFloatingView: widget.enableFloatingView ?? !isDesktopDevice,
-          ),
-      bottomNavigationBar:
-          widget.callControlsBuilder?.call(context, call, participants) ??
-              StreamCallControls.withDefaultOptions(
-                call: widget.call,
-                localParticipant: localParticipant!,
-                onLeaveCall: () async {
-                  await widget.call.disconnect();
-                  widget.onLeaveCall?.call();
-                },
-              ),
-    );
+    if (callState.status.isConnected) {
+      return Scaffold(
+        appBar: widget.callAppBarBuilder?.call(context, call) ??
+            CallAppBar(
+              call: call,
+              onBackPressed: widget.onBackPressed,
+              onParticipantsTap: widget.onParticipantsTap ??
+                  () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            widget.participantsInfoWidgetBuilder
+                                ?.call(context, call) ??
+                            StreamCallParticipantsInfoView(
+                              call: call,
+                              usersProvider: usersProvider,
+                            ),
+                      ),
+                    );
+                  },
+            ),
+        body: widget.callParticipantsBuilder?.call(context, participants) ??
+            StreamCallParticipants(
+              call: call,
+              participants: participants,
+              enableFloatingView: widget.enableFloatingView ?? !isDesktopDevice,
+            ),
+        bottomNavigationBar:
+            widget.callControlsBuilder?.call(context, call, participants) ??
+                StreamCallControls.withDefaultOptions(
+                  call: widget.call,
+                  localParticipant: localParticipant!,
+                  onLeaveCall: () async {
+                    await widget.call.disconnect();
+                    widget.onLeaveCall?.call();
+                  },
+                ),
+      );
+    } else {
+      // TODO: Improve the design
+      return Scaffold(
+        appBar: AppBar(
+          elevation: 4,
+          centerTitle: false,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: widget.onCancelPressed,
+            ),
+          ],
+          title: Text('CallId: ${callState.callCid.value}'),
+        ),
+        body: Center(
+          child: Text('Status: ${callState.status.runtimeType}'),
+        ),
+      );
+    }
   }
 }

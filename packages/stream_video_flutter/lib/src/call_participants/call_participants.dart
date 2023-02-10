@@ -164,10 +164,10 @@ class _RegularCallParticipantsContentState
     final participantWidgets = <Widget>[];
     for (var i = 0; i < participantsToDisplay.length; i++) {
       final participantWidget =
-          widget.itemBuilder?.call(context, i, participants[i]) ??
+          widget.itemBuilder?.call(context, i, participantsToDisplay[i]) ??
               StreamCallParticipant(
                 call: widget.call,
-                participant: participants[i],
+                participant: participantsToDisplay[i],
               );
 
       participantWidgets.add(participantWidget);

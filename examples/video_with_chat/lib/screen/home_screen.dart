@@ -18,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final _textController = TextEditingController();
 
   late StreamChatClient chatClient;
-  final videoClient = StreamVideo.instance;
+  final videoClient = StreamVideoV2.instance;
 
   var _isInProgress = false;
 
@@ -77,9 +77,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   final callId = _textController.text;
-                  _joinOrCreateCall(callId);
+                  await _joinOrCreateCall(callId);
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -143,14 +143,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<Call> _initVideoCall({required String callId}) async {
-    final call = await videoClient.joinCall(
-      id: callId,
-      type: 'default',
-    );
-
-    await call.connect();
-    return call;
+  Future<CallV2> _initVideoCall({required String callId}) async {
+    final callCid = StreamCallCid.from(type: "default", id: callId);
+    final data = await videoClient.getOrCreateCall(cid: callCid);
+    return CallV2.fromCreated(data: data.getOrNull()!.data);
   }
 
   Future<Channel> _initChatChannel({required String channelId}) async {

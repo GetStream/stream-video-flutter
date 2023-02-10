@@ -13,7 +13,8 @@ import 'incoming_call_controls.dart';
 class IncomingCallContent extends StatelessWidget {
   const IncomingCallContent({
     super.key,
-    required this.state,
+    required this.call,
+    required this.callState,
     required this.onRejectPressed,
     required this.onAcceptPressed,
     required this.onMicrophoneTap,
@@ -21,8 +22,11 @@ class IncomingCallContent extends StatelessWidget {
     this.theme,
   });
 
+  /// Represents a call.
+  final CallV2 call;
+
   /// Holds information about the call.
-  final CallStateV2 state;
+  final CallStateV2 callState;
 
   /// The action to perform when the accept call button is tapped.
   final VoidCallback onAcceptPressed;
@@ -44,7 +48,8 @@ class IncomingCallContent extends StatelessWidget {
     final streamChatTheme = StreamVideoTheme.of(context);
     final theme = this.theme ?? streamChatTheme.incomingCallTheme;
 
-    final users = state.otherParticipants.map((e) => e.toUserInfo()).toList();
+    final users =
+        callState.otherParticipants.map((e) => e.toUserInfo()).toList();
 
     return CallBackground(
       participants: users,

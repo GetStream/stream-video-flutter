@@ -15,15 +15,19 @@ class OutgoingCallContent extends StatelessWidget {
   /// Creates a new instance of [OutgoingCallContent].
   const OutgoingCallContent({
     super.key,
-    required this.state,
+    required this.call,
+    required this.callState,
     required this.onCancelPressed,
     required this.onMicrophoneTap,
     required this.onCameraTap,
     this.theme,
   });
 
+  /// Represents a call.
+  final CallV2 call;
+
   /// Holds information about the call.
-  final CallStateV2 state;
+  final CallStateV2 callState;
 
   /// The action to perform when the hang up button is tapped.
   final VoidCallback onCancelPressed;
@@ -42,7 +46,7 @@ class OutgoingCallContent extends StatelessWidget {
     final streamChatTheme = StreamVideoTheme.of(context);
     final theme = this.theme ?? streamChatTheme.outgoingCallTheme;
     final participants =
-        state.otherParticipants.map((e) => e.toUserInfo()).toList();
+        callState.otherParticipants.map((e) => e.toUserInfo()).toList();
 
     return CallBackground(
       participants: participants,
