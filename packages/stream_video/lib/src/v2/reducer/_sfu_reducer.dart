@@ -182,6 +182,7 @@ class SfuReducer {
         if (levelInfo != null) {
           return participant.copyWith(
             audioLevel: levelInfo.level,
+            isSpeaking: levelInfo.isSpeaking,
           );
         } else {
           return participant;
