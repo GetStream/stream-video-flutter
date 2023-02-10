@@ -62,7 +62,7 @@ class CallStateV2 extends Equatable {
   final List<CallParticipantStateV2> callParticipants;
 
   CallParticipantStateV2? get localParticipant {
-    return callParticipants.where((element) => element.isLocal)?.firstOrNull;
+    return callParticipants.firstWhereOrNull((element) => element.isLocal);
   }
 
   List<CallParticipantStateV2> get otherParticipants {

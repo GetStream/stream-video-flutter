@@ -5,7 +5,6 @@ import 'package:logging/logging.dart';
 
 import '../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
     as rpc;
-import '../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../logger/logger.dart';
 import '../models/user_info.dart';
@@ -429,15 +428,16 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     );
   }
 
+  @override
   Future<void> inviteUsers({
     required String callCid,
     required List<UserInfo> users,
   }) async {
     await _client.inviteUsers(
-      UpsertCallMembersRequest(
+      rpc.UpsertCallMembersRequest(
         callCid: callCid,
         members: users.map((user) {
-          return MemberInput(userId: user.id, role: user.role);
+          return rpc.MemberInput(userId: user.id, role: user.role);
         }),
       ),
     );
