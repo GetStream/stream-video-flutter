@@ -112,6 +112,10 @@ class CallParticipantStateV2 with EquatableMixin {
     return publishedTracks[SfuTrackType.audio];
   }
 
+  TrackState? get screenShareTrack {
+    return publishedTracks[SfuTrackType.screenShare];
+  }
+
   bool get isAudioEnabled {
     return !(audioTrack?.muted ?? true);
   }

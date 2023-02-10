@@ -1,15 +1,13 @@
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/src/call_participants/screen_share_item.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/device_segmentation.dart';
 import '../widgets/floating_view/floating_view_alignment.dart';
 import '../widgets/tile_view.dart';
-import 'call_participant.dart';
+import 'screen_share_item.dart';
 
 /// The maximum number of participants displayed in a grid on mobile.
 const maxParticipantCountMobile = 4;
@@ -17,18 +15,14 @@ const maxParticipantCountMobile = 4;
 /// The maximum number of participants displayed in a grid on web.
 const maxParticipantCountWeb = 24;
 
-/// {@template callParticipantWidgetBuilder}
 /// Builder function used to build a participant grid item.
-/// {@endtemplate}
 typedef CallParticipantWidgetBuilder = Widget Function(
   BuildContext context,
   int index,
   CallParticipantStateV2 participant,
 );
 
-/// {@template screenShareItemBuilder}
 /// Builder function used to build a screen sharing item.
-/// {@endtemplate}
 typedef ScreenShareItemBuilder = Widget Function(
   BuildContext context,
   CallParticipantStateV2 participant,
@@ -37,6 +31,7 @@ typedef ScreenShareItemBuilder = Widget Function(
 /// Widget that renders all the [StreamCallParticipant], based on the number
 /// of people in a call.
 class StreamCallParticipants extends StatelessWidget {
+  /// Creates a new instance of [StreamCallParticipant].
   const StreamCallParticipants({
     required this.call,
     required this.participants,
@@ -48,18 +43,19 @@ class StreamCallParticipants extends StatelessWidget {
     super.key,
   });
 
+  /// Represents a call.
   final CallV2 call;
 
   /// The list of participants to display.
   final List<CallParticipantStateV2> participants;
 
-  /// {@macro screenShareItemBuilder}
+  /// Builder function used to build a screen sharing item.
   final ScreenShareItemBuilder? screenShareItemBuilder;
 
-  /// {@macro callParticipantWidgetBuilder}
+  /// Builder function used to build a participant grid item.
   final CallParticipantWidgetBuilder? itemBuilder;
 
-  /// Enable picture-in-picture for current participant
+  /// Enable picture-in-picture for the current participant.
   final bool enableFloatingView;
 
   /// If the floating view should be automatically anchored to one of the
@@ -71,32 +67,35 @@ class StreamCallParticipants extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenSharingParticipant = participants.firstWhereOrNull(
-      (p) => p.publishedTracks.containsKey(SfuTrackType.screenShare),
+    final screenShareParticipant = participants.firstWhereOrNull(
+      (element) => element.screenShareTrack != null,
     );
 
-    if (screenSharingParticipant != null) {
-      return ScreenSharingCallParticipantsContent(
+    if (screenShareParticipant != null) {
+      return ScreenShareCallParticipantsContent(
         call: call,
         participants: participants,
-        screenSharingParticipant: screenSharingParticipant,
+        screenSharingParticipant: screenShareParticipant,
         screenShareItemBuilder: screenShareItemBuilder,
         itemBuilder: itemBuilder,
       );
+    } else {
+      return RegularCallParticipantsContent(
+        call: call,
+        participants: participants,
+        itemBuilder: itemBuilder,
+        enableFloatingView: enableFloatingView,
+        floatingParticipantTheme: floatingParticipantTheme,
+        enableSnappingBehavior: enableSnappingBehavior,
+      );
     }
-
-    return RegularCallParticipantsContent(
-      call: call,
-      participants: participants,
-      itemBuilder: itemBuilder,
-      enableFloatingView: enableFloatingView,
-      floatingParticipantTheme: floatingParticipantTheme,
-      enableSnappingBehavior: enableSnappingBehavior,
-    );
   }
 }
 
+/// A widget that represents the main area of the call when nobody is
+/// sharing their screen.
 class RegularCallParticipantsContent extends StatefulWidget {
+  /// Creates a new instance of [RegularCallParticipantsContent].
   const RegularCallParticipantsContent({
     super.key,
     required this.call,
@@ -107,15 +106,16 @@ class RegularCallParticipantsContent extends StatefulWidget {
     this.floatingParticipantTheme,
   });
 
+  /// Represents a call.
   final CallV2 call;
 
   /// The list of participants to display.
   final List<CallParticipantStateV2> participants;
 
-  /// {@macro callParticipantWidgetBuilder}
+  /// Builder function used to build a participant grid item.
   final CallParticipantWidgetBuilder? itemBuilder;
 
-  /// Enable picture-in-picture for current participant
+  /// Enable picture-in-picture for current participant.
   final bool enableFloatingView;
 
   /// If the floating view should be automatically anchored to one of the
@@ -167,7 +167,9 @@ class _RegularCallParticipantsContentState
       final participantWidget =
           widget.itemBuilder?.call(context, i, participants[i]) ??
               StreamCallParticipant(
-                  call: widget.call, participant: participants[i]);
+                call: widget.call,
+                participant: participants[i],
+              );
 
       participantWidgets.add(participantWidget);
     }
@@ -200,22 +202,13 @@ class _RegularCallParticipantsContentState
       child: participantGrid,
     );
   }
-
-  // int _participantComparator(CallParticipantStateV2 a, CallParticipantStateV2 b) {
-  //   final aLastSpokeAt = a.lastSpokeAt?.millisecondsSinceEpoch ?? 0;
-  //   final bLastSpokeAt = b.lastSpokeAt?.millisecondsSinceEpoch ?? 0;
-  //
-  //   if (aLastSpokeAt != bLastSpokeAt) {
-  //     return aLastSpokeAt > bLastSpokeAt ? -1 : 1;
-  //   }
-  //
-  //   return a.joinedAt.millisecondsSinceEpoch -
-  //       b.joinedAt.millisecondsSinceEpoch;
-  // }
 }
 
-class ScreenSharingCallParticipantsContent extends StatelessWidget {
-  const ScreenSharingCallParticipantsContent({
+/// A widget that represents the main area of the call when somebody is
+/// sharing their screen.
+class ScreenShareCallParticipantsContent extends StatelessWidget {
+  /// Creates a new instance of [ScreenShareCallParticipantsContent].
+  const ScreenShareCallParticipantsContent({
     super.key,
     required this.call,
     required this.screenSharingParticipant,
@@ -224,13 +217,16 @@ class ScreenSharingCallParticipantsContent extends StatelessWidget {
     this.itemBuilder,
   });
 
+  /// Represents a call.
   final CallV2 call;
 
+  /// The participant that shares their screen.
   final CallParticipantStateV2 screenSharingParticipant;
 
   /// The list of participants to display.
   final List<CallParticipantStateV2> participants;
 
+  /// Builder function used to build a screen sharing item.
   final ScreenShareItemBuilder? screenShareItemBuilder;
 
   /// {@macro callParticipantWidgetBuilder}
@@ -293,9 +289,9 @@ class ScreenSharingCallParticipantsContent extends StatelessWidget {
   }
 }
 
-/// Represents the arrangement of participants on desktop.
+/// Represents the arrangement of participants on desktop devices.
 class DesktopParticipantGrid extends StatelessWidget {
-  /// Constructor for creating [DesktopParticipantGrid].
+  /// Creates a new instance of [DesktopParticipantGrid].
   const DesktopParticipantGrid({
     super.key,
     required this.participants,
@@ -326,7 +322,7 @@ class DesktopParticipantGrid extends StatelessWidget {
 
 /// Represents the arrangement of participants on phones.
 class MobileParticipantGrid extends StatelessWidget {
-  /// Constructor for creating [MobileParticipantGrid].
+  /// Creates a new instance of [MobileParticipantGrid].
   const MobileParticipantGrid({
     super.key,
     required this.participants,

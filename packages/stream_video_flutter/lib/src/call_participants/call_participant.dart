@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_video_flutter/src/call_participants/participant_label.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/device_segmentation.dart';
 import 'indicators/connection_quality_indicator.dart';
+import 'participant_label.dart';
 
+/// A widget that represents a single participant in a call.
 class StreamCallParticipant extends StatelessWidget {
+  /// Creates a new instance of [StreamCallParticipant].
   const StreamCallParticipant({
     super.key,
     required this.call,
@@ -14,26 +16,17 @@ class StreamCallParticipant extends StatelessWidget {
     this.theme,
   });
 
+  /// Represents a call.
   final CallV2 call;
 
   /// The participant to display.
-  final CallParticipantStateV2? participant;
+  final CallParticipantStateV2 participant;
 
-  /// Theme for the call participant.
+  /// Theme for the participant.
   final StreamCallParticipantTheme? theme;
 
   @override
   Widget build(BuildContext context) {
-    final participant = this.participant;
-    print('(D/SV:ParticipantView) [build] participant: $participant');
-
-    if (participant == null) {
-      return Container(
-        alignment: Alignment.center,
-        child: const Text('Mock Participant'),
-      );
-    }
-
     final streamVideoTheme = StreamVideoTheme.of(context);
     final theme = this.theme ?? streamVideoTheme.callParticipantTheme;
 
@@ -54,7 +47,6 @@ class StreamCallParticipant extends StatelessWidget {
         decoration: BoxDecoration(color: theme.backgroundColor),
         child: Stack(
           children: [
-            // TODO: videoFit: VideoFit.cover
             VideoTrackRenderer(
               call: call,
               participant: participant,
@@ -79,7 +71,7 @@ class StreamCallParticipant extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8),
                     child: StreamParticipantLabel(
                       participant: participant,
                       audioLevelIndicatorColor: theme.audioLevelIndicatorColor,
@@ -95,7 +87,7 @@ class StreamCallParticipant extends StatelessWidget {
             Align(
               alignment: theme.connectionLevelAlignment,
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8),
                 child: StreamConnectionQualityIndicator(
                   connectionQuality: participant.connectionQuality,
                   activeColor: theme.connectionLevelActiveColor,

@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'call_participant.dart';
 
-/// PIP participant floating on top of the participants grid.
+/// Floating participant on top of the participants grid.
 class StreamFloatingCallParticipant extends StatelessWidget {
+  /// Creates a new instance of [StreamFloatingCallParticipant].
   const StreamFloatingCallParticipant({
     super.key,
     required this.call,
@@ -14,6 +14,7 @@ class StreamFloatingCallParticipant extends StatelessWidget {
     this.theme,
   });
 
+  /// Represents a call.
   final CallV2 call;
 
   /// The participant to display.

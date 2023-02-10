@@ -6,17 +6,18 @@ import 'audio_level_indicator.dart';
 /// Widget used to indicate the audio state of a given participant.
 /// Either shows a mute icon or audio levels.
 class StreamAudioIndicator extends StatelessWidget {
+  /// Creates a new instance of [StreamAudioIndicator].
   const StreamAudioIndicator({
     super.key,
-    required this.hasAudio,
+    required this.isAudioEnabled,
     required this.isSpeaking,
     this.audioLevelIndicatorColor,
     this.enabledMicrophoneColor,
     this.disabledMicrophoneColor,
   });
 
-  /// If the participant has audio active.
-  final bool hasAudio;
+  /// If the participant has microphone enabled.
+  final bool isAudioEnabled;
 
   /// If the participant is speaking.
   final bool isSpeaking;
@@ -34,16 +35,16 @@ class StreamAudioIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context).callParticipantTheme;
 
-    if (hasAudio && isSpeaking) {
+    if (isAudioEnabled && isSpeaking) {
       return StreamAudioLevelIndicator(
         color: audioLevelIndicatorColor,
       );
-    } else if (hasAudio && !isSpeaking) {
+    } else if (isAudioEnabled && !isSpeaking) {
       return Padding(
         padding: const EdgeInsets.all(4),
         child: Icon(
           Icons.mic,
-          size: 16.0,
+          size: 16,
           color: enabledMicrophoneColor ?? theme.enabledMicrophoneColor,
         ),
       );
@@ -52,7 +53,7 @@ class StreamAudioIndicator extends StatelessWidget {
         padding: const EdgeInsets.all(4),
         child: Icon(
           Icons.mic_off,
-          size: 16.0,
+          size: 16,
           color: disabledMicrophoneColor ?? theme.disabledMicrophoneColor,
         ),
       );

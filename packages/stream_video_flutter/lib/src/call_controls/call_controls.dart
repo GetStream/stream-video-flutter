@@ -70,15 +70,15 @@ class StreamCallControls extends StatefulWidget {
 class _StreamCallControlsState extends State<StreamCallControls> {
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context);
-    final barTheme = theme.callControlsBarTheme;
+    final streamVideoTheme = StreamVideoTheme.of(context);
+    final theme = streamVideoTheme.callControlsBarTheme;
 
     Widget callControlOptions = SafeArea(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: widget.options.insertBetween(
           // Spacing between the buttons.
-          SizedBox(width: widget.spacing ?? barTheme.spacing),
+          SizedBox(width: widget.spacing ?? theme.spacing),
         ),
       ),
     );
@@ -86,20 +86,20 @@ class _StreamCallControlsState extends State<StreamCallControls> {
     if (widget.options.length > 5) {
       callControlOptions = SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        padding: widget.padding ?? barTheme.padding,
+        padding: widget.padding ?? theme.padding,
         child: callControlOptions,
       );
     } else {
       callControlOptions = Padding(
-        padding: widget.padding ?? barTheme.padding,
+        padding: widget.padding ?? theme.padding,
         child: callControlOptions,
       );
     }
 
     return Material(
-      elevation: widget.elevation ?? barTheme.elevation,
-      borderRadius: widget.borderRadius ?? barTheme.borderRadius,
-      color: widget.backgroundColor ?? barTheme.backgroundColor,
+      elevation: widget.elevation ?? theme.elevation,
+      borderRadius: widget.borderRadius ?? theme.borderRadius,
+      color: widget.backgroundColor ?? theme.backgroundColor,
       child: callControlOptions,
     );
   }
