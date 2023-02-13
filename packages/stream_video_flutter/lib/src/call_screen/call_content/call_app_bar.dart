@@ -3,9 +3,9 @@ import 'package:flutter/material.dart' hide ConnectionState;
 import '../../../stream_video_flutter.dart';
 
 /// Widget that represents the default app bar that's shown in calls.
-class ActiveCallAppBar extends StatelessWidget implements PreferredSizeWidget {
-  /// Creates a new instance of [ActiveCallAppBar].
-  const ActiveCallAppBar({
+class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
+  /// Creates a new instance of [CallAppBar].
+  const CallAppBar({
     super.key,
     required this.call,
     this.showBackButton = true,
@@ -19,15 +19,15 @@ class ActiveCallAppBar extends StatelessWidget implements PreferredSizeWidget {
   }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   /// Represents a call.
-  final Call call;
+  final CallV2 call;
 
   /// Whether to show the leading back button.
   final bool showBackButton;
 
-  /// The elevation for this [ActiveCallAppBar].
+  /// The elevation for this [CallAppBar].
   final double elevation;
 
-  /// The background color for this [ActiveCallAppBar].
+  /// The background color for this [CallAppBar].
   final Color? backgroundColor;
 
   /// The action to perform when the back button is pressed.
@@ -51,6 +51,7 @@ class ActiveCallAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
+    final callCid = call.state.value.callCid.value;
 
     final leadingWidget = leading ??
         (showBackButton
@@ -80,32 +81,10 @@ class ActiveCallAppBar extends StatelessWidget implements PreferredSizeWidget {
           ],
       title: title ??
           Text(
-            _buildTitleText(),
+            callCid,
             style: theme.textTheme.title3Bold,
             overflow: TextOverflow.visible,
           ),
     );
-  }
-
-  String _buildTitleText() {
-    final callId = call.callId;
-
-    var connectionState = '';
-    switch (call.connectionState) {
-      case ConnectionState.disconnected:
-        connectionState = 'Disconnected';
-        break;
-      case ConnectionState.connecting:
-        connectionState = 'Connecting';
-        break;
-      case ConnectionState.reconnecting:
-        connectionState = 'reconnecting';
-        break;
-      case ConnectionState.connected:
-        connectionState = 'Connected';
-        break;
-    }
-
-    return callId.isEmpty ? connectionState : '$connectionState: $callId';
   }
 }

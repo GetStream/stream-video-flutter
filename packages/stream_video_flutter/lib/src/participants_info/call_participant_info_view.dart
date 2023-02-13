@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import '../utils/extensions.dart';
 
-/// {@template streamCallParticipantInfoView}
 /// Displays call participant info view.
-/// {@endtemplate}
 class CallParticipantInfoView extends StatelessWidget {
-  /// {@macro streamCallParticipantInfoView}
+  /// Creates a new instance of [CallParticipantInfoView].
   const CallParticipantInfoView({
     super.key,
     required this.participant,
@@ -17,7 +16,7 @@ class CallParticipantInfoView extends StatelessWidget {
   });
 
   /// Represents current participant state.
-  final CallParticipantState participant;
+  final CallParticipantStateV2 participant;
 
   /// Active/Inactive icons for the video button.
   final StreamIconToggle videoIcon;
@@ -29,7 +28,7 @@ class CallParticipantInfoView extends StatelessWidget {
   final StreamParticipantInfoTheme? participantInfoTheme;
 
   /// The action to perform when a participant is tapped.
-  final ValueChanged<CallParticipantState>? onParticipantTap;
+  final ValueChanged<CallParticipantStateV2>? onParticipantTap;
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +37,9 @@ class CallParticipantInfoView extends StatelessWidget {
         this.participantInfoTheme ?? streamChatTheme.participantInfoTheme;
     final avatarTheme =
         participantInfoTheme.avatarTheme ?? streamChatTheme.avatarTheme;
+
+    final isAudioEnabled = participant.isAudioEnabled;
+    final isVideoEnabled = participant.isVideoEnabled;
 
     return InkWell(
       onTap: () {
@@ -48,32 +50,28 @@ class CallParticipantInfoView extends StatelessWidget {
         child: Row(
           children: [
             StreamUserAvatar(
-              user: participant.user,
+              user: participant.toUserInfo(),
               avatarTheme: avatarTheme,
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  participant.user.name,
+                  participant.name,
                   style: participantInfoTheme.usernameTextStyle,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
             _MediaIcon(
-              icon: participant.videoAvailable
-                  ? videoIcon.active
-                  : videoIcon.inactive,
-              color: participant.videoAvailable
+              icon: isVideoEnabled ? videoIcon.active : videoIcon.inactive,
+              color: isVideoEnabled
                   ? participantInfoTheme.iconActiveColor
                   : participantInfoTheme.iconInactiveColor,
             ),
             _MediaIcon(
-              icon: participant.audioAvailable
-                  ? audioIcon.active
-                  : audioIcon.inactive,
-              color: participant.audioAvailable
+              icon: isAudioEnabled ? audioIcon.active : audioIcon.inactive,
+              color: isAudioEnabled
                   ? participantInfoTheme.iconActiveColor
                   : participantInfoTheme.iconInactiveColor,
             ),

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../models/call_invite_state.dart';
 import '../utils/extensions.dart';
-import 'users_configuration.dart';
 
 /// A controller for an invitable user list.
 ///
@@ -15,14 +13,14 @@ import 'users_configuration.dart';
 /// * Provide selection info using [isSelected] and [hasSelected].
 /// * Provide user count info using [userCount].
 class StreamInviteUserListController extends ValueNotifier<CallInviteState> {
-  /// Creates a Stream invitable user list controller.
+  /// Creates a new instance of [StreamInviteUserListController].
   StreamInviteUserListController({
     required this.call,
     required this.usersProvider,
   }) : super(const CallInviteState(users: [], selectedUsers: {}));
 
-  /// Reference to [Call].
-  final Call call;
+  /// Represents a call.
+  final CallV2 call;
 
   /// Reference to [StreamUsersProvider].
   final StreamUsersProvider usersProvider;
@@ -54,6 +52,7 @@ class StreamInviteUserListController extends ValueNotifier<CallInviteState> {
   Future<void> inviteSelected() async {
     final users = value.users;
     final selectedUsers = value.selectedUsers;
+
     await call.inviteUsers(selectedUsers.values.toList());
     users.removeWhere((user) => selectedUsers.containsKey(user.id));
     selectedUsers.clear();

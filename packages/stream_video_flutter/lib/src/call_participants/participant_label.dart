@@ -6,6 +6,7 @@ import 'indicators/audio_indicator.dart';
 
 /// Widget used to display participant name and mute status on a call.
 class StreamParticipantLabel extends StatelessWidget {
+  /// Creates a new instance of [StreamParticipantLabel].
   const StreamParticipantLabel({
     required this.participant,
     this.audioLevelIndicatorColor,
@@ -16,7 +17,7 @@ class StreamParticipantLabel extends StatelessWidget {
   });
 
   /// The participant to display.
-  final Participant participant;
+  final CallParticipantStateV2 participant;
 
   /// The color of an audio level indicator.
   final Color? audioLevelIndicatorColor;
@@ -40,28 +41,26 @@ class StreamParticipantLabel extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(width: 8.0),
+          const SizedBox(width: 8),
           Flexible(
             child: Text(
-              participant.userId,
+              participant.name,
               style:
                   participantLabelTextStyle ?? theme.participantLabelTextStyle,
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          const SizedBox(width: 4.0),
+          const SizedBox(width: 4),
           StreamAudioIndicator(
-            hasAudio: participant.isAudioEnabled,
+            isAudioEnabled: participant.isAudioEnabled,
             isSpeaking: participant.isSpeaking,
             audioLevelIndicatorColor: audioLevelIndicatorColor,
             enabledMicrophoneColor: enabledMicrophoneColor,
             disabledMicrophoneColor: disabledMicrophoneColor,
           ),
-          const SizedBox(width: 2.0),
+          const SizedBox(width: 2),
         ],
       ),
     );

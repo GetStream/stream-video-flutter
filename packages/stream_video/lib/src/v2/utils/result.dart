@@ -175,4 +175,13 @@ extension PatternMatching<T> on Result<T> {
         return error?.call(this as Failure);
     }
   }
+
+  T? getOrNull() {
+    switch (_type) {
+      case _ResultType.success:
+        return (this as Success<T>).data;
+      case _ResultType.failure:
+        return null;
+    }
+  }
 }

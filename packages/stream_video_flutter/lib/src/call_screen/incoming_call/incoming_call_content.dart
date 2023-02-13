@@ -2,28 +2,37 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../../theme/stream_incoming_outgoing_call_theme.dart';
+import '../../utils/extensions.dart';
 import '../common/call_background.dart';
 import '../common/calling_participants.dart';
 import '../common/participant_avatars.dart';
-import 'outgoing_call_controls.dart';
+import 'incoming_call_controls.dart';
 
-/// Represents the Outgoing Call state and UI, when the user is calling
+/// Represents the Incoming Call state and UI, when the user is called by
 /// other people.
-class StreamOutgoingCall extends StatelessWidget {
-  const StreamOutgoingCall({
+class IncomingCallContent extends StatelessWidget {
+  const IncomingCallContent({
     super.key,
-    required this.users,
-    required this.onHangup,
+    required this.call,
+    required this.callState,
+    required this.onRejectPressed,
+    required this.onAcceptPressed,
     required this.onMicrophoneTap,
     required this.onCameraTap,
     this.theme,
   });
 
-  /// The participant to display.
-  final List<UserInfo> users;
+  /// Represents a call.
+  final CallV2 call;
+
+  /// Holds information about the call.
+  final CallStateV2 callState;
+
+  /// The action to perform when the accept call button is tapped.
+  final VoidCallback onAcceptPressed;
 
   /// The action to perform when the hang up button is tapped.
-  final VoidCallback onHangup;
+  final VoidCallback onRejectPressed;
 
   /// The action to perform when the microphone button is tapped.
   final VoidCallback onMicrophoneTap;
@@ -31,13 +40,16 @@ class StreamOutgoingCall extends StatelessWidget {
   /// The action to perform when the camera button is tapped.
   final VoidCallback onCameraTap;
 
-  /// Theme for the outgoing call widget.
+  /// Theme for the incoming call widget.
   final StreamIncomingOutgoingCallTheme? theme;
 
   @override
   Widget build(BuildContext context) {
     final streamChatTheme = StreamVideoTheme.of(context);
-    final theme = this.theme ?? streamChatTheme.outgoingCallTheme;
+    final theme = this.theme ?? streamChatTheme.incomingCallTheme;
+
+    final users =
+        callState.otherParticipants.map((e) => e.toUserInfo()).toList();
 
     return CallBackground(
       participants: users,
@@ -63,12 +75,13 @@ class StreamOutgoingCall extends StatelessWidget {
               ),
             ),
             Text(
-              'Calling…',
+              'Incoming Call...',
               style: theme.callingLabelTextStyle,
             ),
             const Spacer(),
-            OutgoingCallControls(
-              onHangup: onHangup,
+            IncomingCallControls(
+              onAccept: onAcceptPressed,
+              onHangup: onRejectPressed,
               onMicrophoneTap: onMicrophoneTap,
               onCameraTap: onCameraTap,
             ),

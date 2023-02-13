@@ -1,33 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:stream_video/stream_video.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../../theme/stream_incoming_outgoing_call_theme.dart';
+import '../../utils/extensions.dart';
 import '../common/call_background.dart';
 import '../common/calling_participants.dart';
 import '../common/participant_avatars.dart';
-import 'incoming_call_controls.dart';
+import 'outgoing_call_controls.dart';
 
-/// Represents the Incoming Call state and UI, when the user is called by
+/// Represents the Outgoing Call state and UI, when the user is calling
 /// other people.
-class StreamIncomingCall extends StatelessWidget {
-  const StreamIncomingCall({
+class OutgoingCallContent extends StatelessWidget {
+  /// Creates a new instance of [OutgoingCallContent].
+  const OutgoingCallContent({
     super.key,
-    required this.users,
-    required this.onAccept,
-    required this.onHangup,
+    required this.call,
+    required this.callState,
+    required this.onCancelPressed,
     required this.onMicrophoneTap,
     required this.onCameraTap,
     this.theme,
   });
 
-  /// The participant to display.
-  final List<UserInfo> users;
+  /// Represents a call.
+  final CallV2 call;
 
-  /// The action to perform when the accept call button is tapped.
-  final VoidCallback onAccept;
+  /// Holds information about the call.
+  final CallStateV2 callState;
 
   /// The action to perform when the hang up button is tapped.
-  final VoidCallback onHangup;
+  final VoidCallback onCancelPressed;
 
   /// The action to perform when the microphone button is tapped.
   final VoidCallback onMicrophoneTap;
@@ -35,16 +38,18 @@ class StreamIncomingCall extends StatelessWidget {
   /// The action to perform when the camera button is tapped.
   final VoidCallback onCameraTap;
 
-  /// Theme for the incoming call widget.
+  /// Theme for the outgoing call widget.
   final StreamIncomingOutgoingCallTheme? theme;
 
   @override
   Widget build(BuildContext context) {
     final streamChatTheme = StreamVideoTheme.of(context);
-    final theme = this.theme ?? streamChatTheme.incomingCallTheme;
+    final theme = this.theme ?? streamChatTheme.outgoingCallTheme;
+    final participants =
+        callState.otherParticipants.map((e) => e.toUserInfo()).toList();
 
     return CallBackground(
-      participants: users,
+      participants: participants,
       child: Material(
         color: Colors.transparent,
         child: Column(
@@ -52,7 +57,7 @@ class StreamIncomingCall extends StatelessWidget {
           children: [
             const Spacer(),
             ParticipantAvatars(
-              participants: users,
+              participants: participants,
               singleParticipantAvatarTheme: theme.singleParticipantAvatarTheme,
               multipleParticipantAvatarTheme:
                   theme.multipleParticipantAvatarTheme,
@@ -60,20 +65,19 @@ class StreamIncomingCall extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
               child: CallingParticipants(
-                participants: users,
+                participants: participants,
                 singleParticipantTextStyle: theme.singleParticipantTextStyle,
                 multipleParticipantTextStyle:
                     theme.multipleParticipantTextStyle,
               ),
             ),
             Text(
-              'Incoming Call...',
+              'Calling…',
               style: theme.callingLabelTextStyle,
             ),
             const Spacer(),
-            IncomingCallControls(
-              onAccept: onAccept,
-              onHangup: onHangup,
+            OutgoingCallControls(
+              onHangup: onCancelPressed,
               onMicrophoneTap: onMicrophoneTap,
               onCameraTap: onCameraTap,
             ),

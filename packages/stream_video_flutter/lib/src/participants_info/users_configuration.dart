@@ -4,6 +4,7 @@ import 'package:stream_video/stream_video.dart';
 /// Used to expose a mechanism that allows the SDK to fetch users. These users
 /// can then be invited to calls, explored in isolation and more.
 class StreamUsersConfiguration extends InheritedWidget {
+  /// Creates a new instance of [StreamUsersConfiguration].
   const StreamUsersConfiguration({
     super.key,
     required this.usersProvider,

@@ -64,17 +64,18 @@ class CallAttachment extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
-                    final call = await _joinCall(context, cid);
+                    final callCid = StreamCallCid(cid: cid);
+                    final call = CallV2.fromCid(callCid: callCid);
 
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         fullscreenDialog: true,
                         builder: (context) {
-                          return StreamActiveCall(
+                          return StreamCallContainer(
                             call: call,
                             onBackPressed: () => _finishCall(context, call),
-                            onHangUp: () => _finishCall(context, call),
+                            onLeaveCall: () => _finishCall(context, call),
                           );
                         },
                       ),
@@ -89,18 +90,7 @@ class CallAttachment extends StatelessWidget {
     );
   }
 
-  /// Joins the call with the give cid.
-  Future<Call> _joinCall(BuildContext context, String cid) async {
-    final parts = cid.split(':');
-    final type = parts[0];
-    final id = parts[1];
-
-    final call = await StreamVideo.instance.joinCall(type: type, id: id);
-    await call.connect();
-    return call;
-  }
-
-  Future<void> _finishCall(BuildContext context, Call call) async {
+  Future<void> _finishCall(BuildContext context, CallV2 call) async {
     await call.disconnect();
 
     Navigator.of(context).pop();

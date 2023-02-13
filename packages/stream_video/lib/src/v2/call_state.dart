@@ -1,7 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'call_participant_state.dart';
 
+import 'call_participant_state.dart';
 import 'coordinator/models/coordinator_models.dart';
 import 'model/call_cid.dart';
 import 'model/call_status.dart';
@@ -59,6 +60,14 @@ class CallStateV2 extends Equatable {
   final String sessionId;
   final CallStatus status;
   final List<CallParticipantStateV2> callParticipants;
+
+  CallParticipantStateV2? get localParticipant {
+    return callParticipants.firstWhereOrNull((element) => element.isLocal);
+  }
+
+  List<CallParticipantStateV2> get otherParticipants {
+    return callParticipants.where((element) => !element.isLocal).toList();
+  }
 
   /// Returns a copy of this [CallStateV2] with the given fields replaced
   /// with the new values.

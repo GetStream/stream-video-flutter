@@ -4,16 +4,21 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
-/// PIP participant floating on top of the participants grid.
+/// Floating participant on top of the participants grid.
 class StreamFloatingCallParticipant extends StatelessWidget {
+  /// Creates a new instance of [StreamFloatingCallParticipant].
   const StreamFloatingCallParticipant({
     super.key,
+    required this.call,
     required this.participant,
     this.theme,
   });
 
+  /// Represents a call.
+  final CallV2 call;
+
   /// The participant to display.
-  final Participant participant;
+  final CallParticipantStateV2 participant;
 
   /// Theme for modifying the look of the window.
   final StreamFloatingCallParticipantTheme? theme;
@@ -37,6 +42,7 @@ class StreamFloatingCallParticipant extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: StreamCallParticipant(
+              call: call,
               participant: participant,
               theme: StreamCallParticipantTheme(
                 avatarTheme: StreamAvatarTheme(

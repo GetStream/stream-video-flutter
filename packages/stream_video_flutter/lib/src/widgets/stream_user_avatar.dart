@@ -4,55 +4,41 @@ import 'package:flutter/material.dart';
 import '../../stream_video_flutter.dart';
 import '../utils/extensions.dart';
 
-/// {@template imageWidgetBuilder}
 /// Builder function used to build an image widget for the user avatar.
-/// {@endtemplate}
 typedef ImageWidgetBuilder = Widget Function(
   BuildContext context,
   UserInfo user,
   ImageProvider imageProvider,
 );
 
-/// {@template placeholderWidgetBuilder}
 /// Builder function used to build a placeholder widget.
-/// {@endtemplate}
 typedef PlaceholderWidgetBuilder = Widget Function(
   BuildContext context,
   UserInfo user,
 );
 
-/// {@template errorWidgetBuilder}
 /// Builder function used to build an error widget.
-/// {@endtemplate}
 typedef ErrorWidgetBuilder = Widget Function(
   BuildContext context,
   UserInfo user,
   Object error,
 );
 
-/// {@template fallbackWidgetBuilder}
 /// Builder function used to build a widget with the user initials.
-/// {@endtemplate}
 typedef FallbackWidgetBuilder = Widget Function(
   BuildContext context,
   UserInfo user,
 );
 
-/// {@template onUserAvatarTap}
 /// The action to perform when the user avatar is tapped.
-/// {@endtemplate}
 typedef OnUserAvatarTap = void Function(UserInfo);
 
-/// {@template onUserAvatarLongPress}
 /// The action to perform when the user avatar is long-pressed.
-/// {@endtemplate}
 typedef OnUserAvatarLongPress = void Function(UserInfo);
 
-/// {@template streamUserAvatar}
 /// Displays a user's avatar.
-/// {@endtemplate}
 class StreamUserAvatar extends StatelessWidget {
-  /// {@macro streamUserAvatar}
+  /// Creates a new instance of [StreamUserAvatar].
   const StreamUserAvatar({
     super.key,
     required this.user,
@@ -75,22 +61,22 @@ class StreamUserAvatar extends StatelessWidget {
   /// Theme for the avatar.
   final StreamAvatarTheme? avatarTheme;
 
-  /// {@macro onUserAvatarTap}
+  /// The action to perform when the user avatar is tapped.
   final OnUserAvatarTap? onTap;
 
-  /// {@macro onUserAvatarLongPress}
+  /// The action to perform when the user avatar is long-pressed.
   final OnUserAvatarLongPress? onLongPress;
 
-  /// {@macro imageWidgetBuilder}
+  /// Builder function used to build an image widget for the user avatar.
   final ImageWidgetBuilder? imageBuilder;
 
-  /// {@macro placeholderWidgetBuilder}
+  /// Builder function used to build a placeholder widget.
   final PlaceholderWidgetBuilder? placeholderBuilder;
 
-  /// {@macro errorWidgetBuilder}
+  /// Builder function used to build an error widget.
   final ErrorWidgetBuilder? errorBuilder;
 
-  /// {@macro fallbackWidgetBuilder}
+  /// Builder function used to build a widget with the user initials.
   final FallbackWidgetBuilder? fallbackBuilder;
 
   @override
@@ -118,7 +104,9 @@ class StreamUserAvatar extends StatelessWidget {
                 imageBuilder: (context, imageProvider) => imageBuilder != null
                     ? imageBuilder!(context, user, imageProvider)
                     : _ImageUserAvatar(
-                        imageProvider: imageProvider, avatarTheme: avatarTheme),
+                        imageProvider: imageProvider,
+                        avatarTheme: avatarTheme,
+                      ),
               )
             : fallbackBuilder != null
                 ? fallbackBuilder!(context, user)
@@ -148,11 +136,9 @@ class StreamUserAvatar extends StatelessWidget {
   }
 }
 
-/// {@template imageUserAvatar}
 /// Displays an avatar with the user picture.
-/// {@endtemplate}
 class _ImageUserAvatar extends StatelessWidget {
-  /// {@macro imageUserAvatar}
+  /// Creates a new instance of [_ImageUserAvatar].
   const _ImageUserAvatar({
     required this.imageProvider,
     required this.avatarTheme,
@@ -178,11 +164,9 @@ class _ImageUserAvatar extends StatelessWidget {
   }
 }
 
-/// {@template initialsUserAvatar}
 /// Displays an avatar with a color background and initials text.
-/// {@endtemplate}
 class _InitialsUserAvatar extends StatelessWidget {
-  /// {@macro initialsUserAvatar}
+  /// Creates a new instance of [_InitialsUserAvatar].
   const _InitialsUserAvatar({
     required this.user,
     required this.avatarTheme,

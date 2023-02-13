@@ -4,6 +4,7 @@ import '../../../stream_video_flutter.dart';
 
 /// Displays call participants as a string.
 class CallingParticipants extends StatelessWidget {
+  /// Creates a new instance of [CallingParticipants].
   const CallingParticipants({
     super.key,
     required this.participants,

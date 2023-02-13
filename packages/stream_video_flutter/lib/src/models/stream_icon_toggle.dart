@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Contains icons for active and inactive states accordingly.
 class StreamIconToggle {
+  /// Creates a new instance of [StreamIconToggle].
   const StreamIconToggle({
     required this.active,
     required this.inactive,

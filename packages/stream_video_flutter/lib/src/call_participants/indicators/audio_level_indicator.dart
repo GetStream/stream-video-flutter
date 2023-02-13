@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:stream_video_flutter/src/theme/stream_video_theme.dart';
+
+import '../../theme/stream_video_theme.dart';
 
 /// Widget used to indicate the audio levels of a given participant.
 class StreamAudioLevelIndicator extends StatefulWidget {
+  /// Creates a new instance of [StreamAudioLevelIndicator].
   const StreamAudioLevelIndicator({
     super.key,
     this.color,
@@ -41,13 +43,13 @@ class _StreamAudioLevelIndicatorState extends State<StreamAudioLevelIndicator>
     final theme = StreamVideoTheme.of(context).callParticipantTheme;
 
     return SizedBox(
-      width: 24.0,
-      height: 24.0,
+      width: 24,
+      height: 24,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (_, child) {
           return CustomPaint(
-            size: const Size.square(24.0),
+            size: const Size.square(24),
             painter: _AudioLevelIndicatorPainter(
               animationValue: _controller.value,
               color: widget.color ?? theme.audioLevelIndicatorColor,

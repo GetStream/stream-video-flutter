@@ -10,6 +10,7 @@ import '../../theme/stream_video_theme.dart';
 /// Renders a call background that shows either a static image or user images
 /// based on the call state.
 class CallBackground extends StatelessWidget {
+  /// Creates a new instance of [CallBackground].
   const CallBackground({
     super.key,
     required this.participants,

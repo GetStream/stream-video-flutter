@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import '../../stream_video_flutter.dart';
+
 /// Extensions on [String].
 extension StringExtension on String {
   /// Returns initials for a string
@@ -44,4 +46,14 @@ extension DoubleExtension on double {
   double coerceIn(double minimumValue, double maximumValue) {
     return max(minimumValue, min(this, maximumValue));
   }
+}
+
+extension CallParticipantExtension on CallParticipantStateV2 {
+  /// Maps [CallParticipantStateV2] into [UserInfo].
+  UserInfo toUserInfo() => UserInfo(
+        id: userId,
+        role: role,
+        name: userId,
+        imageUrl: profileImageURL,
+      );
 }

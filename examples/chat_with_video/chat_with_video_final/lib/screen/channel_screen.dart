@@ -62,14 +62,15 @@ class ChannelScreen extends StatelessWidget {
     final currentUser = StreamChat.of(context).currentUser;
     final channel = StreamChannel.of(context).channel;
 
-    final createCallResult = await StreamVideo.instance.createCall(
-      id: 'call${Random().nextInt(10000)}',
+    final callCid = StreamCallCid.from(
       type: "default",
+      id: "call${Random().nextInt(10000)}",
+    );
+    await StreamVideoV2.instance.createCall(
+      cid: callCid,
       ringing: false,
       participantIds: [],
     );
-
-    final call = createCallResult.call;
 
     channel.sendMessage(
       Message(
@@ -79,7 +80,7 @@ class ChannelScreen extends StatelessWidget {
             authorName: currentUser?.name ?? "",
             uploadState: UploadState.success(),
             extraData: {
-              "callCid": call.callCid,
+              "callCid": callCid.value,
             },
           )
         ],

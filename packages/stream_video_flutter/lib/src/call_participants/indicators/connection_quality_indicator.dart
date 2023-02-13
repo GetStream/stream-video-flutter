@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../../../stream_video_flutter.dart';
 
 /// Widget used to indicate the connection quality of a given participant.
 class StreamConnectionQualityIndicator extends StatelessWidget {
+  /// Creates a new instance of [StreamConnectionQualityIndicator].
   const StreamConnectionQualityIndicator({
     super.key,
     required this.connectionQuality,
@@ -11,7 +13,7 @@ class StreamConnectionQualityIndicator extends StatelessWidget {
   });
 
   /// The connection quality of the participant.
-  final ConnectionQuality connectionQuality;
+  final SfuConnectionQuality connectionQuality;
 
   /// The color of an active connection quality level.
   final Color? activeColor;
@@ -29,10 +31,10 @@ class StreamConnectionQualityIndicator extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: SizedBox(
-        width: 24.0,
-        height: 24.0,
+        width: 24,
+        height: 24,
         child: CustomPaint(
-          size: const Size.square(24.0),
+          size: const Size.square(24),
           painter: _ConnectionQualityIndicatorPainter(
             connectionQuality: connectionQuality,
             activeColor: activeColor ?? theme.connectionLevelActiveColor,
@@ -54,7 +56,7 @@ class _ConnectionQualityIndicatorPainter extends CustomPainter {
   });
 
   /// The connection quality of the participant.
-  final ConnectionQuality connectionQuality;
+  final SfuConnectionQuality connectionQuality;
 
   /// The color of an active connection quality level.
   final Color activeColor;
@@ -74,7 +76,7 @@ class _ConnectionQualityIndicatorPainter extends CustomPainter {
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
 
-    for (int i = 0; i < 3; i++) {
+    for (var i = 0; i < 3; i++) {
       final double offsetLeft = 7 + i * 5;
       final double offsetTop = 14 - i * 3;
       final connectionLevel = _getConnectionLevel();
@@ -89,11 +91,11 @@ class _ConnectionQualityIndicatorPainter extends CustomPainter {
 
   int _getConnectionLevel() {
     switch (connectionQuality) {
-      case ConnectionQuality.poor:
+      case SfuConnectionQuality.poor:
         return 1;
-      case ConnectionQuality.good:
+      case SfuConnectionQuality.good:
         return 2;
-      case ConnectionQuality.excellent:
+      case SfuConnectionQuality.excellent:
         return 3;
       default:
         return 0;

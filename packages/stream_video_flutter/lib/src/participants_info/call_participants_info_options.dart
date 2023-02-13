@@ -2,21 +2,23 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
-/// {@template streamCallParticipantsInfoView}
 /// Displays call participants info.
-/// {@endtemplate}
 class CallParticipantsInfoOptions extends StatelessWidget {
-  /// {@macro streamCallParticipantsInfoView}
+  /// Creates a new instance of [CallParticipantsInfoOptions].
   const CallParticipantsInfoOptions({
     super.key,
     required this.call,
+    required this.localParticipant,
     required this.inviteButtonTitle,
     required this.muteToggleTitles,
     this.onInviteButtonPress,
   });
 
-  /// Reference to [Call].
-  final Call call;
+  /// Represents a call.
+  final CallV2 call;
+
+  /// The current local participant.
+  final CallParticipantStateV2 localParticipant;
 
   /// Invite button title.
   final String inviteButtonTitle;
@@ -35,9 +37,14 @@ class CallParticipantsInfoOptions extends StatelessWidget {
         alignment: MainAxisAlignment.center,
         children: [
           _InviteButton(
-              title: inviteButtonTitle,
-              onInviteButtonPress: onInviteButtonPress),
-          _MuteToggle(titles: muteToggleTitles, call: call)
+            title: inviteButtonTitle,
+            onInviteButtonPress: onInviteButtonPress,
+          ),
+          _MuteToggle(
+            titles: muteToggleTitles,
+            call: call,
+            localParticipant: localParticipant,
+          )
         ],
       ),
     );
@@ -62,7 +69,7 @@ class _InviteButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         elevation: 3,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(32.0),
+          borderRadius: BorderRadius.circular(32),
         ),
         minimumSize: const Size(144, 48),
       ),
@@ -80,57 +87,47 @@ class _MuteToggle extends StatefulWidget {
   const _MuteToggle({
     required this.titles,
     required this.call,
+    required this.localParticipant,
   });
 
+  /// Represents a call.
+  final CallV2 call;
+
+  /// The current local participant.
+  final CallParticipantStateV2 localParticipant;
+
+  /// Contains titles for muted and unmuted states.
   final MuteToggleTitles titles;
-  final Call call;
 
   @override
   State<_MuteToggle> createState() => _MuteToggleState();
 }
 
 class _MuteToggleState extends State<_MuteToggle> {
-  Function? _cancelListener;
-
-  @override
-  void initState() {
-    super.initState();
-    _cancelListener = widget.call.events.listen((event) {
-      if (event is ParticipantInfoUpdatedEvent) {
-        setState(() {});
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _cancelListener?.call();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final enabled = widget.localParticipant.isAudioEnabled;
+
     final streamChatTheme = StreamVideoTheme.of(context);
     return OutlinedButton(
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(
-            32.0,
+            32,
           ),
         ),
         side: BorderSide(
-          width: 1,
           color: streamChatTheme.colorTheme.overlay,
         ),
         minimumSize: const Size(144, 48),
       ),
-      onPressed: () async {
-        await widget.call.localParticipant?.toggleMicrophone();
+      onPressed: () {
+        widget.call.apply(
+          SetMicrophoneEnabled(enabled: !enabled),
+        );
       },
       child: Text(
-        widget.call.localParticipant?.isAudioEnabled == true
-            ? widget.titles.muteTitle
-            : widget.titles.unmuteTitle,
+        enabled ? widget.titles.muteTitle : widget.titles.unmuteTitle,
         style: const TextStyle(fontSize: 16),
       ),
     );

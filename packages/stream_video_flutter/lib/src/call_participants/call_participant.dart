@@ -1,64 +1,30 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/device_segmentation.dart';
+import '../utils/extensions.dart';
 import 'indicators/connection_quality_indicator.dart';
 import 'participant_label.dart';
 
-/// Widget that represents a single participant in a call.
-class StreamCallParticipant extends StatefulWidget {
+/// A widget that represents a single participant in a call.
+class StreamCallParticipant extends StatelessWidget {
+  /// Creates a new instance of [StreamCallParticipant].
   const StreamCallParticipant({
+    super.key,
+    required this.call,
     required this.participant,
     this.theme,
-    super.key,
   });
 
-  /// The participant to display.
-  final Participant participant;
+  /// Represents a call.
+  final CallV2 call;
 
-  /// Theme for the call participant.
+  /// The participant to display.
+  final CallParticipantStateV2 participant;
+
+  /// Theme for the participant.
   final StreamCallParticipantTheme? theme;
-
-  @override
-  State<StatefulWidget> createState() {
-    return _StreamCallParticipantState();
-  }
-}
-
-class _StreamCallParticipantState extends State<StreamCallParticipant> {
-  /// The participant to display.
-  Participant get participant => widget.participant;
-
-  /// The video track to render.
-  VideoTrack? get videoTrack =>
-      participant.videoTracks.firstOrNull?.track as VideoTrack?;
-
-  /// Theme for the call participant.
-  StreamCallParticipantTheme? get theme => widget.theme;
-
-  @override
-  void initState() {
-    super.initState();
-    participant.events.listen(_onParticipantChanged);
-    _onParticipantChanged('');
-  }
-
-  @override
-  void dispose() {
-    participant.events.cancel(_onParticipantChanged);
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(StreamCallParticipant oldWidget) {
-    oldWidget.participant.events.cancel(_onParticipantChanged);
-    participant.events.listen(_onParticipantChanged);
-    _onParticipantChanged('');
-    super.didUpdateWidget(oldWidget);
-  }
-
-  void _onParticipantChanged(_) => setState(() {});
 
   @override
   Widget build(BuildContext context) {
@@ -82,22 +48,19 @@ class _StreamCallParticipantState extends State<StreamCallParticipant> {
         decoration: BoxDecoration(color: theme.backgroundColor),
         child: Stack(
           children: [
-            if (videoTrack != null && !videoTrack!.muted)
-              StreamVideoRenderer(
-                videoTrack: videoTrack!,
-                videoFit: VideoFit.cover,
-              )
-            else
-              Center(
-                child: StreamUserAvatar(
-                  user: UserInfo(
-                    id: participant.userId,
-                    role: 'admin',
-                    name: participant.userId,
+            VideoTrackRenderer(
+              call: call,
+              participant: participant,
+              videoTrackType: SfuTrackType.video,
+              placeholderBuilder: (context) {
+                return Center(
+                  child: StreamUserAvatar(
+                    avatarTheme: theme.avatarTheme,
+                    user: participant.toUserInfo(),
                   ),
-                  avatarTheme: theme.avatarTheme,
-                ),
-              ),
+                );
+              },
+            ),
             Align(
               alignment: theme.participantLabelAlignment,
               child: Column(
@@ -105,7 +68,7 @@ class _StreamCallParticipantState extends State<StreamCallParticipant> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8),
                     child: StreamParticipantLabel(
                       participant: participant,
                       audioLevelIndicatorColor: theme.audioLevelIndicatorColor,
@@ -121,7 +84,7 @@ class _StreamCallParticipantState extends State<StreamCallParticipant> {
             Align(
               alignment: theme.connectionLevelAlignment,
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8),
                 child: StreamConnectionQualityIndicator(
                   connectionQuality: participant.connectionQuality,
                   activeColor: theme.connectionLevelActiveColor,

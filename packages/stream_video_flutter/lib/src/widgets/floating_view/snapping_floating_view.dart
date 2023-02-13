@@ -8,6 +8,7 @@ const _snapAnimationDuration = Duration(milliseconds: 300);
 /// A floating view that will be automatically snapped to the closest
 /// corner after it was dragged.
 class SnappingFloatingView extends StatefulWidget {
+  /// Creates a new instance of [SnappingFloatingView].
   const SnappingFloatingView({
     super.key,
     required this.child,

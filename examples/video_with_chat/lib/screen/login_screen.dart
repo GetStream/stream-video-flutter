@@ -8,7 +8,7 @@ import 'package:video_with_chat/screen/home_screen.dart';
 import '../app_config.dart';
 import '../user_mapper.dart';
 
-class ChooseUserScreen extends StatelessWidget {
+class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final users = defaultUsers;
@@ -49,7 +49,7 @@ class ChooseUserScreen extends StatelessWidget {
 
   /// Connects the current user to the Video API.
   Future<void> _connectVideoUser(SampleUser user) async {
-    final videoClient = StreamVideo.instance;
+    final videoClient = StreamVideoV2.instance;
 
     await videoClient.connectUser(
       user.toVideoUser(),

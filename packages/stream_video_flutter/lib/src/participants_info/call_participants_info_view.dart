@@ -1,30 +1,26 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'call_participant_info_view.dart';
+import 'call_participants_info_options.dart';
+import 'invite_user_list_controller.dart';
+import 'invite_user_list_view.dart';
 
-/// {@template participantsInfoViewBuilder}
 /// Builder function used to build a participant info view.
-/// {@endtemplate}
 typedef ParticipantInfoViewBuilder = Widget Function(
   BuildContext context,
   int index,
-  CallParticipantState participant,
+  CallParticipantStateV2 participant,
 );
 
-/// {@template participantInfoDividerBuilder}
 /// Builder function used to build a participant info divider.
-/// {@endtemplate}
 typedef ParticipantInfoDividerBuilder = Widget Function(
   BuildContext context,
   int index,
 );
 
-/// {@template streamCallParticipantsInfoView}
 /// Displays call participants info.
-/// {@endtemplate}
 class StreamCallParticipantsInfoView extends StatefulWidget {
-  /// {@macro streamCallParticipantsInfoView}
+  /// Creates a new instance of [StreamCallParticipantsInfoView].
   const StreamCallParticipantsInfoView({
     super.key,
     required this.call,
@@ -42,8 +38,8 @@ class StreamCallParticipantsInfoView extends StatefulWidget {
     this.participantInfoDividerBuilder,
   });
 
-  /// Reference to [Call].
-  final Call call;
+  /// Reference to [CallV2].
+  final CallV2 call;
 
   /// Provider for users that can be invited to the call.
   final StreamUsersProvider usersProvider;
@@ -57,10 +53,10 @@ class StreamCallParticipantsInfoView extends StatefulWidget {
   /// Theme for the participants info.
   final StreamParticipantsInfoTheme? participantsInfoTheme;
 
-  /// {@macro participantsInfoViewBuilder}
+  /// Builder function used to build a participant info view.
   final ParticipantInfoViewBuilder? participantInfoViewBuilder;
 
-  /// {@macro participantInfoDividerBuilder}
+  /// Builder function used to build a participant info divider.
   final ParticipantInfoDividerBuilder? participantInfoDividerBuilder;
 
   @override
@@ -70,10 +66,8 @@ class StreamCallParticipantsInfoView extends StatefulWidget {
 
 class _StreamCallParticipantsInfoViewState
     extends State<StreamCallParticipantsInfoView> {
-  Function? _cancelListener;
-  final participants = <CallParticipantState>[];
-
   late StreamInviteUserListController _controller;
+  final _subscriptions = Subscriptions();
 
   @override
   void initState() {
@@ -83,47 +77,32 @@ class _StreamCallParticipantsInfoViewState
       usersProvider: widget.usersProvider,
     );
 
-    _setParticipants();
-    _cancelListener = widget.call.events.listen((event) {
-      if (event is ParticipantJoinedEvent ||
-          event is ParticipantLeftEvent ||
-          event is ParticipantInfoUpdatedEvent) {
-        setState(_setParticipants);
-      }
-    });
+    _subscriptions.add(0, widget.call.state.listen(_setState));
+    _setState(widget.call.state.value);
   }
 
   @override
   void dispose() {
     super.dispose();
-    _cancelListener?.call();
+    _subscriptions.cancelAll();
   }
 
-  /// Applies participants from the given [widget.call].
-  void _setParticipants() {
-    participants.clear();
-    final localParticipant = widget.call.localParticipant;
-    final localState = localParticipant != null
-        ? _mapToState(localParticipant.info, self: true)
-        : null;
-    if (localState != null) {
-      participants.add(localState);
-    }
-    participants.addAll(
-      widget.call.participants.values.map((participant) {
-        return _mapToState(participant.info, self: false);
-      }),
-    );
+  Future<void> _setState(CallStateV2 state) async {
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final callState = widget.call.state.value;
+    final localParticipant = callState.localParticipant;
+    final participants = callState.callParticipants;
+
     final streamChatTheme = StreamVideoTheme.of(context);
     final participantsInfoTheme =
         widget.participantsInfoTheme ?? streamChatTheme.participantsInfoTheme;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Participants (${widget.call.participants.length + 1})'),
+        title: Text('Participants (${callState.callParticipants.length})'),
       ),
       body: Column(
         children: [
@@ -156,6 +135,7 @@ class _StreamCallParticipantsInfoViewState
             elevation: 8,
             color: streamChatTheme.colorTheme.appBg,
             child: CallParticipantsInfoOptions(
+              localParticipant: localParticipant!,
               call: widget.call,
               inviteButtonTitle: 'Invite',
               muteToggleTitles: const MuteToggleTitles(
@@ -175,20 +155,6 @@ class _StreamCallParticipantsInfoViewState
           ),
         ],
       ),
-    );
-  }
-
-  /// Creates [CallParticipantState] from [ParticipantInfo] and [self] flag.
-  CallParticipantState _mapToState(
-    ParticipantInfo info, {
-    required bool self,
-  }) {
-    //TODO grab role from coordinator User
-    return CallParticipantState(
-      self: self,
-      user: UserInfo(id: info.userId, role: 'member', name: info.userId),
-      audioAvailable: info.hasPublishedAudioTrack(),
-      videoAvailable: info.hasPublishedVideoTrack(),
     );
   }
 }
