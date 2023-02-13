@@ -43,9 +43,9 @@ class PushNotificationManager {
     await _client.createDevice(token: token);
   }
 
-  Future<bool> handlePushNotification(RemoteMessage remoteMessage) async {
-    if (_isValid(remoteMessage)) {
-      final cid = remoteMessage.data['call_cid'] as String;
+  Future<bool> handlePushNotification(Map<String, dynamic> payload) async {
+    if (_isValid(payload)) {
+      final cid = payload['call_cid'] as String;
       final type = cid.substring(0, cid.indexOf(':'));
       final id = cid.substring(cid.indexOf(':') + 1);
       final call = await _client.getOrCreateCall(type: type, id: id);
@@ -74,18 +74,17 @@ class PushNotificationManager {
     await _client.rejectCall(callCid: cid);
   }
 
-  bool _isValid(RemoteMessage remoteMessage) {
-    return _isFromStreamServer(remoteMessage) &&
-        _isValidIncomingCall(remoteMessage);
+  bool _isValid(Map<String, dynamic> payload) {
+    return _isFromStreamServer(payload) && _isValidIncomingCall(payload);
   }
 
-  bool _isFromStreamServer(RemoteMessage remoteMessage) {
-    return remoteMessage.data['sender'] == 'stream.video';
+  bool _isFromStreamServer(Map<String, dynamic> payload) {
+    return payload['sender'] == 'stream.video';
   }
 
-  bool _isValidIncomingCall(RemoteMessage remoteMessage) {
-    return remoteMessage.data['type'] == 'call_incoming' &&
-        ((remoteMessage.data['call_cid'] as String?)?.isNotEmpty ?? false);
+  bool _isValidIncomingCall(Map<String, dynamic> payload) {
+    return payload['type'] == 'call_incoming' &&
+        ((payload['call_cid'] as String?)?.isNotEmpty ?? false);
   }
 
   bool _isFirebaseInitialized() {
