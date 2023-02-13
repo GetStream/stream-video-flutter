@@ -7,12 +7,12 @@ import 'package:test/test.dart';
 
 import '../mocks.dart';
 
-void main() {
+Future<void> main() async {
   final streamVideo = StreamVideoMock();
   final callNotificationWrapper = CallNotificationWrapperMock();
   final sharedPreferences = SharedPreferencesMock();
-  var sut = PushNotificationManager(
-    client: streamVideo,
+  var sut = await PushNotificationManager.create(
+    streamVideo,
     sharedPreferences: sharedPreferences,
     callNotification: callNotificationWrapper,
   );
