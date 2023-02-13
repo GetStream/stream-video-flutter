@@ -296,7 +296,12 @@ class CallV2Impl extends CallV2 {
     }
     _logger.d(() => '[joinIfNeeded] no args');
     await _stateManager.onCallJoining();
-    final joinedResult = await _streamVideo.joinCall(cid: state.callCid);
+    final joinedResult = await _streamVideo.joinCall(
+      cid: state.callCid,
+      onReceivedOrCreated: (data) async {
+        await _stateManager.onCallReceivedOrCreated(data);
+      },
+    );
     if (joinedResult is Success<CallJoined>) {
       _logger.v(() => '[joinIfNeeded] completed');
       await _stateManager.onCallJoined(joinedResult.data);

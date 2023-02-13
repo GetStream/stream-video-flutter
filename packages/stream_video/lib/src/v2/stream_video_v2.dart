@@ -84,6 +84,7 @@ abstract class StreamVideoV2 {
 
   Future<Result<CallJoined>> joinCall({
     required StreamCallCid cid,
+    void Function(CallReceivedOrCreated)? onReceivedOrCreated,
   });
 
   Future<Result<None>> acceptCall({

@@ -4,6 +4,7 @@ import '../../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import '../../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pbtwirp.dart';
 import '../../../protobuf/video/coordinator/edge_v1/edge.pb.dart';
 import '../../latency_service/latency.dart';
+import '../../logger/impl/tagged_logger.dart';
 import '../../token/token_manager.dart';
 import '../errors/video_error_composer.dart';
 import '../utils/result.dart';
@@ -16,6 +17,7 @@ class CoordinatorClientV2 {
     required this.tokenManager,
   }) : _rpclient = ClientRPCProtobufClient(baseUrl, '');
 
+  final _logger = taggedLogger(tag: 'SV:CoordClient');
   final String apiKey;
   final TokenManager tokenManager;
 
@@ -97,7 +99,12 @@ class CoordinatorClientV2 {
     required String callCid,
     required List<Edge> edges,
   }) async {
+    _logger.d(
+      () => '[findBestCallEdgeServer] callCid: $callCid, '
+          'edges.length: ${edges.length}',
+    );
     final latencyByEdge = await measureEdgeLatencies(edges: edges);
+    _logger.v(() => '[findBestCallEdgeServer] latencyByEdge: $latencyByEdge');
     final response = await selectCallEdgeServer(
       GetCallEdgeServerRequest(
         callCid: callCid,
@@ -106,7 +113,15 @@ class CoordinatorClientV2 {
         ),
       ),
     );
-
+    response.when(
+      success: (data) {
+        final server = data.credentials.server;
+        _logger.v(() => '[findBestCallEdgeServer] selectedEdge: $server');
+      },
+      failure: (error) {
+        _logger.e(() => '[findBestCallEdgeServer] failed: $error');
+      },
+    );
     return response;
   }
 

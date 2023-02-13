@@ -3,6 +3,7 @@ import '../action/lifecycle_action.dart';
 import '../call_participant_state.dart';
 import '../call_state.dart';
 import '../coordinator/models/coordinator_models.dart';
+import '../model/call_created.dart';
 import '../model/call_status.dart';
 import '../model/drop_reason.dart';
 
@@ -54,14 +55,9 @@ class LifecycleReducer {
     CallCreatedAction action,
   ) {
     return state.copyWith(
-      status: action.data.metadata.toCallStatus(
-        currentUserId: state.currentUserId,
-        ringing: action.data.ringing,
-      ),
+      status: action.data.toCallStatus(state: state),
       createdByUserId: action.data.metadata.info.createdByUserId,
-      callParticipants: action.data.metadata.toCallParticipants(
-        state.currentUserId,
-      ),
+      callParticipants: action.data.metadata.toCallParticipants(state),
     );
   }
 
@@ -81,9 +77,7 @@ class LifecycleReducer {
     return state.copyWith(
       status: CallStatus.joined(action.data.credentials),
       createdByUserId: action.data.metadata.info.createdByUserId,
-      callParticipants: action.data.metadata.toCallParticipants(
-        state.currentUserId,
-      ),
+      callParticipants: action.data.metadata.toCallParticipants(state),
     );
   }
 
@@ -140,27 +134,31 @@ class LifecycleReducer {
   }
 }
 
-extension on CallMetadata {
+extension on CallCreated {
   CallStatus toCallStatus({
-    required String currentUserId,
-    required bool ringing,
+    required CallStateV2 state,
   }) {
-    final createdByMe = currentUserId == info.createdByUserId;
-    if (createdByMe && ringing) {
+    final status = state.status;
+    final createdByMe = state.currentUserId == metadata.info.createdByUserId;
+    if (ringing && !status.isOutgoing && createdByMe) {
       return CallStatus.outgoing();
-    } else if (!createdByMe && ringing) {
+    } else if (ringing && !status.isIncoming && !createdByMe) {
       return CallStatus.incoming();
-    } else {
+    } else if (status.isIdle) {
       return CallStatus.created();
+    } else {
+      return status;
     }
   }
+}
 
-  List<CallParticipantStateV2> toCallParticipants(String currentUserId) {
+extension on CallMetadata {
+  List<CallParticipantStateV2> toCallParticipants(CallStateV2 state) {
     final result = <CallParticipantStateV2>[];
     for (final userId in users.keys) {
       final member = details.members[userId];
       final user = users[userId];
-      final isLocal = currentUserId == userId;
+      final isLocal = state.currentUserId == userId;
       result.add(
         CallParticipantStateV2(
           userId: userId,
