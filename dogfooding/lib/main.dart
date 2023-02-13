@@ -2,14 +2,27 @@ import 'dart:async';
 
 import 'package:dogfooding/src/routes/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:uni_links/uni_links.dart';
 
 import 'firebase_options.dart';
 import 'src/routes/app_routes.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  _initStreamVideo();
+  await _handleRemoteMessage(message);
+}
+
+Future<void> _handleRemoteMessage(RemoteMessage message) async {
+  await StreamVideo.instance.handlePushNotification(message);
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +30,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   _initStreamVideo();
-  runApp(const StreamDogFoodingApp());
+  runApp(StreamDogFoodingApp());
 }
 
 void _initStreamVideo() {
@@ -41,13 +54,18 @@ class StreamDogFoodingApp extends StatefulWidget {
   State<StreamDogFoodingApp> createState() => _StreamDogFoodingAppState();
 }
 
-class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
+class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
+    with WidgetsBindingObserver {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late StreamSubscription<Uri?> _subscription;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
+    _tryConsumingIncomingCallFromTerminatedState();
     _observeDeepLinks();
   }
 
@@ -80,6 +98,56 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
     );
   }
 
+  void _tryConsumingIncomingCallFromTerminatedState() {
+    if (_navigatorKey.currentContext == null) {
+      // App is not running yet. Postpone consuming after app is in the foreground
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        _consumeIncomingCall();
+      });
+    } else {
+      // no-op. If the app is already running we'll handle this in didChangeAppLifecycleState
+    }
+  }
+
+  Future<void> _consumeIncomingCall() async {
+    if (_navigatorKey.currentContext == null) {
+      return;
+    }
+    final incomingCall = await StreamVideo.instance.consumeIncomingCall();
+    if (incomingCall != null) {
+      Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
+        Routes.CALL,
+        arguments: incomingCall,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _consumeIncomingCall();
+        break;
+      case AppLifecycleState.inactive:
+        // widget is inactive
+        break;
+      case AppLifecycleState.paused:
+        // widget is paused
+        break;
+      case AppLifecycleState.detached:
+        // widget is detached
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final appTheme = StreamVideoTheme.light();
@@ -95,11 +163,5 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
       ),
       onGenerateRoute: AppRoutes.generateRoute,
     );
-  }
-
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
   }
 }

@@ -13,6 +13,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   firebase_core: ^2.4.1
   firebase_auth: ^4.2.5
+  firebase_messaging: ^14.2.1
   flutter_svg: ^1.1.6
   google_sign_in: ^5.4.4
   google_fonts: ^3.0.1

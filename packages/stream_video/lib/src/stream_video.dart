@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:logging/logging.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
@@ -18,6 +20,9 @@ import 'package:stream_video/src/options.dart';
 import 'package:stream_video/src/token/token.dart';
 import 'package:stream_video/src/token/token_manager.dart';
 import 'package:synchronized/synchronized.dart';
+
+import '../protobuf/video/coordinator/push_v1/push.pb.dart';
+import 'push_notification/push_notification_manager.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -98,7 +103,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     required Level logLevel,
     required LogHandlerFunction logHandlerFunction,
   }) {
-    // Preparing logger
+// Preparing logger
     setLogLevel(logLevel);
     setLogHandler(logHandlerFunction);
 
@@ -107,6 +112,13 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
       tokenManager: _tokenManager,
       baseUrl: coordinatorRpcUrl,
     );
+    _initPushNotification();
+  }
+
+  Future<void> _initPushNotification() async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    _pushNotificationManager = PushNotificationManager(
+        client: this, sharedPreferences: sharedPreferences);
   }
 
   static StreamVideo? _instance;
@@ -148,6 +160,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
 
   final _tokenManager = TokenManager();
   late final CoordinatorClient _client;
+  late final PushNotificationManager _pushNotificationManager;
 
   var _state = _StreamVideoState();
 
@@ -183,7 +196,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     logger.info('setting user : ${user.id}');
 
     _state.currentUser.value = user;
-    _tokenManager.setTokenOrProvider(
+    await _tokenManager.setTokenOrProvider(
       user.id,
       token: token,
       provider: provider,
@@ -197,7 +210,8 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
         tokenManager: _tokenManager,
       )..events.listen(events.emit);
 
-      return _ws!.connect();
+      await _ws!.connect();
+      return _pushNotificationManager.onUserLoggedIn();
     } catch (e, stk) {
       logger.severe('error connecting user : ${user.id}', e, stk);
       rethrow;
@@ -241,6 +255,19 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     );
 
     return response.call;
+  }
+
+  Future<Device> createDevice({required String token}) async {
+    final response = await _client.createDevice(
+      CreateDeviceRequest(
+        input: DeviceInput(
+          id: token,
+          pushProviderId: 'firebase',
+        ),
+      ),
+    );
+
+    return response.device;
   }
 
   Future<CallEnvelope> getOrCreateCall({
@@ -383,6 +410,14 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     );
 
     return response;
+  }
+
+  Future<bool> handlePushNotification(RemoteMessage remoteMessage) {
+    return _pushNotificationManager.handlePushNotification(remoteMessage);
+  }
+
+  Future<Call?> consumeIncomingCall() {
+    return _pushNotificationManager.consumeIncomingCall();
   }
 
   Future<Call> acceptCall({
