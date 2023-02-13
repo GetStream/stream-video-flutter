@@ -15,6 +15,7 @@ import 'package:stream_video/src/latency_service/latency.dart';
 import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/options.dart';
+import 'package:stream_video/src/push_notification/no_op_push_notification.dart';
 import 'package:stream_video/src/token/token.dart';
 import 'package:stream_video/src/token/token_manager.dart';
 import 'package:synchronized/synchronized.dart';
@@ -114,7 +115,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
   }
 
   Future<void> _initPushNotification() async {
-    _pushNotificationManager = await StreamPushNotificationManager.create(this);
+    _pushNotificationManager = NoOpPushNotificationManager();
   }
 
   static StreamVideo? _instance;
