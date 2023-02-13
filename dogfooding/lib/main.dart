@@ -1,17 +1,17 @@
 import 'dart:async';
 
-import 'package:dogfooding/src/routes/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:uni_links/uni_links.dart';
 
 import 'firebase_options.dart';
 import 'src/routes/app_routes.dart';
+import 'src/routes/routes.dart';
+import 'src/user_repository.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -34,8 +34,8 @@ Future<void> main() async {
 }
 
 void _initStreamVideo() {
-  if (!StreamVideo.isInitialized()) {
-    StreamVideo.init(
+  if (!StreamVideoV2.isInitialized()) {
+    StreamVideoV2.init(
       'us83cfwuhy8n', // see <video>/data/fixtures/apps.yaml for API secret
       coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
           'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
@@ -92,10 +92,27 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
 
   Future<void> _handleDeepLink(Uri uri) async {
     final callId = uri.pathSegments.last;
-    await _navigatorKey.currentState?.pushReplacementNamed(
-      Routes.JOIN,
-      arguments: callId,
-    );
+
+    final userCredentials = await UserRepository.instance.getUserCredentials();
+
+    if (userCredentials != null) {
+      final user = userCredentials.user;
+      final token = userCredentials.token;
+
+      await StreamVideoV2.instance.connectUser(
+        user,
+        token: Token(token),
+      );
+
+      final callCid = StreamCallCid.from(type: 'default', id: callId);
+      final data = await StreamVideoV2.instance.getOrCreateCall(cid: callCid);
+      final call = CallV2.fromCreated(data: data.getOrNull()!.data);
+
+      await _navigatorKey.currentState?.pushReplacementNamed(
+        Routes.CALL,
+        arguments: call,
+      );
+    }
   }
 
   void _tryConsumingIncomingCallFromTerminatedState() {

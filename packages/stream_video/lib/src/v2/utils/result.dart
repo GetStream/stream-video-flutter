@@ -176,6 +176,8 @@ extension PatternMatching<T> on Result<T> {
     }
   }
 
+  /// Returns the encapsulated value if this instance represents success
+  /// or null of it is failure.
   T? getOrNull() {
     switch (_type) {
       case _ResultType.success:

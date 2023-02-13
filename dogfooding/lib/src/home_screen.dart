@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:dogfooding/src/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import 'routes/routes.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -13,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final streamVideoClient = StreamVideo.instance;
+  final streamVideoClient = StreamVideoV2.instance;
   late final currentUser = streamVideoClient.currentUser!;
 
   final _callIdController = TextEditingController();
@@ -27,14 +28,11 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _isInProgress = true);
 
     try {
-      final call = await streamVideoClient.joinCall(
-        id: callId,
-        type: 'default',
-      );
+      final callCid = StreamCallCid.from(type: 'default', id: callId);
+      final data = await streamVideoClient.getOrCreateCall(cid: callCid);
+      final call = CallV2.fromCreated(data: data.getOrNull()!.data);
 
-      await call.connect();
-
-      Navigator.of(context).pushReplacementNamed(
+      await Navigator.of(context).pushReplacementNamed(
         Routes.CALL,
         arguments: call,
       );
@@ -68,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await streamVideoClient.disconnectUser();
-              Navigator.of(context).pushReplacementNamed(Routes.LOGIN);
+              await Navigator.of(context).pushReplacementNamed(Routes.LOGIN);
             },
           ),
         ],
