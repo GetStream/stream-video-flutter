@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:logging/logging.dart';
+import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
+import 'package:stream_video/protobuf/video/coordinator/push_v1/push.pb.dart';
 
 import '../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
     as rpc;
@@ -453,6 +455,19 @@ class StreamVideoV2Impl implements StreamVideoV2 {
         }),
       ),
     );
+  }
+
+  @override
+  Future<void> createDevice({
+    required String token,
+    required String pushProviderId,
+  }) async {
+    await _client.createDevice(CreateDeviceRequest(
+      input: DeviceInput(
+        id: token,
+        pushProviderId: pushProviderId,
+      ),
+    ));
   }
 }
 

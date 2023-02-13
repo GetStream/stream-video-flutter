@@ -115,6 +115,11 @@ abstract class StreamVideoV2 {
     required List<UserInfo> users,
   });
 
+  Future<void> createDevice({
+    required String token,
+    required String pushProviderId,
+  });
+
   static void init(
     String apiKey, {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
