@@ -51,6 +51,7 @@ class StreamCallParticipant extends StatelessWidget {
             VideoTrackRenderer(
               call: call,
               participant: participant,
+              videoTrackType: SfuTrackType.video,
               placeholderBuilder: (context) {
                 return Center(
                   child: StreamUserAvatar(

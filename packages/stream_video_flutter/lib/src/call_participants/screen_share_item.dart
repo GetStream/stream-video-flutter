@@ -42,6 +42,7 @@ class ScreenShareItem extends StatelessWidget {
             child: VideoTrackRenderer(
               call: call,
               participant: participant,
+              videoTrackType: SfuTrackType.screenShare,
             ),
           );
         },

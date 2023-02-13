@@ -3,28 +3,35 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
 import '../../../stream_video.dart';
-import '../model/call_track_state.dart';
 
 Widget _defaultPlaceholderBuilder(BuildContext context) => const Placeholder();
 
+/// Widget that renders a single video track based.
 class VideoTrackRenderer extends StatelessWidget {
+  /// Creates a new instance of [VideoTrackRenderer].
   const VideoTrackRenderer({
     super.key,
     required this.call,
     required this.participant,
+    required this.videoTrackType,
     this.placeholderBuilder = _defaultPlaceholderBuilder,
   });
 
+  /// Represents a call.
   final CallV2 call;
+
+  /// The participant who is publishing the track.
   final CallParticipantStateV2 participant;
+
+  /// The type of video track to display.
+  final SfuTrackTypeVideo videoTrackType;
+
+  /// A builder for the placeholder.
   final WidgetBuilder placeholderBuilder;
 
   @override
   Widget build(BuildContext context) {
-    final userId = participant.userId;
-    final trackState = participant.publishedTracks[SfuTrackType.video];
-    print('(D/SV:ParticipantView) [build] userId: $userId, '
-        'trackState: $trackState');
+    final trackState = participant.publishedTracks[videoTrackType];
 
     // Haven't published video track yet.
     if (trackState == null) {
@@ -34,11 +41,8 @@ class VideoTrackRenderer extends StatelessWidget {
     Widget buildRtcVideoView() {
       final track = call.getTrack(
         participant.trackIdPrefix,
-        SfuTrackType.video,
+        videoTrackType,
       )!;
-
-      print('(D/SV:ParticipantView) [buildRtcVideoView] userId: $userId, '
-          'trackState.muted: ${trackState.muted}');
 
       if (trackState.muted) return placeholderBuilder.call(context);
 
@@ -61,14 +65,13 @@ class VideoTrackRenderer extends StatelessWidget {
     }
     return _SizeChangedLayoutNotifier(
       onSizeChanged: (size) {
-        print('(D/SV:VideoTrackRenderer) [build] size: $size');
         WidgetsBinding.instance.addPostFrameCallback((_) {
           call.apply(
             UpdateSubscription(
               userId: participant.userId,
               sessionId: participant.sessionId,
               trackIdPrefix: participant.trackIdPrefix,
-              trackType: SfuTrackType.video,
+              trackType: videoTrackType,
               videoDimension: RtcVideoDimension(
                 width: size.width.toInt(),
                 height: size.height.toInt(),
