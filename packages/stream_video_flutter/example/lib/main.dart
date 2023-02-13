@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'env/env.dart';
+import 'foreground_service.dart';
 import 'screen/login_screen.dart';
+
+const _tag = 'MyApp';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +19,8 @@ Future<void> main() async {
     logLevel: LogLevel.all,
   );
 
+  ForegroundService.init();
+
   runApp(const MyApp());
 }
 
@@ -23,6 +29,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    streamLog.i(_tag, () => '[build] activeCall: ${Call.activeCall}');
+
     return MaterialApp(
       title: 'Stream Video UI Example',
       theme: ThemeData(

@@ -13,9 +13,14 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
    <application
         android:label="example"
-        android:name="${applicationName}"
+        android:name=".MyApp"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
@@ -43,5 +48,9 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+       <!-- Add android:stopWithTask option only when necessary. -->
+       <service
+           android:name="com.pravera.flutter_foreground_task.service.ForegroundService" />
     </application>
 </manifest>
