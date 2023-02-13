@@ -58,20 +58,8 @@ class _JoinCallTabState extends State<JoinCallTab> {
       return;
     }
 
-    setState(() => _callInProgress = true);
-
     final callCid = StreamCallCid.from(type: 'default', id: callId);
-    final result = await StreamVideoV2.instance.getOrCreateCall(cid: callCid);
-
-    result.when(
-      success: (data) {
-        final call = CallV2.fromCreated(data: data.data);
-        widget.onNavigateToCall(call);
-      },
-      failure: (error) {
-        setState(() => _callInProgress = false);
-        context.showSnackBar(error.message);
-      },
-    );
+    final call = CallV2.fromCid(callCid: callCid);
+    widget.onNavigateToCall(call);
   }
 }
