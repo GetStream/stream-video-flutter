@@ -21,7 +21,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> _handleRemoteMessage(RemoteMessage message) async {
-  await StreamVideo.instance.handlePushNotification(message);
+  await StreamVideo.instance.handlePushNotification(message.data);
 }
 
 Future<void> main() async {
