@@ -2,8 +2,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import 'package:stream_video/src/call/call.dart';
-import 'package:stream_video/src/push_notification/call_notification_wrapper.dart';
 import 'package:stream_video/src/stream_video.dart';
+import 'package:stream_video_push_notification/src/call_notification_wrapper.dart';
 
 class StreamVideoMock extends Mock implements StreamVideo {}
 

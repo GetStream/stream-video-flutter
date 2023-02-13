@@ -10,11 +10,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  shared_preferences: ^2.0.17
+  firebase_messaging: ^14.2.1
+  stream_video:
+    path: ../stream_video
+  flutter_callkit_incoming: ^1.0.3+3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  mocktail: ^0.3.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
