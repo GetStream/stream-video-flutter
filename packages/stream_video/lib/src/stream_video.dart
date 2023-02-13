@@ -114,7 +114,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
   }
 
   Future<void> _initPushNotification() async {
-    _pushNotificationManager = await PushNotificationManager.create(this);
+    _pushNotificationManager = await StreamPushNotificationManager.create(this);
   }
 
   static StreamVideo? _instance;

@@ -10,7 +10,7 @@ Future<void> main() async {
   final streamVideo = StreamVideoMock();
   final callNotificationWrapper = CallNotificationWrapperMock();
   final sharedPreferences = SharedPreferencesMock();
-  var sut = await PushNotificationManager.create(
+  var sut = await StreamPushNotificationManager.create(
     streamVideo,
     sharedPreferences: sharedPreferences,
     callNotification: callNotificationWrapper,
