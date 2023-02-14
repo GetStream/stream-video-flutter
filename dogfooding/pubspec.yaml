@@ -23,6 +23,8 @@ dependencies:
     path: ../packages/stream_video
   stream_video_flutter:
     path: ../packages/stream_video_flutter
+  stream_video_push_notification:
+    path: ../packages/stream_video_push_notification
 
 dev_dependencies:
   flutter_test:
