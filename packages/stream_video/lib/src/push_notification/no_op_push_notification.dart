@@ -1,10 +1,10 @@
 import 'package:stream_video/src/push_notification/push_notification_manager.dart';
 
-import '../call/call.dart';
+import '../../stream_video.dart';
 
 class NoOpPushNotificationManager implements PushNotificationManager {
   @override
-  Future<Call?> consumeIncomingCall() => Future.value();
+  Future<CallV2?> consumeIncomingCall() => Future.value();
 
   @override
   Future<bool> handlePushNotification(Map<String, dynamic> payload) =>

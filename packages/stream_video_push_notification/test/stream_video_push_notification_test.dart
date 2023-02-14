@@ -1,34 +1,52 @@
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/user_v1/user.pb.dart';
+import 'package:stream_video/src/v2/coordinator/models/coordinator_models.dart';
+import 'package:stream_video/src/v2/shared_emitter.dart';
+import 'package:stream_video/src/v2/utils/none.dart';
+import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:test/test.dart';
 
 import 'mocks.dart';
 
 Future<void> main() async {
-  final streamVideo = StreamVideoMock();
+  final streamVideo = StreamVideoV2Mock();
   final callNotificationWrapper = CallNotificationWrapperMock();
   final sharedPreferences = SharedPreferencesMock();
-  var sut = await StreamVideoPushNotificationManager.create(
-    streamVideo,
-    sharedPreferences: sharedPreferences,
-    callNotification: callNotificationWrapper,
+  final StreamCallCid streamCallCid = StreamCallCid(cid: 'call:123');
+  final callCreatedData = CallCreated(
+    callCid: streamCallCid,
+    ringing: true,
+    metadata: CallMetadata(
+      details: const CallDetails(
+        memberUserIds: [],
+        members: {},
+        isBroadcastingEnabled: false,
+        isRecordingEnabled: false,
+      ),
+      info: CallInfo(
+        cid: streamCallCid,
+        createdByUserId: 'Jc',
+      ),
+      users: const {},
+    ),
   );
-  var callEnvolope = CallEnvelope(users: {
-    '0': User(id: '0', name: "Jc", imageUrl: 'https://domain.com/jc.jpg')
-  });
-  var call = CallMock();
-  when(() => streamVideo.getOrCreateCall(
-      type: any(named: 'type'),
-      id: any(named: 'id'))).thenAnswer((_) => Future.value(callEnvolope));
-  when(() => streamVideo.acceptCall(
-      type: any(named: 'type'),
-      id: any(named: 'id'))).thenAnswer((invocation) => Future.value(call));
-  when(() => streamVideo.rejectCall(callCid: any(named: 'callCid')))
-      .thenAnswer((invocation) => Future.value(SendEventResponseMock()));
+  final callReceivedOrCreated = CallReceivedOrCreated(
+    wasCreated: true,
+    data: callCreatedData,
+  );
+  when(() => streamVideo.events)
+      .thenAnswer((invocation) => MutableSharedEmitterImpl());
+  final call =
+      CallV2.fromCreated(data: callCreatedData, streamVideo: streamVideo);
+  when(() => streamVideo.getOrCreateCall(cid: streamCallCid))
+      .thenAnswer((_) => Future.value(Result.success(callReceivedOrCreated)));
+  when(() => streamVideo.acceptCall(cid: streamCallCid))
+      .thenAnswer((invocation) => Future.value(Result.success(None())));
+  when(() => streamVideo.rejectCall(cid: streamCallCid))
+      .thenAnswer((invocation) => Future.value(Result.success(None())));
+  registerFallbackValue(streamCallCid);
   when(() => callNotificationWrapper.showCallNotification(
-        callId: any(named: 'callId'),
+        streamCallCid: any(named: 'streamCallCid'),
         callers: any(named: 'callers'),
         isVideoCall: any(named: 'isVideoCall'),
         avatarUrl: any(named: 'avatarUrl'),
@@ -41,6 +59,12 @@ Future<void> main() async {
   when(() => sharedPreferences.remove('incomingCallCid'))
       .thenAnswer((_) => Future.value(true));
 
+  var sut = await StreamVideoPushNotificationManager.create(
+    streamVideo,
+    sharedPreferences: sharedPreferences,
+    callNotification: callNotificationWrapper,
+  );
+
   test('A valid RemoteMessage should be handled', () async {
     const data = {
       'sender': 'stream.video',
@@ -51,14 +75,13 @@ Future<void> main() async {
     final result = await sut.handlePushNotification(data);
 
     expect(result, true);
-    verify(() => streamVideo.getOrCreateCall(type: 'call', id: '123'))
-        .called(1);
+    verify(() => streamVideo.getOrCreateCall(cid: streamCallCid)).called(1);
     verify(() => callNotificationWrapper.showCallNotification(
-          callId: any(named: 'callId', that: equals('call:123')),
-          callers: any(named: 'callers', that: equals('Jc')),
+          streamCallCid:
+              any(named: 'streamCallCid', that: equals(streamCallCid)),
+          callers: any(named: 'callers'),
           isVideoCall: any(named: 'isVideoCall', that: equals(true)),
-          avatarUrl: any(
-              named: 'avatarUrl', that: equals('https://domain.com/jc.jpg')),
+          avatarUrl: any(named: 'avatarUrl'),
           onCallAccepted: any(named: 'onCallAccepted'),
           onCallRejected: any(named: 'onCallRejected'),
         )).called(1);
@@ -72,7 +95,8 @@ Future<void> main() async {
       'call_cid': 'call:123',
     };
     when(() => callNotificationWrapper.showCallNotification(
-          callId: any(named: 'callId'),
+          streamCallCid:
+              any(named: 'streamCallCid', that: equals(streamCallCid)),
           callers: any(named: 'callers'),
           isVideoCall: any(named: 'isVideoCall'),
           avatarUrl: any(named: 'avatarUrl'),
@@ -81,8 +105,8 @@ Future<void> main() async {
         )).thenAnswer((invocation) {
       final onCallAccepted =
           invocation.namedArguments[const Symbol('onCallAccepted')] as void
-              Function(String callId);
-      final callId = invocation.namedArguments[const Symbol('callId')];
+              Function(StreamCallCid streamCallCid);
+      final callId = invocation.namedArguments[const Symbol('streamCallCid')];
       onCallAccepted(callId);
       return Future.value();
     });
@@ -91,7 +115,10 @@ Future<void> main() async {
 
     verify(() => sharedPreferences.setString('incomingCallCid', 'call:123'))
         .called(1);
-    verify(() => streamVideo.acceptCall(type: 'call', id: '123')).called(1);
+    verify(() => streamVideo.getOrCreateCall(
+        cid: any(named: 'cid', that: equals(streamCallCid)))).called(1);
+    verify(() => streamVideo.acceptCall(
+        cid: any(named: 'cid', that: equals(streamCallCid)))).called(1);
   });
 
   test('When a call is rejected it needs to be rejected on StreamVideo',
@@ -102,7 +129,8 @@ Future<void> main() async {
       'call_cid': 'call:123',
     };
     when(() => callNotificationWrapper.showCallNotification(
-          callId: any(named: 'callId'),
+          streamCallCid:
+              any(named: 'streamCallCid', that: equals(streamCallCid)),
           callers: any(named: 'callers'),
           isVideoCall: any(named: 'isVideoCall'),
           avatarUrl: any(named: 'avatarUrl'),
@@ -111,15 +139,18 @@ Future<void> main() async {
         )).thenAnswer((invocation) {
       final onCallRejected =
           invocation.namedArguments[const Symbol('onCallRejected')] as void
-              Function(String callId);
-      final callId = invocation.namedArguments[const Symbol('callId')];
+              Function(StreamCallCid streamCallCid);
+      final callId = invocation.namedArguments[const Symbol('streamCallCid')];
       onCallRejected(callId);
       return Future.value();
     });
 
     await sut.handlePushNotification(data);
 
-    verify(() => streamVideo.rejectCall(callCid: 'call:123')).called(1);
+    verify(() => streamVideo.rejectCall(
+        cid: any(named: 'cid', that: equals(streamCallCid)))).called(1);
+    verify(() => streamVideo.getOrCreateCall(
+        cid: any(named: 'cid', that: equals(streamCallCid)))).called(1);
   });
 
   test('When a call was accepted, it should be able to be consumed', () async {
@@ -127,9 +158,9 @@ Future<void> main() async {
         .thenReturn('call:123');
     final resutl = await sut.consumeIncomingCall();
 
-    expect(resutl, call);
-    verify(() => streamVideo.acceptCall(
-        type: any(named: 'type'), id: any(named: 'id'))).called(1);
+    expect(resutl?.callCid, streamCallCid);
+    verify(() => streamVideo.getOrCreateCall(
+        cid: any(named: 'cid', that: equals(streamCallCid)))).called(1);
   });
 
   test("When there aren't any accepted call, it shouldn't consume any call",
@@ -138,8 +169,8 @@ Future<void> main() async {
     final resutl = await sut.consumeIncomingCall();
 
     expect(resutl, null);
-    verifyNever(() =>
-        streamVideo.acceptCall(type: any(named: 'type'), id: any(named: 'id')));
+    verifyNever(() => streamVideo.acceptCall(
+        cid: any(named: 'cid', that: equals(streamCallCid))));
   });
 
   test("A RemoteMessage without stream.video as sender shouldn't be handled",

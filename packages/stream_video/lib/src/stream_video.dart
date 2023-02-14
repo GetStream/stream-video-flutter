@@ -415,8 +415,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
   }
 
   Future<Call?> consumeIncomingCall() {
-    return _pushNotificationManager?.consumeIncomingCall() ??
-        Future.value(null);
+    return Future.value(null);
   }
 
   Future<Call> acceptCall({
