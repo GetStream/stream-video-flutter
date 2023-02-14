@@ -4,12 +4,15 @@ import 'dart:convert';
 import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/push_v1/push.pb.dart';
+import 'package:stream_video/src/v2/call/call.dart';
 
 import '../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
     as rpc;
 import '../logger/impl/tagged_logger.dart';
 import '../logger/logger.dart';
 import '../models/user_info.dart';
+import '../push_notification/no_op_push_notification.dart';
+import '../push_notification/push_notification_manager.dart';
 import '../token/token.dart';
 import '../token/token_manager.dart';
 import 'coordinator/coordinator_client.dart';
@@ -31,8 +34,8 @@ import 'utils/result.dart';
 /// [LogRecord] as the only parameter.
 typedef LogHandlerFunction = void Function(LogRecord record);
 
-/// Handler function used for logging records. Function requires a single
-/// [LogRecord] as the only parameter.
+typedef PushNotificationFactory = Future<PushNotificationManager> Function(
+    StreamVideoV2);
 
 final _levelEmojiMapper = {
   Level.INFO: 'ℹ️',
@@ -61,6 +64,8 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     int latencyMeasurementRounds = 3,
     Level logLevel = Level.ALL,
     LogHandlerFunction logHandlerFunction = StreamVideoV2Impl.defaultLogHandler,
+    PushNotificationFactory pushNotificationFactrory =
+        defaultPushNotificationManager,
   }) {
     return StreamVideoV2Impl._(
       apiKey,
@@ -69,6 +74,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
       latencyMeasurementRounds: latencyMeasurementRounds,
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
+      pushNotificationFactrory: pushNotificationFactrory,
     );
   }
 
@@ -79,6 +85,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     required this.latencyMeasurementRounds,
     required Level logLevel,
     required LogHandlerFunction logHandlerFunction,
+    required PushNotificationFactory pushNotificationFactrory,
   }) {
     // Preparing logger
     setLogLevel(logLevel);
@@ -89,6 +96,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
       tokenManager: _tokenManager,
       baseUrl: coordinatorRpcUrl,
     );
+    _initPushNotificationManager(pushNotificationFactrory);
   }
 
   final _logger = taggedLogger(tag: 'SV:Client');
@@ -100,6 +108,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
 
   final _tokenManager = TokenManager();
   late final CoordinatorClientV2 _client;
+  late final PushNotificationManager _pushNotificationManager;
 
   var _state = _StreamVideoStateV2();
 
@@ -175,7 +184,8 @@ class StreamVideoV2Impl implements StreamVideoV2 {
         _events.emit(event);
       });
 
-      return _ws!.connect();
+      await _ws!.connect();
+      return _pushNotificationManager.onUserLoggedIn();
     } catch (e, stk) {
       logger.severe('error connecting user : ${user.id}', e, stk);
       rethrow;
@@ -468,6 +478,19 @@ class StreamVideoV2Impl implements StreamVideoV2 {
         pushProviderId: pushProviderId,
       ),
     ));
+  }
+
+  Future<bool> handlePushNotification(Map<String, dynamic> payload) {
+    return _pushNotificationManager.handlePushNotification(payload);
+  }
+
+  Future<CallV2?> consumeIncomingCall() {
+    return _pushNotificationManager.consumeIncomingCall();
+  }
+
+  Future<void> _initPushNotificationManager(
+      PushNotificationFactory pushNotificationManagerFactrory) async {
+    _pushNotificationManager = await pushNotificationManagerFactrory(this);
   }
 }
 

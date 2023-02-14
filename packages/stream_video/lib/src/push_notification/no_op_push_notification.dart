@@ -13,3 +13,7 @@ class NoOpPushNotificationManager implements PushNotificationManager {
   @override
   Future<void> onUserLoggedIn() => Future.value();
 }
+
+Future<PushNotificationManager> defaultPushNotificationManager(
+        StreamVideoV2 streamVideoV2) =>
+    Future.value(NoOpPushNotificationManager());
