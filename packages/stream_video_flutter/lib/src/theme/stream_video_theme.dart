@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide TextTheme;
 
+import '../utils/device_segmentation.dart';
 import 'stream_incoming_outgoing_call_theme.dart';
 import 'themes.dart';
 
@@ -115,7 +116,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         selectionThickness: 4,
       ),
       callParticipantTheme: StreamCallParticipantTheme(
-        focusedColor: colorTheme.accentPrimary,
+        showFocusedBorder: true,
+        borderRadius: isDesktopDevice
+            ? const BorderRadius.all(Radius.circular(12))
+            : BorderRadius.zero,
+        focusedBorderColor: colorTheme.accentInfo,
+        focusedBorderThickness: 4,
         backgroundColor: const Color(0xFF272A30),
         avatarTheme: StreamAvatarTheme(
           constraints: const BoxConstraints.tightFor(
@@ -137,7 +143,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       ),
       floatingCallParticipantTheme: StreamFloatingCallParticipantTheme(
         streamCallParticipantTheme: StreamCallParticipantTheme(
-          focusedColor: colorTheme.accentPrimary,
+          showFocusedBorder: false,
           backgroundColor: const Color(0xFF272A30),
           avatarTheme: StreamAvatarTheme(
             constraints: const BoxConstraints.tightFor(

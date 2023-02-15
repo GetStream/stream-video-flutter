@@ -307,14 +307,7 @@ class DesktopParticipantGrid extends StatelessWidget {
       columnCount: columnCount,
       itemSpacing: 16,
       edgeInsets: const EdgeInsets.all(16),
-      children: participants
-          .map(
-            (participant) => ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: participant,
-            ),
-          )
-          .toList(),
+      children: participants,
     );
   }
 }
