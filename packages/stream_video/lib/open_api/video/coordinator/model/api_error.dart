@@ -99,10 +99,10 @@ class APIError {
 
       return APIError(
         statusCode: json[r'StatusCode'] == null
-            ? null
+            ? -1
             : num.parse(json[r'StatusCode'].toString()),
         code: json[r'code'] == null
-            ? null
+            ? -1
             : num.parse(json[r'code'].toString()),
         details: json[r'details'] is List
             ? (json[r'details'] as List).cast<num>()

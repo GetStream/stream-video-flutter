@@ -76,7 +76,7 @@ class CallUpdated {
         call: CallResponse.fromJson(json[r'call'])!,
         capabilitiesByRole: json[r'capabilities_by_role'] == null
           ? const {}
-            : mapCastOfType<String, List>(json, r'capabilities_by_role'),
+            : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
         createdAt: mapDateTime(json, r'created_at', '')!,
         type: mapValueOfType<String>(json, r'type')!,
       );

@@ -57,7 +57,7 @@ class GetCallEdgeServerRequest {
       return GetCallEdgeServerRequest(
         latencyMeasurements: json[r'latency_measurements'] == null
           ? const {}
-            : mapCastOfType<String, List>(json, r'latency_measurements'),
+            : mapCastOfType<String, List<double>>(json, r'latency_measurements') ?? const {},
       );
     }
     return null;
