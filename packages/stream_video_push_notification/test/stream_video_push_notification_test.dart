@@ -27,7 +27,20 @@ Future<void> main() async {
         cid: streamCallCid,
         createdByUserId: 'Jc',
       ),
-      users: const {},
+      users: const {
+        'jc': CallUser(
+            id: "jc",
+            name: "Jc",
+            role: "role",
+            imageUrl: "https://mydomain.io/jc.png",
+            teams: []),
+        'isa': CallUser(
+            id: "isa",
+            name: "Isa",
+            role: "role",
+            imageUrl: "https://mydomain.io/isa.png",
+            teams: []),
+      },
     ),
   );
   final callReceivedOrCreated = CallReceivedOrCreated(
@@ -79,9 +92,10 @@ Future<void> main() async {
     verify(() => callNotificationWrapper.showCallNotification(
           streamCallCid:
               any(named: 'streamCallCid', that: equals(streamCallCid)),
-          callers: any(named: 'callers'),
+          callers: any(named: 'callers', that: equals("Jc, Isa")),
           isVideoCall: any(named: 'isVideoCall', that: equals(true)),
-          avatarUrl: any(named: 'avatarUrl'),
+          avatarUrl: any(
+              named: 'avatarUrl', that: equals("https://mydomain.io/jc.png")),
           onCallAccepted: any(named: 'onCallAccepted'),
           onCallRejected: any(named: 'onCallRejected'),
         )).called(1);
@@ -158,7 +172,7 @@ Future<void> main() async {
         .thenReturn('call:123');
     final result = await sut.consumeIncomingCall();
 
-    expect(result?.callCid, streamCallCid);
+    expect(result, callCreatedData);
     verify(() => streamVideo.getOrCreateCall(
         cid: any(named: 'cid', that: equals(streamCallCid)))).called(1);
   });

@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:logging/logging.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/push_v1/push.pb.dart';
-import 'package:stream_video/src/v2/call/call.dart';
 
 import '../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
     as rpc;
@@ -485,7 +484,8 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     return _pushNotificationManager.handlePushNotification(payload);
   }
 
-  Future<CallV2?> consumeIncomingCall() {
+  @override
+  Future<CallCreated?> consumeIncomingCall() {
     return _pushNotificationManager.consumeIncomingCall();
   }
 

@@ -4,7 +4,7 @@ import '../../stream_video.dart';
 
 class NoOpPushNotificationManager implements PushNotificationManager {
   @override
-  Future<CallV2?> consumeIncomingCall() => Future.value();
+  Future<CallCreated?> consumeIncomingCall() => Future.value();
 
   @override
   Future<bool> handlePushNotification(Map<String, dynamic> payload) =>
@@ -15,5 +15,6 @@ class NoOpPushNotificationManager implements PushNotificationManager {
 }
 
 Future<PushNotificationManager> defaultPushNotificationManager(
-        StreamVideoV2 streamVideoV2) =>
+  StreamVideoV2 streamVideoV2,
+) =>
     Future.value(NoOpPushNotificationManager());

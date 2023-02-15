@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:logging/logging.dart';
 import 'package:stream_video/src/push_notification/no_op_push_notification.dart';
-import 'package:stream_video/src/v2/call/call.dart';
 
 import '../models/user_info.dart';
 import '../token/token.dart';
@@ -125,7 +124,7 @@ abstract class StreamVideoV2 {
 
   Future<bool> handlePushNotification(Map<String, dynamic> payload);
 
-  Future<CallV2?> consumeIncomingCall();
+  Future<CallCreated?> consumeIncomingCall();
 
   static void init(
     String apiKey, {

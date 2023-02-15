@@ -51,11 +51,9 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       if (call != null) {
         await _callNotification.showCallNotification(
           streamCallCid: streamCallCid,
-          callers:
-              call.state.value.callParticipants.map((e) => e.name).join(', '),
+          callers: call.metadata.users.values.map((e) => e.name).join(', '),
           isVideoCall: true,
-          avatarUrl:
-              call.state.value.callParticipants.firstOrNull?.profileImageURL,
+          avatarUrl: call.metadata.users.values.firstOrNull?.imageUrl,
           onCallAccepted: _acceptCall,
           onCallRejected: _rejectCall,
         );
@@ -91,16 +89,13 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     return Firebase.apps.isNotEmpty;
   }
 
-  Future<CallV2?> _from(StreamCallCid streamCallCid) async {
-    final data =
-        (await _client.getOrCreateCall(cid: streamCallCid)).getOrNull()?.data;
-    if (data != null) {
-      return CallV2.fromCreated(data: data, streamVideo: _client);
-    }
-    return Future.value();
+  Future<CallCreated?> _from(StreamCallCid streamCallCid) async {
+    return (await _client.getOrCreateCall(cid: streamCallCid))
+        .getOrNull()
+        ?.data;
   }
 
-  Future<CallV2?> consumeIncomingCall() async {
+  Future<CallCreated?> consumeIncomingCall() async {
     // We need to wait for a second to be sure sharedPreferences has been updated
     await _sharedPreferences.reload();
     final incomingCallCid = _sharedPreferences.getString('incomingCallCid');

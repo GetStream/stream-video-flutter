@@ -141,7 +141,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     if (incomingCall != null) {
       Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
         Routes.CALL,
-        arguments: incomingCall,
+        arguments: CallV2.fromCreated(data: incomingCall),
       );
     }
   }
