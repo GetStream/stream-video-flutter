@@ -15,10 +15,13 @@ import '../push_notification/push_notification_manager.dart';
 import '../token/token.dart';
 import '../token/token_manager.dart';
 import 'coordinator/coordinator_client.dart';
+import 'coordinator/coordinator_ws.dart';
+import 'coordinator/models/coordinator_events.dart';
+import 'coordinator/models/coordinator_input.dart' as input;
 import 'coordinator/models/coordinator_models.dart';
-import 'coordinator/ws/coordinator_events.dart';
-import 'coordinator/ws/coordinator_ws.dart';
-import 'coordinator/ws/mapper_extensions.dart';
+import 'coordinator/protobuf/coordinator_client_protobuf.dart';
+import 'coordinator/protobuf/coordinator_ws_protobuf.dart';
+import 'coordinator/protobuf/mapper_extensions.dart';
 import 'model/call_cid.dart';
 import 'model/call_created.dart';
 import 'model/call_joined.dart';
@@ -90,7 +93,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     setLogLevel(logLevel);
     setLogHandler(logHandlerFunction);
 
-    _client = CoordinatorClientV2(
+    _client = CoordinatorClientProtobuf(
       apiKey: apiKey,
       tokenManager: _tokenManager,
       baseUrl: coordinatorRpcUrl,
@@ -154,7 +157,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     );
 
     try {
-      _ws = CoordinatorWebSocketV2(
+      _ws = CoordinatorWebSocketProtobuf(
         coordinatorWsUrl,
         apiKey: apiKey,
         userInfo: user,
@@ -241,7 +244,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
       ),
     );
 
-    return response.map(
+    return response.fold(
       success: (it) {
         final finalResult = CallCreated(
           callCid: cid,
@@ -292,7 +295,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
       ),
     );
 
-    return response.map(
+    return response.fold(
       success: (it) {
         final finalResult = CallReceivedOrCreated(
           wasCreated: it.data.created,
@@ -362,7 +365,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   }) async {
     return _sendEvent(
       cid: cid,
-      eventType: rpc.UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL,
+      eventType: input.EventTypeInput.accepted,
     );
   }
 
@@ -372,7 +375,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   }) async {
     return _sendEvent(
       cid: cid,
-      eventType: rpc.UserEventType.USER_EVENT_TYPE_REJECTED_CALL,
+      eventType: input.EventTypeInput.rejected,
     );
   }
 
@@ -382,22 +385,22 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   }) async {
     return _sendEvent(
       cid: cid,
-      eventType: rpc.UserEventType.USER_EVENT_TYPE_CANCELLED_CALL,
+      eventType: input.EventTypeInput.cancelled,
     );
   }
 
   Future<Result<None>> _sendEvent({
     required StreamCallCid cid,
-    required rpc.UserEventType eventType,
+    required input.EventTypeInput eventType,
   }) async {
     final result = await _client.sendUserEvent(
-      rpc.SendEventRequest(
-        callCid: cid.value,
+      input.EventInput(
+        callCid: cid,
         eventType: eventType,
       ),
     );
 
-    return result.map(
+    return result.fold(
       success: (_) => Result.success(None()),
       failure: (it) => it,
     );
@@ -406,18 +409,18 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   @override
   Future<Result<None>> sendCustomEvent({
     required StreamCallCid cid,
-    required List<int> dataJson,
-    String? eventType,
+    required String eventType,
+    required Map<String, dynamic> dataJson,
   }) async {
     final result = await _client.sendCustomEvent(
-      rpc.SendCustomEventRequest(
-        callCid: cid.value,
+      input.CustomEventInput(
+        callCid: cid,
+        eventType: eventType,
         dataJson: dataJson,
-        type: eventType,
       ),
     );
 
-    return result.map(
+    return result.fold(
       success: (_) => Result.success(None()),
       failure: (it) => it,
     );
@@ -441,7 +444,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     _logger.v(() => '[queryUsers] request: $request');
     final usersResult = await _client.queryUsers(request);
 
-    return usersResult.map(
+    return usersResult.fold(
       success: (it) {
         final users = it.data.users.toCallUsers();
         _logger.v(() => '[queryUsers] completed: $users');
@@ -452,16 +455,16 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   }
 
   @override
-  Future<void> inviteUsers({
+  Future<Result<None>> inviteUsers({
     required String callCid,
     required List<UserInfo> users,
   }) async {
-    await _client.inviteUsers(
-      rpc.UpsertCallMembersRequest(
-        callCid: callCid,
+    return _client.inviteUsers(
+      input.UpsertCallMembersInput(
+        callCid: StreamCallCid(cid: callCid),
         members: users.map((user) {
-          return rpc.MemberInput(userId: user.id, role: user.role);
-        }),
+          return input.MemberInput(userId: user.id, role: user.role);
+        }).toList(),
       ),
     );
   }

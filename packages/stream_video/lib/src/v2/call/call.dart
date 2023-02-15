@@ -82,5 +82,5 @@ abstract class CallV2 {
 
   RtcTrack? getTrack(String trackIdPrefix, SfuTrackType trackType);
 
-  Future<void> inviteUsers(List<UserInfo> users);
+  Future<Result<None>> inviteUsers(List<UserInfo> users);
 }

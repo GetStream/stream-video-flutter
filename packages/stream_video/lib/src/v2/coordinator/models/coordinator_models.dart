@@ -3,7 +3,18 @@ import 'package:meta/meta.dart';
 
 import '../../model/call_cid.dart';
 
-class CallMetadata extends Equatable {
+@immutable
+abstract class CoordinatorModelV2 with EquatableMixin {
+  const CoordinatorModelV2();
+
+  @override
+  bool? get stringify => true;
+
+  @override
+  List<Object?> get props => const [];
+}
+
+class CallMetadata extends CoordinatorModelV2 {
   const CallMetadata({
     required this.details,
     required this.info,
@@ -22,7 +33,7 @@ class CallMetadata extends Equatable {
   }
 }
 
-class CallSfuServer extends Equatable {
+class CallSfuServer extends CoordinatorModelV2 {
   const CallSfuServer({
     required this.name,
     required this.url,
@@ -39,7 +50,7 @@ class CallSfuServer extends Equatable {
   }
 }
 
-class CallIceServer extends Equatable {
+class CallIceServer extends CoordinatorModelV2 {
   const CallIceServer({
     required this.username,
     required this.password,
@@ -60,7 +71,7 @@ class CallIceServer extends Equatable {
 }
 
 @immutable
-class CallCredentials extends Equatable {
+class CallCredentials extends CoordinatorModelV2 {
   const CallCredentials({
     required this.sfuServer,
     required this.sfuToken,
@@ -81,7 +92,7 @@ class CallCredentials extends Equatable {
 }
 
 @immutable
-class CallInfo extends Equatable {
+class CallInfo extends CoordinatorModelV2 {
   const CallInfo({
     required this.cid,
     required this.createdByUserId,
@@ -111,7 +122,7 @@ class CallInfo extends Equatable {
 }
 
 @immutable
-class CallDetails extends Equatable {
+class CallDetails extends CoordinatorModelV2 {
   const CallDetails({
     required this.memberUserIds,
     required this.members,
@@ -140,7 +151,7 @@ class CallDetails extends Equatable {
   }
 }
 
-class CallMember extends Equatable {
+class CallMember extends CoordinatorModelV2 {
   const CallMember({
     required this.callCid,
     required this.userId,
@@ -171,7 +182,7 @@ class CallMember extends Equatable {
   }
 }
 
-class CallUser extends Equatable {
+class CallUser extends CoordinatorModelV2 {
   const CallUser({
     required this.id,
     required this.name,
@@ -210,4 +221,54 @@ class CallUser extends Equatable {
         'teams: $teams, createdAt: $createdAt, updatedAt: $updatedAt, '
         'customJson: $customJson}';
   }
+}
+
+class SfuEdge extends CoordinatorModelV2 {
+  const SfuEdge({
+    this.name,
+    this.latencyUrl,
+    this.coordinates,
+  });
+
+  final String? name;
+  final String? latencyUrl;
+  final Coordinates? coordinates;
+
+  @override
+  List<Object?> get props => [name, latencyUrl, coordinates];
+}
+
+class Coordinates extends CoordinatorModelV2 {
+  const Coordinates(this.lat, this.lng);
+
+  final double? lat;
+  final double? lng;
+
+  @override
+  List<Object?> get props => [lat, lng];
+}
+
+class Device extends CoordinatorModelV2 {
+  const Device({
+    required this.userId,
+    required this.pushToken,
+    required this.pushProviderName,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  final String userId;
+  final String pushToken;
+  final String pushProviderName;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  @override
+  List<Object?> get props => [
+        userId,
+        pushProviderName,
+        pushToken,
+        createdAt,
+        updatedAt,
+      ];
 }

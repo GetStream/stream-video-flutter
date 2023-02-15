@@ -426,7 +426,7 @@ class CallV2Impl extends CallV2 {
   }
 
   @override
-  Future<void> inviteUsers(List<UserInfo> users) {
+  Future<Result<None>> inviteUsers(List<UserInfo> users) {
     return _streamVideo.inviteUsers(callCid: callCid.value, users: users);
   }
 }

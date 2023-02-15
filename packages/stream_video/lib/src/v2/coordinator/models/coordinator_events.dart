@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import '../models/coordinator_models.dart';
+import 'coordinator_models.dart';
 
 // TODO: Should we call it VideoEvent or CoordinatorEvent?
 

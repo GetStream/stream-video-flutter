@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import '../../../../protobuf/video/coordinator/call_v1/call.pb.dart'
     as coordinator_call;
+import '../../../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
+    as rpc;
 import '../../../../protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart'
     as coordinator_envelopes;
 import '../../../../protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart'
@@ -13,9 +15,9 @@ import '../../../../protobuf/video/coordinator/user_v1/user.pb.dart'
     as coord_users;
 import '../../../logger/logger.dart';
 import '../../model/call_cid.dart';
-import '../../utils/result.dart';
+import '../models/coordinator_events.dart';
+import '../models/coordinator_input.dart';
 import '../models/coordinator_models.dart';
-import 'coordinator_events.dart';
 
 /// Converts [coordinator_ws.WebsocketEvent] into [CoordinatorEventV2].
 extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
@@ -189,5 +191,20 @@ extension UserListExt on List<coord_users.User> {
 extension UserMapExt on Map<String, coord_users.User> {
   Map<String, CallUser> toCallUsers() {
     return map((key, value) => MapEntry(key, value.toCallUser()));
+  }
+}
+
+extension EventTypeInputExt on EventTypeInput {
+  rpc.UserEventType toDto() {
+    switch (this) {
+      case EventTypeInput.accepted:
+        return rpc.UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL;
+      case EventTypeInput.rejected:
+        return rpc.UserEventType.USER_EVENT_TYPE_REJECTED_CALL;
+      case EventTypeInput.cancelled:
+        return rpc.UserEventType.USER_EVENT_TYPE_CANCELLED_CALL;
+      default:
+        return rpc.UserEventType.USER_EVENT_TYPE_UNSPECIFIED;
+    }
   }
 }

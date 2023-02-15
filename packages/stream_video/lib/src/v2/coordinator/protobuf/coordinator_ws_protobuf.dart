@@ -13,14 +13,15 @@ import '../../../types/other.dart';
 import '../../../ws/keep_alive.dart';
 import '../../../ws/ws.dart';
 import '../../shared_emitter.dart';
-import 'coordinator_events.dart';
+import '../coordinator_ws.dart';
+import '../models/coordinator_events.dart';
 import 'mapper_extensions.dart';
 
 // TODO: The class needs further refactor. Some parts can be abstracted.
 
-class CoordinatorWebSocketV2 extends StreamWebSocket
+class CoordinatorWebSocketProtobuf extends CoordinatorWebSocketV2
     with KeepAlive, ConnectionStateMixin {
-  CoordinatorWebSocketV2(
+  CoordinatorWebSocketProtobuf(
     super.url, {
     super.protocols,
     required this.apiKey,
@@ -39,6 +40,7 @@ class CoordinatorWebSocketV2 extends StreamWebSocket
   /// The token manager used to fetch or refresh token.
   final TokenManager tokenManager;
 
+  @override
   SharedEmitter<CoordinatorEventV2> get events => _events;
   final _events = MutableSharedEmitterImpl<CoordinatorEventV2>();
 

@@ -6,8 +6,8 @@ import 'package:stream_video/src/push_notification/no_op_push_notification.dart'
 import '../models/user_info.dart';
 import '../token/token.dart';
 import '../token/token_manager.dart';
+import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/models/coordinator_models.dart';
-import 'coordinator/ws/coordinator_events.dart';
 import 'internal/_instance_holder.dart';
 import 'model/call_cid.dart';
 import 'model/call_created.dart';
@@ -103,8 +103,8 @@ abstract class StreamVideoV2 {
 
   Future<Result<None>> sendCustomEvent({
     required StreamCallCid cid,
-    required List<int> dataJson,
-    String? eventType,
+    required String eventType,
+    required Map<String, dynamic> dataJson,
   });
 
   // TODO replace with domain users
@@ -112,7 +112,7 @@ abstract class StreamVideoV2 {
     required Set<String> userIds,
   });
 
-  Future<void> inviteUsers({
+  Future<Result<None>> inviteUsers({
     required String callCid,
     required List<UserInfo> users,
   });

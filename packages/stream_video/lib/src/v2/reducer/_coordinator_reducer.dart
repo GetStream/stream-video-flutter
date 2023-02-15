@@ -4,7 +4,7 @@ import '../../logger/impl/tagged_logger.dart';
 import '../action/coordinator_action.dart';
 import '../call_participant_state.dart';
 import '../call_state.dart';
-import '../coordinator/ws/coordinator_events.dart';
+import '../coordinator/models/coordinator_events.dart';
 import '../model/call_status.dart';
 import '../model/drop_reason.dart';
 
