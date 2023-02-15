@@ -22,6 +22,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   final CallNotificationWrapper _callNotification;
   final SharedPreferences _sharedPreferences;
 
+  @override
   Future<void> onUserLoggedIn() async {
     if (_isFirebaseInitialized()) {
       FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
@@ -41,6 +42,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     await _client.createDevice(token: token, pushProviderId: 'firebase');
   }
 
+  @override
   Future<bool> handlePushNotification(Map<String, dynamic> payload) async {
     if (_isValid(payload)) {
       final cid = payload['call_cid'] as String;

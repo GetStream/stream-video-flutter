@@ -156,9 +156,9 @@ Future<void> main() async {
   test('When a call was accepted, it should be able to be consumed', () async {
     when(() => sharedPreferences.getString('incomingCallCid'))
         .thenReturn('call:123');
-    final resutl = await sut.consumeIncomingCall();
+    final result = await sut.consumeIncomingCall();
 
-    expect(resutl?.callCid, streamCallCid);
+    expect(result?.callCid, streamCallCid);
     verify(() => streamVideo.getOrCreateCall(
         cid: any(named: 'cid', that: equals(streamCallCid)))).called(1);
   });
@@ -166,9 +166,9 @@ Future<void> main() async {
   test("When there aren't any accepted call, it shouldn't consume any call",
       () async {
     when(() => sharedPreferences.getString('incomingCallCid')).thenReturn(null);
-    final resutl = await sut.consumeIncomingCall();
+    final result = await sut.consumeIncomingCall();
 
-    expect(resutl, null);
+    expect(result, null);
     verifyNever(() => streamVideo.acceptCall(
         cid: any(named: 'cid', that: equals(streamCallCid))));
   });

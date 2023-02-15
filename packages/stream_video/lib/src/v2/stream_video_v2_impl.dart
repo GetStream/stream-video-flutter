@@ -480,6 +480,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     ));
   }
 
+  @override
   Future<bool> handlePushNotification(Map<String, dynamic> payload) {
     return _pushNotificationManager.handlePushNotification(payload);
   }
