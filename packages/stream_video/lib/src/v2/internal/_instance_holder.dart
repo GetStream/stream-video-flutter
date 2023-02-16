@@ -15,6 +15,7 @@ class InstanceHolder {
     required int latencyMeasurementRounds,
     required Level logLevel,
     required LogHandlerFunction logHandlerFunction,
+    required PushNotificationFactory pushNotificationFactory,
   }) {
     if (_instance != null) {
       throw Exception('''
@@ -30,6 +31,7 @@ class InstanceHolder {
       latencyMeasurementRounds: latencyMeasurementRounds,
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
+      pushNotificationFactrory: pushNotificationFactory,
     );
   }
 

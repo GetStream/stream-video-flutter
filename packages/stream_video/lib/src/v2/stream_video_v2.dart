@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:logging/logging.dart';
+import 'package:stream_video/src/push_notification/no_op_push_notification.dart';
 
 import '../models/user_info.dart';
 import '../token/token.dart';
@@ -35,14 +36,14 @@ const _defaultCoordinatorWsUrl =
 
 /// The client responsible for handling config and maintaining calls
 abstract class StreamVideoV2 {
-  factory StreamVideoV2(
-    String apiKey, {
-    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
-    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
-    int latencyMeasurementRounds = 3,
-    Level logLevel = Level.ALL,
-    LogHandlerFunction logHandlerFunction = _defaultLogHandler,
-  }) {
+  factory StreamVideoV2(String apiKey,
+      {String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
+      String coordinatorWsUrl = _defaultCoordinatorWsUrl,
+      int latencyMeasurementRounds = 3,
+      Level logLevel = Level.ALL,
+      LogHandlerFunction logHandlerFunction = _defaultLogHandler,
+      PushNotificationFactory pushNotificationFactory =
+          defaultPushNotificationManager}) {
     return StreamVideoV2Impl(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
@@ -50,6 +51,7 @@ abstract class StreamVideoV2 {
       latencyMeasurementRounds: latencyMeasurementRounds,
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
+      pushNotificationFactrory: pushNotificationFactory,
     );
   }
   static final InstanceHolder _instanceHolder = InstanceHolder();
@@ -115,6 +117,15 @@ abstract class StreamVideoV2 {
     required List<UserInfo> users,
   });
 
+  Future<void> createDevice({
+    required String token,
+    required String pushProviderId,
+  });
+
+  Future<bool> handlePushNotification(Map<String, dynamic> payload);
+
+  Future<CallCreated?> consumeIncomingCall();
+
   static void init(
     String apiKey, {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
@@ -122,6 +133,8 @@ abstract class StreamVideoV2 {
     int latencyMeasurementRounds = 3,
     Level logLevel = Level.OFF,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
+    PushNotificationFactory pushNotificationFactory =
+        defaultPushNotificationManager,
   }) {
     _instanceHolder.init(
       apiKey,
@@ -130,6 +143,7 @@ abstract class StreamVideoV2 {
       latencyMeasurementRounds: latencyMeasurementRounds,
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
+      pushNotificationFactory: pushNotificationFactory,
     );
   }
 
