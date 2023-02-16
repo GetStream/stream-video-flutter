@@ -194,7 +194,7 @@ class CallControlReducer {
                 if (deviceId != null) {
                   return trackState.copyWith(
                     deviceId: deviceId,
-                    // CameraPosition is always going to be front on web.
+                    // CameraPosition is always going to be front on web running on desktop.
                     cameraPosition: CameraPositionV2.front,
                   );
                 }
