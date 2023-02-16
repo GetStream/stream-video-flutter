@@ -41,6 +41,8 @@ class SfuReducer {
       return _reduceTrackPublished(state, event);
     } else if (event is SfuTrackUnpublishedEvent) {
       return _reduceTrackUnpublished(state, event);
+    } else if (event is SfuDominantSpeakerChangedEvent) {
+      return _reduceDominantSpeakerChanged(state, event);
     }
     return state;
   }
@@ -187,6 +189,30 @@ class SfuReducer {
         } else {
           return participant;
         }
+      }).toList(),
+    );
+  }
+
+  CallStateV2 _reduceDominantSpeakerChanged(
+    CallStateV2 state,
+    SfuDominantSpeakerChangedEvent event,
+  ) {
+    return state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        // Mark the new dominant speaker
+        if (participant.userId == event.userId &&
+            participant.sessionId == event.sessionId) {
+          return participant.copyWith(
+            isDominantSpeaker: true,
+          );
+        }
+        // Unmark the old dominant speaker
+        if (participant.isDominantSpeaker) {
+          return participant.copyWith(
+            isDominantSpeaker: false,
+          );
+        }
+        return participant;
       }).toList(),
     );
   }
