@@ -1,6 +1,5 @@
 import '../../../stream_video.dart';
-import '../../logger/stream_logger.dart';
-import '../model/call_track_state.dart';
+import '../../platform_detector/platform_detector.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-Control');
 
@@ -23,6 +22,8 @@ class CallControlReducer {
       return _reduceMicrophoneEnabled(state, action);
     } else if (action is SetScreenShareEnabled) {
       return _reduceScreenShareEnabled(state, action);
+    } else if (action is SwitchCamera) {
+      return _reduceSwitchCamera(state, action);
     } else if (action is SetCameraPosition) {
       return _reduceCameraPosition(state, action);
     } else if (action is UpdateSubscriptions) {
@@ -169,6 +170,46 @@ class CallControlReducer {
                 SfuTrackType.video: trackState.copyWith(
                   cameraPosition: action.cameraPosition,
                 ),
+              },
+            );
+          }
+        }
+        return participant;
+      }).toList(),
+    );
+  }
+
+  CallStateV2 _reduceSwitchCamera(
+    CallStateV2 state,
+    SwitchCamera action,
+  ) {
+    return state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.isLocal) {
+          final trackState = participant.publishedTracks[SfuTrackType.video];
+          if (trackState is LocalTrackState) {
+            LocalTrackState getUpdatedState() {
+              if (CurrentPlatform.isWeb) {
+                final deviceId = action.deviceId;
+                if (deviceId != null) {
+                  return trackState.copyWith(
+                    deviceId: deviceId,
+                    // CameraPosition is always going to be front on web.
+                    cameraPosition: CameraPositionV2.front,
+                  );
+                }
+              }
+
+              return trackState.copyWith(
+                cameraPosition: trackState.cameraPosition?.switched(),
+              );
+            }
+
+            final updatedState = getUpdatedState();
+            return participant.copyWith(
+              publishedTracks: {
+                ...participant.publishedTracks,
+                SfuTrackType.video: updatedState,
               },
             );
           }

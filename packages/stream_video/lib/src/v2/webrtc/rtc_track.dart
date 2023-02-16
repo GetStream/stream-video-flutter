@@ -57,7 +57,6 @@ class RtcRemoteTrack extends RtcTrack {
     RtcVideoDimension? videoDimension,
     rtc.RTCRtpReceiver? receiver,
     rtc.RTCRtpTransceiver? transceiver,
-    bool? muted,
   }) {
     return RtcRemoteTrack(
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
@@ -84,6 +83,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     required super.stream,
     required super.track,
     required this.mediaConstraints,
+    this.stopTrackOnMute = true,
     super.videoDimension,
     super.receiver,
     super.transceiver,
@@ -95,6 +95,11 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   /// For example, if the user changes the camera.
   final T mediaConstraints;
 
+  /// Whether to stop the track when the user mutes it.
+  ///
+  /// This is used to avoid the track indicator light remaining on.
+  final bool stopTrackOnMute;
+
   @override
   RtcLocalTrack<T> copyWith({
     String? trackIdPrefix,
@@ -102,10 +107,10 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     rtc.MediaStream? stream,
     rtc.MediaStreamTrack? track,
     T? mediaConstraints,
+    bool? stopTrackOnMute,
     RtcVideoDimension? videoDimension,
     rtc.RTCRtpReceiver? receiver,
     rtc.RTCRtpTransceiver? transceiver,
-    bool? muted,
   }) {
     return RtcLocalTrack(
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
@@ -113,6 +118,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       stream: stream ?? this.stream,
       track: track ?? this.track,
       mediaConstraints: mediaConstraints ?? this.mediaConstraints,
+      stopTrackOnMute: stopTrackOnMute ?? this.stopTrackOnMute,
       videoDimension: videoDimension ?? this.videoDimension,
       receiver: receiver ?? this.receiver,
       transceiver: transceiver ?? this.transceiver,

@@ -152,6 +152,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return _onSetMicrophoneEnabled(action.enabled);
     } else if (action is SetScreenShareEnabled) {
       return _onSetScreenShareEnabled(action.enabled);
+    } else if (action is SwitchCamera) {
+      return _onSwitchCamera(action.deviceId);
     } else if (action is SetCameraPosition) {
       return _onSetCameraPosition(action.cameraPosition);
     } else if (action is UpdateSubscriptions) {
@@ -377,6 +379,16 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         'Unable to enable/disable screen-share, Track not found',
       );
     }
+
+    return Result.success(None());
+  }
+
+  Future<Result<None>> _onSwitchCamera(String? deviceId) async {
+    final track = await rtcManager?.switchCamera(deviceId: deviceId);
+    if (track == null) {
+      return Result.error('Unable to switch camera, Track not found');
+    }
+
     return Result.success(None());
   }
 
