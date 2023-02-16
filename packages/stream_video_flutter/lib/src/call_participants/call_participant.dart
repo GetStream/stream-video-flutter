@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../stream_video_flutter.dart';
-import '../utils/device_segmentation.dart';
 import '../utils/extensions.dart';
 import 'indicators/connection_quality_indicator.dart';
 import 'participant_label.dart';
@@ -35,15 +34,13 @@ class StreamCallParticipant extends StatelessWidget {
       borderRadius: theme.borderRadius,
       child: Container(
         foregroundDecoration: BoxDecoration(
-          border: participant.isSpeaking
+          border: participant.isDominantSpeaker && theme.showFocusedBorder
               ? Border.all(
-                  width: 4,
-                  color: theme.focusedColor,
+                  width: theme.focusedBorderThickness,
+                  color: theme.focusedBorderColor,
                 )
               : null,
-          borderRadius: BorderRadius.all(
-            Radius.circular(isDesktopDevice ? 12 : 0),
-          ),
+          borderRadius: theme.borderRadius,
         ),
         decoration: BoxDecoration(color: theme.backgroundColor),
         child: Stack(

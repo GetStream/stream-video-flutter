@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:logging/logging.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
 import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
@@ -17,6 +15,7 @@ import 'package:stream_video/src/latency_service/latency.dart';
 import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/options.dart';
+import 'package:stream_video/src/push_notification/no_op_push_notification.dart';
 import 'package:stream_video/src/token/token.dart';
 import 'package:stream_video/src/token/token_manager.dart';
 import 'package:synchronized/synchronized.dart';
@@ -116,9 +115,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
   }
 
   Future<void> _initPushNotification() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    _pushNotificationManager = PushNotificationManager(
-        client: this, sharedPreferences: sharedPreferences);
+    _pushNotificationManager = NoOpPushNotificationManager();
   }
 
   static StreamVideo? _instance;
@@ -160,7 +157,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
 
   final _tokenManager = TokenManager();
   late final CoordinatorClient _client;
-  late final PushNotificationManager _pushNotificationManager;
+  PushNotificationManager? _pushNotificationManager;
 
   var _state = _StreamVideoState();
 
@@ -211,7 +208,7 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
       )..events.listen(events.emit);
 
       await _ws!.connect();
-      return _pushNotificationManager.onUserLoggedIn();
+      return _pushNotificationManager?.onUserLoggedIn();
     } catch (e, stk) {
       logger.severe('error connecting user : ${user.id}', e, stk);
       rethrow;
@@ -412,12 +409,13 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     return response;
   }
 
-  Future<bool> handlePushNotification(RemoteMessage remoteMessage) {
-    return _pushNotificationManager.handlePushNotification(remoteMessage);
+  Future<bool> handlePushNotification(Map<String, dynamic> payload) {
+    return _pushNotificationManager?.handlePushNotification(payload) ??
+        Future.value(false);
   }
 
   Future<Call?> consumeIncomingCall() {
-    return _pushNotificationManager.consumeIncomingCall();
+    return Future.value(null);
   }
 
   Future<Call> acceptCall({

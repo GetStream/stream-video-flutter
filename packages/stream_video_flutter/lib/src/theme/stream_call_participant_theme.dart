@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -7,7 +9,9 @@ import 'stream_avatar_theme.dart';
 class StreamCallParticipantTheme with Diagnosticable {
   /// Constructor for creating [StreamCallParticipantTheme].
   const StreamCallParticipantTheme({
-    this.focusedColor = const Color(0xff005FFF),
+    this.showFocusedBorder = true,
+    this.focusedBorderColor = const Color(0xff20E070),
+    this.focusedBorderThickness = 4,
     this.backgroundColor = const Color(0xFF272A30),
     this.borderRadius = BorderRadius.zero,
     this.avatarTheme = const StreamAvatarTheme(
@@ -37,8 +41,14 @@ class StreamCallParticipantTheme with Diagnosticable {
     this.connectionLevelAlignment = Alignment.bottomRight,
   });
 
-  /// The color in the focused state.
-  final Color focusedColor;
+  /// Whether to show the border for dominant speaker.
+  final bool showFocusedBorder;
+
+  /// The color of the focus border.
+  final Color focusedBorderColor;
+
+  /// The thickness of the focus border.
+  final double focusedBorderThickness;
 
   /// The color of the background behind avatar.
   final Color backgroundColor;
@@ -74,7 +84,9 @@ class StreamCallParticipantTheme with Diagnosticable {
   final AlignmentGeometry connectionLevelAlignment;
 
   StreamCallParticipantTheme copyWith({
-    Color? focusedColor,
+    bool? showFocusedBorder,
+    Color? focusedBorderColor,
+    double? focusedBorderThickness,
     Color? backgroundColor,
     BorderRadius? borderRadius,
     StreamAvatarTheme? avatarTheme,
@@ -88,7 +100,10 @@ class StreamCallParticipantTheme with Diagnosticable {
     AlignmentGeometry? connectionLevelAlignment,
   }) {
     return StreamCallParticipantTheme(
-      focusedColor: focusedColor ?? this.focusedColor,
+      showFocusedBorder: showFocusedBorder ?? this.showFocusedBorder,
+      focusedBorderColor: focusedBorderColor ?? this.focusedBorderColor,
+      focusedBorderThickness:
+          focusedBorderThickness ?? this.focusedBorderThickness,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       borderRadius: borderRadius ?? this.borderRadius,
       avatarTheme: avatarTheme ?? this.avatarTheme,
@@ -116,7 +131,11 @@ class StreamCallParticipantTheme with Diagnosticable {
   /// All the properties must be non-null.
   StreamCallParticipantTheme lerp(StreamCallParticipantTheme other, double t) {
     return StreamCallParticipantTheme(
-      focusedColor: Color.lerp(focusedColor, other.focusedColor, t)!,
+      showFocusedBorder: showFocusedBorder,
+      focusedBorderColor:
+          Color.lerp(focusedBorderColor, other.focusedBorderColor, t)!,
+      focusedBorderThickness:
+          lerpDouble(focusedBorderThickness, other.focusedBorderThickness, t)!,
       backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t)!,
       borderRadius: BorderRadius.lerp(borderRadius, other.borderRadius, t)!,
       avatarTheme: avatarTheme.lerp(other.avatarTheme, t),
@@ -144,7 +163,9 @@ class StreamCallParticipantTheme with Diagnosticable {
       identical(this, other) ||
       other is StreamCallParticipantTheme &&
           runtimeType == other.runtimeType &&
-          focusedColor == other.focusedColor &&
+          showFocusedBorder == other.showFocusedBorder &&
+          focusedBorderColor == other.focusedBorderColor &&
+          focusedBorderThickness == other.focusedBorderThickness &&
           backgroundColor == other.backgroundColor &&
           borderRadius == other.borderRadius &&
           avatarTheme == other.avatarTheme &&
@@ -159,7 +180,9 @@ class StreamCallParticipantTheme with Diagnosticable {
 
   @override
   int get hashCode =>
-      focusedColor.hashCode ^
+      showFocusedBorder.hashCode ^
+      focusedBorderColor.hashCode ^
+      focusedBorderThickness.hashCode ^
       backgroundColor.hashCode ^
       borderRadius.hashCode ^
       avatarTheme.hashCode ^
@@ -176,7 +199,9 @@ class StreamCallParticipantTheme with Diagnosticable {
   StreamCallParticipantTheme merge(StreamCallParticipantTheme? other) {
     if (other == null) return this;
     return copyWith(
-      focusedColor: other.focusedColor,
+      showFocusedBorder: other.showFocusedBorder,
+      focusedBorderColor: other.focusedBorderColor,
+      focusedBorderThickness: other.focusedBorderThickness,
       backgroundColor: other.backgroundColor,
       borderRadius: other.borderRadius,
       avatarTheme: other.avatarTheme,
@@ -195,7 +220,10 @@ class StreamCallParticipantTheme with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty('focusedColor', focusedColor))
+      ..add(DiagnosticsProperty('showFocusedBorder', showFocusedBorder))
+      ..add(DiagnosticsProperty('focusedBorderColor', focusedBorderColor))
+      ..add(
+          DiagnosticsProperty('focusedBorderThickness', focusedBorderThickness))
       ..add(DiagnosticsProperty('backgroundColor', backgroundColor))
       ..add(DiagnosticsProperty('borderRadius', borderRadius))
       ..add(DiagnosticsProperty('avatarTheme', avatarTheme))
