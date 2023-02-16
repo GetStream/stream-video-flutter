@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import '../../../types/video_dimensions.dart';
-import '../../../types/video_encoding.dart';
+
 import 'rtc_video_dimension.dart';
 import 'rtc_video_encoding.dart';
 
