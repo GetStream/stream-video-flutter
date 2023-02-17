@@ -5,7 +5,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 void main() {
   /// Initialize Stream Video SDK.
-  StreamVideoV2.init(
+  StreamVideo.init(
     "us83cfwuhy8n",
     logLevel: Level.INFO,
   );

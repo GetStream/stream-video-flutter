@@ -45,10 +45,10 @@ class StreamInviteUserListView extends StatefulWidget {
 
   @override
   State<StreamInviteUserListView> createState() =>
-      _StreamInviteUserListViewStateV2();
+      _StreamInviteUserListViewState();
 }
 
-class _StreamInviteUserListViewStateV2 extends State<StreamInviteUserListView> {
+class _StreamInviteUserListViewState extends State<StreamInviteUserListView> {
   StreamInviteUserListController get _controller => widget.controller;
 
   @override
