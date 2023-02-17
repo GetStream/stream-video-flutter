@@ -1,48 +1,51 @@
-import '../../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
-    as rpc;
-import '../../../protobuf/video/coordinator/edge_v1/edge.pb.dart' as edge;
+import '../model/call_cid.dart';
+import '../model/call_created.dart';
+import '../model/call_device.dart';
+import '../model/call_metadata.dart';
+import '../model/call_received_created.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
-import 'models/coordinator_input.dart' as input;
-import 'models/coordinator_models.dart' as model;
+import 'models/coordinator_inputs.dart' as inputs;
+import 'models/coordinator_models.dart' as models;
 
 abstract class CoordinatorClientV2 {
-  Future<Result<model.Device>> createDevice(
-    input.CreateDeviceInput input,
+  Future<Result<CallDevice>> createDevice(
+    inputs.CreateDeviceInput input,
   );
 
-  Future<Result<None>> deleteDevice(input.DeleteDeviceInput input);
+  Future<Result<None>> deleteDevice(inputs.DeleteDeviceInput input);
 
-  Future<Result<rpc.CreateCallResponse>> createCall(
-    rpc.CreateCallRequest request,
+  Future<Result<CallCreated>> createCall(
+    inputs.CreateCallInput input,
   );
 
-  Future<Result<rpc.GetOrCreateCallResponse>> getOrCreateCall(
-    rpc.GetOrCreateCallRequest request,
+  Future<Result<CallReceivedOrCreated>> getOrCreateCall(
+    inputs.GetOrCreateCallInput input,
   );
 
-  Future<Result<rpc.JoinCallResponse>> joinCall(rpc.JoinCallRequest request);
+  Future<Result<models.CoordinatorJoined>> joinCall(inputs.JoinCallInput input);
 
-  Future<Result<rpc.GetCallEdgeServerResponse>> findBestCallEdgeServer({
-    required String callCid,
-    required List<edge.Edge> edges,
+  Future<Result<models.SfuServerSelected>> findBestCallEdgeServer({
+    required StreamCallCid callCid,
+    required List<models.SfuEdge> edges,
   });
 
-  Future<Result<rpc.GetCallEdgeServerResponse>> selectCallEdgeServer(
-    rpc.GetCallEdgeServerRequest request,
-  );
+  Future<Result<models.SfuServerSelected>> selectCallEdgeServer({
+    required StreamCallCid callCid,
+    required Map<String, models.SfuLatency> latencyByEdge,
+  });
 
   Future<Result<None>> sendUserEvent(
-    input.EventInput input,
+    inputs.EventInput input,
   );
 
   Future<Result<None>> sendCustomEvent(
-    input.CustomEventInput input,
+    inputs.CustomEventInput input,
   );
 
-  Future<Result<None>> inviteUsers(input.UpsertCallMembersInput input);
+  Future<Result<None>> inviteUsers(inputs.UpsertCallMembersInput input);
 
-  Future<Result<rpc.QueryUsersResponse>> queryUsers(
-    rpc.QueryUsersRequest request,
+  Future<Result<List<CallUser>>> queryUsers(
+    inputs.QueryUsersInput input,
   );
 }

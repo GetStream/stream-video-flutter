@@ -2,8 +2,8 @@ import '../../logger/impl/tagged_logger.dart';
 import '../action/lifecycle_action.dart';
 import '../call_participant_state.dart';
 import '../call_state.dart';
-import '../coordinator/models/coordinator_models.dart';
 import '../model/call_created.dart';
+import '../model/call_metadata.dart';
 import '../model/call_status.dart';
 import '../model/drop_reason.dart';
 

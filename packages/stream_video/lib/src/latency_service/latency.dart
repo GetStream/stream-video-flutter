@@ -1,8 +1,9 @@
 import 'package:http/http.dart' as http;
-import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
 
-Future<Map<String, Latency>> measureEdgeLatencies({
-  required List<Edge> edges,
+import '../v2/coordinator/models/coordinator_models.dart';
+
+Future<Map<String, SfuLatency>> measureEdgeLatencies({
+  required List<SfuEdge> edges,
   int rounds = 3,
 }) async {
   return {
@@ -21,13 +22,13 @@ Future<Map<String, Latency>> measureEdgeLatencies({
 ///
 /// The latency is determined by sending a request to the edge server and
 /// measuring the time it takes to receive a response.
-Future<Latency> measureEdgeLatency({
-  required Edge edge,
+Future<SfuLatency> measureEdgeLatency({
+  required SfuEdge edge,
   int rounds = 3,
 }) async {
   final latencyUrl = Uri.tryParse(edge.latencyUrl);
   if (latencyUrl == null) {
-    return Latency(measurementsSeconds: [double.maxFinite]);
+    return const SfuLatency(measurementsSeconds: [double.maxFinite]);
   }
 
   final measurementsSeconds = <double>[];
@@ -45,5 +46,5 @@ Future<Latency> measureEdgeLatency({
     }
   }
 
-  return Latency(measurementsSeconds: measurementsSeconds);
+  return SfuLatency(measurementsSeconds: measurementsSeconds);
 }

@@ -1,12 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:logging/logging.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/push_v1/push.pb.dart';
 
-import '../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
-    as rpc;
 import '../logger/impl/tagged_logger.dart';
 import '../logger/logger.dart';
 import '../models/user_info.dart';
@@ -17,14 +12,16 @@ import '../token/token_manager.dart';
 import 'coordinator/coordinator_client.dart';
 import 'coordinator/coordinator_ws.dart';
 import 'coordinator/models/coordinator_events.dart';
-import 'coordinator/models/coordinator_input.dart' as input;
+import 'coordinator/models/coordinator_inputs.dart' as input;
+import 'coordinator/models/coordinator_inputs.dart';
 import 'coordinator/models/coordinator_models.dart';
 import 'coordinator/protobuf/coordinator_client_protobuf.dart';
 import 'coordinator/protobuf/coordinator_ws_protobuf.dart';
-import 'coordinator/protobuf/mapper_extensions.dart';
 import 'model/call_cid.dart';
 import 'model/call_created.dart';
+import 'model/call_device.dart';
 import 'model/call_joined.dart';
+import 'model/call_metadata.dart';
 import 'model/call_received_created.dart';
 import 'shared_emitter.dart';
 import 'state_emitter.dart';
@@ -147,7 +144,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   }) async {
     if (_ws != null) return;
 
-    logger.info('setting user : ${user.id}');
+    _logger.i(() => '[connectUser] user.id : ${user.id}');
 
     _state.currentUser.value = user;
     await _tokenManager.setTokenOrProvider(
@@ -188,8 +185,8 @@ class StreamVideoV2Impl implements StreamVideoV2 {
 
       await _ws!.connect();
       return _pushNotificationManager.onUserLoggedIn();
-    } catch (e, stk) {
-      logger.severe('error connecting user : ${user.id}', e, stk);
+    } catch (e) {
+      _logger.e(() => '[connectUser] failed(${user.id}): $e');
       rethrow;
     }
   }
@@ -197,7 +194,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   /// Disconnects the [user] from the Stream Video service.
   @override
   Future<void> disconnectUser() async {
-    logger.info('disconnecting user : ${currentUser?.id}');
+    _logger.i(() => '[disconnectUser] currentUser.id: ${currentUser?.id}');
 
     if (_ws == null) return;
     await _ws?.disconnect();
@@ -229,31 +226,22 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     }
 
     final response = await _client.createCall(
-      rpc.CreateCallRequest(
-        type: cid.type,
-        id: cid.id,
-        input: rpc.CreateCallInput(
-          members: participantIds.map((id) {
-            return rpc.MemberInput(
-              userId: id,
-              role: 'admin',
-            );
-          }),
-          ring: ringing,
-        ),
+      input.CreateCallInput(
+        callCid: cid,
+        ringing: ringing,
+        members: participantIds.map((id) {
+          return input.MemberInput(
+            userId: id,
+            role: 'admin',
+          );
+        }),
       ),
     );
 
     return response.fold(
       success: (it) {
-        final finalResult = CallCreated(
-          callCid: cid,
-          ringing: ringing,
-          metadata: it.data.call.toCallMetadata(),
-        );
-
-        _logger.v(() => '[createCall] completed: $finalResult');
-        return Result.success(finalResult);
+        _logger.v(() => '[createCall] completed: ${it.data}');
+        return it;
       },
       failure: (it) {
         _logger.e(() => '[createCall] failed: ${it.error}');
@@ -280,34 +268,22 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     }
 
     final response = await _client.getOrCreateCall(
-      rpc.GetOrCreateCallRequest(
-        id: cid.id,
-        type: cid.type,
-        input: rpc.CreateCallInput(
-          members: participantIds.map((id) {
-            return rpc.MemberInput(
-              userId: id,
-              role: 'admin',
-            );
-          }),
-          ring: ringing,
-        ),
+      input.GetOrCreateCallInput(
+        callCid: cid,
+        ringing: ringing,
+        members: participantIds.map((id) {
+          return input.MemberInput(
+            userId: id,
+            role: 'admin',
+          );
+        }),
       ),
     );
 
     return response.fold(
       success: (it) {
-        final finalResult = CallReceivedOrCreated(
-          wasCreated: it.data.created,
-          data: CallCreated(
-            callCid: cid,
-            ringing: ringing,
-            metadata: it.data.call.toCallMetadata(),
-          ),
-        );
-
-        _logger.v(() => '[getOrCreateCall] completed: $finalResult');
-        return Result.success(finalResult);
+        _logger.v(() => '[getOrCreateCall] completed: ${it.data}');
+        return it;
       },
       failure: (it) {
         _logger.e(() => '[getOrCreateCall] failed: ${it.error}');
@@ -323,37 +299,36 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   }) async {
     _logger.d(() => '[joinCall] cid: $cid');
     final joinResult = await _client.joinCall(
-      rpc.JoinCallRequest(type: cid.type, id: cid.id),
+      input.JoinCallInput(callCid: cid),
     );
-    if (joinResult is! Success<rpc.JoinCallResponse>) {
+    if (joinResult is! Success<CoordinatorJoined>) {
       _logger.e(() => '[joinCall] join failed: $joinResult');
       return joinResult as Failure;
     }
-    final metadata = joinResult.data.call.toCallMetadata();
     onReceivedOrCreated?.call(
       CallReceivedOrCreated(
-        wasCreated: joinResult.data.created,
+        wasCreated: joinResult.data.wasCreated,
         data: CallCreated(
           callCid: cid,
           ringing: false,
-          metadata: metadata,
+          metadata: joinResult.data.metadata,
         ),
       ),
     );
-    _logger.v(() => '[joinCall] joinedMetadata: $metadata');
+    _logger.v(() => '[joinCall] joinedMetadata: ${joinResult.data.metadata}');
     final edgeResult = await _client.findBestCallEdgeServer(
-      callCid: cid.value,
+      callCid: cid,
       edges: joinResult.data.edges,
     );
-    if (edgeResult is! Success<rpc.GetCallEdgeServerResponse>) {
+    if (edgeResult is! Success<SfuServerSelected>) {
       _logger.e(() => '[joinCall] edge finding failed: $joinResult');
       return joinResult as Failure;
     }
     final call = CallJoined(
       callCid: cid,
-      wasCreated: joinResult.data.created,
-      metadata: edgeResult.data.call.toCallMetadata(),
-      credentials: edgeResult.data.credentials.toCallCredentials(),
+      wasCreated: joinResult.data.wasCreated,
+      metadata: edgeResult.data.metadata,
+      credentials: edgeResult.data.credentials,
     );
     _logger.v(() => '[joinCall] completed: $call');
     return Result.success(call);
@@ -410,13 +385,13 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   Future<Result<None>> sendCustomEvent({
     required StreamCallCid cid,
     required String eventType,
-    required Map<String, dynamic> dataJson,
+    required Map<String, dynamic> extraData,
   }) async {
     final result = await _client.sendCustomEvent(
       input.CustomEventInput(
         callCid: cid,
         eventType: eventType,
-        dataJson: dataJson,
+        dataJson: extraData,
       ),
     );
 
@@ -430,27 +405,23 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   Future<Result<List<CallUser>>> queryUsers({
     required Set<String> userIds,
   }) async {
-    final mqJson = {
-      'id': {
-        r'$in': userIds.toList(),
-      },
-    };
-    _logger.d(() => '[queryUsers] mqJson: $mqJson');
-    final request = rpc.QueryUsersRequest(
-      mqJson: utf8.encode(
-        json.encode(mqJson),
+    _logger.d(() => '[queryUsers] userIds: $userIds');
+    final usersResult = await _client.queryUsers(
+      input.QueryUsersInput(
+        mqJson: {
+          'id': {r'$in': userIds.toList()},
+        },
       ),
     );
-    _logger.v(() => '[queryUsers] request: $request');
-    final usersResult = await _client.queryUsers(request);
-
     return usersResult.fold(
       success: (it) {
-        final users = it.data.users.toCallUsers();
-        _logger.v(() => '[queryUsers] completed: $users');
-        return Result.success(users);
+        _logger.v(() => '[queryUsers] completed: ${it.data}');
+        return Result.success(it.data);
       },
-      failure: (it) => it,
+      failure: (it) {
+        _logger.e(() => '[queryUsers] failed: $it');
+        return it;
+      },
     );
   }
 
@@ -470,16 +441,16 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   }
 
   @override
-  Future<void> createDevice({
+  Future<Result<CallDevice>> createDevice({
     required String token,
     required String pushProviderId,
   }) async {
-    await _client.createDevice(CreateDeviceRequest(
-      input: DeviceInput(
-        id: token,
+    return _client.createDevice(
+      CreateDeviceInput(
+        pushToken: token,
         pushProviderId: pushProviderId,
       ),
-    ));
+    );
   }
 
   @override

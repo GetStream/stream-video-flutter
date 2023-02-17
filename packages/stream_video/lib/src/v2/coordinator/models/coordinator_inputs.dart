@@ -37,7 +37,7 @@ class CreateCallInput extends CoordinatorInputV2 {
   });
 
   final StreamCallCid callCid;
-  final List<MemberInput>? members;
+  final Iterable<MemberInput>? members;
   final bool? ringing;
 }
 
@@ -49,7 +49,21 @@ class GetOrCreateCallInput {
   });
 
   final StreamCallCid callCid;
-  final List<MemberInput>? members;
+  final Iterable<MemberInput>? members;
+  final bool? ringing;
+}
+
+class JoinCallInput {
+  const JoinCallInput({
+    required this.callCid,
+    this.datacenterId,
+    this.members,
+    this.ringing,
+  });
+
+  final StreamCallCid callCid;
+  final String? datacenterId;
+  final Iterable<MemberInput>? members;
   final bool? ringing;
 }
 
@@ -61,7 +75,7 @@ class UpsertCallMembersInput {
   });
 
   final StreamCallCid callCid;
-  final List<MemberInput> members;
+  final Iterable<MemberInput> members;
   final bool? ringing;
 }
 
@@ -132,7 +146,10 @@ class QueryUsersInput extends CoordinatorInputV2 {
 }
 
 class SortInput extends CoordinatorInputV2 {
-  const SortInput(this.field, this.direction);
+  const SortInput({
+    required this.field,
+    required this.direction,
+  });
 
   final String field;
   final DirectionInput direction;

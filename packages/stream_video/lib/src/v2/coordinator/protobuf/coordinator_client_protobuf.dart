@@ -6,17 +6,20 @@ import '../../../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
 import '../../../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pbtwirp.dart';
 import '../../../../protobuf/video/coordinator/edge_v1/edge.pb.dart';
 import '../../../../protobuf/video/coordinator/push_v1/push.pb.dart';
-import '../../../../protobuf/video/coordinator/user_v1/user.pb.dart';
 import '../../../latency_service/latency.dart';
 import '../../../logger/impl/tagged_logger.dart';
 import '../../../token/token_manager.dart';
 import '../../errors/video_error_composer.dart';
+import '../../model/call_cid.dart';
+import '../../model/call_created.dart';
+import '../../model/call_device.dart';
+import '../../model/call_metadata.dart';
+import '../../model/call_received_created.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
-import '../../utils/standard.dart';
 import '../coordinator_client.dart';
-import '../models/coordinator_input.dart' as input;
-import '../models/coordinator_models.dart' as model;
+import '../models/coordinator_inputs.dart' as input;
+import '../models/coordinator_models.dart';
 import 'mapper_extensions.dart';
 
 /// An accessor that allows us to communicate with the API around video calls.
@@ -35,7 +38,7 @@ class CoordinatorClientProtobuf extends CoordinatorClientV2 {
 
   /// Create a new Device used to receive Push Notifications.
   @override
-  Future<Result<model.Device>> createDevice(
+  Future<Result<CallDevice>> createDevice(
     input.CreateDeviceInput input,
   ) async {
     try {
@@ -54,7 +57,7 @@ class CoordinatorClientProtobuf extends CoordinatorClientV2 {
       });
 
       return result.map(
-        (data) => model.Device(
+        (data) => CallDevice(
           userId: data.device.userId,
           pushToken: data.device.id,
           pushProviderName: data.device.pushProviderName,
@@ -90,15 +93,32 @@ class CoordinatorClientProtobuf extends CoordinatorClientV2 {
 
   /// Attempts to create a new call.
   @override
-  Future<Result<CreateCallResponse>> createCall(
-    CreateCallRequest request,
+  Future<Result<CallCreated>> createCall(
+    input.CreateCallInput input,
   ) async {
     try {
       final result = await _withAuthHeaders().then((ctx) {
-        return _rpclient.createCall(ctx, request).then(Result.success);
+        return _rpclient
+            .createCall(
+              ctx,
+              CreateCallRequest(
+                type: input.callCid.type,
+                id: input.callCid.id,
+                input: CreateCallInput(
+                  ring: input.ringing,
+                  members: input.members?.map((it) => it.toDto()),
+                ),
+              ),
+            )
+            .then(Result.success);
       });
-
-      return result;
+      return result.map(
+        (data) => CallCreated(
+          callCid: input.callCid,
+          ringing: input.ringing ?? false,
+          metadata: data.call.toCallMetadata(),
+        ),
+      );
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -106,15 +126,36 @@ class CoordinatorClientProtobuf extends CoordinatorClientV2 {
 
   /// Gets the call if already exists or attempts to create a new call.
   @override
-  Future<Result<GetOrCreateCallResponse>> getOrCreateCall(
-    GetOrCreateCallRequest request,
+  Future<Result<CallReceivedOrCreated>> getOrCreateCall(
+    input.GetOrCreateCallInput input,
   ) async {
     try {
       final result = await _withAuthHeaders().then((ctx) {
-        return _rpclient.getOrCreateCall(ctx, request).then(Result.success);
+        return _rpclient
+            .getOrCreateCall(
+              ctx,
+              GetOrCreateCallRequest(
+                type: input.callCid.type,
+                id: input.callCid.id,
+                input: CreateCallInput(
+                  ring: input.ringing,
+                  members: input.members?.map((it) => it.toDto()),
+                ),
+              ),
+            )
+            .then(Result.success);
       });
 
-      return result;
+      return result.map(
+        (data) => CallReceivedOrCreated(
+          wasCreated: data.created,
+          data: CallCreated(
+            callCid: input.callCid,
+            ringing: input.ringing ?? false,
+            metadata: data.call.toCallMetadata(),
+          ),
+        ),
+      );
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -123,22 +164,41 @@ class CoordinatorClientProtobuf extends CoordinatorClientV2 {
   /// Attempts to join a [Call]. If successful, gives us more information
   /// about the user and the call itself.
   @override
-  Future<Result<JoinCallResponse>> joinCall(JoinCallRequest request) async {
+  Future<Result<CoordinatorJoined>> joinCall(input.JoinCallInput input) async {
     try {
       final result = await _withAuthHeaders().then((ctx) {
-        return _rpclient.joinCall(ctx, request).then(Result.success);
+        return _rpclient
+            .joinCall(
+              ctx,
+              JoinCallRequest(
+                type: input.callCid.type,
+                id: input.callCid.id,
+              ),
+            )
+            .then(Result.success);
       });
 
-      return result;
+      return result.map((data) {
+        return CoordinatorJoined(
+          wasCreated: data.created,
+          metadata: data.call.toCallMetadata(),
+          edges: data.edges.map((edge) {
+            return SfuEdge(
+              name: edge.name,
+              latencyUrl: edge.latencyUrl,
+            );
+          }).toList(),
+        );
+      });
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
   @override
-  Future<Result<GetCallEdgeServerResponse>> findBestCallEdgeServer({
-    required String callCid,
-    required List<Edge> edges,
+  Future<Result<SfuServerSelected>> findBestCallEdgeServer({
+    required StreamCallCid callCid,
+    required List<SfuEdge> edges,
   }) async {
     _logger.d(
       () => '[findBestCallEdgeServer] callCid: $callCid, '
@@ -147,16 +207,12 @@ class CoordinatorClientProtobuf extends CoordinatorClientV2 {
     final latencyByEdge = await measureEdgeLatencies(edges: edges);
     _logger.v(() => '[findBestCallEdgeServer] latencyByEdge: $latencyByEdge');
     final response = await selectCallEdgeServer(
-      GetCallEdgeServerRequest(
-        callCid: callCid,
-        measurements: LatencyMeasurements(
-          measurements: latencyByEdge,
-        ),
-      ),
+      callCid: callCid,
+      latencyByEdge: latencyByEdge,
     );
     response.when(
       success: (data) {
-        final server = data.credentials.server;
+        final server = data.credentials.sfuServer;
         _logger.v(() => '[findBestCallEdgeServer] selectedEdge: $server');
       },
       failure: (error) {
@@ -168,15 +224,38 @@ class CoordinatorClientProtobuf extends CoordinatorClientV2 {
 
   /// Finds the correct server to connect to for given user and [request].
   @override
-  Future<Result<GetCallEdgeServerResponse>> selectCallEdgeServer(
-    GetCallEdgeServerRequest request,
-  ) async {
+  Future<Result<SfuServerSelected>> selectCallEdgeServer({
+    required StreamCallCid callCid,
+    required Map<String, SfuLatency> latencyByEdge,
+  }) async {
     try {
       final result = await _withAuthHeaders().then((ctx) {
-        return _rpclient.getCallEdgeServer(ctx, request).then(Result.success);
+        return _rpclient
+            .getCallEdgeServer(
+              ctx,
+              GetCallEdgeServerRequest(
+                callCid: callCid.value,
+                measurements: LatencyMeasurements(
+                  measurements: latencyByEdge.map(
+                    (name, latency) => MapEntry(
+                      name,
+                      Latency(
+                        measurementsSeconds: latency.measurementsSeconds,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+            .then(Result.success);
       });
 
-      return result;
+      return result.map(
+        (data) => SfuServerSelected(
+          metadata: data.call.toCallMetadata(),
+          credentials: data.credentials.toCallCredentials(),
+        ),
+      );
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -244,27 +323,7 @@ class CoordinatorClientProtobuf extends CoordinatorClientV2 {
               ctx,
               UpsertCallMembersRequest(
                 callCid: input.callCid.value,
-                members: input.members.map((member) {
-                  return MemberInput(
-                    userId: member.userId,
-                    role: member.role,
-                    customJson: utf8.encode(
-                      json.encode(member.customJson),
-                    ),
-                    userInput: UserInput(
-                      id: member.userInput?.id,
-                      name: member.userInput?.name,
-                      role: member.userInput?.role,
-                      teams: member.userInput?.teams,
-                      imageUrl: member.userInput?.imageUrl,
-                      customJson: member.userInput?.customJson?.let(
-                        (it) => utf8.encode(
-                          json.encode(it),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
+                members: input.members.map((member) => member.toDto()),
                 ring: input.ringing,
               ),
             )
@@ -277,17 +336,27 @@ class CoordinatorClientProtobuf extends CoordinatorClientV2 {
     }
   }
 
-  /// Queries users based on the given [request].
+  /// Queries users based on the given [input].
   @override
-  Future<Result<QueryUsersResponse>> queryUsers(
-    QueryUsersRequest request,
+  Future<Result<List<CallUser>>> queryUsers(
+    input.QueryUsersInput input,
   ) async {
     try {
       final result = await _withAuthHeaders().then((ctx) {
-        return _rpclient.queryUsers(ctx, request).then(Result.success);
+        return _rpclient
+            .queryUsers(
+              ctx,
+              QueryUsersRequest(
+                mqJson: utf8.encode(
+                  json.encode(input.mqJson),
+                ),
+                limit: input.limit,
+                sorts: input.sorts?.map((it) => it.toDto()),
+              ),
+            )
+            .then(Result.success);
       });
-
-      return result;
+      return result.map((data) => data.users.toCallUsers());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }

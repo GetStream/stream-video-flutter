@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../../model/call_cid.dart';
+import '../../model/call_credentials.dart';
+import '../../model/call_metadata.dart';
 
 @immutable
 abstract class CoordinatorModelV2 with EquatableMixin {
@@ -14,232 +15,54 @@ abstract class CoordinatorModelV2 with EquatableMixin {
   List<Object?> get props => const [];
 }
 
-class CallMetadata extends CoordinatorModelV2 {
-  const CallMetadata({
-    required this.details,
-    required this.info,
-    required this.users,
+class CoordinatorJoined extends CoordinatorModelV2 {
+  const CoordinatorJoined({
+    required this.wasCreated,
+    required this.metadata,
+    required this.edges,
   });
-  final CallDetails details;
-  final CallInfo info;
-  final Map<String, CallUser> users;
+
+  final bool wasCreated;
+  final CallMetadata metadata;
+  final List<SfuEdge> edges;
 
   @override
-  List<Object> get props => [details, info, users];
-
-  @override
-  String toString() {
-    return 'CallMetadata{details: $details, info: $info, users: $users}';
-  }
+  List<Object?> get props => [wasCreated, metadata, edges];
 }
 
-class CallSfuServer extends CoordinatorModelV2 {
-  const CallSfuServer({
-    required this.name,
-    required this.url,
-  });
-  final String name;
-  final String url;
-
-  @override
-  List<Object> get props => [name, url];
-
-  @override
-  String toString() {
-    return 'CallEdgeServer{name: $name, url: $url}';
-  }
-}
-
-class CallIceServer extends CoordinatorModelV2 {
-  const CallIceServer({
-    required this.username,
-    required this.password,
-    required this.urls,
-  });
-  final String username;
-  final String password;
-  final List<String> urls;
-
-  @override
-  List<Object> get props => [username, password, urls];
-
-  @override
-  String toString() {
-    return 'CallIceServer{username: $username, '
-        'password: $password, urls: $urls}';
-  }
-}
-
-@immutable
-class CallCredentials extends CoordinatorModelV2 {
-  const CallCredentials({
-    required this.sfuServer,
-    required this.sfuToken,
-    required this.iceServers,
-  });
-  final CallSfuServer sfuServer;
-  final String sfuToken;
-  final List<CallIceServer> iceServers;
-
-  @override
-  List<Object> get props => [sfuServer, sfuToken, iceServers];
-
-  @override
-  String toString() {
-    return 'CallCredentials{sfuToken.length: ${sfuToken.length}, '
-        'edgeServer: $sfuServer, iceServers: $iceServers}';
-  }
-}
-
-@immutable
-class CallInfo extends CoordinatorModelV2 {
-  const CallInfo({
-    required this.cid,
-    required this.createdByUserId,
-    this.createdAt,
-    this.updatedAt,
+class SfuServerSelected extends CoordinatorModelV2 {
+  const SfuServerSelected({
+    required this.metadata,
+    required this.credentials,
   });
 
-  final StreamCallCid cid;
-  final String createdByUserId;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
+  final CallMetadata metadata;
+  final CallCredentials credentials;
 
   @override
-  List<Object> get props => [
-        cid,
-        createdByUserId,
-        createdAt ?? 0,
-        updatedAt ?? 0,
-      ];
-
-  @override
-  String toString() {
-    return 'CallInfo{cid: $cid, '
-        'createdByUserId: $createdByUserId, createdAt: $createdAt, '
-        'updatedAt: $updatedAt}';
-  }
-}
-
-@immutable
-class CallDetails extends CoordinatorModelV2 {
-  const CallDetails({
-    required this.memberUserIds,
-    required this.members,
-    required this.isBroadcastingEnabled,
-    required this.isRecordingEnabled,
-  });
-
-  final List<String> memberUserIds;
-  final Map<String, CallMember> members;
-  final bool isBroadcastingEnabled;
-  final bool isRecordingEnabled;
-
-  @override
-  List<Object> get props => [
-        memberUserIds,
-        members,
-        isBroadcastingEnabled,
-        isRecordingEnabled,
-      ];
-
-  @override
-  String toString() {
-    return 'CallDetails{memberUserIds: $memberUserIds, members: $members, '
-        'isBroadcastingEnabled: $isBroadcastingEnabled, '
-        'isRecordingEnabled: $isRecordingEnabled}';
-  }
-}
-
-class CallMember extends CoordinatorModelV2 {
-  const CallMember({
-    required this.callCid,
-    required this.userId,
-    required this.role,
-    this.createdAt,
-    this.updatedAt,
-  });
-
-  final String callCid;
-  final String userId;
-  final String role;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-
-  @override
-  List<Object> get props => [
-        callCid,
-        userId,
-        role,
-        createdAt ?? 0,
-        updatedAt ?? 0,
-      ];
-
-  @override
-  String toString() {
-    return 'CallMember{callCid: $callCid, userId: $userId, role: $role,'
-        ' createdAt: $createdAt, updatedAt: $updatedAt}';
-  }
-}
-
-class CallUser extends CoordinatorModelV2 {
-  const CallUser({
-    required this.id,
-    required this.name,
-    required this.role,
-    required this.imageUrl,
-    required this.teams,
-    this.createdAt,
-    this.updatedAt,
-    this.customJson,
-  });
-
-  final String id;
-  final String name;
-  final String role;
-  final String imageUrl;
-  final List<String> teams;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-  final String? customJson;
-
-  @override
-  List<Object> get props => [
-        id,
-        name,
-        role,
-        imageUrl,
-        teams,
-        createdAt ?? 0,
-        updatedAt ?? 0,
-        customJson ?? '',
-      ];
-
-  @override
-  String toString() {
-    return 'CallUser{id: $id, name: $name, role: $role, imageUrl: $imageUrl, '
-        'teams: $teams, createdAt: $createdAt, updatedAt: $updatedAt, '
-        'customJson: $customJson}';
-  }
+  List<Object?> get props => [credentials, metadata];
 }
 
 class SfuEdge extends CoordinatorModelV2 {
   const SfuEdge({
-    this.name,
-    this.latencyUrl,
+    required this.name,
+    required this.latencyUrl,
     this.coordinates,
   });
 
-  final String? name;
-  final String? latencyUrl;
-  final Coordinates? coordinates;
+  final String name;
+  final String latencyUrl;
+  final SfuCoordinates? coordinates;
 
   @override
   List<Object?> get props => [name, latencyUrl, coordinates];
 }
 
-class Coordinates extends CoordinatorModelV2 {
-  const Coordinates(this.lat, this.lng);
+class SfuCoordinates extends CoordinatorModelV2 {
+  const SfuCoordinates({
+    this.lat,
+    this.lng,
+  });
 
   final double? lat;
   final double? lng;
@@ -248,27 +71,13 @@ class Coordinates extends CoordinatorModelV2 {
   List<Object?> get props => [lat, lng];
 }
 
-class Device extends CoordinatorModelV2 {
-  const Device({
-    required this.userId,
-    required this.pushToken,
-    required this.pushProviderName,
-    required this.createdAt,
-    required this.updatedAt,
+class SfuLatency extends CoordinatorModelV2 {
+  const SfuLatency({
+    required this.measurementsSeconds,
   });
 
-  final String userId;
-  final String pushToken;
-  final String pushProviderName;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final List<double> measurementsSeconds;
 
   @override
-  List<Object?> get props => [
-        userId,
-        pushProviderName,
-        pushToken,
-        createdAt,
-        updatedAt,
-      ];
+  List<Object?> get props => [measurementsSeconds];
 }

@@ -1,27 +1,28 @@
 import 'dart:async';
 
 import 'package:logging/logging.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/edge_v1/edge.pb.dart';
-import 'package:stream_video/src/call/call.dart';
-import 'package:stream_video/src/coordinator_client.dart';
-import 'package:stream_video/src/coordinator_ws.dart';
-import 'package:stream_video/src/core/rx_controller.dart';
-import 'package:stream_video/src/core/video_error.dart';
-import 'package:stream_video/src/event_emitter.dart';
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/latency_service/latency.dart';
-import 'package:stream_video/src/logger/logger.dart';
-import 'package:stream_video/src/models/user_info.dart';
-import 'package:stream_video/src/options.dart';
-import 'package:stream_video/src/push_notification/no_op_push_notification.dart';
-import 'package:stream_video/src/token/token.dart';
-import 'package:stream_video/src/token/token_manager.dart';
 import 'package:synchronized/synchronized.dart';
 
-import '../protobuf/video/coordinator/push_v1/push.pb.dart';
+import '../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
+import '../protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
+import '../protobuf/video/coordinator/edge_v1/edge.pb.dart';
+import '../protobuf/video/coordinator/push_v1/push.pb.dart' as push;
+import 'call/call.dart';
+import 'coordinator_client.dart';
+import 'coordinator_ws.dart';
+import 'core/rx_controller.dart';
+import 'core/video_error.dart';
+import 'event_emitter.dart';
+import 'events.dart';
+import 'latency_service/latency.dart';
+import 'logger/logger.dart';
+import 'models/user_info.dart';
+import 'options.dart';
+import 'push_notification/no_op_push_notification.dart';
 import 'push_notification/push_notification_manager.dart';
+import 'token/token.dart';
+import 'token/token_manager.dart';
+import 'v2/coordinator/models/coordinator_models.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -254,10 +255,10 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     return response.call;
   }
 
-  Future<Device> createDevice({required String token}) async {
+  Future<push.Device> createDevice({required String token}) async {
     final response = await _client.createDevice(
       CreateDeviceRequest(
-        input: DeviceInput(
+        input: push.DeviceInput(
           id: token,
           pushProviderId: 'firebase',
         ),
@@ -366,12 +367,23 @@ class StreamVideo with EventEmittable<CoordinatorEvent> {
     required String callCid,
     required List<Edge> edges,
   }) async {
-    final latencyByEdge = await measureEdgeLatencies(edges: edges);
+    final latencyByEdge = await measureEdgeLatencies(
+      edges: edges.map((it) {
+        return SfuEdge(name: it.name, latencyUrl: it.latencyUrl);
+      }).toList(),
+    );
     final response = await _client.getCallEdgeServer(
       GetCallEdgeServerRequest(
         callCid: callCid,
         measurements: LatencyMeasurements(
-          measurements: latencyByEdge,
+          measurements: latencyByEdge.map(
+            (name, latency) => MapEntry(
+              name,
+              Latency(
+                measurementsSeconds: latency.measurementsSeconds,
+              ),
+            ),
+          ),
         ),
       ),
     );

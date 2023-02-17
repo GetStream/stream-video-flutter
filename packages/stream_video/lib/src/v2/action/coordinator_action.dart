@@ -1,5 +1,5 @@
-import '../coordinator/models/coordinator_models.dart';
 import '../coordinator/models/coordinator_events.dart';
+import '../model/call_metadata.dart';
 import 'action.dart';
 
 abstract class CoordinatorAction extends StreamAction {

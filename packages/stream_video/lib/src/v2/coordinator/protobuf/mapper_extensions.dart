@@ -13,10 +13,15 @@ import '../../../../protobuf/video/coordinator/edge_v1/edge.pb.dart'
 import '../../../../protobuf/video/coordinator/member_v1/member.pb.dart';
 import '../../../../protobuf/video/coordinator/user_v1/user.pb.dart'
     as coord_users;
+import '../../../../protobuf/video/coordinator/utils_v1/utils.pb.dart'
+    as coord_utils;
 import '../../../logger/logger.dart';
 import '../../model/call_cid.dart';
+import '../../model/call_credentials.dart';
+import '../../model/call_metadata.dart';
+import '../../utils/standard.dart';
 import '../models/coordinator_events.dart';
-import '../models/coordinator_input.dart';
+import '../models/coordinator_inputs.dart';
 import '../models/coordinator_models.dart';
 
 /// Converts [coordinator_ws.WebsocketEvent] into [CoordinatorEventV2].
@@ -167,6 +172,19 @@ extension CredentialsExt on coord_edge.Credentials {
   }
 }
 
+extension EdgeExt on coord_edge.Edge {
+  SfuEdge toSfuEdge() {
+    return SfuEdge(
+      name: name,
+      latencyUrl: latencyUrl,
+      coordinates: SfuCoordinates(
+        lat: coordinates.lat,
+        lng: coordinates.long,
+      ),
+    );
+  }
+}
+
 extension UserExt on coord_users.User {
   CallUser toCallUser() {
     return CallUser(
@@ -206,5 +224,55 @@ extension EventTypeInputExt on EventTypeInput {
       default:
         return rpc.UserEventType.USER_EVENT_TYPE_UNSPECIFIED;
     }
+  }
+}
+
+extension DirectionInputExt on DirectionInput {
+  coord_utils.Direction toDto() {
+    switch (this) {
+      case DirectionInput.asc:
+        return coord_utils.Direction.DIRECTION_ASC;
+      case DirectionInput.desc:
+        return coord_utils.Direction.DIRECTION_DESC;
+      default:
+        return coord_utils.Direction.DIRECTION_UNSPECIFIED;
+    }
+  }
+}
+
+extension SortInputExt on SortInput {
+  coord_utils.Sort toDto() {
+    return coord_utils.Sort(
+      field_1: field,
+      direction: direction.toDto(),
+    );
+  }
+}
+
+extension MemberInputExt on MemberInput {
+  rpc.MemberInput toDto() {
+    return rpc.MemberInput(
+      userId: userId,
+      role: role,
+      customJson: customJson?.let(
+        (it) => utf8.encode(
+          json.encode(it),
+        ),
+      ),
+      userInput: userInput?.let(
+        (user) => coord_users.UserInput(
+          id: user.id,
+          name: user.name,
+          role: user.role,
+          teams: user.teams,
+          imageUrl: user.imageUrl,
+          customJson: user.customJson?.let(
+            (it) => utf8.encode(
+              json.encode(it),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
