@@ -130,7 +130,7 @@ class CustomEventInput extends CoordinatorInputV2 {
 
   final StreamCallCid callCid;
   final String eventType;
-  final Map<String, dynamic> dataJson;
+  final Map<String, Object> dataJson;
 }
 
 class QueryUsersInput extends CoordinatorInputV2 {
@@ -140,7 +140,7 @@ class QueryUsersInput extends CoordinatorInputV2 {
     this.limit,
   });
 
-  final Map<String, dynamic> mqJson;
+  final Map<String, Object> mqJson;
   final List<SortInput>? sorts;
   final int? limit;
 }
@@ -158,11 +158,43 @@ class SortInput extends CoordinatorInputV2 {
 enum EventTypeInput {
   accepted,
   rejected,
-  cancelled,
+  cancelled;
+
+  @override
+  String toString() {
+    return name;
+  }
+
+  String get alias {
+    switch (this) {
+      case EventTypeInput.accepted:
+        return 'call.accepted';
+      case EventTypeInput.rejected:
+        return 'call.rejected';
+      case EventTypeInput.cancelled:
+        return 'call.cancelled';
+    }
+  }
 }
 
 enum DirectionInput {
   asc,
   desc,
-  undefined,
+  undefined;
+
+  @override
+  String toString() {
+    return name;
+  }
+
+  String get alias {
+    switch (this) {
+      case DirectionInput.asc:
+        return 'direction.asc';
+      case DirectionInput.desc:
+        return 'direction.desc';
+      case DirectionInput.undefined:
+        return 'direction.undefined';
+    }
+  }
 }

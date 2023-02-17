@@ -134,7 +134,7 @@ class CallUser with EquatableMixin {
   final List<String> teams;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final String? customJson;
+  final Map<String, dynamic>? customJson;
 
   @override
   List<Object> get props => [

@@ -195,7 +195,9 @@ extension UserExt on coord_users.User {
       imageUrl: imageUrl,
       createdAt: createdAt.toDateTime(),
       updatedAt: updatedAt.toDateTime(),
-      customJson: utf8.decode(customJson),
+      customJson: json.decode(
+        utf8.decode(customJson),
+      ),
     );
   }
 }

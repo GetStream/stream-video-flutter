@@ -385,7 +385,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   Future<Result<None>> sendCustomEvent({
     required StreamCallCid cid,
     required String eventType,
-    required Map<String, dynamic> extraData,
+    required Map<String, Object> extraData,
   }) async {
     final result = await _client.sendCustomEvent(
       input.CustomEventInput(

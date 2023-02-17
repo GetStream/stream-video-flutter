@@ -105,7 +105,7 @@ abstract class StreamVideoV2 {
   Future<Result<None>> sendCustomEvent({
     required StreamCallCid cid,
     required String eventType,
-    required Map<String, dynamic> extraData,
+    required Map<String, Object> extraData,
   });
 
   // TODO replace with domain users
