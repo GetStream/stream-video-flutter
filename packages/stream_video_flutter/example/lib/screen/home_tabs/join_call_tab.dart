@@ -10,7 +10,7 @@ class JoinCallTab extends StatefulWidget {
     required this.onNavigateToCall,
   });
 
-  final void Function(CallV2 call) onNavigateToCall;
+  final void Function(Call call) onNavigateToCall;
 
   @override
   State<JoinCallTab> createState() => _JoinCallTabState();
@@ -59,7 +59,7 @@ class _JoinCallTabState extends State<JoinCallTab> {
     }
 
     final callCid = StreamCallCid.from(type: 'default', id: callId);
-    final call = CallV2.fromCid(callCid: callCid);
+    final call = Call.fromCid(callCid: callCid);
     widget.onNavigateToCall(call);
   }
 }

@@ -14,7 +14,7 @@ import '../model/call_status.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
-import '../stream_video_v2.dart';
+import '../stream_video.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
 import '../utils/subscriptions.dart';
@@ -31,49 +31,49 @@ const _tag = 'SV:Call';
 
 int _callSeq = 1;
 
-/// Represents a [CallV2Impl] in which you can connect to.
-class CallV2Impl extends CallV2 {
-  factory CallV2Impl({
+/// Represents a [CallImpl] in which you can connect to.
+class CallImpl extends Call {
+  factory CallImpl({
     required StreamCallCid callCid,
-    StreamVideoV2? streamVideo,
+    StreamVideo? streamVideo,
   }) {
     streamLog.i(_tag, () => '<factory> callCid: $callCid');
-    final finalStreamVideo = streamVideo ?? StreamVideoV2.instance;
+    final finalStreamVideo = streamVideo ?? StreamVideo.instance;
     final stateManager = _makeCallStateManager(callCid, finalStreamVideo);
-    return CallV2Impl._(
+    return CallImpl._(
       streamVideo: finalStreamVideo,
       stateManager: stateManager,
     );
   }
-  factory CallV2Impl.created({
+  factory CallImpl.created({
     required CallCreated data,
-    StreamVideoV2? streamVideo,
+    StreamVideo? streamVideo,
   }) {
     streamLog.i(_tag, () => '<factory> created: $data');
-    final finalStreamVideo = streamVideo ?? StreamVideoV2.instance;
+    final finalStreamVideo = streamVideo ?? StreamVideo.instance;
     final stateManager = _makeCallStateManager(data.callCid, finalStreamVideo);
     stateManager.onCallCreated(data);
-    return CallV2Impl._(
+    return CallImpl._(
       streamVideo: finalStreamVideo,
       stateManager: stateManager,
     );
   }
-  factory CallV2Impl.joined({
+  factory CallImpl.joined({
     required CallJoined data,
-    StreamVideoV2? streamVideo,
+    StreamVideo? streamVideo,
   }) {
     streamLog.i(_tag, () => '<factory> joined: $data');
-    final finalStreamVideo = streamVideo ?? StreamVideoV2.instance;
+    final finalStreamVideo = streamVideo ?? StreamVideo.instance;
     final stateManager = _makeCallStateManager(data.callCid, finalStreamVideo);
     stateManager.onCallJoined(data);
-    return CallV2Impl._(
+    return CallImpl._(
       streamVideo: finalStreamVideo,
       stateManager: stateManager,
     );
   }
 
-  CallV2Impl._({
-    required StreamVideoV2 streamVideo,
+  CallImpl._({
+    required StreamVideo streamVideo,
     required CallStateManager stateManager,
   })  : _sessionFactory = CallSessionFactory(
           callCid: stateManager.state.value.callCid,
@@ -91,7 +91,7 @@ class CallV2Impl extends CallV2 {
   late final _logger = taggedLogger(tag: '$_tag-${_callSeq++}');
   late final _subscriptions = Subscriptions();
 
-  final StreamVideoV2 _streamVideo;
+  final StreamVideo _streamVideo;
   final CallSessionFactory _sessionFactory;
   final CallStateManager _stateManager;
 
@@ -99,11 +99,11 @@ class CallV2Impl extends CallV2 {
   StreamCallCid get callCid => _stateManager.state.value.callCid;
 
   @override
-  StateEmitter<CallStateV2> get state => _stateManager.state;
+  StateEmitter<CallState> get state => _stateManager.state;
 
   @override
-  SharedEmitter<SfuEventV2> get events => _events;
-  final _events = MutableSharedEmitterImpl<SfuEventV2>();
+  SharedEmitter<SfuEvent> get events => _events;
+  final _events = MutableSharedEmitterImpl<SfuEvent>();
 
   final _status = MutableStateEmitterImpl<_ConnectionStatus>(
     _ConnectionStatus.disconnected,
@@ -228,9 +228,9 @@ class CallV2Impl extends CallV2 {
         return Result.error('original "connect" failed');
       }
     }
-    await CallV2.activeCall?.disconnect();
-    CallV2.activeCall = this;
-    CallV2.onActiveCall?.call(this);
+    await Call.activeCall?.disconnect();
+    Call.activeCall = this;
+    Call.onActiveCall?.call(this);
     _status.value = _ConnectionStatus.connecting;
     final result = await _connect(settings);
     if (result.isSuccess) {
@@ -347,8 +347,8 @@ class CallV2Impl extends CallV2 {
     await _session?.dispose();
     _session = null;
     _status.value = _ConnectionStatus.disconnected;
-    CallV2.activeCall = null;
-    CallV2.onActiveCall?.call(null);
+    Call.activeCall = null;
+    Call.onActiveCall?.call(null);
     return Result.success(None());
   }
 
@@ -435,11 +435,11 @@ typedef GetUserId = String? Function();
 
 CallStateManager _makeCallStateManager(
   StreamCallCid callCid,
-  StreamVideoV2 streamVideo,
+  StreamVideo streamVideo,
 ) {
   final currentUserId = streamVideo.currentUser?.id ?? '';
   return CallStateManagerImpl(
-    initialState: CallStateV2(
+    initialState: CallState(
       currentUserId: currentUserId,
       callCid: callCid,
     ),
@@ -448,7 +448,7 @@ CallStateManager _makeCallStateManager(
 }
 
 extension on CallStateManager {
-  Future<Result<None>> validateUserId(StreamVideoV2 streamVideo) async {
+  Future<Result<None>> validateUserId(StreamVideo streamVideo) async {
     final stateUserId = state.value.currentUserId;
     final currentUserId = streamVideo.currentUser?.id ?? '';
     if (currentUserId.isEmpty) {

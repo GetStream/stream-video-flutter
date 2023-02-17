@@ -18,9 +18,9 @@ import 'mapper_extensions.dart';
 
 // TODO: The class needs further refactor. Some parts can be abstracted.
 
-class CoordinatorWebSocketV2 extends StreamWebSocket
+class CoordinatorWebSocket extends StreamWebSocket
     with KeepAlive, ConnectionStateMixin {
-  CoordinatorWebSocketV2(
+  CoordinatorWebSocket(
     super.url, {
     super.protocols,
     required this.apiKey,
@@ -39,8 +39,8 @@ class CoordinatorWebSocketV2 extends StreamWebSocket
   /// The token manager used to fetch or refresh token.
   final TokenManager tokenManager;
 
-  SharedEmitter<CoordinatorEventV2> get events => _events;
-  final _events = MutableSharedEmitterImpl<CoordinatorEventV2>();
+  SharedEmitter<CoordinatorEvent> get events => _events;
+  final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
 
   String? _userId;
   String? _clientId;

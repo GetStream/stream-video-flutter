@@ -13,48 +13,48 @@ import '../webrtc/rtc_track.dart';
 import 'call_impl.dart';
 import 'call_settings.dart';
 
-/// Represents a [CallV2] in which you can connect to.
-abstract class CallV2 {
-  const CallV2();
+/// Represents a [Call] in which you can connect to.
+abstract class Call {
+  const Call();
 
-  factory CallV2.fromCid({
+  factory Call.fromCid({
     required StreamCallCid callCid,
-    StreamVideoV2? streamVideo,
+    StreamVideo? streamVideo,
   }) {
-    return CallV2Impl(
+    return CallImpl(
       callCid: callCid,
       streamVideo: streamVideo,
     );
   }
 
-  factory CallV2.fromCreated({
+  factory Call.fromCreated({
     required CallCreated data,
-    StreamVideoV2? streamVideo,
+    StreamVideo? streamVideo,
   }) {
-    return CallV2Impl.created(
+    return CallImpl.created(
       data: data,
       streamVideo: streamVideo,
     );
   }
 
-  factory CallV2.fromJoined({
+  factory Call.fromJoined({
     required CallJoined data,
-    StreamVideoV2? streamVideo,
+    StreamVideo? streamVideo,
   }) {
-    return CallV2Impl.joined(
+    return CallImpl.joined(
       data: data,
       streamVideo: streamVideo,
     );
   }
 
-  static CallV2? activeCall;
-  static void Function(CallV2?)? onActiveCall;
+  static Call? activeCall;
+  static void Function(Call?)? onActiveCall;
 
   StreamCallCid get callCid;
 
-  StateEmitter<CallStateV2> get state;
+  StateEmitter<CallState> get state;
 
-  SharedEmitter<SfuEventV2> get events;
+  SharedEmitter<SfuEvent> get events;
 
   Future<Result<CallCreated>> dial({
     required List<String> participantIds,

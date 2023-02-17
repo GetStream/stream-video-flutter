@@ -15,6 +15,6 @@ class NoOpPushNotificationManager implements PushNotificationManager {
 }
 
 Future<PushNotificationManager> defaultPushNotificationManager(
-  StreamVideoV2 streamVideoV2,
+  StreamVideo streamVideoV2,
 ) =>
     Future.value(NoOpPushNotificationManager());

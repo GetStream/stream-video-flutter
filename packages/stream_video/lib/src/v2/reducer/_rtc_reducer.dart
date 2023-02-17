@@ -8,8 +8,8 @@ final _logger = taggedLogger(tag: 'SV:Reducer-RTC');
 class RtcReducer {
   const RtcReducer();
 
-  CallStateV2 reduce(
-    CallStateV2 state,
+  CallState reduce(
+    CallState state,
     RtcAction action,
   ) {
     if (action is SubscriberTrackReceivedAction) {
@@ -18,8 +18,8 @@ class RtcReducer {
     return state;
   }
 
-  CallStateV2 _reduceSubscriberTrackReceived(
-    CallStateV2 state,
+  CallState _reduceSubscriberTrackReceived(
+    CallState state,
     SubscriberTrackReceivedAction action,
   ) {
     _logger.d(

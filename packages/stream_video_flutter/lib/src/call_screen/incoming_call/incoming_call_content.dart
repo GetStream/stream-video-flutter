@@ -23,10 +23,10 @@ class IncomingCallContent extends StatelessWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// Holds information about the call.
-  final CallStateV2 callState;
+  final CallState callState;
 
   /// The action to perform when the accept call button is tapped.
   final VoidCallback onAcceptPressed;

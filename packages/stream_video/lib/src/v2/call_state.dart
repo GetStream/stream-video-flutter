@@ -9,12 +9,12 @@ import 'model/call_status.dart';
 
 /// TODO - Class that holds any information about the call, including participants
 @immutable
-class CallStateV2 extends Equatable {
-  factory CallStateV2({
+class CallState extends Equatable {
+  factory CallState({
     required String currentUserId,
     required StreamCallCid callCid,
   }) {
-    return CallStateV2._(
+    return CallState._(
       currentUserId: currentUserId,
       callCid: callCid,
       createdByUserId: '',
@@ -24,13 +24,13 @@ class CallStateV2 extends Equatable {
     );
   }
 
-  factory CallStateV2.fromMetadata({
+  factory CallState.fromMetadata({
     required String currentUserId,
     required StreamCallCid callCid,
     required bool ringing,
     required CallMetadata metadata,
   }) {
-    return CallStateV2._(
+    return CallState._(
       currentUserId: currentUserId,
       callCid: callCid,
       createdByUserId: metadata.info.createdByUserId,
@@ -45,7 +45,7 @@ class CallStateV2 extends Equatable {
   }
 
   /// TODO
-  const CallStateV2._({
+  const CallState._({
     required this.currentUserId,
     required this.callCid,
     required this.createdByUserId,
@@ -59,27 +59,27 @@ class CallStateV2 extends Equatable {
   final String createdByUserId;
   final String sessionId;
   final CallStatus status;
-  final List<CallParticipantStateV2> callParticipants;
+  final List<CallParticipantState> callParticipants;
 
-  CallParticipantStateV2? get localParticipant {
+  CallParticipantState? get localParticipant {
     return callParticipants.firstWhereOrNull((element) => element.isLocal);
   }
 
-  List<CallParticipantStateV2> get otherParticipants {
+  List<CallParticipantState> get otherParticipants {
     return callParticipants.where((element) => !element.isLocal).toList();
   }
 
-  /// Returns a copy of this [CallStateV2] with the given fields replaced
+  /// Returns a copy of this [CallState] with the given fields replaced
   /// with the new values.
-  CallStateV2 copyWith({
+  CallState copyWith({
     String? currentUserId,
     StreamCallCid? callCid,
     String? createdByUserId,
     String? sessionId,
     CallStatus? status,
-    List<CallParticipantStateV2>? callParticipants,
+    List<CallParticipantState>? callParticipants,
   }) {
-    return CallStateV2._(
+    return CallState._(
       currentUserId: currentUserId ?? this.currentUserId,
       callCid: callCid ?? this.callCid,
       createdByUserId: createdByUserId ?? this.createdByUserId,
@@ -101,7 +101,7 @@ class CallStateV2 extends Equatable {
 
   @override
   String toString() {
-    return 'CallStateV2{currentUserId: $currentUserId, callCid: $callCid, '
+    return 'CallState{currentUserId: $currentUserId, callCid: $callCid, '
         'createdByUserId: $createdByUserId, status: $status, '
         'sessionId: $sessionId, callParticipants: $callParticipants}';
   }
@@ -119,13 +119,13 @@ extension on CallMetadata {
     }
   }
 
-  List<CallParticipantStateV2> toCallParticipants(String currentUserId) {
-    final result = <CallParticipantStateV2>[];
+  List<CallParticipantState> toCallParticipants(String currentUserId) {
+    final result = <CallParticipantState>[];
     for (final userId in details.memberUserIds) {
       final member = details.members[userId];
       final isLocal = currentUserId == userId;
       result.add(
-        CallParticipantStateV2(
+        CallParticipantState(
           userId: userId,
           role: member?.role ?? '',
           name: '',

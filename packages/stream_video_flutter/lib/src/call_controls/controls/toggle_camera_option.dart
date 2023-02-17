@@ -16,10 +16,10 @@ class ToggleCameraOption extends StatelessWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// The current local participant.
-  final CallParticipantStateV2 localParticipant;
+  final CallParticipantState localParticipant;
 
   /// The icon that is shown when the camera is enabled.
   final IconData enabledCameraIcon;

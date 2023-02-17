@@ -19,7 +19,7 @@ import 'reducer/call_state_reducer.dart';
 import 'sfu/data/events/sfu_events.dart';
 import 'sfu/data/models/sfu_track_type.dart';
 import 'state_emitter.dart';
-import 'stream_video_v2.dart';
+import 'stream_video.dart';
 import 'utils/result.dart';
 
 const _tag = 'SV:StateManager';
@@ -27,7 +27,7 @@ int _stateSeq = 1;
 
 abstract class CallStateManager {
   const CallStateManager();
-  StateEmitter<CallStateV2> get state;
+  StateEmitter<CallState> get state;
   Future<void> onUserIdSet(String userId);
   Future<void> onCallCreated(CallCreated data);
   Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data);
@@ -37,8 +37,8 @@ abstract class CallStateManager {
   Future<void> onConnected();
   Future<void> onDisconnect();
   Future<void> onCallControlAction(CallControlAction action);
-  Future<void> onSfuEvent(SfuEventV2 event);
-  Future<void> onCoordinatorEvent(CoordinatorEventV2 event);
+  Future<void> onSfuEvent(SfuEvent event);
+  Future<void> onCoordinatorEvent(CoordinatorEvent event);
   Future<void> onWaitingTimeout(Duration dropTimeout);
   Future<void> onConnectFailed(VideoError error);
 
@@ -47,8 +47,8 @@ abstract class CallStateManager {
 
 class CallStateManagerImpl extends CallStateManager {
   CallStateManagerImpl({
-    required CallStateV2 initialState,
-    required StreamVideoV2 streamVideo,
+    required CallState initialState,
+    required StreamVideo streamVideo,
   })  : _streamVideo = streamVideo,
         _state = MutableStateEmitterImpl(initialState),
         _stateReducer = CallStateReducer() {
@@ -57,12 +57,12 @@ class CallStateManagerImpl extends CallStateManager {
 
   late final _logger = taggedLogger(tag: '$_tag-$_stateSeq');
 
-  final StreamVideoV2 _streamVideo;
+  final StreamVideo _streamVideo;
   final CallStateReducer _stateReducer;
-  final MutableStateEmitter<CallStateV2> _state;
+  final MutableStateEmitter<CallState> _state;
 
   @override
-  StateEmitter<CallStateV2> get state => _state;
+  StateEmitter<CallState> get state => _state;
 
   @override
   Future<void> onUserIdSet(String userId) async {
@@ -131,7 +131,7 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  Future<void> onSfuEvent(SfuEventV2 event) async {
+  Future<void> onSfuEvent(SfuEvent event) async {
     if (event is SfuHealthCheckResponseEvent) {
       return;
     }
@@ -152,7 +152,7 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  Future<void> onCoordinatorEvent(CoordinatorEventV2 event) async {
+  Future<void> onCoordinatorEvent(CoordinatorEvent event) async {
     if (event is CoordinatorHealthCheckEvent) {
       return;
     }
@@ -194,7 +194,7 @@ class CallStateManagerImpl extends CallStateManager {
     _postState(state: reduced);
   }
 
-  void _postState({required CallStateV2 state}) {
+  void _postState({required CallState state}) {
     if (state != _state.value) {
       _logger.v(() => '[postState] state: $state');
       _state.value = state;

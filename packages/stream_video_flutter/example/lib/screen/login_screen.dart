@@ -26,7 +26,7 @@ class LoginScreen extends StatelessWidget {
               subtitle: Text('Role: ${user.userInfo.role}'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () async {
-                await StreamVideoV2.instance.connectUser(
+                await StreamVideo.instance.connectUser(
                   user.userInfo,
                   token: Token(user.token),
                 );

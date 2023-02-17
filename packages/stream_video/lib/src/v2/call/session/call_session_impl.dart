@@ -67,13 +67,13 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   final String sessionId;
   final CallSessionConfig config;
   final CallStateManager stateManager;
-  final SfuClientV2 sfuClient;
+  final SfuClient sfuClient;
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
   RtcManager? rtcManager;
 
   @override
-  SharedEmitter<SfuEventV2> get events => sfuWS.events;
+  SharedEmitter<SfuEvent> get events => sfuWS.events;
 
   @override
   Future<Result<None>> start() async {
@@ -179,7 +179,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   }
 
   @override
-  Future<void> onSfuEvent(SfuEventV2 event) async {
+  Future<void> onSfuEvent(SfuEvent event) async {
     _logger.v(() => '[onSfuEvent] event: $event');
     if (event is SfuSubscriberOfferEvent) {
       await _onSubscriberOffer(event);
@@ -403,7 +403,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     return Result.success(None());
   }
 
-  Future<Result<None>> _onSetCameraPosition(CameraPositionV2 position) async {
+  Future<Result<None>> _onSetCameraPosition(CameraPosition position) async {
     final track = await rtcManager?.setCameraPosition(cameraPosition: position);
     if (track == null) {
       return Result.error('Unable to set camera position, Track not found');
@@ -435,7 +435,7 @@ extension RtcTracksInfoMapper on List<RtcTrackInfo> {
   }
 }
 
-extension on SfuClientV2 {
+extension on SfuClient {
   Future<Result<None>> update({
     required String sessionId,
     required Iterable<SfuSubscriptionDetails> subscriptions,
@@ -493,7 +493,7 @@ extension on SetSubscription {
   }
 }
 
-extension on List<CallParticipantStateV2> {
+extension on List<CallParticipantState> {
   void getSubscriptions(
     Map<String, SfuSubscriptionDetails> output, [
     Set<SfuTrackType>? exclude,
@@ -510,7 +510,7 @@ extension on List<CallParticipantStateV2> {
   }
 }
 
-extension on CallParticipantStateV2 {
+extension on CallParticipantState {
   void getSubscriptions(
     Map<String, SfuSubscriptionDetails> output, [
     Set<SfuTrackType>? exclude,

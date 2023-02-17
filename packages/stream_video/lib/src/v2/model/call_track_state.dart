@@ -11,7 +11,7 @@ abstract class TrackState with EquatableMixin {
   factory TrackState.local({
     bool muted = false,
     String? deviceId,
-    CameraPositionV2? cameraPosition,
+    CameraPosition? cameraPosition,
   }) {
     return LocalTrackState._(
       muted: muted,
@@ -71,7 +71,7 @@ class LocalTrackState extends TrackState {
   final String? deviceId;
 
   /// The camera position of the track in case it is a video track.
-  final CameraPositionV2? cameraPosition;
+  final CameraPosition? cameraPosition;
 
   @override
   List<Object?> get props => [muted, deviceId, cameraPosition];
@@ -95,7 +95,7 @@ class LocalTrackState extends TrackState {
   LocalTrackState copyWith({
     bool? muted,
     String? deviceId,
-    CameraPositionV2? cameraPosition,
+    CameraPosition? cameraPosition,
   }) {
     return LocalTrackState._(
       muted: muted ?? this.muted,
