@@ -18,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final _textController = TextEditingController();
 
   late StreamChatClient chatClient;
-  final videoClient = StreamVideoV2.instance;
+  final videoClient = StreamVideo.instance;
 
   var _isInProgress = false;
 
@@ -143,10 +143,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<CallV2> _initVideoCall({required String callId}) async {
+  Future<Call> _initVideoCall({required String callId}) async {
     final callCid = StreamCallCid.from(type: "default", id: callId);
     final data = await videoClient.getOrCreateCall(cid: callCid);
-    return CallV2.fromCreated(data: data.getOrNull()!.data);
+    return Call.fromCreated(data: data.getOrNull()!.data);
   }
 
   Future<Channel> _initChatChannel({required String channelId}) async {
