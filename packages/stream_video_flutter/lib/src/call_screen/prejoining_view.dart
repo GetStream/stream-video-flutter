@@ -227,6 +227,8 @@ class _StreamPreJoiningViewState extends State<StreamPreJoiningView> {
   @override
   Future<void> dispose() async {
     super.dispose();
+    await _removeVideoTracks();
+    await _removeAudioTracks();
     await _localVideoRenderer.srcObject?.dispose();
     await _localVideoRenderer.dispose();
   }
@@ -241,9 +243,11 @@ class _StreamPreJoiningViewState extends State<StreamPreJoiningView> {
   Future<void> _joinCall() async {
     final result = await call.joinCall();
     if (result.isSuccess) {
-      setState(() {
-        _isJoining = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isJoining = false;
+        });
+      }
     }
   }
 
