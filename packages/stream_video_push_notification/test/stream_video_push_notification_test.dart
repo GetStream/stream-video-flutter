@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'mocks.dart';
 
 Future<void> main() async {
-  final streamVideo = StreamVideoV2Mock();
+  final streamVideo = StreamVideoMock();
   final callNotificationWrapper = CallNotificationWrapperMock();
   final sharedPreferences = SharedPreferencesMock();
   final StreamCallCid streamCallCid = StreamCallCid(cid: 'call:123');
