@@ -10,8 +10,8 @@ import '../errors/video_error_composer.dart';
 import '../utils/result.dart';
 
 /// An accessor that allows us to communicate with the API around video calls.
-class CoordinatorClientV2 {
-  CoordinatorClientV2({
+class CoordinatorClient {
+  CoordinatorClient({
     required String baseUrl,
     required this.apiKey,
     required this.tokenManager,

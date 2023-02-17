@@ -15,10 +15,10 @@ class CallParticipantsInfoOptions extends StatelessWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// The current local participant.
-  final CallParticipantStateV2 localParticipant;
+  final CallParticipantState localParticipant;
 
   /// Invite button title.
   final String inviteButtonTitle;
@@ -91,10 +91,10 @@ class _MuteToggle extends StatefulWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// The current local participant.
-  final CallParticipantStateV2 localParticipant;
+  final CallParticipantState localParticipant;
 
   /// Contains titles for muted and unmuted states.
   final MuteToggleTitles titles;

@@ -5,7 +5,7 @@ import 'package:stream_video/src/v2/coordinator/models/coordinator_models.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_push_notification/src/call_notification_wrapper.dart';
 
-class StreamVideoV2Mock extends Mock implements StreamVideoV2 {}
+class StreamVideoV2Mock extends Mock implements StreamVideo {}
 
 class CallNotificationWrapperMock extends Mock
     implements CallNotificationWrapper {}

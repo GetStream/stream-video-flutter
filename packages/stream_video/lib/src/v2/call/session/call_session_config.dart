@@ -1,5 +1,4 @@
 import '../../../types/other.dart';
-import '../call_settings.dart';
 
 class CallSessionConfig {
   const CallSessionConfig({

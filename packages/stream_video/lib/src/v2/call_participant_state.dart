@@ -6,8 +6,8 @@ import 'sfu/data/models/sfu_connection_quality.dart';
 import 'sfu/data/models/sfu_track_type.dart';
 
 @immutable
-class CallParticipantStateV2 with EquatableMixin {
-  factory CallParticipantStateV2({
+class CallParticipantState with EquatableMixin {
+  factory CallParticipantState({
     required String userId,
     required String role,
     required String name,
@@ -22,7 +22,7 @@ class CallParticipantStateV2 with EquatableMixin {
     bool isSpeaking = false,
     bool isDominantSpeaker = false,
   }) {
-    return CallParticipantStateV2._(
+    return CallParticipantState._(
       userId: userId,
       role: role,
       name: name,
@@ -40,7 +40,7 @@ class CallParticipantStateV2 with EquatableMixin {
   }
 
   /// TODO: Documentation
-  const CallParticipantStateV2._({
+  const CallParticipantState._({
     required this.userId,
     required this.role,
     required this.name,
@@ -70,9 +70,9 @@ class CallParticipantStateV2 with EquatableMixin {
   final bool isSpeaking;
   final bool isDominantSpeaker;
 
-  /// Returns a copy of this [CallParticipantStateV2] with the given fields
+  /// Returns a copy of this [CallParticipantState] with the given fields
   /// replaced with the new values.
-  CallParticipantStateV2 copyWith({
+  CallParticipantState copyWith({
     String? userId,
     String? role,
     String? name,
@@ -87,7 +87,7 @@ class CallParticipantStateV2 with EquatableMixin {
     bool? isSpeaking,
     bool? isDominantSpeaker,
   }) {
-    return CallParticipantStateV2(
+    return CallParticipantState(
       userId: userId ?? this.userId,
       role: role ?? this.role,
       name: name ?? this.name,

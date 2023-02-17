@@ -9,7 +9,7 @@ abstract class CoordinatorAction extends StreamAction {
 class CoordinatorEventAction extends CoordinatorAction {
   const CoordinatorEventAction(this.event);
 
-  final CoordinatorEventV2 event;
+  final CoordinatorEvent event;
 }
 
 class CoordinatorUsersAction extends CoordinatorAction {

@@ -33,7 +33,7 @@ abstract class SessionControlAction extends CallControlAction {
 
 class SetCameraPosition extends SessionControlAction {
   const SetCameraPosition({required this.cameraPosition});
-  final CameraPositionV2 cameraPosition;
+  final CameraPosition cameraPosition;
 
   @override
   List<Object?> get props => [cameraPosition];

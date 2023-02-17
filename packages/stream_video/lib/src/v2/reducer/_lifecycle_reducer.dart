@@ -12,8 +12,8 @@ final _logger = taggedLogger(tag: 'SV:Reducer-Lifecycle');
 class LifecycleReducer {
   const LifecycleReducer();
 
-  CallStateV2 reduce(
-    CallStateV2 state,
+  CallState reduce(
+    CallState state,
     LifecycleAction action,
   ) {
     if (action is CallUserIdAction) {
@@ -38,8 +38,8 @@ class LifecycleReducer {
     return state;
   }
 
-  CallStateV2 _reduceUserId(
-    CallStateV2 state,
+  CallState _reduceUserId(
+    CallState state,
     CallUserIdAction action,
   ) {
     return state.copyWith(
@@ -50,8 +50,8 @@ class LifecycleReducer {
     );
   }
 
-  CallStateV2 _reduceCallCreated(
-    CallStateV2 state,
+  CallState _reduceCallCreated(
+    CallState state,
     CallCreatedAction action,
   ) {
     return state.copyWith(
@@ -61,8 +61,8 @@ class LifecycleReducer {
     );
   }
 
-  CallStateV2 _reduceCallJoining(
-    CallStateV2 state,
+  CallState _reduceCallJoining(
+    CallState state,
     CallJoiningAction action,
   ) {
     return state.copyWith(
@@ -70,8 +70,8 @@ class LifecycleReducer {
     );
   }
 
-  CallStateV2 _reduceCallJoined(
-    CallStateV2 state,
+  CallState _reduceCallJoined(
+    CallState state,
     CallJoinedAction action,
   ) {
     return state.copyWith(
@@ -81,8 +81,8 @@ class LifecycleReducer {
     );
   }
 
-  CallStateV2 _reduceCallDisconnected(
-    CallStateV2 state,
+  CallState _reduceCallDisconnected(
+    CallState state,
     CallDisconnectedAction action,
   ) {
     final status = state.status;
@@ -99,8 +99,8 @@ class LifecycleReducer {
     );
   }
 
-  CallStateV2 _reduceCallTimeout(
-    CallStateV2 state,
+  CallState _reduceCallTimeout(
+    CallState state,
     CallTimeoutAction action,
   ) {
     return state.copyWith(
@@ -108,8 +108,8 @@ class LifecycleReducer {
     );
   }
 
-  CallStateV2 _reduceCallConnectFailed(
-    CallStateV2 state,
+  CallState _reduceCallConnectFailed(
+    CallState state,
     CallConnectFailedAction action,
   ) {
     return state.copyWith(
@@ -117,15 +117,15 @@ class LifecycleReducer {
     );
   }
 
-  CallStateV2 _reduceCallSessionStart(
-    CallStateV2 state,
+  CallState _reduceCallSessionStart(
+    CallState state,
     CallSessionStartAction action,
   ) {
     return state.copyWith(sessionId: action.sessionId);
   }
 
-  CallStateV2 _reduceCallConnected(
-    CallStateV2 state,
+  CallState _reduceCallConnected(
+    CallState state,
     CallConnectedAction action,
   ) {
     return state.copyWith(
@@ -136,7 +136,7 @@ class LifecycleReducer {
 
 extension on CallCreated {
   CallStatus toCallStatus({
-    required CallStateV2 state,
+    required CallState state,
   }) {
     final status = state.status;
     final createdByMe = state.currentUserId == metadata.info.createdByUserId;
@@ -153,14 +153,14 @@ extension on CallCreated {
 }
 
 extension on CallMetadata {
-  List<CallParticipantStateV2> toCallParticipants(CallStateV2 state) {
-    final result = <CallParticipantStateV2>[];
+  List<CallParticipantState> toCallParticipants(CallState state) {
+    final result = <CallParticipantState>[];
     for (final userId in users.keys) {
       final member = details.members[userId];
       final user = users[userId];
       final isLocal = state.currentUserId == userId;
       result.add(
-        CallParticipantStateV2(
+        CallParticipantState(
           userId: userId,
           role: member?.role ?? user?.role ?? '',
           name: user?.name ?? '',

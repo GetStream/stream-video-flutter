@@ -10,7 +10,7 @@ import 'src/call_notification_wrapper.dart';
 
 class StreamVideoPushNotificationManager implements PushNotificationManager {
   StreamVideoPushNotificationManager._create({
-    required StreamVideoV2 client,
+    required StreamVideo client,
     required SharedPreferences sharedPreferences,
     CallNotificationWrapper callNotification = const CallNotificationWrapper(),
   })  : _client = client,
@@ -18,7 +18,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         _sharedPreferences = sharedPreferences;
 
   final _logger = taggedLogger(tag: 'PNManager');
-  final StreamVideoV2 _client;
+  final StreamVideo _client;
   final CallNotificationWrapper _callNotification;
   final SharedPreferences _sharedPreferences;
 
@@ -107,7 +107,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   static Future<StreamVideoPushNotificationManager> create(
-    StreamVideoV2 client, {
+    StreamVideo client, {
     SharedPreferences? sharedPreferences,
     CallNotificationWrapper? callNotification,
   }) async {

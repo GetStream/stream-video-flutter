@@ -13,8 +13,8 @@ final _logger = taggedLogger(tag: 'SV:CoordReducer');
 class CoordinatorReducer {
   const CoordinatorReducer();
 
-  CallStateV2 reduce(
-    CallStateV2 state,
+  CallState reduce(
+    CallState state,
     CoordinatorAction action,
   ) {
     if (action is CoordinatorUsersAction) {
@@ -25,8 +25,8 @@ class CoordinatorReducer {
     return state;
   }
 
-  CallStateV2 _reduceCoordinatorUsers(
-    CallStateV2 state,
+  CallState _reduceCoordinatorUsers(
+    CallState state,
     CoordinatorUsersAction action,
   ) {
     return state.copyWith(
@@ -44,9 +44,9 @@ class CoordinatorReducer {
     );
   }
 
-  CallStateV2 _reduceCoordinatorEvent(
-    CallStateV2 state,
-    CoordinatorEventV2 event,
+  CallState _reduceCoordinatorEvent(
+    CallState state,
+    CoordinatorEvent event,
   ) {
     if (event is CoordinatorCallRejectedEvent) {
       return _reduceCallRejected(state, event);
@@ -58,8 +58,8 @@ class CoordinatorReducer {
     return state;
   }
 
-  CallStateV2 _reduceCallAccepted(
-    CallStateV2 state,
+  CallState _reduceCallAccepted(
+    CallState state,
     CoordinatorCallAcceptedEvent event,
   ) {
     final status = state.status;
@@ -79,8 +79,8 @@ class CoordinatorReducer {
     );
   }
 
-  CallStateV2 _reduceCallRejected(
-    CallStateV2 state,
+  CallState _reduceCallRejected(
+    CallState state,
     CoordinatorCallRejectedEvent event,
   ) {
     final status = state.status;
@@ -119,8 +119,8 @@ class CoordinatorReducer {
     );
   }
 
-  CallStateV2 _reduceCallCancelled(
-    CallStateV2 state,
+  CallState _reduceCallCancelled(
+    CallState state,
     CoordinatorCallCancelledEvent event,
   ) {
     final status = state.status;
@@ -157,7 +157,7 @@ class CoordinatorReducer {
   }
 }
 
-extension on List<CallParticipantStateV2> {
+extension on List<CallParticipantState> {
   bool hasSingle(String userId) {
     return length == 1 && firstOrNull?.userId == userId;
   }

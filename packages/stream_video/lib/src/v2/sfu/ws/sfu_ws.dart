@@ -60,8 +60,8 @@ class SfuWebSocket extends StreamWebSocket
   final Set<SfuEventListener> _eventListeners = {};
   bool _manuallyClosed = false;
 
-  SharedEmitter<SfuEventV2> get events => _events;
-  final _events = MutableSharedEmitterImpl<SfuEventV2>();
+  SharedEmitter<SfuEvent> get events => _events;
+  final _events = MutableSharedEmitterImpl<SfuEvent>();
 
   void addEventListener(SfuEventListener listener) {
     _eventListeners.add(listener);
@@ -115,7 +115,7 @@ class SfuWebSocket extends StreamWebSocket
     _notifyEvent(event);
   }
 
-  void _handleEvent(SfuEventV2 event) {
+  void _handleEvent(SfuEvent event) {
     if (event is SfuJoinResponseEvent) {
       if (!isKeepAliveStarted) {
         _logger.d(() => '[handleEvent] start PingPong');
@@ -206,7 +206,7 @@ class SfuWebSocket extends StreamWebSocket
     return (math.Random().nextDouble() * (max - min) + min).floor();
   }
 
-  void _notifyEvent(SfuEventV2 event) {
+  void _notifyEvent(SfuEvent event) {
     _events.emit(event);
     for (final listener in _eventListeners) {
       listener.onSfuEvent(event);

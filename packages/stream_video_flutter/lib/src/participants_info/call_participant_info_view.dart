@@ -16,7 +16,7 @@ class CallParticipantInfoView extends StatelessWidget {
   });
 
   /// Represents current participant state.
-  final CallParticipantStateV2 participant;
+  final CallParticipantState participant;
 
   /// Active/Inactive icons for the video button.
   final StreamIconToggle videoIcon;
@@ -28,7 +28,7 @@ class CallParticipantInfoView extends StatelessWidget {
   final StreamParticipantInfoTheme? participantInfoTheme;
 
   /// The action to perform when a participant is tapped.
-  final ValueChanged<CallParticipantStateV2>? onParticipantTap;
+  final ValueChanged<CallParticipantState>? onParticipantTap;
 
   @override
   Widget build(BuildContext context) {

@@ -13,14 +13,13 @@ import '../../../../protobuf/video/coordinator/user_v1/user.pb.dart'
     as coord_users;
 import '../../../logger/logger.dart';
 import '../../model/call_cid.dart';
-import '../../utils/result.dart';
 import '../models/coordinator_models.dart';
 import 'coordinator_events.dart';
 
-/// Converts [coordinator_ws.WebsocketEvent] into [CoordinatorEventV2].
+/// Converts [coordinator_ws.WebsocketEvent] into [CoordinatorEvent].
 extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
-  /// Returns [CoordinatorEventV2].
-  CoordinatorEventV2 toEvent() {
+  /// Returns [CoordinatorEvent].
+  CoordinatorEvent toEvent() {
     final eventType = whichEvent();
     switch (eventType) {
       case coordinator_ws.WebsocketEvent_Event.healthcheck:

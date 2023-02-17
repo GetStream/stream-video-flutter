@@ -18,10 +18,10 @@ class VideoTrackRenderer extends StatelessWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// The participant who is publishing the track.
-  final CallParticipantStateV2 participant;
+  final CallParticipantState participant;
 
   /// The type of video track to display.
   final SfuTrackTypeVideo videoTrackType;

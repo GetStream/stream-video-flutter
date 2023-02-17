@@ -1,13 +1,14 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+
 import '../models/coordinator_models.dart';
 
 // TODO: Should we call it VideoEvent or CoordinatorEvent?
 
 /// Represents the events coming in from the socket.
 @immutable
-abstract class CoordinatorEventV2 with EquatableMixin {
-  const CoordinatorEventV2();
+abstract class CoordinatorEvent with EquatableMixin {
+  const CoordinatorEvent();
 
   @override
   bool? get stringify => true;
@@ -17,7 +18,7 @@ abstract class CoordinatorEventV2 with EquatableMixin {
 }
 
 /// Sent periodically by the server to keep the connection alive.
-class CoordinatorHealthCheckEvent extends CoordinatorEventV2 {
+class CoordinatorHealthCheckEvent extends CoordinatorEvent {
   const CoordinatorHealthCheckEvent(
       {required this.clientId, required this.userId});
 
@@ -29,7 +30,7 @@ class CoordinatorHealthCheckEvent extends CoordinatorEventV2 {
 }
 
 /// Sent when someone creates a call and invites another person to participate.
-class CoordinatorCallCreatedEvent extends CoordinatorEventV2 {
+class CoordinatorCallCreatedEvent extends CoordinatorEvent {
   const CoordinatorCallCreatedEvent({
     required this.callCid,
     required this.ringing,
@@ -49,7 +50,7 @@ class CoordinatorCallCreatedEvent extends CoordinatorEventV2 {
 }
 
 /// Sent when a call gets updated.
-class CoordinatorCallUpdatedEvent extends CoordinatorEventV2 {
+class CoordinatorCallUpdatedEvent extends CoordinatorEvent {
   const CoordinatorCallUpdatedEvent({
     required this.callCid,
     required this.info,
@@ -67,7 +68,7 @@ class CoordinatorCallUpdatedEvent extends CoordinatorEventV2 {
 }
 
 /// Sent when a calls gets ended.
-class CoordinatorCallEndedEvent extends CoordinatorEventV2 {
+class CoordinatorCallEndedEvent extends CoordinatorEvent {
   const CoordinatorCallEndedEvent({
     required this.callCid,
     required this.info,
@@ -85,7 +86,7 @@ class CoordinatorCallEndedEvent extends CoordinatorEventV2 {
 }
 
 /// Sent when a user accepts the call.
-class CoordinatorCallAcceptedEvent extends CoordinatorEventV2 {
+class CoordinatorCallAcceptedEvent extends CoordinatorEvent {
   const CoordinatorCallAcceptedEvent({
     required this.callCid,
     required this.sentByUserId,
@@ -105,7 +106,7 @@ class CoordinatorCallAcceptedEvent extends CoordinatorEventV2 {
 }
 
 /// Sent when a user rejects the call.
-class CoordinatorCallRejectedEvent extends CoordinatorEventV2 {
+class CoordinatorCallRejectedEvent extends CoordinatorEvent {
   const CoordinatorCallRejectedEvent({
     required this.callCid,
     required this.sentByUserId,
@@ -125,7 +126,7 @@ class CoordinatorCallRejectedEvent extends CoordinatorEventV2 {
 }
 
 /// Sent when a user cancels the call.
-class CoordinatorCallCancelledEvent extends CoordinatorEventV2 {
+class CoordinatorCallCancelledEvent extends CoordinatorEvent {
   const CoordinatorCallCancelledEvent({
     required this.callCid,
     required this.sentByUserId,
@@ -145,7 +146,7 @@ class CoordinatorCallCancelledEvent extends CoordinatorEventV2 {
 }
 
 /// Sent when call members are updated.
-class CoordinatorCallMembersUpdatedEvent extends CoordinatorEventV2 {
+class CoordinatorCallMembersUpdatedEvent extends CoordinatorEvent {
   const CoordinatorCallMembersUpdatedEvent({
     required this.callCid,
     required this.info,
@@ -163,7 +164,7 @@ class CoordinatorCallMembersUpdatedEvent extends CoordinatorEventV2 {
 }
 
 /// Sent when call members are deleted.
-class CoordinatorCallMembersDeletedEvent extends CoordinatorEventV2 {
+class CoordinatorCallMembersDeletedEvent extends CoordinatorEvent {
   const CoordinatorCallMembersDeletedEvent({
     required this.callCid,
     required this.info,
@@ -180,7 +181,7 @@ class CoordinatorCallMembersDeletedEvent extends CoordinatorEventV2 {
   List<Object?> get props => [callCid, info, details, users];
 }
 
-class CoordinatorCallCustomEvent extends CoordinatorEventV2 {
+class CoordinatorCallCustomEvent extends CoordinatorEvent {
   const CoordinatorCallCustomEvent({
     required this.callCid,
     required this.type,
@@ -212,6 +213,6 @@ class CoordinatorCallCustomEvent extends CoordinatorEventV2 {
 }
 
 // Unknown event.
-class CoordinatorUnknownEvent extends CoordinatorEventV2 {
+class CoordinatorUnknownEvent extends CoordinatorEvent {
   const CoordinatorUnknownEvent();
 }

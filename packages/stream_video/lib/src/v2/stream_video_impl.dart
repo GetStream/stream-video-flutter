@@ -25,7 +25,7 @@ import 'model/call_joined.dart';
 import 'model/call_received_created.dart';
 import 'shared_emitter.dart';
 import 'state_emitter.dart';
-import 'stream_video_v2.dart';
+import 'stream_video.dart';
 import 'utils/none.dart';
 import 'utils/result.dart';
 
@@ -34,7 +34,7 @@ import 'utils/result.dart';
 typedef LogHandlerFunction = void Function(LogRecord record);
 
 typedef PushNotificationFactory = Future<PushNotificationManager> Function(
-    StreamVideoV2);
+    StreamVideo);
 
 final _levelEmojiMapper = {
   Level.INFO: 'ℹ️',
@@ -53,20 +53,20 @@ const _defaultCoordinatorWsUrl =
     'wss://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
 
 /// The client responsible for handling config and maintaining calls
-class StreamVideoV2Impl implements StreamVideoV2 {
+class StreamVideoImpl implements StreamVideo {
   /// Creates a new Stream Video client unassociated with the
   /// Stream Video singleton instance
-  factory StreamVideoV2Impl(
+  factory StreamVideoImpl(
     String apiKey, {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
     Level logLevel = Level.ALL,
-    LogHandlerFunction logHandlerFunction = StreamVideoV2Impl.defaultLogHandler,
+    LogHandlerFunction logHandlerFunction = StreamVideoImpl.defaultLogHandler,
     PushNotificationFactory pushNotificationFactrory =
         defaultPushNotificationManager,
   }) {
-    return StreamVideoV2Impl._(
+    return StreamVideoImpl._(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
@@ -77,7 +77,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     );
   }
 
-  StreamVideoV2Impl._(
+  StreamVideoImpl._(
     this.apiKey, {
     required this.coordinatorRpcUrl,
     required this.coordinatorWsUrl,
@@ -90,7 +90,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     setLogLevel(logLevel);
     setLogHandler(logHandlerFunction);
 
-    _client = CoordinatorClientV2(
+    _client = CoordinatorClient(
       apiKey: apiKey,
       tokenManager: _tokenManager,
       baseUrl: coordinatorRpcUrl,
@@ -106,25 +106,25 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   final int latencyMeasurementRounds;
 
   final _tokenManager = TokenManager();
-  late final CoordinatorClientV2 _client;
+  late final CoordinatorClient _client;
   late final PushNotificationManager _pushNotificationManager;
 
-  var _state = _StreamVideoStateV2();
+  var _state = _StreamVideoState();
 
   @override
   UserInfo? get currentUser => _state.currentUser.value;
 
-  CoordinatorWebSocketV2? _ws;
-  StreamSubscription<CoordinatorEventV2>? _wsSubscription;
+  CoordinatorWebSocket? _ws;
+  StreamSubscription<CoordinatorEvent>? _wsSubscription;
 
   @override
-  SharedEmitter<CoordinatorEventV2> get events => _events;
-  final _events = MutableSharedEmitterImpl<CoordinatorEventV2>();
+  SharedEmitter<CoordinatorEvent> get events => _events;
+  final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
 
   @override
   void Function(CallCreated)? onCallCreated;
 
-  /// Default log handler function for the [StreamVideoV2Impl] logger.
+  /// Default log handler function for the [StreamVideoImpl] logger.
   static void defaultLogHandler(LogRecord record) {
     print(
       '${record.time} '
@@ -154,7 +154,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
     );
 
     try {
-      _ws = CoordinatorWebSocketV2(
+      _ws = CoordinatorWebSocket(
         coordinatorWsUrl,
         apiKey: apiKey,
         userInfo: user,
@@ -205,7 +205,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
 
     // Resetting the state.
     await _state.close();
-    _state = _StreamVideoStateV2();
+    _state = _StreamVideoState();
   }
 
   @override
@@ -495,7 +495,7 @@ class StreamVideoV2Impl implements StreamVideoV2 {
   }
 }
 
-class _StreamVideoStateV2 {
+class _StreamVideoState {
   final MutableStateEmitter<UserInfo?> currentUser = MutableStateEmitterImpl();
 
   Future<void> close() async {

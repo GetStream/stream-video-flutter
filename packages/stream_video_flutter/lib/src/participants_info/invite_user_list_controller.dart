@@ -20,7 +20,7 @@ class StreamInviteUserListController extends ValueNotifier<CallInviteState> {
   }) : super(const CallInviteState(users: [], selectedUsers: {}));
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// Reference to [StreamUsersProvider].
   final StreamUsersProvider usersProvider;

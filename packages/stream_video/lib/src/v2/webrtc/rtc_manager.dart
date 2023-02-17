@@ -13,7 +13,6 @@ import '../utils/none.dart';
 import '../utils/result.dart';
 import 'codecs_helper.dart' as codecs;
 import 'media/media_constraints.dart';
-
 import 'model/rtc_audio_bitrate_preset.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_dimension.dart';
@@ -583,9 +582,9 @@ extension on RtcLocalTrack<VideoConstraints> {
 
 extension RtcManagerTrackHelper on RtcManager {
   Future<RtcLocalTrack?> setCameraPosition({
-    required CameraPositionV2 cameraPosition,
+    required CameraPosition cameraPosition,
   }) {
-    final facingMode = cameraPosition == CameraPositionV2.front
+    final facingMode = cameraPosition == CameraPosition.front
         ? FacingMode.user
         : FacingMode.environment;
 

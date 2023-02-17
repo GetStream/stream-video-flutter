@@ -1,5 +1,4 @@
 import '../../../stream_video.dart';
-import '../../logger/stream_logger.dart';
 import '../model/call_track_state.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-Control');
@@ -7,8 +6,8 @@ final _logger = taggedLogger(tag: 'SV:Reducer-Control');
 class CallControlReducer {
   const CallControlReducer();
 
-  CallStateV2 reduce(
-    CallStateV2 state,
+  CallState reduce(
+    CallState state,
     CallControlAction action,
   ) {
     if (action is AcceptCall) {
@@ -35,8 +34,8 @@ class CallControlReducer {
     return state;
   }
 
-  CallStateV2 _reduceUpdateSubscriptions(
-    CallStateV2 state,
+  CallState _reduceUpdateSubscriptions(
+    CallState state,
     UpdateSubscriptions action,
   ) {
     final sessionId = state.sessionId;
@@ -52,8 +51,8 @@ class CallControlReducer {
     return newState;
   }
 
-  CallStateV2 _reduceUpdateSubscription(
-    CallStateV2 state,
+  CallState _reduceUpdateSubscription(
+    CallState state,
     UpdateSubscription action,
   ) {
     _logger.d(() => '[updateSub] #${state.sessionId}; action: $action');
@@ -80,8 +79,8 @@ class CallControlReducer {
     );
   }
 
-  CallStateV2 _reduceUnsubscribeVideoTrack(
-    CallStateV2 state,
+  CallState _reduceUnsubscribeVideoTrack(
+    CallState state,
     RemoveSubscription action,
   ) {
     return state.copyWith(
@@ -105,8 +104,8 @@ class CallControlReducer {
     );
   }
 
-  CallStateV2 _reduceCallAccepted(
-    CallStateV2 state,
+  CallState _reduceCallAccepted(
+    CallState state,
     AcceptCall action,
   ) {
     final status = state.status;
@@ -121,8 +120,8 @@ class CallControlReducer {
     );
   }
 
-  CallStateV2 _reduceCallRejected(
-    CallStateV2 state,
+  CallState _reduceCallRejected(
+    CallState state,
     RejectCall action,
   ) {
     final status = state.status;
@@ -141,8 +140,8 @@ class CallControlReducer {
     );
   }
 
-  CallStateV2 _reduceCallCancelled(
-    CallStateV2 state,
+  CallState _reduceCallCancelled(
+    CallState state,
     CancelCall action,
   ) {
     return state.copyWith(
@@ -154,8 +153,8 @@ class CallControlReducer {
     );
   }
 
-  CallStateV2 _reduceCameraPosition(
-    CallStateV2 state,
+  CallState _reduceCameraPosition(
+    CallState state,
     SetCameraPosition action,
   ) {
     return state.copyWith(
@@ -178,29 +177,29 @@ class CallControlReducer {
     );
   }
 
-  CallStateV2 _reduceCameraEnabled(
-    CallStateV2 state,
+  CallState _reduceCameraEnabled(
+    CallState state,
     SetCameraEnabled action,
   ) {
     return _toggleTrackType(state, SfuTrackType.video, action.enabled);
   }
 
-  CallStateV2 _reduceMicrophoneEnabled(
-    CallStateV2 state,
+  CallState _reduceMicrophoneEnabled(
+    CallState state,
     SetMicrophoneEnabled action,
   ) {
     return _toggleTrackType(state, SfuTrackType.audio, action.enabled);
   }
 
-  CallStateV2 _reduceScreenShareEnabled(
-    CallStateV2 state,
+  CallState _reduceScreenShareEnabled(
+    CallState state,
     SetScreenShareEnabled action,
   ) {
     return _toggleTrackType(state, SfuTrackType.screenShare, action.enabled);
   }
 
-  CallStateV2 _toggleTrackType(
-    CallStateV2 state,
+  CallState _toggleTrackType(
+    CallState state,
     SfuTrackType trackType,
     bool enabled,
   ) {
@@ -212,7 +211,7 @@ class CallControlReducer {
           if (trackState is LocalTrackState) {
             var cameraPosition = trackState.cameraPosition;
             if (trackType == SfuTrackType.video && cameraPosition == null) {
-              cameraPosition = CameraPositionV2.front;
+              cameraPosition = CameraPosition.front;
             }
             return participant.copyWith(
               publishedTracks: {

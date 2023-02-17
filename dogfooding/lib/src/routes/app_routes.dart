@@ -30,7 +30,7 @@ mixin AppRoutes {
         return MaterialPageRoute(
           settings: const RouteSettings(name: Routes.CALL),
           builder: (context) {
-            final call = settings.arguments as CallV2;
+            final call = settings.arguments as Call;
 
             void navigateHome() {
               Navigator.of(context).pushReplacementNamed(Routes.HOME);
