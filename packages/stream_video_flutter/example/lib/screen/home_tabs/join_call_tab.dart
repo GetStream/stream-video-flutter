@@ -68,6 +68,7 @@ class _JoinCallTabState extends State<JoinCallTab> {
         builder: (context) => StreamPreJoiningView(
           call: call,
           onJoinCallTap: () {
+            Navigator.of(context).pop();
             widget.onNavigateToCall(call);
           },
         ),

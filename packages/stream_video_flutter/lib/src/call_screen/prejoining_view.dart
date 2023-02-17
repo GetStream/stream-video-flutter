@@ -209,7 +209,9 @@ class _StreamPreJoiningViewState extends State<StreamPreJoiningView> {
                             ),
                           )
                         else
-                          CircularProgressIndicator(),
+                          const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
                       ],
                     ),
                   ),
@@ -239,7 +241,9 @@ class _StreamPreJoiningViewState extends State<StreamPreJoiningView> {
   Future<void> _joinCall() async {
     final result = await call.joinCall();
     if (result.isSuccess) {
-      _isJoining = false;
+      setState(() {
+        _isJoining = false;
+      });
     }
   }
 
