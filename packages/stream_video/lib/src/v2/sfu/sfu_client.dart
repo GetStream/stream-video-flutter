@@ -2,7 +2,7 @@ import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../utils/result.dart';
 
-abstract class SfuClientV2 {
+abstract class SfuClient {
   Future<Result<sfu.SendAnswerResponse>> sendAnswer(
     sfu.SendAnswerRequest request,
   );

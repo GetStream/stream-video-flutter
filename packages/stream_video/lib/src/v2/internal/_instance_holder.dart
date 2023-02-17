@@ -1,12 +1,12 @@
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
-import '../stream_video_v2.dart';
-import '../stream_video_v2_impl.dart';
+import '../stream_video.dart';
+import '../stream_video_impl.dart';
 
 @internal
 class InstanceHolder {
-  StreamVideoV2? _instance;
+  StreamVideo? _instance;
 
   void init(
     String apiKey, {
@@ -24,7 +24,7 @@ class InstanceHolder {
         If you want to use multiple instances of the SDK, use StreamVideo.new() instead.
         ''');
     }
-    _instance = StreamVideoV2Impl(
+    _instance = StreamVideoImpl(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
@@ -36,7 +36,7 @@ class InstanceHolder {
   }
 
   /// The singleton instance of the Stream Video client.
-  StreamVideoV2 get instance {
+  StreamVideo get instance {
     final instance = _instance;
     if (instance == null) {
       throw Exception(

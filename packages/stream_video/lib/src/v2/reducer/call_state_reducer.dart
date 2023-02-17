@@ -20,7 +20,7 @@ class CallStateReducer {
   late final rtcReducer = const RtcReducer();
   late final callControlReducer = const CallControlReducer();
 
-  CallStateV2 reduce(CallStateV2 state, StreamAction action) {
+  CallState reduce(CallState state, StreamAction action) {
     if (action is LifecycleAction) {
       return lifecycleReducer.reduce(state, action);
     } else if (action is CoordinatorAction) {

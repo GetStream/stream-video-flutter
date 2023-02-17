@@ -12,8 +12,8 @@ final _logger = taggedLogger(tag: 'SV:Reducer-SFU');
 class SfuReducer {
   const SfuReducer();
 
-  CallStateV2 reduce(
-    CallStateV2 state,
+  CallState reduce(
+    CallState state,
     SfuAction action,
   ) {
     if (action is SfuJoinedAction) {
@@ -26,7 +26,7 @@ class SfuReducer {
     return state;
   }
 
-  CallStateV2 _reduceSfuEvent(CallStateV2 state, SfuEventV2 event) {
+  CallState _reduceSfuEvent(CallState state, SfuEvent event) {
     if (event is SfuJoinResponseEvent) {
       return _reduceJoinResponse(state, event);
     } else if (event is SfuParticipantJoinedEvent) {
@@ -47,14 +47,14 @@ class SfuReducer {
     return state;
   }
 
-  CallStateV2 _reduceJoinResponse(
-    CallStateV2 state,
+  CallState _reduceJoinResponse(
+    CallState state,
     SfuJoinResponseEvent event,
   ) {
     _logger.d(() => '[reduceJoinResponse] ${state.sessionId}; event: $event');
     final participants = event.callState.participants.map((aParticipant) {
       final isLocal = aParticipant.userId == state.currentUserId;
-      return CallParticipantStateV2(
+      return CallParticipantState(
         userId: aParticipant.userId,
         role: '',
         name: aParticipant.userId,
@@ -78,8 +78,8 @@ class SfuReducer {
     );
   }
 
-  CallStateV2 _reduceJoined(
-    CallStateV2 state,
+  CallState _reduceJoined(
+    CallState state,
     SfuJoinedAction action,
   ) {
     _logger.d(
@@ -88,7 +88,7 @@ class SfuReducer {
     final participants = action.participants.map((aParticipant) {
       final user = action.users[aParticipant.userId];
       final isLocal = aParticipant.userId == state.currentUserId;
-      return CallParticipantStateV2(
+      return CallParticipantState(
         userId: user?.id ?? aParticipant.userId,
         role: user?.role ?? '',
         name: user?.name ?? aParticipant.userId,
@@ -112,8 +112,8 @@ class SfuReducer {
     );
   }
 
-  CallStateV2 _reduceTrackUnpublished(
-    CallStateV2 state,
+  CallState _reduceTrackUnpublished(
+    CallState state,
     SfuTrackUnpublishedEvent event,
   ) {
     _logger.d(
@@ -142,8 +142,8 @@ class SfuReducer {
     );
   }
 
-  CallStateV2 _reduceTrackPublished(
-    CallStateV2 state,
+  CallState _reduceTrackPublished(
+    CallState state,
     SfuTrackPublishedEvent event,
   ) {
     _logger.d(() => '[reduceTrackPublished] ${state.sessionId}; event: $event');
@@ -171,8 +171,8 @@ class SfuReducer {
     );
   }
 
-  CallStateV2 _reduceAudioLevelChanged(
-    CallStateV2 state,
+  CallState _reduceAudioLevelChanged(
+    CallState state,
     SfuAudioLevelChangedEvent event,
   ) {
     return state.copyWith(
@@ -193,8 +193,8 @@ class SfuReducer {
     );
   }
 
-  CallStateV2 _reduceDominantSpeakerChanged(
-    CallStateV2 state,
+  CallState _reduceDominantSpeakerChanged(
+    CallState state,
     SfuDominantSpeakerChangedEvent event,
   ) {
     return state.copyWith(
@@ -217,8 +217,8 @@ class SfuReducer {
     );
   }
 
-  CallStateV2 _reduceConnectionQualityChanged(
-    CallStateV2 state,
+  CallState _reduceConnectionQualityChanged(
+    CallState state,
     SfuConnectionQualityChangedEvent event,
   ) {
     return state.copyWith(
@@ -238,12 +238,12 @@ class SfuReducer {
     );
   }
 
-  CallStateV2 _reduceParticipantJoined(
-    CallStateV2 state,
+  CallState _reduceParticipantJoined(
+    CallState state,
     SfuParticipantJoinedEvent event,
   ) {
     final isLocal = state.currentUserId == event.participant.userId;
-    final participant = CallParticipantStateV2(
+    final participant = CallParticipantState(
       userId: event.participant.userId,
       role: '',
       name: '',
@@ -260,8 +260,8 @@ class SfuReducer {
     );
   }
 
-  CallStateV2 _reduceParticipantLeft(
-    CallStateV2 state,
+  CallState _reduceParticipantLeft(
+    CallState state,
     SfuParticipantLeftEvent event,
   ) {
     return state.copyWith(
@@ -273,11 +273,11 @@ class SfuReducer {
     );
   }
 
-  CallStateV2 _reduceParticipantJoined2(
-    CallStateV2 state,
+  CallState _reduceParticipantJoined2(
+    CallState state,
     SfuParticipantJoinedAction action,
   ) {
-    final participant = CallParticipantStateV2(
+    final participant = CallParticipantState(
       userId: action.user?.id ?? action.participant.userId,
       role: action.user?.role ?? '',
       name: action.user?.name ?? action.participant.userId,

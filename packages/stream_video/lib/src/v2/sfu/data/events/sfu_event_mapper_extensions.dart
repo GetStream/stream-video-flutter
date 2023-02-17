@@ -19,7 +19,7 @@ import '../models/sfu_model_mapper_extensions.dart';
 /// TODO
 extension SfuEventMapper on sfu_events.SfuEvent {
   /// TODO
-  SfuEventV2 toDomain() {
+  SfuEvent toDomain() {
     final eventType = whichEventPayload();
     switch (eventType) {
       case sfu_events.SfuEvent_EventPayload.subscriberOffer:

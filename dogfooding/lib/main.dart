@@ -22,7 +22,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> _handleRemoteMessage(RemoteMessage message) async {
-  await StreamVideoV2.instance.handlePushNotification(message.data);
+  await StreamVideo.instance.handlePushNotification(message.data);
 }
 
 Future<void> main() async {
@@ -35,8 +35,8 @@ Future<void> main() async {
 }
 
 void _initStreamVideo() {
-  if (!StreamVideoV2.isInitialized()) {
-    StreamVideoV2.init(
+  if (!StreamVideo.isInitialized()) {
+    StreamVideo.init(
       'us83cfwuhy8n', // see <video>/data/fixtures/apps.yaml for API secret
       coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
           'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
@@ -50,7 +50,7 @@ void _initStreamVideo() {
 }
 
 Future<PushNotificationManager> createPushNotificationManager(
-    StreamVideoV2 client) {
+    StreamVideo client) {
   return StreamVideoPushNotificationManager.create(client);
 }
 
@@ -106,14 +106,14 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
       final user = userCredentials.user;
       final token = userCredentials.token;
 
-      await StreamVideoV2.instance.connectUser(
+      await StreamVideo.instance.connectUser(
         user,
         token: Token(token),
       );
 
       final callCid = StreamCallCid.from(type: 'default', id: callId);
-      final data = await StreamVideoV2.instance.getOrCreateCall(cid: callCid);
-      final call = CallV2.fromCreated(data: data.getOrNull()!.data);
+      final data = await StreamVideo.instance.getOrCreateCall(cid: callCid);
+      final call = Call.fromCreated(data: data.getOrNull()!.data);
 
       await _navigatorKey.currentState?.pushReplacementNamed(
         Routes.CALL,
@@ -137,11 +137,11 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     if (_navigatorKey.currentContext == null) {
       return;
     }
-    final incomingCall = await StreamVideoV2.instance.consumeIncomingCall();
+    final incomingCall = await StreamVideo.instance.consumeIncomingCall();
     if (incomingCall != null) {
       Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
         Routes.CALL,
-        arguments: CallV2.fromCreated(data: incomingCall),
+        arguments: Call.fromCreated(data: incomingCall),
       );
     }
   }

@@ -50,7 +50,7 @@ Future<void> main() async {
   when(() => streamVideo.events)
       .thenAnswer((invocation) => MutableSharedEmitterImpl());
   final call =
-      CallV2.fromCreated(data: callCreatedData, streamVideo: streamVideo);
+      Call.fromCreated(data: callCreatedData, streamVideo: streamVideo);
   when(() => streamVideo.getOrCreateCall(cid: streamCallCid))
       .thenAnswer((_) => Future.value(Result.success(callReceivedOrCreated)));
   when(() => streamVideo.acceptCall(cid: streamCallCid))

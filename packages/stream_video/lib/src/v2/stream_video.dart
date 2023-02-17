@@ -14,7 +14,7 @@ import 'model/call_created.dart';
 import 'model/call_joined.dart';
 import 'model/call_received_created.dart';
 import 'shared_emitter.dart';
-import 'stream_video_v2_impl.dart';
+import 'stream_video_impl.dart';
 import 'utils/none.dart';
 import 'utils/result.dart';
 
@@ -35,8 +35,8 @@ const _defaultCoordinatorWsUrl =
     'wss://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
 
 /// The client responsible for handling config and maintaining calls
-abstract class StreamVideoV2 {
-  factory StreamVideoV2(String apiKey,
+abstract class StreamVideo {
+  factory StreamVideo(String apiKey,
       {String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
       String coordinatorWsUrl = _defaultCoordinatorWsUrl,
       int latencyMeasurementRounds = 3,
@@ -44,7 +44,7 @@ abstract class StreamVideoV2 {
       LogHandlerFunction logHandlerFunction = _defaultLogHandler,
       PushNotificationFactory pushNotificationFactory =
           defaultPushNotificationManager}) {
-    return StreamVideoV2Impl(
+    return StreamVideoImpl(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
@@ -58,7 +58,7 @@ abstract class StreamVideoV2 {
 
   UserInfo? get currentUser;
 
-  SharedEmitter<CoordinatorEventV2> get events;
+  SharedEmitter<CoordinatorEvent> get events;
 
   void Function(CallCreated)? onCallCreated;
 
@@ -148,7 +148,7 @@ abstract class StreamVideoV2 {
   }
 
   /// The singleton instance of the Stream Video client.
-  static StreamVideoV2 get instance {
+  static StreamVideo get instance {
     return _instanceHolder.instance;
   }
 
@@ -170,7 +170,7 @@ abstract class StreamVideoV2 {
   }
 }
 
-/// Default log handler function for the [StreamVideoV2Impl] logger.
+/// Default log handler function for the [StreamVideoImpl] logger.
 void _defaultLogHandler(LogRecord record) {
   print(
     '${record.time} '

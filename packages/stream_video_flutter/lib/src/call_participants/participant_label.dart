@@ -17,7 +17,7 @@ class StreamParticipantLabel extends StatelessWidget {
   });
 
   /// The participant to display.
-  final CallParticipantStateV2 participant;
+  final CallParticipantState participant;
 
   /// The color of an audio level indicator.
   final Color? audioLevelIndicatorColor;

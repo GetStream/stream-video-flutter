@@ -10,7 +10,7 @@ import '../utils/result.dart';
 import 'sfu_client.dart';
 
 /// TODO
-class SfuClientImpl extends SfuClientV2 {
+class SfuClientImpl extends SfuClient {
   /// TODO
   SfuClientImpl({
     required String baseUrl,

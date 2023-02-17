@@ -9,7 +9,7 @@ import '../../utils/result.dart';
 abstract class CallSession extends Disposable {
   String get sessionId;
 
-  SharedEmitter<SfuEventV2> get events;
+  SharedEmitter<SfuEvent> get events;
 
   Future<Result<None>> start();
 
