@@ -39,7 +39,7 @@ class FlipCameraOption extends StatelessWidget {
           ? Icon(frontCameraIcon)
           : Icon(backCameraIcon),
       onPressed: position != null //
-          ? () => call.apply(const SwitchCamera())
+          ? () => call.apply(const FlipCamera())
           : null,
     );
   }

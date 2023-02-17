@@ -4,4 +4,17 @@ enum FacingMode {
   environment,
   left,
   right;
+
+  FacingMode flip() {
+    switch (this) {
+      case FacingMode.user:
+        return FacingMode.environment;
+      case FacingMode.environment:
+        return FacingMode.user;
+      case FacingMode.left:
+        return FacingMode.right;
+      case FacingMode.right:
+        return FacingMode.left;
+    }
+  }
 }

@@ -10,8 +10,8 @@ abstract class RtcTrack {
   const RtcTrack({
     required this.trackIdPrefix,
     required this.trackType,
-    required this.stream,
-    required this.track,
+    required this.mediaStream,
+    required this.mediaTrack,
     this.videoDimension,
     this.receiver,
     this.transceiver,
@@ -19,8 +19,8 @@ abstract class RtcTrack {
 
   final String trackIdPrefix;
   final SfuTrackType trackType;
-  final rtc.MediaStream stream;
-  final rtc.MediaStreamTrack track;
+  final rtc.MediaStream mediaStream;
+  final rtc.MediaStreamTrack mediaTrack;
   final rtc.RTCRtpReceiver? receiver;
   final rtc.RTCRtpTransceiver? transceiver;
 
@@ -41,8 +41,8 @@ class RtcRemoteTrack extends RtcTrack {
   const RtcRemoteTrack({
     required super.trackIdPrefix,
     required super.trackType,
-    required super.stream,
-    required super.track,
+    required super.mediaStream,
+    required super.mediaTrack,
     super.videoDimension,
     super.receiver,
     super.transceiver,
@@ -52,8 +52,8 @@ class RtcRemoteTrack extends RtcTrack {
   RtcRemoteTrack copyWith({
     String? trackIdPrefix,
     SfuTrackType? trackType,
-    rtc.MediaStream? stream,
-    rtc.MediaStreamTrack? track,
+    rtc.MediaStream? mediaStream,
+    rtc.MediaStreamTrack? mediaTrack,
     RtcVideoDimension? videoDimension,
     rtc.RTCRtpReceiver? receiver,
     rtc.RTCRtpTransceiver? transceiver,
@@ -61,8 +61,8 @@ class RtcRemoteTrack extends RtcTrack {
     return RtcRemoteTrack(
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
       trackType: trackType ?? this.trackType,
-      stream: stream ?? this.stream,
-      track: track ?? this.track,
+      mediaStream: mediaStream ?? this.mediaStream,
+      mediaTrack: mediaTrack ?? this.mediaTrack,
       videoDimension: videoDimension ?? this.videoDimension,
       receiver: receiver ?? this.receiver,
       transceiver: transceiver ?? this.transceiver,
@@ -72,7 +72,7 @@ class RtcRemoteTrack extends RtcTrack {
   @override
   String toString() {
     return 'RtcRemoteTrack{trackIdPrefix: $trackIdPrefix, '
-        'trackType: $trackType, stream.id: ${stream.id}';
+        'trackType: $trackType, stream.id: ${mediaStream.id}';
   }
 }
 
@@ -80,8 +80,8 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   const RtcLocalTrack({
     required super.trackIdPrefix,
     required super.trackType,
-    required super.stream,
-    required super.track,
+    required super.mediaStream,
+    required super.mediaTrack,
     required this.mediaConstraints,
     this.stopTrackOnMute = true,
     super.videoDimension,
@@ -104,8 +104,8 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   RtcLocalTrack<T> copyWith({
     String? trackIdPrefix,
     SfuTrackType? trackType,
-    rtc.MediaStream? stream,
-    rtc.MediaStreamTrack? track,
+    rtc.MediaStream? mediaStream,
+    rtc.MediaStreamTrack? mediaTrack,
     T? mediaConstraints,
     bool? stopTrackOnMute,
     RtcVideoDimension? videoDimension,
@@ -115,8 +115,8 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     return RtcLocalTrack(
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
       trackType: trackType ?? this.trackType,
-      stream: stream ?? this.stream,
-      track: track ?? this.track,
+      mediaStream: mediaStream ?? this.mediaStream,
+      mediaTrack: mediaTrack ?? this.mediaTrack,
       mediaConstraints: mediaConstraints ?? this.mediaConstraints,
       stopTrackOnMute: stopTrackOnMute ?? this.stopTrackOnMute,
       videoDimension: videoDimension ?? this.videoDimension,
@@ -128,6 +128,6 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   @override
   String toString() {
     return 'RtcLocalTrack{trackIdPrefix: $trackIdPrefix, '
-        'trackType: $trackType, stream.id: ${stream.id}';
+        'trackType: $trackType, stream.id: ${mediaStream.id}';
   }
 }
