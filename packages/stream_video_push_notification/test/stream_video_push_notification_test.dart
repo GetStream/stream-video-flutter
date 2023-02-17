@@ -1,7 +1,7 @@
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/src/v2/coordinator/models/coordinator_models.dart';
-import 'package:stream_video/src/v2/shared_emitter.dart';
-import 'package:stream_video/src/v2/utils/none.dart';
+import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
+import 'package:stream_video/src/shared_emitter.dart';
+import 'package:stream_video/src/utils/none.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:test/test.dart';
