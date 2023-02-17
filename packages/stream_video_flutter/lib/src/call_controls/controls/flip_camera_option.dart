@@ -38,14 +38,8 @@ class FlipCameraOption extends StatelessWidget {
       icon: position == CameraPositionV2.front
           ? Icon(frontCameraIcon)
           : Icon(backCameraIcon),
-      onPressed: position != null
-          ? () {
-              final newPosition = position == CameraPositionV2.front
-                  ? CameraPositionV2.back
-                  : CameraPositionV2.front;
-
-              call.apply(SetCameraPosition(cameraPosition: newPosition));
-            }
+      onPressed: position != null //
+          ? () => call.apply(const FlipCamera())
           : null,
     );
   }

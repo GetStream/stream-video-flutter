@@ -39,6 +39,18 @@ class SetCameraPosition extends SessionControlAction {
   List<Object?> get props => [cameraPosition];
 }
 
+class FlipCamera extends SessionControlAction {
+  const FlipCamera();
+}
+
+class SetCameraDeviceId extends SessionControlAction {
+  const SetCameraDeviceId({required this.deviceId});
+  final String deviceId;
+
+  @override
+  List<Object?> get props => [deviceId];
+}
+
 class SetCameraEnabled extends SessionControlAction {
   const SetCameraEnabled({required this.enabled});
   final bool enabled;

@@ -1,6 +1,5 @@
 import '../../../stream_video.dart';
-import '../../logger/stream_logger.dart';
-import '../model/call_track_state.dart';
+import '../../platform_detector/platform_detector.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-Control');
 
@@ -23,6 +22,10 @@ class CallControlReducer {
       return _reduceMicrophoneEnabled(state, action);
     } else if (action is SetScreenShareEnabled) {
       return _reduceScreenShareEnabled(state, action);
+    } else if (action is FlipCamera) {
+      return _reduceFlipCamera(state, action);
+    } else if (action is SetCameraDeviceId) {
+      return _reduceCameraDeviceId(state, action);
     } else if (action is SetCameraPosition) {
       return _reduceCameraPosition(state, action);
     } else if (action is UpdateSubscriptions) {
@@ -168,6 +171,56 @@ class CallControlReducer {
                 ...participant.publishedTracks,
                 SfuTrackType.video: trackState.copyWith(
                   cameraPosition: action.cameraPosition,
+                ),
+              },
+            );
+          }
+        }
+        return participant;
+      }).toList(),
+    );
+  }
+
+  CallStateV2 _reduceFlipCamera(
+    CallStateV2 state,
+    FlipCamera action,
+  ) {
+    return state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.isLocal) {
+          final trackState = participant.publishedTracks[SfuTrackType.video];
+          if (trackState is LocalTrackState) {
+            return participant.copyWith(
+              publishedTracks: {
+                ...participant.publishedTracks,
+                SfuTrackType.video: trackState.copyWith(
+                  cameraPosition: trackState.cameraPosition?.flip(),
+                ),
+              },
+            );
+          }
+        }
+        return participant;
+      }).toList(),
+    );
+  }
+
+  CallStateV2 _reduceCameraDeviceId(
+    CallStateV2 state,
+    SetCameraDeviceId action,
+  ) {
+    return state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.isLocal) {
+          final trackState = participant.publishedTracks[SfuTrackType.video];
+          if (trackState is LocalTrackState) {
+            return participant.copyWith(
+              publishedTracks: {
+                ...participant.publishedTracks,
+                SfuTrackType.video: trackState.copyWith(
+                  deviceId: action.deviceId,
+                  // reset camera position to default
+                  cameraPosition: CameraPositionV2.front,
                 ),
               },
             );
