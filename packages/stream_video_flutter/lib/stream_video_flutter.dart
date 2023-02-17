@@ -19,6 +19,7 @@ export 'src/call_screen/call_content/call_app_bar.dart';
 export 'src/call_screen/call_content/call_content.dart';
 export 'src/call_screen/incoming_call/incoming_call_content.dart';
 export 'src/call_screen/outgoing_call/outgoing_call_content.dart';
+export 'src/call_screen/prejoining_view.dart';
 export 'src/models/call_invite_state.dart';
 export 'src/models/mute_toggle_titles.dart';
 export 'src/models/stream_icon_toggle.dart';

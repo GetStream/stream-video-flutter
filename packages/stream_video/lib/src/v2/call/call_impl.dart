@@ -45,6 +45,7 @@ class CallV2Impl extends CallV2 {
       stateManager: stateManager,
     );
   }
+
   factory CallV2Impl.created({
     required CallCreated data,
     StreamVideoV2? streamVideo,
@@ -58,6 +59,7 @@ class CallV2Impl extends CallV2 {
       stateManager: stateManager,
     );
   }
+
   factory CallV2Impl.joined({
     required CallJoined data,
     StreamVideoV2? streamVideo,
@@ -189,6 +191,11 @@ class CallV2Impl extends CallV2 {
       await _stateManager.onCallReceivedOrCreated(result.data);
     }
     return result;
+  }
+
+  @override
+  Future<Result<CallCredentials>> joinCall() async {
+    return _joinIfNeeded();
   }
 
   @override

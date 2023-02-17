@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../utils.dart';
 import 'call_text_field.dart';
@@ -60,6 +61,17 @@ class _JoinCallTabState extends State<JoinCallTab> {
 
     final callCid = StreamCallCid.from(type: 'default', id: callId);
     final call = CallV2.fromCid(callCid: callCid);
-    widget.onNavigateToCall(call);
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StreamPreJoiningView(
+          call: call,
+          onJoinCallTap: () {
+            widget.onNavigateToCall(call);
+          },
+        ),
+      ),
+    );
   }
 }
