@@ -57,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final token = json.decode(response.body)['token'];
 
-    await StreamVideoV2.instance.connectUser(
+    await StreamVideo.instance.connectUser(
       user,
       token: Token(token),
     );

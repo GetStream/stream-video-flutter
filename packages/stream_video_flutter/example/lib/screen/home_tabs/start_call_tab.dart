@@ -11,7 +11,7 @@ class StartCallTab extends StatefulWidget {
     required this.onNavigateToCall,
   });
 
-  final void Function(CallV2 call) onNavigateToCall;
+  final void Function(Call call) onNavigateToCall;
 
   @override
   State<StartCallTab> createState() => _StartCallTabState();
@@ -51,7 +51,7 @@ class _StartCallTabState extends State<StartCallTab>
           const SizedBox(height: 8),
           Flexible(
             child: ParticipantsList(
-              currentUserId: StreamVideoV2.instance.currentUser!.id,
+              currentUserId: StreamVideo.instance.currentUser!.id,
               onSelectionChanged: (selectedUsers) {
                 setState(() {
                   _selectedUsers.clear();
@@ -103,7 +103,7 @@ class _StartCallTabState extends State<StartCallTab>
     setState(() => _callInProgress = true);
 
     final callCid = StreamCallCid.from(type: 'default', id: callId);
-    final result = await StreamVideoV2.instance.createCall(
+    final result = await StreamVideo.instance.createCall(
       cid: callCid,
       ringing: _ringingCall,
       participantIds: [
@@ -115,7 +115,7 @@ class _StartCallTabState extends State<StartCallTab>
       success: (data) {
         setState(() => _callInProgress = false);
 
-        final call = CallV2.fromCreated(data: data);
+        final call = Call.fromCreated(data: data);
 
         if (_ringingCall) {
           widget.onNavigateToCall(call);

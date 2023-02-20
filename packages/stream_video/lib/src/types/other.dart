@@ -1,5 +1,5 @@
-import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/events.dart';
+import 'package:stream_video/src/logger/logger.dart';
 
 /// Connection state type used throughout the SDK.
 enum ConnectionState {
@@ -7,22 +7,6 @@ enum ConnectionState {
   connecting,
   reconnecting,
   connected,
-}
-
-/// Connection quality between the [Participant] and server.
-enum ConnectionQuality {
-  unknown,
-  poor,
-  good,
-  excellent,
-}
-
-/// The reason why a track failed to publish.
-enum TrackSubscribeFailReason {
-  invalidServerResponse,
-  notTrackMetadataFound,
-  unsupportedTrackType,
-  // ...
 }
 
 /// The iceTransportPolicy used for [RTCConfiguration].

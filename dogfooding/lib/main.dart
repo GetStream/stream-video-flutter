@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:uni_links/uni_links.dart';
 
 import 'firebase_options.dart';
@@ -21,7 +22,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> _handleRemoteMessage(RemoteMessage message) async {
-  await StreamVideo.instance.handlePushNotification(message);
+  await StreamVideo.instance.handlePushNotification(message.data);
 }
 
 Future<void> main() async {
@@ -34,8 +35,8 @@ Future<void> main() async {
 }
 
 void _initStreamVideo() {
-  if (!StreamVideoV2.isInitialized()) {
-    StreamVideoV2.init(
+  if (!StreamVideo.isInitialized()) {
+    StreamVideo.init(
       'us83cfwuhy8n', // see <video>/data/fixtures/apps.yaml for API secret
       coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
           'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
@@ -43,8 +44,14 @@ void _initStreamVideo() {
       coordinatorWsUrl: //replace host with your local ip address
           'wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
       // 'ws://192.168.1.7:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
+      pushNotificationFactory: createPushNotificationManager,
     );
   }
+}
+
+Future<PushNotificationManager> createPushNotificationManager(
+    StreamVideo client) {
+  return StreamVideoPushNotificationManager.create(client);
 }
 
 class StreamDogFoodingApp extends StatefulWidget {
@@ -99,14 +106,14 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
       final user = userCredentials.user;
       final token = userCredentials.token;
 
-      await StreamVideoV2.instance.connectUser(
+      await StreamVideo.instance.connectUser(
         user,
         token: Token(token),
       );
 
       final callCid = StreamCallCid.from(type: 'default', id: callId);
-      final data = await StreamVideoV2.instance.getOrCreateCall(cid: callCid);
-      final call = CallV2.fromCreated(data: data.getOrNull()!.data);
+      final data = await StreamVideo.instance.getOrCreateCall(cid: callCid);
+      final call = Call.fromCreated(data: data.getOrNull()!.data);
 
       await _navigatorKey.currentState?.pushReplacementNamed(
         Routes.CALL,
@@ -134,7 +141,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     if (incomingCall != null) {
       Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
         Routes.CALL,
-        arguments: incomingCall,
+        arguments: Call.fromCreated(data: incomingCall),
       );
     }
   }

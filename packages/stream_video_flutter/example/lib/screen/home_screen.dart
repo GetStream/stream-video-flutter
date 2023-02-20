@@ -13,7 +13,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final StreamVideoV2 _streamVideo = StreamVideoV2.instance;
+  final StreamVideo _streamVideo = StreamVideo.instance;
   late final currentUser = _streamVideo.currentUser!;
 
   @override
@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _streamVideo.onCallCreated = (data) {
       if (data.ringing) {
-        final call = CallV2.fromCreated(data: data);
+        final call = Call.fromCreated(data: data);
         _onNavigateToCall(call);
       }
     };
@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.of(context).pop();
   }
 
-  void _onNavigateToCall(CallV2 call) {
+  void _onNavigateToCall(Call call) {
     Navigator.push(
       context,
       MaterialPageRoute(

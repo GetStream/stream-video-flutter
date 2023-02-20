@@ -4,8 +4,8 @@ import '../../../stream_video_flutter.dart';
 
 /// Builds the default set of call control options.
 List<Widget> defaultCallControlOptions({
-  required CallV2 call,
-  required CallParticipantStateV2 localParticipant,
+  required Call call,
+  required CallParticipantState localParticipant,
   required VoidCallback onLeaveCall,
 }) {
   return [

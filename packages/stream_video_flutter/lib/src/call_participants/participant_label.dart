@@ -20,7 +20,7 @@ class StreamParticipantLabel extends StatelessWidget {
 
   StreamParticipantLabel.fromParticipant({
     super.key,
-    required CallParticipantStateV2 participant,
+    required CallParticipantState participant,
     this.audioLevelIndicatorColor,
     this.enabledMicrophoneColor,
     this.disabledMicrophoneColor,

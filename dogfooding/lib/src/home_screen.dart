@@ -14,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final streamVideoClient = StreamVideoV2.instance;
+  final streamVideoClient = StreamVideo.instance;
   late final currentUser = streamVideoClient.currentUser!;
 
   final _callIdController = TextEditingController();
@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final callCid = StreamCallCid.from(type: 'default', id: callId);
       final data = await streamVideoClient.getOrCreateCall(cid: callCid);
-      final call = CallV2.fromCreated(data: data.getOrNull()!.data);
+      final call = Call.fromCreated(data: data.getOrNull()!.data);
 
       await Navigator.of(context).pushReplacementNamed(
         Routes.CALL,

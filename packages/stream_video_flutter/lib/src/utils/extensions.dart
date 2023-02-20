@@ -48,8 +48,8 @@ extension DoubleExtension on double {
   }
 }
 
-extension CallParticipantExtension on CallParticipantStateV2 {
-  /// Maps [CallParticipantStateV2] into [UserInfo].
+extension CallParticipantExtension on CallParticipantState {
+  /// Maps [CallParticipantState] into [UserInfo].
   UserInfo toUserInfo() => UserInfo(
         id: userId,
         role: role,

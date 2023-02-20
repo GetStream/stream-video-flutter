@@ -11,7 +11,7 @@ class CallScreen extends StatefulWidget {
     required this.channel,
   }) : super(key: key);
 
-  final CallV2 call;
+  final Call call;
   final Channel channel;
 
   @override
@@ -86,7 +86,7 @@ class _CallScreenState extends State<CallScreen> {
 }
 
 List<Widget> customCallControlOptions({
-  required CallV2 call,
+  required Call call,
   required Channel channel,
   required VoidCallback onLeaveCall,
   required VoidCallback onChatTap,
