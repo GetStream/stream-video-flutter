@@ -110,7 +110,7 @@ class _VideoRendererState extends State<VideoRenderer> {
     super.initState();
     (() async {
       await _videoRenderer.initialize();
-      _videoRenderer.srcObject = widget.track.stream;
+      _videoRenderer.srcObject = widget.track.mediaStream;
       setState(() {});
     })();
   }
@@ -119,7 +119,7 @@ class _VideoRendererState extends State<VideoRenderer> {
   void didUpdateWidget(covariant VideoRenderer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.track != oldWidget.track) {
-      _videoRenderer.srcObject = widget.track.stream;
+      _videoRenderer.srcObject = widget.track.mediaStream;
       setState(() {});
     }
   }
@@ -145,7 +145,6 @@ typedef OnSizeChanged = void Function(Size size);
 
 class _SizeChangedLayoutNotifier extends SingleChildRenderObjectWidget {
   const _SizeChangedLayoutNotifier({
-    super.key,
     super.child,
     this.onSizeChanged,
   });

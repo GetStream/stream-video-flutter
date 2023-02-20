@@ -150,8 +150,8 @@ class RtcManager extends Disposable {
     final remoteTrack = RtcRemoteTrack(
       trackIdPrefix: trackId,
       trackType: SfuTrackTypeParser.parseSfuName(trackType),
-      track: track,
-      stream: stream,
+      mediaTrack: track,
+      mediaStream: stream,
       receiver: receiver,
       transceiver: transceiver,
     );
@@ -168,10 +168,9 @@ class RtcManager extends Disposable {
       return;
     }
 
-    publishedTrack.track.enabled = false;
+    publishedTrack.mediaTrack.enabled = false;
     if (publishedTrack is RtcLocalTrack) {
-      await publishedTrack.track.stop();
-      await publishedTrack.stream.dispose();
+      await publishedTrack.stop();
     }
 
     final sender = publishedTrack.transceiver?.sender;
@@ -275,7 +274,7 @@ extension PublisherRtcManager on RtcManager {
       }
 
       return RtcTrackInfo(
-        trackId: it.track.id,
+        trackId: it.mediaTrack.id,
         trackType: it.trackType,
         mid: it.transceiver?.mid,
         layers: videoLayers,
@@ -285,6 +284,7 @@ extension PublisherRtcManager on RtcManager {
 
   Future<RtcLocalTrack<AudioConstraints>> publishAudioTrack({
     required RtcLocalTrack<AudioConstraints> track,
+    bool stopTrackOnMute = true,
   }) async {
     // Adding early as we need to access it in the onPublisherNegotiationNeeded
     // callback.
@@ -292,8 +292,8 @@ extension PublisherRtcManager on RtcManager {
     publishedTracks[track.trackId] = track;
 
     final transceiver = await _publisher.addAudioTransceiver(
-      stream: track.stream,
-      track: track.track,
+      stream: track.mediaStream,
+      track: track.mediaTrack,
       encodings: [
         rtc.RTCRtpEncoding(rid: 'a', maxBitrate: AudioBitrate.music),
       ],
@@ -304,11 +304,13 @@ extension PublisherRtcManager on RtcManager {
     return publishedTracks[track.trackId] = track.copyWith(
       receiver: transceiver.receiver,
       transceiver: transceiver,
+      stopTrackOnMute: stopTrackOnMute,
     );
   }
 
   Future<RtcLocalTrack<VideoConstraints>> publishVideoTrack({
     required RtcLocalTrack<VideoConstraints> track,
+    bool stopTrackOnMute = true,
   }) async {
     // Adding early as we need to access it in the onPublisherNegotiationNeeded
     // callback.
@@ -330,8 +332,8 @@ extension PublisherRtcManager on RtcManager {
     }
 
     final transceiver = await _publisher.addVideoTransceiver(
-      stream: track.stream,
-      track: track.track,
+      stream: track.mediaStream,
+      track: track.mediaTrack,
       encodings: encodings,
     );
     _logger.v(() => '[publishVideoTrack] transceiver: $transceiver');
@@ -341,6 +343,7 @@ extension PublisherRtcManager on RtcManager {
       receiver: transceiver.receiver,
       transceiver: transceiver,
       videoDimension: dimension,
+      stopTrackOnMute: stopTrackOnMute,
     );
   }
 
@@ -356,14 +359,13 @@ extension PublisherRtcManager on RtcManager {
       return;
     }
 
-    final updatedTrack = track.copyWith(muted: true);
-    updatedTrack.track.enabled = false;
-    await updatedTrack.track.stop();
-    await updatedTrack.stream.dispose();
+    track.mediaTrack.enabled = false;
+    if (track.stopTrackOnMute) {
+      // Releases the track and stops the permission indicator.
+      await track.stop();
+    }
 
-    publishedTracks[trackId] = updatedTrack;
-
-    return onPublisherTrackMuted?.call(updatedTrack, true);
+    return onPublisherTrackMuted?.call(track, true);
   }
 
   Future<void> unmuteTrack({required String trackId}) async {
@@ -378,12 +380,15 @@ extension PublisherRtcManager on RtcManager {
       return;
     }
 
-    final updatedTrack = track.copyWith(muted: false);
-    updatedTrack.track.enabled = true;
+    // If the track was released before, restart it.
+    if (track.stopTrackOnMute) {
+      final updatedTrack = await restartTrack(track: track);
+      return onPublisherTrackMuted?.call(updatedTrack!, false);
+    }
 
-    await restartTrack(track: updatedTrack);
-
-    return onPublisherTrackMuted?.call(updatedTrack, false);
+    // Otherwise simply enable it again
+    track.mediaTrack.enabled = true;
+    return onPublisherTrackMuted?.call(track, false);
   }
 
   Future<RtcLocalTrack<AudioConstraints>?> createAudioTrack({
@@ -401,8 +406,8 @@ extension PublisherRtcManager on RtcManager {
     final track = RtcLocalTrack(
       trackIdPrefix: publisherId,
       trackType: SfuTrackType.audio,
-      stream: stream,
-      track: audioTrack,
+      mediaStream: stream,
+      mediaTrack: audioTrack,
       mediaConstraints: constraints,
     );
 
@@ -424,8 +429,8 @@ extension PublisherRtcManager on RtcManager {
     final track = RtcLocalTrack(
       trackIdPrefix: publisherId,
       trackType: SfuTrackType.video,
-      stream: stream,
-      track: videoTrack,
+      mediaStream: stream,
+      mediaTrack: videoTrack,
       mediaConstraints: constraints,
     );
 
@@ -449,8 +454,8 @@ extension PublisherRtcManager on RtcManager {
     final track = RtcLocalTrack(
       trackIdPrefix: publisherId,
       trackType: SfuTrackType.screenShare,
-      stream: stream,
-      track: videoTrack,
+      mediaStream: stream,
+      mediaTrack: videoTrack,
       mediaConstraints: constraints,
     );
 
@@ -474,8 +479,8 @@ extension PublisherRtcManager on RtcManager {
         RtcLocalTrack(
           trackIdPrefix: publisherId,
           trackType: SfuTrackType.screenShare,
-          stream: stream,
-          track: videoTrack,
+          mediaStream: stream,
+          mediaTrack: videoTrack,
           mediaConstraints: constraints,
         ),
       );
@@ -488,8 +493,8 @@ extension PublisherRtcManager on RtcManager {
         RtcLocalTrack(
           trackIdPrefix: publisherId,
           trackType: SfuTrackType.screenShareAudio,
-          stream: stream,
-          track: audioTrack,
+          mediaStream: stream,
+          mediaTrack: audioTrack,
           mediaConstraints: constraints,
         ),
       );
@@ -511,8 +516,7 @@ extension PublisherRtcManager on RtcManager {
     final constraints = mediaConstraints ?? track.mediaConstraints;
 
     // stop if not already stopped...
-    await track.track.stop();
-    await track.stream.dispose();
+    await track.stop();
 
     final newStream = await rtc.navigator.mediaDevices.getMedia(constraints);
     final newTrack = newStream.getTracks().first;
@@ -526,8 +530,8 @@ extension PublisherRtcManager on RtcManager {
 
     // Update new stream, track and constraints.
     return publishedTracks[track.trackId] = track.copyWith(
-      track: newTrack,
-      stream: newStream,
+      mediaTrack: newTrack,
+      mediaStream: newStream,
       mediaConstraints: constraints,
     );
   }
@@ -550,6 +554,29 @@ extension PublisherRtcManager on RtcManager {
       mediaConstraints: constraints.copyWith(facingMode: facingMode),
     );
   }
+
+  Future<RtcLocalTrack?> setCameraDeviceId({required String deviceId}) async {
+    final track = getPublisherTrackByType(SfuTrackType.video);
+    if (track == null) {
+      _logger.w(() => '[setCameraDeviceId] rejected (track is null)');
+      return null;
+    }
+
+    final constraints = track.mediaConstraints;
+    if (constraints is! CameraConstraints) {
+      _logger.e(() => 'Cannot set camera deviceId on non-camera track');
+      return null;
+    }
+
+    return restartTrack(
+      track: track,
+      mediaConstraints: constraints.copyWith(
+        deviceId: deviceId,
+        // Always going to be user on browser which don't supports facingMode.
+        facingMode: FacingMode.user,
+      ),
+    );
+  }
 }
 
 extension on RtcLocalTrack<VideoConstraints> {
@@ -561,7 +588,7 @@ extension on RtcLocalTrack<VideoConstraints> {
       // getSettings() is only implemented for Web
       try {
         // try to use getSettings for more accurate resolution
-        final settings = track.getSettings();
+        final settings = mediaTrack.getSettings();
         streamLog.v(_tag, () => '[publishVideoTrack] settings: $settings');
         if (settings['width'] is int) {
           dimension = dimension.copyWith(width: settings['width'] as int);
@@ -581,13 +608,49 @@ extension on RtcLocalTrack<VideoConstraints> {
 }
 
 extension RtcManagerTrackHelper on RtcManager {
+  Future<RtcLocalTrack?> flipCamera() async {
+    final track = getPublisherTrackByType(SfuTrackType.video);
+    if (track == null) {
+      _logger.e(() => '[switchCamera] rejected (track is null)');
+      return null;
+    }
+
+    final constraints = track.mediaConstraints;
+    if (constraints is! CameraConstraints) {
+      _logger.e(() => 'Cannot switch camera on non-camera track');
+      return null;
+    }
+
+    if (CurrentPlatform.isWeb) {
+      final supported = rtc.navigator.mediaDevices.getSupportedConstraints();
+      if (supported.facingMode) {
+        final currentFacingMode = constraints.facingMode;
+        final flippedFacingMode = currentFacingMode.flip();
+
+        return setTrackFacingMode(facingMode: flippedFacingMode);
+      }
+
+      _logger.e(
+        () {
+          return '''Cannot switch camera facingMode not supported, Use `setCameraDeviceId` instead''';
+        },
+      );
+      return null;
+    }
+
+    // Use the native switchCamera method.
+    final isFrontCamera = await rtc.Helper.switchCamera(track.mediaTrack);
+    return publishedTracks[track.trackId] = track.copyWith(
+      mediaConstraints: constraints.copyWith(
+        facingMode: isFrontCamera ? FacingMode.user : FacingMode.environment,
+      ),
+    );
+  }
+
   Future<RtcLocalTrack?> setCameraPosition({
     required CameraPosition cameraPosition,
   }) {
-    final facingMode = cameraPosition == CameraPosition.front
-        ? FacingMode.user
-        : FacingMode.environment;
-
+    final facingMode = cameraPosition.toFacingMode();
     return setTrackFacingMode(facingMode: facingMode);
   }
 
@@ -673,5 +736,22 @@ extension RtcManagerTrackHelper on RtcManager {
 
     _logger.e(() => 'Unsupported trackType $trackType');
     return null;
+  }
+}
+
+extension on RtcLocalTrack {
+  Future<void> stop() async {
+    streamLog.i('SV:RtcLocalTrack', () => 'Stopping track: $trackId');
+    try {
+      await mediaTrack.stop();
+    } catch (e) {
+      streamLog.w('SV:RtcLocalTrack', () => 'Error stopping track: $e');
+    }
+
+    try {
+      await mediaStream.dispose();
+    } catch (e) {
+      streamLog.w('SV:RtcLocalTrack', () => 'Error disposing stream: $e');
+    }
   }
 }

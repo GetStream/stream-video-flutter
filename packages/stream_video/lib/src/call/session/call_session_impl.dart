@@ -6,31 +6,24 @@ import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
-import '../../action/call_control_action.dart';
 import '../../call_state_manager.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
-import '../../models/call_cid.dart';
-import '../../models/call_track_state.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
-import '../../sfu/data/models/sfu_track_type.dart';
 import '../../sfu/sfu_client.dart';
 import '../../sfu/sfu_client_impl.dart';
 import '../../sfu/ws/sfu_event_listener.dart';
 import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
 import '../../utils/none.dart';
-import '../../utils/result.dart';
-import '../../webrtc/media/constraints/camera_position.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/peer_type.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
-import '../../webrtc/rtc_track.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
 
@@ -152,6 +145,10 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return _onSetMicrophoneEnabled(action.enabled);
     } else if (action is SetScreenShareEnabled) {
       return _onSetScreenShareEnabled(action.enabled);
+    } else if (action is FlipCamera) {
+      return _onFlipCamera();
+    } else if (action is SetCameraDeviceId) {
+      return _onSetCameraDeviceId(action.deviceId);
     } else if (action is SetCameraPosition) {
       return _onSetCameraPosition(action.cameraPosition);
     } else if (action is UpdateSubscriptions) {
@@ -377,6 +374,25 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         'Unable to enable/disable screen-share, Track not found',
       );
     }
+
+    return Result.success(None());
+  }
+
+  Future<Result<None>> _onFlipCamera() async {
+    final track = await rtcManager?.flipCamera();
+    if (track == null) {
+      return Result.error('Unable to switch camera, Track not found');
+    }
+
+    return Result.success(None());
+  }
+
+  Future<Result<None>> _onSetCameraDeviceId(String deviceId) async {
+    final track = await rtcManager?.setCameraDeviceId(deviceId: deviceId);
+    if (track == null) {
+      return Result.error('Unable to set camera device id, Track not found');
+    }
+
     return Result.success(None());
   }
 
