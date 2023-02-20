@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import '../../stream_video.dart';
-import '../coordinator/models/coordinator_models.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
@@ -66,7 +65,7 @@ abstract class Call {
     bool ringing = false,
   });
 
-  Future<Result<CallCredentials>> joinCall();
+  Future<Result<None>> joinCall();
 
   Future<Result<None>> connect({
     CallSettings settings = const CallSettings(),

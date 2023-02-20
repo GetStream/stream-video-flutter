@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
@@ -46,9 +48,6 @@ class _StreamPreJoiningViewState extends State<StreamPreJoiningView> {
 
   /// Whether the camera is enabled.
   bool _isVideoEnabled = false;
-
-  /// If joining is still in progress.
-  bool _isJoining = true;
 
   @override
   void initState() {
@@ -190,28 +189,23 @@ class _StreamPreJoiningViewState extends State<StreamPreJoiningView> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        if (!_isJoining)
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: colorTheme.accentPrimary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              minimumSize: const Size.fromHeight(40),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colorTheme.accentPrimary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            onPressed: () {
-                              widget.onJoinCallTap();
-                            },
-                            child: Text(
-                              'Join Call',
-                              style: textTheme.title3Bold
-                                  .copyWith(color: Colors.white),
-                            ),
-                          )
-                        else
-                          const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            minimumSize: const Size.fromHeight(40),
                           ),
+                          onPressed: () {
+                            widget.onJoinCallTap();
+                          },
+                          child: Text(
+                            'Join Call',
+                            style: textTheme.title3Bold
+                                .copyWith(color: Colors.white),
+                          ),
+                        )
                       ],
                     ),
                   ),
@@ -241,14 +235,7 @@ class _StreamPreJoiningViewState extends State<StreamPreJoiningView> {
   /// Obtains SFU credentials and picks the best server, but doesn't
   /// connect to the call yet.
   Future<void> _joinCall() async {
-    final result = await call.joinCall();
-    if (result.isSuccess) {
-      if (mounted) {
-        setState(() {
-          _isJoining = false;
-        });
-      }
-    }
+    unawaited(call.joinCall());
   }
 
   /// Enables camera.
@@ -332,20 +319,26 @@ class _StreamPreJoiningViewState extends State<StreamPreJoiningView> {
 
   /// Removes all the video tracks from local [MediaStream].
   Future<void> _removeVideoTracks() async {
-    final tracks = _localMediaStream!.getVideoTracks();
+    final localMediaStream = _localMediaStream;
+    if (localMediaStream == null) return;
+
+    final tracks = localMediaStream.getVideoTracks();
     for (var i = tracks.length - 1; i >= 0; i--) {
       final track = tracks[i];
-      await _localMediaStream!.removeTrack(track);
+      await localMediaStream.removeTrack(track);
       await track.stop();
     }
   }
 
   /// Removes all the audio tracks from local [MediaStream].
   Future<void> _removeAudioTracks() async {
-    final tracks = _localMediaStream!.getAudioTracks();
+    final localMediaStream = _localMediaStream;
+    if (localMediaStream == null) return;
+
+    final tracks = localMediaStream.getAudioTracks();
     for (var i = tracks.length - 1; i >= 0; i--) {
       final track = tracks[i];
-      await _localMediaStream!.removeTrack(track);
+      await localMediaStream.removeTrack(track);
       await track.stop();
     }
   }

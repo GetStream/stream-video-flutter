@@ -182,11 +182,6 @@ class CallImpl extends Call {
   }
 
   @override
-  Future<Result<CallCredentials>> joinCall() async {
-    return _joinIfNeeded();
-  }
-
-  @override
   Future<Result<CallCreated>> create({
     List<String> participantIds = const [],
     bool ringing = false,
@@ -201,6 +196,16 @@ class CallImpl extends Call {
       await _stateManager.onCallCreated(result.data);
     }
     return result;
+  }
+
+  @override
+  Future<Result<None>> joinCall() async {
+    try {
+      await _joinIfNeeded();
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+    return Result.success(None());
   }
 
   @override
@@ -247,8 +252,9 @@ class CallImpl extends Call {
 
     final state = _stateManager.state.value;
     final status = state.status;
-    if (!status.isJoinable && !status.isJoined) {
-      _logger.w(() => '[connect] rejected (not Joinable/Joined): $status');
+    if (!status.isJoinable && !status.isJoined && !status.isJoining) {
+      _logger
+          .w(() => '[connect] rejected (not Joinable/Joining/Joined): $status');
       return Result.error('invalid status: $status');
     }
 
@@ -326,6 +332,11 @@ class CallImpl extends Call {
       }
       if (status is CallStatusIncoming && !status.acceptedByMe) {
         await _awaitIncomingToBeAccepted(timeLimit);
+      }
+      // If we are coming from the pre-joining screen and already
+      // started joining the call.
+      if (status is CallStatusJoining) {
+        await _awaitJoiningToBeJoined(timeLimit);
       }
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -415,6 +426,15 @@ class CallImpl extends Call {
       (state) {
         final status = state.status;
         return status is CallStatusOutgoing && status.acceptedByCallee;
+      },
+      timeLimit: timeLimit,
+    );
+  }
+
+  Future<void> _awaitJoiningToBeJoined(Duration timeLimit) async {
+    await _stateManager.state.firstWhere(
+      (state) {
+        return state.status is CallStatusJoined;
       },
       timeLimit: timeLimit,
     );
