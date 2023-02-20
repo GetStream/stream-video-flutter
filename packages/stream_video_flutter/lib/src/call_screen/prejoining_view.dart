@@ -17,7 +17,7 @@ class StreamPreJoiningView extends StatefulWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// The action to perform when pressing the "join call" button.
   final VoidCallback onJoinCallTap;
@@ -33,7 +33,7 @@ class StreamPreJoiningView extends StatefulWidget {
 
 class _StreamPreJoiningViewState extends State<StreamPreJoiningView> {
   /// Represents a call.
-  CallV2 get call => widget.call;
+  Call get call => widget.call;
 
   /// Video renderer for the local media stream.
   final _localVideoRenderer = RTCVideoRenderer();
@@ -64,7 +64,7 @@ class _StreamPreJoiningViewState extends State<StreamPreJoiningView> {
     final colorTheme = streamVideoTheme.colorTheme;
     final theme = streamVideoTheme.prejoiningViewTheme;
 
-    final currentUser = StreamVideoV2.instance.currentUser;
+    final currentUser = StreamVideo.instance.currentUser;
 
     return Scaffold(
       backgroundColor: theme.backgroundColor,
