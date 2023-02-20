@@ -336,7 +336,7 @@ class CallImpl extends Call {
       // If we are coming from the pre-joining screen and already
       // started joining the call.
       if (status is CallStatusJoining) {
-        await _awaitJoiningToBeJoined(timeLimit);
+        await _awaitCallToBeJoined();
       }
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -431,12 +431,12 @@ class CallImpl extends Call {
     );
   }
 
-  Future<void> _awaitJoiningToBeJoined(Duration timeLimit) async {
+  Future<void> _awaitCallToBeJoined() async {
     await _stateManager.state.firstWhere(
       (state) {
         return state.status is CallStatusJoined;
       },
-      timeLimit: timeLimit,
+      timeLimit: const Duration(seconds: 60),
     );
   }
 
