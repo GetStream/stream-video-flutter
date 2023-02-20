@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'stream_avatar_theme.dart';
 
 /// A style of a pre-joining screen.
-class StreamPrejoiningViewTheme with Diagnosticable {
-  /// Constructor for creating [StreamPrejoiningViewTheme].
-  const StreamPrejoiningViewTheme({
+class StreamLobbyViewTheme with Diagnosticable {
+  /// Constructor for creating [StreamLobbyViewTheme].
+  const StreamLobbyViewTheme({
     this.cardBackgroundColor = const Color(0xFFF2F2F2),
     this.backgroundColor = Colors.white,
     this.avatarTheme = const StreamAvatarTheme(
@@ -34,23 +34,23 @@ class StreamPrejoiningViewTheme with Diagnosticable {
   /// Theme for the avatar.
   final StreamAvatarTheme avatarTheme;
 
-  StreamPrejoiningViewTheme copyWith({
+  StreamLobbyViewTheme copyWith({
     Color? backgroundColor,
     Color? cardBackgroundColor,
     StreamAvatarTheme? avatarTheme,
   }) {
-    return StreamPrejoiningViewTheme(
+    return StreamLobbyViewTheme(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       cardBackgroundColor: cardBackgroundColor ?? this.cardBackgroundColor,
       avatarTheme: avatarTheme ?? this.avatarTheme,
     );
   }
 
-  /// Linearly interpolate between two [StreamPrejoiningViewTheme] themes.
+  /// Linearly interpolate between two [StreamLobbyViewTheme] themes.
   ///
   /// All the properties must be non-null.
-  StreamPrejoiningViewTheme lerp(StreamPrejoiningViewTheme other, double t) {
-    return StreamPrejoiningViewTheme(
+  StreamLobbyViewTheme lerp(StreamLobbyViewTheme other, double t) {
+    return StreamLobbyViewTheme(
       backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t)!,
       cardBackgroundColor:
           Color.lerp(cardBackgroundColor, other.cardBackgroundColor, t)!,
@@ -61,7 +61,7 @@ class StreamPrejoiningViewTheme with Diagnosticable {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is StreamPrejoiningViewTheme &&
+      other is StreamLobbyViewTheme &&
           runtimeType == other.runtimeType &&
           backgroundColor == other.backgroundColor &&
           cardBackgroundColor == other.cardBackgroundColor &&
@@ -73,8 +73,8 @@ class StreamPrejoiningViewTheme with Diagnosticable {
       cardBackgroundColor.hashCode ^
       avatarTheme.hashCode;
 
-  /// Merges one [StreamPrejoiningViewTheme] with the another.
-  StreamPrejoiningViewTheme merge(StreamPrejoiningViewTheme? other) {
+  /// Merges one [StreamLobbyViewTheme] with the another.
+  StreamLobbyViewTheme merge(StreamLobbyViewTheme? other) {
     if (other == null) return this;
     return copyWith(
       backgroundColor: other.backgroundColor,

@@ -9,9 +9,9 @@ import '../call_participants/participant_label.dart';
 /// A widget that can be shown before joining a call. Measures latencies
 /// and selects the best SFU. This speeds up the process of joining when
 /// the user decides to enter the call.
-class StreamPreJoiningView extends StatefulWidget {
-  /// Creates a new instance of [StreamPreJoiningView].
-  const StreamPreJoiningView({
+class StreamLobbyView extends StatefulWidget {
+  /// Creates a new instance of [StreamLobbyView].
+  const StreamLobbyView({
     super.key,
     required this.call,
     required this.onJoinCallTap,
@@ -30,10 +30,10 @@ class StreamPreJoiningView extends StatefulWidget {
   final VoidCallback? onCloseTap;
 
   @override
-  State<StreamPreJoiningView> createState() => _StreamPreJoiningViewState();
+  State<StreamLobbyView> createState() => _StreamLobbyViewState();
 }
 
-class _StreamPreJoiningViewState extends State<StreamPreJoiningView> {
+class _StreamLobbyViewState extends State<StreamLobbyView> {
   /// Represents a call.
   Call get call => widget.call;
 
@@ -61,7 +61,7 @@ class _StreamPreJoiningViewState extends State<StreamPreJoiningView> {
     final streamVideoTheme = StreamVideoTheme.of(context);
     final textTheme = streamVideoTheme.textTheme;
     final colorTheme = streamVideoTheme.colorTheme;
-    final theme = streamVideoTheme.prejoiningViewTheme;
+    final theme = streamVideoTheme.lobbyViewTheme;
 
     final currentUser = StreamVideo.instance.currentUser;
 

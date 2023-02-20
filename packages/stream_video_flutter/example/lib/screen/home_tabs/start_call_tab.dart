@@ -123,7 +123,7 @@ class _StartCallTabState extends State<StartCallTab>
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => StreamPreJoiningView(
+              builder: (context) => StreamLobbyView(
                 call: call,
                 onJoinCallTap: () {
                   Navigator.of(context).pop();
