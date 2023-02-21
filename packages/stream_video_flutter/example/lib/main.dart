@@ -35,6 +35,7 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.robotoMonoTextTheme(),
       ),
       home: const LoginScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

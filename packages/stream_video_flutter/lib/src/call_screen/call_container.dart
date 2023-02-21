@@ -120,13 +120,6 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
 
   Future<void> _start() async {
     try {
-      if (call.state.value.status.isIdle) {
-        final result = await call.getOrCreate();
-        if (result.isFailure) {
-          await _onCancelCall();
-          return;
-        }
-      }
       final result = await call.connect();
       if (result.isFailure) {
         await _onCancelCall();

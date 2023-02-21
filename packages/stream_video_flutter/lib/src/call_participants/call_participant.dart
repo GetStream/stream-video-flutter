@@ -66,7 +66,7 @@ class StreamCallParticipant extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8),
-                    child: StreamParticipantLabel(
+                    child: StreamParticipantLabel.fromParticipant(
                       participant: participant,
                       audioLevelIndicatorColor: theme.audioLevelIndicatorColor,
                       disabledMicrophoneColor: theme.disabledMicrophoneColor,
