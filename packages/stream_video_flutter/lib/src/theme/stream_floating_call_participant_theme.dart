@@ -9,7 +9,7 @@ import '../../stream_video_flutter.dart';
 /// participant widget in [StreamCallParticipants].
 class StreamFloatingCallParticipantTheme with Diagnosticable {
   const StreamFloatingCallParticipantTheme({
-    this.streamCallParticipantTheme = const StreamCallParticipantTheme(),
+    this.streamCallParticipantTheme = const StreamCallParticipantThemeData(),
     this.floatingParticipantHeight = 150,
     this.floatingParticipantWidth = 125,
     this.floatingParticipantPadding = 16,
@@ -18,7 +18,7 @@ class StreamFloatingCallParticipantTheme with Diagnosticable {
   });
 
   /// The theme for the participant item.
-  final StreamCallParticipantTheme streamCallParticipantTheme;
+  final StreamCallParticipantThemeData streamCallParticipantTheme;
 
   /// The height of the floating participant item.
   final double floatingParticipantHeight;
@@ -38,7 +38,7 @@ class StreamFloatingCallParticipantTheme with Diagnosticable {
   /// Returns a new [StreamFloatingCallParticipantTheme] replacing some of its
   /// properties.
   StreamFloatingCallParticipantTheme copyWith({
-    StreamCallParticipantTheme? streamCallParticipantTheme,
+    StreamCallParticipantThemeData? streamCallParticipantTheme,
     double? floatingParticipantHeight,
     double? floatingParticipantWidth,
     double? floatingParticipantPadding,

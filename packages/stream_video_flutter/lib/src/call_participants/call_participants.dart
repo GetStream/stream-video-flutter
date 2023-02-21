@@ -273,10 +273,8 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
                     child: StreamCallParticipant(
                       call: call,
                       participant: participant,
-                      theme: const StreamCallParticipantTheme(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                        connectionLevelAlignment: Alignment.topRight,
-                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      connectionLevelAlignment: Alignment.topRight,
                     ),
                   );
             },

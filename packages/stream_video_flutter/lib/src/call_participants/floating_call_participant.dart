@@ -44,14 +44,12 @@ class StreamFloatingCallParticipant extends StatelessWidget {
             child: StreamCallParticipant(
               call: call,
               participant: participant,
-              theme: theme.streamCallParticipantTheme.copyWith(
-                avatarTheme: StreamAvatarTheme(
-                  constraints: BoxConstraints.tightFor(
-                    height: avatarSize,
-                    width: avatarSize,
-                  ),
-                  borderRadius: avatarBorderRadius,
+              avatarTheme: StreamAvatarTheme(
+                constraints: BoxConstraints.tightFor(
+                  height: avatarSize,
+                  width: avatarSize,
                 ),
+                borderRadius: avatarBorderRadius,
               ),
             ),
           ),

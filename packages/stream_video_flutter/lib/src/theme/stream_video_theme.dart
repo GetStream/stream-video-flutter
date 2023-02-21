@@ -17,7 +17,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallControlsBarTheme? callControlsBarTheme,
     StreamAvatarTheme? avatarTheme,
     StreamLobbyViewTheme? lobbyViewTheme,
-    StreamCallParticipantTheme? callParticipantTheme,
+    StreamCallParticipantThemeData? callParticipantTheme,
     StreamFloatingCallParticipantTheme? floatingCallParticipantTheme,
     StreamParticipantsInfoTheme? participantsInfoTheme,
     StreamParticipantInfoTheme? participantInfoTheme,
@@ -133,13 +133,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           selectionThickness: 4,
         ),
       ),
-      callParticipantTheme: StreamCallParticipantTheme(
-        showFocusedBorder: true,
+      callParticipantTheme: StreamCallParticipantThemeData(
+        showDominantSpeakerBorder: true,
         borderRadius: isDesktopDevice
             ? const BorderRadius.all(Radius.circular(12))
             : BorderRadius.zero,
-        focusedBorderColor: colorTheme.accentInfo,
-        focusedBorderThickness: 4,
+        dominantSpeakerBorderColor: colorTheme.accentInfo,
+        dominantSpeakerBorderThickness: 4,
         backgroundColor: const Color(0xFF272A30),
         avatarTheme: StreamAvatarTheme(
           constraints: const BoxConstraints.tightFor(
@@ -160,8 +160,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         connectionLevelInactiveColor: Colors.white,
       ),
       floatingCallParticipantTheme: StreamFloatingCallParticipantTheme(
-        streamCallParticipantTheme: StreamCallParticipantTheme(
-          showFocusedBorder: false,
+        streamCallParticipantTheme: StreamCallParticipantThemeData(
+          showDominantSpeakerBorder: false,
           backgroundColor: const Color(0xFF272A30),
           avatarTheme: StreamAvatarTheme(
             constraints: const BoxConstraints.tightFor(
@@ -352,7 +352,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   final StreamLobbyViewTheme lobbyViewTheme;
 
   /// Theme for the call participant widget.
-  final StreamCallParticipantTheme callParticipantTheme;
+  final StreamCallParticipantThemeData callParticipantTheme;
 
   /// Theme for the floating pip call participant widget.
   final StreamFloatingCallParticipantTheme floatingCallParticipantTheme;
@@ -384,7 +384,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallControlsBarTheme? callControlsBarTheme,
     StreamAvatarTheme? avatarTheme,
     StreamLobbyViewTheme? lobbyViewTheme,
-    StreamCallParticipantTheme? callParticipantTheme,
+    StreamCallParticipantThemeData? callParticipantTheme,
     StreamFloatingCallParticipantTheme? floatingCallParticipantTheme,
     StreamParticipantInfoTheme? participantInfoTheme,
     StreamParticipantsInfoTheme? participantsInfoTheme,

@@ -13,7 +13,22 @@ class StreamCallParticipant extends StatelessWidget {
     super.key,
     required this.call,
     required this.participant,
-    this.theme,
+    this.backgroundColor,
+    this.borderRadius,
+    this.avatarTheme,
+    this.showDominantSpeakerBorder,
+    this.dominantSpeakerBorderThickness,
+    this.dominantSpeakerBorderColor,
+    this.showParticipantLabel,
+    this.participantLabelTextStyle,
+    this.participantLabelAlignment,
+    this.audioLevelIndicatorColor,
+    this.enabledMicrophoneColor,
+    this.disabledMicrophoneColor,
+    this.showConnectionQualityIndicator,
+    this.connectionLevelActiveColor,
+    this.connectionLevelInactiveColor,
+    this.connectionLevelAlignment,
   });
 
   /// Represents a call.
@@ -22,27 +37,105 @@ class StreamCallParticipant extends StatelessWidget {
   /// The participant to display.
   final CallParticipantState participant;
 
-  /// Theme for the participant.
-  final StreamCallParticipantTheme? theme;
+  /// The background color of the call participant.
+  final Color? backgroundColor;
+
+  /// The border radius of the call participant.
+  final BorderRadius? borderRadius;
+
+  /// The theme for the avatar.
+  final StreamAvatarTheme? avatarTheme;
+
+  /// Whether to highlight the dominant speaker.
+  final bool? showDominantSpeakerBorder;
+
+  /// The thickness of the dominant speaker border.
+  final double? dominantSpeakerBorderThickness;
+
+  /// The color of the dominant speaker border.
+  final Color? dominantSpeakerBorderColor;
+
+  /// Whether to show the label with participant name and mute status.
+  final bool? showParticipantLabel;
+
+  /// Text style for the participant label.
+  final TextStyle? participantLabelTextStyle;
+
+  /// Alignment for the participant label.
+  final AlignmentGeometry? participantLabelAlignment;
+
+  /// The color of an audio level indicator.
+  final Color? audioLevelIndicatorColor;
+
+  /// The color of an enabled microphone icon.
+  final Color? enabledMicrophoneColor;
+
+  /// The color of a disabled microphone icon.
+  final Color? disabledMicrophoneColor;
+
+  /// Whether to show the connection quality indicator.
+  final bool? showConnectionQualityIndicator;
+
+  /// The color of an active connection quality level.
+  final Color? connectionLevelActiveColor;
+
+  /// The color of an inactive connection quality level.
+  final Color? connectionLevelInactiveColor;
+
+  /// Alignment for the connection level.
+  final AlignmentGeometry? connectionLevelAlignment;
 
   @override
   Widget build(BuildContext context) {
-    final streamVideoTheme = StreamVideoTheme.of(context);
-    final theme = this.theme ?? streamVideoTheme.callParticipantTheme;
+    final theme = StreamCallParticipantTheme.of(context);
+
+    final backgroundColor = this.backgroundColor ?? theme.backgroundColor;
+    final borderRadius = this.borderRadius ?? theme.borderRadius;
+    final avatarTheme = this.avatarTheme ?? theme.avatarTheme;
+    final showDominantSpeakerBorder =
+        this.showDominantSpeakerBorder ?? theme.showDominantSpeakerBorder;
+    final dominantSpeakerBorderThickness =
+        this.dominantSpeakerBorderThickness ??
+            theme.dominantSpeakerBorderThickness;
+    final dominantSpeakerBorderColor =
+        this.dominantSpeakerBorderColor ?? theme.dominantSpeakerBorderColor;
+    final showParticipantLabel =
+        this.showParticipantLabel ?? theme.showParticipantLabel;
+    final participantLabelTextStyle =
+        this.participantLabelTextStyle ?? theme.participantLabelTextStyle;
+    final participantLabelAlignment =
+        this.participantLabelAlignment ?? theme.participantLabelAlignment;
+    final audioLevelIndicatorColor =
+        this.audioLevelIndicatorColor ?? theme.audioLevelIndicatorColor;
+    final enabledMicrophoneColor =
+        this.enabledMicrophoneColor ?? theme.enabledMicrophoneColor;
+    final disabledMicrophoneColor =
+        this.disabledMicrophoneColor ?? theme.disabledMicrophoneColor;
+    final showConnectionQualityIndicator =
+        this.showConnectionQualityIndicator ??
+            theme.showConnectionQualityIndicator;
+    final connectionLevelActiveColor =
+        this.connectionLevelActiveColor ?? theme.connectionLevelActiveColor;
+    final connectionLevelInactiveColor =
+        this.connectionLevelInactiveColor ?? theme.connectionLevelInactiveColor;
+    final connectionLevelAlignment =
+        this.connectionLevelAlignment ?? theme.connectionLevelAlignment;
 
     return ClipRRect(
-      borderRadius: theme.borderRadius,
+      borderRadius: borderRadius,
       child: Container(
         foregroundDecoration: BoxDecoration(
-          border: participant.isDominantSpeaker && theme.showFocusedBorder
+          border: participant.isDominantSpeaker && showDominantSpeakerBorder
               ? Border.all(
-                  width: theme.focusedBorderThickness,
-                  color: theme.focusedBorderColor,
+                  width: dominantSpeakerBorderThickness,
+                  color: dominantSpeakerBorderColor,
                 )
               : null,
           borderRadius: theme.borderRadius,
         ),
-        decoration: BoxDecoration(color: theme.backgroundColor),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+        ),
         child: Stack(
           children: [
             VideoTrackRenderer(
@@ -52,43 +145,44 @@ class StreamCallParticipant extends StatelessWidget {
               placeholderBuilder: (context) {
                 return Center(
                   child: StreamUserAvatar(
-                    avatarTheme: theme.avatarTheme,
+                    avatarTheme: avatarTheme,
                     user: participant.toUserInfo(),
                   ),
                 );
               },
             ),
-            Align(
-              alignment: theme.participantLabelAlignment,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: StreamParticipantLabel.fromParticipant(
-                      participant: participant,
-                      audioLevelIndicatorColor: theme.audioLevelIndicatorColor,
-                      disabledMicrophoneColor: theme.disabledMicrophoneColor,
-                      enabledMicrophoneColor: theme.enabledMicrophoneColor,
-                      participantLabelTextStyle:
-                          theme.participantLabelTextStyle,
+            if (showParticipantLabel)
+              Align(
+                alignment: participantLabelAlignment,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: StreamParticipantLabel.fromParticipant(
+                        participant: participant,
+                        audioLevelIndicatorColor: audioLevelIndicatorColor,
+                        disabledMicrophoneColor: disabledMicrophoneColor,
+                        enabledMicrophoneColor: enabledMicrophoneColor,
+                        participantLabelTextStyle: participantLabelTextStyle,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Align(
-              alignment: theme.connectionLevelAlignment,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: StreamConnectionQualityIndicator(
-                  connectionQuality: participant.connectionQuality,
-                  activeColor: theme.connectionLevelActiveColor,
-                  inactiveColor: theme.connectionLevelInactiveColor,
+                  ],
                 ),
               ),
-            ),
+            if (showConnectionQualityIndicator)
+              Align(
+                alignment: connectionLevelAlignment,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: StreamConnectionQualityIndicator(
+                    connectionQuality: participant.connectionQuality,
+                    activeColor: connectionLevelActiveColor,
+                    inactiveColor: connectionLevelInactiveColor,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
