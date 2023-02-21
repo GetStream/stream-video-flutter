@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'stream_avatar_theme.dart';
+import 'user_avatar_theme.dart';
 
 /// {@template invitableUserTheme}
 /// A style that overrides the default appearance of invitable user widget.
@@ -11,7 +11,7 @@ class StreamInvitableUserTheme with Diagnosticable {
   const StreamInvitableUserTheme({
     this.usernameTextStyle = const TextStyle(fontSize: 18.0),
     this.selectedIconColor = Colors.blue,
-    this.avatarTheme = const StreamAvatarTheme(
+    this.userAvatarTheme = const StreamUserAvatarThemeData(
       initialsTextStyle: TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.bold,
@@ -34,19 +34,19 @@ class StreamInvitableUserTheme with Diagnosticable {
   final Color selectedIconColor;
 
   /// Theme for the user avatar widget.
-  final StreamAvatarTheme? avatarTheme;
+  final StreamUserAvatarThemeData? userAvatarTheme;
 
   /// Returns a new [StreamInvitableUserTheme] replacing some of its
   /// properties
   StreamInvitableUserTheme copyWith({
     TextStyle? usernameTextStyle,
     Color? selectedIconColor,
-    StreamAvatarTheme? avatarTheme,
+    StreamUserAvatarThemeData? userAvatarTheme,
   }) {
     return StreamInvitableUserTheme(
       usernameTextStyle: usernameTextStyle ?? this.usernameTextStyle,
       selectedIconColor: selectedIconColor ?? this.selectedIconColor,
-      avatarTheme: avatarTheme ?? this.avatarTheme,
+      userAvatarTheme: userAvatarTheme ?? this.userAvatarTheme,
     );
   }
 
@@ -59,9 +59,10 @@ class StreamInvitableUserTheme with Diagnosticable {
             TextStyle.lerp(usernameTextStyle, other.usernameTextStyle, t)!,
         selectedIconColor:
             Color.lerp(selectedIconColor, other.selectedIconColor, t)!,
-        avatarTheme: avatarTheme != null && other.avatarTheme != null
-            ? avatarTheme!.lerp(other.avatarTheme!, t)
-            : other.avatarTheme ?? avatarTheme);
+        userAvatarTheme:
+            userAvatarTheme != null && other.userAvatarTheme != null
+                ? userAvatarTheme!.lerp(other.userAvatarTheme!, t)
+                : other.userAvatarTheme ?? userAvatarTheme);
   }
 
   @override
@@ -71,13 +72,13 @@ class StreamInvitableUserTheme with Diagnosticable {
           runtimeType == other.runtimeType &&
           usernameTextStyle == other.usernameTextStyle &&
           selectedIconColor == other.selectedIconColor &&
-          avatarTheme == other.avatarTheme;
+          userAvatarTheme == other.userAvatarTheme;
 
   @override
   int get hashCode =>
       usernameTextStyle.hashCode ^
       selectedIconColor.hashCode ^
-      avatarTheme.hashCode;
+      userAvatarTheme.hashCode;
 
   /// Merges one [StreamInvitableUserTheme] with the another.
   StreamInvitableUserTheme merge(StreamInvitableUserTheme? other) {
@@ -85,7 +86,7 @@ class StreamInvitableUserTheme with Diagnosticable {
     return copyWith(
       usernameTextStyle: other.usernameTextStyle,
       selectedIconColor: other.selectedIconColor,
-      avatarTheme: other.avatarTheme,
+      userAvatarTheme: other.userAvatarTheme,
     );
   }
 
@@ -95,6 +96,6 @@ class StreamInvitableUserTheme with Diagnosticable {
     properties
       ..add(DiagnosticsProperty('usernameTextStyle', usernameTextStyle))
       ..add(DiagnosticsProperty('selectedIconColor', selectedIconColor))
-      ..add(DiagnosticsProperty('avatarTheme', avatarTheme));
+      ..add(DiagnosticsProperty('userAvatarTheme', userAvatarTheme));
   }
 }

@@ -124,9 +124,11 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                         )
                       else if (currentUser != null)
                         Center(
-                          child: StreamUserAvatar(
-                            avatarTheme: theme.avatarTheme,
-                            user: currentUser,
+                          child: StreamUserAvatarTheme(
+                            data: theme.userAvatarTheme,
+                            child: StreamUserAvatar(
+                              user: currentUser,
+                            ),
                           ),
                         ),
                       Align(

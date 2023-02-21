@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'stream_avatar_theme.dart';
+import 'user_avatar_theme.dart';
 
 /// A style of a pre-joining screen.
 class StreamLobbyViewTheme with Diagnosticable {
@@ -9,7 +9,7 @@ class StreamLobbyViewTheme with Diagnosticable {
   const StreamLobbyViewTheme({
     this.cardBackgroundColor = const Color(0xFFF2F2F2),
     this.backgroundColor = Colors.white,
-    this.avatarTheme = const StreamAvatarTheme(
+    this.userAvatarTheme = const StreamUserAvatarThemeData(
       constraints: BoxConstraints.tightFor(
         height: 100,
         width: 100,
@@ -32,17 +32,17 @@ class StreamLobbyViewTheme with Diagnosticable {
   final Color cardBackgroundColor;
 
   /// Theme for the avatar.
-  final StreamAvatarTheme avatarTheme;
+  final StreamUserAvatarThemeData userAvatarTheme;
 
   StreamLobbyViewTheme copyWith({
     Color? backgroundColor,
     Color? cardBackgroundColor,
-    StreamAvatarTheme? avatarTheme,
+    StreamUserAvatarThemeData? userAvatarTheme,
   }) {
     return StreamLobbyViewTheme(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       cardBackgroundColor: cardBackgroundColor ?? this.cardBackgroundColor,
-      avatarTheme: avatarTheme ?? this.avatarTheme,
+      userAvatarTheme: userAvatarTheme ?? this.userAvatarTheme,
     );
   }
 
@@ -54,7 +54,7 @@ class StreamLobbyViewTheme with Diagnosticable {
       backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t)!,
       cardBackgroundColor:
           Color.lerp(cardBackgroundColor, other.cardBackgroundColor, t)!,
-      avatarTheme: avatarTheme.lerp(other.avatarTheme, t),
+      userAvatarTheme: userAvatarTheme.lerp(other.userAvatarTheme, t),
     );
   }
 
@@ -65,13 +65,13 @@ class StreamLobbyViewTheme with Diagnosticable {
           runtimeType == other.runtimeType &&
           backgroundColor == other.backgroundColor &&
           cardBackgroundColor == other.cardBackgroundColor &&
-          avatarTheme == other.avatarTheme;
+          userAvatarTheme == other.userAvatarTheme;
 
   @override
   int get hashCode =>
       backgroundColor.hashCode ^
       cardBackgroundColor.hashCode ^
-      avatarTheme.hashCode;
+      userAvatarTheme.hashCode;
 
   /// Merges one [StreamLobbyViewTheme] with the another.
   StreamLobbyViewTheme merge(StreamLobbyViewTheme? other) {
@@ -79,7 +79,7 @@ class StreamLobbyViewTheme with Diagnosticable {
     return copyWith(
       backgroundColor: other.backgroundColor,
       cardBackgroundColor: other.cardBackgroundColor,
-      avatarTheme: other.avatarTheme,
+      userAvatarTheme: other.userAvatarTheme,
     );
   }
 
@@ -89,6 +89,6 @@ class StreamLobbyViewTheme with Diagnosticable {
     properties
       ..add(DiagnosticsProperty('backgroundColor', backgroundColor))
       ..add(DiagnosticsProperty('cardBackgroundColor', cardBackgroundColor))
-      ..add(DiagnosticsProperty('avatarTheme', avatarTheme));
+      ..add(DiagnosticsProperty('userAvatarTheme', userAvatarTheme));
   }
 }

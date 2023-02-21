@@ -15,7 +15,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
     StreamCallControlsThemeData? callControlsTheme,
-    StreamAvatarTheme? avatarTheme,
+    StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewTheme? lobbyViewTheme,
     StreamCallParticipantThemeData? callParticipantTheme,
     StreamFloatingCallParticipantTheme? floatingCallParticipantTheme,
@@ -41,7 +41,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       textTheme: textTheme,
       colorTheme: colorTheme,
       callControlsTheme: callControlsTheme,
-      avatarTheme: avatarTheme,
+      userAvatarTheme: userAvatarTheme,
       lobbyViewTheme: lobbyViewTheme,
       callParticipantTheme: callParticipantTheme,
       floatingCallParticipantTheme: floatingCallParticipantTheme,
@@ -69,7 +69,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.textTheme,
     required this.colorTheme,
     required this.callControlsTheme,
-    required this.avatarTheme,
+    required this.userAvatarTheme,
     required this.lobbyViewTheme,
     required this.callParticipantTheme,
     required this.floatingCallParticipantTheme,
@@ -119,7 +119,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         optionShape: CircleBorder(),
         optionPadding: EdgeInsets.all(16),
       ),
-      avatarTheme: StreamAvatarTheme(
+      userAvatarTheme: StreamUserAvatarThemeData(
         borderRadius: BorderRadius.circular(20),
         constraints: const BoxConstraints.tightFor(
           height: 40,
@@ -136,7 +136,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       lobbyViewTheme: StreamLobbyViewTheme(
         backgroundColor: Colors.white,
         cardBackgroundColor: const Color(0xFFF2F2F2),
-        avatarTheme: StreamAvatarTheme(
+        userAvatarTheme: StreamUserAvatarThemeData(
           constraints: const BoxConstraints.tightFor(
             height: 100,
             width: 100,
@@ -155,7 +155,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         dominantSpeakerBorderColor: colorTheme.accentInfo,
         dominantSpeakerBorderThickness: 4,
         backgroundColor: const Color(0xFF272A30),
-        avatarTheme: StreamAvatarTheme(
+        userAvatarTheme: StreamUserAvatarThemeData(
           constraints: const BoxConstraints.tightFor(
             height: 100,
             width: 100,
@@ -177,7 +177,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         streamCallParticipantTheme: StreamCallParticipantThemeData(
           showDominantSpeakerBorder: false,
           backgroundColor: const Color(0xFF272A30),
-          avatarTheme: StreamAvatarTheme(
+          userAvatarTheme: StreamUserAvatarThemeData(
             constraints: const BoxConstraints.tightFor(
               height: 100,
               width: 100,
@@ -208,7 +208,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         ),
         iconActiveColor: colorTheme.textHighEmphasis,
         iconInactiveColor: colorTheme.accentError,
-        avatarTheme: StreamAvatarTheme(
+        userAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -232,7 +232,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         usernameTextStyle:
             TextStyle(color: colorTheme.textHighEmphasis, fontSize: 18.0),
         selectedIconColor: colorTheme.accentPrimary,
-        avatarTheme: StreamAvatarTheme(
+        userAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -248,7 +248,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         ),
       ),
       incomingCallTheme: StreamIncomingOutgoingCallTheme(
-        singleParticipantAvatarTheme: StreamAvatarTheme(
+        singleParticipantAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
@@ -262,7 +262,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             Radius.circular(80),
           ),
         ),
-        multipleParticipantAvatarTheme: StreamAvatarTheme(
+        multipleParticipantAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -292,7 +292,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         ),
       ),
       outgoingCallTheme: StreamIncomingOutgoingCallTheme(
-        singleParticipantAvatarTheme: StreamAvatarTheme(
+        singleParticipantAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
@@ -306,7 +306,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             Radius.circular(80),
           ),
         ),
-        multipleParticipantAvatarTheme: StreamAvatarTheme(
+        multipleParticipantAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -360,7 +360,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   final StreamCallControlsThemeData callControlsTheme;
 
   /// Theme for the user avatar widget.
-  final StreamAvatarTheme avatarTheme;
+  final StreamUserAvatarThemeData userAvatarTheme;
 
   /// Theme for the pre-joining view widget.
   final StreamLobbyViewTheme lobbyViewTheme;
@@ -396,7 +396,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
     StreamCallControlsThemeData? callControlsTheme,
-    StreamAvatarTheme? avatarTheme,
+    StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewTheme? lobbyViewTheme,
     StreamCallParticipantThemeData? callParticipantTheme,
     StreamFloatingCallParticipantTheme? floatingCallParticipantTheme,
@@ -411,7 +411,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         textTheme: this.textTheme.merge(textTheme),
         colorTheme: this.colorTheme.merge(colorTheme),
         callControlsTheme: this.callControlsTheme.merge(callControlsTheme),
-        avatarTheme: this.avatarTheme.merge(avatarTheme),
+        userAvatarTheme: this.userAvatarTheme.merge(userAvatarTheme),
         lobbyViewTheme: this.lobbyViewTheme.merge(lobbyViewTheme),
         callParticipantTheme:
             this.callParticipantTheme.merge(callParticipantTheme),
@@ -436,7 +436,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       textTheme: textTheme.merge(other.textTheme),
       colorTheme: colorTheme.merge(other.colorTheme),
       callControlsTheme: callControlsTheme.merge(callControlsTheme),
-      avatarTheme: avatarTheme.merge(other.avatarTheme),
+      userAvatarTheme: userAvatarTheme.merge(other.userAvatarTheme),
       lobbyViewTheme: lobbyViewTheme.merge(other.lobbyViewTheme),
       callParticipantTheme:
           callParticipantTheme.merge(other.callParticipantTheme),
@@ -461,7 +461,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return StreamVideoTheme.raw(
       textTheme: textTheme.lerp(other.textTheme, t),
       colorTheme: colorTheme.lerp(other.colorTheme, t),
-      avatarTheme: avatarTheme.lerp(other.avatarTheme, t),
+      userAvatarTheme: userAvatarTheme.lerp(other.userAvatarTheme, t),
       lobbyViewTheme: lobbyViewTheme.lerp(other.lobbyViewTheme, t),
       callParticipantTheme:
           callParticipantTheme.lerp(other.callParticipantTheme, t),

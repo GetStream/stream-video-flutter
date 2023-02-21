@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'stream_avatar_theme.dart';
+import 'user_avatar_theme.dart';
 
 /// {@template participantsInfoTheme}
 /// A style that overrides the default appearance of the incoming and outgoing call widget.
@@ -9,7 +9,7 @@ import 'stream_avatar_theme.dart';
 class StreamIncomingOutgoingCallTheme with Diagnosticable {
   /// {@macro outgoingCallTheme}
   const StreamIncomingOutgoingCallTheme({
-    this.singleParticipantAvatarTheme = const StreamAvatarTheme(
+    this.singleParticipantAvatarTheme = const StreamUserAvatarThemeData(
       initialsTextStyle: TextStyle(
         fontSize: 32,
         fontWeight: FontWeight.bold,
@@ -23,7 +23,7 @@ class StreamIncomingOutgoingCallTheme with Diagnosticable {
         Radius.circular(80),
       ),
     ),
-    this.multipleParticipantAvatarTheme = const StreamAvatarTheme(
+    this.multipleParticipantAvatarTheme = const StreamUserAvatarThemeData(
       initialsTextStyle: TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.bold,
@@ -54,10 +54,10 @@ class StreamIncomingOutgoingCallTheme with Diagnosticable {
   });
 
   /// Theme for the avatar in a call with one participant.
-  final StreamAvatarTheme singleParticipantAvatarTheme;
+  final StreamUserAvatarThemeData singleParticipantAvatarTheme;
 
   /// Theme for the avatar in a call with multiple participants.
-  final StreamAvatarTheme multipleParticipantAvatarTheme;
+  final StreamUserAvatarThemeData multipleParticipantAvatarTheme;
 
   /// Text style for the participant label in a call with one participant.
   final TextStyle singleParticipantTextStyle;
@@ -69,8 +69,8 @@ class StreamIncomingOutgoingCallTheme with Diagnosticable {
   final TextStyle callingLabelTextStyle;
 
   StreamIncomingOutgoingCallTheme copyWith({
-    StreamAvatarTheme? singleParticipantAvatarTheme,
-    StreamAvatarTheme? multipleParticipantAvatarTheme,
+    StreamUserAvatarThemeData? singleParticipantAvatarTheme,
+    StreamUserAvatarThemeData? multipleParticipantAvatarTheme,
     TextStyle? singleParticipantTextStyle,
     TextStyle? multipleParticipantTextStyle,
     TextStyle? callingLabelTextStyle,
@@ -92,7 +92,8 @@ class StreamIncomingOutgoingCallTheme with Diagnosticable {
   /// Linearly interpolate between two [StreamIncomingOutgoingCallTheme] themes.
   ///
   /// All the properties must be non-null.
-  StreamIncomingOutgoingCallTheme lerp(StreamIncomingOutgoingCallTheme other, double t) {
+  StreamIncomingOutgoingCallTheme lerp(
+      StreamIncomingOutgoingCallTheme other, double t) {
     return StreamIncomingOutgoingCallTheme(
       singleParticipantAvatarTheme: singleParticipantAvatarTheme.lerp(
           other.singleParticipantAvatarTheme, t),
@@ -128,7 +129,8 @@ class StreamIncomingOutgoingCallTheme with Diagnosticable {
       callingLabelTextStyle.hashCode;
 
   /// Merges one [StreamIncomingOutgoingCallTheme] with the another.
-  StreamIncomingOutgoingCallTheme merge(StreamIncomingOutgoingCallTheme? other) {
+  StreamIncomingOutgoingCallTheme merge(
+      StreamIncomingOutgoingCallTheme? other) {
     if (other == null) return this;
     return copyWith(
       singleParticipantAvatarTheme: other.singleParticipantAvatarTheme,

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'stream_avatar_theme.dart';
+import 'user_avatar_theme.dart';
 
 /// {@template participantInfoTheme}
 /// A style that overrides the default appearance of participants info widget.
@@ -12,7 +12,7 @@ class StreamParticipantInfoTheme with Diagnosticable {
     this.usernameTextStyle = const TextStyle(fontSize: 18.0),
     this.iconActiveColor = Colors.black54,
     this.iconInactiveColor = Colors.red,
-    this.avatarTheme = const StreamAvatarTheme(
+    this.userAvatarTheme = const StreamUserAvatarThemeData(
       initialsTextStyle: TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.bold,
@@ -38,7 +38,7 @@ class StreamParticipantInfoTheme with Diagnosticable {
   final Color iconInactiveColor;
 
   /// Theme for the user avatar widget.
-  final StreamAvatarTheme? avatarTheme;
+  final StreamUserAvatarThemeData? userAvatarTheme;
 
   /// Returns a new [StreamParticipantInfoTheme] replacing some of its
   /// properties
@@ -46,13 +46,13 @@ class StreamParticipantInfoTheme with Diagnosticable {
     TextStyle? usernameTextStyle,
     Color? iconActiveColor,
     Color? iconInactiveColor,
-    StreamAvatarTheme? avatarTheme,
+    StreamUserAvatarThemeData? userAvatarTheme,
   }) {
     return StreamParticipantInfoTheme(
       usernameTextStyle: usernameTextStyle ?? this.usernameTextStyle,
       iconActiveColor: iconActiveColor ?? this.iconActiveColor,
       iconInactiveColor: iconInactiveColor ?? this.iconInactiveColor,
-      avatarTheme: avatarTheme ?? this.avatarTheme,
+      userAvatarTheme: userAvatarTheme ?? this.userAvatarTheme,
     );
   }
 
@@ -66,9 +66,10 @@ class StreamParticipantInfoTheme with Diagnosticable {
         iconActiveColor: Color.lerp(iconActiveColor, other.iconActiveColor, t)!,
         iconInactiveColor:
             Color.lerp(iconInactiveColor, other.iconInactiveColor, t)!,
-        avatarTheme: avatarTheme != null && other.avatarTheme != null
-            ? avatarTheme!.lerp(other.avatarTheme!, t)
-            : other.avatarTheme ?? avatarTheme);
+        userAvatarTheme:
+            userAvatarTheme != null && other.userAvatarTheme != null
+                ? userAvatarTheme!.lerp(other.userAvatarTheme!, t)
+                : other.userAvatarTheme ?? userAvatarTheme);
   }
 
   @override
@@ -79,14 +80,14 @@ class StreamParticipantInfoTheme with Diagnosticable {
           usernameTextStyle == other.usernameTextStyle &&
           iconActiveColor == other.iconActiveColor &&
           iconInactiveColor == other.iconInactiveColor &&
-          avatarTheme == other.avatarTheme;
+          userAvatarTheme == other.userAvatarTheme;
 
   @override
   int get hashCode =>
       usernameTextStyle.hashCode ^
       iconActiveColor.hashCode ^
       iconInactiveColor.hashCode ^
-      avatarTheme.hashCode;
+      userAvatarTheme.hashCode;
 
   /// Merges one [StreamParticipantInfoTheme] with the another
   StreamParticipantInfoTheme merge(StreamParticipantInfoTheme? other) {
@@ -95,7 +96,7 @@ class StreamParticipantInfoTheme with Diagnosticable {
       usernameTextStyle: other.usernameTextStyle,
       iconActiveColor: other.iconActiveColor,
       iconInactiveColor: other.iconInactiveColor,
-      avatarTheme: other.avatarTheme,
+      userAvatarTheme: other.userAvatarTheme,
     );
   }
 
@@ -106,6 +107,6 @@ class StreamParticipantInfoTheme with Diagnosticable {
       ..add(DiagnosticsProperty('usernameTextStyle', usernameTextStyle))
       ..add(DiagnosticsProperty('iconActiveColor', iconActiveColor))
       ..add(DiagnosticsProperty('iconInactiveColor', iconInactiveColor))
-      ..add(DiagnosticsProperty('avatarTheme', avatarTheme));
+      ..add(DiagnosticsProperty('userAvatarTheme', userAvatarTheme));
   }
 }

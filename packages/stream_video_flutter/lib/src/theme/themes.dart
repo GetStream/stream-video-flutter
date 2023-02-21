@@ -1,6 +1,5 @@
 export 'call_controls_theme.dart';
 export 'call_participant_theme.dart';
-export 'stream_avatar_theme.dart';
 export 'stream_color_theme.dart';
 export 'stream_floating_call_participant_theme.dart';
 export 'stream_invitable_user_list_theme.dart';
@@ -9,3 +8,4 @@ export 'stream_participant_info_theme.dart';
 export 'stream_participants_info_theme.dart';
 export 'stream_text_theme.dart';
 export 'stream_video_theme.dart';
+export 'user_avatar_theme.dart';

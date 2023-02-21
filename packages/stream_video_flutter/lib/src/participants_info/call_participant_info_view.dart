@@ -35,8 +35,8 @@ class CallParticipantInfoView extends StatelessWidget {
     final streamChatTheme = StreamVideoTheme.of(context);
     final participantInfoTheme =
         this.participantInfoTheme ?? streamChatTheme.participantInfoTheme;
-    final avatarTheme =
-        participantInfoTheme.avatarTheme ?? streamChatTheme.avatarTheme;
+    final userAvatarTheme =
+        participantInfoTheme.userAvatarTheme ?? streamChatTheme.userAvatarTheme;
 
     final isAudioEnabled = participant.isAudioEnabled;
     final isVideoEnabled = participant.isVideoEnabled;
@@ -49,9 +49,11 @@ class CallParticipantInfoView extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            StreamUserAvatar(
-              user: participant.toUserInfo(),
-              avatarTheme: avatarTheme,
+            StreamUserAvatarTheme(
+              data: userAvatarTheme,
+              child: StreamUserAvatar(
+                user: participant.toUserInfo(),
+              ),
             ),
             Expanded(
               child: Padding(

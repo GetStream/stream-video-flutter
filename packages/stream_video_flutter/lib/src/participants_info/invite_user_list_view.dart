@@ -172,8 +172,8 @@ class InviteUserItem extends StatelessWidget {
     final streamChatTheme = StreamVideoTheme.of(context);
     final invitableUserTheme =
         this.invitableUserTheme ?? streamChatTheme.invitableUserTheme;
-    final avatarTheme =
-        invitableUserTheme.avatarTheme ?? streamChatTheme.avatarTheme;
+    final userAvatarTheme =
+        invitableUserTheme.userAvatarTheme ?? streamChatTheme.userAvatarTheme;
 
     return InkWell(
       onTap: () => onInvitableUserTap?.call(user),
@@ -181,9 +181,11 @@ class InviteUserItem extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            StreamUserAvatar(
-              user: user,
-              avatarTheme: avatarTheme,
+            StreamUserAvatarTheme(
+              data: userAvatarTheme,
+              child: StreamUserAvatar(
+                user: user,
+              ),
             ),
             Expanded(
               child: Padding(

@@ -15,7 +15,7 @@ class StreamCallParticipant extends StatelessWidget {
     required this.participant,
     this.backgroundColor,
     this.borderRadius,
-    this.avatarTheme,
+    this.userAvatarTheme,
     this.showDominantSpeakerBorder,
     this.dominantSpeakerBorderThickness,
     this.dominantSpeakerBorderColor,
@@ -44,7 +44,7 @@ class StreamCallParticipant extends StatelessWidget {
   final BorderRadius? borderRadius;
 
   /// The theme for the avatar.
-  final StreamAvatarTheme? avatarTheme;
+  final StreamUserAvatarThemeData? userAvatarTheme;
 
   /// Whether to highlight the dominant speaker.
   final bool? showDominantSpeakerBorder;
@@ -91,7 +91,7 @@ class StreamCallParticipant extends StatelessWidget {
 
     final backgroundColor = this.backgroundColor ?? theme.backgroundColor;
     final borderRadius = this.borderRadius ?? theme.borderRadius;
-    final avatarTheme = this.avatarTheme ?? theme.avatarTheme;
+    final userAvatarTheme = this.userAvatarTheme ?? theme.userAvatarTheme;
     final showDominantSpeakerBorder =
         this.showDominantSpeakerBorder ?? theme.showDominantSpeakerBorder;
     final dominantSpeakerBorderThickness =
@@ -144,9 +144,11 @@ class StreamCallParticipant extends StatelessWidget {
               videoTrackType: SfuTrackType.video,
               placeholderBuilder: (context) {
                 return Center(
-                  child: StreamUserAvatar(
-                    avatarTheme: avatarTheme,
-                    user: participant.toUserInfo(),
+                  child: StreamUserAvatarTheme(
+                    data: userAvatarTheme,
+                    child: StreamUserAvatar(
+                      user: participant.toUserInfo(),
+                    ),
                   ),
                 );
               },
