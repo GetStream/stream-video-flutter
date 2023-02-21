@@ -30,7 +30,7 @@ class CoordinatorClientProtobuf extends CoordinatorClient {
     required this.tokenManager,
   }) : _rpclient = ClientRPCProtobufClient(baseUrl, '');
 
-  final _logger = taggedLogger(tag: 'SV:CoordClient');
+  final _logger = taggedLogger(tag: 'SV:CoordClientProto');
   final String apiKey;
   final TokenManager tokenManager;
 
@@ -191,6 +191,7 @@ class CoordinatorClientProtobuf extends CoordinatorClient {
         );
       });
     } catch (e, stk) {
+      _logger.e(() => '[joinCall] failed: $e, stk: $stk');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }

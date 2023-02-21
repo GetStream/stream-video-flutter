@@ -18,6 +18,7 @@ import '../../logger/logger.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_credentials.dart';
 import '../../models/call_metadata.dart';
+import '../../utils/iterable.dart';
 import '../../utils/standard.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_inputs.dart';
@@ -194,8 +195,10 @@ extension UserExt on coord_users.User {
       imageUrl: imageUrl,
       createdAt: createdAt.toDateTime(),
       updatedAt: updatedAt.toDateTime(),
-      customJson: json.decode(
-        utf8.decode(customJson),
+      customJson: customJson.ifNotEmpty(
+        (it) => json.decode(
+          utf8.decode(it),
+        ),
       ),
     );
   }
