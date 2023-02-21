@@ -20,6 +20,7 @@ class _JoinCallTabState extends State<JoinCallTab> {
   final _callIdController = TextEditingController();
 
   bool _callInProgress = false;
+  bool _useLobby = false;
 
   @override
   void dispose() {
@@ -35,6 +36,20 @@ class _JoinCallTabState extends State<JoinCallTab> {
         children: [
           CallIdTextField(
             controller: _callIdController,
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              const Text('Start With Lobby'),
+              Switch(
+                value: _useLobby,
+                onChanged: (value) {
+                  setState(() {
+                    _useLobby = value;
+                  });
+                },
+              )
+            ],
           ),
           const SizedBox(height: 24),
           if (_callInProgress)
@@ -61,6 +76,10 @@ class _JoinCallTabState extends State<JoinCallTab> {
     final callCid = StreamCallCid.from(type: 'default', id: callId);
     final call = Call.fromCid(callCid: callCid);
 
+    if (!_useLobby) {
+      widget.onNavigateToCall(call);
+      return;
+    }
     await Navigator.push(
       context,
       MaterialPageRoute(

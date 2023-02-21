@@ -1,28 +1,39 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:uuid/uuid.dart';
+
 import '../../core/video_error.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/user_info.dart';
 import '../../shared_emitter.dart';
 import '../../token/token_manager.dart';
 import '../../types/other.dart';
+import '../../utils/standard.dart';
 import '../../ws/base_ws.dart';
 import '../../ws/keep_alive.dart';
 import '../coordinator_ws.dart';
 import '../models/coordinator_events.dart';
+import 'generated/event_dto.dart';
+import 'generated/health_check_event_dto.dart';
+import 'open_api_event_parser.dart';
+import 'open_api_mapper_extensions.dart';
 
 // TODO: The class needs further refactor. Some parts can be abstracted.
+
+String buildUrl(String baseUrl, String apiKey) {
+  return '$baseUrl?api_key=$apiKey&stream-auth-type=jwt&X-Stream-Client=stream-video-flutter';
+}
 
 class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     with KeepAlive, ConnectionStateMixin {
   CoordinatorWebSocketOpenApi(
-    super.url, {
-    super.protocols,
+    String url, {
+    Iterable<String>? protocols,
     required this.apiKey,
     required this.userInfo,
     required this.tokenManager,
-  });
+  }) : super(buildUrl(url, apiKey), protocols: protocols);
 
   late final _logger = taggedLogger(tag: 'SV:CoordinatorWS');
 
@@ -35,12 +46,15 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   /// The token manager used to fetch or refresh token.
   final TokenManager tokenManager;
 
+  late final OpenApiEventParser eventParser = OpenApiEventParser();
+
   @override
   SharedEmitter<CoordinatorEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
 
   String? _userId;
   String? _clientId;
+  String? _connectionId;
 
   set callInfo(CallInfo? info) => _callInfo = info;
   CallInfo? _callInfo;
@@ -71,9 +85,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
         'imageUrl': userInfo.imageUrl,
         'role': userInfo.role,
         'teams': userInfo.teams,
-        'customJson': utf8.encode(
-          json.encode(userInfo.extraData),
-        ),
+        'customJson': json.encode(userInfo.extraData),
       },
     };
     return send(
@@ -129,40 +141,34 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     _reconnect();
   }
 
-  @override
-  void onMessage(dynamic message) {
-    // TODO: implement onMessage
-  }
-
-  /* TODO
  @override
   void onMessage(dynamic message) {
-    coordinator.WebsocketEvent? event;
+   _logger.i(() => '[onMessage] message: $message');
+    EventDto? dtoEvent;
     try {
-      event = coordinator.WebsocketEvent.fromBuffer(message);
+      dtoEvent = eventParser.parse(message);
     } catch (e, stk) {
       _logger.e(
         () => '[onMessage] msg parsing failed: "$e"; stk: $stk',
       );
     }
 
-    if (event == null) {
+    if (dtoEvent == null) {
       _logger.w(() => '[onMessage] event is null');
       return;
     }
 
-    final eventType = event.whichEvent();
-    _logger.v(() => '[onMessage] eventType: $eventType');
+    _logger.v(() => '[onMessage] dtoEvent: ${dtoEvent?.toJson()}');
 
-    if (eventType == coordinator.WebsocketEvent_Event.healthcheck) {
-      _handleHealthCheckEvent(event.healthcheck);
+    if (dtoEvent is HealthCheckEventDto) {
+      _handleHealthCheckEvent(dtoEvent);
     }
 
     // Parsing
-    _events.emit(event.toEvent());
+    dtoEvent.toCoordinatorEvent()?.let(_events.emit);
   }
 
-  void _handleHealthCheckEvent(coordinator.WebsocketHealthcheck event) {
+  void _handleHealthCheckEvent(HealthCheckEventDto event) {
     if (!isKeepAliveStarted) {
       connectionState = ConnectionState.connected;
 
@@ -170,9 +176,13 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       startPingPong();
     }
     ackPong(event);
-    _userId = event.userId;
-    _clientId = event.clientId;
-  }*/
+    final me = event.me;
+    if (me != null) {
+      _userId ??= me.id;
+      _clientId ??= '${me.id}--${const Uuid().v4()}';
+      _connectionId ??= event.connectionId;
+    }
+  }
 
   @override
   Future<void> disconnect([int? closeCode, String? closeReason]) async {
@@ -207,10 +217,10 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     final healthCheck = [
       {
         'type': 'health.check',
-        'user_id': _userId,
+        // 'user_id': _userId,
         'client_id': _clientId,
-        'call_type': _callInfo?.callType,
-        'call_id': _callInfo?.callId,
+        // 'call_type': _callInfo?.callType,
+        // 'call_id': _callInfo?.callId,
       }
     ];
 

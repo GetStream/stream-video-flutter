@@ -9,6 +9,8 @@ import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/models/coordinator_inputs.dart' as input;
 import 'coordinator/models/coordinator_inputs.dart';
 import 'coordinator/models/coordinator_models.dart';
+import 'coordinator/open_api/coordinator_client_open_api.dart';
+import 'coordinator/open_api/coordinator_ws_open_api.dart';
 import 'coordinator/protobuf/coordinator_client_protobuf.dart';
 import 'coordinator/protobuf/coordinator_ws_protobuf.dart';
 import 'logger/logger.dart';
@@ -74,7 +76,7 @@ class StreamVideoImpl implements StreamVideo {
     setLogLevel(logLevel);
     setLogHandler(logHandlerFunction);
 
-    _client = CoordinatorClientProtobuf(
+    _client = buildCoordinatorClient(
       apiKey: apiKey,
       tokenManager: _tokenManager,
       baseUrl: coordinatorRpcUrl,
@@ -138,7 +140,7 @@ class StreamVideoImpl implements StreamVideo {
     );
 
     try {
-      _ws = CoordinatorWebSocketProtobuf(
+      _ws = buildCoordinatorWs(
         coordinatorWsUrl,
         apiKey: apiKey,
         userInfo: user,
@@ -459,4 +461,48 @@ class _StreamVideoState {
   Future<void> close() async {
     await currentUser.close();
   }
+}
+
+CoordinatorClient buildCoordinatorClient({
+  required String baseUrl,
+  required String apiKey,
+  required TokenManager tokenManager,
+}) {
+  if (StreamVideo.useNewCoordinator) {
+    return CoordinatorClientOpenApi(
+      apiKey: apiKey,
+      tokenManager: tokenManager,
+      baseUrl: baseUrl,
+    );
+  }
+  return CoordinatorClientProtobuf(
+    apiKey: apiKey,
+    tokenManager: tokenManager,
+    baseUrl: baseUrl,
+  );
+}
+
+CoordinatorWebSocket buildCoordinatorWs(
+  String url, {
+  Iterable<String>? protocols,
+  required String apiKey,
+  required UserInfo userInfo,
+  required TokenManager tokenManager,
+}) {
+  if (StreamVideo.useNewCoordinator) {
+    return CoordinatorWebSocketOpenApi(
+      url,
+      protocols: protocols,
+      apiKey: apiKey,
+      userInfo: userInfo,
+      tokenManager: tokenManager,
+    );
+  }
+  return CoordinatorWebSocketProtobuf(
+    url,
+    protocols: protocols,
+    apiKey: apiKey,
+    userInfo: userInfo,
+    tokenManager: tokenManager,
+  );
 }

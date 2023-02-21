@@ -5,20 +5,13 @@ import 'package:logging/logging.dart';
 import '../stream_video.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'internal/_instance_holder.dart';
-import 'models/call_cid.dart';
-import 'models/call_created.dart';
 import 'models/call_device.dart';
-import 'models/call_joined.dart';
 import 'models/call_metadata.dart';
-import 'models/call_received_created.dart';
-import 'models/user_info.dart';
 import 'push_notification/no_op_push_notification.dart';
 import 'shared_emitter.dart';
 import 'stream_video_impl.dart';
-import 'token/token.dart';
 import 'token/token_manager.dart';
 import 'utils/none.dart';
-import 'utils/result.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -68,6 +61,8 @@ abstract class StreamVideo {
     );
   }
   static final InstanceHolder _instanceHolder = InstanceHolder();
+
+  static const useNewCoordinator = true;
 
   UserInfo? get currentUser;
 

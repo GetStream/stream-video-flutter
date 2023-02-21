@@ -2,7 +2,15 @@ import 'package:stream_video/stream_video.dart';
 
 import 'sample_user.dart';
 
-final sampleUsers = <SampleUser>[
+List<SampleUser> get sampleUsers {
+  StreamVideo.instance;
+  if (StreamVideo.useNewCoordinator) {
+    return newSampleUsers;
+  }
+  return oldSampleUsers;
+}
+
+final oldSampleUsers = <SampleUser>[
   SampleUser(
     const UserInfo(
       id: 'tommaso',
@@ -52,5 +60,28 @@ final sampleUsers = <SampleUser>[
           'https://getstream.io/static/76cda49669be38b92306cfc93ca742f1/802d2/filip-babi%C4%87.webp',
     ),
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9maWxpcCIsImlhdCI6MTY3MDMzOTQ4MSwidXNlcl9pZCI6ImZpbGlwIn0.rGK-twVawPRItb_xQigYuYVO8UDTCCNPYKM5xP6mpbo',
+  ),
+];
+
+final newSampleUsers = <SampleUser>[
+  SampleUser(
+    const UserInfo(
+      id: 'oliver.lazoroski@getstream.io',
+      role: 'admin',
+      name: 'Oliver',
+      imageUrl:
+          'https://getstream.io/static/712bb5c0bd5ed8d3fa6e5842f6cfbeed/c59de/tommaso.webp',
+    ),
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tanNAdjAuMC4wIiwic3ViIjoidXNlci9vbGl2ZXIubGF6b3Jvc2tpQGdldHN0cmVhbS5pbyIsImlhdCI6MTY3NTY4NDI0NywidXNlcl9pZCI6Im9saXZlci5sYXpvcm9za2lAZ2V0c3RyZWFtLmlvIn0.BOxI8jfHdDDnpmW26rzN_BMx3e_VH_H9bDV9-TeXGg4',
+  ),
+  SampleUser(
+    const UserInfo(
+      id: 'martin',
+      role: 'admin',
+      name: 'Martin',
+      imageUrl:
+          'https://getstream.io/static/237f45f28690696ad8fff92726f45106/c59de/thierry.webp',
+    ),
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwidXNlcl9pZCI6Im1hcnRpbiIsImlhdCI6MTUxNjIzOTAyMn0.Rgz8X6arOZduR03BuDFH-ji5yixtPrj5w7PKj1gNyMg',
   ),
 ];

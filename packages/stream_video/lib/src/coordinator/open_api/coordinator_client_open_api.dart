@@ -16,7 +16,7 @@ import '../coordinator_client.dart';
 import '../models/coordinator_inputs.dart' as input;
 import '../models/coordinator_inputs.dart';
 import '../models/coordinator_models.dart';
-import 'open_api_mapper_extensions.dart';
+import 'open_api_extensions.dart';
 
 /// An accessor that allows us to communicate with the API around video calls.
 class CoordinatorClientOpenApi extends CoordinatorClient {
