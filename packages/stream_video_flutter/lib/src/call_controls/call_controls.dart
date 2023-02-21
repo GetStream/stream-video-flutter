@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/extensions.dart';
-import 'controls/default_control_options.dart';
 
 /// Represents the set of controls the user can use to change their audio
 /// and video device state, or browse other types of settings, leave the call,
@@ -24,43 +23,42 @@ class StreamCallControls extends StatefulWidget {
     required Call call,
     required CallParticipantState localParticipant,
     required VoidCallback onLeaveCall,
-    BorderRadius? borderRadius,
     Color? backgroundColor,
     double? elevation,
-    EdgeInsets? padding,
     double? spacing,
+    EdgeInsets? padding,
+    BorderRadius? borderRadius,
   }) {
     return StreamCallControls(
-      backgroundColor: backgroundColor,
-      elevation: elevation,
-      padding: padding,
-      spacing: spacing,
-      borderRadius: borderRadius,
       options: defaultCallControlOptions(
         call: call,
         localParticipant: localParticipant,
         onLeaveCall: onLeaveCall,
       ),
+      backgroundColor: backgroundColor,
+      elevation: elevation,
+      spacing: spacing,
+      padding: padding,
+      borderRadius: borderRadius,
     );
   }
 
   /// List of options to display.
   final List<Widget> options;
 
-  /// Color of the background of the bar.
+  /// The background color of the call controls bar.
   final Color? backgroundColor;
 
-  /// Elevation effect of the bar. This changes the top shadow in the Widget.
+  /// The elevation of the call controls bar.
   final double? elevation;
 
-  /// Spacing between the buttons.
+  /// The spacing between the call controls.
   final double? spacing;
 
-  /// Paging of the container Widget. You can use to increase/decrease the
-  /// padding of the bar and its inner buttons.
+  /// The padding applied to the call controls bar.
   final EdgeInsets? padding;
 
-  /// Style of borders of container bar.
+  /// The border radius of the call controls bar.
   final BorderRadius? borderRadius;
 
   @override
@@ -70,8 +68,7 @@ class StreamCallControls extends StatefulWidget {
 class _StreamCallControlsState extends State<StreamCallControls> {
   @override
   Widget build(BuildContext context) {
-    final streamVideoTheme = StreamVideoTheme.of(context);
-    final theme = streamVideoTheme.callControlsBarTheme;
+    final theme = StreamCallControlsTheme.of(context);
 
     Widget callControlOptions = SafeArea(
       child: Row(

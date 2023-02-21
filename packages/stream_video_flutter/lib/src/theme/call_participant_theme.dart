@@ -8,6 +8,7 @@ import '../../stream_video_flutter.dart';
 /// Defines default property values for [StreamCallParticipant] widgets.
 @immutable
 class StreamCallParticipantThemeData with Diagnosticable {
+  /// Creates a new instance of [StreamCallParticipantThemeData].
   const StreamCallParticipantThemeData({
     this.backgroundColor = const Color(0xFF272A30),
     this.borderRadius = BorderRadius.zero,
@@ -147,7 +148,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
   ///
   /// All the properties must be non-null.
   StreamCallParticipantThemeData lerp(
-      StreamCallParticipantThemeData other, double t) {
+    StreamCallParticipantThemeData other,
+    double t,
+  ) {
     return StreamCallParticipantThemeData(
       backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t)!,
       borderRadius: BorderRadius.lerp(borderRadius, other.borderRadius, t)!,

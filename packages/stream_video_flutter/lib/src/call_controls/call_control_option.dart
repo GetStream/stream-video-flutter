@@ -39,19 +39,18 @@ class CallControlOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context);
-    final barTheme = theme.callControlsBarTheme;
+    final theme = StreamCallControlsTheme.of(context);
 
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        elevation: elevation ?? barTheme.optionElevation,
-        backgroundColor: backgroundColor ?? barTheme.optionBackgroundColor,
-        shape: shape ?? barTheme.optionShape,
-        padding: padding ?? barTheme.optionPadding,
+        elevation: elevation ?? theme.optionElevation,
+        backgroundColor: backgroundColor ?? theme.optionBackgroundColor,
+        shape: shape ?? theme.optionShape,
+        padding: padding ?? theme.optionPadding,
       ),
       onPressed: onPressed,
       child: IconTheme.merge(
-        data: IconThemeData(color: iconColor ?? barTheme.optionIconColor),
+        data: IconThemeData(color: iconColor ?? theme.optionIconColor),
         child: icon,
       ),
     );

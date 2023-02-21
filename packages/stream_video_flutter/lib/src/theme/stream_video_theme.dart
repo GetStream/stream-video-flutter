@@ -14,7 +14,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required Brightness brightness,
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
-    StreamCallControlsBarTheme? callControlsBarTheme,
+    StreamCallControlsThemeData? callControlsTheme,
     StreamAvatarTheme? avatarTheme,
     StreamLobbyViewTheme? lobbyViewTheme,
     StreamCallParticipantThemeData? callParticipantTheme,
@@ -40,7 +40,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     final customizedTheme = defaultTheme.copyWith(
       textTheme: textTheme,
       colorTheme: colorTheme,
-      callControlsBarTheme: callControlsBarTheme,
+      callControlsTheme: callControlsTheme,
       avatarTheme: avatarTheme,
       lobbyViewTheme: lobbyViewTheme,
       callParticipantTheme: callParticipantTheme,
@@ -68,7 +68,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   const StreamVideoTheme.raw({
     required this.textTheme,
     required this.colorTheme,
-    required this.callControlsBarTheme,
+    required this.callControlsTheme,
     required this.avatarTheme,
     required this.lobbyViewTheme,
     required this.callParticipantTheme,
@@ -101,9 +101,23 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return StreamVideoTheme.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
-      callControlsBarTheme: StreamCallControlsBarTheme.fromColorAndTextTheme(
-        colorTheme,
-        textTheme,
+      callControlsTheme: StreamCallControlsThemeData(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(32),
+          topRight: Radius.circular(32),
+        ),
+        backgroundColor: colorTheme.appBg,
+        elevation: 8,
+        padding: EdgeInsets.all(14),
+        spacing: 10,
+        optionIconColor: Colors.black,
+        inactiveOptionIconColor: Colors.black,
+        optionElevation: 2,
+        inactiveOptionElevation: 2,
+        optionBackgroundColor: Colors.white,
+        inactiveOptionBackgroundColor: Colors.white,
+        optionShape: CircleBorder(),
+        optionPadding: EdgeInsets.all(16),
       ),
       avatarTheme: StreamAvatarTheme(
         borderRadius: BorderRadius.circular(20),
@@ -343,7 +357,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   final StreamColorTheme colorTheme;
 
   /// The color themes used in CallControlsView
-  final StreamCallControlsBarTheme callControlsBarTheme;
+  final StreamCallControlsThemeData callControlsTheme;
 
   /// Theme for the user avatar widget.
   final StreamAvatarTheme avatarTheme;
@@ -381,7 +395,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   StreamVideoTheme copyWith({
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
-    StreamCallControlsBarTheme? callControlsBarTheme,
+    StreamCallControlsThemeData? callControlsTheme,
     StreamAvatarTheme? avatarTheme,
     StreamLobbyViewTheme? lobbyViewTheme,
     StreamCallParticipantThemeData? callParticipantTheme,
@@ -396,8 +410,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       StreamVideoTheme.raw(
         textTheme: this.textTheme.merge(textTheme),
         colorTheme: this.colorTheme.merge(colorTheme),
-        callControlsBarTheme:
-            this.callControlsBarTheme.merge(callControlsBarTheme),
+        callControlsTheme: this.callControlsTheme.merge(callControlsTheme),
         avatarTheme: this.avatarTheme.merge(avatarTheme),
         lobbyViewTheme: this.lobbyViewTheme.merge(lobbyViewTheme),
         callParticipantTheme:
@@ -422,7 +435,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return copyWith(
       textTheme: textTheme.merge(other.textTheme),
       colorTheme: colorTheme.merge(other.colorTheme),
-      callControlsBarTheme: callControlsBarTheme.merge(callControlsBarTheme),
+      callControlsTheme: callControlsTheme.merge(callControlsTheme),
       avatarTheme: avatarTheme.merge(other.avatarTheme),
       lobbyViewTheme: lobbyViewTheme.merge(other.lobbyViewTheme),
       callParticipantTheme:
@@ -456,8 +469,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         other.floatingCallParticipantTheme,
         t,
       ),
-      callControlsBarTheme:
-          callControlsBarTheme.lerp(other.callControlsBarTheme, t),
+      callControlsTheme: callControlsTheme.lerp(other.callControlsTheme, t),
       participantsInfoTheme:
           participantsInfoTheme.lerp(other.participantsInfoTheme, t),
       participantInfoTheme:
