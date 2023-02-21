@@ -1,32 +1,32 @@
 import 'dart:async';
 
 import 'package:logging/logging.dart';
-import 'package:synchronized/synchronized.dart';
 
-import '../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
-import '../protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart';
-import '../protobuf/video/coordinator/edge_v1/edge.pb.dart';
-import '../protobuf/video/coordinator/push_v1/push.pb.dart' as push;
-import 'call/call.dart';
-import 'coordinator_client.dart';
-import 'coordinator_ws.dart';
-import 'core/rx_controller.dart';
-import 'core/video_error.dart';
-import 'event_emitter.dart';
-import 'events.dart';
-import 'latency_service/latency.dart';
-import 'logger/logger.dart';
+import '../stream_video.dart';
+import 'coordinator/models/coordinator_events.dart';
+import 'internal/_instance_holder.dart';
+import 'models/call_cid.dart';
+import 'models/call_created.dart';
+import 'models/call_device.dart';
+import 'models/call_joined.dart';
+import 'models/call_metadata.dart';
+import 'models/call_received_created.dart';
 import 'models/user_info.dart';
-import 'options.dart';
 import 'push_notification/no_op_push_notification.dart';
-import 'push_notification/push_notification_manager.dart';
+import 'shared_emitter.dart';
+import 'stream_video_impl.dart';
 import 'token/token.dart';
 import 'token/token_manager.dart';
-import 'v2/coordinator/models/coordinator_models.dart';
+import 'utils/none.dart';
+import 'utils/result.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
 typedef LogHandlerFunction = void Function(LogRecord record);
+
+typedef PushNotificationFactory = Future<PushNotificationManager> Function(
+  StreamVideo,
+);
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -45,471 +45,151 @@ final _levelEmojiMapper = {
 const _defaultCoordinatorRpcUrl =
     'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc';
 const _defaultCoordinatorWsUrl =
-    'wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
+    'wss://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
 
 /// The client responsible for handling config and maintaining calls
-class StreamVideo with EventEmittable<CoordinatorEvent> {
-  /// Initialises the Stream Video SDK and creates the singleton instance of the client.
-  StreamVideo.init(
-    this.apiKey, {
-    this.coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
-    this.coordinatorWsUrl = _defaultCoordinatorWsUrl,
-    this.latencyMeasurementRounds = 3,
-    Level logLevel = Level.ALL,
-    LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
-  }) {
-    if (_instance != null) {
-      throw Exception('''
-        StreamVideo has already been initialised, use StreamVideo.instance to access the singleton instance.
-        If you want to re-initialise the SDK, call StreamVideo.reset() first.
-        If you want to use multiple instances of the SDK, use StreamVideo.new() instead.
-        ''');
-    }
-    _instance = StreamVideo._(
+abstract class StreamVideo {
+  factory StreamVideo(String apiKey,
+      {String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
+      String coordinatorWsUrl = _defaultCoordinatorWsUrl,
+      int latencyMeasurementRounds = 3,
+      Level logLevel = Level.ALL,
+      LogHandlerFunction logHandlerFunction = _defaultLogHandler,
+      PushNotificationFactory pushNotificationFactory =
+          defaultPushNotificationManager}) {
+    return StreamVideoImpl(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
+      pushNotificationFactrory: pushNotificationFactory,
     );
   }
+  static final InstanceHolder _instanceHolder = InstanceHolder();
 
-  /// Creates a new Stream Video client unassociated with the
-  /// Stream Video singleton instance
-  factory StreamVideo.new(
-    String apiKey, {
-    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
-    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
-    int latencyMeasurementRounds = 3,
-    Level logLevel = Level.ALL,
-    LogHandlerFunction logHandlerFunction = StreamVideo.defaultLogHandler,
-  }) {
-    return StreamVideo._(
-      apiKey,
-      coordinatorRpcUrl: coordinatorRpcUrl,
-      coordinatorWsUrl: coordinatorWsUrl,
-      latencyMeasurementRounds: latencyMeasurementRounds,
-      logLevel: logLevel,
-      logHandlerFunction: logHandlerFunction,
-    );
-  }
+  UserInfo? get currentUser;
 
-  StreamVideo._(
-    this.apiKey, {
-    required this.coordinatorRpcUrl,
-    required this.coordinatorWsUrl,
-    required this.latencyMeasurementRounds,
-    required Level logLevel,
-    required LogHandlerFunction logHandlerFunction,
-  }) {
-// Preparing logger
-    setLogLevel(logLevel);
-    setLogHandler(logHandlerFunction);
+  SharedEmitter<CoordinatorEvent> get events;
 
-    _client = CoordinatorClient(
-      apiKey: apiKey,
-      tokenManager: _tokenManager,
-      baseUrl: coordinatorRpcUrl,
-    );
-    _initPushNotification();
-  }
-
-  Future<void> _initPushNotification() async {
-    _pushNotificationManager = NoOpPushNotificationManager();
-  }
-
-  static StreamVideo? _instance;
-
-  /// The singleton instance of the Stream Video client.
-  static StreamVideo get instance {
-    final instance = _instance;
-    if (instance == null) {
-      throw Exception(
-        'Please initialise Stream Video by calling StreamVideo.init()',
-      );
-    }
-
-    return instance;
-  }
-
-  /// Resets the singleton instance of the Stream Video client.
-  ///
-  /// This is useful if you want to re-initialise the SDK with a different
-  /// API key.
-  static void reset({bool disconnectUser = false}) async {
-    if (disconnectUser) {
-      _instance?.activeCall?.disconnect();
-      _instance?.disconnectUser();
-    }
-    _instance = null;
-  }
-
-  /// Return if the singleton instance of the Stream Video Client has already
-  /// been initialized.
-  static bool isInitialized() {
-    return _instance != null;
-  }
-
-  final String apiKey;
-  final String coordinatorRpcUrl;
-  final String coordinatorWsUrl;
-  final int latencyMeasurementRounds;
-
-  final _tokenManager = TokenManager();
-  late final CoordinatorClient _client;
-  PushNotificationManager? _pushNotificationManager;
-
-  var _state = _StreamVideoState();
-
-  UserInfo? get currentUser => _state.currentUser.valueOrNull;
-
-  Stream<UserInfo?> get currentUserStream => _state.currentUser.stream;
-
-  Call? get activeCall => _state.activeCall.valueOrNull;
-
-  Stream<Call?> get activeCallStream => _state.activeCall.stream;
-
-  CoordinatorWebSocket? _ws;
-
-  /// Default log handler function for the [StreamVideo] logger.
-  static void defaultLogHandler(LogRecord record) {
-    print(
-      '${record.time} '
-      '${_levelEmojiMapper[record.level] ?? record.level.name} '
-      '[${record.loggerName}] ${record.message} ',
-    );
-    if (record.error != null) print(record.error);
-    if (record.stackTrace != null) print(record.stackTrace);
-  }
+  void Function(CallCreated)? onCallCreated;
 
   /// Connects the [user] to the Stream Video service.
   Future<void> connectUser(
     UserInfo user, {
     Token? token,
     TokenProvider? provider,
-  }) async {
-    if (_ws != null) return;
-
-    logger.info('setting user : ${user.id}');
-
-    _state.currentUser.value = user;
-    await _tokenManager.setTokenOrProvider(
-      user.id,
-      token: token,
-      provider: provider,
-    );
-
-    try {
-      _ws = CoordinatorWebSocket(
-        coordinatorWsUrl,
-        apiKey: apiKey,
-        userInfo: user,
-        tokenManager: _tokenManager,
-      )..events.listen(events.emit);
-
-      await _ws!.connect();
-      return _pushNotificationManager?.onUserLoggedIn();
-    } catch (e, stk) {
-      logger.severe('error connecting user : ${user.id}', e, stk);
-      rethrow;
-    }
-  }
+  });
 
   /// Disconnects the [user] from the Stream Video service.
-  Future<void> disconnectUser() async {
-    logger.info('disconnecting user : ${currentUser?.id}');
+  Future<void> disconnectUser();
 
-    if (_ws == null) return;
-    await _ws?.disconnect();
-    _ws = null;
-    _tokenManager.reset();
-
-    // Resetting the state.
-    await _state.dispose();
-    _state = _StreamVideoState();
-  }
-
-  Future<CallEnvelope> createCall({
-    required String type,
-    required String id,
+  Future<Result<CallCreated>> createCall({
+    required StreamCallCid cid,
     List<String> participantIds = const [],
     bool ringing = false,
-  }) async {
-    final response = await _client.createCall(
-      CreateCallRequest(
-        id: id,
-        type: type,
-        input: CreateCallInput(
-          members: participantIds.map((id) {
-            return MemberInput(
-              userId: id,
-              role: 'admin',
-            );
-          }),
-          ring: ringing,
-        ),
-      ),
-    );
+  });
 
-    return response.call;
-  }
-
-  Future<push.Device> createDevice({required String token}) async {
-    final response = await _client.createDevice(
-      CreateDeviceRequest(
-        input: push.DeviceInput(
-          id: token,
-          pushProviderId: 'firebase',
-        ),
-      ),
-    );
-
-    return response.device;
-  }
-
-  Future<CallEnvelope> getOrCreateCall({
-    required String type,
-    required String id,
+  Future<Result<CallReceivedOrCreated>> getOrCreateCall({
+    required StreamCallCid cid,
     List<String> participantIds = const [],
     bool ringing = false,
-  }) async {
-    final response = await _client.getOrCreateCall(
-      GetOrCreateCallRequest(
-        id: id,
-        type: type,
-        input: CreateCallInput(
-          members: participantIds.map((id) {
-            return MemberInput(
-              userId: id,
-              role: 'admin',
-            );
-          }),
-          ring: ringing,
-        ),
-      ),
-    );
-    return response.call;
-  }
+  });
 
-  Future<Call> joinCall({
-    required String type,
-    required String id,
-    CallOptions callOptions = const CallOptions(),
-  }) async {
-    final response = await _client.joinCall(
-      JoinCallRequest(id: id, type: type),
-    );
+  Future<Result<CallJoined>> joinCall({
+    required StreamCallCid cid,
+    void Function(CallReceivedOrCreated)? onReceivedOrCreated,
+  });
 
-    final edges = response.edges;
-    final callId = response.call.call.id;
-    final callType = response.call.call.type;
-    final callCid = response.call.call.callCid;
+  Future<Result<None>> acceptCall({
+    required StreamCallCid cid,
+  });
 
-    if (edges.isEmpty) {
-      throw StreamVideoError('No edges found for call $callCid');
-    }
+  Future<Result<None>> rejectCall({
+    required StreamCallCid cid,
+  });
 
-    final edgeServer = await _getCallEdgeServer(
-      callCid: callCid,
-      edges: edges,
-    );
+  Future<Result<None>> cancelCall({
+    required StreamCallCid cid,
+  });
 
-    if (!edgeServer.hasCredentials() || !edgeServer.credentials.hasServer()) {
-      throw StreamVideoError('No credentials found for call $callCid');
-    }
+  Future<Result<None>> sendCustomEvent({
+    required StreamCallCid cid,
+    required String eventType,
+    required Map<String, Object> extraData,
+  });
 
-    final credentials = edgeServer.credentials;
+  // TODO replace with domain users
+  Future<Result<List<CallUser>>> queryUsers({
+    required Set<String> userIds,
+  });
 
-    final call = Call.fromDetails(
-      callId: callId,
-      callType: callType,
-      credentials: credentials,
-      callOptions: callOptions,
-      client: this,
-    );
-
-    _state.pendingCalls.add(call);
-
-    return call;
-  }
-
-  void updateCallStateConnected(Call call) {
-    _state.activeCall.value = call;
-
-    // Updating ws about the current call.
-    final callInfo = CallInfo(callId: call.callId, callType: call.callType);
-    _ws?.callInfo = callInfo;
-  }
-
-  void updateCallStateDisconnected(Call call) {
-    _state.activeCall.value = null;
-
-    // Updating ws about the current call.
-    _ws?.callInfo = null;
-  }
-
-  Future<ReportCallStatsResponse> reportCallStats({
-    required String callCid,
-    required List<int> stats,
-  }) async {
-    final response = await _client.reportCallStats(
-      ReportCallStatsRequest(
-        callCid: callCid,
-        statsJson: stats,
-      ),
-    );
-
-    return response;
-  }
-
-  Future<GetCallEdgeServerResponse> _getCallEdgeServer({
-    required String callCid,
-    required List<Edge> edges,
-  }) async {
-    final latencyByEdge = await measureEdgeLatencies(
-      edges: edges.map((it) {
-        return SfuEdge(name: it.name, latencyUrl: it.latencyUrl);
-      }).toList(),
-    );
-    final response = await _client.getCallEdgeServer(
-      GetCallEdgeServerRequest(
-        callCid: callCid,
-        measurements: LatencyMeasurements(
-          measurements: latencyByEdge.map(
-            (name, latency) => MapEntry(
-              name,
-              Latency(
-                measurementsSeconds: latency.measurementsSeconds,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    return response;
-  }
-
-  Future<SendEventResponse> sendEvent({
-    required String callCid,
-    required UserEventType eventType,
-  }) async {
-    final response = _client.sendEvent(
-      SendEventRequest(
-        callCid: callCid,
-        eventType: eventType,
-      ),
-    );
-
-    return response;
-  }
-
-  Future<Future<SendCustomEventResponse>> sendCustomEvent({
-    required String callCid,
-    required List<int> dataJson,
-    String? eventType,
-  }) async {
-    final response = _client.sendCustomEvent(
-      SendCustomEventRequest(
-        callCid: callCid,
-        dataJson: dataJson,
-        type: eventType,
-      ),
-    );
-
-    return response;
-  }
-
-  Future<bool> handlePushNotification(Map<String, dynamic> payload) {
-    return _pushNotificationManager?.handlePushNotification(payload) ??
-        Future.value(false);
-  }
-
-  Future<Call?> consumeIncomingCall() {
-    return Future.value(null);
-  }
-
-  Future<Call> acceptCall({
-    required String type,
-    required String id,
-  }) async {
-    final call = await joinCall(type: type, id: id);
-
-    await sendEvent(
-      callCid: call.callCid,
-      eventType: UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL,
-    );
-
-    return call;
-  }
-
-  Future<SendEventResponse> rejectCall({
-    required String callCid,
-  }) async {
-    final response = await sendEvent(
-      callCid: callCid,
-      eventType: UserEventType.USER_EVENT_TYPE_REJECTED_CALL,
-    );
-
-    return response;
-  }
-
-  Future<SendEventResponse> cancelCall({
-    required String callCid,
-  }) async {
-    final response = await sendEvent(
-      callCid: callCid,
-      eventType: UserEventType.USER_EVENT_TYPE_CANCELLED_CALL,
-    );
-
-    return response;
-  }
-
-  Future<void> inviteUsers({
+  Future<Result<None>> inviteUsers({
     required String callCid,
     required List<UserInfo> users,
-  }) async {
-    final res = await _client.upsertCallMembers(
-      UpsertCallMembersRequest(
-        callCid: callCid,
-        members: users.map((user) {
-          return MemberInput(userId: user.id, role: user.role);
-        }),
-      ),
+  });
+
+  Future<Result<CallDevice>> createDevice({
+    required String token,
+    required String pushProviderId,
+  });
+
+  Future<bool> handlePushNotification(Map<String, dynamic> payload);
+
+  Future<CallCreated?> consumeIncomingCall();
+
+  static void init(
+    String apiKey, {
+    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
+    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
+    int latencyMeasurementRounds = 3,
+    Level logLevel = Level.OFF,
+    LogHandlerFunction logHandlerFunction = _defaultLogHandler,
+    PushNotificationFactory pushNotificationFactory =
+        defaultPushNotificationManager,
+  }) {
+    _instanceHolder.init(
+      apiKey,
+      coordinatorRpcUrl: coordinatorRpcUrl,
+      coordinatorWsUrl: coordinatorWsUrl,
+      latencyMeasurementRounds: latencyMeasurementRounds,
+      logLevel: logLevel,
+      logHandlerFunction: logHandlerFunction,
+      pushNotificationFactory: pushNotificationFactory,
     );
-    print('[inviteUsers] res: $res');
+  }
+
+  /// The singleton instance of the Stream Video client.
+  static StreamVideo get instance {
+    return _instanceHolder.instance;
+  }
+
+  /// Resets the singleton instance of the Stream Video client.
+  ///
+  /// This is useful if you want to re-initialise the SDK with a different
+  /// API key.
+  static Future<void> reset({bool disconnectUser = false}) async {
+    if (disconnectUser) {
+      await _instanceHolder.instance.disconnectUser();
+    }
+    return _instanceHolder.reset();
+  }
+
+  /// Return if the singleton instance of the Stream Video Client has already
+  /// been initialized.
+  static bool isInitialized() {
+    return _instanceHolder.isInitialized();
   }
 }
 
-class _StreamVideoState {
-  final _lock = Lock();
-
-  final currentUser = UserInfoController();
-  final activeCall = ActiveCallController();
-  final pendingCalls = PendingCallsController();
-
-  Future<void> dispose() async {
-    await currentUser.dispose();
-    await activeCall.dispose();
-    await pendingCalls.dispose();
-  }
-}
-
-typedef UserInfoController = RxController<UserInfo>;
-
-typedef ActiveCallController = RxController<Call?>;
-
-class PendingCallsController extends RxController<List<Call>> {
-  PendingCallsController() : super(seedValue: const []);
-
-  void add(Call call) {
-    final calls = [...value];
-    value = [...calls, call];
-  }
-
-  void remove(Call call) {
-    final calls = [...value];
-    value = calls.where((it) => it.callCid != call.callCid).toList();
-  }
+/// Default log handler function for the [StreamVideoImpl] logger.
+void _defaultLogHandler(LogRecord record) {
+  print(
+    '${record.time} '
+    '${_levelEmojiMapper[record.level] ?? record.level.name} '
+    '[${record.loggerName}] ${record.message} ',
+  );
+  if (record.error != null) print(record.error);
+  if (record.stackTrace != null) print(record.stackTrace);
 }

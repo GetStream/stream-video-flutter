@@ -65,7 +65,7 @@ class CallAttachment extends StatelessWidget {
                   ),
                   onPressed: () async {
                     final callCid = StreamCallCid(cid: cid);
-                    final call = CallV2.fromCid(callCid: callCid);
+                    final call = Call.fromCid(callCid: callCid);
 
                     Navigator.push(
                       context,
@@ -90,7 +90,7 @@ class CallAttachment extends StatelessWidget {
     );
   }
 
-  Future<void> _finishCall(BuildContext context, CallV2 call) async {
+  Future<void> _finishCall(BuildContext context, Call call) async {
     await call.disconnect();
 
     Navigator.of(context).pop();

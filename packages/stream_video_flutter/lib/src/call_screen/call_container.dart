@@ -6,7 +6,7 @@ import '../participants_info/call_participants_info_view.dart';
 /// Builder used to create a custom participants info screen.
 typedef CallParticipantsInfoWidgetBuilder = Widget Function(
   BuildContext context,
-  CallV2 call,
+  Call call,
 );
 
 /// Represents different call content based on the call state.
@@ -22,7 +22,7 @@ class StreamCallContainer extends StatefulWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// The action to perform when the back button is pressed.
   final VoidCallback onBackPressed;
@@ -44,10 +44,10 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   final _subscriptions = Subscriptions();
 
   /// Represents a call.
-  CallV2 get call => widget.call;
+  Call get call => widget.call;
 
   /// Holds information about the call.
-  late CallStateV2 _callState;
+  late CallState _callState;
 
   @override
   void initState() {
@@ -63,7 +63,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     _subscriptions.cancelAll();
   }
 
-  Future<void> _setState(CallStateV2 callState) async {
+  Future<void> _setState(CallState callState) async {
     setState(() {
       _callState = callState;
     });
@@ -120,13 +120,6 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
 
   Future<void> _start() async {
     try {
-      if (call.state.value.status.isIdle) {
-        final result = await call.getOrCreate();
-        if (result.isFailure) {
-          await _onCancelCall();
-          return;
-        }
-      }
       final result = await call.connect();
       if (result.isFailure) {
         await _onCancelCall();

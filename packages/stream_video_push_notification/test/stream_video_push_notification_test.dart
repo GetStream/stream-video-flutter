@@ -1,7 +1,7 @@
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/src/v2/coordinator/models/coordinator_models.dart';
-import 'package:stream_video/src/v2/shared_emitter.dart';
-import 'package:stream_video/src/v2/utils/none.dart';
+import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
+import 'package:stream_video/src/shared_emitter.dart';
+import 'package:stream_video/src/utils/none.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:test/test.dart';
@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'mocks.dart';
 
 Future<void> main() async {
-  final streamVideo = StreamVideoV2Mock();
+  final streamVideo = StreamVideoMock();
   final callNotificationWrapper = CallNotificationWrapperMock();
   final sharedPreferences = SharedPreferencesMock();
   final StreamCallCid streamCallCid = StreamCallCid(cid: 'call:123');
@@ -50,7 +50,7 @@ Future<void> main() async {
   when(() => streamVideo.events)
       .thenAnswer((invocation) => MutableSharedEmitterImpl());
   final call =
-      CallV2.fromCreated(data: callCreatedData, streamVideo: streamVideo);
+      Call.fromCreated(data: callCreatedData, streamVideo: streamVideo);
   when(() => streamVideo.getOrCreateCall(cid: streamCallCid))
       .thenAnswer((_) => Future.value(Result.success(callReceivedOrCreated)));
   when(() => streamVideo.acceptCall(cid: streamCallCid))

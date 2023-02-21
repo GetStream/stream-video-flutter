@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 
-import '../v2/coordinator/models/coordinator_models.dart';
+import '../coordinator/models/coordinator_models.dart';
 
 Future<Map<String, SfuLatency>> measureEdgeLatencies({
   required List<SfuEdge> edges,

@@ -15,10 +15,10 @@ class FlipCameraOption extends StatelessWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// The current local participant.
-  final CallParticipantStateV2 localParticipant;
+  final CallParticipantState localParticipant;
 
   /// The icon that is shown when the front camera is active.
   final IconData frontCameraIcon;
@@ -28,14 +28,14 @@ class FlipCameraOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    CameraPositionV2? position;
+    CameraPosition? position;
     final trackState = localParticipant.videoTrack;
     if (trackState is LocalTrackState) {
       position = trackState.cameraPosition;
     }
 
     return CallControlOption(
-      icon: position == CameraPositionV2.front
+      icon: position == CameraPosition.front
           ? Icon(frontCameraIcon)
           : Icon(backCameraIcon),
       onPressed: position != null //

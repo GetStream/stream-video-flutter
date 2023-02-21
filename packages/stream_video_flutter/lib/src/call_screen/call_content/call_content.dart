@@ -7,20 +7,20 @@ import '../../utils/device_segmentation.dart';
 /// Builder used to create a custom call app bar.
 typedef CallAppBarWidgetBuilder = PreferredSizeWidget Function(
   BuildContext context,
-  CallV2 call,
+  Call call,
 );
 
 /// Builder used to create a custom participants grid.
 typedef CallParticipantsWidgetBuilder = Widget Function(
   BuildContext context,
-  List<CallParticipantStateV2> participants,
+  List<CallParticipantState> participants,
 );
 
 /// Builder used to create a custom call controls panel.
 typedef CallControlsWidgetBuilder = Widget Function(
   BuildContext context,
-  CallV2 call,
-  List<CallParticipantStateV2> participants,
+  Call call,
+  List<CallParticipantState> participants,
 );
 
 /// Represents the UI in an active call that shows participants and their video,
@@ -44,10 +44,10 @@ class StreamCallContent extends StatefulWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// Holds information about the call.
-  final CallStateV2 callState;
+  final CallState callState;
 
   /// Builder used to create a custom call app bar.
   final CallAppBarWidgetBuilder? callAppBarBuilder;
@@ -82,10 +82,10 @@ class StreamCallContent extends StatefulWidget {
 
 class _StreamCallContentState extends State<StreamCallContent> {
   /// Represents a call.
-  CallV2 get call => widget.call;
+  Call get call => widget.call;
 
   /// Holds information about the call.
-  CallStateV2 get callState => widget.callState;
+  CallState get callState => widget.callState;
 
   @override
   Future<void> dispose() async {

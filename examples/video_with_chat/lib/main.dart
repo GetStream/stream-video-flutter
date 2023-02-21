@@ -6,7 +6,7 @@ import 'package:video_with_chat/screen/login_screen.dart';
 
 Future<void> main() async {
   /// Initialize Stream Video SDK.
-  StreamVideoV2.init(
+  StreamVideo.init(
     videoApiKey,
     logLevel: Level.INFO,
   );

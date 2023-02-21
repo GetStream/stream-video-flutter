@@ -19,7 +19,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
   }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// Whether to show the leading back button.
   final bool showBackButton;

@@ -67,7 +67,7 @@ class LoginScreen extends StatelessWidget {
 
   /// Connects the current user to the Video API.
   Future<void> _connectVideoUser(SampleUser user) async {
-    final videoClient = StreamVideoV2.instance;
+    final videoClient = StreamVideo.instance;
 
     await videoClient.connectUser(
       user.toVideoUser(),
@@ -93,7 +93,7 @@ class LoginScreen extends StatelessWidget {
 
   /// Disconnects the currently logged in user from the Video API.
   Future<void> _disconnectVideoUser() async {
-    final videoClient = StreamVideoV2.instance;
+    final videoClient = StreamVideo.instance;
 
     await videoClient.disconnectUser();
   }

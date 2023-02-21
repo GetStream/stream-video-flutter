@@ -19,13 +19,13 @@ const maxParticipantCountWeb = 24;
 typedef CallParticipantWidgetBuilder = Widget Function(
   BuildContext context,
   int index,
-  CallParticipantStateV2 participant,
+  CallParticipantState participant,
 );
 
 /// Builder function used to build a screen sharing item.
 typedef ScreenShareItemBuilder = Widget Function(
   BuildContext context,
-  CallParticipantStateV2 participant,
+  CallParticipantState participant,
 );
 
 /// Widget that renders all the [StreamCallParticipant], based on the number
@@ -44,10 +44,10 @@ class StreamCallParticipants extends StatelessWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// The list of participants to display.
-  final List<CallParticipantStateV2> participants;
+  final List<CallParticipantState> participants;
 
   /// Builder function used to build a screen sharing item.
   final ScreenShareItemBuilder? screenShareItemBuilder;
@@ -107,10 +107,10 @@ class RegularCallParticipantsContent extends StatefulWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// The list of participants to display.
-  final List<CallParticipantStateV2> participants;
+  final List<CallParticipantState> participants;
 
   /// Builder function used to build a participant grid item.
   final CallParticipantWidgetBuilder? itemBuilder;
@@ -146,7 +146,7 @@ class _RegularCallParticipantsContentState
     final maxRemoteParticipantCount =
         isDesktopDevice ? maxParticipantCountWeb : maxParticipantCountMobile;
 
-    final participantsToDisplay = <CallParticipantStateV2>[
+    final participantsToDisplay = <CallParticipantState>[
       // We are only able to show max 3 remote participants in the grid
       // on mobile and 23 on web.
       ...remote.take(maxRemoteParticipantCount - 1),
@@ -217,13 +217,13 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// The participant that shares their screen.
-  final CallParticipantStateV2 screenSharingParticipant;
+  final CallParticipantState screenSharingParticipant;
 
   /// The list of participants to display.
-  final List<CallParticipantStateV2> participants;
+  final List<CallParticipantState> participants;
 
   /// Builder function used to build a screen sharing item.
   final ScreenShareItemBuilder? screenShareItemBuilder;

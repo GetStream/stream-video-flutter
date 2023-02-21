@@ -1,5 +1,3 @@
-import 'package:stream_video/src/push_notification/push_notification_manager.dart';
-
 import '../../stream_video.dart';
 
 class NoOpPushNotificationManager implements PushNotificationManager {
@@ -15,6 +13,6 @@ class NoOpPushNotificationManager implements PushNotificationManager {
 }
 
 Future<PushNotificationManager> defaultPushNotificationManager(
-  StreamVideoV2 streamVideoV2,
+  StreamVideo streamVideo,
 ) =>
     Future.value(NoOpPushNotificationManager());

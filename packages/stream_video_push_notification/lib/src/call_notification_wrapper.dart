@@ -5,7 +5,7 @@ import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_callkit_incoming/entities/ios_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
-import 'package:stream_video/src/v2/model/call_cid.dart';
+import 'package:stream_video/stream_video.dart';
 
 StreamSubscription<CallEvent?>? _streamSubscription;
 

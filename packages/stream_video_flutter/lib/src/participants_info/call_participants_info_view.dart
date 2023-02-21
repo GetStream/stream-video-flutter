@@ -9,7 +9,7 @@ import 'invite_user_list_view.dart';
 typedef ParticipantInfoViewBuilder = Widget Function(
   BuildContext context,
   int index,
-  CallParticipantStateV2 participant,
+  CallParticipantState participant,
 );
 
 /// Builder function used to build a participant info divider.
@@ -38,8 +38,8 @@ class StreamCallParticipantsInfoView extends StatefulWidget {
     this.participantInfoDividerBuilder,
   });
 
-  /// Reference to [CallV2].
-  final CallV2 call;
+  /// Reference to [Call].
+  final Call call;
 
   /// Provider for users that can be invited to the call.
   final StreamUsersProvider usersProvider;
@@ -87,7 +87,7 @@ class _StreamCallParticipantsInfoViewState
     _subscriptions.cancelAll();
   }
 
-  Future<void> _setState(CallStateV2 state) async {
+  Future<void> _setState(CallState state) async {
     setState(() {});
   }
 

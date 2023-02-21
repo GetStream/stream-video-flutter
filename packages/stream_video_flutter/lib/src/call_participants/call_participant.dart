@@ -17,10 +17,10 @@ class StreamCallParticipant extends StatelessWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// The participant to display.
-  final CallParticipantStateV2 participant;
+  final CallParticipantState participant;
 
   /// Theme for the participant.
   final StreamCallParticipantTheme? theme;
@@ -66,7 +66,7 @@ class StreamCallParticipant extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8),
-                    child: StreamParticipantLabel(
+                    child: StreamParticipantLabel.fromParticipant(
                       participant: participant,
                       audioLevelIndicatorColor: theme.audioLevelIndicatorColor,
                       disabledMicrophoneColor: theme.disabledMicrophoneColor,

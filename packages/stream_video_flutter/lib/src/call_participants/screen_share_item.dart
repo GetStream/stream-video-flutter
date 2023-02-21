@@ -13,10 +13,10 @@ class ScreenShareItem extends StatelessWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// The participant that shares their screen.
-  final CallParticipantStateV2 participant;
+  final CallParticipantState participant;
 
   /// The background color for the video.
   final Color backgroundColor;

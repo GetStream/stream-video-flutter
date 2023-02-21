@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../call_control_option.dart';
 
 /// A widget that represents a call control option to toggle if the microphone
 /// is on or off.
@@ -16,10 +15,10 @@ class ToggleMicrophoneOption extends StatelessWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// The current local participant.
-  final CallParticipantStateV2 localParticipant;
+  final CallParticipantState localParticipant;
 
   /// The icon that is shown when the microphone is enabled.
   final IconData enabledMicrophoneIcon;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide TextTheme;
 
 import '../utils/device_segmentation.dart';
 import 'stream_incoming_outgoing_call_theme.dart';
+import 'stream_lobby_view_theme.dart';
 import 'themes.dart';
 
 /// {@template streamVideoThemeData}
@@ -15,6 +16,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamColorTheme? colorTheme,
     StreamCallControlsBarTheme? callControlsBarTheme,
     StreamAvatarTheme? avatarTheme,
+    StreamLobbyViewTheme? lobbyViewTheme,
     StreamCallParticipantTheme? callParticipantTheme,
     StreamFloatingCallParticipantTheme? floatingCallParticipantTheme,
     StreamParticipantsInfoTheme? participantsInfoTheme,
@@ -40,6 +42,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       colorTheme: colorTheme,
       callControlsBarTheme: callControlsBarTheme,
       avatarTheme: avatarTheme,
+      lobbyViewTheme: lobbyViewTheme,
       callParticipantTheme: callParticipantTheme,
       floatingCallParticipantTheme: floatingCallParticipantTheme,
       participantsInfoTheme: participantsInfoTheme,
@@ -67,6 +70,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.colorTheme,
     required this.callControlsBarTheme,
     required this.avatarTheme,
+    required this.lobbyViewTheme,
     required this.callParticipantTheme,
     required this.floatingCallParticipantTheme,
     required this.participantsInfoTheme,
@@ -114,6 +118,20 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         ),
         selectionColor: colorTheme.accentPrimary,
         selectionThickness: 4,
+      ),
+      lobbyViewTheme: StreamLobbyViewTheme(
+        backgroundColor: Colors.white,
+        cardBackgroundColor: const Color(0xFFF2F2F2),
+        avatarTheme: StreamAvatarTheme(
+          constraints: const BoxConstraints.tightFor(
+            height: 100,
+            width: 100,
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(50)),
+          initialsTextStyle: textTheme.title1.copyWith(color: Colors.white),
+          selectionColor: colorTheme.accentPrimary,
+          selectionThickness: 4,
+        ),
       ),
       callParticipantTheme: StreamCallParticipantTheme(
         showFocusedBorder: true,
@@ -330,6 +348,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the user avatar widget.
   final StreamAvatarTheme avatarTheme;
 
+  /// Theme for the pre-joining view widget.
+  final StreamLobbyViewTheme lobbyViewTheme;
+
   /// Theme for the call participant widget.
   final StreamCallParticipantTheme callParticipantTheme;
 
@@ -362,6 +383,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamColorTheme? colorTheme,
     StreamCallControlsBarTheme? callControlsBarTheme,
     StreamAvatarTheme? avatarTheme,
+    StreamLobbyViewTheme? lobbyViewTheme,
     StreamCallParticipantTheme? callParticipantTheme,
     StreamFloatingCallParticipantTheme? floatingCallParticipantTheme,
     StreamParticipantInfoTheme? participantInfoTheme,
@@ -377,6 +399,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         callControlsBarTheme:
             this.callControlsBarTheme.merge(callControlsBarTheme),
         avatarTheme: this.avatarTheme.merge(avatarTheme),
+        lobbyViewTheme: this.lobbyViewTheme.merge(lobbyViewTheme),
         callParticipantTheme:
             this.callParticipantTheme.merge(callParticipantTheme),
         participantsInfoTheme:
@@ -401,6 +424,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       colorTheme: colorTheme.merge(other.colorTheme),
       callControlsBarTheme: callControlsBarTheme.merge(callControlsBarTheme),
       avatarTheme: avatarTheme.merge(other.avatarTheme),
+      lobbyViewTheme: lobbyViewTheme.merge(other.lobbyViewTheme),
       callParticipantTheme:
           callParticipantTheme.merge(other.callParticipantTheme),
       participantsInfoTheme:
@@ -425,6 +449,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       textTheme: textTheme.lerp(other.textTheme, t),
       colorTheme: colorTheme.lerp(other.colorTheme, t),
       avatarTheme: avatarTheme.lerp(other.avatarTheme, t),
+      lobbyViewTheme: lobbyViewTheme.lerp(other.lobbyViewTheme, t),
       callParticipantTheme:
           callParticipantTheme.lerp(other.callParticipantTheme, t),
       floatingCallParticipantTheme: floatingCallParticipantTheme.lerp(

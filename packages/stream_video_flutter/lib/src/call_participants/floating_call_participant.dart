@@ -15,10 +15,10 @@ class StreamFloatingCallParticipant extends StatelessWidget {
   });
 
   /// Represents a call.
-  final CallV2 call;
+  final Call call;
 
   /// The participant to display.
-  final CallParticipantStateV2 participant;
+  final CallParticipantState participant;
 
   /// Theme for modifying the look of the window.
   final StreamFloatingCallParticipantTheme? theme;

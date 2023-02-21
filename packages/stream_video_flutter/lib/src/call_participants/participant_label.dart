@@ -8,7 +8,9 @@ import 'indicators/audio_indicator.dart';
 class StreamParticipantLabel extends StatelessWidget {
   /// Creates a new instance of [StreamParticipantLabel].
   const StreamParticipantLabel({
-    required this.participant,
+    required this.participantName,
+    required this.isAudioEnabled,
+    required this.isSpeaking,
     this.audioLevelIndicatorColor,
     this.enabledMicrophoneColor,
     this.disabledMicrophoneColor,
@@ -16,8 +18,25 @@ class StreamParticipantLabel extends StatelessWidget {
     super.key,
   });
 
-  /// The participant to display.
-  final CallParticipantStateV2 participant;
+  StreamParticipantLabel.fromParticipant({
+    super.key,
+    required CallParticipantState participant,
+    this.audioLevelIndicatorColor,
+    this.enabledMicrophoneColor,
+    this.disabledMicrophoneColor,
+    this.participantLabelTextStyle,
+  })  : participantName = participant.name,
+        isAudioEnabled = participant.isAudioEnabled,
+        isSpeaking = participant.isSpeaking;
+
+  /// The name of the participant.
+  final String participantName;
+
+  /// If the participant has microphone enabled.
+  final bool isAudioEnabled;
+
+  /// If the participant is speaking.
+  final bool isSpeaking;
 
   /// The color of an audio level indicator.
   final Color? audioLevelIndicatorColor;
@@ -35,7 +54,7 @@ class StreamParticipantLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context).callParticipantTheme;
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.85),
         borderRadius: BorderRadius.circular(6),
@@ -46,7 +65,7 @@ class StreamParticipantLabel extends StatelessWidget {
           const SizedBox(width: 8),
           Flexible(
             child: Text(
-              participant.name,
+              participantName,
               style:
                   participantLabelTextStyle ?? theme.participantLabelTextStyle,
               overflow: TextOverflow.ellipsis,
@@ -54,8 +73,8 @@ class StreamParticipantLabel extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           StreamAudioIndicator(
-            isAudioEnabled: participant.isAudioEnabled,
-            isSpeaking: participant.isSpeaking,
+            isAudioEnabled: isAudioEnabled,
+            isSpeaking: isSpeaking,
             audioLevelIndicatorColor: audioLevelIndicatorColor,
             enabledMicrophoneColor: enabledMicrophoneColor,
             disabledMicrophoneColor: disabledMicrophoneColor,
