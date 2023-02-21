@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart' hide TextTheme;
 
 import '../utils/device_segmentation.dart';
+import 'lobby_view_theme.dart';
 import 'stream_incoming_outgoing_call_theme.dart';
-import 'stream_lobby_view_theme.dart';
 import 'themes.dart';
 
 /// {@template streamVideoThemeData}
@@ -16,7 +16,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamColorTheme? colorTheme,
     StreamCallControlsThemeData? callControlsTheme,
     StreamUserAvatarThemeData? userAvatarTheme,
-    StreamLobbyViewTheme? lobbyViewTheme,
+    StreamLobbyViewThemeData? lobbyViewTheme,
     StreamCallParticipantThemeData? callParticipantTheme,
     StreamFloatingCallParticipantTheme? floatingCallParticipantTheme,
     StreamParticipantsInfoTheme? participantsInfoTheme,
@@ -133,7 +133,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         selectionColor: colorTheme.accentPrimary,
         selectionThickness: 4,
       ),
-      lobbyViewTheme: StreamLobbyViewTheme(
+      lobbyViewTheme: StreamLobbyViewThemeData(
         backgroundColor: Colors.white,
         cardBackgroundColor: const Color(0xFFF2F2F2),
         userAvatarTheme: StreamUserAvatarThemeData(
@@ -363,7 +363,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   final StreamUserAvatarThemeData userAvatarTheme;
 
   /// Theme for the pre-joining view widget.
-  final StreamLobbyViewTheme lobbyViewTheme;
+  final StreamLobbyViewThemeData lobbyViewTheme;
 
   /// Theme for the call participant widget.
   final StreamCallParticipantThemeData callParticipantTheme;
@@ -397,7 +397,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamColorTheme? colorTheme,
     StreamCallControlsThemeData? callControlsTheme,
     StreamUserAvatarThemeData? userAvatarTheme,
-    StreamLobbyViewTheme? lobbyViewTheme,
+    StreamLobbyViewThemeData? lobbyViewTheme,
     StreamCallParticipantThemeData? callParticipantTheme,
     StreamFloatingCallParticipantTheme? floatingCallParticipantTheme,
     StreamParticipantInfoTheme? participantInfoTheme,
