@@ -138,7 +138,7 @@ class StreamCallParticipant extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            VideoTrackRenderer(
+            StreamVideoRenderer(
               call: call,
               participant: participant,
               videoTrackType: SfuTrackType.video,

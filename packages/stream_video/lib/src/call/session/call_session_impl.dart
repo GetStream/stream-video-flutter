@@ -1,36 +1,31 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
-import '../../action/call_control_action.dart';
 import '../../call_state_manager.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
-import '../../models/call_cid.dart';
-import '../../models/call_track_state.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
-import '../../sfu/data/models/sfu_track_type.dart';
 import '../../sfu/sfu_client.dart';
 import '../../sfu/sfu_client_impl.dart';
 import '../../sfu/ws/sfu_event_listener.dart';
 import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
 import '../../utils/none.dart';
-import '../../utils/result.dart';
-import '../../webrtc/media/constraints/camera_position.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/peer_type.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
-import '../../webrtc/rtc_track.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
 
@@ -185,8 +180,82 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       await _onSubscriberOffer(event);
     } else if (event is SfuIceTrickleEvent) {
       await _onRemoteIceCandidate(event);
+    } else if (event is SfuParticipantLeftEvent) {
+      await _onParticipantLeft(event);
+    } else if (event is SfuTrackPublishedEvent) {
+      await _onTrackPublished(event);
+    } else if (event is SfuTrackUnpublishedEvent) {
+      await _onTrackUnpublished(event);
     }
-    await stateManager.onSfuEvent(event);
+
+    return stateManager.onSfuEvent(event);
+  }
+
+  Future<void> _onParticipantLeft(SfuParticipantLeftEvent event) async {
+    _logger.v(() => '[onParticipantLeft] event: $event');
+    final participant = event.participant;
+    final trackIdPrefix = participant.trackLookupPrefix;
+    await rtcManager?.removeSubscriber(trackIdPrefix);
+  }
+
+  Future<Result<RtcTrack>> _getTrackForParticipant(
+    String userId,
+    String sessionId,
+    SfuTrackType trackType,
+  ) async {
+    bool matchParticipant(CallParticipantState participant) {
+      return participant.userId == userId && participant.sessionId == sessionId;
+    }
+
+    final callParticipants = stateManager.state.value.callParticipants;
+    final participant = callParticipants.firstWhereOrNull(matchParticipant);
+
+    if (participant == null) {
+      return Result.error('Participant not found: $userId:$sessionId');
+    }
+
+    final trackIdPrefix = participant.trackIdPrefix;
+    final track = getTrack(trackIdPrefix, trackType);
+
+    // If the track is not found, return an error.
+    if (track == null) {
+      return Result.error('Track not found: $trackIdPrefix:$trackType');
+    }
+
+    // If the track is found, return it.
+    return Result.success(track);
+  }
+
+  Future<void> _onTrackPublished(
+    SfuTrackPublishedEvent event,
+  ) async {
+    _logger.v(() => '[onTrackPublished] event: $event');
+
+    final trackResult = await _getTrackForParticipant(
+      event.userId,
+      event.sessionId,
+      event.trackType,
+    );
+
+    final track = trackResult.getDataOrNull();
+    if (track == null) return;
+    await track.start();
+  }
+
+  Future<void> _onTrackUnpublished(
+    SfuTrackUnpublishedEvent event,
+  ) async {
+    _logger.v(() => '[onTrackUnpublished] event: $event');
+
+    final trackResult = await _getTrackForParticipant(
+      event.userId,
+      event.sessionId,
+      event.trackType,
+    );
+
+    final track = trackResult.getDataOrNull();
+    if (track == null) return;
+    await track.stop();
   }
 
   Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {

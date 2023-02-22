@@ -1,9 +1,11 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:meta/meta.dart';
 
+import '../logger/stream_log.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import 'media/media_constraints.dart';
 import 'model/rtc_video_dimension.dart';
+import 'rtc_audio_api/rtc_audio_api.dart' as rtc_audio_api;
 
 @immutable
 abstract class RtcTrack {
@@ -34,6 +36,38 @@ abstract class RtcTrack {
         trackType == SfuTrackType.screenShare;
   }
 
+  bool get isAudioTrack =>
+      trackType == SfuTrackType.audio ||
+      trackType == SfuTrackType.screenShareAudio;
+
+  void enable() {
+    // Return if the track is already enabled.
+    if (mediaTrack.enabled) return;
+
+    streamLog.i('SV:RtcTrack', () => 'Enabling track $trackId');
+    try {
+      mediaTrack.enabled = true;
+    } catch (_) {
+      streamLog.w('SV:RtcTrack', () => 'Failed to enable track $trackId');
+    }
+  }
+
+  void disable() {
+    // Return if the track is already disabled.
+    if (!mediaTrack.enabled) return;
+
+    streamLog.i('SV:RtcTrack', () => 'Disabling track $trackId');
+    try {
+      mediaTrack.enabled = false;
+    } catch (_) {
+      streamLog.w('SV:RtcTrack', () => 'Failed to disable track $trackId');
+    }
+  }
+
+  Future<void> start();
+
+  Future<void> stop();
+
   RtcTrack copyWith();
 }
 
@@ -47,6 +81,32 @@ class RtcRemoteTrack extends RtcTrack {
     super.receiver,
     super.transceiver,
   });
+
+  @override
+  Future<void> start() async {
+    // Enable the track.
+    enable();
+
+    streamLog.i('SV:RtcRemoteTrack', () => 'Starting track: $trackId');
+
+    // Start the audio player if it's an audio track.
+    if (isAudioTrack) {
+      rtc_audio_api.startAudio(trackId, mediaTrack);
+    }
+  }
+
+  @override
+  Future<void> stop() async {
+    // Disable the track.
+    disable();
+
+    streamLog.i('SV:RtcRemoteTrack', () => 'Stopping track: $trackId');
+
+    // Stop the audio player if it's an audio track.
+    if (isAudioTrack) {
+      rtc_audio_api.stopAudio(trackId);
+    }
+  }
 
   @override
   RtcRemoteTrack copyWith({
@@ -99,6 +159,33 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   ///
   /// This is used to avoid the track indicator light remaining on.
   final bool stopTrackOnMute;
+
+  @override
+  Future<void> start() async {
+    streamLog.i('SV:RtcLocalTrack', () => 'Starting track: $trackId');
+    // Enable the track.
+    enable();
+  }
+
+  @override
+  Future<void> stop() async {
+    // Disable the track.
+    disable();
+
+    // Stop the track.
+    streamLog.i('SV:RtcLocalTrack', () => 'Stopping track: $trackId');
+    try {
+      await mediaTrack.stop();
+    } catch (e) {
+      streamLog.w('SV:RtcLocalTrack', () => 'Error stopping mediaTrack: $e');
+    }
+
+    try {
+      await mediaStream.dispose();
+    } catch (e) {
+      streamLog.w('SV:RtcLocalTrack', () => 'Error disposing mediaStream: $e');
+    }
+  }
 
   @override
   RtcLocalTrack<T> copyWith({

@@ -1,0 +1,150 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
+
+import '../../stream_video.dart';
+import 'size_change_listener.dart';
+
+Widget _defaultPlaceholderBuilder(BuildContext context) => const Placeholder();
+
+/// Widget that renders a single video track for a call participant.
+class StreamVideoRenderer extends StatelessWidget {
+  /// Creates a new instance of [StreamVideoRenderer].
+  const StreamVideoRenderer({
+    super.key,
+    required this.call,
+    required this.participant,
+    required this.videoTrackType,
+    this.placeholderBuilder = _defaultPlaceholderBuilder,
+  });
+
+  /// Represents a call.
+  final Call call;
+
+  /// The participant who is publishing the track.
+  final CallParticipantState participant;
+
+  /// The type of video track to display.
+  final SfuTrackTypeVideo videoTrackType;
+
+  /// A builder for the placeholder.
+  final WidgetBuilder placeholderBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    final trackState = participant.publishedTracks[videoTrackType];
+
+    // The video track hasn't been published yet.
+    if (trackState == null) {
+      return placeholderBuilder.call(context);
+    }
+    // The video track is local and shouldn't send size notifications..
+    if (trackState is! RemoteTrackState) {
+      return _buildVideoTrackRenderer(context, trackState);
+    }
+
+    final Widget child;
+    if (trackState.received && !trackState.muted) {
+      child = _buildVideoTrackRenderer(context, trackState);
+    } else {
+      child = placeholderBuilder.call(context);
+    }
+    return SizeChangeListener(
+      onSizeChanged: (size) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          call.apply(
+            UpdateSubscription(
+              userId: participant.userId,
+              sessionId: participant.sessionId,
+              trackIdPrefix: participant.trackIdPrefix,
+              trackType: videoTrackType,
+              videoDimension: RtcVideoDimension(
+                width: size.width.toInt(),
+                height: size.height.toInt(),
+              ),
+            ),
+          );
+        });
+      },
+      child: child,
+    );
+  }
+
+  Widget _buildVideoTrackRenderer(BuildContext context, TrackState trackState) {
+    if (trackState.muted) {
+      return placeholderBuilder.call(context);
+    } else {
+      final videoTrack = call.getTrack(
+        participant.trackIdPrefix,
+        videoTrackType,
+      )!;
+      return VideoTrackRenderer(
+        videoTrack: videoTrack,
+        mirror: participant.isLocal,
+        placeholderBuilder: placeholderBuilder,
+      );
+    }
+  }
+}
+
+/// A widget that renders a single video track.
+class VideoTrackRenderer extends StatefulWidget {
+  /// Creates a new instance of [VideoTrackRenderer].
+  const VideoTrackRenderer({
+    super.key,
+    required this.videoTrack,
+    this.mirror = false,
+    this.placeholderBuilder,
+  });
+
+  /// The video track to display.
+  final RtcTrack videoTrack;
+
+  /// If the video should be mirrored.
+  final bool mirror;
+
+  /// A builder for the placeholder.
+  final WidgetBuilder? placeholderBuilder;
+
+  @override
+  State<VideoTrackRenderer> createState() => _VideoTrackRendererState();
+}
+
+class _VideoTrackRendererState extends State<VideoTrackRenderer> {
+  /// Renderer to display WebRTC video stream.
+  final _videoRenderer = RTCVideoRenderer();
+
+  @override
+  void initState() {
+    super.initState();
+    (() async {
+      await _videoRenderer.initialize();
+      _videoRenderer.srcObject = widget.videoTrack.mediaStream;
+      setState(() {});
+    })();
+  }
+
+  @override
+  void didUpdateWidget(covariant VideoTrackRenderer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.videoTrack != oldWidget.videoTrack) {
+      _videoRenderer.srcObject = widget.videoTrack.mediaStream;
+      setState(() {});
+    }
+  }
+
+  @override
+  Future<void> dispose() async {
+    super.dispose();
+    _videoRenderer.srcObject = null;
+    await _videoRenderer.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RTCVideoView(
+      _videoRenderer,
+      mirror: widget.mirror,
+      placeholderBuilder: widget.placeholderBuilder,
+    );
+  }
+}

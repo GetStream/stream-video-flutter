@@ -156,6 +156,9 @@ class RtcManager extends Disposable {
       transceiver: transceiver,
     );
 
+    // Start the track.
+    remoteTrack.start();
+
     publishedTracks[remoteTrack.trackId] = remoteTrack;
     _logger.v(() => '[onSubscriberTrack] published: ${remoteTrack.trackId}');
     onSubscriberTrackReceived?.call(pc, remoteTrack);
@@ -168,10 +171,7 @@ class RtcManager extends Disposable {
       return;
     }
 
-    publishedTrack.mediaTrack.enabled = false;
-    if (publishedTrack is RtcLocalTrack) {
-      await publishedTrack.stop();
-    }
+    await publishedTrack.stop();
 
     final sender = publishedTrack.transceiver?.sender;
     if (sender != null) {
@@ -282,6 +282,14 @@ extension PublisherRtcManager on RtcManager {
     }).toList();
   }
 
+  /// Removes all tracks from the publisher with the given [trackIdPrefix].
+  Future<void> removeSubscriber(String trackIdPrefix) async {
+    final tracks = getTracks(trackIdPrefix);
+    for (final track in tracks) {
+      await unpublishTrack(trackId: track.trackId);
+    }
+  }
+
   Future<RtcLocalTrack<AudioConstraints>> publishAudioTrack({
     required RtcLocalTrack<AudioConstraints> track,
     bool stopTrackOnMute = true,
@@ -299,6 +307,9 @@ extension PublisherRtcManager on RtcManager {
       ],
     );
     _logger.v(() => '[publishAudioTrack] transceiver: $transceiver');
+
+    // Start the track.
+    await track.start();
 
     // Update track with the added transceiver.
     return publishedTracks[track.trackId] = track.copyWith(
@@ -338,6 +349,9 @@ extension PublisherRtcManager on RtcManager {
     );
     _logger.v(() => '[publishVideoTrack] transceiver: $transceiver');
 
+    // Start the track.
+    await track.start();
+
     // Update track with the added transceiver and dimension.
     return publishedTracks[track.trackId] = track.copyWith(
       receiver: transceiver.receiver,
@@ -359,7 +373,7 @@ extension PublisherRtcManager on RtcManager {
       return;
     }
 
-    track.mediaTrack.enabled = false;
+    track.disable();
     if (track.stopTrackOnMute) {
       // Releases the track and stops the permission indicator.
       await track.stop();
@@ -387,7 +401,7 @@ extension PublisherRtcManager on RtcManager {
     }
 
     // Otherwise simply enable it again
-    track.mediaTrack.enabled = true;
+    track.enable();
     return onPublisherTrackMuted?.call(track, false);
   }
 
@@ -579,34 +593,6 @@ extension PublisherRtcManager on RtcManager {
   }
 }
 
-extension on RtcLocalTrack<VideoConstraints> {
-  RtcVideoDimension getVideoDimension() {
-    // use constraints passed to getUserMedia by default
-    var dimension = mediaConstraints.params.dimension;
-
-    if (CurrentPlatform.isWeb) {
-      // getSettings() is only implemented for Web
-      try {
-        // try to use getSettings for more accurate resolution
-        final settings = mediaTrack.getSettings();
-        streamLog.v(_tag, () => '[publishVideoTrack] settings: $settings');
-        if (settings['width'] is int) {
-          dimension = dimension.copyWith(width: settings['width'] as int);
-        }
-        if (settings['height'] is int) {
-          dimension = dimension.copyWith(height: settings['height'] as int);
-        }
-      } catch (_) {
-        streamLog.w(
-          _tag,
-          () => '[publishVideoTrack] `mediaStreamTrack.getSettings()` failed',
-        );
-      }
-    }
-    return dimension;
-  }
-}
-
 extension RtcManagerTrackHelper on RtcManager {
   Future<RtcLocalTrack?> flipCamera() async {
     final track = getPublisherTrackByType(SfuTrackType.video);
@@ -739,19 +725,30 @@ extension RtcManagerTrackHelper on RtcManager {
   }
 }
 
-extension on RtcLocalTrack {
-  Future<void> stop() async {
-    streamLog.i('SV:RtcLocalTrack', () => 'Stopping track: $trackId');
-    try {
-      await mediaTrack.stop();
-    } catch (e) {
-      streamLog.w('SV:RtcLocalTrack', () => 'Error stopping track: $e');
-    }
+extension on RtcLocalTrack<VideoConstraints> {
+  RtcVideoDimension getVideoDimension() {
+    // use constraints passed to getUserMedia by default
+    var dimension = mediaConstraints.params.dimension;
 
-    try {
-      await mediaStream.dispose();
-    } catch (e) {
-      streamLog.w('SV:RtcLocalTrack', () => 'Error disposing stream: $e');
+    if (CurrentPlatform.isWeb) {
+      // getSettings() is only implemented for Web
+      try {
+        // try to use getSettings for more accurate resolution
+        final settings = mediaTrack.getSettings();
+        streamLog.v(_tag, () => '[publishVideoTrack] settings: $settings');
+        if (settings['width'] is int) {
+          dimension = dimension.copyWith(width: settings['width'] as int);
+        }
+        if (settings['height'] is int) {
+          dimension = dimension.copyWith(height: settings['height'] as int);
+        }
+      } catch (_) {
+        streamLog.w(
+          _tag,
+          () => '[publishVideoTrack] `mediaStreamTrack.getSettings()` failed',
+        );
+      }
     }
+    return dimension;
   }
 }
