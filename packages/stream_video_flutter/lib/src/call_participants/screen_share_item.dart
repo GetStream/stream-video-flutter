@@ -39,7 +39,7 @@ class ScreenShareItem extends StatelessWidget {
           }
 
           return InteractiveViewer(
-            child: VideoTrackRenderer(
+            child: StreamVideoRenderer(
               call: call,
               participant: participant,
               videoTrackType: SfuTrackType.screenShare,

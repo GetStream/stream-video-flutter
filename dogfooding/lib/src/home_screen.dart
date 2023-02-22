@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final callCid = StreamCallCid.from(type: 'default', id: callId);
       final data = await streamVideoClient.getOrCreateCall(cid: callCid);
-      final call = Call.fromCreated(data: data.getOrNull()!.data);
+      final call = Call.fromCreated(data: data.getDataOrNull()!.data);
 
       await Navigator.of(context).pushReplacementNamed(
         Routes.CALL,

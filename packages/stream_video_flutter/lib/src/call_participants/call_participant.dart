@@ -45,7 +45,7 @@ class StreamCallParticipant extends StatelessWidget {
         decoration: BoxDecoration(color: theme.backgroundColor),
         child: Stack(
           children: [
-            VideoTrackRenderer(
+            StreamVideoRenderer(
               call: call,
               participant: participant,
               videoTrackType: SfuTrackType.video,

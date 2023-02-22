@@ -18,7 +18,7 @@ export 'src/models/call_track_state.dart';
 export 'src/models/drop_reason.dart';
 export 'src/models/user_info.dart';
 export 'src/push_notification/push_notification_manager.dart';
-export 'src/renderer/video_track_renderer.dart';
+export 'src/renderer/video_renderer.dart';
 export 'src/sfu/data/models/sfu_connection_quality.dart';
 export 'src/sfu/data/models/sfu_track_type.dart';
 export 'src/stream_video.dart';
