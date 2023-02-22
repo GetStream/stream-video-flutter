@@ -4,15 +4,18 @@ import '../../stream_video_flutter.dart';
 import '../utils/extensions.dart';
 
 /// Displays call participant info view.
-class CallParticipantInfoView extends StatelessWidget {
-  /// Creates a new instance of [CallParticipantInfoView].
-  const CallParticipantInfoView({
+class CallParticipantsInfoItem extends StatelessWidget {
+  /// Creates a new instance of [CallParticipantsInfoItem].
+  const CallParticipantsInfoItem({
     super.key,
     required this.participant,
     required this.videoIcon,
     required this.audioIcon,
-    this.participantInfoTheme,
     this.onParticipantTap,
+    this.participantNameTextStyle,
+    this.participantIconActiveColor,
+    this.participantIconInactiveColor,
+    this.participantUserAvatarTheme,
   });
 
   /// Represents current participant state.
@@ -24,19 +27,32 @@ class CallParticipantInfoView extends StatelessWidget {
   /// Active/Inactive icons for the audio button.
   final StreamIconToggle audioIcon;
 
-  /// Theme for the participants info.
-  final StreamParticipantInfoTheme? participantInfoTheme;
-
   /// The action to perform when a participant is tapped.
   final ValueChanged<CallParticipantState>? onParticipantTap;
 
+  /// [TextStyle] for the user name.
+  final TextStyle? participantNameTextStyle;
+
+  /// Color of the active icon.
+  final Color? participantIconActiveColor;
+
+  /// Color of the inactive icon.
+  final Color? participantIconInactiveColor;
+
+  /// Theme for the user avatar widget.
+  final StreamUserAvatarThemeData? participantUserAvatarTheme;
+
   @override
   Widget build(BuildContext context) {
-    final streamChatTheme = StreamVideoTheme.of(context);
-    final participantInfoTheme =
-        this.participantInfoTheme ?? streamChatTheme.participantInfoTheme;
-    final avatarTheme =
-        participantInfoTheme.avatarTheme ?? streamChatTheme.avatarTheme;
+    final theme = StreamCallParticipantsInfoMenuTheme.of(context);
+    final participantNameTextStyle =
+        this.participantNameTextStyle ?? theme.participantNameTextStyle;
+    final participantIconActiveColor =
+        this.participantIconActiveColor ?? theme.participantIconActiveColor;
+    final participantIconInactiveColor =
+        this.participantIconInactiveColor ?? theme.participantIconInactiveColor;
+    final participantUserAvatarTheme =
+        this.participantUserAvatarTheme ?? theme.participantUserAvatarTheme;
 
     final isAudioEnabled = participant.isAudioEnabled;
     final isVideoEnabled = participant.isVideoEnabled;
@@ -49,16 +65,18 @@ class CallParticipantInfoView extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            StreamUserAvatar(
-              user: participant.toUserInfo(),
-              avatarTheme: avatarTheme,
+            StreamUserAvatarTheme(
+              data: participantUserAvatarTheme,
+              child: StreamUserAvatar(
+                user: participant.toUserInfo(),
+              ),
             ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   participant.name,
-                  style: participantInfoTheme.usernameTextStyle,
+                  style: participantNameTextStyle,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -66,14 +84,14 @@ class CallParticipantInfoView extends StatelessWidget {
             _MediaIcon(
               icon: isVideoEnabled ? videoIcon.active : videoIcon.inactive,
               color: isVideoEnabled
-                  ? participantInfoTheme.iconActiveColor
-                  : participantInfoTheme.iconInactiveColor,
+                  ? participantIconActiveColor
+                  : participantIconInactiveColor,
             ),
             _MediaIcon(
               icon: isAudioEnabled ? audioIcon.active : audioIcon.inactive,
               color: isAudioEnabled
-                  ? participantInfoTheme.iconActiveColor
-                  : participantInfoTheme.iconInactiveColor,
+                  ? participantIconActiveColor
+                  : participantIconInactiveColor,
             ),
           ],
         ),

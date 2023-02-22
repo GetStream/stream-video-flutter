@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../participants_info/call_participants_info_view.dart';
+import '../participants_info/call_participants_info_menu.dart';
 
 /// Builder used to create a custom participants info screen.
 typedef CallParticipantsInfoWidgetBuilder = Widget Function(
@@ -107,7 +107,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
               builder: (context) =>
                   widget.participantsInfoWidgetBuilder
                       ?.call(context, widget.call) ??
-                  StreamCallParticipantsInfoView(
+                  StreamCallParticipantsInfoMenu(
                     call: widget.call,
                     usersProvider: usersProvider,
                   ),

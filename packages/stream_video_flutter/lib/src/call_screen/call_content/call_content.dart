@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../../participants_info/call_participants_info_view.dart';
+import '../../participants_info/call_participants_info_menu.dart';
 import '../../utils/device_segmentation.dart';
 
 /// Builder used to create a custom call app bar.
@@ -112,7 +112,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
                         builder: (context) =>
                             widget.participantsInfoWidgetBuilder
                                 ?.call(context, call) ??
-                            StreamCallParticipantsInfoView(
+                            StreamCallParticipantsInfoMenu(
                               call: call,
                               usersProvider: usersProvider,
                             ),

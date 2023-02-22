@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart' hide TextTheme;
 
 import '../utils/device_segmentation.dart';
-import 'stream_incoming_outgoing_call_theme.dart';
-import 'stream_lobby_view_theme.dart';
 import 'themes.dart';
 
 /// {@template streamVideoThemeData}
@@ -14,17 +12,14 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required Brightness brightness,
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
-    StreamCallControlsBarTheme? callControlsBarTheme,
-    StreamAvatarTheme? avatarTheme,
-    StreamLobbyViewTheme? lobbyViewTheme,
-    StreamCallParticipantTheme? callParticipantTheme,
-    StreamFloatingCallParticipantTheme? floatingCallParticipantTheme,
-    StreamParticipantsInfoTheme? participantsInfoTheme,
-    StreamParticipantInfoTheme? participantInfoTheme,
-    StreamInvitableUserListTheme? invitableUserListTheme,
-    StreamInvitableUserTheme? invitableUserTheme,
-    StreamIncomingOutgoingCallTheme? incomingCallTheme,
-    StreamIncomingOutgoingCallTheme? outgoingCallTheme,
+    StreamCallControlsThemeData? callControlsTheme,
+    StreamUserAvatarThemeData? userAvatarTheme,
+    StreamLobbyViewThemeData? lobbyViewTheme,
+    StreamCallParticipantThemeData? callParticipantTheme,
+    StreamFloatingCallParticipantThemeData? floatingCallParticipantTheme,
+    StreamCallParticipantsInfoMenuThemeData? callParticipantsInfoMenuTheme,
+    StreamIncomingOutgoingCallThemeData? incomingCallTheme,
+    StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
   }) {
     final isDark = brightness == Brightness.dark;
     textTheme ??=
@@ -40,15 +35,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     final customizedTheme = defaultTheme.copyWith(
       textTheme: textTheme,
       colorTheme: colorTheme,
-      callControlsBarTheme: callControlsBarTheme,
-      avatarTheme: avatarTheme,
+      callControlsTheme: callControlsTheme,
+      userAvatarTheme: userAvatarTheme,
       lobbyViewTheme: lobbyViewTheme,
       callParticipantTheme: callParticipantTheme,
       floatingCallParticipantTheme: floatingCallParticipantTheme,
-      participantsInfoTheme: participantsInfoTheme,
-      participantInfoTheme: participantInfoTheme,
-      invitableUserListTheme: invitableUserListTheme,
-      invitableUserTheme: invitableUserTheme,
+      callParticipantsInfoMenuTheme: callParticipantsInfoMenuTheme,
       incomingCallTheme: incomingCallTheme,
       outgoingCallTheme: outgoingCallTheme,
     );
@@ -68,15 +60,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   const StreamVideoTheme.raw({
     required this.textTheme,
     required this.colorTheme,
-    required this.callControlsBarTheme,
-    required this.avatarTheme,
+    required this.callControlsTheme,
+    required this.userAvatarTheme,
     required this.lobbyViewTheme,
     required this.callParticipantTheme,
     required this.floatingCallParticipantTheme,
-    required this.participantsInfoTheme,
-    required this.participantInfoTheme,
-    required this.invitableUserListTheme,
-    required this.invitableUserTheme,
+    required this.callParticipantsInfoMenuTheme,
     required this.incomingCallTheme,
     required this.outgoingCallTheme,
   });
@@ -101,11 +90,25 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return StreamVideoTheme.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
-      callControlsBarTheme: StreamCallControlsBarTheme.fromColorAndTextTheme(
-        colorTheme,
-        textTheme,
+      callControlsTheme: StreamCallControlsThemeData(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(32),
+          topRight: Radius.circular(32),
+        ),
+        backgroundColor: colorTheme.appBg,
+        elevation: 8,
+        padding: EdgeInsets.all(14),
+        spacing: 10,
+        optionIconColor: Colors.black,
+        inactiveOptionIconColor: Colors.black,
+        optionElevation: 2,
+        inactiveOptionElevation: 2,
+        optionBackgroundColor: Colors.white,
+        inactiveOptionBackgroundColor: Colors.white,
+        optionShape: CircleBorder(),
+        optionPadding: EdgeInsets.all(16),
       ),
-      avatarTheme: StreamAvatarTheme(
+      userAvatarTheme: StreamUserAvatarThemeData(
         borderRadius: BorderRadius.circular(20),
         constraints: const BoxConstraints.tightFor(
           height: 40,
@@ -119,10 +122,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         selectionColor: colorTheme.accentPrimary,
         selectionThickness: 4,
       ),
-      lobbyViewTheme: StreamLobbyViewTheme(
+      lobbyViewTheme: StreamLobbyViewThemeData(
         backgroundColor: Colors.white,
         cardBackgroundColor: const Color(0xFFF2F2F2),
-        avatarTheme: StreamAvatarTheme(
+        userAvatarTheme: StreamUserAvatarThemeData(
           constraints: const BoxConstraints.tightFor(
             height: 100,
             width: 100,
@@ -133,15 +136,15 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           selectionThickness: 4,
         ),
       ),
-      callParticipantTheme: StreamCallParticipantTheme(
-        showFocusedBorder: true,
+      callParticipantTheme: StreamCallParticipantThemeData(
+        showDominantSpeakerBorder: true,
         borderRadius: isDesktopDevice
             ? const BorderRadius.all(Radius.circular(12))
             : BorderRadius.zero,
-        focusedBorderColor: colorTheme.accentInfo,
-        focusedBorderThickness: 4,
+        dominantSpeakerBorderColor: colorTheme.accentInfo,
+        dominantSpeakerBorderThickness: 4,
         backgroundColor: const Color(0xFF272A30),
-        avatarTheme: StreamAvatarTheme(
+        userAvatarTheme: StreamUserAvatarThemeData(
           constraints: const BoxConstraints.tightFor(
             height: 100,
             width: 100,
@@ -159,11 +162,11 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         connectionLevelActiveColor: colorTheme.accentPrimary,
         connectionLevelInactiveColor: Colors.white,
       ),
-      floatingCallParticipantTheme: StreamFloatingCallParticipantTheme(
-        streamCallParticipantTheme: StreamCallParticipantTheme(
-          showFocusedBorder: false,
+      floatingCallParticipantTheme: StreamFloatingCallParticipantThemeData(
+        streamCallParticipantTheme: StreamCallParticipantThemeData(
+          showDominantSpeakerBorder: false,
           backgroundColor: const Color(0xFF272A30),
-          avatarTheme: StreamAvatarTheme(
+          userAvatarTheme: StreamUserAvatarThemeData(
             constraints: const BoxConstraints.tightFor(
               height: 100,
               width: 100,
@@ -182,59 +185,55 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           connectionLevelInactiveColor: Colors.white,
         ),
       ),
-      participantsInfoTheme: StreamParticipantsInfoTheme(
-        dividerColor: colorTheme.overlayDark,
-        dividerIndent: 0.0,
-        dividerHeight: 0.0,
-      ),
-      participantInfoTheme: StreamParticipantInfoTheme(
-        usernameTextStyle: TextStyle(
+      callParticipantsInfoMenuTheme: StreamCallParticipantsInfoMenuThemeData(
+        participantDividerColor: colorTheme.overlayDark,
+        participantDividerIndent: 0.0,
+        participantDividerHeight: 0.0,
+        participantNameTextStyle: TextStyle(
           color: colorTheme.textHighEmphasis,
-          fontSize: 17.0,
+          fontSize: 18.0,
         ),
-        iconActiveColor: colorTheme.textHighEmphasis,
-        iconInactiveColor: colorTheme.accentError,
-        avatarTheme: StreamAvatarTheme(
+        participantIconActiveColor: colorTheme.textHighEmphasis,
+        participantIconInactiveColor: colorTheme.accentError,
+        participantUserAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
             color: colorTheme.barsBg,
           ),
-          constraints: const BoxConstraints(
+          constraints: BoxConstraints(
             minHeight: 56,
             minWidth: 56,
           ),
-          borderRadius: const BorderRadius.all(
+          borderRadius: BorderRadius.all(
             Radius.circular(32),
           ),
         ),
-      ),
-      invitableUserListTheme: StreamInvitableUserListTheme(
-        dividerColor: colorTheme.overlayDark,
-        dividerIndent: 16.0,
-        dividerHeight: 0.0,
-      ),
-      invitableUserTheme: StreamInvitableUserTheme(
-        usernameTextStyle:
-            TextStyle(color: colorTheme.textHighEmphasis, fontSize: 18.0),
-        selectedIconColor: colorTheme.accentPrimary,
-        avatarTheme: StreamAvatarTheme(
+        inviteDividerColor: colorTheme.overlayDark,
+        inviteDividerIndent: 16.0,
+        inviteDividerHeight: 0.0,
+        inviteUsernameTextStyle: TextStyle(
+          color: colorTheme.textHighEmphasis,
+          fontSize: 18,
+        ),
+        inviteSelectedIconColor: colorTheme.accentPrimary,
+        inviteUserAvatarTheme: const StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: colorTheme.barsBg,
+            color: Colors.white,
           ),
-          constraints: const BoxConstraints(
+          constraints: BoxConstraints(
             minHeight: 56,
             minWidth: 56,
           ),
-          borderRadius: const BorderRadius.all(
+          borderRadius: BorderRadius.all(
             Radius.circular(32),
           ),
         ),
       ),
-      incomingCallTheme: StreamIncomingOutgoingCallTheme(
-        singleParticipantAvatarTheme: StreamAvatarTheme(
+      incomingCallTheme: StreamIncomingOutgoingCallThemeData(
+        singleParticipantAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
@@ -248,7 +247,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             Radius.circular(80),
           ),
         ),
-        multipleParticipantAvatarTheme: StreamAvatarTheme(
+        multipleParticipantAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -277,8 +276,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           fontWeight: FontWeight.bold,
         ),
       ),
-      outgoingCallTheme: StreamIncomingOutgoingCallTheme(
-        singleParticipantAvatarTheme: StreamAvatarTheme(
+      outgoingCallTheme: StreamIncomingOutgoingCallThemeData(
+        singleParticipantAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
@@ -292,7 +291,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             Radius.circular(80),
           ),
         ),
-        multipleParticipantAvatarTheme: StreamAvatarTheme(
+        multipleParticipantAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -343,37 +342,28 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   final StreamColorTheme colorTheme;
 
   /// The color themes used in CallControlsView
-  final StreamCallControlsBarTheme callControlsBarTheme;
+  final StreamCallControlsThemeData callControlsTheme;
 
   /// Theme for the user avatar widget.
-  final StreamAvatarTheme avatarTheme;
+  final StreamUserAvatarThemeData userAvatarTheme;
 
   /// Theme for the pre-joining view widget.
-  final StreamLobbyViewTheme lobbyViewTheme;
+  final StreamLobbyViewThemeData lobbyViewTheme;
 
   /// Theme for the call participant widget.
-  final StreamCallParticipantTheme callParticipantTheme;
+  final StreamCallParticipantThemeData callParticipantTheme;
 
   /// Theme for the floating pip call participant widget.
-  final StreamFloatingCallParticipantTheme floatingCallParticipantTheme;
+  final StreamFloatingCallParticipantThemeData floatingCallParticipantTheme;
 
   /// Theme for the participants info widget.
-  final StreamParticipantsInfoTheme participantsInfoTheme;
-
-  /// Theme for the participant info widget.
-  final StreamParticipantInfoTheme participantInfoTheme;
-
-  /// Theme for the invitable user list widget.
-  final StreamInvitableUserListTheme invitableUserListTheme;
-
-  /// Theme for the invitable user widget.
-  final StreamInvitableUserTheme invitableUserTheme;
+  final StreamCallParticipantsInfoMenuThemeData callParticipantsInfoMenuTheme;
 
   /// Theme for the outgoing call widget.
-  final StreamIncomingOutgoingCallTheme incomingCallTheme;
+  final StreamIncomingOutgoingCallThemeData incomingCallTheme;
 
   /// Theme for the outgoing call widget.
-  final StreamIncomingOutgoingCallTheme outgoingCallTheme;
+  final StreamIncomingOutgoingCallThemeData outgoingCallTheme;
 
   /// Creates a copy of [StreamVideoTheme] with specified attributes
   /// overridden.
@@ -381,37 +371,29 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   StreamVideoTheme copyWith({
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
-    StreamCallControlsBarTheme? callControlsBarTheme,
-    StreamAvatarTheme? avatarTheme,
-    StreamLobbyViewTheme? lobbyViewTheme,
-    StreamCallParticipantTheme? callParticipantTheme,
-    StreamFloatingCallParticipantTheme? floatingCallParticipantTheme,
-    StreamParticipantInfoTheme? participantInfoTheme,
-    StreamParticipantsInfoTheme? participantsInfoTheme,
-    StreamInvitableUserListTheme? invitableUserListTheme,
-    StreamInvitableUserTheme? invitableUserTheme,
-    StreamIncomingOutgoingCallTheme? incomingCallTheme,
-    StreamIncomingOutgoingCallTheme? outgoingCallTheme,
+    StreamCallControlsThemeData? callControlsTheme,
+    StreamUserAvatarThemeData? userAvatarTheme,
+    StreamLobbyViewThemeData? lobbyViewTheme,
+    StreamCallParticipantThemeData? callParticipantTheme,
+    StreamFloatingCallParticipantThemeData? floatingCallParticipantTheme,
+    StreamCallParticipantsInfoMenuThemeData? callParticipantsInfoMenuTheme,
+    StreamIncomingOutgoingCallThemeData? incomingCallTheme,
+    StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
   }) =>
       StreamVideoTheme.raw(
         textTheme: this.textTheme.merge(textTheme),
         colorTheme: this.colorTheme.merge(colorTheme),
-        callControlsBarTheme:
-            this.callControlsBarTheme.merge(callControlsBarTheme),
-        avatarTheme: this.avatarTheme.merge(avatarTheme),
+        callControlsTheme: this.callControlsTheme.merge(callControlsTheme),
+        userAvatarTheme: this.userAvatarTheme.merge(userAvatarTheme),
         lobbyViewTheme: this.lobbyViewTheme.merge(lobbyViewTheme),
         callParticipantTheme:
             this.callParticipantTheme.merge(callParticipantTheme),
-        participantsInfoTheme:
-            this.participantsInfoTheme.merge(participantsInfoTheme),
+        callParticipantsInfoMenuTheme: this
+            .callParticipantsInfoMenuTheme
+            .merge(callParticipantsInfoMenuTheme),
         floatingCallParticipantTheme: this
             .floatingCallParticipantTheme
             .merge(floatingCallParticipantTheme),
-        participantInfoTheme:
-            this.participantInfoTheme.merge(participantInfoTheme),
-        invitableUserListTheme:
-            this.invitableUserListTheme.merge(invitableUserListTheme),
-        invitableUserTheme: this.invitableUserTheme.merge(invitableUserTheme),
         incomingCallTheme: this.incomingCallTheme.merge(incomingCallTheme),
         outgoingCallTheme: this.outgoingCallTheme.merge(outgoingCallTheme),
       );
@@ -422,18 +404,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return copyWith(
       textTheme: textTheme.merge(other.textTheme),
       colorTheme: colorTheme.merge(other.colorTheme),
-      callControlsBarTheme: callControlsBarTheme.merge(callControlsBarTheme),
-      avatarTheme: avatarTheme.merge(other.avatarTheme),
+      callControlsTheme: callControlsTheme.merge(callControlsTheme),
+      userAvatarTheme: userAvatarTheme.merge(other.userAvatarTheme),
       lobbyViewTheme: lobbyViewTheme.merge(other.lobbyViewTheme),
       callParticipantTheme:
           callParticipantTheme.merge(other.callParticipantTheme),
-      participantsInfoTheme:
-          participantsInfoTheme.merge(other.participantsInfoTheme),
-      participantInfoTheme:
-          participantInfoTheme.merge(other.participantInfoTheme),
-      invitableUserListTheme:
-          invitableUserListTheme.merge(other.invitableUserListTheme),
-      invitableUserTheme: invitableUserTheme.merge(other.invitableUserTheme),
+      callParticipantsInfoMenuTheme: callParticipantsInfoMenuTheme
+          .merge(other.callParticipantsInfoMenuTheme),
       incomingCallTheme: incomingCallTheme.merge(other.incomingCallTheme),
       outgoingCallTheme: outgoingCallTheme.merge(other.outgoingCallTheme),
     );
@@ -448,7 +425,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return StreamVideoTheme.raw(
       textTheme: textTheme.lerp(other.textTheme, t),
       colorTheme: colorTheme.lerp(other.colorTheme, t),
-      avatarTheme: avatarTheme.lerp(other.avatarTheme, t),
+      userAvatarTheme: userAvatarTheme.lerp(other.userAvatarTheme, t),
       lobbyViewTheme: lobbyViewTheme.lerp(other.lobbyViewTheme, t),
       callParticipantTheme:
           callParticipantTheme.lerp(other.callParticipantTheme, t),
@@ -456,15 +433,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         other.floatingCallParticipantTheme,
         t,
       ),
-      callControlsBarTheme:
-          callControlsBarTheme.lerp(other.callControlsBarTheme, t),
-      participantsInfoTheme:
-          participantsInfoTheme.lerp(other.participantsInfoTheme, t),
-      participantInfoTheme:
-          participantInfoTheme.lerp(other.participantInfoTheme, t),
-      invitableUserListTheme:
-          invitableUserListTheme.lerp(other.invitableUserListTheme, t),
-      invitableUserTheme: invitableUserTheme.lerp(other.invitableUserTheme, t),
+      callControlsTheme: callControlsTheme.lerp(other.callControlsTheme, t),
+      callParticipantsInfoMenuTheme: callParticipantsInfoMenuTheme.lerp(
+          other.callParticipantsInfoMenuTheme, t),
       incomingCallTheme: incomingCallTheme.lerp(other.incomingCallTheme, t),
       outgoingCallTheme: outgoingCallTheme.lerp(other.outgoingCallTheme, t),
     );
