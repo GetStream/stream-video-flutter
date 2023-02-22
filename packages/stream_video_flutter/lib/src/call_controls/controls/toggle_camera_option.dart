@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../call_control_option.dart';
 
 /// A widget that represents a call control option to toggle if the camera
 /// is on or off.

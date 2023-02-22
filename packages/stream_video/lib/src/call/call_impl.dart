@@ -1,25 +1,13 @@
 import 'dart:async';
 
 import '../../stream_video.dart';
-import '../action/call_control_action.dart';
-import '../call_state.dart';
 import '../call_state_manager.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../errors/video_error_composer.dart';
-import '../models/call_cid.dart';
-import '../models/call_created.dart';
-import '../models/call_joined.dart';
-import '../models/call_received_created.dart';
-import '../models/call_status.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
-import '../stream_video.dart';
 import '../utils/none.dart';
-import '../utils/result.dart';
-import '../utils/subscriptions.dart';
-import '../webrtc/rtc_track.dart';
-import 'call.dart';
 import 'call_settings.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
@@ -45,6 +33,7 @@ class CallImpl extends Call {
       stateManager: stateManager,
     );
   }
+
   factory CallImpl.created({
     required CallCreated data,
     StreamVideo? streamVideo,
@@ -58,6 +47,7 @@ class CallImpl extends Call {
       stateManager: stateManager,
     );
   }
+
   factory CallImpl.joined({
     required CallJoined data,
     StreamVideo? streamVideo,
@@ -209,6 +199,16 @@ class CallImpl extends Call {
   }
 
   @override
+  Future<Result<None>> joinCall() async {
+    try {
+      await _joinIfNeeded();
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+    return Result.success(None());
+  }
+
+  @override
   Future<Result<None>> connect({
     CallSettings settings = const CallSettings(),
   }) async {
@@ -252,8 +252,9 @@ class CallImpl extends Call {
 
     final state = _stateManager.state.value;
     final status = state.status;
-    if (!status.isJoinable && !status.isJoined) {
-      _logger.w(() => '[connect] rejected (not Joinable/Joined): $status');
+    if (!status.isJoinable && !status.isJoined && !status.isJoining) {
+      _logger
+          .w(() => '[connect] rejected (not Joinable/Joining/Joined): $status');
       return Result.error('invalid status: $status');
     }
 
@@ -331,6 +332,11 @@ class CallImpl extends Call {
       }
       if (status is CallStatusIncoming && !status.acceptedByMe) {
         await _awaitIncomingToBeAccepted(timeLimit);
+      }
+      // If we are coming from the pre-joining screen and already
+      // started joining the call.
+      if (status is CallStatusJoining) {
+        await _awaitCallToBeJoined();
       }
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -422,6 +428,15 @@ class CallImpl extends Call {
         return status is CallStatusOutgoing && status.acceptedByCallee;
       },
       timeLimit: timeLimit,
+    );
+  }
+
+  Future<void> _awaitCallToBeJoined() async {
+    await _stateManager.state.firstWhere(
+      (state) {
+        return state.status is CallStatusJoined;
+      },
+      timeLimit: const Duration(seconds: 60),
     );
   }
 

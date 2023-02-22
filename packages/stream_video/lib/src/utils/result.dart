@@ -120,13 +120,13 @@ extension PatternMatching<T> on Result<T> {
   /// but non-exhaustive.
   R? whenOrNull<R extends Object?>({
     R Function(T data)? success,
-    R Function(VideoError error)? error,
+    R Function(VideoError error)? failure,
   }) {
     switch (_type) {
       case _ResultType.success:
         return success?.call((this as Success<T>).data);
       case _ResultType.failure:
-        return error?.call((this as Failure).error);
+        return failure?.call((this as Failure).error);
     }
   }
 
@@ -166,24 +166,21 @@ extension PatternMatching<T> on Result<T> {
   /// but non-exhaustive.
   R? mapOrNull<R extends Object?>({
     R Function(Success<T> success)? success,
-    R Function(Failure failure)? error,
+    R Function(Failure failure)? failure,
   }) {
     switch (_type) {
       case _ResultType.success:
         return success?.call(this as Success<T>);
       case _ResultType.failure:
-        return error?.call(this as Failure);
+        return failure?.call(this as Failure);
     }
   }
 
   /// Returns the encapsulated value if this instance represents success
   /// or null of it is failure.
-  T? getOrNull() {
-    switch (_type) {
-      case _ResultType.success:
-        return (this as Success<T>).data;
-      case _ResultType.failure:
-        return null;
-    }
-  }
+  T? getDataOrNull() => whenOrNull(success: _identity);
+
+  VideoError? getErrorOrNull() => whenOrNull(failure: _identity);
 }
+
+T _identity<T>(T x) => x;

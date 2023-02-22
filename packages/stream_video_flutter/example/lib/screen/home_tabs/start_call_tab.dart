@@ -116,7 +116,23 @@ class _StartCallTabState extends State<StartCallTab>
         setState(() => _callInProgress = false);
 
         final call = Call.fromCreated(data: data);
-        widget.onNavigateToCall(call);
+
+        if (_ringingCall) {
+          widget.onNavigateToCall(call);
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StreamLobbyView(
+                call: call,
+                onJoinCallTap: () {
+                  Navigator.of(context).pop();
+                  widget.onNavigateToCall(call);
+                },
+              ),
+            ),
+          );
+        }
       },
       failure: (error) {
         setState(() => _callInProgress = false);

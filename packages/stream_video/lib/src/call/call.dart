@@ -1,15 +1,10 @@
 import 'dart:async';
 
 import '../../stream_video.dart';
-import '../action/call_control_action.dart';
 import '../sfu/data/events/sfu_events.dart';
-import '../sfu/data/models/sfu_track_type.dart';
-import '../utils/none.dart';
-import '../utils/result.dart';
-import '../call_state.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
-import '../webrtc/rtc_track.dart';
+import '../utils/none.dart';
 import 'call_impl.dart';
 import 'call_settings.dart';
 
@@ -69,6 +64,8 @@ abstract class Call {
     List<String> participantIds = const [],
     bool ringing = false,
   });
+
+  Future<Result<None>> joinCall();
 
   Future<Result<None>> connect({
     CallSettings settings = const CallSettings(),
