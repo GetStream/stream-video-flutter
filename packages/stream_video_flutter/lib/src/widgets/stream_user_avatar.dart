@@ -43,13 +43,17 @@ class StreamUserAvatar extends StatelessWidget {
     super.key,
     required this.user,
     this.selected = false,
-    this.avatarTheme,
     this.onTap,
     this.onLongPress,
     this.imageBuilder,
     this.placeholderBuilder,
     this.errorBuilder,
     this.fallbackBuilder,
+    this.constraints,
+    this.borderRadius,
+    this.initialsTextStyle,
+    this.selectionColor,
+    this.selectionThickness,
   });
 
   /// User whose avatar is to be displayed.
@@ -57,9 +61,6 @@ class StreamUserAvatar extends StatelessWidget {
 
   /// Flag for if avatar is selected. Defaults to `false`.
   final bool selected;
-
-  /// Theme for the avatar.
-  final StreamAvatarTheme? avatarTheme;
 
   /// The action to perform when the user avatar is tapped.
   final OnUserAvatarTap? onTap;
@@ -79,17 +80,38 @@ class StreamUserAvatar extends StatelessWidget {
   /// Builder function used to build a widget with the user initials.
   final FallbackWidgetBuilder? fallbackBuilder;
 
+  /// Sizing constraints of the avatar.
+  final BoxConstraints? constraints;
+
+  /// [BorderRadius] of the image.
+  final BorderRadius? borderRadius;
+
+  /// [TextStyle] for the initials text.
+  final TextStyle? initialsTextStyle;
+
+  /// Color of the selection.
+  final Color? selectionColor;
+
+  /// Selection thickness around the avatar.
+  final double? selectionThickness;
+
   @override
   Widget build(BuildContext context) {
     final imageUrl = user.imageUrl;
     final hasImage = imageUrl != null && imageUrl.isNotEmpty;
-    final streamChatTheme = StreamVideoTheme.of(context);
-    final avatarTheme = this.avatarTheme ?? streamChatTheme.avatarTheme;
+
+    final theme = StreamUserAvatarTheme.of(context);
+    final constraints = this.constraints ?? theme.constraints;
+    final borderRadius = this.borderRadius ?? theme.borderRadius;
+    final initialsTextStyle = this.initialsTextStyle ?? theme.initialsTextStyle;
+    final selectionColor = this.selectionColor ?? theme.selectionColor;
+    final selectionThickness =
+        this.selectionThickness ?? theme.selectionThickness;
 
     Widget avatar = FittedBox(
       fit: BoxFit.cover,
       child: Container(
-        constraints: avatarTheme.constraints,
+        constraints: constraints,
         child: hasImage
             ? CachedNetworkImage(
                 fit: BoxFit.cover,
@@ -97,7 +119,11 @@ class StreamUserAvatar extends StatelessWidget {
                 imageUrl: imageUrl,
                 errorWidget: (context, __, error) => errorBuilder != null
                     ? errorBuilder!(context, user, error)
-                    : _InitialsUserAvatar(user: user, avatarTheme: avatarTheme),
+                    : _InitialsUserAvatar(
+                        user: user,
+                        borderRadius: borderRadius,
+                        initialsTextStyle: initialsTextStyle,
+                      ),
                 placeholder: placeholderBuilder != null
                     ? (context, __) => placeholderBuilder!(context, user)
                     : null,
@@ -105,24 +131,27 @@ class StreamUserAvatar extends StatelessWidget {
                     ? imageBuilder!(context, user, imageProvider)
                     : _ImageUserAvatar(
                         imageProvider: imageProvider,
-                        avatarTheme: avatarTheme,
+                        borderRadius: borderRadius,
                       ),
               )
             : fallbackBuilder != null
                 ? fallbackBuilder!(context, user)
-                : _InitialsUserAvatar(user: user, avatarTheme: avatarTheme),
+                : _InitialsUserAvatar(
+                    user: user,
+                    borderRadius: borderRadius,
+                    initialsTextStyle: initialsTextStyle,
+                  ),
       ),
     );
 
     if (selected) {
       avatar = ClipRRect(
-        borderRadius: avatarTheme.borderRadius +
-            BorderRadius.circular(avatarTheme.selectionThickness),
+        borderRadius: borderRadius + BorderRadius.circular(selectionThickness),
         child: Container(
-          constraints: avatarTheme.constraints,
-          color: avatarTheme.selectionColor,
+          constraints: constraints,
+          color: selectionColor,
           child: Padding(
-            padding: EdgeInsets.all(avatarTheme.selectionThickness),
+            padding: EdgeInsets.all(selectionThickness),
             child: avatar,
           ),
         ),
@@ -141,20 +170,20 @@ class _ImageUserAvatar extends StatelessWidget {
   /// Creates a new instance of [_ImageUserAvatar].
   const _ImageUserAvatar({
     required this.imageProvider,
-    required this.avatarTheme,
+    required this.borderRadius,
   });
 
   /// The image to be painted into the decoration.
   final ImageProvider imageProvider;
 
-  /// Theme for the avatar.
-  final StreamAvatarTheme avatarTheme;
+  /// [BorderRadius] of the image.
+  final BorderRadius borderRadius;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: avatarTheme.borderRadius,
+        borderRadius: borderRadius,
         image: DecorationImage(
           image: imageProvider,
           fit: BoxFit.cover,
@@ -169,14 +198,18 @@ class _InitialsUserAvatar extends StatelessWidget {
   /// Creates a new instance of [_InitialsUserAvatar].
   const _InitialsUserAvatar({
     required this.user,
-    required this.avatarTheme,
+    required this.borderRadius,
+    required this.initialsTextStyle,
   });
 
   /// User whose avatar is to be displayed.
   final UserInfo user;
 
-  /// Theme for the avatar.
-  final StreamAvatarTheme avatarTheme;
+  /// [BorderRadius] of the image.
+  final BorderRadius borderRadius;
+
+  /// [TextStyle] for the initials text.
+  final TextStyle? initialsTextStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -189,12 +222,12 @@ class _InitialsUserAvatar extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: avatarColor,
-        borderRadius: avatarTheme.borderRadius,
+        borderRadius: borderRadius,
       ),
       child: Center(
         child: Text(
           initials,
-          style: avatarTheme.initialsTextStyle,
+          style: initialsTextStyle,
         ),
       ),
     );

@@ -9,7 +9,7 @@ class ParticipantAvatars extends StatelessWidget {
   const ParticipantAvatars({
     super.key,
     required this.participants,
-    this.singleParticipantAvatarTheme = const StreamAvatarTheme(
+    this.singleParticipantAvatarTheme = const StreamUserAvatarThemeData(
       initialsTextStyle: TextStyle(
         fontSize: 32,
         fontWeight: FontWeight.bold,
@@ -23,7 +23,7 @@ class ParticipantAvatars extends StatelessWidget {
         Radius.circular(80),
       ),
     ),
-    this.multipleParticipantAvatarTheme = const StreamAvatarTheme(
+    this.multipleParticipantAvatarTheme = const StreamUserAvatarThemeData(
       initialsTextStyle: TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.bold,
@@ -43,10 +43,10 @@ class ParticipantAvatars extends StatelessWidget {
   final List<UserInfo> participants;
 
   /// Theme for the avatar in a call with one participant.
-  final StreamAvatarTheme singleParticipantAvatarTheme;
+  final StreamUserAvatarThemeData singleParticipantAvatarTheme;
 
   /// Theme for the avatar in a call with multiple participants.
-  final StreamAvatarTheme multipleParticipantAvatarTheme;
+  final StreamUserAvatarThemeData multipleParticipantAvatarTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -54,33 +54,41 @@ class ParticipantAvatars extends StatelessWidget {
     final length = participants.length;
 
     if (length == 1) {
-      return StreamUserAvatar(
-        user: participants[0],
-        avatarTheme: singleParticipantAvatarTheme,
+      return StreamUserAvatarTheme(
+        data: singleParticipantAvatarTheme,
+        child: StreamUserAvatar(
+          user: participants[0],
+        ),
       );
     } else if (length == 2) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          StreamUserAvatar(
-            user: participants[0],
-            avatarTheme: multipleParticipantAvatarTheme,
+          StreamUserAvatarTheme(
+            data: multipleParticipantAvatarTheme,
+            child: StreamUserAvatar(
+              user: participants[0],
+            ),
           ),
           const SizedBox(
             width: 32,
           ),
-          StreamUserAvatar(
-            user: participants[1],
-            avatarTheme: multipleParticipantAvatarTheme,
+          StreamUserAvatarTheme(
+            data: multipleParticipantAvatarTheme,
+            child: StreamUserAvatar(
+              user: participants[1],
+            ),
           )
         ],
       );
     } else if (length >= 3) {
       return Column(
         children: [
-          StreamUserAvatar(
-            user: participants[0],
-            avatarTheme: multipleParticipantAvatarTheme,
+          StreamUserAvatarTheme(
+            data: multipleParticipantAvatarTheme,
+            child: StreamUserAvatar(
+              user: participants[0],
+            ),
           ),
           const SizedBox(
             height: 8,
@@ -88,9 +96,11 @@ class ParticipantAvatars extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              StreamUserAvatar(
-                user: participants[1],
-                avatarTheme: multipleParticipantAvatarTheme,
+              StreamUserAvatarTheme(
+                data: multipleParticipantAvatarTheme,
+                child: StreamUserAvatar(
+                  user: participants[1],
+                ),
               ),
               const SizedBox(
                 width: 32,
@@ -112,9 +122,11 @@ class ParticipantAvatars extends StatelessWidget {
                   ),
                 )
               else
-                StreamUserAvatar(
-                  user: participants[2],
-                  avatarTheme: multipleParticipantAvatarTheme,
+                StreamUserAvatarTheme(
+                  data: multipleParticipantAvatarTheme,
+                  child: StreamUserAvatar(
+                    user: participants[2],
+                  ),
                 )
             ],
           )

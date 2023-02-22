@@ -5,6 +5,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import '../../stream_video_flutter.dart';
 import '../call_participants/participant_label.dart';
+import '../theme/lobby_view_theme.dart';
 
 /// A widget that can be shown before joining a call. Measures latencies
 /// and selects the best SFU. This speeds up the process of joining when
@@ -16,6 +17,9 @@ class StreamLobbyView extends StatefulWidget {
     required this.call,
     required this.onJoinCallTap,
     this.onCloseTap,
+    this.backgroundColor,
+    this.cardBackgroundColor,
+    this.userAvatarTheme,
   });
 
   /// Represents a call.
@@ -28,6 +32,15 @@ class StreamLobbyView extends StatefulWidget {
   ///
   /// By default it calls [Navigator.pop].
   final VoidCallback? onCloseTap;
+
+  /// The color of the background behind avatar.
+  final Color? backgroundColor;
+
+  /// The color of the focus border.
+  final Color? cardBackgroundColor;
+
+  /// Theme for the avatar.
+  final StreamUserAvatarThemeData? userAvatarTheme;
 
   @override
   State<StreamLobbyView> createState() => _StreamLobbyViewState();
@@ -61,12 +74,17 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
     final streamVideoTheme = StreamVideoTheme.of(context);
     final textTheme = streamVideoTheme.textTheme;
     final colorTheme = streamVideoTheme.colorTheme;
-    final theme = streamVideoTheme.lobbyViewTheme;
+
+    final theme = StreamLobbyViewTheme.of(context);
+    final backgroundColor = widget.backgroundColor ?? theme.backgroundColor;
+    final cardBackgroundColor =
+        widget.cardBackgroundColor ?? theme.cardBackgroundColor;
+    final userAvatarTheme = widget.userAvatarTheme ?? theme.userAvatarTheme;
 
     final currentUser = StreamVideo.instance.currentUser;
 
     return Scaffold(
-      backgroundColor: theme.backgroundColor,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
@@ -111,7 +129,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
-                  decoration: BoxDecoration(color: theme.cardBackgroundColor),
+                  decoration: BoxDecoration(color: cardBackgroundColor),
                   child: Stack(
                     children: [
                       if (_isVideoEnabled)
@@ -124,9 +142,11 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                         )
                       else if (currentUser != null)
                         Center(
-                          child: StreamUserAvatar(
-                            avatarTheme: theme.avatarTheme,
-                            user: currentUser,
+                          child: StreamUserAvatarTheme(
+                            data: userAvatarTheme,
+                            child: StreamUserAvatar(
+                              user: currentUser,
+                            ),
                           ),
                         ),
                       Align(
