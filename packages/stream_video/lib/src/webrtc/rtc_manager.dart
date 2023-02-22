@@ -282,6 +282,14 @@ extension PublisherRtcManager on RtcManager {
     }).toList();
   }
 
+  /// Removes all tracks from the publisher with the given [trackIdPrefix].
+  Future<void> removeSubscriber(String trackIdPrefix) async {
+    final tracks = getTracks(trackIdPrefix);
+    for (final track in tracks) {
+      await unpublishTrack(trackId: track.trackId);
+    }
+  }
+
   Future<RtcLocalTrack<AudioConstraints>> publishAudioTrack({
     required RtcLocalTrack<AudioConstraints> track,
     bool stopTrackOnMute = true,

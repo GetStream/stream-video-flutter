@@ -177,16 +177,25 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   Future<void> onSfuEvent(SfuEvent event) async {
     _logger.v(() => '[onSfuEvent] event: $event');
     if (event is SfuSubscriberOfferEvent) {
-      return _onSubscriberOffer(event);
+      await _onSubscriberOffer(event);
     } else if (event is SfuIceTrickleEvent) {
-      return _onRemoteIceCandidate(event);
+      await _onRemoteIceCandidate(event);
+    } else if (event is SfuParticipantLeftEvent) {
+      await _onParticipantLeft(event);
     } else if (event is SfuTrackPublishedEvent) {
-      unawaited(_onTrackPublished(event));
+      await _onTrackPublished(event);
     } else if (event is SfuTrackUnpublishedEvent) {
-      unawaited(_onTrackUnpublished(event));
+      await _onTrackUnpublished(event);
     }
 
     return stateManager.onSfuEvent(event);
+  }
+
+  Future<void> _onParticipantLeft(SfuParticipantLeftEvent event) async {
+    _logger.v(() => '[onParticipantLeft] event: $event');
+    final participant = event.participant;
+    final trackIdPrefix = participant.trackLookupPrefix;
+    await rtcManager?.removeSubscriber(trackIdPrefix);
   }
 
   Future<Result<RtcTrack>> _getTrackForParticipant(
