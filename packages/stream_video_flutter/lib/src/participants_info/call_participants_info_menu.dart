@@ -153,6 +153,26 @@ class _StreamCallParticipantsInfoMenuState
         widget.participantDividerIndent ?? theme.participantDividerIndent;
     final participantDividerHeight =
         widget.participantDividerHeight ?? theme.participantDividerHeight;
+    final participantNameTextStyle =
+        widget.participantNameTextStyle ?? theme.participantNameTextStyle;
+    final participantIconActiveColor =
+        widget.participantIconActiveColor ?? theme.participantIconActiveColor;
+    final participantIconInactiveColor = widget.participantIconInactiveColor ??
+        theme.participantIconInactiveColor;
+    final participantUserAvatarTheme =
+        widget.participantUserAvatarTheme ?? theme.participantUserAvatarTheme;
+    final inviteDividerColor =
+        widget.inviteDividerColor ?? theme.inviteDividerColor;
+    final inviteDividerIndent =
+        widget.inviteDividerIndent ?? theme.inviteDividerIndent;
+    final inviteDividerHeight =
+        widget.inviteDividerHeight ?? theme.inviteDividerHeight;
+    final inviteUsernameTextStyle =
+        widget.inviteUsernameTextStyle ?? theme.inviteUsernameTextStyle;
+    final inviteSelectedIconColor =
+        widget.inviteSelectedIconColor ?? theme.inviteSelectedIconColor;
+    final inviteUserAvatarTheme =
+        widget.inviteUserAvatarTheme ?? theme.inviteUserAvatarTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -173,6 +193,10 @@ class _StreamCallParticipantsInfoMenuState
                   participant: participant,
                   videoIcon: widget.videoIcon,
                   audioIcon: widget.audioIcon,
+                  participantNameTextStyle: participantNameTextStyle,
+                  participantIconActiveColor: participantIconActiveColor,
+                  participantIconInactiveColor: participantIconInactiveColor,
+                  participantUserAvatarTheme: participantUserAvatarTheme,
                 );
               },
               separatorBuilder: (context, index) =>
@@ -201,6 +225,12 @@ class _StreamCallParticipantsInfoMenuState
                   MaterialPageRoute(
                     builder: (context) => StreamInviteUserListView(
                       controller: _controller,
+                      inviteDividerColor: inviteDividerColor,
+                      inviteDividerIndent: inviteDividerIndent,
+                      inviteDividerHeight: inviteDividerHeight,
+                      inviteUsernameTextStyle: inviteUsernameTextStyle,
+                      inviteSelectedIconColor: inviteSelectedIconColor,
+                      inviteUserAvatarTheme: inviteUserAvatarTheme,
                     ),
                   ),
                 );

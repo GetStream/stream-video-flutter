@@ -28,6 +28,9 @@ class StreamInviteUserListView extends StatefulWidget {
     this.inviteDividerColor,
     this.inviteDividerIndent,
     this.inviteDividerHeight,
+    this.inviteUsernameTextStyle,
+    this.inviteSelectedIconColor,
+    this.inviteUserAvatarTheme,
   });
 
   /// Controller used to control the list of users.
@@ -49,6 +52,15 @@ class StreamInviteUserListView extends StatefulWidget {
 
   /// List divider height.
   final double? inviteDividerHeight;
+
+  /// [TextStyle] for the user name.
+  final TextStyle? inviteUsernameTextStyle;
+
+  /// Color of the selected icon.
+  final Color? inviteSelectedIconColor;
+
+  /// Theme for the user avatar widget.
+  final StreamUserAvatarThemeData? inviteUserAvatarTheme;
 
   @override
   State<StreamInviteUserListView> createState() =>
@@ -77,6 +89,12 @@ class _StreamInviteUserListViewState extends State<StreamInviteUserListView> {
         widget.inviteDividerIndent ?? theme.inviteDividerIndent;
     final inviteDividerHeight =
         widget.inviteDividerHeight ?? theme.inviteDividerHeight;
+    final inviteUsernameTextStyle =
+        widget.inviteUsernameTextStyle ?? theme.inviteUsernameTextStyle;
+    final inviteSelectedIconColor =
+        widget.inviteSelectedIconColor ?? theme.inviteSelectedIconColor;
+    final inviteUserAvatarTheme =
+        widget.inviteUserAvatarTheme ?? theme.inviteUserAvatarTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -104,6 +122,9 @@ class _StreamInviteUserListViewState extends State<StreamInviteUserListView> {
                     widget.controller.toggleSelection(user);
                   },
                   selectedIcon: widget.selectedIcon,
+                  inviteUsernameTextStyle: inviteUsernameTextStyle,
+                  inviteSelectedIconColor: inviteSelectedIconColor,
+                  inviteUserAvatarTheme: inviteUserAvatarTheme,
                 );
               },
               separatorBuilder: (context, index) =>
