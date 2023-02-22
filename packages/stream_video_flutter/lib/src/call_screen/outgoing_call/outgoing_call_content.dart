@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../../theme/stream_incoming_outgoing_call_theme.dart';
+import '../../theme/incoming_outgoing_call_theme.dart';
 import '../../utils/extensions.dart';
 import '../common/call_background.dart';
 import '../common/calling_participants.dart';
@@ -20,7 +19,11 @@ class OutgoingCallContent extends StatelessWidget {
     required this.onCancelPressed,
     required this.onMicrophoneTap,
     required this.onCameraTap,
-    this.theme,
+    this.singleParticipantAvatarTheme,
+    this.multipleParticipantAvatarTheme,
+    this.singleParticipantTextStyle,
+    this.multipleParticipantTextStyle,
+    this.callingLabelTextStyle,
   });
 
   /// Represents a call.
@@ -38,13 +41,37 @@ class OutgoingCallContent extends StatelessWidget {
   /// The action to perform when the camera button is tapped.
   final VoidCallback onCameraTap;
 
-  /// Theme for the outgoing call widget.
-  final StreamIncomingOutgoingCallTheme? theme;
+  /// Theme for the avatar in a call with one participant.
+  final StreamUserAvatarThemeData? singleParticipantAvatarTheme;
+
+  /// Theme for the avatar in a call with multiple participants.
+  final StreamUserAvatarThemeData? multipleParticipantAvatarTheme;
+
+  /// Text style for the participant label in a call with one participant.
+  final TextStyle? singleParticipantTextStyle;
+
+  /// Text style for the participant label in a call with multiple participants.
+  final TextStyle? multipleParticipantTextStyle;
+
+  /// Text style for the calling label.
+  final TextStyle? callingLabelTextStyle;
 
   @override
   Widget build(BuildContext context) {
-    final streamChatTheme = StreamVideoTheme.of(context);
-    final theme = this.theme ?? streamChatTheme.outgoingCallTheme;
+    final theme = StreamIncomingOutgoingCallTheme.outgoingCallThemeOf(context);
+
+    final singleParticipantAvatarTheme =
+        this.singleParticipantAvatarTheme ?? theme.singleParticipantAvatarTheme;
+    final multipleParticipantAvatarTheme =
+        this.multipleParticipantAvatarTheme ??
+            theme.multipleParticipantAvatarTheme;
+    final singleParticipantTextStyle =
+        this.singleParticipantTextStyle ?? theme.singleParticipantTextStyle;
+    final multipleParticipantTextStyle =
+        this.multipleParticipantTextStyle ?? theme.multipleParticipantTextStyle;
+    final callingLabelTextStyle =
+        this.callingLabelTextStyle ?? theme.callingLabelTextStyle;
+
     final participants =
         callState.otherParticipants.map((e) => e.toUserInfo()).toList();
 
@@ -58,22 +85,20 @@ class OutgoingCallContent extends StatelessWidget {
             const Spacer(),
             ParticipantAvatars(
               participants: participants,
-              singleParticipantAvatarTheme: theme.singleParticipantAvatarTheme,
-              multipleParticipantAvatarTheme:
-                  theme.multipleParticipantAvatarTheme,
+              singleParticipantAvatarTheme: singleParticipantAvatarTheme,
+              multipleParticipantAvatarTheme: multipleParticipantAvatarTheme,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
               child: CallingParticipants(
                 participants: participants,
-                singleParticipantTextStyle: theme.singleParticipantTextStyle,
-                multipleParticipantTextStyle:
-                    theme.multipleParticipantTextStyle,
+                singleParticipantTextStyle: singleParticipantTextStyle,
+                multipleParticipantTextStyle: multipleParticipantTextStyle,
               ),
             ),
             Text(
               'Calling…',
-              style: theme.callingLabelTextStyle,
+              style: callingLabelTextStyle,
             ),
             const Spacer(),
             OutgoingCallControls(

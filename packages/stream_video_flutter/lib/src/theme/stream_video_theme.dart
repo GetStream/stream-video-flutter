@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart' hide TextTheme;
 
 import '../utils/device_segmentation.dart';
+import 'incoming_outgoing_call_theme.dart';
 import 'lobby_view_theme.dart';
-import 'stream_incoming_outgoing_call_theme.dart';
 import 'themes.dart';
 
 /// {@template streamVideoThemeData}
@@ -23,8 +23,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamParticipantInfoTheme? participantInfoTheme,
     StreamInvitableUserListTheme? invitableUserListTheme,
     StreamInvitableUserTheme? invitableUserTheme,
-    StreamIncomingOutgoingCallTheme? incomingCallTheme,
-    StreamIncomingOutgoingCallTheme? outgoingCallTheme,
+    StreamIncomingOutgoingCallThemeData? incomingCallTheme,
+    StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
   }) {
     final isDark = brightness == Brightness.dark;
     textTheme ??=
@@ -247,7 +247,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           ),
         ),
       ),
-      incomingCallTheme: StreamIncomingOutgoingCallTheme(
+      incomingCallTheme: StreamIncomingOutgoingCallThemeData(
         singleParticipantAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
             fontSize: 32,
@@ -291,7 +291,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           fontWeight: FontWeight.bold,
         ),
       ),
-      outgoingCallTheme: StreamIncomingOutgoingCallTheme(
+      outgoingCallTheme: StreamIncomingOutgoingCallThemeData(
         singleParticipantAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
             fontSize: 32,
@@ -384,10 +384,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   final StreamInvitableUserTheme invitableUserTheme;
 
   /// Theme for the outgoing call widget.
-  final StreamIncomingOutgoingCallTheme incomingCallTheme;
+  final StreamIncomingOutgoingCallThemeData incomingCallTheme;
 
   /// Theme for the outgoing call widget.
-  final StreamIncomingOutgoingCallTheme outgoingCallTheme;
+  final StreamIncomingOutgoingCallThemeData outgoingCallTheme;
 
   /// Creates a copy of [StreamVideoTheme] with specified attributes
   /// overridden.
@@ -404,8 +404,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamParticipantsInfoTheme? participantsInfoTheme,
     StreamInvitableUserListTheme? invitableUserListTheme,
     StreamInvitableUserTheme? invitableUserTheme,
-    StreamIncomingOutgoingCallTheme? incomingCallTheme,
-    StreamIncomingOutgoingCallTheme? outgoingCallTheme,
+    StreamIncomingOutgoingCallThemeData? incomingCallTheme,
+    StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
   }) =>
       StreamVideoTheme.raw(
         textTheme: this.textTheme.merge(textTheme),

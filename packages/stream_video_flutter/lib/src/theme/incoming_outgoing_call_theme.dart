@@ -1,14 +1,16 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'user_avatar_theme.dart';
+import '../../stream_video_flutter.dart';
 
-/// {@template participantsInfoTheme}
-/// A style that overrides the default appearance of the incoming and outgoing call widget.
-/// {@endtemplate}
-class StreamIncomingOutgoingCallTheme with Diagnosticable {
-  /// {@macro outgoingCallTheme}
-  const StreamIncomingOutgoingCallTheme({
+/// Defines default property values for [IncomingCallContent] and
+/// [OutgoingCallContent] widgets.
+@immutable
+class StreamIncomingOutgoingCallThemeData with Diagnosticable {
+  /// Creates a new instance of [StreamIncomingOutgoingCallThemeData].
+  const StreamIncomingOutgoingCallThemeData({
     this.singleParticipantAvatarTheme = const StreamUserAvatarThemeData(
       initialsTextStyle: TextStyle(
         fontSize: 32,
@@ -68,14 +70,16 @@ class StreamIncomingOutgoingCallTheme with Diagnosticable {
   /// Text style for the calling label.
   final TextStyle callingLabelTextStyle;
 
-  StreamIncomingOutgoingCallTheme copyWith({
+  /// Creates a copy of this object with the given fields replaced with the
+  /// new values.
+  StreamIncomingOutgoingCallThemeData copyWith({
     StreamUserAvatarThemeData? singleParticipantAvatarTheme,
     StreamUserAvatarThemeData? multipleParticipantAvatarTheme,
     TextStyle? singleParticipantTextStyle,
     TextStyle? multipleParticipantTextStyle,
     TextStyle? callingLabelTextStyle,
   }) {
-    return StreamIncomingOutgoingCallTheme(
+    return StreamIncomingOutgoingCallThemeData(
       singleParticipantAvatarTheme:
           singleParticipantAvatarTheme ?? this.singleParticipantAvatarTheme,
       multipleParticipantAvatarTheme:
@@ -89,12 +93,12 @@ class StreamIncomingOutgoingCallTheme with Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two [StreamIncomingOutgoingCallTheme] themes.
+  /// Linearly interpolate between two [StreamIncomingOutgoingCallThemeData] themes.
   ///
   /// All the properties must be non-null.
-  StreamIncomingOutgoingCallTheme lerp(
-      StreamIncomingOutgoingCallTheme other, double t) {
-    return StreamIncomingOutgoingCallTheme(
+  StreamIncomingOutgoingCallThemeData lerp(
+      StreamIncomingOutgoingCallThemeData other, double t) {
+    return StreamIncomingOutgoingCallThemeData(
       singleParticipantAvatarTheme: singleParticipantAvatarTheme.lerp(
           other.singleParticipantAvatarTheme, t),
       multipleParticipantAvatarTheme: multipleParticipantAvatarTheme.lerp(
@@ -109,36 +113,30 @@ class StreamIncomingOutgoingCallTheme with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is StreamIncomingOutgoingCallTheme &&
-          runtimeType == other.runtimeType &&
-          singleParticipantAvatarTheme == other.singleParticipantAvatarTheme &&
-          multipleParticipantAvatarTheme ==
-              other.multipleParticipantAvatarTheme &&
-          singleParticipantTextStyle == other.singleParticipantTextStyle &&
-          multipleParticipantTextStyle == other.multipleParticipantTextStyle &&
-          callingLabelTextStyle == other.callingLabelTextStyle;
+  int get hashCode => Object.hash(
+        singleParticipantAvatarTheme,
+        multipleParticipantAvatarTheme,
+        singleParticipantTextStyle,
+        multipleParticipantTextStyle,
+        callingLabelTextStyle,
+      );
 
   @override
-  int get hashCode =>
-      singleParticipantAvatarTheme.hashCode ^
-      multipleParticipantAvatarTheme.hashCode ^
-      singleParticipantTextStyle.hashCode ^
-      multipleParticipantTextStyle.hashCode ^
-      callingLabelTextStyle.hashCode;
-
-  /// Merges one [StreamIncomingOutgoingCallTheme] with the another.
-  StreamIncomingOutgoingCallTheme merge(
-      StreamIncomingOutgoingCallTheme? other) {
-    if (other == null) return this;
-    return copyWith(
-      singleParticipantAvatarTheme: other.singleParticipantAvatarTheme,
-      multipleParticipantAvatarTheme: other.multipleParticipantAvatarTheme,
-      singleParticipantTextStyle: other.singleParticipantTextStyle,
-      multipleParticipantTextStyle: other.multipleParticipantTextStyle,
-      callingLabelTextStyle: other.callingLabelTextStyle,
-    );
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is StreamIncomingOutgoingCallThemeData &&
+        runtimeType == other.runtimeType &&
+        singleParticipantAvatarTheme == other.singleParticipantAvatarTheme &&
+        multipleParticipantAvatarTheme ==
+            other.multipleParticipantAvatarTheme &&
+        singleParticipantTextStyle == other.singleParticipantTextStyle &&
+        multipleParticipantTextStyle == other.multipleParticipantTextStyle &&
+        callingLabelTextStyle == other.callingLabelTextStyle;
   }
 
   @override
@@ -155,5 +153,60 @@ class StreamIncomingOutgoingCallTheme with Diagnosticable {
           'multipleParticipantTextStyle', multipleParticipantTextStyle))
       ..add(
           DiagnosticsProperty('callingLabelTextStyle', callingLabelTextStyle));
+  }
+
+  /// Merges one [StreamIncomingOutgoingCallThemeData] with the another.
+  StreamIncomingOutgoingCallThemeData merge(
+      StreamIncomingOutgoingCallThemeData? other) {
+    if (other == null) return this;
+    return copyWith(
+      singleParticipantAvatarTheme: other.singleParticipantAvatarTheme,
+      multipleParticipantAvatarTheme: other.multipleParticipantAvatarTheme,
+      singleParticipantTextStyle: other.singleParticipantTextStyle,
+      multipleParticipantTextStyle: other.multipleParticipantTextStyle,
+      callingLabelTextStyle: other.callingLabelTextStyle,
+    );
+  }
+}
+
+/// Applies a incoming/outgoing call theme to descendant [IncomingCallContent]
+/// and [OutgoingCallContent] widgets.
+class StreamIncomingOutgoingCallTheme extends InheritedWidget {
+  /// Creates a new instance of [StreamIncomingOutgoingCallTheme].
+  const StreamIncomingOutgoingCallTheme({
+    super.key,
+    required this.data,
+    required super.child,
+  });
+
+  /// The properties used for all descendant [IncomingCallContent] and
+  /// [OutgoingCallContent] widgets.
+  final StreamIncomingOutgoingCallThemeData data;
+
+  /// Returns the configuration [data] from the closest
+  /// [StreamIncomingOutgoingCallTheme] ancestor. If there is no ancestor,
+  /// it returns [StreamVideoTheme.incomingCallTheme].
+  static StreamIncomingOutgoingCallThemeData incomingCallThemeOf(
+      BuildContext context) {
+    final incomingOutgoingCallTheme = context
+        .dependOnInheritedWidgetOfExactType<StreamIncomingOutgoingCallTheme>();
+    return incomingOutgoingCallTheme?.data ??
+        StreamVideoTheme.of(context).incomingCallTheme;
+  }
+
+  /// Returns the configuration [data] from the closest
+  /// [StreamIncomingOutgoingCallTheme] ancestor. If there is no ancestor,
+  /// it returns [StreamVideoTheme.outgoingCallTheme].
+  static StreamIncomingOutgoingCallThemeData outgoingCallThemeOf(
+      BuildContext context) {
+    final incomingOutgoingCallTheme = context
+        .dependOnInheritedWidgetOfExactType<StreamIncomingOutgoingCallTheme>();
+    return incomingOutgoingCallTheme?.data ??
+        StreamVideoTheme.of(context).outgoingCallTheme;
+  }
+
+  @override
+  bool updateShouldNotify(StreamIncomingOutgoingCallTheme oldWidget) {
+    return data != oldWidget.data;
   }
 }
