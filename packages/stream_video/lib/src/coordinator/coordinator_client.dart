@@ -3,12 +3,22 @@ import '../models/call_created.dart';
 import '../models/call_device.dart';
 import '../models/call_metadata.dart';
 import '../models/call_received_created.dart';
+import '../models/user_info.dart';
+import '../shared_emitter.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
+import 'models/coordinator_events.dart';
 import 'models/coordinator_inputs.dart' as inputs;
 import 'models/coordinator_models.dart' as models;
 
 abstract class CoordinatorClient {
+
+  SharedEmitter<CoordinatorEvent> get events;
+
+  Future<void> onUserLogin(UserInfo user);
+
+  Future<void> onUserLogout();
+
   Future<Result<CallDevice>> createDevice(
     inputs.CreateDeviceInput input,
   );

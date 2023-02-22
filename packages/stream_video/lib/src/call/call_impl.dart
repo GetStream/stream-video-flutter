@@ -169,6 +169,7 @@ class CallImpl extends Call {
     List<String> participantIds = const [],
     bool ringing = false,
   }) async {
+    _logger.d(() => '[getOrCreate] no args');
     final state = _stateManager.state.value;
     final result = await _streamVideo.getOrCreateCall(
       cid: state.callCid,
@@ -186,6 +187,7 @@ class CallImpl extends Call {
     List<String> participantIds = const [],
     bool ringing = false,
   }) async {
+    _logger.d(() => '[create] no args');
     final state = _stateManager.state.value;
     final result = await _streamVideo.createCall(
       cid: state.callCid,
@@ -200,6 +202,7 @@ class CallImpl extends Call {
 
   @override
   Future<Result<None>> joinCall() async {
+    _logger.d(() => '[joinCall] no args');
     try {
       await _joinIfNeeded();
     } catch (e, stk) {

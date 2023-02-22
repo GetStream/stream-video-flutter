@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:tart/tart.dart';
@@ -14,27 +15,72 @@ import '../../models/call_created.dart';
 import '../../models/call_device.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_received_created.dart';
+import '../../models/user_info.dart';
+import '../../shared_emitter.dart';
 import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
 import '../coordinator_client.dart';
+import '../models/coordinator_events.dart';
 import '../models/coordinator_inputs.dart' as input;
 import '../models/coordinator_models.dart';
+import 'coordinator_ws_protobuf.dart';
 import 'mapper_extensions.dart';
 
 /// An accessor that allows us to communicate with the API around video calls.
 class CoordinatorClientProtobuf extends CoordinatorClient {
+
   CoordinatorClientProtobuf({
-    required String baseUrl,
+    required String rpcUrl,
+    required this.wsUrl,
     required this.apiKey,
     required this.tokenManager,
-  }) : _rpclient = ClientRPCProtobufClient(baseUrl, '');
+  }) : _rpcClient = ClientRPCProtobufClient(rpcUrl, '');
 
   final _logger = taggedLogger(tag: 'SV:CoordClientProto');
   final String apiKey;
+  final String wsUrl;
   final TokenManager tokenManager;
 
-  final ClientRPC _rpclient;
+  final ClientRPC _rpcClient;
+
+  @override
+  SharedEmitter<CoordinatorEvent> get events => _events;
+  final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
+
+  CoordinatorWebSocketProtobuf? _ws;
+  StreamSubscription<CoordinatorEvent>? _wsSubscription;
+
+  @override
+  Future<void> onUserLogin(UserInfo user) async {
+    try {
+      final ws = CoordinatorWebSocketProtobuf(
+        wsUrl,
+        apiKey: apiKey,
+        userInfo: user,
+        tokenManager: tokenManager,
+      );
+      _ws = ws;
+      _wsSubscription = ws.events.listen((event) {
+        _logger.v(() => '[onUserLogin] event.type: ${event.runtimeType}');
+        _events.emit(event);
+      });
+
+      await ws.connect();
+    } catch (e) {
+      _logger.e(() => '[onUserLogin] failed(${user.id}): $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> onUserLogout() async {
+    if (_ws == null) return;
+    await _ws?.disconnect();
+    _ws = null;
+    await _wsSubscription?.cancel();
+    _wsSubscription = null;
+  }
 
   /// Create a new Device used to receive Push Notifications.
   @override
@@ -43,7 +89,7 @@ class CoordinatorClientProtobuf extends CoordinatorClient {
   ) async {
     try {
       final result = await _withAuthHeaders().then((ctx) {
-        return _rpclient
+        return _rpcClient
             .createDevice(
               ctx,
               CreateDeviceRequest(
@@ -75,7 +121,7 @@ class CoordinatorClientProtobuf extends CoordinatorClient {
   Future<Result<None>> deleteDevice(input.DeleteDeviceInput input) async {
     try {
       await _withAuthHeaders().then((ctx) {
-        return _rpclient
+        return _rpcClient
             .deleteDevice(
               ctx,
               DeleteDeviceRequest(
@@ -98,7 +144,7 @@ class CoordinatorClientProtobuf extends CoordinatorClient {
   ) async {
     try {
       final result = await _withAuthHeaders().then((ctx) {
-        return _rpclient
+        return _rpcClient
             .createCall(
               ctx,
               CreateCallRequest(
@@ -131,7 +177,7 @@ class CoordinatorClientProtobuf extends CoordinatorClient {
   ) async {
     try {
       final result = await _withAuthHeaders().then((ctx) {
-        return _rpclient
+        return _rpcClient
             .getOrCreateCall(
               ctx,
               GetOrCreateCallRequest(
@@ -167,7 +213,7 @@ class CoordinatorClientProtobuf extends CoordinatorClient {
   Future<Result<CoordinatorJoined>> joinCall(input.JoinCallInput input) async {
     try {
       final result = await _withAuthHeaders().then((ctx) {
-        return _rpclient
+        return _rpcClient
             .joinCall(
               ctx,
               JoinCallRequest(
@@ -231,7 +277,7 @@ class CoordinatorClientProtobuf extends CoordinatorClient {
   }) async {
     try {
       final result = await _withAuthHeaders().then((ctx) {
-        return _rpclient
+        return _rpcClient
             .getCallEdgeServer(
               ctx,
               GetCallEdgeServerRequest(
@@ -270,7 +316,7 @@ class CoordinatorClientProtobuf extends CoordinatorClient {
   ) async {
     try {
       await _withAuthHeaders().then((ctx) {
-        return _rpclient
+        return _rpcClient
             .sendEvent(
               ctx,
               SendEventRequest(
@@ -294,7 +340,7 @@ class CoordinatorClientProtobuf extends CoordinatorClient {
   ) async {
     try {
       await _withAuthHeaders().then((ctx) {
-        return _rpclient
+        return _rpcClient
             .sendCustomEvent(
               ctx,
               SendCustomEventRequest(
@@ -319,7 +365,7 @@ class CoordinatorClientProtobuf extends CoordinatorClient {
   Future<Result<None>> inviteUsers(input.UpsertCallMembersInput input) async {
     try {
       await _withAuthHeaders().then((ctx) {
-        return _rpclient
+        return _rpcClient
             .upsertCallMembers(
               ctx,
               UpsertCallMembersRequest(
@@ -344,7 +390,7 @@ class CoordinatorClientProtobuf extends CoordinatorClient {
   ) async {
     try {
       final result = await _withAuthHeaders().then((ctx) {
-        return _rpclient
+        return _rpcClient
             .queryUsers(
               ctx,
               QueryUsersRequest(

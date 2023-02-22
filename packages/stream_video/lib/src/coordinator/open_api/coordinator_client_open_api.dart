@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:tart/tart.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
@@ -9,35 +11,85 @@ import '../../models/call_created.dart';
 import '../../models/call_device.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_received_created.dart';
+import '../../models/user_info.dart';
+import '../../shared_emitter.dart';
 import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
 import '../coordinator_client.dart';
+import '../models/coordinator_events.dart';
 import '../models/coordinator_inputs.dart' as input;
 import '../models/coordinator_inputs.dart';
 import '../models/coordinator_models.dart';
+import 'coordinator_ws_open_api.dart';
 import 'open_api_extensions.dart';
 
 /// An accessor that allows us to communicate with the API around video calls.
 class CoordinatorClientOpenApi extends CoordinatorClient {
   CoordinatorClientOpenApi({
-    required String baseUrl,
+    required String rpcUrl,
+    required this.wsUrl,
     required this.apiKey,
     required this.tokenManager,
   }) : _apiClient = open.ApiClient(
-          basePath: baseUrl,
+          basePath: rpcUrl,
           authentication:
               _Authentication(apiKey: apiKey, tokenManager: tokenManager),
         );
 
   final _logger = taggedLogger(tag: 'SV:CoordClient');
   final String apiKey;
+  final String wsUrl;
   final TokenManager tokenManager;
+
+  String? userId = null;
 
   final open.ApiClient _apiClient;
   late final videoApi = open.VideoCallsApi(_apiClient);
   late final eventsApi = open.EventsApi(_apiClient);
   late final usersApi = open.UsersApi(_apiClient);
+
+  @override
+  SharedEmitter<CoordinatorEvent> get events => _events;
+  final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
+
+  CoordinatorWebSocketOpenApi? _ws;
+  StreamSubscription<CoordinatorEvent>? _wsSubscription;
+
+  @override
+  Future<void> onUserLogin(UserInfo user) async {
+    try {
+      _logger.d(() => '[onUserLogin] user: $user');
+      userId = user.id;
+      final ws = CoordinatorWebSocketOpenApi(
+        wsUrl,
+        apiKey: apiKey,
+        userInfo: user,
+        tokenManager: tokenManager,
+      );
+      _ws = ws;
+      _wsSubscription = ws.events.listen((event) {
+        _logger.v(() => '[onWsEvent] event.type: ${event.runtimeType}');
+
+        _events.emit(event);
+      });
+
+      await ws.connect();
+    } catch (e) {
+      _logger.e(() => '[onUserLogin] failed(${user.id}): $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> onUserLogout() async {
+    if (_ws == null) return;
+    userId = null;
+    await _ws?.disconnect();
+    _ws = null;
+    await _wsSubscription?.cancel();
+    _wsSubscription = null;
+  }
 
   /// Create a new Device used to receive Push Notifications.
   @override
@@ -114,9 +166,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         input.callCid.type,
         input.callCid.id,
         open.JoinCallRequest(
-          // TODO get from health.check event
-          connectionId: '',
+          connectionId: _ws?.clientId,
         ),
+        connectionId: _ws?.clientId,
       );
       if (result == null) {
         return Result.error('message');
@@ -259,14 +311,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     }
   }
 
-  Future<Context> _withAuthHeaders([Context? ctx]) async {
-    ctx ??= Context();
-    final token = await tokenManager.loadToken();
-    return withHttpRequestHeaders(ctx, {
-      'api_key': apiKey,
-      'Authorization': 'Bearer ${token.rawValue}',
-    });
-  }
 }
 
 class _Authentication extends open.Authentication {
@@ -282,6 +326,7 @@ class _Authentication extends open.Authentication {
   ) async {
     final token = await tokenManager.loadToken();
     headerParams['api_key'] = apiKey;
-    headerParams['Authorization'] = 'Bearer ${token.rawValue}';
+    headerParams['Authorization'] = token.rawValue;
+    headerParams['stream-auth-type'] = 'jwt';
   }
 }

@@ -49,7 +49,7 @@ class StreamVideoImpl implements StreamVideo {
     int latencyMeasurementRounds = 3,
     Level logLevel = Level.ALL,
     LogHandlerFunction logHandlerFunction = StreamVideoImpl.defaultLogHandler,
-    PushNotificationFactory pushNotificationFactrory =
+    PushNotificationFactory pushNotificationFactory =
         defaultPushNotificationManager,
   }) {
     return StreamVideoImpl._(
@@ -59,7 +59,7 @@ class StreamVideoImpl implements StreamVideo {
       latencyMeasurementRounds: latencyMeasurementRounds,
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
-      pushNotificationFactrory: pushNotificationFactrory,
+      pushNotificationFactrory: pushNotificationFactory,
     );
   }
 
@@ -79,7 +79,8 @@ class StreamVideoImpl implements StreamVideo {
     _client = buildCoordinatorClient(
       apiKey: apiKey,
       tokenManager: _tokenManager,
-      baseUrl: coordinatorRpcUrl,
+      rpcUrl: coordinatorRpcUrl,
+      wsUrl: coordinatorWsUrl,
     );
     _initPushNotificationManager(pushNotificationFactrory);
   }
@@ -97,15 +98,13 @@ class StreamVideoImpl implements StreamVideo {
 
   var _state = _StreamVideoState();
 
-  @override
-  UserInfo? get currentUser => _state.currentUser.value;
-
-  CoordinatorWebSocket? _ws;
-  StreamSubscription<CoordinatorEvent>? _wsSubscription;
+  StreamSubscription<CoordinatorEvent>? _eventSubscription;
 
   @override
-  SharedEmitter<CoordinatorEvent> get events => _events;
-  final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
+  UserInfo? get currentUser => _state.currentUser.valueOrNull;
+
+  @override
+  SharedEmitter<CoordinatorEvent> get events => _client.events;
 
   @override
   void Function(CallCreated)? onCallCreated;
@@ -128,10 +127,11 @@ class StreamVideoImpl implements StreamVideo {
     Token? token,
     TokenProvider? provider,
   }) async {
-    if (_ws != null) return;
-
     _logger.i(() => '[connectUser] user.id : ${user.id}');
-
+    if (currentUser != null) {
+      _logger.w(() => '[connectUser] rejected (already set): $currentUser');
+      return;
+    }
     _state.currentUser.value = user;
     await _tokenManager.setTokenOrProvider(
       user.id,
@@ -140,20 +140,9 @@ class StreamVideoImpl implements StreamVideo {
     );
 
     try {
-      _ws = buildCoordinatorWs(
-        coordinatorWsUrl,
-        apiKey: apiKey,
-        userInfo: user,
-        tokenManager: _tokenManager,
-      );
-      _wsSubscription = _ws?.events.listen((event) {
+      _eventSubscription = _client.events.listen((event) {
         _logger.v(() => '[onCoordWsEvent] event.type: ${event.runtimeType}');
         if (event is CoordinatorCallCreatedEvent) {
-          final currentUserId = _state.currentUser.value?.id;
-          if (currentUserId == null) {
-            _logger.v(() => '[onCoordWsEvent] rejected(no currentUserId)');
-            return;
-          }
           final callCreated = CallCreated(
             callCid: StreamCallCid(cid: event.callCid),
             ringing: event.ringing,
@@ -163,13 +152,12 @@ class StreamVideoImpl implements StreamVideo {
               users: event.users,
             ),
           );
-          _logger.v(() => '[onCoordWsEvent] onCallCreated: $onCallCreated');
+          _logger.v(() => '[onCoordWsEvent] onCallCreated: $callCreated');
           onCallCreated?.call(callCreated);
         }
-        _events.emit(event);
       });
 
-      await _ws!.connect();
+      await _client.onUserLogin(user);
       return _pushNotificationManager.onUserLoggedIn();
     } catch (e) {
       _logger.e(() => '[connectUser] failed(${user.id}): $e');
@@ -181,12 +169,13 @@ class StreamVideoImpl implements StreamVideo {
   @override
   Future<void> disconnectUser() async {
     _logger.i(() => '[disconnectUser] currentUser.id: ${currentUser?.id}');
-
-    if (_ws == null) return;
-    await _ws?.disconnect();
-    _ws = null;
-    await _wsSubscription?.cancel();
-    _wsSubscription = null;
+    if (currentUser == null) {
+      _logger.w(() => '[disconnectUser] rejected (no user): $currentUser');
+      return;
+    }
+    await _client.onUserLogout();
+    await _eventSubscription?.cancel();
+    _eventSubscription = null;
     _tokenManager.reset();
 
     // Resetting the state.
@@ -464,7 +453,8 @@ class _StreamVideoState {
 }
 
 CoordinatorClient buildCoordinatorClient({
-  required String baseUrl,
+  required String rpcUrl,
+  required String wsUrl,
   required String apiKey,
   required TokenManager tokenManager,
 }) {
@@ -472,13 +462,15 @@ CoordinatorClient buildCoordinatorClient({
     return CoordinatorClientOpenApi(
       apiKey: apiKey,
       tokenManager: tokenManager,
-      baseUrl: baseUrl,
+      rpcUrl: rpcUrl,
+      wsUrl: wsUrl,
     );
   }
   return CoordinatorClientProtobuf(
     apiKey: apiKey,
     tokenManager: tokenManager,
-    baseUrl: baseUrl,
+    rpcUrl: rpcUrl,
+    wsUrl: wsUrl,
   );
 }
 

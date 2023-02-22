@@ -18,13 +18,13 @@ class EndpointConfig {
 
   static EndpointConfig stagingOregon = const EndpointConfig(
     apiKey: '554fuj7wzx4r',
-    rpcUrl: 'https://video-edge-oregon-ce3.stream-io-api.com/',
+    rpcUrl: 'https://video-edge-oregon-ce3.stream-io-api.com/video',
     wsUrl: 'wss://video-edge-oregon-ce3.stream-io-api.com/video/connect',
   );
 
   static EndpointConfig stagingFrankfurt = const EndpointConfig(
     apiKey: 'w6yaq5388uym',
-    rpcUrl: 'https://video-edge-frankfurt-ce1.stream-io-api.com/',
+    rpcUrl: 'https://video-edge-frankfurt-ce1.stream-io-api.com/video',
     wsUrl: 'wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect',
   );
 }

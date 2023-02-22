@@ -52,9 +52,8 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   SharedEmitter<CoordinatorEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
 
-  String? _userId;
-  String? _clientId;
-  String? _connectionId;
+  String? userId;
+  String? clientId;
 
   set callInfo(CallInfo? info) => _callInfo = info;
   CallInfo? _callInfo;
@@ -129,8 +128,8 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     );
 
     // resetting connection
-    _userId = null;
-    _clientId = null;
+    userId = null;
+    clientId = null;
 
     // check if we manually closed the connection
     if (_manuallyClosed) {
@@ -176,12 +175,8 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       startPingPong();
     }
     ackPong(event);
-    final me = event.me;
-    if (me != null) {
-      _userId ??= me.id;
-      _clientId ??= '${me.id}--${const Uuid().v4()}';
-      _connectionId ??= event.connectionId;
-    }
+    userId ??= event.me?.id;
+    clientId ??= event.connectionId;
   }
 
   @override
@@ -218,7 +213,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       {
         'type': 'health.check',
         // 'user_id': _userId,
-        'client_id': _clientId,
+        'client_id': clientId,
         // 'call_type': _callInfo?.callType,
         // 'call_id': _callInfo?.callId,
       }

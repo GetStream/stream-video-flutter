@@ -25,6 +25,7 @@ export 'src/stream_video.dart';
 export 'src/token/token.dart';
 export 'src/types/other.dart';
 export 'src/utils/result.dart';
+export 'src/utils/string.dart';
 export 'src/utils/subscriptions.dart';
 export 'src/webrtc/media/media_constraints.dart';
 export 'src/webrtc/model/rtc_video_dimension.dart';

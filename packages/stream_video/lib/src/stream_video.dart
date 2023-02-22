@@ -57,7 +57,7 @@ abstract class StreamVideo {
       latencyMeasurementRounds: latencyMeasurementRounds,
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
-      pushNotificationFactrory: pushNotificationFactory,
+      pushNotificationFactory: pushNotificationFactory,
     );
   }
   static final InstanceHolder _instanceHolder = InstanceHolder();

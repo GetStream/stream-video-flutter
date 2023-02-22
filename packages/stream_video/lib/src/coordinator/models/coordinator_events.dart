@@ -19,8 +19,10 @@ abstract class CoordinatorEvent with EquatableMixin {
 
 /// Sent periodically by the server to keep the connection alive.
 class CoordinatorHealthCheckEvent extends CoordinatorEvent {
-  const CoordinatorHealthCheckEvent(
-      {required this.clientId, required this.userId});
+  const CoordinatorHealthCheckEvent({
+    required this.clientId,
+    required this.userId,
+  });
 
   final String clientId;
   final String userId;
