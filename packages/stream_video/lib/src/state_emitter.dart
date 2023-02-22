@@ -6,6 +6,12 @@ import 'package:rxdart/rxdart.dart';
 abstract class StateEmitter<T> {
   T get value;
 
+  Stream<T> get valueStream;
+
+  bool get hasValue;
+
+  T? get valueOrNull;
+
   StreamSubscription<T> listen(
     void Function(T value)? onData, {
     Function? onError,
@@ -19,12 +25,16 @@ abstract class StateEmitter<T> {
 
   Future<T> firstWhere(
     bool Function(T element) test, {
+    T Function()? orElse,
     required Duration timeLimit,
   });
 }
 
 abstract class MutableStateEmitter<T> extends StateEmitter<T> {
   set value(T newValue);
+
+  Sink<T> get valueSink;
+
   Future<dynamic> close();
 }
 
@@ -42,23 +52,39 @@ class MutableStateEmitterImpl<T> extends MutableStateEmitter<T> {
   @override
   T get value => _state.value;
 
+  @override
+  Stream<T> get valueStream => _state.stream;
+
+  @override
+  bool get hasValue => _state.hasValue;
+
+  @override
+  T? get valueOrNull => _state.valueOrNull;
+
   /// Set and emit the new value.
   @override
   set value(T newValue) => _state.value = newValue;
 
   @override
+  Sink<T> get valueSink => _state.sink;
+
+  @override
   Future<E> waitFor<E extends T>({
     required Duration timeLimit,
   }) {
-    return _state.takeWhile((it) => it is E).cast<E>().first.timeout(timeLimit);
+    return firstWhere(
+      (it) => it is E,
+      timeLimit: timeLimit,
+    ).then((it) => it as E);
   }
 
   @override
   Future<T> firstWhere(
     bool Function(T element) test, {
+    T Function()? orElse,
     required Duration timeLimit,
   }) {
-    return _state.firstWhere(test).timeout(timeLimit);
+    return _state.firstWhere(test, orElse: orElse).timeout(timeLimit);
   }
 
   @override
@@ -67,10 +93,11 @@ class MutableStateEmitterImpl<T> extends MutableStateEmitter<T> {
   }
 
   /// Adds a subscription to this emitter.
+  @override
   StreamSubscription<T> listen(
-    void onData(T value)?, {
+    void Function(T value)? onData, {
     Function? onError,
-    void onDone()?,
+    void Function()? onDone,
     bool? cancelOnError,
   }) {
     return _state.listen(
