@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:video_with_chat/app_config.dart';
 import 'package:video_with_chat/screen/login_screen.dart';
 
 import 'env/env.dart';
@@ -9,13 +8,13 @@ import 'env/env.dart';
 Future<void> main() async {
   /// Initialize Stream Video SDK.
   StreamVideo.init(
-    Env.apiKey,
+    Env.streamVideoApiKey,
     logLevel: Level.INFO,
   );
 
   /// Initialize Stream Chat SDK.
   final client = StreamChatClient(
-    chatApiKey,
+    Env.streamChatApiKey,
     logLevel: Level.INFO,
   );
 

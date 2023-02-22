@@ -7,8 +7,6 @@ part 'env.g.dart';
 abstract class Env {
   @EnviedField(varName: 'SAMPLE_STREAM_VIDEO_API_KEY')
   static const streamVideoApiKey = _Env.streamVideoApiKey;
-  @EnviedField(varName: 'SAMPLE_STREAM_CHAT_API_KEY')
-  static const streamChatApiKey = _Env.streamChatApiKey;
 
   @EnviedField(varName: 'SAMPLE_USER_00_ID')
   static const sampleUserId00 = _Env.sampleUserId00;
@@ -20,8 +18,6 @@ abstract class Env {
   static const sampleUserImage00 = _Env.sampleUserImage00;
   @EnviedField(varName: 'SAMPLE_USER_00_VIDEO_TOKEN')
   static const sampleUserVideoToken00 = _Env.sampleUserVideoToken00;
-  @EnviedField(varName: 'SAMPLE_USER_00_CHAT_TOKEN')
-  static const sampleUserChatToken00 = _Env.sampleUserChatToken00;
 
   @EnviedField(varName: 'SAMPLE_USER_01_ID')
   static const sampleUserId01 = _Env.sampleUserId01;
@@ -33,8 +29,6 @@ abstract class Env {
   static const sampleUserImage01 = _Env.sampleUserImage01;
   @EnviedField(varName: 'SAMPLE_USER_01_VIDEO_TOKEN')
   static const sampleUserVideoToken01 = _Env.sampleUserVideoToken01;
-  @EnviedField(varName: 'SAMPLE_USER_01_CHAT_TOKEN')
-  static const sampleUserChatToken01 = _Env.sampleUserChatToken01;
 
   @EnviedField(varName: 'SAMPLE_USER_02_ID')
   static const sampleUserId02 = _Env.sampleUserId02;
@@ -46,8 +40,6 @@ abstract class Env {
   static const sampleUserImage02 = _Env.sampleUserImage02;
   @EnviedField(varName: 'SAMPLE_USER_02_VIDEO_TOKEN')
   static const sampleUserVideoToken02 = _Env.sampleUserVideoToken02;
-  @EnviedField(varName: 'SAMPLE_USER_02_CHAT_TOKEN')
-  static const sampleUserChatToken02 = _Env.sampleUserChatToken02;
 
   @EnviedField(varName: 'SAMPLE_USER_03_ID')
   static const sampleUserId03 = _Env.sampleUserId03;
@@ -59,8 +51,6 @@ abstract class Env {
   static const sampleUserImage03 = _Env.sampleUserImage03;
   @EnviedField(varName: 'SAMPLE_USER_03_VIDEO_TOKEN')
   static const sampleUserVideoToken03 = _Env.sampleUserVideoToken03;
-  @EnviedField(varName: 'SAMPLE_USER_03_CHAT_TOKEN')
-  static const sampleUserChatToken03 = _Env.sampleUserChatToken03;
 
   @EnviedField(varName: 'SAMPLE_USER_04_ID')
   static const sampleUserId04 = _Env.sampleUserId04;
@@ -72,8 +62,6 @@ abstract class Env {
   static const sampleUserImage04 = _Env.sampleUserImage04;
   @EnviedField(varName: 'SAMPLE_USER_04_VIDEO_TOKEN')
   static const sampleUserVideoToken04 = _Env.sampleUserVideoToken04;
-  @EnviedField(varName: 'SAMPLE_USER_04_CHAT_TOKEN')
-  static const sampleUserChatToken04 = _Env.sampleUserChatToken04;
 
   @EnviedField(varName: 'SAMPLE_USER_05_ID')
   static const sampleUserId05 = _Env.sampleUserId05;
@@ -85,6 +73,4 @@ abstract class Env {
   static const sampleUserImage05 = _Env.sampleUserImage05;
   @EnviedField(varName: 'SAMPLE_USER_05_VIDEO_TOKEN')
   static const sampleUserVideoToken05 = _Env.sampleUserVideoToken05;
-  @EnviedField(varName: 'SAMPLE_USER_05_CHAT_TOKEN')
-  static const sampleUserChatToken05 = _Env.sampleUserChatToken05;
 }
