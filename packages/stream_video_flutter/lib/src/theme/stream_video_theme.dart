@@ -18,7 +18,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewThemeData? lobbyViewTheme,
     StreamCallParticipantThemeData? callParticipantTheme,
-    StreamFloatingCallParticipantTheme? floatingCallParticipantTheme,
+    StreamFloatingCallParticipantThemeData? floatingCallParticipantTheme,
     StreamParticipantsInfoTheme? participantsInfoTheme,
     StreamParticipantInfoTheme? participantInfoTheme,
     StreamInvitableUserListTheme? invitableUserListTheme,
@@ -173,7 +173,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         connectionLevelActiveColor: colorTheme.accentPrimary,
         connectionLevelInactiveColor: Colors.white,
       ),
-      floatingCallParticipantTheme: StreamFloatingCallParticipantTheme(
+      floatingCallParticipantTheme: StreamFloatingCallParticipantThemeData(
         streamCallParticipantTheme: StreamCallParticipantThemeData(
           showDominantSpeakerBorder: false,
           backgroundColor: const Color(0xFF272A30),
@@ -369,7 +369,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   final StreamCallParticipantThemeData callParticipantTheme;
 
   /// Theme for the floating pip call participant widget.
-  final StreamFloatingCallParticipantTheme floatingCallParticipantTheme;
+  final StreamFloatingCallParticipantThemeData floatingCallParticipantTheme;
 
   /// Theme for the participants info widget.
   final StreamParticipantsInfoTheme participantsInfoTheme;
@@ -399,7 +399,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewThemeData? lobbyViewTheme,
     StreamCallParticipantThemeData? callParticipantTheme,
-    StreamFloatingCallParticipantTheme? floatingCallParticipantTheme,
+    StreamFloatingCallParticipantThemeData? floatingCallParticipantTheme,
     StreamParticipantInfoTheme? participantInfoTheme,
     StreamParticipantsInfoTheme? participantsInfoTheme,
     StreamInvitableUserListTheme? invitableUserListTheme,

@@ -39,7 +39,6 @@ class StreamCallParticipants extends StatelessWidget {
     this.itemBuilder,
     this.enableFloatingView = true,
     this.enableSnappingBehavior = true,
-    this.floatingParticipantTheme,
     super.key,
   });
 
@@ -62,9 +61,6 @@ class StreamCallParticipants extends StatelessWidget {
   /// corners.
   final bool enableSnappingBehavior;
 
-  /// Theme for participant pip window
-  final StreamFloatingCallParticipantTheme? floatingParticipantTheme;
-
   @override
   Widget build(BuildContext context) {
     final screenShareParticipant = participants.firstWhereOrNull(
@@ -85,7 +81,6 @@ class StreamCallParticipants extends StatelessWidget {
         participants: participants,
         itemBuilder: itemBuilder,
         enableFloatingView: enableFloatingView,
-        floatingParticipantTheme: floatingParticipantTheme,
         enableSnappingBehavior: enableSnappingBehavior,
       );
     }
@@ -103,7 +98,6 @@ class RegularCallParticipantsContent extends StatefulWidget {
     this.itemBuilder,
     this.enableFloatingView = true,
     this.enableSnappingBehavior = true,
-    this.floatingParticipantTheme,
   });
 
   /// Represents a call.
@@ -121,9 +115,6 @@ class RegularCallParticipantsContent extends StatefulWidget {
   /// If the floating view should be automatically anchored to one of the
   /// corners.
   final bool enableSnappingBehavior;
-
-  /// Theme for participant pip window
-  final StreamFloatingCallParticipantTheme? floatingParticipantTheme;
 
   @override
   State<RegularCallParticipantsContent> createState() =>
@@ -181,9 +172,7 @@ class _RegularCallParticipantsContentState
       return participantGrid;
     }
 
-    final streamChatTheme =
-        StreamVideoTheme.of(context).floatingCallParticipantTheme;
-    final floatingTheme = widget.floatingParticipantTheme ?? streamChatTheme;
+    final floatingTheme = StreamFloatingCallParticipantTheme.of(context);
     final floatingParticipantWidth = floatingTheme.floatingParticipantWidth;
     final floatingParticipantHeight = floatingTheme.floatingParticipantHeight;
     final floatingParticipantPadding = floatingTheme.floatingParticipantPadding;
