@@ -200,10 +200,12 @@ class CallImpl extends Call {
 
   @override
   Future<Result<None>> joinCall() async {
-    try {
-      await _joinIfNeeded();
-    } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+    _logger.v(() => '[connect] joining to coordinator');
+    final joinedResult = await _joinIfNeeded();
+    if (joinedResult is Failure) {
+      _logger.e(() => '[connect] joining failed: $joinedResult');
+      await _stateManager.onConnectFailed(joinedResult.error);
+      return joinedResult;
     }
     return Result.success(None());
   }
@@ -268,7 +270,7 @@ class CallImpl extends Call {
     _logger.v(() => '[connect] joining to coordinator');
     final joinedResult = await _joinIfNeeded();
     if (joinedResult is! Success<CallCredentials>) {
-      _logger.e(() => '[connect] joining failed: $result');
+      _logger.e(() => '[connect] joining failed: $joinedResult');
       await _stateManager.onConnectFailed((joinedResult as Failure).error);
       return result;
     }
