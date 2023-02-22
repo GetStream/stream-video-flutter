@@ -113,7 +113,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
 
       final callCid = StreamCallCid.from(type: 'default', id: callId);
       final data = await StreamVideo.instance.getOrCreateCall(cid: callCid);
-      final call = Call.fromCreated(data: data.getOrNull()!.data);
+      final call = Call.fromCreated(data: data.getDataOrNull()!.data);
 
       await _navigatorKey.currentState?.pushReplacementNamed(
         Routes.CALL,

@@ -91,7 +91,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   Future<CallCreated?> _from(StreamCallCid streamCallCid) async {
     return (await _client.getOrCreateCall(cid: streamCallCid))
-        .getOrNull()
+        .getDataOrNull()
         ?.data;
   }
 
