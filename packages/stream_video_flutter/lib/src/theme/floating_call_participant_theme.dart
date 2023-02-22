@@ -60,11 +60,14 @@ class StreamFloatingCallParticipantThemeData with Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two [StreamFloatingCallParticipantThemeData] themes.
+  /// Linearly interpolate between two [StreamFloatingCallParticipantThemeData]
+  /// themes.
   ///
   /// All the properties must be non-null.
   StreamFloatingCallParticipantThemeData lerp(
-      StreamFloatingCallParticipantThemeData other, double t) {
+    StreamFloatingCallParticipantThemeData other,
+    double t,
+  ) {
     return StreamFloatingCallParticipantThemeData(
       streamCallParticipantTheme:
           streamCallParticipantTheme.lerp(other.streamCallParticipantTheme, t),
@@ -127,7 +130,8 @@ class StreamFloatingCallParticipantThemeData with Diagnosticable {
 
   /// Merges one [StreamFloatingCallParticipantThemeData] with the another.
   StreamFloatingCallParticipantThemeData merge(
-      StreamFloatingCallParticipantThemeData? other) {
+    StreamFloatingCallParticipantThemeData? other,
+  ) {
     if (other == null) return this;
     return copyWith(
       streamCallParticipantTheme: other.streamCallParticipantTheme,
@@ -150,7 +154,8 @@ class StreamFloatingCallParticipantTheme extends InheritedWidget {
     required super.child,
   });
 
-  /// The properties used for all descendant [StreamFloatingCallParticipant] widgets.
+  /// The properties used for all descendant [StreamFloatingCallParticipant]
+  /// widgets.
   final StreamFloatingCallParticipantThemeData data;
 
   /// Returns the configuration [data] from the closest

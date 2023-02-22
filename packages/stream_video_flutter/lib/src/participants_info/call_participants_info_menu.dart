@@ -19,9 +19,9 @@ typedef ParticipantInfoDividerBuilder = Widget Function(
 );
 
 /// Displays call participants info.
-class StreamCallParticipantsInfoView extends StatefulWidget {
-  /// Creates a new instance of [StreamCallParticipantsInfoView].
-  const StreamCallParticipantsInfoView({
+class StreamCallParticipantsInfoMenu extends StatefulWidget {
+  /// Creates a new instance of [StreamCallParticipantsInfoMenu].
+  const StreamCallParticipantsInfoMenu({
     super.key,
     required this.call,
     required this.usersProvider,
@@ -33,9 +33,21 @@ class StreamCallParticipantsInfoView extends StatefulWidget {
       active: Icons.mic,
       inactive: Icons.mic_off,
     ),
-    this.participantsInfoTheme,
     this.participantInfoViewBuilder,
     this.participantInfoDividerBuilder,
+    this.participantDividerColor,
+    this.participantDividerIndent,
+    this.participantDividerHeight,
+    this.participantNameTextStyle,
+    this.participantIconActiveColor,
+    this.participantIconInactiveColor,
+    this.participantUserAvatarTheme,
+    this.inviteDividerColor,
+    this.inviteDividerIndent,
+    this.inviteDividerHeight,
+    this.inviteUsernameTextStyle,
+    this.inviteSelectedIconColor,
+    this.inviteUserAvatarTheme,
   });
 
   /// Reference to [Call].
@@ -50,22 +62,58 @@ class StreamCallParticipantsInfoView extends StatefulWidget {
   /// Toggle container for the "audio" icons.
   final StreamIconToggle audioIcon;
 
-  /// Theme for the participants info.
-  final StreamParticipantsInfoTheme? participantsInfoTheme;
-
   /// Builder function used to build a participant info view.
   final ParticipantInfoViewBuilder? participantInfoViewBuilder;
 
   /// Builder function used to build a participant info divider.
   final ParticipantInfoDividerBuilder? participantInfoDividerBuilder;
 
+  /// List divider color.
+  final Color? participantDividerColor;
+
+  /// List divider indent.
+  final double? participantDividerIndent;
+
+  /// List divider height.
+  final double? participantDividerHeight;
+
+  /// [TextStyle] for the user name.
+  final TextStyle? participantNameTextStyle;
+
+  /// Color of the active icon.
+  final Color? participantIconActiveColor;
+
+  /// Color of the inactive icon.
+  final Color? participantIconInactiveColor;
+
+  /// Theme for the user avatar widget.
+  final StreamUserAvatarThemeData? participantUserAvatarTheme;
+
+  /// List divider color.
+  final Color? inviteDividerColor;
+
+  /// List divider indent.
+  final double? inviteDividerIndent;
+
+  /// List divider height.
+  final double? inviteDividerHeight;
+
+  /// [TextStyle] for the user name.
+  final TextStyle? inviteUsernameTextStyle;
+
+  /// Color of the selected icon.
+  final Color? inviteSelectedIconColor;
+
+  /// Theme for the user avatar widget.
+  final StreamUserAvatarThemeData? inviteUserAvatarTheme;
+
   @override
-  State<StreamCallParticipantsInfoView> createState() =>
-      _StreamCallParticipantsInfoViewState();
+  State<StreamCallParticipantsInfoMenu> createState() =>
+      _StreamCallParticipantsInfoMenuState();
 }
 
-class _StreamCallParticipantsInfoViewState
-    extends State<StreamCallParticipantsInfoView> {
+class _StreamCallParticipantsInfoMenuState
+    extends State<StreamCallParticipantsInfoMenu> {
   late StreamInviteUserListController _controller;
   final _subscriptions = Subscriptions();
 
@@ -98,8 +146,14 @@ class _StreamCallParticipantsInfoViewState
     final participants = callState.callParticipants;
 
     final streamChatTheme = StreamVideoTheme.of(context);
-    final participantsInfoTheme =
-        widget.participantsInfoTheme ?? streamChatTheme.participantsInfoTheme;
+    final theme = StreamCallParticipantsInfoMenuTheme.of(context);
+    final participantDividerColor =
+        widget.participantDividerColor ?? theme.participantDividerColor;
+    final participantDividerIndent =
+        widget.participantDividerIndent ?? theme.participantDividerIndent;
+    final participantDividerHeight =
+        widget.participantDividerHeight ?? theme.participantDividerHeight;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Participants (${callState.callParticipants.length})'),
@@ -115,7 +169,7 @@ class _StreamCallParticipantsInfoViewState
                 if (builder != null) {
                   return builder.call(context, index, participant);
                 }
-                return CallParticipantInfoView(
+                return CallParticipantsInfoItem(
                   participant: participant,
                   videoIcon: widget.videoIcon,
                   audioIcon: widget.audioIcon,
@@ -124,9 +178,9 @@ class _StreamCallParticipantsInfoViewState
               separatorBuilder: (context, index) =>
                   widget.participantInfoDividerBuilder?.call(context, index) ??
                   Divider(
-                    indent: participantsInfoTheme.dividerIndent,
-                    height: participantsInfoTheme.dividerHeight,
-                    color: participantsInfoTheme.dividerColor,
+                    indent: participantDividerIndent,
+                    height: participantDividerHeight,
+                    color: participantDividerColor,
                   ),
               itemCount: participants.length,
             ),

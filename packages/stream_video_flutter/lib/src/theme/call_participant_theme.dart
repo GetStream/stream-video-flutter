@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'user_avatar_theme.dart';
 
 /// Defines default property values for [StreamCallParticipant] widgets.
 @immutable

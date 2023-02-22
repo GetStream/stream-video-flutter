@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -93,11 +91,14 @@ class StreamIncomingOutgoingCallThemeData with Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two [StreamIncomingOutgoingCallThemeData] themes.
+  /// Linearly interpolate between two [StreamIncomingOutgoingCallThemeData]
+  /// themes.
   ///
   /// All the properties must be non-null.
   StreamIncomingOutgoingCallThemeData lerp(
-      StreamIncomingOutgoingCallThemeData other, double t) {
+    StreamIncomingOutgoingCallThemeData other,
+    double t,
+  ) {
     return StreamIncomingOutgoingCallThemeData(
       singleParticipantAvatarTheme: singleParticipantAvatarTheme.lerp(
           other.singleParticipantAvatarTheme, t),
@@ -157,7 +158,8 @@ class StreamIncomingOutgoingCallThemeData with Diagnosticable {
 
   /// Merges one [StreamIncomingOutgoingCallThemeData] with the another.
   StreamIncomingOutgoingCallThemeData merge(
-      StreamIncomingOutgoingCallThemeData? other) {
+    StreamIncomingOutgoingCallThemeData? other,
+  ) {
     if (other == null) return this;
     return copyWith(
       singleParticipantAvatarTheme: other.singleParticipantAvatarTheme,
@@ -187,7 +189,8 @@ class StreamIncomingOutgoingCallTheme extends InheritedWidget {
   /// [StreamIncomingOutgoingCallTheme] ancestor. If there is no ancestor,
   /// it returns [StreamVideoTheme.incomingCallTheme].
   static StreamIncomingOutgoingCallThemeData incomingCallThemeOf(
-      BuildContext context) {
+    BuildContext context,
+  ) {
     final incomingOutgoingCallTheme = context
         .dependOnInheritedWidgetOfExactType<StreamIncomingOutgoingCallTheme>();
     return incomingOutgoingCallTheme?.data ??
@@ -198,7 +201,8 @@ class StreamIncomingOutgoingCallTheme extends InheritedWidget {
   /// [StreamIncomingOutgoingCallTheme] ancestor. If there is no ancestor,
   /// it returns [StreamVideoTheme.outgoingCallTheme].
   static StreamIncomingOutgoingCallThemeData outgoingCallThemeOf(
-      BuildContext context) {
+    BuildContext context,
+  ) {
     final incomingOutgoingCallTheme = context
         .dependOnInheritedWidgetOfExactType<StreamIncomingOutgoingCallTheme>();
     return incomingOutgoingCallTheme?.data ??

@@ -52,7 +52,10 @@ class StreamLobbyViewThemeData with Diagnosticable {
   /// Linearly interpolate between two [StreamLobbyViewThemeData] themes.
   ///
   /// All the properties must be non-null.
-  StreamLobbyViewThemeData lerp(StreamLobbyViewThemeData other, double t) {
+  StreamLobbyViewThemeData lerp(
+    StreamLobbyViewThemeData other,
+    double t,
+  ) {
     return StreamLobbyViewThemeData(
       backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t)!,
       cardBackgroundColor:
