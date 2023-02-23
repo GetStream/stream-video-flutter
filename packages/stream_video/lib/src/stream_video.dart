@@ -117,6 +117,7 @@ abstract class StreamVideo {
 
   // TODO replace with domain users
   Future<Result<List<CallUser>>> queryUsers({
+    required StreamCallCid callCid,
     required Set<String> userIds,
   });
 

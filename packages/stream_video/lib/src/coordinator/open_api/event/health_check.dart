@@ -1,9 +1,7 @@
 import 'dart:convert';
 
-import 'event_dto.dart';
-
-class HealthCheckEventDto extends EventDto {
-  HealthCheckEventDto({
+class HealthCheck {
+  HealthCheck({
     this.type,
     this.connectionId,
     this.cid,
@@ -17,14 +15,14 @@ class HealthCheckEventDto extends EventDto {
   final Me? me;
   final DateTime? createdAt;
 
-  HealthCheckEventDto copyWith({
+  HealthCheck copyWith({
     String? type,
     String? connectionId,
     String? cid,
     Me? me,
     DateTime? createdAt,
   }) =>
-      HealthCheckEventDto(
+      HealthCheck(
         type: type ?? this.type,
         connectionId: connectionId ?? this.connectionId,
         cid: cid ?? this.cid,
@@ -32,11 +30,11 @@ class HealthCheckEventDto extends EventDto {
         createdAt: createdAt ?? this.createdAt,
       );
 
-  factory HealthCheckEventDto.fromRawJson(String str) => HealthCheckEventDto.fromJson(json.decode(str));
+  factory HealthCheck.fromRawJson(String str) => HealthCheck.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-  factory HealthCheckEventDto.fromJson(Map<String, dynamic> json) => HealthCheckEventDto(
+  factory HealthCheck.fromJson(Map<String, dynamic> json) => HealthCheck(
     type: json["type"],
     connectionId: json["connection_id"],
     cid: json["cid"],

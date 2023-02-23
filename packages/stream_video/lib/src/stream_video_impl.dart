@@ -378,11 +378,13 @@ class StreamVideoImpl implements StreamVideo {
 
   @override
   Future<Result<List<CallUser>>> queryUsers({
+    required StreamCallCid callCid,
     required Set<String> userIds,
   }) async {
-    _logger.d(() => '[queryUsers] userIds: $userIds');
+    _logger.d(() => '[queryUsers] callCid: $callCid, userIds: $userIds');
     final usersResult = await _client.queryUsers(
       input.QueryUsersInput(
+        callCid: callCid,
         mqJson: {
           'id': {r'$in': userIds.toList()},
         },

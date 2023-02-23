@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:uuid/uuid.dart';
-
 import '../../core/video_error.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/user_info.dart';
@@ -14,9 +12,8 @@ import '../../ws/base_ws.dart';
 import '../../ws/keep_alive.dart';
 import '../coordinator_ws.dart';
 import '../models/coordinator_events.dart';
-import 'generated/event_dto.dart';
-import 'generated/health_check_event_dto.dart';
-import 'open_api_event_parser.dart';
+import 'event/health_check.dart';
+import 'event/open_api_event.dart';
 import 'open_api_mapper_extensions.dart';
 
 // TODO: The class needs further refactor. Some parts can be abstracted.
@@ -45,8 +42,6 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
 
   /// The token manager used to fetch or refresh token.
   final TokenManager tokenManager;
-
-  late final OpenApiEventParser eventParser = OpenApiEventParser();
 
   @override
   SharedEmitter<CoordinatorEvent> get events => _events;
@@ -140,12 +135,12 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     _reconnect();
   }
 
- @override
+  @override
   void onMessage(dynamic message) {
-   _logger.i(() => '[onMessage] message: $message');
-    EventDto? dtoEvent;
+    _logger.i(() => '[onMessage] message: $message');
+    OpenApiEvent? dtoEvent;
     try {
-      dtoEvent = eventParser.parse(message);
+      dtoEvent = OpenApiEvent.fromRawJson(message);
     } catch (e, stk) {
       _logger.e(
         () => '[onMessage] msg parsing failed: "$e"; stk: $stk',
@@ -157,17 +152,17 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       return;
     }
 
-    _logger.v(() => '[onMessage] dtoEvent: ${dtoEvent?.toJson()}');
+    _logger.v(() => '[onMessage] dtoEvent.type: ${dtoEvent?.type}');
 
-    if (dtoEvent is HealthCheckEventDto) {
-      _handleHealthCheckEvent(dtoEvent);
+    if (dtoEvent.healthCheck != null) {
+      _handleHealthCheckEvent(dtoEvent.healthCheck!);
     }
 
     // Parsing
     dtoEvent.toCoordinatorEvent()?.let(_events.emit);
   }
 
-  void _handleHealthCheckEvent(HealthCheckEventDto event) {
+  void _handleHealthCheckEvent(HealthCheck event) {
     if (!isKeepAliveStarted) {
       connectionState = ConnectionState.connected;
 

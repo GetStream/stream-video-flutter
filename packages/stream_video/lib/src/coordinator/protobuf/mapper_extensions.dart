@@ -38,6 +38,7 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
       case coordinator_ws.WebsocketEvent_Event.callCreated:
         return CoordinatorCallCreatedEvent(
           callCid: callCreated.call.callCid,
+          createdAt: DateTime.now(),
           ringing: callCreated.ringing,
           info: callCreated.call.toCallInfo(),
           details: callCreated.callDetails.toCallDetails(),
@@ -53,6 +54,8 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
       case coordinator_ws.WebsocketEvent_Event.callEnded:
         return CoordinatorCallEndedEvent(
           callCid: callEnded.call.callCid,
+          sentByUserId: '',
+          createdAt: DateTime.now(),
           info: callEnded.call.toCallInfo(),
           details: callEnded.callDetails.toCallDetails(),
           users: users.toCallUsers(),
@@ -61,6 +64,7 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
         return CoordinatorCallAcceptedEvent(
           callCid: callAccepted.call.callCid,
           sentByUserId: callAccepted.senderUserId,
+          createdAt: DateTime.now(),
           info: callAccepted.call.toCallInfo(),
           details: callAccepted.callDetails.toCallDetails(),
           users: users.toCallUsers(),
@@ -69,6 +73,7 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
         return CoordinatorCallRejectedEvent(
           callCid: callRejected.call.callCid,
           sentByUserId: callRejected.senderUserId,
+          createdAt: DateTime.now(),
           info: callRejected.call.toCallInfo(),
           details: callRejected.callDetails.toCallDetails(),
           users: users.toCallUsers(),
@@ -77,6 +82,7 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
         return CoordinatorCallCancelledEvent(
           callCid: callCancelled.call.callCid,
           sentByUserId: callCancelled.senderUserId,
+          createdAt: DateTime.now(),
           info: callCancelled.call.toCallInfo(),
           details: callCancelled.callDetails.toCallDetails(),
           users: users.toCallUsers(),
@@ -100,10 +106,15 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
           callCid: callCustom.call.callCid,
           type: callCustom.type,
           senderUserId: callCustom.senderUserId,
+          createdAt: DateTime.now(),
           info: callCustom.call.toCallInfo(),
           details: callCustom.callDetails.toCallDetails(),
           users: users.toCallUsers(),
-          customJson: utf8.decode(callCustom.dataJson),
+          customJson: callCustom.dataJson.ifNotEmpty(
+            (it) => json.decode(
+              utf8.decode(it),
+            ),
+          ),
         );
       default:
         logger.warning('Unknown Video Event $eventType');

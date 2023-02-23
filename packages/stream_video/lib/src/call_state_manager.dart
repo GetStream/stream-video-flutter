@@ -1,5 +1,3 @@
-import 'package:collection/collection.dart';
-
 import 'action/action.dart';
 import 'action/call_control_action.dart';
 import 'action/coordinator_action.dart';
@@ -174,13 +172,12 @@ class CallStateManagerImpl extends CallStateManager {
     );
   }
 
-  Future<CallUser?> _queryUserById(String userId) async {
-    final result = await _queryUsersByIds({userId});
-    return result.firstOrNull;
-  }
-
-  Future<List<CallUser>> _queryUsersByIds(Set<String> userIds) async {
-    final usersResult = await _streamVideo.queryUsers(userIds: userIds);
+  Future<List<CallUser>> _queryUsersByIds(
+    Set<String> userIds,
+  ) async {
+    final callCid = state.value.callCid;
+    final usersResult =
+        await _streamVideo.queryUsers(callCid: callCid, userIds: userIds);
     if (usersResult is! Success<List<CallUser>>) {
       return List.empty();
     }

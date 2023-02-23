@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:tart/tart.dart';
-
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../errors/video_error_composer.dart';
 import '../../latency_service/latency.dart';
@@ -23,6 +21,7 @@ import '../models/coordinator_inputs.dart';
 import '../models/coordinator_models.dart';
 import 'coordinator_ws_open_api.dart';
 import 'open_api_extensions.dart';
+import 'open_api_mapper_extensions.dart';
 
 /// An accessor that allows us to communicate with the API around video calls.
 class CoordinatorClientOpenApi extends CoordinatorClient {
@@ -113,6 +112,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     final result = await getOrCreateCall(
       GetOrCreateCallInput(
         callCid: input.callCid,
+        ringing: input.ringing,
+        members: input.members,
       ),
     );
 
@@ -125,19 +126,18 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     input.GetOrCreateCallInput input,
   ) async {
     try {
+      _logger.d(() => '[getOrCreateCall] input: $input');
       final result = await videoApi.getOrCreateCall(
         input.callCid.type,
         input.callCid.id,
         open.GetOrCreateCallRequest(
           data: open.CallRequest(
-            members: [
-              // TODO
-            ],
+            members: input.members?.toOpenDto() ?? [],
           ),
           ring: input.ringing,
         ),
       );
-
+      _logger.v(() => '[getOrCreateCall] completed: $result');
       if (result == null) {
         return Result.error('message');
       }
@@ -153,6 +153,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
     } catch (e, stk) {
+      _logger.v(() => '[getOrCreateCall] failed: $e; $stk');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -255,13 +256,16 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     input.EventInput input,
   ) async {
     try {
-      await eventsApi.sendEvent(
+      _logger.d(() => '[sendUserEvent] input: $input');
+      final result = await eventsApi.sendEvent(
         input.callCid.type,
         input.callCid.id,
         open.SendEventRequest(eventType: input.eventType.alias),
       );
+      _logger.v(() => '[sendUserEvent] completed: $result');
       return Result.success(None());
     } catch (e, stk) {
+      _logger.e(() => '[sendUserEvent] failed: $e; $stk');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -304,13 +308,21 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     input.QueryUsersInput input,
   ) async {
     try {
-      // TODO
-      return const Result.success([]);
+      final result = await videoApi.queryMembers(
+        open.QueryMembersRequest(
+          type: input.callCid.type,
+          id: input.callCid.id,
+          filterConditions: input.mqJson,
+        ),
+      );
+      if (result == null) {
+        return Result.error('message');
+      }
+      return Result.success(result.members.toCallUsers().values.toList());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
-
 }
 
 class _Authentication extends open.Authentication {

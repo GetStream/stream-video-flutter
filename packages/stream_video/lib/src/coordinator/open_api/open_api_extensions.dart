@@ -4,10 +4,9 @@ import '../../models/call_credentials.dart';
 import '../../models/call_metadata.dart';
 
 extension MemberExt on open.MemberResponse {
-  CallMember toCallMember() {
+  CallMember toCallMember(String callCid) {
     return CallMember(
-      // TODO remove callCid
-      callCid: 'fake:123',
+      callCid: callCid,
       userId: userId,
       role: role,
       createdAt: createdAt,
@@ -17,8 +16,14 @@ extension MemberExt on open.MemberResponse {
 }
 
 extension MemberListExt on List<open.MemberResponse> {
-  List<CallMember> toCallMembers() {
-    return map((it) => it.toCallMember()).toList();
+  Map<String, CallMember> toCallMembers(String callCid) {
+    return {
+      for (var member in this) member.userId: member.toCallMember(callCid)
+    };
+  }
+
+  Map<String, CallUser> toCallUsers() {
+    return {for (var member in this) member.userId: member.user.toCallUser()};
   }
 }
 
