@@ -38,7 +38,7 @@ class SendEventRequest {
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'custom'] = this.custom;
-      json[r'event_type'] = this.eventType;
+      json[r'type'] = this.eventType;
     return json;
   }
 
