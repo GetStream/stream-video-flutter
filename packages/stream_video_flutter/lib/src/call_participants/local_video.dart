@@ -11,12 +11,13 @@ class StreamLocalVideo extends StatelessWidget {
     required this.child,
     required this.call,
     required this.localParticipant,
+    this.localVideoWidth,
+    this.localVideoHeight,
+    this.localVideoPadding,
+    this.initialAlignment,
     this.enableSnappingBehavior,
-    this.floatingParticipantWidth,
-    this.floatingParticipantHeight,
-    this.floatingParticipantPadding,
-    this.floatingViewAlignment,
     this.userAvatarTheme,
+    this.borderRadius,
     this.shadowColor,
   });
 
@@ -30,16 +31,16 @@ class StreamLocalVideo extends StatelessWidget {
   final CallParticipantState localParticipant;
 
   /// The width of the floating view.
-  final double? floatingParticipantWidth;
+  final double? localVideoWidth;
 
   /// The height of the floating view.
-  final double? floatingParticipantHeight;
+  final double? localVideoHeight;
 
   /// The padding between floating view and the container.
-  final double? floatingParticipantPadding;
+  final double? localVideoPadding;
 
   /// The initial position of the floating view.
-  final FloatingViewAlignment? floatingViewAlignment;
+  final FloatingViewAlignment? initialAlignment;
 
   /// If the floating view should be automatically anchored to one of the
   /// corners.
@@ -48,36 +49,36 @@ class StreamLocalVideo extends StatelessWidget {
   /// The theme for the avatar.
   final StreamUserAvatarThemeData? userAvatarTheme;
 
+  /// The border radius of the local video.
+  final BorderRadius? borderRadius;
+
   /// The color of shadow.
   final Color? shadowColor;
 
   @override
   Widget build(BuildContext context) {
     final theme = StreamLocalVideoTheme.of(context);
-    final floatingParticipantWidth =
-        this.floatingParticipantWidth ?? theme.floatingParticipantWidth;
-    final floatingParticipantHeight =
-        this.floatingParticipantHeight ?? theme.floatingParticipantHeight;
-    final floatingParticipantPadding =
-        this.floatingParticipantPadding ?? theme.floatingParticipantPadding;
-    final floatingViewAlignment =
-        this.floatingViewAlignment ?? theme.floatingViewAlignment;
+    final localVideoWidth = this.localVideoWidth ?? theme.localVideoWidth;
+    final localVideoHeight = this.localVideoHeight ?? theme.localVideoHeight;
+    final localVideoPadding = this.localVideoPadding ?? theme.localVideoPadding;
+    final initialAlignment = this.initialAlignment ?? theme.initialAlignment;
     final enableSnappingBehavior =
         this.enableSnappingBehavior ?? theme.enableSnappingBehavior;
     final userAvatarTheme = this.userAvatarTheme ?? theme.userAvatarTheme;
+    final borderRadius = this.borderRadius ?? theme.borderRadius;
     final shadowColor = this.shadowColor ?? theme.shadowColor;
 
     return FloatingViewContainer(
-      floatingViewWidth: floatingParticipantWidth,
-      floatingViewHeight: floatingParticipantHeight,
-      floatingViewPadding: floatingParticipantPadding,
+      floatingViewWidth: localVideoWidth,
+      floatingViewHeight: localVideoHeight,
+      floatingViewPadding: localVideoPadding,
       enableSnappingBehavior: enableSnappingBehavior,
-      floatingViewAlignment: floatingViewAlignment,
+      floatingViewAlignment: initialAlignment,
       floatingView: Container(
-        height: floatingParticipantHeight,
-        width: floatingParticipantWidth,
+        width: localVideoWidth,
+        height: localVideoHeight,
         decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(16)),
+          borderRadius: borderRadius,
           boxShadow: [
             BoxShadow(
               color: shadowColor,
@@ -89,8 +90,10 @@ class StreamLocalVideo extends StatelessWidget {
         child: StreamCallParticipant(
           call: call,
           participant: localParticipant,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: borderRadius,
           userAvatarTheme: userAvatarTheme,
+          showParticipantLabel: false,
+          showDominantSpeakerBorder: false,
         ),
       ),
       child: child,

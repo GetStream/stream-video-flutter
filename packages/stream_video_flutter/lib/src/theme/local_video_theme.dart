@@ -11,10 +11,10 @@ import '../widgets/floating_view/floating_view_alignment.dart';
 class StreamLocalVideoThemeData with Diagnosticable {
   /// Creates a new instance of [StreamLocalVideoThemeData].
   const StreamLocalVideoThemeData({
-    this.floatingParticipantHeight = 150,
-    this.floatingParticipantWidth = 125,
-    this.floatingParticipantPadding = 16,
-    this.floatingViewAlignment = FloatingViewAlignment.topRight,
+    this.localVideoWidth = 125,
+    this.localVideoHeight = 150,
+    this.localVideoPadding = 16,
+    this.initialAlignment = FloatingViewAlignment.topRight,
     this.enableSnappingBehavior = true,
     this.userAvatarTheme = const StreamUserAvatarThemeData(
       constraints: BoxConstraints.tightFor(
@@ -28,27 +28,31 @@ class StreamLocalVideoThemeData with Diagnosticable {
         color: Colors.white,
       ),
     ),
+    this.borderRadius = const BorderRadius.all(Radius.circular(16)),
     this.shadowColor = const Color(0xFF212121),
   });
 
-  /// The height of the floating participant item.
-  final double floatingParticipantHeight;
+  /// The width of the local video item.
+  final double localVideoWidth;
 
-  /// The width of the floating participant item.
-  final double floatingParticipantWidth;
+  /// The height of the local video item.
+  final double localVideoHeight;
 
-  /// The padding between floating participant item and [StreamCallParticipants].
-  final double floatingParticipantPadding;
+  /// The padding between local video item and [StreamCallParticipants] borders.
+  final double localVideoPadding;
 
-  /// The initial position of the floating view.
-  final FloatingViewAlignment floatingViewAlignment;
+  /// The initial position of the local video view.
+  final FloatingViewAlignment initialAlignment;
 
-  /// If the floating view should be automatically anchored to one of the
+  /// If the local video should be automatically anchored to one of the
   /// corners.
   final bool enableSnappingBehavior;
 
   /// The theme for the avatar.
   final StreamUserAvatarThemeData userAvatarTheme;
+
+  /// The border radius of the local video.
+  final BorderRadius borderRadius;
 
   /// The color of shadow.
   final Color shadowColor;
@@ -56,26 +60,24 @@ class StreamLocalVideoThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   StreamLocalVideoThemeData copyWith({
-    double? floatingParticipantHeight,
-    double? floatingParticipantWidth,
-    double? floatingParticipantPadding,
-    FloatingViewAlignment? floatingViewAlignment,
+    double? localVideoWidth,
+    double? localVideoHeight,
+    double? localVideoPadding,
+    FloatingViewAlignment? initialAlignment,
     bool? enableSnappingBehavior,
     StreamUserAvatarThemeData? userAvatarTheme,
+    BorderRadius? borderRadius,
     Color? shadowColor,
   }) {
     return StreamLocalVideoThemeData(
-      floatingParticipantHeight:
-          floatingParticipantHeight ?? this.floatingParticipantHeight,
-      floatingParticipantWidth:
-          floatingParticipantWidth ?? this.floatingParticipantWidth,
-      floatingParticipantPadding:
-          floatingParticipantPadding ?? this.floatingParticipantPadding,
-      floatingViewAlignment:
-          floatingViewAlignment ?? this.floatingViewAlignment,
+      localVideoWidth: localVideoWidth ?? this.localVideoWidth,
+      localVideoHeight: localVideoHeight ?? this.localVideoHeight,
+      localVideoPadding: localVideoPadding ?? this.localVideoPadding,
+      initialAlignment: initialAlignment ?? this.initialAlignment,
       enableSnappingBehavior:
           enableSnappingBehavior ?? this.enableSnappingBehavior,
       userAvatarTheme: userAvatarTheme ?? this.userAvatarTheme,
+      borderRadius: borderRadius ?? this.borderRadius,
       shadowColor: shadowColor ?? this.shadowColor,
     );
   }
@@ -89,29 +91,29 @@ class StreamLocalVideoThemeData with Diagnosticable {
     double t,
   ) {
     return StreamLocalVideoThemeData(
-      floatingParticipantHeight: lerpDouble(
-          floatingParticipantHeight, other.floatingParticipantHeight, t)!,
-      floatingParticipantWidth: lerpDouble(
-          floatingParticipantWidth, other.floatingParticipantWidth, t)!,
-      floatingParticipantPadding: lerpDouble(
-          floatingParticipantPadding, other.floatingParticipantPadding, t)!,
-      floatingViewAlignment:
-          t < 0.5 ? floatingViewAlignment : other.floatingViewAlignment,
+      localVideoWidth: lerpDouble(localVideoWidth, other.localVideoWidth, t)!,
+      localVideoHeight:
+          lerpDouble(localVideoHeight, other.localVideoHeight, t)!,
+      localVideoPadding:
+          lerpDouble(localVideoPadding, other.localVideoPadding, t)!,
+      initialAlignment: t < 0.5 ? initialAlignment : other.initialAlignment,
       enableSnappingBehavior:
           t < 0.5 ? enableSnappingBehavior : other.enableSnappingBehavior,
       userAvatarTheme: userAvatarTheme.lerp(other.userAvatarTheme, t),
+      borderRadius: BorderRadius.lerp(borderRadius, other.borderRadius, t)!,
       shadowColor: Color.lerp(shadowColor, other.shadowColor, t)!,
     );
   }
 
   @override
   int get hashCode => Object.hash(
-        floatingParticipantHeight,
-        floatingParticipantWidth,
-        floatingParticipantPadding,
-        floatingViewAlignment,
+        localVideoWidth,
+        localVideoHeight,
+        localVideoPadding,
+        initialAlignment,
         enableSnappingBehavior,
         userAvatarTheme,
+        borderRadius,
         shadowColor,
       );
 
@@ -124,12 +126,13 @@ class StreamLocalVideoThemeData with Diagnosticable {
       return false;
     }
     return other is StreamLocalVideoThemeData &&
-        floatingParticipantHeight == other.floatingParticipantHeight &&
-        floatingParticipantWidth == other.floatingParticipantWidth &&
-        floatingParticipantPadding == other.floatingParticipantPadding &&
-        floatingViewAlignment == other.floatingViewAlignment &&
+        localVideoWidth == other.localVideoWidth &&
+        localVideoHeight == other.localVideoHeight &&
+        localVideoPadding == other.localVideoPadding &&
+        initialAlignment == other.initialAlignment &&
         enableSnappingBehavior == other.enableSnappingBehavior &&
         userAvatarTheme == other.userAvatarTheme &&
+        borderRadius == other.borderRadius &&
         shadowColor == other.shadowColor;
   }
 
@@ -137,16 +140,14 @@ class StreamLocalVideoThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty(
-          'floatingParticipantHeight', floatingParticipantHeight))
-      ..add(DiagnosticsProperty(
-          'floatingParticipantWidth', floatingParticipantWidth))
-      ..add(DiagnosticsProperty(
-          'floatingParticipantPadding', floatingParticipantPadding))
-      ..add(DiagnosticsProperty('floatingViewAlignment', floatingViewAlignment))
+      ..add(DiagnosticsProperty('localVideoWidth', localVideoWidth))
+      ..add(DiagnosticsProperty('localVideoHeight', localVideoHeight))
+      ..add(DiagnosticsProperty('localVideoPadding', localVideoPadding))
+      ..add(DiagnosticsProperty('initialAlignment', initialAlignment))
       ..add(
           DiagnosticsProperty('enableSnappingBehavior', enableSnappingBehavior))
       ..add(DiagnosticsProperty('userAvatarTheme', userAvatarTheme))
+      ..add(DiagnosticsProperty('borderRadius', borderRadius))
       ..add(DiagnosticsProperty('shadowColor', shadowColor));
   }
 
@@ -156,12 +157,13 @@ class StreamLocalVideoThemeData with Diagnosticable {
   ) {
     if (other == null) return this;
     return copyWith(
-      floatingParticipantHeight: other.floatingParticipantHeight,
-      floatingParticipantWidth: other.floatingParticipantWidth,
-      floatingParticipantPadding: other.floatingParticipantPadding,
-      floatingViewAlignment: other.floatingViewAlignment,
+      localVideoWidth: other.localVideoWidth,
+      localVideoHeight: other.localVideoHeight,
+      localVideoPadding: other.localVideoPadding,
+      initialAlignment: other.initialAlignment,
       enableSnappingBehavior: other.enableSnappingBehavior,
       userAvatarTheme: other.userAvatarTheme,
+      borderRadius: other.borderRadius,
       shadowColor: other.shadowColor,
     );
   }
@@ -183,9 +185,9 @@ class StreamLocalVideoTheme extends InheritedWidget {
   /// [StreamLocalVideoTheme] ancestor. If there is no ancestor,
   /// it returns [StreamVideoTheme.localVideoTheme].
   static StreamLocalVideoThemeData of(BuildContext context) {
-    final floatingCallParticipantTheme =
+    final localVideoTheme =
         context.dependOnInheritedWidgetOfExactType<StreamLocalVideoTheme>();
-    return floatingCallParticipantTheme?.data ??
+    return localVideoTheme?.data ??
         StreamVideoTheme.of(context).localVideoTheme;
   }
 

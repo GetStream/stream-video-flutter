@@ -164,10 +164,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         connectionLevelInactiveColor: Colors.white,
       ),
       localVideoTheme: const StreamLocalVideoThemeData(
-        floatingParticipantHeight: 150,
-        floatingParticipantWidth: 125,
-        floatingParticipantPadding: 16,
-        floatingViewAlignment: FloatingViewAlignment.topRight,
+        localVideoHeight: 150,
+        localVideoWidth: 125,
+        localVideoPadding: 16,
+        initialAlignment: FloatingViewAlignment.topRight,
         enableSnappingBehavior: true,
         userAvatarTheme: StreamUserAvatarThemeData(
           constraints: BoxConstraints.tightFor(
