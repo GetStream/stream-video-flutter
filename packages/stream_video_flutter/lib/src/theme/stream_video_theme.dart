@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide TextTheme;
 
 import '../utils/device_segmentation.dart';
+import '../widgets/floating_view/floating_view_alignment.dart';
 import 'themes.dart';
 
 /// {@template streamVideoThemeData}
@@ -16,7 +17,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewThemeData? lobbyViewTheme,
     StreamCallParticipantThemeData? callParticipantTheme,
-    StreamFloatingCallParticipantThemeData? floatingCallParticipantTheme,
+    StreamLocalVideoThemeData? localVideoTheme,
     StreamCallParticipantsInfoMenuThemeData? callParticipantsInfoMenuTheme,
     StreamIncomingOutgoingCallThemeData? incomingCallTheme,
     StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
@@ -39,7 +40,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       userAvatarTheme: userAvatarTheme,
       lobbyViewTheme: lobbyViewTheme,
       callParticipantTheme: callParticipantTheme,
-      floatingCallParticipantTheme: floatingCallParticipantTheme,
+      localVideoTheme: localVideoTheme,
       callParticipantsInfoMenuTheme: callParticipantsInfoMenuTheme,
       incomingCallTheme: incomingCallTheme,
       outgoingCallTheme: outgoingCallTheme,
@@ -64,7 +65,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.userAvatarTheme,
     required this.lobbyViewTheme,
     required this.callParticipantTheme,
-    required this.floatingCallParticipantTheme,
+    required this.localVideoTheme,
     required this.callParticipantsInfoMenuTheme,
     required this.incomingCallTheme,
     required this.outgoingCallTheme,
@@ -162,27 +163,23 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         connectionLevelActiveColor: colorTheme.accentPrimary,
         connectionLevelInactiveColor: Colors.white,
       ),
-      floatingCallParticipantTheme: StreamFloatingCallParticipantThemeData(
-        streamCallParticipantTheme: StreamCallParticipantThemeData(
-          showDominantSpeakerBorder: false,
-          backgroundColor: const Color(0xFF272A30),
-          userAvatarTheme: StreamUserAvatarThemeData(
-            constraints: const BoxConstraints.tightFor(
-              height: 100,
-              width: 100,
-            ),
-            borderRadius: const BorderRadius.all(Radius.circular(50)),
-            initialsTextStyle: textTheme.title1.copyWith(color: Colors.white),
-            selectionColor: colorTheme.accentPrimary,
-            selectionThickness: 4,
+      localVideoTheme: const StreamLocalVideoThemeData(
+        floatingParticipantHeight: 150,
+        floatingParticipantWidth: 125,
+        floatingParticipantPadding: 16,
+        floatingViewAlignment: FloatingViewAlignment.topRight,
+        enableSnappingBehavior: true,
+        userAvatarTheme: StreamUserAvatarThemeData(
+          constraints: BoxConstraints.tightFor(
+            height: 50,
+            width: 50,
           ),
-          audioLevelIndicatorColor: colorTheme.accentPrimary,
-          participantLabelTextStyle:
-              textTheme.footnote.copyWith(color: Colors.white),
-          disabledMicrophoneColor: colorTheme.accentError,
-          enabledMicrophoneColor: Colors.white,
-          connectionLevelActiveColor: colorTheme.accentPrimary,
-          connectionLevelInactiveColor: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(25)),
+          initialsTextStyle: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
       ),
       callParticipantsInfoMenuTheme: StreamCallParticipantsInfoMenuThemeData(
@@ -354,7 +351,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   final StreamCallParticipantThemeData callParticipantTheme;
 
   /// Theme for the floating pip call participant widget.
-  final StreamFloatingCallParticipantThemeData floatingCallParticipantTheme;
+  final StreamLocalVideoThemeData localVideoTheme;
 
   /// Theme for the participants info widget.
   final StreamCallParticipantsInfoMenuThemeData callParticipantsInfoMenuTheme;
@@ -375,7 +372,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewThemeData? lobbyViewTheme,
     StreamCallParticipantThemeData? callParticipantTheme,
-    StreamFloatingCallParticipantThemeData? floatingCallParticipantTheme,
+    StreamLocalVideoThemeData? localVideoTheme,
     StreamCallParticipantsInfoMenuThemeData? callParticipantsInfoMenuTheme,
     StreamIncomingOutgoingCallThemeData? incomingCallTheme,
     StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
@@ -391,9 +388,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         callParticipantsInfoMenuTheme: this
             .callParticipantsInfoMenuTheme
             .merge(callParticipantsInfoMenuTheme),
-        floatingCallParticipantTheme: this
-            .floatingCallParticipantTheme
-            .merge(floatingCallParticipantTheme),
+        localVideoTheme: this.localVideoTheme.merge(localVideoTheme),
         incomingCallTheme: this.incomingCallTheme.merge(incomingCallTheme),
         outgoingCallTheme: this.outgoingCallTheme.merge(outgoingCallTheme),
       );
@@ -429,10 +424,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       lobbyViewTheme: lobbyViewTheme.lerp(other.lobbyViewTheme, t),
       callParticipantTheme:
           callParticipantTheme.lerp(other.callParticipantTheme, t),
-      floatingCallParticipantTheme: floatingCallParticipantTheme.lerp(
-        other.floatingCallParticipantTheme,
-        t,
-      ),
+      localVideoTheme: localVideoTheme.lerp(other.localVideoTheme, t),
       callControlsTheme: callControlsTheme.lerp(other.callControlsTheme, t),
       callParticipantsInfoMenuTheme: callParticipantsInfoMenuTheme.lerp(
           other.callParticipantsInfoMenuTheme, t),

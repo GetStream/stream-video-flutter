@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/device_segmentation.dart';
-import '../widgets/floating_view/floating_view_alignment.dart';
 import '../widgets/tile_view.dart';
 import 'screen_share_item.dart';
 
@@ -172,21 +171,9 @@ class _RegularCallParticipantsContentState
       return participantGrid;
     }
 
-    final floatingTheme = StreamFloatingCallParticipantTheme.of(context);
-    final floatingParticipantWidth = floatingTheme.floatingParticipantWidth;
-    final floatingParticipantHeight = floatingTheme.floatingParticipantHeight;
-    final floatingParticipantPadding = floatingTheme.floatingParticipantPadding;
-
-    return FloatingViewContainer(
-      floatingViewWidth: floatingParticipantWidth,
-      floatingViewHeight: floatingParticipantHeight,
-      enableSnappingBehavior: widget.enableSnappingBehavior,
-      floatingViewPadding: floatingParticipantPadding,
-      floatingViewAlignment: FloatingViewAlignment.topRight,
-      floatingView: StreamFloatingCallParticipant(
-        call: widget.call,
-        participant: local.first,
-      ),
+    return StreamLocalVideo(
+      call: widget.call,
+      localParticipant: local.first,
       child: participantGrid,
     );
   }
