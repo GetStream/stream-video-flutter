@@ -62,8 +62,6 @@ abstract class StreamVideo {
   }
   static final InstanceHolder _instanceHolder = InstanceHolder();
 
-  static const useNewCoordinator = true;
-
   UserInfo? get currentUser;
 
   SharedEmitter<CoordinatorEvent> get events;

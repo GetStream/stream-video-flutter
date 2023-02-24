@@ -4,15 +4,11 @@ import 'package:logging/logging.dart';
 
 import '../stream_video.dart';
 import 'coordinator/coordinator_client.dart';
-import 'coordinator/coordinator_ws.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/models/coordinator_inputs.dart' as input;
 import 'coordinator/models/coordinator_inputs.dart';
 import 'coordinator/models/coordinator_models.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
-import 'coordinator/open_api/coordinator_ws_open_api.dart';
-import 'coordinator/protobuf/coordinator_client_protobuf.dart';
-import 'coordinator/protobuf/coordinator_ws_protobuf.dart';
 import 'logger/logger.dart';
 import 'models/call_device.dart';
 import 'models/call_metadata.dart';
@@ -460,43 +456,10 @@ CoordinatorClient buildCoordinatorClient({
   required String apiKey,
   required TokenManager tokenManager,
 }) {
-  if (StreamVideo.useNewCoordinator) {
-    return CoordinatorClientOpenApi(
-      apiKey: apiKey,
-      tokenManager: tokenManager,
-      rpcUrl: rpcUrl,
-      wsUrl: wsUrl,
-    );
-  }
-  return CoordinatorClientProtobuf(
+  return CoordinatorClientOpenApi(
     apiKey: apiKey,
     tokenManager: tokenManager,
     rpcUrl: rpcUrl,
     wsUrl: wsUrl,
-  );
-}
-
-CoordinatorWebSocket buildCoordinatorWs(
-  String url, {
-  Iterable<String>? protocols,
-  required String apiKey,
-  required UserInfo userInfo,
-  required TokenManager tokenManager,
-}) {
-  if (StreamVideo.useNewCoordinator) {
-    return CoordinatorWebSocketOpenApi(
-      url,
-      protocols: protocols,
-      apiKey: apiKey,
-      userInfo: userInfo,
-      tokenManager: tokenManager,
-    );
-  }
-  return CoordinatorWebSocketProtobuf(
-    url,
-    protocols: protocols,
-    apiKey: apiKey,
-    userInfo: userInfo,
-    tokenManager: tokenManager,
   );
 }

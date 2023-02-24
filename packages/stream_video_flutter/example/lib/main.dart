@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stream_video/stream_video.dart';
 
-import 'endpoint_config.dart';
 import 'screen/login_screen.dart';
 
 Future<void> main() async {
@@ -12,11 +11,12 @@ Future<void> main() async {
     ..logger = ConsoleStreamLogger()
     ..validator = (priority, tag) => true;
 
-  final endpointConfig = EndpointConfig.stagingFrankfurt;
   StreamVideo.init(
-    endpointConfig.apiKey,
-    coordinatorRpcUrl: endpointConfig.rpcUrl,
-    coordinatorWsUrl: endpointConfig.wsUrl,
+    'w6yaq5388uym',
+    coordinatorRpcUrl:
+        'https://video-edge-frankfurt-ce1.stream-io-api.com/video',
+    coordinatorWsUrl:
+        'wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect',
   );
 
   runApp(const MyApp());
