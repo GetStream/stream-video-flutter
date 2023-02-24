@@ -6,7 +6,9 @@ import 'sfu/data/models/sfu_connection_quality.dart';
 import 'sfu/data/models/sfu_track_type.dart';
 
 @immutable
-class CallParticipantState with EquatableMixin {
+class CallParticipantState
+    with EquatableMixin
+    implements Comparable<CallParticipantState> {
   factory CallParticipantState({
     required String userId,
     required String role,
@@ -122,6 +124,29 @@ class CallParticipantState with EquatableMixin {
 
   bool get isVideoEnabled {
     return !(videoTrack?.muted ?? true);
+  }
+
+  @override
+  int compareTo(CallParticipantState other) {
+    if (isDominantSpeaker && !other.isDominantSpeaker) {
+      return -1;
+    } else if (!isDominantSpeaker && other.isDominantSpeaker) {
+      return 1;
+    }
+
+    if (isSpeaking && !other.isSpeaking) {
+      return -1;
+    } else if (!isSpeaking && other.isSpeaking) {
+      return 1;
+    }
+
+    if (isLocal && !other.isLocal) {
+      return -1;
+    } else if (!isLocal && other.isLocal) {
+      return 1;
+    }
+
+    return 0;
   }
 
   @override

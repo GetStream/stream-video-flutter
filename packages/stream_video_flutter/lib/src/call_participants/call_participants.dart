@@ -28,6 +28,15 @@ typedef ScreenShareItemBuilder = Widget Function(
   CallParticipantState participant,
 );
 
+typedef Filter<T> = bool Function(T element);
+typedef Sort<T> = Comparator<T>;
+
+bool _defaultFilter(CallParticipantState participant) => true;
+
+int _defaultSort(CallParticipantState previous, CallParticipantState current) {
+  return previous.compareTo(current);
+}
+
 /// Widget that renders all the [StreamCallParticipant], based on the number
 /// of people in a call.
 class StreamCallParticipants extends StatelessWidget {
@@ -35,6 +44,8 @@ class StreamCallParticipants extends StatelessWidget {
   const StreamCallParticipants({
     required this.call,
     required this.participants,
+    this.filter = _defaultFilter,
+    this.sort = _defaultSort,
     this.screenShareItemBuilder,
     this.itemBuilder,
     this.enableFloatingView = true,
@@ -46,7 +57,13 @@ class StreamCallParticipants extends StatelessWidget {
   final Call call;
 
   /// The list of participants to display.
-  final List<CallParticipantState> participants;
+  final Iterable<CallParticipantState> participants;
+
+  /// Filter used to filter the participants.
+  final Filter<CallParticipantState> filter;
+
+  /// Sort used to sort the participants.
+  final Sort<CallParticipantState> sort;
 
   /// Builder function used to build a screen sharing item.
   final ScreenShareItemBuilder? screenShareItemBuilder;
@@ -63,6 +80,8 @@ class StreamCallParticipants extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final participants = this.participants.where(filter).sorted(sort);
+
     final screenShareParticipant = participants.firstWhereOrNull(
       (element) => element.screenShareTrack != null,
     );
@@ -104,7 +123,7 @@ class RegularCallParticipantsContent extends StatefulWidget {
   final Call call;
 
   /// The list of participants to display.
-  final List<CallParticipantState> participants;
+  final Iterable<CallParticipantState> participants;
 
   /// Builder function used to build a participant grid item.
   final CallParticipantWidgetBuilder? itemBuilder;
@@ -130,8 +149,8 @@ class _RegularCallParticipantsContentState
   Widget build(BuildContext context) {
     final participants = widget.participants;
 
-    final remote = participants.where((element) => !element.isLocal).toList();
-    final local = participants.where((element) => element.isLocal).toList();
+    final remote = participants.where((element) => !element.isLocal);
+    final local = participants.where((element) => element.isLocal);
     assert(local.isNotEmpty, 'Local participant is required');
 
     final maxRemoteParticipantCount =
@@ -212,7 +231,7 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
   final CallParticipantState screenSharingParticipant;
 
   /// The list of participants to display.
-  final List<CallParticipantState> participants;
+  final Iterable<CallParticipantState> participants;
 
   /// Builder function used to build a screen sharing item.
   final ScreenShareItemBuilder? screenShareItemBuilder;
@@ -255,7 +274,7 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             separatorBuilder: (context, index) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
-              final participant = participants[index];
+              final participant = participants.elementAt(index);
               return itemBuilder?.call(context, index, participant) ??
                   SizedBox(
                     width: 150,
