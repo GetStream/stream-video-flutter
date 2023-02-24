@@ -9,6 +9,7 @@ import 'coordinator/models/coordinator_inputs.dart' as input;
 import 'coordinator/models/coordinator_inputs.dart';
 import 'coordinator/models/coordinator_models.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
+import 'errors/video_error_composer.dart';
 import 'logger/logger.dart';
 import 'models/call_device.dart';
 import 'models/call_metadata.dart';
@@ -118,7 +119,7 @@ class StreamVideoImpl implements StreamVideo {
 
   /// Connects the [user] to the Stream Video service.
   @override
-  Future<void> connectUser(
+  Future<Result<None>> connectUser(
     UserInfo user, {
     Token? token,
     TokenProvider? provider,
@@ -126,7 +127,7 @@ class StreamVideoImpl implements StreamVideo {
     _logger.i(() => '[connectUser] user.id : ${user.id}');
     if (currentUser != null) {
       _logger.w(() => '[connectUser] rejected (already set): $currentUser');
-      return;
+      return Result.success(None());
     }
     _state.currentUser.value = user;
     await _tokenManager.setTokenOrProvider(
@@ -153,30 +154,37 @@ class StreamVideoImpl implements StreamVideo {
         }
       });
 
-      await _client.onUserLogin(user);
-      return _pushNotificationManager.onUserLoggedIn();
-    } catch (e) {
+      final result = await _client.onUserLogin(user);
+      await _pushNotificationManager.onUserLoggedIn();
+      return result;
+    } catch (e, stk) {
       _logger.e(() => '[connectUser] failed(${user.id}): $e');
-      rethrow;
+      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
   /// Disconnects the [user] from the Stream Video service.
   @override
-  Future<void> disconnectUser() async {
+  Future<Result<None>> disconnectUser() async {
     _logger.i(() => '[disconnectUser] currentUser.id: ${currentUser?.id}');
     if (currentUser == null) {
       _logger.w(() => '[disconnectUser] rejected (no user): $currentUser');
-      return;
+      return Result.success(None());
     }
-    await _client.onUserLogout();
-    await _eventSubscription?.cancel();
-    _eventSubscription = null;
-    _tokenManager.reset();
+    try {
+      await _client.onUserLogout();
+      await _eventSubscription?.cancel();
+      _eventSubscription = null;
+      _tokenManager.reset();
 
-    // Resetting the state.
-    await _state.close();
-    _state = _StreamVideoState();
+      // Resetting the state.
+      await _state.close();
+      _state = _StreamVideoState();
+      return Result.success(None());
+    } catch (e, stk) {
+      _logger.e(() => '[disconnectUser] failed: $e');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
   }
 
   @override

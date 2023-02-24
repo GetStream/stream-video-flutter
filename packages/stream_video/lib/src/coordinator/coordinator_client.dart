@@ -12,12 +12,11 @@ import 'models/coordinator_inputs.dart' as inputs;
 import 'models/coordinator_models.dart' as models;
 
 abstract class CoordinatorClient {
-
   SharedEmitter<CoordinatorEvent> get events;
 
-  Future<void> onUserLogin(UserInfo user);
+  Future<Result<None>> onUserLogin(UserInfo user);
 
-  Future<void> onUserLogout();
+  Future<Result<None>> onUserLogout();
 
   Future<Result<CallDevice>> createDevice(
     inputs.CreateDeviceInput input,

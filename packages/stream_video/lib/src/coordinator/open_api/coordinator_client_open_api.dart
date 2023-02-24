@@ -56,7 +56,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   StreamSubscription<CoordinatorEvent>? _wsSubscription;
 
   @override
-  Future<void> onUserLogin(UserInfo user) async {
+  Future<Result<None>> onUserLogin(UserInfo user) async {
     try {
       _logger.d(() => '[onUserLogin] user: $user');
       userId = user.id;
@@ -74,20 +74,29 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       });
 
       await ws.connect();
-    } catch (e) {
+      return Result.success(None());
+    } catch (e, stk) {
       _logger.e(() => '[onUserLogin] failed(${user.id}): $e');
-      rethrow;
+      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
   @override
-  Future<void> onUserLogout() async {
-    if (_ws == null) return;
-    userId = null;
-    await _ws?.disconnect();
-    _ws = null;
-    await _wsSubscription?.cancel();
-    _wsSubscription = null;
+  Future<Result<None>> onUserLogout() async {
+    if (_ws == null) {
+      return Result.success(None());
+    }
+    try {
+      userId = null;
+      await _ws?.disconnect();
+      _ws = null;
+      await _wsSubscription?.cancel();
+      _wsSubscription = null;
+      return Result.success(None());
+    } catch (e, stk) {
+      _logger.e(() => '[onUserLogout] failed: $e');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
   }
 
   /// Create a new Device used to receive Push Notifications.

@@ -69,14 +69,14 @@ abstract class StreamVideo {
   void Function(CallCreated)? onCallCreated;
 
   /// Connects the [user] to the Stream Video service.
-  Future<void> connectUser(
+  Future<Result<None>> connectUser(
     UserInfo user, {
     Token? token,
     TokenProvider? provider,
   });
 
   /// Disconnects the [user] from the Stream Video service.
-  Future<void> disconnectUser();
+  Future<Result<None>> disconnectUser();
 
   Future<Result<CallCreated>> createCall({
     required StreamCallCid cid,

@@ -29,7 +29,6 @@ import 'mapper_extensions.dart';
 
 /// An accessor that allows us to communicate with the API around video calls.
 class CoordinatorClientProtobuf extends CoordinatorClient {
-
   CoordinatorClientProtobuf({
     required String rpcUrl,
     required this.wsUrl,
@@ -52,7 +51,7 @@ class CoordinatorClientProtobuf extends CoordinatorClient {
   StreamSubscription<CoordinatorEvent>? _wsSubscription;
 
   @override
-  Future<void> onUserLogin(UserInfo user) async {
+  Future<Result<None>> onUserLogin(UserInfo user) async {
     try {
       final ws = CoordinatorWebSocketProtobuf(
         wsUrl,
@@ -67,19 +66,28 @@ class CoordinatorClientProtobuf extends CoordinatorClient {
       });
 
       await ws.connect();
-    } catch (e) {
+      return Result.success(None());
+    } catch (e, stk) {
       _logger.e(() => '[onUserLogin] failed(${user.id}): $e');
-      rethrow;
+      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
   @override
-  Future<void> onUserLogout() async {
-    if (_ws == null) return;
-    await _ws?.disconnect();
-    _ws = null;
-    await _wsSubscription?.cancel();
-    _wsSubscription = null;
+  Future<Result<None>> onUserLogout() async {
+    if (_ws == null) {
+      return Result.success(None());
+    }
+    try {
+      await _ws?.disconnect();
+      _ws = null;
+      await _wsSubscription?.cancel();
+      _wsSubscription = null;
+      return Result.success(None());
+    } catch (e, stk) {
+      _logger.e(() => '[onUserLogout] failed: $e');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
   }
 
   /// Create a new Device used to receive Push Notifications.
