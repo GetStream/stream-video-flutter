@@ -40,7 +40,7 @@ class StreamCallContent extends StatefulWidget {
     this.onCancelPressed,
     this.onLeaveCall,
     this.onParticipantsTap,
-    this.enableFloatingView,
+    this.enableLocalVideo,
   });
 
   /// Represents a call.
@@ -74,7 +74,7 @@ class StreamCallContent extends StatefulWidget {
   final VoidCallback? onParticipantsTap;
 
   /// Enable floating participant in the call.
-  final bool? enableFloatingView;
+  final bool? enableLocalVideo;
 
   @override
   State<StreamCallContent> createState() => _StreamCallContentState();
@@ -124,7 +124,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
             StreamCallParticipants(
               call: call,
               participants: participants,
-              enableFloatingView: widget.enableFloatingView ?? !isDesktopDevice,
+              enableLocalVideo: widget.enableLocalVideo ?? !isDesktopDevice,
             ),
         bottomNavigationBar:
             widget.callControlsBuilder?.call(context, call, participants) ??
