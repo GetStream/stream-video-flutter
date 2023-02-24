@@ -1,5 +1,3 @@
-import 'package:collection/collection.dart';
-
 import 'action/action.dart';
 import 'action/call_control_action.dart';
 import 'action/coordinator_action.dart';
@@ -7,13 +5,13 @@ import 'action/lifecycle_action.dart';
 import 'action/rtc_action.dart';
 import 'action/sfu_action.dart';
 import 'call_state.dart';
-import 'coordinator/models/coordinator_models.dart';
-import 'coordinator/ws/coordinator_events.dart';
+import 'coordinator/models/coordinator_events.dart';
 import 'errors/video_error.dart';
 import 'logger/impl/tagged_logger.dart';
 import 'logger/stream_log.dart';
 import 'models/call_created.dart';
 import 'models/call_joined.dart';
+import 'models/call_metadata.dart';
 import 'models/call_received_created.dart';
 import 'reducer/call_state_reducer.dart';
 import 'sfu/data/events/sfu_events.dart';
@@ -174,13 +172,12 @@ class CallStateManagerImpl extends CallStateManager {
     );
   }
 
-  Future<CallUser?> _queryUserById(String userId) async {
-    final result = await _queryUsersByIds({userId});
-    return result.firstOrNull;
-  }
-
-  Future<List<CallUser>> _queryUsersByIds(Set<String> userIds) async {
-    final usersResult = await _streamVideo.queryUsers(userIds: userIds);
+  Future<List<CallUser>> _queryUsersByIds(
+    Set<String> userIds,
+  ) async {
+    final callCid = state.value.callCid;
+    final usersResult =
+        await _streamVideo.queryUsers(callCid: callCid, userIds: userIds);
     if (usersResult is! Success<List<CallUser>>) {
       return List.empty();
     }

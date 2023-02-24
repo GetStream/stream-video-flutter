@@ -1,5 +1,9 @@
 import 'dart:convert';
 
+import '../../../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
+    as rpc;
+import '../../../../protobuf/video/coordinator/utils_v1/utils.pb.dart'
+    as coord_utils;
 import '../../../protobuf/video/coordinator/call_v1/call.pb.dart'
     as coordinator_call;
 import '../../../protobuf/video/coordinator/client_v1_rpc/envelopes.pb.dart'
@@ -12,8 +16,13 @@ import '../../../protobuf/video/coordinator/user_v1/user.pb.dart'
     as coord_users;
 import '../../logger/logger.dart';
 import '../../models/call_cid.dart';
+import '../../models/call_credentials.dart';
+import '../../models/call_metadata.dart';
+import '../../utils/iterable.dart';
+import '../../utils/standard.dart';
+import '../models/coordinator_events.dart';
+import '../models/coordinator_inputs.dart';
 import '../models/coordinator_models.dart';
-import 'coordinator_events.dart';
 
 /// Converts [coordinator_ws.WebsocketEvent] into [CoordinatorEvent].
 extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
@@ -29,6 +38,7 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
       case coordinator_ws.WebsocketEvent_Event.callCreated:
         return CoordinatorCallCreatedEvent(
           callCid: callCreated.call.callCid,
+          createdAt: DateTime.now(),
           ringing: callCreated.ringing,
           info: callCreated.call.toCallInfo(),
           details: callCreated.callDetails.toCallDetails(),
@@ -44,6 +54,8 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
       case coordinator_ws.WebsocketEvent_Event.callEnded:
         return CoordinatorCallEndedEvent(
           callCid: callEnded.call.callCid,
+          sentByUserId: '',
+          createdAt: DateTime.now(),
           info: callEnded.call.toCallInfo(),
           details: callEnded.callDetails.toCallDetails(),
           users: users.toCallUsers(),
@@ -52,6 +64,7 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
         return CoordinatorCallAcceptedEvent(
           callCid: callAccepted.call.callCid,
           sentByUserId: callAccepted.senderUserId,
+          createdAt: DateTime.now(),
           info: callAccepted.call.toCallInfo(),
           details: callAccepted.callDetails.toCallDetails(),
           users: users.toCallUsers(),
@@ -60,6 +73,7 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
         return CoordinatorCallRejectedEvent(
           callCid: callRejected.call.callCid,
           sentByUserId: callRejected.senderUserId,
+          createdAt: DateTime.now(),
           info: callRejected.call.toCallInfo(),
           details: callRejected.callDetails.toCallDetails(),
           users: users.toCallUsers(),
@@ -68,6 +82,7 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
         return CoordinatorCallCancelledEvent(
           callCid: callCancelled.call.callCid,
           sentByUserId: callCancelled.senderUserId,
+          createdAt: DateTime.now(),
           info: callCancelled.call.toCallInfo(),
           details: callCancelled.callDetails.toCallDetails(),
           users: users.toCallUsers(),
@@ -91,10 +106,15 @@ extension WebsocketEventMapperExt on coordinator_ws.WebsocketEvent {
           callCid: callCustom.call.callCid,
           type: callCustom.type,
           senderUserId: callCustom.senderUserId,
+          createdAt: DateTime.now(),
           info: callCustom.call.toCallInfo(),
           details: callCustom.callDetails.toCallDetails(),
           users: users.toCallUsers(),
-          customJson: utf8.decode(callCustom.dataJson),
+          customJson: callCustom.dataJson.ifNotEmpty(
+            (it) => json.decode(
+              utf8.decode(it),
+            ),
+          ),
         );
       default:
         logger.warning('Unknown Video Event $eventType');
@@ -163,6 +183,19 @@ extension CredentialsExt on coord_edge.Credentials {
   }
 }
 
+extension EdgeExt on coord_edge.Edge {
+  SfuEdge toSfuEdge() {
+    return SfuEdge(
+      name: name,
+      latencyUrl: latencyUrl,
+      coordinates: SfuCoordinates(
+        lat: coordinates.lat,
+        lng: coordinates.long,
+      ),
+    );
+  }
+}
+
 extension UserExt on coord_users.User {
   CallUser toCallUser() {
     return CallUser(
@@ -173,7 +206,11 @@ extension UserExt on coord_users.User {
       imageUrl: imageUrl,
       createdAt: createdAt.toDateTime(),
       updatedAt: updatedAt.toDateTime(),
-      customJson: utf8.decode(customJson),
+      customJson: customJson.ifNotEmpty(
+        (it) => json.decode(
+          utf8.decode(it),
+        ),
+      ),
     );
   }
 }
@@ -187,5 +224,70 @@ extension UserListExt on List<coord_users.User> {
 extension UserMapExt on Map<String, coord_users.User> {
   Map<String, CallUser> toCallUsers() {
     return map((key, value) => MapEntry(key, value.toCallUser()));
+  }
+}
+
+extension EventTypeInputExt on EventTypeInput {
+  rpc.UserEventType toDto() {
+    switch (this) {
+      case EventTypeInput.accepted:
+        return rpc.UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL;
+      case EventTypeInput.rejected:
+        return rpc.UserEventType.USER_EVENT_TYPE_REJECTED_CALL;
+      case EventTypeInput.cancelled:
+        return rpc.UserEventType.USER_EVENT_TYPE_CANCELLED_CALL;
+      default:
+        return rpc.UserEventType.USER_EVENT_TYPE_UNSPECIFIED;
+    }
+  }
+}
+
+extension DirectionInputExt on DirectionInput {
+  coord_utils.Direction toDto() {
+    switch (this) {
+      case DirectionInput.asc:
+        return coord_utils.Direction.DIRECTION_ASC;
+      case DirectionInput.desc:
+        return coord_utils.Direction.DIRECTION_DESC;
+      default:
+        return coord_utils.Direction.DIRECTION_UNSPECIFIED;
+    }
+  }
+}
+
+extension SortInputExt on SortInput {
+  coord_utils.Sort toDto() {
+    return coord_utils.Sort(
+      field_1: field,
+      direction: direction.toDto(),
+    );
+  }
+}
+
+extension MemberInputExt on MemberInput {
+  rpc.MemberInput toDto() {
+    return rpc.MemberInput(
+      userId: userId,
+      role: role,
+      customJson: customJson?.let(
+        (it) => utf8.encode(
+          json.encode(it),
+        ),
+      ),
+      userInput: userInput?.let(
+        (user) => coord_users.UserInput(
+          id: user.id,
+          name: user.name,
+          role: user.role,
+          teams: user.teams,
+          imageUrl: user.imageUrl,
+          customJson: user.customJson?.let(
+            (it) => utf8.encode(
+              json.encode(it),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

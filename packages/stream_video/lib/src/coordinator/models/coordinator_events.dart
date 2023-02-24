@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../models/coordinator_models.dart';
+import '../../models/call_metadata.dart';
 
 // TODO: Should we call it VideoEvent or CoordinatorEvent?
 
@@ -19,8 +19,10 @@ abstract class CoordinatorEvent with EquatableMixin {
 
 /// Sent periodically by the server to keep the connection alive.
 class CoordinatorHealthCheckEvent extends CoordinatorEvent {
-  const CoordinatorHealthCheckEvent(
-      {required this.clientId, required this.userId});
+  const CoordinatorHealthCheckEvent({
+    required this.clientId,
+    required this.userId,
+  });
 
   final String clientId;
   final String userId;
@@ -34,6 +36,7 @@ class CoordinatorCallCreatedEvent extends CoordinatorEvent {
   const CoordinatorCallCreatedEvent({
     required this.callCid,
     required this.ringing,
+    required this.createdAt,
     required this.info,
     required this.details,
     required this.users,
@@ -41,12 +44,20 @@ class CoordinatorCallCreatedEvent extends CoordinatorEvent {
 
   final String callCid;
   final bool ringing;
+  final DateTime createdAt;
   final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
 
   @override
-  List<Object?> get props => [callCid, ringing, info, details, users];
+  List<Object?> get props => [
+        callCid,
+        ringing,
+        createdAt,
+        info,
+        details,
+        users,
+      ];
 }
 
 /// Sent when a call gets updated.
@@ -71,25 +82,8 @@ class CoordinatorCallUpdatedEvent extends CoordinatorEvent {
 class CoordinatorCallEndedEvent extends CoordinatorEvent {
   const CoordinatorCallEndedEvent({
     required this.callCid,
-    required this.info,
-    required this.details,
-    required this.users,
-  });
-
-  final String callCid;
-  final CallInfo info;
-  final CallDetails details;
-  final Map<String, CallUser> users;
-
-  @override
-  List<Object?> get props => [callCid, info, details, users];
-}
-
-/// Sent when a user accepts the call.
-class CoordinatorCallAcceptedEvent extends CoordinatorEvent {
-  const CoordinatorCallAcceptedEvent({
-    required this.callCid,
     required this.sentByUserId,
+    required this.createdAt,
     required this.info,
     required this.details,
     required this.users,
@@ -97,6 +91,38 @@ class CoordinatorCallAcceptedEvent extends CoordinatorEvent {
 
   final String callCid;
   final String sentByUserId;
+  final DateTime createdAt;
+  // TODO delete props below
+  final CallInfo info;
+  final CallDetails details;
+  final Map<String, CallUser> users;
+
+  @override
+  List<Object?> get props => [
+        callCid,
+        sentByUserId,
+        createdAt,
+        info,
+        details,
+        users,
+      ];
+}
+
+/// Sent when a user accepts the call.
+class CoordinatorCallAcceptedEvent extends CoordinatorEvent {
+  const CoordinatorCallAcceptedEvent({
+    required this.callCid,
+    required this.sentByUserId,
+    required this.createdAt,
+    required this.info,
+    required this.details,
+    required this.users,
+  });
+
+  final String callCid;
+  final String sentByUserId;
+  final DateTime createdAt;
+  // TODO delete props below
   final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
@@ -111,18 +137,28 @@ class CoordinatorCallRejectedEvent extends CoordinatorEvent {
     required this.callCid,
     required this.sentByUserId,
     required this.info,
+    required this.createdAt,
     required this.details,
     required this.users,
   });
 
   final String callCid;
   final String sentByUserId;
+  final DateTime createdAt;
+  // TODO remove props below
   final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
 
   @override
-  List<Object?> get props => [callCid, sentByUserId, info, details, users];
+  List<Object?> get props => [
+        callCid,
+        sentByUserId,
+        createdAt,
+        info,
+        details,
+        users,
+      ];
 }
 
 /// Sent when a user cancels the call.
@@ -130,6 +166,7 @@ class CoordinatorCallCancelledEvent extends CoordinatorEvent {
   const CoordinatorCallCancelledEvent({
     required this.callCid,
     required this.sentByUserId,
+    required this.createdAt,
     required this.info,
     required this.details,
     required this.users,
@@ -137,12 +174,21 @@ class CoordinatorCallCancelledEvent extends CoordinatorEvent {
 
   final String callCid;
   final String sentByUserId;
+  final DateTime createdAt;
+  // TODO remove props below
   final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
 
   @override
-  List<Object?> get props => [callCid, sentByUserId, info, details, users];
+  List<Object?> get props => [
+        callCid,
+        sentByUserId,
+        createdAt,
+        info,
+        details,
+        users,
+      ];
 }
 
 /// Sent when call members are updated.
@@ -184,8 +230,9 @@ class CoordinatorCallMembersDeletedEvent extends CoordinatorEvent {
 class CoordinatorCallCustomEvent extends CoordinatorEvent {
   const CoordinatorCallCustomEvent({
     required this.callCid,
-    required this.type,
     required this.senderUserId,
+    required this.createdAt,
+    required this.type,
     required this.info,
     required this.details,
     required this.users,
@@ -193,18 +240,21 @@ class CoordinatorCallCustomEvent extends CoordinatorEvent {
   });
 
   final String callCid;
-  final String type;
   final String senderUserId;
+  final DateTime createdAt;
+  final String type;
+  final Map<String, Object>? customJson;
+  // TODO remove below
   final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
-  final String? customJson;
 
   @override
   List<Object?> get props => [
         callCid,
-        type,
         senderUserId,
+        createdAt,
+        type,
         info,
         details,
         users,

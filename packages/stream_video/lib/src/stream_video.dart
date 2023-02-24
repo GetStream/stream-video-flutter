@@ -1,22 +1,28 @@
 import 'dart:async';
 
 import 'package:logging/logging.dart';
-import 'package:stream_video/src/push_notification/no_op_push_notification.dart';
 
-import 'coordinator/models/coordinator_models.dart';
-import 'coordinator/ws/coordinator_events.dart';
+import '../stream_video.dart';
+import 'coordinator/models/coordinator_events.dart';
 import 'internal/_instance_holder.dart';
-import 'models/call_cid.dart';
-import 'models/call_created.dart';
-import 'models/call_joined.dart';
-import 'models/call_received_created.dart';
-import 'models/user_info.dart';
+import 'models/call_device.dart';
+import 'models/call_metadata.dart';
+import 'push_notification/no_op_push_notification.dart';
 import 'shared_emitter.dart';
 import 'stream_video_impl.dart';
-import 'token/token.dart';
 import 'token/token_manager.dart';
 import 'utils/none.dart';
-import 'utils/result.dart';
+
+/// Handler function used for logging records. Function requires a single
+/// [LogRecord] as the only parameter.
+typedef LogHandlerFunction = void Function(LogRecord record);
+
+typedef PushNotificationFactory = Future<PushNotificationManager> Function(
+  StreamVideo,
+);
+
+/// Handler function used for logging records. Function requires a single
+/// [LogRecord] as the only parameter.
 
 final _levelEmojiMapper = {
   Level.INFO: 'ℹ️',
@@ -51,7 +57,7 @@ abstract class StreamVideo {
       latencyMeasurementRounds: latencyMeasurementRounds,
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
-      pushNotificationFactrory: pushNotificationFactory,
+      pushNotificationFactory: pushNotificationFactory,
     );
   }
   static final InstanceHolder _instanceHolder = InstanceHolder();
@@ -63,14 +69,14 @@ abstract class StreamVideo {
   void Function(CallCreated)? onCallCreated;
 
   /// Connects the [user] to the Stream Video service.
-  Future<void> connectUser(
+  Future<Result<None>> connectUser(
     UserInfo user, {
     Token? token,
     TokenProvider? provider,
   });
 
   /// Disconnects the [user] from the Stream Video service.
-  Future<void> disconnectUser();
+  Future<Result<None>> disconnectUser();
 
   Future<Result<CallCreated>> createCall({
     required StreamCallCid cid,
@@ -103,21 +109,22 @@ abstract class StreamVideo {
 
   Future<Result<None>> sendCustomEvent({
     required StreamCallCid cid,
-    required List<int> dataJson,
-    String? eventType,
+    required String eventType,
+    required Map<String, Object> extraData,
   });
 
   // TODO replace with domain users
   Future<Result<List<CallUser>>> queryUsers({
+    required StreamCallCid callCid,
     required Set<String> userIds,
   });
 
-  Future<void> inviteUsers({
+  Future<Result<None>> inviteUsers({
     required String callCid,
     required List<UserInfo> users,
   });
 
-  Future<void> createDevice({
+  Future<Result<CallDevice>> createDevice({
     required String token,
     required String pushProviderId,
   });
