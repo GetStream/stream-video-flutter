@@ -5,8 +5,8 @@ import '../../models/call_credentials.dart';
 import '../../models/call_metadata.dart';
 
 @immutable
-abstract class CoordinatorModelV2 with EquatableMixin {
-  const CoordinatorModelV2();
+abstract class CoordinatorModel with EquatableMixin {
+  const CoordinatorModel();
 
   @override
   bool? get stringify => true;
@@ -15,7 +15,7 @@ abstract class CoordinatorModelV2 with EquatableMixin {
   List<Object?> get props => const [];
 }
 
-class CoordinatorJoined extends CoordinatorModelV2 {
+class CoordinatorJoined extends CoordinatorModel {
   const CoordinatorJoined({
     required this.wasCreated,
     required this.metadata,
@@ -30,7 +30,7 @@ class CoordinatorJoined extends CoordinatorModelV2 {
   List<Object?> get props => [wasCreated, metadata, edges];
 }
 
-class SfuServerSelected extends CoordinatorModelV2 {
+class SfuServerSelected extends CoordinatorModel {
   const SfuServerSelected({
     required this.metadata,
     required this.credentials,
@@ -43,7 +43,7 @@ class SfuServerSelected extends CoordinatorModelV2 {
   List<Object?> get props => [credentials, metadata];
 }
 
-class SfuEdge extends CoordinatorModelV2 {
+class SfuEdge extends CoordinatorModel {
   const SfuEdge({
     required this.name,
     required this.latencyUrl,
@@ -58,7 +58,7 @@ class SfuEdge extends CoordinatorModelV2 {
   List<Object?> get props => [name, latencyUrl, coordinates];
 }
 
-class SfuCoordinates extends CoordinatorModelV2 {
+class SfuCoordinates extends CoordinatorModel {
   const SfuCoordinates({
     this.lat,
     this.lng,
@@ -71,7 +71,7 @@ class SfuCoordinates extends CoordinatorModelV2 {
   List<Object?> get props => [lat, lng];
 }
 
-class SfuLatency extends CoordinatorModelV2 {
+class SfuLatency extends CoordinatorModel {
   const SfuLatency({
     required this.measurementsSeconds,
   });
