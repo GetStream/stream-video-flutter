@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/device_segmentation.dart';
-import '../widgets/floating_view/floating_view_alignment.dart';
 import '../widgets/tile_view.dart';
 import 'screen_share_item.dart';
 
@@ -38,7 +37,6 @@ class StreamCallParticipants extends StatelessWidget {
     this.screenShareItemBuilder,
     this.itemBuilder,
     this.enableFloatingView = true,
-    this.enableSnappingBehavior = true,
     super.key,
   });
 
@@ -56,10 +54,6 @@ class StreamCallParticipants extends StatelessWidget {
 
   /// Enable picture-in-picture for the current participant.
   final bool enableFloatingView;
-
-  /// If the floating view should be automatically anchored to one of the
-  /// corners.
-  final bool enableSnappingBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +75,6 @@ class StreamCallParticipants extends StatelessWidget {
         participants: participants,
         itemBuilder: itemBuilder,
         enableFloatingView: enableFloatingView,
-        enableSnappingBehavior: enableSnappingBehavior,
       );
     }
   }
@@ -89,7 +82,7 @@ class StreamCallParticipants extends StatelessWidget {
 
 /// A widget that represents the main area of the call when nobody is
 /// sharing their screen.
-class RegularCallParticipantsContent extends StatefulWidget {
+class RegularCallParticipantsContent extends StatelessWidget {
   /// Creates a new instance of [RegularCallParticipantsContent].
   const RegularCallParticipantsContent({
     super.key,
@@ -97,7 +90,6 @@ class RegularCallParticipantsContent extends StatefulWidget {
     required this.participants,
     this.itemBuilder,
     this.enableFloatingView = true,
-    this.enableSnappingBehavior = true,
   });
 
   /// Represents a call.
@@ -112,24 +104,8 @@ class RegularCallParticipantsContent extends StatefulWidget {
   /// Enable picture-in-picture for current participant.
   final bool enableFloatingView;
 
-  /// If the floating view should be automatically anchored to one of the
-  /// corners.
-  final bool enableSnappingBehavior;
-
-  @override
-  State<RegularCallParticipantsContent> createState() =>
-      _RegularCallParticipantsContentState();
-}
-
-class _RegularCallParticipantsContentState
-    extends State<RegularCallParticipantsContent> {
-  final bottomRightOffset =
-      ValueNotifier<Offset>(const Offset(0, double.infinity));
-
   @override
   Widget build(BuildContext context) {
-    final participants = widget.participants;
-
     final remote = participants.where((element) => !element.isLocal).toList();
     final local = participants.where((element) => element.isLocal).toList();
     assert(local.isNotEmpty, 'Local participant is required');
@@ -146,7 +122,7 @@ class _RegularCallParticipantsContentState
     // are one or two remote remote participants. Otherwise show local
     // participant in the grid.
     final showFloatingParticipant =
-        widget.enableFloatingView && remote.isNotEmpty && remote.length < 3;
+        enableFloatingView && remote.isNotEmpty && remote.length < 3;
 
     if (!showFloatingParticipant) {
       participantsToDisplay.add(local.first);
@@ -155,9 +131,9 @@ class _RegularCallParticipantsContentState
     final participantWidgets = <Widget>[];
     for (var i = 0; i < participantsToDisplay.length; i++) {
       final participantWidget =
-          widget.itemBuilder?.call(context, i, participantsToDisplay[i]) ??
+          itemBuilder?.call(context, i, participantsToDisplay[i]) ??
               StreamCallParticipant(
-                call: widget.call,
+                call: call,
                 participant: participantsToDisplay[i],
               );
 
@@ -172,21 +148,9 @@ class _RegularCallParticipantsContentState
       return participantGrid;
     }
 
-    final floatingTheme = StreamFloatingCallParticipantTheme.of(context);
-    final floatingParticipantWidth = floatingTheme.floatingParticipantWidth;
-    final floatingParticipantHeight = floatingTheme.floatingParticipantHeight;
-    final floatingParticipantPadding = floatingTheme.floatingParticipantPadding;
-
-    return FloatingViewContainer(
-      floatingViewWidth: floatingParticipantWidth,
-      floatingViewHeight: floatingParticipantHeight,
-      enableSnappingBehavior: widget.enableSnappingBehavior,
-      floatingViewPadding: floatingParticipantPadding,
-      floatingViewAlignment: FloatingViewAlignment.topRight,
-      floatingView: StreamFloatingCallParticipant(
-        call: widget.call,
-        participant: local.first,
-      ),
+    return StreamLocalVideo(
+      call: call,
+      localParticipant: local.first,
       child: participantGrid,
     );
   }
