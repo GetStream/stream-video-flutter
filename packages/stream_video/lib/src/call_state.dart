@@ -3,8 +3,8 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 import 'call_participant_state.dart';
-import 'coordinator/models/coordinator_models.dart';
 import 'models/call_cid.dart';
+import 'models/call_metadata.dart';
 import 'models/call_status.dart';
 
 /// TODO - Class that holds any information about the call, including participants

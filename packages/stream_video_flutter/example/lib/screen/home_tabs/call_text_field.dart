@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:stream_video/stream_video.dart';
 
 class CallIdTextField extends StatelessWidget {
   const CallIdTextField({
@@ -27,7 +28,7 @@ class CallIdTextField extends StatelessWidget {
           icon: const Icon(Icons.refresh),
           onPressed: () {
             // generate a 10 character nanoId for call id
-            final callId = _nanoid(10);
+            final callId = generateAlphanumericString(10);
             controller.value = TextEditingValue(
               text: callId,
               selection: TextSelection.collapsed(offset: callId.length),
@@ -38,10 +39,4 @@ class CallIdTextField extends StatelessWidget {
     );
   }
 
-  /// Generates a nanoId of given length
-  String _nanoid(int length) {
-    final random = math.Random.secure();
-    final values = List<int>.generate(length, (index) => random.nextInt(256));
-    return base64Url.encode(values);
-  }
 }

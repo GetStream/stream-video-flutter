@@ -1,32 +1,36 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import '../../../protobuf/video/coordinator/client_v1_rpc/websocket.pb.dart'
-    as coordinator;
-import '../../../protobuf/video/coordinator/user_v1/user.pb.dart'
-    as coordinator_user;
 import '../../core/video_error.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/user_info.dart';
 import '../../shared_emitter.dart';
 import '../../token/token_manager.dart';
 import '../../types/other.dart';
+import '../../utils/standard.dart';
+import '../../ws/base_ws.dart';
 import '../../ws/keep_alive.dart';
-import '../../ws/ws.dart';
-import 'coordinator_events.dart';
-import 'mapper_extensions.dart';
+import '../coordinator_ws.dart';
+import '../models/coordinator_events.dart';
+import 'event/health_check.dart';
+import 'event/open_api_event.dart';
+import 'open_api_mapper_extensions.dart';
 
 // TODO: The class needs further refactor. Some parts can be abstracted.
 
-class CoordinatorWebSocket extends StreamWebSocket
+String buildUrl(String baseUrl, String apiKey) {
+  return '$baseUrl?api_key=$apiKey&stream-auth-type=jwt&X-Stream-Client=stream-video-flutter';
+}
+
+class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     with KeepAlive, ConnectionStateMixin {
-  CoordinatorWebSocket(
-    super.url, {
-    super.protocols,
+  CoordinatorWebSocketOpenApi(
+    String url, {
+    Iterable<String>? protocols,
     required this.apiKey,
     required this.userInfo,
     required this.tokenManager,
-  });
+  }) : super(buildUrl(url, apiKey), protocols: protocols);
 
   late final _logger = taggedLogger(tag: 'SV:CoordinatorWS');
 
@@ -39,11 +43,12 @@ class CoordinatorWebSocket extends StreamWebSocket
   /// The token manager used to fetch or refresh token.
   final TokenManager tokenManager;
 
+  @override
   SharedEmitter<CoordinatorEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
 
-  String? _userId;
-  String? _clientId;
+  String? userId;
+  String? clientId;
 
   set callInfo(CallInfo? info) => _callInfo = info;
   CallInfo? _callInfo;
@@ -65,25 +70,20 @@ class CoordinatorWebSocket extends StreamWebSocket
     _logger.i(() => '[authenticateUser] url: $url');
 
     final token = await tokenManager.loadToken();
-    final authPayload = coordinator.WebsocketAuthRequest(
-      apiKey: apiKey,
-      token: token.rawValue,
-      user: coordinator_user.UserInput(
-        id: userInfo.id,
-        name: userInfo.name,
-        imageUrl: userInfo.imageUrl,
-        role: userInfo.role,
-        teams: userInfo.teams,
-        customJson: utf8.encode(
-          json.encode(userInfo.extraData),
-        ),
-      ),
-    );
 
+    final authMessage = {
+      'token': token.rawValue,
+      'user_details': {
+        'id': userInfo.id,
+        'name': userInfo.name,
+        'imageUrl': userInfo.imageUrl,
+        'role': userInfo.role,
+        'teams': userInfo.teams,
+        'customJson': json.encode(userInfo.extraData),
+      },
+    };
     return send(
-      coordinator.WebsocketClientEvent(
-        authRequest: authPayload,
-      ),
+      json.encode(authMessage),
     );
   }
 
@@ -123,8 +123,8 @@ class CoordinatorWebSocket extends StreamWebSocket
     );
 
     // resetting connection
-    _userId = null;
-    _clientId = null;
+    userId = null;
+    clientId = null;
 
     // check if we manually closed the connection
     if (_manuallyClosed) {
@@ -137,32 +137,32 @@ class CoordinatorWebSocket extends StreamWebSocket
 
   @override
   void onMessage(dynamic message) {
-    coordinator.WebsocketEvent? event;
+    _logger.i(() => '[onMessage] message: $message');
+    OpenApiEvent? dtoEvent;
     try {
-      event = coordinator.WebsocketEvent.fromBuffer(message);
+      dtoEvent = OpenApiEvent.fromRawJson(message);
     } catch (e, stk) {
       _logger.e(
         () => '[onMessage] msg parsing failed: "$e"; stk: $stk',
       );
     }
 
-    if (event == null) {
+    if (dtoEvent == null) {
       _logger.w(() => '[onMessage] event is null');
       return;
     }
 
-    final eventType = event.whichEvent();
-    _logger.v(() => '[onMessage] eventType: $eventType');
+    _logger.v(() => '[onMessage] dtoEvent.type: ${dtoEvent?.type}');
 
-    if (eventType == coordinator.WebsocketEvent_Event.healthcheck) {
-      _handleHealthCheckEvent(event.healthcheck);
+    if (dtoEvent.healthCheck != null) {
+      _handleHealthCheckEvent(dtoEvent.healthCheck!);
     }
 
     // Parsing
-    _events.emit(event.toEvent());
+    dtoEvent.toCoordinatorEvent()?.let(_events.emit);
   }
 
-  void _handleHealthCheckEvent(coordinator.WebsocketHealthcheck event) {
+  void _handleHealthCheckEvent(HealthCheck event) {
     if (!isKeepAliveStarted) {
       connectionState = ConnectionState.connected;
 
@@ -170,8 +170,8 @@ class CoordinatorWebSocket extends StreamWebSocket
       startPingPong();
     }
     ackPong(event);
-    _userId = event.userId;
-    _clientId = event.clientId;
+    userId ??= event.me?.id;
+    clientId ??= event.connectionId;
   }
 
   @override
@@ -196,25 +196,26 @@ class CoordinatorWebSocket extends StreamWebSocket
   }
 
   @override
-  void send(coordinator.WebsocketClientEvent message) {
+  void send(String message) {
     _logger.d(() => '[send] message: $message');
-    super.send(message.writeToBuffer());
+    super.send(message);
   }
 
   @override
   void sendPing() {
     _logger.d(() => '[sendPing] no args');
-    final healthCheck = coordinator.WebsocketHealthcheck(
-      userId: _userId,
-      clientId: _clientId,
-      callType: _callInfo?.callType,
-      callId: _callInfo?.callId,
-    );
+    final healthCheck = [
+      {
+        'type': 'health.check',
+        // 'user_id': _userId,
+        'client_id': clientId,
+        // 'call_type': _callInfo?.callType,
+        // 'call_id': _callInfo?.callId,
+      }
+    ];
 
     return send(
-      coordinator.WebsocketClientEvent(
-        healthcheck: healthCheck,
-      ),
+      json.encode(healthCheck),
     );
   }
 

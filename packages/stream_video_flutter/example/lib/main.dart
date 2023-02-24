@@ -12,13 +12,11 @@ Future<void> main() async {
     ..validator = (priority, tag) => true;
 
   StreamVideo.init(
-    'us83cfwuhy8n', // see <video>/data/fixtures/apps.yaml for API secret
-    coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
-        'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
-    // 'http://192.168.1.7:26991/rpc',
-    coordinatorWsUrl: //replace host with your local ip address
-        'wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
-    // 'ws://192.168.1.7:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
+    'w6yaq5388uym',
+    coordinatorRpcUrl:
+        'https://video-edge-frankfurt-ce1.stream-io-api.com/video',
+    coordinatorWsUrl:
+        'wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect',
   );
 
   runApp(const MyApp());

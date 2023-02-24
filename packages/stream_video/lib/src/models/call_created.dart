@@ -1,7 +1,11 @@
-import '../coordinator/models/coordinator_models.dart';
-import 'call_cid.dart';
+import 'package:equatable/equatable.dart';
+import 'package:meta/meta.dart';
 
-class CallCreated {
+import 'call_cid.dart';
+import 'call_metadata.dart';
+
+@immutable
+class CallCreated with EquatableMixin {
   const CallCreated({
     required this.callCid,
     required this.ringing,
@@ -10,6 +14,9 @@ class CallCreated {
   final StreamCallCid callCid;
   final bool ringing;
   final CallMetadata metadata;
+
+  @override
+  List<Object?> get props => [callCid, ringing, metadata];
 
   @override
   String toString() {
