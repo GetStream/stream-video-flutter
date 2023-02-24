@@ -59,7 +59,7 @@ class StreamCallParticipants extends StatelessWidget {
   /// Filter used to filter the participants.
   final Filter<CallParticipantState> filter;
 
-  /// Sort used to sort the participants.
+  /// Used for sorting the call participants.
   final Sort<CallParticipantState> sort;
 
   /// Builder function used to build a screen sharing item.
