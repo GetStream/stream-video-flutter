@@ -105,134 +105,141 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Text(
-              'Before Joining',
-              style: textTheme.title3.copyWith(
-                fontSize: 28,
-                color: colorTheme.textHighEmphasis,
-              ),
-            ),
-            Text(
-              'Setup your audio and video',
-              style: textTheme.title3.copyWith(
-                color: colorTheme.textLowEmphasis,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              constraints: const BoxConstraints(maxWidth: 420),
-              height: 300,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  decoration: BoxDecoration(color: cardBackgroundColor),
-                  child: Stack(
-                    children: [
-                      if (_isVideoEnabled)
-                        RTCVideoView(
-                          _localVideoRenderer,
-                          filterQuality: FilterQuality.high,
-                          mirror: true,
-                          objectFit:
-                              RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                        )
-                      else if (currentUser != null)
-                        Center(
-                          child: StreamUserAvatarTheme(
-                            data: userAvatarTheme,
-                            child: StreamUserAvatar(
-                              user: currentUser,
-                            ),
-                          ),
-                        ),
-                      Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: StreamParticipantLabel(
-                                isAudioEnabled: _isAudioEnabled,
-                                isSpeaking: false,
-                                participantName: currentUser?.name ?? '',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                Text(
+                  'Before Joining',
+                  style: textTheme.title3.copyWith(
+                    fontSize: 28,
+                    color: colorTheme.textHighEmphasis,
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CallControlOption(
-                  icon: _isAudioEnabled
-                      ? const Icon(Icons.mic_rounded)
-                      : const Icon(Icons.mic_off_rounded),
-                  onPressed: _isAudioEnabled ? _disableAudio : _enableAudio,
+                Text(
+                  'Setup your audio and video',
+                  style: textTheme.title3.copyWith(
+                    color: colorTheme.textLowEmphasis,
+                  ),
                 ),
-                const SizedBox(width: 16),
-                CallControlOption(
-                  icon: _isVideoEnabled
-                      ? const Icon(Icons.videocam_rounded)
-                      : const Icon(Icons.videocam_off_rounded),
-                  onPressed: _isVideoEnabled ? _disableVideo : _enableVideo,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Container(
-              constraints: const BoxConstraints(maxWidth: 360),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  decoration: BoxDecoration(color: theme.cardBackgroundColor),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'You are about to join a call. 0 more people are in the call.',
-                            style: textTheme.title3,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: colorTheme.accentPrimary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                const SizedBox(height: 16),
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  height: 280,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(color: cardBackgroundColor),
+                      child: Stack(
+                        children: [
+                          if (_isVideoEnabled)
+                            RTCVideoView(
+                              _localVideoRenderer,
+                              filterQuality: FilterQuality.high,
+                              mirror: true,
+                              objectFit: RTCVideoViewObjectFit
+                                  .RTCVideoViewObjectFitCover,
+                            )
+                          else if (currentUser != null)
+                            Center(
+                              child: StreamUserAvatarTheme(
+                                data: userAvatarTheme,
+                                child: StreamUserAvatar(
+                                  user: currentUser,
+                                ),
+                              ),
                             ),
-                            minimumSize: const Size.fromHeight(40),
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: StreamParticipantLabel(
+                                    isAudioEnabled: _isAudioEnabled,
+                                    isSpeaking: false,
+                                    participantName: currentUser?.name ?? '',
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          onPressed: () {
-                            widget.onJoinCallTap();
-                          },
-                          child: Text(
-                            'Join Call',
-                            style: textTheme.title3Bold
-                                .copyWith(color: Colors.white),
-                          ),
-                        )
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CallControlOption(
+                      icon: _isAudioEnabled
+                          ? const Icon(Icons.mic_rounded)
+                          : const Icon(Icons.mic_off_rounded),
+                      onPressed: _isAudioEnabled ? _disableAudio : _enableAudio,
+                    ),
+                    const SizedBox(width: 16),
+                    CallControlOption(
+                      icon: _isVideoEnabled
+                          ? const Icon(Icons.videocam_rounded)
+                          : const Icon(Icons.videocam_off_rounded),
+                      onPressed: _isVideoEnabled ? _disableVideo : _enableVideo,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 360),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      decoration:
+                          BoxDecoration(color: theme.cardBackgroundColor),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(
+                                'You are about to join a call. 0 more people are in the call.',
+                                style: textTheme.title3,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colorTheme.accentPrimary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                minimumSize: const Size.fromHeight(40),
+                              ),
+                              onPressed: () {
+                                widget.onJoinCallTap();
+                              },
+                              child: Text(
+                                'Join Call',
+                                style: textTheme.title3Bold
+                                    .copyWith(color: Colors.white),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 56),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
