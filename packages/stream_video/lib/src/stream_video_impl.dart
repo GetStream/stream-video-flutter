@@ -1,40 +1,23 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:logging/logging.dart';
-import 'package:stream_video/protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart';
-import 'package:stream_video/protobuf/video/coordinator/push_v1/push.pb.dart';
 
-import '../../protobuf/video/coordinator/client_v1_rpc/client_rpc.pb.dart'
-    as rpc;
 import '../stream_video.dart';
 import 'coordinator/coordinator_client.dart';
+import 'coordinator/models/coordinator_events.dart';
+import 'coordinator/models/coordinator_inputs.dart' as input;
+import 'coordinator/models/coordinator_inputs.dart';
 import 'coordinator/models/coordinator_models.dart';
-import 'coordinator/ws/coordinator_events.dart';
-import 'coordinator/ws/coordinator_ws.dart';
-import 'coordinator/ws/mapper_extensions.dart';
-import 'logger/impl/tagged_logger.dart';
+import 'coordinator/open_api/coordinator_client_open_api.dart';
+import 'errors/video_error_composer.dart';
 import 'logger/logger.dart';
-import 'models/call_cid.dart';
-import 'models/call_created.dart';
-import 'models/call_joined.dart';
-import 'models/call_received_created.dart';
-import 'models/user_info.dart';
+import 'models/call_device.dart';
+import 'models/call_metadata.dart';
 import 'push_notification/no_op_push_notification.dart';
-import 'push_notification/push_notification_manager.dart';
 import 'shared_emitter.dart';
 import 'state_emitter.dart';
-import 'token/token.dart';
 import 'token/token_manager.dart';
 import 'utils/none.dart';
-import 'utils/result.dart';
-
-/// Handler function used for logging records. Function requires a single
-/// [LogRecord] as the only parameter.
-typedef LogHandlerFunction = void Function(LogRecord record);
-
-typedef PushNotificationFactory = Future<PushNotificationManager> Function(
-    StreamVideo);
 
 final _levelEmojiMapper = {
   Level.INFO: 'ℹ️',
@@ -63,7 +46,7 @@ class StreamVideoImpl implements StreamVideo {
     int latencyMeasurementRounds = 3,
     Level logLevel = Level.ALL,
     LogHandlerFunction logHandlerFunction = StreamVideoImpl.defaultLogHandler,
-    PushNotificationFactory pushNotificationFactrory =
+    PushNotificationFactory pushNotificationFactory =
         defaultPushNotificationManager,
   }) {
     return StreamVideoImpl._(
@@ -73,7 +56,7 @@ class StreamVideoImpl implements StreamVideo {
       latencyMeasurementRounds: latencyMeasurementRounds,
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
-      pushNotificationFactrory: pushNotificationFactrory,
+      pushNotificationFactrory: pushNotificationFactory,
     );
   }
 
@@ -90,10 +73,11 @@ class StreamVideoImpl implements StreamVideo {
     setLogLevel(logLevel);
     setLogHandler(logHandlerFunction);
 
-    _client = CoordinatorClient(
+    _client = buildCoordinatorClient(
       apiKey: apiKey,
       tokenManager: _tokenManager,
-      baseUrl: coordinatorRpcUrl,
+      rpcUrl: coordinatorRpcUrl,
+      wsUrl: coordinatorWsUrl,
     );
     _initPushNotificationManager(pushNotificationFactrory);
   }
@@ -111,15 +95,13 @@ class StreamVideoImpl implements StreamVideo {
 
   var _state = _StreamVideoState();
 
-  @override
-  UserInfo? get currentUser => _state.currentUser.value;
-
-  CoordinatorWebSocket? _ws;
-  StreamSubscription<CoordinatorEvent>? _wsSubscription;
+  StreamSubscription<CoordinatorEvent>? _eventSubscription;
 
   @override
-  SharedEmitter<CoordinatorEvent> get events => _events;
-  final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
+  UserInfo? get currentUser => _state.currentUser.valueOrNull;
+
+  @override
+  SharedEmitter<CoordinatorEvent> get events => _client.events;
 
   @override
   void Function(CallCreated)? onCallCreated;
@@ -137,15 +119,16 @@ class StreamVideoImpl implements StreamVideo {
 
   /// Connects the [user] to the Stream Video service.
   @override
-  Future<void> connectUser(
+  Future<Result<None>> connectUser(
     UserInfo user, {
     Token? token,
     TokenProvider? provider,
   }) async {
-    if (_ws != null) return;
-
-    logger.info('setting user : ${user.id}');
-
+    _logger.i(() => '[connectUser] user.id : ${user.id}');
+    if (currentUser != null) {
+      _logger.w(() => '[connectUser] rejected (already set): $currentUser');
+      return Result.success(None());
+    }
     _state.currentUser.value = user;
     await _tokenManager.setTokenOrProvider(
       user.id,
@@ -154,20 +137,9 @@ class StreamVideoImpl implements StreamVideo {
     );
 
     try {
-      _ws = CoordinatorWebSocket(
-        coordinatorWsUrl,
-        apiKey: apiKey,
-        userInfo: user,
-        tokenManager: _tokenManager,
-      );
-      _wsSubscription = _ws?.events.listen((event) {
+      _eventSubscription = _client.events.listen((event) {
         _logger.v(() => '[onCoordWsEvent] event.type: ${event.runtimeType}');
         if (event is CoordinatorCallCreatedEvent) {
-          final currentUserId = _state.currentUser.value?.id;
-          if (currentUserId == null) {
-            _logger.v(() => '[onCoordWsEvent] rejected(no currentUserId)');
-            return;
-          }
           final callCreated = CallCreated(
             callCid: StreamCallCid(cid: event.callCid),
             ringing: event.ringing,
@@ -177,35 +149,42 @@ class StreamVideoImpl implements StreamVideo {
               users: event.users,
             ),
           );
-          _logger.v(() => '[onCoordWsEvent] onCallCreated: $onCallCreated');
+          _logger.v(() => '[onCoordWsEvent] onCallCreated: $callCreated');
           onCallCreated?.call(callCreated);
         }
-        _events.emit(event);
       });
 
-      await _ws!.connect();
-      return _pushNotificationManager.onUserLoggedIn();
+      final result = await _client.onUserLogin(user);
+      await _pushNotificationManager.onUserLoggedIn();
+      return result;
     } catch (e, stk) {
-      logger.severe('error connecting user : ${user.id}', e, stk);
-      rethrow;
+      _logger.e(() => '[connectUser] failed(${user.id}): $e');
+      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
   /// Disconnects the [user] from the Stream Video service.
   @override
-  Future<void> disconnectUser() async {
-    logger.info('disconnecting user : ${currentUser?.id}');
+  Future<Result<None>> disconnectUser() async {
+    _logger.i(() => '[disconnectUser] currentUser.id: ${currentUser?.id}');
+    if (currentUser == null) {
+      _logger.w(() => '[disconnectUser] rejected (no user): $currentUser');
+      return Result.success(None());
+    }
+    try {
+      await _client.onUserLogout();
+      await _eventSubscription?.cancel();
+      _eventSubscription = null;
+      _tokenManager.reset();
 
-    if (_ws == null) return;
-    await _ws?.disconnect();
-    _ws = null;
-    await _wsSubscription?.cancel();
-    _wsSubscription = null;
-    _tokenManager.reset();
-
-    // Resetting the state.
-    await _state.close();
-    _state = _StreamVideoState();
+      // Resetting the state.
+      await _state.close();
+      _state = _StreamVideoState();
+      return Result.success(None());
+    } catch (e, stk) {
+      _logger.e(() => '[disconnectUser] failed: $e');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
   }
 
   @override
@@ -226,31 +205,22 @@ class StreamVideoImpl implements StreamVideo {
     }
 
     final response = await _client.createCall(
-      rpc.CreateCallRequest(
-        type: cid.type,
-        id: cid.id,
-        input: rpc.CreateCallInput(
-          members: participantIds.map((id) {
-            return rpc.MemberInput(
-              userId: id,
-              role: 'admin',
-            );
-          }),
-          ring: ringing,
-        ),
+      input.CreateCallInput(
+        callCid: cid,
+        ringing: ringing,
+        members: participantIds.map((id) {
+          return input.MemberInput(
+            userId: id,
+            role: 'admin',
+          );
+        }),
       ),
     );
 
-    return response.map(
+    return response.fold(
       success: (it) {
-        final finalResult = CallCreated(
-          callCid: cid,
-          ringing: ringing,
-          metadata: it.data.call.toCallMetadata(),
-        );
-
-        _logger.v(() => '[createCall] completed: $finalResult');
-        return Result.success(finalResult);
+        _logger.v(() => '[createCall] completed: ${it.data}');
+        return it;
       },
       failure: (it) {
         _logger.e(() => '[createCall] failed: ${it.error}');
@@ -277,34 +247,22 @@ class StreamVideoImpl implements StreamVideo {
     }
 
     final response = await _client.getOrCreateCall(
-      rpc.GetOrCreateCallRequest(
-        id: cid.id,
-        type: cid.type,
-        input: rpc.CreateCallInput(
-          members: participantIds.map((id) {
-            return rpc.MemberInput(
-              userId: id,
-              role: 'admin',
-            );
-          }),
-          ring: ringing,
-        ),
+      input.GetOrCreateCallInput(
+        callCid: cid,
+        ringing: ringing,
+        members: participantIds.map((id) {
+          return input.MemberInput(
+            userId: id,
+            role: 'admin',
+          );
+        }),
       ),
     );
 
-    return response.map(
+    return response.fold(
       success: (it) {
-        final finalResult = CallReceivedOrCreated(
-          wasCreated: it.data.created,
-          data: CallCreated(
-            callCid: cid,
-            ringing: ringing,
-            metadata: it.data.call.toCallMetadata(),
-          ),
-        );
-
-        _logger.v(() => '[getOrCreateCall] completed: $finalResult');
-        return Result.success(finalResult);
+        _logger.v(() => '[getOrCreateCall] completed: ${it.data}');
+        return it;
       },
       failure: (it) {
         _logger.e(() => '[getOrCreateCall] failed: ${it.error}');
@@ -320,37 +278,36 @@ class StreamVideoImpl implements StreamVideo {
   }) async {
     _logger.d(() => '[joinCall] cid: $cid');
     final joinResult = await _client.joinCall(
-      rpc.JoinCallRequest(type: cid.type, id: cid.id),
+      input.JoinCallInput(callCid: cid),
     );
-    if (joinResult is! Success<rpc.JoinCallResponse>) {
+    if (joinResult is! Success<CoordinatorJoined>) {
       _logger.e(() => '[joinCall] join failed: $joinResult');
       return joinResult as Failure;
     }
-    final metadata = joinResult.data.call.toCallMetadata();
     onReceivedOrCreated?.call(
       CallReceivedOrCreated(
-        wasCreated: joinResult.data.created,
+        wasCreated: joinResult.data.wasCreated,
         data: CallCreated(
           callCid: cid,
           ringing: false,
-          metadata: metadata,
+          metadata: joinResult.data.metadata,
         ),
       ),
     );
-    _logger.v(() => '[joinCall] joinedMetadata: $metadata');
+    _logger.v(() => '[joinCall] joinedMetadata: ${joinResult.data.metadata}');
     final edgeResult = await _client.findBestCallEdgeServer(
-      callCid: cid.value,
+      callCid: cid,
       edges: joinResult.data.edges,
     );
-    if (edgeResult is! Success<rpc.GetCallEdgeServerResponse>) {
+    if (edgeResult is! Success<SfuServerSelected>) {
       _logger.e(() => '[joinCall] edge finding failed: $joinResult');
       return joinResult as Failure;
     }
     final call = CallJoined(
       callCid: cid,
-      wasCreated: joinResult.data.created,
-      metadata: edgeResult.data.call.toCallMetadata(),
-      credentials: edgeResult.data.credentials.toCallCredentials(),
+      wasCreated: joinResult.data.wasCreated,
+      metadata: edgeResult.data.metadata,
+      credentials: edgeResult.data.credentials,
     );
     _logger.v(() => '[joinCall] completed: $call');
     return Result.success(call);
@@ -362,7 +319,7 @@ class StreamVideoImpl implements StreamVideo {
   }) async {
     return _sendEvent(
       cid: cid,
-      eventType: rpc.UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL,
+      eventType: input.EventTypeInput.accepted,
     );
   }
 
@@ -372,7 +329,7 @@ class StreamVideoImpl implements StreamVideo {
   }) async {
     return _sendEvent(
       cid: cid,
-      eventType: rpc.UserEventType.USER_EVENT_TYPE_REJECTED_CALL,
+      eventType: input.EventTypeInput.rejected,
     );
   }
 
@@ -382,22 +339,22 @@ class StreamVideoImpl implements StreamVideo {
   }) async {
     return _sendEvent(
       cid: cid,
-      eventType: rpc.UserEventType.USER_EVENT_TYPE_CANCELLED_CALL,
+      eventType: input.EventTypeInput.cancelled,
     );
   }
 
   Future<Result<None>> _sendEvent({
     required StreamCallCid cid,
-    required rpc.UserEventType eventType,
+    required input.EventTypeInput eventType,
   }) async {
     final result = await _client.sendUserEvent(
-      rpc.SendEventRequest(
-        callCid: cid.value,
+      input.EventInput(
+        callCid: cid,
         eventType: eventType,
       ),
     );
 
-    return result.map(
+    return result.fold(
       success: (_) => Result.success(None()),
       failure: (it) => it,
     );
@@ -406,18 +363,18 @@ class StreamVideoImpl implements StreamVideo {
   @override
   Future<Result<None>> sendCustomEvent({
     required StreamCallCid cid,
-    required List<int> dataJson,
-    String? eventType,
+    required String eventType,
+    required Map<String, Object> extraData,
   }) async {
     final result = await _client.sendCustomEvent(
-      rpc.SendCustomEventRequest(
-        callCid: cid.value,
-        dataJson: dataJson,
-        type: eventType,
+      input.CustomEventInput(
+        callCid: cid,
+        eventType: eventType,
+        dataJson: extraData,
       ),
     );
 
-    return result.map(
+    return result.fold(
       success: (_) => Result.success(None()),
       failure: (it) => it,
     );
@@ -425,58 +382,56 @@ class StreamVideoImpl implements StreamVideo {
 
   @override
   Future<Result<List<CallUser>>> queryUsers({
+    required StreamCallCid callCid,
     required Set<String> userIds,
   }) async {
-    final mqJson = {
-      'id': {
-        r'$in': userIds.toList(),
-      },
-    };
-    _logger.d(() => '[queryUsers] mqJson: $mqJson');
-    final request = rpc.QueryUsersRequest(
-      mqJson: utf8.encode(
-        json.encode(mqJson),
+    _logger.d(() => '[queryUsers] callCid: $callCid, userIds: $userIds');
+    final usersResult = await _client.queryUsers(
+      input.QueryUsersInput(
+        callCid: callCid,
+        mqJson: {
+          'id': {r'$in': userIds.toList()},
+        },
       ),
     );
-    _logger.v(() => '[queryUsers] request: $request');
-    final usersResult = await _client.queryUsers(request);
-
-    return usersResult.map(
+    return usersResult.fold(
       success: (it) {
-        final users = it.data.users.toCallUsers();
-        _logger.v(() => '[queryUsers] completed: $users');
-        return Result.success(users);
+        _logger.v(() => '[queryUsers] completed: ${it.data}');
+        return Result.success(it.data);
       },
-      failure: (it) => it,
+      failure: (it) {
+        _logger.e(() => '[queryUsers] failed: $it');
+        return it;
+      },
     );
   }
 
   @override
-  Future<void> inviteUsers({
+  Future<Result<None>> inviteUsers({
     required String callCid,
     required List<UserInfo> users,
   }) async {
-    await _client.inviteUsers(
-      rpc.UpsertCallMembersRequest(
-        callCid: callCid,
+    return _client.inviteUsers(
+      input.UpsertCallMembersInput(
+        callCid: StreamCallCid(cid: callCid),
         members: users.map((user) {
-          return rpc.MemberInput(userId: user.id, role: user.role);
-        }),
+          return input.MemberInput(userId: user.id, role: user.role);
+        }).toList(),
       ),
     );
   }
 
   @override
-  Future<void> createDevice({
+  Future<Result<CallDevice>> createDevice({
     required String token,
     required String pushProviderId,
   }) async {
-    await _client.createDevice(CreateDeviceRequest(
-      input: DeviceInput(
-        id: token,
+    return _client.createDevice(
+      CreateDeviceInput(
+        pushToken: token,
         pushProviderId: pushProviderId,
       ),
-    ));
+    );
   }
 
   @override
@@ -501,4 +456,18 @@ class _StreamVideoState {
   Future<void> close() async {
     await currentUser.close();
   }
+}
+
+CoordinatorClient buildCoordinatorClient({
+  required String rpcUrl,
+  required String wsUrl,
+  required String apiKey,
+  required TokenManager tokenManager,
+}) {
+  return CoordinatorClientOpenApi(
+    apiKey: apiKey,
+    tokenManager: tokenManager,
+    rpcUrl: rpcUrl,
+    wsUrl: wsUrl,
+  );
 }

@@ -31,7 +31,7 @@ class InstanceHolder {
       latencyMeasurementRounds: latencyMeasurementRounds,
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
-      pushNotificationFactrory: pushNotificationFactory,
+      pushNotificationFactory: pushNotificationFactory,
     );
   }
 

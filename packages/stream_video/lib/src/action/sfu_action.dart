@@ -1,4 +1,4 @@
-import '../coordinator/models/coordinator_models.dart';
+import '../models/call_metadata.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../sfu/data/models/sfu_participant.dart';
 import 'action.dart';
