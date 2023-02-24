@@ -18,7 +18,8 @@ dependencies:
   rxdart: ^0.27.5
   web_socket_channel: ^2.2.0
   collection: ^1.16.0
-  flutter_webrtc: ^0.9.18
+  flutter_webrtc: ^0.9.23
+  intl: ^0.17.0
   meta: ^1.8.0
   sdp_transform: ^0.3.2
   synchronized: ^3.0.0+3

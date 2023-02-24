@@ -132,7 +132,19 @@ extension PatternMatching<T> on Result<T> {
 
   /// The [map] method is the equivalent to pattern matching.
   /// Its prototype depends on the _Result [_type]s defined.
-  R map<R extends Object?>({
+  Result<R> map<R>(R Function(T data) convert) {
+    switch (_type) {
+      case _ResultType.success:
+        final origin = this as Success<T>;
+        return Result.success(convert(origin.data));
+      case _ResultType.failure:
+        return this as Failure;
+    }
+  }
+
+  /// The [fold] method is the equivalent to pattern matching.
+  /// Its prototype depends on the _Result [_type]s defined.
+  R fold<R extends Object?>({
     required R Function(Success<T> success) success,
     required R Function(Failure failure) failure,
   }) {
@@ -144,12 +156,12 @@ extension PatternMatching<T> on Result<T> {
     }
   }
 
-  /// The [mapOrElse] method is equivalent to [map], but doesn't require
+  /// The [foldOrElse] method is equivalent to [fold], but doesn't require
   /// all callbacks to be specified.
   ///
   /// On the other hand, it adds an extra orElse required parameter,
   /// for fallback behavior.
-  R mapOrElse<R extends Object>({
+  R foldOrElse<R extends Object>({
     R Function(Success<T> success)? success,
     R Function(Failure failure)? failure,
     required R Function(Result<T>) orElse,
@@ -162,9 +174,9 @@ extension PatternMatching<T> on Result<T> {
     }
   }
 
-  /// The [mapOrNull] method is equivalent to [whenOrElse],
+  /// The [foldOrNull] method is equivalent to [whenOrElse],
   /// but non-exhaustive.
-  R? mapOrNull<R extends Object?>({
+  R? foldOrNull<R extends Object?>({
     R Function(Success<T> success)? success,
     R Function(Failure failure)? failure,
   }) {

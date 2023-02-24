@@ -1,7 +1,12 @@
-import '../../stream_video.dart';
-import '../coordinator/models/coordinator_models.dart';
+import 'package:equatable/equatable.dart';
+import 'package:meta/meta.dart';
 
-class CallJoined {
+import 'call_cid.dart';
+import 'call_credentials.dart';
+import 'call_metadata.dart';
+
+@immutable
+class CallJoined with EquatableMixin {
   const CallJoined({
     required this.callCid,
     required this.wasCreated,
@@ -12,6 +17,9 @@ class CallJoined {
   final bool wasCreated;
   final CallMetadata metadata;
   final CallCredentials credentials;
+
+  @override
+  List<Object?> get props => [callCid, wasCreated, metadata, credentials];
 
   @override
   String toString() {

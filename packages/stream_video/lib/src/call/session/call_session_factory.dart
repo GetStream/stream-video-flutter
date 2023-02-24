@@ -1,10 +1,10 @@
 import 'package:uuid/uuid.dart';
 
 import '../../call_state_manager.dart';
-import '../../coordinator/models/coordinator_models.dart';
 import '../../core/utils.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
+import '../../models/call_credentials.dart';
 import '../../types/other.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
