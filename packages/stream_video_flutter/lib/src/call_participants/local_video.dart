@@ -30,19 +30,19 @@ class StreamLocalVideo extends StatelessWidget {
   /// The current local participant.
   final CallParticipantState localParticipant;
 
-  /// The width of the floating view.
+  /// The width of the local video view.
   final double? localVideoWidth;
 
-  /// The height of the floating view.
+  /// The height of the local video view.
   final double? localVideoHeight;
 
-  /// The padding between floating view and the container.
+  /// The padding between local video view and the container.
   final double? localVideoPadding;
 
-  /// The initial position of the floating view.
+  /// The initial position of the local video view.
   final FloatingViewAlignment? initialAlignment;
 
-  /// If the floating view should be automatically anchored to one of the
+  /// If the local video view should be automatically anchored to one of the
   /// corners.
   final bool? enableSnappingBehavior;
 
