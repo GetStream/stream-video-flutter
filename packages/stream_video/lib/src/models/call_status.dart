@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../coordinator/models/coordinator_models.dart';
+import 'call_credentials.dart';
 import 'drop_reason.dart';
 
 @immutable

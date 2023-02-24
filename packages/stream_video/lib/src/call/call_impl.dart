@@ -2,8 +2,8 @@ import 'dart:async';
 
 import '../../stream_video.dart';
 import '../call_state_manager.dart';
-import '../coordinator/models/coordinator_models.dart';
 import '../errors/video_error_composer.dart';
+import '../models/call_credentials.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
@@ -169,6 +169,7 @@ class CallImpl extends Call {
     List<String> participantIds = const [],
     bool ringing = false,
   }) async {
+    _logger.d(() => '[getOrCreate] no args');
     final state = _stateManager.state.value;
     final result = await _streamVideo.getOrCreateCall(
       cid: state.callCid,
@@ -186,6 +187,7 @@ class CallImpl extends Call {
     List<String> participantIds = const [],
     bool ringing = false,
   }) async {
+    _logger.d(() => '[create] no args');
     final state = _stateManager.state.value;
     final result = await _streamVideo.createCall(
       cid: state.callCid,
@@ -200,6 +202,7 @@ class CallImpl extends Call {
 
   @override
   Future<Result<None>> joinCall() async {
+    _logger.d(() => '[joinCall] no args');
     try {
       await _joinIfNeeded();
     } catch (e, stk) {
@@ -441,7 +444,7 @@ class CallImpl extends Call {
   }
 
   @override
-  Future<void> inviteUsers(List<UserInfo> users) {
+  Future<Result<None>> inviteUsers(List<UserInfo> users) {
     return _streamVideo.inviteUsers(callCid: callCid.value, users: users);
   }
 }
