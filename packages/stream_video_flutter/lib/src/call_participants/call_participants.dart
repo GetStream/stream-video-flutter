@@ -56,7 +56,7 @@ class StreamCallParticipants extends StatelessWidget {
   /// The list of participants to display.
   final Iterable<CallParticipantState> participants;
 
-  /// Filter used to filter the participants.
+  /// Used for filtering the call participants.
   final Filter<CallParticipantState> filter;
 
   /// Used for sorting the call participants.
