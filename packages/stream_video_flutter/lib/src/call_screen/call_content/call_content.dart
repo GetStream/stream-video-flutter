@@ -73,7 +73,7 @@ class StreamCallContent extends StatefulWidget {
   /// The action to perform when the participants button is pressed.
   final VoidCallback? onParticipantsTap;
 
-  /// Enable floating participant in the call.
+  /// Enable local video view for the local participant.
   final bool? enableLocalVideo;
 
   @override

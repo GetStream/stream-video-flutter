@@ -51,7 +51,7 @@ class StreamCallParticipants extends StatelessWidget {
   /// Builder function used to build a participant grid item.
   final CallParticipantWidgetBuilder? itemBuilder;
 
-  /// Enable picture-in-picture for the current participant.
+  /// Enable local video view for the local participant.
   final bool enableLocalVideo;
 
   @override
@@ -100,7 +100,7 @@ class RegularCallParticipantsContent extends StatelessWidget {
   /// Builder function used to build a participant grid item.
   final CallParticipantWidgetBuilder? itemBuilder;
 
-  /// Enable picture-in-picture for current participant.
+  /// Enable local video view for the local participant.
   final bool enableLocalVideo;
 
   @override
