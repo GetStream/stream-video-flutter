@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 
-import '../action/coordinator_action.dart';
+import '../action/coordinator_call_action.dart';
 import '../call_participant_state.dart';
 import '../call_state.dart';
 import '../coordinator/models/coordinator_events.dart';
@@ -10,24 +10,24 @@ import '../models/drop_reason.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
-class CoordinatorReducer {
-  const CoordinatorReducer();
+class CoordinatorCallReducer {
+  const CoordinatorCallReducer();
 
   CallState reduce(
     CallState state,
-    CoordinatorAction action,
+    CoordinatorCallAction action,
   ) {
-    if (action is CoordinatorUsersAction) {
-      return _reduceCoordinatorUsers(state, action);
-    } else if (action is CoordinatorEventAction) {
-      return _reduceCoordinatorEvent(state, action.event);
+    if (action is CoordinatorCallUsersAction) {
+      return _reduceCallCoordinatorUsers(state, action);
+    } else if (action is CoordinatorCallEventAction) {
+      return _reduceCoordinatorCallEvent(state, action.event);
     }
     return state;
   }
 
-  CallState _reduceCoordinatorUsers(
+  CallState _reduceCallCoordinatorUsers(
     CallState state,
-    CoordinatorUsersAction action,
+    CoordinatorCallUsersAction action,
   ) {
     return state.copyWith(
       callParticipants: state.callParticipants.map(
@@ -44,9 +44,9 @@ class CoordinatorReducer {
     );
   }
 
-  CallState _reduceCoordinatorEvent(
+  CallState _reduceCoordinatorCallEvent(
     CallState state,
-    CoordinatorEvent event,
+    CoordinatorCallEvent event,
   ) {
     if (event is CoordinatorCallRejectedEvent) {
       return _reduceCallRejected(state, event);
@@ -54,6 +54,8 @@ class CoordinatorReducer {
       return _reduceCallAccepted(state, event);
     } else if (event is CoordinatorCallCancelledEvent) {
       return _reduceCallCancelled(state, event);
+    } else if (event is CoordinatorCallPermissionsUpdatedEvent) {
+      return _reduceCallPermissionsUpdated(state, event);
     }
     return state;
   }
@@ -153,6 +155,23 @@ class CoordinatorReducer {
     }
     return state.copyWith(
       callParticipants: callParticipants,
+    );
+  }
+
+  CallState _reduceCallPermissionsUpdated(
+    CallState state,
+    CoordinatorCallPermissionsUpdatedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () => '[reduceCallPermissionsUpdated] rejected (status is not Active)',
+      );
+      return state;
+    }
+
+    return state.copyWith(
+      ownCapabilities: event.ownCapabilities,
     );
   }
 }

@@ -42,14 +42,16 @@ const _defaultCoordinatorWsUrl =
 
 /// The client responsible for handling config and maintaining calls
 abstract class StreamVideo {
-  factory StreamVideo(String apiKey,
-      {String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
-      String coordinatorWsUrl = _defaultCoordinatorWsUrl,
-      int latencyMeasurementRounds = 3,
-      Level logLevel = Level.ALL,
-      LogHandlerFunction logHandlerFunction = _defaultLogHandler,
-      PushNotificationFactory pushNotificationFactory =
-          defaultPushNotificationManager}) {
+  factory StreamVideo(
+    String apiKey, {
+    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
+    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
+    int latencyMeasurementRounds = 3,
+    Level logLevel = Level.ALL,
+    LogHandlerFunction logHandlerFunction = _defaultLogHandler,
+    PushNotificationFactory pushNotificationFactory =
+        defaultPushNotificationManager,
+  }) {
     return StreamVideoImpl(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
@@ -124,6 +126,18 @@ abstract class StreamVideo {
     required List<UserInfo> users,
   });
 
+  Future<Result<None>> requestPermissions({
+    required StreamCallCid callCid,
+    required List<String> permissions,
+  });
+
+  Future<Result<None>> updateUserPermissions({
+    required StreamCallCid callCid,
+    required String userId,
+    List<String> grantPermissions = const [],
+    List<String> revokePermissions = const [],
+  });
+
   Future<Result<CallDevice>> createDevice({
     required String token,
     required String pushProviderId,
@@ -186,4 +200,48 @@ void _defaultLogHandler(LogRecord record) {
   );
   if (record.error != null) print(record.error);
   if (record.stackTrace != null) print(record.stackTrace);
+}
+
+extension StreamVideoX on StreamVideo {
+  /// Connects the [user] to the Stream Video service.
+  Future<Result<None>> connectUserWithToken(
+    UserInfo user,
+    Token token,
+  ) {
+    return connectUser(user, token: token);
+  }
+
+  /// Connects the [user] to the Stream Video service.
+  Future<Result<None>> connectUserWithProvider(
+    UserInfo user,
+    TokenProvider provider,
+  ) {
+    return connectUser(user, provider: provider);
+  }
+
+  /// Grants the [permissions] to the [userId] in the [callCid].
+  Future<Result<None>> grantUserPermissions({
+    required StreamCallCid callCid,
+    required String userId,
+    required List<String> permissions,
+  }) {
+    return updateUserPermissions(
+      callCid: callCid,
+      userId: userId,
+      grantPermissions: permissions,
+    );
+  }
+
+  /// Revokes the [permissions] from the [userId] in the [callCid].
+  Future<Result<None>> revokeUserPermissions({
+    required StreamCallCid callCid,
+    required String userId,
+    required List<String> permissions,
+  }) {
+    return updateUserPermissions(
+      callCid: callCid,
+      userId: userId,
+      revokePermissions: permissions,
+    );
+  }
 }

@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import 'call_participant_state.dart';
 import 'models/call_cid.dart';
 import 'models/call_metadata.dart';
+import 'models/call_setting.dart';
 import 'models/call_status.dart';
 
 /// TODO - Class that holds any information about the call, including participants
@@ -20,6 +21,8 @@ class CallState extends Equatable {
       createdByUserId: '',
       sessionId: '',
       status: CallStatus.idle(),
+      settings: const CallSettings.disabled(),
+      ownCapabilities: const [],
       callParticipants: List.unmodifiable(const []),
     );
   }
@@ -36,6 +39,8 @@ class CallState extends Equatable {
       createdByUserId: metadata.info.createdByUserId,
       sessionId: '',
       status: metadata.toCallStatus(currentUserId, ringing),
+      settings: metadata.details.settings,
+      ownCapabilities: metadata.details.ownCapabilities,
       callParticipants: List.unmodifiable(
         metadata.toCallParticipants(
           currentUserId,
@@ -51,6 +56,8 @@ class CallState extends Equatable {
     required this.createdByUserId,
     required this.sessionId,
     required this.status,
+    required this.settings,
+    required this.ownCapabilities,
     required this.callParticipants,
   });
 
@@ -59,6 +66,8 @@ class CallState extends Equatable {
   final String createdByUserId;
   final String sessionId;
   final CallStatus status;
+  final CallSettings settings;
+  final List<String> ownCapabilities;
   final List<CallParticipantState> callParticipants;
 
   CallParticipantState? get localParticipant {
@@ -77,6 +86,8 @@ class CallState extends Equatable {
     String? createdByUserId,
     String? sessionId,
     CallStatus? status,
+    CallSettings? settings,
+    List<String>? ownCapabilities,
     List<CallParticipantState>? callParticipants,
   }) {
     return CallState._(
@@ -85,6 +96,8 @@ class CallState extends Equatable {
       createdByUserId: createdByUserId ?? this.createdByUserId,
       sessionId: sessionId ?? this.sessionId,
       status: status ?? this.status,
+      settings: settings ?? this.settings,
+      ownCapabilities: ownCapabilities ?? this.ownCapabilities,
       callParticipants: callParticipants ?? this.callParticipants,
     );
   }
@@ -121,15 +134,16 @@ extension on CallMetadata {
 
   List<CallParticipantState> toCallParticipants(String currentUserId) {
     final result = <CallParticipantState>[];
-    for (final userId in details.memberUserIds) {
+    for (final userId in details.members.keys) {
       final member = details.members[userId];
+      final user = users[userId];
       final isLocal = currentUserId == userId;
       result.add(
         CallParticipantState(
           userId: userId,
-          role: member?.role ?? '',
-          name: '',
-          profileImageURL: '',
+          role: member?.role ?? user?.role ?? '',
+          name: user?.name ?? '',
+          profileImageURL: user?.imageUrl ?? '',
           sessionId: '',
           trackIdPrefix: '',
           isLocal: isLocal,

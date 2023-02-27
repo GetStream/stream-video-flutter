@@ -1,5 +1,5 @@
-class CallSettings {
-  const CallSettings({
+class CallConnectOptions {
+  const CallConnectOptions({
     this.cameraEnabled = false,
     this.microphoneEnabled = false,
     this.screenShareEnabled = false,
@@ -13,7 +13,7 @@ class CallSettings {
 
   @override
   String toString() {
-    return 'CallOptions{cameraEnabled: $cameraEnabled, microphoneEnabled: '
+    return 'CallConnectOptions{cameraEnabled: $cameraEnabled, microphoneEnabled: '
         '$microphoneEnabled, screenShareEnabled: $screenShareEnabled, '
         'dropTimeout: $dropTimeout}';
   }

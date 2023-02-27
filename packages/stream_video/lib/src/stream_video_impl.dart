@@ -422,6 +422,40 @@ class StreamVideoImpl implements StreamVideo {
   }
 
   @override
+  Future<Result<None>> requestPermissions({
+    required StreamCallCid callCid,
+    required List<String> permissions,
+  }) async {
+    final result = await _client.requestPermissions(
+      input.RequestPermissionsInput(
+        callCid: callCid,
+        permissions: permissions,
+      ),
+    );
+
+    return result;
+  }
+
+  @override
+  Future<Result<None>> updateUserPermissions({
+    required StreamCallCid callCid,
+    required String userId,
+    List<String> grantPermissions = const [],
+    List<String> revokePermissions = const [],
+  }) async {
+    final result = await _client.updateUserPermissions(
+      input.UpdateUserPermissionsInput(
+        callCid: callCid,
+        userId: userId,
+        grantPermissions: grantPermissions,
+        revokePermissions: revokePermissions,
+      ),
+    );
+
+    return result;
+  }
+
+  @override
   Future<Result<CallDevice>> createDevice({
     required String token,
     required String pushProviderId,

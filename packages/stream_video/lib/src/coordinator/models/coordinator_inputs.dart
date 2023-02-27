@@ -85,6 +85,41 @@ class JoinCallInput extends CoordinatorInput {
   List<Object?> get props => [datacenterId, callCid, ringing, members];
 }
 
+class RequestPermissionsInput extends CoordinatorInput {
+  const RequestPermissionsInput({
+    required this.callCid,
+    required this.permissions,
+  });
+
+  final StreamCallCid callCid;
+  final List<String> permissions;
+
+  @override
+  List<Object?> get props => [callCid, permissions];
+}
+
+class UpdateUserPermissionsInput extends CoordinatorInput {
+  const UpdateUserPermissionsInput({
+    required this.callCid,
+    required this.userId,
+    required this.grantPermissions,
+    required this.revokePermissions,
+  });
+
+  final StreamCallCid callCid;
+  final String userId;
+  final List<String> grantPermissions;
+  final List<String> revokePermissions;
+
+  @override
+  List<Object?> get props => [
+        callCid,
+        userId,
+        grantPermissions,
+        revokePermissions,
+      ];
+}
+
 class UpsertCallMembersInput extends CoordinatorInput {
   const UpsertCallMembersInput({
     required this.callCid,
@@ -197,45 +232,27 @@ class SortInput extends CoordinatorInput {
 }
 
 enum EventTypeInput {
-  accepted,
-  rejected,
-  cancelled;
+  accepted('call.accepted'),
+  rejected('call.rejected'),
+  cancelled('call.cancelled');
+
+  const EventTypeInput(this.alias);
+
+  final String alias;
 
   @override
-  String toString() {
-    return name;
-  }
-
-  String get alias {
-    switch (this) {
-      case EventTypeInput.accepted:
-        return 'call.accepted';
-      case EventTypeInput.rejected:
-        return 'call.rejected';
-      case EventTypeInput.cancelled:
-        return 'call.cancelled';
-    }
-  }
+  String toString() => name;
 }
 
 enum DirectionInput {
-  asc,
-  desc,
-  undefined;
+  asc('direction.asc'),
+  desc('direction.desc'),
+  undefined('direction.undefined');
+
+  const DirectionInput(this.alias);
+
+  final String alias;
 
   @override
-  String toString() {
-    return name;
-  }
-
-  String get alias {
-    switch (this) {
-      case DirectionInput.asc:
-        return 'direction.asc';
-      case DirectionInput.desc:
-        return 'direction.desc';
-      case DirectionInput.undefined:
-        return 'direction.undefined';
-    }
-  }
+  String toString() => name;
 }
