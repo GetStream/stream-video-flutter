@@ -9,6 +9,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:uni_links/uni_links.dart';
 
+import 'env/env.dart';
 import 'firebase_options.dart';
 import 'src/routes/app_routes.dart';
 import 'src/routes/routes.dart';
@@ -41,11 +42,9 @@ void _initStreamVideo() {
       ..validator = (priority, tag) => true;
 
     StreamVideo.init(
-      'w6yaq5388uym',
-      coordinatorRpcUrl:
-          'https://video-edge-frankfurt-ce1.stream-io-api.com/video',
-      coordinatorWsUrl:
-          'wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect',
+      Env.apiKey,
+      coordinatorRpcUrl: Env.coordinatorRpcUrl,
+      coordinatorWsUrl: Env.coordinatorWsUrl,
       pushNotificationFactory: createPushNotificationManager,
     );
   }

@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.refresh),
                   onPressed: () {
                     // generate a 10 character nanoId for call id
-                    final callId = nanoid(10);
+                    final callId = generateAlphanumericString(10);
                     _callIdController.value = TextEditingValue(
                       text: callId,
                       selection: TextSelection.collapsed(offset: callId.length),
@@ -118,11 +118,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-}
-
-/// Generates a nanoId of given length
-String nanoid(int length) {
-  final random = math.Random.secure();
-  final values = List<int>.generate(length, (index) => random.nextInt(256));
-  return base64Url.encode(values);
 }
