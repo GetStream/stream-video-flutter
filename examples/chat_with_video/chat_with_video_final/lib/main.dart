@@ -3,16 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import 'env/env.dart';
+
 void main() {
   /// Initialize Stream Video SDK.
   StreamVideo.init(
-    "us83cfwuhy8n",
+    Env.streamVideoApiKey,
     logLevel: Level.INFO,
   );
 
   /// Initialize Stream Chat SDK.
   final client = StreamChatClient(
-    "tp8sef43xcpc",
+    Env.streamChatApiKey,
     logLevel: Level.INFO,
   );
 
