@@ -10,13 +10,13 @@
 
 part of openapi.api;
 
-class CallEnded {
-  /// Returns a new [CallEnded] instance.
-  CallEnded({
+class CallBlockedUser {
+  /// Returns a new [CallBlockedUser] instance.
+  CallBlockedUser({
     required this.callCid,
     required this.createdAt,
     required this.type,
-    this.user,
+    required this.userId,
   });
 
   String callCid;
@@ -25,20 +25,14 @@ class CallEnded {
 
   String type;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  UserResponse? user;
+  String userId;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallEnded &&
+  bool operator ==(Object other) => identical(this, other) || other is CallBlockedUser &&
      other.callCid == callCid &&
      other.createdAt == createdAt &&
      other.type == type &&
-     other.user == user;
+     other.userId == userId;
 
   @override
   int get hashCode =>
@@ -46,28 +40,24 @@ class CallEnded {
     (callCid.hashCode) +
     (createdAt.hashCode) +
     (type.hashCode) +
-    (user == null ? 0 : user!.hashCode);
+    (userId.hashCode);
 
   @override
-  String toString() => 'CallEnded[callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
+  String toString() => 'CallBlockedUser[callCid=$callCid, createdAt=$createdAt, type=$type, userId=$userId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'type'] = this.type;
-    if (this.user != null) {
-      json[r'user'] = this.user;
-    } else {
-      json[r'user'] = null;
-    }
+      json[r'user_id'] = this.userId;
     return json;
   }
 
-  /// Returns a new [CallEnded] instance and imports its values from
+  /// Returns a new [CallBlockedUser] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static CallEnded? fromJson(dynamic value) {
+  static CallBlockedUser? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -76,27 +66,27 @@ class CallEnded {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallEnded[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallEnded[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "CallBlockedUser[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "CallBlockedUser[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return CallEnded(
+      return CallBlockedUser(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
         type: mapValueOfType<String>(json, r'type')!,
-        user: UserResponse.fromJson(json[r'user']),
+        userId: mapValueOfType<String>(json, r'user_id')!,
       );
     }
     return null;
   }
 
-  static List<CallEnded>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <CallEnded>[];
+  static List<CallBlockedUser>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <CallBlockedUser>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CallEnded.fromJson(row);
+        final value = CallBlockedUser.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -105,12 +95,12 @@ class CallEnded {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallEnded> mapFromJson(dynamic json) {
-    final map = <String, CallEnded>{};
+  static Map<String, CallBlockedUser> mapFromJson(dynamic json) {
+    final map = <String, CallBlockedUser>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallEnded.fromJson(entry.value);
+        final value = CallBlockedUser.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -119,13 +109,13 @@ class CallEnded {
     return map;
   }
 
-  // maps a json object with a list of CallEnded-objects as value to a dart map
-  static Map<String, List<CallEnded>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<CallEnded>>{};
+  // maps a json object with a list of CallBlockedUser-objects as value to a dart map
+  static Map<String, List<CallBlockedUser>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<CallBlockedUser>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallEnded.listFromJson(entry.value, growable: growable,);
+        final value = CallBlockedUser.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -139,6 +129,7 @@ class CallEnded {
     'call_cid',
     'created_at',
     'type',
+    'user_id',
   };
 }
 

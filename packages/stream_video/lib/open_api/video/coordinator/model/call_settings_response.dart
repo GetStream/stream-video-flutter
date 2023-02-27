@@ -14,6 +14,7 @@ class CallSettingsResponse {
   /// Returns a new [CallSettingsResponse] instance.
   CallSettingsResponse({
     required this.audio,
+    required this.backstage,
     required this.broadcasting,
     required this.geofencing,
     required this.recording,
@@ -22,6 +23,8 @@ class CallSettingsResponse {
   });
 
   AudioSettings audio;
+
+  BackstageSettings backstage;
 
   BroadcastSettings broadcasting;
 
@@ -36,6 +39,7 @@ class CallSettingsResponse {
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallSettingsResponse &&
      other.audio == audio &&
+     other.backstage == backstage &&
      other.broadcasting == broadcasting &&
      other.geofencing == geofencing &&
      other.recording == recording &&
@@ -46,6 +50,7 @@ class CallSettingsResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (audio.hashCode) +
+    (backstage.hashCode) +
     (broadcasting.hashCode) +
     (geofencing.hashCode) +
     (recording.hashCode) +
@@ -53,11 +58,12 @@ class CallSettingsResponse {
     (video.hashCode);
 
   @override
-  String toString() => 'CallSettingsResponse[audio=$audio, broadcasting=$broadcasting, geofencing=$geofencing, recording=$recording, screensharing=$screensharing, video=$video]';
+  String toString() => 'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, recording=$recording, screensharing=$screensharing, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'audio'] = this.audio;
+      json[r'backstage'] = this.backstage;
       json[r'broadcasting'] = this.broadcasting;
       json[r'geofencing'] = this.geofencing;
       json[r'recording'] = this.recording;
@@ -86,6 +92,7 @@ class CallSettingsResponse {
 
       return CallSettingsResponse(
         audio: AudioSettings.fromJson(json[r'audio'])!,
+        backstage: BackstageSettings.fromJson(json[r'backstage'])!,
         broadcasting: BroadcastSettings.fromJson(json[r'broadcasting'])!,
         geofencing: GeofenceSettings.fromJson(json[r'geofencing'])!,
         recording: RecordSettings.fromJson(json[r'recording'])!,
@@ -141,6 +148,7 @@ class CallSettingsResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'audio',
+    'backstage',
     'broadcasting',
     'geofencing',
     'recording',

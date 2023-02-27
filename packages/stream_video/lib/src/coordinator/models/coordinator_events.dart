@@ -282,6 +282,42 @@ class CoordinatorCallPermissionsUpdatedEvent extends CoordinatorCallEvent {
       ];
 }
 
+class CoordinatorCallRecordingStartedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallRecordingStartedEvent({
+    required super.callCid,
+    required this.createdAt,
+    required this.type,
+  });
+
+  final DateTime createdAt;
+  final String type;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    type,
+  ];
+}
+
+class CoordinatorCallRecordingStoppedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallRecordingStoppedEvent({
+    required super.callCid,
+    required this.createdAt,
+    required this.type,
+  });
+
+  final DateTime createdAt;
+  final String type;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    type,
+  ];
+}
+
 class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
   const CoordinatorCallCustomEvent({
     required super.callCid,

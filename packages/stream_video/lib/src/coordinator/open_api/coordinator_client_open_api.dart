@@ -173,7 +173,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<CoordinatorJoined>> joinCall(input.JoinCallInput input) async {
     try {
-      final result = await videoApi.joinCall(
+      final result = await videoApi.joinCallTypeId0(
         input.callCid.type,
         input.callCid.id,
         open.JoinCallRequest(
@@ -270,7 +270,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       final result = await eventsApi.sendEvent(
         input.callCid.type,
         input.callCid.id,
-        open.SendEventRequest(eventType: input.eventType.alias),
+        open.SendEventRequest(type: input.eventType.alias),
       );
       _logger.v(() => '[sendUserEvent] completed: $result');
       return Result.success(None());
@@ -290,7 +290,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         input.callCid.type,
         input.callCid.id,
         open.SendEventRequest(
-          eventType: input.eventType,
+          type: input.eventType,
           custom: input.dataJson,
         ),
       );
