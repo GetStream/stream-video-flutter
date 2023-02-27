@@ -20,7 +20,7 @@ class CoordinatorCallReducer {
     if (action is CoordinatorCallUsersAction) {
       return _reduceCallCoordinatorUsers(state, action);
     } else if (action is CoordinatorCallEventAction) {
-      return _reduceCallCoordinatorEvent(state, action.event);
+      return _reduceCoordinatorCallEvent(state, action.event);
     }
     return state;
   }
@@ -44,7 +44,7 @@ class CoordinatorCallReducer {
     );
   }
 
-  CallState _reduceCallCoordinatorEvent(
+  CallState _reduceCoordinatorCallEvent(
     CallState state,
     CoordinatorCallEvent event,
   ) {
