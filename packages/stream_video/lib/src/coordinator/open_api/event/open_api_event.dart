@@ -31,29 +31,35 @@ class OpenApiEvent with EquatableMixin {
 
     switch (type) {
       case EventType.healthCheck:
-        return result.copyWith(healthCheck: HealthCheck.fromJson(obj));
+        final healthCheck = HealthCheck.fromJson(obj);
+        return result.copyWith(healthCheck: healthCheck);
       case EventType.callCreated:
-        return result.copyWith(callCreated: open.CallCreated.fromJson(obj));
+        final callCreated = open.CallCreated.fromJson(obj);
+        return result.copyWith(callCreated: callCreated);
       case EventType.callAccepted:
-        return result.copyWith(callAccepted: open.CallAccepted.fromJson(obj));
+        final callAccepted = open.CallAccepted.fromJson(obj);
+        return result.copyWith(callAccepted: callAccepted);
       case EventType.callRejected:
-        return result.copyWith(callRejected: open.CallRejected.fromJson(obj));
+        final callRejected = open.CallRejected.fromJson(obj);
+        return result.copyWith(callRejected: callRejected);
       case EventType.callCancelled:
-        return result.copyWith(callCancelled: open.CallCancelled.fromJson(obj));
+        final callCancelled = open.CallCancelled.fromJson(obj);
+        return result.copyWith(callCancelled: callCancelled);
       case EventType.callUpdated:
-        return result.copyWith(callUpdated: open.CallUpdated.fromJson(obj));
+        final callUpdated = open.CallUpdated.fromJson(obj);
+        return result.copyWith(callUpdated: callUpdated);
       case EventType.callEnded:
-        return result.copyWith(callEnded: open.CallEnded.fromJson(obj));
+        final callEnded = open.CallEnded.fromJson(obj);
+        return result.copyWith(callEnded: callEnded);
       case EventType.callPermissionRequest:
-        return result.copyWith(
-          callPermissionRequest: open.CallPermissionRequest.fromJson(obj),
-        );
+        final callPermissionRequest = open.CallPermissionRequest.fromJson(obj);
+        return result.copyWith(callPermissionRequest: callPermissionRequest);
       case EventType.callPermissionsUpdated:
-        return result.copyWith(
-          callPermissionsUpdated: open.CallPermissionsUpdated.fromJson(obj),
-        );
+        final permissionsUpdated = open.CallPermissionsUpdated.fromJson(obj);
+        return result.copyWith(callPermissionsUpdated: permissionsUpdated);
       case EventType.custom:
-        return result.copyWith(custom: open.Custom.fromJson(obj));
+        final custom = open.Custom.fromJson(obj);
+        return result.copyWith(custom: custom);
       case EventType.unknown:
         return result;
     }
