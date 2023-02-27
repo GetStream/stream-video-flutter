@@ -32,11 +32,15 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   _initStreamVideo();
-  runApp(StreamDogFoodingApp());
+  runApp(const StreamDogFoodingApp());
 }
 
 void _initStreamVideo() {
   if (!StreamVideo.isInitialized()) {
+    StreamLog()
+      ..logger = ConsoleStreamLogger()
+      ..validator = (priority, tag) => true;
+
     StreamVideo.init(
       Env.apiKey,
       coordinatorRpcUrl: Env.coordinatorRpcUrl,
@@ -47,7 +51,8 @@ void _initStreamVideo() {
 }
 
 Future<PushNotificationManager> createPushNotificationManager(
-    StreamVideo client) {
+  StreamVideo client,
+) {
   return StreamVideoPushNotificationManager.create(client);
 }
 

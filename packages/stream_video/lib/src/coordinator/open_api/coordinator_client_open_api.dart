@@ -141,7 +141,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         input.callCid.id,
         open.GetOrCreateCallRequest(
           data: open.CallRequest(
-            members: input.members?.toOpenDto() ?? [],
+            members: [...?input.members?.toOpenDto()],
           ),
           ring: input.ringing,
         ),
