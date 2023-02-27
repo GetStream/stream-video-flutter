@@ -31,8 +31,8 @@ class CoordinatorHealthCheckEvent extends CoordinatorEvent {
   List<Object?> get props => [clientId, userId];
 }
 
-abstract class CallCoordinatorEvent extends CoordinatorEvent {
-  const CallCoordinatorEvent({required this.callCid});
+abstract class CoordinatorCallEvent extends CoordinatorEvent {
+  const CoordinatorCallEvent({required this.callCid});
 
   final String callCid;
 
@@ -41,7 +41,7 @@ abstract class CallCoordinatorEvent extends CoordinatorEvent {
 }
 
 /// Sent when someone creates a call and invites another person to participate.
-class CoordinatorCallCreatedEvent extends CallCoordinatorEvent {
+class CoordinatorCallCreatedEvent extends CoordinatorCallEvent {
   const CoordinatorCallCreatedEvent({
     required super.callCid,
     required this.ringing,
@@ -69,7 +69,7 @@ class CoordinatorCallCreatedEvent extends CallCoordinatorEvent {
 }
 
 /// Sent when a call gets updated.
-class CoordinatorCallUpdatedEvent extends CallCoordinatorEvent {
+class CoordinatorCallUpdatedEvent extends CoordinatorCallEvent {
   const CoordinatorCallUpdatedEvent({
     required super.callCid,
     required this.info,
@@ -86,7 +86,7 @@ class CoordinatorCallUpdatedEvent extends CallCoordinatorEvent {
 }
 
 /// Sent when a calls gets ended.
-class CoordinatorCallEndedEvent extends CallCoordinatorEvent {
+class CoordinatorCallEndedEvent extends CoordinatorCallEvent {
   const CoordinatorCallEndedEvent({
     required super.callCid,
     required this.sentByUserId,
@@ -115,7 +115,7 @@ class CoordinatorCallEndedEvent extends CallCoordinatorEvent {
 }
 
 /// Sent when a user accepts the call.
-class CoordinatorCallAcceptedEvent extends CallCoordinatorEvent {
+class CoordinatorCallAcceptedEvent extends CoordinatorCallEvent {
   const CoordinatorCallAcceptedEvent({
     required super.callCid,
     required this.sentByUserId,
@@ -143,7 +143,7 @@ class CoordinatorCallAcceptedEvent extends CallCoordinatorEvent {
 }
 
 /// Sent when a user rejects the call.
-class CoordinatorCallRejectedEvent extends CallCoordinatorEvent {
+class CoordinatorCallRejectedEvent extends CoordinatorCallEvent {
   const CoordinatorCallRejectedEvent({
     required super.callCid,
     required this.sentByUserId,
@@ -172,7 +172,7 @@ class CoordinatorCallRejectedEvent extends CallCoordinatorEvent {
 }
 
 /// Sent when a user cancels the call.
-class CoordinatorCallCancelledEvent extends CallCoordinatorEvent {
+class CoordinatorCallCancelledEvent extends CoordinatorCallEvent {
   const CoordinatorCallCancelledEvent({
     required super.callCid,
     required this.sentByUserId,
@@ -201,7 +201,7 @@ class CoordinatorCallCancelledEvent extends CallCoordinatorEvent {
 }
 
 /// Sent when call members are updated.
-class CoordinatorCallMembersUpdatedEvent extends CallCoordinatorEvent {
+class CoordinatorCallMembersUpdatedEvent extends CoordinatorCallEvent {
   const CoordinatorCallMembersUpdatedEvent({
     required super.callCid,
     required this.info,
@@ -218,7 +218,7 @@ class CoordinatorCallMembersUpdatedEvent extends CallCoordinatorEvent {
 }
 
 /// Sent when call members are deleted.
-class CoordinatorCallMembersDeletedEvent extends CallCoordinatorEvent {
+class CoordinatorCallMembersDeletedEvent extends CoordinatorCallEvent {
   const CoordinatorCallMembersDeletedEvent({
     required super.callCid,
     required this.info,
@@ -234,7 +234,7 @@ class CoordinatorCallMembersDeletedEvent extends CallCoordinatorEvent {
   List<Object?> get props => [...super.props, info, details, users];
 }
 
-class CoordinatorCallPermissionRequestEvent extends CallCoordinatorEvent {
+class CoordinatorCallPermissionRequestEvent extends CoordinatorCallEvent {
   const CoordinatorCallPermissionRequestEvent({
     required super.callCid,
     required this.createdAt,
@@ -258,7 +258,7 @@ class CoordinatorCallPermissionRequestEvent extends CallCoordinatorEvent {
       ];
 }
 
-class CoordinatorCallPermissionsUpdatedEvent extends CallCoordinatorEvent {
+class CoordinatorCallPermissionsUpdatedEvent extends CoordinatorCallEvent {
   const CoordinatorCallPermissionsUpdatedEvent({
     required super.callCid,
     required this.createdAt,
@@ -282,7 +282,7 @@ class CoordinatorCallPermissionsUpdatedEvent extends CallCoordinatorEvent {
       ];
 }
 
-class CoordinatorCallCustomEvent extends CallCoordinatorEvent {
+class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
   const CoordinatorCallCustomEvent({
     required super.callCid,
     required this.senderUserId,

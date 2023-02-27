@@ -1,6 +1,6 @@
 import 'action/action.dart';
 import 'action/call_control_action.dart';
-import 'action/call_coordinator_action.dart';
+import 'action/coordinator_call_action.dart';
 import 'action/lifecycle_action.dart';
 import 'action/rtc_action.dart';
 import 'action/sfu_action.dart';
@@ -24,12 +24,12 @@ import 'utils/result.dart';
 const _tag = 'SV:StateManager';
 int _stateSeq = 1;
 
-abstract class CallCoordinatorEventListener extends CoordinatorEventListener {
+abstract class CoordinatorCallEventListener extends CoordinatorEventListener {
   @override
-  Future<void> onCoordinatorEvent(CallCoordinatorEvent event);
+  Future<void> onCoordinatorEvent(CoordinatorCallEvent event);
 }
 
-abstract class CallStateManager implements CallCoordinatorEventListener {
+abstract class CallStateManager implements CoordinatorCallEventListener {
   const CallStateManager();
   StateEmitter<CallState> get state;
   Future<void> onUserIdSet(String userId);
@@ -147,19 +147,20 @@ class CallStateManagerImpl extends CallStateManager {
       );
       _logger.v(() => '[onSfuEvent] received coord users: $users');
       _postReduced(
-        CallCoordinatorUsersAction(users: users.toUnmodifiableMap()),
+        CoordinatorCallUsersAction(users: users.toUnmodifiableMap()),
       );
     } else if (event is SfuParticipantJoinedEvent) {
       final users = await _queryUsersByIds({event.participant.userId});
       _logger.v(() => '[onSfuEvent] received coord users: $users');
-      _postReduced(CallCoordinatorUsersAction(users: users.toUnmodifiableMap()));
+      _postReduced(
+          CoordinatorCallUsersAction(users: users.toUnmodifiableMap()));
     }
   }
 
   @override
-  Future<void> onCoordinatorEvent(CallCoordinatorEvent event) async {
+  Future<void> onCoordinatorEvent(CoordinatorCallEvent event) async {
     _logger.d(() => '[onCoordinatorEvent] event: $event');
-    _postReduced(CallCoordinatorEventAction(event));
+    _postReduced(CoordinatorCallEventAction(event));
   }
 
   @override

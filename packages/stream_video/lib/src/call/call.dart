@@ -15,8 +15,6 @@ typedef OnCallPermissionRequest = void Function(
 
 /// Represents a [Call] in which you can connect to.
 abstract class Call {
-  // Call();
-
   factory Call.fromCid({
     required StreamCallCid callCid,
     StreamVideo? streamVideo,

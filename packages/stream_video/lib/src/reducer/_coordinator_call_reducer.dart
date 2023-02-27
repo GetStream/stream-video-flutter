@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 
-import '../action/call_coordinator_action.dart';
+import '../action/coordinator_call_action.dart';
 import '../call_participant_state.dart';
 import '../call_state.dart';
 import '../coordinator/models/coordinator_events.dart';
@@ -10,16 +10,16 @@ import '../models/drop_reason.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
-class CallCoordinatorReducer {
-  const CallCoordinatorReducer();
+class CoordinatorCallReducer {
+  const CoordinatorCallReducer();
 
   CallState reduce(
     CallState state,
-    CallCoordinatorAction action,
+    CoordinatorCallAction action,
   ) {
-    if (action is CallCoordinatorUsersAction) {
+    if (action is CoordinatorCallUsersAction) {
       return _reduceCallCoordinatorUsers(state, action);
-    } else if (action is CallCoordinatorEventAction) {
+    } else if (action is CoordinatorCallEventAction) {
       return _reduceCallCoordinatorEvent(state, action.event);
     }
     return state;
@@ -27,7 +27,7 @@ class CallCoordinatorReducer {
 
   CallState _reduceCallCoordinatorUsers(
     CallState state,
-    CallCoordinatorUsersAction action,
+    CoordinatorCallUsersAction action,
   ) {
     return state.copyWith(
       callParticipants: state.callParticipants.map(
@@ -46,7 +46,7 @@ class CallCoordinatorReducer {
 
   CallState _reduceCallCoordinatorEvent(
     CallState state,
-    CallCoordinatorEvent event,
+    CoordinatorCallEvent event,
   ) {
     if (event is CoordinatorCallRejectedEvent) {
       return _reduceCallRejected(state, event);

@@ -74,7 +74,7 @@ class CallImpl implements Call {
     streamLog.i(_tag, () => '<init> state: ${stateManager.state.value}');
     _subscriptions.add(
       _idCoordEvents,
-      streamVideo.events.on<CallCoordinatorEvent>((event) {
+      streamVideo.events.on<CoordinatorCallEvent>((event) {
         // Return if the event is not for this call.
         if (event.callCid != state.value.callCid.value) return;
         _logger.v(() => '[onCallCoordEvent] event.type: ${event.runtimeType}');

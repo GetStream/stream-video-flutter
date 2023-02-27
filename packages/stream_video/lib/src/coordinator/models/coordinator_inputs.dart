@@ -232,45 +232,27 @@ class SortInput extends CoordinatorInput {
 }
 
 enum EventTypeInput {
-  accepted,
-  rejected,
-  cancelled;
+  accepted('call.accepted'),
+  rejected('call.rejected'),
+  cancelled('call.cancelled');
+
+  const EventTypeInput(this.alias);
+
+  final String alias;
 
   @override
-  String toString() {
-    return name;
-  }
-
-  String get alias {
-    switch (this) {
-      case EventTypeInput.accepted:
-        return 'call.accepted';
-      case EventTypeInput.rejected:
-        return 'call.rejected';
-      case EventTypeInput.cancelled:
-        return 'call.cancelled';
-    }
-  }
+  String toString() => name;
 }
 
 enum DirectionInput {
-  asc,
-  desc,
-  undefined;
+  asc('direction.asc'),
+  desc('direction.desc'),
+  undefined('direction.undefined');
+
+  const DirectionInput(this.alias);
+
+  final String alias;
 
   @override
-  String toString() {
-    return name;
-  }
-
-  String get alias {
-    switch (this) {
-      case DirectionInput.asc:
-        return 'direction.asc';
-      case DirectionInput.desc:
-        return 'direction.desc';
-      case DirectionInput.undefined:
-        return 'direction.undefined';
-    }
-  }
+  String toString() => name;
 }
