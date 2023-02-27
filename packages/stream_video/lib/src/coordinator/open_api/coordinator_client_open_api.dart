@@ -41,9 +41,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   final String wsUrl;
   final TokenManager tokenManager;
 
-  String? userId = null;
+  String? userId;
 
   final open.ApiClient _apiClient;
+  late final defaultApi = open.DefaultApi(_apiClient);
   late final videoApi = open.VideoCallsApi(_apiClient);
   late final eventsApi = open.EventsApi(_apiClient);
   late final usersApi = open.UsersApi(_apiClient);
@@ -305,6 +306,50 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     try {
       // TODO
 
+      return Result.success(None());
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  Future<Result<None>> requestPermissions(
+    input.RequestPermissionsInput input,
+  ) async {
+    try {
+      final result = await defaultApi.requestPermission(
+        input.callCid.type,
+        input.callCid.id,
+        open.RequestPermissionRequest(
+          permissions: input.permissions,
+        ),
+      );
+      if (result == null) {
+        return Result.error('message');
+      }
+      return Result.success(None());
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  Future<Result<None>> updateUserPermissions(
+    input.UpdateUserPermissionsInput input,
+  ) async {
+    try {
+      final result = await defaultApi.updateUserPermissions(
+        input.callCid.type,
+        input.callCid.id,
+        open.UpdateUserPermissionsRequest(
+          userId: input.userId,
+          grantPermissions: input.grantPermissions,
+          revokePermissions: input.revokePermissions,
+        ),
+      );
+      if (result == null) {
+        return Result.error('message');
+      }
       return Result.success(None());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));

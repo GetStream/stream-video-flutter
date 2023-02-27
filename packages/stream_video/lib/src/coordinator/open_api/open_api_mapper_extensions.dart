@@ -1,6 +1,7 @@
 import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../models/call_cid.dart';
 import '../../models/call_metadata.dart';
+import '../../models/call_setting.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_inputs.dart';
 import 'event/open_api_event.dart';
@@ -34,9 +35,10 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         ),
         details: CallDetails(
           isBroadcastingEnabled: call.settings.broadcasting.enabled,
-          memberUserIds: callCreated.members.map((it) => it.userId).toList(),
           members: callCreated.members.toCallMembers(call.cid),
           isRecordingEnabled: call.settings.recording.audioOnly,
+          ownCapabilities: call.ownCapabilities,
+          settings: call.settings.toCallSettings(),
         ),
         users: callCreated.members.toCallUsers(),
       );
@@ -53,9 +55,10 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         ),
         details: const CallDetails(
           isBroadcastingEnabled: false,
-          memberUserIds: [],
           members: {},
           isRecordingEnabled: false,
+          ownCapabilities: [],
+          settings: CallSettings.disabled(),
         ),
         users: const {},
       );
@@ -72,9 +75,10 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         ),
         details: const CallDetails(
           isBroadcastingEnabled: false,
-          memberUserIds: [],
           members: {},
           isRecordingEnabled: false,
+          ownCapabilities: [],
+          settings: CallSettings.disabled(),
         ),
         users: const {},
       );
@@ -91,9 +95,10 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         ),
         details: const CallDetails(
           isBroadcastingEnabled: false,
-          memberUserIds: [],
           members: {},
           isRecordingEnabled: false,
+          ownCapabilities: [],
+          settings: CallSettings.disabled(),
         ),
         users: const {},
       );
@@ -111,9 +116,10 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         ),
         details: CallDetails(
           isBroadcastingEnabled: call.settings.broadcasting.enabled,
-          memberUserIds: const [],
           members: const {},
           isRecordingEnabled: call.settings.recording.audioOnly,
+          ownCapabilities: call.ownCapabilities,
+          settings: call.settings.toCallSettings(),
         ),
         users: const {},
       );
@@ -130,20 +136,33 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         ),
         details: const CallDetails(
           isBroadcastingEnabled: false,
-          memberUserIds: [],
           members: {},
           isRecordingEnabled: false,
+          ownCapabilities: [],
+          settings: CallSettings.disabled(),
         ),
         users: const {},
       );
     } else if (callPermissionRequest != null) {
       final callPermissionRequest = this.callPermissionRequest!;
 
-      // TODO support
+      return CoordinatorCallPermissionRequestEvent(
+        callCid: callPermissionRequest.callCid,
+        createdAt: callPermissionRequest.createdAt,
+        permissions: callPermissionRequest.permissions,
+        type: callPermissionRequest.type,
+        user: callPermissionRequest.user.toCallUser(),
+      );
     } else if (callPermissionsUpdated != null) {
       final callPermissionsUpdated = this.callPermissionsUpdated!;
 
-      // TODO support
+      return CoordinatorCallPermissionsUpdatedEvent(
+        callCid: callPermissionsUpdated.callCid,
+        createdAt: callPermissionsUpdated.createdAt,
+        ownCapabilities: callPermissionsUpdated.ownCapabilities,
+        type: callPermissionsUpdated.type,
+        user: callPermissionsUpdated.user.toCallUser(),
+      );
     } else if (custom != null) {
       final custom = this.custom!;
 
@@ -159,9 +178,10 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         ),
         details: const CallDetails(
           isBroadcastingEnabled: false,
-          memberUserIds: [],
           members: {},
           isRecordingEnabled: false,
+          ownCapabilities: [],
+          settings: CallSettings.disabled(),
         ),
         users: {custom.user.id: custom.user.toCallUser()},
       );

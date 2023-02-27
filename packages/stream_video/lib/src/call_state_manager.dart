@@ -1,10 +1,11 @@
 import 'action/action.dart';
 import 'action/call_control_action.dart';
-import 'action/coordinator_action.dart';
+import 'action/call_coordinator_action.dart';
 import 'action/lifecycle_action.dart';
 import 'action/rtc_action.dart';
 import 'action/sfu_action.dart';
 import 'call_state.dart';
+import 'coordinator/coordinator_socket_listener.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'errors/video_error.dart';
 import 'logger/impl/tagged_logger.dart';
@@ -23,7 +24,12 @@ import 'utils/result.dart';
 const _tag = 'SV:StateManager';
 int _stateSeq = 1;
 
-abstract class CallStateManager {
+abstract class CallCoordinatorEventListener extends CoordinatorEventListener {
+  @override
+  Future<void> onCoordinatorEvent(CallCoordinatorEvent event);
+}
+
+abstract class CallStateManager implements CallCoordinatorEventListener {
   const CallStateManager();
   StateEmitter<CallState> get state;
   Future<void> onUserIdSet(String userId);
@@ -36,7 +42,6 @@ abstract class CallStateManager {
   Future<void> onDisconnect();
   Future<void> onCallControlAction(CallControlAction action);
   Future<void> onSfuEvent(SfuEvent event);
-  Future<void> onCoordinatorEvent(CoordinatorEvent event);
   Future<void> onWaitingTimeout(Duration dropTimeout);
   Future<void> onConnectFailed(VideoError error);
 
@@ -141,21 +146,20 @@ class CallStateManagerImpl extends CallStateManager {
         participants.map((it) => it.userId).toSet(),
       );
       _logger.v(() => '[onSfuEvent] received coord users: $users');
-      _postReduced(CoordinatorUsersAction(users: users.toUnmodifiableMap()));
+      _postReduced(
+        CallCoordinatorUsersAction(users: users.toUnmodifiableMap()),
+      );
     } else if (event is SfuParticipantJoinedEvent) {
       final users = await _queryUsersByIds({event.participant.userId});
       _logger.v(() => '[onSfuEvent] received coord users: $users');
-      _postReduced(CoordinatorUsersAction(users: users.toUnmodifiableMap()));
+      _postReduced(CallCoordinatorUsersAction(users: users.toUnmodifiableMap()));
     }
   }
 
   @override
-  Future<void> onCoordinatorEvent(CoordinatorEvent event) async {
-    if (event is CoordinatorHealthCheckEvent) {
-      return;
-    }
+  Future<void> onCoordinatorEvent(CallCoordinatorEvent event) async {
     _logger.d(() => '[onCoordinatorEvent] event: $event');
-    _postReduced(CoordinatorEventAction(event));
+    _postReduced(CallCoordinatorEventAction(event));
   }
 
   @override

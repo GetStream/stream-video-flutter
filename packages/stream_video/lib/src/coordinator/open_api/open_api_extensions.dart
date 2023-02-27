@@ -2,6 +2,7 @@ import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../models/call_cid.dart';
 import '../../models/call_credentials.dart';
 import '../../models/call_metadata.dart';
+import '../../models/call_setting.dart';
 
 extension MemberExt on open.MemberResponse {
   CallMember toCallMember(String callCid) {
@@ -40,6 +41,16 @@ extension UserExt on open.UserResponse {
       customJson: custom,
     );
   }
+
+  CallMember toCallMember(String callCid) {
+    return CallMember(
+      callCid: callCid,
+      userId: id,
+      role: role,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
+  }
 }
 
 extension UserListExt on List<open.UserResponse> {
@@ -52,10 +63,11 @@ extension EnvelopeExt on open.CallResponse {
   CallMetadata toCallMetadata() {
     return CallMetadata(
       details: CallDetails(
-        memberUserIds: [createdBy.id],
-        members: const {},
+        members: {createdBy.id: createdBy.toCallMember(cid)},
         isBroadcastingEnabled: settings.broadcasting.enabled,
         isRecordingEnabled: settings.recording.mode.isNotEmpty,
+        ownCapabilities: ownCapabilities,
+        settings: settings.toCallSettings(),
       ),
       info: CallInfo(
         cid: StreamCallCid(cid: cid),
@@ -64,6 +76,22 @@ extension EnvelopeExt on open.CallResponse {
         updatedAt: updatedAt,
       ),
       users: {createdBy.id: createdBy.toCallUser()},
+    );
+  }
+}
+
+extension CallSettingsExt on open.CallSettingsResponse {
+  CallSettings toCallSettings() {
+    return CallSettings(
+      audio: AudioSetting(
+        accessRequestEnabled: audio.accessRequestEnabled,
+      ),
+      video: VideoSetting(
+        accessRequestEnabled: video.accessRequestEnabled,
+      ),
+      screenShare: ScreenShareSetting(
+        accessRequestEnabled: screensharing.accessRequestEnabled,
+      ),
     );
   }
 }

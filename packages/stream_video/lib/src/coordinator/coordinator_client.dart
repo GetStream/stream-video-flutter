@@ -54,6 +54,12 @@ abstract class CoordinatorClient {
 
   Future<Result<None>> inviteUsers(inputs.UpsertCallMembersInput input);
 
+  Future<Result<None>> requestPermissions(inputs.RequestPermissionsInput input);
+
+  Future<Result<None>> updateUserPermissions(
+    inputs.UpdateUserPermissionsInput input,
+  );
+
   Future<Result<List<CallUser>>> queryUsers(
     inputs.QueryUsersInput input,
   );

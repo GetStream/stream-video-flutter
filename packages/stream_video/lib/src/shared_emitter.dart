@@ -7,7 +7,7 @@ abstract class SharedEmitter<T> {
     required Duration timeLimit,
   });
 
-  StreamSubscription<E> on<E extends T>(void Function(T event) onEvent);
+  StreamSubscription<E> on<E extends T>(void Function(E event) onEvent);
 
   Future<T> firstWhere(
     bool Function(T element) test, {
@@ -42,24 +42,24 @@ class MutableSharedEmitterImpl<T> extends MutableSharedEmitter<T> {
 
   /// Emit the new value.
   @override
-  void emit(T value) {
-    _shared.add(value);
-  }
+  void emit(T value) => _shared.add(value);
 
+  @override
   Future<E> waitFor<E extends T>({
     required Duration timeLimit,
   }) {
-    return _shared
-        .takeWhile((it) => it is E)
-        .cast<E>()
-        .first
-        .timeout(timeLimit);
+    return firstWhere(
+      (it) => it is E,
+      timeLimit: timeLimit,
+    ).then((it) => it as E);
   }
 
-  StreamSubscription<E> on<E extends T>(void Function(T event) onEvent) {
+  @override
+  StreamSubscription<E> on<E extends T>(void Function(E event) onEvent) {
     return _shared.where((it) => it is E).cast<E>().listen(onEvent);
   }
 
+  @override
   Future<T> firstWhere(
     bool Function(T element) test, {
     required Duration timeLimit,
@@ -68,6 +68,7 @@ class MutableSharedEmitterImpl<T> extends MutableSharedEmitter<T> {
   }
 
   /// Adds a subscription to this emitter.
+  @override
   StreamSubscription<T> listen(
     void Function(T value)? onData, {
     Function? onError,

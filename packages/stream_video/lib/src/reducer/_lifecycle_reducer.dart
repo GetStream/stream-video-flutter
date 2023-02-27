@@ -155,7 +155,7 @@ extension on CallCreated {
 extension on CallMetadata {
   List<CallParticipantState> toCallParticipants(CallState state) {
     final result = <CallParticipantState>[];
-    for (final userId in users.keys) {
+    for (final userId in details.members.keys) {
       final member = details.members[userId];
       final user = users[userId];
       final isLocal = state.currentUserId == userId;

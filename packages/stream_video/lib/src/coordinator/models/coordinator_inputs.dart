@@ -85,6 +85,41 @@ class JoinCallInput extends CoordinatorInput {
   List<Object?> get props => [datacenterId, callCid, ringing, members];
 }
 
+class RequestPermissionsInput extends CoordinatorInput {
+  const RequestPermissionsInput({
+    required this.callCid,
+    required this.permissions,
+  });
+
+  final StreamCallCid callCid;
+  final List<String> permissions;
+
+  @override
+  List<Object?> get props => [callCid, permissions];
+}
+
+class UpdateUserPermissionsInput extends CoordinatorInput {
+  const UpdateUserPermissionsInput({
+    required this.callCid,
+    required this.userId,
+    required this.grantPermissions,
+    required this.revokePermissions,
+  });
+
+  final StreamCallCid callCid;
+  final String userId;
+  final List<String> grantPermissions;
+  final List<String> revokePermissions;
+
+  @override
+  List<Object?> get props => [
+        callCid,
+        userId,
+        grantPermissions,
+        revokePermissions,
+      ];
+}
+
 class UpsertCallMembersInput extends CoordinatorInput {
   const UpsertCallMembersInput({
     required this.callCid,
