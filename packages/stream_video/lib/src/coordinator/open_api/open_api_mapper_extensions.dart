@@ -130,7 +130,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
 
         return CoordinatorCallEndedEvent(
           callCid: callEnded.callCid,
-          sentByUserId: callEnded.user.id,
+          sentByUserId: callEnded.user?.id ?? '',
           createdAt: callEnded.createdAt,
           info: CallInfo(
             cid: StreamCallCid(cid: callEnded.callCid),
@@ -164,6 +164,22 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           ownCapabilities: callPermissionsUpdated.ownCapabilities,
           type: callPermissionsUpdated.type,
           user: callPermissionsUpdated.user.toCallUser(),
+        );
+      case EventType.callRecordingStarted:
+        final callRecordingStarted = this.callRecordingStarted!;
+
+        return CoordinatorCallRecordingStartedEvent(
+          callCid: callRecordingStarted.callCid,
+          createdAt: callRecordingStarted.createdAt,
+          type: callRecordingStarted.type,
+        );
+      case EventType.callRecordingStopped:
+        final callRecordingStopped = this.callRecordingStopped!;
+
+        return CoordinatorCallRecordingStoppedEvent(
+          callCid: callRecordingStopped.callCid,
+          createdAt: callRecordingStopped.createdAt,
+          type: callRecordingStopped.type,
         );
       case EventType.custom:
         final custom = this.custom!;

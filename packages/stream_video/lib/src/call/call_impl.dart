@@ -121,16 +121,6 @@ class CallImpl implements Call {
     return 'Call{cid: $callCid}';
   }
 
-  @override
-  Future<Result<CallCreated>> dial({
-    required List<String> participantIds,
-  }) async {
-    return create(
-      participantIds: participantIds,
-      ringing: true,
-    );
-  }
-
   Future<Result<None>> _acceptCall(AcceptCall action) async {
     final state = this.state.value;
     final status = state.status;
@@ -175,42 +165,6 @@ class CallImpl implements Call {
     _logger.v(() => '[cancelCall] completed: $result');
     if (result is Success<None>) {
       await _stateManager.onCallControlAction(action);
-    }
-    return result;
-  }
-
-  @override
-  Future<Result<CallReceivedOrCreated>> getOrCreate({
-    List<String> participantIds = const [],
-    bool ringing = false,
-  }) async {
-    _logger.d(() => '[getOrCreate] no args');
-    final state = this.state.value;
-    final result = await _streamVideo.getOrCreateCall(
-      cid: state.callCid,
-      participantIds: participantIds,
-      ringing: ringing,
-    );
-    if (result is Success<CallReceivedOrCreated>) {
-      await _stateManager.onCallReceivedOrCreated(result.data);
-    }
-    return result;
-  }
-
-  @override
-  Future<Result<CallCreated>> create({
-    List<String> participantIds = const [],
-    bool ringing = false,
-  }) async {
-    _logger.d(() => '[create] no args');
-    final state = this.state.value;
-    final result = await _streamVideo.createCall(
-      cid: state.callCid,
-      participantIds: participantIds,
-      ringing: ringing,
-    );
-    if (result is Success<CallCreated>) {
-      await _stateManager.onCallCreated(result.data);
     }
     return result;
   }

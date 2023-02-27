@@ -18,6 +18,8 @@ class OpenApiEvent with EquatableMixin {
     this.callEnded,
     this.callPermissionRequest,
     this.callPermissionsUpdated,
+    this.callRecordingStarted,
+    this.callRecordingStopped,
     this.custom,
   });
 
@@ -57,6 +59,15 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callPermissionsUpdated:
         final permissionsUpdated = open.CallPermissionsUpdated.fromJson(obj);
         return result.copyWith(callPermissionsUpdated: permissionsUpdated);
+
+      case EventType.callRecordingStarted:
+        final permissionsUpdated = open.CallPermissionsUpdated.fromJson(obj);
+        return result.copyWith(callPermissionsUpdated: permissionsUpdated);
+
+      case EventType.callRecordingStopped:
+        final permissionsUpdated = open.CallPermissionsUpdated.fromJson(obj);
+        return result.copyWith(callPermissionsUpdated: permissionsUpdated);
+
       case EventType.custom:
         final custom = open.Custom.fromJson(obj);
         return result.copyWith(custom: custom);
@@ -75,6 +86,8 @@ class OpenApiEvent with EquatableMixin {
   final open.CallEnded? callEnded;
   final open.CallPermissionRequest? callPermissionRequest;
   final open.CallPermissionsUpdated? callPermissionsUpdated;
+  final open.CallRecordingStarted? callRecordingStarted;
+  final open.CallRecordingStopped? callRecordingStopped;
   final open.Custom? custom;
 
   OpenApiEvent copyWith({
@@ -88,6 +101,8 @@ class OpenApiEvent with EquatableMixin {
     open.CallEnded? callEnded,
     open.CallPermissionRequest? callPermissionRequest,
     open.CallPermissionsUpdated? callPermissionsUpdated,
+    open.CallRecordingStarted? callRecordingStarted,
+    open.CallRecordingStopped? callRecordingStopped,
     open.Custom? custom,
   }) {
     return OpenApiEvent(
@@ -103,6 +118,8 @@ class OpenApiEvent with EquatableMixin {
           callPermissionRequest ?? this.callPermissionRequest,
       callPermissionsUpdated:
           callPermissionsUpdated ?? this.callPermissionsUpdated,
+      callRecordingStarted: callRecordingStarted ?? this.callRecordingStarted,
+      callRecordingStopped: callRecordingStopped ?? this.callRecordingStopped,
       custom: custom ?? this.custom,
     );
   }
@@ -122,6 +139,8 @@ class OpenApiEvent with EquatableMixin {
         callEnded,
         callPermissionRequest,
         callPermissionsUpdated,
+        callRecordingStarted,
+        callRecordingStopped,
         custom,
       ];
 }

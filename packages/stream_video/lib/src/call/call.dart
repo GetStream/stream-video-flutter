@@ -56,20 +56,6 @@ abstract class Call {
 
   OnCallPermissionRequest? onPermissionRequest;
 
-  Future<Result<CallCreated>> dial({
-    required List<String> participantIds,
-  });
-
-  Future<Result<CallReceivedOrCreated>> getOrCreate({
-    List<String> participantIds = const [],
-    bool ringing = false,
-  });
-
-  Future<Result<CallCreated>> create({
-    List<String> participantIds = const [],
-    bool ringing = false,
-  });
-
   Future<Result<None>> joinCall();
 
   Future<Result<None>> connect({
