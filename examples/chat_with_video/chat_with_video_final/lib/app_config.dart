@@ -1,68 +1,53 @@
-import 'package:chat_with_video_final/sample_user.dart';
+import 'env/env.dart';
+import 'sample_user.dart';
 
 final sampleUsers = <SampleUser>[
   const SampleUser(
-    id: 'vasil',
-    name: 'Willard Hessel',
-    role: 'admin',
-    image:
-        'https://getstream.io/chat/docs/sdk/avatars/jpg/Willard%20Hessel.jpg',
-    videoToken:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci92YXNpbCIsImlhdCI6MTY3MDkyOTk4MSwidXNlcl9pZCI6InZhc2lsIn0.YlbxW8zCgTPDUe_rofCta2eKubF-Km5xqsJi_geDsv0',
-    chatToken:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmFzaWwifQ.7xb2ns3CWqX1XpYwJy89OHyARuIvouISpEoUTRwvZGg',
+    id: Env.sampleUserId00,
+    name: Env.sampleUserName00,
+    role: Env.sampleUserRole00,
+    image: Env.sampleUserImage00,
+    videoToken: Env.sampleUserVideoToken00,
+    chatToken: Env.sampleUserChatToken00,
   ),
   const SampleUser(
-    id: 'veselin',
-    name: 'Blanche Schoen',
-    role: 'admin',
-    image:
-        'https://getstream.io/chat/docs/sdk/avatars/jpg/Blanche%20Schoen.jpg',
-    videoToken:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci92ZXNlbGluIiwiaWF0IjoxNjcwOTI5OTk4LCJ1c2VyX2lkIjoidmVzZWxpbiJ9.-scF4--7n3NGRE3wj5vfj7bJ4n5aWcYKdVg5uSqVNGc',
-    chatToken:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmVzZWxpbiJ9.8WJIIBHinLz80cSi_qy-xj45rT60nGdCBmarW7KEGeU',
+    id: Env.sampleUserId01,
+    name: Env.sampleUserName01,
+    role: Env.sampleUserRole01,
+    image: Env.sampleUserImage01,
+    videoToken: Env.sampleUserVideoToken01,
+    chatToken: Env.sampleUserChatToken01,
   ),
   const SampleUser(
-    id: 'valia',
-    name: 'Bernard Windler',
-    role: 'admin',
-    image:
-        'https://getstream.io/chat/docs/sdk/avatars/jpg/Bernard%20Windler.jpg',
-    videoToken:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci92YWxpYSIsImlhdCI6MTY3MDkzMDAxNywidXNlcl9pZCI6InZhbGlhIn0.SMz_Dggqf8ppxov3rjZtcs88v4FmKits0shVTfyObUQ',
-    chatToken:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmFsaWEifQ.MCm5GWwNeqOWdXnAReXt_9v7nIH7Xg6c94uBg1dxMOk',
+    id: Env.sampleUserId02,
+    name: Env.sampleUserName02,
+    role: Env.sampleUserRole02,
+    image: Env.sampleUserImage02,
+    videoToken: Env.sampleUserVideoToken02,
+    chatToken: Env.sampleUserChatToken02,
   ),
   const SampleUser(
-    id: 'damjan',
-    name: 'Tyrone Bailey',
-    role: 'admin',
-    image: 'https://getstream.io/chat/docs/sdk/avatars/jpg/Tyrone%20Bailey.jpg',
-    videoToken:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci9kYW1qYW4iLCJpYXQiOjE2NzA5MzAwMzMsInVzZXJfaWQiOiJkYW1qYW4ifQ.ECGyzMLH1ZQEaWiM7iyGsdh3bdubcJRXwGBLZlYJlXM',
-    chatToken:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZGFtamFuIn0.BSeX6DPXC3YfVjHAf8gzl2hJ532DFmrJEhqT3pFLY3c',
+    id: Env.sampleUserId03,
+    name: Env.sampleUserName03,
+    role: Env.sampleUserRole03,
+    image: Env.sampleUserImage03,
+    videoToken: Env.sampleUserVideoToken03,
+    chatToken: Env.sampleUserChatToken03,
   ),
   const SampleUser(
-    id: 'jordan',
-    name: 'Claudia Bradtke',
-    role: 'admin',
-    image:
-        'https://getstream.io/chat/docs/sdk/avatars/jpg/Claudia%20Bradtke.jpg',
-    videoToken:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci9qb3JkYW4iLCJpYXQiOjE2NzA5MzAwNTIsInVzZXJfaWQiOiJqb3JkYW4ifQ.reRIu94p1nJnR-487zC3ySEFeV1Er7hK3I-1b13mIyA',
-    chatToken:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiam9yZGFuIn0.wwqn1Y2rwcDlO4-U3pmurIpK6CrIT0TQFvI4XovER88',
+    id: Env.sampleUserId04,
+    name: Env.sampleUserName04,
+    role: Env.sampleUserRole04,
+    image: Env.sampleUserImage04,
+    videoToken: Env.sampleUserVideoToken04,
+    chatToken: Env.sampleUserChatToken04,
   ),
   const SampleUser(
-    id: 'ina',
-    name: 'Byron Waelchi',
-    role: 'admin',
-    image: 'https://getstream.io/chat/docs/sdk/avatars/jpg/Byron%20Waelchi.jpg',
-    videoToken:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci9pbmEiLCJpYXQiOjE2NzA5MzAwNjQsInVzZXJfaWQiOiJpbmEifQ.FTVAMAWsKoO413lPIIzgbHsxrM-q-I5OO_bEYoeDfYo',
-    chatToken:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiaW5hIn0.3mTkk94zpzGbSHdkRXb_UHqboTq06WZ5zqDH8xtgyyg',
+    id: Env.sampleUserId05,
+    name: Env.sampleUserName05,
+    role: Env.sampleUserRole05,
+    image: Env.sampleUserImage05,
+    videoToken: Env.sampleUserVideoToken05,
+    chatToken: Env.sampleUserChatToken05,
   ),
 ];

@@ -25,8 +25,11 @@ dependencies:
     path: ../packages/stream_video_flutter
   stream_video_push_notification:
     path: ../packages/stream_video_push_notification
+  envied: ^0.3.0
 
 dev_dependencies:
+  build_runner: ^2.3.3
+  envied_generator: ^0.3.0
   flutter_test:
     sdk: flutter
 

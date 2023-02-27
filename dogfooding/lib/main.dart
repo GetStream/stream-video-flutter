@@ -9,6 +9,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:uni_links/uni_links.dart';
 
+import 'env/env.dart';
 import 'firebase_options.dart';
 import 'src/routes/app_routes.dart';
 import 'src/routes/routes.dart';
@@ -31,26 +32,27 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   _initStreamVideo();
-  runApp(StreamDogFoodingApp());
+  runApp(const StreamDogFoodingApp());
 }
 
 void _initStreamVideo() {
   if (!StreamVideo.isInitialized()) {
+    StreamLog()
+      ..logger = ConsoleStreamLogger()
+      ..validator = (priority, tag) => true;
+
     StreamVideo.init(
-      'us83cfwuhy8n', // see <video>/data/fixtures/apps.yaml for API secret
-      coordinatorRpcUrl: //replace with the url obtained with ngrok http 26991
-          'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc',
-      // 'http://192.168.1.7:26991/rpc',
-      coordinatorWsUrl: //replace host with your local ip address
-          'wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
-      // 'ws://192.168.1.7:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect',
+      Env.apiKey,
+      coordinatorRpcUrl: Env.coordinatorRpcUrl,
+      coordinatorWsUrl: Env.coordinatorWsUrl,
       pushNotificationFactory: createPushNotificationManager,
     );
   }
 }
 
 Future<PushNotificationManager> createPushNotificationManager(
-    StreamVideo client) {
+  StreamVideo client,
+) {
   return StreamVideoPushNotificationManager.create(client);
 }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stream_video/stream_video.dart';
 
+import 'env/env.dart';
 import 'screen/login_screen.dart';
 
 Future<void> main() async {
@@ -12,11 +13,9 @@ Future<void> main() async {
     ..validator = (priority, tag) => true;
 
   StreamVideo.init(
-    'w6yaq5388uym',
-    coordinatorRpcUrl:
-        'https://video-edge-frankfurt-ce1.stream-io-api.com/video',
-    coordinatorWsUrl:
-        'wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect',
+    Env.streamVideoApiKey,
+    coordinatorRpcUrl: Env.streamCoordinatorRpcUrl,
+    coordinatorWsUrl: Env.streamCoordinatorWSUrl,
   );
 
   runApp(const MyApp());

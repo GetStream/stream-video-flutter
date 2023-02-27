@@ -36,9 +36,9 @@ final _levelEmojiMapper = {
 };
 
 const _defaultCoordinatorRpcUrl =
-    'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc';
+    'https://video-edge-frankfurt-ce1.stream-io-api.com/video';
 const _defaultCoordinatorWsUrl =
-    'wss://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
+    'wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect';
 
 /// The client responsible for handling config and maintaining calls
 abstract class StreamVideo {
