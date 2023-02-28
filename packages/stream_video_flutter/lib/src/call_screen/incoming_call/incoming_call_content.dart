@@ -5,6 +5,7 @@ import '../../utils/extensions.dart';
 import '../common/call_background.dart';
 import '../common/calling_participants.dart';
 import '../common/participant_avatars.dart';
+import 'incoming_call_controls.dart';
 
 /// Represents the Incoming Call state and UI, when the user is called by
 /// other people.
@@ -15,6 +16,8 @@ class IncomingCallContent extends StatelessWidget {
     required this.callState,
     this.onAcceptCallTap,
     this.onDeclineCallTap,
+    this.onMicrophoneTap,
+    this.onCameraTap,
     this.singleParticipantAvatarTheme,
     this.multipleParticipantAvatarTheme,
     this.singleParticipantTextStyle,
@@ -33,6 +36,12 @@ class IncomingCallContent extends StatelessWidget {
 
   /// The action to perform when the decline call button is tapped.
   final VoidCallback? onDeclineCallTap;
+
+  /// The action to perform when the microphone button is tapped.
+  final VoidCallback? onMicrophoneTap;
+
+  /// The action to perform when the camera button is tapped.
+  final VoidCallback? onCameraTap;
 
   /// Theme for the avatar in a call with one participant.
   final StreamUserAvatarThemeData? singleParticipantAvatarTheme;
@@ -94,26 +103,11 @@ class IncomingCallContent extends StatelessWidget {
               style: callingLabelTextStyle,
             ),
             const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                CallControlOption(
-                  icon: const Icon(Icons.call_end_rounded),
-                  iconColor: Colors.white,
-                  backgroundColor: Colors.red,
-                  onPressed: () {
-                    _onDeclineCallTap(context);
-                  },
-                  padding: const EdgeInsets.all(24),
-                ),
-                CallControlOption(
-                  icon: const Icon(Icons.call_rounded),
-                  iconColor: Colors.white,
-                  backgroundColor: Colors.green,
-                  onPressed: _onAcceptCallTap,
-                  padding: const EdgeInsets.all(24),
-                ),
-              ],
+            IncomingCallControls(
+              onAcceptCallTap: _onAcceptCallTap,
+              onDeclineCallTap: () => _onDeclineCallTap(context),
+              onMicrophoneTap: onMicrophoneTap ?? () {},
+              onCameraTap: onCameraTap ?? () {},
             ),
           ],
         ),
@@ -122,19 +116,21 @@ class IncomingCallContent extends StatelessWidget {
   }
 
   Future<void> _onDeclineCallTap(BuildContext context) async {
-    await call.apply(const RejectCall());
-    await call.disconnect();
-
     if (onDeclineCallTap != null) {
       onDeclineCallTap!();
     } else {
+      await call.apply(const RejectCall());
+      await call.disconnect();
+
       await Navigator.maybePop(context);
     }
   }
 
   Future<void> _onAcceptCallTap() async {
-    await call.apply(const AcceptCall());
-
-    onDeclineCallTap?.call();
+    if (onAcceptCallTap != null) {
+      onAcceptCallTap!();
+    } else {
+      await call.apply(const AcceptCall());
+    }
   }
 }

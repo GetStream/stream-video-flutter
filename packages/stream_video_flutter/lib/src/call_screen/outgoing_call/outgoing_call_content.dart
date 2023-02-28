@@ -5,6 +5,7 @@ import '../../utils/extensions.dart';
 import '../common/call_background.dart';
 import '../common/calling_participants.dart';
 import '../common/participant_avatars.dart';
+import 'outgoing_call_controls.dart';
 
 /// Represents the Outgoing Call state and UI, when the user is calling
 /// other people.
@@ -15,6 +16,8 @@ class OutgoingCallContent extends StatelessWidget {
     required this.call,
     required this.callState,
     this.onCancelCallTap,
+    this.onMicrophoneTap,
+    this.onCameraTap,
     this.singleParticipantAvatarTheme,
     this.multipleParticipantAvatarTheme,
     this.singleParticipantTextStyle,
@@ -30,6 +33,12 @@ class OutgoingCallContent extends StatelessWidget {
 
   /// The action to perform when the cancel call button is tapped.
   final VoidCallback? onCancelCallTap;
+
+  /// The action to perform when the microphone button is tapped.
+  final VoidCallback? onMicrophoneTap;
+
+  /// The action to perform when the camera button is tapped.
+  final VoidCallback? onCameraTap;
 
   /// Theme for the avatar in a call with one participant.
   final StreamUserAvatarThemeData? singleParticipantAvatarTheme;
@@ -91,15 +100,11 @@ class OutgoingCallContent extends StatelessWidget {
               style: callingLabelTextStyle,
             ),
             const Spacer(),
-            CallControlOption(
-              icon: const Icon(Icons.call_end_rounded),
-              iconColor: Colors.white,
-              backgroundColor: Colors.red,
-              onPressed: () {
-                _onCancelCallTap(context);
-              },
-              padding: const EdgeInsets.all(24),
-            )
+            OutgoingCallControls(
+              onCancelCallTap: () => _onCancelCallTap(context),
+              onMicrophoneTap: onMicrophoneTap ?? () {},
+              onCameraTap: onCameraTap ?? () {},
+            ),
           ],
         ),
       ),
@@ -107,12 +112,12 @@ class OutgoingCallContent extends StatelessWidget {
   }
 
   Future<void> _onCancelCallTap(BuildContext context) async {
-    await call.apply(const CancelCall());
-    await call.disconnect();
-
     if (onCancelCallTap != null) {
       onCancelCallTap!();
     } else {
+      await call.apply(const CancelCall());
+      await call.disconnect();
+
       await Navigator.maybePop(context);
     }
   }
