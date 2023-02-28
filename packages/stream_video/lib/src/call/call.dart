@@ -7,7 +7,6 @@ import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../utils/none.dart';
 import 'call_impl.dart';
-import 'call_settings.dart';
 
 typedef OnCallPermissionRequest = void Function(
   CoordinatorCallPermissionRequestEvent,
@@ -59,7 +58,7 @@ abstract class Call {
   Future<Result<None>> joinCall();
 
   Future<Result<None>> connect({
-    CallConnectOptions settings = const CallConnectOptions(),
+    CallConnectOptions options = const CallConnectOptions(),
   });
 
   Future<Result<None>> disconnect();

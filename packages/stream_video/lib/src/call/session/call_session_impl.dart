@@ -143,10 +143,16 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     _logger.d(() => '[apply] action: $action');
     if (action is SetCameraEnabled) {
       return _onSetCameraEnabled(action.enabled);
+    } else if (action is SetCameraTrack) {
+      return _onSetCameraTrack(action.track);
     } else if (action is SetMicrophoneEnabled) {
       return _onSetMicrophoneEnabled(action.enabled);
+    } else if (action is SetMicrophoneTrack) {
+      return _onSetMicrophoneTrack(action.track);
     } else if (action is SetScreenShareEnabled) {
       return _onSetScreenShareEnabled(action.enabled);
+    } else if (action is SetScreenShareTrack) {
+      return _onSetScreenShareTrack(action.track);
     } else if (action is FlipCamera) {
       return _onFlipCamera();
     } else if (action is SetCameraDeviceId) {
@@ -239,6 +245,10 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
 
     final track = trackResult.getDataOrNull();
     if (track == null) return;
+
+    // Only start remote tracks. Local tracks are started by the user.
+    if (track is! RtcRemoteTrack) return;
+
     await track.start();
   }
 
@@ -255,6 +265,10 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
 
     final track = trackResult.getDataOrNull();
     if (track == null) return;
+
+    // Only stop remote tracks. Local tracks are stopped by the user.
+    if (track is! RtcRemoteTrack) return;
+
     await track.stop();
   }
 
@@ -432,6 +446,15 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     return Result.success(None());
   }
 
+  Future<Result<None>> _onSetCameraTrack(RtcLocalCameraTrack track) async {
+    final result = await rtcManager?.publishVideoTrack(track: track);
+    if (result == null) {
+      return Result.error('Unable to set camera track, Call not yet connected');
+    }
+
+    return Result.success(None());
+  }
+
   Future<Result<None>> _onSetMicrophoneEnabled(bool enabled) async {
     final track = await rtcManager?.setMicrophoneEnabled(enabled: enabled);
     if (track == null) {
@@ -443,11 +466,35 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     return Result.success(None());
   }
 
+  Future<Result<None>> _onSetMicrophoneTrack(RtcLocalAudioTrack track) async {
+    final result = await rtcManager?.publishAudioTrack(track: track);
+    if (result == null) {
+      return Result.error(
+        'Unable to set microphone track, Call not yet connected',
+      );
+    }
+
+    return Result.success(None());
+  }
+
   Future<Result<None>> _onSetScreenShareEnabled(bool enabled) async {
     final track = await rtcManager?.setScreenShareEnabled(enabled: enabled);
     if (track == null) {
       return Result.error(
         'Unable to enable/disable screen-share, Track not found',
+      );
+    }
+
+    return Result.success(None());
+  }
+
+  Future<Result<None>> _onSetScreenShareTrack(
+    RtcLocalScreenShareTrack track,
+  ) async {
+    final result = await rtcManager?.publishVideoTrack(track: track);
+    if (result == null) {
+      return Result.error(
+        'Unable to set screen-share track, Call not yet connected',
       );
     }
 

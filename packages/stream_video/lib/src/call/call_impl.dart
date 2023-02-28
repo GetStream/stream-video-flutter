@@ -9,7 +9,6 @@ import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../utils/none.dart';
-import 'call_settings.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 
@@ -183,7 +182,7 @@ class CallImpl implements Call {
 
   @override
   Future<Result<None>> connect({
-    CallConnectOptions settings = const CallConnectOptions(),
+    CallConnectOptions options = const CallConnectOptions(),
   }) async {
     if (_status.value == _ConnectionStatus.connected) {
       _logger.w(() => '[connect] rejected (connected)');
@@ -193,7 +192,7 @@ class CallImpl implements Call {
       _logger.v(() => '[connect] await "connecting" change');
       final status = await _status.firstWhere(
         (it) => it != _ConnectionStatus.connecting,
-        timeLimit: settings.dropTimeout,
+        timeLimit: options.dropTimeout,
       );
       if (status == _ConnectionStatus.connected) {
         return Result.success(None());
@@ -205,7 +204,7 @@ class CallImpl implements Call {
     Call.activeCall = this;
     Call.onActiveCall?.call(this);
     _status.value = _ConnectionStatus.connecting;
-    final result = await _connect(settings);
+    final result = await _connect(options);
     if (result.isSuccess) {
       _status.value = _ConnectionStatus.connected;
     } else {
@@ -214,8 +213,8 @@ class CallImpl implements Call {
     return result;
   }
 
-  Future<Result<None>> _connect(CallConnectOptions settings) async {
-    _logger.d(() => '[connect] settings: $settings');
+  Future<Result<None>> _connect(CallConnectOptions options) async {
+    _logger.d(() => '[connect] options: $options');
     final validation = await _stateManager.validateUserId(_streamVideo);
     if (validation.isFailure) {
       _logger.w(() => '[connect] rejected (validation): $validation');
@@ -231,10 +230,10 @@ class CallImpl implements Call {
       return Result.error('invalid status: $status');
     }
 
-    final result = await _awaitIfNeeded(settings.dropTimeout);
+    final result = await _awaitIfNeeded(options.dropTimeout);
     if (result.isFailure) {
       _logger.e(() => '[connect] waiting failed: $result');
-      await _stateManager.onWaitingTimeout(settings.dropTimeout);
+      await _stateManager.onWaitingTimeout(options.dropTimeout);
       return result;
     }
 
@@ -255,7 +254,7 @@ class CallImpl implements Call {
     }
     _logger.v(() => '[connect] started session');
     await _stateManager.onConnected();
-    await _applySettings(settings);
+    await _applyConnectOptions(options);
 
     _logger.v(() => '[connect] completed');
     return Result.success(None());
@@ -372,15 +371,32 @@ class CallImpl implements Call {
     return result;
   }
 
-  Future<void> _applySettings(CallConnectOptions settings) async {
-    if (settings.cameraEnabled) {
-      await apply(const SetCameraEnabled(enabled: true));
+  Future<void> _applyConnectOptions(CallConnectOptions options) async {
+    if (options.camera.enabled) {
+      final cameraTrack = options.camera.track;
+      if (cameraTrack != null) {
+        await apply(SetCameraTrack(cameraTrack));
+      } else {
+        await apply(const SetCameraEnabled(enabled: true));
+      }
     }
-    if (settings.microphoneEnabled) {
-      await apply(const SetMicrophoneEnabled(enabled: true));
+
+    if (options.microphone.enabled) {
+      final microphoneTrack = options.microphone.track;
+      if (microphoneTrack != null) {
+        await apply(SetMicrophoneTrack(microphoneTrack));
+      } else {
+        await apply(const SetMicrophoneEnabled(enabled: true));
+      }
     }
-    if (settings.screenShareEnabled) {
-      await apply(const SetScreenShareEnabled(enabled: true));
+
+    if (options.screenShare.enabled) {
+      final screenShareTrack = options.screenShare.track;
+      if (screenShareTrack != null) {
+        await apply(SetScreenShareTrack(screenShareTrack));
+      } else {
+        await apply(const SetScreenShareEnabled(enabled: true));
+      }
     }
   }
 

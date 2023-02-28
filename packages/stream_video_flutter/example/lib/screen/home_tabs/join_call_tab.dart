@@ -10,7 +10,7 @@ class JoinCallTab extends StatefulWidget {
     required this.onNavigateToCall,
   });
 
-  final void Function(Call call) onNavigateToCall;
+  final void Function(Call call, {CallConnectOptions options}) onNavigateToCall;
 
   @override
   State<JoinCallTab> createState() => _JoinCallTabState();
@@ -85,9 +85,9 @@ class _JoinCallTabState extends State<JoinCallTab> {
       MaterialPageRoute(
         builder: (context) => StreamLobbyView(
           call: call,
-          onJoinCallTap: () {
+          onJoinCallPressed: (options) {
             Navigator.of(context).pop();
-            widget.onNavigateToCall(call);
+            widget.onNavigateToCall(call, options: options);
           },
         ),
       ),

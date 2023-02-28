@@ -15,6 +15,7 @@ class StreamCallContainer extends StatefulWidget {
   const StreamCallContainer({
     super.key,
     required this.call,
+    this.callConnectOptions = const CallConnectOptions(),
     required this.onBackPressed,
     required this.onLeaveCall,
     this.participantsInfoWidgetBuilder,
@@ -23,6 +24,9 @@ class StreamCallContainer extends StatefulWidget {
 
   /// Represents a call.
   final Call call;
+
+  /// Options used while connecting to the call.
+  final CallConnectOptions callConnectOptions;
 
   /// The action to perform when the back button is pressed.
   final VoidCallback onBackPressed;
@@ -120,7 +124,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
 
   Future<void> _start() async {
     try {
-      final result = await call.connect();
+      final result = await call.connect(options: widget.callConnectOptions);
       if (result.isFailure) {
         await _onCancelCall();
       }

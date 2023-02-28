@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../webrtc/media/constraints/camera_position.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
+import '../webrtc/rtc_track/rtc_local_track.dart';
 import 'action.dart';
 
 abstract class CallControlAction extends StreamAction with EquatableMixin {
@@ -59,6 +60,15 @@ class SetCameraEnabled extends SessionControlAction {
   List<Object?> get props => [enabled];
 }
 
+// TODO: Maybe rename to PublishCameraTrack?
+class SetCameraTrack extends SessionControlAction {
+  const SetCameraTrack(this.track);
+  final RtcLocalCameraTrack track;
+
+  @override
+  List<Object?> get props => [track];
+}
+
 class SetMicrophoneEnabled extends SessionControlAction {
   const SetMicrophoneEnabled({required this.enabled});
   final bool enabled;
@@ -67,12 +77,28 @@ class SetMicrophoneEnabled extends SessionControlAction {
   List<Object?> get props => [enabled];
 }
 
+class SetMicrophoneTrack extends SessionControlAction {
+  const SetMicrophoneTrack(this.track);
+  final RtcLocalAudioTrack track;
+
+  @override
+  List<Object?> get props => [track];
+}
+
 class SetScreenShareEnabled extends SessionControlAction {
   const SetScreenShareEnabled({required this.enabled});
   final bool enabled;
 
   @override
   List<Object?> get props => [enabled];
+}
+
+class SetScreenShareTrack extends SessionControlAction {
+  const SetScreenShareTrack(this.track);
+  final RtcLocalScreenShareTrack track;
+
+  @override
+  List<Object?> get props => [track];
 }
 
 class SetSubscription extends SessionControlAction {

@@ -1,5 +1,4 @@
 import '../../stream_video.dart';
-import '../models/call_track_state.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-Control');
 
@@ -18,10 +17,16 @@ class CallControlReducer {
       return _reduceCallCancelled(state, action);
     } else if (action is SetCameraEnabled) {
       return _reduceCameraEnabled(state, action);
+    } else if (action is SetCameraTrack) {
+      return _reduceSetCameraTrack(state, action);
     } else if (action is SetMicrophoneEnabled) {
       return _reduceMicrophoneEnabled(state, action);
+    } else if (action is SetMicrophoneTrack) {
+      return _reduceSetMicrophoneTrack(state, action);
     } else if (action is SetScreenShareEnabled) {
       return _reduceScreenShareEnabled(state, action);
+    } else if (action is SetScreenShareTrack) {
+      return _reduceSetScreenShareTrack(state, action);
     } else if (action is FlipCamera) {
       return _reduceFlipCamera(state, action);
     } else if (action is SetCameraDeviceId) {
@@ -238,6 +243,13 @@ class CallControlReducer {
     return _toggleTrackType(state, SfuTrackType.video, action.enabled);
   }
 
+  CallState _reduceSetCameraTrack(
+    CallState state,
+    SetCameraTrack action,
+  ) {
+    return _toggleTrackType(state, SfuTrackType.video, true);
+  }
+
   CallState _reduceMicrophoneEnabled(
     CallState state,
     SetMicrophoneEnabled action,
@@ -245,11 +257,25 @@ class CallControlReducer {
     return _toggleTrackType(state, SfuTrackType.audio, action.enabled);
   }
 
+  CallState _reduceSetMicrophoneTrack(
+    CallState state,
+    SetMicrophoneTrack action,
+  ) {
+    return _toggleTrackType(state, SfuTrackType.audio, true);
+  }
+
   CallState _reduceScreenShareEnabled(
     CallState state,
     SetScreenShareEnabled action,
   ) {
     return _toggleTrackType(state, SfuTrackType.screenShare, action.enabled);
+  }
+
+  CallState _reduceSetScreenShareTrack(
+    CallState state,
+    SetScreenShareTrack action,
+  ) {
+    return _toggleTrackType(state, SfuTrackType.screenShare, true);
   }
 
   CallState _toggleTrackType(
