@@ -23,15 +23,18 @@ class LeaveCallOption extends StatelessWidget {
       icon: const Icon(Icons.call_rounded),
       iconColor: Colors.white,
       backgroundColor: Colors.red,
-      onPressed: () {
-        call.disconnect();
-
-        if (onLeaveCallTap != null) {
-          onLeaveCallTap!();
-        } else {
-          Navigator.maybePop(context);
-        }
-      },
+      onPressed: () => _onLeaveCallTap(context),
     );
+  }
+
+  Future<void> _onLeaveCallTap(BuildContext context) async {
+    if (onLeaveCallTap != null) {
+      onLeaveCallTap!();
+    } else {
+      await call.apply(const CancelCall());
+      await call.disconnect();
+
+      await Navigator.maybePop(context);
+    }
   }
 }
