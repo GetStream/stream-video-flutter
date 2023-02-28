@@ -23,13 +23,6 @@ typedef CallControlsBuilder = Widget Function(
   CallState callState,
 );
 
-/// Builder used to create a custom participants info widget.
-typedef CallParticipantsInfoBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
-
 /// Represents the UI in an active call that shows participants and their video,
 /// as well as some extra UI features to control the call settings, browse
 /// participants and more.
@@ -95,6 +88,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
               call: call,
               onBackPressed: widget.onBackPressed,
               onParticipantsInfoTap: widget.onParticipantsInfoTap,
+              participantsInfoBuilder: widget.participantsInfoBuilder,
             ),
         body: widget.callParticipantsBuilder?.call(context, call, callState) ??
             StreamCallParticipants(
@@ -151,7 +145,13 @@ class _ConnectingCallContent extends StatelessWidget {
             Icons.arrow_back,
             color: theme.colorTheme.textHighEmphasis,
           ),
-          onPressed: onBackPressed,
+          onPressed: () {
+            if (onBackPressed != null) {
+              onBackPressed!();
+            } else {
+              Navigator.maybePop(context);
+            }
+          },
         ),
         backgroundColor: theme.colorTheme.barsBg,
         centerTitle: false,

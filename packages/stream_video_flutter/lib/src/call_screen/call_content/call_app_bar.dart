@@ -2,6 +2,12 @@ import 'package:flutter/material.dart' hide ConnectionState;
 
 import '../../../stream_video_flutter.dart';
 
+/// Builder used to create a custom participants info widget.
+typedef CallParticipantsInfoBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+);
+
 /// Widget that represents the default app bar that's shown in calls.
 class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a new instance of [CallAppBar].
@@ -107,7 +113,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
       Navigator.of(context).push(
         MaterialPageRoute<Widget>(
           builder: (context) =>
-              participantsInfoBuilder?.call(context, call, call.state.value) ??
+              participantsInfoBuilder?.call(context, call) ??
               StreamCallParticipantsInfoMenu(
                 call: call,
                 usersProvider: usersProvider,
