@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 import '../stream_video.dart';
+import 'call_permission.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'internal/_instance_holder.dart';
 import 'models/call_device.dart';
@@ -128,15 +129,19 @@ abstract class StreamVideo {
 
   Future<Result<None>> requestPermissions({
     required StreamCallCid callCid,
-    required List<String> permissions,
+    required List<CallPermission> permissions,
   });
 
   Future<Result<None>> updateUserPermissions({
     required StreamCallCid callCid,
     required String userId,
-    List<String> grantPermissions = const [],
-    List<String> revokePermissions = const [],
+    List<CallPermission> grantPermissions = const [],
+    List<CallPermission> revokePermissions = const [],
   });
+
+  Future<Result<None>> startRecording(StreamCallCid callCid);
+
+  Future<Result<None>> stopRecording(StreamCallCid callCid);
 
   Future<Result<CallDevice>> createDevice({
     required String token,
@@ -223,7 +228,7 @@ extension StreamVideoX on StreamVideo {
   Future<Result<None>> grantUserPermissions({
     required StreamCallCid callCid,
     required String userId,
-    required List<String> permissions,
+    required List<CallPermission> permissions,
   }) {
     return updateUserPermissions(
       callCid: callCid,
@@ -236,7 +241,7 @@ extension StreamVideoX on StreamVideo {
   Future<Result<None>> revokeUserPermissions({
     required StreamCallCid callCid,
     required String userId,
-    required List<String> permissions,
+    required List<CallPermission> permissions,
   }) {
     return updateUserPermissions(
       callCid: callCid,

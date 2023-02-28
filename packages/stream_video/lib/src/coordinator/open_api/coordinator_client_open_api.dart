@@ -321,7 +321,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         input.callCid.type,
         input.callCid.id,
         open.RequestPermissionRequest(
-          permissions: input.permissions,
+          permissions: [...input.permissions.map((e) => e.alias)],
         ),
       );
       if (result == null) {
@@ -343,13 +343,33 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         input.callCid.id,
         open.UpdateUserPermissionsRequest(
           userId: input.userId,
-          grantPermissions: input.grantPermissions,
-          revokePermissions: input.revokePermissions,
+          grantPermissions: [...input.grantPermissions.map((e) => e.alias)],
+          revokePermissions: [...input.revokePermissions.map((e) => e.alias)],
         ),
       );
       if (result == null) {
         return Result.error('message');
       }
+      return Result.success(None());
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  Future<Result<None>> startRecording(StreamCallCid callCid) async {
+    try {
+      await defaultApi.startRecording(callCid.type, callCid.id);
+      return Result.success(None());
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  Future<Result<None>> stopRecording(StreamCallCid callCid) async {
+    try {
+      await defaultApi.stopRecording(callCid.type, callCid.id);
       return Result.success(None());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));

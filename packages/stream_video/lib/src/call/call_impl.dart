@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../../stream_video.dart';
+import '../call_permission.dart';
 import '../call_state_manager.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../errors/video_error_composer.dart';
@@ -419,18 +420,18 @@ class CallImpl implements Call {
   }
 
   @override
-  bool canRequestPermission(String permission) {
+  bool canRequestPermission(CallPermission permission) {
     final settings = state.valueOrNull?.settings;
     if (settings == null) {
       _logger.w(() => 'canRequestPermission: no settings');
       return false;
     }
 
-    if (permission == Permission.sendAudio) {
+    if (permission == CallPermission.sendAudio) {
       return settings.audio.accessRequestEnabled;
-    } else if (permission == Permission.sendVideo) {
+    } else if (permission == CallPermission.sendVideo) {
       return settings.video.accessRequestEnabled;
-    } else if (permission == Permission.screenshare) {
+    } else if (permission == CallPermission.screenshare) {
       return settings.screenShare.accessRequestEnabled;
     }
 
@@ -439,7 +440,9 @@ class CallImpl implements Call {
   }
 
   @override
-  Future<Result<None>> requestPermissions(List<String> permissions) async {
+  Future<Result<None>> requestPermissions(
+    List<CallPermission> permissions,
+  ) async {
     final canRequest = permissions.every(canRequestPermission);
     if (!canRequest) {
       return Result.error(
@@ -461,14 +464,14 @@ class CallImpl implements Call {
       return false;
     }
 
-    return capabilities.contains('update-call-permissions');
+    return capabilities.contains(CallPermission.updateCallPermissions);
   }
 
   @override
   Future<Result<None>> updateUserPermissions({
     required String userId,
-    List<String> grantPermissions = const [],
-    List<String> revokePermissions = const [],
+    List<CallPermission> grantPermissions = const [],
+    List<CallPermission> revokePermissions = const [],
   }) async {
     final canUpdate = canUpdateUserPermissions();
     if (!canUpdate) {
@@ -483,6 +486,30 @@ class CallImpl implements Call {
       grantPermissions: grantPermissions,
       revokePermissions: revokePermissions,
     );
+  }
+
+  @override
+  Future<Result<None>> startRecording() async {
+    final capabilities = state.valueOrNull?.ownCapabilities;
+    final canRecord = capabilities?.contains(CallPermission.startRecordCall);
+
+    if (canRecord == null || !canRecord) {
+      return Result.error('Cannot start recording (no permission)');
+    }
+
+    return _streamVideo.startRecording(callCid);
+  }
+
+  @override
+  Future<Result<None>> stopRecording() async {
+    final capabilities = state.valueOrNull?.ownCapabilities;
+    final canStopRecord = capabilities?.contains(CallPermission.stopRecordCall);
+
+    if (canStopRecord == null || !canStopRecord) {
+      return Result.error('Cannot stop recording (no permission)');
+    }
+
+    return _streamVideo.stopRecording(callCid);
   }
 }
 
@@ -518,10 +545,4 @@ enum _ConnectionStatus {
   disconnected,
   connecting,
   connected;
-}
-
-mixin Permission {
-  static const sendAudio = 'send-audio';
-  static const sendVideo = 'send-video';
-  static const screenshare = 'screenshare';
 }
