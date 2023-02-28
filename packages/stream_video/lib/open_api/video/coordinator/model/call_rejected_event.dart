@@ -10,65 +10,54 @@
 
 part of openapi.api;
 
-class HealthCheck {
-  /// Returns a new [HealthCheck] instance.
-  HealthCheck({
-    required this.cid,
+class CallRejectedEvent {
+  /// Returns a new [CallRejectedEvent] instance.
+  CallRejectedEvent({
+    required this.callCid,
     required this.createdAt,
-    this.me,
     required this.type,
+    required this.user,
   });
 
-  /// The unique identifier for a call (<type>:<id>)
-  String cid;
+  String callCid;
 
   DateTime createdAt;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  OwnUserResponse? me;
-
   String type;
 
+  UserResponse user;
+
   @override
-  bool operator ==(Object other) => identical(this, other) || other is HealthCheck &&
-     other.cid == cid &&
+  bool operator ==(Object other) => identical(this, other) || other is CallRejectedEvent &&
+     other.callCid == callCid &&
      other.createdAt == createdAt &&
-     other.me == me &&
-     other.type == type;
+     other.type == type &&
+     other.user == user;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (cid.hashCode) +
+    (callCid.hashCode) +
     (createdAt.hashCode) +
-    (me == null ? 0 : me!.hashCode) +
-    (type.hashCode);
+    (type.hashCode) +
+    (user.hashCode);
 
   @override
-  String toString() => 'HealthCheck[cid=$cid, createdAt=$createdAt, me=$me, type=$type]';
+  String toString() => 'CallRejectedEvent[callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'cid'] = this.cid;
+      json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    if (this.me != null) {
-      json[r'me'] = this.me;
-    } else {
-      json[r'me'] = null;
-    }
       json[r'type'] = this.type;
+      json[r'user'] = this.user;
     return json;
   }
 
-  /// Returns a new [HealthCheck] instance and imports its values from
+  /// Returns a new [CallRejectedEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static HealthCheck? fromJson(dynamic value) {
+  static CallRejectedEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -77,27 +66,27 @@ class HealthCheck {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "HealthCheck[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "HealthCheck[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "CallRejectedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "CallRejectedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return HealthCheck(
-        cid: mapValueOfType<String>(json, r'cid')!,
+      return CallRejectedEvent(
+        callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
-        me: OwnUserResponse.fromJson(json[r'me']),
         type: mapValueOfType<String>(json, r'type')!,
+        user: UserResponse.fromJson(json[r'user'])!,
       );
     }
     return null;
   }
 
-  static List<HealthCheck>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <HealthCheck>[];
+  static List<CallRejectedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <CallRejectedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = HealthCheck.fromJson(row);
+        final value = CallRejectedEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -106,12 +95,12 @@ class HealthCheck {
     return result.toList(growable: growable);
   }
 
-  static Map<String, HealthCheck> mapFromJson(dynamic json) {
-    final map = <String, HealthCheck>{};
+  static Map<String, CallRejectedEvent> mapFromJson(dynamic json) {
+    final map = <String, CallRejectedEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = HealthCheck.fromJson(entry.value);
+        final value = CallRejectedEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -120,13 +109,13 @@ class HealthCheck {
     return map;
   }
 
-  // maps a json object with a list of HealthCheck-objects as value to a dart map
-  static Map<String, List<HealthCheck>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<HealthCheck>>{};
+  // maps a json object with a list of CallRejectedEvent-objects as value to a dart map
+  static Map<String, List<CallRejectedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<CallRejectedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = HealthCheck.listFromJson(entry.value, growable: growable,);
+        final value = CallRejectedEvent.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -137,9 +126,10 @@ class HealthCheck {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'cid',
+    'call_cid',
     'created_at',
     'type',
+    'user',
   };
 }
 

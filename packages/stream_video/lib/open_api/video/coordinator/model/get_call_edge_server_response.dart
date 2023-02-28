@@ -13,12 +13,15 @@ part of openapi.api;
 class GetCallEdgeServerResponse {
   /// Returns a new [GetCallEdgeServerResponse] instance.
   GetCallEdgeServerResponse({
+    this.blockedUsers = const [],
     required this.call,
     required this.credentials,
     required this.duration,
     this.members = const [],
     this.membership,
   });
+
+  List<UserResponse> blockedUsers;
 
   CallResponse call;
 
@@ -39,6 +42,7 @@ class GetCallEdgeServerResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is GetCallEdgeServerResponse &&
+     other.blockedUsers == blockedUsers &&
      other.call == call &&
      other.credentials == credentials &&
      other.duration == duration &&
@@ -48,6 +52,7 @@ class GetCallEdgeServerResponse {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (blockedUsers.hashCode) +
     (call.hashCode) +
     (credentials.hashCode) +
     (duration.hashCode) +
@@ -55,10 +60,11 @@ class GetCallEdgeServerResponse {
     (membership == null ? 0 : membership!.hashCode);
 
   @override
-  String toString() => 'GetCallEdgeServerResponse[call=$call, credentials=$credentials, duration=$duration, members=$members, membership=$membership]';
+  String toString() => 'GetCallEdgeServerResponse[blockedUsers=$blockedUsers, call=$call, credentials=$credentials, duration=$duration, members=$members, membership=$membership]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'blocked_users'] = this.blockedUsers;
       json[r'call'] = this.call;
       json[r'credentials'] = this.credentials;
       json[r'duration'] = this.duration;
@@ -90,6 +96,7 @@ class GetCallEdgeServerResponse {
       }());
 
       return GetCallEdgeServerResponse(
+        blockedUsers: UserResponse.listFromJson(json[r'blocked_users'])!,
         call: CallResponse.fromJson(json[r'call'])!,
         credentials: Credentials.fromJson(json[r'credentials'])!,
         duration: mapValueOfType<String>(json, r'duration')!,
@@ -144,6 +151,7 @@ class GetCallEdgeServerResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'blocked_users',
     'call',
     'credentials',
     'duration',

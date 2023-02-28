@@ -10,11 +10,12 @@
 
 part of openapi.api;
 
-class CallRejected {
-  /// Returns a new [CallRejected] instance.
-  CallRejected({
+class CustomVideoEvent {
+  /// Returns a new [CustomVideoEvent] instance.
+  CustomVideoEvent({
     required this.callCid,
     required this.createdAt,
+    this.custom = const {},
     required this.type,
     required this.user,
   });
@@ -23,14 +24,18 @@ class CallRejected {
 
   DateTime createdAt;
 
+  /// Custom data for this object
+  Map<String, Object> custom;
+
   String type;
 
   UserResponse user;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallRejected &&
+  bool operator ==(Object other) => identical(this, other) || other is CustomVideoEvent &&
      other.callCid == callCid &&
      other.createdAt == createdAt &&
+     other.custom == custom &&
      other.type == type &&
      other.user == user;
 
@@ -39,25 +44,27 @@ class CallRejected {
     // ignore: unnecessary_parenthesis
     (callCid.hashCode) +
     (createdAt.hashCode) +
+    (custom.hashCode) +
     (type.hashCode) +
     (user.hashCode);
 
   @override
-  String toString() => 'CallRejected[callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
+  String toString() => 'CustomVideoEvent[callCid=$callCid, createdAt=$createdAt, custom=$custom, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+      json[r'custom'] = this.custom;
       json[r'type'] = this.type;
       json[r'user'] = this.user;
     return json;
   }
 
-  /// Returns a new [CallRejected] instance and imports its values from
+  /// Returns a new [CustomVideoEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static CallRejected? fromJson(dynamic value) {
+  static CustomVideoEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -66,15 +73,16 @@ class CallRejected {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallRejected[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallRejected[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "CustomVideoEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "CustomVideoEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return CallRejected(
+      return CustomVideoEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
+        custom: mapCastOfType<String, Object>(json, r'custom')!,
         type: mapValueOfType<String>(json, r'type')!,
         user: UserResponse.fromJson(json[r'user'])!,
       );
@@ -82,11 +90,11 @@ class CallRejected {
     return null;
   }
 
-  static List<CallRejected>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <CallRejected>[];
+  static List<CustomVideoEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <CustomVideoEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CallRejected.fromJson(row);
+        final value = CustomVideoEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -95,12 +103,12 @@ class CallRejected {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallRejected> mapFromJson(dynamic json) {
-    final map = <String, CallRejected>{};
+  static Map<String, CustomVideoEvent> mapFromJson(dynamic json) {
+    final map = <String, CustomVideoEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallRejected.fromJson(entry.value);
+        final value = CustomVideoEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -109,13 +117,13 @@ class CallRejected {
     return map;
   }
 
-  // maps a json object with a list of CallRejected-objects as value to a dart map
-  static Map<String, List<CallRejected>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<CallRejected>>{};
+  // maps a json object with a list of CustomVideoEvent-objects as value to a dart map
+  static Map<String, List<CustomVideoEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<CustomVideoEvent>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallRejected.listFromJson(entry.value, growable: growable,);
+        final value = CustomVideoEvent.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -128,6 +136,7 @@ class CallRejected {
   static const requiredKeys = <String>{
     'call_cid',
     'created_at',
+    'custom',
     'type',
     'user',
   };

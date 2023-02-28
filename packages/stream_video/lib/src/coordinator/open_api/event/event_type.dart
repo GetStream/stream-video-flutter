@@ -8,6 +8,8 @@ enum EventType {
   callEnded('call.ended'),
   callPermissionRequest('call.permission_request'),
   callPermissionsUpdated('call.permissions_updated'),
+  callUserBlocked('call.blocked_user'),
+  callUserUnblocked('call.unblocked_user'),
   callRecordingStarted('call.recording_started'),
   callRecordingStopped('call.recording_stopped'),
   custom('custom'),

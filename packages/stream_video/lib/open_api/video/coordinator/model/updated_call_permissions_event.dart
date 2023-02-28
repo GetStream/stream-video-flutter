@@ -10,48 +10,61 @@
 
 part of openapi.api;
 
-class CallRecordingStopped {
-  /// Returns a new [CallRecordingStopped] instance.
-  CallRecordingStopped({
+class UpdatedCallPermissionsEvent {
+  /// Returns a new [UpdatedCallPermissionsEvent] instance.
+  UpdatedCallPermissionsEvent({
     required this.callCid,
     required this.createdAt,
+    this.ownCapabilities = const [],
     required this.type,
+    required this.user,
   });
 
   String callCid;
 
   DateTime createdAt;
 
+  /// The updated list of capabilities the user has in the call
+  List<String> ownCapabilities;
+
   String type;
 
+  UserResponse user;
+
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallRecordingStopped &&
+  bool operator ==(Object other) => identical(this, other) || other is UpdatedCallPermissionsEvent &&
      other.callCid == callCid &&
      other.createdAt == createdAt &&
-     other.type == type;
+     other.ownCapabilities == ownCapabilities &&
+     other.type == type &&
+     other.user == user;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (callCid.hashCode) +
     (createdAt.hashCode) +
-    (type.hashCode);
+    (ownCapabilities.hashCode) +
+    (type.hashCode) +
+    (user.hashCode);
 
   @override
-  String toString() => 'CallRecordingStopped[callCid=$callCid, createdAt=$createdAt, type=$type]';
+  String toString() => 'UpdatedCallPermissionsEvent[callCid=$callCid, createdAt=$createdAt, ownCapabilities=$ownCapabilities, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+      json[r'own_capabilities'] = this.ownCapabilities;
       json[r'type'] = this.type;
+      json[r'user'] = this.user;
     return json;
   }
 
-  /// Returns a new [CallRecordingStopped] instance and imports its values from
+  /// Returns a new [UpdatedCallPermissionsEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static CallRecordingStopped? fromJson(dynamic value) {
+  static UpdatedCallPermissionsEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -60,26 +73,30 @@ class CallRecordingStopped {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallRecordingStopped[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallRecordingStopped[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "UpdatedCallPermissionsEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "UpdatedCallPermissionsEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return CallRecordingStopped(
+      return UpdatedCallPermissionsEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
+        ownCapabilities: json[r'own_capabilities'] is List
+            ? (json[r'own_capabilities'] as List).cast<String>()
+            : const [],
         type: mapValueOfType<String>(json, r'type')!,
+        user: UserResponse.fromJson(json[r'user'])!,
       );
     }
     return null;
   }
 
-  static List<CallRecordingStopped>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <CallRecordingStopped>[];
+  static List<UpdatedCallPermissionsEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <UpdatedCallPermissionsEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CallRecordingStopped.fromJson(row);
+        final value = UpdatedCallPermissionsEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -88,12 +105,12 @@ class CallRecordingStopped {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallRecordingStopped> mapFromJson(dynamic json) {
-    final map = <String, CallRecordingStopped>{};
+  static Map<String, UpdatedCallPermissionsEvent> mapFromJson(dynamic json) {
+    final map = <String, UpdatedCallPermissionsEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallRecordingStopped.fromJson(entry.value);
+        final value = UpdatedCallPermissionsEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -102,13 +119,13 @@ class CallRecordingStopped {
     return map;
   }
 
-  // maps a json object with a list of CallRecordingStopped-objects as value to a dart map
-  static Map<String, List<CallRecordingStopped>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<CallRecordingStopped>>{};
+  // maps a json object with a list of UpdatedCallPermissionsEvent-objects as value to a dart map
+  static Map<String, List<UpdatedCallPermissionsEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<UpdatedCallPermissionsEvent>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallRecordingStopped.listFromJson(entry.value, growable: growable,);
+        final value = UpdatedCallPermissionsEvent.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -121,7 +138,9 @@ class CallRecordingStopped {
   static const requiredKeys = <String>{
     'call_cid',
     'created_at',
+    'own_capabilities',
     'type',
+    'user',
   };
 }
 

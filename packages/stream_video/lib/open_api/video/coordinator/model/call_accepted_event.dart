@@ -10,60 +10,54 @@
 
 part of openapi.api;
 
-class CallCreated {
-  /// Returns a new [CallCreated] instance.
-  CallCreated({
-    required this.call,
+class CallAcceptedEvent {
+  /// Returns a new [CallAcceptedEvent] instance.
+  CallAcceptedEvent({
+    required this.callCid,
     required this.createdAt,
-    this.members = const [],
-    required this.ringing,
     required this.type,
+    required this.user,
   });
 
-  CallResponse call;
+  String callCid;
 
   DateTime createdAt;
 
-  List<MemberResponse> members;
-
-  bool ringing;
-
   String type;
 
+  UserResponse user;
+
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallCreated &&
-     other.call == call &&
+  bool operator ==(Object other) => identical(this, other) || other is CallAcceptedEvent &&
+     other.callCid == callCid &&
      other.createdAt == createdAt &&
-     other.members == members &&
-     other.ringing == ringing &&
-     other.type == type;
+     other.type == type &&
+     other.user == user;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (call.hashCode) +
+    (callCid.hashCode) +
     (createdAt.hashCode) +
-    (members.hashCode) +
-    (ringing.hashCode) +
-    (type.hashCode);
+    (type.hashCode) +
+    (user.hashCode);
 
   @override
-  String toString() => 'CallCreated[call=$call, createdAt=$createdAt, members=$members, ringing=$ringing, type=$type]';
+  String toString() => 'CallAcceptedEvent[callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call'] = this.call;
+      json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'members'] = this.members;
-      json[r'ringing'] = this.ringing;
       json[r'type'] = this.type;
+      json[r'user'] = this.user;
     return json;
   }
 
-  /// Returns a new [CallCreated] instance and imports its values from
+  /// Returns a new [CallAcceptedEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static CallCreated? fromJson(dynamic value) {
+  static CallAcceptedEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -72,28 +66,27 @@ class CallCreated {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallCreated[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallCreated[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "CallAcceptedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "CallAcceptedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return CallCreated(
-        call: CallResponse.fromJson(json[r'call'])!,
+      return CallAcceptedEvent(
+        callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
-        members: MemberResponse.listFromJson(json[r'members'])!,
-        ringing: mapValueOfType<bool>(json, r'ringing')!,
         type: mapValueOfType<String>(json, r'type')!,
+        user: UserResponse.fromJson(json[r'user'])!,
       );
     }
     return null;
   }
 
-  static List<CallCreated>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <CallCreated>[];
+  static List<CallAcceptedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <CallAcceptedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CallCreated.fromJson(row);
+        final value = CallAcceptedEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -102,12 +95,12 @@ class CallCreated {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallCreated> mapFromJson(dynamic json) {
-    final map = <String, CallCreated>{};
+  static Map<String, CallAcceptedEvent> mapFromJson(dynamic json) {
+    final map = <String, CallAcceptedEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallCreated.fromJson(entry.value);
+        final value = CallAcceptedEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -116,13 +109,13 @@ class CallCreated {
     return map;
   }
 
-  // maps a json object with a list of CallCreated-objects as value to a dart map
-  static Map<String, List<CallCreated>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<CallCreated>>{};
+  // maps a json object with a list of CallAcceptedEvent-objects as value to a dart map
+  static Map<String, List<CallAcceptedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<CallAcceptedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallCreated.listFromJson(entry.value, growable: growable,);
+        final value = CallAcceptedEvent.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -133,11 +126,10 @@ class CallCreated {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'call',
+    'call_cid',
     'created_at',
-    'members',
-    'ringing',
     'type',
+    'user',
   };
 }
 
