@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 import '../stream_video.dart';
+import 'call_permission.dart';
 import 'coordinator/coordinator_client.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/models/coordinator_inputs.dart' as input;
@@ -424,7 +425,7 @@ class StreamVideoImpl implements StreamVideo {
   @override
   Future<Result<None>> requestPermissions({
     required StreamCallCid callCid,
-    required List<String> permissions,
+    required List<CallPermission> permissions,
   }) async {
     final result = await _client.requestPermissions(
       input.RequestPermissionsInput(
@@ -440,8 +441,8 @@ class StreamVideoImpl implements StreamVideo {
   Future<Result<None>> updateUserPermissions({
     required StreamCallCid callCid,
     required String userId,
-    List<String> grantPermissions = const [],
-    List<String> revokePermissions = const [],
+    List<CallPermission> grantPermissions = const [],
+    List<CallPermission> revokePermissions = const [],
   }) async {
     final result = await _client.updateUserPermissions(
       input.UpdateUserPermissionsInput(
@@ -453,6 +454,16 @@ class StreamVideoImpl implements StreamVideo {
     );
 
     return result;
+  }
+
+  @override
+  Future<Result<None>> startRecording(StreamCallCid callCid) async {
+    return _client.startRecording(callCid);
+  }
+
+  @override
+  Future<Result<None>> stopRecording(StreamCallCid callCid) {
+    return _client.stopRecording(callCid);
   }
 
   @override
@@ -479,8 +490,9 @@ class StreamVideoImpl implements StreamVideo {
   }
 
   Future<void> _initPushNotificationManager(
-      PushNotificationFactory pushNotificationManagerFactrory) async {
-    _pushNotificationManager = await pushNotificationManagerFactrory(this);
+    PushNotificationFactory pushNotificationManagerFactory,
+  ) async {
+    _pushNotificationManager = await pushNotificationManagerFactory(this);
   }
 }
 

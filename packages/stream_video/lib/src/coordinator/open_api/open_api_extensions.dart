@@ -1,4 +1,5 @@
 import '../../../../open_api/video/coordinator/api.dart' as open;
+import '../../call_permission.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_credentials.dart';
 import '../../models/call_metadata.dart';
@@ -66,7 +67,7 @@ extension EnvelopeExt on open.CallResponse {
         members: {createdBy.id: createdBy.toCallMember(cid)},
         isBroadcastingEnabled: settings.broadcasting.enabled,
         isRecordingEnabled: settings.recording.mode.isNotEmpty,
-        ownCapabilities: ownCapabilities,
+        ownCapabilities: ownCapabilities.map(CallPermission.fromAlias),
         settings: settings.toCallSettings(),
       ),
       info: CallInfo(

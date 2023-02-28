@@ -17,7 +17,7 @@ enum EventType {
 
   factory EventType.fromAlias(dynamic alias) {
     return EventType.values.firstWhere(
-      (it) => it.alias == alias,
+      (e) => e.alias == alias,
       orElse: () => EventType.unknown,
     );
   }

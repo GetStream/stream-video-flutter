@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../../call_permission.dart';
 import '../../models/call_cid.dart';
 
 @immutable
@@ -92,7 +93,7 @@ class RequestPermissionsInput extends CoordinatorInput {
   });
 
   final StreamCallCid callCid;
-  final List<String> permissions;
+  final List<CallPermission> permissions;
 
   @override
   List<Object?> get props => [callCid, permissions];
@@ -108,8 +109,8 @@ class UpdateUserPermissionsInput extends CoordinatorInput {
 
   final StreamCallCid callCid;
   final String userId;
-  final List<String> grantPermissions;
-  final List<String> revokePermissions;
+  final List<CallPermission> grantPermissions;
+  final List<CallPermission> revokePermissions;
 
   @override
   List<Object?> get props => [
