@@ -326,7 +326,7 @@ extension PublisherRtcManager on RtcManager {
 
   Future<RtcLocalTrack<VideoConstraints>> publishVideoTrack({
     required RtcLocalTrack<VideoConstraints> track,
-    bool stopTrackOnMute = false,
+    bool stopTrackOnMute = true,
   }) async {
     // Add publisherId to the trackIdPrefix if it's a local track.
     if (track.trackIdPrefix == kLocalTrackIdPrefix) {
