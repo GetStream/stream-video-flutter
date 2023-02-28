@@ -14,6 +14,7 @@ class CallResponse {
   /// Returns a new [CallResponse] instance.
   CallResponse({
     required this.backstage,
+    this.blockedUserIds = const [],
     required this.broadcastEgress,
     required this.cid,
     required this.createdAt,
@@ -31,6 +32,8 @@ class CallResponse {
   });
 
   bool backstage;
+
+  List<String> blockedUserIds;
 
   String broadcastEgress;
 
@@ -84,6 +87,7 @@ class CallResponse {
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallResponse &&
      other.backstage == backstage &&
+     other.blockedUserIds == blockedUserIds &&
      other.broadcastEgress == broadcastEgress &&
      other.cid == cid &&
      other.createdAt == createdAt &&
@@ -103,6 +107,7 @@ class CallResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (backstage.hashCode) +
+    (blockedUserIds.hashCode) +
     (broadcastEgress.hashCode) +
     (cid.hashCode) +
     (createdAt.hashCode) +
@@ -119,11 +124,12 @@ class CallResponse {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'CallResponse[backstage=$backstage, broadcastEgress=$broadcastEgress, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, endedAt=$endedAt, id=$id, ownCapabilities=$ownCapabilities, recordEgress=$recordEgress, settings=$settings, startsAt=$startsAt, team=$team, type=$type, updatedAt=$updatedAt]';
+  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcastEgress=$broadcastEgress, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, endedAt=$endedAt, id=$id, ownCapabilities=$ownCapabilities, recordEgress=$recordEgress, settings=$settings, startsAt=$startsAt, team=$team, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'backstage'] = this.backstage;
+      json[r'blocked_user_ids'] = this.blockedUserIds;
       json[r'broadcast_egress'] = this.broadcastEgress;
       json[r'cid'] = this.cid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
@@ -169,6 +175,9 @@ class CallResponse {
 
       return CallResponse(
         backstage: mapValueOfType<bool>(json, r'backstage')!,
+        blockedUserIds: json[r'blocked_user_ids'] is List
+            ? (json[r'blocked_user_ids'] as List).cast<String>()
+            : const [],
         broadcastEgress: mapValueOfType<String>(json, r'broadcast_egress')!,
         cid: mapValueOfType<String>(json, r'cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
@@ -235,6 +244,7 @@ class CallResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'backstage',
+    'blocked_user_ids',
     'broadcast_egress',
     'cid',
     'created_at',

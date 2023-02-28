@@ -183,8 +183,8 @@ class ApiClient {
           return value is DateTime ? value : DateTime.tryParse(value);
         case 'APIError':
           return APIError.fromJson(value);
-        case 'Any':
-          return Any.fromJson(value);
+        case 'AnyEvent':
+          return AnyEvent.fromJson(value);
         case 'AudioSettings':
           return AudioSettings.fromJson(value);
         case 'BackstageSettings':
@@ -193,28 +193,24 @@ class ApiClient {
           return BlockUserRequest.fromJson(value);
         case 'BlockUserResponse':
           return BlockUserResponse.fromJson(value);
+        case 'BlockedUserEvent':
+          return BlockedUserEvent.fromJson(value);
         case 'BroadcastSettings':
           return BroadcastSettings.fromJson(value);
-        case 'CallAccepted':
-          return CallAccepted.fromJson(value);
-        case 'CallBlockedUser':
-          return CallBlockedUser.fromJson(value);
-        case 'CallCancelled':
-          return CallCancelled.fromJson(value);
-        case 'CallCreated':
-          return CallCreated.fromJson(value);
-        case 'CallEnded':
-          return CallEnded.fromJson(value);
-        case 'CallPermissionRequest':
-          return CallPermissionRequest.fromJson(value);
-        case 'CallPermissionsUpdated':
-          return CallPermissionsUpdated.fromJson(value);
-        case 'CallRecordingStarted':
-          return CallRecordingStarted.fromJson(value);
-        case 'CallRecordingStopped':
-          return CallRecordingStopped.fromJson(value);
-        case 'CallRejected':
-          return CallRejected.fromJson(value);
+        case 'CallAcceptedEvent':
+          return CallAcceptedEvent.fromJson(value);
+        case 'CallCancelledEvent':
+          return CallCancelledEvent.fromJson(value);
+        case 'CallCreatedEvent':
+          return CallCreatedEvent.fromJson(value);
+        case 'CallEndedEvent':
+          return CallEndedEvent.fromJson(value);
+        case 'CallRecordingStartedEvent':
+          return CallRecordingStartedEvent.fromJson(value);
+        case 'CallRecordingStoppedEvent':
+          return CallRecordingStoppedEvent.fromJson(value);
+        case 'CallRejectedEvent':
+          return CallRejectedEvent.fromJson(value);
         case 'CallRequest':
           return CallRequest.fromJson(value);
         case 'CallResponse':
@@ -225,16 +221,14 @@ class ApiClient {
           return CallSettingsResponse.fromJson(value);
         case 'CallStateResponseFields':
           return CallStateResponseFields.fromJson(value);
-        case 'CallUnblockedUser':
-          return CallUnblockedUser.fromJson(value);
-        case 'CallUpdated':
-          return CallUpdated.fromJson(value);
+        case 'CallUpdatedEvent':
+          return CallUpdatedEvent.fromJson(value);
         case 'Coordinates':
           return Coordinates.fromJson(value);
         case 'Credentials':
           return Credentials.fromJson(value);
-        case 'Custom':
-          return Custom.fromJson(value);
+        case 'CustomVideoEvent':
+          return CustomVideoEvent.fromJson(value);
         case 'DatacenterResponse':
           return DatacenterResponse.fromJson(value);
         case 'Device':
@@ -257,8 +251,8 @@ class ApiClient {
           return GoLiveResponse.fromJson(value);
         case 'HLSSettings':
           return HLSSettings.fromJson(value);
-        case 'HealthCheck':
-          return HealthCheck.fromJson(value);
+        case 'HealthCheckEvent':
+          return HealthCheckEvent.fromJson(value);
         case 'ICEServer':
           return ICEServer.fromJson(value);
         case 'JoinCallRequest':
@@ -277,6 +271,8 @@ class ApiClient {
           return OwnUserResponse.fromJson(value);
         case 'PaginationParamsRequest':
           return PaginationParamsRequest.fromJson(value);
+        case 'PermissionRequestEvent':
+          return PermissionRequestEvent.fromJson(value);
         case 'QueryCallsRequest':
           return QueryCallsRequest.fromJson(value);
         case 'QueryCallsResponse':
@@ -311,6 +307,8 @@ class ApiClient {
           return UnblockUserRequest.fromJson(value);
         case 'UnblockUserResponse':
           return UnblockUserResponse.fromJson(value);
+        case 'UnblockedUserEvent':
+          return UnblockedUserEvent.fromJson(value);
         case 'UpdateCallRequest':
           return UpdateCallRequest.fromJson(value);
         case 'UpdateCallResponse':
@@ -319,6 +317,8 @@ class ApiClient {
           return UpdateUserPermissionsRequest.fromJson(value);
         case 'UpdateUserPermissionsResponse':
           return UpdateUserPermissionsResponse.fromJson(value);
+        case 'UpdatedCallPermissionsEvent':
+          return UpdatedCallPermissionsEvent.fromJson(value);
         case 'UserRequest':
           return UserRequest.fromJson(value);
         case 'UserResponse':

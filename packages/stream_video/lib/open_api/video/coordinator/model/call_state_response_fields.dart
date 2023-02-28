@@ -13,10 +13,13 @@ part of openapi.api;
 class CallStateResponseFields {
   /// Returns a new [CallStateResponseFields] instance.
   CallStateResponseFields({
+    this.blockedUsers = const [],
     required this.call,
     this.members = const [],
     this.membership,
   });
+
+  List<UserResponse> blockedUsers;
 
   CallResponse call;
 
@@ -33,6 +36,7 @@ class CallStateResponseFields {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallStateResponseFields &&
+     other.blockedUsers == blockedUsers &&
      other.call == call &&
      other.members == members &&
      other.membership == membership;
@@ -40,15 +44,17 @@ class CallStateResponseFields {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (blockedUsers.hashCode) +
     (call.hashCode) +
     (members.hashCode) +
     (membership == null ? 0 : membership!.hashCode);
 
   @override
-  String toString() => 'CallStateResponseFields[call=$call, members=$members, membership=$membership]';
+  String toString() => 'CallStateResponseFields[blockedUsers=$blockedUsers, call=$call, members=$members, membership=$membership]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'blocked_users'] = this.blockedUsers;
       json[r'call'] = this.call;
       json[r'members'] = this.members;
     if (this.membership != null) {
@@ -78,6 +84,7 @@ class CallStateResponseFields {
       }());
 
       return CallStateResponseFields(
+        blockedUsers: UserResponse.listFromJson(json[r'blocked_users'])!,
         call: CallResponse.fromJson(json[r'call'])!,
         members: MemberResponse.listFromJson(json[r'members'])!,
         membership: MemberResponse.fromJson(json[r'membership']),
@@ -130,6 +137,7 @@ class CallStateResponseFields {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'blocked_users',
     'call',
     'members',
   };

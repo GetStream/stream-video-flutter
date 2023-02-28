@@ -13,6 +13,7 @@ part of openapi.api;
 class JoinCallResponse {
   /// Returns a new [JoinCallResponse] instance.
   JoinCallResponse({
+    this.blockedUsers = const [],
     required this.call,
     required this.created,
     required this.duration,
@@ -20,6 +21,8 @@ class JoinCallResponse {
     this.members = const [],
     this.membership,
   });
+
+  List<UserResponse> blockedUsers;
 
   CallResponse call;
 
@@ -41,6 +44,7 @@ class JoinCallResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is JoinCallResponse &&
+     other.blockedUsers == blockedUsers &&
      other.call == call &&
      other.created == created &&
      other.duration == duration &&
@@ -51,6 +55,7 @@ class JoinCallResponse {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (blockedUsers.hashCode) +
     (call.hashCode) +
     (created.hashCode) +
     (duration.hashCode) +
@@ -59,10 +64,11 @@ class JoinCallResponse {
     (membership == null ? 0 : membership!.hashCode);
 
   @override
-  String toString() => 'JoinCallResponse[call=$call, created=$created, duration=$duration, edges=$edges, members=$members, membership=$membership]';
+  String toString() => 'JoinCallResponse[blockedUsers=$blockedUsers, call=$call, created=$created, duration=$duration, edges=$edges, members=$members, membership=$membership]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'blocked_users'] = this.blockedUsers;
       json[r'call'] = this.call;
       json[r'created'] = this.created;
       json[r'duration'] = this.duration;
@@ -95,6 +101,7 @@ class JoinCallResponse {
       }());
 
       return JoinCallResponse(
+        blockedUsers: UserResponse.listFromJson(json[r'blocked_users'])!,
         call: CallResponse.fromJson(json[r'call'])!,
         created: mapValueOfType<bool>(json, r'created')!,
         duration: mapValueOfType<String>(json, r'duration')!,
@@ -150,6 +157,7 @@ class JoinCallResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'blocked_users',
     'call',
     'created',
     'duration',
