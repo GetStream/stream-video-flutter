@@ -22,9 +22,9 @@ typedef CallParticipantBuilder = Widget Function(
 /// Builder function used to build a local video widget.
 typedef LocalVideoBuilder = Widget Function(
   BuildContext context,
-  Widget child,
   Call call,
   CallParticipantState participant,
+  Widget localVideoChild,
 );
 
 /// Builder function used to build a screen sharing content.
@@ -48,7 +48,7 @@ class StreamCallParticipants extends StatelessWidget {
   const StreamCallParticipants({
     required this.call,
     required this.participants,
-    this.enableLocalVideo = true,
+    this.enableLocalVideo,
     this.callParticipantBuilder,
     this.localVideoBuilder,
     this.screenShareContentBuilder,
@@ -75,13 +75,15 @@ class StreamCallParticipants extends StatelessWidget {
   final ScreenShareParticipantBuilder? screenShareParticipantBuilder;
 
   /// Enable local video view for the local participant.
-  final bool enableLocalVideo;
+  final bool? enableLocalVideo;
 
   @override
   Widget build(BuildContext context) {
     final screenShareParticipant = participants.firstWhereOrNull(
       (element) => element.screenShareTrack != null,
     );
+    // By default we don't show local video on desktop devices.
+    final enableLocalVideo = this.enableLocalVideo ?? !isDesktopDevice;
 
     if (screenShareParticipant != null) {
       return ScreenShareCallParticipantsContent(
@@ -186,7 +188,11 @@ class RegularCallParticipantsContent extends StatelessWidget {
       return participantGrid;
     } else {
       return localVideoBuilder?.call(
-              context, participantGrid, call, localParticipant) ??
+            context,
+            call,
+            localParticipant,
+            participantGrid,
+          ) ??
           StreamLocalVideo(
             call: call,
             localParticipant: localParticipant,
