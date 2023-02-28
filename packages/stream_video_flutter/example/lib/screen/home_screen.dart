@@ -74,7 +74,10 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.of(context).pop();
   }
 
-  void _onNavigateToCall(Call call) {
+  void _onNavigateToCall(
+    Call call, {
+    CallConnectOptions options = const CallConnectOptions(),
+  }) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -82,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
           usersProvider: MockUsersProvider(),
           child: StreamCallContainer(
             call: call,
+            callConnectOptions: options,
             onBackPressed: () {
               Navigator.of(context).pop();
             },

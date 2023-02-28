@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
 import '../../stream_video.dart';
 import 'size_change_listener.dart';
@@ -43,7 +43,7 @@ class StreamVideoRenderer extends StatelessWidget {
     }
 
     final Widget child;
-    if (trackState.received && !trackState.muted) {
+    if (trackState.received) {
       child = _buildVideoTrackRenderer(context, trackState);
     } else {
       child = placeholderBuilder.call(context);
@@ -70,20 +70,28 @@ class StreamVideoRenderer extends StatelessWidget {
   }
 
   Widget _buildVideoTrackRenderer(BuildContext context, TrackState trackState) {
-    if (trackState.muted) {
-      return placeholderBuilder.call(context);
-    } else {
-      final videoTrack = call.getTrack(
-        participant.trackIdPrefix,
-        videoTrackType,
-      )!;
-      return VideoTrackRenderer(
-        videoTrack: videoTrack,
-        mirror: participant.isLocal,
-        placeholderBuilder: placeholderBuilder,
-      );
-    }
+    if (trackState.muted) return placeholderBuilder.call(context);
+
+    final videoTrack = call.getTrack(
+      participant.trackIdPrefix,
+      videoTrackType,
+    )!;
+    return VideoTrackRenderer(
+      videoTrack: videoTrack,
+      mirror: participant.isLocal,
+      placeholderBuilder: placeholderBuilder,
+    );
   }
+}
+
+/// Options for scaling the bounds of a video.
+enum VideoFit {
+  /// Center the video in the widget, but perform no scaling.
+  contain,
+
+  /// Scale the video uniformly (maintain the video's aspect ratio)
+  /// to cover the entire widget area.
+  cover,
 }
 
 /// A widget that renders a single video track.
@@ -93,6 +101,7 @@ class VideoTrackRenderer extends StatefulWidget {
     super.key,
     required this.videoTrack,
     this.mirror = false,
+    this.videoFit = VideoFit.contain,
     this.placeholderBuilder,
   });
 
@@ -101,6 +110,9 @@ class VideoTrackRenderer extends StatefulWidget {
 
   /// If the video should be mirrored.
   final bool mirror;
+
+  /// The scale type of the video.
+  final VideoFit videoFit;
 
   /// A builder for the placeholder.
   final WidgetBuilder? placeholderBuilder;
@@ -111,7 +123,7 @@ class VideoTrackRenderer extends StatefulWidget {
 
 class _VideoTrackRendererState extends State<VideoTrackRenderer> {
   /// Renderer to display WebRTC video stream.
-  final _videoRenderer = RTCVideoRenderer();
+  final _videoRenderer = rtc.RTCVideoRenderer();
 
   @override
   void initState() {
@@ -141,10 +153,22 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
 
   @override
   Widget build(BuildContext context) {
-    return RTCVideoView(
+    final objectFit = _getVideoViewObjectFit(widget.videoFit);
+    return rtc.RTCVideoView(
       _videoRenderer,
       mirror: widget.mirror,
+      objectFit: objectFit,
+      filterQuality: FilterQuality.medium,
       placeholderBuilder: widget.placeholderBuilder,
     );
+  }
+
+  rtc.RTCVideoViewObjectFit _getVideoViewObjectFit(VideoFit videoFit) {
+    switch (videoFit) {
+      case VideoFit.cover:
+        return rtc.RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
+      case VideoFit.contain:
+        return rtc.RTCVideoViewObjectFit.RTCVideoViewObjectFitContain;
+    }
   }
 }

@@ -184,7 +184,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       _logger.w(() => '[disconnect] rejected (already disconnected)');
       return;
     }
-    await _events.close();
+
     // Stop sending keep alive messages.
     stopPingPong();
 
