@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../../theme/incoming_outgoing_call_theme.dart';
 import '../../utils/extensions.dart';
 import '../common/call_background.dart';
 import '../common/calling_participants.dart';
 import '../common/participant_avatars.dart';
-import 'outgoing_call_controls.dart';
 
 /// Represents the Outgoing Call state and UI, when the user is calling
 /// other people.
@@ -16,9 +14,7 @@ class OutgoingCallContent extends StatelessWidget {
     super.key,
     required this.call,
     required this.callState,
-    required this.onCancelPressed,
-    required this.onMicrophoneTap,
-    required this.onCameraTap,
+    this.onCancelCallTap,
     this.singleParticipantAvatarTheme,
     this.multipleParticipantAvatarTheme,
     this.singleParticipantTextStyle,
@@ -32,14 +28,8 @@ class OutgoingCallContent extends StatelessWidget {
   /// Holds information about the call.
   final CallState callState;
 
-  /// The action to perform when the hang up button is tapped.
-  final VoidCallback onCancelPressed;
-
-  /// The action to perform when the microphone button is tapped.
-  final VoidCallback onMicrophoneTap;
-
-  /// The action to perform when the camera button is tapped.
-  final VoidCallback onCameraTap;
+  /// The action to perform when the cancel call button is tapped.
+  final VoidCallback? onCancelCallTap;
 
   /// Theme for the avatar in a call with one participant.
   final StreamUserAvatarThemeData? singleParticipantAvatarTheme;
@@ -101,14 +91,29 @@ class OutgoingCallContent extends StatelessWidget {
               style: callingLabelTextStyle,
             ),
             const Spacer(),
-            OutgoingCallControls(
-              onHangup: onCancelPressed,
-              onMicrophoneTap: onMicrophoneTap,
-              onCameraTap: onCameraTap,
-            ),
+            CallControlOption(
+              icon: const Icon(Icons.call_end_rounded),
+              iconColor: Colors.white,
+              backgroundColor: Colors.red,
+              onPressed: () {
+                _onCancelCallTap(context);
+              },
+              padding: const EdgeInsets.all(24),
+            )
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _onCancelCallTap(BuildContext context) async {
+    await call.apply(const CancelCall());
+    await call.disconnect();
+
+    if (onCancelCallTap != null) {
+      onCancelCallTap!();
+    } else {
+      await Navigator.maybePop(context);
+    }
   }
 }

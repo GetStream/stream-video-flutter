@@ -22,7 +22,7 @@ class StreamCallControls extends StatefulWidget {
   factory StreamCallControls.withDefaultOptions({
     required Call call,
     required CallParticipantState localParticipant,
-    required VoidCallback onLeaveCall,
+    VoidCallback? onLeaveCallTap,
     Color? backgroundColor,
     double? elevation,
     double? spacing,
@@ -33,7 +33,7 @@ class StreamCallControls extends StatefulWidget {
       options: defaultCallControlOptions(
         call: call,
         localParticipant: localParticipant,
-        onLeaveCall: onLeaveCall,
+        onLeaveCallTap: onLeaveCallTap,
       ),
       backgroundColor: backgroundColor,
       elevation: elevation,

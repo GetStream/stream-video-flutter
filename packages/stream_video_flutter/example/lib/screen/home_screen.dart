@@ -86,12 +86,6 @@ class _HomeScreenState extends State<HomeScreen> {
           child: StreamCallContainer(
             call: call,
             callConnectOptions: options,
-            onBackPressed: () {
-              Navigator.of(context).pop();
-            },
-            onLeaveCall: () {
-              Navigator.of(context).pop();
-            },
           ),
         ),
       ),

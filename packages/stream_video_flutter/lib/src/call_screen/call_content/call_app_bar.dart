@@ -12,7 +12,8 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.elevation = 1,
     this.backgroundColor,
     this.onBackPressed,
-    this.onParticipantsTap,
+    this.onParticipantsInfoTap,
+    this.participantsInfoBuilder,
     this.leading,
     this.title,
     this.actions,
@@ -33,8 +34,11 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// The action to perform when the back button is pressed.
   final VoidCallback? onBackPressed;
 
-  /// The action to perform when the participants button is tapped.
-  final VoidCallback? onParticipantsTap;
+  /// The action to perform when the participants info button is tapped.
+  final VoidCallback? onParticipantsInfoTap;
+
+  /// Builder used to create a custom participants info screen.
+  final CallParticipantsInfoBuilder? participantsInfoBuilder;
 
   /// The leading widget to display.
   final Widget? leading;
@@ -60,7 +64,13 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
                   Icons.arrow_back,
                   color: theme.colorTheme.textHighEmphasis,
                 ),
-                onPressed: onBackPressed,
+                onPressed: () {
+                  if (onBackPressed != null) {
+                    onBackPressed!();
+                  } else {
+                    Navigator.maybePop(context);
+                  }
+                },
               )
             : const SizedBox());
 
@@ -76,7 +86,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
                 Icons.group_rounded,
                 color: theme.colorTheme.textHighEmphasis,
               ),
-              onPressed: onParticipantsTap,
+              onPressed: () => _onParticipantsInfoTap(context),
             ),
           ],
       title: title ??
@@ -86,5 +96,24 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
             overflow: TextOverflow.visible,
           ),
     );
+  }
+
+  void _onParticipantsInfoTap(BuildContext context) {
+    if (onParticipantsInfoTap != null) {
+      onParticipantsInfoTap!();
+    } else {
+      final usersProvider = StreamUsersConfiguration.of(context);
+
+      Navigator.of(context).push(
+        MaterialPageRoute<Widget>(
+          builder: (context) =>
+              participantsInfoBuilder?.call(context, call, call.state.value) ??
+              StreamCallParticipantsInfoMenu(
+                call: call,
+                usersProvider: usersProvider,
+              ),
+        ),
+      );
+    }
   }
 }

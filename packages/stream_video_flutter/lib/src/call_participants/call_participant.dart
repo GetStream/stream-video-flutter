@@ -6,6 +6,27 @@ import '../utils/extensions.dart';
 import 'indicators/connection_quality_indicator.dart';
 import 'participant_label.dart';
 
+/// Builder function used to build a video placeholder.
+typedef VideoPlaceholderBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallParticipantState participant,
+);
+
+/// Builder function used to build a video renderer.
+typedef VideoRendererBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallParticipantState participant,
+);
+
+/// Builder function used to build an overlay with indicators.
+typedef ParticipantOverlayBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallParticipantState participant,
+);
+
 /// A widget that represents a single participant in a call.
 class StreamCallParticipant extends StatelessWidget {
   /// Creates a new instance of [StreamCallParticipant].
@@ -29,6 +50,9 @@ class StreamCallParticipant extends StatelessWidget {
     this.connectionLevelActiveColor,
     this.connectionLevelInactiveColor,
     this.connectionLevelAlignment,
+    this.videoPlaceholderBuilder,
+    this.videoRendererBuilder,
+    this.participantOverlayBuilder,
   });
 
   /// Represents a call.
@@ -85,6 +109,15 @@ class StreamCallParticipant extends StatelessWidget {
   /// Alignment for the connection level.
   final AlignmentGeometry? connectionLevelAlignment;
 
+  /// Builder function used to build a video placeholder.
+  final VideoPlaceholderBuilder? videoPlaceholderBuilder;
+
+  /// Builder function used to build a video renderer.
+  final VideoRendererBuilder? videoRendererBuilder;
+
+  /// Builder function used to build an overlay with indicators.
+  final ParticipantOverlayBuilder? participantOverlayBuilder;
+
   @override
   Widget build(BuildContext context) {
     final theme = StreamCallParticipantTheme.of(context);
@@ -138,53 +171,75 @@ class StreamCallParticipant extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            StreamVideoRenderer(
-              call: call,
-              participant: participant,
-              videoTrackType: SfuTrackType.video,
-              placeholderBuilder: (context) {
-                return Center(
-                  child: StreamUserAvatarTheme(
-                    data: userAvatarTheme,
-                    child: StreamUserAvatar(
-                      user: participant.toUserInfo(),
-                    ),
-                  ),
-                );
-              },
-            ),
-            if (showParticipantLabel)
-              Align(
-                alignment: participantLabelAlignment,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+            videoRendererBuilder?.call(
+                  context,
+                  call,
+                  participant,
+                ) ??
+                StreamVideoRenderer(
+                  call: call,
+                  participant: participant,
+                  videoTrackType: SfuTrackType.video,
+                  placeholderBuilder: (context) {
+                    return videoPlaceholderBuilder?.call(
+                          context,
+                          call,
+                          participant,
+                        ) ??
+                        Center(
+                          child: StreamUserAvatarTheme(
+                            data: userAvatarTheme,
+                            child: StreamUserAvatar(
+                              user: participant.toUserInfo(),
+                            ),
+                          ),
+                        );
+                  },
+                ),
+            participantOverlayBuilder?.call(
+                  context,
+                  call,
+                  participant,
+                ) ??
+                Stack(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: StreamParticipantLabel.fromParticipant(
-                        participant: participant,
-                        audioLevelIndicatorColor: audioLevelIndicatorColor,
-                        disabledMicrophoneColor: disabledMicrophoneColor,
-                        enabledMicrophoneColor: enabledMicrophoneColor,
-                        participantLabelTextStyle: participantLabelTextStyle,
+                    if (showParticipantLabel)
+                      Align(
+                        alignment: participantLabelAlignment,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: StreamParticipantLabel.fromParticipant(
+                                participant: participant,
+                                audioLevelIndicatorColor:
+                                    audioLevelIndicatorColor,
+                                disabledMicrophoneColor:
+                                    disabledMicrophoneColor,
+                                enabledMicrophoneColor: enabledMicrophoneColor,
+                                participantLabelTextStyle:
+                                    participantLabelTextStyle,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                    if (showConnectionQualityIndicator)
+                      Align(
+                        alignment: connectionLevelAlignment,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: StreamConnectionQualityIndicator(
+                            connectionQuality: participant.connectionQuality,
+                            activeColor: connectionLevelActiveColor,
+                            inactiveColor: connectionLevelInactiveColor,
+                          ),
+                        ),
+                      ),
                   ],
-                ),
-              ),
-            if (showConnectionQualityIndicator)
-              Align(
-                alignment: connectionLevelAlignment,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: StreamConnectionQualityIndicator(
-                    connectionQuality: participant.connectionQuality,
-                    activeColor: connectionLevelActiveColor,
-                    inactiveColor: connectionLevelInactiveColor,
-                  ),
-                ),
-              ),
+                )
           ],
         ),
       ),

@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../participants_info/call_participants_info_menu.dart';
 
-/// Builder used to create a custom participants info screen.
-typedef CallParticipantsInfoWidgetBuilder = Widget Function(
+/// Builder used to create a custom incoming call widget.
+typedef IncomingCallBuilder = Widget Function(
   BuildContext context,
   Call call,
+  CallState callState,
+);
+
+/// Builder used to create a custom outgoing call widget.
+typedef OutgoingCallBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallState callState,
+);
+
+/// Builder used to create a custom call content widget.
+typedef CallContentBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallState callState,
 );
 
 /// Represents different call content based on the call state.
@@ -16,10 +30,14 @@ class StreamCallContainer extends StatefulWidget {
     super.key,
     required this.call,
     this.callConnectOptions = const CallConnectOptions(),
-    required this.onBackPressed,
-    required this.onLeaveCall,
-    this.participantsInfoWidgetBuilder,
-    this.callControlsBuilder,
+    this.onBackPressed,
+    this.onLeaveCallTap,
+    this.onAcceptCallTap,
+    this.onDeclineCallTap,
+    this.onCancelCallTap,
+    this.incomingCallBuilder,
+    this.outgoingCallBuilder,
+    this.callContentBuilder,
   });
 
   /// Represents a call.
@@ -29,16 +47,28 @@ class StreamCallContainer extends StatefulWidget {
   final CallConnectOptions callConnectOptions;
 
   /// The action to perform when the back button is pressed.
-  final VoidCallback onBackPressed;
+  final VoidCallback? onBackPressed;
 
-  /// The action to perform when the leave call button is pressed.
-  final VoidCallback onLeaveCall;
+  /// The action to perform when the leave call button is tapped.
+  final VoidCallback? onLeaveCallTap;
 
-  /// Builder used to create a custom participants info screen.
-  final CallParticipantsInfoWidgetBuilder? participantsInfoWidgetBuilder;
+  /// The action to perform when the accept call button is tapped.
+  final VoidCallback? onAcceptCallTap;
 
-  /// Builder used to create a custom call controls panel.
-  final CallControlsWidgetBuilder? callControlsBuilder;
+  /// The action to perform when the decline call button is tapped.
+  final VoidCallback? onDeclineCallTap;
+
+  /// The action to perform when the cancel call button is tapped.
+  final VoidCallback? onCancelCallTap;
+
+  /// Builder used to create a custom incoming call widget.
+  final IncomingCallBuilder? incomingCallBuilder;
+
+  /// Builder used to create a custom outgoing call widget.
+  final OutgoingCallBuilder? outgoingCallBuilder;
+
+  /// Builder used to create a custom call content widget.
+  final CallContentBuilder? callContentBuilder;
 
   @override
   State<StreamCallContainer> createState() => _StreamCallContainerState();
@@ -58,7 +88,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     super.initState();
     _subscriptions.add(0, call.state.listen(_setState));
     _callState = call.state.value;
-    _start();
+    _connect();
   }
 
   @override
@@ -67,7 +97,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     _subscriptions.cancelAll();
   }
 
-  Future<void> _setState(CallState callState) async {
+  void _setState(CallState callState) {
     setState(() {
       _callState = callState;
     });
@@ -80,49 +110,32 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     if (status.isDrop) _disconnect();
 
     if (status is CallStatusIncoming && !status.acceptedByMe) {
-      return IncomingCallContent(
-        call: call,
-        callState: _callState,
-        onRejectPressed: _onRejectCall,
-        onAcceptPressed: _onAcceptCall,
-        onMicrophoneTap: () {},
-        onCameraTap: () {},
-      );
-    } else if (status is CallStatusOutgoing && !status.acceptedByCallee) {
-      return OutgoingCallContent(
-        call: call,
-        callState: _callState,
-        onCancelPressed: _onCancelCall,
-        onMicrophoneTap: () {},
-        onCameraTap: () {},
-      );
-    } else {
-      final usersProvider = StreamUsersConfiguration.of(context);
-
-      return StreamCallContent(
-        call: call,
-        callState: _callState,
-        onBackPressed: widget.onBackPressed,
-        onLeaveCall: widget.onLeaveCall,
-        callControlsBuilder: widget.callControlsBuilder,
-        onParticipantsTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) =>
-                  widget.participantsInfoWidgetBuilder
-                      ?.call(context, widget.call) ??
-                  StreamCallParticipantsInfoMenu(
-                    call: widget.call,
-                    usersProvider: usersProvider,
-                  ),
-            ),
+      return widget.incomingCallBuilder?.call(context, call, _callState) ??
+          IncomingCallContent(
+            call: call,
+            callState: _callState,
+            onAcceptCallTap: widget.onAcceptCallTap,
+            onDeclineCallTap: widget.onDeclineCallTap,
           );
-        },
-      );
+    } else if (status is CallStatusOutgoing && !status.acceptedByCallee) {
+      return widget.outgoingCallBuilder?.call(context, call, _callState) ??
+          OutgoingCallContent(
+            call: call,
+            callState: _callState,
+            onCancelCallTap: widget.onCancelCallTap,
+          );
+    } else {
+      return widget.callContentBuilder?.call(context, call, _callState) ??
+          StreamCallContent(
+            call: call,
+            callState: _callState,
+            onBackPressed: widget.onBackPressed,
+            onLeaveCallTap: widget.onLeaveCallTap,
+          );
     }
   }
 
-  Future<void> _start() async {
+  Future<void> _connect() async {
     try {
       final result = await call.connect(options: widget.callConnectOptions);
       if (result.isFailure) {
@@ -133,23 +146,13 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     }
   }
 
-  Future<void> _onRejectCall() async {
-    await call.apply(const RejectCall());
-    await call.disconnect();
-    widget.onBackPressed();
-  }
-
-  Future<void> _onAcceptCall() async {
-    await call.apply(const AcceptCall());
-  }
-
   Future<void> _onCancelCall() async {
     await call.apply(const CancelCall());
     await _disconnect();
   }
 
   Future<void> _disconnect() async {
-    await widget.call.disconnect();
-    widget.onBackPressed();
+    await call.disconnect();
+    await Navigator.maybePop(context);
   }
 }

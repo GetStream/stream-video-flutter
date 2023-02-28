@@ -1,26 +1,33 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../../participants_info/call_participants_info_menu.dart';
-import '../../utils/device_segmentation.dart';
 
 /// Builder used to create a custom call app bar.
-typedef CallAppBarWidgetBuilder = PreferredSizeWidget Function(
+typedef CallAppBarBuilder = PreferredSizeWidget Function(
   BuildContext context,
   Call call,
+  CallState callState,
 );
 
-/// Builder used to create a custom participants grid.
-typedef CallParticipantsWidgetBuilder = Widget Function(
-  BuildContext context,
-  List<CallParticipantState> participants,
-);
-
-/// Builder used to create a custom call controls panel.
-typedef CallControlsWidgetBuilder = Widget Function(
+/// Builder used to create a custom call participants widget.
+typedef CallParticipantsBuilder = Widget Function(
   BuildContext context,
   Call call,
-  List<CallParticipantState> participants,
+  CallState callState,
+);
+
+/// Builder used to create a custom call controls widget.
+typedef CallControlsBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallState callState,
+);
+
+/// Builder used to create a custom participants info widget.
+typedef CallParticipantsInfoBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallState callState,
 );
 
 /// Represents the UI in an active call that shows participants and their video,
@@ -32,15 +39,13 @@ class StreamCallContent extends StatefulWidget {
     super.key,
     required this.call,
     required this.callState,
+    this.onBackPressed,
+    this.onLeaveCallTap,
+    this.onParticipantsInfoTap,
     this.callAppBarBuilder,
     this.callParticipantsBuilder,
     this.callControlsBuilder,
-    this.participantsInfoWidgetBuilder,
-    this.onBackPressed,
-    this.onCancelPressed,
-    this.onLeaveCall,
-    this.onParticipantsTap,
-    this.enableLocalVideo,
+    this.participantsInfoBuilder,
   });
 
   /// Represents a call.
@@ -49,32 +54,26 @@ class StreamCallContent extends StatefulWidget {
   /// Holds information about the call.
   final CallState callState;
 
-  /// Builder used to create a custom call app bar.
-  final CallAppBarWidgetBuilder? callAppBarBuilder;
-
-  /// Builder used to create a custom participants grid.
-  final CallParticipantsWidgetBuilder? callParticipantsBuilder;
-
-  /// Builder used to create a custom call controls panel.
-  final CallControlsWidgetBuilder? callControlsBuilder;
-
-  /// Builder used to create a custom participants info screen.
-  final CallParticipantsInfoWidgetBuilder? participantsInfoWidgetBuilder;
-
   /// The action to perform when the back button is pressed.
   final VoidCallback? onBackPressed;
 
-  /// The action to perform when the cancel button is tapped.
-  final VoidCallback? onCancelPressed;
-
-  /// The action to perform when the leave call button is pressed.
-  final VoidCallback? onLeaveCall;
+  /// The action to perform when the leave call button is tapped.
+  final VoidCallback? onLeaveCallTap;
 
   /// The action to perform when the participants button is pressed.
-  final VoidCallback? onParticipantsTap;
+  final VoidCallback? onParticipantsInfoTap;
 
-  /// Enable local video view for the local participant.
-  final bool? enableLocalVideo;
+  /// Builder used to create a custom call app bar.
+  final CallAppBarBuilder? callAppBarBuilder;
+
+  /// Builder used to create a custom participants grid.
+  final CallParticipantsBuilder? callParticipantsBuilder;
+
+  /// Builder used to create a custom call controls panel.
+  final CallControlsBuilder? callControlsBuilder;
+
+  /// Builder used to create a custom participants info screen.
+  final CallParticipantsInfoBuilder? participantsInfoBuilder;
 
   @override
   State<StreamCallContent> createState() => _StreamCallContentState();
@@ -88,81 +87,83 @@ class _StreamCallContentState extends State<StreamCallContent> {
   CallState get callState => widget.callState;
 
   @override
-  Future<void> dispose() async {
-    super.dispose();
-    await widget.call.disconnect();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final usersProvider = StreamUsersConfiguration.of(context);
-    final participants = callState.callParticipants;
-    final localParticipant = callState.localParticipant;
-
     if (callState.status.isConnected) {
       return Scaffold(
-        appBar: widget.callAppBarBuilder?.call(context, call) ??
+        appBar: widget.callAppBarBuilder?.call(context, call, callState) ??
             CallAppBar(
               call: call,
               onBackPressed: widget.onBackPressed,
-              onParticipantsTap: widget.onParticipantsTap ??
-                  () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            widget.participantsInfoWidgetBuilder
-                                ?.call(context, call) ??
-                            StreamCallParticipantsInfoMenu(
-                              call: call,
-                              usersProvider: usersProvider,
-                            ),
-                      ),
-                    );
-                  },
+              onParticipantsInfoTap: widget.onParticipantsInfoTap,
             ),
-        body: widget.callParticipantsBuilder?.call(context, participants) ??
+        body: widget.callParticipantsBuilder?.call(context, call, callState) ??
             StreamCallParticipants(
               call: call,
-              participants: participants,
-              enableLocalVideo: widget.enableLocalVideo ?? !isDesktopDevice,
+              participants: callState.callParticipants,
+              enableLocalVideo: !isDesktopDevice,
             ),
         bottomNavigationBar:
-            widget.callControlsBuilder?.call(context, call, participants) ??
+            widget.callControlsBuilder?.call(context, call, callState) ??
                 StreamCallControls.withDefaultOptions(
-                  call: widget.call,
-                  localParticipant: localParticipant!,
-                  onLeaveCall: () async {
-                    await widget.call.disconnect();
-                    widget.onLeaveCall?.call();
-                  },
+                  call: call,
+                  localParticipant: callState.localParticipant!,
+                  onLeaveCallTap: widget.onLeaveCallTap,
                 ),
       );
     } else {
-      final callCid = callState.callCid.value;
-      final theme = StreamVideoTheme.of(context);
-
-      return Scaffold(
-        appBar: AppBar(
-          elevation: 8,
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: theme.colorTheme.textHighEmphasis,
-            ),
-            onPressed: widget.onCancelPressed,
-          ),
-          backgroundColor: theme.colorTheme.barsBg,
-          centerTitle: false,
-          title: Text(
-            callCid,
-            style: theme.textTheme.title3Bold,
-            overflow: TextOverflow.visible,
-          ),
-        ),
-        body: const Center(
-          child: Text('Connecting'),
-        ),
+      return _ConnectingCallContent(
+        title: callState.callCid.value,
+        onBackPressed: widget.onBackPressed,
       );
     }
+  }
+
+  @override
+  Future<void> dispose() async {
+    super.dispose();
+    await call.disconnect();
+  }
+}
+
+/// A widget that represent a call in the connecting state.
+class _ConnectingCallContent extends StatelessWidget {
+  /// Creates a new instance of [_ConnectingCallContent].
+  const _ConnectingCallContent({
+    required this.title,
+    required this.onBackPressed,
+  });
+
+  /// The title for the connecting state.
+  final String title;
+
+  /// The action to perform when the back button is pressed.
+  final VoidCallback? onBackPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = StreamVideoTheme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 8,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: theme.colorTheme.textHighEmphasis,
+          ),
+          onPressed: onBackPressed,
+        ),
+        backgroundColor: theme.colorTheme.barsBg,
+        centerTitle: false,
+        title: Text(
+          title,
+          style: theme.textTheme.title3Bold,
+          overflow: TextOverflow.visible,
+        ),
+      ),
+      body: const Center(
+        child: Text('Connecting'),
+      ),
+    );
   }
 }

@@ -27,16 +27,16 @@ class _CallScreenState extends State<CallScreen> {
       children: [
         Expanded(
           flex: 2,
-          child: StreamCallContainer(
+          child: StreamCallContent(
             call: widget.call,
+            callState: widget.call.state.value,
             onBackPressed: () => _finishCall(context),
-            onLeaveCall: () => _finishCall(context),
-            callControlsBuilder: (context, call, participants) {
+            onLeaveCallTap: () => _finishCall(context),
+            callControlsBuilder: (context, call, callState) {
               return StreamCallControls(
                 options: customCallControlOptions(
                   call: call,
                   channel: widget.channel,
-                  onLeaveCall: () => _finishCall(context),
                   onChatTap: () {
                     if (kIsWeb) {
                       toggleChatPane();
@@ -88,7 +88,6 @@ class _CallScreenState extends State<CallScreen> {
 List<Widget> customCallControlOptions({
   required Call call,
   required Channel channel,
-  required VoidCallback onLeaveCall,
   required VoidCallback onChatTap,
 }) {
   final localParticipant = call.state.value.localParticipant;
@@ -102,7 +101,7 @@ List<Widget> customCallControlOptions({
     ToggleMicrophoneOption(call: call, localParticipant: localParticipant!),
     ToggleCameraOption(call: call, localParticipant: localParticipant),
     FlipCameraOption(call: call, localParticipant: localParticipant),
-    LeaveCallOption(onLeaveCall: onLeaveCall),
+    LeaveCallOption(call: call),
   ];
 }
 

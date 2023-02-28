@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -32,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final data = await streamVideoClient.getOrCreateCall(cid: callCid);
       final call = Call.fromCreated(data: data.getDataOrNull()!.data);
 
-      await Navigator.of(context).pushReplacementNamed(
+      await Navigator.of(context).pushNamed(
         Routes.CALL,
         arguments: call,
       );
