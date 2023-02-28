@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../../stream_video.dart';
+import '../call_permission.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
@@ -65,17 +66,21 @@ abstract class Call {
 
   Future<Result<None>> apply(CallControlAction action);
 
-  bool canRequestPermission(String permission);
+  bool canRequestPermission(CallPermission permission);
 
   bool canUpdateUserPermissions();
 
-  Future<Result<None>> requestPermissions(List<String> permissions);
+  Future<Result<None>> requestPermissions(List<CallPermission> permissions);
 
   Future<Result<None>> updateUserPermissions({
     required String userId,
-    List<String> grantPermissions = const [],
-    List<String> revokePermissions = const [],
+    List<CallPermission> grantPermissions = const [],
+    List<CallPermission> revokePermissions = const [],
   });
+
+  Future<Result<None>> startRecording();
+
+  Future<Result<None>> stopRecording();
 
   List<RtcTrack> getTracks(String trackIdPrefix);
 
@@ -87,7 +92,7 @@ abstract class Call {
 extension CallX on Call {
   Future<Result<None>> grantPermissions({
     required String userId,
-    required List<String> permissions,
+    required List<CallPermission> permissions,
   }) {
     return updateUserPermissions(
       userId: userId,
@@ -97,7 +102,7 @@ extension CallX on Call {
 
   Future<Result<None>> revokePermissions({
     required String userId,
-    required List<String> permissions,
+    required List<CallPermission> permissions,
   }) {
     return updateUserPermissions(
       userId: userId,

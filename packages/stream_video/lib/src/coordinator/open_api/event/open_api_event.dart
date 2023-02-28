@@ -59,15 +59,12 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callPermissionsUpdated:
         final permissionsUpdated = open.CallPermissionsUpdated.fromJson(obj);
         return result.copyWith(callPermissionsUpdated: permissionsUpdated);
-
       case EventType.callRecordingStarted:
-        final permissionsUpdated = open.CallPermissionsUpdated.fromJson(obj);
-        return result.copyWith(callPermissionsUpdated: permissionsUpdated);
-
+        final recordingStarted = open.CallRecordingStarted.fromJson(obj);
+        return result.copyWith(callRecordingStarted: recordingStarted);
       case EventType.callRecordingStopped:
-        final permissionsUpdated = open.CallPermissionsUpdated.fromJson(obj);
-        return result.copyWith(callPermissionsUpdated: permissionsUpdated);
-
+        final recordingStopped = open.CallRecordingStopped.fromJson(obj);
+        return result.copyWith(callRecordingStopped: recordingStopped);
       case EventType.custom:
         final custom = open.Custom.fromJson(obj);
         return result.copyWith(custom: custom);

@@ -56,6 +56,10 @@ class CoordinatorCallReducer {
       return _reduceCallCancelled(state, event);
     } else if (event is CoordinatorCallPermissionsUpdatedEvent) {
       return _reduceCallPermissionsUpdated(state, event);
+    } else if (event is CoordinatorCallRecordingStartedEvent) {
+      return _reduceCallRecordingStarted(state, event);
+    } else if (event is CoordinatorCallRecordingStoppedEvent) {
+      return _reduceCallRecordingStopped(state, event);
     }
     return state;
   }
@@ -171,7 +175,43 @@ class CoordinatorCallReducer {
     }
 
     return state.copyWith(
-      ownCapabilities: event.ownCapabilities,
+      ownCapabilities: List.unmodifiable(
+        event.ownCapabilities,
+      ),
+    );
+  }
+
+  CallState _reduceCallRecordingStarted(
+    CallState state,
+    CoordinatorCallRecordingStartedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () => '[reduceCallRecordingStarted] rejected (status is not Active)',
+      );
+      return state;
+    }
+
+    return state.copyWith(
+      isRecording: true,
+    );
+  }
+
+  CallState _reduceCallRecordingStopped(
+    CallState state,
+    CoordinatorCallRecordingStoppedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () => '[reduceCallRecordingStopped] rejected (status is not Active)',
+      );
+      return state;
+    }
+
+    return state.copyWith(
+      isRecording: false,
     );
   }
 }

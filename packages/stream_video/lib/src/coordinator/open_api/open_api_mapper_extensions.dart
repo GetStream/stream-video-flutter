@@ -1,4 +1,5 @@
 import '../../../open_api/video/coordinator/api.dart' as open;
+import '../../call_permission.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_setting.dart';
@@ -39,7 +40,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
             isBroadcastingEnabled: call.settings.broadcasting.enabled,
             members: callCreated.members.toCallMembers(call.cid),
             isRecordingEnabled: call.settings.recording.audioOnly,
-            ownCapabilities: call.ownCapabilities,
+            ownCapabilities: call.ownCapabilities.map(CallPermission.fromAlias),
             settings: call.settings.toCallSettings(),
           ),
           users: callCreated.members.toCallUsers(),
@@ -120,7 +121,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
             isBroadcastingEnabled: call.settings.broadcasting.enabled,
             members: const {},
             isRecordingEnabled: call.settings.recording.audioOnly,
-            ownCapabilities: call.ownCapabilities,
+            ownCapabilities: call.ownCapabilities.map(CallPermission.fromAlias),
             settings: call.settings.toCallSettings(),
           ),
           users: const {},
@@ -161,7 +162,8 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallPermissionsUpdatedEvent(
           callCid: callPermissionsUpdated.callCid,
           createdAt: callPermissionsUpdated.createdAt,
-          ownCapabilities: callPermissionsUpdated.ownCapabilities,
+          ownCapabilities: callPermissionsUpdated.ownCapabilities
+              .map(CallPermission.fromAlias),
           type: callPermissionsUpdated.type,
           user: callPermissionsUpdated.user.toCallUser(),
         );

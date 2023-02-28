@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../../call_permission.dart';
 import '../../models/call_metadata.dart';
 
 // TODO: Should we call it VideoEvent or CoordinatorEvent?
@@ -268,7 +269,7 @@ class CoordinatorCallPermissionsUpdatedEvent extends CoordinatorCallEvent {
   });
 
   final DateTime createdAt;
-  final List<String> ownCapabilities;
+  final Iterable<CallPermission> ownCapabilities;
   final String type;
   final CallUser user;
 
@@ -294,10 +295,10 @@ class CoordinatorCallRecordingStartedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-    ...super.props,
-    createdAt,
-    type,
-  ];
+        ...super.props,
+        createdAt,
+        type,
+      ];
 }
 
 class CoordinatorCallRecordingStoppedEvent extends CoordinatorCallEvent {
@@ -312,10 +313,10 @@ class CoordinatorCallRecordingStoppedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-    ...super.props,
-    createdAt,
-    type,
-  ];
+        ...super.props,
+        createdAt,
+        type,
+      ];
 }
 
 class CoordinatorCallCustomEvent extends CoordinatorCallEvent {

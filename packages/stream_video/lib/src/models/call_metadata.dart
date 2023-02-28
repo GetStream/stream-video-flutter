@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../call_permission.dart';
 import 'call_cid.dart';
 import 'call_setting.dart';
 
@@ -35,7 +36,7 @@ class CallDetails with EquatableMixin {
   });
 
   final Map<String, CallMember> members;
-  final List<String> ownCapabilities;
+  final Iterable<CallPermission> ownCapabilities;
   final CallSettings settings;
   final bool isBroadcastingEnabled;
   final bool isRecordingEnabled;
