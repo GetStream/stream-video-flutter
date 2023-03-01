@@ -23,6 +23,7 @@ class CallParticipantState
     double audioLevel = 0,
     bool isSpeaking = false,
     bool isDominantSpeaker = false,
+    DateTime? dominantSpeakerAt,
   }) {
     return CallParticipantState._(
       userId: userId,
@@ -38,6 +39,7 @@ class CallParticipantState
       audioLevel: audioLevel,
       isSpeaking: isSpeaking,
       isDominantSpeaker: isDominantSpeaker,
+      dominantSpeakerAt: dominantSpeakerAt,
     );
   }
 
@@ -56,6 +58,7 @@ class CallParticipantState
     this.audioLevel = 0,
     this.isSpeaking = false,
     this.isDominantSpeaker = false,
+    this.dominantSpeakerAt,
   });
 
   final String userId;
@@ -71,6 +74,9 @@ class CallParticipantState
   final double audioLevel;
   final bool isSpeaking;
   final bool isDominantSpeaker;
+
+  /// When the participant has last been a dominant speaker.
+  final DateTime? dominantSpeakerAt;
 
   /// Returns a copy of this [CallParticipantState] with the given fields
   /// replaced with the new values.
@@ -88,6 +94,7 @@ class CallParticipantState
     double? audioLevel,
     bool? isSpeaking,
     bool? isDominantSpeaker,
+    DateTime? dominantSpeakerAt,
   }) {
     return CallParticipantState(
       userId: userId ?? this.userId,
@@ -103,6 +110,7 @@ class CallParticipantState
       audioLevel: audioLevel ?? this.audioLevel,
       isSpeaking: isSpeaking ?? this.isSpeaking,
       isDominantSpeaker: isDominantSpeaker ?? this.isDominantSpeaker,
+      dominantSpeakerAt: dominantSpeakerAt ?? this.dominantSpeakerAt,
     );
   }
 
@@ -126,6 +134,10 @@ class CallParticipantState
     return !(videoTrack?.muted ?? true);
   }
 
+  /// Compares two participants.
+  ///
+  /// Participants that have recently been dominant speakers go first.
+  /// The only exception is the local participant who always goes last.
   @override
   int compareTo(CallParticipantState other) {
     if (isDominantSpeaker && !other.isDominantSpeaker) {
@@ -134,15 +146,15 @@ class CallParticipantState
       return 1;
     }
 
-    if (isSpeaking && !other.isSpeaking) {
-      return -1;
-    } else if (!isSpeaking && other.isSpeaking) {
-      return 1;
+    final speakerAt = dominantSpeakerAt?.millisecondsSinceEpoch ?? 0;
+    final otherSpeakerAt = other.dominantSpeakerAt?.millisecondsSinceEpoch ?? 0;
+    if (speakerAt != otherSpeakerAt) {
+      return speakerAt > otherSpeakerAt ? -1 : 1;
     }
 
-    if (isLocal && !other.isLocal) {
+    if (!isLocal && other.isLocal) {
       return -1;
-    } else if (!isLocal && other.isLocal) {
+    } else if (isLocal && !other.isLocal) {
       return 1;
     }
 
@@ -158,7 +170,8 @@ class CallParticipantState
         'isLocal: $isLocal, '
         'connectionQuality: $connectionQuality, isOnline: $isOnline, '
         'audioLevel: $audioLevel, isSpeaking: $isSpeaking, '
-        'isDominantSpeaker: $isDominantSpeaker}';
+        'isDominantSpeaker: $isDominantSpeaker}, '
+        'dominantSpeakerAt: $dominantSpeakerAt}';
   }
 
   @override
@@ -175,6 +188,7 @@ class CallParticipantState
         isOnline,
         audioLevel,
         isSpeaking,
-        isDominantSpeaker
+        isDominantSpeaker,
+        dominantSpeakerAt,
       ];
 }

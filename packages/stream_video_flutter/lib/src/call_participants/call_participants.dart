@@ -26,11 +26,19 @@ typedef ScreenShareItemBuilder = Widget Function(
   CallParticipantState participant,
 );
 
+/// A function used to sort the participants.
 typedef Filter<T> = bool Function(T element);
+
+/// Comparator used to sort the participants.
 typedef Sort<T> = Comparator<T>;
 
+/// The default participant filter.
 bool _defaultFilter(CallParticipantState participant) => true;
 
+/// The default participant sort.
+///
+/// Participants that have recently been dominant speakers go first.
+/// The only exception is the local participant who always goes last.
 int _defaultSort(CallParticipantState previous, CallParticipantState current) {
   return previous.compareTo(current);
 }
