@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../stream_video_flutter.dart';
 
 /// A widget that represents a participant in screen sharing mode.
-class ScreeShareParticipant extends StatelessWidget {
+class ScreenShareParticipant extends StatelessWidget {
   /// Creates a new instance of [ScreeShareParticipant].
   const ScreeShareParticipant({
     super.key,
