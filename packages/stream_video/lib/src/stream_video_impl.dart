@@ -13,8 +13,6 @@ import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'errors/video_error_composer.dart';
 import 'logger/logger.dart';
 import 'models/call_device.dart';
-import 'models/call_metadata.dart';
-import 'push_notification/no_op_push_notification.dart';
 import 'shared_emitter.dart';
 import 'state_emitter.dart';
 import 'token/token_manager.dart';
@@ -47,8 +45,6 @@ class StreamVideoImpl implements StreamVideo {
     int latencyMeasurementRounds = 3,
     Level logLevel = Level.ALL,
     LogHandlerFunction logHandlerFunction = StreamVideoImpl.defaultLogHandler,
-    PushNotificationFactory pushNotificationFactory =
-        defaultPushNotificationManager,
   }) {
     return StreamVideoImpl._(
       apiKey,
@@ -57,7 +53,6 @@ class StreamVideoImpl implements StreamVideo {
       latencyMeasurementRounds: latencyMeasurementRounds,
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
-      pushNotificationFactrory: pushNotificationFactory,
     );
   }
 
@@ -68,7 +63,6 @@ class StreamVideoImpl implements StreamVideo {
     required this.latencyMeasurementRounds,
     required Level logLevel,
     required LogHandlerFunction logHandlerFunction,
-    required PushNotificationFactory pushNotificationFactrory,
   }) {
     // Preparing logger
     setLogLevel(logLevel);
@@ -80,7 +74,6 @@ class StreamVideoImpl implements StreamVideo {
       rpcUrl: coordinatorRpcUrl,
       wsUrl: coordinatorWsUrl,
     );
-    _initPushNotificationManager(pushNotificationFactrory);
   }
 
   final _logger = taggedLogger(tag: 'SV:Client');
@@ -92,11 +85,16 @@ class StreamVideoImpl implements StreamVideo {
 
   final _tokenManager = TokenManager();
   late final CoordinatorClient _client;
-  late final PushNotificationManager _pushNotificationManager;
+  PushNotificationManager? _pushNotificationManager;
 
   var _state = _StreamVideoState();
 
   StreamSubscription<CoordinatorEvent>? _eventSubscription;
+
+  @override
+  set pushNotificationManager(PushNotificationManager pushNotificationManager) {
+    _pushNotificationManager = pushNotificationManager;
+  }
 
   @override
   UserInfo? get currentUser => _state.currentUser.valueOrNull;
@@ -156,7 +154,7 @@ class StreamVideoImpl implements StreamVideo {
       });
 
       final result = await _client.onUserLogin(user);
-      await _pushNotificationManager.onUserLoggedIn();
+      await _pushNotificationManager?.onUserLoggedIn();
       return result;
     } catch (e, stk) {
       _logger.e(() => '[connectUser] failed(${user.id}): $e');
@@ -481,18 +479,13 @@ class StreamVideoImpl implements StreamVideo {
 
   @override
   Future<bool> handlePushNotification(Map<String, dynamic> payload) {
-    return _pushNotificationManager.handlePushNotification(payload);
+    return _pushNotificationManager?.handlePushNotification(payload) ??
+        Future.value(false);
   }
 
   @override
   Future<CallCreated?> consumeIncomingCall() {
-    return _pushNotificationManager.consumeIncomingCall();
-  }
-
-  Future<void> _initPushNotificationManager(
-    PushNotificationFactory pushNotificationManagerFactory,
-  ) async {
-    _pushNotificationManager = await pushNotificationManagerFactory(this);
+    return _pushNotificationManager?.consumeIncomingCall() ?? Future.value();
   }
 }
 

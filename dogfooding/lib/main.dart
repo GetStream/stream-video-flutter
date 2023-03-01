@@ -35,18 +35,19 @@ Future<void> main() async {
   runApp(const StreamDogFoodingApp());
 }
 
-void _initStreamVideo() {
+void _initStreamVideo() async {
   if (!StreamVideo.isInitialized()) {
     StreamLog()
       ..logger = ConsoleStreamLogger()
       ..validator = (priority, tag) => true;
 
-    StreamVideo.init(
+    final client = StreamVideo.init(
       Env.apiKey,
       coordinatorRpcUrl: Env.coordinatorRpcUrl,
       coordinatorWsUrl: Env.coordinatorWsUrl,
-      pushNotificationFactory: createPushNotificationManager,
     );
+    client.pushNotificationManager =
+        await StreamVideoPushNotificationManager.create(client);
   }
 }
 

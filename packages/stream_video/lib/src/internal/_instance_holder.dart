@@ -8,14 +8,13 @@ import '../stream_video_impl.dart';
 class InstanceHolder {
   StreamVideo? _instance;
 
-  void init(
+  StreamVideo init(
     String apiKey, {
     required String coordinatorRpcUrl,
     required String coordinatorWsUrl,
     required int latencyMeasurementRounds,
     required Level logLevel,
     required LogHandlerFunction logHandlerFunction,
-    required PushNotificationFactory pushNotificationFactory,
   }) {
     if (_instance != null) {
       throw Exception('''
@@ -31,8 +30,8 @@ class InstanceHolder {
       latencyMeasurementRounds: latencyMeasurementRounds,
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
-      pushNotificationFactory: pushNotificationFactory,
     );
+    return _instance!;
   }
 
   /// The singleton instance of the Stream Video client.
