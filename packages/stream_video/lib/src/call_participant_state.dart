@@ -6,7 +6,9 @@ import 'sfu/data/models/sfu_connection_quality.dart';
 import 'sfu/data/models/sfu_track_type.dart';
 
 @immutable
-class CallParticipantState with EquatableMixin {
+class CallParticipantState
+    with EquatableMixin
+    implements Comparable<CallParticipantState> {
   factory CallParticipantState({
     required String userId,
     required String role,
@@ -21,6 +23,7 @@ class CallParticipantState with EquatableMixin {
     double audioLevel = 0,
     bool isSpeaking = false,
     bool isDominantSpeaker = false,
+    DateTime? dominantSpeakerAt,
   }) {
     return CallParticipantState._(
       userId: userId,
@@ -36,6 +39,7 @@ class CallParticipantState with EquatableMixin {
       audioLevel: audioLevel,
       isSpeaking: isSpeaking,
       isDominantSpeaker: isDominantSpeaker,
+      dominantSpeakerAt: dominantSpeakerAt,
     );
   }
 
@@ -54,6 +58,7 @@ class CallParticipantState with EquatableMixin {
     this.audioLevel = 0,
     this.isSpeaking = false,
     this.isDominantSpeaker = false,
+    this.dominantSpeakerAt,
   });
 
   final String userId;
@@ -69,6 +74,9 @@ class CallParticipantState with EquatableMixin {
   final double audioLevel;
   final bool isSpeaking;
   final bool isDominantSpeaker;
+
+  /// When the participant has last been a dominant speaker.
+  final DateTime? dominantSpeakerAt;
 
   /// Returns a copy of this [CallParticipantState] with the given fields
   /// replaced with the new values.
@@ -86,6 +94,7 @@ class CallParticipantState with EquatableMixin {
     double? audioLevel,
     bool? isSpeaking,
     bool? isDominantSpeaker,
+    DateTime? dominantSpeakerAt,
   }) {
     return CallParticipantState(
       userId: userId ?? this.userId,
@@ -101,6 +110,7 @@ class CallParticipantState with EquatableMixin {
       audioLevel: audioLevel ?? this.audioLevel,
       isSpeaking: isSpeaking ?? this.isSpeaking,
       isDominantSpeaker: isDominantSpeaker ?? this.isDominantSpeaker,
+      dominantSpeakerAt: dominantSpeakerAt ?? this.dominantSpeakerAt,
     );
   }
 
@@ -124,6 +134,33 @@ class CallParticipantState with EquatableMixin {
     return !(videoTrack?.muted ?? true);
   }
 
+  /// Compares two participants.
+  ///
+  /// Participants that have recently been dominant speakers go first.
+  /// The only exception is the local participant who always goes last.
+  @override
+  int compareTo(CallParticipantState other) {
+    if (isDominantSpeaker && !other.isDominantSpeaker) {
+      return -1;
+    } else if (!isDominantSpeaker && other.isDominantSpeaker) {
+      return 1;
+    }
+
+    final speakerAt = dominantSpeakerAt?.millisecondsSinceEpoch ?? 0;
+    final otherSpeakerAt = other.dominantSpeakerAt?.millisecondsSinceEpoch ?? 0;
+    if (speakerAt != otherSpeakerAt) {
+      return speakerAt > otherSpeakerAt ? -1 : 1;
+    }
+
+    if (!isLocal && other.isLocal) {
+      return -1;
+    } else if (isLocal && !other.isLocal) {
+      return 1;
+    }
+
+    return 0;
+  }
+
   @override
   String toString() {
     return 'CallParticipantState{userId: $userId, role: $role, name: $name, '
@@ -133,7 +170,8 @@ class CallParticipantState with EquatableMixin {
         'isLocal: $isLocal, '
         'connectionQuality: $connectionQuality, isOnline: $isOnline, '
         'audioLevel: $audioLevel, isSpeaking: $isSpeaking, '
-        'isDominantSpeaker: $isDominantSpeaker}';
+        'isDominantSpeaker: $isDominantSpeaker}, '
+        'dominantSpeakerAt: $dominantSpeakerAt}';
   }
 
   @override
@@ -150,6 +188,7 @@ class CallParticipantState with EquatableMixin {
         isOnline,
         audioLevel,
         isSpeaking,
-        isDominantSpeaker
+        isDominantSpeaker,
+        dominantSpeakerAt,
       ];
 }

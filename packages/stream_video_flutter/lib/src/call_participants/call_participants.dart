@@ -41,6 +41,23 @@ typedef ScreenShareParticipantBuilder = Widget Function(
   CallParticipantState participant,
 );
 
+/// A function used to sort the participants.
+typedef Filter<T> = bool Function(T element);
+
+/// Comparator used to sort the participants.
+typedef Sort<T> = Comparator<T>;
+
+/// The default participant filter.
+bool _defaultFilter(CallParticipantState participant) => true;
+
+/// The default participant sort.
+///
+/// Participants that have recently been dominant speakers go first.
+/// The only exception is the local participant who always goes last.
+int _defaultSort(CallParticipantState previous, CallParticipantState current) {
+  return previous.compareTo(current);
+}
+
 /// Widget that renders all the [StreamCallParticipant], based on the number
 /// of people in a call.
 class StreamCallParticipants extends StatelessWidget {
@@ -48,6 +65,8 @@ class StreamCallParticipants extends StatelessWidget {
   const StreamCallParticipants({
     required this.call,
     required this.participants,
+    this.filter = _defaultFilter,
+    this.sort = _defaultSort,
     this.enableLocalVideo,
     this.callParticipantBuilder,
     this.localVideoBuilder,
@@ -60,7 +79,13 @@ class StreamCallParticipants extends StatelessWidget {
   final Call call;
 
   /// The list of participants to display.
-  final List<CallParticipantState> participants;
+  final Iterable<CallParticipantState> participants;
+
+  /// Used for filtering the call participants.
+  final Filter<CallParticipantState> filter;
+
+  /// Used for sorting the call participants.
+  final Sort<CallParticipantState> sort;
 
   /// Builder function used to build a participant grid item.
   final CallParticipantBuilder? callParticipantBuilder;
@@ -79,6 +104,8 @@ class StreamCallParticipants extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final participants = this.participants.where(filter).sorted(sort);
+
     final screenShareParticipant = participants.firstWhereOrNull(
       (element) => element.screenShareTrack != null,
     );
@@ -121,7 +148,7 @@ class RegularCallParticipantsContent extends StatelessWidget {
   final Call call;
 
   /// The list of participants to display.
-  final List<CallParticipantState> participants;
+  final Iterable<CallParticipantState> participants;
 
   /// Enable local video view for the local participant.
   final bool enableLocalVideo;
@@ -222,7 +249,7 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
   final CallParticipantState screenSharingParticipant;
 
   /// The list of participants to display.
-  final List<CallParticipantState> participants;
+  final Iterable<CallParticipantState> participants;
 
   /// Builder function used to build a screen sharing item.
   final ScreenShareContentBuilder? screenShareContentBuilder;
@@ -266,7 +293,7 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             separatorBuilder: (context, index) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
-              final participant = participants[index];
+              final participant = participants.elementAt(index);
               return screenShareParticipantBuilder?.call(
                     context,
                     call,
