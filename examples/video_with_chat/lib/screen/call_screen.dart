@@ -93,8 +93,8 @@ class _CallScreenState extends State<CallScreen> {
 List<Widget> customCallControlOptions({
   required Call call,
   required Channel channel,
-  required VoidCallback onChatTap,
   required VoidCallback onLeaveCallTap,
+  required VoidCallback onChatTap,
 }) {
   final localParticipant = call.state.value.localParticipant;
   assert(localParticipant != null, 'The local participant is null.');
