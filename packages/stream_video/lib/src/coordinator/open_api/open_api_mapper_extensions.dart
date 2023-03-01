@@ -153,7 +153,6 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: callPermissionRequest.callCid,
           createdAt: callPermissionRequest.createdAt,
           permissions: callPermissionRequest.permissions,
-          type: callPermissionRequest.type,
           user: callPermissionRequest.user.toCallUser(),
         );
       case EventType.callPermissionsUpdated:
@@ -164,24 +163,48 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           createdAt: callPermissionsUpdated.createdAt,
           ownCapabilities: callPermissionsUpdated.ownCapabilities
               .map(CallPermission.fromAlias),
-          type: callPermissionsUpdated.type,
           user: callPermissionsUpdated.user.toCallUser(),
         );
       case EventType.callRecordingStarted:
-        final callRecordingStarted = this.callRecordingStarted!;
+        final event = callRecordingStarted!;
 
         return CoordinatorCallRecordingStartedEvent(
-          callCid: callRecordingStarted.callCid,
-          createdAt: callRecordingStarted.createdAt,
-          type: callRecordingStarted.type,
+          callCid: event.callCid,
+          createdAt: event.createdAt,
         );
       case EventType.callRecordingStopped:
-        final callRecordingStopped = this.callRecordingStopped!;
+        final event = callRecordingStopped!;
 
         return CoordinatorCallRecordingStoppedEvent(
-          callCid: callRecordingStopped.callCid,
-          createdAt: callRecordingStopped.createdAt,
-          type: callRecordingStopped.type,
+          callCid: event.callCid,
+          createdAt: event.createdAt,
+        );
+      case EventType.callUserBlocked:
+        final event = callUserBlocked!;
+
+        return CoordinatorCallUserBlockedEvent(
+          callCid: event.callCid,
+          createdAt: event.createdAt,
+          userId: event.userId,
+        );
+      case EventType.callUserUnblocked:
+        final event = callUserUnblocked!;
+
+        return CoordinatorCallUserUnblockedEvent(
+          callCid: event.callCid,
+          createdAt: event.createdAt,
+          userId: event.userId,
+        );
+      case EventType.callReaction:
+        final event = callReaction!;
+
+        return CoordinatorCallReactionEvent(
+          callCid: event.callCid,
+          createdAt: event.createdAt,
+          reactionType: event.reaction.type,
+          user: event.reaction.user.toCallUser(),
+          emojiCode: event.reaction.emojiCode,
+          custom: event.reaction.custom,
         );
       case EventType.custom:
         final custom = this.custom!;
@@ -190,8 +213,8 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: custom.callCid,
           senderUserId: custom.user.id,
           createdAt: custom.createdAt,
-          type: custom.type,
-          customJson: custom.custom,
+          eventType: custom.type,
+          custom: custom.custom,
           info: CallInfo(
             cid: StreamCallCid(cid: custom.callCid),
             createdByUserId: '',

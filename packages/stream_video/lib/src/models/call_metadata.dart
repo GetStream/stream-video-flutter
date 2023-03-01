@@ -130,7 +130,7 @@ class CallUser with EquatableMixin {
     required this.teams,
     this.createdAt,
     this.updatedAt,
-    this.customJson,
+    this.custom,
   });
 
   final String id;
@@ -140,7 +140,7 @@ class CallUser with EquatableMixin {
   final List<String> teams;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final Map<String, dynamic>? customJson;
+  final Map<String, Object>? custom;
 
   @override
   List<Object> get props => [
@@ -151,13 +151,13 @@ class CallUser with EquatableMixin {
         teams,
         createdAt ?? 0,
         updatedAt ?? 0,
-        customJson ?? '',
+        custom ?? '',
       ];
 
   @override
   String toString() {
     return 'CallUser{id: $id, name: $name, role: $role, imageUrl: $imageUrl, '
         'teams: $teams, createdAt: $createdAt, updatedAt: $updatedAt, '
-        'customJson: $customJson}';
+        'custom: $custom}';
   }
 }

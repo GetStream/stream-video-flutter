@@ -205,6 +205,10 @@ class ApiClient {
           return CallCreatedEvent.fromJson(value);
         case 'CallEndedEvent':
           return CallEndedEvent.fromJson(value);
+        case 'CallReactionEvent':
+          return CallReactionEvent.fromJson(value);
+        case 'CallRecording':
+          return CallRecording.fromJson(value);
         case 'CallRecordingStartedEvent':
           return CallRecordingStartedEvent.fromJson(value);
         case 'CallRecordingStoppedEvent':
@@ -259,6 +263,8 @@ class ApiClient {
           return JoinCallRequest.fromJson(value);
         case 'JoinCallResponse':
           return JoinCallResponse.fromJson(value);
+        case 'ListRecordingsResponse':
+          return ListRecordingsResponse.fromJson(value);
         case 'MemberRequest':
           return MemberRequest.fromJson(value);
         case 'MemberResponse':
@@ -281,6 +287,8 @@ class ApiClient {
           return QueryMembersRequest.fromJson(value);
         case 'QueryMembersResponse':
           return QueryMembersResponse.fromJson(value);
+        case 'ReactionResponse':
+          return ReactionResponse.fromJson(value);
         case 'RecordSettings':
           return RecordSettings.fromJson(value);
         case 'RecordSettingsRequest':
@@ -299,6 +307,10 @@ class ApiClient {
           return SendEventRequest.fromJson(value);
         case 'SendEventResponse':
           return SendEventResponse.fromJson(value);
+        case 'SendReactionRequest':
+          return SendReactionRequest.fromJson(value);
+        case 'SendReactionResponse':
+          return SendReactionResponse.fromJson(value);
         case 'SortParamRequest':
           return SortParamRequest.fromJson(value);
         case 'StopLiveResponse':

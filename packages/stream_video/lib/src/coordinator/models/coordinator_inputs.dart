@@ -140,17 +140,17 @@ class MemberInput extends CoordinatorInput {
   const MemberInput({
     required this.userId,
     this.role,
-    this.customJson,
+    this.custom,
     this.userInput,
   });
 
   final String userId;
   final String? role;
-  final String? customJson;
+  final String? custom;
   final UserInput? userInput;
 
   @override
-  List<Object?> get props => [userId, role, userInput, customJson];
+  List<Object?> get props => [userId, role, userInput, custom];
 }
 
 class UserInput extends CoordinatorInput {
@@ -160,7 +160,7 @@ class UserInput extends CoordinatorInput {
     this.role,
     this.imageUrl,
     this.teams,
-    this.customJson,
+    this.custom = const {},
   });
 
   final String id;
@@ -168,10 +168,10 @@ class UserInput extends CoordinatorInput {
   final String? role;
   final String? imageUrl;
   final List<String>? teams;
-  final Map<String, dynamic>? customJson;
+  final Map<String, Object> custom;
 
   @override
-  List<Object?> get props => [id, name, role, teams, imageUrl, customJson];
+  List<Object?> get props => [id, name, role, teams, imageUrl, custom];
 }
 
 class EventInput extends CoordinatorInput {
@@ -191,15 +191,32 @@ class CustomEventInput extends CoordinatorInput {
   const CustomEventInput({
     required this.callCid,
     required this.eventType,
-    required this.dataJson,
+    this.custom = const {},
   });
 
   final StreamCallCid callCid;
   final String eventType;
-  final Map<String, Object> dataJson;
+  final Map<String, Object> custom;
 
   @override
-  List<Object?> get props => [callCid, eventType, dataJson];
+  List<Object?> get props => [callCid, eventType, custom];
+}
+
+class ReactionInput extends CoordinatorInput {
+  const ReactionInput({
+    required this.callCid,
+    required this.reactionType,
+    this.emojiCode,
+    this.custom = const {},
+  });
+
+  final StreamCallCid callCid;
+  final String reactionType;
+  final String? emojiCode;
+  final Map<String, Object> custom;
+
+  @override
+  List<Object?> get props => [callCid, reactionType, emojiCode, custom];
 }
 
 class QueryUsersInput extends CoordinatorInput {

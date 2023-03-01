@@ -16,6 +16,73 @@ class DefaultApi {
 
   final ApiClient apiClient;
 
+  /// List recordings
+  ///
+  /// Lists recordings
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [String] session (required):
+  Future<Response> listRecordingsWithHttpInfo(String type, String id, String session,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/call/{type}/{id}/{session}/recordings'
+      .replaceAll('{type}', type)
+      .replaceAll('{id}', id)
+      .replaceAll('{session}', session);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// List recordings
+  ///
+  /// Lists recordings
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [String] session (required):
+  Future<ListRecordingsResponse?> listRecordings(String type, String id, String session,) async {
+    final response = await listRecordingsWithHttpInfo(type, id, session,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ListRecordingsResponse',) as ListRecordingsResponse;
+    
+    }
+    return null;
+  }
+
   /// Query call
   ///
   /// Query calls with filter query
@@ -133,6 +200,72 @@ class DefaultApi {
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'RequestPermissionResponse',) as RequestPermissionResponse;
+    
+    }
+    return null;
+  }
+
+  /// Send reaction to the call
+  ///
+  /// Sends reaction to the call
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [SendReactionRequest] sendReactionRequest (required):
+  Future<Response> sendVideoReactionWithHttpInfo(String type, String id, SendReactionRequest sendReactionRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/call/{type}/{id}/reaction'
+      .replaceAll('{type}', type)
+      .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody = sendReactionRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Send reaction to the call
+  ///
+  /// Sends reaction to the call
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [SendReactionRequest] sendReactionRequest (required):
+  Future<SendReactionResponse?> sendVideoReaction(String type, String id, SendReactionRequest sendReactionRequest,) async {
+    final response = await sendVideoReactionWithHttpInfo(type, id, sendReactionRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'SendReactionResponse',) as SendReactionResponse;
     
     }
     return null;
