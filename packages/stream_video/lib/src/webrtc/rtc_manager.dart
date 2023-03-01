@@ -19,7 +19,7 @@ import 'model/rtc_video_dimension.dart';
 import 'peer_connection.dart';
 import 'peer_type.dart';
 import 'rtc_parser.dart';
-import 'rtc_track.dart';
+import 'rtc_track/rtc_track.dart';
 
 /// {@template OnPublisherTrackMuted}
 /// Callback for when a publisher track is muted.
@@ -294,6 +294,11 @@ extension PublisherRtcManager on RtcManager {
     required RtcLocalTrack<AudioConstraints> track,
     bool stopTrackOnMute = true,
   }) async {
+    // Add publisherId to the trackIdPrefix if it's a local track.
+    if (track.trackIdPrefix == kLocalTrackIdPrefix) {
+      track = track.copyWith(trackIdPrefix: publisherId);
+    }
+
     // Adding early as we need to access it in the onPublisherNegotiationNeeded
     // callback.
     _logger.d(() => '[publishAudioTrack] track: $track');
@@ -323,6 +328,11 @@ extension PublisherRtcManager on RtcManager {
     required RtcLocalTrack<VideoConstraints> track,
     bool stopTrackOnMute = true,
   }) async {
+    // Add publisherId to the trackIdPrefix if it's a local track.
+    if (track.trackIdPrefix == kLocalTrackIdPrefix) {
+      track = track.copyWith(trackIdPrefix: publisherId);
+    }
+
     // Adding early as we need to access it in the onPublisherNegotiationNeeded
     // callback.
     _logger.i(() => '[publishVideoTrack] track: $track');
@@ -409,46 +419,34 @@ extension PublisherRtcManager on RtcManager {
     AudioConstraints constraints = const AudioConstraints(),
   }) async {
     _logger.d(() => '[createAudioTrack] constraints: ${constraints.toMap()}');
-    final stream = await rtc.navigator.mediaDevices.getMedia(constraints);
-    final audioTrack = stream.getAudioTracks().firstOrNull;
+    final audioTrack = await RtcLocalTrack.audio(
+      trackIdPrefix: publisherId,
+      constraints: constraints,
+    );
 
     if (audioTrack == null) {
       _logger.w(() => '[createAudioTrack] rejected (track is null)');
       return null;
     }
 
-    final track = RtcLocalTrack(
-      trackIdPrefix: publisherId,
-      trackType: SfuTrackType.audio,
-      mediaStream: stream,
-      mediaTrack: audioTrack,
-      mediaConstraints: constraints,
-    );
-
-    return track;
+    return audioTrack;
   }
 
   Future<RtcLocalTrack<CameraConstraints>?> createCameraTrack({
     CameraConstraints constraints = const CameraConstraints(),
   }) async {
     _logger.d(() => '[createCameraTrack] constraints: ${constraints.toMap()}');
-    final stream = await rtc.navigator.mediaDevices.getMedia(constraints);
-    final videoTrack = stream.getVideoTracks().firstOrNull;
+    final videoTrack = await RtcLocalTrack.camera(
+      trackIdPrefix: publisherId,
+      constraints: constraints,
+    );
 
     if (videoTrack == null) {
       _logger.w(() => '[createCameraTrack] rejected (track is null)');
       return null;
     }
 
-    final track = RtcLocalTrack(
-      trackIdPrefix: publisherId,
-      trackType: SfuTrackType.video,
-      mediaStream: stream,
-      mediaTrack: videoTrack,
-      mediaConstraints: constraints,
-    );
-
-    return track;
+    return videoTrack;
   }
 
   Future<RtcLocalTrack<ScreenShareConstraints>?> createScreenShareTrack({
@@ -457,64 +455,17 @@ extension PublisherRtcManager on RtcManager {
     _logger.d(
       () => '[createScreenShareTrack] constraints: ${constraints.toMap()}',
     );
-    final stream = await rtc.navigator.mediaDevices.getMedia(constraints);
-    final videoTrack = stream.getVideoTracks().firstOrNull;
+    final screenShareTrack = await RtcLocalTrack.screenShare(
+      trackIdPrefix: publisherId,
+      constraints: constraints,
+    );
 
-    if (videoTrack == null) {
+    if (screenShareTrack == null) {
       _logger.w(() => '[createScreenShareTrack] rejected (track is null)');
       return null;
     }
 
-    final track = RtcLocalTrack(
-      trackIdPrefix: publisherId,
-      trackType: SfuTrackType.screenShare,
-      mediaStream: stream,
-      mediaTrack: videoTrack,
-      mediaConstraints: constraints,
-    );
-
-    return track;
-  }
-
-  Future<List<RtcLocalTrack>> createScreenShareTrackWithAudio({
-    ScreenShareConstraints constraints = const ScreenShareConstraints(),
-  }) async {
-    _logger.d(
-      () => '[createScreenShareTrackWithAudio] '
-          'constraints: ${constraints.toMap()}',
-    );
-    final stream = await rtc.navigator.mediaDevices.getMedia(constraints);
-
-    final tracks = <RtcLocalTrack>[];
-    final videoTrack = stream.getVideoTracks().firstOrNull;
-    if (videoTrack != null) {
-      _logger.v(() => '[createScreenShareTrackWithAudio] vTrack is created');
-      tracks.add(
-        RtcLocalTrack(
-          trackIdPrefix: publisherId,
-          trackType: SfuTrackType.screenShare,
-          mediaStream: stream,
-          mediaTrack: videoTrack,
-          mediaConstraints: constraints,
-        ),
-      );
-    }
-
-    final audioTrack = stream.getAudioTracks().firstOrNull;
-    if (audioTrack != null) {
-      _logger.v(() => '[createScreenShareTrackWithAudio] aTrack is created');
-      tracks.add(
-        RtcLocalTrack(
-          trackIdPrefix: publisherId,
-          trackType: SfuTrackType.screenShareAudio,
-          mediaStream: stream,
-          mediaTrack: audioTrack,
-          mediaConstraints: constraints,
-        ),
-      );
-    }
-
-    return tracks;
+    return screenShareTrack;
   }
 
   Future<RtcLocalTrack?> restartTrack({

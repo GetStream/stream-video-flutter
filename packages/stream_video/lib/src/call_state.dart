@@ -3,8 +3,10 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 import 'call_participant_state.dart';
+import 'call_permission.dart';
 import 'models/call_cid.dart';
 import 'models/call_metadata.dart';
+import 'models/call_setting.dart';
 import 'models/call_status.dart';
 
 /// TODO - Class that holds any information about the call, including participants
@@ -20,6 +22,9 @@ class CallState extends Equatable {
       createdByUserId: '',
       sessionId: '',
       status: CallStatus.idle(),
+      isRecording: false,
+      settings: const CallSettings.disabled(),
+      ownCapabilities: List.unmodifiable(const []),
       callParticipants: List.unmodifiable(const []),
     );
   }
@@ -35,7 +40,10 @@ class CallState extends Equatable {
       callCid: callCid,
       createdByUserId: metadata.info.createdByUserId,
       sessionId: '',
-      status: metadata.toCallStatus(currentUserId, ringing),
+      status: metadata.toCallStatus(currentUserId, ringing: ringing),
+      isRecording: false,
+      settings: metadata.details.settings,
+      ownCapabilities: List.unmodifiable(metadata.details.ownCapabilities),
       callParticipants: List.unmodifiable(
         metadata.toCallParticipants(
           currentUserId,
@@ -51,6 +59,9 @@ class CallState extends Equatable {
     required this.createdByUserId,
     required this.sessionId,
     required this.status,
+    required this.isRecording,
+    required this.settings,
+    required this.ownCapabilities,
     required this.callParticipants,
   });
 
@@ -59,6 +70,9 @@ class CallState extends Equatable {
   final String createdByUserId;
   final String sessionId;
   final CallStatus status;
+  final bool isRecording;
+  final CallSettings settings;
+  final List<CallPermission> ownCapabilities;
   final List<CallParticipantState> callParticipants;
 
   CallParticipantState? get localParticipant {
@@ -77,6 +91,9 @@ class CallState extends Equatable {
     String? createdByUserId,
     String? sessionId,
     CallStatus? status,
+    bool? isRecording,
+    CallSettings? settings,
+    List<CallPermission>? ownCapabilities,
     List<CallParticipantState>? callParticipants,
   }) {
     return CallState._(
@@ -85,6 +102,9 @@ class CallState extends Equatable {
       createdByUserId: createdByUserId ?? this.createdByUserId,
       sessionId: sessionId ?? this.sessionId,
       status: status ?? this.status,
+      isRecording: isRecording ?? this.isRecording,
+      settings: settings ?? this.settings,
+      ownCapabilities: ownCapabilities ?? this.ownCapabilities,
       callParticipants: callParticipants ?? this.callParticipants,
     );
   }
@@ -96,6 +116,9 @@ class CallState extends Equatable {
         createdByUserId,
         sessionId,
         status,
+        isRecording,
+        settings,
+        ownCapabilities,
         callParticipants,
       ];
 
@@ -103,12 +126,17 @@ class CallState extends Equatable {
   String toString() {
     return 'CallState{currentUserId: $currentUserId, callCid: $callCid, '
         'createdByUserId: $createdByUserId, status: $status, '
+        'isRecordingInProgress: $isRecording, settings: $settings, '
+        'ownCapabilities: $ownCapabilities, '
         'sessionId: $sessionId, callParticipants: $callParticipants}';
   }
 }
 
 extension on CallMetadata {
-  CallStatus toCallStatus(String currentUserId, bool ringing) {
+  CallStatus toCallStatus(
+    String currentUserId, {
+    required bool ringing,
+  }) {
     final createdByMe = currentUserId == info.createdByUserId;
     if (createdByMe && ringing) {
       return CallStatus.outgoing();
@@ -121,15 +149,16 @@ extension on CallMetadata {
 
   List<CallParticipantState> toCallParticipants(String currentUserId) {
     final result = <CallParticipantState>[];
-    for (final userId in details.memberUserIds) {
+    for (final userId in details.members.keys) {
       final member = details.members[userId];
+      final user = users[userId];
       final isLocal = currentUserId == userId;
       result.add(
         CallParticipantState(
           userId: userId,
-          role: member?.role ?? '',
-          name: '',
-          profileImageURL: '',
+          role: member?.role ?? user?.role ?? '',
+          name: user?.name ?? '',
+          profileImageURL: user?.imageUrl ?? '',
           sessionId: '',
           trackIdPrefix: '',
           isLocal: isLocal,

@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../call_permission.dart';
 import 'call_cid.dart';
+import 'call_setting.dart';
 
 @immutable
 class CallMetadata with EquatableMixin {
@@ -26,28 +28,32 @@ class CallMetadata with EquatableMixin {
 @immutable
 class CallDetails with EquatableMixin {
   const CallDetails({
-    required this.memberUserIds,
     required this.members,
+    required this.ownCapabilities,
+    required this.settings,
     required this.isBroadcastingEnabled,
     required this.isRecordingEnabled,
   });
 
-  final List<String> memberUserIds;
   final Map<String, CallMember> members;
+  final Iterable<CallPermission> ownCapabilities;
+  final CallSettings settings;
   final bool isBroadcastingEnabled;
   final bool isRecordingEnabled;
 
   @override
   List<Object> get props => [
-        memberUserIds,
         members,
+        ownCapabilities,
+        settings,
         isBroadcastingEnabled,
         isRecordingEnabled,
       ];
 
   @override
   String toString() {
-    return 'CallDetails{memberUserIds: $memberUserIds, members: $members, '
+    return 'CallDetails{members: $members, '
+        'capabilities: $ownCapabilities, settings: $settings, '
         'isBroadcastingEnabled: $isBroadcastingEnabled, '
         'isRecordingEnabled: $isRecordingEnabled}';
   }

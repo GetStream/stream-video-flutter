@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-class CallAccepted {
-  /// Returns a new [CallAccepted] instance.
-  CallAccepted({
+class CallRejectedEvent {
+  /// Returns a new [CallRejectedEvent] instance.
+  CallRejectedEvent({
     required this.callCid,
     required this.createdAt,
     required this.type,
@@ -28,7 +28,7 @@ class CallAccepted {
   UserResponse user;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallAccepted &&
+  bool operator ==(Object other) => identical(this, other) || other is CallRejectedEvent &&
      other.callCid == callCid &&
      other.createdAt == createdAt &&
      other.type == type &&
@@ -43,7 +43,7 @@ class CallAccepted {
     (user.hashCode);
 
   @override
-  String toString() => 'CallAccepted[callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
+  String toString() => 'CallRejectedEvent[callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -54,10 +54,10 @@ class CallAccepted {
     return json;
   }
 
-  /// Returns a new [CallAccepted] instance and imports its values from
+  /// Returns a new [CallRejectedEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static CallAccepted? fromJson(dynamic value) {
+  static CallRejectedEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -66,13 +66,13 @@ class CallAccepted {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallAccepted[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallAccepted[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "CallRejectedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "CallRejectedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return CallAccepted(
+      return CallRejectedEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
         type: mapValueOfType<String>(json, r'type')!,
@@ -82,11 +82,11 @@ class CallAccepted {
     return null;
   }
 
-  static List<CallAccepted>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <CallAccepted>[];
+  static List<CallRejectedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <CallRejectedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CallAccepted.fromJson(row);
+        final value = CallRejectedEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -95,12 +95,12 @@ class CallAccepted {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallAccepted> mapFromJson(dynamic json) {
-    final map = <String, CallAccepted>{};
+  static Map<String, CallRejectedEvent> mapFromJson(dynamic json) {
+    final map = <String, CallRejectedEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallAccepted.fromJson(entry.value);
+        final value = CallRejectedEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -109,13 +109,13 @@ class CallAccepted {
     return map;
   }
 
-  // maps a json object with a list of CallAccepted-objects as value to a dart map
-  static Map<String, List<CallAccepted>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<CallAccepted>>{};
+  // maps a json object with a list of CallRejectedEvent-objects as value to a dart map
+  static Map<String, List<CallRejectedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<CallRejectedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallAccepted.listFromJson(entry.value, growable: growable,);
+        final value = CallRejectedEvent.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }

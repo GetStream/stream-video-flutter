@@ -1,14 +1,15 @@
 import 'dart:async';
 
 import '../../stream_video.dart';
+import '../call_permission.dart';
 import '../call_state_manager.dart';
+import '../coordinator/models/coordinator_events.dart';
 import '../errors/video_error_composer.dart';
 import '../models/call_credentials.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../utils/none.dart';
-import 'call_settings.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 
@@ -20,7 +21,7 @@ const _tag = 'SV:Call';
 int _callSeq = 1;
 
 /// Represents a [CallImpl] in which you can connect to.
-class CallImpl extends Call {
+class CallImpl implements Call {
   factory CallImpl({
     required StreamCallCid callCid,
     StreamVideo? streamVideo,
@@ -71,11 +72,22 @@ class CallImpl extends Call {
         _stateManager = stateManager,
         _streamVideo = streamVideo {
     streamLog.i(_tag, () => '<init> state: ${stateManager.state.value}');
-    _subscriptions.add(_idCoordEvents, streamVideo.events.listen((event) {
-      _logger.v(() => '[onCallCoordEvent] event.type: ${event.runtimeType}');
-      _logger.v(() => '[onCallCoordEvent] calStatus: ${state.value.status}');
-      _stateManager.onCoordinatorEvent(event);
-    }));
+    _subscriptions.add(
+      _idCoordEvents,
+      streamVideo.events.on<CoordinatorCallEvent>((event) {
+        // Return if the event is not for this call.
+        if (event.callCid != state.value.callCid.value) return;
+        _logger.v(() => '[onCallCoordEvent] event.type: ${event.runtimeType}');
+        _logger.v(() => '[onCallCoordEvent] calStatus: ${state.value.status}');
+
+        if (event is CoordinatorCallPermissionRequestEvent) {
+          // Notify the client about the permission request.
+          return onPermissionRequest?.call(event);
+        }
+
+        _stateManager.onCoordinatorEvent(event);
+      }),
+    );
   }
 
   late final _logger = taggedLogger(tag: '$_tag-${_callSeq++}');
@@ -86,7 +98,7 @@ class CallImpl extends Call {
   final CallStateManager _stateManager;
 
   @override
-  StreamCallCid get callCid => _stateManager.state.value.callCid;
+  StreamCallCid get callCid => state.value.callCid;
 
   @override
   StateEmitter<CallState> get state => _stateManager.state;
@@ -94,6 +106,9 @@ class CallImpl extends Call {
   @override
   SharedEmitter<SfuEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<SfuEvent>();
+
+  @override
+  OnCallPermissionRequest? onPermissionRequest;
 
   final _status = MutableStateEmitterImpl<_ConnectionStatus>(
     _ConnectionStatus.disconnected,
@@ -106,18 +121,8 @@ class CallImpl extends Call {
     return 'Call{cid: $callCid}';
   }
 
-  @override
-  Future<Result<CallCreated>> dial({
-    required List<String> participantIds,
-  }) async {
-    return create(
-      participantIds: participantIds,
-      ringing: true,
-    );
-  }
-
   Future<Result<None>> _acceptCall(AcceptCall action) async {
-    final state = _stateManager.state.value;
+    final state = this.state.value;
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
       _logger.w(() => '[acceptCall] rejected (invalid status): $status');
@@ -133,7 +138,7 @@ class CallImpl extends Call {
   }
 
   Future<Result<None>> _rejectCall(RejectCall action) async {
-    final state = _stateManager.state.value;
+    final state = this.state.value;
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
       _logger.w(() => '[rejectCall] rejected (invalid status): $status');
@@ -149,7 +154,7 @@ class CallImpl extends Call {
   }
 
   Future<Result<None>> _cancelCall(CancelCall action) async {
-    final state = _stateManager.state.value;
+    final state = this.state.value;
     final status = state.status;
     _logger.d(() => '[cancelCall] status: $status');
     if (status is! CallStatusOutgoing || status.acceptedByCallee) {
@@ -160,42 +165,6 @@ class CallImpl extends Call {
     _logger.v(() => '[cancelCall] completed: $result');
     if (result is Success<None>) {
       await _stateManager.onCallControlAction(action);
-    }
-    return result;
-  }
-
-  @override
-  Future<Result<CallReceivedOrCreated>> getOrCreate({
-    List<String> participantIds = const [],
-    bool ringing = false,
-  }) async {
-    _logger.d(() => '[getOrCreate] no args');
-    final state = _stateManager.state.value;
-    final result = await _streamVideo.getOrCreateCall(
-      cid: state.callCid,
-      participantIds: participantIds,
-      ringing: ringing,
-    );
-    if (result is Success<CallReceivedOrCreated>) {
-      await _stateManager.onCallReceivedOrCreated(result.data);
-    }
-    return result;
-  }
-
-  @override
-  Future<Result<CallCreated>> create({
-    List<String> participantIds = const [],
-    bool ringing = false,
-  }) async {
-    _logger.d(() => '[create] no args');
-    final state = _stateManager.state.value;
-    final result = await _streamVideo.createCall(
-      cid: state.callCid,
-      participantIds: participantIds,
-      ringing: ringing,
-    );
-    if (result is Success<CallCreated>) {
-      await _stateManager.onCallCreated(result.data);
     }
     return result;
   }
@@ -214,7 +183,7 @@ class CallImpl extends Call {
 
   @override
   Future<Result<None>> connect({
-    CallSettings settings = const CallSettings(),
+    CallConnectOptions options = const CallConnectOptions(),
   }) async {
     if (_status.value == _ConnectionStatus.connected) {
       _logger.w(() => '[connect] rejected (connected)');
@@ -224,7 +193,7 @@ class CallImpl extends Call {
       _logger.v(() => '[connect] await "connecting" change');
       final status = await _status.firstWhere(
         (it) => it != _ConnectionStatus.connecting,
-        timeLimit: settings.dropTimeout,
+        timeLimit: options.dropTimeout,
       );
       if (status == _ConnectionStatus.connected) {
         return Result.success(None());
@@ -236,7 +205,7 @@ class CallImpl extends Call {
     Call.activeCall = this;
     Call.onActiveCall?.call(this);
     _status.value = _ConnectionStatus.connecting;
-    final result = await _connect(settings);
+    final result = await _connect(options);
     if (result.isSuccess) {
       _status.value = _ConnectionStatus.connected;
     } else {
@@ -245,8 +214,8 @@ class CallImpl extends Call {
     return result;
   }
 
-  Future<Result<None>> _connect(CallSettings settings) async {
-    _logger.d(() => '[connect] settings: $settings');
+  Future<Result<None>> _connect(CallConnectOptions options) async {
+    _logger.d(() => '[connect] options: $options');
     final validation = await _stateManager.validateUserId(_streamVideo);
     if (validation.isFailure) {
       _logger.w(() => '[connect] rejected (validation): $validation');
@@ -254,7 +223,7 @@ class CallImpl extends Call {
     }
     _logger.v(() => '[connect] validated');
 
-    final state = _stateManager.state.value;
+    final state = this.state.value;
     final status = state.status;
     if (!status.isJoinable && !status.isJoined && !status.isJoining) {
       _logger
@@ -262,10 +231,10 @@ class CallImpl extends Call {
       return Result.error('invalid status: $status');
     }
 
-    final result = await _awaitIfNeeded(settings.dropTimeout);
+    final result = await _awaitIfNeeded(options.dropTimeout);
     if (result.isFailure) {
       _logger.e(() => '[connect] waiting failed: $result');
-      await _stateManager.onWaitingTimeout(settings.dropTimeout);
+      await _stateManager.onWaitingTimeout(options.dropTimeout);
       return result;
     }
 
@@ -286,14 +255,14 @@ class CallImpl extends Call {
     }
     _logger.v(() => '[connect] started session');
     await _stateManager.onConnected();
-    await _applySettings(settings);
+    await _applyConnectOptions(options);
 
     _logger.v(() => '[connect] completed');
     return Result.success(None());
   }
 
   Future<Result<CallCredentials>> _joinIfNeeded() async {
-    final state = _stateManager.state.value;
+    final state = this.state.value;
     final status = state.status;
     if (status is CallStatusJoined) {
       _logger.w(() => '[joinIfNeeded] rejected (already joined): $status');
@@ -329,7 +298,7 @@ class CallImpl extends Call {
 
   Future<Result<None>> _awaitIfNeeded(Duration timeLimit) async {
     try {
-      final state = _stateManager.state.value;
+      final state = this.state.value;
       final status = state.status;
       if (status is CallStatusOutgoing && !status.acceptedByCallee) {
         await _awaitOutgoingToBeAccepted(timeLimit);
@@ -350,7 +319,7 @@ class CallImpl extends Call {
 
   @override
   Future<Result<None>> disconnect() async {
-    final state = _stateManager.state.value;
+    final state = this.state.value;
     _logger.d(() => '[disconnect] state: $state');
     await _stateManager.onDisconnect();
     await _subscriptions.cancelAll();
@@ -403,20 +372,37 @@ class CallImpl extends Call {
     return result;
   }
 
-  Future<void> _applySettings(CallSettings settings) async {
-    if (settings.cameraEnabled) {
-      await apply(const SetCameraEnabled(enabled: true));
+  Future<void> _applyConnectOptions(CallConnectOptions options) async {
+    if (options.camera.enabled) {
+      final cameraTrack = options.camera.track;
+      if (cameraTrack != null) {
+        await apply(SetCameraTrack(cameraTrack));
+      } else {
+        await apply(const SetCameraEnabled(enabled: true));
+      }
     }
-    if (settings.microphoneEnabled) {
-      await apply(const SetMicrophoneEnabled(enabled: true));
+
+    if (options.microphone.enabled) {
+      final microphoneTrack = options.microphone.track;
+      if (microphoneTrack != null) {
+        await apply(SetMicrophoneTrack(microphoneTrack));
+      } else {
+        await apply(const SetMicrophoneEnabled(enabled: true));
+      }
     }
-    if (settings.screenShareEnabled) {
-      await apply(const SetScreenShareEnabled(enabled: true));
+
+    if (options.screenShare.enabled) {
+      final screenShareTrack = options.screenShare.track;
+      if (screenShareTrack != null) {
+        await apply(SetScreenShareTrack(screenShareTrack));
+      } else {
+        await apply(const SetScreenShareEnabled(enabled: true));
+      }
     }
   }
 
   Future<void> _awaitIncomingToBeAccepted(Duration timeLimit) async {
-    await _stateManager.state.firstWhere(
+    await state.firstWhere(
       (state) {
         final status = state.status;
         return status is CallStatusIncoming && status.acceptedByMe;
@@ -426,7 +412,7 @@ class CallImpl extends Call {
   }
 
   Future<void> _awaitOutgoingToBeAccepted(Duration timeLimit) async {
-    await _stateManager.state.firstWhere(
+    await state.firstWhere(
       (state) {
         final status = state.status;
         return status is CallStatusOutgoing && status.acceptedByCallee;
@@ -436,7 +422,7 @@ class CallImpl extends Call {
   }
 
   Future<void> _awaitCallToBeJoined() async {
-    await _stateManager.state.firstWhere(
+    await state.firstWhere(
       (state) {
         return state.status is CallStatusJoined;
       },
@@ -448,9 +434,100 @@ class CallImpl extends Call {
   Future<Result<None>> inviteUsers(List<UserInfo> users) {
     return _streamVideo.inviteUsers(callCid: callCid.value, users: users);
   }
-}
 
-typedef GetUserId = String? Function();
+  @override
+  bool canRequestPermission(CallPermission permission) {
+    final settings = state.valueOrNull?.settings;
+    if (settings == null) {
+      _logger.w(() => 'canRequestPermission: no settings');
+      return false;
+    }
+
+    if (permission == CallPermission.sendAudio) {
+      return settings.audio.accessRequestEnabled;
+    } else if (permission == CallPermission.sendVideo) {
+      return settings.video.accessRequestEnabled;
+    } else if (permission == CallPermission.screenshare) {
+      return settings.screenShare.accessRequestEnabled;
+    }
+
+    _logger.w(() => 'canRequestPermission: unknown permission: $permission');
+    return false;
+  }
+
+  @override
+  Future<Result<None>> requestPermissions(
+    List<CallPermission> permissions,
+  ) async {
+    final canRequest = permissions.every(canRequestPermission);
+    if (!canRequest) {
+      return Result.error(
+        'Some permissions cannot be requested (see canRequestPermission method)',
+      );
+    }
+
+    return _streamVideo.requestPermissions(
+      callCid: callCid,
+      permissions: permissions,
+    );
+  }
+
+  @override
+  bool canUpdateUserPermissions() {
+    final capabilities = state.valueOrNull?.ownCapabilities;
+    if (capabilities == null || capabilities.isEmpty) {
+      _logger.w(() => 'canUpdatePermission: no capabilities');
+      return false;
+    }
+
+    return capabilities.contains(CallPermission.updateCallPermissions);
+  }
+
+  @override
+  Future<Result<None>> updateUserPermissions({
+    required String userId,
+    List<CallPermission> grantPermissions = const [],
+    List<CallPermission> revokePermissions = const [],
+  }) async {
+    final canUpdate = canUpdateUserPermissions();
+    if (!canUpdate) {
+      return Result.error(
+        'Cannot update permissions (see canUpdatePermission method)',
+      );
+    }
+
+    return _streamVideo.updateUserPermissions(
+      callCid: callCid,
+      userId: userId,
+      grantPermissions: grantPermissions,
+      revokePermissions: revokePermissions,
+    );
+  }
+
+  @override
+  Future<Result<None>> startRecording() async {
+    final capabilities = state.valueOrNull?.ownCapabilities;
+    final canRecord = capabilities?.contains(CallPermission.startRecordCall);
+
+    if (canRecord == null || !canRecord) {
+      return Result.error('Cannot start recording (no permission)');
+    }
+
+    return _streamVideo.startRecording(callCid);
+  }
+
+  @override
+  Future<Result<None>> stopRecording() async {
+    final capabilities = state.valueOrNull?.ownCapabilities;
+    final canStopRecord = capabilities?.contains(CallPermission.stopRecordCall);
+
+    if (canStopRecord == null || !canStopRecord) {
+      return Result.error('Cannot stop recording (no permission)');
+    }
+
+    return _streamVideo.stopRecording(callCid);
+  }
+}
 
 CallStateManager _makeCallStateManager(
   StreamCallCid callCid,

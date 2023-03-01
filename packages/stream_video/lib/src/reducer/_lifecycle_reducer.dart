@@ -57,6 +57,8 @@ class LifecycleReducer {
     return state.copyWith(
       status: action.data.toCallStatus(state: state),
       createdByUserId: action.data.metadata.info.createdByUserId,
+      settings: action.data.metadata.details.settings,
+      ownCapabilities: action.data.metadata.details.ownCapabilities.toList(),
       callParticipants: action.data.metadata.toCallParticipants(state),
     );
   }
@@ -77,6 +79,8 @@ class LifecycleReducer {
     return state.copyWith(
       status: CallStatus.joined(action.data.credentials),
       createdByUserId: action.data.metadata.info.createdByUserId,
+      settings: action.data.metadata.details.settings,
+      ownCapabilities: action.data.metadata.details.ownCapabilities.toList(),
       callParticipants: action.data.metadata.toCallParticipants(state),
     );
   }
@@ -155,7 +159,7 @@ extension on CallCreated {
 extension on CallMetadata {
   List<CallParticipantState> toCallParticipants(CallState state) {
     final result = <CallParticipantState>[];
-    for (final userId in users.keys) {
+    for (final userId in details.members.keys) {
       final member = details.members[userId];
       final user = users[userId];
       final isLocal = state.currentUserId == userId;

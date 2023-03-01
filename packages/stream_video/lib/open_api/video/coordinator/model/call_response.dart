@@ -13,6 +13,8 @@ part of openapi.api;
 class CallResponse {
   /// Returns a new [CallResponse] instance.
   CallResponse({
+    required this.backstage,
+    this.blockedUserIds = const [],
     required this.broadcastEgress,
     required this.cid,
     required this.createdAt,
@@ -23,10 +25,15 @@ class CallResponse {
     this.ownCapabilities = const [],
     required this.recordEgress,
     required this.settings,
+    this.startsAt,
     required this.team,
     required this.type,
     required this.updatedAt,
   });
+
+  bool backstage;
+
+  List<String> blockedUserIds;
 
   String broadcastEgress;
 
@@ -41,6 +48,7 @@ class CallResponse {
   /// Custom data for this object
   Map<String, Object> custom;
 
+  /// Date/time when the call ended
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -59,6 +67,15 @@ class CallResponse {
 
   CallSettingsResponse settings;
 
+  /// Date/time when the call will start
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? startsAt;
+
   String team;
 
   /// The type of call
@@ -69,6 +86,8 @@ class CallResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallResponse &&
+     other.backstage == backstage &&
+     other.blockedUserIds == blockedUserIds &&
      other.broadcastEgress == broadcastEgress &&
      other.cid == cid &&
      other.createdAt == createdAt &&
@@ -79,6 +98,7 @@ class CallResponse {
      other.ownCapabilities == ownCapabilities &&
      other.recordEgress == recordEgress &&
      other.settings == settings &&
+     other.startsAt == startsAt &&
      other.team == team &&
      other.type == type &&
      other.updatedAt == updatedAt;
@@ -86,6 +106,8 @@ class CallResponse {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (backstage.hashCode) +
+    (blockedUserIds.hashCode) +
     (broadcastEgress.hashCode) +
     (cid.hashCode) +
     (createdAt.hashCode) +
@@ -96,15 +118,18 @@ class CallResponse {
     (ownCapabilities.hashCode) +
     (recordEgress.hashCode) +
     (settings.hashCode) +
+    (startsAt == null ? 0 : startsAt!.hashCode) +
     (team.hashCode) +
     (type.hashCode) +
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'CallResponse[broadcastEgress=$broadcastEgress, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, endedAt=$endedAt, id=$id, ownCapabilities=$ownCapabilities, recordEgress=$recordEgress, settings=$settings, team=$team, type=$type, updatedAt=$updatedAt]';
+  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcastEgress=$broadcastEgress, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, endedAt=$endedAt, id=$id, ownCapabilities=$ownCapabilities, recordEgress=$recordEgress, settings=$settings, startsAt=$startsAt, team=$team, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'backstage'] = this.backstage;
+      json[r'blocked_user_ids'] = this.blockedUserIds;
       json[r'broadcast_egress'] = this.broadcastEgress;
       json[r'cid'] = this.cid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
@@ -119,6 +144,11 @@ class CallResponse {
       json[r'own_capabilities'] = this.ownCapabilities;
       json[r'record_egress'] = this.recordEgress;
       json[r'settings'] = this.settings;
+    if (this.startsAt != null) {
+      json[r'starts_at'] = this.startsAt!.toUtc().toIso8601String();
+    } else {
+      json[r'starts_at'] = null;
+    }
       json[r'team'] = this.team;
       json[r'type'] = this.type;
       json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
@@ -144,6 +174,10 @@ class CallResponse {
       }());
 
       return CallResponse(
+        backstage: mapValueOfType<bool>(json, r'backstage')!,
+        blockedUserIds: json[r'blocked_user_ids'] is List
+            ? (json[r'blocked_user_ids'] as List).cast<String>()
+            : const [],
         broadcastEgress: mapValueOfType<String>(json, r'broadcast_egress')!,
         cid: mapValueOfType<String>(json, r'cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
@@ -156,6 +190,7 @@ class CallResponse {
             : const [],
         recordEgress: mapValueOfType<String>(json, r'record_egress')!,
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,
+        startsAt: mapDateTime(json, r'starts_at', ''),
         team: mapValueOfType<String>(json, r'team')!,
         type: mapValueOfType<String>(json, r'type')!,
         updatedAt: mapDateTime(json, r'updated_at', '')!,
@@ -208,6 +243,8 @@ class CallResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'backstage',
+    'blocked_user_ids',
     'broadcast_egress',
     'cid',
     'created_at',

@@ -10,54 +10,64 @@
 
 part of openapi.api;
 
-class CallUpdated {
-  /// Returns a new [CallUpdated] instance.
-  CallUpdated({
-    required this.call,
-    this.capabilitiesByRole = const {},
+class CallEndedEvent {
+  /// Returns a new [CallEndedEvent] instance.
+  CallEndedEvent({
+    required this.callCid,
     required this.createdAt,
     required this.type,
+    this.user,
   });
 
-  CallResponse call;
-
-  Map<String, List<String>> capabilitiesByRole;
+  String callCid;
 
   DateTime createdAt;
 
   String type;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  UserResponse? user;
+
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallUpdated &&
-     other.call == call &&
-     other.capabilitiesByRole == capabilitiesByRole &&
+  bool operator ==(Object other) => identical(this, other) || other is CallEndedEvent &&
+     other.callCid == callCid &&
      other.createdAt == createdAt &&
-     other.type == type;
+     other.type == type &&
+     other.user == user;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (call.hashCode) +
-    (capabilitiesByRole.hashCode) +
+    (callCid.hashCode) +
     (createdAt.hashCode) +
-    (type.hashCode);
+    (type.hashCode) +
+    (user == null ? 0 : user!.hashCode);
 
   @override
-  String toString() => 'CallUpdated[call=$call, capabilitiesByRole=$capabilitiesByRole, createdAt=$createdAt, type=$type]';
+  String toString() => 'CallEndedEvent[callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call'] = this.call;
-      json[r'capabilities_by_role'] = this.capabilitiesByRole;
+      json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'type'] = this.type;
+    if (this.user != null) {
+      json[r'user'] = this.user;
+    } else {
+      json[r'user'] = null;
+    }
     return json;
   }
 
-  /// Returns a new [CallUpdated] instance and imports its values from
+  /// Returns a new [CallEndedEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static CallUpdated? fromJson(dynamic value) {
+  static CallEndedEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -66,29 +76,27 @@ class CallUpdated {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallUpdated[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallUpdated[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "CallEndedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "CallEndedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return CallUpdated(
-        call: CallResponse.fromJson(json[r'call'])!,
-        capabilitiesByRole: json[r'capabilities_by_role'] == null
-          ? const {}
-            : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
+      return CallEndedEvent(
+        callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
         type: mapValueOfType<String>(json, r'type')!,
+        user: UserResponse.fromJson(json[r'user']),
       );
     }
     return null;
   }
 
-  static List<CallUpdated>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <CallUpdated>[];
+  static List<CallEndedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <CallEndedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CallUpdated.fromJson(row);
+        final value = CallEndedEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -97,12 +105,12 @@ class CallUpdated {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallUpdated> mapFromJson(dynamic json) {
-    final map = <String, CallUpdated>{};
+  static Map<String, CallEndedEvent> mapFromJson(dynamic json) {
+    final map = <String, CallEndedEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallUpdated.fromJson(entry.value);
+        final value = CallEndedEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -111,13 +119,13 @@ class CallUpdated {
     return map;
   }
 
-  // maps a json object with a list of CallUpdated-objects as value to a dart map
-  static Map<String, List<CallUpdated>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<CallUpdated>>{};
+  // maps a json object with a list of CallEndedEvent-objects as value to a dart map
+  static Map<String, List<CallEndedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<CallEndedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallUpdated.listFromJson(entry.value, growable: growable,);
+        final value = CallEndedEvent.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -128,8 +136,7 @@ class CallUpdated {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'call',
-    'capabilities_by_role',
+    'call_cid',
     'created_at',
     'type',
   };

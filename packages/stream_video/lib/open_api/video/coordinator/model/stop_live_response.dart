@@ -10,42 +10,43 @@
 
 part of openapi.api;
 
-class Any {
-  /// Returns a new [Any] instance.
-  Any({
-    required this.createdAt,
-    required this.type,
+class StopLiveResponse {
+  /// Returns a new [StopLiveResponse] instance.
+  StopLiveResponse({
+    required this.call,
+    required this.duration,
   });
 
-  DateTime createdAt;
+  CallResponse call;
 
-  String type;
+  /// Duration of the request in human-readable format
+  String duration;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Any &&
-     other.createdAt == createdAt &&
-     other.type == type;
+  bool operator ==(Object other) => identical(this, other) || other is StopLiveResponse &&
+     other.call == call &&
+     other.duration == duration;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (createdAt.hashCode) +
-    (type.hashCode);
+    (call.hashCode) +
+    (duration.hashCode);
 
   @override
-  String toString() => 'Any[createdAt=$createdAt, type=$type]';
+  String toString() => 'StopLiveResponse[call=$call, duration=$duration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'type'] = this.type;
+      json[r'call'] = this.call;
+      json[r'duration'] = this.duration;
     return json;
   }
 
-  /// Returns a new [Any] instance and imports its values from
+  /// Returns a new [StopLiveResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static Any? fromJson(dynamic value) {
+  static StopLiveResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -54,25 +55,25 @@ class Any {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Any[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Any[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "StopLiveResponse[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "StopLiveResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return Any(
-        createdAt: mapDateTime(json, r'created_at', '')!,
-        type: mapValueOfType<String>(json, r'type')!,
+      return StopLiveResponse(
+        call: CallResponse.fromJson(json[r'call'])!,
+        duration: mapValueOfType<String>(json, r'duration')!,
       );
     }
     return null;
   }
 
-  static List<Any>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <Any>[];
+  static List<StopLiveResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <StopLiveResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = Any.fromJson(row);
+        final value = StopLiveResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -81,12 +82,12 @@ class Any {
     return result.toList(growable: growable);
   }
 
-  static Map<String, Any> mapFromJson(dynamic json) {
-    final map = <String, Any>{};
+  static Map<String, StopLiveResponse> mapFromJson(dynamic json) {
+    final map = <String, StopLiveResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = Any.fromJson(entry.value);
+        final value = StopLiveResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -95,13 +96,13 @@ class Any {
     return map;
   }
 
-  // maps a json object with a list of Any-objects as value to a dart map
-  static Map<String, List<Any>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<Any>>{};
+  // maps a json object with a list of StopLiveResponse-objects as value to a dart map
+  static Map<String, List<StopLiveResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<StopLiveResponse>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = Any.listFromJson(entry.value, growable: growable,);
+        final value = StopLiveResponse.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -112,8 +113,8 @@ class Any {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'created_at',
-    'type',
+    'call',
+    'duration',
   };
 }
 

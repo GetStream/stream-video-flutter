@@ -10,61 +10,42 @@
 
 part of openapi.api;
 
-class Custom {
-  /// Returns a new [Custom] instance.
-  Custom({
-    required this.callCid,
+class AnyEvent {
+  /// Returns a new [AnyEvent] instance.
+  AnyEvent({
     required this.createdAt,
-    this.custom = const {},
     required this.type,
-    required this.user,
   });
-
-  String callCid;
 
   DateTime createdAt;
 
-  /// Custom data for this object
-  Map<String, Object> custom;
-
   String type;
 
-  UserResponse user;
-
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Custom &&
-     other.callCid == callCid &&
+  bool operator ==(Object other) => identical(this, other) || other is AnyEvent &&
      other.createdAt == createdAt &&
-     other.custom == custom &&
-     other.type == type &&
-     other.user == user;
+     other.type == type;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (callCid.hashCode) +
     (createdAt.hashCode) +
-    (custom.hashCode) +
-    (type.hashCode) +
-    (user.hashCode);
+    (type.hashCode);
 
   @override
-  String toString() => 'Custom[callCid=$callCid, createdAt=$createdAt, custom=$custom, type=$type, user=$user]';
+  String toString() => 'AnyEvent[createdAt=$createdAt, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'custom'] = this.custom;
       json[r'type'] = this.type;
-      json[r'user'] = this.user;
     return json;
   }
 
-  /// Returns a new [Custom] instance and imports its values from
+  /// Returns a new [AnyEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static Custom? fromJson(dynamic value) {
+  static AnyEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -73,28 +54,25 @@ class Custom {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Custom[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Custom[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "AnyEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "AnyEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return Custom(
-        callCid: mapValueOfType<String>(json, r'call_cid')!,
+      return AnyEvent(
         createdAt: mapDateTime(json, r'created_at', '')!,
-        custom: mapCastOfType<String, Object>(json, r'custom')!,
         type: mapValueOfType<String>(json, r'type')!,
-        user: UserResponse.fromJson(json[r'user'])!,
       );
     }
     return null;
   }
 
-  static List<Custom>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <Custom>[];
+  static List<AnyEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <AnyEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = Custom.fromJson(row);
+        final value = AnyEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -103,12 +81,12 @@ class Custom {
     return result.toList(growable: growable);
   }
 
-  static Map<String, Custom> mapFromJson(dynamic json) {
-    final map = <String, Custom>{};
+  static Map<String, AnyEvent> mapFromJson(dynamic json) {
+    final map = <String, AnyEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = Custom.fromJson(entry.value);
+        final value = AnyEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -117,13 +95,13 @@ class Custom {
     return map;
   }
 
-  // maps a json object with a list of Custom-objects as value to a dart map
-  static Map<String, List<Custom>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<Custom>>{};
+  // maps a json object with a list of AnyEvent-objects as value to a dart map
+  static Map<String, List<AnyEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<AnyEvent>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = Custom.listFromJson(entry.value, growable: growable,);
+        final value = AnyEvent.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -134,11 +112,8 @@ class Custom {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'call_cid',
     'created_at',
-    'custom',
     'type',
-    'user',
   };
 }
 

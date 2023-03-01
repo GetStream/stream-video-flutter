@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 import '../stream_video.dart';
+import 'call_permission.dart';
 import 'coordinator/coordinator_client.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/models/coordinator_inputs.dart' as input;
@@ -422,6 +423,50 @@ class StreamVideoImpl implements StreamVideo {
   }
 
   @override
+  Future<Result<None>> requestPermissions({
+    required StreamCallCid callCid,
+    required List<CallPermission> permissions,
+  }) async {
+    final result = await _client.requestPermissions(
+      input.RequestPermissionsInput(
+        callCid: callCid,
+        permissions: permissions,
+      ),
+    );
+
+    return result;
+  }
+
+  @override
+  Future<Result<None>> updateUserPermissions({
+    required StreamCallCid callCid,
+    required String userId,
+    List<CallPermission> grantPermissions = const [],
+    List<CallPermission> revokePermissions = const [],
+  }) async {
+    final result = await _client.updateUserPermissions(
+      input.UpdateUserPermissionsInput(
+        callCid: callCid,
+        userId: userId,
+        grantPermissions: grantPermissions,
+        revokePermissions: revokePermissions,
+      ),
+    );
+
+    return result;
+  }
+
+  @override
+  Future<Result<None>> startRecording(StreamCallCid callCid) async {
+    return _client.startRecording(callCid);
+  }
+
+  @override
+  Future<Result<None>> stopRecording(StreamCallCid callCid) {
+    return _client.stopRecording(callCid);
+  }
+
+  @override
   Future<Result<CallDevice>> createDevice({
     required String token,
     required String pushProviderId,
@@ -445,8 +490,9 @@ class StreamVideoImpl implements StreamVideo {
   }
 
   Future<void> _initPushNotificationManager(
-      PushNotificationFactory pushNotificationManagerFactrory) async {
-    _pushNotificationManager = await pushNotificationManagerFactrory(this);
+    PushNotificationFactory pushNotificationManagerFactory,
+  ) async {
+    _pushNotificationManager = await pushNotificationManagerFactory(this);
   }
 }
 

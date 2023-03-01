@@ -24,13 +24,13 @@ class DefaultApi {
   ///
   /// Parameters:
   ///
-  /// * [QueryCallRequest] queryCallRequest (required):
-  Future<Response> queryCallsWithHttpInfo(QueryCallRequest queryCallRequest,) async {
+  /// * [QueryCallsRequest] queryCallsRequest (required):
+  Future<Response> queryCallsWithHttpInfo(QueryCallsRequest queryCallsRequest,) async {
     // ignore: prefer_const_declarations
     final path = r'/calls';
 
     // ignore: prefer_final_locals
-    Object? postBody = queryCallRequest;
+    Object? postBody = queryCallsRequest;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
@@ -56,9 +56,9 @@ class DefaultApi {
   ///
   /// Parameters:
   ///
-  /// * [QueryCallRequest] queryCallRequest (required):
-  Future<QueryCallsResponse?> queryCalls(QueryCallRequest queryCallRequest,) async {
-    final response = await queryCallsWithHttpInfo(queryCallRequest,);
+  /// * [QueryCallsRequest] queryCallsRequest (required):
+  Future<QueryCallsResponse?> queryCalls(QueryCallsRequest queryCallsRequest,) async {
+    final response = await queryCallsWithHttpInfo(queryCallsRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

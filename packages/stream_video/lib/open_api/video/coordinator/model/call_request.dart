@@ -18,6 +18,7 @@ class CallRequest {
     this.custom = const {},
     this.members = const [],
     this.settingsOverride,
+    this.startsAt,
     this.team,
   });
 
@@ -55,6 +56,14 @@ class CallRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
+  DateTime? startsAt;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
   String? team;
 
   @override
@@ -64,6 +73,7 @@ class CallRequest {
      other.custom == custom &&
      other.members == members &&
      other.settingsOverride == settingsOverride &&
+     other.startsAt == startsAt &&
      other.team == team;
 
   @override
@@ -74,10 +84,11 @@ class CallRequest {
     (custom.hashCode) +
     (members.hashCode) +
     (settingsOverride == null ? 0 : settingsOverride!.hashCode) +
+    (startsAt == null ? 0 : startsAt!.hashCode) +
     (team == null ? 0 : team!.hashCode);
 
   @override
-  String toString() => 'CallRequest[createdBy=$createdBy, createdById=$createdById, custom=$custom, members=$members, settingsOverride=$settingsOverride, team=$team]';
+  String toString() => 'CallRequest[createdBy=$createdBy, createdById=$createdById, custom=$custom, members=$members, settingsOverride=$settingsOverride, startsAt=$startsAt, team=$team]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -97,6 +108,11 @@ class CallRequest {
       json[r'settings_override'] = this.settingsOverride;
     } else {
       json[r'settings_override'] = null;
+    }
+    if (this.startsAt != null) {
+      json[r'starts_at'] = this.startsAt!.toUtc().toIso8601String();
+    } else {
+      json[r'starts_at'] = null;
     }
     if (this.team != null) {
       json[r'team'] = this.team;
@@ -130,6 +146,7 @@ class CallRequest {
         custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
         members: MemberRequest.listFromJson(json[r'members']) ?? const [],
         settingsOverride: CallSettingsRequest.fromJson(json[r'settings_override']),
+        startsAt: mapDateTime(json, r'starts_at', ''),
         team: mapValueOfType<String>(json, r'team'),
       );
     }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 import '../stream_video.dart';
+import 'call_permission.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'internal/_instance_holder.dart';
 import 'models/call_device.dart';
@@ -42,14 +43,16 @@ const _defaultCoordinatorWsUrl =
 
 /// The client responsible for handling config and maintaining calls
 abstract class StreamVideo {
-  factory StreamVideo(String apiKey,
-      {String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
-      String coordinatorWsUrl = _defaultCoordinatorWsUrl,
-      int latencyMeasurementRounds = 3,
-      Level logLevel = Level.ALL,
-      LogHandlerFunction logHandlerFunction = _defaultLogHandler,
-      PushNotificationFactory pushNotificationFactory =
-          defaultPushNotificationManager}) {
+  factory StreamVideo(
+    String apiKey, {
+    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
+    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
+    int latencyMeasurementRounds = 3,
+    Level logLevel = Level.ALL,
+    LogHandlerFunction logHandlerFunction = _defaultLogHandler,
+    PushNotificationFactory pushNotificationFactory =
+        defaultPushNotificationManager,
+  }) {
     return StreamVideoImpl(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
@@ -124,6 +127,22 @@ abstract class StreamVideo {
     required List<UserInfo> users,
   });
 
+  Future<Result<None>> requestPermissions({
+    required StreamCallCid callCid,
+    required List<CallPermission> permissions,
+  });
+
+  Future<Result<None>> updateUserPermissions({
+    required StreamCallCid callCid,
+    required String userId,
+    List<CallPermission> grantPermissions = const [],
+    List<CallPermission> revokePermissions = const [],
+  });
+
+  Future<Result<None>> startRecording(StreamCallCid callCid);
+
+  Future<Result<None>> stopRecording(StreamCallCid callCid);
+
   Future<Result<CallDevice>> createDevice({
     required String token,
     required String pushProviderId,
@@ -186,4 +205,48 @@ void _defaultLogHandler(LogRecord record) {
   );
   if (record.error != null) print(record.error);
   if (record.stackTrace != null) print(record.stackTrace);
+}
+
+extension StreamVideoX on StreamVideo {
+  /// Connects the [user] to the Stream Video service.
+  Future<Result<None>> connectUserWithToken(
+    UserInfo user,
+    Token token,
+  ) {
+    return connectUser(user, token: token);
+  }
+
+  /// Connects the [user] to the Stream Video service.
+  Future<Result<None>> connectUserWithProvider(
+    UserInfo user,
+    TokenProvider provider,
+  ) {
+    return connectUser(user, provider: provider);
+  }
+
+  /// Grants the [permissions] to the [userId] in the [callCid].
+  Future<Result<None>> grantUserPermissions({
+    required StreamCallCid callCid,
+    required String userId,
+    required List<CallPermission> permissions,
+  }) {
+    return updateUserPermissions(
+      callCid: callCid,
+      userId: userId,
+      grantPermissions: permissions,
+    );
+  }
+
+  /// Revokes the [permissions] from the [userId] in the [callCid].
+  Future<Result<None>> revokeUserPermissions({
+    required StreamCallCid callCid,
+    required String userId,
+    required List<CallPermission> permissions,
+  }) {
+    return updateUserPermissions(
+      callCid: callCid,
+      userId: userId,
+      revokePermissions: permissions,
+    );
+  }
 }

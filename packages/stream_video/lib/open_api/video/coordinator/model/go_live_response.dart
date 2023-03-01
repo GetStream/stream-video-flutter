@@ -10,42 +10,43 @@
 
 part of openapi.api;
 
-class SendEventRequest {
-  /// Returns a new [SendEventRequest] instance.
-  SendEventRequest({
-    this.custom = const {},
-    required this.type,
+class GoLiveResponse {
+  /// Returns a new [GoLiveResponse] instance.
+  GoLiveResponse({
+    required this.call,
+    required this.duration,
   });
 
-  Map<String, Object> custom;
+  CallResponse call;
 
-  String type;
+  /// Duration of the request in human-readable format
+  String duration;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is SendEventRequest &&
-     other.custom == custom &&
-     other.type == type;
+  bool operator ==(Object other) => identical(this, other) || other is GoLiveResponse &&
+     other.call == call &&
+     other.duration == duration;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (custom.hashCode) +
-    (type.hashCode);
+    (call.hashCode) +
+    (duration.hashCode);
 
   @override
-  String toString() => 'SendEventRequest[custom=$custom, type=$type]';
+  String toString() => 'GoLiveResponse[call=$call, duration=$duration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'custom'] = this.custom;
-      json[r'type'] = this.type;
+      json[r'call'] = this.call;
+      json[r'duration'] = this.duration;
     return json;
   }
 
-  /// Returns a new [SendEventRequest] instance and imports its values from
+  /// Returns a new [GoLiveResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static SendEventRequest? fromJson(dynamic value) {
+  static GoLiveResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -54,25 +55,25 @@ class SendEventRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "SendEventRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "SendEventRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "GoLiveResponse[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "GoLiveResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return SendEventRequest(
-        custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
-        type: mapValueOfType<String>(json, r'type')!,
+      return GoLiveResponse(
+        call: CallResponse.fromJson(json[r'call'])!,
+        duration: mapValueOfType<String>(json, r'duration')!,
       );
     }
     return null;
   }
 
-  static List<SendEventRequest>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <SendEventRequest>[];
+  static List<GoLiveResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <GoLiveResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = SendEventRequest.fromJson(row);
+        final value = GoLiveResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -81,12 +82,12 @@ class SendEventRequest {
     return result.toList(growable: growable);
   }
 
-  static Map<String, SendEventRequest> mapFromJson(dynamic json) {
-    final map = <String, SendEventRequest>{};
+  static Map<String, GoLiveResponse> mapFromJson(dynamic json) {
+    final map = <String, GoLiveResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = SendEventRequest.fromJson(entry.value);
+        final value = GoLiveResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -95,13 +96,13 @@ class SendEventRequest {
     return map;
   }
 
-  // maps a json object with a list of SendEventRequest-objects as value to a dart map
-  static Map<String, List<SendEventRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<SendEventRequest>>{};
+  // maps a json object with a list of GoLiveResponse-objects as value to a dart map
+  static Map<String, List<GoLiveResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<GoLiveResponse>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = SendEventRequest.listFromJson(entry.value, growable: growable,);
+        final value = GoLiveResponse.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -112,7 +113,8 @@ class SendEventRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'type',
+    'call',
+    'duration',
   };
 }
 
