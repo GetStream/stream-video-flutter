@@ -72,11 +72,7 @@ class CallAttachment extends StatelessWidget {
                       MaterialPageRoute(
                         fullscreenDialog: true,
                         builder: (context) {
-                          return StreamCallContainer(
-                            call: call,
-                            onBackPressed: () => _finishCall(context, call),
-                            onLeaveCall: () => _finishCall(context, call),
-                          );
+                          return StreamCallContainer(call: call);
                         },
                       ),
                     );
@@ -88,11 +84,5 @@ class CallAttachment extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _finishCall(BuildContext context, Call call) async {
-    await call.disconnect();
-
-    Navigator.of(context).pop();
   }
 }

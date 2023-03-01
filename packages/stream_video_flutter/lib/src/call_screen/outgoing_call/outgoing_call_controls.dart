@@ -8,7 +8,7 @@ class OutgoingCallControls extends StatelessWidget {
   /// Creates a new instance of [OutgoingCallControls].
   const OutgoingCallControls({
     super.key,
-    required this.onHangup,
+    required this.onCancelCallTap,
     required this.onMicrophoneTap,
     required this.onCameraTap,
     this.isMicrophoneEnabled = false,
@@ -16,7 +16,7 @@ class OutgoingCallControls extends StatelessWidget {
   });
 
   /// The action to perform when the hang up button is tapped.
-  final VoidCallback onHangup;
+  final VoidCallback onCancelCallTap;
 
   /// The action to perform when the microphone button is tapped.
   final VoidCallback onMicrophoneTap;
@@ -40,7 +40,7 @@ class OutgoingCallControls extends StatelessWidget {
             icon: const Icon(Icons.call_end_rounded),
             iconColor: Colors.white,
             backgroundColor: Colors.red,
-            onPressed: onHangup,
+            onPressed: onCancelCallTap,
             padding: const EdgeInsets.all(24),
           ),
           const SizedBox(

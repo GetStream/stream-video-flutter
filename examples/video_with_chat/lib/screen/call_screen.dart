@@ -29,32 +29,37 @@ class _CallScreenState extends State<CallScreen> {
           flex: 2,
           child: StreamCallContainer(
             call: widget.call,
-            onBackPressed: () => _finishCall(context),
-            onLeaveCall: () => _finishCall(context),
-            callControlsBuilder: (context, call, participants) {
-              return StreamCallControls(
-                options: customCallControlOptions(
-                  call: call,
-                  channel: widget.channel,
-                  onLeaveCall: () => _finishCall(context),
-                  onChatTap: () {
-                    if (kIsWeb) {
-                      toggleChatPane();
-                    } else {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return StreamChannel(
-                              channel: widget.channel,
-                              child: const ChatScreen(),
-                            );
-                          },
-                          fullscreenDialog: true,
-                        ),
-                      );
-                    }
-                  },
-                ),
+            callContentBuilder: (context, call, callState) {
+              return StreamCallContent(
+                call: call,
+                callState: callState,
+                onBackPressed: () => _finishCall(context),
+                callControlsBuilder: (context, call, callState) {
+                  return StreamCallControls(
+                    options: customCallControlOptions(
+                      call: call,
+                      channel: widget.channel,
+                      onLeaveCallTap: () => _finishCall(context),
+                      onChatTap: () {
+                        if (kIsWeb) {
+                          toggleChatPane();
+                        } else {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return StreamChannel(
+                                  channel: widget.channel,
+                                  child: const ChatScreen(),
+                                );
+                              },
+                              fullscreenDialog: true,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  );
+                },
               );
             },
           ),
@@ -88,7 +93,7 @@ class _CallScreenState extends State<CallScreen> {
 List<Widget> customCallControlOptions({
   required Call call,
   required Channel channel,
-  required VoidCallback onLeaveCall,
+  required VoidCallback onLeaveCallTap,
   required VoidCallback onChatTap,
 }) {
   final localParticipant = call.state.value.localParticipant;
@@ -102,7 +107,7 @@ List<Widget> customCallControlOptions({
     ToggleMicrophoneOption(call: call, localParticipant: localParticipant!),
     ToggleCameraOption(call: call, localParticipant: localParticipant),
     FlipCameraOption(call: call, localParticipant: localParticipant),
-    LeaveCallOption(onLeaveCall: onLeaveCall),
+    LeaveCallOption(call: call, onLeaveCallTap: onLeaveCallTap),
   ];
 }
 

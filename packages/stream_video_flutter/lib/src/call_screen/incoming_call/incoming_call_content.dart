@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../../theme/incoming_outgoing_call_theme.dart';
 import '../../utils/extensions.dart';
 import '../common/call_background.dart';
 import '../common/calling_participants.dart';
@@ -15,10 +14,10 @@ class IncomingCallContent extends StatelessWidget {
     super.key,
     required this.call,
     required this.callState,
-    required this.onRejectPressed,
-    required this.onAcceptPressed,
-    required this.onMicrophoneTap,
-    required this.onCameraTap,
+    this.onAcceptCallTap,
+    this.onDeclineCallTap,
+    this.onMicrophoneTap,
+    this.onCameraTap,
     this.singleParticipantAvatarTheme,
     this.multipleParticipantAvatarTheme,
     this.singleParticipantTextStyle,
@@ -33,16 +32,16 @@ class IncomingCallContent extends StatelessWidget {
   final CallState callState;
 
   /// The action to perform when the accept call button is tapped.
-  final VoidCallback onAcceptPressed;
+  final VoidCallback? onAcceptCallTap;
 
-  /// The action to perform when the hang up button is tapped.
-  final VoidCallback onRejectPressed;
+  /// The action to perform when the decline call button is tapped.
+  final VoidCallback? onDeclineCallTap;
 
   /// The action to perform when the microphone button is tapped.
-  final VoidCallback onMicrophoneTap;
+  final VoidCallback? onMicrophoneTap;
 
   /// The action to perform when the camera button is tapped.
-  final VoidCallback onCameraTap;
+  final VoidCallback? onCameraTap;
 
   /// Theme for the avatar in a call with one participant.
   final StreamUserAvatarThemeData? singleParticipantAvatarTheme;
@@ -105,14 +104,33 @@ class IncomingCallContent extends StatelessWidget {
             ),
             const Spacer(),
             IncomingCallControls(
-              onAccept: onAcceptPressed,
-              onHangup: onRejectPressed,
-              onMicrophoneTap: onMicrophoneTap,
-              onCameraTap: onCameraTap,
+              onAcceptCallTap: _onAcceptCallTap,
+              onDeclineCallTap: () => _onDeclineCallTap(context),
+              onMicrophoneTap: onMicrophoneTap ?? () {},
+              onCameraTap: onCameraTap ?? () {},
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _onDeclineCallTap(BuildContext context) async {
+    if (onDeclineCallTap != null) {
+      onDeclineCallTap!();
+    } else {
+      await call.apply(const RejectCall());
+      await call.disconnect();
+
+      await Navigator.maybePop(context);
+    }
+  }
+
+  Future<void> _onAcceptCallTap() async {
+    if (onAcceptCallTap != null) {
+      onAcceptCallTap!();
+    } else {
+      await call.apply(const AcceptCall());
+    }
   }
 }

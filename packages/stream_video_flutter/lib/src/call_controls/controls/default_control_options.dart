@@ -6,13 +6,13 @@ import '../../../stream_video_flutter.dart';
 List<Widget> defaultCallControlOptions({
   required Call call,
   required CallParticipantState localParticipant,
-  required VoidCallback onLeaveCall,
+  VoidCallback? onLeaveCallTap,
 }) {
   return [
     const ToggleSpeakerphoneOption(),
     ToggleMicrophoneOption(call: call, localParticipant: localParticipant),
     ToggleCameraOption(call: call, localParticipant: localParticipant),
     FlipCameraOption(call: call, localParticipant: localParticipant),
-    LeaveCallOption(onLeaveCall: onLeaveCall),
+    LeaveCallOption(call: call, onLeaveCallTap: onLeaveCallTap),
   ];
 }

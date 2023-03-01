@@ -8,8 +8,8 @@ class IncomingCallControls extends StatelessWidget {
   /// Creates a new instance of [IncomingCallControls].
   const IncomingCallControls({
     super.key,
-    required this.onAccept,
-    required this.onHangup,
+    required this.onAcceptCallTap,
+    required this.onDeclineCallTap,
     required this.onMicrophoneTap,
     required this.onCameraTap,
     this.isMicrophoneEnabled = false,
@@ -17,10 +17,10 @@ class IncomingCallControls extends StatelessWidget {
   });
 
   /// The action to perform when the accept call button is tapped.
-  final VoidCallback onAccept;
+  final VoidCallback onAcceptCallTap;
 
   /// The action to perform when the hang up button is tapped.
-  final VoidCallback onHangup;
+  final VoidCallback onDeclineCallTap;
 
   /// The action to perform when the microphone button is tapped.
   final VoidCallback onMicrophoneTap;
@@ -47,14 +47,14 @@ class IncomingCallControls extends StatelessWidget {
                 icon: const Icon(Icons.call_end_rounded),
                 iconColor: Colors.white,
                 backgroundColor: Colors.red,
-                onPressed: onHangup,
+                onPressed: onDeclineCallTap,
                 padding: const EdgeInsets.all(24),
               ),
               CallControlOption(
                 icon: const Icon(Icons.call_rounded),
                 iconColor: Colors.white,
                 backgroundColor: Colors.green,
-                onPressed: onAccept,
+                onPressed: onAcceptCallTap,
                 padding: const EdgeInsets.all(24),
               ),
             ],

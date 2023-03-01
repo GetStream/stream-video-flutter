@@ -32,17 +32,9 @@ mixin AppRoutes {
           builder: (context) {
             final call = settings.arguments as Call;
 
-            void navigateHome() {
-              Navigator.of(context).pushReplacementNamed(Routes.HOME);
-            }
-
             return StreamUsersConfiguration(
               usersProvider: MockUsersProvider(),
-              child: StreamCallContainer(
-                call: call,
-                onBackPressed: navigateHome,
-                onLeaveCall: navigateHome,
-              ),
+              child: StreamCallContainer(call: call),
             );
           },
         );

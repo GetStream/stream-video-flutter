@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../stream_video_flutter.dart';
 
 /// A widget that renders a screen sharing track in the screen.
-class ScreenShareItem extends StatelessWidget {
-  /// Creates a new instance of [ScreenShareItem].
-  const ScreenShareItem({
+class ScreenShareContent extends StatelessWidget {
+  /// Creates a new instance of [ScreenShareContent].
+  const ScreenShareContent({
     super.key,
     required this.call,
     required this.participant,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../../theme/incoming_outgoing_call_theme.dart';
 import '../../utils/extensions.dart';
 import '../common/call_background.dart';
 import '../common/calling_participants.dart';
@@ -16,9 +15,9 @@ class OutgoingCallContent extends StatelessWidget {
     super.key,
     required this.call,
     required this.callState,
-    required this.onCancelPressed,
-    required this.onMicrophoneTap,
-    required this.onCameraTap,
+    this.onCancelCallTap,
+    this.onMicrophoneTap,
+    this.onCameraTap,
     this.singleParticipantAvatarTheme,
     this.multipleParticipantAvatarTheme,
     this.singleParticipantTextStyle,
@@ -32,14 +31,14 @@ class OutgoingCallContent extends StatelessWidget {
   /// Holds information about the call.
   final CallState callState;
 
-  /// The action to perform when the hang up button is tapped.
-  final VoidCallback onCancelPressed;
+  /// The action to perform when the cancel call button is tapped.
+  final VoidCallback? onCancelCallTap;
 
   /// The action to perform when the microphone button is tapped.
-  final VoidCallback onMicrophoneTap;
+  final VoidCallback? onMicrophoneTap;
 
   /// The action to perform when the camera button is tapped.
-  final VoidCallback onCameraTap;
+  final VoidCallback? onCameraTap;
 
   /// Theme for the avatar in a call with one participant.
   final StreamUserAvatarThemeData? singleParticipantAvatarTheme;
@@ -102,13 +101,24 @@ class OutgoingCallContent extends StatelessWidget {
             ),
             const Spacer(),
             OutgoingCallControls(
-              onHangup: onCancelPressed,
-              onMicrophoneTap: onMicrophoneTap,
-              onCameraTap: onCameraTap,
+              onCancelCallTap: () => _onCancelCallTap(context),
+              onMicrophoneTap: onMicrophoneTap ?? () {},
+              onCameraTap: onCameraTap ?? () {},
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _onCancelCallTap(BuildContext context) async {
+    if (onCancelCallTap != null) {
+      onCancelCallTap!();
+    } else {
+      await call.apply(const CancelCall());
+      await call.disconnect();
+
+      await Navigator.maybePop(context);
+    }
   }
 }

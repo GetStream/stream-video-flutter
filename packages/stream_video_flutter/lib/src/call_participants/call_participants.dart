@@ -4,9 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../utils/device_segmentation.dart';
 import '../widgets/tile_view.dart';
-import 'screen_share_item.dart';
 
 /// The maximum number of participants displayed in a grid on mobile.
 const maxRemoteParticipantsMobile = 3;
@@ -14,15 +12,32 @@ const maxRemoteParticipantsMobile = 3;
 /// The maximum number of participants displayed in a grid on desktop.
 const maxRemoteParticipantsDesktop = 24;
 
-/// Builder function used to build a participant grid item.
-typedef CallParticipantWidgetBuilder = Widget Function(
+/// Builder function used to build a participant item.
+typedef CallParticipantBuilder = Widget Function(
   BuildContext context,
+  Call call,
   CallParticipantState participant,
 );
 
-/// Builder function used to build a screen sharing item.
-typedef ScreenShareItemBuilder = Widget Function(
+/// Builder function used to build a local video widget.
+typedef LocalVideoBuilder = Widget Function(
   BuildContext context,
+  Call call,
+  CallParticipantState participant,
+  Widget localVideoChild,
+);
+
+/// Builder function used to build a screen sharing content.
+typedef ScreenShareContentBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallParticipantState participant,
+);
+
+/// Builder function used to build participant item in screen sharing mode.
+typedef ScreenShareParticipantBuilder = Widget Function(
+  BuildContext context,
+  Call call,
   CallParticipantState participant,
 );
 
@@ -52,9 +67,11 @@ class StreamCallParticipants extends StatelessWidget {
     required this.participants,
     this.filter = _defaultFilter,
     this.sort = _defaultSort,
-    this.screenShareItemBuilder,
-    this.itemBuilder,
-    this.enableLocalVideo = true,
+    this.enableLocalVideo,
+    this.callParticipantBuilder,
+    this.localVideoBuilder,
+    this.screenShareContentBuilder,
+    this.screenShareParticipantBuilder,
     super.key,
   });
 
@@ -70,14 +87,20 @@ class StreamCallParticipants extends StatelessWidget {
   /// Used for sorting the call participants.
   final Sort<CallParticipantState> sort;
 
-  /// Builder function used to build a screen sharing item.
-  final ScreenShareItemBuilder? screenShareItemBuilder;
-
   /// Builder function used to build a participant grid item.
-  final CallParticipantWidgetBuilder? itemBuilder;
+  final CallParticipantBuilder? callParticipantBuilder;
+
+  /// Builder function used to build a local video widget.
+  final LocalVideoBuilder? localVideoBuilder;
+
+  /// Builder function used to build a screen sharing item.
+  final ScreenShareContentBuilder? screenShareContentBuilder;
+
+  /// Builder function used to build participant item in screen sharing mode.
+  final ScreenShareParticipantBuilder? screenShareParticipantBuilder;
 
   /// Enable local video view for the local participant.
-  final bool enableLocalVideo;
+  final bool? enableLocalVideo;
 
   @override
   Widget build(BuildContext context) {
@@ -86,21 +109,23 @@ class StreamCallParticipants extends StatelessWidget {
     final screenShareParticipant = participants.firstWhereOrNull(
       (element) => element.screenShareTrack != null,
     );
+    // By default we don't show local video on desktop devices.
+    final enableLocalVideo = this.enableLocalVideo ?? !isDesktopDevice;
 
     if (screenShareParticipant != null) {
       return ScreenShareCallParticipantsContent(
         call: call,
         participants: participants,
         screenSharingParticipant: screenShareParticipant,
-        screenShareItemBuilder: screenShareItemBuilder,
-        itemBuilder: itemBuilder,
+        screenShareContentBuilder: screenShareContentBuilder,
       );
     } else {
       return RegularCallParticipantsContent(
         call: call,
         participants: participants,
-        itemBuilder: itemBuilder,
         enableLocalVideo: enableLocalVideo,
+        callParticipantBuilder: callParticipantBuilder,
+        localVideoBuilder: localVideoBuilder,
       );
     }
   }
@@ -114,8 +139,9 @@ class RegularCallParticipantsContent extends StatelessWidget {
     super.key,
     required this.call,
     required this.participants,
-    this.itemBuilder,
     this.enableLocalVideo = true,
+    this.callParticipantBuilder,
+    this.localVideoBuilder,
   });
 
   /// Represents a call.
@@ -124,11 +150,14 @@ class RegularCallParticipantsContent extends StatelessWidget {
   /// The list of participants to display.
   final Iterable<CallParticipantState> participants;
 
-  /// Builder function used to build a participant grid item.
-  final CallParticipantWidgetBuilder? itemBuilder;
-
   /// Enable local video view for the local participant.
   final bool enableLocalVideo;
+
+  /// Builder function used to build a participant grid item.
+  final CallParticipantBuilder? callParticipantBuilder;
+
+  /// Builder function used to build a local video widget.
+  final LocalVideoBuilder? localVideoBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -150,8 +179,8 @@ class RegularCallParticipantsContent extends StatelessWidget {
       if (!showLocalVideo) localParticipant
     ];
 
-    final itemBuilder = this.itemBuilder ??
-        (context, participant) {
+    final itemBuilder = callParticipantBuilder ??
+        (context, call, participant) {
           return StreamCallParticipant(
             call: call,
             participant: participant,
@@ -160,6 +189,7 @@ class RegularCallParticipantsContent extends StatelessWidget {
 
     final participantGrid = isDesktopDevice
         ? DesktopParticipantGrid(
+            call: call,
             participants: gridParticipants,
             itemBuilder: itemBuilder,
           )
@@ -167,11 +197,13 @@ class RegularCallParticipantsContent extends StatelessWidget {
             builder: (context, orientation) {
               if (orientation == Orientation.portrait) {
                 return PortraitParticipantGrid(
+                  call: call,
                   participants: gridParticipants,
                   itemBuilder: itemBuilder,
                 );
               } else {
                 return LandscapeParticipantGrid(
+                  call: call,
                   participants: gridParticipants,
                   itemBuilder: itemBuilder,
                 );
@@ -182,11 +214,17 @@ class RegularCallParticipantsContent extends StatelessWidget {
     if (!showLocalVideo) {
       return participantGrid;
     } else {
-      return StreamLocalVideo(
-        call: call,
-        localParticipant: localParticipant,
-        child: participantGrid,
-      );
+      return localVideoBuilder?.call(
+            context,
+            call,
+            localParticipant,
+            participantGrid,
+          ) ??
+          StreamLocalVideo(
+            call: call,
+            localParticipant: localParticipant,
+            child: participantGrid,
+          );
     }
   }
 }
@@ -200,8 +238,8 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
     required this.call,
     required this.screenSharingParticipant,
     required this.participants,
-    this.screenShareItemBuilder,
-    this.itemBuilder,
+    this.screenShareContentBuilder,
+    this.screenShareParticipantBuilder,
   });
 
   /// Represents a call.
@@ -214,10 +252,10 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
   final Iterable<CallParticipantState> participants;
 
   /// Builder function used to build a screen sharing item.
-  final ScreenShareItemBuilder? screenShareItemBuilder;
+  final ScreenShareContentBuilder? screenShareContentBuilder;
 
-  /// Builder function used to build a participant grid item.
-  final CallParticipantWidgetBuilder? itemBuilder;
+  /// Builder function used to build participant item in screen sharing mode.
+  final ScreenShareParticipantBuilder? screenShareParticipantBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -236,11 +274,12 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: screenShareItemBuilder?.call(
+          child: screenShareContentBuilder?.call(
                 context,
+                call,
                 screenSharingParticipant,
               ) ??
-              ScreenShareItem(
+              ScreenShareContent(
                 call: call,
                 participant: screenSharingParticipant,
               ),
@@ -255,15 +294,14 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
             separatorBuilder: (context, index) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final participant = participants.elementAt(index);
-              return itemBuilder?.call(context, participant) ??
-                  SizedBox(
-                    width: 150,
-                    child: StreamCallParticipant(
-                      call: call,
-                      participant: participant,
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      connectionLevelAlignment: Alignment.topRight,
-                    ),
+              return screenShareParticipantBuilder?.call(
+                    context,
+                    call,
+                    participant,
+                  ) ??
+                  ScreenShareParticipant(
+                    call: call,
+                    participant: participant,
                   );
             },
           ),
@@ -279,15 +317,19 @@ class DesktopParticipantGrid extends StatelessWidget {
   /// Creates a new instance of [DesktopParticipantGrid].
   const DesktopParticipantGrid({
     super.key,
+    required this.call,
     required this.participants,
     required this.itemBuilder,
   });
+
+  /// Represents a call.
+  final Call call;
 
   /// The list of participants display.
   final List<CallParticipantState> participants;
 
   /// Builder function used to build a participant item.
-  final CallParticipantWidgetBuilder itemBuilder;
+  final CallParticipantBuilder itemBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -297,7 +339,9 @@ class DesktopParticipantGrid extends StatelessWidget {
       columnCount: columnCount,
       itemSpacing: 16,
       edgeInsets: const EdgeInsets.all(16),
-      children: participants.map((e) => itemBuilder(context, e)).toList(),
+      children: participants
+          .map((participant) => itemBuilder(context, call, participant))
+          .toList(),
     );
   }
 }
@@ -308,37 +352,41 @@ class PortraitParticipantGrid extends StatelessWidget {
   /// Creates a new instance of [PortraitParticipantGrid].
   const PortraitParticipantGrid({
     super.key,
+    required this.call,
     required this.participants,
     required this.itemBuilder,
   });
+
+  /// Represents a call.
+  final Call call;
 
   /// The widgets to display.
   final List<CallParticipantState> participants;
 
   /// Builder function used to build a participant item.
-  final CallParticipantWidgetBuilder itemBuilder;
+  final CallParticipantBuilder itemBuilder;
 
   @override
   Widget build(BuildContext context) {
     final participantsCount = participants.length;
     if (participantsCount == 1) {
-      return itemBuilder(context, participants[0]);
+      return itemBuilder(context, call, participants[0]);
     } else if (participantsCount == 2) {
       return Column(
         children: [
-          Expanded(child: itemBuilder(context, participants[0])),
-          Expanded(child: itemBuilder(context, participants[1])),
+          Expanded(child: itemBuilder(context, call, participants[0])),
+          Expanded(child: itemBuilder(context, call, participants[1])),
         ],
       );
     } else if (participantsCount == 3) {
       return Column(
         children: [
-          Expanded(child: itemBuilder(context, participants[0])),
+          Expanded(child: itemBuilder(context, call, participants[0])),
           Expanded(
             child: Row(
               children: [
-                Expanded(child: itemBuilder(context, participants[1])),
-                Expanded(child: itemBuilder(context, participants[2])),
+                Expanded(child: itemBuilder(context, call, participants[1])),
+                Expanded(child: itemBuilder(context, call, participants[2])),
               ],
             ),
           ),
@@ -350,16 +398,16 @@ class PortraitParticipantGrid extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                Expanded(child: itemBuilder(context, participants[0])),
-                Expanded(child: itemBuilder(context, participants[1])),
+                Expanded(child: itemBuilder(context, call, participants[0])),
+                Expanded(child: itemBuilder(context, call, participants[1])),
               ],
             ),
           ),
           Expanded(
             child: Row(
               children: [
-                Expanded(child: itemBuilder(context, participants[2])),
-                Expanded(child: itemBuilder(context, participants[3])),
+                Expanded(child: itemBuilder(context, call, participants[2])),
+                Expanded(child: itemBuilder(context, call, participants[3])),
               ],
             ),
           ),
@@ -377,23 +425,27 @@ class LandscapeParticipantGrid extends StatelessWidget {
   /// Creates a new instance of [LandscapeParticipantGrid].
   const LandscapeParticipantGrid({
     super.key,
+    required this.call,
     required this.participants,
     required this.itemBuilder,
   });
+
+  /// Represents a call.
+  final Call call;
 
   /// The widgets to display.
   final List<CallParticipantState> participants;
 
   /// Builder function used to build a participant item.
-  final CallParticipantWidgetBuilder itemBuilder;
+  final CallParticipantBuilder itemBuilder;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: participants
           .map(
-            (e) => Expanded(
-              child: itemBuilder(context, e),
+            (participant) => Expanded(
+              child: itemBuilder(context, call, participant),
             ),
           )
           .toList(),
