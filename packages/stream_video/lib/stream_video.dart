@@ -1,5 +1,6 @@
 library stream_video;
 
+export 'open_api/video/coordinator/api.dart';
 export 'src/action/call_control_action.dart';
 export 'src/call/call.dart';
 export 'src/call/call_connect_options.dart';
@@ -13,7 +14,9 @@ export 'src/logger/stream_log.dart';
 export 'src/models/call_cid.dart';
 export 'src/models/call_created.dart';
 export 'src/models/call_joined.dart';
+export 'src/models/call_metadata.dart';
 export 'src/models/call_received_created.dart';
+export 'src/models/call_setting.dart';
 export 'src/models/call_status.dart';
 export 'src/models/call_track_state.dart';
 export 'src/models/drop_reason.dart';

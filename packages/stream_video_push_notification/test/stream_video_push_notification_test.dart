@@ -1,5 +1,5 @@
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
+import 'package:stream_video/open_api/video/coordinator/api.dart';
 import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/src/utils/none.dart';
 import 'package:stream_video/stream_video.dart';
@@ -17,8 +17,12 @@ Future<void> main() async {
     callCid: streamCallCid,
     ringing: true,
     metadata: CallMetadata(
-      details: const CallDetails(
-        memberUserIds: [],
+      details:const CallDetails(
+        settings: CallSettings(
+            audio: AudioSetting(accessRequestEnabled: true),
+            screenShare: ScreenShareSetting(accessRequestEnabled: true),
+            video: VideoSetting(accessRequestEnabled: true)),
+        ownCapabilities: [],
         members: {},
         isBroadcastingEnabled: false,
         isRecordingEnabled: false,
