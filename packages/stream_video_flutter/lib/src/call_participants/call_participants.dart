@@ -272,7 +272,7 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
                     call,
                     participant,
                   ) ??
-                  ScreeShareParticipant(
+                  ScreenShareParticipant(
                     call: call,
                     participant: participant,
                   );
