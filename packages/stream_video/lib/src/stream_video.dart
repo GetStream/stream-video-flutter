@@ -7,8 +7,6 @@ import 'call_permission.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'internal/_instance_holder.dart';
 import 'models/call_device.dart';
-import 'models/call_metadata.dart';
-import 'push_notification/no_op_push_notification.dart';
 import 'shared_emitter.dart';
 import 'stream_video_impl.dart';
 import 'token/token_manager.dart';
@@ -17,10 +15,6 @@ import 'utils/none.dart';
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
 typedef LogHandlerFunction = void Function(LogRecord record);
-
-typedef PushNotificationFactory = Future<PushNotificationManager> Function(
-  StreamVideo,
-);
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -50,8 +44,6 @@ abstract class StreamVideo {
     int latencyMeasurementRounds = 3,
     Level logLevel = Level.ALL,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
-    PushNotificationFactory pushNotificationFactory =
-        defaultPushNotificationManager,
   }) {
     return StreamVideoImpl(
       apiKey,
@@ -60,10 +52,11 @@ abstract class StreamVideo {
       latencyMeasurementRounds: latencyMeasurementRounds,
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
-      pushNotificationFactory: pushNotificationFactory,
     );
   }
   static final InstanceHolder _instanceHolder = InstanceHolder();
+
+  set pushNotificationManager(PushNotificationManager pushNotificationManager);
 
   UserInfo? get currentUser;
 
@@ -152,24 +145,21 @@ abstract class StreamVideo {
 
   Future<CallCreated?> consumeIncomingCall();
 
-  static void init(
+  static StreamVideo init(
     String apiKey, {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
     Level logLevel = Level.OFF,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
-    PushNotificationFactory pushNotificationFactory =
-        defaultPushNotificationManager,
   }) {
-    _instanceHolder.init(
+    return _instanceHolder.init(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
       logLevel: logLevel,
       logHandlerFunction: logHandlerFunction,
-      pushNotificationFactory: pushNotificationFactory,
     );
   }
 
