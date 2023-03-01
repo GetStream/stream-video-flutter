@@ -2,6 +2,7 @@ import '../models/call_cid.dart';
 import '../models/call_created.dart';
 import '../models/call_device.dart';
 import '../models/call_metadata.dart';
+import '../models/call_reaction.dart';
 import '../models/call_received_created.dart';
 import '../models/user_info.dart';
 import '../shared_emitter.dart';
@@ -63,6 +64,8 @@ abstract class CoordinatorClient {
   Future<Result<None>> startRecording(StreamCallCid callCid);
 
   Future<Result<None>> stopRecording(StreamCallCid callCid);
+
+  Future<Result<CallReaction>> sendReaction(inputs.ReactionInput input);
 
   Future<Result<List<CallUser>>> queryUsers(
     inputs.QueryUsersInput input,

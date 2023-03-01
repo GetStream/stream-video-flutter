@@ -8,6 +8,7 @@ import '../../models/call_cid.dart';
 import '../../models/call_created.dart';
 import '../../models/call_device.dart';
 import '../../models/call_metadata.dart';
+import '../../models/call_reaction.dart';
 import '../../models/call_received_created.dart';
 import '../../models/user_info.dart';
 import '../../shared_emitter.dart';
@@ -149,7 +150,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       );
       _logger.v(() => '[getOrCreateCall] completed: $result');
       if (result == null) {
-        return Result.error('message');
+        return Result.error('getOrCreateCall result is null');
       }
 
       return Result.success(
@@ -182,7 +183,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         connectionId: _ws?.clientId,
       );
       if (result == null) {
-        return Result.error('message');
+        return Result.error('joinCall result is null');
       }
 
       return Result.success(
@@ -246,7 +247,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
       if (result == null) {
-        return Result.error('message');
+        return Result.error('selectCallEdgeServer result is null');
       }
       return Result.success(
         SfuServerSelected(
@@ -273,6 +274,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         open.SendEventRequest(type: input.eventType.alias),
       );
       _logger.v(() => '[sendUserEvent] completed: $result');
+      if (result == null) {
+        return Result.error('sendUserEvent result is null');
+      }
       return Result.success(None());
     } catch (e, stk) {
       _logger.e(() => '[sendUserEvent] failed: $e; $stk');
@@ -286,16 +290,22 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     input.CustomEventInput input,
   ) async {
     try {
-      await eventsApi.sendEvent(
+      _logger.d(() => '[sendCustomEvent] input: $input');
+      final result = await eventsApi.sendEvent(
         input.callCid.type,
         input.callCid.id,
         open.SendEventRequest(
           type: input.eventType,
-          custom: input.dataJson,
+          custom: input.custom,
         ),
       );
+      _logger.v(() => '[sendCustomEvent] completed: $result');
+      if (result == null) {
+        return Result.error('sendCustomEvent result is null');
+      }
       return Result.success(None());
     } catch (e, stk) {
+      _logger.e(() => '[sendCustomEvent] failed: $e; $stk');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -325,7 +335,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
       if (result == null) {
-        return Result.error('message');
+        return Result.error('requestPermissions result is null');
       }
       return Result.success(None());
     } catch (e, stk) {
@@ -371,6 +381,27 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     try {
       await defaultApi.stopRecording(callCid.type, callCid.id);
       return Result.success(None());
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  Future<Result<CallReaction>> sendReaction(ReactionInput input) async {
+    try {
+      final result = await defaultApi.sendVideoReaction(
+        input.callCid.type,
+        input.callCid.id,
+        open.SendReactionRequest(
+          type: input.reactionType,
+          emojiCode: input.emojiCode,
+          custom: input.custom,
+        ),
+      );
+      if (result == null) {
+        return Result.error('sendReaction result is null');
+      }
+      return Result.success(result.reaction.toCallReaction());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }

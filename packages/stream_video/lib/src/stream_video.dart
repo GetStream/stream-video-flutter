@@ -7,6 +7,7 @@ import 'call_permission.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'internal/_instance_holder.dart';
 import 'models/call_device.dart';
+import 'models/call_reaction.dart';
 import 'shared_emitter.dart';
 import 'stream_video_impl.dart';
 import 'token/token_manager.dart';
@@ -135,6 +136,13 @@ abstract class StreamVideo {
   Future<Result<None>> startRecording(StreamCallCid callCid);
 
   Future<Result<None>> stopRecording(StreamCallCid callCid);
+
+  Future<Result<CallReaction>> sendReaction({
+    required StreamCallCid callCid,
+    required String reactionType,
+    String? emojiCode,
+    Map<String, Object> custom = const {},
+  });
 
   Future<Result<CallDevice>> createDevice({
     required String token,

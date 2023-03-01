@@ -13,6 +13,7 @@ import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'errors/video_error_composer.dart';
 import 'logger/logger.dart';
 import 'models/call_device.dart';
+import 'models/call_reaction.dart';
 import 'shared_emitter.dart';
 import 'state_emitter.dart';
 import 'token/token_manager.dart';
@@ -369,7 +370,7 @@ class StreamVideoImpl implements StreamVideo {
       input.CustomEventInput(
         callCid: cid,
         eventType: eventType,
-        dataJson: extraData,
+        custom: extraData,
       ),
     );
 
@@ -462,6 +463,23 @@ class StreamVideoImpl implements StreamVideo {
   @override
   Future<Result<None>> stopRecording(StreamCallCid callCid) {
     return _client.stopRecording(callCid);
+  }
+
+  @override
+  Future<Result<CallReaction>> sendReaction({
+    required StreamCallCid callCid,
+    required String reactionType,
+    String? emojiCode,
+    Map<String, Object> custom = const {},
+  }) {
+    return _client.sendReaction(
+      input.ReactionInput(
+        callCid: callCid,
+        reactionType: reactionType,
+        emojiCode: emojiCode,
+        custom: custom,
+      ),
+    );
   }
 
   @override

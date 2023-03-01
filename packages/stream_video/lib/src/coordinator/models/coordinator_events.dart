@@ -240,13 +240,11 @@ class CoordinatorCallPermissionRequestEvent extends CoordinatorCallEvent {
     required super.callCid,
     required this.createdAt,
     required this.permissions,
-    required this.type,
     required this.user,
   });
 
   final DateTime createdAt;
   final List<String> permissions;
-  final String type;
   final CallUser user;
 
   @override
@@ -254,7 +252,6 @@ class CoordinatorCallPermissionRequestEvent extends CoordinatorCallEvent {
         ...super.props,
         createdAt,
         permissions,
-        type,
         user,
       ];
 }
@@ -264,13 +261,11 @@ class CoordinatorCallPermissionsUpdatedEvent extends CoordinatorCallEvent {
     required super.callCid,
     required this.createdAt,
     required this.ownCapabilities,
-    required this.type,
     required this.user,
   });
 
   final DateTime createdAt;
   final Iterable<CallPermission> ownCapabilities;
-  final String type;
   final CallUser user;
 
   @override
@@ -278,7 +273,6 @@ class CoordinatorCallPermissionsUpdatedEvent extends CoordinatorCallEvent {
         ...super.props,
         createdAt,
         ownCapabilities,
-        type,
         user,
       ];
 }
@@ -287,17 +281,14 @@ class CoordinatorCallRecordingStartedEvent extends CoordinatorCallEvent {
   const CoordinatorCallRecordingStartedEvent({
     required super.callCid,
     required this.createdAt,
-    required this.type,
   });
 
   final DateTime createdAt;
-  final String type;
 
   @override
   List<Object?> get props => [
         ...super.props,
         createdAt,
-        type,
       ];
 }
 
@@ -305,18 +296,63 @@ class CoordinatorCallRecordingStoppedEvent extends CoordinatorCallEvent {
   const CoordinatorCallRecordingStoppedEvent({
     required super.callCid,
     required this.createdAt,
-    required this.type,
   });
 
   final DateTime createdAt;
-  final String type;
 
   @override
   List<Object?> get props => [
         ...super.props,
         createdAt,
-        type,
       ];
+}
+
+class CoordinatorCallUserBlockedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallUserBlockedEvent({
+    required super.callCid,
+    required this.createdAt,
+    required this.userId,
+  });
+
+  final DateTime createdAt;
+  final String userId;
+
+  @override
+  List<Object?> get props => [...super.props, createdAt, userId];
+}
+
+class CoordinatorCallUserUnblockedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallUserUnblockedEvent({
+    required super.callCid,
+    required this.createdAt,
+    required this.userId,
+  });
+
+  final DateTime createdAt;
+  final String userId;
+
+  @override
+  List<Object?> get props => [...super.props, createdAt, userId];
+}
+
+class CoordinatorCallReactionEvent extends CoordinatorCallEvent {
+  const CoordinatorCallReactionEvent({
+    required super.callCid,
+    required this.createdAt,
+    required this.reactionType,
+    required this.user,
+    this.emojiCode,
+    this.custom = const {},
+  });
+
+  final DateTime createdAt;
+  final String reactionType;
+  final String? emojiCode;
+  final CallUser user;
+  final Map<String, Object>? custom;
+
+  @override
+  List<Object?> get props => [...super.props, createdAt, emojiCode, custom];
 }
 
 class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
@@ -324,17 +360,17 @@ class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
     required super.callCid,
     required this.senderUserId,
     required this.createdAt,
-    required this.type,
+    required this.eventType,
     required this.info,
     required this.details,
     required this.users,
-    required this.customJson,
+    required this.custom,
   });
 
   final String senderUserId;
   final DateTime createdAt;
-  final String type;
-  final Map<String, Object>? customJson;
+  final String eventType;
+  final Map<String, Object>? custom;
   // TODO remove below
   final CallInfo info;
   final CallDetails details;
@@ -345,11 +381,11 @@ class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
         ...super.props,
         senderUserId,
         createdAt,
-        type,
+        eventType,
+        custom,
         info,
         details,
         users,
-        customJson,
       ];
 }
 

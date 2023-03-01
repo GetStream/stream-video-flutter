@@ -3,8 +3,11 @@ import 'dart:convert';
 import 'package:equatable/equatable.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
+import '../../../logger/stream_log.dart';
 import 'event_type.dart';
 import 'health_check.dart';
+
+const _tag = 'SV:OpenApiEvent';
 
 class OpenApiEvent with EquatableMixin {
   const OpenApiEvent({
@@ -22,6 +25,7 @@ class OpenApiEvent with EquatableMixin {
     this.callUserUnblocked,
     this.callRecordingStarted,
     this.callRecordingStopped,
+    this.callReaction,
     this.custom,
   });
 
@@ -35,51 +39,60 @@ class OpenApiEvent with EquatableMixin {
 
     switch (type) {
       case EventType.healthCheck:
-        final healthCheck = HealthCheck.fromJson(obj);
-        return result.copyWith(healthCheck: healthCheck);
+        final event = HealthCheck.fromJson(obj);
+        return result.copyWith(healthCheck: event);
       case EventType.callCreated:
-        final callCreated = open.CallCreatedEvent.fromJson(obj);
-        return result.copyWith(callCreated: callCreated);
+        final event = open.CallCreatedEvent.fromJson(obj);
+        return result.copyWith(callCreated: event);
       case EventType.callAccepted:
-        final callAccepted = open.CallAcceptedEvent.fromJson(obj);
-        return result.copyWith(callAccepted: callAccepted);
+        final event = open.CallAcceptedEvent.fromJson(obj);
+        return result.copyWith(callAccepted: event);
       case EventType.callRejected:
-        final callRejected = open.CallRejectedEvent.fromJson(obj);
-        return result.copyWith(callRejected: callRejected);
+        final event = open.CallRejectedEvent.fromJson(obj);
+        return result.copyWith(callRejected: event);
       case EventType.callCancelled:
-        final callCancelled = open.CallCancelledEvent.fromJson(obj);
-        return result.copyWith(callCancelled: callCancelled);
+        final event = open.CallCancelledEvent.fromJson(obj);
+        return result.copyWith(callCancelled: event);
       case EventType.callUpdated:
-        final callUpdated = open.CallUpdatedEvent.fromJson(obj);
-        return result.copyWith(callUpdated: callUpdated);
+        final event = open.CallUpdatedEvent.fromJson(obj);
+        return result.copyWith(callUpdated: event);
       case EventType.callEnded:
-        final callEnded = open.CallEndedEvent.fromJson(obj);
-        return result.copyWith(callEnded: callEnded);
+        final event = open.CallEndedEvent.fromJson(obj);
+        return result.copyWith(callEnded: event);
       case EventType.callPermissionRequest:
-        final callPermissionRequest = open.PermissionRequestEvent.fromJson(obj);
-        return result.copyWith(callPermissionRequest: callPermissionRequest);
+        final event = open.PermissionRequestEvent.fromJson(obj);
+        return result.copyWith(callPermissionRequest: event);
       case EventType.callPermissionsUpdated:
-        final permissionsUpdated = open.UpdatedCallPermissionsEvent.fromJson(
-          obj,
-        );
-        return result.copyWith(callPermissionsUpdated: permissionsUpdated);
+        final event = open.UpdatedCallPermissionsEvent.fromJson(obj);
+        return result.copyWith(callPermissionsUpdated: event);
       case EventType.callUserBlocked:
-        final userBlocked = open.BlockedUserEvent.fromJson(obj);
-        return result.copyWith(callUserBlocked: userBlocked);
+        final event = open.BlockedUserEvent.fromJson(obj);
+        return result.copyWith(callUserBlocked: event);
       case EventType.callUserUnblocked:
-        final userUnblocked = open.UnblockedUserEvent.fromJson(obj);
-        return result.copyWith(callUserUnblocked: userUnblocked);
+        final event = open.UnblockedUserEvent.fromJson(obj);
+        return result.copyWith(callUserUnblocked: event);
       case EventType.callRecordingStarted:
-        final recordingStarted = open.CallRecordingStartedEvent.fromJson(obj);
-        return result.copyWith(callRecordingStarted: recordingStarted);
+        final event = open.CallRecordingStartedEvent.fromJson(obj);
+        return result.copyWith(callRecordingStarted: event);
       case EventType.callRecordingStopped:
-        final recordingStopped = open.CallRecordingStoppedEvent.fromJson(obj);
-        return result.copyWith(callRecordingStopped: recordingStopped);
+        final event = open.CallRecordingStoppedEvent.fromJson(obj);
+        return result.copyWith(callRecordingStopped: event);
+      case EventType.callReaction:
+        final event = open.CallReactionEvent.fromJson(obj);
+        return result.copyWith(callReaction: event);
       case EventType.custom:
-        final custom = open.CustomVideoEvent.fromJson(obj);
-        return result.copyWith(custom: custom);
+        /* no-op */
+        break;
       case EventType.unknown:
-        return result;
+        /* no-op */
+        break;
+    }
+    try {
+      final event = open.CustomVideoEvent.fromJson(obj);
+      return result.copyWith(type: EventType.custom, custom: event);
+    } catch(e, stk) {
+      streamLog.e(_tag, () => '[fromJson] failed: $e; $stk');
+      return result.copyWith(type: EventType.unknown);
     }
   }
 
@@ -97,6 +110,7 @@ class OpenApiEvent with EquatableMixin {
   final open.UnblockedUserEvent? callUserUnblocked;
   final open.CallRecordingStartedEvent? callRecordingStarted;
   final open.CallRecordingStoppedEvent? callRecordingStopped;
+  final open.CallReactionEvent? callReaction;
   final open.CustomVideoEvent? custom;
 
   OpenApiEvent copyWith({
@@ -114,6 +128,7 @@ class OpenApiEvent with EquatableMixin {
     open.UnblockedUserEvent? callUserUnblocked,
     open.CallRecordingStartedEvent? callRecordingStarted,
     open.CallRecordingStoppedEvent? callRecordingStopped,
+    open.CallReactionEvent? callReaction,
     open.CustomVideoEvent? custom,
   }) {
     return OpenApiEvent(
@@ -133,6 +148,7 @@ class OpenApiEvent with EquatableMixin {
       callUserUnblocked: callUserUnblocked ?? this.callUserUnblocked,
       callRecordingStarted: callRecordingStarted ?? this.callRecordingStarted,
       callRecordingStopped: callRecordingStopped ?? this.callRecordingStopped,
+      callReaction: callReaction ?? this.callReaction,
       custom: custom ?? this.custom,
     );
   }
@@ -156,6 +172,7 @@ class OpenApiEvent with EquatableMixin {
         callUserBlocked,
         callUserUnblocked,
         callRecordingStopped,
+        callReaction,
         custom,
       ];
 }

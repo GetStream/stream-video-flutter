@@ -3,6 +3,7 @@ import '../../call_permission.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_credentials.dart';
 import '../../models/call_metadata.dart';
+import '../../models/call_reaction.dart';
 import '../../models/call_setting.dart';
 
 extension MemberExt on open.MemberResponse {
@@ -39,7 +40,7 @@ extension UserExt on open.UserResponse {
       imageUrl: image ?? '',
       createdAt: createdAt,
       updatedAt: updatedAt,
-      customJson: custom,
+      custom: custom,
     );
   }
 
@@ -114,6 +115,17 @@ extension CredentialsExt on open.Credentials {
             ),
           )
           .toList(),
+    );
+  }
+}
+
+extension ReactionExt on open.ReactionResponse {
+  CallReaction toCallReaction() {
+    return CallReaction(
+      reactionType: type,
+      user: user.toCallUser(),
+      emojiCode: emojiCode,
+      custom: custom,
     );
   }
 }
