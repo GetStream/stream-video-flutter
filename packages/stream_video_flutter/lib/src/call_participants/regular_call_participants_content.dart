@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import '../widgets/tile_view.dart';
+import 'overlay_app_bar.dart';
 
 /// A widget that represents the main area of the call when nobody is
 /// sharing their screen.
@@ -75,7 +76,7 @@ class RegularCallParticipantsContent extends StatelessWidget {
           );
         };
 
-    final participantGrid = isDesktopDevice
+    Widget participantsWidget = isDesktopDevice
         ? DesktopParticipantGrid(
             call: call,
             participants: gridParticipants,
@@ -99,25 +100,32 @@ class RegularCallParticipantsContent extends StatelessWidget {
             },
           );
 
-    final participantGridWithLocalVideo = !showLocalVideo
-        ? participantGrid
+    participantsWidget = !showLocalVideo
+        ? participantsWidget
         : localVideoBuilder?.call(
               context,
               call,
               localParticipant,
-              participantGrid,
+              participantsWidget,
             ) ??
             StreamLocalVideo(
               call: call,
               localParticipant: localParticipant,
-              child: participantGrid,
+              child: participantsWidget,
             );
 
     final callState = call.state.value;
     if (isMobileLandscape(context)) {
       return Row(
         children: [
-          Expanded(child: participantGridWithLocalVideo),
+          Expanded(
+            child: Stack(
+              children: [
+                participantsWidget,
+                OverlayAppBar(call: call),
+              ],
+            ),
+          ),
           callControlsBuilder?.call(context, call, callState) ??
               StreamCallControls.withDefaultOptions(
                 call: call,
@@ -127,7 +135,7 @@ class RegularCallParticipantsContent extends StatelessWidget {
         ],
       );
     } else {
-      return participantGridWithLocalVideo;
+      return participantsWidget;
     }
   }
 }
