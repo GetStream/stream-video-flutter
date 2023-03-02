@@ -12,13 +12,13 @@ bool get isDesktopDevice =>
     defaultTargetPlatform == TargetPlatform.windows ||
     defaultTargetPlatform == TargetPlatform.linux;
 
-/// Returns true if the app is running in a mobile device in landscape mode.
+/// Returns true if the app is running on a mobile device in landscape mode.
 bool isMobileLandscape(BuildContext context) {
   return isMobileDevice &&
       MediaQuery.of(context).orientation == Orientation.landscape;
 }
 
-/// Returns true if the app is running in a mobile device in portrait mode.
+/// Returns true if the app is running on a mobile device in portrait mode.
 bool isMobilePortrait(BuildContext context) {
   return isMobileDevice &&
       MediaQuery.of(context).orientation == Orientation.portrait;
