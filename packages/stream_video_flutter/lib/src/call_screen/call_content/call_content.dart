@@ -81,89 +81,49 @@ class _StreamCallContentState extends State<StreamCallContent> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget bodyWidget;
     if (callState.status.isConnected) {
-      return Scaffold(
-        appBar: widget.callAppBarBuilder?.call(context, call, callState) ??
-            CallAppBar(
-              call: call,
-              onBackPressed: widget.onBackPressed,
-              onParticipantsInfoTap: widget.onParticipantsInfoTap,
-              participantsInfoBuilder: widget.participantsInfoBuilder,
-            ),
-        body: widget.callParticipantsBuilder?.call(context, call, callState) ??
-            StreamCallParticipants(
-              call: call,
-              participants: callState.callParticipants,
-              enableLocalVideo: !isDesktopDevice,
-            ),
-        bottomNavigationBar:
-            widget.callControlsBuilder?.call(context, call, callState) ??
-                StreamCallControls.withDefaultOptions(
-                  call: call,
-                  localParticipant: callState.localParticipant!,
-                  onLeaveCallTap: widget.onLeaveCallTap,
-                ),
-      );
+      bodyWidget = widget.callParticipantsBuilder?.call(
+            context,
+            call,
+            callState,
+          ) ??
+          StreamCallParticipants(
+            call: call,
+            participants: callState.callParticipants,
+            enableLocalVideo: !isDesktopDevice,
+          );
     } else {
-      return _ConnectingCallContent(
-        title: callState.callCid.value,
-        onBackPressed: widget.onBackPressed,
+      bodyWidget = const Center(
+        child: Text('Connecting'),
       );
     }
+
+    return Scaffold(
+      appBar: !isMobileLandscape(context)
+          ? widget.callAppBarBuilder?.call(context, call, callState) ??
+              CallAppBar(
+                call: call,
+                onBackPressed: widget.onBackPressed,
+                onParticipantsInfoTap: widget.onParticipantsInfoTap,
+                participantsInfoBuilder: widget.participantsInfoBuilder,
+              )
+          : null,
+      body: bodyWidget,
+      bottomNavigationBar: !isMobileLandscape(context)
+          ? widget.callControlsBuilder?.call(context, call, callState) ??
+              StreamCallControls.withDefaultOptions(
+                call: call,
+                localParticipant: callState.localParticipant!,
+                onLeaveCallTap: widget.onLeaveCallTap,
+              )
+          : null,
+    );
   }
 
   @override
   Future<void> dispose() async {
     super.dispose();
     await call.disconnect();
-  }
-}
-
-/// A widget that represent a call in the connecting state.
-class _ConnectingCallContent extends StatelessWidget {
-  /// Creates a new instance of [_ConnectingCallContent].
-  const _ConnectingCallContent({
-    required this.title,
-    required this.onBackPressed,
-  });
-
-  /// The title for the connecting state.
-  final String title;
-
-  /// The action to perform when the back button is pressed.
-  final VoidCallback? onBackPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 8,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: theme.colorTheme.textHighEmphasis,
-          ),
-          onPressed: () {
-            if (onBackPressed != null) {
-              onBackPressed!();
-            } else {
-              Navigator.maybePop(context);
-            }
-          },
-        ),
-        backgroundColor: theme.colorTheme.barsBg,
-        centerTitle: false,
-        title: Text(
-          title,
-          style: theme.textTheme.title3Bold,
-          overflow: TextOverflow.visible,
-        ),
-      ),
-      body: const Center(
-        child: Text('Connecting'),
-      ),
-    );
   }
 }
