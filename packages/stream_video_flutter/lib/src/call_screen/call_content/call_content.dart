@@ -104,8 +104,11 @@ class _StreamCallContentState extends State<StreamCallContent> {
       );
     }
 
+    final localParticipant = callState.localParticipant;
+    final isDesktopOrPortrait = !isMobileLandscape(context);
+
     return Scaffold(
-      appBar: !isMobileLandscape(context)
+      appBar: isDesktopOrPortrait
           ? widget.callAppBarBuilder?.call(context, call, callState) ??
               CallAppBar(
                 call: call,
@@ -113,11 +116,11 @@ class _StreamCallContentState extends State<StreamCallContent> {
               )
           : null,
       body: bodyWidget,
-      bottomNavigationBar: !isMobileLandscape(context)
+      bottomNavigationBar: isDesktopOrPortrait && localParticipant != null
           ? widget.callControlsBuilder?.call(context, call, callState) ??
               StreamCallControls.withDefaultOptions(
                 call: call,
-                localParticipant: callState.localParticipant!,
+                localParticipant: localParticipant,
                 onLeaveCallTap: widget.onLeaveCallTap,
               )
           : null,
