@@ -63,35 +63,18 @@ class StreamCallControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isDesktopDevice) {
+    if (isMobileLandscape(context)) {
+      return LandscapeCallControls(
+        options: options,
+        spacing: spacing,
+      );
+    } else {
       return PortraitCallControls(
         options: options,
         elevation: elevation,
         spacing: spacing,
         padding: padding,
         borderRadius: borderRadius,
-      );
-    } else {
-      return OrientationBuilder(
-        builder: (context, orientation) {
-          if (orientation == Orientation.portrait) {
-            return PortraitCallControls(
-              options: options,
-              elevation: elevation,
-              spacing: spacing,
-              padding: padding,
-              borderRadius: borderRadius,
-            );
-          } else {
-            return LandscapeCallControls(
-              options: options,
-              elevation: elevation,
-              spacing: spacing,
-              padding: padding,
-              borderRadius: borderRadius,
-            );
-          }
-        },
       );
     }
   }
@@ -162,10 +145,7 @@ class LandscapeCallControls extends StatelessWidget {
     super.key,
     required this.options,
     this.backgroundColor,
-    this.elevation,
     this.spacing,
-    this.padding,
-    this.borderRadius,
   });
 
   /// List of options to display.
@@ -174,17 +154,8 @@ class LandscapeCallControls extends StatelessWidget {
   /// The background color of the call controls bar.
   final Color? backgroundColor;
 
-  /// The elevation of the call controls bar.
-  final double? elevation;
-
   /// The spacing between the call controls.
   final double? spacing;
-
-  /// The padding applied to the call controls bar.
-  final EdgeInsets? padding;
-
-  /// The border radius of the call controls bar.
-  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +170,6 @@ class LandscapeCallControls extends StatelessWidget {
         child: Center(
           widthFactor: 1,
           child: SingleChildScrollView(
-            padding: padding ?? theme.padding,
             child: Column(
               children: options.insertBetween(
                 SizedBox(height: spacing ?? theme.spacing),
