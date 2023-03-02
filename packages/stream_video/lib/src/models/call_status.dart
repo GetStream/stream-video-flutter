@@ -53,6 +53,8 @@ abstract class CallStatus extends Equatable {
 
   bool get isJoinable => this is CallStatusJoinable;
 
+  bool get isCreated => this is CallStatusCreated;
+
   bool get isOutgoing => this is CallStatusOutgoing;
 
   bool get isIncoming => this is CallStatusIncoming;

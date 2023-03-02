@@ -63,6 +63,8 @@ extension CallStatusExtension on CallStatus {
   String toStatusString() {
     if (isIdle) {
       return 'Idle';
+    } else if (isCreated) {
+      return 'Created';
     } else if (isOutgoing) {
       return 'Outgoing';
     } else if (isIncoming) {
