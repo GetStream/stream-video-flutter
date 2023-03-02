@@ -235,25 +235,29 @@ class LandscapeScreenShareCallParticipantsContent extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(
-          width: 128,
-          child: ListView.separated(
-            itemCount: participants.length,
-            scrollDirection: Axis.vertical,
-            padding: const EdgeInsets.all(8),
-            separatorBuilder: (context, index) => const SizedBox(height: 8),
-            itemBuilder: (context, index) {
-              final participant = participants.elementAt(index);
-              return screenShareParticipantBuilder?.call(
-                    context,
-                    call,
-                    participant,
-                  ) ??
-                  ScreenShareParticipant(
-                    call: call,
-                    participant: participant,
-                  );
-            },
+        SafeArea(
+          left: false,
+          right: false,
+          child: SizedBox(
+            width: 128,
+            child: ListView.separated(
+              itemCount: participants.length,
+              scrollDirection: Axis.vertical,
+              padding: const EdgeInsets.all(8),
+              separatorBuilder: (context, index) => const SizedBox(height: 8),
+              itemBuilder: (context, index) {
+                final participant = participants.elementAt(index);
+                return screenShareParticipantBuilder?.call(
+                      context,
+                      call,
+                      participant,
+                    ) ??
+                    ScreenShareParticipant(
+                      call: call,
+                      participant: participant,
+                    );
+              },
+            ),
           ),
         ),
         callControlsBuilder?.call(context, call, callState) ??
