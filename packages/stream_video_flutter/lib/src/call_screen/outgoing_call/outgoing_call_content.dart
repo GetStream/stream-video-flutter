@@ -9,9 +9,9 @@ import 'outgoing_call_controls.dart';
 
 /// Represents the Outgoing Call state and UI, when the user is calling
 /// other people.
-class OutgoingCallContent extends StatelessWidget {
-  /// Creates a new instance of [OutgoingCallContent].
-  const OutgoingCallContent({
+class StreamOutgoingCallContent extends StatelessWidget {
+  /// Creates a new instance of [StreamOutgoingCallContent].
+  const StreamOutgoingCallContent({
     super.key,
     required this.call,
     required this.callState,

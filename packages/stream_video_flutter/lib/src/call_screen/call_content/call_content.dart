@@ -91,7 +91,6 @@ class _StreamCallContentState extends State<StreamCallContent> {
           StreamCallParticipants(
             call: call,
             participants: callState.callParticipants,
-            enableLocalVideo: !isDesktopDevice,
           );
     } else {
       bodyWidget = const Center(
