@@ -16,23 +16,30 @@
 
 package io.getstream.video.flutter.background.stream_video_flutter_background.service.notification
 
-public sealed class NotificationAction {
+sealed class NotificationAction {
+    internal abstract val type: String
     internal abstract val callCid: StreamCallCid
 
     internal data class Accept(override val callCid: StreamCallCid) : NotificationAction() {
+        override val type: String = TYPE
         companion object {
+            const val TYPE = "accept"
             const val NAME = "io.getstream.video.flutter.android.service.notification.ACCEPT"
         }
     }
 
     internal data class Reject(override val callCid: StreamCallCid) : NotificationAction() {
+        override val type: String = TYPE
         companion object {
+            const val TYPE = "reject"
             const val NAME = "io.getstream.video.flutter.android.service.notification.REJECT"
         }
     }
 
     internal data class Cancel(override val callCid: StreamCallCid) : NotificationAction() {
+        override val type: String = TYPE
         companion object {
+            const val TYPE = "cancel"
             const val NAME = "io.getstream.video.flutter.android.service.notification.CANCEL"
         }
     }

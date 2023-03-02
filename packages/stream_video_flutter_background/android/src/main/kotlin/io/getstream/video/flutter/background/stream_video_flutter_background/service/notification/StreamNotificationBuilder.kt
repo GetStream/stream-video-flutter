@@ -21,12 +21,12 @@ import android.app.Notification
 /**
  * Handler responsible for showing and dismissing notification.
  */
-public interface StreamNotificationBuilder {
+interface StreamNotificationBuilder {
 
     /**
-     * Shows a notification for the given [callCid].
+     * Shows a notification for the given [NotificationOptions].
      */
-    public fun build(callCid: StreamCallCid): IdentifiedNotification
+    fun build(options: NotificationOptions): IdentifiedNotification
 }
 
-public data class IdentifiedNotification(val id: Int, val value: Notification)
+data class IdentifiedNotification(val id: Int, val value: Notification)

@@ -16,8 +16,17 @@
 
 package io.getstream.video.flutter.background.stream_video_flutter_background.service.notification
 
+import android.content.Context
+import io.getstream.video.flutter.background.stream_video_flutter_background.service.utils.registerReceiverAsFlow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
-internal interface NotificationActionReceiver {
-    suspend fun registerAsFlow(): Flow<NotificationAction>
+fun Context.registerNotificationActionReceiverAsFlow(): Flow<NotificationAction> {
+    return registerReceiverAsFlow(
+        NotificationAction.Accept.NAME,
+        NotificationAction.Reject.NAME,
+        NotificationAction.Cancel.NAME
+    ).map {
+        it.extractNotificationAction()
+    }
 }

@@ -18,7 +18,7 @@ internal val Context.notificationManager: NotificationManager
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
-internal suspend fun Context.registerReceiverAsFlow(vararg actions: String): Flow<Intent> {
+internal fun Context.registerReceiverAsFlow(vararg actions: String): Flow<Intent> {
     return callbackFlow {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {

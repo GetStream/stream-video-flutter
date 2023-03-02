@@ -1,8 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_video_flutter_background/stream_video_flutter_background.dart';
-import 'package:stream_video_flutter_background/stream_video_flutter_background_platform_interface.dart';
-import 'package:stream_video_flutter_background/stream_video_flutter_background_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:stream_video_flutter_background/model/notification_options.dart';
+import 'package:stream_video_flutter_background/stream_video_flutter_background.dart';
+import 'package:stream_video_flutter_background/stream_video_flutter_background_method_channel.dart';
+import 'package:stream_video_flutter_background/stream_video_flutter_background_platform_interface.dart';
 
 class MockStreamVideoFlutterBackgroundPlatform
     with MockPlatformInterfaceMixin
@@ -11,10 +12,10 @@ class MockStreamVideoFlutterBackgroundPlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<bool> get isRunningService => Future.value(true);
+  Future<bool> get isServiceRunning => Future.value(true);
 
   @override
-  Future<bool> startService() {
+  Future<bool> startService(NotificationOptions options) {
     return Future.value(true);
   }
 
@@ -22,6 +23,9 @@ class MockStreamVideoFlutterBackgroundPlatform
   Future<bool> stopService() {
     return Future.value(true);
   }
+
+  @override
+  Function(String buttonType, String callCid)? onButtonClick;
 }
 
 void main() {
@@ -35,12 +39,10 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    StreamVideoFlutterBackground streamVideoFlutterBackgroundPlugin =
-        StreamVideoFlutterBackground();
     MockStreamVideoFlutterBackgroundPlatform fakePlatform =
         MockStreamVideoFlutterBackgroundPlatform();
     StreamVideoFlutterBackgroundPlatform.instance = fakePlatform;
 
-    expect(await streamVideoFlutterBackgroundPlugin.getPlatformVersion(), '42');
+    expect(await StreamVideoFlutterBackground.getPlatformVersion(), '42');
   });
 }

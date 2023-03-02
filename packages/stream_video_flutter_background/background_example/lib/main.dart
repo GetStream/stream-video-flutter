@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
+import 'package:stream_video_flutter_background/model/notification_options.dart';
 import 'package:stream_video_flutter_background/stream_video_flutter_background.dart';
 
 void main() {
@@ -16,9 +16,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _buttonId = 'Unknown buttonId';
+  String _buttonType = '<button_type>';
+  String _callCid = '<call_cid>';
   String _platformVersion = 'Unknown';
-  final _backgroundPlugin = StreamVideoFlutterBackground();
 
   @override
   void initState() {
@@ -32,15 +32,18 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      platformVersion = await _backgroundPlugin.getPlatformVersion() ??
-          'Unknown platform version';
-
-      _backgroundPlugin.setOnButtonClick((buttonId) => {
+      platformVersion =
+          await StreamVideoFlutterBackground.getPlatformVersion() ??
+              'Unknown platform version';
+      print('[initPlatformState] platformVersion: $platformVersion');
+      StreamVideoFlutterBackground.setOnButtonClick((buttonType, callCid) => {
             setState(() {
-              _buttonId = buttonId;
+              _buttonType = buttonType;
+              _callCid = callCid;
             })
           });
-    } on PlatformException {
+    } catch (e, stk) {
+      print('[initPlatformState] failed: $e; $stk');
       platformVersion = 'Failed to get platform version.';
     }
 
@@ -65,8 +68,25 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              ElevatedButton(
+                  child: const Text('Start Service'),
+                  onPressed: () async {
+                    await StreamVideoFlutterBackground.startService(
+                      const NotificationOptions(
+                        appId: 'xyz123',
+                        callCid: "call328",
+                        contentTitle: "call328: Connected",
+                        contentText: "John & Kevin",
+                      ),
+                    );
+                  }),
+              ElevatedButton(
+                  child: const Text('Stop Service'),
+                  onPressed: () async {
+                    await StreamVideoFlutterBackground.stopService();
+                  }),
               Text('Running on: $_platformVersion\n'),
-              Text('On Button Click: $_buttonId\n')
+              Text('On Button Click: $_buttonType(callCid=$_callCid)\n')
             ],
           ),
         ),

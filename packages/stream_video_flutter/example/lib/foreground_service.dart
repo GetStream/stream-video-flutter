@@ -35,12 +35,12 @@ class ForegroundService extends TaskHandler {
           foregroundTaskOptions ?? _defaultForegroundTaskOptions(),
     );
 
-    CallV2.onActiveCall = (call) {
+    Call.onActiveCall = (call) {
       _onActiveCall(call, callback ?? injectTaskHandler);
     };
   }
 
-  static Future<void> _onActiveCall(CallV2? call, [Function? callback]) async {
+  static Future<void> _onActiveCall(Call? call, [Function? callback]) async {
     StreamSubscription<dynamic>? receivePortSubscription;
     try {
       streamLog.d(_tag, () => '[onActiveCall] activeCall: $call');

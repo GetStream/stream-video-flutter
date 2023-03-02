@@ -22,19 +22,20 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import io.getstream.log.taggedLogger
+import io.getstream.video.flutter.background.stream_video_flutter_background.R
+import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.NotificationOptions
+import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.StreamCallCid
 import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.StreamNotificationBuilder
 import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.StreamNotificationBuilderImpl
-import io.getstream.video.flutter.background.stream_video_flutter_background.R
-import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.StreamCallCid
 import io.getstream.video.flutter.background.stream_video_flutter_background.service.utils.notificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-public open class StreamCallService : Service() {
+open class StreamCallService : Service() {
 
-    private val logger by taggedLogger("Call:StreamService")
+    private val logger by taggedLogger("StreamCallService")
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
@@ -52,24 +53,21 @@ public open class StreamCallService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-
+        isRunning = true
 
         logger.i { "[onCreate] no args" }
-        startForeground(callCid = "")
-        scope.launch {
-
-        }
-        isRunning = true
+        startForeground()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
+        logger.i { "[onStartCommand] startId: $startId, flags: $flags, intent: $intent" }
 
         return START_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        stopForeground(true)
         logger.i { "[onDestroy] no args" }
         scope.cancel()
         isRunning = false
@@ -77,9 +75,9 @@ public open class StreamCallService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun startForeground(callCid: StreamCallCid) {
-        logger.v { "[startForeground] callCid: $callCid" }
-        val (notificationId, notification) = notificationBuilder.build(callCid)
+    private fun startForeground() {
+        logger.v { "[startForeground] notificationOptions: $notificationOptions" }
+        val (notificationId, notification) = notificationBuilder.build(notificationOptions)
         startForeground(notificationId, notification)
     }
 
@@ -88,14 +86,16 @@ public open class StreamCallService : Service() {
         stopSelf()
     }
 
-    private fun updateNotification(callCid: StreamCallCid) {
-        logger.v { "[updateNotification] callCid: $callCid" }
-        val (notificationId, notification) = notificationBuilder.build(callCid)
+    private fun updateNotification() {
+        logger.v { "[updateNotification] notificationOptions: $notificationOptions" }
+        val (notificationId, notification) = notificationBuilder.build(notificationOptions)
         notificationManager.notify(notificationId, notification)
     }
 
     companion object {
         var isRunning = false
+
+        var notificationOptions = NotificationOptions()
     }
 }
 

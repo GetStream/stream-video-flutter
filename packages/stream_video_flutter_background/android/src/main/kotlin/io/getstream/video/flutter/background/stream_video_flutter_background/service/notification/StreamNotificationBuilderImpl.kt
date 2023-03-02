@@ -28,8 +28,8 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.flutter.background.stream_video_flutter_background.R
 import io.getstream.video.flutter.background.stream_video_flutter_background.service.utils.notificationManager
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+
+private const val ACTION_CALL = "io.getstream.video.flutter.intent.action.CALL"
 
 internal class StreamNotificationBuilderImpl(
     private val context: Context,
@@ -44,15 +44,9 @@ internal class StreamNotificationBuilderImpl(
             context
         )
     }
-    private val actionReceiver: NotificationActionReceiver by lazy {
-        NotificationActionReceiverImpl(
-            context
-        )
-    }
 
     init {
         initNotificationChannel()
-        observeAction()
     }
 
     private fun initNotificationChannel() {
@@ -62,24 +56,15 @@ internal class StreamNotificationBuilderImpl(
         }
     }
 
-    private fun observeAction() {
-        scope.launch {
-            actionReceiver.registerAsFlow().collectLatest {
-
-
-            }
-        }
-    }
-
-    override fun build(callCid: StreamCallCid): IdentifiedNotification {
+    override fun build(options: NotificationOptions): IdentifiedNotification {
         val notificationId = getNotificationId()
         val notification = getNotificationBuilder(
-            contentTitle = "contentTitle",
-            contentText = "contentText",
-            groupKey = callCid,
-            intent = Intent(Intent.ACTION_CALL)
+            contentTitle = options.contentTitle,
+            contentText = options.contentText,
+            groupKey = options.callCid,
+            intent = Intent("${ACTION_CALL}.${options.appId}")
         ).apply {
-            buildNotificationActions(notificationId, callCid).forEach {
+            buildNotificationActions(notificationId, options.callCid).forEach {
                 addAction(it)
             }
         }.build()
