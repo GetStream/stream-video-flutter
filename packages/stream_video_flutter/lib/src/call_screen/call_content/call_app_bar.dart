@@ -97,14 +97,14 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
           ],
       title: title ??
           Text(
-            _getAppBarTitle(),
+            _getTitleText(),
             style: theme.textTheme.title3Bold,
             overflow: TextOverflow.visible,
           ),
     );
   }
 
-  String _getAppBarTitle() {
+  String _getTitleText() {
     final callState = call.state.value;
 
     final status = callState.status.toStatusString();
