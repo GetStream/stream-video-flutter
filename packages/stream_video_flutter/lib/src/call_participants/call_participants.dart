@@ -74,6 +74,7 @@ class StreamCallParticipants extends StatelessWidget {
     this.screenShareContentBuilder,
     this.screenShareParticipantBuilder,
     this.callControlsBuilder,
+    this.overlayAppBarBuilder,
     super.key,
   });
 
@@ -113,6 +114,9 @@ class StreamCallParticipants extends StatelessWidget {
   /// Builder used to create a custom call controls panel.
   final CallControlsBuilder? callControlsBuilder;
 
+  /// Builder used to create a custom call app bar in landscape mode.
+  final OverlayAppBarBuilder? overlayAppBarBuilder;
+
   @override
   Widget build(BuildContext context) {
     final participants = this.participants.where(filter).sorted(sort);
@@ -127,9 +131,11 @@ class StreamCallParticipants extends StatelessWidget {
         participants: participants,
         enableLocalVideo: enableLocalVideo,
         onLeaveCallTap: onLeaveCallTap,
+        onBackPressed: onBackPressed,
         callParticipantBuilder: callParticipantBuilder,
         localVideoBuilder: localVideoBuilder,
         callControlsBuilder: callControlsBuilder,
+        overlayAppBarBuilder: overlayAppBarBuilder,
       );
     } else {
       return ScreenShareCallParticipantsContent(
@@ -137,8 +143,10 @@ class StreamCallParticipants extends StatelessWidget {
         participants: participants,
         screenSharingParticipant: screenShareParticipant,
         onLeaveCallTap: onLeaveCallTap,
+        onBackPressed: onBackPressed,
         screenShareContentBuilder: screenShareContentBuilder,
         callControlsBuilder: callControlsBuilder,
+        overlayAppBarBuilder: overlayAppBarBuilder,
       );
     }
   }

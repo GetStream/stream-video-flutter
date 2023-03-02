@@ -20,6 +20,7 @@ class RegularCallParticipantsContent extends StatelessWidget {
     this.callParticipantBuilder,
     this.localVideoBuilder,
     this.callControlsBuilder,
+    this.overlayAppBarBuilder,
   });
 
   /// Represents a call.
@@ -45,6 +46,9 @@ class RegularCallParticipantsContent extends StatelessWidget {
 
   /// Builder used to create a custom call controls panel.
   final CallControlsBuilder? callControlsBuilder;
+
+  /// Builder used to create a custom call app bar in landscape mode.
+  final OverlayAppBarBuilder? overlayAppBarBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +126,11 @@ class RegularCallParticipantsContent extends StatelessWidget {
             child: Stack(
               children: [
                 participantsWidget,
-                OverlayAppBar(call: call),
+                overlayAppBarBuilder?.call(context, call, callState) ??
+                    OverlayAppBar(
+                      call: call,
+                      onBackPressed: onBackPressed,
+                    ),
               ],
             ),
           ),

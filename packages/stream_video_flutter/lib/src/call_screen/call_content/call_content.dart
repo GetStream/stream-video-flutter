@@ -9,6 +9,13 @@ typedef CallAppBarBuilder = PreferredSizeWidget Function(
   CallState callState,
 );
 
+/// Builder used to create a custom call app bar in landscape mode.
+typedef OverlayAppBarBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallState callState,
+);
+
 /// Builder used to create a custom call participants widget.
 typedef CallParticipantsBuilder = Widget Function(
   BuildContext context,
@@ -34,11 +41,10 @@ class StreamCallContent extends StatefulWidget {
     required this.callState,
     this.onBackPressed,
     this.onLeaveCallTap,
-    this.onParticipantsInfoTap,
     this.callAppBarBuilder,
+    this.overlayAppBarBuilder,
     this.callParticipantsBuilder,
     this.callControlsBuilder,
-    this.participantsInfoBuilder,
   });
 
   /// Represents a call.
@@ -53,20 +59,17 @@ class StreamCallContent extends StatefulWidget {
   /// The action to perform when the leave call button is tapped.
   final VoidCallback? onLeaveCallTap;
 
-  /// The action to perform when the participants button is pressed.
-  final VoidCallback? onParticipantsInfoTap;
-
   /// Builder used to create a custom call app bar.
   final CallAppBarBuilder? callAppBarBuilder;
+
+  /// Builder used to create a custom call app bar in landscape mode.
+  final OverlayAppBarBuilder? overlayAppBarBuilder;
 
   /// Builder used to create a custom participants grid.
   final CallParticipantsBuilder? callParticipantsBuilder;
 
   /// Builder used to create a custom call controls panel.
   final CallControlsBuilder? callControlsBuilder;
-
-  /// Builder used to create a custom participants info screen.
-  final CallParticipantsInfoBuilder? participantsInfoBuilder;
 
   @override
   State<StreamCallContent> createState() => _StreamCallContentState();
@@ -91,6 +94,9 @@ class _StreamCallContentState extends State<StreamCallContent> {
           StreamCallParticipants(
             call: call,
             participants: callState.callParticipants,
+            onBackPressed: widget.onBackPressed,
+            onLeaveCallTap: widget.onLeaveCallTap,
+            overlayAppBarBuilder: widget.overlayAppBarBuilder,
           );
     } else {
       bodyWidget = const Center(
@@ -104,8 +110,6 @@ class _StreamCallContentState extends State<StreamCallContent> {
               CallAppBar(
                 call: call,
                 onBackPressed: widget.onBackPressed,
-                onParticipantsInfoTap: widget.onParticipantsInfoTap,
-                participantsInfoBuilder: widget.participantsInfoBuilder,
               )
           : null,
       body: bodyWidget,

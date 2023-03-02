@@ -17,6 +17,7 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
     this.screenShareContentBuilder,
     this.screenShareParticipantBuilder,
     this.callControlsBuilder,
+    this.overlayAppBarBuilder,
   });
 
   /// Represents a call.
@@ -43,6 +44,9 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
   /// Builder used to create a custom call controls panel.
   final CallControlsBuilder? callControlsBuilder;
 
+  /// Builder used to create a custom call app bar in landscape mode.
+  final OverlayAppBarBuilder? overlayAppBarBuilder;
+
   @override
   Widget build(BuildContext context) {
     if (isMobileLandscape(context)) {
@@ -51,9 +55,11 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
         screenSharingParticipant: screenSharingParticipant,
         participants: participants,
         onLeaveCallTap: onLeaveCallTap,
+        onBackPressed: onBackPressed,
         screenShareContentBuilder: screenShareContentBuilder,
         screenShareParticipantBuilder: screenShareParticipantBuilder,
         callControlsBuilder: callControlsBuilder,
+        overlayAppBarBuilder: overlayAppBarBuilder,
       );
     } else {
       return PortraitScreenShareCallParticipantsContent(
@@ -168,9 +174,11 @@ class LandscapeScreenShareCallParticipantsContent extends StatelessWidget {
     required this.screenSharingParticipant,
     required this.participants,
     this.onLeaveCallTap,
+    this.onBackPressed,
     this.screenShareContentBuilder,
     this.screenShareParticipantBuilder,
     this.callControlsBuilder,
+    this.overlayAppBarBuilder,
   });
 
   /// Represents a call.
@@ -185,6 +193,9 @@ class LandscapeScreenShareCallParticipantsContent extends StatelessWidget {
   /// The action to perform when the leave call button is tapped.
   final VoidCallback? onLeaveCallTap;
 
+  /// The action to perform when the back button is pressed.
+  final VoidCallback? onBackPressed;
+
   /// Builder function used to build a screen sharing item.
   final ScreenShareContentBuilder? screenShareContentBuilder;
 
@@ -193,6 +204,9 @@ class LandscapeScreenShareCallParticipantsContent extends StatelessWidget {
 
   /// Builder used to create a custom call controls panel.
   final CallControlsBuilder? callControlsBuilder;
+
+  /// Builder used to create a custom call app bar in landscape mode.
+  final OverlayAppBarBuilder? overlayAppBarBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -213,11 +227,11 @@ class LandscapeScreenShareCallParticipantsContent extends StatelessWidget {
                     call: call,
                     participant: screenSharingParticipant,
                   ),
-              Container(
-                height: 56,
-                width: double.infinity,
-                child: OverlayAppBar(call: call),
-              ),
+              overlayAppBarBuilder?.call(context, call, callState) ??
+                  OverlayAppBar(
+                    call: call,
+                    onBackPressed: onBackPressed,
+                  ),
             ],
           ),
         ),

@@ -12,21 +12,18 @@ class OverlayAppBar extends StatelessWidget {
   const OverlayAppBar({
     super.key,
     required this.call,
-    this.showBackButton = true,
+    this.showBackButton,
     this.backgroundColor,
     this.onBackPressed,
     this.onParticipantsInfoTap,
     this.participantsInfoBuilder,
-    this.leading,
-    this.title,
-    this.actions,
   });
 
   /// Represents a call.
   final Call call;
 
   /// Whether to show the leading back button.
-  final bool showBackButton;
+  final bool? showBackButton;
 
   /// The background color for this [CallAppBar].
   final Color? backgroundColor;
@@ -40,21 +37,12 @@ class OverlayAppBar extends StatelessWidget {
   /// Builder used to create a custom participants info screen.
   final CallParticipantsInfoBuilder? participantsInfoBuilder;
 
-  /// The leading widget to display.
-  final Widget? leading;
-
-  /// The title widget to display.
-  final Widget? title;
-
-  /// Displays the participants button by default.
-  final List<Widget>? actions;
-
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
 
     return ColoredBox(
-      color: theme.colorTheme.overlay,
+      color: backgroundColor ?? theme.colorTheme.overlay,
       child: SafeArea(
         right: false,
         bottom: false,
@@ -64,7 +52,7 @@ class OverlayAppBar extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                if (showBackButton)
+                if (showBackButton ?? true)
                   IconButton(
                     icon: const Icon(
                       Icons.arrow_back,
