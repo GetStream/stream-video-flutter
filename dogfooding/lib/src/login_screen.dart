@@ -7,13 +7,14 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:stream_video/stream_video.dart';
 
+import '../env/env.dart';
 import 'model/user_credentials.dart';
 import 'routes/routes.dart';
 import 'user_repository.dart';
 import 'utils/assets.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -52,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _onLoginSuccess(UserInfo user) async {
     final userId = user.id;
     final response = await http.get(Uri.parse(
-      'https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$userId',
+      'https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$userId&api_key=${Env.apiKey}',
     ));
 
     final token = json.decode(response.body)['token'];
