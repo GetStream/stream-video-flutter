@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide ConnectionState;
 
 import '../../../stream_video_flutter.dart';
+import '../../utils/extensions.dart';
 
 /// Builder used to create a custom participants info widget.
 typedef CallParticipantsInfoBuilder = Widget Function(
@@ -61,7 +62,6 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
-    final callCid = call.state.value.callCid.value;
 
     final leadingWidget = leading ??
         (showBackButton
@@ -97,11 +97,19 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
           ],
       title: title ??
           Text(
-            callCid,
+            _getTitleText(),
             style: theme.textTheme.title3Bold,
             overflow: TextOverflow.visible,
           ),
     );
+  }
+
+  String _getTitleText() {
+    final callState = call.state.value;
+
+    final status = callState.status.toStatusString();
+    final callId = callState.callCid.id;
+    return '$status: $callId';
   }
 
   void _onParticipantsInfoTap(BuildContext context) {

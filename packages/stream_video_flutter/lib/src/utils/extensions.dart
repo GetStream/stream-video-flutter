@@ -57,3 +57,28 @@ extension CallParticipantExtension on CallParticipantState {
         imageUrl: profileImageURL,
       );
 }
+
+extension CallStatusExtension on CallStatus {
+  /// Returns human readable text representation of [CallStatus].
+  String toStatusString() {
+    if (isIdle) {
+      return 'Idle';
+    } else if (isCreated) {
+      return 'Created';
+    } else if (isOutgoing) {
+      return 'Outgoing';
+    } else if (isIncoming) {
+      return 'Incoming';
+    } else if (isJoining) {
+      return 'Joining';
+    } else if (isJoined) {
+      return 'Joined';
+    } else if (isConnected) {
+      return 'Connected';
+    } else if (isDrop) {
+      return 'Drop';
+    } else {
+      return '';
+    }
+  }
+}

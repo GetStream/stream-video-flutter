@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
-/// Defines default property values for [IncomingCallContent] and
-/// [OutgoingCallContent] widgets.
+/// Defines default property values for [StreamIncomingCallContent] and
+/// [StreamOutgoingCallContent] widgets.
 @immutable
 class StreamIncomingOutgoingCallThemeData with Diagnosticable {
   /// Creates a new instance of [StreamIncomingOutgoingCallThemeData].
@@ -171,8 +171,8 @@ class StreamIncomingOutgoingCallThemeData with Diagnosticable {
   }
 }
 
-/// Applies a incoming/outgoing call theme to descendant [IncomingCallContent]
-/// and [OutgoingCallContent] widgets.
+/// Applies a incoming/outgoing call theme to descendant [StreamIncomingCallContent]
+/// and [StreamOutgoingCallContent] widgets.
 class StreamIncomingOutgoingCallTheme extends InheritedWidget {
   /// Creates a new instance of [StreamIncomingOutgoingCallTheme].
   const StreamIncomingOutgoingCallTheme({
@@ -181,8 +181,8 @@ class StreamIncomingOutgoingCallTheme extends InheritedWidget {
     required super.child,
   });
 
-  /// The properties used for all descendant [IncomingCallContent] and
-  /// [OutgoingCallContent] widgets.
+  /// The properties used for all descendant [StreamIncomingCallContent] and
+  /// [StreamOutgoingCallContent] widgets.
   final StreamIncomingOutgoingCallThemeData data;
 
   /// Returns the configuration [data] from the closest

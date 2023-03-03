@@ -111,7 +111,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
 
     if (status is CallStatusIncoming && !status.acceptedByMe) {
       return widget.incomingCallBuilder?.call(context, call, _callState) ??
-          IncomingCallContent(
+          StreamIncomingCallContent(
             call: call,
             callState: _callState,
             onAcceptCallTap: widget.onAcceptCallTap,
@@ -119,7 +119,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
           );
     } else if (status is CallStatusOutgoing && !status.acceptedByCallee) {
       return widget.outgoingCallBuilder?.call(context, call, _callState) ??
-          OutgoingCallContent(
+          StreamOutgoingCallContent(
             call: call,
             callState: _callState,
             onCancelCallTap: widget.onCancelCallTap,

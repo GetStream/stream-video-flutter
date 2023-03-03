@@ -9,8 +9,8 @@ import 'incoming_call_controls.dart';
 
 /// Represents the Incoming Call state and UI, when the user is called by
 /// other people.
-class IncomingCallContent extends StatelessWidget {
-  const IncomingCallContent({
+class StreamIncomingCallContent extends StatelessWidget {
+  const StreamIncomingCallContent({
     super.key,
     required this.call,
     required this.callState,
