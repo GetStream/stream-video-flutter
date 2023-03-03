@@ -47,6 +47,7 @@ class StreamLobbyView extends StatefulWidget {
 class _StreamLobbyViewState extends State<StreamLobbyView> {
   RtcLocalAudioTrack? _microphoneTrack;
   RtcLocalCameraTrack? _cameraTrack;
+  bool _isJoiningCall = false;
 
   Future<void> toggleCamera() async {
     if (_cameraTrack != null) {
@@ -69,6 +70,8 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
   }
 
   void onJoinCallPressed() {
+    _isJoiningCall = true;
+
     var options = const CallConnectOptions();
 
     final cameraTrack = _cameraTrack;
@@ -104,6 +107,12 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
 
   @override
   void dispose() {
+    // Dispose tracks if we closed lobby screen without joining the call.
+    if (!_isJoiningCall) {
+      _cameraTrack?.stop();
+      _microphoneTrack?.stop();
+    }
+
     _cameraTrack = null;
     _microphoneTrack = null;
     super.dispose();
