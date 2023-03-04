@@ -1,13 +1,9 @@
 package io.getstream.video.flutter.background.stream_video_flutter_background_example
 
 import android.app.Application
-import android.content.pm.ApplicationInfo
 import android.os.Build
 import android.util.Log
 import androidx.annotation.ChecksSdkIntAtLeast
-import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.FlutterEngineCache
-import io.flutter.embedding.engine.dart.DartExecutor
 import io.getstream.log.Priority
 import io.getstream.log.StreamLog
 import io.getstream.log.StreamLogger
@@ -17,27 +13,11 @@ private const val TAG = "StreamTestApp"
 
 class StreamTestApp : Application() {
 
-    lateinit var flutterEngine : FlutterEngine
-
     override fun onCreate() {
         super.onCreate()
         StreamLog.setValidator { _, _ -> true }
         StreamLog.install(AndroidStreamLogger())
         StreamLog.i(TAG) { "[onCreate] no args" }
-
-
-       /* // Instantiate a FlutterEngine.
-        flutterEngine = FlutterEngine(this)
-
-        // Start executing Dart code to pre-warm the FlutterEngine.
-        flutterEngine.dartExecutor.executeDartEntrypoint(
-            DartExecutor.DartEntrypoint.createDefault()
-        )
-
-        // Cache the FlutterEngine to be used by FlutterActivity.
-        FlutterEngineCache
-            .getInstance()
-            .put(ENGINE_ID, flutterEngine)*/
     }
 
 }

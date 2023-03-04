@@ -157,15 +157,20 @@ class CallImpl implements Call {
     final state = this.state.value;
     final status = state.status;
     _logger.d(() => '[cancelCall] status: $status');
-    if (status is! CallStatusOutgoing || status.acceptedByCallee) {
+    if (status is! CallStatusActive) {
       _logger.w(() => '[cancelCall] rejected (invalid status): $status');
       return Result.error('invalid status: $status');
     }
     final result = await _streamVideo.cancelCall(cid: state.callCid);
-    _logger.v(() => '[cancelCall] completed: $result');
+    _logger.v(() => '[cancelCall] result: $result');
     if (result is Success<None>) {
+      _status.value = _ConnectionStatus.cancelled;
+      _subscriptions.cancelAll();
       await _stateManager.onCallControlAction(action);
+      await _session?.dispose();
+      _session = null;
     }
+    _logger.v(() => '[cancelCall] completed');
     return result;
   }
 
@@ -174,7 +179,7 @@ class CallImpl implements Call {
     _logger.d(() => '[joinCall] no args');
     final joinedResult = await _joinIfNeeded();
     if (joinedResult is Failure) {
-      _logger.e(() => '[connect] joining failed: $joinedResult');
+      _logger.e(() => '[joinCall] failed: $joinedResult');
       await _stateManager.onConnectFailed(joinedResult.error);
       return joinedResult;
     }
@@ -202,8 +207,10 @@ class CallImpl implements Call {
       }
     }
     await Call.activeCall?.disconnect();
-    Call.activeCall = this;
-    Call.onActiveCall?.call(this);
+    if (Call.activeCall == null) {
+      Call.activeCall = this;
+      Call.onActiveCall?.call(this);
+    }
     _status.value = _ConnectionStatus.connecting;
     final result = await _connect(options);
     if (result.isSuccess) {
@@ -320,14 +327,21 @@ class CallImpl implements Call {
   @override
   Future<Result<None>> disconnect() async {
     final state = this.state.value;
-    _logger.d(() => '[disconnect] state: $state');
+    _logger.d(() => '[disconnect] ${_status.value}; state: $state');
+    if (_status.value == _ConnectionStatus.disconnected) {
+      _logger.w(() => '[disconnect] rejected (already disconnected)');
+      return Result.success(None());
+    }
+    _status.value = _ConnectionStatus.disconnected;
+    _subscriptions.cancelAll();
     await _stateManager.onDisconnect();
-    await _subscriptions.cancelAll();
     await _session?.dispose();
     _session = null;
-    _status.value = _ConnectionStatus.disconnected;
-    Call.activeCall = null;
-    Call.onActiveCall?.call(null);
+    if (Call.activeCall != null) {
+      Call.activeCall = null;
+      Call.onActiveCall?.call(null);
+    }
+    _logger.v(() => '[disconnect] finished');
     return Result.success(None());
   }
 
@@ -558,7 +572,13 @@ extension on CallStateManager {
 }
 
 enum _ConnectionStatus {
+  cancelled,
   disconnected,
   connecting,
   connected;
+
+  @override
+  String toString() {
+    return name;
+  }
 }

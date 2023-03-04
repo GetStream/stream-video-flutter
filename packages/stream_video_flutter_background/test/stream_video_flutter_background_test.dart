@@ -20,6 +20,11 @@ class MockStreamVideoFlutterBackgroundPlatform
   }
 
   @override
+  Future<bool> updateService(NotificationOptions options) {
+    return Future.value(true);
+  }
+
+  @override
   Future<bool> stopService() {
     return Future.value(true);
   }

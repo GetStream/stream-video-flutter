@@ -22,20 +22,24 @@ private const val KEY_CID = "cid"
 
 internal fun Intent.extractNotificationAction(): NotificationAction {
     val callGuid = extractCallGuid()
-    return when (val action = action) {
-        NotificationAction.Accept.NAME -> NotificationAction.Accept(callGuid)
-        NotificationAction.Reject.NAME -> NotificationAction.Reject(callGuid)
-        NotificationAction.Cancel.NAME -> NotificationAction.Cancel(callGuid)
+    val action = action.orEmpty()
+    return when {
+        action.endsWith(NotificationAction.Accept.SUFFIX) -> NotificationAction.Accept(callGuid)
+        action.endsWith(NotificationAction.Reject.SUFFIX) -> NotificationAction.Reject(callGuid)
+        action.endsWith(NotificationAction.Cancel.SUFFIX) -> NotificationAction.Cancel(callGuid)
         else -> error("unexpected action: $action")
     }
 }
 
-internal fun Intent.setNotificationAction(action: NotificationAction): Intent {
+internal fun Intent.setNotificationAction(
+    packageName: String,
+    action: NotificationAction,
+): Intent {
     putExtra(KEY_CID, action.callCid)
     this.action = when (action) {
-        is NotificationAction.Accept -> NotificationAction.Accept.NAME
-        is NotificationAction.Reject -> NotificationAction.Reject.NAME
-        is NotificationAction.Cancel -> NotificationAction.Cancel.NAME
+        is NotificationAction.Accept -> "$packageName.${NotificationAction.Accept.SUFFIX}"
+        is NotificationAction.Reject -> "$packageName.${NotificationAction.Reject.SUFFIX}"
+        is NotificationAction.Cancel -> "$packageName.${NotificationAction.Cancel.SUFFIX}"
     }
     return this
 }

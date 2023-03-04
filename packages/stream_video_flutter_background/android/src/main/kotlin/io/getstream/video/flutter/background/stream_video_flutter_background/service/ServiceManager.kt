@@ -4,9 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import io.getstream.log.taggedLogger
+import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.NotificationOptions
 
 interface ServiceManager {
-    fun start(): Boolean
+    fun start(options: NotificationOptions): Boolean
+    fun update(options: NotificationOptions): Boolean
     fun stop(): Boolean
 }
 
@@ -19,10 +21,31 @@ class ServiceManagerImpl(
     /**
      * Start the foreground service.
      */
-    override fun start(): Boolean {
-        logger.d { "[start] no args" }
+    override fun start(options: NotificationOptions): Boolean {
+        logger.d { "[start] options: $options" }
+        StreamCallService.notificationOptions = options
         try {
             val nIntent = Intent(appContext, StreamCallService::class.java)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                appContext.startForegroundService(nIntent)
+            } else {
+                appContext.startService(nIntent)
+            }
+        } catch (e: Exception) {
+            return false
+        }
+
+        return true
+    }
+
+    override fun update(options: NotificationOptions): Boolean {
+        logger.d { "[update] options: $options" }
+        StreamCallService.notificationOptions = options
+        try {
+            val nIntent = Intent(appContext, StreamCallService::class.java).apply {
+                action = StreamCallService.ACTION_UPDATE
+            }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 appContext.startForegroundService(nIntent)
@@ -41,6 +64,7 @@ class ServiceManagerImpl(
      */
     override fun stop(): Boolean {
         logger.d { "[stop] no args" }
+        StreamCallService.notificationOptions = NotificationOptions()
         try {
             val nIntent = Intent(appContext, StreamCallService::class.java)
             appContext.stopService(nIntent)

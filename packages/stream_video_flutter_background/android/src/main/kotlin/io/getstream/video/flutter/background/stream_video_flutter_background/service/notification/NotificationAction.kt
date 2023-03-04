@@ -24,7 +24,7 @@ sealed class NotificationAction {
         override val type: String = TYPE
         companion object {
             const val TYPE = "accept"
-            const val NAME = "io.getstream.video.flutter.android.service.notification.ACCEPT"
+            const val SUFFIX = "intent.action.STREAM_ACCEPT"
         }
     }
 
@@ -32,7 +32,7 @@ sealed class NotificationAction {
         override val type: String = TYPE
         companion object {
             const val TYPE = "reject"
-            const val NAME = "io.getstream.video.flutter.android.service.notification.REJECT"
+            const val SUFFIX = "intent.action.STREAM_REJECT"
         }
     }
 
@@ -40,7 +40,7 @@ sealed class NotificationAction {
         override val type: String = TYPE
         companion object {
             const val TYPE = "cancel"
-            const val NAME = "io.getstream.video.flutter.android.service.notification.CANCEL"
+            const val SUFFIX = "intent.action.STREAM_CANCEL"
         }
     }
 }

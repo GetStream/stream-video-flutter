@@ -16,6 +16,14 @@ import kotlinx.coroutines.flow.callbackFlow
 internal val Context.notificationManager: NotificationManager
     get() = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+internal val Context.applicationName: String get() {
+    return try {
+        val stringResId = applicationInfo.labelRes
+        if (stringResId == 0) applicationInfo.nonLocalizedLabel.toString() else getString(stringResId)
+    } catch (e: Throwable) {
+        "Unknown"
+    }
+}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun Context.registerReceiverAsFlow(vararg actions: String): Flow<Intent> {

@@ -23,6 +23,7 @@ import 'utils/result.dart';
 
 const _tag = 'SV:StateManager';
 int _stateSeq = 1;
+bool _verbose = false;
 
 abstract class CoordinatorCallEventListener extends CoordinatorEventListener {
   @override
@@ -190,9 +191,9 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   void _postReduced(StreamAction action) {
-    _logger.v(() => '[postReduced] state: ${_state.value}');
+    if (_verbose) _logger.v(() => '[postReduced] state: ${_state.value}');
     final reduced = _stateReducer.reduce(_state.value, action);
-    _logger.v(() => '[postReduced] reduced: $reduced');
+    if (_verbose) _logger.v(() => '[postReduced] reduced: $reduced');
     _postState(state: reduced);
   }
 

@@ -35,6 +35,10 @@ abstract class StreamVideoFlutterBackgroundPlatform extends PlatformInterface {
     throw UnimplementedError('startService() has not been implemented.');
   }
 
+  Future<bool> updateService(NotificationOptions options) {
+    throw UnimplementedError('updateService() has not been implemented.');
+  }
+
   Future<bool> stopService() {
     throw UnimplementedError('stopService() has not been implemented.');
   }

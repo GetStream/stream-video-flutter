@@ -24,14 +24,12 @@ import android.os.IBinder
 import io.getstream.log.taggedLogger
 import io.getstream.video.flutter.background.stream_video_flutter_background.R
 import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.NotificationOptions
-import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.StreamCallCid
 import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.StreamNotificationBuilder
 import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.StreamNotificationBuilderImpl
 import io.getstream.video.flutter.background.stream_video_flutter_background.service.utils.notificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 
 open class StreamCallService : Service() {
 
@@ -44,6 +42,14 @@ open class StreamCallService : Service() {
 
     private val notificationBuilder: StreamNotificationBuilder by lazy {
         createNotificationBuilder(application)
+    }
+
+    private val options: NotificationOptions get() {
+        val options = notificationOptions
+        if (options.callCid.isEmpty()) {
+            error("[StreamCallService.callCid] NotificationOptions.callCid must not be empty")
+        }
+        return options
     }
 
     protected open fun createNotificationBuilder(context: Context): StreamNotificationBuilder =
@@ -60,8 +66,10 @@ open class StreamCallService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        logger.i { "[onStartCommand] startId: $startId, flags: $flags, intent: $intent" }
-
+        logger.i { "[onStartCommand] startId: $startId, flags: $flags, action: ${intent?.action}, intent: $intent" }
+        if (intent?.action == ACTION_UPDATE) {
+            updateNotification()
+        }
         return START_STICKY
     }
 
@@ -76,19 +84,14 @@ open class StreamCallService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun startForeground() {
-        logger.v { "[startForeground] notificationOptions: $notificationOptions" }
-        val (notificationId, notification) = notificationBuilder.build(notificationOptions)
+        logger.v { "[startForeground] notificationOptions: $options" }
+        val (notificationId, notification) = notificationBuilder.build(options)
         startForeground(notificationId, notification)
     }
 
-    private fun destroySelf() {
-        logger.i { "[destroySelf] no args" }
-        stopSelf()
-    }
-
     private fun updateNotification() {
-        logger.v { "[updateNotification] notificationOptions: $notificationOptions" }
-        val (notificationId, notification) = notificationBuilder.build(notificationOptions)
+        logger.v { "[updateNotification] notificationOptions: $options" }
+        val (notificationId, notification) = notificationBuilder.build(options)
         notificationManager.notify(notificationId, notification)
     }
 
@@ -96,6 +99,8 @@ open class StreamCallService : Service() {
         var isRunning = false
 
         var notificationOptions = NotificationOptions()
+
+        internal const val ACTION_UPDATE = "UPDATE"
     }
 }
 

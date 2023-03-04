@@ -23,9 +23,9 @@ import kotlinx.coroutines.flow.map
 
 fun Context.registerNotificationActionReceiverAsFlow(): Flow<NotificationAction> {
     return registerReceiverAsFlow(
-        NotificationAction.Accept.NAME,
-        NotificationAction.Reject.NAME,
-        NotificationAction.Cancel.NAME
+        "$packageName.${NotificationAction.Accept.SUFFIX}",
+        "$packageName.${NotificationAction.Reject.SUFFIX}",
+        "$packageName.${NotificationAction.Cancel.SUFFIX}",
     ).map {
         it.extractNotificationAction()
     }

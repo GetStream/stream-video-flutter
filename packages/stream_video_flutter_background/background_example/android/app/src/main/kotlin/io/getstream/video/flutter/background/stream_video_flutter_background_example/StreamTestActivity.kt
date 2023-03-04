@@ -16,18 +16,10 @@ class StreamTestActivity: FlutterActivity() {
     private val logger by taggedLogger(tag = TAG)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        logger.i { "[onCreate] before" }
+        logger.i { "[onCreate] before super" }
         super.onCreate(savedInstanceState)
-        logger.i { "[onCreate] after" }
-
-        //FlutterEngineCache.getInstance().put(StreamTestApp.ENGINE_ID, flutterEngine)
+        logger.i { "[onCreate] after super" }
     }
-
-//    override fun getCachedEngineId(): String? {
-//        val cachedEngineId = super.getCachedEngineId()
-//        logger.i { "[getFlutterEngineId] cachedEngineId: $cachedEngineId" }
-//        return cachedEngineId
-//    }
 
     override fun provideFlutterEngine(context: Context): FlutterEngine? {
         val engine = FlutterEngineCache.getInstance().get(STREAM_FLUTTER_BACKGROUND_ENGINE_ID)
@@ -36,12 +28,9 @@ class StreamTestActivity: FlutterActivity() {
     }
 
     override fun onDestroy() {
-        logger.i { "[onDestroy] before" }
-//        if (shouldDestroyEngineWithHost()) {
-//            FlutterEngineCache.getInstance().remove(StreamTestApp.ENGINE_ID)
-//        }
+        logger.i { "[onDestroy] before super" }
         super.onDestroy()
-        logger.i { "[onDestroy] after" }
+        logger.i { "[onDestroy] after super" }
     }
 
 }

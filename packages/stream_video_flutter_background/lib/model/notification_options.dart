@@ -1,24 +1,33 @@
 import 'package:equatable/equatable.dart';
 
 class NotificationOptions with EquatableMixin {
-  const NotificationOptions({
-    required this.appId,
+  NotificationOptions({
     required this.callCid,
-    required this.contentTitle,
-    required this.contentText,
+    this.content,
   });
 
-  final String appId;
-  final String callCid;
-  final String contentTitle;
-  final String contentText;
+  factory NotificationOptions.from({
+    required String callCid,
+    String? contentTitle,
+    String? contentText,
+  }) {
+    return NotificationOptions(
+      callCid: callCid,
+      content: ContentOptions(
+        title: contentTitle,
+        text: contentText,
+      ),
+    );
+  }
 
-  Map<String, Object> toJson() {
+  final String callCid;
+  ContentOptions? content;
+
+  Map<String, Object?> toJson() {
     return {
-      'app_id': appId,
       'call_cid': callCid,
-      'content_title': contentTitle,
-      'content_text': contentText,
+      'content_title': content?.title,
+      'content_text': content?.text,
     };
   }
 
@@ -26,5 +35,21 @@ class NotificationOptions with EquatableMixin {
   bool? get stringify => true;
 
   @override
-  List<Object?> get props => [appId, callCid, contentTitle, contentText];
+  List<Object?> get props => [callCid, content];
+}
+
+class ContentOptions with EquatableMixin {
+  String? title;
+  String? text;
+
+  ContentOptions({
+    this.title,
+    this.text,
+  });
+
+  @override
+  bool? get stringify => true;
+
+  @override
+  List<Object?> get props => [title, text];
 }

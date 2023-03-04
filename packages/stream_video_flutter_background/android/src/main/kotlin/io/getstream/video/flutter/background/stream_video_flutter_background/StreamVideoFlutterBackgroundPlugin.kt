@@ -5,8 +5,6 @@ import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.flutter.embedding.engine.plugins.service.ServiceAware
-import io.flutter.embedding.engine.plugins.service.ServicePluginBinding
 import io.flutter.plugin.common.MethodChannel
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
@@ -21,7 +19,7 @@ import kotlinx.coroutines.launch
 private const val TAG = "StreamVideoPlugin"
 
 /** StreamVideoFlutterBackgroundPlugin */
-class StreamVideoFlutterBackgroundPlugin : FlutterPlugin, ActivityAware, ServiceAware {
+class StreamVideoFlutterBackgroundPlugin : FlutterPlugin, ActivityAware {
 
     init {
         StreamLog.i(TAG) { "<init> no args" }
@@ -31,38 +29,24 @@ class StreamVideoFlutterBackgroundPlugin : FlutterPlugin, ActivityAware, Service
 
     private val scope = CoroutineScope(context = SupervisorJob() + Dispatchers.Main)
 
-    /// The MethodChannel that will the communication between Flutter and native Android
-    ///
-    /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-    /// when the Flutter Engine is detached from the Activity
     private var channel: MethodChannel? = null
     private var handler: MethodCallHandlerImpl? = null
 
     private var activity: Activity? = null
 
-    override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         logger.i { "[onAttachedToEngine] no args" }
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, CHANNEL_NAME).apply {
-            setMethodCallHandler(MethodCallHandlerImpl(flutterPluginBinding.applicationContext) { activity }.also {
+        channel = MethodChannel(binding.binaryMessenger, CHANNEL_NAME).apply {
+            setMethodCallHandler(MethodCallHandlerImpl(binding.applicationContext) { activity }.also {
                 handler = it
             })
         }
         scope.launch {
-            flutterPluginBinding.applicationContext.registerNotificationActionReceiverAsFlow().collect {
+            binding.applicationContext.registerNotificationActionReceiverAsFlow().collect {
                 logger.i { "[onNotificationAction] action: $it" }
                 channel?.invokeMethod("onButtonClick", arrayListOf(it.type, it.callCid))
             }
         }
-    }
-
-
-
-    override fun onAttachedToService(binding: ServicePluginBinding) {
-        logger.i { "[onAttachedToService] service: ${binding.service}" }
-    }
-
-    override fun onDetachedFromService() {
-        logger.i { "[onDetachedFromService] no args" }
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {

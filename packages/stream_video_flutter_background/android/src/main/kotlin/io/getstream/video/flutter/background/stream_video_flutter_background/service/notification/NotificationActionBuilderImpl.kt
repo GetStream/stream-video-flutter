@@ -66,7 +66,7 @@ internal class NotificationActionBuilderImpl(
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,
-        Intent().setNotificationAction(NotificationAction.Accept(callCid)),
+        Intent().setNotificationAction(context.packageName, NotificationAction.Accept(callCid)),
         IMMUTABLE_PENDING_INTENT_FLAGS,
     )
 
@@ -76,7 +76,7 @@ internal class NotificationActionBuilderImpl(
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,
-        Intent().setNotificationAction(NotificationAction.Reject(callCid)),
+        Intent().setNotificationAction(context.packageName, NotificationAction.Reject(callCid)),
         IMMUTABLE_PENDING_INTENT_FLAGS,
     )
 
@@ -86,7 +86,7 @@ internal class NotificationActionBuilderImpl(
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,
-        Intent().setNotificationAction(NotificationAction.Cancel(callCid)),
+        Intent().setNotificationAction(context.packageName, NotificationAction.Cancel(callCid)),
         IMMUTABLE_PENDING_INTENT_FLAGS,
     )
 

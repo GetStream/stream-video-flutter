@@ -48,6 +48,17 @@ class MethodChannelStreamVideoFlutterBackground
   }
 
   @override
+  Future<bool> updateService(NotificationOptions options) async {
+    if (await isServiceRunning == true) {
+      return await methodChannel.invokeMethod(
+        'updateService',
+        options.toJson(),
+      );
+    }
+    return false;
+  }
+
+  @override
   Future<bool> stopService() async {
     if (await isServiceRunning == true) {
       return await methodChannel.invokeMethod('stopService');

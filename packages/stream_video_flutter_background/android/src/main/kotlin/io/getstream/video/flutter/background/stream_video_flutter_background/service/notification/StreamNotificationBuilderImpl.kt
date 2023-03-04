@@ -26,10 +26,11 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.flutter.background.stream_video_flutter_background.R
+import io.getstream.video.flutter.background.stream_video_flutter_background.service.utils.applicationName
 import io.getstream.video.flutter.background.stream_video_flutter_background.service.utils.notificationManager
 import kotlinx.coroutines.CoroutineScope
 
-private const val ACTION_CALL = "io.getstream.video.flutter.intent.action.CALL"
+private const val ACTION_CALL_SUFFIX = "intent.action.STREAM_CALL"
 
 internal class StreamNotificationBuilderImpl(
     private val context: Context,
@@ -59,10 +60,10 @@ internal class StreamNotificationBuilderImpl(
     override fun build(options: NotificationOptions): IdentifiedNotification {
         val notificationId = getNotificationId()
         val notification = getNotificationBuilder(
-            contentTitle = options.contentTitle,
+            contentTitle = options.contentTitle ?: context.applicationName,
             contentText = options.contentText,
             groupKey = options.callCid,
-            intent = Intent("${ACTION_CALL}.${options.appId}")
+            intent = Intent("${context.packageName}.${ACTION_CALL_SUFFIX}")
         ).apply {
             buildNotificationActions(notificationId, options.callCid).forEach {
                 addAction(it)
@@ -82,7 +83,7 @@ internal class StreamNotificationBuilderImpl(
 
     private fun getNotificationBuilder(
         contentTitle: String,
-        contentText: String,
+        contentText: String?,
         groupKey: String,
         intent: Intent,
     ): NotificationCompat.Builder {
@@ -98,16 +99,20 @@ internal class StreamNotificationBuilderImpl(
             flags,
         )
 
-        return NotificationCompat.Builder(context, getNotificationChannelId())
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
-            .setAutoCancel(false)
-            .setSmallIcon(R.drawable.baseline_call_stream_24dp)
-            .setContentTitle(contentTitle)
-            .setContentText(contentText)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_CALL)
-            .setContentIntent(contentIntent)
-            .setGroup(groupKey)
+        return NotificationCompat.Builder(context, getNotificationChannelId()).apply {
+            setDefaults(NotificationCompat.DEFAULT_ALL)
+            setAutoCancel(false)
+            setSmallIcon(R.drawable.baseline_call_stream_24dp)
+            setContentTitle(contentTitle)
+            if (!contentText.isNullOrEmpty()) {
+                setContentText(contentText)
+            }
+            priority = NotificationCompat.PRIORITY_MAX
+            setCategory(NotificationCompat.CATEGORY_CALL)
+            setContentIntent(contentIntent)
+            setGroup(groupKey)
+        }
+
     }
 
     private fun getNotificationChannelId(): String {

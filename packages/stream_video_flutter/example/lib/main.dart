@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import 'background_service.dart';
 import 'env/env.dart';
 import 'screen/login_screen.dart';
 
@@ -19,8 +17,7 @@ Future<void> main() async {
     logLevel: LogLevel.all,
   );
 
-  //ForegroundService.init();
-  BackgroundService.init();
+  StreamBackgroundService.init();
 
   runApp(const MyApp());
 }

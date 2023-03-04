@@ -25,7 +25,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="io.getstream.video.flutter.intent.action.CALL.xyz123"/>
+                <action android:name="io.getstream.video.flutter.background.stream_video_flutter_background_example.intent.action.STREAM_CALL"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
