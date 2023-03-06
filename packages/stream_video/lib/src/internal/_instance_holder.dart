@@ -1,4 +1,3 @@
-import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
 import '../stream_video.dart';
@@ -13,8 +12,6 @@ class InstanceHolder {
     required String coordinatorRpcUrl,
     required String coordinatorWsUrl,
     required int latencyMeasurementRounds,
-    required Level logLevel,
-    required LogHandlerFunction logHandlerFunction,
   }) {
     if (_instance != null) {
       throw Exception('''
@@ -28,8 +25,6 @@ class InstanceHolder {
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
-      logLevel: logLevel,
-      logHandlerFunction: logHandlerFunction,
     );
     return _instance!;
   }

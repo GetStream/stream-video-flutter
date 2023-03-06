@@ -1,11 +1,13 @@
 import 'dart:async';
 
-import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/ws/connect/connect.dart'
     if (dart.library.html) 'package:stream_video/src/ws/connect/connect_html.dart'
     if (dart.library.io) 'package:stream_video/src/ws/connect/connect_io.dart'
     as platform;
 import 'package:web_socket_channel/web_socket_channel.dart';
+
+import '../logger/stream_log.dart';
+
 export 'package:web_socket_channel/web_socket_channel.dart';
 
 /// A simple wrapper around [WebSocketChannel] to make it easier to use.
@@ -34,7 +36,7 @@ abstract class StreamWebSocket {
   /// Connects to [uri] using and returns a channel that can be used to
   /// communicate over the resulting socket.
   Future<void> connect() async {
-    logger.info('Connecting websocket: $url');
+    streamLog.i('SV:AbstractWS', () => '[connect] url: $url');
     try {
       if (_connectRequestInProgress) return;
       _connectRequestInProgress = true;
@@ -77,7 +79,7 @@ abstract class StreamWebSocket {
   /// [close code]: https://tools.ietf.org/html/rfc6455#section-7.1.5
   /// [reason]: https://tools.ietf.org/html/rfc6455#section-7.1.6
   Future<void> disconnect([int? closeCode, String? closeReason]) async {
-    logger.info('Disconnecting websocket: $url');
+    streamLog.i('SV:AbstractWS', () => '[disconnect] url: $url');
     await _ws?.sink.close(closeCode, closeReason);
     _ws = null;
     await _wsSubscription?.cancel();

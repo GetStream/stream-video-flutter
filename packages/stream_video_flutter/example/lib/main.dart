@@ -8,14 +8,11 @@ import 'screen/login_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  StreamLog()
-    ..logger = ConsoleStreamLogger()
-    ..validator = (priority, tag) => true;
-
   StreamVideo.init(
     Env.streamVideoApiKey,
     coordinatorRpcUrl: Env.streamCoordinatorRpcUrl,
     coordinatorWsUrl: Env.streamCoordinatorWSUrl,
+    logLevel: LogLevel.all,
   );
 
   runApp(const MyApp());

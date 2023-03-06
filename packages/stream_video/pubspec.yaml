@@ -14,7 +14,6 @@ dependencies:
   protobuf: ^2.1.0
   tart: ^0.3.0
   uuid: ^3.0.6
-  logging: ^1.0.2
   rxdart: ^0.27.5
   web_socket_channel: ^2.2.0
   collection: ^1.16.0

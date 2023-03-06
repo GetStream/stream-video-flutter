@@ -1,5 +1,3 @@
-import 'impl/tagged_logger.dart';
-
 final _priorityEmojiMapper = {
   Priority.error: '🚨',
   Priority.warning: '⚠️',
@@ -17,6 +15,7 @@ final _priorityNameMapper = {
 };
 
 abstract class StreamLogger {
+  const StreamLogger();
   String emoji(Priority priority) => _priorityEmojiMapper[priority] ?? '📣';
 
   String name(Priority priority) => _priorityNameMapper[priority] ?? '*';
@@ -34,4 +33,29 @@ typedef MessageBuilder = String Function();
 typedef Tag = String;
 typedef IsLoggableValidator = bool Function(Priority, Tag);
 
-enum Priority { verbose, debug, info, warning, error }
+enum Priority implements Comparable<Priority> {
+  verbose(level: 2),
+  debug(level: 3),
+  info(level: 4),
+  warning(level: 5),
+  error(level: 6),
+  none(level: 7);
+
+  const Priority({required this.level});
+
+  final int level;
+
+  @override
+  String toString() => name;
+
+  @override
+  int compareTo(Priority other) => level.compareTo(other.level);
+
+  bool operator <(Priority other) => level < other.level;
+
+  bool operator <=(Priority other) => level <= other.level;
+
+  bool operator >(Priority other) => level > other.level;
+
+  bool operator >=(Priority other) => level >= other.level;
+}

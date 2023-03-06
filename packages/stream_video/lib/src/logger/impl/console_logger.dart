@@ -1,6 +1,8 @@
 import '../stream_logger.dart';
 
 class ConsoleStreamLogger extends StreamLogger {
+  const ConsoleStreamLogger();
+
   @override
   void log(
     Priority priority,

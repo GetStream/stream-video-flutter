@@ -9,7 +9,7 @@ void main() {
   /// Initialize Stream Video SDK.
   StreamVideo.init(
     Env.streamVideoApiKey,
-    logLevel: Level.INFO,
+    logLevel: LogLevel.info,
   );
 
   /// Initialize Stream Chat SDK.

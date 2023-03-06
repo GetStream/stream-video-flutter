@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:logging/logging.dart';
-
 import '../stream_video.dart';
 import 'call_permission.dart';
 import 'coordinator/coordinator_client.dart';
@@ -11,7 +9,6 @@ import 'coordinator/models/coordinator_inputs.dart';
 import 'coordinator/models/coordinator_models.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'errors/video_error_composer.dart';
-import 'logger/logger.dart';
 import 'models/call_device.dart';
 import 'models/call_reaction.dart';
 import 'shared_emitter.dart';
@@ -19,41 +16,21 @@ import 'state_emitter.dart';
 import 'token/token_manager.dart';
 import 'utils/none.dart';
 
-final _levelEmojiMapper = {
-  Level.INFO: 'ℹ️',
-  Level.WARNING: '⚠️',
-  Level.SEVERE: '🚨',
-  Level.SHOUT: '📣',
-  Level.FINE: '🔍',
-  Level.FINER: '🔎',
-  Level.FINEST: '🔎',
-  Level.CONFIG: '🔧',
-};
-
-const _defaultCoordinatorRpcUrl =
-    'https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc';
-const _defaultCoordinatorWsUrl =
-    'wss://wss-video-coordinator.oregon-v1.stream-io-video.com:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect';
-
 /// The client responsible for handling config and maintaining calls
 class StreamVideoImpl implements StreamVideo {
   /// Creates a new Stream Video client unassociated with the
   /// Stream Video singleton instance
   factory StreamVideoImpl(
     String apiKey, {
-    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
-    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
-    int latencyMeasurementRounds = 3,
-    Level logLevel = Level.ALL,
-    LogHandlerFunction logHandlerFunction = StreamVideoImpl.defaultLogHandler,
+    required String coordinatorRpcUrl,
+    required String coordinatorWsUrl,
+    required int latencyMeasurementRounds,
   }) {
     return StreamVideoImpl._(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
-      logLevel: logLevel,
-      logHandlerFunction: logHandlerFunction,
     );
   }
 
@@ -62,13 +39,7 @@ class StreamVideoImpl implements StreamVideo {
     required this.coordinatorRpcUrl,
     required this.coordinatorWsUrl,
     required this.latencyMeasurementRounds,
-    required Level logLevel,
-    required LogHandlerFunction logHandlerFunction,
   }) {
-    // Preparing logger
-    setLogLevel(logLevel);
-    setLogHandler(logHandlerFunction);
-
     _client = buildCoordinatorClient(
       apiKey: apiKey,
       tokenManager: _tokenManager,
@@ -105,17 +76,6 @@ class StreamVideoImpl implements StreamVideo {
 
   @override
   void Function(CallCreated)? onCallCreated;
-
-  /// Default log handler function for the [StreamVideoImpl] logger.
-  static void defaultLogHandler(LogRecord record) {
-    print(
-      '${record.time} '
-      '${_levelEmojiMapper[record.level] ?? record.level.name} '
-      '[${record.loggerName}] ${record.message} ',
-    );
-    if (record.error != null) print(record.error);
-    if (record.stackTrace != null) print(record.stackTrace);
-  }
 
   /// Connects the [user] to the Stream Video service.
   @override

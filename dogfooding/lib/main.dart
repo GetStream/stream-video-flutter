@@ -37,14 +37,11 @@ Future<void> main() async {
 
 void _initStreamVideo() async {
   if (!StreamVideo.isInitialized()) {
-    StreamLog()
-      ..logger = ConsoleStreamLogger()
-      ..validator = (priority, tag) => true;
-
     final client = StreamVideo.init(
       Env.apiKey,
       coordinatorRpcUrl: Env.coordinatorRpcUrl,
       coordinatorWsUrl: Env.coordinatorWsUrl,
+      logLevel: LogLevel.all,
     );
     client.pushNotificationManager =
         await StreamVideoPushNotificationManager.create(client);

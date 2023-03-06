@@ -1,5 +1,5 @@
-import 'package:stream_video/src/events.dart';
-import 'package:stream_video/src/logger/logger.dart';
+import '../events.dart';
+import '../logger/stream_log.dart';
 
 /// Connection state type used throughout the SDK.
 enum ConnectionState {
@@ -102,9 +102,9 @@ mixin ConnectionStateMixin {
     final oldState = _connectionState;
     if (oldState == newState) return;
 
-    logger.fine(
-      'SignalClient ConnectionState '
-      '${oldState.name} -> ${newState.name}',
+    streamLog.v(
+      'SV:ConnectionStateMixin',
+      () => '[setConnectionState] ${oldState.name} -> ${newState.name}',
     );
 
     _connectionState = newState;

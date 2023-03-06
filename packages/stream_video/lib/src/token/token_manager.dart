@@ -1,4 +1,4 @@
-import 'package:stream_video/src/token/token.dart';
+import 'token.dart';
 
 /// A function which can be used to request a Stream Video API token from your
 /// own backend server.
