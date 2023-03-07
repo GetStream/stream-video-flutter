@@ -8,13 +8,14 @@ class Subscriptions {
     _subscriptions[id] = subscription;
   }
 
-  Future<void> cancel(int id) async {
-    await _subscriptions[id]?.cancel();
+  void cancel(int id) {
+    _subscriptions[id]?.cancel();
+    _subscriptions.remove(id);
   }
 
-  Future<void> cancelAll() async {
+  void cancelAll() {
     for (final subscription in _subscriptions.values) {
-      await subscription.cancel();
+      subscription.cancel();
     }
     _subscriptions.clear();
   }

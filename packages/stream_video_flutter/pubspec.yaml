@@ -16,6 +16,8 @@ dependencies:
     sdk: flutter
   stream_video:
     path: ../stream_video
+  stream_video_flutter_background:
+    path: ../stream_video_flutter_background
 
 dev_dependencies:
   flutter_test:

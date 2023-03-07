@@ -75,6 +75,7 @@ class StreamCallContainer extends StatefulWidget {
 }
 
 class _StreamCallContainerState extends State<StreamCallContainer> {
+  final _logger = taggedLogger(tag: 'SV:CallContainer');
   final _subscriptions = Subscriptions();
 
   /// Represents a call.
@@ -98,16 +99,19 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   }
 
   void _setState(CallState callState) {
+    _logger.v(() => '[setState] callState.status: ${callState.status}');
     setState(() {
       _callState = callState;
     });
+    if (callState.status.isDrop) {
+      _disconnect();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final status = _callState.status;
-
-    if (status.isDrop) _disconnect();
+    _logger.v(() => '[build] status: $status');
 
     if (status is CallStatusIncoming && !status.acceptedByMe) {
       return widget.incomingCallBuilder?.call(context, call, _callState) ??
@@ -147,12 +151,15 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   }
 
   Future<void> _onCancelCall() async {
+    _logger.d(() => '[onCancelCall] no args');
     await call.apply(const CancelCall());
     await _disconnect();
   }
 
   Future<void> _disconnect() async {
+    _logger.d(() => '[disconnect] no args');
     await call.disconnect();
-    await Navigator.maybePop(context);
+    final popped = await Navigator.maybePop(context);
+    _logger.v(() => '[disconnect] popped: $popped');
   }
 }

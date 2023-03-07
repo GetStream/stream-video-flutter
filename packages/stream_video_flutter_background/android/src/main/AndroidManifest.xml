@@ -1,0 +1,13 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="io.getstream.video.flutter.background.stream_video_flutter_background">
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application>
+
+        <service android:name=".service.StreamCallService"
+            android:exported="false" />
+
+    </application>
+</manifest>
