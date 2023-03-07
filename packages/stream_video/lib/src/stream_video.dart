@@ -1,11 +1,10 @@
 import 'dart:async';
 
-import 'package:logging/logging.dart';
-
 import '../stream_video.dart';
 import 'call_permission.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'internal/_instance_holder.dart';
+import 'logger/impl/external_logger.dart';
 import 'models/call_device.dart';
 import 'models/call_reaction.dart';
 import 'shared_emitter.dart';
@@ -13,23 +12,14 @@ import 'stream_video_impl.dart';
 import 'token/token_manager.dart';
 import 'utils/none.dart';
 
-/// Handler function used for logging records. Function requires a single
-/// [LogRecord] as the only parameter.
-typedef LogHandlerFunction = void Function(LogRecord record);
-
-/// Handler function used for logging records. Function requires a single
-/// [LogRecord] as the only parameter.
-
-final _levelEmojiMapper = {
-  Level.INFO: 'ℹ️',
-  Level.WARNING: '⚠️',
-  Level.SEVERE: '🚨',
-  Level.SHOUT: '📣',
-  Level.FINE: '🔍',
-  Level.FINER: '🔎',
-  Level.FINEST: '🔎',
-  Level.CONFIG: '🔧',
-};
+/// Handler function used for logging.
+typedef LogHandlerFunction = void Function(
+  Priority priority,
+  String tag,
+  MessageBuilder message, [
+  Object? error,
+  StackTrace? stk,
+]);
 
 const _defaultCoordinatorRpcUrl =
     'https://video-edge-frankfurt-ce1.stream-io-api.com/video';
@@ -43,16 +33,12 @@ abstract class StreamVideo {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
-    Level logLevel = Level.ALL,
-    LogHandlerFunction logHandlerFunction = _defaultLogHandler,
   }) {
     return StreamVideoImpl(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
-      logLevel: logLevel,
-      logHandlerFunction: logHandlerFunction,
     );
   }
   static final InstanceHolder _instanceHolder = InstanceHolder();
@@ -158,16 +144,15 @@ abstract class StreamVideo {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
-    Level logLevel = Level.OFF,
+    LogLevel logLevel = LogLevel.off,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
   }) {
+    _setupLogger(logLevel, logHandlerFunction);
     return _instanceHolder.init(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
-      logLevel: logLevel,
-      logHandlerFunction: logHandlerFunction,
     );
   }
 
@@ -194,15 +179,25 @@ abstract class StreamVideo {
   }
 }
 
-/// Default log handler function for the [StreamVideoImpl] logger.
-void _defaultLogHandler(LogRecord record) {
-  print(
-    '${record.time} '
-    '${_levelEmojiMapper[record.level] ?? record.level.name} '
-    '[${record.loggerName}] ${record.message} ',
-  );
-  if (record.error != null) print(record.error);
-  if (record.stackTrace != null) print(record.stackTrace);
+void _setupLogger(LogLevel logLevel, LogHandlerFunction logHandlerFunction) {
+  if (logLevel != LogLevel.off) {
+    StreamLog().validator = (priority, _) => priority >= logLevel.priority;
+    StreamLog().logger = CompositeStreamLogger([
+      const ConsoleStreamLogger(),
+      ExternalStreamLogger(logHandlerFunction),
+    ]);
+  }
+}
+
+/// Default log handler function for the [StreamVideo] logger.
+void _defaultLogHandler(
+  Priority priority,
+  String tag,
+  MessageBuilder message, [
+  Object? error,
+  StackTrace? stk,
+]) {
+  /* no-op */
 }
 
 extension StreamVideoX on StreamVideo {

@@ -1,6 +1,8 @@
 import '../stream_logger.dart';
 
 class SilentStreamLogger extends StreamLogger {
+  const SilentStreamLogger();
+
   @override
   void log(
     Priority priority,

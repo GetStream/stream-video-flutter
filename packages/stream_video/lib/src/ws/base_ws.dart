@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:stream_video/src/logger/logger.dart';
 import 'package:stream_video/src/state_emitter.dart';
 import 'package:stream_video/src/ws/connect/connect.dart'
     if (dart.library.html) 'package:stream_video/src/ws/connect/connect_html.dart'
@@ -10,7 +9,11 @@ import 'package:stream_video/src/ws/socket_connection_state.dart';
 import 'package:stream_video/src/ws/utils/web_socket_extension.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import '../logger/stream_log.dart';
+
 export 'package:web_socket_channel/web_socket_channel.dart';
+
+const _tag = 'SV:AbstractWebSocket';
 
 /// TODO WIP - just initial structure.
 abstract class AbstractWebSocket {
@@ -107,7 +110,7 @@ abstract class AbstractWebSocket {
   /// [close code]: https://tools.ietf.org/html/rfc6455#section-7.1.5
   /// [reason]: https://tools.ietf.org/html/rfc6455#section-7.1.6
   Future<void> disconnect([int? closeCode, String? closeReason]) async {
-    logger.info('Disconnecting websocket: $url');
+    streamLog.i(_tag, () => '[disconnect] url: $url');
     await _ws?.sink.close(closeCode, closeReason);
     _ws = null;
     await _wsSubscription?.cancel();

@@ -1,5 +1,4 @@
 import 'impl/silent_logger.dart';
-import 'impl/tagged_logger.dart';
 import 'stream_logger.dart';
 
 StreamLog get streamLog => StreamLog();
@@ -11,7 +10,7 @@ class StreamLog {
   StreamLog._();
   static final StreamLog _instance = StreamLog._();
 
-  StreamLogger _logger = SilentStreamLogger();
+  StreamLogger _logger = const SilentStreamLogger();
   IsLoggableValidator _validator = (Priority priority, Tag tag) => false;
 
   static StreamLog get instance => _instance;
