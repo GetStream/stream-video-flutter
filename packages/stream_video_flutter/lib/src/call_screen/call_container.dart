@@ -112,7 +112,6 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   Widget build(BuildContext context) {
     final status = _callState.status;
     _logger.v(() => '[build] status: $status');
-    //if (status.isDrop) _disconnect();
 
     if (status is CallStatusIncoming && !status.acceptedByMe) {
       return widget.incomingCallBuilder?.call(context, call, _callState) ??
