@@ -1,0 +1,47 @@
+name: App Distribute CI
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+
+jobs:
+  build_and_deploy_android:
+    name: Build and Distribute Dogfooding Android
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+      - name: Install Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+      - name: Install Melos
+        run: flutter pub global activate melos
+      - name: Bootstrap workspace
+        run: melos bootstrap
+      - name: Prepare environment
+        run: |
+          echo "${{ secrets.ENV_PROPERTIES }}" > .env
+          melos run generate:all
+      - name: Build APK
+        run: flutter build apk
+        working-directory: dogfooding
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: dogfooding
+          path: dogfooding/build/app/outputs/apk/release/app-release.apk
+      - name: Upload artifact to Firebase
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.5.0
+        with:
+          appId: ${{secrets.FIREBASE_ANDROID_APP_ID}}
+          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
+          groups: stream-testers
+          debug: true
+          file: dogfooding/build/app/outputs/apk/release/app-release.apk

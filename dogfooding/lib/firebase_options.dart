@@ -44,42 +44,41 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBvwO0jKjENtBiII2nsJNRdxmExOF0VAc4',
-    appId: '1:248009810755:web:a5838daf7b9914d47585f6',
-    messagingSenderId: '248009810755',
-    projectId: 'dogfooding-d769a',
-    authDomain: 'dogfooding-d769a.firebaseapp.com',
-    storageBucket: 'dogfooding-d769a.appspot.com',
-    measurementId: 'G-TL7YZVYYBT',
+    apiKey: 'AIzaSyB1swZGD2U9qEKV4xYKlr9KBHeysTHJ_1w',
+    appId: '1:347024607410:web:fd70974cbc1256bb8c21ab',
+    messagingSenderId: '347024607410',
+    projectId: 'stream-video-9b586',
+    authDomain: 'stream-video-9b586.firebaseapp.com',
+    storageBucket: 'stream-video-9b586.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDXy4FMxcRErB8VW9CvPGG5spLVSUQzhc4',
-    appId: '1:248009810755:android:0b7ef9072bfeceba7585f6',
+    apiKey: 'AIzaSyD4FMyTdDv97hJia6YiV1NMgTdJhbnEwQE',
+    appId: '1:347024607410:android:09387231c1b256b68c21ab',
     messagingSenderId: '248009810755',
-    projectId: 'dogfooding-d769a',
-    storageBucket: 'dogfooding-d769a.appspot.com',
+    projectId: 'stream-video-9b586',
+    storageBucket: 'stream-video-9b586.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCDkgIdxQNP-YB4XVKhvz39dGcDqPGcJTw',
-    appId: '1:248009810755:ios:f82e5e4f77548fd57585f6',
-    messagingSenderId: '248009810755',
-    projectId: 'dogfooding-d769a',
-    storageBucket: 'dogfooding-d769a.appspot.com',
+    apiKey: 'AIzaSyCvN-HAjjnGuJS1sV5-XkhZ0BYnkxXZdPs',
+    appId: '1:347024607410:ios:ffe113a4b22025cd8c21ab',
+    messagingSenderId: '347024607410',
+    projectId: 'stream-video-9b586',
+    storageBucket: 'stream-video-9b586.appspot.com',
     iosClientId:
-        '248009810755-m0kiquvbvhaopveniq2elpph6at18tbj.apps.googleusercontent.com',
+        '347024607410-rdemfqlplsgrglpuc12itra4e4npo1p7.apps.googleusercontent.com',
     iosBundleId: 'io.getstream.video.flutter.dogfooding',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCDkgIdxQNP-YB4XVKhvz39dGcDqPGcJTw',
-    appId: '1:248009810755:ios:f82e5e4f77548fd57585f6',
-    messagingSenderId: '248009810755',
-    projectId: 'dogfooding-d769a',
-    storageBucket: 'dogfooding-d769a.appspot.com',
+    apiKey: 'AIzaSyCvN-HAjjnGuJS1sV5-XkhZ0BYnkxXZdPs',
+    appId: '1:347024607410:ios:ffe113a4b22025cd8c21ab',
+    messagingSenderId: '347024607410',
+    projectId: 'stream-video-9b586',
+    storageBucket: 'stream-video-9b586.appspot.com',
     iosClientId:
-        '248009810755-m0kiquvbvhaopveniq2elpph6at18tbj.apps.googleusercontent.com',
+        '347024607410-rdemfqlplsgrglpuc12itra4e4npo1p7.apps.googleusercontent.com',
     iosBundleId: 'io.getstream.video.flutter.dogfooding',
   );
 }
