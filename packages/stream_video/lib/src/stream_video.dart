@@ -7,6 +7,7 @@ import 'internal/_instance_holder.dart';
 import 'logger/impl/external_logger.dart';
 import 'models/call_device.dart';
 import 'models/call_reaction.dart';
+import 'models/queried_calls.dart';
 import 'shared_emitter.dart';
 import 'stream_video_impl.dart';
 import 'token/token_manager.dart';
@@ -102,6 +103,12 @@ abstract class StreamVideo {
     required Set<String> userIds,
   });
 
+  Future<Result<QueriedCalls>> queryCalls({
+    required Map<String, Object> filterConditions,
+    String? next,
+    int? limit,
+  });
+
   Future<Result<None>> inviteUsers({
     required String callCid,
     required List<UserInfo> users,
@@ -119,9 +126,48 @@ abstract class StreamVideo {
     List<CallPermission> revokePermissions = const [],
   });
 
-  Future<Result<None>> startRecording(StreamCallCid callCid);
+  Future<Result<None>> startRecording({
+    required StreamCallCid callCid,
+  });
 
-  Future<Result<None>> stopRecording(StreamCallCid callCid);
+  Future<Result<None>> stopRecording({
+    required StreamCallCid callCid,
+  });
+
+  Future<Result<None>> startBroadcasting({
+    required StreamCallCid callCid,
+  });
+
+  Future<Result<None>> stopBroadcasting({
+    required StreamCallCid callCid,
+  });
+
+  Future<Result<None>> blockUser({
+    required StreamCallCid callCid,
+    required String userId,
+  });
+
+  Future<Result<None>> unblockUser({
+    required StreamCallCid callCid,
+    required String userId,
+  });
+
+  Future<Result<CallMetadata>> goLive({
+    required StreamCallCid callCid,
+  });
+
+  Future<Result<CallMetadata>> stopLive({
+    required StreamCallCid callCid,
+  });
+
+  Future<Result<None>> endCall({
+    required StreamCallCid callCid,
+  });
+
+  Future<Result<None>> muteUsers({
+    required StreamCallCid callCid,
+    required List<String> userIds,
+  });
 
   Future<Result<CallReaction>> sendReaction({
     required StreamCallCid callCid,

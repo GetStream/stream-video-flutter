@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../call_permission.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../webrtc/media/constraints/camera_position.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
@@ -26,6 +27,85 @@ class RejectCall extends CallControlAction {
 
 class CancelCall extends CallControlAction {
   const CancelCall();
+}
+
+class EndCall extends CallControlAction {
+  const EndCall();
+}
+
+class RequestPermissions extends CallControlAction {
+  const RequestPermissions({
+    required this.permissions,
+  });
+
+  final List<CallPermission> permissions;
+
+  @override
+  List<Object?> get props => [permissions];
+}
+
+class UpdateUserPermissions extends CallControlAction {
+  const UpdateUserPermissions({
+    required this.userId,
+    this.grantPermissions = const [],
+    this.revokePermissions = const [],
+  });
+
+  final String userId;
+  final List<CallPermission> grantPermissions;
+  final List<CallPermission> revokePermissions;
+
+  @override
+  List<Object?> get props => [userId, grantPermissions, revokePermissions];
+}
+
+class BlockUser extends CallControlAction {
+  const BlockUser({
+    required this.userId,
+  });
+
+  final String userId;
+
+  @override
+  List<Object?> get props => [userId];
+}
+
+class UnblockUser extends CallControlAction {
+  const UnblockUser({
+    required this.userId,
+  });
+
+  final String userId;
+
+  @override
+  List<Object?> get props => [userId];
+}
+
+class MuteUsers extends CallControlAction {
+  const MuteUsers({
+    required this.userIds,
+  });
+
+  final List<String> userIds;
+
+  @override
+  List<Object?> get props => [userIds];
+}
+
+class StartRecording extends CallControlAction {
+  const StartRecording();
+}
+
+class StopRecording extends CallControlAction {
+  const StopRecording();
+}
+
+class StartBroadcasting extends CallControlAction {
+  const StartBroadcasting();
+}
+
+class StopBroadcasting extends CallControlAction {
+  const StopBroadcasting();
 }
 
 abstract class SessionControlAction extends CallControlAction {

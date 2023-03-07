@@ -243,8 +243,71 @@ extension MemberExt on MemberInput {
   }
 }
 
+extension SortExt on SortInput {
+  open.SortParamRequest toOpenDto() {
+    return open.SortParamRequest(
+      //TODO
+      direction: 1,
+      field: field,
+    );
+  }
+}
+
 extension MemberListExt on Iterable<MemberInput> {
   List<open.MemberRequest> toOpenDto() {
     return map((it) => it.toOpenDto()).toList();
+  }
+}
+
+extension SortListExt on Iterable<SortInput> {
+  List<open.SortParamRequest> toOpenDto() {
+    return map((it) => it.toOpenDto()).toList();
+  }
+}
+
+extension CallSettingsInputExt on CallSettingsInput {
+  open.CallSettingsRequest toOpenDto() {
+    return open.CallSettingsRequest(
+      video: video?.toOpenDto(),
+      screensharing: screensharing?.toOpenDto(),
+      recording: recording?.toOpenDto(),
+      geofencing: geofencing?.toOpenDto(),
+    );
+  }
+}
+
+extension on VideoSettingsInput {
+  open.VideoSettingsRequest toOpenDto() {
+    return open.VideoSettingsRequest(
+      enabled: enabled,
+      accessRequestEnabled: accessRequestEnabled,
+    );
+  }
+}
+
+extension on ScreensharingSettingsInput {
+  open.ScreensharingSettingsRequest toOpenDto() {
+    return open.ScreensharingSettingsRequest(
+      enabled: enabled,
+      accessRequestEnabled: accessRequestEnabled,
+    );
+  }
+}
+
+extension on RecordSettingsInput {
+  open.RecordSettingsRequest toOpenDto() {
+    return open.RecordSettingsRequest(
+      audioOnly: audioOnly,
+      mode: mode,
+      quality: quality,
+    );
+  }
+}
+
+extension on GeofenceSettingsInput {
+  open.GeofenceSettingsRequest toOpenDto() {
+    return open.GeofenceSettingsRequest(
+      names: names,
+    );
   }
 }

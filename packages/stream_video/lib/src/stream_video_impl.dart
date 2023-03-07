@@ -11,6 +11,7 @@ import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'errors/video_error_composer.dart';
 import 'models/call_device.dart';
 import 'models/call_reaction.dart';
+import 'models/queried_calls.dart';
 import 'shared_emitter.dart';
 import 'state_emitter.dart';
 import 'token/token_manager.dart';
@@ -349,7 +350,7 @@ class StreamVideoImpl implements StreamVideo {
     final usersResult = await _client.queryUsers(
       input.QueryUsersInput(
         callCid: callCid,
-        mqJson: {
+        filterConditions: {
           'id': {r'$in': userIds.toList()},
         },
       ),
@@ -363,6 +364,21 @@ class StreamVideoImpl implements StreamVideo {
         _logger.e(() => '[queryUsers] failed: $it');
         return it;
       },
+    );
+  }
+
+  @override
+  Future<Result<QueriedCalls>> queryCalls({
+    required Map<String, Object> filterConditions,
+    String? next,
+    int? limit,
+  }) {
+    return _client.queryCalls(
+      input.QueryCallsInput(
+        filterConditions: filterConditions,
+        next: next,
+        limit: limit,
+      ),
     );
   }
 
@@ -416,13 +432,86 @@ class StreamVideoImpl implements StreamVideo {
   }
 
   @override
-  Future<Result<None>> startRecording(StreamCallCid callCid) async {
+  Future<Result<None>> startRecording({
+    required StreamCallCid callCid,
+  }) async {
     return _client.startRecording(callCid);
   }
 
   @override
-  Future<Result<None>> stopRecording(StreamCallCid callCid) {
+  Future<Result<None>> stopRecording({
+    required StreamCallCid callCid,
+  }) {
     return _client.stopRecording(callCid);
+  }
+
+  @override
+  Future<Result<None>> startBroadcasting({
+    required StreamCallCid callCid,
+  }) async {
+    return _client.startBroadcasting(callCid);
+  }
+
+  @override
+  Future<Result<None>> stopBroadcasting({
+    required StreamCallCid callCid,
+  }) async {
+    return _client.stopBroadcasting(callCid);
+  }
+
+  @override
+  Future<Result<None>> blockUser({
+    required StreamCallCid callCid,
+    required String userId,
+  }) async {
+    return _client.blockUser(BlockUserInput(callCid: callCid, userId: userId));
+  }
+
+  @override
+  Future<Result<None>> unblockUser({
+    required StreamCallCid callCid,
+    required String userId,
+  }) async {
+    return _client.unblockUser(
+      UnblockUserInput(
+        callCid: callCid,
+        userId: userId,
+      ),
+    );
+  }
+
+  @override
+  Future<Result<CallMetadata>> goLive({
+    required StreamCallCid callCid,
+  }) async {
+    return _client.goLive(callCid);
+  }
+
+  @override
+  Future<Result<CallMetadata>> stopLive({
+    required StreamCallCid callCid,
+  }) async {
+    return _client.stopLive(callCid);
+  }
+
+  @override
+  Future<Result<None>> endCall({
+    required StreamCallCid callCid,
+  }) async {
+    return _client.endCall(callCid);
+  }
+
+  @override
+  Future<Result<None>> muteUsers({
+    required StreamCallCid callCid,
+    required List<String> userIds,
+  }) async {
+    return _client.muteUsers(
+      input.MuteUsersInput(
+        callCid: callCid,
+        userIds: userIds,
+      ),
+    );
   }
 
   @override

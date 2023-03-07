@@ -222,18 +222,48 @@ class ReactionInput extends CoordinatorInput {
 class QueryUsersInput extends CoordinatorInput {
   const QueryUsersInput({
     required this.callCid,
-    required this.mqJson,
-    this.sorts,
+    required this.filterConditions,
+    this.next,
+    this.prev,
+    this.sorts = const [],
     this.limit,
   });
 
   final StreamCallCid callCid;
-  final Map<String, Object> mqJson;
-  final List<SortInput>? sorts;
+  final Map<String, Object> filterConditions;
+  final String? next;
+  final String? prev;
+  final List<SortInput> sorts;
   final int? limit;
 
   @override
-  List<Object?> get props => [callCid, mqJson, limit, sorts];
+  List<Object?> get props => [
+        callCid,
+        filterConditions,
+        next,
+        prev,
+        limit,
+        sorts,
+      ];
+}
+
+class QueryCallsInput extends CoordinatorInput {
+  const QueryCallsInput({
+    required this.filterConditions,
+    this.next,
+    this.prev,
+    this.sorts = const [],
+    this.limit,
+  });
+
+  final Map<String, Object> filterConditions;
+  final String? next;
+  final String? prev;
+  final List<SortInput> sorts;
+  final int? limit;
+
+  @override
+  List<Object?> get props => [filterConditions, next, prev, sorts, limit];
 }
 
 class SortInput extends CoordinatorInput {
@@ -247,6 +277,160 @@ class SortInput extends CoordinatorInput {
 
   @override
   List<Object?> get props => [field, direction];
+}
+
+class BlockUserInput extends CoordinatorInput {
+  const BlockUserInput({
+    required this.callCid,
+    required this.userId,
+  });
+
+  final StreamCallCid callCid;
+  final String userId;
+
+  @override
+  List<Object?> get props => [callCid, userId];
+}
+
+class UnblockUserInput extends CoordinatorInput {
+  const UnblockUserInput({
+    required this.callCid,
+    required this.userId,
+  });
+
+  final StreamCallCid callCid;
+  final String userId;
+
+  @override
+  List<Object?> get props => [callCid, userId];
+}
+
+class MuteUsersInput extends CoordinatorInput {
+  const MuteUsersInput({
+    required this.callCid,
+    required this.userIds,
+    this.muteAllUsers,
+    this.audio,
+    this.video,
+    this.screenshare,
+  });
+
+  final StreamCallCid callCid;
+  final List<String> userIds;
+  final bool? muteAllUsers;
+  final bool? audio;
+  final bool? video;
+  final bool? screenshare;
+
+  @override
+  List<Object?> get props => [
+        callCid,
+        userIds,
+        muteAllUsers,
+        audio,
+        video,
+        screenshare,
+      ];
+}
+
+class UpdateCallInput extends CoordinatorInput {
+  const UpdateCallInput({
+    required this.callCid,
+    required this.userIds,
+    this.custom = const {},
+    this.settingsOverride,
+  });
+
+  final StreamCallCid callCid;
+  final List<String> userIds;
+  final Map<String, Object> custom;
+  final CallSettingsInput? settingsOverride;
+
+  @override
+  List<Object?> get props => [
+        callCid,
+        userIds,
+        custom,
+        settingsOverride,
+      ];
+}
+
+class CallSettingsInput extends CoordinatorInput {
+  const CallSettingsInput({
+    this.video,
+    this.screensharing,
+    this.recording,
+    this.geofencing,
+  });
+
+  final VideoSettingsInput? video;
+  final ScreensharingSettingsInput? screensharing;
+  final RecordSettingsInput? recording;
+  final GeofenceSettingsInput? geofencing;
+
+  @override
+  List<Object?> get props => [
+        video,
+        screensharing,
+        recording,
+        geofencing,
+      ];
+}
+
+abstract class FeatureSettingsInput extends CoordinatorInput {
+  const FeatureSettingsInput();
+}
+
+class VideoSettingsInput extends FeatureSettingsInput {
+  const VideoSettingsInput({
+    this.enabled,
+    this.accessRequestEnabled,
+  });
+
+  final bool? enabled;
+  final bool? accessRequestEnabled;
+
+  @override
+  List<Object?> get props => [enabled, accessRequestEnabled];
+}
+
+class ScreensharingSettingsInput extends FeatureSettingsInput {
+  const ScreensharingSettingsInput({
+    this.enabled,
+    this.accessRequestEnabled,
+  });
+
+  final bool? enabled;
+  final bool? accessRequestEnabled;
+
+  @override
+  List<Object?> get props => [enabled, accessRequestEnabled];
+}
+
+class RecordSettingsInput extends FeatureSettingsInput {
+  const RecordSettingsInput({
+    this.audioOnly,
+    this.mode,
+    this.quality,
+  });
+
+  final bool? audioOnly;
+  final String? mode;
+  final String? quality;
+
+  @override
+  List<Object?> get props => [audioOnly, mode, quality];
+}
+
+class GeofenceSettingsInput extends FeatureSettingsInput {
+  const GeofenceSettingsInput({
+    this.names = const [],
+  });
+
+  final List<String> names;
+
+  @override
+  List<Object?> get props => [names];
 }
 
 enum EventTypeInput {
