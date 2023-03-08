@@ -141,7 +141,8 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
 
   Future<void> _connect() async {
     try {
-      final result = await call.connect(options: widget.callConnectOptions);
+      call.setInitialCallOptions(widget.callConnectOptions);
+      final result = await call.connect();
       if (result.isFailure) {
         await _onCancelCall();
       }
