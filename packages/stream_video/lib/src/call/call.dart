@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import '../../stream_video.dart';
-import '../call_permission.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
@@ -66,47 +65,9 @@ abstract class Call {
 
   Future<Result<None>> apply(CallControlAction action);
 
-  bool canRequestPermission(CallPermission permission);
-
-  bool canUpdateUserPermissions();
-
-  Future<Result<None>> requestPermissions(List<CallPermission> permissions);
-
-  Future<Result<None>> updateUserPermissions({
-    required String userId,
-    List<CallPermission> grantPermissions = const [],
-    List<CallPermission> revokePermissions = const [],
-  });
-
-  Future<Result<None>> startRecording();
-
-  Future<Result<None>> stopRecording();
+  Future<Result<None>> inviteUsers(List<UserInfo> users);
 
   List<RtcTrack> getTracks(String trackIdPrefix);
 
   RtcTrack? getTrack(String trackIdPrefix, SfuTrackType trackType);
-
-  Future<Result<None>> inviteUsers(List<UserInfo> users);
-}
-
-extension CallX on Call {
-  Future<Result<None>> grantPermissions({
-    required String userId,
-    required List<CallPermission> permissions,
-  }) {
-    return updateUserPermissions(
-      userId: userId,
-      grantPermissions: permissions,
-    );
-  }
-
-  Future<Result<None>> revokePermissions({
-    required String userId,
-    required List<CallPermission> permissions,
-  }) {
-    return updateUserPermissions(
-      userId: userId,
-      revokePermissions: permissions,
-    );
-  }
 }

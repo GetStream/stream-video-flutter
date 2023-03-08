@@ -5,6 +5,7 @@ import '../../models/call_credentials.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_reaction.dart';
 import '../../models/call_setting.dart';
+import '../../models/queried_calls.dart';
 
 extension MemberExt on open.MemberResponse {
   CallMember toCallMember(String callCid) {
@@ -126,6 +127,27 @@ extension ReactionExt on open.ReactionResponse {
       user: user.toCallUser(),
       emojiCode: emojiCode,
       custom: custom,
+    );
+  }
+}
+
+extension CallStateResponseFieldsExt on open.CallStateResponseFields {
+  QueriedCall toQueriedCall() {
+    return QueriedCall(
+      call: call.toCallMetadata(),
+      blockedUsers: blockedUsers.map((it) => it.toCallUser()).toList(),
+      members: members.map((it) => it.toCallMember(call.cid)).toList(),
+      membership: membership?.toCallMember(call.cid),
+    );
+  }
+}
+
+extension QueryCallsResponseExt on open.QueryCallsResponse {
+  QueriedCalls toQueriedCalls() {
+    return QueriedCalls(
+      calls: calls.map((it) => it.toQueriedCall()).toList(),
+      next: next,
+      prev: prev,
     );
   }
 }

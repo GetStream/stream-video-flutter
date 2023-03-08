@@ -4,6 +4,7 @@ import '../models/call_device.dart';
 import '../models/call_metadata.dart';
 import '../models/call_reaction.dart';
 import '../models/call_received_created.dart';
+import '../models/queried_calls.dart';
 import '../models/user_info.dart';
 import '../shared_emitter.dart';
 import '../utils/none.dart';
@@ -65,9 +66,27 @@ abstract class CoordinatorClient {
 
   Future<Result<None>> stopRecording(StreamCallCid callCid);
 
+  Future<Result<None>> startBroadcasting(StreamCallCid callCid);
+
+  Future<Result<None>> stopBroadcasting(StreamCallCid callCid);
+
   Future<Result<CallReaction>> sendReaction(inputs.ReactionInput input);
 
-  Future<Result<List<CallUser>>> queryUsers(
-    inputs.QueryUsersInput input,
-  );
+  Future<Result<List<CallUser>>> queryUsers(inputs.QueryUsersInput input);
+
+  Future<Result<QueriedCalls>> queryCalls(inputs.QueryCallsInput input);
+
+  Future<Result<None>> blockUser(inputs.BlockUserInput input);
+
+  Future<Result<None>> unblockUser(inputs.UnblockUserInput input);
+
+  Future<Result<None>> endCall(StreamCallCid callCid);
+
+  Future<Result<CallMetadata>> goLive(StreamCallCid callCid);
+
+  Future<Result<CallMetadata>> stopLive(StreamCallCid callCid);
+
+  Future<Result<None>> muteUsers(inputs.MuteUsersInput input);
+
+  Future<Result<CallMetadata>> updateCall(inputs.UpdateCallInput input);
 }
