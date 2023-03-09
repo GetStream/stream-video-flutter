@@ -7,9 +7,15 @@ import 'package:stream_video_flutter_background/stream_video_flutter_background.
 const _tag = 'SV:Background';
 const _btnCancel = 'cancel';
 
+enum ButtonType {
+  cancel;
+}
+
 typedef ContentOptionsBuilder = ContentOptions Function(Call);
 
-typedef OnCancelClick = Future<void> Function(Call);
+typedef OnButtonClick = Future<void> Function(Call, ButtonType);
+typedef OnNotificationClick = Future<void> Function(Call);
+typedef OnUiLayerDestroyed = Future<void> Function(Call);
 
 class StreamBackgroundService {
   factory StreamBackgroundService() {
@@ -20,13 +26,17 @@ class StreamBackgroundService {
 
   static void init({
     ContentOptionsBuilder optionsBuilder = _defaultOptions,
-    OnCancelClick? onCancelClick,
+    OnNotificationClick? onNotificationClick,
+    OnButtonClick? onButtonClick,
+    OnUiLayerDestroyed? onPlatformUiLayerDestroyed,
   }) {
     Call.onActiveCall = (call) async {
       await _instance.onActiveCall(
         call: call,
         optionsBuilder: optionsBuilder,
-        onCancelClick: onCancelClick,
+        onNotificationClick: onNotificationClick,
+        onButtonClick: onButtonClick,
+        onUiLayerDestroyed: onPlatformUiLayerDestroyed,
       );
     };
   }
@@ -37,12 +47,20 @@ class StreamBackgroundService {
   Future<void> onActiveCall({
     Call? call,
     ContentOptionsBuilder optionsBuilder = _defaultOptions,
-    OnCancelClick? onCancelClick,
+    OnNotificationClick? onNotificationClick,
+    OnButtonClick? onButtonClick,
+    OnUiLayerDestroyed? onUiLayerDestroyed,
   }) async {
     try {
       _logger.d(() => '[onActiveCall] activeCall: $call');
       if (call != null) {
-        await _onConnected(call, optionsBuilder, onCancelClick);
+        await _onConnected(
+          call: call,
+          optionsBuilder: optionsBuilder,
+          onNotificationClick: onNotificationClick,
+          onButtonClick: onButtonClick,
+          onUiLayerDestroyed: onUiLayerDestroyed,
+        );
       } else {
         await _onDisconnected();
       }
@@ -51,11 +69,13 @@ class StreamBackgroundService {
     }
   }
 
-  Future<void> _onConnected(
-    Call call,
-    ContentOptionsBuilder optionsBuilder,
-    OnCancelClick? onCancelClick,
-  ) async {
+  Future<void> _onConnected({
+    required Call call,
+    required ContentOptionsBuilder optionsBuilder,
+    OnNotificationClick? onNotificationClick,
+    OnButtonClick? onButtonClick,
+    OnUiLayerDestroyed? onUiLayerDestroyed,
+  }) async {
     try {
       final result = await StreamVideoFlutterBackground.startService(
         NotificationOptions(
@@ -65,8 +85,14 @@ class StreamBackgroundService {
       );
       _logger.d(() => '[onConnected] service start result: $result');
       if (result) {
-        StreamVideoFlutterBackground.setOnButtonClick(
-          _buildOnButtonClick(call, onCancelClick),
+        StreamVideoFlutterBackground.setOnNotificationContentClick(
+          _buildOnContentClick(call, onNotificationClick),
+        );
+        StreamVideoFlutterBackground.setOnNotificationButtonClick(
+          _buildOnButtonClick(call, onButtonClick),
+        );
+        StreamVideoFlutterBackground.setOnPlatformUiLayerDestroyed(
+          _buildOnUiLayerDestroyed(call, onUiLayerDestroyed),
         );
         _subscription = _listenState(call, optionsBuilder);
       }
@@ -77,7 +103,9 @@ class StreamBackgroundService {
 
   Future<void> _onDisconnected() async {
     try {
-      StreamVideoFlutterBackground.setOnButtonClick(null);
+      StreamVideoFlutterBackground.setOnNotificationContentClick(null);
+      StreamVideoFlutterBackground.setOnNotificationButtonClick(null);
+      StreamVideoFlutterBackground.setOnPlatformUiLayerDestroyed(null);
       await _subscription?.cancel();
       final result = await StreamVideoFlutterBackground.stopService();
       _logger.d(() => '[onDisconnected] service stop result: $result');
@@ -88,20 +116,54 @@ class StreamBackgroundService {
 
   OnNotificationButtonClick _buildOnButtonClick(
     Call call,
-    OnCancelClick? onCancelClick,
+    OnButtonClick? onCancelClick,
   ) {
     return (btn, callCid) async {
       _logger.d(() => '[onButtonClick] btn: $btn, callCid: $callCid');
+      final expected = call.callCid.value;
       if (call.callCid.value != callCid) {
+        _logger.w(() => '[onButtonClick] rejected (expectedCid: $expected)');
         return;
       }
       if (btn == _btnCancel) {
         if (onCancelClick != null) {
-          await onCancelClick.call(call);
+          await onCancelClick.call(call, ButtonType.cancel);
         } else {
           await call.apply(const CancelCall());
+          await call.disconnect();
         }
       }
+    };
+  }
+
+  OnNotificationContentClick _buildOnContentClick(
+    Call call,
+    OnNotificationClick? onNotificationClick,
+  ) {
+    return (callCid) async {
+      _logger.d(() => '[onContentClick] callCid: $callCid');
+      final expected = call.callCid.value;
+      if (expected != callCid) {
+        _logger.w(() => '[onContentClick] rejected (expectedCid: $expected)');
+        return;
+      }
+      await onNotificationClick?.call(call);
+    };
+  }
+
+  OnPlatformUiLayerDestroyed _buildOnUiLayerDestroyed(
+    Call call,
+    OnUiLayerDestroyed? onUiLayerDestroyed,
+  ) {
+    return (callCid) async {
+      _logger.d(() => '[onUiLayerDestroyed] callCid: $callCid');
+      final expected = call.callCid.value;
+      if (expected != callCid) {
+        _logger
+            .w(() => '[onUiLayerDestroyed] rejected (expectedCid: $expected)');
+        return;
+      }
+      await onUiLayerDestroyed?.call(call);
     };
   }
 

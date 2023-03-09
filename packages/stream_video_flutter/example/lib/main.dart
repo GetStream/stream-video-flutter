@@ -17,7 +17,16 @@ Future<void> main() async {
     logLevel: LogLevel.all,
   );
 
-  StreamBackgroundService.init();
+  StreamBackgroundService.init(
+    onNotificationClick: (call) async {
+      streamLog.i(_tag, () => '[onNotificationClick] call: $call');
+      // TODO navigate to call
+    },
+    onPlatformUiLayerDestroyed: (call) async {
+      streamLog.i(_tag, () => '[onPlatformUiLayerDestroyed] call: $call');
+      // TODO
+    },
+  );
 
   runApp(const MyApp());
 }
