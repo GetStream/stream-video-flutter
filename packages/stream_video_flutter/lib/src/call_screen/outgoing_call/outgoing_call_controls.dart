@@ -8,12 +8,18 @@ class OutgoingCallControls extends StatelessWidget {
   /// Creates a new instance of [OutgoingCallControls].
   const OutgoingCallControls({
     super.key,
+    this.isMicrophoneEnabled = false,
+    this.isCameraEnabled = false,
     required this.onCancelCallTap,
     required this.onMicrophoneTap,
     required this.onCameraTap,
-    this.isMicrophoneEnabled = false,
-    this.isCameraEnabled = false,
   });
+
+  /// If camera is enabled.
+  final bool isCameraEnabled;
+
+  /// If microphone is enabled.
+  final bool isMicrophoneEnabled;
 
   /// The action to perform when the hang up button is tapped.
   final VoidCallback onCancelCallTap;
@@ -24,28 +30,12 @@ class OutgoingCallControls extends StatelessWidget {
   /// The action to perform when the camera button is tapped.
   final VoidCallback onCameraTap;
 
-  /// If camera is enabled.
-  final bool isCameraEnabled;
-
-  /// If microphone is enabled.
-  final bool isMicrophoneEnabled;
-
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 64),
       child: Column(
         children: [
-          CallControlOption(
-            icon: const Icon(Icons.call_end_rounded),
-            iconColor: Colors.white,
-            backgroundColor: Colors.red,
-            onPressed: onCancelCallTap,
-            padding: const EdgeInsets.all(24),
-          ),
-          const SizedBox(
-            height: 32,
-          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -64,7 +54,17 @@ class OutgoingCallControls extends StatelessWidget {
                 onPressed: onCameraTap,
               ),
             ],
-          )
+          ),
+          CallControlOption(
+            icon: const Icon(Icons.call_end_rounded),
+            iconColor: Colors.white,
+            backgroundColor: Colors.red,
+            onPressed: onCancelCallTap,
+            padding: const EdgeInsets.all(24),
+          ),
+          const SizedBox(
+            height: 32,
+          ),
         ],
       ),
     );

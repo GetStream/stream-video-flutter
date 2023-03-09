@@ -9,7 +9,7 @@ import 'incoming_call_controls.dart';
 
 /// Represents the Incoming Call state and UI, when the user is called by
 /// other people.
-class StreamIncomingCallContent extends StatelessWidget {
+class StreamIncomingCallContent extends StatefulWidget {
   const StreamIncomingCallContent({
     super.key,
     required this.call,
@@ -59,23 +59,33 @@ class StreamIncomingCallContent extends StatelessWidget {
   final TextStyle? callingLabelTextStyle;
 
   @override
+  State<StreamIncomingCallContent> createState() =>
+      _StreamIncomingCallContentState();
+}
+
+class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
+  CallConnectOptions get options => widget.call.getInitialCallOptions();
+  MicrophoneTrackOption get microphoneTrackOption => options.microphone;
+  CameraTrackOption get cameraTrackOption => options.camera;
+
+  @override
   Widget build(BuildContext context) {
     final theme = StreamIncomingOutgoingCallTheme.incomingCallThemeOf(context);
 
-    final singleParticipantAvatarTheme =
-        this.singleParticipantAvatarTheme ?? theme.singleParticipantAvatarTheme;
+    final singleParticipantAvatarTheme = widget.singleParticipantAvatarTheme ??
+        theme.singleParticipantAvatarTheme;
     final multipleParticipantAvatarTheme =
-        this.multipleParticipantAvatarTheme ??
+        widget.multipleParticipantAvatarTheme ??
             theme.multipleParticipantAvatarTheme;
     final singleParticipantTextStyle =
-        this.singleParticipantTextStyle ?? theme.singleParticipantTextStyle;
-    final multipleParticipantTextStyle =
-        this.multipleParticipantTextStyle ?? theme.multipleParticipantTextStyle;
+        widget.singleParticipantTextStyle ?? theme.singleParticipantTextStyle;
+    final multipleParticipantTextStyle = widget.multipleParticipantTextStyle ??
+        theme.multipleParticipantTextStyle;
     final callingLabelTextStyle =
-        this.callingLabelTextStyle ?? theme.callingLabelTextStyle;
+        widget.callingLabelTextStyle ?? theme.callingLabelTextStyle;
 
     final users =
-        callState.otherParticipants.map((e) => e.toUserInfo()).toList();
+        widget.callState.otherParticipants.map((e) => e.toUserInfo()).toList();
 
     return CallBackground(
       participants: users,
@@ -104,10 +114,12 @@ class StreamIncomingCallContent extends StatelessWidget {
             ),
             const Spacer(),
             IncomingCallControls(
+              isMicrophoneEnabled: microphoneTrackOption.enabled,
+              isCameraEnabled: cameraTrackOption.enabled,
               onAcceptCallTap: _onAcceptCallTap,
               onDeclineCallTap: () => _onDeclineCallTap(context),
-              onMicrophoneTap: onMicrophoneTap ?? () {},
-              onCameraTap: onCameraTap ?? () {},
+              onMicrophoneTap: () => _onMicrophoneTap(context),
+              onCameraTap: () => _onCameraTap(context),
             ),
           ],
         ),
@@ -116,21 +128,51 @@ class StreamIncomingCallContent extends StatelessWidget {
   }
 
   Future<void> _onDeclineCallTap(BuildContext context) async {
-    if (onDeclineCallTap != null) {
-      onDeclineCallTap!();
+    if (widget.onDeclineCallTap != null) {
+      widget.onDeclineCallTap!();
     } else {
-      await call.apply(const RejectCall());
-      await call.disconnect();
+      await widget.call.apply(const RejectCall());
+      await widget.call.disconnect();
 
       await Navigator.maybePop(context);
     }
   }
 
   Future<void> _onAcceptCallTap() async {
-    if (onAcceptCallTap != null) {
-      onAcceptCallTap!();
+    if (widget.onAcceptCallTap != null) {
+      widget.onAcceptCallTap!();
     } else {
-      await call.apply(const AcceptCall());
+      await widget.call.apply(const AcceptCall());
+    }
+  }
+
+  Future<void> _onMicrophoneTap(BuildContext context) async {
+    if (widget.onMicrophoneTap != null) {
+      widget.onMicrophoneTap!();
+    } else {
+      widget.call.setInitialCallOptions(
+        options.copyWith(
+          microphone: MicrophoneTrackOption(
+            enabled: !microphoneTrackOption.enabled,
+          ),
+        ),
+      );
+      return setState(() => {});
+    }
+  }
+
+  Future<void> _onCameraTap(BuildContext context) async {
+    if (widget.onCameraTap != null) {
+      widget.onCameraTap!();
+    } else {
+      widget.call.setInitialCallOptions(
+        options.copyWith(
+          camera: CameraTrackOption(
+            enabled: !cameraTrackOption.enabled,
+          ),
+        ),
+      );
+      return setState(() => {});
     }
   }
 }

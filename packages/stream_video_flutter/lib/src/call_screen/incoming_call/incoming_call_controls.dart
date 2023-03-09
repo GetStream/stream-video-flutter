@@ -8,13 +8,19 @@ class IncomingCallControls extends StatelessWidget {
   /// Creates a new instance of [IncomingCallControls].
   const IncomingCallControls({
     super.key,
+    this.isMicrophoneEnabled = false,
+    this.isCameraEnabled = false,
     required this.onAcceptCallTap,
     required this.onDeclineCallTap,
     required this.onMicrophoneTap,
     required this.onCameraTap,
-    this.isMicrophoneEnabled = false,
-    this.isCameraEnabled = false,
   });
+
+  /// If camera is enabled.
+  final bool isCameraEnabled;
+
+  /// If microphone is enabled.
+  final bool isMicrophoneEnabled;
 
   /// The action to perform when the accept call button is tapped.
   final VoidCallback onAcceptCallTap;
@@ -27,12 +33,6 @@ class IncomingCallControls extends StatelessWidget {
 
   /// The action to perform when the camera button is tapped.
   final VoidCallback onCameraTap;
-
-  /// If camera is enabled.
-  final bool isCameraEnabled;
-
-  /// If microphone is enabled.
-  final bool isMicrophoneEnabled;
 
   @override
   Widget build(BuildContext context) {

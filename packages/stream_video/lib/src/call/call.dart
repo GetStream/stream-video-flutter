@@ -55,11 +55,13 @@ abstract class Call {
 
   OnCallPermissionRequest? onPermissionRequest;
 
+  void setInitialCallOptions(CallConnectOptions options);
+
+  CallConnectOptions getInitialCallOptions();
+
   Future<Result<None>> joinCall();
 
-  Future<Result<None>> connect({
-    CallConnectOptions options = const CallConnectOptions(),
-  });
+  Future<Result<None>> connect();
 
   Future<Result<None>> disconnect();
 

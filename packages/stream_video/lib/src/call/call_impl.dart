@@ -116,9 +116,19 @@ class CallImpl implements Call {
 
   CallSession? _session;
 
+  CallConnectOptions _options = const CallConnectOptions();
+
   @override
   String toString() {
     return 'Call{cid: $callCid}';
+  }
+
+  void setInitialCallOptions(CallConnectOptions options) {
+    _options = options;
+  }
+
+  CallConnectOptions getInitialCallOptions() {
+    return _options;
   }
 
   Future<Result<None>> _acceptCall(AcceptCall action) async {
@@ -203,9 +213,7 @@ class CallImpl implements Call {
   }
 
   @override
-  Future<Result<None>> connect({
-    CallConnectOptions options = const CallConnectOptions(),
-  }) async {
+  Future<Result<None>> connect() async {
     if (_status.value == _ConnectionStatus.connected) {
       _logger.w(() => '[connect] rejected (connected)');
       return Result.success(None());
@@ -214,7 +222,7 @@ class CallImpl implements Call {
       _logger.v(() => '[connect] await "connecting" change');
       final status = await _status.firstWhere(
         (it) => it != _ConnectionStatus.connecting,
-        timeLimit: options.dropTimeout,
+        timeLimit: _options.dropTimeout,
       );
       if (status == _ConnectionStatus.connected) {
         return Result.success(None());
@@ -228,7 +236,7 @@ class CallImpl implements Call {
       Call.onActiveCall?.call(this);
     }
     _status.value = _ConnectionStatus.connecting;
-    final result = await _connect(options);
+    final result = await _connect();
     if (result.isSuccess) {
       _status.value = _ConnectionStatus.connected;
     } else {
@@ -237,8 +245,8 @@ class CallImpl implements Call {
     return result;
   }
 
-  Future<Result<None>> _connect(CallConnectOptions options) async {
-    _logger.d(() => '[connect] options: $options');
+  Future<Result<None>> _connect() async {
+    _logger.d(() => '[connect] options: $_options');
     final validation = await _stateManager.validateUserId(_streamVideo);
     if (validation.isFailure) {
       _logger.w(() => '[connect] rejected (validation): $validation');
@@ -254,10 +262,10 @@ class CallImpl implements Call {
       return Result.error('invalid status: $status');
     }
 
-    final result = await _awaitIfNeeded(options.dropTimeout);
+    final result = await _awaitIfNeeded(_options.dropTimeout);
     if (result.isFailure) {
       _logger.e(() => '[connect] waiting failed: $result');
-      await _stateManager.onWaitingTimeout(options.dropTimeout);
+      await _stateManager.onWaitingTimeout(_options.dropTimeout);
       return result;
     }
 
@@ -278,7 +286,7 @@ class CallImpl implements Call {
     }
     _logger.v(() => '[connect] started session');
     await _stateManager.onConnected();
-    await _applyConnectOptions(options);
+    await _applyConnectOptions();
 
     _logger.v(() => '[connect] completed');
     return Result.success(None());
@@ -422,9 +430,9 @@ class CallImpl implements Call {
     return result;
   }
 
-  Future<void> _applyConnectOptions(CallConnectOptions options) async {
-    if (options.camera.enabled) {
-      final cameraTrack = options.camera.track;
+  Future<void> _applyConnectOptions() async {
+    if (_options.camera.enabled) {
+      final cameraTrack = _options.camera.track;
       if (cameraTrack != null) {
         await apply(SetCameraTrack(cameraTrack));
       } else {
@@ -432,8 +440,8 @@ class CallImpl implements Call {
       }
     }
 
-    if (options.microphone.enabled) {
-      final microphoneTrack = options.microphone.track;
+    if (_options.microphone.enabled) {
+      final microphoneTrack = _options.microphone.track;
       if (microphoneTrack != null) {
         await apply(SetMicrophoneTrack(microphoneTrack));
       } else {
@@ -441,8 +449,8 @@ class CallImpl implements Call {
       }
     }
 
-    if (options.screenShare.enabled) {
-      final screenShareTrack = options.screenShare.track;
+    if (_options.screenShare.enabled) {
+      final screenShareTrack = _options.screenShare.track;
       if (screenShareTrack != null) {
         await apply(SetScreenShareTrack(screenShareTrack));
       } else {
