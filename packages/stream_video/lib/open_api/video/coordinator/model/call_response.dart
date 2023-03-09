@@ -46,7 +46,7 @@ class CallResponse {
   UserResponse createdBy;
 
   /// Custom data for this object
-  Map<String, Object> custom;
+  Map<String, Object?> custom;
 
   /// Date/time when the call ended
   ///
@@ -85,73 +85,76 @@ class CallResponse {
   DateTime updatedAt;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallResponse &&
-     other.backstage == backstage &&
-     other.blockedUserIds == blockedUserIds &&
-     other.broadcastEgress == broadcastEgress &&
-     other.cid == cid &&
-     other.createdAt == createdAt &&
-     other.createdBy == createdBy &&
-     other.custom == custom &&
-     other.endedAt == endedAt &&
-     other.id == id &&
-     other.ownCapabilities == ownCapabilities &&
-     other.recordEgress == recordEgress &&
-     other.settings == settings &&
-     other.startsAt == startsAt &&
-     other.team == team &&
-     other.type == type &&
-     other.updatedAt == updatedAt;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CallResponse &&
+          other.backstage == backstage &&
+          other.blockedUserIds == blockedUserIds &&
+          other.broadcastEgress == broadcastEgress &&
+          other.cid == cid &&
+          other.createdAt == createdAt &&
+          other.createdBy == createdBy &&
+          other.custom == custom &&
+          other.endedAt == endedAt &&
+          other.id == id &&
+          other.ownCapabilities == ownCapabilities &&
+          other.recordEgress == recordEgress &&
+          other.settings == settings &&
+          other.startsAt == startsAt &&
+          other.team == team &&
+          other.type == type &&
+          other.updatedAt == updatedAt;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (backstage.hashCode) +
-    (blockedUserIds.hashCode) +
-    (broadcastEgress.hashCode) +
-    (cid.hashCode) +
-    (createdAt.hashCode) +
-    (createdBy.hashCode) +
-    (custom.hashCode) +
-    (endedAt == null ? 0 : endedAt!.hashCode) +
-    (id.hashCode) +
-    (ownCapabilities.hashCode) +
-    (recordEgress.hashCode) +
-    (settings.hashCode) +
-    (startsAt == null ? 0 : startsAt!.hashCode) +
-    (team.hashCode) +
-    (type.hashCode) +
-    (updatedAt.hashCode);
+      // ignore: unnecessary_parenthesis
+      (backstage.hashCode) +
+      (blockedUserIds.hashCode) +
+      (broadcastEgress.hashCode) +
+      (cid.hashCode) +
+      (createdAt.hashCode) +
+      (createdBy.hashCode) +
+      (custom.hashCode) +
+      (endedAt == null ? 0 : endedAt!.hashCode) +
+      (id.hashCode) +
+      (ownCapabilities.hashCode) +
+      (recordEgress.hashCode) +
+      (settings.hashCode) +
+      (startsAt == null ? 0 : startsAt!.hashCode) +
+      (team.hashCode) +
+      (type.hashCode) +
+      (updatedAt.hashCode);
 
   @override
-  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcastEgress=$broadcastEgress, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, endedAt=$endedAt, id=$id, ownCapabilities=$ownCapabilities, recordEgress=$recordEgress, settings=$settings, startsAt=$startsAt, team=$team, type=$type, updatedAt=$updatedAt]';
+  String toString() =>
+      'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcastEgress=$broadcastEgress, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, endedAt=$endedAt, id=$id, ownCapabilities=$ownCapabilities, recordEgress=$recordEgress, settings=$settings, startsAt=$startsAt, team=$team, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'backstage'] = this.backstage;
-      json[r'blocked_user_ids'] = this.blockedUserIds;
-      json[r'broadcast_egress'] = this.broadcastEgress;
-      json[r'cid'] = this.cid;
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'created_by'] = this.createdBy;
-      json[r'custom'] = this.custom;
+    json[r'backstage'] = this.backstage;
+    json[r'blocked_user_ids'] = this.blockedUserIds;
+    json[r'broadcast_egress'] = this.broadcastEgress;
+    json[r'cid'] = this.cid;
+    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    json[r'created_by'] = this.createdBy;
+    json[r'custom'] = this.custom;
     if (this.endedAt != null) {
       json[r'ended_at'] = this.endedAt!.toUtc().toIso8601String();
     } else {
       json[r'ended_at'] = null;
     }
-      json[r'id'] = this.id;
-      json[r'own_capabilities'] = this.ownCapabilities;
-      json[r'record_egress'] = this.recordEgress;
-      json[r'settings'] = this.settings;
+    json[r'id'] = this.id;
+    json[r'own_capabilities'] = this.ownCapabilities;
+    json[r'record_egress'] = this.recordEgress;
+    json[r'settings'] = this.settings;
     if (this.startsAt != null) {
       json[r'starts_at'] = this.startsAt!.toUtc().toIso8601String();
     } else {
       json[r'starts_at'] = null;
     }
-      json[r'team'] = this.team;
-      json[r'type'] = this.type;
-      json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
+    json[r'team'] = this.team;
+    json[r'type'] = this.type;
+    json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
     return json;
   }
 
@@ -167,8 +170,10 @@ class CallResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "CallResponse[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "CallResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -199,7 +204,10 @@ class CallResponse {
     return null;
   }
 
-  static List<CallResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallResponse>? listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -227,12 +235,18 @@ class CallResponse {
   }
 
   // maps a json object with a list of CallResponse-objects as value to a dart map
-  static Map<String, List<CallResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallResponse>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallResponse.listFromJson(entry.value, growable: growable,);
+        final value = CallResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
         if (value != null) {
           map[entry.key] = value;
         }
@@ -259,4 +273,3 @@ class CallResponse {
     'updated_at',
   };
 }
-

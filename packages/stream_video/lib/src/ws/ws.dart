@@ -41,7 +41,12 @@ abstract class StreamWebSocket {
       if (_connectRequestInProgress) return;
       _connectRequestInProgress = true;
 
-      final uri = Uri.parse(url);
+      var uri = Uri.parse(url);
+      //useful for local development
+      if (uri.scheme == 'wss' && uri.host == '127.0.0.1') {
+        uri = Uri.parse(url.replaceFirst('wss', 'ws'));
+      }
+      streamLog.i('SV:AbstractWS', () => '[connect] with new url: $url');
       _ws = await platform.connect(uri, protocols: protocols);
 
       onOpen();

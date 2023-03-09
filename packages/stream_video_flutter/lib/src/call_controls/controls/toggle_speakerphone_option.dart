@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
@@ -32,7 +32,7 @@ class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
   StreamSubscription<List<MediaDevice>>? _deviceChangeSubscription;
 
   Future<void> _toggleSpeaker({bool enabled = false}) async {
-    final newAudio = _audioOutputs?.firstWhere((audioOut) {
+    final newAudio = _audioOutputs?.firstWhereOrNull((audioOut) {
       if (enabled) return audioOut.deviceId == deviceIdSpeaker;
       return audioOut.deviceId == deviceIdEarpiece;
     });

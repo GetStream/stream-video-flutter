@@ -95,13 +95,23 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
 
       _logger.v(() => '[start] sfu joined: $event');
       final currentUserId = stateManager.state.value.currentUserId;
-      final localParticipant = event.callState.participants.firstWhere(
+      _logger.v(() => '[start] currentUserId: $currentUserId');
+      final participants = event.callState.participants;
+      _logger.v(() => '[start] participants: $participants');
+
+      final localParticipant = participants.firstWhereOrNull(
         (it) => it.userId == currentUserId,
       );
-      final localTrackId = localParticipant.trackLookupPrefix;
+      _logger.v(() => '[start] localParticipant: $localParticipant');
+      final localTrackId = localParticipant?.trackLookupPrefix;
       _logger.v(() => '[start] localTrackId: $localTrackId');
+      if (localTrackId == null) {
+        throw VideoError(
+          message: 'localTrackId is null',
+        );
+      }
       rtcManager = await rtcManagerFactory.makeRtcManager(
-        publisherId: localTrackId,
+        publisherId: localTrackId!,
       )
         ..onPublisherIceCandidate = _onLocalIceCandidate
         ..onSubscriberIceCandidate = _onLocalIceCandidate

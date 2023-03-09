@@ -140,7 +140,7 @@ class CallUser with EquatableMixin {
   final List<String> teams;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final Map<String, Object>? custom;
+  final Map<String, Object?>? custom;
 
   @override
   List<Object> get props => [
