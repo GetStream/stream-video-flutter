@@ -129,8 +129,6 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
     } else {
       await widget.call.apply(const CancelCall());
       await widget.call.disconnect();
-
-      await Navigator.maybePop(context);
     }
   }
 

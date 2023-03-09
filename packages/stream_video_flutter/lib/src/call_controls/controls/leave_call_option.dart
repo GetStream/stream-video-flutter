@@ -33,8 +33,6 @@ class LeaveCallOption extends StatelessWidget {
     } else {
       await call.apply(const CancelCall());
       await call.disconnect();
-
-      await Navigator.maybePop(context);
     }
   }
 }

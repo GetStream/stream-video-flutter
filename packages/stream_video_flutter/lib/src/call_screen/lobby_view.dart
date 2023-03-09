@@ -151,7 +151,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
               if (widget.onCloseTap != null) {
                 widget.onCloseTap!();
               } else {
-                await Navigator.of(context).maybePop();
+                await Navigator.maybePop(context);
               }
             },
           ),
