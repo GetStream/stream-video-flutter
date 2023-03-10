@@ -62,6 +62,8 @@ abstract class CoordinatorClient {
     inputs.UpdateUserPermissionsInput input,
   );
 
+  Future<Result<None>> startTranscription(StreamCallCid callCid);
+
   Future<Result<None>> startRecording(StreamCallCid callCid);
 
   Future<Result<None>> stopRecording(StreamCallCid callCid);

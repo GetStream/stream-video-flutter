@@ -368,6 +368,16 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   @override
+  Future<Result<None>> startTranscription(StreamCallCid callCid) async {
+    try {
+      await defaultApi.startTranscription(callCid.type, callCid.id);
+      return Result.success(None());
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
   Future<Result<None>> startRecording(StreamCallCid callCid) async {
     try {
       await defaultApi.startRecording(callCid.type, callCid.id);

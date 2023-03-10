@@ -20,6 +20,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor,
     this.onBackPressed,
     this.onParticipantsInfoTap,
+    this.onSettingsTap,
     this.participantsInfoBuilder,
     this.leading,
     this.title,
@@ -43,6 +44,9 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// The action to perform when the participants info button is tapped.
   final VoidCallback? onParticipantsInfoTap;
+
+  //settings callback
+  final VoidCallback? onSettingsTap;
 
   /// Builder used to create a custom participants info screen.
   final CallParticipantsInfoBuilder? participantsInfoBuilder;
@@ -89,10 +93,11 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
           <Widget>[
             IconButton(
               icon: Icon(
-                Icons.group_rounded,
+                //vertical settings icon
+                Icons.more_vert,
                 color: theme.colorTheme.textHighEmphasis,
               ),
-              onPressed: () => _onParticipantsInfoTap(context),
+              onPressed: () => _onSettingsTap(context),
             ),
           ],
       title: title ??
@@ -110,6 +115,45 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
     final status = callState.status.toStatusString();
     final callId = callState.callCid.id;
     return '$status: $callId';
+  }
+
+  void _onSettingsTap(BuildContext context) {
+    if (onSettingsTap != null) {
+      onSettingsTap!();
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => SimpleDialog(
+          children: [
+            SimpleDialogOption(
+              child: IconButton(
+                icon: Icon(
+                  Icons.group_rounded,
+                  color:
+                      StreamVideoTheme.of(context).colorTheme.textHighEmphasis,
+                ),
+                onPressed: () => _onParticipantsInfoTap(context),
+              ),
+            ),
+            SimpleDialogOption(
+              child: IconButton(
+                icon: Icon(
+                  Icons.transcribe,
+                  color:
+                      StreamVideoTheme.of(context).colorTheme.textHighEmphasis,
+                ),
+                onPressed: () async {
+                  print("transcribing");
+                  Navigator.of(context).pop();
+                  await call.startTranscription();
+                  //transcribe call
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   void _onParticipantsInfoTap(BuildContext context) {

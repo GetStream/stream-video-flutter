@@ -431,6 +431,22 @@ class StreamVideoImpl implements StreamVideo {
     return result;
   }
 
+
+  @override
+  Future<Result<None>> startTranscription({
+    required StreamCallCid callCid,
+  }) async {
+    return _client.startTranscription(callCid);
+  }
+
+  //stop transcription
+  // @override
+  // Future<Result<None>> stopTranscription({
+  //   required StreamCallCid callCid,
+  // }) async {
+  //   return _client.stopTranscription(callCid);
+  // }
+
   @override
   Future<Result<None>> startRecording({
     required StreamCallCid callCid,

@@ -589,6 +589,23 @@ class CallImpl implements Call {
     return result;
   }
 
+  @override
+  Future<Result<None>> startTranscription() async {
+    final result = await _streamVideo.startTranscription(callCid: callCid);
+    _logger.v(() => '[startTranscription] result: $result');
+    // if (!_hasPermission(CallPermission.startTranscription)) {
+    //   _logger.w(() => '[startTranscription] rejected (no permission)');
+    //   return Result.error('Cannot start transcription (no permission)');
+    // }
+    // _logger.d(() => '[startTranscription] action: $action');
+    // final result = await _streamVideo.startTranscription(callCid: callCid);
+    // _logger.v(() => '[startTranscription] result: $result');
+    // if (result.isSuccess) {
+    //   await _stateManager.onCallControlAction(action);
+    // }
+    return result;
+  }
+
   Future<Result<None>> _startRecording(StartRecording action) async {
     if (!_hasPermission(CallPermission.startRecordCall)) {
       _logger.w(() => '[startRecording] rejected (no permission)');
