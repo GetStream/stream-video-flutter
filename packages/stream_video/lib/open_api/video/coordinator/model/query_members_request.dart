@@ -40,7 +40,7 @@ class QueryMembersRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  num? limit;
+  int? limit;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -135,9 +135,7 @@ class QueryMembersRequest {
       return QueryMembersRequest(
         filterConditions: mapCastOfType<String, Object>(json, r'filter_conditions')!,
         id: mapValueOfType<String>(json, r'id'),
-        limit: json[r'limit'] == null
-            ? null
-            : num.parse(json[r'limit'].toString()),
+        limit: mapValueOfType<int>(json, r'limit'),
         next: mapValueOfType<String>(json, r'next'),
         prev: mapValueOfType<String>(json, r'prev'),
         sort: SortParamRequest.listFromJson(json[r'sort']) ?? const [],
