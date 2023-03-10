@@ -116,19 +116,30 @@ class CallImpl implements Call {
 
   CallSession? _session;
 
-  CallConnectOptions _options = const CallConnectOptions();
+  CallConnectOptions _connectOptions = const CallConnectOptions();
 
   @override
   String toString() {
     return 'Call{cid: $callCid}';
   }
 
-  void setInitialCallOptions(CallConnectOptions options) {
-    _options = options;
+  @override
+  CallConnectOptions get connectOptions {
+    return _connectOptions;
   }
 
-  CallConnectOptions getInitialCallOptions() {
-    return _options;
+  @override
+  set connectOptions(CallConnectOptions connectOptions) {
+    final status = _status.value;
+    if (status == _ConnectionStatus.connecting ||
+        status == _ConnectionStatus.connected) {
+      _logger.w(
+        () => '[setConnectOptions] rejected (connectOptions must be'
+            ' set before invoking `connect`)',
+      );
+      return;
+    }
+    _connectOptions = connectOptions;
   }
 
   Future<Result<None>> _acceptCall(AcceptCall action) async {
@@ -222,7 +233,7 @@ class CallImpl implements Call {
       _logger.v(() => '[connect] await "connecting" change');
       final status = await _status.firstWhere(
         (it) => it != _ConnectionStatus.connecting,
-        timeLimit: _options.dropTimeout,
+        timeLimit: _connectOptions.dropTimeout,
       );
       if (status == _ConnectionStatus.connected) {
         return Result.success(None());
@@ -246,7 +257,7 @@ class CallImpl implements Call {
   }
 
   Future<Result<None>> _connect() async {
-    _logger.d(() => '[connect] options: $_options');
+    _logger.d(() => '[connect] options: $_connectOptions');
     final validation = await _stateManager.validateUserId(_streamVideo);
     if (validation.isFailure) {
       _logger.w(() => '[connect] rejected (validation): $validation');
@@ -262,10 +273,10 @@ class CallImpl implements Call {
       return Result.error('invalid status: $status');
     }
 
-    final result = await _awaitIfNeeded(_options.dropTimeout);
+    final result = await _awaitIfNeeded(_connectOptions.dropTimeout);
     if (result.isFailure) {
       _logger.e(() => '[connect] waiting failed: $result');
-      await _stateManager.onWaitingTimeout(_options.dropTimeout);
+      await _stateManager.onWaitingTimeout(_connectOptions.dropTimeout);
       return result;
     }
 
@@ -431,31 +442,58 @@ class CallImpl implements Call {
   }
 
   Future<void> _applyConnectOptions() async {
-    if (_options.camera.enabled) {
-      final cameraTrack = _options.camera.track;
-      if (cameraTrack != null) {
-        await apply(SetCameraTrack(cameraTrack));
-      } else {
-        await apply(const SetCameraEnabled(enabled: true));
-      }
-    }
+    await _applyCameraOption(_connectOptions.camera);
+    await _applyMicrophoneOption(_connectOptions.microphone);
+    await _applyScreenShareOption(_connectOptions.screenShare);
+  }
 
-    if (_options.microphone.enabled) {
-      final microphoneTrack = _options.microphone.track;
-      if (microphoneTrack != null) {
-        await apply(SetMicrophoneTrack(microphoneTrack));
-      } else {
-        await apply(const SetMicrophoneEnabled(enabled: true));
-      }
+  Future<void> _applyCameraOption(TrackOption cameraOption) async {
+    if (cameraOption is TrackProvided) {
+      await _applyLocalTrack(
+        track: cameraOption.track,
+        stateAction: const SetCameraEnabled(enabled: true),
+      );
+    } else if (cameraOption is TrackEnabled) {
+      await _applySessionAction(const SetCameraEnabled(enabled: true));
     }
+  }
 
-    if (_options.screenShare.enabled) {
-      final screenShareTrack = _options.screenShare.track;
-      if (screenShareTrack != null) {
-        await apply(SetScreenShareTrack(screenShareTrack));
-      } else {
-        await apply(const SetScreenShareEnabled(enabled: true));
-      }
+  Future<void> _applyMicrophoneOption(TrackOption microphoneOption) async {
+    if (microphoneOption is TrackProvided) {
+      await _applyLocalTrack(
+        track: microphoneOption.track,
+        stateAction: const SetMicrophoneEnabled(enabled: true),
+      );
+    } else if (microphoneOption is TrackEnabled) {
+      await _applySessionAction(const SetMicrophoneEnabled(enabled: true));
+    }
+  }
+
+  Future<void> _applyScreenShareOption(TrackOption screenShareOption) async {
+    if (screenShareOption is TrackProvided) {
+      await _applyLocalTrack(
+        track: screenShareOption.track,
+        stateAction: const SetScreenShareEnabled(enabled: true),
+      );
+    } else if (screenShareOption is TrackEnabled) {
+      await _applySessionAction(const SetScreenShareEnabled(enabled: true));
+    }
+  }
+
+  Future<void> _applyLocalTrack({
+    required RtcLocalTrack track,
+    required SessionControlAction stateAction,
+  }) async {
+    _logger.d(() => '[applyLocalTrack] localTrack: $track');
+    final session = _session;
+    if (session == null) {
+      _logger.w(() => '[applyLocalTrack] rejected (session is null);');
+      return;
+    }
+    final result = await session.setLocalTrack(track);
+    _logger.v(() => '[applyLocalTrack] completed: $result');
+    if (result.isSuccess) {
+      await _stateManager.onCallControlAction(stateAction);
     }
   }
 

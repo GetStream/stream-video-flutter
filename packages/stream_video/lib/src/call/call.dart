@@ -55,9 +55,9 @@ abstract class Call {
 
   OnCallPermissionRequest? onPermissionRequest;
 
-  void setInitialCallOptions(CallConnectOptions options);
+  CallConnectOptions get connectOptions;
 
-  CallConnectOptions getInitialCallOptions();
+  set connectOptions(CallConnectOptions connectOptions);
 
   Future<Result<None>> joinCall();
 

@@ -15,6 +15,8 @@ abstract class CallSession extends Disposable {
 
   Future<Result<None>> apply(SessionControlAction action);
 
+  Future<Result<None>> setLocalTrack(RtcLocalTrack track);
+
   List<RtcTrack> getTracks(String trackIdPrefix);
 
   RtcTrack? getTrack(String trackIdPrefix, SfuTrackType trackType);
