@@ -116,7 +116,7 @@ class StreamBackgroundService {
 
   OnNotificationButtonClick _buildOnButtonClick(
     Call call,
-    OnButtonClick? onCancelClick,
+    OnButtonClick? onButtonClick,
   ) {
     return (btn, callCid) async {
       _logger.d(() => '[onButtonClick] btn: $btn, callCid: $callCid');
@@ -126,8 +126,8 @@ class StreamBackgroundService {
         return;
       }
       if (btn == _btnCancel) {
-        if (onCancelClick != null) {
-          await onCancelClick.call(call, ButtonType.cancel);
+        if (onButtonClick != null) {
+          await onButtonClick.call(call, ButtonType.cancel);
         } else {
           await call.apply(const CancelCall());
           await call.disconnect();
