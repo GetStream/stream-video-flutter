@@ -237,6 +237,8 @@ class ApiClient {
           return DatacenterResponse.fromJson(value);
         case 'Device':
           return Device.fromJson(value);
+        case 'EdgeResponse':
+          return EdgeResponse.fromJson(value);
         case 'EndCallResponse':
           return EndCallResponse.fromJson(value);
         case 'GeofenceSettings':
@@ -247,6 +249,8 @@ class ApiClient {
           return GetCallEdgeServerRequest.fromJson(value);
         case 'GetCallEdgeServerResponse':
           return GetCallEdgeServerResponse.fromJson(value);
+        case 'GetEdgesResponse':
+          return GetEdgesResponse.fromJson(value);
         case 'GetOrCreateCallRequest':
           return GetOrCreateCallRequest.fromJson(value);
         case 'GetOrCreateCallResponse':

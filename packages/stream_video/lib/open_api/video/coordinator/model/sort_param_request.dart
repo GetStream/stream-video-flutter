@@ -23,7 +23,7 @@ class SortParamRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  num? direction;
+  int? direction;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -81,9 +81,7 @@ class SortParamRequest {
       }());
 
       return SortParamRequest(
-        direction: json[r'direction'] == null
-            ? null
-            : num.parse(json[r'direction'].toString()),
+        direction: mapValueOfType<int>(json, r'direction'),
         field: mapValueOfType<String>(json, r'field'),
       );
     }
