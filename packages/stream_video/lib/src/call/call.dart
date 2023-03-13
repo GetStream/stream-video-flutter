@@ -69,6 +69,8 @@ abstract class Call {
 
   Future<Result<None>> inviteUsers(List<UserInfo> users);
 
+  Future<Result<None>> setLocalTrack(RtcLocalTrack track);
+
   List<RtcTrack> getTracks(String trackIdPrefix);
 
   RtcTrack? getTrack(String trackIdPrefix, SfuTrackType trackType);

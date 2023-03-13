@@ -72,6 +72,9 @@ class _TrackDisabled extends TrackOption {
   }
   const _TrackDisabled._();
   static const _TrackDisabled _instance = _TrackDisabled._();
+
+  @override
+  String toString() => 'disabled';
 }
 
 class _TrackEnabled extends TrackOption {
@@ -80,6 +83,9 @@ class _TrackEnabled extends TrackOption {
   }
   const _TrackEnabled._();
   static const _TrackEnabled _instance = _TrackEnabled._();
+
+  @override
+  String toString() => 'enabled';
 }
 
 class _TrackProvided<T extends MediaConstraints> extends TrackOption {
@@ -89,6 +95,9 @@ class _TrackProvided<T extends MediaConstraints> extends TrackOption {
 
   @override
   List<Object?> get props => [track.trackType];
+
+  @override
+  String toString() => 'provided(${track.trackId})';
 }
 
 extension TrackOptionX on TrackOption {

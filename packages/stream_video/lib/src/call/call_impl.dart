@@ -381,6 +381,11 @@ class CallImpl implements Call {
   }
 
   @override
+  Future<Result<None>> setLocalTrack(RtcLocalTrack track) async {
+    return _applyLocalTrack(track);
+  }
+
+  @override
   RtcTrack? getTrack(String trackIdPrefix, SfuTrackType trackType) {
     return _session?.getTrack(trackIdPrefix, trackType);
   }
@@ -442,17 +447,16 @@ class CallImpl implements Call {
   }
 
   Future<void> _applyConnectOptions() async {
+    _logger.d(() => '[applyConnectOptions] connectOptions: $_connectOptions');
     await _applyCameraOption(_connectOptions.camera);
     await _applyMicrophoneOption(_connectOptions.microphone);
     await _applyScreenShareOption(_connectOptions.screenShare);
+    _logger.v(() => '[applyConnectOptions] finished');
   }
 
   Future<void> _applyCameraOption(TrackOption cameraOption) async {
     if (cameraOption.isProvided) {
-      await _applyLocalTrack(
-        track: cameraOption.track,
-        stateAction: const SetCameraEnabled(enabled: true),
-      );
+      await _applyLocalTrack(cameraOption.track);
     } else if (cameraOption.isEnabled) {
       await _applySessionAction(const SetCameraEnabled(enabled: true));
     }
@@ -460,10 +464,7 @@ class CallImpl implements Call {
 
   Future<void> _applyMicrophoneOption(TrackOption microphoneOption) async {
     if (microphoneOption.isProvided) {
-      await _applyLocalTrack(
-        track: microphoneOption.track,
-        stateAction: const SetMicrophoneEnabled(enabled: true),
-      );
+      await _applyLocalTrack(microphoneOption.track);
     } else if (microphoneOption.isEnabled) {
       await _applySessionAction(const SetMicrophoneEnabled(enabled: true));
     }
@@ -471,30 +472,29 @@ class CallImpl implements Call {
 
   Future<void> _applyScreenShareOption(TrackOption screenShareOption) async {
     if (screenShareOption.isProvided) {
-      await _applyLocalTrack(
-        track: screenShareOption.track,
-        stateAction: const SetScreenShareEnabled(enabled: true),
-      );
+      await _applyLocalTrack(screenShareOption.track);
     } else if (screenShareOption.isEnabled) {
       await _applySessionAction(const SetScreenShareEnabled(enabled: true));
     }
   }
 
-  Future<void> _applyLocalTrack({
-    required RtcLocalTrack track,
-    required SessionControlAction stateAction,
-  }) async {
+  Future<Result<None>> _applyLocalTrack(RtcLocalTrack track) async {
     _logger.d(() => '[applyLocalTrack] localTrack: $track');
     final session = _session;
     if (session == null) {
       _logger.w(() => '[applyLocalTrack] rejected (session is null);');
-      return;
+      return Result.error('no call session');
     }
     final result = await session.setLocalTrack(track);
     _logger.v(() => '[applyLocalTrack] completed: $result');
     if (result.isSuccess) {
-      await _stateManager.onCallControlAction(stateAction);
+      final action = track.composeControlAction();
+      _logger.v(() => '[applyLocalTrack] composed action: $action');
+      if (action != null) {
+        await _stateManager.onCallControlAction(action);
+      }
     }
+    return result;
   }
 
   Future<void> _awaitIncomingToBeAccepted(Duration timeLimit) async {
@@ -726,6 +726,20 @@ extension on CallStateManager {
       await onUserIdSet(currentUserId);
     }
     return Result.success(None());
+  }
+}
+
+extension on RtcLocalTrack {
+  SessionControlAction? composeControlAction() {
+    if (mediaConstraints is AudioConstraints) {
+      return const SetMicrophoneEnabled(enabled: true);
+    } else if (mediaConstraints is CameraConstraints) {
+      return const SetCameraEnabled(enabled: true);
+    } else if (mediaConstraints is ScreenShareConstraints) {
+      return const SetScreenShareEnabled(enabled: true);
+    }
+    streamLog.e(_tag, () => '[composeControlAction] failed: $mediaConstraints');
+    return null;
   }
 }
 
