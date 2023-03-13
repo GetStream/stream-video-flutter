@@ -77,14 +77,14 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
     final cameraTrack = _cameraTrack;
     if (cameraTrack != null) {
       options = options.copyWith(
-        camera: TrackProvided(track: cameraTrack),
+        camera: TrackOption.provided(cameraTrack),
       );
     }
 
     final microphoneTrack = _microphoneTrack;
     if (microphoneTrack != null) {
       options = options.copyWith(
-        microphone: TrackProvided(track: microphoneTrack),
+        microphone: TrackOption.provided(microphoneTrack),
       );
     }
 

@@ -5,9 +5,9 @@ import '../webrtc/rtc_track/rtc_local_track.dart';
 
 class CallConnectOptions with EquatableMixin {
   const CallConnectOptions({
-    this.camera = TrackDisabled._instance,
-    this.microphone = TrackDisabled._instance,
-    this.screenShare = TrackDisabled._instance,
+    this.camera = _TrackDisabled._instance,
+    this.microphone = _TrackDisabled._instance,
+    this.screenShare = _TrackDisabled._instance,
     this.dropTimeout = const Duration(seconds: 30),
   });
 
@@ -47,6 +47,18 @@ class CallConnectOptions with EquatableMixin {
 abstract class TrackOption with EquatableMixin {
   const TrackOption();
 
+  factory TrackOption.enabled() {
+    return _TrackEnabled();
+  }
+
+  factory TrackOption.disabled() {
+    return _TrackEnabled();
+  }
+
+  factory TrackOption.provided(RtcLocalTrack track) {
+    return _TrackProvided(track: track);
+  }
+
   @override
   bool? get stringify => true;
 
@@ -54,24 +66,24 @@ abstract class TrackOption with EquatableMixin {
   List<Object?> get props => [];
 }
 
-class TrackDisabled extends TrackOption {
-  factory TrackDisabled() {
+class _TrackDisabled extends TrackOption {
+  factory _TrackDisabled() {
     return _instance;
   }
-  const TrackDisabled._();
-  static const TrackDisabled _instance = TrackDisabled._();
+  const _TrackDisabled._();
+  static const _TrackDisabled _instance = _TrackDisabled._();
 }
 
-class TrackEnabled extends TrackOption {
-  factory TrackEnabled() {
+class _TrackEnabled extends TrackOption {
+  factory _TrackEnabled() {
     return _instance;
   }
-  const TrackEnabled._();
-  static const TrackEnabled _instance = TrackEnabled._();
+  const _TrackEnabled._();
+  static const _TrackEnabled _instance = _TrackEnabled._();
 }
 
-class TrackProvided<T extends MediaConstraints> extends TrackOption {
-  const TrackProvided({required this.track});
+class _TrackProvided<T extends MediaConstraints> extends TrackOption {
+  const _TrackProvided({required this.track});
 
   final RtcLocalTrack<T> track;
 
@@ -81,17 +93,33 @@ class TrackProvided<T extends MediaConstraints> extends TrackOption {
 
 extension TrackOptionX on TrackOption {
   TrackOption toggle() {
-    if (this is TrackEnabled) {
-      return TrackDisabled();
-    } else if (this is TrackDisabled) {
-      return TrackEnabled();
+    if (isEnabled) {
+      return TrackOption.disabled();
+    } else if (isDisabled) {
+      return TrackOption.enabled();
     }
     return this;
   }
 
-  bool get isEnabled => this is TrackEnabled;
+  bool get isEnabled => this is _TrackEnabled;
 
-  bool get isDisabled => this is TrackDisabled;
+  bool get isDisabled => this is _TrackDisabled;
 
-  bool get isProvided => this is TrackProvided;
+  bool get isProvided => this is _TrackProvided;
+
+  RtcLocalTrack? get trackOrNull {
+    final self = this;
+    if (self is _TrackProvided) {
+      return self.track;
+    }
+    return null;
+  }
+
+  RtcLocalTrack get track {
+    final self = this;
+    if (self is _TrackProvided) {
+      return self.track;
+    }
+    throw AssertionError('$runtimeType option has no track');
+  }
 }
