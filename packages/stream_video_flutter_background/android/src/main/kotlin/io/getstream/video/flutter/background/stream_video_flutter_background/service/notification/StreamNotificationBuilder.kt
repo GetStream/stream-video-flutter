@@ -29,4 +29,8 @@ interface StreamNotificationBuilder {
     fun build(options: NotificationOptions): IdentifiedNotification
 }
 
-data class IdentifiedNotification(val id: Int, val value: Notification)
+data class IdentifiedNotification(val id: Int, val value: Notification) {
+    companion object {
+        const val ACTION_CALL_SUFFIX = "intent.action.STREAM_CALL"
+    }
+}

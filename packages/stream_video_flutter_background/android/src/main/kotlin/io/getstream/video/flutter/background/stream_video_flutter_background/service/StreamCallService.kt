@@ -79,6 +79,7 @@ open class StreamCallService : Service() {
         logger.i { "[onDestroy] no args" }
         scope.cancel()
         isRunning = false
+        notificationOptions = NotificationOptions()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

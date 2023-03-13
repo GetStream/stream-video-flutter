@@ -130,6 +130,5 @@ class _StreamCallContentState extends State<StreamCallContent> {
   @override
   Future<void> dispose() async {
     super.dispose();
-    await call.disconnect();
   }
 }
