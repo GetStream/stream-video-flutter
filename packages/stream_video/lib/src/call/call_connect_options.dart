@@ -48,11 +48,11 @@ abstract class TrackOption with EquatableMixin {
   const TrackOption();
 
   factory TrackOption.enabled() {
-    return TrackEnabled();
+    return TrackEnabled._instance;
   }
 
   factory TrackOption.disabled() {
-    return TrackDisabled();
+    return TrackDisabled._instance;
   }
 
   factory TrackOption.provided(RtcLocalTrack track) {
@@ -67,9 +67,6 @@ abstract class TrackOption with EquatableMixin {
 }
 
 class TrackDisabled extends TrackOption {
-  factory TrackDisabled() {
-    return _instance;
-  }
   const TrackDisabled._();
   static const TrackDisabled _instance = TrackDisabled._();
 
@@ -78,9 +75,6 @@ class TrackDisabled extends TrackOption {
 }
 
 class TrackEnabled extends TrackOption {
-  factory TrackEnabled() {
-    return _instance;
-  }
   const TrackEnabled._();
   static const TrackEnabled _instance = TrackEnabled._();
 
