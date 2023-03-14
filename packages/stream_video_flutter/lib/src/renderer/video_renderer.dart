@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
-import '../../stream_video.dart';
-import 'size_change_listener.dart';
+import '../../stream_video_flutter.dart';
+import '../widgets/size_change_listener.dart';
 
-Widget _defaultPlaceholderBuilder(BuildContext context) => const Placeholder();
+/// A builder for the widget that is displayed when there's no video stream.
+Widget _defaultPlaceholderBuilder(BuildContext context) => Container();
 
 /// Widget that renders a single video track for a call participant.
 class StreamVideoRenderer extends StatelessWidget {
@@ -102,7 +103,7 @@ class VideoTrackRenderer extends StatefulWidget {
     required this.videoTrack,
     this.mirror = false,
     this.videoFit = VideoFit.contain,
-    this.placeholderBuilder,
+    this.placeholderBuilder = _defaultPlaceholderBuilder,
   });
 
   /// The video track to display.
@@ -115,7 +116,7 @@ class VideoTrackRenderer extends StatefulWidget {
   final VideoFit videoFit;
 
   /// A builder for the placeholder.
-  final WidgetBuilder? placeholderBuilder;
+  final WidgetBuilder placeholderBuilder;
 
   @override
   State<VideoTrackRenderer> createState() => _VideoTrackRendererState();
@@ -125,13 +126,18 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
   /// Renderer to display WebRTC video stream.
   final _videoRenderer = rtc.RTCVideoRenderer();
 
+  /// If [rtc.RTCVideoRenderer] is initialized.
+  bool _isInitialized = false;
+
   @override
   void initState() {
     super.initState();
     (() async {
       await _videoRenderer.initialize();
       _videoRenderer.srcObject = widget.videoTrack.mediaStream;
-      setState(() {});
+      setState(() {
+        _isInitialized = true;
+      });
     })();
   }
 
@@ -153,14 +159,15 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
 
   @override
   Widget build(BuildContext context) {
-    final objectFit = _getVideoViewObjectFit(widget.videoFit);
-    return rtc.RTCVideoView(
-      _videoRenderer,
-      mirror: widget.mirror,
-      objectFit: objectFit,
-      filterQuality: FilterQuality.medium,
-      placeholderBuilder: widget.placeholderBuilder,
-    );
+    return !_isInitialized
+        ? widget.placeholderBuilder.call(context)
+        : rtc.RTCVideoView(
+            _videoRenderer,
+            mirror: widget.mirror,
+            objectFit: _getVideoViewObjectFit(widget.videoFit),
+            filterQuality: FilterQuality.medium,
+            placeholderBuilder: widget.placeholderBuilder,
+          );
   }
 
   rtc.RTCVideoViewObjectFit _getVideoViewObjectFit(VideoFit videoFit) {
