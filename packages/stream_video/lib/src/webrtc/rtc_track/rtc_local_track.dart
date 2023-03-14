@@ -91,7 +91,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
 
     final track = RtcLocalTrack(
       trackIdPrefix: trackIdPrefix,
-      trackType: SfuTrackType.video,
+      trackType: SfuTrackType.screenShare,
       mediaStream: stream,
       mediaTrack: videoTrack,
       mediaConstraints: constraints,

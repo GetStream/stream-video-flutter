@@ -290,6 +290,15 @@ extension PublisherRtcManager on RtcManager {
     }
   }
 
+  Future<RtcLocalTrack?> publishTrack(RtcLocalTrack track) async {
+    if (track is RtcLocalTrack<AudioConstraints>) {
+      return publishAudioTrack(track: track);
+    } else if (track is RtcLocalTrack<VideoConstraints>) {
+      return publishVideoTrack(track: track);
+    }
+    return null;
+  }
+
   Future<RtcLocalTrack<AudioConstraints>> publishAudioTrack({
     required RtcLocalTrack<AudioConstraints> track,
     bool stopTrackOnMute = true,

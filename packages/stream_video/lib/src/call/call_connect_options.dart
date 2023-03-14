@@ -1,23 +1,25 @@
+import 'package:equatable/equatable.dart';
+
 import '../webrtc/media/media_constraints.dart';
 import '../webrtc/rtc_track/rtc_local_track.dart';
 
-class CallConnectOptions {
+class CallConnectOptions with EquatableMixin {
   const CallConnectOptions({
-    this.camera = const CameraTrackOption(),
-    this.microphone = const MicrophoneTrackOption(),
-    this.screenShare = const ScreenShareTrackOption(),
+    this.camera = TrackDisabled._instance,
+    this.microphone = TrackDisabled._instance,
+    this.screenShare = TrackDisabled._instance,
     this.dropTimeout = const Duration(seconds: 30),
   });
 
-  final CameraTrackOption camera;
-  final MicrophoneTrackOption microphone;
-  final ScreenShareTrackOption screenShare;
+  final TrackOption camera;
+  final TrackOption microphone;
+  final TrackOption screenShare;
   final Duration dropTimeout;
 
   CallConnectOptions copyWith({
-    CameraTrackOption? camera,
-    MicrophoneTrackOption? microphone,
-    ScreenShareTrackOption? screenShare,
+    TrackOption? camera,
+    TrackOption? microphone,
+    TrackOption? screenShare,
     Duration? dropTimeout,
   }) {
     return CallConnectOptions(
@@ -27,6 +29,9 @@ class CallConnectOptions {
       dropTimeout: dropTimeout ?? this.dropTimeout,
     );
   }
+
+  @override
+  List<Object> get props => [camera, microphone, screenShare, dropTimeout];
 
   @override
   String toString() {
@@ -39,24 +44,77 @@ class CallConnectOptions {
   }
 }
 
-abstract class TrackOption<T extends MediaConstraints> {
-  const TrackOption({this.enabled = false, this.track});
+abstract class TrackOption with EquatableMixin {
+  const TrackOption();
 
-  final bool enabled;
-  final RtcLocalTrack<T>? track;
+  factory TrackOption.enabled() {
+    return TrackEnabled._instance;
+  }
+
+  factory TrackOption.disabled() {
+    return TrackDisabled._instance;
+  }
+
+  factory TrackOption.provided(RtcLocalTrack track) {
+    return TrackProvided._(track: track);
+  }
 
   @override
-  String toString() => 'TrackOption{enabled: $enabled, track: $track}';
+  bool? get stringify => true;
+
+  @override
+  List<Object?> get props => [];
 }
 
-class CameraTrackOption extends TrackOption<CameraConstraints> {
-  const CameraTrackOption({super.enabled, super.track});
+class TrackDisabled extends TrackOption {
+  const TrackDisabled._();
+  static const TrackDisabled _instance = TrackDisabled._();
+
+  @override
+  String toString() => 'disabled';
 }
 
-class MicrophoneTrackOption extends TrackOption<AudioConstraints> {
-  const MicrophoneTrackOption({super.enabled, super.track});
+class TrackEnabled extends TrackOption {
+  const TrackEnabled._();
+  static const TrackEnabled _instance = TrackEnabled._();
+
+  @override
+  String toString() => 'enabled';
 }
 
-class ScreenShareTrackOption extends TrackOption<ScreenShareConstraints> {
-  const ScreenShareTrackOption({super.enabled, super.track});
+class TrackProvided<T extends MediaConstraints> extends TrackOption {
+  const TrackProvided._({required this.track});
+
+  final RtcLocalTrack<T> track;
+
+  @override
+  List<Object?> get props => [track.trackType];
+
+  @override
+  String toString() => 'provided(${track.trackId})';
+}
+
+extension TrackOptionX on TrackOption {
+  TrackOption toggle() {
+    if (isEnabled) {
+      return TrackOption.disabled();
+    } else if (isDisabled) {
+      return TrackOption.enabled();
+    }
+    return this;
+  }
+
+  bool get isEnabled => this is TrackEnabled;
+
+  bool get isDisabled => this is TrackDisabled;
+
+  bool get isProvided => this is TrackProvided;
+
+  RtcLocalTrack? get trackOrNull {
+    final self = this;
+    if (self is TrackProvided) {
+      return self.track;
+    }
+    return null;
+  }
 }

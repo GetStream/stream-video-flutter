@@ -1,29 +1,78 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:stream_video_flutter_background/model/notification_options.dart';
 
 import 'stream_video_flutter_background_platform_interface.dart';
 
+typedef OnNotificationContentClick = Function(String callCid);
+
 typedef OnNotificationButtonClick = Function(String buttonType, String callCid);
 
-class StreamVideoFlutterBackground {
-  static Future<String?> getPlatformVersion() {
-    return StreamVideoFlutterBackgroundPlatform.instance.getPlatformVersion();
-  }
+typedef OnPlatformUiLayerDestroyed = Function(String callCid);
 
-  static Future<bool> startService(NotificationOptions options) {
+class StreamVideoFlutterBackground {
+  static Future<bool> startService(NotificationOptions options) async {
+    if (!isAndroid) {
+      return false;
+    }
     return StreamVideoFlutterBackgroundPlatform.instance.startService(options);
   }
 
-  static Future<bool> updateService(NotificationOptions options) {
+  static Future<bool> updateService(NotificationOptions options) async {
+    if (!isAndroid) {
+      return false;
+    }
     return StreamVideoFlutterBackgroundPlatform.instance.updateService(options);
   }
 
-  static Future<bool> stopService() {
+  static Future<bool> stopService() async {
+    if (!isAndroid) {
+      return false;
+    }
     return StreamVideoFlutterBackgroundPlatform.instance.stopService();
   }
 
-  static void setOnButtonClick(
+  static Future<bool> get isServiceRunning async {
+    if (!isAndroid) {
+      return false;
+    }
+    return StreamVideoFlutterBackgroundPlatform.instance.isServiceRunning;
+  }
+
+  static void setOnNotificationContentClick(
+    OnNotificationContentClick? onContentClick,
+  ) {
+    if (!isAndroid) {
+      return;
+    }
+    StreamVideoFlutterBackgroundPlatform.instance.onContentClick =
+        onContentClick;
+  }
+
+  static void setOnNotificationButtonClick(
     OnNotificationButtonClick? onButtonClick,
   ) {
+    if (!isAndroid) {
+      return;
+    }
     StreamVideoFlutterBackgroundPlatform.instance.onButtonClick = onButtonClick;
+  }
+
+  static void setOnPlatformUiLayerDestroyed(
+    OnPlatformUiLayerDestroyed? onUiLayerDestroyed,
+  ) {
+    if (!isAndroid) {
+      return;
+    }
+    StreamVideoFlutterBackgroundPlatform.instance.onUiLayerDestroyed =
+        onUiLayerDestroyed;
+  }
+
+  static bool get isAndroid {
+    if (kIsWeb) {
+      return false;
+    }
+    return Platform.isAndroid;
   }
 }
