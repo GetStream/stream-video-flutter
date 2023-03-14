@@ -28,6 +28,7 @@ export 'src/models/stream_icon_toggle.dart';
 export 'src/participants_info/call_participants_info_item.dart';
 export 'src/participants_info/call_participants_info_menu.dart';
 export 'src/participants_info/users_configuration.dart';
+export 'src/renderer/video_renderer.dart';
 export 'src/theme/themes.dart';
 export 'src/utils/device_segmentation.dart';
 export 'src/widgets/floating_view/floating_view_container.dart';
