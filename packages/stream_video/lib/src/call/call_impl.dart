@@ -455,25 +455,25 @@ class CallImpl implements Call {
   }
 
   Future<void> _applyCameraOption(TrackOption cameraOption) async {
-    if (cameraOption.isProvided) {
+    if (cameraOption is TrackProvided) {
       await _applyLocalTrack(cameraOption.track);
-    } else if (cameraOption.isEnabled) {
+    } else if (cameraOption is TrackEnabled) {
       await _applySessionAction(const SetCameraEnabled(enabled: true));
     }
   }
 
   Future<void> _applyMicrophoneOption(TrackOption microphoneOption) async {
-    if (microphoneOption.isProvided) {
+    if (microphoneOption is TrackProvided) {
       await _applyLocalTrack(microphoneOption.track);
-    } else if (microphoneOption.isEnabled) {
+    } else if (microphoneOption is TrackEnabled) {
       await _applySessionAction(const SetMicrophoneEnabled(enabled: true));
     }
   }
 
   Future<void> _applyScreenShareOption(TrackOption screenShareOption) async {
-    if (screenShareOption.isProvided) {
+    if (screenShareOption is TrackProvided) {
       await _applyLocalTrack(screenShareOption.track);
-    } else if (screenShareOption.isEnabled) {
+    } else if (screenShareOption is TrackEnabled) {
       await _applySessionAction(const SetScreenShareEnabled(enabled: true));
     }
   }

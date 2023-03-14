@@ -5,9 +5,9 @@ import '../webrtc/rtc_track/rtc_local_track.dart';
 
 class CallConnectOptions with EquatableMixin {
   const CallConnectOptions({
-    this.camera = _TrackDisabled._instance,
-    this.microphone = _TrackDisabled._instance,
-    this.screenShare = _TrackDisabled._instance,
+    this.camera = TrackDisabled._instance,
+    this.microphone = TrackDisabled._instance,
+    this.screenShare = TrackDisabled._instance,
     this.dropTimeout = const Duration(seconds: 30),
   });
 
@@ -48,15 +48,15 @@ abstract class TrackOption with EquatableMixin {
   const TrackOption();
 
   factory TrackOption.enabled() {
-    return _TrackEnabled();
+    return TrackEnabled();
   }
 
   factory TrackOption.disabled() {
-    return _TrackEnabled();
+    return TrackDisabled();
   }
 
   factory TrackOption.provided(RtcLocalTrack track) {
-    return _TrackProvided(track: track);
+    return TrackProvided._(track: track);
   }
 
   @override
@@ -66,30 +66,30 @@ abstract class TrackOption with EquatableMixin {
   List<Object?> get props => [];
 }
 
-class _TrackDisabled extends TrackOption {
-  factory _TrackDisabled() {
+class TrackDisabled extends TrackOption {
+  factory TrackDisabled() {
     return _instance;
   }
-  const _TrackDisabled._();
-  static const _TrackDisabled _instance = _TrackDisabled._();
+  const TrackDisabled._();
+  static const TrackDisabled _instance = TrackDisabled._();
 
   @override
   String toString() => 'disabled';
 }
 
-class _TrackEnabled extends TrackOption {
-  factory _TrackEnabled() {
+class TrackEnabled extends TrackOption {
+  factory TrackEnabled() {
     return _instance;
   }
-  const _TrackEnabled._();
-  static const _TrackEnabled _instance = _TrackEnabled._();
+  const TrackEnabled._();
+  static const TrackEnabled _instance = TrackEnabled._();
 
   @override
   String toString() => 'enabled';
 }
 
-class _TrackProvided<T extends MediaConstraints> extends TrackOption {
-  const _TrackProvided({required this.track});
+class TrackProvided<T extends MediaConstraints> extends TrackOption {
+  const TrackProvided._({required this.track});
 
   final RtcLocalTrack<T> track;
 
@@ -110,25 +110,17 @@ extension TrackOptionX on TrackOption {
     return this;
   }
 
-  bool get isEnabled => this is _TrackEnabled;
+  bool get isEnabled => this is TrackEnabled;
 
-  bool get isDisabled => this is _TrackDisabled;
+  bool get isDisabled => this is TrackDisabled;
 
-  bool get isProvided => this is _TrackProvided;
+  bool get isProvided => this is TrackProvided;
 
   RtcLocalTrack? get trackOrNull {
     final self = this;
-    if (self is _TrackProvided) {
+    if (self is TrackProvided) {
       return self.track;
     }
     return null;
-  }
-
-  RtcLocalTrack get track {
-    final self = this;
-    if (self is _TrackProvided) {
-      return self.track;
-    }
-    throw AssertionError('$runtimeType option has no track');
   }
 }
