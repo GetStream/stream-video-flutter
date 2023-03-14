@@ -30,8 +30,6 @@ import io.getstream.video.flutter.background.stream_video_flutter_background.ser
 import io.getstream.video.flutter.background.stream_video_flutter_background.service.utils.notificationManager
 import kotlinx.coroutines.CoroutineScope
 
-private const val ACTION_CALL_SUFFIX = "intent.action.STREAM_CALL"
-
 internal class StreamNotificationBuilderImpl(
     private val context: Context,
     private val scope: CoroutineScope,
@@ -63,7 +61,7 @@ internal class StreamNotificationBuilderImpl(
             contentTitle = options.contentTitle ?: context.applicationName,
             contentText = options.contentText,
             groupKey = options.callCid,
-            intent = Intent("${context.packageName}.${ACTION_CALL_SUFFIX}")
+            intent = Intent("${context.packageName}.${IdentifiedNotification.ACTION_CALL_SUFFIX}")
         ).apply {
             buildNotificationActions(notificationId, options.callCid).forEach {
                 addAction(it)

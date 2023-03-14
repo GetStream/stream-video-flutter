@@ -61,9 +61,7 @@ class StreamOutgoingCallContent extends StatefulWidget {
 }
 
 class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
-  CallConnectOptions get options => widget.call.getInitialCallOptions();
-  MicrophoneTrackOption get microphoneTrackOption => options.microphone;
-  CameraTrackOption get cameraTrackOption => options.camera;
+  CallConnectOptions get connectOptions => widget.call.connectOptions;
 
   @override
   Widget build(BuildContext context) {
@@ -111,8 +109,8 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
             ),
             const Spacer(),
             OutgoingCallControls(
-              isMicrophoneEnabled: microphoneTrackOption.enabled,
-              isCameraEnabled: cameraTrackOption.enabled,
+              isMicrophoneEnabled: connectOptions.microphone.isEnabled,
+              isCameraEnabled: connectOptions.camera.isEnabled,
               onCancelCallTap: () => _onCancelCallTap(context),
               onMicrophoneTap: () => _onMicrophoneTap(context),
               onCameraTap: () => _onCameraTap(context),
@@ -136,12 +134,8 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
     if (widget.onMicrophoneTap != null) {
       widget.onMicrophoneTap!();
     } else {
-      widget.call.setInitialCallOptions(
-        options.copyWith(
-          microphone: MicrophoneTrackOption(
-            enabled: !microphoneTrackOption.enabled,
-          ),
-        ),
+      widget.call.connectOptions = connectOptions.copyWith(
+        microphone: connectOptions.microphone.toggle(),
       );
       return setState(() => {});
     }
@@ -151,12 +145,8 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
     if (widget.onCameraTap != null) {
       widget.onCameraTap!();
     } else {
-      widget.call.setInitialCallOptions(
-        options.copyWith(
-          camera: CameraTrackOption(
-            enabled: !cameraTrackOption.enabled,
-          ),
-        ),
+      widget.call.connectOptions = connectOptions.copyWith(
+        camera: connectOptions.camera.toggle(),
       );
       return setState(() => {});
     }

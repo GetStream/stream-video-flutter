@@ -3,8 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video_flutter_background/stream_video_flutter_background_method_channel.dart';
 
 void main() {
-  MethodChannelStreamVideoFlutterBackground platform = MethodChannelStreamVideoFlutterBackground();
-  const MethodChannel channel = MethodChannel('stream_video_flutter_background');
+  MethodChannelStreamVideoFlutterBackground platform =
+      MethodChannelStreamVideoFlutterBackground();
+  const MethodChannel channel =
+      MethodChannel('stream_video_flutter_background');
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -16,9 +18,5 @@ void main() {
 
   tearDown(() {
     channel.setMockMethodCallHandler(null);
-  });
-
-  test('getPlatformVersion', () async {
-    expect(await platform.getPlatformVersion(), '42');
   });
 }

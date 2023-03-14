@@ -30,12 +30,13 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      StreamVideoFlutterBackground.setOnButtonClick((buttonType, callCid) => {
-            setState(() {
-              _buttonType = buttonType;
-              _callCid = callCid;
-            })
-          });
+      StreamVideoFlutterBackground.setOnNotificationButtonClick(
+          (buttonType, callCid) => {
+                setState(() {
+                  _buttonType = buttonType;
+                  _callCid = callCid;
+                })
+              });
     } catch (e, stk) {
       print('[initPlatformState] failed: $e; $stk');
     }
@@ -44,7 +45,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void dispose() {
     super.dispose();
-    StreamVideoFlutterBackground.setOnButtonClick(null);
+    StreamVideoFlutterBackground.setOnNotificationButtonClick(null);
   }
 
   @override

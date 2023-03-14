@@ -38,8 +38,8 @@ flutter:
       android:
         package: io.getstream.video.flutter.background.stream_video_flutter_background
         pluginClass: StreamVideoFlutterBackgroundPlugin
-      ios:
-        pluginClass: StreamVideoFlutterBackgroundPlugin
+  #   ios:
+  #     pluginClass: StreamVideoFlutterBackgroundPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

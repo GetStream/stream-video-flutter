@@ -64,7 +64,6 @@ class ServiceManagerImpl(
      */
     override fun stop(): Boolean {
         logger.d { "[stop] no args" }
-        StreamCallService.notificationOptions = NotificationOptions()
         try {
             val nIntent = Intent(appContext, StreamCallService::class.java)
             appContext.stopService(nIntent)
