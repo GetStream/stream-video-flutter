@@ -26,7 +26,7 @@ class UserRepository {
     await prefs.setString(keyUserId, user.id);
     await prefs.setString(keyUserName, user.name);
     await prefs.setString(keyUserRole, user.role);
-    await prefs.setString(keyUserImage, user.imageUrl ?? '');
+    await prefs.setString(keyUserImage, user.image ?? '');
     await prefs.setString(keyToken, token);
   }
 
@@ -44,7 +44,7 @@ class UserRepository {
           id: id,
           name: name,
           role: role,
-          imageUrl: image,
+          image: image,
         ),
         token: token,
       );

@@ -11,6 +11,7 @@ import '../../models/call_metadata.dart';
 import '../../models/call_reaction.dart';
 import '../../models/call_received_created.dart';
 import '../../models/queried_calls.dart';
+import '../../models/queried_members.dart';
 import '../../models/user_info.dart';
 import '../../shared_emitter.dart';
 import '../../token/token_manager.dart';
@@ -114,22 +115,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> deleteDevice(inputs.DeleteDeviceInput input) async {
     return Result.error('not implemented');
-  }
-
-  /// Attempts to create a new call.
-  @override
-  Future<Result<CallCreated>> createCall(
-    inputs.CreateCallInput input,
-  ) async {
-    final result = await getOrCreateCall(
-      GetOrCreateCallInput(
-        callCid: input.callCid,
-        ringing: input.ringing,
-        members: input.members,
-      ),
-    );
-
-    return result.map((data) => data.data);
   }
 
   /// Gets the call if already exists or attempts to create a new call.
@@ -430,7 +415,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
   /// Queries users based on the given [input].
   @override
-  Future<Result<List<CallUser>>> queryUsers(
+  Future<Result<QueriedMembers>> queryMembers(
     inputs.QueryUsersInput input,
   ) async {
     try {
@@ -446,9 +431,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
       if (result == null) {
-        return Result.error('queryUsers result is null');
+        return Result.error('queryMembers result is null');
       }
-      return Result.success(result.members.toCallUsers().values.toList());
+      return Result.success(result.toQueriedMembers(input.callCid));
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }

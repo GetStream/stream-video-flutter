@@ -1,9 +1,13 @@
-import 'package:stream_video/src/sfu/data/models/sfu_connection_quality.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:equatable/equatable.dart';
 
-class SfuParticipant {
+import 'sfu_connection_quality.dart';
+import 'sfu_track_type.dart';
+
+class SfuParticipant with EquatableMixin {
   SfuParticipant({
     required this.userId,
+    required this.userName,
+    required this.userImage,
     required this.sessionId,
     required this.publishedTracks,
     required this.joinedAt,
@@ -15,6 +19,8 @@ class SfuParticipant {
   });
 
   final String userId;
+  final String userName;
+  final String userImage;
   final String sessionId;
   final List<SfuTrackType> publishedTracks;
   final DateTime joinedAt;
@@ -24,39 +30,55 @@ class SfuParticipant {
   final bool isDominantSpeaker;
   final double audioLevel;
 
+  SfuParticipant copyWith({
+    String? userId,
+    String? userName,
+    String? userImage,
+    String? sessionId,
+    List<SfuTrackType>? publishedTracks,
+    DateTime? joinedAt,
+    String? trackLookupPrefix,
+    SfuConnectionQuality? connectionQuality,
+    bool? isSpeaking,
+    bool? isDominantSpeaker,
+    double? audioLevel,
+  }) =>
+      SfuParticipant(
+        userId: userId ?? this.userId,
+        userName: userId ?? this.userName,
+        userImage: userId ?? this.userImage,
+        sessionId: sessionId ?? this.sessionId,
+        publishedTracks: publishedTracks ?? this.publishedTracks,
+        joinedAt: joinedAt ?? this.joinedAt,
+        trackLookupPrefix: trackLookupPrefix ?? this.trackLookupPrefix,
+        connectionQuality: connectionQuality ?? this.connectionQuality,
+        isSpeaking: isSpeaking ?? this.isSpeaking,
+        isDominantSpeaker: isDominantSpeaker ?? this.isDominantSpeaker,
+        audioLevel: audioLevel ?? this.audioLevel,
+      );
+
   @override
   String toString() {
     return 'SfuParticipant{userId: $userId, sessionId: $sessionId, '
-        'publishedTracks: $publishedTracks, joinedAt: $joinedAt, '
         'trackLookupPrefix: $trackLookupPrefix, '
+        'userName: $userName, userImage: $userImage, '
+        'publishedTracks: $publishedTracks, joinedAt: $joinedAt, '
         'connectionQuality: $connectionQuality, isSpeaking: $isSpeaking, '
         'isDominantSpeaker: $isDominantSpeaker, audioLevel: $audioLevel}';
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SfuParticipant &&
-          runtimeType == other.runtimeType &&
-          userId == other.userId &&
-          sessionId == other.sessionId &&
-          publishedTracks == other.publishedTracks &&
-          joinedAt == other.joinedAt &&
-          trackLookupPrefix == other.trackLookupPrefix &&
-          connectionQuality == other.connectionQuality &&
-          isSpeaking == other.isSpeaking &&
-          isDominantSpeaker == other.isDominantSpeaker &&
-          audioLevel == other.audioLevel;
-
-  @override
-  int get hashCode =>
-      userId.hashCode ^
-      sessionId.hashCode ^
-      publishedTracks.hashCode ^
-      joinedAt.hashCode ^
-      trackLookupPrefix.hashCode ^
-      connectionQuality.hashCode ^
-      isSpeaking.hashCode ^
-      isDominantSpeaker.hashCode ^
-      audioLevel.hashCode;
+  List<Object?> get props => [
+        userId,
+        userName,
+        userImage,
+        sessionId,
+        publishedTracks,
+        joinedAt,
+        trackLookupPrefix,
+        connectionQuality,
+        isSpeaking,
+        isDominantSpeaker,
+        audioLevel.hashCode,
+      ];
 }

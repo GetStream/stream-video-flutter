@@ -82,7 +82,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         streamCallCid: streamCallCid,
         callers: call.metadata.users.values.map((e) => e.name).join(', '),
         isVideoCall: true,
-        avatarUrl: call.metadata.users.values.firstOrNull?.imageUrl,
+        avatarUrl: call.metadata.users.values.firstOrNull?.image,
         onCallAccepted: _acceptCall,
         onCallRejected: _rejectCall,
       );

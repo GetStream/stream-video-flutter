@@ -97,7 +97,7 @@ class StreamUserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = user.imageUrl;
+    final imageUrl = user.image;
     final hasImage = imageUrl != null && imageUrl.isNotEmpty;
 
     final theme = StreamUserAvatarTheme.of(context);

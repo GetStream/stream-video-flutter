@@ -246,10 +246,20 @@ extension MemberExt on MemberInput {
 extension SortExt on SortInput {
   open.SortParamRequest toOpenDto() {
     return open.SortParamRequest(
-      //TODO
-      direction: 1,
+      direction: direction.toOpenDto(),
       field: field,
     );
+  }
+}
+
+extension on DirectionInput {
+  int toOpenDto() {
+    switch (this) {
+      case DirectionInput.asc:
+        return 1;
+      case DirectionInput.desc:
+        return -1;
+    }
   }
 }
 

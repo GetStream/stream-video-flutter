@@ -13,7 +13,7 @@ class CallParticipantState
     required String userId,
     required String role,
     required String name,
-    String? profileImageURL,
+    String? image,
     required String sessionId,
     required String trackIdPrefix,
     Map<SfuTrackType, TrackState> publishedTracks = const {},
@@ -29,7 +29,7 @@ class CallParticipantState
       userId: userId,
       role: role,
       name: name,
-      profileImageURL: profileImageURL,
+      image: image,
       sessionId: sessionId,
       trackIdPrefix: trackIdPrefix,
       publishedTracks: Map.unmodifiable(publishedTracks),
@@ -48,7 +48,7 @@ class CallParticipantState
     required this.userId,
     required this.role,
     required this.name,
-    this.profileImageURL,
+    this.image,
     required this.sessionId,
     required this.trackIdPrefix,
     required this.publishedTracks,
@@ -64,7 +64,7 @@ class CallParticipantState
   final String userId;
   final String role;
   final String name;
-  final String? profileImageURL;
+  final String? image;
   final String sessionId;
   final String trackIdPrefix;
   final Map<SfuTrackType, TrackState> publishedTracks;
@@ -84,7 +84,7 @@ class CallParticipantState
     String? userId,
     String? role,
     String? name,
-    String? profileImageURL,
+    String? image,
     String? sessionId,
     String? trackIdPrefix,
     Map<SfuTrackType, TrackState>? publishedTracks,
@@ -100,7 +100,7 @@ class CallParticipantState
       userId: userId ?? this.userId,
       role: role ?? this.role,
       name: name ?? this.name,
-      profileImageURL: profileImageURL ?? this.profileImageURL,
+      image: image ?? this.image,
       sessionId: sessionId ?? this.sessionId,
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
       publishedTracks: publishedTracks ?? this.publishedTracks,
@@ -164,8 +164,8 @@ class CallParticipantState
   @override
   String toString() {
     return 'CallParticipantState{userId: $userId, role: $role, name: $name, '
-        'profileImageURL: $profileImageURL, sessionId: $sessionId, '
-        'trackId: $trackIdPrefix, '
+        'sessionId: $sessionId, '
+        'trackId: $trackIdPrefix, image: $image, '
         'publishedTracks: $publishedTracks, '
         'isLocal: $isLocal, '
         'connectionQuality: $connectionQuality, isOnline: $isOnline, '
@@ -179,7 +179,7 @@ class CallParticipantState
         userId,
         role,
         name,
-        profileImageURL,
+        image,
         sessionId,
         trackIdPrefix,
         publishedTracks,

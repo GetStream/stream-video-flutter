@@ -3,7 +3,19 @@ import 'package:equatable/equatable.dart';
 import 'call_metadata.dart';
 
 class QueriedCalls with EquatableMixin {
-  QueriedCalls({
+  factory QueriedCalls({
+    required List<QueriedCall> calls,
+    String? next,
+    String? prev,
+  }) {
+    return QueriedCalls._(
+      calls: calls,
+      next: next,
+      prev: prev,
+    );
+  }
+
+  const QueriedCalls._({
     required this.calls,
     this.next,
     this.prev,

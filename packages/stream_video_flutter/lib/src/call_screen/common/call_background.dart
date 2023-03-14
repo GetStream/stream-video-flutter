@@ -30,7 +30,7 @@ class CallBackground extends StatelessWidget {
       children: [
         if (participants.length == 1)
           _ParticipantImageBackground(
-            imageUrl: participants.first.imageUrl,
+            imageUrl: participants.first.image,
           )
         else
           _DefaultCallBackground(),

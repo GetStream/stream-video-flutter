@@ -103,7 +103,7 @@ class _StartCallTabState extends State<StartCallTab>
     setState(() => _callInProgress = true);
 
     final callCid = StreamCallCid.from(type: 'default', id: callId);
-    final result = await StreamVideo.instance.createCall(
+    final result = await StreamVideo.instance.getOrCreateCall(
       cid: callCid,
       ringing: _ringingCall,
       participantIds: [
@@ -115,7 +115,7 @@ class _StartCallTabState extends State<StartCallTab>
       success: (data) {
         setState(() => _callInProgress = false);
 
-        final call = Call.fromCreated(data: data);
+        final call = Call.fromCreated(data: data.data);
 
         if (_ringingCall) {
           widget.onNavigateToCall(call);

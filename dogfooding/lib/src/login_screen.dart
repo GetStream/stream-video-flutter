@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
       role: 'admin',
       id: googleUser.email,
       name: googleUser.displayName ?? '',
-      imageUrl: googleUser.photoUrl,
+      image: googleUser.photoUrl,
     );
 
     return _onLoginSuccess(user);

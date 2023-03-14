@@ -12,6 +12,7 @@ import '../../ws/base_ws.dart';
 import '../../ws/keep_alive.dart';
 import '../coordinator_ws.dart';
 import '../models/coordinator_events.dart';
+import 'error/open_api_error.dart';
 import 'event/health_check.dart';
 import 'event/open_api_event.dart';
 import 'open_api_mapper_extensions.dart';
@@ -75,11 +76,14 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       'token': token.rawValue,
       'user_details': {
         'id': userInfo.id,
-        'name': userInfo.name,
-        'imageUrl': userInfo.imageUrl,
-        'role': userInfo.role,
-        'teams': userInfo.teams,
-        'customJson': json.encode(userInfo.extraData),
+        // TODO BE requires "name" & "image" to be inside "custom" field
+        // 'name': userInfo.name,
+        // 'image': userInfo.image,
+        'custom': <String, dynamic>{
+          'name': userInfo.name,
+          'image': userInfo.image,
+          ...?userInfo.extraData,
+        },
       },
     };
     return send(
@@ -137,14 +141,20 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
 
   @override
   void onMessage(dynamic message) {
-    _logger.i(() => '[onMessage] message: $message');
+    _logger.i(() => '[onRawMessage] message: $message');
+    OpenApiError? dtoError;
     OpenApiEvent? dtoEvent;
     try {
-      dtoEvent = OpenApiEvent.fromRawJson(message);
+      final jsonDecoded = json.decode(message);
+      dtoError = OpenApiError.fromJson(jsonDecoded);
+      dtoEvent = OpenApiEvent.fromJson(jsonDecoded);
     } catch (e, stk) {
-      _logger.e(
-        () => '[onMessage] msg parsing failed: "$e"; stk: $stk',
-      );
+      _logger.e(() => '[onMessage] msg parsing failed: "$e"; stk: $stk');
+    }
+
+    if (dtoError != null) {
+      _logger.e(() => '[onMessage] apiError: ${dtoError?.apiError}');
+      return;
     }
 
     if (dtoEvent == null) {

@@ -158,7 +158,7 @@ class UserInput extends CoordinatorInput {
     required this.id,
     this.name,
     this.role,
-    this.imageUrl,
+    this.image,
     this.teams,
     this.custom = const {},
   });
@@ -166,12 +166,12 @@ class UserInput extends CoordinatorInput {
   final String id;
   final String? name;
   final String? role;
-  final String? imageUrl;
+  final String? image;
   final List<String>? teams;
   final Map<String, Object> custom;
 
   @override
-  List<Object?> get props => [id, name, role, teams, imageUrl, custom];
+  List<Object?> get props => [id, name, role, teams, image, custom];
 }
 
 class EventInput extends CoordinatorInput {
@@ -448,8 +448,7 @@ enum EventTypeInput {
 
 enum DirectionInput {
   asc('direction.asc'),
-  desc('direction.desc'),
-  undefined('direction.undefined');
+  desc('direction.desc');
 
   const DirectionInput(this.alias);
 
