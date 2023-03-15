@@ -126,7 +126,7 @@ class CallUser with EquatableMixin {
     required this.id,
     required this.name,
     required this.role,
-    required this.imageUrl,
+    required this.image,
     required this.teams,
     this.createdAt,
     this.updatedAt,
@@ -136,7 +136,7 @@ class CallUser with EquatableMixin {
   final String id;
   final String name;
   final String role;
-  final String imageUrl;
+  final String image;
   final List<String> teams;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -147,7 +147,7 @@ class CallUser with EquatableMixin {
         id,
         name,
         role,
-        imageUrl,
+        image,
         teams,
         createdAt ?? 0,
         updatedAt ?? 0,
@@ -156,7 +156,7 @@ class CallUser with EquatableMixin {
 
   @override
   String toString() {
-    return 'CallUser{id: $id, name: $name, role: $role, imageUrl: $imageUrl, '
+    return 'CallUser{id: $id, name: $name, role: $role, image: $image, '
         'teams: $teams, createdAt: $createdAt, updatedAt: $updatedAt, '
         'custom: $custom}';
   }

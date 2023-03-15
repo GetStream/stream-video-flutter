@@ -29,56 +29,60 @@ class OpenApiEvent with EquatableMixin {
     this.custom,
   });
 
-  factory OpenApiEvent.fromRawJson(String rawJson) {
+  static OpenApiEvent? fromRawJson(String rawJson) {
     return OpenApiEvent.fromJson(json.decode(rawJson));
   }
 
-  factory OpenApiEvent.fromJson(dynamic obj) {
-    final type = EventType.fromAlias(obj['type']);
+  static OpenApiEvent? fromJson(dynamic jsonObj) {
+    final rawType = jsonObj['type'];
+    if (rawType == null) {
+      return null;
+    }
+    final type = EventType.fromAlias(rawType);
+    streamLog.i(_tag, () => '[fromJson] rawType; $rawType, type: $type');
     final result = OpenApiEvent(type: type);
-
     switch (type) {
       case EventType.healthCheck:
-        final event = HealthCheck.fromJson(obj);
+        final event = HealthCheck.fromJson(jsonObj);
         return result.copyWith(healthCheck: event);
       case EventType.callCreated:
-        final event = open.CallCreatedEvent.fromJson(obj);
+        final event = open.CallCreatedEvent.fromJson(jsonObj);
         return result.copyWith(callCreated: event);
       case EventType.callAccepted:
-        final event = open.CallAcceptedEvent.fromJson(obj);
+        final event = open.CallAcceptedEvent.fromJson(jsonObj);
         return result.copyWith(callAccepted: event);
       case EventType.callRejected:
-        final event = open.CallRejectedEvent.fromJson(obj);
+        final event = open.CallRejectedEvent.fromJson(jsonObj);
         return result.copyWith(callRejected: event);
       case EventType.callCancelled:
-        final event = open.CallCancelledEvent.fromJson(obj);
+        final event = open.CallCancelledEvent.fromJson(jsonObj);
         return result.copyWith(callCancelled: event);
       case EventType.callUpdated:
-        final event = open.CallUpdatedEvent.fromJson(obj);
+        final event = open.CallUpdatedEvent.fromJson(jsonObj);
         return result.copyWith(callUpdated: event);
       case EventType.callEnded:
-        final event = open.CallEndedEvent.fromJson(obj);
+        final event = open.CallEndedEvent.fromJson(jsonObj);
         return result.copyWith(callEnded: event);
       case EventType.callPermissionRequest:
-        final event = open.PermissionRequestEvent.fromJson(obj);
+        final event = open.PermissionRequestEvent.fromJson(jsonObj);
         return result.copyWith(callPermissionRequest: event);
       case EventType.callPermissionsUpdated:
-        final event = open.UpdatedCallPermissionsEvent.fromJson(obj);
+        final event = open.UpdatedCallPermissionsEvent.fromJson(jsonObj);
         return result.copyWith(callPermissionsUpdated: event);
       case EventType.callUserBlocked:
-        final event = open.BlockedUserEvent.fromJson(obj);
+        final event = open.BlockedUserEvent.fromJson(jsonObj);
         return result.copyWith(callUserBlocked: event);
       case EventType.callUserUnblocked:
-        final event = open.UnblockedUserEvent.fromJson(obj);
+        final event = open.UnblockedUserEvent.fromJson(jsonObj);
         return result.copyWith(callUserUnblocked: event);
       case EventType.callRecordingStarted:
-        final event = open.CallRecordingStartedEvent.fromJson(obj);
+        final event = open.CallRecordingStartedEvent.fromJson(jsonObj);
         return result.copyWith(callRecordingStarted: event);
       case EventType.callRecordingStopped:
-        final event = open.CallRecordingStoppedEvent.fromJson(obj);
+        final event = open.CallRecordingStoppedEvent.fromJson(jsonObj);
         return result.copyWith(callRecordingStopped: event);
       case EventType.callReaction:
-        final event = open.CallReactionEvent.fromJson(obj);
+        final event = open.CallReactionEvent.fromJson(jsonObj);
         return result.copyWith(callReaction: event);
       case EventType.custom:
         /* no-op */
@@ -88,9 +92,9 @@ class OpenApiEvent with EquatableMixin {
         break;
     }
     try {
-      final event = open.CustomVideoEvent.fromJson(obj);
+      final event = open.CustomVideoEvent.fromJson(jsonObj);
       return result.copyWith(type: EventType.custom, custom: event);
-    } catch(e, stk) {
+    } catch (e, stk) {
       streamLog.e(_tag, () => '[fromJson] failed: $e; $stk');
       return result.copyWith(type: EventType.unknown);
     }

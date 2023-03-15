@@ -1,20 +1,17 @@
-import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
-    as sfu_events;
-import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
-    as sfu_models;
-import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_audio_level.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_audio_sender.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_call_state.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_connection_quality.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_error.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_models.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_video_sender.dart';
-
+import '../../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
+import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import '../models/sfu_audio_level.dart';
+import '../models/sfu_audio_sender.dart';
+import '../models/sfu_call_state.dart';
+import '../models/sfu_codec.dart';
+import '../models/sfu_connection_quality.dart';
+import '../models/sfu_error.dart';
 import '../models/sfu_model_mapper_extensions.dart';
+import '../models/sfu_models.dart';
+import '../models/sfu_participant.dart';
+import '../models/sfu_track_type.dart';
+import '../models/sfu_video_sender.dart';
+import 'sfu_events.dart';
 
 /// TODO
 extension SfuEventMapper on sfu_events.SfuEvent {
@@ -143,6 +140,8 @@ extension SfuParticipantExtension on sfu_models.Participant {
   SfuParticipant toDomain() {
     return SfuParticipant(
       userId: userId,
+      userName: name,
+      userImage: image,
       sessionId: sessionId,
       publishedTracks: publishedTracks
           .map(

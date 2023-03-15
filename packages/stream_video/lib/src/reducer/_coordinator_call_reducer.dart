@@ -37,7 +37,7 @@ class CoordinatorCallReducer {
           return participant.copyWith(
             role: user.role,
             name: user.name,
-            profileImageURL: user.imageUrl,
+            image: user.image,
           );
         },
       ).toList(),

@@ -99,11 +99,14 @@ const Participant$json = const {
     const {'1': 'is_speaking', '3': 7, '4': 1, '5': 8, '10': 'isSpeaking'},
     const {'1': 'is_dominant_speaker', '3': 8, '4': 1, '5': 8, '10': 'isDominantSpeaker'},
     const {'1': 'audio_level', '3': 9, '4': 1, '5': 2, '10': 'audioLevel'},
+    const {'1': 'name', '3': 10, '4': 1, '5': 9, '10': 'name'},
+    const {'1': 'image', '3': 11, '4': 1, '5': 9, '10': 'image'},
+    const {'1': 'custom', '3': 12, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
   ],
 };
 
 /// Descriptor for `Participant`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List participantDescriptor = $convert.base64Decode('CgtQYXJ0aWNpcGFudBIXCgd1c2VyX2lkGAEgASgJUgZ1c2VySWQSHQoKc2Vzc2lvbl9pZBgCIAEoCVIJc2Vzc2lvbklkEk0KEHB1Ymxpc2hlZF90cmFja3MYAyADKA4yIi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5UcmFja1R5cGVSD3B1Ymxpc2hlZFRyYWNrcxI3Cglqb2luZWRfYXQYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUghqb2luZWRBdBIuChN0cmFja19sb29rdXBfcHJlZml4GAUgASgJUhF0cmFja0xvb2t1cFByZWZpeBJZChJjb25uZWN0aW9uX3F1YWxpdHkYBiABKA4yKi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Db25uZWN0aW9uUXVhbGl0eVIRY29ubmVjdGlvblF1YWxpdHkSHwoLaXNfc3BlYWtpbmcYByABKAhSCmlzU3BlYWtpbmcSLgoTaXNfZG9taW5hbnRfc3BlYWtlchgIIAEoCFIRaXNEb21pbmFudFNwZWFrZXISHwoLYXVkaW9fbGV2ZWwYCSABKAJSCmF1ZGlvTGV2ZWw=');
+final $typed_data.Uint8List participantDescriptor = $convert.base64Decode('CgtQYXJ0aWNpcGFudBIXCgd1c2VyX2lkGAEgASgJUgZ1c2VySWQSHQoKc2Vzc2lvbl9pZBgCIAEoCVIJc2Vzc2lvbklkEk0KEHB1Ymxpc2hlZF90cmFja3MYAyADKA4yIi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5UcmFja1R5cGVSD3B1Ymxpc2hlZFRyYWNrcxI3Cglqb2luZWRfYXQYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUghqb2luZWRBdBIuChN0cmFja19sb29rdXBfcHJlZml4GAUgASgJUhF0cmFja0xvb2t1cFByZWZpeBJZChJjb25uZWN0aW9uX3F1YWxpdHkYBiABKA4yKi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Db25uZWN0aW9uUXVhbGl0eVIRY29ubmVjdGlvblF1YWxpdHkSHwoLaXNfc3BlYWtpbmcYByABKAhSCmlzU3BlYWtpbmcSLgoTaXNfZG9taW5hbnRfc3BlYWtlchgIIAEoCFIRaXNEb21pbmFudFNwZWFrZXISHwoLYXVkaW9fbGV2ZWwYCSABKAJSCmF1ZGlvTGV2ZWwSEgoEbmFtZRgKIAEoCVIEbmFtZRIUCgVpbWFnZRgLIAEoCVIFaW1hZ2USLwoGY3VzdG9tGAwgASgLMhcuZ29vZ2xlLnByb3RvYnVmLlN0cnVjdFIGY3VzdG9t');
 @$core.Deprecated('Use streamQualityDescriptor instead')
 const StreamQuality$json = const {
   '1': 'StreamQuality',

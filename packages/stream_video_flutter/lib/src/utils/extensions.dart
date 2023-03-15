@@ -53,8 +53,8 @@ extension CallParticipantExtension on CallParticipantState {
   UserInfo toUserInfo() => UserInfo(
         id: userId,
         role: role,
-        name: userId,
-        imageUrl: profileImageURL,
+        name: name.ifEmpty(() => userId),
+        image: image,
       );
 }
 

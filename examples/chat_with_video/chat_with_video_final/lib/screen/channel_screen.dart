@@ -66,7 +66,7 @@ class ChannelScreen extends StatelessWidget {
       type: "default",
       id: "call${Random().nextInt(10000)}",
     );
-    await StreamVideo.instance.createCall(
+    await StreamVideo.instance.getOrCreateCall(
       cid: callCid,
       ringing: false,
       participantIds: [],

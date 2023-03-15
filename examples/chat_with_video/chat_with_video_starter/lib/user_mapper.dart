@@ -16,7 +16,7 @@ extension SampleUserX on SampleUser {
         id: id,
         role: role,
         name: name,
-        imageUrl: image,
+        image: image,
       );
 
   /// Maps a [SampleUser] into user from the Chat SDK.

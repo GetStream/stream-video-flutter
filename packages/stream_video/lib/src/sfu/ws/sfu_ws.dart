@@ -107,8 +107,7 @@ class SfuWebSocket extends StreamWebSocket
 
     if (rawEvent == null) return;
 
-    final eventType = rawEvent.whichEventPayload();
-    _logger.v(() => '[onMessage] eventType: $eventType');
+    _logger.v(() => '[onRawMessage] message: $rawEvent');
 
     final event = rawEvent.toDomain();
     _handleEvent(event);
