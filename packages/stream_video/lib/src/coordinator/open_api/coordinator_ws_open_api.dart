@@ -71,6 +71,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     _logger.i(() => '[authenticateUser] url: $url');
 
     final token = await tokenManager.loadToken();
+    final image = userInfo.image;
 
     final authMessage = {
       'token': token.rawValue,
@@ -81,7 +82,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
         // 'image': userInfo.image,
         'custom': <String, dynamic>{
           'name': userInfo.name,
-          'image': userInfo.image,
+          if (image != null) ...{'image': image},
           ...?userInfo.extraData,
         },
       },
