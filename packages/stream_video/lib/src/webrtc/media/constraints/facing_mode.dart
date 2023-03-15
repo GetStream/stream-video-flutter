@@ -1,9 +1,20 @@
 /// https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints/facingMode
 enum FacingMode {
-  user,
-  environment,
-  left,
-  right;
+  user('user'),
+  environment('environment'),
+  left('left'),
+  right('right');
+
+  const FacingMode(this.alias);
+
+  factory FacingMode.fromAlias(String? alias) {
+    return FacingMode.values.firstWhere(
+      (it) => it.alias == alias,
+      orElse: () => FacingMode.user,
+    );
+  }
+
+  final String alias;
 
   FacingMode flip() {
     switch (this) {

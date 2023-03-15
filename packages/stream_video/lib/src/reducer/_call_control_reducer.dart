@@ -19,12 +19,14 @@ class CallControlReducer {
       return _reduceCameraEnabled(state, action);
     } else if (action is SetMicrophoneEnabled) {
       return _reduceMicrophoneEnabled(state, action);
+    } else if (action is SetMicrophoneDevice) {
+      return _reduceSetMicrophoneDevice(state, action);
     } else if (action is SetScreenShareEnabled) {
       return _reduceScreenShareEnabled(state, action);
     } else if (action is FlipCamera) {
       return _reduceFlipCamera(state, action);
-    } else if (action is SetCameraDeviceId) {
-      return _reduceCameraDeviceId(state, action);
+    } else if (action is SetCameraDevice) {
+      return _reduceSetCameraDevice(state, action);
     } else if (action is SetCameraPosition) {
       return _reduceCameraPosition(state, action);
     } else if (action is UpdateSubscriptions) {
@@ -32,7 +34,9 @@ class CallControlReducer {
     } else if (action is UpdateSubscription) {
       return _reduceUpdateSubscription(state, action);
     } else if (action is RemoveSubscription) {
-      return _reduceUnsubscribeVideoTrack(state, action);
+      return _reduceRemoveSubscription(state, action);
+    } else if (action is SetSpeakerDevice) {
+      return _reduceSetSpeakerDevice(state, action);
     }
     return state;
   }
@@ -48,7 +52,7 @@ class CallControlReducer {
       if (child is UpdateSubscription) {
         newState = _reduceUpdateSubscription(newState, child);
       } else if (child is RemoveSubscription) {
-        newState = _reduceUnsubscribeVideoTrack(newState, child);
+        newState = _reduceRemoveSubscription(newState, child);
       }
     }
     return newState;
@@ -82,7 +86,7 @@ class CallControlReducer {
     );
   }
 
-  CallState _reduceUnsubscribeVideoTrack(
+  CallState _reduceRemoveSubscription(
     CallState state,
     RemoveSubscription action,
   ) {
@@ -103,6 +107,30 @@ class CallControlReducer {
           }
         }
         return participant;
+      }).toList(),
+    );
+  }
+
+  CallState _reduceSetSpeakerDevice(
+    CallState state,
+    SetSpeakerDevice action,
+  ) {
+    return state.copyWith(
+      speakerDevice: action.device,
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.isLocal) return participant;
+
+        final trackState = participant.publishedTracks[SfuTrackType.audio];
+        if (trackState is! RemoteTrackState) return participant;
+
+        return participant.copyWith(
+          publishedTracks: {
+            ...participant.publishedTracks,
+            SfuTrackType.audio: trackState.copyWith(
+              audioSinkDevice: action.device,
+            ),
+          },
+        );
       }).toList(),
     );
   }
@@ -204,11 +232,12 @@ class CallControlReducer {
     );
   }
 
-  CallState _reduceCameraDeviceId(
+  CallState _reduceSetCameraDevice(
     CallState state,
-    SetCameraDeviceId action,
+    SetCameraDevice action,
   ) {
     return state.copyWith(
+      cameraDevice: action.device,
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
           final trackState = participant.publishedTracks[SfuTrackType.video];
@@ -217,9 +246,34 @@ class CallControlReducer {
               publishedTracks: {
                 ...participant.publishedTracks,
                 SfuTrackType.video: trackState.copyWith(
-                  deviceId: action.deviceId,
+                  sourceDevice: action.device,
                   // reset camera position to default
                   cameraPosition: CameraPosition.front,
+                ),
+              },
+            );
+          }
+        }
+        return participant;
+      }).toList(),
+    );
+  }
+
+  CallState _reduceSetMicrophoneDevice(
+    CallState state,
+    SetMicrophoneDevice action,
+  ) {
+    return state.copyWith(
+      microphoneDevice: action.device,
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.isLocal) {
+          final trackState = participant.publishedTracks[SfuTrackType.audio];
+          if (trackState is LocalTrackState) {
+            return participant.copyWith(
+              publishedTracks: {
+                ...participant.publishedTracks,
+                SfuTrackType.audio: trackState.copyWith(
+                  sourceDevice: action.device,
                 ),
               },
             );

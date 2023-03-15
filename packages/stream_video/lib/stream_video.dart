@@ -33,6 +33,8 @@ export 'src/types/other.dart';
 export 'src/utils/result.dart';
 export 'src/utils/string.dart';
 export 'src/utils/subscriptions.dart';
+export 'src/webrtc/device_manager/rtc_device_manager.dart';
+export 'src/webrtc/device_manager/rtc_media_device.dart';
 export 'src/webrtc/media/media_constraints.dart';
 export 'src/webrtc/model/rtc_video_dimension.dart';
 export 'src/webrtc/peer_type.dart';

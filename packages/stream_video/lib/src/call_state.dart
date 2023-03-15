@@ -8,6 +8,7 @@ import 'models/call_cid.dart';
 import 'models/call_metadata.dart';
 import 'models/call_setting.dart';
 import 'models/call_status.dart';
+import 'webrtc/device_manager/rtc_media_device.dart';
 
 /// TODO - Class that holds any information about the call, including participants
 @immutable
@@ -26,6 +27,9 @@ class CallState extends Equatable {
       settings: const CallSettings.disabled(),
       ownCapabilities: List.unmodifiable(const []),
       callParticipants: List.unmodifiable(const []),
+      cameraDevice: null,
+      microphoneDevice: null,
+      speakerDevice: null,
     );
   }
 
@@ -49,6 +53,9 @@ class CallState extends Equatable {
           currentUserId,
         ),
       ),
+      cameraDevice: null,
+      microphoneDevice: null,
+      speakerDevice: null,
     );
   }
 
@@ -63,6 +70,9 @@ class CallState extends Equatable {
     required this.settings,
     required this.ownCapabilities,
     required this.callParticipants,
+    required this.cameraDevice,
+    required this.microphoneDevice,
+    required this.speakerDevice,
   });
 
   final String currentUserId;
@@ -74,6 +84,11 @@ class CallState extends Equatable {
   final CallSettings settings;
   final List<CallPermission> ownCapabilities;
   final List<CallParticipantState> callParticipants;
+
+  // Hardware devices used in the call (camera, microphone, speaker).
+  final RtcMediaDevice? cameraDevice;
+  final RtcMediaDevice? microphoneDevice;
+  final RtcMediaDevice? speakerDevice;
 
   CallParticipantState? get localParticipant {
     return callParticipants.firstWhereOrNull((element) => element.isLocal);
@@ -95,6 +110,9 @@ class CallState extends Equatable {
     CallSettings? settings,
     List<CallPermission>? ownCapabilities,
     List<CallParticipantState>? callParticipants,
+    RtcMediaDevice? cameraDevice,
+    RtcMediaDevice? microphoneDevice,
+    RtcMediaDevice? speakerDevice,
   }) {
     return CallState._(
       currentUserId: currentUserId ?? this.currentUserId,
@@ -106,6 +124,9 @@ class CallState extends Equatable {
       settings: settings ?? this.settings,
       ownCapabilities: ownCapabilities ?? this.ownCapabilities,
       callParticipants: callParticipants ?? this.callParticipants,
+      cameraDevice: cameraDevice ?? this.cameraDevice,
+      microphoneDevice: microphoneDevice ?? this.microphoneDevice,
+      speakerDevice: speakerDevice ?? this.speakerDevice,
     );
   }
 
@@ -120,6 +141,9 @@ class CallState extends Equatable {
         settings,
         ownCapabilities,
         callParticipants,
+        cameraDevice,
+        microphoneDevice,
+        speakerDevice,
       ];
 
   @override
@@ -128,7 +152,9 @@ class CallState extends Equatable {
         'createdByUserId: $createdByUserId, status: $status, '
         'isRecordingInProgress: $isRecording, settings: $settings, '
         'ownCapabilities: $ownCapabilities, '
-        'sessionId: $sessionId, callParticipants: $callParticipants}';
+        'sessionId: $sessionId, callParticipants: $callParticipants'
+        'cameraDevice: $cameraDevice, microphoneDevice: $microphoneDevice, '
+        'speakerDevice: $speakerDevice}';
   }
 }
 

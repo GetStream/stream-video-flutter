@@ -20,6 +20,7 @@ import '../../sfu/ws/sfu_event_listener.dart';
 import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
 import '../../utils/none.dart';
+import '../../webrtc/device_manager/rtc_media_device.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
 import '../../webrtc/model/stats/rtc_printable_stats.dart';
@@ -169,12 +170,14 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return _onSetCameraEnabled(action.enabled);
     } else if (action is SetMicrophoneEnabled) {
       return _onSetMicrophoneEnabled(action.enabled);
+    } else if (action is SetMicrophoneDevice) {
+      return _onSetMicrophoneDevice(action.device);
     } else if (action is SetScreenShareEnabled) {
       return _onSetScreenShareEnabled(action.enabled);
     } else if (action is FlipCamera) {
       return _onFlipCamera();
-    } else if (action is SetCameraDeviceId) {
-      return _onSetCameraDeviceId(action.deviceId);
+    } else if (action is SetCameraDevice) {
+      return _onSetCameraDevice(action.device);
     } else if (action is SetCameraPosition) {
       return _onSetCameraPosition(action.cameraPosition);
     } else if (action is UpdateSubscriptions) {
@@ -187,6 +190,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return _setSubscriptions([action]);
     } else if (action is SetSubscriptions) {
       return _setSubscriptions(action.actions);
+    } else if (action is SetSpeakerDevice) {
+      return _onSetSpeakerDevice(action.device);
     }
     return Result.error('Action not supported: $action');
   }
@@ -404,7 +409,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     _logger.d(
       () => '[onSubscriberTrackReceived] remoteTrack: $remoteTrack',
     );
-    stateManager.onSubscriberTrackReceived(
+    return stateManager.onSubscriberTrackReceived(
       remoteTrack.trackIdPrefix,
       remoteTrack.trackType,
     );
@@ -469,6 +474,15 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     return result;
   }
 
+  Future<Result<None>> _onSetSpeakerDevice(RtcMediaDevice device) async {
+    final tracks = await rtcManager?.setSpeakerDevice(device: device);
+    if (tracks == null || tracks.isEmpty) {
+      return Result.error('Unable to set speaker device, Track not found');
+    }
+
+    return Result.success(None());
+  }
+
   Future<Result<None>> _onSetCameraEnabled(bool enabled) async {
     final track = await rtcManager?.setCameraEnabled(enabled: enabled);
     if (track == null) {
@@ -484,6 +498,17 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return Result.error(
         'Unable to enable/disable microphone, Track not found',
       );
+    }
+
+    return Result.success(None());
+  }
+
+  Future<Result<None>> _onSetMicrophoneDevice(
+    RtcMediaDevice device,
+  ) async {
+    final result = await rtcManager?.setMicrophoneDevice(device: device);
+    if (result == null) {
+      return Result.error('Unable to set microphone device, Track not found');
     }
 
     return Result.success(None());
@@ -509,10 +534,10 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     return Result.success(None());
   }
 
-  Future<Result<None>> _onSetCameraDeviceId(String deviceId) async {
-    final track = await rtcManager?.setCameraDeviceId(deviceId: deviceId);
+  Future<Result<None>> _onSetCameraDevice(RtcMediaDevice device) async {
+    final track = await rtcManager?.setCameraDevice(device: device);
     if (track == null) {
-      return Result.error('Unable to set camera device id, Track not found');
+      return Result.error('Unable to set camera device, Track not found');
     }
 
     return Result.success(None());
