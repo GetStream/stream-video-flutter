@@ -606,6 +606,16 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
+
+  @override
+  Future<Result<None>> stopTranscription(StreamCallCid callCid) async {
+    try {
+      await defaultApi.stoptranscription(callCid.type, callCid.id);
+      return Result.success(None());
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
 }
 
 class _Authentication extends open.Authentication {

@@ -27,7 +27,7 @@ class PaginationParamsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  num? idGt;
+  int? idGt;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -35,7 +35,7 @@ class PaginationParamsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  num? idGte;
+  int? idGte;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -43,7 +43,7 @@ class PaginationParamsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  num? idLt;
+  int? idLt;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -51,7 +51,7 @@ class PaginationParamsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  num? idLte;
+  int? idLte;
 
   /// Minimum value: 0
   ///
@@ -60,7 +60,7 @@ class PaginationParamsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  num? limit;
+  int? limit;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -68,7 +68,7 @@ class PaginationParamsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  num? offset;
+  int? offset;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is PaginationParamsRequest &&
@@ -146,24 +146,12 @@ class PaginationParamsRequest {
       }());
 
       return PaginationParamsRequest(
-        idGt: json[r'id_gt'] == null
-            ? null
-            : num.parse(json[r'id_gt'].toString()),
-        idGte: json[r'id_gte'] == null
-            ? null
-            : num.parse(json[r'id_gte'].toString()),
-        idLt: json[r'id_lt'] == null
-            ? null
-            : num.parse(json[r'id_lt'].toString()),
-        idLte: json[r'id_lte'] == null
-            ? null
-            : num.parse(json[r'id_lte'].toString()),
-        limit: json[r'limit'] == null
-            ? null
-            : num.parse(json[r'limit'].toString()),
-        offset: json[r'offset'] == null
-            ? null
-            : num.parse(json[r'offset'].toString()),
+        idGt: mapValueOfType<int>(json, r'id_gt'),
+        idGte: mapValueOfType<int>(json, r'id_gte'),
+        idLt: mapValueOfType<int>(json, r'id_lt'),
+        idLte: mapValueOfType<int>(json, r'id_lte'),
+        limit: mapValueOfType<int>(json, r'limit'),
+        offset: mapValueOfType<int>(json, r'offset'),
       );
     }
     return null;

@@ -27,7 +27,7 @@ class UserResponse {
   /// Date/time of creation
   DateTime createdAt;
 
-  Map<String, Object?> custom;
+  Map<String, Object> custom;
 
   /// Date/time of deletion
   ///
@@ -64,46 +64,43 @@ class UserResponse {
   DateTime updatedAt;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is UserResponse &&
-          other.createdAt == createdAt &&
-          other.custom == custom &&
-          other.deletedAt == deletedAt &&
-          other.id == id &&
-          other.image == image &&
-          other.name == name &&
-          other.role == role &&
-          other.teams == teams &&
-          other.updatedAt == updatedAt;
+  bool operator ==(Object other) => identical(this, other) || other is UserResponse &&
+     other.createdAt == createdAt &&
+     other.custom == custom &&
+     other.deletedAt == deletedAt &&
+     other.id == id &&
+     other.image == image &&
+     other.name == name &&
+     other.role == role &&
+     other.teams == teams &&
+     other.updatedAt == updatedAt;
 
   @override
   int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (createdAt.hashCode) +
-      (custom.hashCode) +
-      (deletedAt == null ? 0 : deletedAt!.hashCode) +
-      (id.hashCode) +
-      (image == null ? 0 : image!.hashCode) +
-      (name == null ? 0 : name!.hashCode) +
-      (role.hashCode) +
-      (teams.hashCode) +
-      (updatedAt.hashCode);
+    // ignore: unnecessary_parenthesis
+    (createdAt.hashCode) +
+    (custom.hashCode) +
+    (deletedAt == null ? 0 : deletedAt!.hashCode) +
+    (id.hashCode) +
+    (image == null ? 0 : image!.hashCode) +
+    (name == null ? 0 : name!.hashCode) +
+    (role.hashCode) +
+    (teams.hashCode) +
+    (updatedAt.hashCode);
 
   @override
-  String toString() =>
-      'UserResponse[createdAt=$createdAt, custom=$custom, deletedAt=$deletedAt, id=$id, image=$image, name=$name, role=$role, teams=$teams, updatedAt=$updatedAt]';
+  String toString() => 'UserResponse[createdAt=$createdAt, custom=$custom, deletedAt=$deletedAt, id=$id, image=$image, name=$name, role=$role, teams=$teams, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'custom'] = this.custom;
+      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+      json[r'custom'] = this.custom;
     if (this.deletedAt != null) {
       json[r'deleted_at'] = this.deletedAt!.toUtc().toIso8601String();
     } else {
       json[r'deleted_at'] = null;
     }
-    json[r'id'] = this.id;
+      json[r'id'] = this.id;
     if (this.image != null) {
       json[r'image'] = this.image;
     } else {
@@ -114,9 +111,9 @@ class UserResponse {
     } else {
       json[r'name'] = null;
     }
-    json[r'role'] = this.role;
-    json[r'teams'] = this.teams;
-    json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
+      json[r'role'] = this.role;
+      json[r'teams'] = this.teams;
+      json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
     return json;
   }
 
@@ -132,17 +129,15 @@ class UserResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "UserResponse[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "UserResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "UserResponse[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "UserResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return UserResponse(
         createdAt: mapDateTime(json, r'created_at', '')!,
-        custom: mapCastOfType<String, Object?>(json, r'custom')!,
+        custom: mapCastOfType<String, Object>(json, r'custom')!,
         deletedAt: mapDateTime(json, r'deleted_at', ''),
         id: mapValueOfType<String>(json, r'id')!,
         image: mapValueOfType<String>(json, r'image'),
@@ -157,10 +152,7 @@ class UserResponse {
     return null;
   }
 
-  static List<UserResponse>? listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static List<UserResponse>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <UserResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -188,18 +180,12 @@ class UserResponse {
   }
 
   // maps a json object with a list of UserResponse-objects as value to a dart map
-  static Map<String, List<UserResponse>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static Map<String, List<UserResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<UserResponse>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = UserResponse.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+        final value = UserResponse.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -217,3 +203,4 @@ class UserResponse {
     'updated_at',
   };
 }
+

@@ -52,12 +52,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _onLoginSuccess(UserInfo user) async {
     final userId = user.id;
+    final apiKey = Env.apiKey;
+    print("login with user: $userId, apiKey: $apiKey");
     final response = await http.get(Uri.parse(
-      'https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$userId&api_key=${Env.apiKey}',
+      'https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$userId&api_key=${apiKey}',
     ));
 
     final token = json.decode(response.body)['token'];
-
+    print("login with token: $token");
     await StreamVideo.instance.connectUser(
       user,
       token: Token(token),

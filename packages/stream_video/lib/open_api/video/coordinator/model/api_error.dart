@@ -23,13 +23,13 @@ class APIError {
   });
 
   /// Response HTTP status code
-  num statusCode;
+  int statusCode;
 
   /// API error code
-  num code;
+  int code;
 
   /// Additional error-specific information
-  List<num> details;
+  List<int> details;
 
   /// Request duration
   String duration;
@@ -98,14 +98,10 @@ class APIError {
       }());
 
       return APIError(
-        statusCode: json[r'StatusCode'] == null
-            ? -1
-            : num.parse(json[r'StatusCode'].toString()),
-        code: json[r'code'] == null
-            ? -1
-            : num.parse(json[r'code'].toString()),
+        statusCode: mapValueOfType<int>(json, r'StatusCode')!,
+        code: mapValueOfType<int>(json, r'code')!,
         details: json[r'details'] is List
-            ? (json[r'details'] as List).cast<num>()
+            ? (json[r'details'] as List).cast<int>()
             : const [],
         duration: mapValueOfType<String>(json, r'duration')!,
         exceptionFields: mapCastOfType<String, String>(json, r'exception_fields') ?? const {},

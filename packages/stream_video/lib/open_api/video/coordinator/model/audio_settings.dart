@@ -14,25 +14,37 @@ class AudioSettings {
   /// Returns a new [AudioSettings] instance.
   AudioSettings({
     required this.accessRequestEnabled,
+    required this.opusDtxEnabled,
+    required this.redundantCodingEnabled,
   });
 
   bool accessRequestEnabled;
 
+  bool opusDtxEnabled;
+
+  bool redundantCodingEnabled;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is AudioSettings &&
-     other.accessRequestEnabled == accessRequestEnabled;
+     other.accessRequestEnabled == accessRequestEnabled &&
+     other.opusDtxEnabled == opusDtxEnabled &&
+     other.redundantCodingEnabled == redundantCodingEnabled;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (accessRequestEnabled.hashCode);
+    (accessRequestEnabled.hashCode) +
+    (opusDtxEnabled.hashCode) +
+    (redundantCodingEnabled.hashCode);
 
   @override
-  String toString() => 'AudioSettings[accessRequestEnabled=$accessRequestEnabled]';
+  String toString() => 'AudioSettings[accessRequestEnabled=$accessRequestEnabled, opusDtxEnabled=$opusDtxEnabled, redundantCodingEnabled=$redundantCodingEnabled]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'access_request_enabled'] = this.accessRequestEnabled;
+      json[r'opus_dtx_enabled'] = this.opusDtxEnabled;
+      json[r'redundant_coding_enabled'] = this.redundantCodingEnabled;
     return json;
   }
 
@@ -56,6 +68,8 @@ class AudioSettings {
 
       return AudioSettings(
         accessRequestEnabled: mapValueOfType<bool>(json, r'access_request_enabled')!,
+        opusDtxEnabled: mapValueOfType<bool>(json, r'opus_dtx_enabled')!,
+        redundantCodingEnabled: mapValueOfType<bool>(json, r'redundant_coding_enabled')!,
       );
     }
     return null;
@@ -106,6 +120,8 @@ class AudioSettings {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'access_request_enabled',
+    'opus_dtx_enabled',
+    'redundant_coding_enabled',
   };
 }
 
