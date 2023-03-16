@@ -30,6 +30,7 @@ class CallState extends Equatable {
       cameraDevice: null,
       microphoneDevice: null,
       speakerDevice: null,
+      speakerphoneEnabled: false,
     );
   }
 
@@ -56,6 +57,7 @@ class CallState extends Equatable {
       cameraDevice: null,
       microphoneDevice: null,
       speakerDevice: null,
+      speakerphoneEnabled: false,
     );
   }
 
@@ -73,6 +75,7 @@ class CallState extends Equatable {
     required this.cameraDevice,
     required this.microphoneDevice,
     required this.speakerDevice,
+    required this.speakerphoneEnabled,
   });
 
   final String currentUserId;
@@ -89,6 +92,7 @@ class CallState extends Equatable {
   final RtcMediaDevice? cameraDevice;
   final RtcMediaDevice? microphoneDevice;
   final RtcMediaDevice? speakerDevice;
+  final bool speakerphoneEnabled;
 
   CallParticipantState? get localParticipant {
     return callParticipants.firstWhereOrNull((element) => element.isLocal);
@@ -113,6 +117,7 @@ class CallState extends Equatable {
     RtcMediaDevice? cameraDevice,
     RtcMediaDevice? microphoneDevice,
     RtcMediaDevice? speakerDevice,
+    bool? speakerphoneEnabled,
   }) {
     return CallState._(
       currentUserId: currentUserId ?? this.currentUserId,
@@ -127,6 +132,7 @@ class CallState extends Equatable {
       cameraDevice: cameraDevice ?? this.cameraDevice,
       microphoneDevice: microphoneDevice ?? this.microphoneDevice,
       speakerDevice: speakerDevice ?? this.speakerDevice,
+      speakerphoneEnabled: speakerphoneEnabled ?? this.speakerphoneEnabled,
     );
   }
 
@@ -144,6 +150,7 @@ class CallState extends Equatable {
         cameraDevice,
         microphoneDevice,
         speakerDevice,
+        speakerphoneEnabled,
       ];
 
   @override
@@ -154,7 +161,7 @@ class CallState extends Equatable {
         'ownCapabilities: $ownCapabilities, '
         'sessionId: $sessionId, callParticipants: $callParticipants'
         'cameraDevice: $cameraDevice, microphoneDevice: $microphoneDevice, '
-        'speakerDevice: $speakerDevice}';
+        'speakerDevice: $speakerDevice, speakerphoneEnabled: $speakerphoneEnabled}';
   }
 }
 

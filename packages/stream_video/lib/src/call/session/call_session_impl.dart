@@ -192,6 +192,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return _setSubscriptions(action.actions);
     } else if (action is SetSpeakerDevice) {
       return _onSetSpeakerDevice(action.device);
+    } else if (action is SetSpeakerphoneEnabled) {
+      return _onSetSpeakerphoneEnabled(action.enabled);
     }
     return Result.error('Action not supported: $action');
   }
@@ -478,6 +480,17 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     final tracks = await rtcManager?.setSpeakerDevice(device: device);
     if (tracks == null || tracks.isEmpty) {
       return Result.error('Unable to set speaker device, Track not found');
+    }
+
+    return Result.success(None());
+  }
+
+  Future<Result<None>> _onSetSpeakerphoneEnabled(bool enabled) async {
+    final success = await rtcManager?.setSpeakerPhoneEnabled(enabled: enabled);
+    if (success == false) {
+      return Result.error(
+        'Unable to enable/disable speaker phone, Track not found',
+      );
     }
 
     return Result.success(None());

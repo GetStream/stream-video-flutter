@@ -37,6 +37,8 @@ class CallControlReducer {
       return _reduceRemoveSubscription(state, action);
     } else if (action is SetSpeakerDevice) {
       return _reduceSetSpeakerDevice(state, action);
+    } else if (action is SetSpeakerphoneEnabled) {
+      return _reduceSpeakerphoneEnabled(state, action);
     }
     return state;
   }
@@ -132,6 +134,15 @@ class CallControlReducer {
           },
         );
       }).toList(),
+    );
+  }
+
+  CallState _reduceSpeakerphoneEnabled(
+    CallState state,
+    SetSpeakerphoneEnabled action,
+  ) {
+    return state.copyWith(
+      speakerphoneEnabled: action.enabled,
     );
   }
 

@@ -79,33 +79,6 @@ class RtcManager extends Disposable {
   OnPublisherTrackMuted? onPublisherTrackMuted;
   OnSubscriberTrackReceived? onSubscriberTrackReceived;
 
-  void _checkAndInvokeIfChanged(
-    RtcMediaDeviceKind kind,
-    List<RtcMediaDevice> previous,
-    List<RtcMediaDevice> current,
-  ) {
-    final previousDevices = previous.where((d) => d.kind == kind).toList();
-    final currentDevices = current.where((d) => d.kind == kind).toList();
-
-    print('kind: $kind');
-    print('previousDevices: $previousDevices');
-    print('currentDevices: $currentDevices');
-
-    final previousDevice = previousDevices.first;
-    final currentDevice = currentDevices.first;
-  }
-
-  // Checks if the current device has changed and invokes the corresponding
-  // callback.
-  void _onDevicesChange(
-    List<RtcMediaDevice> previous,
-    List<RtcMediaDevice> current,
-  ) {
-    _checkAndInvokeIfChanged(RtcMediaDeviceKind.audioInput, previous, current);
-    _checkAndInvokeIfChanged(RtcMediaDeviceKind.videoInput, previous, current);
-    _checkAndInvokeIfChanged(RtcMediaDeviceKind.audioOutput, previous, current);
-  }
-
   /// Returns a generic sdp.
   static Future<String> getGenericSdp() async {
     const direction = rtc.TransceiverDirection.RecvOnly;
@@ -625,6 +598,22 @@ extension RtcManagerTrackHelper on RtcManager {
   }) {
     final facingMode = cameraPosition.toFacingMode();
     return setTrackFacingMode(facingMode: facingMode);
+  }
+
+  Future<bool?> setSpeakerPhoneEnabled({bool enabled = true}) async {
+    if (!CurrentPlatform.isAndroid || !CurrentPlatform.isIos) {
+      _logger.e(() => '[setSpeakerPhoneEnabled] rejected (not supported)');
+      return null;
+    }
+
+    try {
+      await rtc.Helper.setSpeakerphoneOn(enabled);
+      return true;
+    } catch (e) {
+      _logger.e(() => '[setSpeakerPhoneEnabled] rejected ($e)');
+    }
+
+    return false;
   }
 
   Future<RtcLocalTrack?> setCameraEnabled({bool enabled = true}) {

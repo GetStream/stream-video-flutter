@@ -1,8 +1,7 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+
 import '../../errors/video_error_composer.dart';
 import '../../utils/result.dart';
-import 'package:rate_limiter/rate_limiter.dart';
-
 import 'rtc_media_device.dart';
 
 typedef OnDevicesChange = void Function(
@@ -22,7 +21,6 @@ class RtcMediaDevices {
 
   OnDevicesChange? onDevicesChange;
   var _currentDevices = const <RtcMediaDevice>[];
-
 
   Future<void> _onDeviceChange(_) async {
     final devicesResult = await enumerateDevices();

@@ -172,6 +172,14 @@ class SetSpeakerDevice extends SessionControlAction {
   List<Object?> get props => [device];
 }
 
+class SetSpeakerphoneEnabled extends SessionControlAction {
+  const SetSpeakerphoneEnabled({required this.enabled});
+  final bool enabled;
+
+  @override
+  List<Object?> get props => [enabled];
+}
+
 class SetSubscription extends SessionControlAction {
   const SetSubscription({
     required this.userId,
