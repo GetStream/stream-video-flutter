@@ -8,6 +8,7 @@ import 'coordinator/models/coordinator_inputs.dart' as input;
 import 'coordinator/models/coordinator_inputs.dart';
 import 'coordinator/models/coordinator_models.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
+import 'coordinator/retry/coordinator_client_retry.dart';
 import 'errors/video_error_composer.dart';
 import 'models/call_device.dart';
 import 'models/call_reaction.dart';
@@ -523,10 +524,12 @@ CoordinatorClient buildCoordinatorClient({
   required String apiKey,
   required TokenManager tokenManager,
 }) {
-  return CoordinatorClientOpenApi(
-    apiKey: apiKey,
-    tokenManager: tokenManager,
-    rpcUrl: rpcUrl,
-    wsUrl: wsUrl,
+  return CoordinatorClientRetry(
+    delegate: CoordinatorClientOpenApi(
+      apiKey: apiKey,
+      tokenManager: tokenManager,
+      rpcUrl: rpcUrl,
+      wsUrl: wsUrl,
+    ),
   );
 }
