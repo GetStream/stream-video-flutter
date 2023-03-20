@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -67,7 +68,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     return super.connect();
   }
 
-  void _authenticateUser() async {
+  Future<void> _authenticateUser() async {
     _logger.i(() => '[authenticateUser] url: $url');
 
     final token = await tokenManager.loadToken();
@@ -232,7 +233,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
 
   int _reconnectAttempt = 0;
 
-  void _reconnect({bool refreshToken = false}) async {
+  Future<void> _reconnect({bool refreshToken = false}) async {
     if (isConnecting || isReconnecting) return;
 
     _logger.i(() => '[reconnect] reconnectAttempt: $_reconnectAttempt');
@@ -244,7 +245,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       Duration(milliseconds: delay),
       () async {
         if (refreshToken) await tokenManager.refreshToken();
-        connect(reconnect: true);
+        unawaited(connect(reconnect: true));
       },
     );
   }

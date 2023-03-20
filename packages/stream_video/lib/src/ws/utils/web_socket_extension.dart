@@ -1,5 +1,5 @@
-import 'package:stream_video/src/ws/base_ws.dart';
-import 'package:stream_video/src/ws/socket_connection_state.dart';
+import '../base_ws.dart';
+import '../socket_connection_state.dart';
 
 /// Extends [AbstractWebSocket] class.
 extension WebSocketExtension on AbstractWebSocket {

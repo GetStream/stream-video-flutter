@@ -41,7 +41,7 @@ class Hardware {
   MediaDevice? selectedVideoInput;
 
   Future<List<MediaDevice>> enumerateDevices({String? type}) async {
-    var infos = await rtc.navigator.mediaDevices.enumerateDevices();
+    final infos = await rtc.navigator.mediaDevices.enumerateDevices();
     final devices = infos.map((it) {
       return MediaDevice(
         deviceId: it.deviceId,
@@ -119,7 +119,7 @@ class Hardware {
   }
 
   dynamic _onDeviceChange(dynamic _) async {
-    var devices = await enumerateDevices();
+    final devices = await enumerateDevices();
     selectedAudioInput ??=
         devices.where((element) => element.kind == 'audioinput').first;
     selectedAudioOutput ??=

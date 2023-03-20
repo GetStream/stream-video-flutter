@@ -32,7 +32,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           createdAt: callCreated.createdAt,
           info: CallInfo(
             cid: StreamCallCid(cid: call.cid),
-            createdByUserId: call.createdBy.id ?? '',
+            createdByUserId: call.createdBy.id,
             createdAt: call.createdAt,
             updatedAt: call.updatedAt,
           ),
@@ -113,7 +113,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: call.cid,
           info: CallInfo(
             cid: StreamCallCid(cid: call.cid),
-            createdByUserId: call.createdBy.id ?? '',
+            createdByUserId: call.createdBy.id,
             createdAt: call.createdAt,
             updatedAt: call.updatedAt,
           ),

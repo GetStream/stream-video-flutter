@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:stream_video/stream_video.dart';
+import '../../stream_video.dart';
 
 abstract class PushNotificationManager {
   Future<void> onUserLoggedIn();

@@ -23,10 +23,10 @@ class StreamVideoEventChannel {
 }
 
 class NativeEvent {
+  NativeEvent(this.type, this.content);
+
   NativeEventType type;
   dynamic content;
-
-  NativeEvent(this.type, this.content);
 }
 
 enum NativeEventType { ACTION_INCOMING_CALL }

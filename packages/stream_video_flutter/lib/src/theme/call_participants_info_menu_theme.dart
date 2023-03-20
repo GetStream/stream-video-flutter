@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../participants_info/call_participants_info_menu.dart';
 
 /// Defines default property values for [StreamCallParticipantsInfoMenu]
 /// widgets.
@@ -146,17 +145,35 @@ class StreamCallParticipantsInfoMenuThemeData with Diagnosticable {
   ) {
     return StreamCallParticipantsInfoMenuThemeData(
       participantDividerColor: Color.lerp(
-          participantDividerColor, other.participantDividerColor, t)!,
+        participantDividerColor,
+        other.participantDividerColor,
+        t,
+      )!,
       participantDividerIndent: lerpDouble(
-          participantDividerIndent, other.participantDividerIndent, t)!,
+        participantDividerIndent,
+        other.participantDividerIndent,
+        t,
+      )!,
       participantDividerHeight: lerpDouble(
-          participantDividerHeight, other.participantDividerHeight, t)!,
+        participantDividerHeight,
+        other.participantDividerHeight,
+        t,
+      )!,
       participantNameTextStyle: TextStyle.lerp(
-          participantNameTextStyle, other.participantNameTextStyle, t)!,
+        participantNameTextStyle,
+        other.participantNameTextStyle,
+        t,
+      )!,
       participantIconActiveColor: Color.lerp(
-          participantIconActiveColor, other.participantIconActiveColor, t)!,
+        participantIconActiveColor,
+        other.participantIconActiveColor,
+        t,
+      )!,
       participantIconInactiveColor: Color.lerp(
-          participantIconInactiveColor, other.participantIconInactiveColor, t)!,
+        participantIconInactiveColor,
+        other.participantIconInactiveColor,
+        t,
+      )!,
       participantUserAvatarTheme:
           participantUserAvatarTheme.lerp(other.participantUserAvatarTheme, t),
       inviteDividerColor:
@@ -166,9 +183,15 @@ class StreamCallParticipantsInfoMenuThemeData with Diagnosticable {
       inviteDividerHeight:
           lerpDouble(inviteDividerHeight, other.inviteDividerHeight, t)!,
       inviteUsernameTextStyle: TextStyle.lerp(
-          inviteUsernameTextStyle, other.inviteUsernameTextStyle, t)!,
+        inviteUsernameTextStyle,
+        other.inviteUsernameTextStyle,
+        t,
+      )!,
       inviteSelectedIconColor: Color.lerp(
-          inviteSelectedIconColor, other.inviteSelectedIconColor, t)!,
+        inviteSelectedIconColor,
+        other.inviteSelectedIconColor,
+        t,
+      )!,
       inviteUserAvatarTheme:
           inviteUserAvatarTheme.lerp(other.inviteUserAvatarTheme, t),
     );
@@ -219,29 +242,66 @@ class StreamCallParticipantsInfoMenuThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty(
-          'participantDividerColor', participantDividerColor))
-      ..add(DiagnosticsProperty(
-          'participantDividerIndent', participantDividerIndent))
-      ..add(DiagnosticsProperty(
-          'participantDividerHeight', participantDividerHeight))
-      ..add(DiagnosticsProperty(
-          'participantNameTextStyle', participantNameTextStyle))
-      ..add(DiagnosticsProperty(
-          'participantIconActiveColor', participantIconActiveColor))
-      ..add(DiagnosticsProperty(
-          'participantIconInactiveColor', participantIconInactiveColor))
-      ..add(DiagnosticsProperty(
-          'participantUserAvatarTheme', participantUserAvatarTheme))
+      ..add(
+        DiagnosticsProperty(
+          'participantDividerColor',
+          participantDividerColor,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'participantDividerIndent',
+          participantDividerIndent,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'participantDividerHeight',
+          participantDividerHeight,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'participantNameTextStyle',
+          participantNameTextStyle,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'participantIconActiveColor',
+          participantIconActiveColor,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'participantIconInactiveColor',
+          participantIconInactiveColor,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'participantUserAvatarTheme',
+          participantUserAvatarTheme,
+        ),
+      )
       ..add(DiagnosticsProperty('inviteDividerColor', inviteDividerColor))
       ..add(DiagnosticsProperty('inviteDividerIndent', inviteDividerIndent))
       ..add(DiagnosticsProperty('inviteDividerHeight', inviteDividerHeight))
-      ..add(DiagnosticsProperty(
-          'inviteUsernameTextStyle', inviteUsernameTextStyle))
-      ..add(DiagnosticsProperty(
-          'inviteSelectedIconColor', inviteSelectedIconColor))
       ..add(
-          DiagnosticsProperty('inviteUserAvatarTheme', inviteUserAvatarTheme));
+        DiagnosticsProperty(
+          'inviteUsernameTextStyle',
+          inviteUsernameTextStyle,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'inviteSelectedIconColor',
+          inviteSelectedIconColor,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty('inviteUserAvatarTheme', inviteUserAvatarTheme),
+      );
   }
 
   /// Merges one [StreamCallParticipantsInfoMenuThemeData] with the another.

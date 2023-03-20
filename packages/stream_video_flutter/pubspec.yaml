@@ -9,11 +9,13 @@ environment:
 
 dependencies:
   cached_network_image: ^3.2.3
+  collection: ^1.16.0
   eva_icons_flutter: ^3.1.0
-  flutter_background: ^1.1.0
-  google_fonts: ^3.0.1
   flutter:
     sdk: flutter
+  flutter_background: ^1.1.0
+  flutter_webrtc: ^0.9.24
+  google_fonts: ^3.0.1
   stream_video:
     path: ../stream_video
   stream_video_flutter_background:

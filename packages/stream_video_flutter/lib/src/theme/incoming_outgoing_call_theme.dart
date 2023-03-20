@@ -101,15 +101,28 @@ class StreamIncomingOutgoingCallThemeData with Diagnosticable {
   ) {
     return StreamIncomingOutgoingCallThemeData(
       singleParticipantAvatarTheme: singleParticipantAvatarTheme.lerp(
-          other.singleParticipantAvatarTheme, t),
+        other.singleParticipantAvatarTheme,
+        t,
+      ),
       multipleParticipantAvatarTheme: multipleParticipantAvatarTheme.lerp(
-          other.multipleParticipantAvatarTheme, t),
+        other.multipleParticipantAvatarTheme,
+        t,
+      ),
       singleParticipantTextStyle: TextStyle.lerp(
-          singleParticipantTextStyle, other.singleParticipantTextStyle, t)!,
+        singleParticipantTextStyle,
+        other.singleParticipantTextStyle,
+        t,
+      )!,
       multipleParticipantTextStyle: TextStyle.lerp(
-          multipleParticipantTextStyle, other.multipleParticipantTextStyle, t)!,
+        multipleParticipantTextStyle,
+        other.multipleParticipantTextStyle,
+        t,
+      )!,
       callingLabelTextStyle: TextStyle.lerp(
-          callingLabelTextStyle, other.callingLabelTextStyle, t)!,
+        callingLabelTextStyle,
+        other.callingLabelTextStyle,
+        t,
+      )!,
     );
   }
 
@@ -144,16 +157,33 @@ class StreamIncomingOutgoingCallThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty(
-          'singleParticipantAvatarTheme', singleParticipantAvatarTheme))
-      ..add(DiagnosticsProperty(
-          'multipleParticipantAvatarTheme', multipleParticipantAvatarTheme))
-      ..add(DiagnosticsProperty(
-          'singleParticipantTextStyle', singleParticipantTextStyle))
-      ..add(DiagnosticsProperty(
-          'multipleParticipantTextStyle', multipleParticipantTextStyle))
       ..add(
-          DiagnosticsProperty('callingLabelTextStyle', callingLabelTextStyle));
+        DiagnosticsProperty(
+          'singleParticipantAvatarTheme',
+          singleParticipantAvatarTheme,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'multipleParticipantAvatarTheme',
+          multipleParticipantAvatarTheme,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'singleParticipantTextStyle',
+          singleParticipantTextStyle,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'multipleParticipantTextStyle',
+          multipleParticipantTextStyle,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty('callingLabelTextStyle', callingLabelTextStyle),
+      );
   }
 
   /// Merges one [StreamIncomingOutgoingCallThemeData] with the another.
