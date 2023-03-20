@@ -155,7 +155,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     }
   }
 
-  /// Attempts to join a [Call]. If successful, gives us more information
+  /// Attempts to join a Call. If successful, gives us more information
   /// about the user and the call itself.
   @override
   Future<Result<CoordinatorJoined>> joinCall(inputs.JoinCallInput input) async {
@@ -216,7 +216,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     return response;
   }
 
-  /// Finds the correct server to connect to for given user and [request].
+  /// Finds the correct server to connect to for given user and request.
   @override
   Future<Result<SfuServerSelected>> selectCallEdgeServer({
     required StreamCallCid callCid,

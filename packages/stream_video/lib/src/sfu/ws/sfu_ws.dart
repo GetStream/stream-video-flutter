@@ -183,7 +183,7 @@ class SfuWebSocket extends StreamWebSocket
 
   int _reconnectAttempt = 0;
 
-  void _reconnect() async {
+  Future<void> _reconnect() async {
     if (isConnecting || isReconnecting) return;
     _logger.d(() => '[_reconnect] _reconnectAttempt: $_reconnectAttempt');
     _reconnectAttempt += 1;

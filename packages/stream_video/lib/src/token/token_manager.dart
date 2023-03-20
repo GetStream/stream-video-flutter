@@ -35,15 +35,18 @@ class TokenManager {
     Token? token,
     TokenProvider? provider,
   }) async {
-    assert(() {
-      if (token == null && provider == null) {
-        throw AssertionError('Provide at-least token or provider');
-      }
-      if (token != null && provider != null) {
-        throw AssertionError("Can't set both token and provider");
-      }
-      return true;
-    }(), '');
+    assert(
+      () {
+        if (token == null && provider == null) {
+          throw AssertionError('Provide at-least token or provider');
+        }
+        if (token != null && provider != null) {
+          throw AssertionError("Can't set both token and provider");
+        }
+        return true;
+      }(),
+      '',
+    );
 
     _userId = userId;
 

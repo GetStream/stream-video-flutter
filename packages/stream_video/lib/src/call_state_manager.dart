@@ -155,7 +155,8 @@ class CallStateManagerImpl extends CallStateManager {
       final users = await _queryUsersByIds({event.participant.userId});
       _logger.v(() => '[onSfuEvent] received coord users: $users');
       _postReduced(
-          CoordinatorCallUsersAction(users: users.toUnmodifiableMap()));
+        CoordinatorCallUsersAction(users: users.toUnmodifiableMap()),
+      );
     }
   }
 
