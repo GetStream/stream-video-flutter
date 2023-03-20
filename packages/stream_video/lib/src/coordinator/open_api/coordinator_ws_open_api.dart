@@ -11,7 +11,7 @@ import '../../token/token_manager.dart';
 import '../../types/other.dart';
 import '../../utils/standard.dart';
 import '../../ws/base_ws.dart';
-import '../../ws/keep_alive.dart';
+import '../../ws/health/health_monitor.dart';
 import '../coordinator_ws.dart';
 import '../models/coordinator_events.dart';
 import 'error/open_api_error.dart';
@@ -20,21 +20,34 @@ import 'open_api_mapper_extensions.dart';
 
 // TODO: The class needs further refactor. Some parts can be abstracted.
 
-String buildUrl(String baseUrl, String apiKey) {
-  return '$baseUrl?api_key=$apiKey&stream-auth-type=jwt&X-Stream-Client=stream-video-flutter';
+const _tag = 'SV:CoordinatorWS';
+
+const _maxJitter = Duration(milliseconds: 500);
+const _defaultDelay = Duration(milliseconds: 250);
+const _retryMaxBackoff = Duration(seconds: 5);
+final _rnd = math.Random();
+
+String _buildUrl(String baseUrl, String apiKey) {
+  return '$baseUrl'
+      '?api_key=$apiKey'
+      '&stream-auth-type=jwt'
+      '&X-Stream-Client=stream-video-flutter';
 }
 
 class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
-    with KeepAlive, ConnectionStateMixin {
+    with ConnectionStateMixin
+    implements HealthListener {
   CoordinatorWebSocketOpenApi(
     String url, {
     Iterable<String>? protocols,
     required this.apiKey,
     required this.userInfo,
     required this.tokenManager,
-  }) : super(buildUrl(url, apiKey), protocols: protocols);
+  }) : super(_buildUrl(url, apiKey), protocols: protocols, tag: _tag);
 
-  late final _logger = taggedLogger(tag: 'SV:CoordinatorWS');
+  late final _logger = taggedLogger(tag: _tag);
+
+  late final HealthMonitor healthMonitor = HealthMonitorImpl('Coord', this);
 
   /// The API key used to authenticate the user.
   final String apiKey;
@@ -60,12 +73,29 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   // OnConnectionStateUpdated get onConnectionStateUpdated => events.emit;
 
   @override
-  Future<void> connect({bool reconnect = false}) {
-    connectionState = reconnect //
-        ? ConnectionState.reconnecting
-        : ConnectionState.connecting;
-
+  Future<void> connect() {
+    _logger.v(() => '[connect] no args');
+    connectionState = ConnectionState.connecting;
+    healthMonitor.start();
     return super.connect();
+  }
+
+  @override
+  Future<void> disconnect([int? closeCode, String? closeReason]) async {
+    _logger.i(
+          () => '[disconnect] closeCode: "$closeCode", '
+              'closeReason: "$closeReason"',
+    );
+    if (connectionState == ConnectionState.disconnected) {
+      _logger.w(() => '[disconnect] rejected (already disconnected)');
+      return;
+    }
+
+    healthMonitor.stop();
+
+    _manuallyClosed = true;
+
+    return super.disconnect(closeCode, closeReason);
   }
 
   Future<void> _authenticateUser() async {
@@ -108,7 +138,9 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   // https://www.notion.so/stream-wiki/WS-Auth-write-error-message-before-closing-the-connection-a2d51f8c05ef401c9dfd206f87188322
   @override
   void onError(Object error, [StackTrace? stackTrace]) {
-    _logger.e(() => '[onError] error: $error, stackTrace: $stackTrace');
+    _logger.e(() => '[onError] error: $error');
+    healthMonitor.onSocketError(error);
+    connectionState = ConnectionState.failed;
 
     StreamVideoWebSocketError wsError;
     if (error is WebSocketChannelException) {
@@ -127,6 +159,8 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     _logger.i(
       () => '[onClose] closeCode: "$closeCode", closeReason: "$closeReason"',
     );
+    healthMonitor.onSocketClose();
+    connectionState = ConnectionState.closed;
 
     // resetting connection
     userId = null;
@@ -168,6 +202,8 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
 
     if (dtoEvent.connected != null) {
       _handleConnectedEvent(dtoEvent.connected!);
+    } else if (dtoEvent.healthCheck != null) {
+      _handleHealthCheckEvent(dtoEvent.healthCheck!);
     }
 
     // Parsing
@@ -175,45 +211,18 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   }
 
   void _handleConnectedEvent(open.WSConnectedEvent event) {
-    if (!isKeepAliveStarted) {
-      connectionState = ConnectionState.connected;
-
-      _logger.d(() => '[handleConnectedEvent] starting ping pong timer');
-      startPingPong();
-    }
-    ackPong(event);
+    _logger.i(() => '[handleConnectedEvent] no args');
+    connectionState = ConnectionState.connected;
+    healthMonitor.onPongReceived();
     userId ??= event.me.id;
     clientId ??= event.connectionId;
   }
 
-  @override
-  Future<void> disconnect([int? closeCode, String? closeReason]) async {
-    _logger.d(
-      () => '[disconnect] closeCode: "$closeCode", closeReason: "$closeReason"',
-    );
-    // return if already disconnected.
-    if (connectionState == ConnectionState.disconnected) {
-      _logger.w(() => '[disconnect] rejected (already disconnected)');
-      return;
-    }
-
-    // Stop sending keep alive messages.
-    stopPingPong();
-
-    // If no close code is provided,
-    // means we are manually closing the connection.
-    if (closeCode == null) _manuallyClosed = true;
-
-    return super.disconnect(closeCode, closeReason);
+  void _handleHealthCheckEvent(open.HealthCheckEvent event) {
+    _logger.i(() => '[handleHealthCheckEvent] no args');
+    healthMonitor.onPongReceived();
   }
 
-  @override
-  void send(String message) {
-    _logger.d(() => '[send] message: $message');
-    super.send(message);
-  }
-
-  @override
   void sendPing() {
     _logger.d(() => '[sendPing] no args');
     final healthCheck = [
@@ -231,32 +240,79 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     );
   }
 
-  int _reconnectAttempt = 0;
-
-  Future<void> _reconnect({bool refreshToken = false}) async {
-    if (isConnecting || isReconnecting) return;
-
-    _logger.i(() => '[reconnect] reconnectAttempt: $_reconnectAttempt');
-    _reconnectAttempt += 1;
-
-    final delay = _getReconnectInterval(_reconnectAttempt);
-
-    Future.delayed(
-      Duration(milliseconds: delay),
-      () async {
-        if (refreshToken) await tokenManager.refreshToken();
-        unawaited(connect(reconnect: true));
-      },
-    );
+  @override
+  void send(dynamic message) {
+    _logger.d(() => '[send] message: $message');
+    super.send(message);
   }
 
-  // returns the reconnect interval based on `reconnectAttempt` in milliseconds
-  int _getReconnectInterval(int reconnectAttempt) {
-    // try to reconnect in 0.25-25 seconds
-    // (random to spread out the load from failures)
-    final max = math.min(500 + reconnectAttempt * 2000, 25000);
-    final min = math.min(math.max(250, (reconnectAttempt - 1) * 2000), 25000);
-    return (math.Random().nextDouble() * (max - min) + min).floor();
+  int _reconnectAttempt = 0;
+
+  Future<void> _reconnect() async {
+    if (isConnecting || isReconnecting) {
+      _logger.w(() => '[reconnect] rejected(already reconnecting/connecting)');
+      return;
+    }
+    _logger.i(
+      () => '[reconnect] isConnecting: $isConnecting, '
+          'isReconnecting: $isReconnecting, '
+          'reconnectAttempt: $_reconnectAttempt',
+    );
+    _reconnectAttempt += 1;
+
+    final delay = _calculateDelay(_reconnectAttempt);
+
+    _logger.v(() => '[reconnect] delay: $delay ms');
+
+    await Future.delayed(delay, () async {
+      _logger.v(() => '[reconnect] triggered');
+      // if (refreshToken) {
+      //   await tokenManager.refreshToken();
+      // }
+      connectionState = ConnectionState.reconnecting;
+      await super.connect();
+      _logger.v(() => '[reconnect] completed');
+    });
+  }
+
+  Duration get jitter {
+    return Duration(milliseconds: _rnd.nextInt(_maxJitter.inMilliseconds));
+  }
+
+  Duration _calculateDelay(int retryAttempt) {
+    if (retryAttempt == 0) {
+      return Duration.zero;
+    }
+    final calculated = _defaultDelay * retryAttempt + jitter;
+    if (calculated < _retryMaxBackoff) {
+      return calculated;
+    }
+    return _retryMaxBackoff;
+  }
+
+  @override
+  Future<void> onPongTimeout(Duration timeout) async {
+    _logger.d(() => '[onPongTimeout] timeout: $timeout');
+
+    await super.disconnect();
+    unawaited(_reconnect());
+  }
+
+  @override
+  void onPingRequested() {
+    _logger.d(() => '[onPingRequested] no args');
+    sendPing();
+  }
+
+  @override
+  void onNetworkDisconnected() {
+    _logger.i(() => '[onNetworkDisconnected] no args');
+  }
+
+  @override
+  void onNetworkConnected() {
+    _logger.i(() => '[onNetworkConnected] no args');
+
   }
 }
 

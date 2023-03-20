@@ -90,7 +90,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
   @override
   Future<Result<None>> onUserLogout() async {
+    _logger.d(() => '[onUserLogout] userId: $userId');
     if (_ws == null) {
+      _logger.w(() => '[onUserLogout] rejected (ws is null)');
       return Result.success(None());
     }
     try {

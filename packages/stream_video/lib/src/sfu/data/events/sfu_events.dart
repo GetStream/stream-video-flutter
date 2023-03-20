@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+import '../../../errors/video_error.dart';
 import '../../../webrtc/peer_type.dart';
 import '../models/sfu_audio_level.dart';
 import '../models/sfu_audio_sender.dart';
@@ -188,4 +189,53 @@ class SfuErrorEvent extends SfuEvent {
 
   @override
   List<Object> get props => [error];
+}
+
+abstract class SfuSocketEvent extends SfuEvent {
+  const SfuSocketEvent();
+}
+
+class SfuSocketConnected extends SfuSocketEvent {
+  const SfuSocketConnected({
+    required this.sessionId,
+    required this.url,
+  });
+
+  final String sessionId;
+  final String url;
+
+  @override
+  List<Object?> get props => [sessionId, url];
+}
+
+class SfuSocketDisconnected extends SfuSocketEvent {
+  const SfuSocketDisconnected({
+    required this.sessionId,
+    required this.url,
+    this.closeCode,
+    this.closeReason,
+  });
+
+  final String sessionId;
+  final String url;
+  final int? closeCode;
+  final String? closeReason;
+
+  @override
+  List<Object?> get props => [sessionId, url, closeCode, closeReason];
+}
+
+class SfuSocketFailed extends SfuSocketEvent {
+  const SfuSocketFailed({
+    required this.sessionId,
+    required this.url,
+    required this.error,
+  });
+
+  final String sessionId;
+  final String url;
+  final VideoError error;
+
+  @override
+  List<Object?> get props => [sessionId, url, error];
 }

@@ -1,7 +1,8 @@
 import 'dart:async';
+
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import '../logger/stream_log.dart';
+import '../logger/impl/tagged_logger.dart';
 import 'connect/connect.dart'
     if (dart.library.html) 'package:stream_video/src/ws/connect/connect_html.dart'
     if (dart.library.io) 'package:stream_video/src/ws/connect/connect_io.dart'
@@ -15,13 +16,17 @@ abstract class StreamWebSocket {
   StreamWebSocket(
     this.url, {
     this.protocols,
-  });
+    String tag = 'SV:AbstractWS',
+  }) : _logger = taggedLogger(tag: tag);
 
   /// The URI to connect to.
   final String url;
 
   /// The protocols to use.
   final Iterable<String>? protocols;
+
+  /// The descendant tag.
+  final TaggedLogger _logger;
 
   WebSocketChannel? _ws;
   StreamSubscription? _wsSubscription;
@@ -35,7 +40,10 @@ abstract class StreamWebSocket {
   /// Connects to [uri] using and returns a channel that can be used to
   /// communicate over the resulting socket.
   Future<void> connect() async {
-    streamLog.i('SV:AbstractWS', () => '[connect] url: $url');
+    _logger.i(
+      () => '[connect] connectRequestInProgress: '
+          '$_connectRequestInProgress, url: $url',
+    );
     try {
       if (_connectRequestInProgress) return;
       _connectRequestInProgress = true;
@@ -51,6 +59,7 @@ abstract class StreamWebSocket {
         onDone: () => onClose(_ws?.closeCode, _ws?.closeReason),
       );
     } catch (error, stackTrace) {
+      _logger.e(() => '[connect] failed: $error');
       onError(error, stackTrace);
     } finally {
       _connectRequestInProgress = false;
@@ -78,7 +87,10 @@ abstract class StreamWebSocket {
   /// [close code]: https://tools.ietf.org/html/rfc6455#section-7.1.5
   /// [reason]: https://tools.ietf.org/html/rfc6455#section-7.1.6
   Future<void> disconnect([int? closeCode, String? closeReason]) async {
-    streamLog.i('SV:AbstractWS', () => '[disconnect] url: $url');
+    _logger.i(
+      () => '[disconnect] connectRequestInProgress: '
+          '$_connectRequestInProgress, url: $url',
+    );
     await _ws?.sink.close(closeCode, closeReason);
     _ws = null;
     await _wsSubscription?.cancel();
@@ -87,6 +99,7 @@ abstract class StreamWebSocket {
 
   /// Sends a [message] to the websocket.
   void send(covariant dynamic /*String|List<int>*/ message) {
+    _logger.v(() => '[send] hasWS: ${_ws != null}');
     return _ws?.sink.add(message);
   }
 }

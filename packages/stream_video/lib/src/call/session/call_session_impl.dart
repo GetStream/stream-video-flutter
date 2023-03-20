@@ -9,14 +9,12 @@ import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
 import '../../call_state_manager.dart';
-import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
 import '../../sfu/sfu_client.dart';
 import '../../sfu/sfu_client_impl.dart';
-import '../../sfu/ws/sfu_event_listener.dart';
 import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
 import '../../utils/none.dart';
@@ -34,7 +32,7 @@ const _tag = 'SV:CallSession';
 
 int _sessionSeq = 1;
 
-class CallSessionImpl extends CallSession implements SfuEventListener {
+class CallSessionImpl extends CallSession {
   CallSessionImpl({
     required this.callCid,
     required this.sessionId,
@@ -67,6 +65,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
   RtcManager? rtcManager;
+  StreamSubscription<SfuEvent>? eventsSubscription;
 
   @override
   SharedEmitter<CallStats> get stats => _stats;
@@ -79,7 +78,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   Future<Result<None>> start() async {
     try {
       _logger.d(() => '[start] no args');
-      sfuWS.addEventListener(this);
+      await eventsSubscription?.cancel();
+      eventsSubscription = sfuWS.events.listen(_onSfuEvent);
       await sfuWS.connect();
       _logger.v(() => '[start] sfu connected');
       final genericSdp = await RtcManager.getGenericSdp();
@@ -128,7 +128,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
     await _stats.close();
-    sfuWS.removeEventListener(this);
+    await eventsSubscription?.cancel();
+    eventsSubscription = null;
     await sfuWS.disconnect();
     await rtcManager?.dispose();
     rtcManager = null;
@@ -192,14 +193,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     return Result.error('Action not supported: $action');
   }
 
-  @override
-  Future<void> onSfuError(VideoError error) async {
-    _logger.e(() => '[onSfuError] error: $error');
-    // TODO: implement onError
-  }
-
-  @override
-  Future<void> onSfuEvent(SfuEvent event) async {
+  Future<void> _onSfuEvent(SfuEvent event) async {
     _logger.v(() => '[onSfuEvent] event: $event');
     if (event is SfuSubscriberOfferEvent) {
       await _onSubscriberOffer(event);
