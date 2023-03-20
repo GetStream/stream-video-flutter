@@ -413,7 +413,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
 
   @override
   ThemeExtension<StreamVideoTheme> lerp(
-      ThemeExtension<StreamVideoTheme>? other, double t) {
+    ThemeExtension<StreamVideoTheme>? other,
+    double t,
+  ) {
     if (other is! StreamVideoTheme) {
       return this;
     }
@@ -427,7 +429,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       localVideoTheme: localVideoTheme.lerp(other.localVideoTheme, t),
       callControlsTheme: callControlsTheme.lerp(other.callControlsTheme, t),
       callParticipantsInfoMenuTheme: callParticipantsInfoMenuTheme.lerp(
-          other.callParticipantsInfoMenuTheme, t),
+        other.callParticipantsInfoMenuTheme,
+        t,
+      ),
       incomingCallTheme: incomingCallTheme.lerp(other.incomingCallTheme, t),
       outgoingCallTheme: outgoingCallTheme.lerp(other.outgoingCallTheme, t),
     );

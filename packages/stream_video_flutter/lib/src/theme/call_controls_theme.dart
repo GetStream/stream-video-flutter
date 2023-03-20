@@ -120,14 +120,23 @@ class StreamCallControlsThemeData with Diagnosticable {
       spacing: lerpDouble(spacing, other.spacing, t)!,
       optionIconColor: Color.lerp(optionIconColor, other.optionIconColor, t)!,
       inactiveOptionIconColor: Color.lerp(
-          inactiveOptionIconColor, other.inactiveOptionIconColor, t)!,
+        inactiveOptionIconColor,
+        other.inactiveOptionIconColor,
+        t,
+      )!,
       optionElevation: lerpDouble(optionElevation, other.optionElevation, t)!,
       inactiveOptionElevation: lerpDouble(
-          inactiveOptionElevation, other.inactiveOptionElevation, t)!,
+        inactiveOptionElevation,
+        other.inactiveOptionElevation,
+        t,
+      )!,
       optionBackgroundColor:
           Color.lerp(optionBackgroundColor, other.optionBackgroundColor, t)!,
-      inactiveOptionBackgroundColor: Color.lerp(inactiveOptionBackgroundColor,
-          other.inactiveOptionBackgroundColor, t)!,
+      inactiveOptionBackgroundColor: Color.lerp(
+        inactiveOptionBackgroundColor,
+        other.inactiveOptionBackgroundColor,
+        t,
+      )!,
       optionShape: OutlinedBorder.lerp(optionShape, other.optionShape, t)!,
       optionPadding:
           EdgeInsetsGeometry.lerp(optionPadding, other.optionPadding, t)!,
@@ -189,11 +198,19 @@ class StreamCallControlsThemeData with Diagnosticable {
       ..add(DoubleProperty('optionElevation', optionElevation))
       ..add(DoubleProperty('inactiveOptionElevation', inactiveOptionElevation))
       ..add(ColorProperty('optionBackgroundColor', optionBackgroundColor))
-      ..add(ColorProperty(
-          'inactiveOptionBackgroundColor', inactiveOptionBackgroundColor))
+      ..add(
+        ColorProperty(
+          'inactiveOptionBackgroundColor',
+          inactiveOptionBackgroundColor,
+        ),
+      )
       ..add(DiagnosticsProperty<OutlinedBorder>('optionShape', optionShape))
-      ..add(DiagnosticsProperty<EdgeInsetsGeometry>(
-          'optionPadding', optionPadding));
+      ..add(
+        DiagnosticsProperty<EdgeInsetsGeometry>(
+          'optionPadding',
+          optionPadding,
+        ),
+      );
   }
 
   /// Merges one [StreamCallControlsThemeData] with the another.

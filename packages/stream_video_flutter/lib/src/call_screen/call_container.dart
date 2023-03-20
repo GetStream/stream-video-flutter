@@ -163,7 +163,12 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   Future<void> _disconnect() async {
     _logger.d(() => '[disconnect] no args');
     await call.disconnect();
-    final popped = await Navigator.maybePop(context);
+    final bool popped;
+    if (mounted) {
+      popped = await Navigator.maybePop(context);
+    } else {
+      popped = false;
+    }
     _logger.v(() => '[disconnect] popped: $popped');
   }
 }

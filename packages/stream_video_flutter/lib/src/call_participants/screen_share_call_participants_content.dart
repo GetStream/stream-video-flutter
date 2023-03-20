@@ -242,7 +242,6 @@ class LandscapeScreenShareCallParticipantsContent extends StatelessWidget {
             width: 128,
             child: ListView.separated(
               itemCount: participants.length,
-              scrollDirection: Axis.vertical,
               padding: const EdgeInsets.all(8),
               separatorBuilder: (context, index) => const SizedBox(height: 8),
               itemBuilder: (context, index) {

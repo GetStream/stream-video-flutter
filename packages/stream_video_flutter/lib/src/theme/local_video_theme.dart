@@ -145,7 +145,8 @@ class StreamLocalVideoThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('localVideoPadding', localVideoPadding))
       ..add(DiagnosticsProperty('initialAlignment', initialAlignment))
       ..add(
-          DiagnosticsProperty('enableSnappingBehavior', enableSnappingBehavior))
+        DiagnosticsProperty('enableSnappingBehavior', enableSnappingBehavior),
+      )
       ..add(DiagnosticsProperty('userAvatarTheme', userAvatarTheme))
       ..add(DiagnosticsProperty('borderRadius', borderRadius))
       ..add(DiagnosticsProperty('shadowColor', shadowColor));

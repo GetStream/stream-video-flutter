@@ -222,17 +222,17 @@ class StreamTextTheme {
   StreamTextTheme lerp(StreamTextTheme? other, double t) {
     if (other == null) return this;
     return copyWith(
-      title1: TextStyle.lerp(title1, other.title1, t)!,
-      title3: TextStyle.lerp(title3, other.title3, t)!,
-      title3Bold: TextStyle.lerp(title3Bold, other.title3Bold, t)!,
-      body: TextStyle.lerp(body, other.body, t)!,
-      bodyItalic: TextStyle.lerp(bodyItalic, other.bodyItalic, t)!,
-      bodyBold: TextStyle.lerp(bodyBold, other.bodyBold, t)!,
-      footnote: TextStyle.lerp(footnote, other.footnote, t)!,
-      footnoteItalic: TextStyle.lerp(footnoteItalic, other.footnoteItalic, t)!,
-      footnoteBold: TextStyle.lerp(footnoteBold, other.footnoteBold, t)!,
-      captionBold: TextStyle.lerp(captionBold, other.captionBold, t)!,
-      tabBar: TextStyle.lerp(tabBar, other.tabBar, t)!,
+      title1: TextStyle.lerp(title1, other.title1, t),
+      title3: TextStyle.lerp(title3, other.title3, t),
+      title3Bold: TextStyle.lerp(title3Bold, other.title3Bold, t),
+      body: TextStyle.lerp(body, other.body, t),
+      bodyItalic: TextStyle.lerp(bodyItalic, other.bodyItalic, t),
+      bodyBold: TextStyle.lerp(bodyBold, other.bodyBold, t),
+      footnote: TextStyle.lerp(footnote, other.footnote, t),
+      footnoteItalic: TextStyle.lerp(footnoteItalic, other.footnoteItalic, t),
+      footnoteBold: TextStyle.lerp(footnoteBold, other.footnoteBold, t),
+      captionBold: TextStyle.lerp(captionBold, other.captionBold, t),
+      tabBar: TextStyle.lerp(tabBar, other.tabBar, t),
     );
   }
 }
