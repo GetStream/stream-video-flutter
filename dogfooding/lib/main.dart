@@ -116,7 +116,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
       final call = Call.fromCreated(data: data.getDataOrNull()!.data);
 
       await _navigatorKey.currentState?.pushNamed(
-        Routes.CALL,
+        Routes.call,
         arguments: call,
       );
     }
@@ -139,8 +139,8 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     }
     final incomingCall = await StreamVideo.instance.consumeIncomingCall();
     if (incomingCall != null) {
-      Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
-        Routes.CALL,
+      await Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
+        Routes.call,
         arguments: Call.fromCreated(data: incomingCall),
       );
     }
