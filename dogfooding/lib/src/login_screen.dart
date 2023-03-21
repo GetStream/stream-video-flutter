@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 48),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(
@@ -117,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 48),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 children: [
                   Expanded(
@@ -127,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    padding: EdgeInsets.symmetric(horizontal: 8),
                     child: Text('OR'),
                   ),
                   Expanded(
@@ -141,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 48),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: GoogleLoginButton(
                 onPressed: _loginWithGoogle,
               ),
@@ -179,28 +179,28 @@ class GoogleLoginButton extends StatelessWidget {
 
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        elevation: 1.0,
-        fixedSize: const Size.fromHeight(56.0),
+        elevation: 1,
+        fixedSize: const Size.fromHeight(56),
         backgroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(36.0),
+          borderRadius: BorderRadius.circular(36),
         ),
       ),
       onPressed: onPressed,
       child: Padding(
-        padding: const EdgeInsets.all(18.0),
+        padding: const EdgeInsets.all(18),
         child: Row(
           children: [
             SvgPicture.asset(
               googleLogoAsset,
               semanticsLabel: 'Google Logo',
             ),
-            const SizedBox(width: 24.0),
+            const SizedBox(width: 24),
             Text(
               label,
               style: const TextStyle(
-                fontSize: 16.0,
+                fontSize: 16,
                 color: Colors.black87,
                 fontWeight: FontWeight.bold,
               ),

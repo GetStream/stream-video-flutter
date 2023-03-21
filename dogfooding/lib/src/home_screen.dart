@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: StreamUserAvatar(user: currentUser),
         ),
         title: const Text('Stream Dog Fooding'),
