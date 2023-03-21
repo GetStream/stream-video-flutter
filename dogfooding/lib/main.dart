@@ -48,12 +48,6 @@ void _initStreamVideo() async {
   }
 }
 
-Future<PushNotificationManager> createPushNotificationManager(
-  StreamVideo client,
-) {
-  return StreamVideoPushNotificationManager.create(client);
-}
-
 class StreamDogFoodingApp extends StatefulWidget {
   const StreamDogFoodingApp({super.key});
 
