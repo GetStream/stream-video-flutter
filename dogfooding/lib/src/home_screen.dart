@@ -4,7 +4,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'routes/routes.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Text(
             'Welcome: $name',
-            style: Theme.of(context).textTheme.headline5,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 24),
           Padding(

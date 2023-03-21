@@ -54,6 +54,7 @@ class StreamDogFoodingApp extends StatefulWidget {
 }
 
 class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
+    //ignore:prefer_mixin
     with WidgetsBindingObserver {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late StreamSubscription<Uri?> _subscription;

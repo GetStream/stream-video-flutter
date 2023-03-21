@@ -52,11 +52,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _onLoginSuccess(UserInfo user) async {
     final userId = user.id;
-    final response = await http.get(Uri.parse(
-      'https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$userId&api_key=${Env.apiKey}',
-    ));
+    final response = await http.get(
+      Uri.parse(
+        'https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$userId&api_key=${Env.apiKey}',
+      ),
+    );
 
-    final token = json.decode(response.body)['token'];
+    final token = (json.decode(response.body) as Map<String, dynamic>)['token'];
 
     await StreamVideo.instance.connectUser(
       user,
@@ -155,10 +157,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
 class GoogleLoginButton extends StatelessWidget {
   const GoogleLoginButton({
-    Key? key,
+    super.key,
     this.label = 'Login with Google',
     this.onPressed,
-  }) : super(key: key);
+  });
 
   final String label;
   final VoidCallback? onPressed;

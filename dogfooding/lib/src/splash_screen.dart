@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:dogfooding/src/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'routes/routes.dart';
 import 'utils/after_layout.dart';
 import 'utils/assets.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -32,7 +32,6 @@ class _SplashScreenState extends State<SplashScreen> with AfterLayoutMixin {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Hero(
               tag: 'stream_logo',
