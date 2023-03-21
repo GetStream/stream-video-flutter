@@ -18,9 +18,9 @@ class _SplashScreenState extends State<SplashScreen> with AfterLayoutMixin {
   @override
   FutureOr<void> afterFirstLayout(BuildContext context) {
     // Show splash screen for 2 seconds.
-    Future.delayed(const Duration(seconds: 2)).then(
+    Future<void>.delayed(const Duration(seconds: 2)).then(
       (_) async {
-        Navigator.of(context).pushReplacementNamed(Routes.LOGIN);
+        await Navigator.of(context).pushReplacementNamed(Routes.login);
       },
     );
   }

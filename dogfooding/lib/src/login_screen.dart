@@ -69,7 +69,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
     await UserRepository.instance.saveUserCredentials(userCredentials);
 
-    Navigator.of(context).pushReplacementNamed(Routes.HOME);
+    if (mounted) {
+      await Navigator.of(context).pushReplacementNamed(Routes.home);
+    }
   }
 
   final _emailController = TextEditingController();

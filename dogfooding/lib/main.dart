@@ -18,7 +18,7 @@ import 'src/user_repository.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  _initStreamVideo();
+  await _initStreamVideo();
   await _handleRemoteMessage(message);
 }
 
@@ -31,16 +31,14 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  _initStreamVideo();
+  await _initStreamVideo();
   runApp(const StreamDogFoodingApp());
 }
 
-void _initStreamVideo() async {
+Future<void> _initStreamVideo() async {
   if (!StreamVideo.isInitialized()) {
     final client = StreamVideo.init(
       Env.apiKey,
-      coordinatorRpcUrl: Env.coordinatorRpcUrl,
-      coordinatorWsUrl: Env.coordinatorWsUrl,
       logLevel: LogLevel.all,
     );
     client.pushNotificationManager =

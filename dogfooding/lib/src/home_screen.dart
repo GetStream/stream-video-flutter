@@ -29,10 +29,12 @@ class _HomeScreenState extends State<HomeScreen> {
       final data = await streamVideoClient.getOrCreateCall(cid: callCid);
       final call = Call.fromCreated(data: data.getDataOrNull()!.data);
 
-      await Navigator.of(context).pushNamed(
-        Routes.CALL,
-        arguments: call,
-      );
+      if (mounted) {
+        await Navigator.of(context).pushNamed(
+          Routes.call,
+          arguments: call,
+        );
+      }
     } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());
@@ -63,7 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await streamVideoClient.disconnectUser();
-              await Navigator.of(context).pushReplacementNamed(Routes.LOGIN);
+              if (mounted) {
+                await Navigator.of(context).pushReplacementNamed(Routes.login);
+              }
             },
           ),
         ],
