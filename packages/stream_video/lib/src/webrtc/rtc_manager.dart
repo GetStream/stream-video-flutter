@@ -70,6 +70,11 @@ class RtcManager extends Disposable {
     _publisher.onRenegotiationNeeded = cb;
   }
 
+  set onStatsReceived(OnStats? cb) {
+    _subscriber.onStats = cb;
+    _publisher.onStats = cb;
+  }
+
   OnPublisherTrackMuted? onPublisherTrackMuted;
   OnSubscriberTrackReceived? onSubscriberTrackReceived;
 
@@ -193,6 +198,7 @@ class RtcManager extends Disposable {
 
     onPublisherTrackMuted = null;
     onSubscriberTrackReceived = null;
+    onStatsReceived = null;
 
     await _publisher.dispose();
     await _subscriber.dispose();

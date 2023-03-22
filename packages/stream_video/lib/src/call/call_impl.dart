@@ -6,15 +6,18 @@ import '../call_state_manager.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../errors/video_error_composer.dart';
 import '../models/call_credentials.dart';
+import '../models/call_stats.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../utils/none.dart';
+import '../webrtc/model/stats/rtc_stats.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 
-const _idSessionEvents = 1;
-const _idCoordEvents = 2;
+const _idCoordEvents = 1;
+const _idSessionEvents = 2;
+const _idSessionStats = 3;
 
 const _tag = 'SV:Call';
 
@@ -102,6 +105,10 @@ class CallImpl implements Call {
 
   @override
   StateEmitter<CallState> get state => _stateManager.state;
+
+  @override
+  SharedEmitter<CallStats> get stats => _stats;
+  late final _stats = MutableSharedEmitterImpl<CallStats>();
 
   @override
   SharedEmitter<SfuEvent> get events => _events;
@@ -334,6 +341,7 @@ class CallImpl implements Call {
     );
     _session = session;
     _subscriptions.add(_idSessionEvents, session.events.listen(_events.emit));
+    _subscriptions.add(_idSessionStats, session.stats.listen(_stats.emit));
     await _stateManager.onSessionStart(session.sessionId);
     return session.start();
   }

@@ -11,6 +11,7 @@ import '../../../stream_video.dart';
 import '../../call_state_manager.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
+import '../../models/call_stats.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
@@ -22,6 +23,7 @@ import '../../shared_emitter.dart';
 import '../../utils/none.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
+import '../../webrtc/model/stats/rtc_stats.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/peer_type.dart';
 import '../../webrtc/rtc_manager.dart';
@@ -67,8 +69,13 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   final RtcManagerFactory rtcManagerFactory;
   RtcManager? rtcManager;
 
+  late final _stats = MutableSharedEmitterImpl<CallStats>();
+
   @override
   SharedEmitter<SfuEvent> get events => sfuWS.events;
+
+  @override
+  SharedEmitter<CallStats> get stats => _stats;
 
   @override
   Future<Result<None>> start() async {
@@ -107,7 +114,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         ..onSubscriberIceCandidate = _onLocalIceCandidate
         ..onPublisherTrackMuted = _onPublisherTrackMuted
         ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded
-        ..onSubscriberTrackReceived = _onSubscriberTrackReceived;
+        ..onSubscriberTrackReceived = _onSubscriberTrackReceived
+        ..onStatsReceived = _onStatsReceived;
 
       _logger.v(() => '[start] completed');
       return Result.success(None());
@@ -399,6 +407,19 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     stateManager.onSubscriberTrackReceived(
       remoteTrack.trackIdPrefix,
       remoteTrack.trackType,
+    );
+  }
+
+  void _onStatsReceived(
+    StreamPeerConnection pc,
+    RtcStats rtcStats,
+  ) {
+    _stats.emit(
+      CallStats(
+        peerType: pc.type,
+        remote: rtcStats.remote,
+        local: rtcStats.local,
+      ),
     );
   }
 
