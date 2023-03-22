@@ -183,7 +183,7 @@ class RTCOutboundRTPVideoStream implements RtcOutboundRtp, RtcWritable {
   void writeTo(StringBuffer out) {
     out
       ..write('outboundId: ')
-      ..write(id)
+      ..write(id.hashCode)
       ..write('\n')
       ..write('rid: ')
       ..write(rid)

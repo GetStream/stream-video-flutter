@@ -45,10 +45,10 @@ class RtcRemoteInboundRtp implements RtcInboundRtp, RtcWritable {
   final String? codecId;
   final int? ssrc;
   final double? jitter;
-  final double? roundTripTimeMeasurements;
+  final int? roundTripTimeMeasurements;
   final double? roundTripTime;
   final double? totalRoundTripTime;
-  final int? fractionLost;
+  final double? fractionLost;
   final int? packetsLost;
 
   @override
@@ -58,7 +58,7 @@ class RtcRemoteInboundRtp implements RtcInboundRtp, RtcWritable {
       ..write(ssrc)
       ..write('\n')
       ..write('outboundId: ')
-      ..write(outboundId)
+      ..write(outboundId.hashCode)
       ..write('\n')
       ..write('roundTripTime: ')
       ..write(roundTripTime)

@@ -108,7 +108,7 @@ class RtcOutboundRtpAudioStream implements RtcOutboundRtp, RtcWritable {
   void writeTo(StringBuffer out) {
     out
       ..write('outboundId: ')
-      ..write(id)
+      ..write(id.hashCode)
       ..write('\n')
       ..write('ssrc: ')
       ..write(ssrc)
