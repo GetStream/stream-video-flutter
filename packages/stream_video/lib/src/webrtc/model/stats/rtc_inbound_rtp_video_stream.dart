@@ -38,11 +38,12 @@
 // }
 
 import '../../../utils/format.dart';
+import 'rtc_inbound_rtp.dart';
 import 'rtc_writable.dart';
 
-class RTCInboundRTPVideoStream implements RtcWritable {
+class RtcInboundRtpVideoStream implements RtcInboundRtp, RtcWritable {
 
-  RTCInboundRTPVideoStream({
+  RtcInboundRtpVideoStream({
     this.id,
     this.type,
     this.timestamp,
@@ -116,9 +117,9 @@ class RTCInboundRTPVideoStream implements RtcWritable {
   final int? packetsReceived;
   final double? totalDecodeTime;
 
-  static RTCInboundRTPVideoStream? fromJson(dynamic value) {
+  static RtcInboundRtpVideoStream? fromJson(dynamic value) {
     if (value is Map) {
-      return RTCInboundRTPVideoStream(
+      return RtcInboundRtpVideoStream(
         id: value['id'],
         type: value['type'],
         timestamp: value['timestamp'],
@@ -197,6 +198,11 @@ class RTCInboundRTPVideoStream implements RtcWritable {
       ..write('\n')
       ..write('packetsLost: ')
       ..write(packetsLost)
+      ..write('\n')
+      ..write('frameSize: w')
+      ..write(frameWidth)
+      ..write('-h')
+      ..write(frameHeight)
       ..write('\n')
       ..write('framesReceived: ')
       ..write(framesReceived)

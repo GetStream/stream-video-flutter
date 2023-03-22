@@ -2,12 +2,10 @@ import 'dart:async';
 
 import '../../stream_video.dart';
 import '../coordinator/models/coordinator_events.dart';
-import '../models/call_stats.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../utils/none.dart';
-import '../webrtc/model/stats/rtc_stats.dart';
 import 'call_impl.dart';
 
 typedef OnCallPermissionRequest = void Function(

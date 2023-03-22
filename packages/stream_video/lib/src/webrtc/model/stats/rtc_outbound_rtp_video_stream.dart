@@ -36,9 +36,10 @@
 // }
 
 import '../../../utils/format.dart';
+import 'rtc_outbound_rtp.dart';
 import 'rtc_writable.dart';
 
-class RTCOutboundRTPVideoStream implements RtcWritable {
+class RTCOutboundRTPVideoStream implements RtcOutboundRtp, RtcWritable {
   RTCOutboundRTPVideoStream({
     this.id,
     this.type,
@@ -157,8 +158,8 @@ class RTCOutboundRTPVideoStream implements RtcWritable {
   @override
   String toString() {
     return 'RTCOutboundRTPVideoStream{id: $id, type: $type, '
-        'timestamp: $timestamp, transportId: $transportId, qpSum: $qpSum,'
-        ' headerBytesSent: $headerBytesSent, hugeFramesSent: $hugeFramesSent, '
+        'timestamp: $timestamp, transportId: $transportId, qpSum: $qpSum, '
+        'headerBytesSent: $headerBytesSent, hugeFramesSent: $hugeFramesSent, '
         'framesEncoded: $framesEncoded, nackCount: $nackCount, '
         'totalPacketSendDelay: $totalPacketSendDelay, rid: $rid, '
         'totalEncodeTime: $totalEncodeTime, firCount: $firCount, '
@@ -181,6 +182,12 @@ class RTCOutboundRTPVideoStream implements RtcWritable {
   @override
   void writeTo(StringBuffer out) {
     out
+      ..write('outboundId: ')
+      ..write(id)
+      ..write('\n')
+      ..write('rid: ')
+      ..write(rid)
+      ..write('\n')
       ..write('ssrc: ')
       ..write(ssrc)
       ..write('\n')
@@ -190,8 +197,16 @@ class RTCOutboundRTPVideoStream implements RtcWritable {
       ..write('bytesSent: ')
       ..write(bytesCountToReadableString(bytesSent ?? 0))
       ..write('\n')
+      ..write('frameSize: w')
+      ..write(frameWidth)
+      ..write('-h')
+      ..write(frameHeight)
+      ..write('\n')
       ..write('framesEncoded: ')
       ..write(framesEncoded)
+      ..write('\n')
+      ..write('framesPerSecond: ')
+      ..write(framesPerSecond)
       ..write('\n');
   }
 }

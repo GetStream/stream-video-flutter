@@ -20,10 +20,11 @@
 // }
 
 import '../../../utils/format.dart';
+import 'rtc_outbound_rtp.dart';
 import 'rtc_writable.dart';
 
-class RTCOutboundRTPAudioStream implements RtcWritable {
-  RTCOutboundRTPAudioStream({
+class RtcOutboundRtpAudioStream implements RtcOutboundRtp, RtcWritable {
+  RtcOutboundRtpAudioStream({
     this.id,
     this.type,
     this.timestamp,
@@ -63,9 +64,9 @@ class RTCOutboundRTPAudioStream implements RtcWritable {
   final int? packetsSent;
   final int? retransmittedBytesSent;
 
-  static RTCOutboundRTPAudioStream? fromJson(dynamic value) {
+  static RtcOutboundRtpAudioStream? fromJson(dynamic value) {
     if (value is Map) {
-      return RTCOutboundRTPAudioStream(
+      return RtcOutboundRtpAudioStream(
         id: value['id'],
         type: value['type'],
         timestamp: value['timestamp'],
@@ -106,6 +107,9 @@ class RTCOutboundRTPAudioStream implements RtcWritable {
   @override
   void writeTo(StringBuffer out) {
     out
+      ..write('outboundId: ')
+      ..write(id)
+      ..write('\n')
       ..write('ssrc: ')
       ..write(ssrc)
       ..write('\n')

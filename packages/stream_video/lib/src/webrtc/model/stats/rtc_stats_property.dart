@@ -1,18 +1,75 @@
-class RTCMediaType {
-  static const String KEY = 'mediaType';
-  static const String AUDIO = 'audio';
-  static const String VIDEO = 'video';
+enum RtcMediaType {
+  audio('audio'),
+  video('video'),
+  unknown('unknown');
+
+  const RtcMediaType(this.alias);
+
+  factory RtcMediaType.fromAlias(dynamic alias) {
+    return RtcMediaType.values.firstWhere(
+      (e) => e.alias == alias,
+      orElse: () => RtcMediaType.unknown,
+    );
+  }
+
+  final String alias;
+
+  static const propertyName = 'mediaType';
+
+  @override
+  String toString() => alias;
 }
 
-class RTCKind {
-  static const String KEY = 'kind';
-  static const String AUDIO = 'audio';
-  static const String VIDEO = 'video';
+enum RtcKind {
+  audio('audio'),
+  video('video'),
+  unknown('unknown');
+
+  const RtcKind(this.alias);
+
+  factory RtcKind.fromAlias(dynamic alias) {
+    return RtcKind.values.firstWhere(
+      (e) => e.alias == alias,
+      orElse: () => RtcKind.unknown,
+    );
+  }
+
+  final String alias;
+
+  static const propertyName = 'kind';
+
+  @override
+  String toString() => alias;
 }
 
-class RTCSource {
-  static const String KEY_REMOTE = 'remoteSource';
+enum RtcSource {
+  local('local'),
+  remote('remote'),
+  unknown('unknown');
 
-  static const String LOCAL = 'local';
-  static const String REMOTE = 'remote';
+  const RtcSource(this.alias);
+
+  factory RtcSource.fromValue(bool? isRemoteSource) {
+    if (isRemoteSource == null) {
+      return unknown;
+    } else if (isRemoteSource) {
+      return remote;
+    } else {
+      return local;
+    }
+  }
+
+  factory RtcSource.fromAlias(dynamic alias) {
+    return RtcSource.values.firstWhere(
+      (e) => e.alias == alias,
+      orElse: () => unknown,
+    );
+  }
+
+  final String alias;
+
+  static const String propertyName = 'remoteSource';
+
+  @override
+  String toString() => alias;
 }

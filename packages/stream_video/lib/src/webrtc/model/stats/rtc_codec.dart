@@ -1,5 +1,17 @@
-class RTCCodec {
-  RTCCodec({
+
+// {
+//   id: RTCCodec_0_Inbound_101,
+//   type: codec,
+//   timestamp: 1679505083000830.0,
+//   mimeType: video/rtx,
+//   transportId: RTCTransport_0_1,
+//   clockRate: 90000,
+//   sdpFmtpLine: apt=100,
+//   payloadType: 101
+// }
+
+class RtcCodec {
+  RtcCodec({
     this.id,
     this.type,
     this.timestamp,
@@ -21,9 +33,9 @@ class RTCCodec {
 
   String? get codecId => id;
 
-  static RTCCodec? fromJson(dynamic value) {
+  static RtcCodec? fromJson(dynamic value) {
     if (value is Map) {
-      return RTCCodec(
+      return RtcCodec(
         id: value['id'],
         type: value['type'],
         timestamp: value['timestamp'],

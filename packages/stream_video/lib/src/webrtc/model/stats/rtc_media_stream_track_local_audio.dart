@@ -10,10 +10,12 @@
 //  ended: false,
 // }
 
+import 'rtc_media_stream_track.dart';
 import 'rtc_writable.dart';
 
-class RTCMediaStreamTrackLocalAudio implements RtcWritable {
-  RTCMediaStreamTrackLocalAudio({
+class RtcMediaStreamTrackLocalAudio
+    implements RtcMediaStreamTrack, RtcWritable {
+  RtcMediaStreamTrackLocalAudio({
     this.id,
     this.type,
     this.timestamp,
@@ -35,9 +37,9 @@ class RTCMediaStreamTrackLocalAudio implements RtcWritable {
   final bool? detached;
   final bool? ended;
 
-  static RTCMediaStreamTrackLocalAudio? fromJson(dynamic value) {
+  static RtcMediaStreamTrackLocalAudio? fromJson(dynamic value) {
     if (value is Map) {
-      return RTCMediaStreamTrackLocalAudio(
+      return RtcMediaStreamTrackLocalAudio(
         id: value['id'],
         type: value['type'],
         timestamp: value['timestamp'],
@@ -63,8 +65,11 @@ class RTCMediaStreamTrackLocalAudio implements RtcWritable {
   @override
   void writeTo(StringBuffer out) {
     out
-      ..write('trackIdentifier: ')
+      ..write('trackId: ')
       ..write(trackIdentifier)
+      ..write('\n')
+      ..write('mediaSourceId: ')
+      ..write(mediaSourceId)
       ..write('\n');
   }
 }

@@ -23,8 +23,8 @@
 //   consentRequestsSent: 0
 // }
 
-class RTCIceCandidatePair {
-  RTCIceCandidatePair({
+class RtcIceCandidatePair {
+  RtcIceCandidatePair({
     this.id,
     this.type,
     this.timestamp,
@@ -72,9 +72,9 @@ class RTCIceCandidatePair {
   final String? state;
   final int? consentRequestsSent;
 
-  static RTCIceCandidatePair? fromJson(dynamic value) {
+  static RtcIceCandidatePair? fromJson(dynamic value) {
     if (value is Map) {
-      return RTCIceCandidatePair(
+      return RtcIceCandidatePair(
         id: value['id'],
         type: value['type'],
         timestamp: value['timestamp'],

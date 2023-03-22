@@ -11,7 +11,6 @@ import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../utils/none.dart';
-import '../webrtc/model/stats/rtc_stats.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 

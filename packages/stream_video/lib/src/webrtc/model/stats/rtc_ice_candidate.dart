@@ -19,8 +19,8 @@
 
 import 'rtc_writable.dart';
 
-class RTCIceCandidate implements RtcWritable {
-  RTCIceCandidate({
+class RtcIceCandidate implements RtcWritable {
+  RtcIceCandidate({
     this.id,
     this.type,
     this.timestamp,
@@ -56,9 +56,9 @@ class RTCIceCandidate implements RtcWritable {
   final String? url;
   final String? relayProtocol;
 
-  static RTCIceCandidate? fromJson(dynamic value) {
+  static RtcIceCandidate? fromJson(dynamic value) {
     if (value is Map) {
-      return RTCIceCandidate(
+      return RtcIceCandidate(
         id: value['id'],
         type: value['type'],
         timestamp: value['timestamp'],

@@ -1,7 +1,5 @@
-import 'package:equatable/equatable.dart';
-
-class RtcStats {
-  RtcStats({
+class RtcPrintableStats {
+  RtcPrintableStats({
     required this.local,
     required this.remote,
   });
@@ -11,13 +9,13 @@ class RtcStats {
 
   @override
   String toString() {
-    return 'RtcStats{local: $local, remote: $remote}';
+    return 'RtcPrintableStats{local: $local, remote: $remote}';
   }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is RtcStats &&
+      other is RtcPrintableStats &&
           runtimeType == other.runtimeType &&
           local == other.local &&
           remote == other.remote;

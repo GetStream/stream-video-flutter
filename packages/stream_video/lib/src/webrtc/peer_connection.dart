@@ -6,10 +6,9 @@ import '../disposable.dart';
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
-import '../shared_emitter.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
-import 'model/stats/rtc_stats.dart';
+import 'model/stats/rtc_printable_stats.dart';
 import 'model/stats/rtc_stats_mapper.dart';
 import 'peer_type.dart';
 
@@ -40,11 +39,11 @@ typedef OnTrack = void Function(
 );
 
 /// {@template onTrack}
-/// Handler whenever we receive [RtcStats].
+/// Handler whenever we receive [RtcPrintableStats].
 /// {@endtemplate}
 typedef OnStats = void Function(
   StreamPeerConnection,
-  RtcStats,
+  RtcPrintableStats,
 );
 
 /// Wrapper around the WebRTC connection that contains tracks.
@@ -285,9 +284,13 @@ class StreamPeerConnection extends Disposable {
 
   void _observeStats() {
     _statsTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
-      final stats = await pc.getStats();
-      final rtcStats = stats.toRtcStats();
-      onStats?.call(this, rtcStats);
+      try {
+        final stats = await pc.getStats();
+        final rtcStats = stats.toRtcStats();
+        onStats?.call(this, rtcStats);
+      } catch (e, stk) {
+        _logger.e(() => '[getStats] failed: $e; $stk');
+      }
     });
   }
 

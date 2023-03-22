@@ -26,11 +26,12 @@
 //  silentConcealedSamples: 57560
 // }
 
-import '../../../utils/format.dart';
+import 'rtc_media_stream_track.dart';
 import 'rtc_writable.dart';
 
-class RTCMediaStreamTrackRemoteAudio implements RtcWritable {
-  RTCMediaStreamTrackRemoteAudio({
+class RtcMediaStreamTrackRemoteAudio
+    implements RtcMediaStreamTrack, RtcWritable {
+  RtcMediaStreamTrackRemoteAudio({
     this.id,
     this.type,
     this.timestamp,
@@ -84,9 +85,9 @@ class RTCMediaStreamTrackRemoteAudio implements RtcWritable {
   final bool? remoteSource;
   final int? silentConcealedSamples;
 
-  static RTCMediaStreamTrackRemoteAudio? fromJson(dynamic value) {
+  static RtcMediaStreamTrackRemoteAudio? fromJson(dynamic value) {
     if (value is Map) {
-      return RTCMediaStreamTrackRemoteAudio(
+      return RtcMediaStreamTrackRemoteAudio(
         id: value['id'],
         type: value['type'],
         timestamp: value['timestamp'],

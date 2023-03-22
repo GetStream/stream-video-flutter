@@ -14,10 +14,12 @@
 //  mediaSourceId: RTCVideoSource_2
 // }
 
+import 'rtc_media_stream_track.dart';
 import 'rtc_writable.dart';
 
-class RTCMediaStreamTrackLocalVideo implements RtcWritable {
-  RTCMediaStreamTrackLocalVideo({
+class RtcMediaStreamTrackLocalVideo
+    implements RtcMediaStreamTrack, RtcWritable {
+  RtcMediaStreamTrackLocalVideo({
     this.id,
     this.type,
     this.timestamp,
@@ -47,9 +49,9 @@ class RTCMediaStreamTrackLocalVideo implements RtcWritable {
   final String? trackIdentifier;
   final String? mediaSourceId;
 
-  static RTCMediaStreamTrackLocalVideo? fromJson(dynamic value) {
+  static RtcMediaStreamTrackLocalVideo? fromJson(dynamic value) {
     if (value is Map) {
-      return RTCMediaStreamTrackLocalVideo(
+      return RtcMediaStreamTrackLocalVideo(
         id: value['id'],
         type: value['type'],
         timestamp: value['timestamp'],
@@ -81,13 +83,12 @@ class RTCMediaStreamTrackLocalVideo implements RtcWritable {
   @override
   void writeTo(StringBuffer out) {
     out
-      ..write('trackIdentifier: ')
+      ..write('trackId: ')
       ..write(trackIdentifier)
       ..write('\n')
-      ..write('frameWidth: ')
+      ..write('frameSize: w')
       ..write(frameWidth)
-      ..write('\n')
-      ..write('frameHeight: ')
+      ..write('-h')
       ..write(frameHeight)
       ..write('\n')
       ..write('framesSent: ')

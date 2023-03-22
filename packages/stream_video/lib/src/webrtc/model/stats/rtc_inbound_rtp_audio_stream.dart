@@ -31,11 +31,12 @@
 // }
 
 import '../../../utils/format.dart';
+import 'rtc_inbound_rtp.dart';
 import 'rtc_writable.dart';
 
-class RTCInboundRTPAudioStream implements RtcWritable {
+class RtcInboundRtpAudioStream implements RtcInboundRtp, RtcWritable {
 
-  RTCInboundRTPAudioStream({
+  RtcInboundRtpAudioStream({
     this.id,
     this.type,
     this.timestamp,
@@ -97,9 +98,9 @@ class RTCInboundRTPAudioStream implements RtcWritable {
   final int? silentConcealedSamples;
   final int? fecPacketsDiscarded;
 
-  static RTCInboundRTPAudioStream? fromJson(dynamic value) {
+  static RtcInboundRtpAudioStream? fromJson(dynamic value) {
     if (value is Map) {
-      return RTCInboundRTPAudioStream(
+      return RtcInboundRtpAudioStream(
         id: value['id'],
         type: value['type'],
         timestamp: value['timestamp'],

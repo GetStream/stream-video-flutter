@@ -22,10 +22,12 @@
 //  sumOfSquaredFramesDuration: 0.2560839999999999,
 // }
 
+import 'rtc_media_stream_track.dart';
 import 'rtc_writable.dart';
 
-class RTCMediaStreamTrackRemoteVideo implements RtcWritable {
-  RTCMediaStreamTrackRemoteVideo({
+class RtcMediaStreamTrackRemoteVideo
+    implements RtcMediaStreamTrack, RtcWritable {
+  RtcMediaStreamTrackRemoteVideo({
     this.id,
     this.type,
     this.timestamp,
@@ -71,9 +73,9 @@ class RTCMediaStreamTrackRemoteVideo implements RtcWritable {
   final int? jitterBufferEmittedCount;
   final double? sumOfSquaredFramesDuration;
 
-  static RTCMediaStreamTrackRemoteVideo? fromJson(dynamic value) {
+  static RtcMediaStreamTrackRemoteVideo? fromJson(dynamic value) {
     if (value is Map) {
-      return RTCMediaStreamTrackRemoteVideo(
+      return RtcMediaStreamTrackRemoteVideo(
         id: value['id'],
         type: value['type'],
         timestamp: value['timestamp'],
@@ -120,13 +122,12 @@ class RTCMediaStreamTrackRemoteVideo implements RtcWritable {
   @override
   void writeTo(StringBuffer out) {
     out
-      ..write('trackIdentifier: ')
+      ..write('trackId: ')
       ..write(trackIdentifier)
       ..write('\n')
-      ..write('frameWidth: ')
+      ..write('frameSize: w')
       ..write(frameWidth)
-      ..write('\n')
-      ..write('frameHeight: ')
+      ..write('-h')
       ..write(frameHeight)
       ..write('\n')
       ..write('framesReceived: ')

@@ -48,10 +48,10 @@ class _CallStatsContentState extends State<CallStatsContent> {
 
   @override
   Widget build(BuildContext context) {
-    final pubRemote = _publisher?.remote ?? '';
-    final pubLocal = _publisher?.local ?? '';
-    final subRemote = _subscriber?.remote ?? '';
-    final subLocal = _subscriber?.local ?? '';
+    final pubRemote = _publisher?.printable.remote ?? '';
+    final pubLocal = _publisher?.printable.local ?? '';
+    final subRemote = _subscriber?.printable.remote ?? '';
+    final subLocal = _subscriber?.printable.local ?? '';
     return ColoredBox(
       color: Colors.black38,
       child: SingleChildScrollView(
