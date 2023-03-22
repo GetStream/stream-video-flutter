@@ -18,7 +18,7 @@ import 'src/user_repository.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  _initStreamVideo();
+  await _initStreamVideo();
   await _handleRemoteMessage(message);
 }
 
@@ -31,27 +31,19 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  _initStreamVideo();
+  await _initStreamVideo();
   runApp(const StreamDogFoodingApp());
 }
 
-void _initStreamVideo() async {
+Future<void> _initStreamVideo() async {
   if (!StreamVideo.isInitialized()) {
     final client = StreamVideo.init(
       Env.apiKey,
-      coordinatorRpcUrl: Env.coordinatorRpcUrl,
-      coordinatorWsUrl: Env.coordinatorWsUrl,
       logLevel: LogLevel.all,
     );
     client.pushNotificationManager =
         await StreamVideoPushNotificationManager.create(client);
   }
-}
-
-Future<PushNotificationManager> createPushNotificationManager(
-  StreamVideo client,
-) {
-  return StreamVideoPushNotificationManager.create(client);
 }
 
 class StreamDogFoodingApp extends StatefulWidget {
@@ -62,6 +54,7 @@ class StreamDogFoodingApp extends StatefulWidget {
 }
 
 class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
+    //ignore:prefer_mixin
     with WidgetsBindingObserver {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late StreamSubscription<Uri?> _subscription;
@@ -116,7 +109,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
       final call = Call.fromCreated(data: data.getDataOrNull()!.data);
 
       await _navigatorKey.currentState?.pushNamed(
-        Routes.CALL,
+        Routes.call,
         arguments: call,
       );
     }
@@ -139,8 +132,8 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     }
     final incomingCall = await StreamVideo.instance.consumeIncomingCall();
     if (incomingCall != null) {
-      Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
-        Routes.CALL,
+      await Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
+        Routes.call,
         arguments: Call.fromCreated(data: incomingCall),
       );
     }

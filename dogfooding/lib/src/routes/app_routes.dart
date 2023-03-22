@@ -11,26 +11,26 @@ mixin AppRoutes {
   /// Add entry for new route here
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case Routes.SPLASH:
+      case Routes.splash:
         return MaterialPageRoute(
-          settings: const RouteSettings(name: Routes.SPLASH),
+          settings: const RouteSettings(name: Routes.splash),
           builder: (_) => const SplashScreen(),
         );
-      case Routes.LOGIN:
+      case Routes.login:
         return MaterialPageRoute(
-          settings: const RouteSettings(name: Routes.LOGIN),
+          settings: const RouteSettings(name: Routes.login),
           builder: (_) => const LoginScreen(),
         );
-      case Routes.HOME:
+      case Routes.home:
         return MaterialPageRoute(
-          settings: const RouteSettings(name: Routes.HOME),
+          settings: const RouteSettings(name: Routes.home),
           builder: (_) => const HomeScreen(),
         );
-      case Routes.CALL:
+      case Routes.call:
         return MaterialPageRoute(
-          settings: const RouteSettings(name: Routes.CALL),
+          settings: const RouteSettings(name: Routes.call),
           builder: (context) {
-            final call = settings.arguments as Call;
+            final call = settings.arguments! as Call;
 
             return StreamUsersConfiguration(
               usersProvider: MockUsersProvider(),

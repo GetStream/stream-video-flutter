@@ -4,7 +4,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'routes/routes.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -29,10 +29,12 @@ class _HomeScreenState extends State<HomeScreen> {
       final data = await streamVideoClient.getOrCreateCall(cid: callCid);
       final call = Call.fromCreated(data: data.getDataOrNull()!.data);
 
-      await Navigator.of(context).pushNamed(
-        Routes.CALL,
-        arguments: call,
-      );
+      if (mounted) {
+        await Navigator.of(context).pushNamed(
+          Routes.call,
+          arguments: call,
+        );
+      }
     } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());
@@ -54,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: StreamUserAvatar(user: currentUser),
         ),
         title: const Text('Stream Dog Fooding'),
@@ -63,7 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await streamVideoClient.disconnectUser();
-              await Navigator.of(context).pushReplacementNamed(Routes.LOGIN);
+              if (mounted) {
+                await Navigator.of(context).pushReplacementNamed(Routes.login);
+              }
             },
           ),
         ],
@@ -73,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Text(
             'Welcome: $name',
-            style: Theme.of(context).textTheme.headline5,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 24),
           Padding(
