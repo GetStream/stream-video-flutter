@@ -2,9 +2,9 @@ import 'package:equatable/equatable.dart';
 
 import '../call_permission.dart';
 import '../sfu/data/models/sfu_track_type.dart';
-import '../webrtc/device_manager/rtc_media_device.dart';
 import '../webrtc/media/constraints/camera_position.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
+import '../webrtc/rtc_media_device/rtc_media_device.dart';
 import 'action.dart';
 
 abstract class CallControlAction extends StreamAction with EquatableMixin {
@@ -124,8 +124,8 @@ class FlipCamera extends SessionControlAction {
   const FlipCamera();
 }
 
-class SetCameraDevice extends SessionControlAction {
-  const SetCameraDevice({required this.device});
+class SetVideoInputDevice extends SessionControlAction {
+  const SetVideoInputDevice({required this.device});
   final RtcMediaDevice device;
 
   @override
@@ -140,8 +140,8 @@ class SetCameraEnabled extends SessionControlAction {
   List<Object?> get props => [enabled];
 }
 
-class SetMicrophoneDevice extends SessionControlAction {
-  const SetMicrophoneDevice({required this.device});
+class SetAudioInputDevice extends SessionControlAction {
+  const SetAudioInputDevice({required this.device});
   final RtcMediaDevice device;
 
   @override
@@ -164,20 +164,12 @@ class SetScreenShareEnabled extends SessionControlAction {
   List<Object?> get props => [enabled];
 }
 
-class SetSpeakerDevice extends SessionControlAction {
-  const SetSpeakerDevice({required this.device});
+class SetAudioOutputDevice extends SessionControlAction {
+  const SetAudioOutputDevice({required this.device});
   final RtcMediaDevice device;
 
   @override
   List<Object?> get props => [device];
-}
-
-class SetSpeakerphoneEnabled extends SessionControlAction {
-  const SetSpeakerphoneEnabled({required this.enabled});
-  final bool enabled;
-
-  @override
-  List<Object?> get props => [enabled];
 }
 
 class SetSubscription extends SessionControlAction {

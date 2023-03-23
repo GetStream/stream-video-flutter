@@ -19,14 +19,14 @@ class CallControlReducer {
       return _reduceCameraEnabled(state, action);
     } else if (action is SetMicrophoneEnabled) {
       return _reduceMicrophoneEnabled(state, action);
-    } else if (action is SetMicrophoneDevice) {
-      return _reduceSetMicrophoneDevice(state, action);
+    } else if (action is SetAudioInputDevice) {
+      return _reduceSetAudioInputDevice(state, action);
     } else if (action is SetScreenShareEnabled) {
       return _reduceScreenShareEnabled(state, action);
     } else if (action is FlipCamera) {
       return _reduceFlipCamera(state, action);
-    } else if (action is SetCameraDevice) {
-      return _reduceSetCameraDevice(state, action);
+    } else if (action is SetVideoInputDevice) {
+      return _reduceSetVideoInputDevice(state, action);
     } else if (action is SetCameraPosition) {
       return _reduceCameraPosition(state, action);
     } else if (action is UpdateSubscriptions) {
@@ -35,10 +35,8 @@ class CallControlReducer {
       return _reduceUpdateSubscription(state, action);
     } else if (action is RemoveSubscription) {
       return _reduceRemoveSubscription(state, action);
-    } else if (action is SetSpeakerDevice) {
-      return _reduceSetSpeakerDevice(state, action);
-    } else if (action is SetSpeakerphoneEnabled) {
-      return _reduceSpeakerphoneEnabled(state, action);
+    } else if (action is SetAudioOutputDevice) {
+      return _reduceSetAudioOutputDevice(state, action);
     }
     return state;
   }
@@ -113,12 +111,12 @@ class CallControlReducer {
     );
   }
 
-  CallState _reduceSetSpeakerDevice(
+  CallState _reduceSetAudioOutputDevice(
     CallState state,
-    SetSpeakerDevice action,
+    SetAudioOutputDevice action,
   ) {
     return state.copyWith(
-      speakerDevice: action.device,
+      audioOutputDevice: action.device,
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) return participant;
 
@@ -134,15 +132,6 @@ class CallControlReducer {
           },
         );
       }).toList(),
-    );
-  }
-
-  CallState _reduceSpeakerphoneEnabled(
-    CallState state,
-    SetSpeakerphoneEnabled action,
-  ) {
-    return state.copyWith(
-      speakerphoneEnabled: action.enabled,
     );
   }
 
@@ -204,12 +193,17 @@ class CallControlReducer {
         if (participant.isLocal) {
           final trackState = participant.publishedTracks[SfuTrackType.video];
           if (trackState is LocalTrackState) {
+            // Creating a new track state to reset the source device.
+            // CopyWith doesn't support null values.
+            final newTrackState = TrackState.local(
+              muted: trackState.muted,
+              cameraPosition: action.cameraPosition,
+            );
+
             return participant.copyWith(
               publishedTracks: {
                 ...participant.publishedTracks,
-                SfuTrackType.video: trackState.copyWith(
-                  cameraPosition: action.cameraPosition,
-                ),
+                SfuTrackType.video: newTrackState,
               },
             );
           }
@@ -228,12 +222,17 @@ class CallControlReducer {
         if (participant.isLocal) {
           final trackState = participant.publishedTracks[SfuTrackType.video];
           if (trackState is LocalTrackState) {
+            // Creating a new track state to reset the source device.
+            // CopyWith doesn't support null values.
+            final newTrackState = TrackState.local(
+              muted: trackState.muted,
+              cameraPosition: trackState.cameraPosition?.flip(),
+            );
+
             return participant.copyWith(
               publishedTracks: {
                 ...participant.publishedTracks,
-                SfuTrackType.video: trackState.copyWith(
-                  cameraPosition: trackState.cameraPosition?.flip(),
-                ),
+                SfuTrackType.video: newTrackState,
               },
             );
           }
@@ -243,12 +242,12 @@ class CallControlReducer {
     );
   }
 
-  CallState _reduceSetCameraDevice(
+  CallState _reduceSetVideoInputDevice(
     CallState state,
-    SetCameraDevice action,
+    SetVideoInputDevice action,
   ) {
     return state.copyWith(
-      cameraDevice: action.device,
+      videoInputDevice: action.device,
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
           final trackState = participant.publishedTracks[SfuTrackType.video];
@@ -270,12 +269,12 @@ class CallControlReducer {
     );
   }
 
-  CallState _reduceSetMicrophoneDevice(
+  CallState _reduceSetAudioInputDevice(
     CallState state,
-    SetMicrophoneDevice action,
+    SetAudioInputDevice action,
   ) {
     return state.copyWith(
-      microphoneDevice: action.device,
+      audioInputDevice: action.device,
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
           final trackState = participant.publishedTracks[SfuTrackType.audio];

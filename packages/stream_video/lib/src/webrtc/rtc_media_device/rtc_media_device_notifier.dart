@@ -1,26 +1,22 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:rxdart/rxdart.dart';
 
 import '../../errors/video_error_composer.dart';
 import '../../utils/result.dart';
 import 'rtc_media_device.dart';
 
-typedef OnDevicesChange = void Function(
-  List<RtcMediaDevice> previous,
-  List<RtcMediaDevice> current,
-);
-
-class RtcMediaDevices {
-  RtcMediaDevices._internal() {
+class RtcMediaDeviceNotifier {
+  RtcMediaDeviceNotifier._internal() {
     // Debounce call the onDeviceChange callback.
     rtc.navigator.mediaDevices.ondevicechange = _onDeviceChange;
     // Triggers the initial device change event to get the devices list.
     _onDeviceChange(null);
   }
 
-  static final RtcMediaDevices instance = RtcMediaDevices._internal();
+  static final instance = RtcMediaDeviceNotifier._internal();
 
-  OnDevicesChange? onDevicesChange;
-  var _currentDevices = const <RtcMediaDevice>[];
+  Stream<List<RtcMediaDevice>> get onDeviceChange => _devicesController.stream;
+  final _devicesController = BehaviorSubject<List<RtcMediaDevice>>();
 
   Future<void> _onDeviceChange(_) async {
     final devicesResult = await enumerateDevices();
@@ -28,9 +24,7 @@ class RtcMediaDevices {
 
     if (devices == null) return;
 
-    final previous = [..._currentDevices];
-    _currentDevices = devices;
-    onDevicesChange?.call(previous, _currentDevices);
+    _devicesController.add(devices);
   }
 
   Future<Result<List<RtcMediaDevice>>> enumerateDevices({

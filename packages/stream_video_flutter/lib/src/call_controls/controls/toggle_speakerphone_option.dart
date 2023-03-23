@@ -1,21 +1,30 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 
+// These are eyeballed device IDs for the speaker and earpiece.
+// based on Android and iOS enumerated devices.
 const deviceIdSpeaker = 'speaker';
 const deviceIdEarpiece = 'earpiece';
 
 /// A widget that represents a call control option to toggle if the
 /// speakerphone is on or off.
+///
+/// This widget is only available on Android and iOS.
 class ToggleSpeakerphoneOption extends StatefulWidget {
   /// Creates a new instance of [ToggleSpeakerphoneOption].
   const ToggleSpeakerphoneOption({
     super.key,
+    required this.call,
     this.enabledSpeakerphoneIcon = Icons.volume_up_rounded,
     this.disabledSpeakerphoneIcon = Icons.volume_off_rounded,
   });
+
+  /// Represents a call.
+  final Call call;
 
   /// The icon that is shown when the speakerphone is enabled.
   final IconData enabledSpeakerphoneIcon;
@@ -28,30 +37,49 @@ class ToggleSpeakerphoneOption extends StatefulWidget {
 }
 
 class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
-  Iterable<MediaDevice>? _audioOutputs;
-  StreamSubscription<List<MediaDevice>>? _deviceChangeSubscription;
+  final _deviceNotifier = RtcMediaDeviceNotifier.instance;
+  StreamSubscription<List<RtcMediaDevice>>? _deviceChangeSubscription;
 
-  Future<void> _toggleSpeaker({bool enabled = false}) async {
-    final newAudio = _audioOutputs?.firstWhere((audioOut) {
-      if (enabled) return audioOut.deviceId == deviceIdSpeaker;
-      return audioOut.deviceId == deviceIdEarpiece;
-    });
+  var _audioOutputs = <RtcMediaDevice>[];
 
-    if (newAudio == null) return;
-    return Hardware.instance.selectAudioOutput(newAudio);
-  }
+  Future<void> _setSpeakerphoneEnabled({bool enabled = false}) async {
+    final audioOutputs = _audioOutputs;
+    if (audioOutputs.isEmpty) return;
 
-  void _onDeviceChange(List<MediaDevice> devices) {
-    final audioOutputs = devices.where((it) => it.kind == 'audiooutput');
-    setState(() => _audioOutputs = audioOutputs);
+    var device = audioOutputs.firstWhereOrNull(
+      (it) => it.id.equalsIgnoreCase(
+        enabled ? deviceIdSpeaker : deviceIdEarpiece,
+      ),
+    );
+
+    if (!enabled && device == null) {
+      // In IOS, we don't have earpiece as a listed device. So we will try to
+      // create a new device with the earpiece ID.
+      if (CurrentPlatform.isIos) {
+        device = const RtcMediaDevice(
+          id: deviceIdEarpiece,
+          kind: RtcMediaDeviceKind.audioOutput,
+          label: 'Earpiece',
+        );
+      }
+    }
+
+    // If we don't have a device, we can't set it as the audio output.
+    if (device == null) return;
+
+    // Set the device as the current audio output.
+    await widget.call.apply(SetAudioOutputDevice(device: device));
   }
 
   @override
   void initState() {
     super.initState();
-    Hardware.instance.enumerateDevices().then(_onDeviceChange);
-    _deviceChangeSubscription =
-        Hardware.instance.onDeviceChange.stream.listen(_onDeviceChange);
+    _deviceChangeSubscription = _deviceNotifier.onDeviceChange.listen((devices) {
+      final audioOutputs = devices.where(
+        (it) => it.kind == RtcMediaDeviceKind.audioOutput,
+      );
+      _audioOutputs = audioOutputs.toList();
+    });
   }
 
   @override
@@ -62,8 +90,13 @@ class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
 
   @override
   Widget build(BuildContext context) {
-    final enabled =
-        Hardware.instance.selectedAudioOutput?.deviceId == deviceIdSpeaker;
+    var enabled = false;
+
+    final callState = widget.call.state.valueOrNull;
+    final audioOutputDevice = callState?.audioOutputDevice;
+    if (audioOutputDevice != null) {
+      enabled = audioOutputDevice.id.equalsIgnoreCase(deviceIdSpeaker);
+    }
 
     return CallControlOption(
       icon: enabled
@@ -72,10 +105,13 @@ class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
       onPressed: () async {
         try {
           // Enable/disable the speaker.
-          await _toggleSpeaker(enabled: !enabled);
-          setState(() {});
+          await _setSpeakerphoneEnabled(enabled: !enabled);
         } catch (_) {}
       },
     );
   }
+}
+
+extension on String {
+  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
 }

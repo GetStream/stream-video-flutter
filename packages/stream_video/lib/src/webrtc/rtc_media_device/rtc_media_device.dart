@@ -33,5 +33,10 @@ class RtcMediaDevice with EquatableMixin {
   final RtcMediaDeviceKind kind;
 
   @override
+  String toString() {
+    return 'RtcMediaDevice{id: $id, label: $label, kind: $kind}';
+  }
+
+  @override
   List<Object?> get props => [id, kind, label];
 }

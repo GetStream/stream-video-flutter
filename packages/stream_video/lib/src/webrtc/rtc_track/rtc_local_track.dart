@@ -4,9 +4,9 @@ import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import '../../logger/stream_log.dart';
 import '../../platform_detector/platform_detector.dart';
 import '../../sfu/data/models/sfu_track_type.dart';
-import '../device_manager/rtc_media_device.dart';
 import '../media/media_constraints.dart';
 import '../model/rtc_video_dimension.dart';
+import '../rtc_media_device/rtc_media_device.dart';
 import 'rtc_track.dart';
 
 const kLocalTrackIdPrefix = 'local';
@@ -223,13 +223,13 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
     );
   }
 
-  Future<RtcLocalCameraTrack> selectCameraInput(RtcMediaDevice device) async {
+  Future<RtcLocalCameraTrack> selectVideoInput(RtcMediaDevice device) async {
     streamLog.i(_cameraTag, () => 'Selecting camera input: $device');
 
     final currentDeviceId = mediaConstraints.deviceId;
     // Check if the device is already selected.
     if (currentDeviceId == device.id) {
-      streamLog.i(_cameraTag, () => 'Camera input already selected: $device');
+      streamLog.i(_cameraTag, () => 'Video input already selected: $device');
       return this;
     }
 

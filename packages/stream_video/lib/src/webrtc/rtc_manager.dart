@@ -12,25 +12,30 @@ import '../sfu/data/models/sfu_track_type.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
 import 'codecs_helper.dart' as codecs;
-import 'device_manager/rtc_media_device.dart';
 import 'media/media_constraints.dart';
 import 'model/rtc_audio_bitrate_preset.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_dimension.dart';
 import 'peer_connection.dart';
 import 'peer_type.dart';
+import 'rtc_media_device/rtc_media_device.dart';
 import 'rtc_parser.dart';
 import 'rtc_track/rtc_track.dart';
 
-/// {@template OnPublisherTrackMuted}
-/// Callback for when a publisher track is muted.
+/// {@template OnLocalTrackMuted}
+/// Callback for when a local track is muted.
 /// {@endtemplate}
-typedef OnPublisherTrackMuted = void Function(RtcLocalTrack track, bool muted);
+typedef OnLocalTrackMuted = void Function(RtcLocalTrack track, bool muted);
 
-/// {@template OnSubscriberTrackPublished}
+/// {@template OnLocalTrackPublished}
+/// Called when a local track is published.
+/// {@endtemplate}
+typedef OnLocalTrackPublished = void Function(RtcLocalTrack track);
+
+/// {@template OnRemoteTrackPublished}
 /// Called when a subscriber track is received.
 /// {@endtemplate}
-typedef OnSubscriberTrackReceived = void Function(
+typedef OnRemoteTrackReceived = void Function(
   StreamPeerConnection pc,
   RtcRemoteTrack track,
 );
@@ -46,7 +51,7 @@ class RtcManager extends Disposable {
     required StreamPeerConnection subscriber,
   })  : _publisher = publisher,
         _subscriber = subscriber {
-    _subscriber.onTrack = _onSubscriberTrack;
+    _subscriber.onTrack = _onRemoteTrack;
   }
 
   final _logger = taggedLogger(tag: _tag);
@@ -67,7 +72,7 @@ class RtcManager extends Disposable {
     _subscriber.onIceCandidate = cb;
   }
 
-  set onPublisherNegotiationNeeded(OnRenegotiationNeeded? cb) {
+  set onRenegotiationNeeded(OnRenegotiationNeeded? cb) {
     _publisher.onRenegotiationNeeded = cb;
   }
 
@@ -76,8 +81,9 @@ class RtcManager extends Disposable {
     _publisher.onStats = cb;
   }
 
-  OnPublisherTrackMuted? onPublisherTrackMuted;
-  OnSubscriberTrackReceived? onSubscriberTrackReceived;
+  OnLocalTrackMuted? onLocalTrackMuted;
+  OnLocalTrackPublished? onLocalTrackPublished;
+  OnRemoteTrackReceived? onRemoteTrackReceived;
 
   /// Returns a generic sdp.
   static Future<String> getGenericSdp() async {
@@ -126,23 +132,23 @@ class RtcManager extends Disposable {
     return Result.error('unexpected peerType: $peerType');
   }
 
-  void _onSubscriberTrack(StreamPeerConnection pc, rtc.RTCTrackEvent event) {
+  void _onRemoteTrack(StreamPeerConnection pc, rtc.RTCTrackEvent event) {
     _logger.d(
-      () => '[onSubscriberTrack] event.streams.length: ${event.streams.length}',
+      () => '[onRemoteTrack] event.streams.length: ${event.streams.length}',
     );
 
     final stream = event.streams.firstOrNull;
     if (stream == null) {
-      _logger.w(() => '[onSubscriberTrack] stream is null');
+      _logger.w(() => '[onRemoteTrack] stream is null');
       return;
     }
-    _logger.v(() => '[onSubscriberTrack] stream.id: ${stream.id}');
+    _logger.v(() => '[onRemoteTrack] stream.id: ${stream.id}');
 
     event.track.onEnded = () {
-      _logger.w(() => '[onSubscriberTrack] #onTrackEnded; no args');
+      _logger.w(() => '[onRemoteTrack] #onTrackEnded; no args');
     };
     stream.onRemoveTrack = (_) {
-      _logger.w(() => '[onSubscriberTrack] #onRemoveTrack; no args');
+      _logger.w(() => '[onRemoteTrack] #onRemoveTrack; no args');
     };
 
     final track = event.track;
@@ -162,12 +168,9 @@ class RtcManager extends Disposable {
       transceiver: transceiver,
     );
 
-    // Start the track.
-    remoteTrack.start();
-
+    onRemoteTrackReceived?.call(pc, remoteTrack);
     publishedTracks[remoteTrack.trackId] = remoteTrack;
-    _logger.v(() => '[onSubscriberTrack] published: ${remoteTrack.trackId}');
-    onSubscriberTrackReceived?.call(pc, remoteTrack);
+    _logger.v(() => '[onRemoteTrack] published: ${remoteTrack.trackId}');
   }
 
   Future<void> unpublishTrack({required String trackId}) async {
@@ -197,8 +200,9 @@ class RtcManager extends Disposable {
 
     publishedTracks.clear();
 
-    onPublisherTrackMuted = null;
-    onSubscriberTrackReceived = null;
+    onLocalTrackMuted = null;
+    onLocalTrackPublished = null;
+    onRemoteTrackReceived = null;
     onStatsReceived = null;
 
     await _publisher.dispose();
@@ -326,8 +330,8 @@ extension PublisherRtcManager on RtcManager {
     );
     _logger.v(() => '[publishAudioTrack] transceiver: $transceiver');
 
-    // Start the track.
-    await track.start();
+    // Notify listeners.
+    onLocalTrackPublished?.call(track);
 
     // Update track with the added transceiver.
     return publishedTracks[track.trackId] = track.copyWith(
@@ -372,8 +376,8 @@ extension PublisherRtcManager on RtcManager {
     );
     _logger.v(() => '[publishVideoTrack] transceiver: $transceiver');
 
-    // Start the track.
-    await track.start();
+    // Notify listeners.
+    onLocalTrackPublished?.call(track);
 
     // Update track with the added transceiver and dimension.
     return publishedTracks[track.trackId] = track.copyWith(
@@ -402,7 +406,7 @@ extension PublisherRtcManager on RtcManager {
       await track.stop();
     }
 
-    return onPublisherTrackMuted?.call(track, true);
+    return onLocalTrackMuted?.call(track, true);
   }
 
   Future<void> unmuteTrack({required String trackId}) async {
@@ -421,12 +425,12 @@ extension PublisherRtcManager on RtcManager {
     if (track.stopTrackOnMute) {
       final updatedTrack = await track.recreate();
       publishedTracks[trackId] = updatedTrack;
-      return onPublisherTrackMuted?.call(updatedTrack, false);
+      return onLocalTrackMuted?.call(updatedTrack, false);
     }
 
     // Otherwise simply enable it again
     track.enable();
-    return onPublisherTrackMuted?.call(track, false);
+    return onLocalTrackMuted?.call(track, false);
   }
 
   Future<RtcLocalAudioTrack?> createAudioTrack({
@@ -525,7 +529,7 @@ extension RtcManagerTrackHelper on RtcManager {
     return publishedTracks[updatedTrack.trackId] = updatedTrack;
   }
 
-  Future<RtcLocalCameraTrack?> setCameraDevice({
+  Future<RtcLocalCameraTrack?> setVideoInputDevice({
     required RtcMediaDevice device,
   }) async {
     final track = getPublisherTrackByType(SfuTrackType.video);
@@ -539,11 +543,11 @@ extension RtcManagerTrackHelper on RtcManager {
       return null;
     }
 
-    final updatedTrack = await track.selectCameraInput(device);
+    final updatedTrack = await track.selectVideoInput(device);
     return publishedTracks[updatedTrack.trackId] = updatedTrack;
   }
 
-  Future<RtcLocalAudioTrack?> setMicrophoneDevice({
+  Future<RtcLocalAudioTrack?> setAudioInputDevice({
     required RtcMediaDevice device,
   }) async {
     final track = getPublisherTrackByType(SfuTrackType.audio);
@@ -561,16 +565,13 @@ extension RtcManagerTrackHelper on RtcManager {
     return publishedTracks[updatedTrack.trackId] = updatedTrack;
   }
 
-  Future<List<RtcRemoteTrack>> setSpeakerDevice({
+  Future<void> setAudioOutputDevice({
     required RtcMediaDevice device,
   }) async {
     // Get all remote audio tracks.
     final audioTracks = publishedTracks.values
         .whereType<RtcRemoteTrack>()
         .where((it) => it.trackType == SfuTrackType.audio);
-
-    // If there are no remote audio tracks, return an empty list.
-    if (audioTracks.isEmpty) return const <RtcRemoteTrack>[];
 
     // Set the sink id for all remote audio tracks to the selected device,
     // if the platform is web.
@@ -580,7 +581,7 @@ extension RtcManagerTrackHelper on RtcManager {
         publishedTracks[updatedTrack.trackId] = updatedTrack;
       }
 
-      return [...audioTracks];
+      return;
     }
 
     // Change the audio output device for all remote audio tracks.
@@ -589,8 +590,6 @@ extension RtcManagerTrackHelper on RtcManager {
       final updatedTrack = audioTrack.copyWith(audioSinkId: device.id);
       publishedTracks[updatedTrack.trackId] = updatedTrack;
     }
-
-    return [...audioTracks];
   }
 
   Future<RtcLocalCameraTrack?> setCameraPosition({
@@ -598,22 +597,6 @@ extension RtcManagerTrackHelper on RtcManager {
   }) {
     final facingMode = cameraPosition.toFacingMode();
     return setTrackFacingMode(facingMode: facingMode);
-  }
-
-  Future<bool?> setSpeakerPhoneEnabled({bool enabled = true}) async {
-    if (!CurrentPlatform.isAndroid || !CurrentPlatform.isIos) {
-      _logger.e(() => '[setSpeakerPhoneEnabled] rejected (not supported)');
-      return null;
-    }
-
-    try {
-      await rtc.Helper.setSpeakerphoneOn(enabled);
-      return true;
-    } catch (e) {
-      _logger.e(() => '[setSpeakerPhoneEnabled] rejected ($e)');
-    }
-
-    return false;
   }
 
   Future<RtcLocalTrack?> setCameraEnabled({bool enabled = true}) {
