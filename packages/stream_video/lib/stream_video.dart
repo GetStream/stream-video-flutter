@@ -35,7 +35,7 @@ export 'src/utils/string.dart';
 export 'src/utils/subscriptions.dart';
 export 'src/webrtc/media/media_constraints.dart';
 export 'src/webrtc/model/rtc_video_dimension.dart';
+export 'src/webrtc/peer_type.dart';
 export 'src/webrtc/rtc_media_device/rtc_media_device.dart';
 export 'src/webrtc/rtc_media_device/rtc_media_device_notifier.dart';
-export 'src/webrtc/peer_type.dart';
 export 'src/webrtc/rtc_track/rtc_track.dart';

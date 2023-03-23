@@ -117,8 +117,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         ..onRemoteTrackReceived = _onRemoteTrackReceived
         ..onStatsReceived = _onStatsReceived;
 
-
-    _logger.v(() => '[start] completed');
+      _logger.v(() => '[start] completed');
       return Result.success(None());
     } catch (e, stk) {
       _logger.e(() => '[start] failed: $e');
