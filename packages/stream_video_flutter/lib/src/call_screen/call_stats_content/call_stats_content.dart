@@ -24,7 +24,6 @@ class CallStatsContent extends StatefulWidget {
 }
 
 class _CallStatsContentState extends State<CallStatsContent> {
-
   /// Represents the publisher stats.
   CallStats? _publisher;
 
@@ -65,70 +64,107 @@ class _CallStatsContentState extends State<CallStatsContent> {
     return ColoredBox(
       color: Colors.black38,
       child: SingleChildScrollView(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    padding: const EdgeInsets.all(16),
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: () => widget.onClosePressed?.call(),
-                  )
-                ],
+        child: Column(
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  padding: const EdgeInsets.all(16),
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => widget.onClosePressed?.call(),
+                )
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: _PublisherContent(
+                local: pubLocal,
+                remote: pubRemote,
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Column(
-                  children: [
-                    const Text(
-                      'PUBLISHER',
-                      style: TextStyle(
-                        color: Colors.greenAccent,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      pubLocal,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    Text(
-                      pubRemote,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: _SubscriberContent(
+                local: subLocal,
+                remote: subRemote,
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Column(
-                  children: [
-                    const Text(
-                      'SUBSCRIBER',
-                      style: TextStyle(
-                        color: Colors.greenAccent,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      subLocal,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    Text(
-                      subRemote,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 40),
-            ],
-          ),
+            ),
+            const SizedBox(height: 40),
+          ],
         ),
       ),
+    );
+  }
+}
+
+/// Represents the publisher stats.
+class _PublisherContent extends StatelessWidget {
+  const _PublisherContent({
+    super.key,
+    required this.remote,
+    required this.local,
+  });
+
+  final String remote;
+  final String local;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Text(
+          'PUBLISHER',
+          style: TextStyle(
+            color: Colors.greenAccent,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          local,
+          style: const TextStyle(color: Colors.white),
+        ),
+        Text(
+          remote,
+          style: const TextStyle(color: Colors.white),
+        ),
+      ],
+    );
+  }
+}
+
+/// Represents the subscriber stats.
+class _SubscriberContent extends StatelessWidget {
+  const _SubscriberContent({
+    super.key,
+    required this.remote,
+    required this.local,
+  });
+
+  final String remote;
+  final String local;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Text(
+          'SUBSCRIBER',
+          style: TextStyle(
+            color: Colors.greenAccent,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          local,
+          style: const TextStyle(color: Colors.white),
+        ),
+        Text(
+          remote,
+          style: const TextStyle(color: Colors.white),
+        ),
+      ],
     );
   }
 }
