@@ -18,18 +18,24 @@ import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_dimension.dart';
 import 'peer_connection.dart';
 import 'peer_type.dart';
+import 'rtc_media_device/rtc_media_device.dart';
 import 'rtc_parser.dart';
 import 'rtc_track/rtc_track.dart';
 
-/// {@template OnPublisherTrackMuted}
-/// Callback for when a publisher track is muted.
+/// {@template OnLocalTrackMuted}
+/// Callback for when a local track is muted.
 /// {@endtemplate}
-typedef OnPublisherTrackMuted = void Function(RtcLocalTrack track, bool muted);
+typedef OnLocalTrackMuted = void Function(RtcLocalTrack track, bool muted);
 
-/// {@template OnSubscriberTrackPublished}
+/// {@template OnLocalTrackPublished}
+/// Called when a local track is published.
+/// {@endtemplate}
+typedef OnLocalTrackPublished = void Function(RtcLocalTrack track);
+
+/// {@template OnRemoteTrackPublished}
 /// Called when a subscriber track is received.
 /// {@endtemplate}
-typedef OnSubscriberTrackReceived = void Function(
+typedef OnRemoteTrackReceived = void Function(
   StreamPeerConnection pc,
   RtcRemoteTrack track,
 );
@@ -45,7 +51,7 @@ class RtcManager extends Disposable {
     required StreamPeerConnection subscriber,
   })  : _publisher = publisher,
         _subscriber = subscriber {
-    _subscriber.onTrack = _onSubscriberTrack;
+    _subscriber.onTrack = _onRemoteTrack;
   }
 
   final _logger = taggedLogger(tag: _tag);
@@ -66,7 +72,7 @@ class RtcManager extends Disposable {
     _subscriber.onIceCandidate = cb;
   }
 
-  set onPublisherNegotiationNeeded(OnRenegotiationNeeded? cb) {
+  set onRenegotiationNeeded(OnRenegotiationNeeded? cb) {
     _publisher.onRenegotiationNeeded = cb;
   }
 
@@ -75,8 +81,9 @@ class RtcManager extends Disposable {
     _publisher.onStats = cb;
   }
 
-  OnPublisherTrackMuted? onPublisherTrackMuted;
-  OnSubscriberTrackReceived? onSubscriberTrackReceived;
+  OnLocalTrackMuted? onLocalTrackMuted;
+  OnLocalTrackPublished? onLocalTrackPublished;
+  OnRemoteTrackReceived? onRemoteTrackReceived;
 
   /// Returns a generic sdp.
   static Future<String> getGenericSdp() async {
@@ -125,23 +132,23 @@ class RtcManager extends Disposable {
     return Result.error('unexpected peerType: $peerType');
   }
 
-  void _onSubscriberTrack(StreamPeerConnection pc, rtc.RTCTrackEvent event) {
+  void _onRemoteTrack(StreamPeerConnection pc, rtc.RTCTrackEvent event) {
     _logger.d(
-      () => '[onSubscriberTrack] event.streams.length: ${event.streams.length}',
+      () => '[onRemoteTrack] event.streams.length: ${event.streams.length}',
     );
 
     final stream = event.streams.firstOrNull;
     if (stream == null) {
-      _logger.w(() => '[onSubscriberTrack] stream is null');
+      _logger.w(() => '[onRemoteTrack] stream is null');
       return;
     }
-    _logger.v(() => '[onSubscriberTrack] stream.id: ${stream.id}');
+    _logger.v(() => '[onRemoteTrack] stream.id: ${stream.id}');
 
     event.track.onEnded = () {
-      _logger.w(() => '[onSubscriberTrack] #onTrackEnded; no args');
+      _logger.w(() => '[onRemoteTrack] #onTrackEnded; no args');
     };
     stream.onRemoveTrack = (_) {
-      _logger.w(() => '[onSubscriberTrack] #onRemoveTrack; no args');
+      _logger.w(() => '[onRemoteTrack] #onRemoveTrack; no args');
     };
 
     final track = event.track;
@@ -161,12 +168,9 @@ class RtcManager extends Disposable {
       transceiver: transceiver,
     );
 
-    // Start the track.
-    remoteTrack.start();
-
+    onRemoteTrackReceived?.call(pc, remoteTrack);
     publishedTracks[remoteTrack.trackId] = remoteTrack;
-    _logger.v(() => '[onSubscriberTrack] published: ${remoteTrack.trackId}');
-    onSubscriberTrackReceived?.call(pc, remoteTrack);
+    _logger.v(() => '[onRemoteTrack] published: ${remoteTrack.trackId}');
   }
 
   Future<void> unpublishTrack({required String trackId}) async {
@@ -196,8 +200,9 @@ class RtcManager extends Disposable {
 
     publishedTracks.clear();
 
-    onPublisherTrackMuted = null;
-    onSubscriberTrackReceived = null;
+    onLocalTrackMuted = null;
+    onLocalTrackPublished = null;
+    onRemoteTrackReceived = null;
     onStatsReceived = null;
 
     await _publisher.dispose();
@@ -208,10 +213,7 @@ class RtcManager extends Disposable {
 
   RtcTrack? getTrack(String trackId) {
     _logger.d(() => '[getTrack] trackId: $trackId');
-    _logger.v(() => '[getTrack] publishedTracks: ${publishedTracks.keys}');
-    final result = publishedTracks[trackId];
-    _logger.v(() => '[getTrack] result: $result');
-    return result;
+    return publishedTracks[trackId];
   }
 
   List<RtcTrack> getTracks(String trackIdPrefix) {
@@ -305,8 +307,8 @@ extension PublisherRtcManager on RtcManager {
     return null;
   }
 
-  Future<RtcLocalTrack<AudioConstraints>> publishAudioTrack({
-    required RtcLocalTrack<AudioConstraints> track,
+  Future<RtcLocalAudioTrack> publishAudioTrack({
+    required RtcLocalAudioTrack track,
     bool stopTrackOnMute = true,
   }) async {
     // Add publisherId to the trackIdPrefix if it's a local track.
@@ -328,8 +330,8 @@ extension PublisherRtcManager on RtcManager {
     );
     _logger.v(() => '[publishAudioTrack] transceiver: $transceiver');
 
-    // Start the track.
-    await track.start();
+    // Notify listeners.
+    onLocalTrackPublished?.call(track);
 
     // Update track with the added transceiver.
     return publishedTracks[track.trackId] = track.copyWith(
@@ -339,8 +341,8 @@ extension PublisherRtcManager on RtcManager {
     );
   }
 
-  Future<RtcLocalTrack<VideoConstraints>> publishVideoTrack({
-    required RtcLocalTrack<VideoConstraints> track,
+  Future<RtcLocalVideoTrack> publishVideoTrack({
+    required RtcLocalVideoTrack track,
     bool stopTrackOnMute = true,
   }) async {
     // Add publisherId to the trackIdPrefix if it's a local track.
@@ -374,8 +376,8 @@ extension PublisherRtcManager on RtcManager {
     );
     _logger.v(() => '[publishVideoTrack] transceiver: $transceiver');
 
-    // Start the track.
-    await track.start();
+    // Notify listeners.
+    onLocalTrackPublished?.call(track);
 
     // Update track with the added transceiver and dimension.
     return publishedTracks[track.trackId] = track.copyWith(
@@ -404,7 +406,7 @@ extension PublisherRtcManager on RtcManager {
       await track.stop();
     }
 
-    return onPublisherTrackMuted?.call(track, true);
+    return onLocalTrackMuted?.call(track, true);
   }
 
   Future<void> unmuteTrack({required String trackId}) async {
@@ -421,16 +423,17 @@ extension PublisherRtcManager on RtcManager {
 
     // If the track was released before, restart it.
     if (track.stopTrackOnMute) {
-      final updatedTrack = await restartTrack(track: track);
-      return onPublisherTrackMuted?.call(updatedTrack!, false);
+      final updatedTrack = await track.recreate();
+      publishedTracks[trackId] = updatedTrack;
+      return onLocalTrackMuted?.call(updatedTrack, false);
     }
 
     // Otherwise simply enable it again
     track.enable();
-    return onPublisherTrackMuted?.call(track, false);
+    return onLocalTrackMuted?.call(track, false);
   }
 
-  Future<RtcLocalTrack<AudioConstraints>?> createAudioTrack({
+  Future<RtcLocalAudioTrack?> createAudioTrack({
     AudioConstraints constraints = const AudioConstraints(),
   }) async {
     _logger.d(() => '[createAudioTrack] constraints: ${constraints.toMap()}');
@@ -447,7 +450,7 @@ extension PublisherRtcManager on RtcManager {
     return audioTrack;
   }
 
-  Future<RtcLocalTrack<CameraConstraints>?> createCameraTrack({
+  Future<RtcLocalCameraTrack?> createCameraTrack({
     CameraConstraints constraints = const CameraConstraints(),
   }) async {
     _logger.d(() => '[createCameraTrack] constraints: ${constraints.toMap()}');
@@ -464,7 +467,7 @@ extension PublisherRtcManager on RtcManager {
     return videoTrack;
   }
 
-  Future<RtcLocalTrack<ScreenShareConstraints>?> createScreenShareTrack({
+  Future<RtcLocalScreenShareTrack?> createScreenShareTrack({
     ScreenShareConstraints constraints = const ScreenShareConstraints(),
   }) async {
     _logger.d(
@@ -483,123 +486,113 @@ extension PublisherRtcManager on RtcManager {
     return screenShareTrack;
   }
 
-  Future<RtcLocalTrack?> restartTrack({
-    required RtcLocalTrack track,
-    MediaConstraints? mediaConstraints,
-  }) async {
-    final sender = track.transceiver?.sender;
-    if (sender == null) {
-      _logger.w(() => '[restartTrack] rejected (sender is null)');
-      return null;
-    }
-
-    final constraints = mediaConstraints ?? track.mediaConstraints;
-
-    // stop if not already stopped...
-    await track.stop();
-
-    final newStream = await rtc.navigator.mediaDevices.getMedia(constraints);
-    final newTrack = newStream.getTracks().first;
-
-    // replace track on sender
-    try {
-      await sender.replaceTrack(newTrack);
-    } catch (error) {
-      _logger.e(() => '[restartTrack] `replaceTrack(...)` failed: $error');
-    }
-
-    // Update new stream, track and constraints.
-    return publishedTracks[track.trackId] = track.copyWith(
-      mediaTrack: newTrack,
-      mediaStream: newStream,
-      mediaConstraints: constraints,
-    );
-  }
-
-  Future<RtcLocalTrack?> setTrackFacingMode({
+  Future<RtcLocalCameraTrack?> setTrackFacingMode({
     required FacingMode facingMode,
   }) async {
     final track = getPublisherTrackByType(SfuTrackType.video);
     if (track == null) return null;
 
-    final constraints = track.mediaConstraints;
-    if (constraints is! CameraConstraints) {
-      _logger.e(() => 'Cannot set facingMode on non-camera track');
+    if (track is! RtcLocalCameraTrack) {
+      _logger.w(() => '[setTrackFacingMode] rejected (track is not camera)');
       return null;
     }
 
-    // restart with new constraints.
-    return restartTrack(
-      track: track,
-      mediaConstraints: constraints.copyWith(facingMode: facingMode),
-    );
-  }
-
-  Future<RtcLocalTrack?> setCameraDeviceId({required String deviceId}) async {
-    final track = getPublisherTrackByType(SfuTrackType.video);
-    if (track == null) {
-      _logger.w(() => '[setCameraDeviceId] rejected (track is null)');
-      return null;
-    }
-
-    final constraints = track.mediaConstraints;
-    if (constraints is! CameraConstraints) {
-      _logger.e(() => 'Cannot set camera deviceId on non-camera track');
-      return null;
-    }
-
-    return restartTrack(
-      track: track,
-      mediaConstraints: constraints.copyWith(
-        deviceId: deviceId,
-        // Always going to be user on browser which don't supports facingMode.
-        facingMode: FacingMode.user,
+    final updatedTrack = await track.recreate(
+      mediaConstraints: track.mediaConstraints.copyWith(
+        facingMode: facingMode,
       ),
     );
+
+    return publishedTracks[updatedTrack.trackId] = updatedTrack;
   }
 }
 
 extension RtcManagerTrackHelper on RtcManager {
-  Future<RtcLocalTrack?> flipCamera() async {
+  Future<RtcLocalCameraTrack?> flipCamera() async {
+    if (CurrentPlatform.isWeb) {
+      _logger.e(() => '[switchCamera] rejected (not supported on web)');
+      return null;
+    }
+
     final track = getPublisherTrackByType(SfuTrackType.video);
     if (track == null) {
       _logger.e(() => '[switchCamera] rejected (track is null)');
       return null;
     }
 
-    final constraints = track.mediaConstraints;
-    if (constraints is! CameraConstraints) {
-      _logger.e(() => 'Cannot switch camera on non-camera track');
+    if (track is! RtcLocalCameraTrack) {
+      _logger.e(() => '[switchCamera] rejected (track is not camera)');
       return null;
     }
 
-    if (CurrentPlatform.isWeb) {
-      final supported = rtc.navigator.mediaDevices.getSupportedConstraints();
-      if (supported.facingMode) {
-        final currentFacingMode = constraints.facingMode;
-        final flippedFacingMode = currentFacingMode.flip();
-
-        return setTrackFacingMode(facingMode: flippedFacingMode);
-      }
-
-      _logger.e(
-        () {
-          return '''Cannot switch camera facingMode not supported, Use `setCameraDeviceId` instead''';
-        },
-      );
-      return null;
-    }
-
-    // Use the native switchCamera method.
-    final isFrontCamera = await rtc.Helper.switchCamera(track.mediaTrack);
-    return publishedTracks[track.trackId] = track.copyWith(
-      mediaConstraints: constraints.copyWith(
-        facingMode: isFrontCamera ? FacingMode.user : FacingMode.environment,
-      ),
-    );
+    final updatedTrack = await track.flipCamera();
+    return publishedTracks[updatedTrack.trackId] = updatedTrack;
   }
 
-  Future<RtcLocalTrack?> setCameraPosition({
+  Future<RtcLocalCameraTrack?> setVideoInputDevice({
+    required RtcMediaDevice device,
+  }) async {
+    final track = getPublisherTrackByType(SfuTrackType.video);
+    if (track == null) {
+      _logger.w(() => '[setCameraDeviceId] rejected (track is null)');
+      return null;
+    }
+
+    if (track is! RtcLocalCameraTrack) {
+      _logger.w(() => '[setCameraDeviceId] rejected (track is not camera)');
+      return null;
+    }
+
+    final updatedTrack = await track.selectVideoInput(device);
+    return publishedTracks[updatedTrack.trackId] = updatedTrack;
+  }
+
+  Future<RtcLocalAudioTrack?> setAudioInputDevice({
+    required RtcMediaDevice device,
+  }) async {
+    final track = getPublisherTrackByType(SfuTrackType.audio);
+    if (track == null) {
+      _logger.w(() => '[setMicrophoneDeviceId] rejected (track is null)');
+      return null;
+    }
+
+    if (track is! RtcLocalAudioTrack) {
+      _logger.w(() => '[setMicrophoneDeviceId] rejected (track is not audio)');
+      return null;
+    }
+
+    final updatedTrack = await track.selectAudioInput(device);
+    return publishedTracks[updatedTrack.trackId] = updatedTrack;
+  }
+
+  Future<void> setAudioOutputDevice({
+    required RtcMediaDevice device,
+  }) async {
+    // Get all remote audio tracks.
+    final audioTracks = publishedTracks.values
+        .whereType<RtcRemoteTrack>()
+        .where((it) => it.trackType == SfuTrackType.audio);
+
+    // Set the sink id for all remote audio tracks to the selected device,
+    // if the platform is web.
+    if (CurrentPlatform.isWeb) {
+      for (final audioTrack in audioTracks) {
+        final updatedTrack = audioTrack.setSinkId(device.id);
+        publishedTracks[updatedTrack.trackId] = updatedTrack;
+      }
+
+      return;
+    }
+
+    // Change the audio output device for all remote audio tracks.
+    await rtc.Helper.selectAudioOutput(device.id);
+    for (final audioTrack in audioTracks) {
+      final updatedTrack = audioTrack.copyWith(audioSinkId: device.id);
+      publishedTracks[updatedTrack.trackId] = updatedTrack;
+    }
+  }
+
+  Future<RtcLocalCameraTrack?> setCameraPosition({
     required CameraPosition cameraPosition,
   }) {
     final facingMode = cameraPosition.toFacingMode();

@@ -7,3 +7,7 @@ void startAudio(String id, rtc.MediaStreamTrack track) {
 void stopAudio(String id) {
   throw UnimplementedError();
 }
+
+void setSinkId(String id, String deviceId) {
+  throw UnimplementedError();
+}

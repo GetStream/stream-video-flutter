@@ -19,12 +19,14 @@ class CallControlReducer {
       return _reduceCameraEnabled(state, action);
     } else if (action is SetMicrophoneEnabled) {
       return _reduceMicrophoneEnabled(state, action);
+    } else if (action is SetAudioInputDevice) {
+      return _reduceSetAudioInputDevice(state, action);
     } else if (action is SetScreenShareEnabled) {
       return _reduceScreenShareEnabled(state, action);
     } else if (action is FlipCamera) {
       return _reduceFlipCamera(state, action);
-    } else if (action is SetCameraDeviceId) {
-      return _reduceCameraDeviceId(state, action);
+    } else if (action is SetVideoInputDevice) {
+      return _reduceSetVideoInputDevice(state, action);
     } else if (action is SetCameraPosition) {
       return _reduceCameraPosition(state, action);
     } else if (action is UpdateSubscriptions) {
@@ -32,7 +34,9 @@ class CallControlReducer {
     } else if (action is UpdateSubscription) {
       return _reduceUpdateSubscription(state, action);
     } else if (action is RemoveSubscription) {
-      return _reduceUnsubscribeVideoTrack(state, action);
+      return _reduceRemoveSubscription(state, action);
+    } else if (action is SetAudioOutputDevice) {
+      return _reduceSetAudioOutputDevice(state, action);
     }
     return state;
   }
@@ -48,7 +52,7 @@ class CallControlReducer {
       if (child is UpdateSubscription) {
         newState = _reduceUpdateSubscription(newState, child);
       } else if (child is RemoveSubscription) {
-        newState = _reduceUnsubscribeVideoTrack(newState, child);
+        newState = _reduceRemoveSubscription(newState, child);
       }
     }
     return newState;
@@ -82,7 +86,7 @@ class CallControlReducer {
     );
   }
 
-  CallState _reduceUnsubscribeVideoTrack(
+  CallState _reduceRemoveSubscription(
     CallState state,
     RemoveSubscription action,
   ) {
@@ -103,6 +107,30 @@ class CallControlReducer {
           }
         }
         return participant;
+      }).toList(),
+    );
+  }
+
+  CallState _reduceSetAudioOutputDevice(
+    CallState state,
+    SetAudioOutputDevice action,
+  ) {
+    return state.copyWith(
+      audioOutputDevice: action.device,
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.isLocal) return participant;
+
+        final trackState = participant.publishedTracks[SfuTrackType.audio];
+        if (trackState is! RemoteTrackState) return participant;
+
+        return participant.copyWith(
+          publishedTracks: {
+            ...participant.publishedTracks,
+            SfuTrackType.audio: trackState.copyWith(
+              audioSinkDevice: action.device,
+            ),
+          },
+        );
       }).toList(),
     );
   }
@@ -165,12 +193,17 @@ class CallControlReducer {
         if (participant.isLocal) {
           final trackState = participant.publishedTracks[SfuTrackType.video];
           if (trackState is LocalTrackState) {
+            // Creating a new track state to reset the source device.
+            // CopyWith doesn't support null values.
+            final newTrackState = TrackState.local(
+              muted: trackState.muted,
+              cameraPosition: action.cameraPosition,
+            );
+
             return participant.copyWith(
               publishedTracks: {
                 ...participant.publishedTracks,
-                SfuTrackType.video: trackState.copyWith(
-                  cameraPosition: action.cameraPosition,
-                ),
+                SfuTrackType.video: newTrackState,
               },
             );
           }
@@ -189,11 +222,43 @@ class CallControlReducer {
         if (participant.isLocal) {
           final trackState = participant.publishedTracks[SfuTrackType.video];
           if (trackState is LocalTrackState) {
+            // Creating a new track state to reset the source device.
+            // CopyWith doesn't support null values.
+            final newTrackState = TrackState.local(
+              muted: trackState.muted,
+              cameraPosition: trackState.cameraPosition?.flip(),
+            );
+
+            return participant.copyWith(
+              publishedTracks: {
+                ...participant.publishedTracks,
+                SfuTrackType.video: newTrackState,
+              },
+            );
+          }
+        }
+        return participant;
+      }).toList(),
+    );
+  }
+
+  CallState _reduceSetVideoInputDevice(
+    CallState state,
+    SetVideoInputDevice action,
+  ) {
+    return state.copyWith(
+      videoInputDevice: action.device,
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.isLocal) {
+          final trackState = participant.publishedTracks[SfuTrackType.video];
+          if (trackState is LocalTrackState) {
             return participant.copyWith(
               publishedTracks: {
                 ...participant.publishedTracks,
                 SfuTrackType.video: trackState.copyWith(
-                  cameraPosition: trackState.cameraPosition?.flip(),
+                  sourceDevice: action.device,
+                  // reset camera position to default
+                  cameraPosition: CameraPosition.front,
                 ),
               },
             );
@@ -204,22 +269,21 @@ class CallControlReducer {
     );
   }
 
-  CallState _reduceCameraDeviceId(
+  CallState _reduceSetAudioInputDevice(
     CallState state,
-    SetCameraDeviceId action,
+    SetAudioInputDevice action,
   ) {
     return state.copyWith(
+      audioInputDevice: action.device,
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
-          final trackState = participant.publishedTracks[SfuTrackType.video];
+          final trackState = participant.publishedTracks[SfuTrackType.audio];
           if (trackState is LocalTrackState) {
             return participant.copyWith(
               publishedTracks: {
                 ...participant.publishedTracks,
-                SfuTrackType.video: trackState.copyWith(
-                  deviceId: action.deviceId,
-                  // reset camera position to default
-                  cameraPosition: CameraPosition.front,
+                SfuTrackType.audio: trackState.copyWith(
+                  sourceDevice: action.device,
                 ),
               },
             );

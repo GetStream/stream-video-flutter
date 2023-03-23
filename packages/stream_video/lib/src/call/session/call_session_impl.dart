@@ -111,9 +111,10 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       )
         ..onPublisherIceCandidate = _onLocalIceCandidate
         ..onSubscriberIceCandidate = _onLocalIceCandidate
-        ..onPublisherTrackMuted = _onPublisherTrackMuted
-        ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded
-        ..onSubscriberTrackReceived = _onSubscriberTrackReceived
+        ..onLocalTrackMuted = _onLocalTrackMuted
+        ..onLocalTrackPublished = _onLocalTrackPublished
+        ..onRenegotiationNeeded = _onRenegotiationNeeded
+        ..onRemoteTrackReceived = _onRemoteTrackReceived
         ..onStatsReceived = _onStatsReceived;
 
       _logger.v(() => '[start] completed');
@@ -169,12 +170,14 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return _onSetCameraEnabled(action.enabled);
     } else if (action is SetMicrophoneEnabled) {
       return _onSetMicrophoneEnabled(action.enabled);
+    } else if (action is SetAudioInputDevice) {
+      return _onSetAudioInputDevice(action.device);
     } else if (action is SetScreenShareEnabled) {
       return _onSetScreenShareEnabled(action.enabled);
     } else if (action is FlipCamera) {
       return _onFlipCamera();
-    } else if (action is SetCameraDeviceId) {
-      return _onSetCameraDeviceId(action.deviceId);
+    } else if (action is SetVideoInputDevice) {
+      return _onSetVideoInputDevice(action.device);
     } else if (action is SetCameraPosition) {
       return _onSetCameraPosition(action.cameraPosition);
     } else if (action is UpdateSubscriptions) {
@@ -187,6 +190,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return _setSubscriptions([action]);
     } else if (action is SetSubscriptions) {
       return _setSubscriptions(action.actions);
+    } else if (action is SetAudioOutputDevice) {
+      return _onSetAudioOutputDevice(action.device);
     }
     return Result.error('Action not supported: $action');
   }
@@ -309,9 +314,10 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     _logger.v(() => '[onSubscriberOffer] result: $result');
   }
 
-  void _onPublisherTrackMuted(RtcLocalTrack track, bool muted) {
+  void _onLocalTrackMuted(RtcLocalTrack track, bool muted) {
     _logger.d(() => '[onPublisherTrackMuted] track: $track');
 
+    // Send a mute state update to the server.
     sfuClient.updateMuteState(
       sfu.UpdateMuteStatesRequest(
         sessionId: sessionId,
@@ -323,6 +329,21 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         ],
       ),
     );
+  }
+
+  Future<void> _onLocalTrackPublished(RtcLocalTrack track) async {
+    _logger.d(() => '[onPublisherTrackPublished] track: $track');
+
+    // Start the track.
+    await track.start();
+
+    // If the track is an audioTrack, apply the current audio output device.
+    if (track.isAudioTrack) {
+      await _applyCurrentAudioOutputDevice();
+    }
+
+    // Send a mute state update to the server.
+    _onLocalTrackMuted(track, false);
   }
 
   Future<void> _onRemoteIceCandidate(SfuIceTrickleEvent event) async {
@@ -357,7 +378,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     _logger.v(() => '[onLocalIceCandidate] result: $result');
   }
 
-  Future<void> _onPublisherNegotiationNeeded(StreamPeerConnection pc) async {
+  Future<void> _onRenegotiationNeeded(StreamPeerConnection pc) async {
     _logger.d(
       () => '[onPubNegotiationNeeded] type: ${pc.type}',
     );
@@ -397,17 +418,32 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     }
   }
 
-  Future<void> _onSubscriberTrackReceived(
+  Future<void> _onRemoteTrackReceived(
     StreamPeerConnection pc,
     RtcRemoteTrack remoteTrack,
   ) async {
-    _logger.d(
-      () => '[onSubscriberTrackReceived] remoteTrack: $remoteTrack',
-    );
-    stateManager.onSubscriberTrackReceived(
+    _logger.d(() => '[onRemoteTrackReceived] remoteTrack: $remoteTrack');
+
+    // Start the track.
+    await remoteTrack.start();
+
+    // If the track is an audioTrack, apply the current audio output device.
+    if (remoteTrack.isAudioTrack) {
+      await _applyCurrentAudioOutputDevice();
+    }
+
+    return stateManager.onSubscriberTrackReceived(
       remoteTrack.trackIdPrefix,
       remoteTrack.trackType,
     );
+  }
+
+  Future<void> _applyCurrentAudioOutputDevice() async {
+    final state = stateManager.state.valueOrNull;
+    final audioOutputDevice = state?.audioOutputDevice;
+    if (audioOutputDevice != null) {
+      await _onSetAudioOutputDevice(audioOutputDevice);
+    }
   }
 
   void _onStatsReceived(
@@ -469,6 +505,14 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     return result;
   }
 
+  Future<Result<None>> _onSetAudioOutputDevice(RtcMediaDevice device) async {
+    if (rtcManager == null) {
+      return Result.error('Unable to set speaker device, RTCManager not found');
+    }
+    await rtcManager!.setAudioOutputDevice(device: device);
+    return Result.success(None());
+  }
+
   Future<Result<None>> _onSetCameraEnabled(bool enabled) async {
     final track = await rtcManager?.setCameraEnabled(enabled: enabled);
     if (track == null) {
@@ -484,6 +528,17 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return Result.error(
         'Unable to enable/disable microphone, Track not found',
       );
+    }
+
+    return Result.success(None());
+  }
+
+  Future<Result<None>> _onSetAudioInputDevice(
+    RtcMediaDevice device,
+  ) async {
+    final result = await rtcManager?.setAudioInputDevice(device: device);
+    if (result == null) {
+      return Result.error('Unable to set microphone device, Track not found');
     }
 
     return Result.success(None());
@@ -509,10 +564,10 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     return Result.success(None());
   }
 
-  Future<Result<None>> _onSetCameraDeviceId(String deviceId) async {
-    final track = await rtcManager?.setCameraDeviceId(deviceId: deviceId);
+  Future<Result<None>> _onSetVideoInputDevice(RtcMediaDevice device) async {
+    final track = await rtcManager?.setVideoInputDevice(device: device);
     if (track == null) {
-      return Result.error('Unable to set camera device id, Track not found');
+      return Result.error('Unable to set camera device, Track not found');
     }
 
     return Result.success(None());

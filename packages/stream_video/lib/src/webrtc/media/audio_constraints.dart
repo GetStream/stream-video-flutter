@@ -39,7 +39,7 @@ class AudioConstraints extends MediaConstraints {
   Map<String, dynamic> toMap() {
     final constraints = <String, dynamic>{};
 
-    /// in we platform it's not possible to provide optional and mandatory parameters.
+    /// in web platform it's not possible to provide optional and mandatory parameters.
     /// deviceId is a mandatory parameter
     if (!CurrentPlatform.isWeb || (CurrentPlatform.isWeb && deviceId == null)) {
       constraints['optional'] = <Map<String, dynamic>>[

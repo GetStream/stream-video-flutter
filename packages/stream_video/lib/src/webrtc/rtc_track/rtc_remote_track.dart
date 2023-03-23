@@ -6,6 +6,8 @@ import '../model/rtc_video_dimension.dart';
 import '../rtc_audio_api/rtc_audio_api.dart' as rtc_audio_api;
 import 'rtc_track.dart';
 
+const _tag = 'SV:RtcRemoteTrack';
+
 class RtcRemoteTrack extends RtcTrack {
   const RtcRemoteTrack({
     required super.trackIdPrefix,
@@ -15,18 +17,23 @@ class RtcRemoteTrack extends RtcTrack {
     super.videoDimension,
     super.receiver,
     super.transceiver,
+    this.audioSinkId,
   });
+
+  /// The audio sink device id of the track in case it is an audio track.
+  final String? audioSinkId;
 
   @override
   Future<void> start() async {
     // Enable the track.
     enable();
 
-    streamLog.i('SV:RtcRemoteTrack', () => 'Starting track: $trackId');
+    streamLog.i(_tag, () => 'Starting track: $trackId');
 
     // Start the audio player if it's an audio track.
     if (isAudioTrack) {
       rtc_audio_api.startAudio(trackId, mediaTrack);
+      if (audioSinkId != null) setSinkId(audioSinkId!);
     }
   }
 
@@ -35,7 +42,7 @@ class RtcRemoteTrack extends RtcTrack {
     // Disable the track.
     disable();
 
-    streamLog.i('SV:RtcRemoteTrack', () => 'Stopping track: $trackId');
+    streamLog.i(_tag, () => 'Stopping track: $trackId');
 
     // Stop the audio player if it's an audio track.
     if (isAudioTrack) {
@@ -52,6 +59,7 @@ class RtcRemoteTrack extends RtcTrack {
     RtcVideoDimension? videoDimension,
     rtc.RTCRtpReceiver? receiver,
     rtc.RTCRtpTransceiver? transceiver,
+    String? audioSinkId,
   }) {
     return RtcRemoteTrack(
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
@@ -61,6 +69,7 @@ class RtcRemoteTrack extends RtcTrack {
       videoDimension: videoDimension ?? this.videoDimension,
       receiver: receiver ?? this.receiver,
       transceiver: transceiver ?? this.transceiver,
+      audioSinkId: audioSinkId ?? this.audioSinkId,
     );
   }
 
@@ -68,5 +77,18 @@ class RtcRemoteTrack extends RtcTrack {
   String toString() {
     return 'RtcRemoteTrack{trackIdPrefix: $trackIdPrefix, '
         'trackType: $trackType, stream.id: ${mediaStream.id}';
+  }
+}
+
+const _audioTag = 'SV:RtcRemoteAudioTrack';
+
+extension RtcRemoteAudioTrackHardwareExt on RtcRemoteTrack {
+  RtcRemoteTrack setSinkId(String id) {
+    if (!isAudioTrack) return this;
+
+    streamLog.i(_audioTag, () => 'Setting sink id for track $trackId to $id');
+
+    rtc_audio_api.setSinkId(trackId, id);
+    return copyWith(audioSinkId: id);
   }
 }

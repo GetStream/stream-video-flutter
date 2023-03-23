@@ -1,8 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_video/src/webrtc/media/constraints/camera_position.dart';
+import '../webrtc/media/constraints/camera_position.dart';
 
 import '../webrtc/model/rtc_video_dimension.dart';
+import '../webrtc/rtc_media_device/rtc_media_device.dart';
 
 @immutable
 abstract class TrackState with EquatableMixin {
@@ -10,12 +11,12 @@ abstract class TrackState with EquatableMixin {
 
   factory TrackState.local({
     bool muted = false,
-    String? deviceId,
+    RtcMediaDevice? sourceDevice,
     CameraPosition? cameraPosition,
   }) {
     return LocalTrackState._(
       muted: muted,
-      deviceId: deviceId,
+      sourceDevice: sourceDevice,
       cameraPosition: cameraPosition,
     );
   }
@@ -24,12 +25,14 @@ abstract class TrackState with EquatableMixin {
     bool muted = false,
     bool subscribed = false,
     bool received = false,
+    RtcMediaDevice? audioSinkDevice,
     RtcVideoDimension? videoDimension,
   }) {
     return RemoteTrackState._(
       muted: muted,
       subscribed: subscribed,
       received: received,
+      audioSinkDevice: audioSinkDevice,
       videoDimension: videoDimension,
     );
   }
@@ -63,24 +66,24 @@ abstract class TrackState with EquatableMixin {
 class LocalTrackState extends TrackState {
   const LocalTrackState._({
     required super.muted,
-    this.deviceId,
+    this.sourceDevice,
     this.cameraPosition,
   });
 
   /// The deviceId of the capture device to use.
-  final String? deviceId;
+  final RtcMediaDevice? sourceDevice;
 
   /// The camera position of the track in case it is a video track.
   final CameraPosition? cameraPosition;
 
   @override
-  List<Object?> get props => [muted, deviceId, cameraPosition];
+  List<Object?> get props => [muted, sourceDevice, cameraPosition];
 
   @override
   String toString() {
     final fields = [
       if (muted) 'muted',
-      if (deviceId != null) 'deviceId($deviceId)',
+      if (sourceDevice != null) 'deviceId($sourceDevice)',
       if (cameraPosition != null) 'camera($cameraPosition)',
     ];
     if (fields.isEmpty) {
@@ -94,12 +97,12 @@ class LocalTrackState extends TrackState {
   @override
   LocalTrackState copyWith({
     bool? muted,
-    String? deviceId,
+    RtcMediaDevice? sourceDevice,
     CameraPosition? cameraPosition,
   }) {
     return LocalTrackState._(
       muted: muted ?? this.muted,
-      deviceId: deviceId ?? this.deviceId,
+      sourceDevice: sourceDevice ?? this.sourceDevice,
       cameraPosition: cameraPosition ?? this.cameraPosition,
     );
   }
@@ -110,6 +113,7 @@ class RemoteTrackState extends TrackState {
     required super.muted,
     this.subscribed = false,
     this.received = false,
+    this.audioSinkDevice,
     this.videoDimension,
   });
 
@@ -117,8 +121,18 @@ class RemoteTrackState extends TrackState {
   final bool received;
   final RtcVideoDimension? videoDimension;
 
+  /// The sinkId of the audio output device to use
+  /// in case it is an audio track.
+  final RtcMediaDevice? audioSinkDevice;
+
   @override
-  List<Object?> get props => [subscribed, received, muted, videoDimension];
+  List<Object?> get props => [
+        subscribed,
+        received,
+        muted,
+        audioSinkDevice,
+        videoDimension,
+      ];
 
   @override
   String toString() {
@@ -126,6 +140,7 @@ class RemoteTrackState extends TrackState {
       if (subscribed) 'subscribed',
       if (received) 'received',
       if (muted) 'muted',
+      if (audioSinkDevice != null) 'audioSinkDevice($audioSinkDevice)',
       if (videoDimension != null)
         'videoDimension(width: ${videoDimension!.width}, height: ${videoDimension!.height})',
     ];
@@ -144,12 +159,14 @@ class RemoteTrackState extends TrackState {
     bool? subscribed,
     bool? received,
     bool? muted,
+    RtcMediaDevice? audioSinkDevice,
     RtcVideoDimension? videoDimension,
   }) {
     return RemoteTrackState._(
       subscribed: subscribed ?? this.subscribed,
       received: received ?? this.received,
       muted: muted ?? this.muted,
+      audioSinkDevice: audioSinkDevice ?? this.audioSinkDevice,
       videoDimension: videoDimension ?? this.videoDimension,
     );
   }
