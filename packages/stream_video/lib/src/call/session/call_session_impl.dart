@@ -337,8 +337,11 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
 
     // Start the track.
     await track.start();
-    // Apply the current audio output device.
-    await _applyCurrentAudioOutputDevice();
+
+    // If the track is an audioTrack, apply the current audio output device.
+    if (track.isAudioTrack) {
+      await _applyCurrentAudioOutputDevice();
+    }
 
     // Send a mute state update to the server.
     _onLocalTrackMuted(track, false);
@@ -422,10 +425,13 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   ) async {
     _logger.d(() => '[onRemoteTrackReceived] remoteTrack: $remoteTrack');
 
-    // start the track.
+    // Start the track.
     await remoteTrack.start();
-    // apply the current audio output device.
-    await _applyCurrentAudioOutputDevice();
+
+    // If the track is an audioTrack, apply the current audio output device.
+    if (remoteTrack.isAudioTrack) {
+      await _applyCurrentAudioOutputDevice();
+    }
 
     return stateManager.onSubscriberTrackReceived(
       remoteTrack.trackIdPrefix,
