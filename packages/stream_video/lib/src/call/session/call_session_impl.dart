@@ -22,8 +22,9 @@ import '../../shared_emitter.dart';
 import '../../utils/none.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
+import '../../webrtc/model/stats/rtc_printable_stats.dart';
+import '../../webrtc/model/stats/rtc_raw_stats.dart';
 import '../../webrtc/peer_connection.dart';
-import '../../webrtc/peer_type.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
 import 'call_session.dart';
@@ -67,8 +68,13 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   final RtcManagerFactory rtcManagerFactory;
   RtcManager? rtcManager;
 
+  late final _stats = MutableSharedEmitterImpl<CallStats>();
+
   @override
   SharedEmitter<SfuEvent> get events => sfuWS.events;
+
+  @override
+  SharedEmitter<CallStats> get stats => _stats;
 
   @override
   Future<Result<None>> start() async {
@@ -107,7 +113,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         ..onSubscriberIceCandidate = _onLocalIceCandidate
         ..onPublisherTrackMuted = _onPublisherTrackMuted
         ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded
-        ..onSubscriberTrackReceived = _onSubscriberTrackReceived;
+        ..onSubscriberTrackReceived = _onSubscriberTrackReceived
+        ..onStatsReceived = _onStatsReceived;
 
       _logger.v(() => '[start] completed');
       return Result.success(None());
@@ -120,6 +127,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   @override
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
+    await _stats.close();
     sfuWS.removeEventListener(this);
     await sfuWS.disconnect();
     await rtcManager?.dispose();
@@ -399,6 +407,20 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     stateManager.onSubscriberTrackReceived(
       remoteTrack.trackIdPrefix,
       remoteTrack.trackType,
+    );
+  }
+
+  void _onStatsReceived(
+    StreamPeerConnection pc,
+    RtcPrintableStats rtcStats,
+  ) {
+    _stats.emit(
+      CallStats(
+        peerType: pc.type,
+        printable: rtcStats,
+        // TODO implement raw stats
+        raw: RtcRawStats(),
+      ),
     );
   }
 

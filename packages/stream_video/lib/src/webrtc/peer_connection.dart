@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
 import '../disposable.dart';
@@ -6,6 +8,8 @@ import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
+import 'model/stats/rtc_printable_stats.dart';
+import 'model/stats/rtc_stats_mapper.dart';
 import 'peer_type.dart';
 
 /// {@template onStreamAdded}
@@ -32,6 +36,14 @@ typedef OnIceCandidate = void Function(
 typedef OnTrack = void Function(
   StreamPeerConnection,
   rtc.RTCTrackEvent,
+);
+
+/// {@template onTrack}
+/// Handler whenever we receive [RtcPrintableStats].
+/// {@endtemplate}
+typedef OnStats = void Function(
+  StreamPeerConnection,
+  RtcPrintableStats,
 );
 
 /// Wrapper around the WebRTC connection that contains tracks.
@@ -64,6 +76,9 @@ class StreamPeerConnection extends Disposable {
 
   /// {@macro onTrack}
   OnTrack? onTrack;
+
+  /// {@macro onTrack}
+  OnStats? onStats;
 
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
 
@@ -187,6 +202,10 @@ class StreamPeerConnection extends Disposable {
     return transceiver;
   }
 
+  void getStats() {
+    pc.getStats();
+  }
+
   void _initRtcCallbacks() {
     pc
       ..onAddStream = _onAddStream
@@ -246,6 +265,33 @@ class StreamPeerConnection extends Disposable {
 
   void _onIceConnectionState(rtc.RTCIceConnectionState state) {
     _logger.v(() => '[onIceConnectionState] state: $state');
+
+    switch (state) {
+      case rtc.RTCIceConnectionState.RTCIceConnectionStateConnected:
+        _observeStats();
+        break;
+      case rtc.RTCIceConnectionState.RTCIceConnectionStateClosed:
+      case rtc.RTCIceConnectionState.RTCIceConnectionStateFailed:
+      case rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected:
+        _statsTimer?.cancel();
+        break;
+      default:
+        break;
+    }
+  }
+
+  Timer? _statsTimer;
+
+  void _observeStats() {
+    _statsTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      try {
+        final stats = await pc.getStats();
+        final rtcStats = stats.toRtcStats();
+        onStats?.call(this, rtcStats);
+      } catch (e, stk) {
+        _logger.e(() => '[getStats] failed: $e; $stk');
+      }
+    });
   }
 
   void _onRenegotiationNeeded() {
@@ -256,6 +302,8 @@ class StreamPeerConnection extends Disposable {
   @override
   Future<void> dispose() async {
     _dropRtcCallbacks();
+    _statsTimer?.cancel();
+    _statsTimer = null;
     onStreamAdded = null;
     onRenegotiationNeeded = null;
     onIceCandidate = null;
@@ -263,5 +311,11 @@ class StreamPeerConnection extends Disposable {
     _pendingCandidates.clear();
     await pc.dispose();
     return await super.dispose();
+  }
+}
+
+extension on rtc.StatsReport {
+  String stringify() {
+    return 'ts: $timestamp, id: $id, type: $type, values: $values';
   }
 }

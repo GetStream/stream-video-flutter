@@ -51,6 +51,8 @@ abstract class Call {
 
   StateEmitter<CallState> get state;
 
+  SharedEmitter<CallStats> get stats;
+
   SharedEmitter<SfuEvent> get events;
 
   OnCallPermissionRequest? onPermissionRequest;
