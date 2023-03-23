@@ -77,14 +77,16 @@ class _CallStatsContentState extends State<CallStatsContent> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: _PublisherContent(
+              child: _PubSubContent(
+                title: 'PUBLISHER',
                 local: pubLocal,
                 remote: pubRemote,
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: _SubscriberContent(
+              child: _PubSubContent(
+                title: 'SUBSCRIBER',
                 local: subLocal,
                 remote: subRemote,
               ),
@@ -97,14 +99,16 @@ class _CallStatsContentState extends State<CallStatsContent> {
   }
 }
 
-/// Represents the publisher stats.
-class _PublisherContent extends StatelessWidget {
-  const _PublisherContent({
+/// Represents the publisher/subscriber stats.
+class _PubSubContent extends StatelessWidget {
+  const _PubSubContent({
     super.key,
+    required this.title,
     required this.remote,
     required this.local,
   });
 
+  final String title;
   final String remote;
   final String local;
 
@@ -112,45 +116,9 @@ class _PublisherContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Text(
-          'PUBLISHER',
-          style: TextStyle(
-            color: Colors.greenAccent,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
         Text(
-          local,
-          style: const TextStyle(color: Colors.white),
-        ),
-        Text(
-          remote,
-          style: const TextStyle(color: Colors.white),
-        ),
-      ],
-    );
-  }
-}
-
-/// Represents the subscriber stats.
-class _SubscriberContent extends StatelessWidget {
-  const _SubscriberContent({
-    super.key,
-    required this.remote,
-    required this.local,
-  });
-
-  final String remote;
-  final String local;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Text(
-          'SUBSCRIBER',
-          style: TextStyle(
+          title,
+          style: const TextStyle(
             color: Colors.greenAccent,
             fontSize: 20,
             fontWeight: FontWeight.bold,
