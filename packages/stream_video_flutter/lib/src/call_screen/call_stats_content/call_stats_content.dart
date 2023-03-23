@@ -4,14 +4,19 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 
+/// Represents the call stats UI mainly for the diagnostics purposes only.
 class CallStatsContent extends StatefulWidget {
+  /// Creates a new instance of [CallStatsContent].
   const CallStatsContent({
     super.key,
     required this.call,
     this.onClosePressed,
   });
 
+  /// Represents a call.
   final Call call;
+
+  /// The action to perform when the close button is pressed.
   final VoidCallback? onClosePressed;
 
   @override
@@ -19,9 +24,14 @@ class CallStatsContent extends StatefulWidget {
 }
 
 class _CallStatsContentState extends State<CallStatsContent> {
+
+  /// Represents the publisher stats.
   CallStats? _publisher;
+
+  /// Represents the subscriber stats.
   CallStats? _subscriber;
 
+  /// Controls the subscription to the stats updates.
   StreamSubscription<CallStats>? _subscription;
 
   @override
