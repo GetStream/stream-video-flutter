@@ -74,7 +74,8 @@ class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
   @override
   void initState() {
     super.initState();
-    _deviceChangeSubscription = _deviceNotifier.onDeviceChange.listen((devices) {
+    _deviceChangeSubscription =
+        _deviceNotifier.onDeviceChange.listen((devices) {
       final audioOutputs = devices.where(
         (it) => it.kind == RtcMediaDeviceKind.audioOutput,
       );

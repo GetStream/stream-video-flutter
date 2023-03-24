@@ -31,7 +31,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     super.transceiver,
   });
 
-  static Future<RtcLocalAudioTrack?> audio({
+  static Future<RtcLocalAudioTrack> audio({
     String trackIdPrefix = kLocalTrackIdPrefix,
     AudioConstraints constraints = const AudioConstraints(),
   }) async {
@@ -42,7 +42,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
 
     if (audioTrack == null) {
       streamLog.w(_tag, () => 'No audio track found');
-      return null;
+      throw Exception('No audio track found');
     }
 
     final track = RtcLocalTrack(
@@ -56,7 +56,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     return track;
   }
 
-  static Future<RtcLocalCameraTrack?> camera({
+  static Future<RtcLocalCameraTrack> camera({
     String trackIdPrefix = kLocalTrackIdPrefix,
     CameraConstraints constraints = const CameraConstraints(),
   }) async {
@@ -66,7 +66,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
 
     if (videoTrack == null) {
       streamLog.w(_tag, () => 'No camera track found');
-      return null;
+      throw Exception('No camera track found');
     }
 
     final track = RtcLocalTrack(
@@ -80,7 +80,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     return track;
   }
 
-  static Future<RtcLocalScreenShareTrack?> screenShare({
+  static Future<RtcLocalScreenShareTrack> screenShare({
     String trackIdPrefix = kLocalTrackIdPrefix,
     ScreenShareConstraints constraints = const ScreenShareConstraints(),
   }) async {
@@ -91,7 +91,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
 
     if (videoTrack == null) {
       streamLog.w(_tag, () => 'No video track found');
-      return null;
+      throw Exception('No video track found');
     }
 
     final track = RtcLocalTrack(
