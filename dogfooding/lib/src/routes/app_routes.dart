@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../home_screen.dart';
-import '../login_screen.dart';
-import '../splash_screen.dart';
+import '../screens/home_screen.dart';
+import '../screens/login_screen.dart';
+import '../screens/splash_screen.dart';
 import '../utils/users_provider.dart';
 import 'routes.dart';
 

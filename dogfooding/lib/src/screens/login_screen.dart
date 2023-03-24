@@ -7,11 +7,11 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:stream_video/stream_video.dart';
 
-import '../env/env.dart';
-import 'model/user_credentials.dart';
-import 'routes/routes.dart';
-import 'user_repository.dart';
-import 'utils/assets.dart';
+import '../../env/env.dart';
+import '../../user_repository.dart';
+import '../model/user_credentials.dart';
+import '../routes/routes.dart';
+import '../utils/assets.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
