@@ -18,7 +18,7 @@ void main() async {
       id: Env.sampleUserId00,
       role: Env.sampleUserRole00,
       name: Env.sampleUserName00,
-      imageUrl: Env.sampleUserImage00,
+      image: Env.sampleUserImage00,
     ),
     token: Token(Env.sampleUserVideoToken00),
   );
