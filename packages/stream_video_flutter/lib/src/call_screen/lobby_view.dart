@@ -55,8 +55,12 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
       return setState(() => _cameraTrack = null);
     }
 
-    final cameraTrack = await RtcLocalTrack.camera();
-    return setState(() => _cameraTrack = cameraTrack);
+    try {
+      final cameraTrack = await RtcLocalTrack.camera();
+      return setState(() => _cameraTrack = cameraTrack);
+    } catch (e) {
+      streamLog.w('SV:LobbyView', () => 'Error creating camera track: $e');
+    }
   }
 
   Future<void> toggleMicrophone() async {
@@ -65,8 +69,12 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
       return setState(() => _microphoneTrack = null);
     }
 
-    final microphoneTrack = await RtcLocalTrack.audio();
-    return setState(() => _microphoneTrack = microphoneTrack);
+    try {
+      final microphoneTrack = await RtcLocalTrack.audio();
+      return setState(() => _microphoneTrack = microphoneTrack);
+    } catch (e) {
+      streamLog.w('SV:LobbyView', () => 'Error creating microphone track: $e');
+    }
   }
 
   void onJoinCallPressed() {

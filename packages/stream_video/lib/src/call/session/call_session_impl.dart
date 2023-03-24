@@ -68,13 +68,12 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   final RtcManagerFactory rtcManagerFactory;
   RtcManager? rtcManager;
 
+  @override
+  SharedEmitter<CallStats> get stats => _stats;
   late final _stats = MutableSharedEmitterImpl<CallStats>();
 
   @override
   SharedEmitter<SfuEvent> get events => sfuWS.events;
-
-  @override
-  SharedEmitter<CallStats> get stats => _stats;
 
   @override
   Future<Result<None>> start() async {
@@ -138,18 +137,15 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
 
   @override
   Future<Result<None>> setLocalTrack(RtcLocalTrack track) async {
-    try {
-      _logger.d(() => '[setLocalTrack] track: $track');
-      final result = await rtcManager?.publishTrack(track);
-      _logger.v(() => '[setLocalTrack] result: $result');
-      if (result == null) {
-        return Result.error('Unable to set local track, Call not connected');
-      }
-      return Result.success(None());
-    } catch (e, stk) {
-      _logger.e(() => '[setLocalTrack] failed: $e; $stk');
-      return Result.failure(VideoErrors.compose(e, stk));
+    _logger.d(() => '[setLocalTrack] track: $track');
+
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set local track, Call not connected');
     }
+
+    final result = await rtcManager.publishTrack(track);
+    return result.map((_) => None());
   }
 
   @override
@@ -506,80 +502,82 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   }
 
   Future<Result<None>> _onSetAudioOutputDevice(RtcMediaDevice device) async {
+    final rtcManager = this.rtcManager;
     if (rtcManager == null) {
-      return Result.error('Unable to set speaker device, RTCManager not found');
+      return Result.error('Unable to set speaker device, Call not connected');
     }
-    await rtcManager!.setAudioOutputDevice(device: device);
-    return Result.success(None());
+
+    return rtcManager.setAudioOutputDevice(device: device);
   }
 
   Future<Result<None>> _onSetCameraEnabled(bool enabled) async {
-    final track = await rtcManager?.setCameraEnabled(enabled: enabled);
-    if (track == null) {
-      return Result.error('Unable to enable/disable camera, Track not found');
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set camera, Call not connected');
     }
 
-    return Result.success(None());
+    final result = await rtcManager.setCameraEnabled(enabled: enabled);
+    return result.map((_) => None());
   }
 
   Future<Result<None>> _onSetMicrophoneEnabled(bool enabled) async {
-    final track = await rtcManager?.setMicrophoneEnabled(enabled: enabled);
-    if (track == null) {
-      return Result.error(
-        'Unable to enable/disable microphone, Track not found',
-      );
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set microphone, Call not connected');
     }
 
-    return Result.success(None());
+    final result = await rtcManager.setMicrophoneEnabled(enabled: enabled);
+    return result.map((_) => None());
   }
 
-  Future<Result<None>> _onSetAudioInputDevice(
-    RtcMediaDevice device,
-  ) async {
-    final result = await rtcManager?.setAudioInputDevice(device: device);
-    if (result == null) {
-      return Result.error('Unable to set microphone device, Track not found');
+  Future<Result<None>> _onSetAudioInputDevice(RtcMediaDevice device) async {
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set audioInput, Call not connected');
     }
 
-    return Result.success(None());
+    final result = await rtcManager.setAudioInputDevice(device: device);
+    return result.map((_) => None());
   }
 
   Future<Result<None>> _onSetScreenShareEnabled(bool enabled) async {
-    final track = await rtcManager?.setScreenShareEnabled(enabled: enabled);
-    if (track == null) {
-      return Result.error(
-        'Unable to enable/disable screen-share, Track not found',
-      );
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set ScreenShare, Call not connected');
     }
 
-    return Result.success(None());
+    final result = await rtcManager.setScreenShareEnabled(enabled: enabled);
+    return result.map((_) => None());
   }
 
   Future<Result<None>> _onFlipCamera() async {
-    final track = await rtcManager?.flipCamera();
-    if (track == null) {
-      return Result.error('Unable to switch camera, Track not found');
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to flip camera, Call not connected');
     }
 
-    return Result.success(None());
+    final result = await rtcManager.flipCamera();
+    return result.map((_) => None());
   }
 
   Future<Result<None>> _onSetVideoInputDevice(RtcMediaDevice device) async {
-    final track = await rtcManager?.setVideoInputDevice(device: device);
-    if (track == null) {
-      return Result.error('Unable to set camera device, Track not found');
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set video input, Call not connected');
     }
 
-    return Result.success(None());
+    final result = await rtcManager.setVideoInputDevice(device: device);
+    return result.map((_) => None());
   }
 
   Future<Result<None>> _onSetCameraPosition(CameraPosition position) async {
-    final track = await rtcManager?.setCameraPosition(cameraPosition: position);
-    if (track == null) {
-      return Result.error('Unable to set camera position, Track not found');
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set camera position, Call not connected');
     }
 
-    return Result.success(None());
+    final result = await rtcManager.setCameraPosition(cameraPosition: position);
+    return result.map((_) => None());
   }
 }
 
@@ -623,16 +621,17 @@ extension on SfuClient {
         ),
       ),
     );
-    if (result is Success<sfu.UpdateSubscriptionsResponse>) {
-      if (result.data.hasError()) {
-        final error = result.data.error;
-        return Result.error('${error.code} - ${error.message}');
-      }
-    }
-    if (result is Failure) {
-      return result;
-    }
-    return Result.success(None());
+
+    return result.fold(
+      failure: (it) => it,
+      success: (it) {
+        if (it.data.hasError()) {
+          final error = it.data.error;
+          return Result.error('${error.code} - ${error.message}');
+        }
+        return Result.success(None());
+      },
+    );
   }
 }
 

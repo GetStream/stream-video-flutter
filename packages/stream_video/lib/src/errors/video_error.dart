@@ -30,7 +30,7 @@ class VideoErrorWithCause extends VideoError {
   });
 
   /// Cause of the error, either a BE exception or an SDK based one.
-  final Exception cause;
+  final Object cause;
 
   @override
   String toString() {
