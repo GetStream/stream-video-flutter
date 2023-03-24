@@ -375,23 +375,29 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   }
 
   Future<void> _onRenegotiationNeeded(StreamPeerConnection pc) async {
-    _logger.d(
-      () => '[onPubNegotiationNeeded] type: ${pc.type}',
-    );
+    _logger.d(() => '[negotiate] type: ${pc.type}');
 
     final offer = await pc.createOffer();
+
     if (offer is! Success<rtc.RTCSessionDescription>) return;
 
     final tracksInfo = rtcManager?.getPublisherTrackInfos();
     if (tracksInfo == null || tracksInfo.isEmpty) {
       _logger.w(
-        () => '[onPubNegotiationNeeded] rejected(tracksInfo '
-            'is null/empty): $tracksInfo',
+        () => '[negotiate] rejected(tracksInfo is null/empty): $tracksInfo',
       );
       return;
     }
 
-    _logger.v(() => '[onPubNegotiationNeeded] tracksInfo: $tracksInfo');
+    for (final track in tracksInfo) {
+      _logger.v(
+        () => '[negotiate] track.id: ${track.trackId}, '
+            'track.type: ${track.trackType}',
+      );
+      for (final layer in [...?track.layers]) {
+        _logger.v(() => '[negotiate] layer: $layer');
+      }
+    }
 
     final pubResult = await sfuClient.setPublisher(
       sfu.SetPublisherRequest(
@@ -402,14 +408,14 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     );
     if (pubResult is! Success<sfu.SetPublisherResponse>) {
       _logger.w(
-        () => '[onPubNegotiationNeeded] #setPublisher; failed: $pubResult',
+        () => '[negotiate] #setPublisher; failed: $pubResult',
       );
       return;
     }
     final ansResult = await pc.setRemoteAnswer(pubResult.data.sdp);
     if (ansResult is! Success<void>) {
       _logger.w(
-        () => '[onPubNegotiationNeeded] #setRemoteAnswer; failed: $ansResult',
+        () => '[negotiate] #setRemoteAnswer; failed: $ansResult',
       );
     }
   }
@@ -592,10 +598,11 @@ extension RtcTracksInfoMapper on List<RtcTrackInfo> {
           return sfu_models.VideoLayer(
             rid: layer.rid,
             videoDimension: sfu_models.VideoDimension(
-              width: layer.videoDimension?.width,
-              height: layer.videoDimension?.height,
+              width: layer.parameters.dimension.width,
+              height: layer.parameters.dimension.height,
             ),
-            bitrate: layer.bitrate,
+            bitrate: layer.parameters.encoding.maxBitrate,
+            fps: layer.parameters.encoding.maxFramerate,
           );
         }),
       );

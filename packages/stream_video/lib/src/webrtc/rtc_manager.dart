@@ -16,6 +16,8 @@ import 'media/media_constraints.dart';
 import 'model/rtc_audio_bitrate_preset.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_dimension.dart';
+import 'model/rtc_video_encoding.dart';
+import 'model/rtc_video_parameters.dart';
 import 'peer_connection.dart';
 import 'peer_type.dart';
 import 'rtc_media_device/rtc_media_device.dart';
@@ -233,9 +235,7 @@ extension PublisherRtcManager on RtcManager {
     });
 
     if (track == null) {
-      _logger.e(
-        () => 'getPublisherTrackByType: track with $trackType not found',
-      );
+      _logger.w(() => '[getPublisherTrackByType] track not found: $trackType');
       return null;
     }
 
@@ -251,32 +251,43 @@ extension PublisherRtcManager on RtcManager {
         final dimension = it.videoDimension!;
         final encodings = it.transceiver?.sender.parameters.encodings;
         _logger.i(() => '[getPublisherTrackInfos] dimension: $dimension');
+
         // default to a single layer, HQ
+        final defaultLayer = RtcVideoLayer(
+          rid: 'f',
+          parameters: RtcVideoParametersPresets.h720_16x9.copyWith(
+            dimension: dimension,
+          ),
+        );
         if (encodings == null) {
           videoLayers = [
-            RtcVideoLayer(
-              rid: 'f',
-              bitrate: 0,
-              videoDimension: RtcVideoDimension(
-                width: dimension.width,
-                height: dimension.height,
-              ),
-            ),
+            defaultLayer,
           ];
         } else {
-          videoLayers = encodings.map((e) {
-            final scale = e.scaleResolutionDownBy ?? 1;
+          videoLayers = encodings.map((it) {
+            final scale = it.scaleResolutionDownBy ?? 1;
             return RtcVideoLayer(
-              rid: e.rid ?? 'f',
-              bitrate: e.maxBitrate ?? 0,
-              videoDimension: RtcVideoDimension(
-                width: (dimension.width / scale).floor(),
-                height: (dimension.height / scale).floor(),
+              rid: it.rid ?? defaultLayer.rid,
+              parameters: RtcVideoParameters(
+                encoding: RtcVideoEncoding(
+                  maxBitrate: it.maxBitrate ??
+                      defaultLayer.parameters.encoding.maxBitrate,
+                  maxFramerate: it.maxFramerate ??
+                      defaultLayer.parameters.encoding.maxFramerate,
+                ),
+                dimension: RtcVideoDimension(
+                  width: (dimension.width / scale).floor(),
+                  height: (dimension.height / scale).floor(),
+                ),
               ),
             );
           }).toList();
         }
       }
+
+      videoLayers?.forEach((layer) {
+        _logger.v(() => '[getPublisherTrackInfos] layer: $layer');
+      });
 
       return RtcTrackInfo(
         trackId: it.mediaTrack.id,

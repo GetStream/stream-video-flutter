@@ -1,1 +1,7 @@
-enum StreamPeerType { publisher, subscriber }
+enum StreamPeerType {
+  publisher,
+  subscriber;
+
+  @override
+  String toString() => name;
+}
