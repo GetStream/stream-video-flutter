@@ -272,7 +272,7 @@ class StreamPeerConnection extends Disposable {
 
     switch (state) {
       case rtc.RTCIceConnectionState.RTCIceConnectionStateConnected:
-        return _startObserveStats();
+        return _startObservingStats();
       case rtc.RTCIceConnectionState.RTCIceConnectionStateClosed:
       case rtc.RTCIceConnectionState.RTCIceConnectionStateFailed:
       case rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected:
@@ -284,7 +284,7 @@ class StreamPeerConnection extends Disposable {
 
   Timer? _statsTimer;
 
-  void _startObserveStats() {
+  void _startObservingStats() {
     // Stop previous timer if any.
     _stopObservingStats();
     // Start new timer.
