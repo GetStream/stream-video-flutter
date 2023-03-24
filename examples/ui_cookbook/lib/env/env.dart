@@ -8,14 +8,14 @@ abstract class Env {
   @EnviedField(varName: 'SAMPLE_STREAM_VIDEO_API_KEY')
   static const streamVideoApiKey = _Env.streamVideoApiKey;
 
-  @EnviedField(varName: 'SAMPLE_USER_ID')
+  @EnviedField(varName: 'SAMPLE_USER_00_ID')
   static const sampleUserId00 = _Env.sampleUserId00;
-  @EnviedField(varName: 'SAMPLE_USER_NAME')
+  @EnviedField(varName: 'SAMPLE_USER_00_NAME')
   static const sampleUserName00 = _Env.sampleUserName00;
-  @EnviedField(varName: 'SAMPLE_USER_ROLE')
+  @EnviedField(varName: 'SAMPLE_USER_00_ROLE')
   static const sampleUserRole00 = _Env.sampleUserRole00;
-  @EnviedField(varName: 'SAMPLE_USER_IMAGE')
+  @EnviedField(varName: 'SAMPLE_USER_00_IMAGE')
   static const sampleUserImage00 = _Env.sampleUserImage00;
-  @EnviedField(varName: 'SAMPLE_USER_TOKEN')
+  @EnviedField(varName: 'SAMPLE_USER_00_VIDEO_TOKEN')
   static const sampleUserVideoToken00 = _Env.sampleUserVideoToken00;
 }
