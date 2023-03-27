@@ -167,16 +167,19 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
 
   @override
   Widget build(BuildContext context) {
-    final appTheme = StreamVideoTheme.light();
+    final appTheme = StreamVideoTheme.dark();
     return MaterialApp(
       navigatorKey: _navigatorKey,
       title: 'Stream Dog Fooding',
       theme: ThemeData(
-        textTheme: GoogleFonts.robotoMonoTextTheme(),
-        scaffoldBackgroundColor: appTheme.colorTheme.appBg,
+        textTheme: GoogleFonts.interTextTheme(),
+        scaffoldBackgroundColor: const Color(0xFF2C2C2E),
         extensions: <ThemeExtension<dynamic>>[
           appTheme,
         ],
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          primary: const Color(0xff005FFF),
+        ),
       ),
       onGenerateRoute: AppRoutes.generateRoute,
     );
