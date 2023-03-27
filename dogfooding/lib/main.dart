@@ -172,7 +172,17 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
       navigatorKey: _navigatorKey,
       title: 'Stream Dog Fooding',
       theme: ThemeData(
-        textTheme: GoogleFonts.interTextTheme(),
+        textTheme: GoogleFonts.interTextTheme().copyWith(
+          bodyLarge: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 28,
+          ),
+          bodyMedium: const TextStyle(
+            fontSize: 18,
+            color: Color(0xFF979797),
+          ),
+        ),
         scaffoldBackgroundColor: const Color(0xFF2C2C2E),
         extensions: <ThemeExtension<dynamic>>[
           appTheme,
