@@ -87,6 +87,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -94,17 +96,26 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             Hero(
               tag: 'stream_logo',
-              child: SvgPicture.asset(
-                streamLogoAsset,
-                semanticsLabel: 'Stream Logo',
+              child: Image.asset(
+                streamVideoIconAsset,
                 width: size.width * 0.3,
               ),
             ),
-            const SizedBox(height: 48),
+            const SizedBox(height: 36),
+            Text('Stream Meetings', style: theme.textTheme.bodyLarge),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+              child: Text(
+                'Please sign in with your Google Stream account.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
                 controller: _emailController,
+                style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: 'Enter Email',
                   isDense: true,
@@ -115,6 +126,11 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loginWithEmail,
+              style: const ButtonStyle(
+                backgroundColor: MaterialStatePropertyAll<Color>(
+                  Color(0xff005FFF),
+                ),
+              ),
               child: const Text('Login with Email'),
             ),
             const SizedBox(height: 48),
@@ -183,7 +199,7 @@ class GoogleLoginButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         elevation: 1,
         fixedSize: const Size.fromHeight(56),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xff005FFF),
         padding: const EdgeInsets.symmetric(horizontal: 4),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(36),
@@ -203,14 +219,14 @@ class GoogleLoginButton extends StatelessWidget {
               label,
               style: const TextStyle(
                 fontSize: 16,
-                color: Colors.black87,
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const Spacer(),
             const Icon(
               Icons.arrow_forward,
-              color: Colors.black87,
+              color: Colors.white,
             ),
           ],
         ),
