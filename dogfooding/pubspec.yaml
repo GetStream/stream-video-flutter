@@ -19,6 +19,9 @@ dependencies:
   google_sign_in: ^5.4.4
   http: ^0.13.5
   shared_preferences: ^2.0.17
+  path_provider: ^2.0.14
+  share_plus: ^6.3.1
+  device_info_plus: ^8.1.0
   stream_video:
     path: ../packages/stream_video
   stream_video_flutter:

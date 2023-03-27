@@ -36,6 +36,7 @@ extension RtcStatsMapper on List<rtc.StatsReport> {
 
     for (final report in this) {
       try {
+        streamLog.v(_tag, () => '[toRtcStats] report: ${report.toJson()}');
         final reportType = RtcReportType.fromAlias(report.type);
         if (reportType == RtcReportType.codec) {
           report.extractCodec(codecs);
@@ -99,10 +100,11 @@ extension on rtc.StatsReport {
     final localCandidate = RtcIceCandidate.fromJson(json);
     if (localCandidate != null &&
         localCandidate.id == candidatePair.localCandidateId) {
-      localStat.write(RtcReportType.localCandidate.alias.toUpperCase());
-      localStat.write(_lineFeed);
+      localStat
+        ..write(_lineFeed)
+        ..write(RtcReportType.localCandidate.alias.toUpperCase())
+        ..write(_lineFeed);
       localCandidate.writeTo(localStat);
-      localStat.write(_lineFeed);
     }
   }
 
@@ -114,10 +116,11 @@ extension on rtc.StatsReport {
     final remoteCandidate = RtcIceCandidate.fromJson(json);
     if (remoteCandidate != null &&
         remoteCandidate.id == candidatePair.remoteCandidateId) {
-      remoteStat.write(RtcReportType.remoteCandidate.alias.toUpperCase());
-      remoteStat.write(_lineFeed);
+      remoteStat
+        ..write(_lineFeed)
+        ..write(RtcReportType.remoteCandidate.alias.toUpperCase())
+        ..write(_lineFeed);
       remoteCandidate.writeTo(remoteStat);
-      remoteStat.write(_lineFeed);
     }
   }
 
@@ -135,25 +138,25 @@ extension on rtc.StatsReport {
       final rtcBase = RtcInboundRtpAudioStream.fromJson(json);
       if (rtcBase != null) {
         remoteStat
+          ..write(_lineFeed)
           ..write(RtcReportType.inboundRtp.alias.toUpperCase())
           ..write(_space)
           ..write(mediaType.alias.toUpperCase())
           ..write(_lineFeed);
         rtcBase.writeTo(remoteStat);
         codecs[rtcBase.codecId]?.writeTo(remoteStat);
-        remoteStat.write(_lineFeed);
       }
     } else if (mediaType == RtcMediaType.video) {
       final rtcBase = RtcInboundRtpVideoStream.fromJson(json);
       if (rtcBase != null) {
         remoteStat
+          ..write(_lineFeed)
           ..write(RtcReportType.inboundRtp.alias.toUpperCase())
           ..write(_space)
           ..write(mediaType.alias.toUpperCase())
           ..write(_lineFeed);
         rtcBase.writeTo(remoteStat);
         codecs[rtcBase.codecId]?.writeTo(remoteStat);
-        remoteStat.write(_lineFeed);
       }
     }
   }
@@ -172,25 +175,25 @@ extension on rtc.StatsReport {
       final rtcBase = RtcOutboundRtpAudioStream.fromJson(json);
       if (rtcBase != null) {
         localStat
+          ..write(_lineFeed)
           ..write(rtcBase.type?.toUpperCase())
           ..write(_space)
           ..write(mediaType.alias.toUpperCase())
           ..write(_lineFeed);
         rtcBase.writeTo(localStat);
         codecs[rtcBase.codecId]?.writeTo(localStat);
-        localStat.write(_lineFeed);
       }
     } else if (mediaType == RtcMediaType.video) {
       final rtcBase = RTCOutboundRTPVideoStream.fromJson(json);
       if (rtcBase != null) {
         localStat
+          ..write(_lineFeed)
           ..write(rtcBase.type?.toUpperCase())
           ..write(_space)
           ..write(mediaType.alias.toUpperCase())
           ..write(_lineFeed);
         rtcBase.writeTo(localStat);
         codecs[rtcBase.codecId]?.writeTo(localStat);
-        localStat.write(_lineFeed);
       }
     }
   }
@@ -199,7 +202,6 @@ extension on rtc.StatsReport {
     required StringBuffer remoteStat,
     required StringBuffer localStat,
   }) {
-    ;
     final bool? sourceValue = values[RtcSource.propertyName];
     final String? kindAlias = values[RtcKind.propertyName];
     if (sourceValue == null || kindAlias == null) {
@@ -223,6 +225,7 @@ extension on rtc.StatsReport {
     final rtcBase = RtcMediaStreamTrackRemoteAudio.fromJson(json);
     if (rtcBase != null) {
       remoteStat
+        ..write(_lineFeed)
         ..write(RtcSource.remote.alias.toUpperCase())
         ..write(_space)
         ..write(RtcMediaType.audio.alias.toUpperCase())
@@ -230,7 +233,6 @@ extension on rtc.StatsReport {
         ..write(RtcReportType.track.alias.toUpperCase())
         ..write(_lineFeed);
       rtcBase.writeTo(remoteStat);
-      remoteStat.write(_lineFeed);
     }
   }
 
@@ -239,6 +241,7 @@ extension on rtc.StatsReport {
     final rtcBase = RtcMediaStreamTrackRemoteVideo.fromJson(json);
     if (rtcBase != null) {
       remoteStat
+        ..write(_lineFeed)
         ..write(RtcSource.remote.alias.toUpperCase())
         ..write(_space)
         ..write(RtcMediaType.video.alias.toUpperCase())
@@ -246,7 +249,6 @@ extension on rtc.StatsReport {
         ..write(RtcReportType.track.alias.toUpperCase())
         ..write(_lineFeed);
       rtcBase.writeTo(remoteStat);
-      remoteStat.write(_lineFeed);
     }
   }
 
@@ -255,6 +257,7 @@ extension on rtc.StatsReport {
     final rtcBase = RtcMediaStreamTrackLocalAudio.fromJson(json);
     if (rtcBase != null) {
       localStat
+        ..write(_lineFeed)
         ..write(RtcSource.local.alias.toUpperCase())
         ..write(_space)
         ..write(RtcMediaType.audio.alias.toUpperCase())
@@ -262,7 +265,6 @@ extension on rtc.StatsReport {
         ..write(RtcReportType.track.alias.toUpperCase())
         ..write(_lineFeed);
       rtcBase.writeTo(localStat);
-      localStat.write(_lineFeed);
     }
   }
 
@@ -271,6 +273,7 @@ extension on rtc.StatsReport {
     final rtcBase = RtcMediaStreamTrackLocalVideo.fromJson(json);
     if (rtcBase != null) {
       localStat
+        ..write(_lineFeed)
         ..write(RtcSource.local.alias.toUpperCase())
         ..write(_space)
         ..write(RtcMediaType.video.alias.toUpperCase())
@@ -278,7 +281,6 @@ extension on rtc.StatsReport {
         ..write(RtcReportType.track.alias.toUpperCase())
         ..write(_lineFeed);
       rtcBase.writeTo(localStat);
-      localStat.write(_lineFeed);
     }
   }
 
@@ -299,12 +301,12 @@ extension on rtc.StatsReport {
     }
     if (rtcBase != null) {
       localStat
+        ..write(_lineFeed)
         ..write(rtcBase.type?.toUpperCase())
         ..write(_space)
         ..write(kind.alias.toUpperCase())
         ..write(_lineFeed);
       rtcBase.writeTo(localStat);
-      localStat.write(_lineFeed);
     }
   }
 
@@ -325,15 +327,13 @@ extension on rtc.StatsReport {
     }
     if (rtcBase != null) {
       localStat
+        ..write(_lineFeed)
         ..write(rtcBase.type?.toUpperCase())
         ..write(_space)
         ..write(kind.alias.toUpperCase())
         ..write(_lineFeed);
       rtcBase.writeTo(localStat);
-      localStat.write(_lineFeed);
     }
-
-
   }
 }
 

@@ -12,6 +12,7 @@ class StreamLog {
 
   StreamLogger _logger = const SilentStreamLogger();
   IsLoggableValidator _validator = (Priority priority, Tag tag) => false;
+  Finder _finder = <T extends StreamLogger>([criteria]) => null;
 
   static StreamLog get instance => _instance;
 
@@ -21,6 +22,16 @@ class StreamLog {
 
   set validator(IsLoggableValidator validator) {
     _validator = validator;
+  }
+
+  set finder(Finder finder) {
+    print('<StreamLog> [setFinder] finder: $finder');
+    _finder = finder;
+  }
+
+  T? find<T extends StreamLogger>([dynamic criteria]) {
+    print('<StreamLog> [find] T: ${T.runtimeType}, criteria: $criteria');
+    return _finder.call(criteria);
   }
 
   void v(Tag tag, MessageBuilder message) {
