@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
+import '../../exceptions/video_exception.dart';
 import '../../logger/stream_log.dart';
 import '../../platform_detector/platform_detector.dart';
 import '../../sfu/data/models/sfu_track_type.dart';
@@ -42,7 +43,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
 
     if (audioTrack == null) {
       streamLog.w(_tag, () => 'No audio track found');
-      throw Exception('No audio track found');
+      throw VideoException('No audio track found');
     }
 
     final track = RtcLocalTrack(
@@ -66,7 +67,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
 
     if (videoTrack == null) {
       streamLog.w(_tag, () => 'No camera track found');
-      throw Exception('No camera track found');
+      throw VideoException('No camera track found');
     }
 
     final track = RtcLocalTrack(
@@ -91,7 +92,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
 
     if (videoTrack == null) {
       streamLog.w(_tag, () => 'No video track found');
-      throw Exception('No video track found');
+      throw VideoException('No video track found');
     }
 
     final track = RtcLocalTrack(

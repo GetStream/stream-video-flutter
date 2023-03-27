@@ -88,6 +88,7 @@ class StreamPeerConnection extends Disposable {
   ]) async {
     try {
       final offer = await pc.createOffer(mediaConstraints);
+      _logger.i(() => '[createLocalOffer] #$type; offerSdp:\n${offer.sdp}');
       await pc.setLocalDescription(offer);
       return Result.success(offer);
     } catch (e, stk) {
@@ -103,6 +104,7 @@ class StreamPeerConnection extends Disposable {
   ]) async {
     try {
       final answer = await pc.createAnswer(mediaConstraints);
+      _logger.i(() => '[createLocalAnswer] #$type; answerSdp:\n${answer.sdp}');
       await pc.setLocalDescription(answer);
       return Result.success(answer);
     } catch (e, stk) {
@@ -114,6 +116,7 @@ class StreamPeerConnection extends Disposable {
   Future<Result<void>> setRemoteOffer(
     String offerSdp,
   ) async {
+    _logger.i(() => '[setRemoteOffer] #$type; answerSdp:\n$offerSdp');
     return setRemoteDescription(
       rtc.RTCSessionDescription(offerSdp, 'offer'),
     );
@@ -123,6 +126,7 @@ class StreamPeerConnection extends Disposable {
   Future<Result<void>> setRemoteAnswer(
     String answerSdp,
   ) async {
+    _logger.i(() => '[setRemoteAnswer] #$type; answerSdp:\n$answerSdp');
     return setRemoteDescription(
       rtc.RTCSessionDescription(answerSdp, 'answer'),
     );

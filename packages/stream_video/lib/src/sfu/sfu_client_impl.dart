@@ -61,6 +61,7 @@ class SfuClientImpl extends SfuClient {
     sfu.SetPublisherRequest request,
   ) async {
     try {
+      _logger.i(() => '[setPublisher] request: ${request.stringify()}');
       final response = await _client.setPublisher(_withAuthHeaders(), request);
       return Result.success(response);
     } catch (e, stk) {
@@ -103,5 +104,11 @@ class SfuClientImpl extends SfuClient {
     return withHttpRequestHeaders(ctx, {
       'Authorization': 'Bearer $authToken',
     });
+  }
+}
+
+extension on sfu.SetPublisherRequest {
+  String stringify() {
+    return 'SetPublisherRequest(sessionId: $sessionId, tracks: $tracks)';
   }
 }

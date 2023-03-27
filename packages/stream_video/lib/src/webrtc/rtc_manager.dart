@@ -16,6 +16,8 @@ import 'media/media_constraints.dart';
 import 'model/rtc_audio_bitrate_preset.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_dimension.dart';
+import 'model/rtc_video_encoding.dart';
+import 'model/rtc_video_parameters.dart';
 import 'peer_connection.dart';
 import 'peer_type.dart';
 import 'rtc_media_device/rtc_media_device.dart';
@@ -223,60 +225,67 @@ class RtcManager extends Disposable {
 }
 
 extension PublisherRtcManager on RtcManager {
-  List<RtcLocalTrack> getPublisherTracks() {
+  List<RtcLocalTrack> getLocalTracks() {
     return [...publishedTracks.values.whereType<RtcLocalTrack>()];
   }
 
-  RtcLocalTrack? getPublisherTrackByType(SfuTrackType trackType) {
-    final track = getPublisherTracks().firstWhereOrNull((track) {
+  RtcLocalTrack? getLocalTrackByType(SfuTrackType trackType) {
+    final track = getLocalTracks().firstWhereOrNull((track) {
       return track.trackType == trackType;
     });
 
     if (track == null) {
-      _logger.e(
-        () => 'getPublisherTrackByType: track with $trackType not found',
-      );
+      _logger.w(() => '[getLocalTrackByType] track not found: $trackType');
       return null;
     }
 
     return track;
   }
 
-  List<RtcTrackInfo> getPublisherTrackInfos() {
-    return getPublisherTracks().map((it) {
+  List<RtcTrackInfo> getLocalTracksInfo() {
+    return getLocalTracks().map((it) {
       List<RtcVideoLayer>? videoLayers;
 
       // Calculate video layers for video tracks.
       if (it.isVideoTrack) {
         final dimension = it.videoDimension!;
         final encodings = it.transceiver?.sender.parameters.encodings;
-        _logger.i(() => '[getPublisherTrackInfos] dimension: $dimension');
+        _logger.i(() => '[getLocalTracksInfo] dimension: $dimension');
+
         // default to a single layer, HQ
+        final defaultLayer = RtcVideoLayer(
+          rid: 'f',
+          parameters: RtcVideoParametersPresets.h720_16x9.copyWith(
+            dimension: dimension,
+          ),
+        );
         if (encodings == null) {
-          videoLayers = [
-            RtcVideoLayer(
-              rid: 'f',
-              bitrate: 0,
-              videoDimension: RtcVideoDimension(
-                width: dimension.width,
-                height: dimension.height,
-              ),
-            ),
-          ];
+          videoLayers = [defaultLayer];
         } else {
-          videoLayers = encodings.map((e) {
-            final scale = e.scaleResolutionDownBy ?? 1;
+          videoLayers = encodings.map((it) {
+            final scale = it.scaleResolutionDownBy ?? 1;
             return RtcVideoLayer(
-              rid: e.rid ?? 'f',
-              bitrate: e.maxBitrate ?? 0,
-              videoDimension: RtcVideoDimension(
-                width: (dimension.width / scale).floor(),
-                height: (dimension.height / scale).floor(),
+              rid: it.rid ?? defaultLayer.rid,
+              parameters: RtcVideoParameters(
+                encoding: RtcVideoEncoding(
+                  maxBitrate: it.maxBitrate ??
+                      defaultLayer.parameters.encoding.maxBitrate,
+                  maxFramerate: it.maxFramerate ??
+                      defaultLayer.parameters.encoding.maxFramerate,
+                ),
+                dimension: RtcVideoDimension(
+                  width: (dimension.width / scale).floor(),
+                  height: (dimension.height / scale).floor(),
+                ),
               ),
             );
           }).toList();
         }
       }
+
+      videoLayers?.forEach((layer) {
+        _logger.v(() => '[getLocalTracksInfo] layer: $layer');
+      });
 
       return RtcTrackInfo(
         trackId: it.mediaTrack.id,
@@ -507,7 +516,7 @@ extension PublisherRtcManager on RtcManager {
   Future<Result<RtcLocalCameraTrack>> setTrackFacingMode({
     required FacingMode facingMode,
   }) async {
-    final track = getPublisherTrackByType(SfuTrackType.video);
+    final track = getLocalTrackByType(SfuTrackType.video);
     if (track == null) return Result.error('Track not found');
 
     if (track is! RtcLocalCameraTrack) {
@@ -533,7 +542,7 @@ extension RtcManagerTrackHelper on RtcManager {
       return Result.error('Not supported on web');
     }
 
-    final track = getPublisherTrackByType(SfuTrackType.video);
+    final track = getLocalTrackByType(SfuTrackType.video);
     if (track == null) {
       _logger.e(() => '[switchCamera] rejected (track is null)');
       return Result.error('Track is null');
@@ -553,7 +562,7 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalCameraTrack>> setVideoInputDevice({
     required RtcMediaDevice device,
   }) async {
-    final track = getPublisherTrackByType(SfuTrackType.video);
+    final track = getLocalTrackByType(SfuTrackType.video);
     if (track == null) {
       _logger.w(() => '[setCameraDeviceId] rejected (track is null)');
       return Result.error('Track is null');
@@ -573,7 +582,7 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalAudioTrack>> setAudioInputDevice({
     required RtcMediaDevice device,
   }) async {
-    final track = getPublisherTrackByType(SfuTrackType.audio);
+    final track = getLocalTrackByType(SfuTrackType.audio);
     if (track == null) {
       _logger.w(() => '[setMicrophoneDeviceId] rejected (track is null)');
       return Result.error('Track is null');
@@ -656,7 +665,7 @@ extension RtcManagerTrackHelper on RtcManager {
     required SfuTrackType trackType,
     required bool enabled,
   }) async {
-    final track = getPublisherTrackByType(trackType);
+    final track = getLocalTrackByType(trackType);
 
     // Track found, mute/unmute it.
     if (track != null) {
@@ -687,7 +696,7 @@ extension RtcManagerTrackHelper on RtcManager {
         await unpublishTrack(trackId: track.trackId);
 
         // Also un-publish the audio track if it was published
-        final screenShareAudioTrack = getPublisherTrackByType(
+        final screenShareAudioTrack = getLocalTrackByType(
           SfuTrackType.screenShareAudio,
         );
         if (screenShareAudioTrack != null) {

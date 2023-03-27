@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:meta/meta.dart';
 
 /// A type that represents video encoding information.
@@ -15,6 +14,16 @@ class RtcVideoEncoding
   final int maxFramerate;
   final int maxBitrate;
 
+  RtcVideoEncoding copyWith({
+    int? maxFramerate,
+    int? maxBitrate,
+  }) {
+    return RtcVideoEncoding(
+      maxFramerate: maxFramerate ?? this.maxFramerate,
+      maxBitrate: maxBitrate ?? this.maxBitrate,
+    );
+  }
+
   @override
   List<Object?> get props => [maxFramerate, maxBitrate];
 
@@ -25,5 +34,10 @@ class RtcVideoEncoding
       return maxFramerate.compareTo(other.maxFramerate);
     }
     return result;
+  }
+
+  @override
+  String toString() {
+    return 'Encoding{maxFramerate: $maxFramerate, maxBitrate: $maxBitrate}';
   }
 }
