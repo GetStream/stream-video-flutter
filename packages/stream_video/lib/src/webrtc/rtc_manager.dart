@@ -225,32 +225,32 @@ class RtcManager extends Disposable {
 }
 
 extension PublisherRtcManager on RtcManager {
-  List<RtcLocalTrack> getPublisherTracks() {
+  List<RtcLocalTrack> getLocalTracks() {
     return [...publishedTracks.values.whereType<RtcLocalTrack>()];
   }
 
-  RtcLocalTrack? getPublisherTrackByType(SfuTrackType trackType) {
-    final track = getPublisherTracks().firstWhereOrNull((track) {
+  RtcLocalTrack? getLocalTrackByType(SfuTrackType trackType) {
+    final track = getLocalTracks().firstWhereOrNull((track) {
       return track.trackType == trackType;
     });
 
     if (track == null) {
-      _logger.w(() => '[getPublisherTrackByType] track not found: $trackType');
+      _logger.w(() => '[getLocalTrackByType] track not found: $trackType');
       return null;
     }
 
     return track;
   }
 
-  List<RtcTrackInfo> getPublisherTrackInfos() {
-    return getPublisherTracks().map((it) {
+  List<RtcTrackInfo> getLocalTracksInfo() {
+    return getLocalTracks().map((it) {
       List<RtcVideoLayer>? videoLayers;
 
       // Calculate video layers for video tracks.
       if (it.isVideoTrack) {
         final dimension = it.videoDimension!;
         final encodings = it.transceiver?.sender.parameters.encodings;
-        _logger.i(() => '[getPublisherTrackInfos] dimension: $dimension');
+        _logger.i(() => '[getLocalTracksInfo] dimension: $dimension');
 
         // default to a single layer, HQ
         final defaultLayer = RtcVideoLayer(
@@ -260,9 +260,7 @@ extension PublisherRtcManager on RtcManager {
           ),
         );
         if (encodings == null) {
-          videoLayers = [
-            defaultLayer,
-          ];
+          videoLayers = [defaultLayer];
         } else {
           videoLayers = encodings.map((it) {
             final scale = it.scaleResolutionDownBy ?? 1;
@@ -286,7 +284,7 @@ extension PublisherRtcManager on RtcManager {
       }
 
       videoLayers?.forEach((layer) {
-        _logger.v(() => '[getPublisherTrackInfos] layer: $layer');
+        _logger.v(() => '[getLocalTracksInfo] layer: $layer');
       });
 
       return RtcTrackInfo(
@@ -518,7 +516,7 @@ extension PublisherRtcManager on RtcManager {
   Future<Result<RtcLocalCameraTrack>> setTrackFacingMode({
     required FacingMode facingMode,
   }) async {
-    final track = getPublisherTrackByType(SfuTrackType.video);
+    final track = getLocalTrackByType(SfuTrackType.video);
     if (track == null) return Result.error('Track not found');
 
     if (track is! RtcLocalCameraTrack) {
@@ -544,7 +542,7 @@ extension RtcManagerTrackHelper on RtcManager {
       return Result.error('Not supported on web');
     }
 
-    final track = getPublisherTrackByType(SfuTrackType.video);
+    final track = getLocalTrackByType(SfuTrackType.video);
     if (track == null) {
       _logger.e(() => '[switchCamera] rejected (track is null)');
       return Result.error('Track is null');
@@ -564,7 +562,7 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalCameraTrack>> setVideoInputDevice({
     required RtcMediaDevice device,
   }) async {
-    final track = getPublisherTrackByType(SfuTrackType.video);
+    final track = getLocalTrackByType(SfuTrackType.video);
     if (track == null) {
       _logger.w(() => '[setCameraDeviceId] rejected (track is null)');
       return Result.error('Track is null');
@@ -584,7 +582,7 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalAudioTrack>> setAudioInputDevice({
     required RtcMediaDevice device,
   }) async {
-    final track = getPublisherTrackByType(SfuTrackType.audio);
+    final track = getLocalTrackByType(SfuTrackType.audio);
     if (track == null) {
       _logger.w(() => '[setMicrophoneDeviceId] rejected (track is null)');
       return Result.error('Track is null');
@@ -667,7 +665,7 @@ extension RtcManagerTrackHelper on RtcManager {
     required SfuTrackType trackType,
     required bool enabled,
   }) async {
-    final track = getPublisherTrackByType(trackType);
+    final track = getLocalTrackByType(trackType);
 
     // Track found, mute/unmute it.
     if (track != null) {
@@ -698,7 +696,7 @@ extension RtcManagerTrackHelper on RtcManager {
         await unpublishTrack(trackId: track.trackId);
 
         // Also un-publish the audio track if it was published
-        final screenShareAudioTrack = getPublisherTrackByType(
+        final screenShareAudioTrack = getLocalTrackByType(
           SfuTrackType.screenShareAudio,
         );
         if (screenShareAudioTrack != null) {

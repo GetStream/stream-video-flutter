@@ -378,14 +378,11 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     _logger.d(() => '[negotiate] type: ${pc.type}');
 
     final offer = await pc.createOffer();
-
     if (offer is! Success<rtc.RTCSessionDescription>) return;
 
-    final tracksInfo = rtcManager?.getPublisherTrackInfos();
-    if (tracksInfo == null || tracksInfo.isEmpty) {
-      _logger.w(
-        () => '[negotiate] rejected(tracksInfo is null/empty): $tracksInfo',
-      );
+    final tracksInfo = rtcManager!.getLocalTracksInfo();
+    if (tracksInfo.isEmpty) {
+      _logger.w(() => '[negotiate] rejected(tracksInfo is empty): $tracksInfo');
       return;
     }
 
@@ -406,17 +403,15 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         tracks: tracksInfo.toDTO(),
       ),
     );
+
     if (pubResult is! Success<sfu.SetPublisherResponse>) {
-      _logger.w(
-        () => '[negotiate] #setPublisher; failed: $pubResult',
-      );
+      _logger.w(() => '[negotiate] #setPublisher; failed: $pubResult');
       return;
     }
+
     final ansResult = await pc.setRemoteAnswer(pubResult.data.sdp);
     if (ansResult is! Success<void>) {
-      _logger.w(
-        () => '[negotiate] #setRemoteAnswer; failed: $ansResult',
-      );
+      _logger.w(() => '[negotiate] #setRemoteAnswer; failed: $ansResult');
     }
   }
 
