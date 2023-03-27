@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../screens/call_screen.dart';
 import '../screens/home_screen.dart';
+import '../screens/lobby_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/splash_screen.dart';
 import '../utils/users_provider.dart';
@@ -31,10 +33,20 @@ mixin AppRoutes {
           settings: const RouteSettings(name: Routes.call),
           builder: (context) {
             final call = settings.arguments! as Call;
-
+            return CallScreen(call: call);
+          },
+        );
+      case Routes.lobby:
+        return MaterialPageRoute(
+          settings: const RouteSettings(name: Routes.lobby),
+          builder: (context) {
+            final args = settings.arguments! as List;
             return StreamUsersConfiguration(
               usersProvider: MockUsersProvider(),
-              child: StreamCallContainer(call: call),
+              child: LobbyScreen(
+                call: args[0],
+                onJoinCallPressed: args[1],
+              ),
             );
           },
         );
