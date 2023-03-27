@@ -13,7 +13,7 @@ import 'env/env.dart';
 import 'firebase_options.dart';
 import 'src/routes/app_routes.dart';
 import 'src/routes/routes.dart';
-import 'src/user_repository.dart';
+import 'user_repository.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
