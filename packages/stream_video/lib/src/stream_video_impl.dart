@@ -82,22 +82,23 @@ class StreamVideoImpl implements StreamVideo {
 
   /// Connects the [user] to the Stream Video service.
   @override
-  Future<Result<None>> connectUser(
+  Future<Result<String>> connectUser(
     UserInfo user, {
-    Token? token,
-    TokenProvider? provider,
+    required TokenProvider tokenProvider,
   }) async {
     _logger.i(() => '[connectUser] user.id : ${user.id}');
     if (currentUser != null) {
       _logger.w(() => '[connectUser] rejected (already set): $currentUser');
-      return Result.success(None());
+      return _tokenManager.getToken();
+    }
+    final tokenResult = await _tokenManager.setTokenProvider(
+      user.id,
+      tokenProvider: tokenProvider,
+    );
+    if (tokenResult.isFailure) {
+      return tokenResult;
     }
     _state.currentUser.value = user;
-    await _tokenManager.setTokenOrProvider(
-      user.id,
-      token: token,
-      provider: provider,
-    );
 
     try {
       _eventSubscription = _client.events.listen((event) {
@@ -119,7 +120,10 @@ class StreamVideoImpl implements StreamVideo {
 
       final result = await _client.onUserLogin(user);
       await _pushNotificationManager?.onUserLoggedIn();
-      return result;
+      if (result is Failure) {
+        return result;
+      }
+      return tokenResult;
     } catch (e, stk) {
       _logger.e(() => '[connectUser] failed(${user.id}): $e');
       return Result.failure(VideoErrors.compose(e, stk));

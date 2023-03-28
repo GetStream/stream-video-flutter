@@ -9,6 +9,7 @@ import '../../models/user_info.dart';
 import '../../shared_emitter.dart';
 import '../../token/token_manager.dart';
 import '../../types/other.dart';
+import '../../utils/result.dart';
 import '../../utils/standard.dart';
 import '../../ws/base_ws.dart';
 import '../../ws/health/health_monitor.dart';
@@ -101,11 +102,15 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   Future<void> _authenticateUser() async {
     _logger.i(() => '[authenticateUser] url: $url');
 
-    final token = await tokenManager.loadToken();
+    final tokenResult = await tokenManager.getToken();
+    if (tokenResult is! Success<String>) {
+      unawaited(_reconnect());
+      return;
+    }
     final image = userInfo.image;
 
     final authMessage = {
-      'token': token.rawValue,
+      'token': tokenResult.data,
       'user_details': {
         'id': userInfo.id,
         // TODO BE requires "name" & "image" to be inside "custom" field
@@ -126,9 +131,6 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   @override
   void onOpen() {
     _logger.i(() => '[onOpen] url: $url');
-
-    // Reset the reconnect attempts.
-    _reconnectAttempt = 0;
 
     // Authenticate the user.
     _authenticateUser();
@@ -212,6 +214,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
 
   void _handleConnectedEvent(open.WSConnectedEvent event) {
     _logger.i(() => '[handleConnectedEvent] no args');
+    _reconnectAttempt = 0;
     connectionState = ConnectionState.connected;
     healthMonitor.onPongReceived();
     userId ??= event.me.id;

@@ -14,6 +14,7 @@ import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 import '../../models/user_info.dart';
 import '../../shared_emitter.dart';
+import '../../token/token.dart';
 import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
@@ -599,9 +600,12 @@ class _Authentication extends open.Authentication {
     List<open.QueryParam> queryParams,
     Map<String, String> headerParams,
   ) async {
-    final token = await tokenManager.loadToken();
+    final tokenResult = await tokenManager.getToken();
+    if (tokenResult is! Success<UserToken>) {
+      throw (tokenResult as Failure).error;
+    }
     queryParams.add(open.QueryParam('api_key', apiKey));
-    headerParams['Authorization'] = token.rawValue;
+    headerParams['Authorization'] = tokenResult.data;
     headerParams['stream-auth-type'] = 'jwt';
   }
 }

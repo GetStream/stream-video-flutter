@@ -129,7 +129,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
 
       await StreamVideo.instance.connectUser(
         user,
-        token: Token(token),
+        tokenProvider: StaticToken(token),
       );
 
       final callCid = StreamCallCid.from(type: 'default', id: callId);

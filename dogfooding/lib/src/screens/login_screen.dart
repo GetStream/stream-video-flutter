@@ -21,6 +21,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
+  final _logger = taggedLogger(tag: 'SV:LoginViewState');
+
   late final _googleSignIn = GoogleSignIn(hostedDomain: 'getstream.io');
 
   Future<void> _loginWithGoogle() async {
@@ -51,29 +54,36 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _onLoginSuccess(UserInfo user) async {
-    final userId = user.id;
+    final tokenResult = await StreamVideo.instance.connectUser(
+      user,
+      tokenProvider: DynamicToken(_tokenLoader, onTokenUpdated: (token) async {
+        _logger.d(() => '[onTokenUpdated] token: $token');
+        final userCredentials = UserCredentials(
+          user: user,
+          token: token,
+        );
+        await UserRepository.instance.saveUserCredentials(userCredentials);
+      }),
+    );
+    _logger.d(() => '[onLoginSuccess] tokenResult: $tokenResult');
+    if (tokenResult is! Success<String>) {
+      // TODO show error
+      return;
+    }
+
+    if (mounted) {
+      await Navigator.of(context).pushReplacementNamed(Routes.home);
+    }
+  }
+
+  Future<String> _tokenLoader(String userId) async {
     final response = await http.get(
       Uri.parse(
         'https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$userId&api_key=${Env.apiKey}',
       ),
     );
-
-    final token = (json.decode(response.body) as Map<String, dynamic>)['token'];
-
-    await StreamVideo.instance.connectUser(
-      user,
-      token: Token(token),
-    );
-
-    final userCredentials = UserCredentials(
-      user: user,
-      token: token,
-    );
-    await UserRepository.instance.saveUserCredentials(userCredentials);
-
-    if (mounted) {
-      await Navigator.of(context).pushReplacementNamed(Routes.home);
-    }
+    final body = json.decode(response.body) as Map<String, dynamic>;
+    return body['token'];
   }
 
   final _emailController = TextEditingController();

@@ -321,10 +321,50 @@ class CallImpl implements Call {
       stateManager: _stateManager,
     );
     _session = session;
-    _subscriptions.add(_idSessionEvents, session.events.listen(_events.emit));
+    _subscriptions.add(
+      _idSessionEvents,
+      session.events.listen((event) {
+        _events.emit(event);
+        _onSfuEvent(event);
+      }),
+    );
     _subscriptions.add(_idSessionStats, session.stats.listen(_stats.emit));
     await _stateManager.onSessionStart(session.sessionId);
     return session.start();
+  }
+
+  Future<void> _onSfuEvent(SfuEvent sfuEvent) async {
+    if (sfuEvent is SfuSocketDisconnected) {
+      await _reconnect();
+    }
+  }
+
+  Future<void> _reconnect() async {
+    _logger.v(() => '[reconnect] no args');
+    _subscriptions.cancel(_idSessionEvents);
+    _status.value = _ConnectionStatus.disconnected;
+    await _stateManager.onDisconnect();
+    await _session?.dispose();
+    _session = null;
+
+    final joinedResult = await _joinIfNeeded();
+    if (joinedResult is! Success<CallCredentials>) {
+      _logger.e(() => '[reconnect] joining failed: $joinedResult');
+      await _stateManager.onConnectFailed((joinedResult as Failure).error);
+      return;
+    }
+
+    _logger.v(() => '[reconnect] starting session');
+    final sessionResult = await _startSession(joinedResult.data);
+    if (sessionResult is! Success<None>) {
+      _logger.w(() => '[reconnect] session start failed: $sessionResult');
+      await _stateManager.onConnectFailed((sessionResult as Failure).error);
+      return;
+    }
+    _logger.v(() => '[reconnect] started session');
+    await _stateManager.onConnected();
+    await _applyConnectOptions();
+    _logger.v(() => '[reconnect] completed');
   }
 
   Future<Result<None>> _awaitIfNeeded(Duration timeLimit) async {

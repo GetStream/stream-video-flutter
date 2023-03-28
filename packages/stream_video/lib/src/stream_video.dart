@@ -60,10 +60,9 @@ abstract class StreamVideo {
   void Function(CallCreated)? onCallCreated;
 
   /// Connects the [user] to the Stream Video service.
-  Future<Result<None>> connectUser(
+  Future<Result<String>> connectUser(
     UserInfo user, {
-    Token? token,
-    TokenProvider? provider,
+    required TokenProvider tokenProvider,
   });
 
   /// Disconnects the user from the Stream Video service.
@@ -289,19 +288,19 @@ void _defaultLogHandler(
 
 extension StreamVideoX on StreamVideo {
   /// Connects the [user] to the Stream Video service.
-  Future<Result<None>> connectUserWithToken(
+  Future<Result<String>> connectUserWithToken(
     UserInfo user,
-    Token token,
+    String token,
   ) {
-    return connectUser(user, token: token);
+    return connectUser(user, tokenProvider: StaticToken(token));
   }
 
   /// Connects the [user] to the Stream Video service.
-  Future<Result<None>> connectUserWithProvider(
+  Future<Result<String>> connectUserWithProvider(
     UserInfo user,
     TokenProvider provider,
   ) {
-    return connectUser(user, provider: provider);
+    return connectUser(user, tokenProvider: provider);
   }
 
   /// Grants the [permissions] to the [userId] in the [callCid].

@@ -1,11 +1,84 @@
-import '../models/user_info.dart';
+import '../../stream_video.dart';
+import '../errors/video_error_composer.dart';
+import 'token_manager.dart';
 
 /// A function which can be used to request a Stream Video API token from your
 /// own backend server
 typedef GuestTokenProvider = Future<String> Function(UserInfo user);
 
 /// Token designed to store the JWT and the user it is related to.
-class Token {
-  Token(this.rawValue);
-  final String rawValue;
+typedef UserToken = String;
+
+/// A function which can be used to request a Stream Video API token from your
+/// own backend server.
+/// Function requires a single [userId].
+typedef TokenLoader = Future<String> Function(String userId);
+
+typedef OnTokenUpdated = Future<void> Function(UserToken token);
+
+abstract class TokenProvider {
+  const TokenProvider();
+
+  Future<Result<UserToken>> getToken(String userId);
+
+  bool get isStatic;
+
+  set onTokenUpdated(OnTokenUpdated onTokenUpdated);
+}
+
+class StaticToken implements TokenProvider {
+  StaticToken(this.token);
+
+  final _logger = taggedLogger(tag: 'SV:StaticToken');
+
+  final UserToken token;
+
+  @override
+  Future<Result<UserToken>> getToken(String userId) async {
+    _logger.e(() => '[getToken] token($userId): $token');
+    return Result.success(token);
+  }
+
+  @override
+  bool get isStatic => true;
+
+  @override
+  set onTokenUpdated(OnTokenUpdated onTokenUpdated) {
+    /* no-op */
+  }
+}
+
+class DynamicToken implements TokenProvider {
+  DynamicToken(
+    this.loader, {
+    OnTokenUpdated? onTokenUpdated,
+  }) : _onTokenUpdated = onTokenUpdated;
+
+  final _logger = taggedLogger(tag: 'SV:DynamicToken');
+
+  final TokenLoader loader;
+
+  OnTokenUpdated? _onTokenUpdated;
+
+  @override
+  bool get isStatic => false;
+
+  @override
+  Future<Result<UserToken>> getToken(String userId) async {
+    try {
+      _logger.d(() => '[loadToken] userId: $userId');
+      final token = await loader.call(userId);
+      _logger.v(() => '[loadToken] completed: $token');
+      await _onTokenUpdated?.call(token);
+      return Result.success(token);
+    } catch (e, stk) {
+      _logger.e(() => '[loadToken] failed: $e; $stk');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  set onTokenUpdated(OnTokenUpdated onTokenUpdated) {
+    _onTokenUpdated = onTokenUpdated;
+  }
 }
