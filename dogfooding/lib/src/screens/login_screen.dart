@@ -91,80 +91,84 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Hero(
-              tag: 'stream_logo',
-              child: Image.asset(
-                streamVideoIconAsset,
-                width: size.width * 0.3,
-              ),
-            ),
-            const SizedBox(height: 36),
-            Text('Stream Meetings', style: theme.textTheme.bodyLarge),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-              child: Text(
-                'Please sign in with your Google Stream account.',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextField(
-                controller: _emailController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Enter Email',
-                  isDense: true,
-                  border: OutlineInputBorder(),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Hero(
+                  tag: 'stream_logo',
+                  child: Image.asset(
+                    streamVideoIconAsset,
+                    width: size.width * 0.3,
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loginWithEmail,
-              style: const ButtonStyle(
-                backgroundColor: MaterialStatePropertyAll<Color>(
-                  Color(0xff005FFF),
+                const SizedBox(height: 36),
+                Text('Stream Meetings', style: theme.textTheme.bodyLarge),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                  child: Text(
+                    'Please sign in with your Google Stream account.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 ),
-              ),
-              child: const Text('Login with Email'),
-            ),
-            const SizedBox(height: 48),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 1,
-                      color: Colors.grey,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: _emailController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Enter Email',
+                      isDense: true,
+                      border: OutlineInputBorder(),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Text('OR'),
-                  ),
-                  Expanded(
-                    child: Container(
-                      height: 1,
-                      color: Colors.grey,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _loginWithEmail,
+                  style: const ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll<Color>(
+                      Color(0xff005FFF),
                     ),
                   ),
-                ],
-              ),
+                  child: const Text('Login with Email'),
+                ),
+                const SizedBox(height: 48),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: Text('OR'),
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 48),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: GoogleLoginButton(
+                    onPressed: _loginWithGoogle,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 48),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: GoogleLoginButton(
-                onPressed: _loginWithGoogle,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
