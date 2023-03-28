@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../../call_permission.dart';
 import '../../models/call_metadata.dart';
+import '../../models/call_permission.dart';
 
 // TODO: Should we call it VideoEvent or CoordinatorEvent?
 

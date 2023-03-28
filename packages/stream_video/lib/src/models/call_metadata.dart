@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../call_permission.dart';
 import 'call_cid.dart';
+import 'call_permission.dart';
 import 'call_setting.dart';
 
 @immutable

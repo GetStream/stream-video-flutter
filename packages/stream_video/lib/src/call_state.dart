@@ -2,10 +2,10 @@ import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import 'call_participant_state.dart';
-import 'call_permission.dart';
 import 'models/call_cid.dart';
 import 'models/call_metadata.dart';
+import 'models/call_participant_state.dart';
+import 'models/call_permission.dart';
 import 'models/call_setting.dart';
 import 'models/call_status.dart';
 import 'webrtc/rtc_media_device/rtc_media_device.dart';

@@ -1,8 +1,9 @@
 import '../../../../open_api/video/coordinator/api.dart' as open;
-import '../../call_permission.dart';
+import '../../../open_api/video/coordinator/api.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_credentials.dart';
 import '../../models/call_metadata.dart';
+import '../../models/call_permission.dart';
 import '../../models/call_reaction.dart';
 import '../../models/call_setting.dart';
 import '../../models/queried_calls.dart';

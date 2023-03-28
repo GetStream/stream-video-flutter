@@ -1,10 +1,10 @@
 import 'package:collection/collection.dart';
 
 import '../action/coordinator_call_action.dart';
-import '../call_participant_state.dart';
 import '../call_state.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../logger/impl/tagged_logger.dart';
+import '../models/call_participant_state.dart';
 import '../models/call_status.dart';
 import '../models/drop_reason.dart';
 

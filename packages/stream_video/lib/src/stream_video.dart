@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import '../stream_video.dart';
-import 'call_permission.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'internal/_instance_holder.dart';
 import 'logger/impl/external_logger.dart';
 import 'models/call_device.dart';
+import 'models/call_permission.dart';
 import 'models/call_reaction.dart';
 import 'models/queried_calls.dart';
 import 'models/queried_members.dart';

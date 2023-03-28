@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../../call_permission.dart';
 import '../../models/call_cid.dart';
+import '../../models/call_permission.dart';
 
 @immutable
 abstract class CoordinatorInput with EquatableMixin {

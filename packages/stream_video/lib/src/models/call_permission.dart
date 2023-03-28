@@ -1,5 +1,6 @@
 enum CallPermission {
   joinCall('join-call'),
+  joinBackstage('join-backstage'),
   stopRecordCall('stop-record-call'),
   endCall('end-call'),
   muteUsers('mute-users'),
@@ -14,6 +15,7 @@ enum CallPermission {
   startRecordCall('start-record-call'),
   updateCallPermissions('update-call-permissions'),
   createCall('create-call'),
+  createReaction('create-reaction'),
   updateCall('update-call'),
   updateCallSettings('update-call-settings'),
   createReaction('create-reaction'),

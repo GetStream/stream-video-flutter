@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import '../stream_video.dart';
-import 'call_permission.dart';
 import 'coordinator/coordinator_client.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/models/coordinator_inputs.dart' as input;
@@ -11,6 +10,7 @@ import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'coordinator/retry/coordinator_client_retry.dart';
 import 'errors/video_error_composer.dart';
 import 'models/call_device.dart';
+import 'models/call_permission.dart';
 import 'models/call_reaction.dart';
 import 'models/queried_calls.dart';
 import 'models/queried_members.dart';

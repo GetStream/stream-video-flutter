@@ -1,12 +1,11 @@
 import 'dart:async';
 
 import '../../stream_video.dart';
-import '../call_permission.dart';
 import '../call_state_manager.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../errors/video_error_composer.dart';
 import '../models/call_credentials.dart';
-import '../models/call_stats.dart';
+import '../models/call_permission.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
