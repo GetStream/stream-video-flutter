@@ -380,7 +380,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     final offer = await pc.createOffer();
     if (offer is! Success<rtc.RTCSessionDescription>) return;
 
-    final tracksInfo = rtcManager!.getLocalTracksInfo();
+    final tracksInfo = rtcManager!.getPublisherTrackInfos();
     if (tracksInfo.isEmpty) {
       _logger.w(() => '[negotiate] rejected(tracksInfo is empty): $tracksInfo');
       return;

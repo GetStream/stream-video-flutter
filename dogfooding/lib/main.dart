@@ -5,12 +5,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:uni_links/uni_links.dart';
 
 import 'env/env.dart';
 import 'firebase_options.dart';
+import 'log_config.dart';
 import 'src/routes/app_routes.dart';
 import 'src/routes/routes.dart';
 import 'src/user_repository.dart';
@@ -37,13 +38,39 @@ Future<void> main() async {
 
 Future<void> _initStreamVideo() async {
   if (!StreamVideo.isInitialized()) {
-    final client = StreamVideo.init(
-      Env.apiKey,
-      logLevel: LogLevel.all,
-    );
-    client.pushNotificationManager =
-        await StreamVideoPushNotificationManager.create(client);
+    final client = StreamVideo.init(Env.apiKey);
+    await _setupLogger();
+    // TODO throws MissingPluginException (No implementation found for method listen on channel stream_video_push_notification_events)
+    // client.pushNotificationManager =
+    //     await StreamVideoPushNotificationManager.create(client);
   }
+}
+
+Future<void> _setupLogger() async {
+  const consoleLogger = ConsoleStreamLogger();
+  final children = <StreamLogger>[consoleLogger];
+  FileStreamLogger? fileLogger;
+  if (!kIsWeb) {
+    fileLogger = FileStreamLogger(
+      AppFileLogConfig('1.0.0'),
+      sender: (logFile) async {
+        consoleLogger.log(
+          Priority.debug,
+          'DogFoodingApp',
+          () => '[send] logFile: $logFile(${logFile.existsSync()})',
+        );
+        await Share.shareXFiles(
+          [XFile(logFile.path)],
+          subject: 'Share Logs',
+          text: 'Stream Flutter Dogfooding Logs',
+        );
+      },
+      console: consoleLogger,
+    );
+    children.add(fileLogger);
+  }
+  StreamLog().validator = (priority, _) => true;
+  StreamLog().logger = CompositeStreamLogger(children);
 }
 
 class StreamDogFoodingApp extends StatefulWidget {
@@ -55,7 +82,8 @@ class StreamDogFoodingApp extends StatefulWidget {
 
 class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     //ignore:prefer_mixin
-    with WidgetsBindingObserver {
+    with
+        WidgetsBindingObserver {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late StreamSubscription<Uri?> _subscription;
 

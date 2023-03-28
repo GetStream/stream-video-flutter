@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../call_stats_content/call_stats_content.dart';
+import '../call_diagnostics_content/call_diagnostics_content.dart';
 
 /// Builder used to create a custom call app bar.
 typedef CallAppBarBuilder = PreferredSizeWidget Function(
@@ -127,7 +127,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
           ),
           Visibility(
             visible: _isStatsVisible,
-            child: CallStatsContent(
+            child: CallDiagnosticsContent(
               call: call,
               onClosePressed: _toggleStatsVisibility,
             ),
