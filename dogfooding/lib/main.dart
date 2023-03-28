@@ -71,18 +71,6 @@ Future<void> _setupLogger() async {
   }
   StreamLog().validator = (priority, _) => true;
   StreamLog().logger = CompositeStreamLogger(children);
-  StreamLog().finder = <T extends StreamLogger>([criteria]) {
-    consoleLogger.log(
-      Priority.debug,
-      'DogFoodingApp',
-      () =>
-          '[find] fileLogger: $fileLogger(${fileLogger is T}),T: ${T}, criteria: $criteria',
-    );
-    if (fileLogger != null && fileLogger is T) {
-      return fileLogger as T;
-    }
-    return null;
-  };
 }
 
 class StreamDogFoodingApp extends StatefulWidget {

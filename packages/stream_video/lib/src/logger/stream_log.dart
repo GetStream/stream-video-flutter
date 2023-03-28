@@ -1,4 +1,3 @@
-import 'impl/silent_logger.dart';
 import 'stream_logger.dart';
 
 StreamLog get streamLog => StreamLog();
@@ -12,7 +11,7 @@ class StreamLog {
 
   StreamLogger _logger = const SilentStreamLogger();
   IsLoggableValidator _validator = (Priority priority, Tag tag) => false;
-  Finder _finder = <T extends StreamLogger>([criteria]) => null;
+  Finder _finder = _defaultFinder;
 
   static StreamLog get instance => _instance;
 
@@ -25,12 +24,10 @@ class StreamLog {
   }
 
   set finder(Finder finder) {
-    print('<StreamLog> [setFinder] finder: $finder');
     _finder = finder;
   }
 
   T? find<T extends StreamLogger>([dynamic criteria]) {
-    print('<StreamLog> [find] T: ${T.runtimeType}, criteria: $criteria');
     return _finder.call(criteria);
   }
 
@@ -61,6 +58,52 @@ class StreamLog {
   void e(Tag tag, MessageBuilder message) {
     if (_validator.call(Priority.verbose, tag)) {
       _logger.log(Priority.error, tag, message);
+    }
+  }
+
+  static T? _defaultFinder<T extends StreamLogger>([dynamic criteria]) {
+    final logger = _instance._logger;
+    if (logger is T) return logger;
+
+    if (logger is CompositeStreamLogger) {
+      for (final child in logger.children) {
+        if (child is T) return child;
+      }
+    }
+    return null;
+  }
+}
+
+class SilentStreamLogger extends StreamLogger {
+  const SilentStreamLogger();
+
+  @override
+  void log(
+    Priority priority,
+    String tag,
+    MessageBuilder message, [
+    Object? error,
+    StackTrace? stk,
+  ]) {
+    /* no-op */
+  }
+}
+
+class CompositeStreamLogger extends StreamLogger {
+  const CompositeStreamLogger(this.children);
+
+  final List<StreamLogger> children;
+
+  @override
+  void log(
+    Priority priority,
+    String tag,
+    MessageBuilder message, [
+    Object? error,
+    StackTrace? stk,
+  ]) {
+    for (final child in children) {
+      child.log(priority, tag, message, error, stk);
     }
   }
 }

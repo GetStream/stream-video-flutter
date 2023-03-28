@@ -6,7 +6,6 @@ export 'src/call/call_connect_options.dart';
 export 'src/call_participant_state.dart';
 export 'src/call_state.dart';
 export 'src/events.dart';
-export 'src/logger/impl/composite_logger.dart';
 export 'src/logger/impl/console_logger.dart';
 export 'src/logger/impl/file_logger.dart';
 export 'src/logger/impl/tagged_logger.dart';
