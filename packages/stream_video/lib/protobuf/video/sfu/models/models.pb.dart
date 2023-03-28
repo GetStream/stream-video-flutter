@@ -675,6 +675,9 @@ class TrackInfo extends $pb.GeneratedMessage {
     ..e<TrackType>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackType', $pb.PbFieldType.OE, defaultOrMaker: TrackType.TRACK_TYPE_UNSPECIFIED, valueOf: TrackType.valueOf, enumValues: TrackType.values)
     ..pc<VideoLayer>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'layers', $pb.PbFieldType.PM, subBuilder: VideoLayer.create)
     ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'mid')
+    ..aOB(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dtx')
+    ..aOB(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stereo')
+    ..aOB(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'red')
     ..hasRequiredFields = false
   ;
 
@@ -684,6 +687,9 @@ class TrackInfo extends $pb.GeneratedMessage {
     TrackType? trackType,
     $core.Iterable<VideoLayer>? layers,
     $core.String? mid,
+    $core.bool? dtx,
+    $core.bool? stereo,
+    $core.bool? red,
   }) {
     final _result = create();
     if (trackId != null) {
@@ -697,6 +703,15 @@ class TrackInfo extends $pb.GeneratedMessage {
     }
     if (mid != null) {
       _result.mid = mid;
+    }
+    if (dtx != null) {
+      _result.dtx = dtx;
+    }
+    if (stereo != null) {
+      _result.stereo = stereo;
+    }
+    if (red != null) {
+      _result.red = red;
     }
     return _result;
   }
@@ -750,6 +765,33 @@ class TrackInfo extends $pb.GeneratedMessage {
   $core.bool hasMid() => $_has(3);
   @$pb.TagNumber(6)
   void clearMid() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.bool get dtx => $_getBF(4);
+  @$pb.TagNumber(7)
+  set dtx($core.bool v) { $_setBool(4, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasDtx() => $_has(4);
+  @$pb.TagNumber(7)
+  void clearDtx() => clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.bool get stereo => $_getBF(5);
+  @$pb.TagNumber(8)
+  set stereo($core.bool v) { $_setBool(5, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasStereo() => $_has(5);
+  @$pb.TagNumber(8)
+  void clearStereo() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.bool get red => $_getBF(6);
+  @$pb.TagNumber(9)
+  set red($core.bool v) { $_setBool(6, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasRed() => $_has(6);
+  @$pb.TagNumber(9)
+  void clearRed() => clearField(9);
 }
 
 class Call extends $pb.GeneratedMessage {
@@ -893,6 +935,7 @@ class Error extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Error', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
     ..e<ErrorCode>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'code', $pb.PbFieldType.OE, defaultOrMaker: ErrorCode.ERROR_CODE_UNSPECIFIED, valueOf: ErrorCode.valueOf, enumValues: ErrorCode.values)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
+    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'shouldRetry')
     ..hasRequiredFields = false
   ;
 
@@ -900,6 +943,7 @@ class Error extends $pb.GeneratedMessage {
   factory Error({
     ErrorCode? code,
     $core.String? message,
+    $core.bool? shouldRetry,
   }) {
     final _result = create();
     if (code != null) {
@@ -907,6 +951,9 @@ class Error extends $pb.GeneratedMessage {
     }
     if (message != null) {
       _result.message = message;
+    }
+    if (shouldRetry != null) {
+      _result.shouldRetry = shouldRetry;
     }
     return _result;
   }
@@ -948,5 +995,89 @@ class Error extends $pb.GeneratedMessage {
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
   void clearMessage() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get shouldRetry => $_getBF(2);
+  @$pb.TagNumber(3)
+  set shouldRetry($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasShouldRetry() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearShouldRetry() => clearField(3);
+}
+
+class ClientDetails extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ClientDetails', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'version', $pb.PbFieldType.O3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'os')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'browser')
+    ..hasRequiredFields = false
+  ;
+
+  ClientDetails._() : super();
+  factory ClientDetails({
+    $core.int? version,
+    $core.String? os,
+    $core.String? browser,
+  }) {
+    final _result = create();
+    if (version != null) {
+      _result.version = version;
+    }
+    if (os != null) {
+      _result.os = os;
+    }
+    if (browser != null) {
+      _result.browser = browser;
+    }
+    return _result;
+  }
+  factory ClientDetails.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ClientDetails.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ClientDetails clone() => ClientDetails()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ClientDetails copyWith(void Function(ClientDetails) updates) => super.copyWith((message) => updates(message as ClientDetails)) as ClientDetails; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ClientDetails create() => ClientDetails._();
+  ClientDetails createEmptyInstance() => create();
+  static $pb.PbList<ClientDetails> createRepeated() => $pb.PbList<ClientDetails>();
+  @$core.pragma('dart2js:noInline')
+  static ClientDetails getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ClientDetails>(create);
+  static ClientDetails? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get version => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set version($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasVersion() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearVersion() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get os => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set os($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasOs() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearOs() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get browser => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set browser($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasBrowser() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearBrowser() => clearField(3);
 }
 

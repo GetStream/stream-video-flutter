@@ -715,6 +715,7 @@ class JoinRequest extends $pb.GeneratedMessage {
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'token')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscriberSdp')
+    ..aOM<$0.ClientDetails>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'clientDetails', subBuilder: $0.ClientDetails.create)
     ..hasRequiredFields = false
   ;
 
@@ -723,6 +724,7 @@ class JoinRequest extends $pb.GeneratedMessage {
     $core.String? token,
     $core.String? sessionId,
     $core.String? subscriberSdp,
+    $0.ClientDetails? clientDetails,
   }) {
     final _result = create();
     if (token != null) {
@@ -733,6 +735,9 @@ class JoinRequest extends $pb.GeneratedMessage {
     }
     if (subscriberSdp != null) {
       _result.subscriberSdp = subscriberSdp;
+    }
+    if (clientDetails != null) {
+      _result.clientDetails = clientDetails;
     }
     return _result;
   }
@@ -783,6 +788,17 @@ class JoinRequest extends $pb.GeneratedMessage {
   $core.bool hasSubscriberSdp() => $_has(2);
   @$pb.TagNumber(3)
   void clearSubscriberSdp() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $0.ClientDetails get clientDetails => $_getN(3);
+  @$pb.TagNumber(4)
+  set clientDetails($0.ClientDetails v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasClientDetails() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearClientDetails() => clearField(4);
+  @$pb.TagNumber(4)
+  $0.ClientDetails ensureClientDetails() => $_ensure(3);
 }
 
 class JoinResponse extends $pb.GeneratedMessage {

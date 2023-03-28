@@ -70,12 +70,16 @@ const ErrorCode$json = const {
     const {'1': 'ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND', '2': 103},
     const {'1': 'ERROR_CODE_PARTICIPANT_NOT_FOUND', '2': 200},
     const {'1': 'ERROR_CODE_CALL_NOT_FOUND', '2': 300},
+    const {'1': 'ERROR_CODE_REQUEST_VALIDATION_FAILED', '2': 400},
+    const {'1': 'ERROR_CODE_UNAUTHENTICATED', '2': 401},
+    const {'1': 'ERROR_CODE_PERMISSION_DENIED', '2': 403},
+    const {'1': 'ERROR_CODE_TOO_MANY_REQUESTS', '2': 429},
     const {'1': 'ERROR_CODE_INTERNAL_SERVER_ERROR', '2': 500},
   ],
 };
 
 /// Descriptor for `ErrorCode`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List errorCodeDescriptor = $convert.base64Decode('CglFcnJvckNvZGUSGgoWRVJST1JfQ09ERV9VTlNQRUNJRklFRBAAEiYKIkVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19OT1RfRk9VTkQQZBImCiJFUlJPUl9DT0RFX1BVQkxJU0hfVFJBQ0tTX01JU01BVENIEGUSKQolRVJST1JfQ09ERV9QVUJMSVNIX1RSQUNLX09VVF9PRl9PUkRFUhBmEjIKLkVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19WSURFT19MQVlFUl9OT1RfRk9VTkQQZxIlCiBFUlJPUl9DT0RFX1BBUlRJQ0lQQU5UX05PVF9GT1VORBDIARIeChlFUlJPUl9DT0RFX0NBTExfTk9UX0ZPVU5EEKwCEiUKIEVSUk9SX0NPREVfSU5URVJOQUxfU0VSVkVSX0VSUk9SEPQD');
+final $typed_data.Uint8List errorCodeDescriptor = $convert.base64Decode('CglFcnJvckNvZGUSGgoWRVJST1JfQ09ERV9VTlNQRUNJRklFRBAAEiYKIkVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19OT1RfRk9VTkQQZBImCiJFUlJPUl9DT0RFX1BVQkxJU0hfVFJBQ0tTX01JU01BVENIEGUSKQolRVJST1JfQ09ERV9QVUJMSVNIX1RSQUNLX09VVF9PRl9PUkRFUhBmEjIKLkVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19WSURFT19MQVlFUl9OT1RfRk9VTkQQZxIlCiBFUlJPUl9DT0RFX1BBUlRJQ0lQQU5UX05PVF9GT1VORBDIARIeChlFUlJPUl9DT0RFX0NBTExfTk9UX0ZPVU5EEKwCEikKJEVSUk9SX0NPREVfUkVRVUVTVF9WQUxJREFUSU9OX0ZBSUxFRBCQAxIfChpFUlJPUl9DT0RFX1VOQVVUSEVOVElDQVRFRBCRAxIhChxFUlJPUl9DT0RFX1BFUk1JU1NJT05fREVOSUVEEJMDEiEKHEVSUk9SX0NPREVfVE9PX01BTllfUkVRVUVTVFMQrQMSJQogRVJST1JfQ09ERV9JTlRFUk5BTF9TRVJWRVJfRVJST1IQ9AM=');
 @$core.Deprecated('Use callStateDescriptor instead')
 const CallState$json = const {
   '1': 'CallState',
@@ -178,11 +182,14 @@ const TrackInfo$json = const {
     const {'1': 'track_type', '3': 2, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'trackType'},
     const {'1': 'layers', '3': 5, '4': 3, '5': 11, '6': '.stream.video.sfu.models.VideoLayer', '10': 'layers'},
     const {'1': 'mid', '3': 6, '4': 1, '5': 9, '10': 'mid'},
+    const {'1': 'dtx', '3': 7, '4': 1, '5': 8, '10': 'dtx'},
+    const {'1': 'stereo', '3': 8, '4': 1, '5': 8, '10': 'stereo'},
+    const {'1': 'red', '3': 9, '4': 1, '5': 8, '10': 'red'},
   ],
 };
 
 /// Descriptor for `TrackInfo`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List trackInfoDescriptor = $convert.base64Decode('CglUcmFja0luZm8SGQoIdHJhY2tfaWQYASABKAlSB3RyYWNrSWQSQQoKdHJhY2tfdHlwZRgCIAEoDjIiLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlRyYWNrVHlwZVIJdHJhY2tUeXBlEjsKBmxheWVycxgFIAMoCzIjLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlZpZGVvTGF5ZXJSBmxheWVycxIQCgNtaWQYBiABKAlSA21pZA==');
+final $typed_data.Uint8List trackInfoDescriptor = $convert.base64Decode('CglUcmFja0luZm8SGQoIdHJhY2tfaWQYASABKAlSB3RyYWNrSWQSQQoKdHJhY2tfdHlwZRgCIAEoDjIiLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlRyYWNrVHlwZVIJdHJhY2tUeXBlEjsKBmxheWVycxgFIAMoCzIjLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlZpZGVvTGF5ZXJSBmxheWVycxIQCgNtaWQYBiABKAlSA21pZBIQCgNkdHgYByABKAhSA2R0eBIWCgZzdGVyZW8YCCABKAhSBnN0ZXJlbxIQCgNyZWQYCSABKAhSA3JlZA==');
 @$core.Deprecated('Use callDescriptor instead')
 const Call$json = const {
   '1': 'Call',
@@ -205,8 +212,21 @@ const Error$json = const {
   '2': const [
     const {'1': 'code', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.ErrorCode', '10': 'code'},
     const {'1': 'message', '3': 2, '4': 1, '5': 9, '10': 'message'},
+    const {'1': 'should_retry', '3': 3, '4': 1, '5': 8, '10': 'shouldRetry'},
   ],
 };
 
 /// Descriptor for `Error`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List errorDescriptor = $convert.base64Decode('CgVFcnJvchI2CgRjb2RlGAEgASgOMiIuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuRXJyb3JDb2RlUgRjb2RlEhgKB21lc3NhZ2UYAiABKAlSB21lc3NhZ2U=');
+final $typed_data.Uint8List errorDescriptor = $convert.base64Decode('CgVFcnJvchI2CgRjb2RlGAEgASgOMiIuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuRXJyb3JDb2RlUgRjb2RlEhgKB21lc3NhZ2UYAiABKAlSB21lc3NhZ2USIQoMc2hvdWxkX3JldHJ5GAMgASgIUgtzaG91bGRSZXRyeQ==');
+@$core.Deprecated('Use clientDetailsDescriptor instead')
+const ClientDetails$json = const {
+  '1': 'ClientDetails',
+  '2': const [
+    const {'1': 'version', '3': 1, '4': 1, '5': 5, '10': 'version'},
+    const {'1': 'os', '3': 2, '4': 1, '5': 9, '10': 'os'},
+    const {'1': 'browser', '3': 3, '4': 1, '5': 9, '10': 'browser'},
+  ],
+};
+
+/// Descriptor for `ClientDetails`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List clientDetailsDescriptor = $convert.base64Decode('Cg1DbGllbnREZXRhaWxzEhgKB3ZlcnNpb24YASABKAVSB3ZlcnNpb24SDgoCb3MYAiABKAlSAm9zEhgKB2Jyb3dzZXIYAyABKAlSB2Jyb3dzZXI=');
