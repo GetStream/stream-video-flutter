@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:uni_links/uni_links.dart';
 
 import 'env/env.dart';
@@ -41,8 +40,9 @@ Future<void> _initStreamVideo() async {
   if (!StreamVideo.isInitialized()) {
     final client = StreamVideo.init(Env.apiKey);
     await _setupLogger();
-    client.pushNotificationManager =
-        await StreamVideoPushNotificationManager.create(client);
+    // TODO throws MissingPluginException (No implementation found for method listen on channel stream_video_push_notification_events)
+    // client.pushNotificationManager =
+    //     await StreamVideoPushNotificationManager.create(client);
   }
 }
 
