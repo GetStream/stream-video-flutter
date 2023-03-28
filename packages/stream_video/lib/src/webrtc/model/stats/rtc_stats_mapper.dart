@@ -36,7 +36,6 @@ extension RtcStatsMapper on List<rtc.StatsReport> {
 
     for (final report in this) {
       try {
-        streamLog.v(_tag, () => '[toRtcStats] report: ${report.toJson()}');
         final reportType = RtcReportType.fromAlias(report.type);
         if (reportType == RtcReportType.codec) {
           report.extractCodec(codecs);

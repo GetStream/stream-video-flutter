@@ -225,32 +225,32 @@ class RtcManager extends Disposable {
 }
 
 extension PublisherRtcManager on RtcManager {
-  List<RtcLocalTrack> getLocalTracks() {
+  List<RtcLocalTrack> getPublisherTracks() {
     return [...publishedTracks.values.whereType<RtcLocalTrack>()];
   }
 
-  RtcLocalTrack? getLocalTrackByType(SfuTrackType trackType) {
-    final track = getLocalTracks().firstWhereOrNull((track) {
+  RtcLocalTrack? getPublisherTrackByType(SfuTrackType trackType) {
+    final track = getPublisherTracks().firstWhereOrNull((track) {
       return track.trackType == trackType;
     });
 
     if (track == null) {
-      _logger.w(() => '[getLocalTrackByType] track not found: $trackType');
+      _logger.w(() => '[getPublisherTrackInfos] track not found: $trackType');
       return null;
     }
 
     return track;
   }
 
-  List<RtcTrackInfo> getLocalTracksInfo() {
-    return getLocalTracks().map((it) {
+  List<RtcTrackInfo> getPublisherTrackInfos() {
+    return getPublisherTracks().map((it) {
       List<RtcVideoLayer>? videoLayers;
 
       // Calculate video layers for video tracks.
       if (it.isVideoTrack) {
         final dimension = it.videoDimension!;
         final encodings = it.transceiver?.sender.parameters.encodings;
-        _logger.i(() => '[getLocalTracksInfo] dimension: $dimension');
+        _logger.i(() => '[getPublisherTrackInfos] dimension: $dimension');
 
         // default to a single layer, HQ
         final defaultLayer = RtcVideoLayer(
@@ -284,7 +284,7 @@ extension PublisherRtcManager on RtcManager {
       }
 
       videoLayers?.forEach((layer) {
-        _logger.v(() => '[getLocalTracksInfo] layer: $layer');
+        _logger.v(() => '[getPublisherTrackInfos] layer: $layer');
       });
 
       return RtcTrackInfo(
@@ -516,7 +516,7 @@ extension PublisherRtcManager on RtcManager {
   Future<Result<RtcLocalCameraTrack>> setTrackFacingMode({
     required FacingMode facingMode,
   }) async {
-    final track = getLocalTrackByType(SfuTrackType.video);
+    final track = getPublisherTrackByType(SfuTrackType.video);
     if (track == null) return Result.error('Track not found');
 
     if (track is! RtcLocalCameraTrack) {
@@ -542,7 +542,7 @@ extension RtcManagerTrackHelper on RtcManager {
       return Result.error('Not supported on web');
     }
 
-    final track = getLocalTrackByType(SfuTrackType.video);
+    final track = getPublisherTrackByType(SfuTrackType.video);
     if (track == null) {
       _logger.e(() => '[switchCamera] rejected (track is null)');
       return Result.error('Track is null');
@@ -562,7 +562,7 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalCameraTrack>> setVideoInputDevice({
     required RtcMediaDevice device,
   }) async {
-    final track = getLocalTrackByType(SfuTrackType.video);
+    final track = getPublisherTrackByType(SfuTrackType.video);
     if (track == null) {
       _logger.w(() => '[setCameraDeviceId] rejected (track is null)');
       return Result.error('Track is null');
@@ -582,7 +582,7 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalAudioTrack>> setAudioInputDevice({
     required RtcMediaDevice device,
   }) async {
-    final track = getLocalTrackByType(SfuTrackType.audio);
+    final track = getPublisherTrackByType(SfuTrackType.audio);
     if (track == null) {
       _logger.w(() => '[setMicrophoneDeviceId] rejected (track is null)');
       return Result.error('Track is null');
@@ -665,7 +665,7 @@ extension RtcManagerTrackHelper on RtcManager {
     required SfuTrackType trackType,
     required bool enabled,
   }) async {
-    final track = getLocalTrackByType(trackType);
+    final track = getPublisherTrackByType(trackType);
 
     // Track found, mute/unmute it.
     if (track != null) {
@@ -696,7 +696,7 @@ extension RtcManagerTrackHelper on RtcManager {
         await unpublishTrack(trackId: track.trackId);
 
         // Also un-publish the audio track if it was published
-        final screenShareAudioTrack = getLocalTrackByType(
+        final screenShareAudioTrack = getPublisherTrackByType(
           SfuTrackType.screenShareAudio,
         );
         if (screenShareAudioTrack != null) {
