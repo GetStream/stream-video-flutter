@@ -38,8 +38,12 @@ Future<void> main() async {
 
 Future<void> _initStreamVideo() async {
   if (!StreamVideo.isInitialized()) {
-    final client = StreamVideo.init(Env.apiKey);
     await _setupLogger();
+    final client = StreamVideo.init(
+      Env.apiKey,
+      coordinatorRpcUrl: Env.coordinatorRpcUrl,
+      coordinatorWsUrl: Env.coordinatorWsUrl,
+    );
     // TODO throws MissingPluginException (No implementation found for method listen on channel stream_video_push_notification_events)
     // client.pushNotificationManager =
     //     await StreamVideoPushNotificationManager.create(client);

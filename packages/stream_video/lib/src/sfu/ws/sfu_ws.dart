@@ -31,16 +31,22 @@ class SfuWebSocket extends StreamWebSocket
     Iterable<String>? protocols,
   }) {
     streamLog.i(_tag, () => '<factory> sessionId: $sessionId');
-    var wsEndpoint = 'ws://$sfuUrl:3031/ws';
-    if (!['localhost', '127.0.0.1'].contains(sfuUrl)) {
-      final wsUrl = Uri.parse(sfuUrl);
-      wsEndpoint = wsUrl
+    final sfuUri = Uri.parse(sfuUrl);
+    streamLog.i(_tag, () => '<factory> sfuUri: $sfuUri');
+    final String wsEndpoint;
+    if (sfuUri.host.startsWith('localhost') ||
+        sfuUri.host.startsWith('127.0.0.1') ||
+        sfuUri.host.startsWith('192.')) {
+      wsEndpoint = 'ws://${sfuUri.host}:3031/ws';
+    } else {
+      wsEndpoint = sfuUri
           .replace(
             scheme: 'wss',
             path: '/ws',
           )
           .toString();
     }
+    streamLog.i(_tag, () => '<factory> wsEndpoint: $wsEndpoint');
     return SfuWebSocket._(
       wsEndpoint,
       protocols: protocols,
