@@ -107,8 +107,7 @@ class SfuWebSocket extends StreamWebSocket
 
     if (rawEvent == null) return;
 
-    final eventType = rawEvent.whichEventPayload();
-    _logger.v(() => '[onMessage] eventType: $eventType');
+    _logger.v(() => '[onRawMessage] message: $rawEvent');
 
     final event = rawEvent.toDomain();
     _handleEvent(event);
@@ -184,7 +183,7 @@ class SfuWebSocket extends StreamWebSocket
 
   int _reconnectAttempt = 0;
 
-  void _reconnect() async {
+  Future<void> _reconnect() async {
     if (isConnecting || isReconnecting) return;
     _logger.d(() => '[_reconnect] _reconnectAttempt: $_reconnectAttempt');
     _reconnectAttempt += 1;

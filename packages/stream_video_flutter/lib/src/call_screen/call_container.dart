@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
@@ -76,7 +78,7 @@ class StreamCallContainer extends StatefulWidget {
 
 class _StreamCallContainerState extends State<StreamCallContainer> {
   final _logger = taggedLogger(tag: 'SV:CallContainer');
-  final _subscriptions = Subscriptions();
+  StreamSubscription<CallState>? _callStateSubscription;
 
   /// Represents a call.
   Call get call => widget.call;
@@ -87,15 +89,16 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   @override
   void initState() {
     super.initState();
-    _subscriptions.add(0, call.state.listen(_setState));
+    _callStateSubscription = call.state.listen(_setState);
     _callState = call.state.value;
     _connect();
   }
 
   @override
   void dispose() {
+    _callStateSubscription?.cancel();
+    _callStateSubscription = null;
     super.dispose();
-    _subscriptions.cancelAll();
   }
 
   void _setState(CallState callState) {
@@ -141,7 +144,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
 
   Future<void> _connect() async {
     try {
-      call.setInitialCallOptions(widget.callConnectOptions);
+      call.connectOptions = widget.callConnectOptions;
       final result = await call.connect();
       if (result.isFailure) {
         await _onCancelCall();
@@ -160,7 +163,12 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   Future<void> _disconnect() async {
     _logger.d(() => '[disconnect] no args');
     await call.disconnect();
-    final popped = await Navigator.maybePop(context);
+    final bool popped;
+    if (mounted) {
+      popped = await Navigator.maybePop(context);
+    } else {
+      popped = false;
+    }
     _logger.v(() => '[disconnect] popped: $popped');
   }
 }

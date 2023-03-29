@@ -157,31 +157,58 @@ class StreamCallParticipantThemeData with Diagnosticable {
       userAvatarTheme: userAvatarTheme.lerp(other.userAvatarTheme, t),
       showDominantSpeakerBorder:
           t < 0.5 ? showDominantSpeakerBorder : other.showDominantSpeakerBorder,
-      dominantSpeakerBorderThickness: lerpDouble(dominantSpeakerBorderThickness,
-          other.dominantSpeakerBorderThickness, t)!,
+      dominantSpeakerBorderThickness: lerpDouble(
+        dominantSpeakerBorderThickness,
+        other.dominantSpeakerBorderThickness,
+        t,
+      )!,
       dominantSpeakerBorderColor: Color.lerp(
-          dominantSpeakerBorderColor, other.dominantSpeakerBorderColor, t)!,
+        dominantSpeakerBorderColor,
+        other.dominantSpeakerBorderColor,
+        t,
+      )!,
       showParticipantLabel:
           t < 0.5 ? showParticipantLabel : other.showParticipantLabel,
       participantLabelTextStyle: TextStyle.lerp(
-          participantLabelTextStyle, other.participantLabelTextStyle, t)!,
+        participantLabelTextStyle,
+        other.participantLabelTextStyle,
+        t,
+      )!,
       participantLabelAlignment: AlignmentGeometry.lerp(
-          participantLabelAlignment, other.participantLabelAlignment, t)!,
+        participantLabelAlignment,
+        other.participantLabelAlignment,
+        t,
+      )!,
       audioLevelIndicatorColor: Color.lerp(
-          audioLevelIndicatorColor, other.audioLevelIndicatorColor, t)!,
+        audioLevelIndicatorColor,
+        other.audioLevelIndicatorColor,
+        t,
+      )!,
       enabledMicrophoneColor:
           Color.lerp(enabledMicrophoneColor, other.enabledMicrophoneColor, t)!,
       disabledMicrophoneColor: Color.lerp(
-          disabledMicrophoneColor, other.disabledMicrophoneColor, t)!,
+        disabledMicrophoneColor,
+        other.disabledMicrophoneColor,
+        t,
+      )!,
       showConnectionQualityIndicator: t < 0.5
           ? showConnectionQualityIndicator
           : other.showConnectionQualityIndicator,
       connectionLevelActiveColor: Color.lerp(
-          connectionLevelActiveColor, other.connectionLevelActiveColor, t)!,
+        connectionLevelActiveColor,
+        other.connectionLevelActiveColor,
+        t,
+      )!,
       connectionLevelInactiveColor: Color.lerp(
-          connectionLevelInactiveColor, other.connectionLevelInactiveColor, t)!,
+        connectionLevelInactiveColor,
+        other.connectionLevelInactiveColor,
+        t,
+      )!,
       connectionLevelAlignment: AlignmentGeometry.lerp(
-          connectionLevelAlignment, other.connectionLevelAlignment, t)!,
+        connectionLevelAlignment,
+        other.connectionLevelAlignment,
+        t,
+      )!,
     );
   }
 
@@ -241,31 +268,76 @@ class StreamCallParticipantThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('backgroundColor', backgroundColor))
       ..add(DiagnosticsProperty('borderRadius', borderRadius))
       ..add(DiagnosticsProperty('userAvatarTheme', userAvatarTheme))
-      ..add(DiagnosticsProperty(
-          'showDominantSpeakerBorder', showDominantSpeakerBorder))
-      ..add(DiagnosticsProperty(
-          'dominantSpeakerBorderThickness', dominantSpeakerBorderThickness))
-      ..add(DiagnosticsProperty(
-          'dominantSpeakerBorderColor', dominantSpeakerBorderColor))
-      ..add(DiagnosticsProperty('showParticipantLabel', showParticipantLabel))
-      ..add(DiagnosticsProperty(
-          'participantLabelTextStyle', participantLabelTextStyle))
-      ..add(DiagnosticsProperty(
-          'participantLabelAlignment', participantLabelAlignment))
-      ..add(DiagnosticsProperty(
-          'audioLevelIndicatorColor', audioLevelIndicatorColor))
       ..add(
-          DiagnosticsProperty('enabledMicrophoneColor', enabledMicrophoneColor))
-      ..add(DiagnosticsProperty(
-          'disabledMicrophoneColor', disabledMicrophoneColor))
-      ..add(DiagnosticsProperty(
-          'showConnectionQualityIndicator', showConnectionQualityIndicator))
-      ..add(DiagnosticsProperty(
-          'connectionLevelActiveColor', connectionLevelActiveColor))
-      ..add(DiagnosticsProperty(
-          'connectionLevelInactiveColor', connectionLevelInactiveColor))
-      ..add(DiagnosticsProperty(
-          'connectionLevelAlignment', connectionLevelAlignment));
+        DiagnosticsProperty(
+          'showDominantSpeakerBorder',
+          showDominantSpeakerBorder,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'dominantSpeakerBorderThickness',
+          dominantSpeakerBorderThickness,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'dominantSpeakerBorderColor',
+          dominantSpeakerBorderColor,
+        ),
+      )
+      ..add(DiagnosticsProperty('showParticipantLabel', showParticipantLabel))
+      ..add(
+        DiagnosticsProperty(
+          'participantLabelTextStyle',
+          participantLabelTextStyle,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'participantLabelAlignment',
+          participantLabelAlignment,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'audioLevelIndicatorColor',
+          audioLevelIndicatorColor,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty('enabledMicrophoneColor', enabledMicrophoneColor),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'disabledMicrophoneColor',
+          disabledMicrophoneColor,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'showConnectionQualityIndicator',
+          showConnectionQualityIndicator,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'connectionLevelActiveColor',
+          connectionLevelActiveColor,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'connectionLevelInactiveColor',
+          connectionLevelInactiveColor,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'connectionLevelAlignment',
+          connectionLevelAlignment,
+        ),
+      );
   }
 
   /// Merges one [StreamCallParticipantThemeData] with the another.

@@ -1,15 +1,14 @@
 import 'dart:async';
-
-import 'package:stream_video/src/state_emitter.dart';
-import 'package:stream_video/src/ws/connect/connect.dart'
-    if (dart.library.html) 'package:stream_video/src/ws/connect/connect_html.dart'
-    if (dart.library.io) 'package:stream_video/src/ws/connect/connect_io.dart'
-    as platform;
-import 'package:stream_video/src/ws/socket_connection_state.dart';
-import 'package:stream_video/src/ws/utils/web_socket_extension.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../logger/stream_log.dart';
+import '../state_emitter.dart';
+import 'connect/connect.dart'
+    if (dart.library.html) 'package:stream_video/src/ws/connect/connect_html.dart'
+    if (dart.library.io) 'package:stream_video/src/ws/connect/connect_io.dart'
+    as platform;
+import 'socket_connection_state.dart';
+import 'utils/web_socket_extension.dart';
 
 export 'package:web_socket_channel/web_socket_channel.dart';
 

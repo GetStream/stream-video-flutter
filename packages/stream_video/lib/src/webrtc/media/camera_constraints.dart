@@ -26,7 +26,7 @@ class CameraConstraints extends VideoConstraints {
   Map<String, dynamic> toMap() {
     final constraints = <String, dynamic>{
       ...super.toMap(),
-      'facingMode': facingMode.name,
+      'facingMode': facingMode.alias,
     };
     if (deviceId != null) {
       if (CurrentPlatform.isWeb) {

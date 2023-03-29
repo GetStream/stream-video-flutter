@@ -1,8 +1,8 @@
 import '../../sfu/data/models/sfu_track_type.dart';
-import 'rtc_video_dimension.dart';
+import 'rtc_video_parameters.dart';
 
 class RtcTrackInfo {
-  RtcTrackInfo({
+  const RtcTrackInfo({
     required this.trackId,
     required this.trackType,
     required this.mid,
@@ -22,19 +22,16 @@ class RtcTrackInfo {
 }
 
 class RtcVideoLayer {
-  RtcVideoLayer({
+  const RtcVideoLayer({
     required this.rid,
-    required this.videoDimension,
-    required this.bitrate,
+    required this.parameters,
   });
 
-  final String? rid;
-  final RtcVideoDimension? videoDimension;
-  final int? bitrate;
+  final String rid;
+  final RtcVideoParameters parameters;
 
   @override
   String toString() {
-    return 'RtcVideoLayer{rid: $rid, videoDimension: $videoDimension, '
-        'bitrate: $bitrate}';
+    return 'RtcVideoLayer{rid: $rid, parameters: $parameters}';
   }
 }

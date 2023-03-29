@@ -20,7 +20,7 @@ abstract class Result<T> extends Equatable {
 
   factory Result.errorWithCause(
     String message,
-    Exception cause, [
+    Object cause, [
     StackTrace? stackTrace,
   ]) = Failure._fromErrorWithCause;
 
@@ -60,7 +60,7 @@ class Failure extends Result<Never> {
 
   factory Failure._fromErrorWithCause(
     String message,
-    Exception cause, [
+    Object cause, [
     StackTrace? stackTrace,
   ]) {
     final error = VideoErrorWithCause(

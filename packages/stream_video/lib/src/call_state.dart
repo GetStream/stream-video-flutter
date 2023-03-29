@@ -8,6 +8,7 @@ import 'models/call_cid.dart';
 import 'models/call_metadata.dart';
 import 'models/call_setting.dart';
 import 'models/call_status.dart';
+import 'webrtc/rtc_media_device/rtc_media_device.dart';
 
 /// TODO - Class that holds any information about the call, including participants
 @immutable
@@ -24,6 +25,9 @@ class CallState extends Equatable {
       status: CallStatus.idle(),
       isRecording: false,
       settings: const CallSettings.disabled(),
+      videoInputDevice: null,
+      audioInputDevice: null,
+      audioOutputDevice: null,
       ownCapabilities: List.unmodifiable(const []),
       callParticipants: List.unmodifiable(const []),
     );
@@ -43,6 +47,9 @@ class CallState extends Equatable {
       status: metadata.toCallStatus(currentUserId, ringing: ringing),
       isRecording: false,
       settings: metadata.details.settings,
+      videoInputDevice: null,
+      audioInputDevice: null,
+      audioOutputDevice: null,
       ownCapabilities: List.unmodifiable(metadata.details.ownCapabilities),
       callParticipants: List.unmodifiable(
         metadata.toCallParticipants(
@@ -63,6 +70,9 @@ class CallState extends Equatable {
     required this.settings,
     required this.ownCapabilities,
     required this.callParticipants,
+    required this.videoInputDevice,
+    required this.audioInputDevice,
+    required this.audioOutputDevice,
   });
 
   final String currentUserId;
@@ -72,6 +82,9 @@ class CallState extends Equatable {
   final CallStatus status;
   final bool isRecording;
   final CallSettings settings;
+  final RtcMediaDevice? videoInputDevice;
+  final RtcMediaDevice? audioInputDevice;
+  final RtcMediaDevice? audioOutputDevice;
   final List<CallPermission> ownCapabilities;
   final List<CallParticipantState> callParticipants;
 
@@ -93,6 +106,9 @@ class CallState extends Equatable {
     CallStatus? status,
     bool? isRecording,
     CallSettings? settings,
+    RtcMediaDevice? videoInputDevice,
+    RtcMediaDevice? audioInputDevice,
+    RtcMediaDevice? audioOutputDevice,
     List<CallPermission>? ownCapabilities,
     List<CallParticipantState>? callParticipants,
   }) {
@@ -104,6 +120,9 @@ class CallState extends Equatable {
       status: status ?? this.status,
       isRecording: isRecording ?? this.isRecording,
       settings: settings ?? this.settings,
+      videoInputDevice: videoInputDevice ?? this.videoInputDevice,
+      audioInputDevice: audioInputDevice ?? this.audioInputDevice,
+      audioOutputDevice: audioOutputDevice ?? this.audioOutputDevice,
       ownCapabilities: ownCapabilities ?? this.ownCapabilities,
       callParticipants: callParticipants ?? this.callParticipants,
     );
@@ -118,17 +137,23 @@ class CallState extends Equatable {
         status,
         isRecording,
         settings,
+        videoInputDevice,
+        audioInputDevice,
+        audioOutputDevice,
         ownCapabilities,
         callParticipants,
       ];
 
   @override
   String toString() {
-    return 'CallState{currentUserId: $currentUserId, callCid: $callCid, '
-        'createdByUserId: $createdByUserId, status: $status, '
-        'isRecordingInProgress: $isRecording, settings: $settings, '
-        'ownCapabilities: $ownCapabilities, '
-        'sessionId: $sessionId, callParticipants: $callParticipants}';
+    return 'CallState(currentUserId: $currentUserId, callCid: $callCid,'
+        ' createdByUserId: $createdByUserId, sessionId: $sessionId,'
+        ' status: $status, isRecording: $isRecording, settings: $settings,'
+        ' videoInputDevice: $videoInputDevice,'
+        ' audioInputDevice: $audioInputDevice,'
+        ' audioOutputDevice: $audioOutputDevice,'
+        ' ownCapabilities: $ownCapabilities,'
+        ' callParticipants: $callParticipants)';
   }
 }
 
@@ -158,7 +183,7 @@ extension on CallMetadata {
           userId: userId,
           role: member?.role ?? user?.role ?? '',
           name: user?.name ?? '',
-          profileImageURL: user?.imageUrl ?? '',
+          image: user?.image ?? '',
           sessionId: '',
           trackIdPrefix: '',
           isLocal: isLocal,

@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:stream_video_flutter_background/model/notification_options.dart';
-import 'package:stream_video_flutter_background/stream_video_flutter_background.dart';
 import 'package:stream_video_flutter_background/stream_video_flutter_background_method_channel.dart';
 import 'package:stream_video_flutter_background/stream_video_flutter_background_platform_interface.dart';
 
@@ -31,6 +30,12 @@ class MockStreamVideoFlutterBackgroundPlatform
 
   @override
   Function(String buttonType, String callCid)? onButtonClick;
+
+  @override
+  Function(String callCid)? onContentClick;
+
+  @override
+  Function(String callCid)? onUiLayerDestroyed;
 }
 
 void main() {
@@ -41,13 +46,5 @@ void main() {
       () {
     expect(initialPlatform,
         isInstanceOf<MethodChannelStreamVideoFlutterBackground>());
-  });
-
-  test('getPlatformVersion', () async {
-    MockStreamVideoFlutterBackgroundPlatform fakePlatform =
-        MockStreamVideoFlutterBackgroundPlatform();
-    StreamVideoFlutterBackgroundPlatform.instance = fakePlatform;
-
-    expect(await StreamVideoFlutterBackground.getPlatformVersion(), '42');
   });
 }

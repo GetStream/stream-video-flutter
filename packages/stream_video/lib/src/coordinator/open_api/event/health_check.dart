@@ -30,25 +30,28 @@ class HealthCheck {
         createdAt: createdAt ?? this.createdAt,
       );
 
-  factory HealthCheck.fromRawJson(String str) => HealthCheck.fromJson(json.decode(str));
+  factory HealthCheck.fromRawJson(String str) =>
+      HealthCheck.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
   factory HealthCheck.fromJson(Map<String, dynamic> json) => HealthCheck(
-    type: json["type"],
-    connectionId: json["connection_id"],
-    cid: json["cid"],
-    me: json["me"] == null ? null : Me.fromJson(json["me"]),
-    createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
-  );
+        type: json["type"],
+        connectionId: json["connection_id"],
+        cid: json["cid"],
+        me: json["me"] == null ? null : Me.fromJson(json["me"]),
+        createdAt: json["created_at"] == null
+            ? null
+            : DateTime.parse(json["created_at"]),
+      );
 
   Map<String, dynamic> toJson() => {
-    "type": type,
-    "connection_id": connectionId,
-    "cid": cid,
-    "me": me?.toJson(),
-    "created_at": createdAt?.toIso8601String(),
-  };
+        "type": type,
+        "connection_id": connectionId,
+        "cid": cid,
+        "me": me?.toJson(),
+        "created_at": createdAt?.toIso8601String(),
+      };
 }
 
 class Me {
@@ -142,46 +145,61 @@ class Me {
   String toRawJson() => json.encode(toJson());
 
   factory Me.fromJson(Map<String, dynamic> json) => Me(
-    id: json["id"],
-    role: json["role"],
-    createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
-    updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
-    lastActive: json["last_active"] == null ? null : DateTime.parse(json["last_active"]),
-    banned: json["banned"],
-    online: json["online"],
-    invisible: json["invisible"],
-    devices: json["devices"] == null ? [] : List<dynamic>.from(json["devices"]!.map((x) => x)),
-    mutes: json["mutes"] == null ? [] : List<dynamic>.from(json["mutes"]!.map((x) => x)),
-    channelMutes: json["channel_mutes"] == null ? [] : List<dynamic>.from(json["channel_mutes"]!.map((x) => x)),
-    unreadCount: json["unread_count"],
-    totalUnreadCount: json["total_unread_count"],
-    unreadChannels: json["unread_channels"],
-    language: json["language"],
-    image: json["image"],
-    imageUrl: json["imageURL"],
-    userName: json["userName"],
-    name: json["name"],
-  );
+        id: json["id"],
+        role: json["role"],
+        createdAt: json["created_at"] == null
+            ? null
+            : DateTime.parse(json["created_at"]),
+        updatedAt: json["updated_at"] == null
+            ? null
+            : DateTime.parse(json["updated_at"]),
+        lastActive: json["last_active"] == null
+            ? null
+            : DateTime.parse(json["last_active"]),
+        banned: json["banned"],
+        online: json["online"],
+        invisible: json["invisible"],
+        devices: json["devices"] == null
+            ? []
+            : List<dynamic>.from(json["devices"]!.map((x) => x)),
+        mutes: json["mutes"] == null
+            ? []
+            : List<dynamic>.from(json["mutes"]!.map((x) => x)),
+        channelMutes: json["channel_mutes"] == null
+            ? []
+            : List<dynamic>.from(json["channel_mutes"]!.map((x) => x)),
+        unreadCount: json["unread_count"],
+        totalUnreadCount: json["total_unread_count"],
+        unreadChannels: json["unread_channels"],
+        language: json["language"],
+        image: json["image"],
+        imageUrl: json["imageURL"],
+        userName: json["userName"],
+        name: json["name"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "role": role,
-    "created_at": createdAt?.toIso8601String(),
-    "updated_at": updatedAt?.toIso8601String(),
-    "last_active": lastActive?.toIso8601String(),
-    "banned": banned,
-    "online": online,
-    "invisible": invisible,
-    "devices": devices == null ? [] : List<dynamic>.from(devices!.map((x) => x)),
-    "mutes": mutes == null ? [] : List<dynamic>.from(mutes!.map((x) => x)),
-    "channel_mutes": channelMutes == null ? [] : List<dynamic>.from(channelMutes!.map((x) => x)),
-    "unread_count": unreadCount,
-    "total_unread_count": totalUnreadCount,
-    "unread_channels": unreadChannels,
-    "language": language,
-    "image": image,
-    "imageURL": imageUrl,
-    "userName": userName,
-    "name": name,
-  };
+        "id": id,
+        "role": role,
+        "created_at": createdAt?.toIso8601String(),
+        "updated_at": updatedAt?.toIso8601String(),
+        "last_active": lastActive?.toIso8601String(),
+        "banned": banned,
+        "online": online,
+        "invisible": invisible,
+        "devices":
+            devices == null ? [] : List<dynamic>.from(devices!.map((x) => x)),
+        "mutes": mutes == null ? [] : List<dynamic>.from(mutes!.map((x) => x)),
+        "channel_mutes": channelMutes == null
+            ? []
+            : List<dynamic>.from(channelMutes!.map((x) => x)),
+        "unread_count": unreadCount,
+        "total_unread_count": totalUnreadCount,
+        "unread_channels": unreadChannels,
+        "language": language,
+        "image": image,
+        "imageURL": imageUrl,
+        "userName": userName,
+        "name": name,
+      };
 }

@@ -5,12 +5,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:uni_links/uni_links.dart';
 
 import 'env/env.dart';
 import 'firebase_options.dart';
+import 'log_config.dart';
 import 'src/routes/app_routes.dart';
 import 'src/routes/routes.dart';
 import 'src/user_repository.dart';
@@ -18,7 +19,7 @@ import 'src/user_repository.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  _initStreamVideo();
+  await _initStreamVideo();
   await _handleRemoteMessage(message);
 }
 
@@ -31,27 +32,45 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  _initStreamVideo();
+  await _initStreamVideo();
   runApp(const StreamDogFoodingApp());
 }
 
-void _initStreamVideo() async {
+Future<void> _initStreamVideo() async {
   if (!StreamVideo.isInitialized()) {
-    final client = StreamVideo.init(
-      Env.apiKey,
-      coordinatorRpcUrl: Env.coordinatorRpcUrl,
-      coordinatorWsUrl: Env.coordinatorWsUrl,
-      logLevel: LogLevel.all,
-    );
-    client.pushNotificationManager =
-        await StreamVideoPushNotificationManager.create(client);
+    final client = StreamVideo.init(Env.apiKey);
+    await _setupLogger();
+    // TODO throws MissingPluginException (No implementation found for method listen on channel stream_video_push_notification_events)
+    // client.pushNotificationManager =
+    //     await StreamVideoPushNotificationManager.create(client);
   }
 }
 
-Future<PushNotificationManager> createPushNotificationManager(
-  StreamVideo client,
-) {
-  return StreamVideoPushNotificationManager.create(client);
+Future<void> _setupLogger() async {
+  const consoleLogger = ConsoleStreamLogger();
+  final children = <StreamLogger>[consoleLogger];
+  FileStreamLogger? fileLogger;
+  if (!kIsWeb) {
+    fileLogger = FileStreamLogger(
+      AppFileLogConfig('1.0.0'),
+      sender: (logFile) async {
+        consoleLogger.log(
+          Priority.debug,
+          'DogFoodingApp',
+          () => '[send] logFile: $logFile(${logFile.existsSync()})',
+        );
+        await Share.shareXFiles(
+          [XFile(logFile.path)],
+          subject: 'Share Logs',
+          text: 'Stream Flutter Dogfooding Logs',
+        );
+      },
+      console: consoleLogger,
+    );
+    children.add(fileLogger);
+  }
+  StreamLog().validator = (priority, _) => true;
+  StreamLog().logger = CompositeStreamLogger(children);
 }
 
 class StreamDogFoodingApp extends StatefulWidget {
@@ -62,7 +81,9 @@ class StreamDogFoodingApp extends StatefulWidget {
 }
 
 class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
-    with WidgetsBindingObserver {
+    //ignore:prefer_mixin
+    with
+        WidgetsBindingObserver {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late StreamSubscription<Uri?> _subscription;
 
@@ -116,7 +137,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
       final call = Call.fromCreated(data: data.getDataOrNull()!.data);
 
       await _navigatorKey.currentState?.pushNamed(
-        Routes.CALL,
+        Routes.call,
         arguments: call,
       );
     }
@@ -139,8 +160,8 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     }
     final incomingCall = await StreamVideo.instance.consumeIncomingCall();
     if (incomingCall != null) {
-      Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
-        Routes.CALL,
+      await Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
+        Routes.call,
         arguments: Call.fromCreated(data: incomingCall),
       );
     }

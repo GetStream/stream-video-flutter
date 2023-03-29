@@ -14,6 +14,7 @@ import 'models/call_created.dart';
 import 'models/call_joined.dart';
 import 'models/call_metadata.dart';
 import 'models/call_received_created.dart';
+import 'models/queried_members.dart';
 import 'reducer/call_state_reducer.dart';
 import 'sfu/data/events/sfu_events.dart';
 import 'sfu/data/models/sfu_track_type.dart';
@@ -154,7 +155,8 @@ class CallStateManagerImpl extends CallStateManager {
       final users = await _queryUsersByIds({event.participant.userId});
       _logger.v(() => '[onSfuEvent] received coord users: $users');
       _postReduced(
-          CoordinatorCallUsersAction(users: users.toUnmodifiableMap()));
+        CoordinatorCallUsersAction(users: users.toUnmodifiableMap()),
+      );
     }
   }
 
@@ -183,11 +185,11 @@ class CallStateManagerImpl extends CallStateManager {
   ) async {
     final callCid = state.value.callCid;
     final usersResult =
-        await _streamVideo.queryUsers(callCid: callCid, userIds: userIds);
-    if (usersResult is! Success<List<CallUser>>) {
+        await _streamVideo.queryMembers(callCid: callCid, userIds: userIds);
+    if (usersResult is! Success<QueriedMembers>) {
       return List.empty();
     }
-    return usersResult.data;
+    return usersResult.data.users.values.toList();
   }
 
   void _postReduced(StreamAction action) {

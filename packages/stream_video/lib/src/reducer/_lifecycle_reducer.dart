@@ -168,7 +168,7 @@ extension on CallMetadata {
           userId: userId,
           role: member?.role ?? user?.role ?? '',
           name: user?.name ?? '',
-          profileImageURL: user?.imageUrl ?? '',
+          image: user?.image ?? '',
           sessionId: '',
           trackIdPrefix: '',
           isLocal: isLocal,

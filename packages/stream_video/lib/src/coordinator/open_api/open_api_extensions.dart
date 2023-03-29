@@ -6,6 +6,7 @@ import '../../models/call_metadata.dart';
 import '../../models/call_reaction.dart';
 import '../../models/call_setting.dart';
 import '../../models/queried_calls.dart';
+import '../../models/queried_members.dart';
 
 extension MemberExt on open.MemberResponse {
   CallMember toCallMember(String callCid) {
@@ -22,12 +23,12 @@ extension MemberExt on open.MemberResponse {
 extension MemberListExt on List<open.MemberResponse> {
   Map<String, CallMember> toCallMembers(String callCid) {
     return {
-      for (var member in this) member.userId: member.toCallMember(callCid)
+      for (final member in this) member.userId: member.toCallMember(callCid)
     };
   }
 
   Map<String, CallUser> toCallUsers() {
-    return {for (var member in this) member.userId: member.user.toCallUser()};
+    return {for (final member in this) member.userId: member.user.toCallUser()};
   }
 }
 
@@ -38,7 +39,7 @@ extension UserExt on open.UserResponse {
       teams: teams,
       role: role,
       name: name ?? '',
-      imageUrl: image ?? '',
+      image: image ?? '',
       createdAt: createdAt,
       updatedAt: updatedAt,
       custom: custom,
@@ -146,6 +147,17 @@ extension QueryCallsResponseExt on open.QueryCallsResponse {
   QueriedCalls toQueriedCalls() {
     return QueriedCalls(
       calls: calls.map((it) => it.toQueriedCall()).toList(),
+      next: next,
+      prev: prev,
+    );
+  }
+}
+
+extension QueryMembersResponseExt on open.QueryMembersResponse {
+  QueriedMembers toQueriedMembers(StreamCallCid callCid) {
+    return QueriedMembers(
+      members: members.toCallMembers(callCid.value),
+      users: members.toCallUsers(),
       next: next,
       prev: prev,
     );

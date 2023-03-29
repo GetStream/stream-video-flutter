@@ -6,14 +6,14 @@ class UserInfo extends Equatable {
     required this.role,
     required this.name,
     this.teams,
-    this.imageUrl,
+    this.image,
     this.extraData,
   });
 
   final String id;
   final String name;
   final String role;
-  final String? imageUrl;
+  final String? image;
   final Iterable<String>? teams;
   final Map<String, Object?>? extraData;
 
@@ -22,7 +22,7 @@ class UserInfo extends Equatable {
       id: json['id'] as String,
       name: json['name'] as String,
       role: json['role'] as String,
-      imageUrl: json['image'] as String?,
+      image: json['image'] as String?,
       teams: json['teams'] as Iterable<String>?,
       extraData: json['extra_data'] as Map<String, Object?>?,
     );
@@ -33,7 +33,7 @@ class UserInfo extends Equatable {
       'id': id,
       'name': name,
       'role': role,
-      'image': imageUrl,
+      'image': image,
       'teams': teams,
       'extra_data': extraData,
     };
@@ -45,7 +45,7 @@ class UserInfo extends Equatable {
         'id: $id, '
         'name: $name, '
         'role: $role, '
-        'imageUrl: $imageUrl, '
+        'image: $image, '
         'teams: $teams, '
         'extraData: $extraData'
         '}';
@@ -56,7 +56,7 @@ class UserInfo extends Equatable {
         id,
         name,
         role,
-        imageUrl,
+        image,
         teams,
         extraData,
       ];

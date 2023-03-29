@@ -12,6 +12,7 @@ import 'errors/video_error_composer.dart';
 import 'models/call_device.dart';
 import 'models/call_reaction.dart';
 import 'models/queried_calls.dart';
+import 'models/queried_members.dart';
 import 'shared_emitter.dart';
 import 'state_emitter.dart';
 import 'token/token_manager.dart';
@@ -146,48 +147,6 @@ class StreamVideoImpl implements StreamVideo {
       _logger.e(() => '[disconnectUser] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
     }
-  }
-
-  @override
-  Future<Result<CallCreated>> createCall({
-    required StreamCallCid cid,
-    List<String> participantIds = const [],
-    bool ringing = false,
-  }) async {
-    _logger.d(
-      () => '[createCall] cid: $cid, ringing: $ringing, '
-          'participantIds: $participantIds',
-    );
-
-    final currentUserId = _state.currentUser.value?.id;
-    if (currentUserId == null) {
-      _logger.e(() => '[createCall] failed (no userId)');
-      return Result.error('[createCall] failed; no user_id found');
-    }
-
-    final response = await _client.createCall(
-      input.CreateCallInput(
-        callCid: cid,
-        ringing: ringing,
-        members: participantIds.map((id) {
-          return input.MemberInput(
-            userId: id,
-            role: 'admin',
-          );
-        }),
-      ),
-    );
-
-    return response.fold(
-      success: (it) {
-        _logger.v(() => '[createCall] completed: ${it.data}');
-        return it;
-      },
-      failure: (it) {
-        _logger.e(() => '[createCall] failed: ${it.error}');
-        return it;
-      },
-    );
   }
 
   @override
@@ -342,26 +301,30 @@ class StreamVideoImpl implements StreamVideo {
   }
 
   @override
-  Future<Result<List<CallUser>>> queryUsers({
+  Future<Result<QueriedMembers>> queryMembers({
     required StreamCallCid callCid,
     required Set<String> userIds,
   }) async {
-    _logger.d(() => '[queryUsers] callCid: $callCid, userIds: $userIds');
-    final usersResult = await _client.queryUsers(
+    _logger.d(() => '[queryMembers] callCid: $callCid, userIds: $userIds');
+    final usersResult = await _client.queryMembers(
       input.QueryUsersInput(
         callCid: callCid,
         filterConditions: {
-          'id': {r'$in': userIds.toList()},
+          'user_id': {r'$in': userIds.toList()},
         },
+        sorts: const [
+          input.SortInput(field: 'user_id', direction: input.DirectionInput.asc)
+        ],
+        limit: userIds.length,
       ),
     );
     return usersResult.fold(
       success: (it) {
-        _logger.v(() => '[queryUsers] completed: ${it.data}');
+        _logger.v(() => '[queryMembers] completed: ${it.data}');
         return Result.success(it.data);
       },
       failure: (it) {
-        _logger.e(() => '[queryUsers] failed: $it');
+        _logger.e(() => '[queryMembers] failed: $it');
         return it;
       },
     );

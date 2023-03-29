@@ -4,7 +4,7 @@ import '../call_permission.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../webrtc/media/constraints/camera_position.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
-import '../webrtc/rtc_track/rtc_local_track.dart';
+import '../webrtc/rtc_media_device/rtc_media_device.dart';
 import 'action.dart';
 
 abstract class CallControlAction extends StreamAction with EquatableMixin {
@@ -124,12 +124,12 @@ class FlipCamera extends SessionControlAction {
   const FlipCamera();
 }
 
-class SetCameraDeviceId extends SessionControlAction {
-  const SetCameraDeviceId({required this.deviceId});
-  final String deviceId;
+class SetVideoInputDevice extends SessionControlAction {
+  const SetVideoInputDevice({required this.device});
+  final RtcMediaDevice device;
 
   @override
-  List<Object?> get props => [deviceId];
+  List<Object?> get props => [device];
 }
 
 class SetCameraEnabled extends SessionControlAction {
@@ -140,13 +140,12 @@ class SetCameraEnabled extends SessionControlAction {
   List<Object?> get props => [enabled];
 }
 
-// TODO: Maybe rename to PublishCameraTrack?
-class SetCameraTrack extends SessionControlAction {
-  const SetCameraTrack(this.track);
-  final RtcLocalCameraTrack track;
+class SetAudioInputDevice extends SessionControlAction {
+  const SetAudioInputDevice({required this.device});
+  final RtcMediaDevice device;
 
   @override
-  List<Object?> get props => [track];
+  List<Object?> get props => [device];
 }
 
 class SetMicrophoneEnabled extends SessionControlAction {
@@ -157,14 +156,6 @@ class SetMicrophoneEnabled extends SessionControlAction {
   List<Object?> get props => [enabled];
 }
 
-class SetMicrophoneTrack extends SessionControlAction {
-  const SetMicrophoneTrack(this.track);
-  final RtcLocalAudioTrack track;
-
-  @override
-  List<Object?> get props => [track];
-}
-
 class SetScreenShareEnabled extends SessionControlAction {
   const SetScreenShareEnabled({required this.enabled});
   final bool enabled;
@@ -173,12 +164,12 @@ class SetScreenShareEnabled extends SessionControlAction {
   List<Object?> get props => [enabled];
 }
 
-class SetScreenShareTrack extends SessionControlAction {
-  const SetScreenShareTrack(this.track);
-  final RtcLocalScreenShareTrack track;
+class SetAudioOutputDevice extends SessionControlAction {
+  const SetAudioOutputDevice({required this.device});
+  final RtcMediaDevice device;
 
   @override
-  List<Object?> get props => [track];
+  List<Object?> get props => [device];
 }
 
 class SetSubscription extends SessionControlAction {

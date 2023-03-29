@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
@@ -115,7 +117,7 @@ class StreamCallParticipantsInfoMenu extends StatefulWidget {
 class _StreamCallParticipantsInfoMenuState
     extends State<StreamCallParticipantsInfoMenu> {
   late StreamInviteUserListController _controller;
-  final _subscriptions = Subscriptions();
+  StreamSubscription<CallState>? _callStateSubscription;
 
   @override
   void initState() {
@@ -125,14 +127,15 @@ class _StreamCallParticipantsInfoMenuState
       usersProvider: widget.usersProvider,
     );
 
-    _subscriptions.add(0, widget.call.state.listen(_setState));
+    _callStateSubscription = widget.call.state.listen(_setState);
     _setState(widget.call.state.value);
   }
 
   @override
   void dispose() {
+    _callStateSubscription?.cancel();
+    _callStateSubscription = null;
     super.dispose();
-    _subscriptions.cancelAll();
   }
 
   Future<void> _setState(CallState state) async {

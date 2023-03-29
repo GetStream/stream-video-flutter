@@ -12,13 +12,13 @@ extension StringExtension on String {
       parts = parts.take(2).toList();
     }
 
-    var result = '';
+    final resultBuffer = StringBuffer();
 
     for (var i = 0; i < parts.length; i++) {
-      result = result + parts[i][0].toUpperCase();
+      resultBuffer.write(parts[i][0].toUpperCase());
     }
 
-    return result;
+    return resultBuffer.toString();
   }
 }
 
@@ -53,8 +53,8 @@ extension CallParticipantExtension on CallParticipantState {
   UserInfo toUserInfo() => UserInfo(
         id: userId,
         role: role,
-        name: userId,
-        imageUrl: profileImageURL,
+        name: name.ifEmpty(() => userId),
+        image: image,
       );
 }
 

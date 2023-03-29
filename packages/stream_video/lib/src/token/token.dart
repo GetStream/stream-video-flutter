@@ -6,6 +6,6 @@ typedef GuestTokenProvider = Future<String> Function(UserInfo user);
 
 /// Token designed to store the JWT and the user it is related to.
 class Token {
-  final String rawValue;
   Token(this.rawValue);
+  final String rawValue;
 }

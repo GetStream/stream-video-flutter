@@ -32,6 +32,7 @@ abstract class StreamLogger {
 typedef MessageBuilder = String Function();
 typedef Tag = String;
 typedef IsLoggableValidator = bool Function(Priority, Tag);
+typedef Finder = T? Function<T extends StreamLogger>([dynamic criteria]);
 
 enum Priority implements Comparable<Priority> {
   verbose(level: 2),

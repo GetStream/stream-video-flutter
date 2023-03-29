@@ -51,13 +51,15 @@ abstract class Call {
 
   StateEmitter<CallState> get state;
 
+  SharedEmitter<CallStats> get stats;
+
   SharedEmitter<SfuEvent> get events;
 
   OnCallPermissionRequest? onPermissionRequest;
 
-  void setInitialCallOptions(CallConnectOptions options);
+  CallConnectOptions get connectOptions;
 
-  CallConnectOptions getInitialCallOptions();
+  set connectOptions(CallConnectOptions connectOptions);
 
   Future<Result<None>> joinCall();
 
@@ -70,6 +72,7 @@ abstract class Call {
   Future<Result<None>> inviteUsers(List<UserInfo> users);
 
   Future<Result<None>> startTranscription();
+  Future<Result<None>> setLocalTrack(RtcLocalTrack track);
 
   List<RtcTrack> getTracks(String trackIdPrefix);
 

@@ -25,11 +25,11 @@ abstract class StreamVideoFlutterBackgroundPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  Function(String callCid)? onContentClick;
+
   Function(String buttonType, String callCid)? onButtonClick;
 
-  Future<String?> getPlatformVersion() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
-  }
+  Function(String callCid)? onUiLayerDestroyed;
 
   Future<bool> startService(NotificationOptions options) {
     throw UnimplementedError('startService() has not been implemented.');

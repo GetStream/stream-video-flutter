@@ -22,8 +22,9 @@ import '../../shared_emitter.dart';
 import '../../utils/none.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
+import '../../webrtc/model/stats/rtc_printable_stats.dart';
+import '../../webrtc/model/stats/rtc_raw_stats.dart';
 import '../../webrtc/peer_connection.dart';
-import '../../webrtc/peer_type.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
 import 'call_session.dart';
@@ -66,6 +67,10 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
   RtcManager? rtcManager;
+
+  @override
+  SharedEmitter<CallStats> get stats => _stats;
+  late final _stats = MutableSharedEmitterImpl<CallStats>();
 
   @override
   SharedEmitter<SfuEvent> get events => sfuWS.events;
@@ -115,9 +120,11 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       )
         ..onPublisherIceCandidate = _onLocalIceCandidate
         ..onSubscriberIceCandidate = _onLocalIceCandidate
-        ..onPublisherTrackMuted = _onPublisherTrackMuted
-        ..onPublisherNegotiationNeeded = _onPublisherNegotiationNeeded
-        ..onSubscriberTrackReceived = _onSubscriberTrackReceived;
+        ..onLocalTrackMuted = _onLocalTrackMuted
+        ..onLocalTrackPublished = _onLocalTrackPublished
+        ..onRenegotiationNeeded = _onRenegotiationNeeded
+        ..onRemoteTrackReceived = _onRemoteTrackReceived
+        ..onStatsReceived = _onStatsReceived;
 
       _logger.v(() => '[start] completed');
       return Result.success(None());
@@ -130,11 +137,25 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   @override
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
+    await _stats.close();
     sfuWS.removeEventListener(this);
     await sfuWS.disconnect();
     await rtcManager?.dispose();
     rtcManager = null;
     return await super.dispose();
+  }
+
+  @override
+  Future<Result<None>> setLocalTrack(RtcLocalTrack track) async {
+    _logger.d(() => '[setLocalTrack] track: $track');
+
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set local track, Call not connected');
+    }
+
+    final result = await rtcManager.publishTrack(track);
+    return result.map((_) => None());
   }
 
   @override
@@ -153,20 +174,16 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     _logger.d(() => '[apply] action: $action');
     if (action is SetCameraEnabled) {
       return _onSetCameraEnabled(action.enabled);
-    } else if (action is SetCameraTrack) {
-      return _onSetCameraTrack(action.track);
     } else if (action is SetMicrophoneEnabled) {
       return _onSetMicrophoneEnabled(action.enabled);
-    } else if (action is SetMicrophoneTrack) {
-      return _onSetMicrophoneTrack(action.track);
+    } else if (action is SetAudioInputDevice) {
+      return _onSetAudioInputDevice(action.device);
     } else if (action is SetScreenShareEnabled) {
       return _onSetScreenShareEnabled(action.enabled);
-    } else if (action is SetScreenShareTrack) {
-      return _onSetScreenShareTrack(action.track);
     } else if (action is FlipCamera) {
       return _onFlipCamera();
-    } else if (action is SetCameraDeviceId) {
-      return _onSetCameraDeviceId(action.deviceId);
+    } else if (action is SetVideoInputDevice) {
+      return _onSetVideoInputDevice(action.device);
     } else if (action is SetCameraPosition) {
       return _onSetCameraPosition(action.cameraPosition);
     } else if (action is UpdateSubscriptions) {
@@ -179,6 +196,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
       return _setSubscriptions([action]);
     } else if (action is SetSubscriptions) {
       return _setSubscriptions(action.actions);
+    } else if (action is SetAudioOutputDevice) {
+      return _onSetAudioOutputDevice(action.device);
     }
     return Result.error('Action not supported: $action');
   }
@@ -301,9 +320,10 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     _logger.v(() => '[onSubscriberOffer] result: $result');
   }
 
-  void _onPublisherTrackMuted(RtcLocalTrack track, bool muted) {
+  void _onLocalTrackMuted(RtcLocalTrack track, bool muted) {
     _logger.d(() => '[onPublisherTrackMuted] track: $track');
 
+    // Send a mute state update to the server.
     sfuClient.updateMuteState(
       sfu.UpdateMuteStatesRequest(
         sessionId: sessionId,
@@ -315,6 +335,21 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         ],
       ),
     );
+  }
+
+  Future<void> _onLocalTrackPublished(RtcLocalTrack track) async {
+    _logger.d(() => '[onPublisherTrackPublished] track: $track');
+
+    // Start the track.
+    await track.start();
+
+    // If the track is an audioTrack, apply the current audio output device.
+    if (track.isAudioTrack) {
+      await _applyCurrentAudioOutputDevice();
+    }
+
+    // Send a mute state update to the server.
+    _onLocalTrackMuted(track, false);
   }
 
   Future<void> _onRemoteIceCandidate(SfuIceTrickleEvent event) async {
@@ -349,24 +384,27 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     _logger.v(() => '[onLocalIceCandidate] result: $result');
   }
 
-  Future<void> _onPublisherNegotiationNeeded(StreamPeerConnection pc) async {
-    _logger.d(
-      () => '[onPubNegotiationNeeded] type: ${pc.type}',
-    );
+  Future<void> _onRenegotiationNeeded(StreamPeerConnection pc) async {
+    _logger.d(() => '[negotiate] type: ${pc.type}');
 
     final offer = await pc.createOffer();
     if (offer is! Success<rtc.RTCSessionDescription>) return;
 
-    final tracksInfo = rtcManager?.getPublisherTrackInfos();
-    if (tracksInfo == null || tracksInfo.isEmpty) {
-      _logger.w(
-        () => '[onPubNegotiationNeeded] rejected(tracksInfo '
-            'is null/empty): $tracksInfo',
-      );
+    final tracksInfo = rtcManager!.getPublisherTrackInfos();
+    if (tracksInfo.isEmpty) {
+      _logger.w(() => '[negotiate] rejected(tracksInfo is empty): $tracksInfo');
       return;
     }
 
-    _logger.v(() => '[onPubNegotiationNeeded] tracksInfo: $tracksInfo');
+    for (final track in tracksInfo) {
+      _logger.v(
+        () => '[negotiate] track.id: ${track.trackId}, '
+            'track.type: ${track.trackType}',
+      );
+      for (final layer in [...?track.layers]) {
+        _logger.v(() => '[negotiate] layer: $layer');
+      }
+    }
 
     final pubResult = await sfuClient.setPublisher(
       sfu.SetPublisherRequest(
@@ -375,30 +413,57 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
         tracks: tracksInfo.toDTO(),
       ),
     );
+
     if (pubResult is! Success<sfu.SetPublisherResponse>) {
-      _logger.w(
-        () => '[onPubNegotiationNeeded] #setPublisher; failed: $pubResult',
-      );
+      _logger.w(() => '[negotiate] #setPublisher; failed: $pubResult');
       return;
     }
+
     final ansResult = await pc.setRemoteAnswer(pubResult.data.sdp);
     if (ansResult is! Success<void>) {
-      _logger.w(
-        () => '[onPubNegotiationNeeded] #setRemoteAnswer; failed: $ansResult',
-      );
+      _logger.w(() => '[negotiate] #setRemoteAnswer; failed: $ansResult');
     }
   }
 
-  Future<void> _onSubscriberTrackReceived(
+  Future<void> _onRemoteTrackReceived(
     StreamPeerConnection pc,
     RtcRemoteTrack remoteTrack,
   ) async {
-    _logger.d(
-      () => '[onSubscriberTrackReceived] remoteTrack: $remoteTrack',
-    );
-    stateManager.onSubscriberTrackReceived(
+    _logger.d(() => '[onRemoteTrackReceived] remoteTrack: $remoteTrack');
+
+    // Start the track.
+    await remoteTrack.start();
+
+    // If the track is an audioTrack, apply the current audio output device.
+    if (remoteTrack.isAudioTrack) {
+      await _applyCurrentAudioOutputDevice();
+    }
+
+    return stateManager.onSubscriberTrackReceived(
       remoteTrack.trackIdPrefix,
       remoteTrack.trackType,
+    );
+  }
+
+  Future<void> _applyCurrentAudioOutputDevice() async {
+    final state = stateManager.state.valueOrNull;
+    final audioOutputDevice = state?.audioOutputDevice;
+    if (audioOutputDevice != null) {
+      await _onSetAudioOutputDevice(audioOutputDevice);
+    }
+  }
+
+  void _onStatsReceived(
+    StreamPeerConnection pc,
+    RtcPrintableStats rtcStats,
+  ) {
+    _stats.emit(
+      CallStats(
+        peerType: pc.type,
+        printable: rtcStats,
+        // TODO implement raw stats
+        raw: RtcRawStats(),
+      ),
     );
   }
 
@@ -447,95 +512,83 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     return result;
   }
 
-  Future<Result<None>> _onSetCameraEnabled(bool enabled) async {
-    final track = await rtcManager?.setCameraEnabled(enabled: enabled);
-    if (track == null) {
-      return Result.error('Unable to enable/disable camera, Track not found');
+  Future<Result<None>> _onSetAudioOutputDevice(RtcMediaDevice device) async {
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set speaker device, Call not connected');
     }
 
-    return Result.success(None());
+    return rtcManager.setAudioOutputDevice(device: device);
   }
 
-  Future<Result<None>> _onSetCameraTrack(RtcLocalCameraTrack track) async {
-    final result = await rtcManager?.publishVideoTrack(track: track);
-    if (result == null) {
-      return Result.error('Unable to set camera track, Call not yet connected');
+  Future<Result<None>> _onSetCameraEnabled(bool enabled) async {
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set camera, Call not connected');
     }
 
-    return Result.success(None());
+    final result = await rtcManager.setCameraEnabled(enabled: enabled);
+    return result.map((_) => None());
   }
 
   Future<Result<None>> _onSetMicrophoneEnabled(bool enabled) async {
-    final track = await rtcManager?.setMicrophoneEnabled(enabled: enabled);
-    if (track == null) {
-      return Result.error(
-        'Unable to enable/disable microphone, Track not found',
-      );
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set microphone, Call not connected');
     }
 
-    return Result.success(None());
+    final result = await rtcManager.setMicrophoneEnabled(enabled: enabled);
+    return result.map((_) => None());
   }
 
-  Future<Result<None>> _onSetMicrophoneTrack(RtcLocalAudioTrack track) async {
-    final result = await rtcManager?.publishAudioTrack(track: track);
-    if (result == null) {
-      return Result.error(
-        'Unable to set microphone track, Call not yet connected',
-      );
+  Future<Result<None>> _onSetAudioInputDevice(RtcMediaDevice device) async {
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set audioInput, Call not connected');
     }
 
-    return Result.success(None());
+    final result = await rtcManager.setAudioInputDevice(device: device);
+    return result.map((_) => None());
   }
 
   Future<Result<None>> _onSetScreenShareEnabled(bool enabled) async {
-    final track = await rtcManager?.setScreenShareEnabled(enabled: enabled);
-    if (track == null) {
-      return Result.error(
-        'Unable to enable/disable screen-share, Track not found',
-      );
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set ScreenShare, Call not connected');
     }
 
-    return Result.success(None());
-  }
-
-  Future<Result<None>> _onSetScreenShareTrack(
-    RtcLocalScreenShareTrack track,
-  ) async {
-    final result = await rtcManager?.publishVideoTrack(track: track);
-    if (result == null) {
-      return Result.error(
-        'Unable to set screen-share track, Call not yet connected',
-      );
-    }
-
-    return Result.success(None());
+    final result = await rtcManager.setScreenShareEnabled(enabled: enabled);
+    return result.map((_) => None());
   }
 
   Future<Result<None>> _onFlipCamera() async {
-    final track = await rtcManager?.flipCamera();
-    if (track == null) {
-      return Result.error('Unable to switch camera, Track not found');
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to flip camera, Call not connected');
     }
 
-    return Result.success(None());
+    final result = await rtcManager.flipCamera();
+    return result.map((_) => None());
   }
 
-  Future<Result<None>> _onSetCameraDeviceId(String deviceId) async {
-    final track = await rtcManager?.setCameraDeviceId(deviceId: deviceId);
-    if (track == null) {
-      return Result.error('Unable to set camera device id, Track not found');
+  Future<Result<None>> _onSetVideoInputDevice(RtcMediaDevice device) async {
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set video input, Call not connected');
     }
 
-    return Result.success(None());
+    final result = await rtcManager.setVideoInputDevice(device: device);
+    return result.map((_) => None());
   }
 
   Future<Result<None>> _onSetCameraPosition(CameraPosition position) async {
-    final track = await rtcManager?.setCameraPosition(cameraPosition: position);
-    if (track == null) {
-      return Result.error('Unable to set camera position, Track not found');
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Unable to set camera position, Call not connected');
     }
 
-    return Result.success(None());
+    final result = await rtcManager.setCameraPosition(cameraPosition: position);
+    return result.map((_) => None());
   }
 }
 
@@ -550,10 +603,11 @@ extension RtcTracksInfoMapper on List<RtcTrackInfo> {
           return sfu_models.VideoLayer(
             rid: layer.rid,
             videoDimension: sfu_models.VideoDimension(
-              width: layer.videoDimension?.width,
-              height: layer.videoDimension?.height,
+              width: layer.parameters.dimension.width,
+              height: layer.parameters.dimension.height,
             ),
-            bitrate: layer.bitrate,
+            bitrate: layer.parameters.encoding.maxBitrate,
+            fps: layer.parameters.encoding.maxFramerate,
           );
         }),
       );
@@ -579,16 +633,17 @@ extension on SfuClient {
         ),
       ),
     );
-    if (result is Success<sfu.UpdateSubscriptionsResponse>) {
-      if (result.data.hasError()) {
-        final error = result.data.error;
-        return Result.error('${error.code} - ${error.message}');
-      }
-    }
-    if (result is Failure) {
-      return result;
-    }
-    return Result.success(None());
+
+    return result.fold(
+      failure: (it) => it,
+      success: (it) {
+        if (it.data.hasError()) {
+          final error = it.data.error;
+          return Result.error('${error.code} - ${error.message}');
+        }
+        return Result.success(None());
+      },
+    );
   }
 }
 

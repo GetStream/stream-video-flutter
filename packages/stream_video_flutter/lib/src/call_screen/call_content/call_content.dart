@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../call_diagnostics_content/call_diagnostics_content.dart';
 
 /// Builder used to create a custom call app bar.
 typedef CallAppBarBuilder = PreferredSizeWidget Function(
@@ -82,6 +83,9 @@ class _StreamCallContentState extends State<StreamCallContent> {
   /// Holds information about the call.
   CallState get callState => widget.callState;
 
+  /// Controls the visibility of [CallStatsContent].
+  bool _isStatsVisible = false;
+
   @override
   Widget build(BuildContext context) {
     final Widget bodyWidget;
@@ -115,7 +119,21 @@ class _StreamCallContentState extends State<StreamCallContent> {
                 onBackPressed: widget.onBackPressed,
               )
           : null,
-      body: bodyWidget,
+      body: Stack(
+        children: [
+          GestureDetector(
+            onDoubleTap: _toggleStatsVisibility,
+            child: bodyWidget,
+          ),
+          Visibility(
+            visible: _isStatsVisible,
+            child: CallDiagnosticsContent(
+              call: call,
+              onClosePressed: _toggleStatsVisibility,
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: isDesktopOrPortrait && localParticipant != null
           ? widget.callControlsBuilder?.call(context, call, callState) ??
               StreamCallControls.withDefaultOptions(
@@ -130,6 +148,11 @@ class _StreamCallContentState extends State<StreamCallContent> {
   @override
   Future<void> dispose() async {
     super.dispose();
-    await call.disconnect();
+  }
+
+  void _toggleStatsVisibility() {
+    setState(() {
+      _isStatsVisible = !_isStatsVisible;
+    });
   }
 }

@@ -18,8 +18,20 @@ class RtcVideoParameters
   final RtcVideoDimension dimension;
   final RtcVideoEncoding encoding;
 
+  RtcVideoParameters copyWith({
+    String? description,
+    RtcVideoDimension? dimension,
+    RtcVideoEncoding? encoding,
+  }) {
+    return RtcVideoParameters(
+      description: description ?? this.description,
+      dimension: dimension ?? this.dimension,
+      encoding: encoding ?? this.encoding,
+    );
+  }
+
   @override
-  List<Object?> get props => [description, dimension, encoding];
+  List<Object?> get props => [dimension, encoding, description];
 
   @override
   bool? get stringify => true;

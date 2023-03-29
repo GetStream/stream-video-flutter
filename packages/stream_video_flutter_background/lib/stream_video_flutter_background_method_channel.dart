@@ -13,30 +13,34 @@ class MethodChannelStreamVideoFlutterBackground
 
   /// The method channel used to interact with the native platform.
   @visibleForTesting
-  final methodChannel = const MethodChannel('stream_video_flutter_background');
+  late final methodChannel =
+      const MethodChannel('stream_video_flutter_background');
+
+  @override
+  Function(String callCid)? onContentClick;
 
   @override
   Function(String buttonType, String callCid)? onButtonClick;
 
+  @override
+  Function(String callCid)? onUiLayerDestroyed;
+
   Future<void> methodHandler(MethodCall call) async {
-    print('[methodHandler] method: ${call.method}, args: ${call.arguments}');
     switch (call.method) {
-      case "onButtonClick":
+      case "onNotificationContentClick":
+        final callCid = call.arguments;
+        onContentClick?.call(callCid);
+        break;
+      case "onNotificationButtonClick":
         final buttonType = call.arguments[0];
         final callCid = call.arguments[1];
-        print('[methodHandler] buttonType: $buttonType, callCid: $callCid');
         onButtonClick?.call(buttonType, callCid);
         break;
-      default:
-        print('no method handler for method ${call.method}');
+      case "onPlatformUiLayerDestroyed":
+        final callCid = call.arguments;
+        onUiLayerDestroyed?.call(callCid);
+        break;
     }
-  }
-
-  @override
-  Future<String?> getPlatformVersion() async {
-    final version =
-        await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
   }
 
   @override

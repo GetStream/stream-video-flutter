@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
 import '../disposable.dart';
@@ -6,6 +8,8 @@ import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
+import 'model/stats/rtc_printable_stats.dart';
+import 'model/stats/rtc_stats_mapper.dart';
 import 'peer_type.dart';
 
 /// {@template onStreamAdded}
@@ -32,6 +36,14 @@ typedef OnIceCandidate = void Function(
 typedef OnTrack = void Function(
   StreamPeerConnection,
   rtc.RTCTrackEvent,
+);
+
+/// {@template onTrack}
+/// Handler whenever we receive [RtcPrintableStats].
+/// {@endtemplate}
+typedef OnStats = void Function(
+  StreamPeerConnection,
+  RtcPrintableStats,
 );
 
 /// Wrapper around the WebRTC connection that contains tracks.
@@ -65,6 +77,9 @@ class StreamPeerConnection extends Disposable {
   /// {@macro onTrack}
   OnTrack? onTrack;
 
+  /// {@macro onTrack}
+  OnStats? onStats;
+
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
 
   /// Creates an offer and sets it as the local description.
@@ -73,6 +88,7 @@ class StreamPeerConnection extends Disposable {
   ]) async {
     try {
       final offer = await pc.createOffer(mediaConstraints);
+      _logger.i(() => '[createLocalOffer] #$type; offerSdp:\n${offer.sdp}');
       await pc.setLocalDescription(offer);
       return Result.success(offer);
     } catch (e, stk) {
@@ -88,6 +104,7 @@ class StreamPeerConnection extends Disposable {
   ]) async {
     try {
       final answer = await pc.createAnswer(mediaConstraints);
+      _logger.i(() => '[createLocalAnswer] #$type; answerSdp:\n${answer.sdp}');
       await pc.setLocalDescription(answer);
       return Result.success(answer);
     } catch (e, stk) {
@@ -99,6 +116,7 @@ class StreamPeerConnection extends Disposable {
   Future<Result<void>> setRemoteOffer(
     String offerSdp,
   ) async {
+    _logger.i(() => '[setRemoteOffer] #$type; answerSdp:\n$offerSdp');
     return setRemoteDescription(
       rtc.RTCSessionDescription(offerSdp, 'offer'),
     );
@@ -108,6 +126,7 @@ class StreamPeerConnection extends Disposable {
   Future<Result<void>> setRemoteAnswer(
     String answerSdp,
   ) async {
+    _logger.i(() => '[setRemoteAnswer] #$type; answerSdp:\n$answerSdp');
     return setRemoteDescription(
       rtc.RTCSessionDescription(answerSdp, 'answer'),
     );
@@ -147,44 +166,52 @@ class StreamPeerConnection extends Disposable {
     }
   }
 
-  /// Adds a local [rtc.MediaStreamTrack] with audio to a given [connection].
-  Future<rtc.RTCRtpTransceiver> addAudioTransceiver({
+  /// Adds a local [rtc.MediaStreamTrack] with audio to the current connection.
+  Future<Result<rtc.RTCRtpTransceiver>> addAudioTransceiver({
     required rtc.MediaStream stream,
     required rtc.MediaStreamTrack track,
     List<rtc.RTCRtpEncoding>? encodings,
   }) async {
-    final transceiver = await pc.addTransceiver(
-      track: track,
-      kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
-      init: rtc.RTCRtpTransceiverInit(
-        direction: rtc.TransceiverDirection.SendOnly,
-        streams: [stream],
-        sendEncodings: encodings,
-      ),
-    );
+    try {
+      final transceiver = await pc.addTransceiver(
+        track: track,
+        kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
+        init: rtc.RTCRtpTransceiverInit(
+          direction: rtc.TransceiverDirection.SendOnly,
+          streams: [stream],
+          sendEncodings: encodings,
+        ),
+      );
 
-    return transceiver;
+      return Result.success(transceiver);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
   }
 
   /// Adds a local [rtc.MediaStreamTrack] with video to a given [connection].
   ///
   /// The video is then sent in three different resolutions using simulcast.
-  Future<rtc.RTCRtpTransceiver> addVideoTransceiver({
+  Future<Result<rtc.RTCRtpTransceiver>> addVideoTransceiver({
     required rtc.MediaStream stream,
     required rtc.MediaStreamTrack track,
     List<rtc.RTCRtpEncoding>? encodings,
   }) async {
-    final transceiver = await pc.addTransceiver(
-      track: track,
-      kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
-      init: rtc.RTCRtpTransceiverInit(
-        streams: [stream],
-        direction: rtc.TransceiverDirection.SendOnly,
-        sendEncodings: encodings,
-      ),
-    );
+    try {
+      final transceiver = await pc.addTransceiver(
+        track: track,
+        kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
+        init: rtc.RTCRtpTransceiverInit(
+          streams: [stream],
+          direction: rtc.TransceiverDirection.SendOnly,
+          sendEncodings: encodings,
+        ),
+      );
 
-    return transceiver;
+      return Result.success(transceiver);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
   }
 
   void _initRtcCallbacks() {
@@ -246,6 +273,42 @@ class StreamPeerConnection extends Disposable {
 
   void _onIceConnectionState(rtc.RTCIceConnectionState state) {
     _logger.v(() => '[onIceConnectionState] state: $state');
+
+    switch (state) {
+      case rtc.RTCIceConnectionState.RTCIceConnectionStateConnected:
+        return _startObservingStats();
+      case rtc.RTCIceConnectionState.RTCIceConnectionStateClosed:
+      case rtc.RTCIceConnectionState.RTCIceConnectionStateFailed:
+      case rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected:
+        return _stopObservingStats();
+      default:
+        break;
+    }
+  }
+
+  Timer? _statsTimer;
+
+  void _startObservingStats() {
+    // Stop previous timer if any.
+    _stopObservingStats();
+    // Start new timer.
+    _statsTimer = Timer.periodic(
+      const Duration(seconds: 2),
+      (_) async {
+        try {
+          final stats = await pc.getStats();
+          final rtcStats = stats.toRtcStats();
+          onStats?.call(this, rtcStats);
+        } catch (e, stk) {
+          _logger.e(() => '[getStats] failed: $e; $stk');
+        }
+      },
+    );
+  }
+
+  void _stopObservingStats() {
+    _statsTimer?.cancel();
+    _statsTimer = null;
   }
 
   void _onRenegotiationNeeded() {
@@ -256,6 +319,7 @@ class StreamPeerConnection extends Disposable {
   @override
   Future<void> dispose() async {
     _dropRtcCallbacks();
+    _stopObservingStats();
     onStreamAdded = null;
     onRenegotiationNeeded = null;
     onIceCandidate = null;
@@ -263,5 +327,11 @@ class StreamPeerConnection extends Disposable {
     _pendingCandidates.clear();
     await pc.dispose();
     return await super.dispose();
+  }
+}
+
+extension on rtc.StatsReport {
+  String stringify() {
+    return 'ts: $timestamp, id: $id, type: $type, values: $values';
   }
 }

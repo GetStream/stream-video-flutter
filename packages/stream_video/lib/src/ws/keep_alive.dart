@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:stream_video/src/ws/ws.dart';
+import 'ws.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
 /// The time duration to ping connection to keep it alive.

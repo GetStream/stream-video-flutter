@@ -68,6 +68,9 @@ class Participant extends $pb.GeneratedMessage {
     ..aOB(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isSpeaking')
     ..aOB(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isDominantSpeaker')
     ..a<$core.double>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audioLevel', $pb.PbFieldType.OF)
+    ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOS(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'image')
+    ..aOM<$1.Struct>(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $1.Struct.create)
     ..hasRequiredFields = false
   ;
 
@@ -82,6 +85,9 @@ class Participant extends $pb.GeneratedMessage {
     $core.bool? isSpeaking,
     $core.bool? isDominantSpeaker,
     $core.double? audioLevel,
+    $core.String? name,
+    $core.String? image,
+    $1.Struct? custom,
   }) {
     final _result = create();
     if (userId != null) {
@@ -110,6 +116,15 @@ class Participant extends $pb.GeneratedMessage {
     }
     if (audioLevel != null) {
       _result.audioLevel = audioLevel;
+    }
+    if (name != null) {
+      _result.name = name;
+    }
+    if (image != null) {
+      _result.image = image;
+    }
+    if (custom != null) {
+      _result.custom = custom;
     }
     return _result;
   }
@@ -210,6 +225,35 @@ class Participant extends $pb.GeneratedMessage {
   $core.bool hasAudioLevel() => $_has(8);
   @$pb.TagNumber(9)
   void clearAudioLevel() => clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.String get name => $_getSZ(9);
+  @$pb.TagNumber(10)
+  set name($core.String v) { $_setString(9, v); }
+  @$pb.TagNumber(10)
+  $core.bool hasName() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearName() => clearField(10);
+
+  @$pb.TagNumber(11)
+  $core.String get image => $_getSZ(10);
+  @$pb.TagNumber(11)
+  set image($core.String v) { $_setString(10, v); }
+  @$pb.TagNumber(11)
+  $core.bool hasImage() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearImage() => clearField(11);
+
+  @$pb.TagNumber(12)
+  $1.Struct get custom => $_getN(11);
+  @$pb.TagNumber(12)
+  set custom($1.Struct v) { setField(12, v); }
+  @$pb.TagNumber(12)
+  $core.bool hasCustom() => $_has(11);
+  @$pb.TagNumber(12)
+  void clearCustom() => clearField(12);
+  @$pb.TagNumber(12)
+  $1.Struct ensureCustom() => $_ensure(11);
 }
 
 class StreamQuality extends $pb.GeneratedMessage {

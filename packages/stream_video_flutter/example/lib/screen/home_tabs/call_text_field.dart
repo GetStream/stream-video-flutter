@@ -38,5 +38,4 @@ class CallIdTextField extends StatelessWidget {
       ),
     );
   }
-
 }

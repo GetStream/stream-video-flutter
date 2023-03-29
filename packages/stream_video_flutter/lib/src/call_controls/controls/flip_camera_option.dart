@@ -38,7 +38,7 @@ class FlipCameraOption extends StatelessWidget {
       icon: position == CameraPosition.front
           ? Icon(frontCameraIcon)
           : Icon(backCameraIcon),
-      onPressed: position != null //
+      onPressed: trackState?.muted == false //
           ? () => call.apply(const FlipCamera())
           : null,
     );

@@ -9,7 +9,7 @@ List<Widget> defaultCallControlOptions({
   VoidCallback? onLeaveCallTap,
 }) {
   return [
-    const ToggleSpeakerphoneOption(),
+    ToggleSpeakerphoneOption(call: call),
     ToggleMicrophoneOption(call: call, localParticipant: localParticipant),
     ToggleCameraOption(call: call, localParticipant: localParticipant),
     FlipCameraOption(call: call, localParticipant: localParticipant),

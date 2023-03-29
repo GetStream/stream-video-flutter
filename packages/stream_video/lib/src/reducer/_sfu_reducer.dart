@@ -1,10 +1,7 @@
 import 'package:collection/collection.dart';
 
+import '../../stream_video.dart';
 import '../action/sfu_action.dart';
-import '../call_participant_state.dart';
-import '../call_state.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../models/call_track_state.dart';
 import '../sfu/data/events/sfu_events.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-SFU');
@@ -16,11 +13,7 @@ class SfuReducer {
     CallState state,
     SfuAction action,
   ) {
-    if (action is SfuJoinedAction) {
-      return _reduceJoined(state, action);
-    } else if (action is SfuParticipantJoinedAction) {
-      return _reduceParticipantJoined2(state, action);
-    } else if (action is SfuEventAction) {
+    if (action is SfuEventAction) {
       return _reduceSfuEvent(state, action.event);
     }
     return state;
@@ -54,49 +47,21 @@ class SfuReducer {
     _logger.d(() => '[reduceJoinResponse] ${state.sessionId}; event: $event');
     final participants = event.callState.participants.map((aParticipant) {
       final isLocal = aParticipant.userId == state.currentUserId;
+      final existing = state.callParticipants.firstWhereOrNull(
+        (it) => it.userId == aParticipant.userId,
+      );
+      final existingName = existing?.name ?? '';
+      final existingRole = existing?.role ?? '';
+      final existingImage = existing?.image ?? '';
       return CallParticipantState(
         userId: aParticipant.userId,
-        role: '',
-        name: aParticipant.userId,
-        profileImageURL: '',
+        role: existingRole,
+        name: aParticipant.userName.ifEmpty(() => existingName),
+        image: aParticipant.userImage.ifEmpty(() => existingImage),
         sessionId: aParticipant.sessionId,
         trackIdPrefix: aParticipant.trackLookupPrefix,
         publishedTracks: {
-          for (var track in aParticipant.publishedTracks)
-            track: TrackState.base(isLocal: isLocal)
-        },
-        isLocal: isLocal,
-        isOnline: !isLocal,
-        isSpeaking: aParticipant.isSpeaking,
-        audioLevel: aParticipant.audioLevel,
-        isDominantSpeaker: aParticipant.isDominantSpeaker,
-      );
-    }).toList();
-
-    return state.copyWith(
-      callParticipants: participants,
-    );
-  }
-
-  CallState _reduceJoined(
-    CallState state,
-    SfuJoinedAction action,
-  ) {
-    _logger.d(
-      () => '[reduceJoined] ${state.sessionId}; action: $action',
-    );
-    final participants = action.participants.map((aParticipant) {
-      final user = action.users[aParticipant.userId];
-      final isLocal = aParticipant.userId == state.currentUserId;
-      return CallParticipantState(
-        userId: user?.id ?? aParticipant.userId,
-        role: user?.role ?? '',
-        name: user?.name ?? aParticipant.userId,
-        profileImageURL: user?.imageUrl,
-        sessionId: aParticipant.sessionId,
-        trackIdPrefix: aParticipant.trackLookupPrefix,
-        publishedTracks: {
-          for (var track in aParticipant.publishedTracks)
+          for (final track in aParticipant.publishedTracks)
             track: TrackState.base(isLocal: isLocal)
         },
         isLocal: isLocal,
@@ -242,11 +207,15 @@ class SfuReducer {
     CallState state,
     SfuParticipantJoinedEvent event,
   ) {
+    _logger.d(
+      () => '[reduceParticipantJoined] ${state.sessionId}; event: $event',
+    );
     final isLocal = state.currentUserId == event.participant.userId;
     final participant = CallParticipantState(
       userId: event.participant.userId,
       role: '',
-      name: '',
+      name: event.participant.userName,
+      image: event.participant.userImage,
       sessionId: event.participant.sessionId,
       trackIdPrefix: event.participant.trackLookupPrefix,
       isLocal: isLocal,
@@ -270,28 +239,6 @@ class SfuReducer {
               participant.userId == event.participant.userId &&
               participant.sessionId == event.participant.sessionId,
         ),
-    );
-  }
-
-  CallState _reduceParticipantJoined2(
-    CallState state,
-    SfuParticipantJoinedAction action,
-  ) {
-    final participant = CallParticipantState(
-      userId: action.user?.id ?? action.participant.userId,
-      role: action.user?.role ?? '',
-      name: action.user?.name ?? action.participant.userId,
-      profileImageURL: action.user?.imageUrl,
-      sessionId: action.participant.sessionId,
-      trackIdPrefix: action.participant.trackLookupPrefix,
-      isLocal: action.isLocalUser,
-      isOnline: !action.isLocalUser,
-    );
-    return state.copyWith(
-      callParticipants: [
-        ...state.callParticipants,
-        participant,
-      ],
     );
   }
 }
