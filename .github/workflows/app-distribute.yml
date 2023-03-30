@@ -30,19 +30,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Cache Flutter SDK
-        uses: actions/cache@v3
-        with:
-          path: /opt/hostedtoolcache/flutter
-          key: ${{ runner.OS }}-flutter-${{ env.FLUTTER_VERSION }}
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
 
       - name: Setup Melos
-        run: flutter pub global activate melos
+        run: |
+          echo ${{ github.workspace }}
+          flutter pub global activate melos
 
       - name: Bootstrap workspace
         run: melos bootstrap
@@ -70,19 +67,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Cache Flutter SDK
-        uses: actions/cache@v3
-        with:
-          path: /opt/hostedtoolcache/flutter
-          key: ${{ runner.OS }}-flutter-${{ env.FLUTTER_VERSION }}
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
 
       - name: Setup Melos
-        run: flutter pub global activate melos
+        run: |
+          echo ${{ github.workspace }}
+          flutter pub global activate melos
 
       - name: Bootstrap workspace
         run: melos bootstrap
