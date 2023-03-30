@@ -66,10 +66,10 @@ Installs all Certs and Profiles necessary for appstore
 
 ## iOS
 
-### ios authenticate_apple_store
+### ios archive
 
 ```sh
-[bundle exec] fastlane ios authenticate_apple_store
+[bundle exec] fastlane ios archive
 ```
 
 

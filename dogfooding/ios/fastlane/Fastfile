@@ -8,18 +8,18 @@ before_all do
   end
 end
 
-desc "Installs all Certs and Profiles necessary for appstore"
-lane :match_appstore do
-  match(
-    type: "appstore",
-    app_identifier: [
-        "io.getstream.video.flutter.dogfooding",
-    ],
-    readonly: is_ci
-  )
-end
-
 platform :ios do
+
+  desc "Installs all Certs and Profiles necessary for appstore"
+  lane :match_appstore do
+    match(
+      type: "appstore",
+      app_identifier: [
+          "io.getstream.video.flutter.dogfooding",
+      ],
+      readonly: is_ci
+    )
+  end
 
   lane :archive do |options|
     method = options[:method]
