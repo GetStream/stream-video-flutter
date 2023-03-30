@@ -7,10 +7,6 @@ on:
       - develop
       - main
 
-defaults:
-  run:
-    working-directory: dogfooding
-
 env:
   FLUTTER_VERSION: 3.7.0
   ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
@@ -38,9 +34,7 @@ jobs:
           cache: true
 
       - name: Setup Melos
-        run: |
-          pwd
-          flutter pub global activate melos
+        run: flutter pub global activate melos
 
       - name: Bootstrap workspace
         run: melos bootstrap
@@ -77,9 +71,7 @@ jobs:
           cache: true
 
       - name: Setup Melos
-        run: |
-          pwd
-          flutter pub global activate melos
+        run: flutter pub global activate melos
 
       - name: Bootstrap workspace
         run: melos bootstrap
@@ -98,5 +90,6 @@ jobs:
 
       - name: Build and Distribute
         run: |
+          ls
           cd dogfooding/android
           bundle exec fastlane android build_and_deploy
