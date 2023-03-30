@@ -118,4 +118,5 @@ jobs:
       - name: Build and Distribute
         uses: bluefireteam/flutter-gh-pages@v7
         with:
+          href: /stream-video-flutter/
           workingDir: dogfooding
