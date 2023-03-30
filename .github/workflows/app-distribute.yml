@@ -51,6 +51,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
+          working-directory: dogfooding
           bundler-cache: true
 
       - name: Install Fastlane
@@ -89,6 +90,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
+          working-directory: dogfooding
           bundler-cache: true
 
       - name: Install Fastlane
