@@ -53,18 +53,18 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 
 
-### match_appstore
-
-```sh
-[bundle exec] fastlane match_appstore
-```
-
-Installs all Certs and Profiles necessary for appstore
-
 ----
 
 
 ## iOS
+
+### ios match_appstore
+
+```sh
+[bundle exec] fastlane ios match_appstore
+```
+
+Installs all Certs and Profiles necessary for appstore
 
 ### ios archive
 
