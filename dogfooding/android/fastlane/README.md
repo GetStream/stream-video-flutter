@@ -58,18 +58,26 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## Android
 
-### android build
+### android build_apk
 
 ```sh
-[bundle exec] fastlane android build
+[bundle exec] fastlane android build_apk
 ```
 
 
 
-### android deploy_staging
+### android build_appbundle
 
 ```sh
-[bundle exec] fastlane android deploy_staging
+[bundle exec] fastlane android build_appbundle
+```
+
+
+
+### android build_and_deploy
+
+```sh
+[bundle exec] fastlane android build_and_deploy
 ```
 
 

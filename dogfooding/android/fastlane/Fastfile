@@ -20,20 +20,10 @@ platform :android do
   end
 
   lane :build_and_deploy do
-    app = "1:347024607410:android:d51590d07b9f9f3c8c21ab"
-
-    latest_app_distribution_release = firebase_app_distribution_get_latest_release(app)
-    latest_app_distribution_version_code = latest_app_distribution_release[:buildVersion].to_i
-
-    increment_version_code(
-      gradle_file_path:"./app/build.gradle",
-      version_code: latest_app_distribution_version_code + 1
-    )
-
     build_apk
 
     firebase_app_distribution(
-      app: app,
+      app: "1:347024607410:android:d51590d07b9f9f3c8c21ab",
       groups: "stream-testers",
       release_notes: "Lots of amazing new features to test out!",
       android_artifact_type: "APK",
