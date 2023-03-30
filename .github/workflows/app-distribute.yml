@@ -50,11 +50,6 @@ jobs:
           working-directory: dogfooding/ios
           bundler-cache: true
 
-      - name: Install Fastlane
-        run: |
-          cd dogfooding/ios
-          gem install fastlane -NV
-
       - name: Build and Distribute
         run: |
           cd dogfooding/ios
