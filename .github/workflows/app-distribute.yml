@@ -7,6 +7,10 @@ on:
       - develop
       - main
 
+defaults:
+  run:
+    working-directory: dogfooding
+
 env:
   FLUTTER_VERSION: 3.7.0
   ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
