@@ -14,7 +14,7 @@ import 'firebase_options.dart';
 import 'log_config.dart';
 import 'src/routes/app_routes.dart';
 import 'src/routes/routes.dart';
-import 'src/user_repository.dart';
+import 'user_repository.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -195,16 +195,29 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
 
   @override
   Widget build(BuildContext context) {
-    final appTheme = StreamVideoTheme.light();
+    final appTheme = StreamVideoTheme.dark();
     return MaterialApp(
       navigatorKey: _navigatorKey,
       title: 'Stream Dog Fooding',
       theme: ThemeData(
-        textTheme: GoogleFonts.robotoMonoTextTheme(),
-        scaffoldBackgroundColor: appTheme.colorTheme.appBg,
+        textTheme: GoogleFonts.interTextTheme().copyWith(
+          bodyLarge: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 28,
+          ),
+          bodyMedium: const TextStyle(
+            fontSize: 18,
+            color: Color(0xFF979797),
+          ),
+        ),
+        scaffoldBackgroundColor: const Color(0xFF2C2C2E),
         extensions: <ThemeExtension<dynamic>>[
           appTheme,
         ],
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          primary: const Color(0xff005FFF),
+        ),
       ),
       onGenerateRoute: AppRoutes.generateRoute,
     );
