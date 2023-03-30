@@ -48,12 +48,12 @@ platform :ios do
   end
 
   lane :build_and_deploy do
-    app_store_connect_api_key
-
     match_appstore
 
     build(sign_enabled: true)
     archive(method: "app-store")
+
+    app_store_connect_api_key
 
     upload_to_testflight(
       groups: ['Internal Testers', 'External Testers'],
