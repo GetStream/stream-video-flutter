@@ -49,7 +49,9 @@ jobs:
           bundler-cache: true
 
       - name: Install Fastlane
-        run: gem install fastlane -NV
+        run: |
+          cd dogfooding/ios
+          gem install fastlane -NV
 
       - name: Build and Distribute
         run: |
@@ -86,10 +88,11 @@ jobs:
           bundler-cache: true
 
       - name: Install Fastlane
-        run: gem install fastlane -NV
+        run: |
+          cd dogfooding/android
+          gem install fastlane -NV
 
       - name: Build and Distribute
         run: |
-          ls
           cd dogfooding/android
           bundle exec fastlane android build_and_deploy
