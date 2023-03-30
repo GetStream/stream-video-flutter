@@ -42,10 +42,10 @@ jobs:
       - name: Prepare environment
         run: echo $ENV_PROPERTIES > .env
 
-      - name: Setup Ruby
+      - name: Setup Ruby and Gems
         uses: ruby/setup-ruby@v1
         with:
-          working-directory: dogfooding
+          working-directory: dogfooding/ios
           bundler-cache: true
 
       - name: Install Fastlane
@@ -81,16 +81,11 @@ jobs:
       - name: Prepare environment
         run: echo $ENV_PROPERTIES > .env
 
-      - name: Setup Ruby
+      - name: Setup Ruby and Gems
         uses: ruby/setup-ruby@v1
         with:
-          working-directory: dogfooding
+          working-directory: dogfooding/android
           bundler-cache: true
-
-#      - name: Install Fastlane
-#        run: |
-#          cd dogfooding/android
-#          gem install fastlane -NV
 
       - name: Build and Distribute
         run: |
