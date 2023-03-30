@@ -138,14 +138,19 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
             SimpleDialogOption(
               child: IconButton(
                 icon: Icon(
+                  //if transcribing green icon, else grey icon transcribe
                   Icons.transcribe,
-                  color:
-                      StreamVideoTheme.of(context).colorTheme.textHighEmphasis,
+                  //TODO fix theming
+                  color: call.state.value.isTranscribing
+                      ? Colors.green
+                      : Colors.grey,
                 ),
                 onPressed: () async {
-                  print("transcribing");
+                  
                   Navigator.of(context).pop();
-                  await call.startTranscription();
+                  call.state.value.isTranscribing
+                      ? await call.apply(const StopTranscription())
+                      : await call.apply(const StartTranscription());
                   //transcribe call
                 },
               ),

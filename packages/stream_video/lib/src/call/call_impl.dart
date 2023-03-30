@@ -418,6 +418,10 @@ class CallImpl implements Call {
       return _blockUser(action);
     } else if (action is UnblockUser) {
       return _unblockUser(action);
+    } else if (action is StartTranscription) {
+      return _startTranscription(action);
+    } else if (action is StopTranscription) {
+      return _stopTranscription(action);
     } else if (action is StartRecording) {
       return _startRecording(action);
     } else if (action is StopRecording) {
@@ -634,20 +638,31 @@ class CallImpl implements Call {
     return result;
   }
 
-  @override
-  Future<Result<None>> startTranscription() async {
+  Future<Result<None>> _startTranscription(StartTranscription action) async {
+    if (!_hasPermission(CallPermission.startTranscribeCall)) {
+      _logger.w(() => '[startTranscription] rejected (no permission)');
+      return Result.error('Cannot start transcription (no permission)');
+    }
+    _logger.d(() => '[startTranscription] action: $action');
     final result = await _streamVideo.startTranscription(callCid: callCid);
     _logger.v(() => '[startTranscription] result: $result');
-    // if (!_hasPermission(CallPermission.startTranscription)) {
-    //   _logger.w(() => '[startTranscription] rejected (no permission)');
-    //   return Result.error('Cannot start transcription (no permission)');
-    // }
-    // _logger.d(() => '[startTranscription] action: $action');
-    // final result = await _streamVideo.startTranscription(callCid: callCid);
-    // _logger.v(() => '[startTranscription] result: $result');
-    // if (result.isSuccess) {
-    //   await _stateManager.onCallControlAction(action);
-    // }
+    if (result.isSuccess) {
+      await _stateManager.onCallControlAction(action);
+    }
+    return result;
+  }
+
+  Future<Result<None>> _stopTranscription(StopTranscription action) async {
+    if (!_hasPermission(CallPermission.stopTranscribeCall)) {
+      _logger.w(() => '[stopTranscription] rejected (no permission)');
+      return Result.error('Cannot stop transcription (no permission)');
+    }
+    _logger.d(() => '[stopTranscription] action: $action');
+    final result = await _streamVideo.stopTranscription(callCid: callCid);
+    _logger.v(() => '[stopTranscription] result: $result');
+    if (result.isSuccess) {
+      await _stateManager.onCallControlAction(action);
+    }
     return result;
   }
 

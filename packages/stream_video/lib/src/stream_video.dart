@@ -171,9 +171,9 @@ abstract class StreamVideo {
     required StreamCallCid callCid,
   });
 
-  // Future<Result<None>> stopTranscription({
-  //   required StreamCallCid callCid,
-  // });
+  Future<Result<None>> stopTranscription({
+    required StreamCallCid callCid,
+  });
 
   Future<Result<None>> startRecording({
     required StreamCallCid callCid,

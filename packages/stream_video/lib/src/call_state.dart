@@ -24,6 +24,7 @@ class CallState extends Equatable {
       sessionId: '',
       status: CallStatus.idle(),
       isRecording: false,
+      isTranscribing: false,
       settings: const CallSettings.disabled(),
       videoInputDevice: null,
       audioInputDevice: null,
@@ -46,6 +47,7 @@ class CallState extends Equatable {
       sessionId: '',
       status: metadata.toCallStatus(currentUserId, ringing: ringing),
       isRecording: false,
+      isTranscribing: false,
       settings: metadata.details.settings,
       videoInputDevice: null,
       audioInputDevice: null,
@@ -67,6 +69,7 @@ class CallState extends Equatable {
     required this.sessionId,
     required this.status,
     required this.isRecording,
+    required this.isTranscribing,
     required this.settings,
     required this.ownCapabilities,
     required this.callParticipants,
@@ -81,6 +84,7 @@ class CallState extends Equatable {
   final String sessionId;
   final CallStatus status;
   final bool isRecording;
+  final bool isTranscribing;
   final CallSettings settings;
   final RtcMediaDevice? videoInputDevice;
   final RtcMediaDevice? audioInputDevice;
@@ -105,6 +109,7 @@ class CallState extends Equatable {
     String? sessionId,
     CallStatus? status,
     bool? isRecording,
+    bool? isTranscribing,
     CallSettings? settings,
     RtcMediaDevice? videoInputDevice,
     RtcMediaDevice? audioInputDevice,
@@ -119,6 +124,7 @@ class CallState extends Equatable {
       sessionId: sessionId ?? this.sessionId,
       status: status ?? this.status,
       isRecording: isRecording ?? this.isRecording,
+      isTranscribing: isTranscribing ?? this.isTranscribing,
       settings: settings ?? this.settings,
       videoInputDevice: videoInputDevice ?? this.videoInputDevice,
       audioInputDevice: audioInputDevice ?? this.audioInputDevice,
@@ -136,6 +142,7 @@ class CallState extends Equatable {
         sessionId,
         status,
         isRecording,
+        isTranscribing,
         settings,
         videoInputDevice,
         audioInputDevice,
@@ -151,7 +158,9 @@ class CallState extends Equatable {
         ' status: $status, isRecording: $isRecording, settings: $settings,'
         ' videoInputDevice: $videoInputDevice,'
         ' audioInputDevice: $audioInputDevice,'
-        ' audioOutputDevice: $audioOutputDevice,'
+        ' audioOutputDevice: $audioOutputDevice, '
+        'isRecordingInProgress: $isRecording, settings: $settings, '
+        'isTranscribingInProgress: $isTranscribing, settings: $settings, '
         ' ownCapabilities: $ownCapabilities,'
         ' callParticipants: $callParticipants)';
   }

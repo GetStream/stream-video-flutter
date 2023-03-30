@@ -92,6 +92,14 @@ class MuteUsers extends CallControlAction {
   List<Object?> get props => [userIds];
 }
 
+class StartTranscription extends CallControlAction {
+  const StartTranscription();
+}
+
+class StopTranscription extends CallControlAction {
+  const StopTranscription();
+}
+
 class StartRecording extends CallControlAction {
   const StartRecording();
 }
