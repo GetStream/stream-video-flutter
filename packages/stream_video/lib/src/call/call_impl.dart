@@ -98,6 +98,8 @@ class CallImpl implements Call {
   final CallSessionFactory _sessionFactory;
   final CallStateManager _stateManager;
 
+  int _reconnectAttempt = 0;
+
   @override
   StreamCallCid get callCid => state.value.callCid;
 
@@ -316,34 +318,42 @@ class CallImpl implements Call {
   }
 
   Future<Result<void>> _startSession(CallCredentials credentials) async {
+    _logger.d(() => '[startSession] credentials: $credentials');
     final session = await _sessionFactory.makeCallSession(
       credentials: credentials,
       stateManager: _stateManager,
     );
+    _logger.v(() => '[startSession] session created: $session');
     _session = session;
     _subscriptions.add(
       _idSessionEvents,
       session.events.listen((event) {
+        _logger.log(
+          event.logPriority,
+          () => '[listenSfuEvent] event.type: ${event.runtimeType}',
+        );
         _events.emit(event);
         _onSfuEvent(event);
       }),
     );
     _subscriptions.add(_idSessionStats, session.stats.listen(_stats.emit));
     await _stateManager.onSessionStart(session.sessionId);
-    return session.start();
+    final result = await session.start();
+    _logger.v(() => '[startSession] completed: $result');
+    return result;
   }
 
   Future<void> _onSfuEvent(SfuEvent sfuEvent) async {
-    if (sfuEvent is SfuSocketDisconnected) {
+    if (sfuEvent is SfuSocketDisconnected || sfuEvent is SfuSocketFailed) {
       await _reconnect();
     }
   }
 
   Future<void> _reconnect() async {
     _logger.v(() => '[reconnect] no args');
+    _reconnectAttempt++;
     _subscriptions.cancel(_idSessionEvents);
-    _status.value = _ConnectionStatus.disconnected;
-    await _stateManager.onDisconnect();
+    _status.value = _ConnectionStatus.connecting;
     await _session?.dispose();
     _session = null;
 
@@ -365,6 +375,10 @@ class CallImpl implements Call {
     await _stateManager.onConnected();
     await _applyConnectOptions();
     _logger.v(() => '[reconnect] completed');
+
+    if (sessionResult.isSuccess) {
+      _status.value = _ConnectionStatus.connected;
+    }
   }
 
   Future<Result<None>> _awaitIfNeeded(Duration timeLimit) async {

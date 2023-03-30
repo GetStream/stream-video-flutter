@@ -36,7 +36,7 @@ class TokenManager {
     _logger.d(() => '[getToken] refresh: $refresh, _token: $_token');
     if (refresh || _token == null) {
       final result = await _provider.getToken(_userId);
-      _logger.v(() => '[getToken] refresh: $refresh, newToken: $result');
+      _logger.v(() => '[getToken] completed: $result');
       if (result is! Success<UserToken>) {
         return result;
       }

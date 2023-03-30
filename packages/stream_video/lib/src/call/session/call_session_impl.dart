@@ -30,11 +30,10 @@ import 'call_session_config.dart';
 
 const _tag = 'SV:CallSession';
 
-int _sessionSeq = 1;
-
 class CallSessionImpl extends CallSession {
   CallSessionImpl({
     required this.callCid,
+    required this.sessionSeq,
     required this.sessionId,
     required this.config,
     required this.stateManager,
@@ -43,6 +42,7 @@ class CallSessionImpl extends CallSession {
           authToken: config.sfuToken,
         ),
         sfuWS = SfuWebSocket(
+          sessionSeq: sessionSeq,
           sfuUrl: config.sfuUrl,
           sessionId: sessionId,
         ),
@@ -54,9 +54,10 @@ class CallSessionImpl extends CallSession {
     _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
   }
 
-  final _logger = taggedLogger(tag: '$_tag-${_sessionSeq++}');
+  late final _logger = taggedLogger(tag: '$_tag-$sessionSeq');
 
   final StreamCallCid callCid;
+  final int sessionSeq;
   @override
   final String sessionId;
   final CallSessionConfig config;
@@ -80,7 +81,11 @@ class CallSessionImpl extends CallSession {
       _logger.d(() => '[start] no args');
       await eventsSubscription?.cancel();
       eventsSubscription = sfuWS.events.listen(_onSfuEvent);
-      await sfuWS.connect();
+      final wsResult = await sfuWS.connect();
+      if (wsResult.isFailure) {
+        _logger.e(() => '[start] ws connect failed: $wsResult');
+        return wsResult;
+      }
       _logger.v(() => '[start] sfu connected');
       final genericSdp = await RtcManager.getGenericSdp();
       _logger.v(() => '[start] genericSdp.len: ${genericSdp.length}');
@@ -194,7 +199,7 @@ class CallSessionImpl extends CallSession {
   }
 
   Future<void> _onSfuEvent(SfuEvent event) async {
-    _logger.v(() => '[onSfuEvent] event: $event');
+    _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
     if (event is SfuSubscriberOfferEvent) {
       await _onSubscriberOffer(event);
     } else if (event is SfuIceTrickleEvent) {
@@ -574,6 +579,9 @@ class CallSessionImpl extends CallSession {
     final result = await rtcManager.setCameraPosition(cameraPosition: position);
     return result.map((_) => None());
   }
+
+  @override
+  String toString() => 'CallSession{seq: $sessionSeq, id: $sessionId}';
 }
 
 extension RtcTracksInfoMapper on List<RtcTrackInfo> {

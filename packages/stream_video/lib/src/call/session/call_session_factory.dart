@@ -10,6 +10,8 @@ import 'call_session.dart';
 import 'call_session_config.dart';
 import 'call_session_impl.dart';
 
+int _sessionSeq = 1;
+
 class CallSessionFactory {
   CallSessionFactory({
     required this.callCid,
@@ -34,6 +36,7 @@ class CallSessionFactory {
     );
     _logger.v(() => '[makeCallSession] sfuUrl: ${sessionConfig.sfuUrl}');
     return CallSessionImpl(
+      sessionSeq: _sessionSeq++,
       callCid: callCid,
       sessionId: sessionId,
       config: sessionConfig,

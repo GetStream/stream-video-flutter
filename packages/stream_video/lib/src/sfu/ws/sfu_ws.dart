@@ -7,13 +7,14 @@ import '../../logger/impl/tagged_logger.dart';
 import '../../logger/stream_log.dart';
 import '../../shared_emitter.dart';
 import '../../types/other.dart';
+import '../../utils/none.dart';
+import '../../utils/result.dart';
 import '../../ws/health/health_monitor.dart';
 import '../../ws/ws.dart';
 import '../data/events/sfu_event_mapper_extensions.dart';
 import '../data/events/sfu_events.dart';
 
 const _tag = 'SV:Sfu-WS';
-int _sfuSeq = 1;
 
 const _maxJitter = Duration(milliseconds: 500);
 const _defaultDelay = Duration(milliseconds: 250);
@@ -26,13 +27,15 @@ class SfuWebSocket extends StreamWebSocket
     implements HealthListener {
   /// TODO
   factory SfuWebSocket({
+    required int sessionSeq,
     required String sessionId,
     required String sfuUrl,
     Iterable<String>? protocols,
   }) {
-    streamLog.i(_tag, () => '<factory> sessionId: $sessionId');
+    final tag = '$_tag-$sessionSeq';
+    streamLog.i(tag, () => '<factory> sessionId: $sessionId');
     final sfuUri = Uri.parse(sfuUrl);
-    streamLog.i(_tag, () => '<factory> sfuUri: $sfuUri');
+    streamLog.i(tag, () => '<factory> sfuUri: $sfuUri');
     final String wsEndpoint;
     if (sfuUri.host.startsWith('localhost') ||
         sfuUri.host.startsWith('127.0.0.1') ||
@@ -46,10 +49,11 @@ class SfuWebSocket extends StreamWebSocket
           )
           .toString();
     }
-    streamLog.i(_tag, () => '<factory> wsEndpoint: $wsEndpoint');
+    streamLog.i(tag, () => '<factory> wsEndpoint: $wsEndpoint');
     return SfuWebSocket._(
       wsEndpoint,
       protocols: protocols,
+      sessionSeq: sessionSeq,
       sessionId: sessionId,
     );
   }
@@ -58,15 +62,21 @@ class SfuWebSocket extends StreamWebSocket
   SfuWebSocket._(
     String url, {
     Iterable<String>? protocols,
+    required this.sessionSeq,
     required this.sessionId,
-  }) : super(url, protocols: protocols, tag: _tag) {
+  }) : super(url, protocols: protocols, tag: '$_tag-$sessionSeq') {
     _logger.i(() => '<init> sessionId: $sessionId');
+
+    onConnectionStateUpdated = (it) {
+
+    };
   }
+
+  late final _logger = taggedLogger(tag: '$_tag-$sessionSeq');
 
   late final HealthMonitor healthMonitor = HealthMonitorImpl('Sfu', this);
 
-  final _logger = taggedLogger(tag: '$_tag-${_sfuSeq++}');
-
+  final int sessionSeq;
   final String sessionId;
 
   bool _manuallyClosed = false;
@@ -75,12 +85,10 @@ class SfuWebSocket extends StreamWebSocket
   final _events = MutableSharedEmitterImpl<SfuEvent>();
 
   @override
-  Future<void> connect() {
+  Future<Result<None>> connect() {
     _logger.i(() => '[connect] connectionState: $connectionState');
     connectionState = ConnectionState.connecting;
-
     healthMonitor.start();
-
     return super.connect();
   }
 
@@ -88,6 +96,7 @@ class SfuWebSocket extends StreamWebSocket
   void onOpen() {
     _logger.i(() => '[onOpen] url: $url');
     connectionState = ConnectionState.connected;
+    healthMonitor.onSocketOpen();
     _reconnectAttempt = 0;
 
     _events.emit(SfuSocketConnected(sessionId: sessionId, url: url));
@@ -163,13 +172,13 @@ class SfuWebSocket extends StreamWebSocket
   }
 
   @override
-  Future<void> disconnect([int? closeCode, String? closeReason]) async {
+  Future<Result<None>> disconnect([int? closeCode, String? closeReason]) async {
     _logger.i(
       () => '[disconnect] closeCode: $closeCode, closeReason: $closeReason',
     );
     if (connectionState == ConnectionState.disconnected) {
       _logger.w(() => '[disconnect] rejected (already disconnected)');
-      return;
+      return Result.success(None());
     }
 
     // Stop sending keep alive messages.

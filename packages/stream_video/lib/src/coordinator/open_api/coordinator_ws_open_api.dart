@@ -9,6 +9,7 @@ import '../../models/user_info.dart';
 import '../../shared_emitter.dart';
 import '../../token/token_manager.dart';
 import '../../types/other.dart';
+import '../../utils/none.dart';
 import '../../utils/result.dart';
 import '../../utils/standard.dart';
 import '../../ws/base_ws.dart';
@@ -16,6 +17,7 @@ import '../../ws/health/health_monitor.dart';
 import '../coordinator_ws.dart';
 import '../models/coordinator_events.dart';
 import 'error/open_api_error.dart';
+import 'error/open_api_error_code.dart';
 import 'event/open_api_event.dart';
 import 'open_api_mapper_extensions.dart';
 
@@ -59,6 +61,8 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   /// The token manager used to fetch or refresh token.
   final TokenManager tokenManager;
 
+  bool _refreshToken = false;
+
   @override
   SharedEmitter<CoordinatorEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
@@ -74,7 +78,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   // OnConnectionStateUpdated get onConnectionStateUpdated => events.emit;
 
   @override
-  Future<void> connect() {
+  Future<Result<None>> connect() {
     _logger.v(() => '[connect] no args');
     connectionState = ConnectionState.connecting;
     healthMonitor.start();
@@ -82,14 +86,14 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   }
 
   @override
-  Future<void> disconnect([int? closeCode, String? closeReason]) async {
+  Future<Result<None>> disconnect([int? closeCode, String? closeReason]) async {
     _logger.i(
-          () => '[disconnect] closeCode: "$closeCode", '
-              'closeReason: "$closeReason"',
+      () => '[disconnect] closeCode: "$closeCode", '
+          'closeReason: "$closeReason"',
     );
     if (connectionState == ConnectionState.disconnected) {
       _logger.w(() => '[disconnect] rejected (already disconnected)');
-      return;
+      return Result.success(None());
     }
 
     healthMonitor.stop();
@@ -102,7 +106,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   Future<void> _authenticateUser() async {
     _logger.i(() => '[authenticateUser] url: $url');
 
-    final tokenResult = await tokenManager.getToken();
+    final tokenResult = await tokenManager.getToken(refresh: _refreshToken);
     if (tokenResult is! Success<String>) {
       unawaited(_reconnect());
       return;
@@ -131,8 +135,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   @override
   void onOpen() {
     _logger.i(() => '[onOpen] url: $url');
-
-    // Authenticate the user.
+    healthMonitor.onSocketOpen();
     _authenticateUser();
   }
 
@@ -192,6 +195,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
 
     if (dtoError != null) {
       _logger.e(() => '[onMessage] apiError: ${dtoError?.apiError}');
+      _handleApiError(dtoError.apiError);
       return;
     }
 
@@ -212,9 +216,17 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     dtoEvent.toCoordinatorEvent()?.let(_events.emit);
   }
 
+  void _handleApiError(open.APIError apiError) {
+    if (OpenApiErrorCode.tokenRelated.contains(apiError.code)) {
+      _logger.i(() => '[handleApiError] token related error: ${apiError.code}');
+      _refreshToken = true;
+    }
+  }
+
   void _handleConnectedEvent(open.WSConnectedEvent event) {
     _logger.i(() => '[handleConnectedEvent] no args');
     _reconnectAttempt = 0;
+    _refreshToken = false;
     connectionState = ConnectionState.connected;
     healthMonitor.onPongReceived();
     userId ??= event.me.id;
@@ -315,7 +327,6 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   @override
   void onNetworkConnected() {
     _logger.i(() => '[onNetworkConnected] no args');
-
   }
 }
 

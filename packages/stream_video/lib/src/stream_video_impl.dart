@@ -19,6 +19,8 @@ import 'state_emitter.dart';
 import 'token/token_manager.dart';
 import 'utils/none.dart';
 
+const _tag = 'SV:Client';
+
 /// The client responsible for handling config and maintaining calls
 class StreamVideoImpl implements StreamVideo {
   /// Creates a new Stream Video client unassociated with the
@@ -51,7 +53,7 @@ class StreamVideoImpl implements StreamVideo {
     );
   }
 
-  final _logger = taggedLogger(tag: 'SV:Client');
+  final _logger = taggedLogger(tag: _tag);
 
   final String apiKey;
   final String coordinatorRpcUrl;
@@ -528,6 +530,9 @@ CoordinatorClient buildCoordinatorClient({
   required String apiKey,
   required TokenManager tokenManager,
 }) {
+  streamLog.i(_tag, () => '[buildCoordinatorClient] rpcUrl: $rpcUrl');
+  streamLog.i(_tag, () => '[buildCoordinatorClient] wsUrl: $wsUrl');
+  streamLog.i(_tag, () => '[buildCoordinatorClient] apiKey: $apiKey');
   return CoordinatorClientRetry(
     delegate: CoordinatorClientOpenApi(
       apiKey: apiKey,

@@ -8,6 +8,7 @@ abstract class HealthMonitor {
   bool get isStarted;
   void start();
   void onPongReceived();
+  void onSocketOpen();
   void onSocketClose();
   void onSocketError(Object error);
   void stop();
@@ -65,6 +66,12 @@ class HealthMonitorImpl implements HealthMonitor {
       listener.onPongTimeout(_pongTimeout);
     });
     _startPinging();
+  }
+
+
+  @override
+  void onSocketOpen() {
+    _logger.d(() => '[onSocketOpen] no args');
   }
 
   @override

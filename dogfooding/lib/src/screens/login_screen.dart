@@ -1,10 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
 import 'package:stream_video/stream_video.dart';
 
 import '../../env/env.dart';
@@ -25,6 +22,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _logger = taggedLogger(tag: 'SV:LoginViewState');
 
   late final _googleSignIn = GoogleSignIn(hostedDomain: 'getstream.io');
+
+  late final _tokenService = TokenService();
 
   Future<void> _loginWithGoogle() async {
     final googleUser = await _googleSignIn.signIn();
@@ -77,13 +76,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<String> _tokenLoader(String userId) async {
-    final response = await http.get(
-      Uri.parse(
-        'https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$userId&api_key=${Env.apiKey}',
-      ),
+    return _tokenService.loadToken(
+        apiKey: Env.apiKey,
+        userId: userId,
     );
-    final body = json.decode(response.body) as Map<String, dynamic>;
-    return body['token'];
   }
 
   final _emailController = TextEditingController();

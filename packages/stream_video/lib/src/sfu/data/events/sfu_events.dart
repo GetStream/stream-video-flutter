@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import '../../../errors/video_error.dart';
+import '../../../logger/stream_logger.dart';
 import '../../../webrtc/peer_type.dart';
 import '../models/sfu_audio_level.dart';
 import '../models/sfu_audio_sender.dart';
@@ -238,4 +239,16 @@ class SfuSocketFailed extends SfuSocketEvent {
 
   @override
   List<Object?> get props => [sessionId, url, error];
+}
+
+extension LogPriority on SfuEvent {
+  Priority get logPriority {
+    if (this is SfuSocketFailed) {
+      return Priority.error;
+    } else if (this is SfuSocketDisconnected) {
+      return Priority.warning;
+    } else {
+      return Priority.verbose;
+    }
+  }
 }

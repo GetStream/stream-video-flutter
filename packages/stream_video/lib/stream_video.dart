@@ -28,6 +28,7 @@ export 'src/sfu/data/models/sfu_connection_quality.dart';
 export 'src/sfu/data/models/sfu_track_type.dart';
 export 'src/stream_video.dart';
 export 'src/token/token.dart';
+export 'src/token/token_service.dart';
 export 'src/types/other.dart';
 export 'src/utils/result.dart';
 export 'src/utils/string.dart';
