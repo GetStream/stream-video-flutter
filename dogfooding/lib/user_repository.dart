@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import 'model/user_credentials.dart';
+import 'src/model/user_credentials.dart';
 
 const keyUserId = 'user_id';
 const keyUserName = 'user_name';

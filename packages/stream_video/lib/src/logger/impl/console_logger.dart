@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 import '../stream_logger.dart';
 
 class ConsoleStreamLogger extends StreamLogger {
@@ -13,6 +15,6 @@ class ConsoleStreamLogger extends StreamLogger {
   ]) {
     final emoji = super.emoji(priority);
     final name = super.name(priority);
-    print('${DateTime.now()} $emoji ($name/$tag): ${message()}');
+    debugPrint('${DateTime.now()} $emoji ($name/$tag): ${message()}');
   }
 }
