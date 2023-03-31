@@ -9,6 +9,7 @@ before_all do
 end
 
 platform :ios do
+
   lane :archive do |options|
     method = options[:method]
 
@@ -47,11 +48,20 @@ platform :ios do
     build(sign_enabled: true)
     archive(method: "app-store")
 
-    upload_to_testflight(
-      groups: ['Internal Testers', 'External Testers'],
-      changelog: "Lots of amazing new features to test out!",
-      reject_build_waiting_for_review: false,
-      skip_waiting_for_build_processing: false,
-    )
+    begin
+      upload_to_testflight(
+        groups: ['Internal Testers', 'External Testers'],
+        changelog: "Lots of amazing new features to test out!",
+        reject_build_waiting_for_review: false,
+        skip_waiting_for_build_processing: false,
+      )
+    rescue Exception => e
+      if e.message.include? "Another build is in review"
+        UI.important("Another build is already in beta review. Skipping beta review submission")
+      else
+        raise
+      end
+    end
   end
+
 end
