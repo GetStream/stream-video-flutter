@@ -9,7 +9,7 @@ Future<void> main() async {
   /// Initialize Stream Video SDK.
   StreamVideo.init(
     Env.streamVideoApiKey,
-    logLevel: LogLevel.info,
+    logPriority: Priority.info,
   );
 
   /// Initialize Stream Chat SDK.
