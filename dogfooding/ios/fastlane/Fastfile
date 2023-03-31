@@ -13,7 +13,8 @@ platform :ios do
   lane :archive do |options|
     method = options[:method]
 
-    build_app(export_method: method,
+    build_app(
+      export_method: method,
       silent: true,
       clean: true,
       include_symbols: true,
@@ -50,9 +51,11 @@ platform :ios do
 
     begin
       upload_to_testflight(
+        distribute_external: true,
+        notify_external_testers: true,
         groups: ['Internal Testers', 'External Testers'],
         changelog: "Lots of amazing new features to test out!",
-        reject_build_waiting_for_review: false,
+        reject_build_waiting_for_review: true,
         skip_waiting_for_build_processing: false,
       )
     rescue Exception => e
