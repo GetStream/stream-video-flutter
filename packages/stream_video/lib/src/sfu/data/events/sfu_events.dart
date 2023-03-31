@@ -213,17 +213,15 @@ class SfuSocketDisconnected extends SfuSocketEvent {
   const SfuSocketDisconnected({
     required this.sessionId,
     required this.url,
-    this.closeCode,
-    this.closeReason,
+    required this.reason,
   });
 
   final String sessionId;
   final String url;
-  final int? closeCode;
-  final String? closeReason;
+  final DisconnectionReason reason;
 
   @override
-  List<Object?> get props => [sessionId, url, closeCode, closeReason];
+  List<Object?> get props => [sessionId, url, reason];
 }
 
 class SfuSocketFailed extends SfuSocketEvent {
@@ -239,6 +237,24 @@ class SfuSocketFailed extends SfuSocketEvent {
 
   @override
   List<Object?> get props => [sessionId, url, error];
+}
+
+class DisconnectionReason with EquatableMixin {
+  DisconnectionReason({
+    this.closeCode,
+    this.closeReason,
+  });
+
+  final int? closeCode;
+  final String? closeReason;
+
+  @override
+  String toString() {
+    return 'DisconnectionReason{code: $closeCode, reason: $closeReason}';
+  }
+
+  @override
+  List<Object?> get props => [closeCode, closeReason];
 }
 
 extension LogPriority on SfuEvent {

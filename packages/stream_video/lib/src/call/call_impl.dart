@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import '../../stream_video.dart';
 import '../call_state_manager.dart';
@@ -16,6 +17,11 @@ import 'session/call_session_factory.dart';
 const _idCoordEvents = 1;
 const _idSessionEvents = 2;
 const _idSessionStats = 3;
+
+const _maxJitter = Duration(milliseconds: 500);
+const _defaultDelay = Duration(milliseconds: 250);
+const _retryMaxBackoff = Duration(seconds: 5);
+final _rnd = math.Random();
 
 const _tag = 'SV:Call';
 
@@ -317,7 +323,7 @@ class CallImpl implements Call {
     return joinedResult as Failure;
   }
 
-  Future<Result<void>> _startSession(CallCredentials credentials) async {
+  Future<Result<None>> _startSession(CallCredentials credentials) async {
     _logger.d(() => '[startSession] credentials: $credentials');
     final session = await _sessionFactory.makeCallSession(
       credentials: credentials,
@@ -344,41 +350,91 @@ class CallImpl implements Call {
   }
 
   Future<void> _onSfuEvent(SfuEvent sfuEvent) async {
-    if (sfuEvent is SfuSocketDisconnected || sfuEvent is SfuSocketFailed) {
-      await _reconnect();
+    if (sfuEvent is SfuSocketDisconnected) {
+      await _reconnect(sfuEvent.reason);
+    } else if (sfuEvent is SfuSocketFailed) {
+      await _reconnect(sfuEvent.error);
     }
   }
 
-  Future<void> _reconnect() async {
-    _logger.v(() => '[reconnect] no args');
-    _reconnectAttempt++;
-    _subscriptions.cancel(_idSessionEvents);
+  Future<void> _reconnect(dynamic reason) async {
+    if (_status.value == _ConnectionStatus.disconnected) {
+      _logger.w(() => '[reconnect] rejected (disconnected)');
+      return;
+    }
+    if (_status.value == _ConnectionStatus.connecting) {
+      _logger.w(() => '[reconnect] rejected (connecting)');
+      return;
+    }
     _status.value = _ConnectionStatus.connecting;
+    _logger.w(() => '[reconnect] >>>>>>>>>>>>>>>> reason: $reason');
+    _subscriptions.cancel(_idSessionEvents);
     await _session?.dispose();
     _session = null;
 
-    final joinedResult = await _joinIfNeeded();
-    if (joinedResult is! Success<CallCredentials>) {
-      _logger.e(() => '[reconnect] joining failed: $joinedResult');
-      await _stateManager.onConnectFailed((joinedResult as Failure).error);
+    Result<None> result;
+    final startTime = DateTime.now().toUtc().millisecondsSinceEpoch;
+    while (true) {
+      _reconnectAttempt++;
+      if (_status.value == _ConnectionStatus.disconnected) {
+        _logger.w(() => '[reconnect] attempt($_reconnectAttempt) rejected (disconnected)');
+        _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< rejected');
+        return;
+      }
+      final elapsed = DateTime.now().toUtc().millisecondsSinceEpoch - startTime;
+      if (elapsed > 15000) {
+        _logger.w(() => '[reconnect] timeout exceed');
+        result = Result.error('was unable to reconnect in 15 seconds');
+        break;
+      }
+      final delay = _calculateDelay(_reconnectAttempt);
+      _logger.v(
+        () => '[reconnect] attempt: $_reconnectAttempt, '
+            'elapsed: $elapsed, delay: $delay',
+      );
+      await Future.delayed(delay);
+      _logger.v(() => '[reconnect] joining to coordinator');
+      final joinedResult = await _joinIfNeeded();
+      if (joinedResult is! Success<CallCredentials>) {
+        _logger.e(() => '[reconnect] joining failed: $joinedResult');
+        continue;
+      }
+      _logger.v(() => '[reconnect] starting session');
+      result = await _startSession(joinedResult.data);
+      if (result is! Success<None>) {
+        _logger.w(() => '[reconnect] session start failed: $result');
+        continue;
+      }
+      _logger.v(() => '[reconnect] session started');
+      break;
+    }
+    _reconnectAttempt = 0;
+    if (result.isFailure) {
+      _logger.e(() => '[reconnect] <<<<<<<<<<<<<<< failed: $result');
+      _status.value = _ConnectionStatus.disconnected;
+      await _stateManager.onConnectFailed((result as Failure).error);
       return;
     }
-
-    _logger.v(() => '[reconnect] starting session');
-    final sessionResult = await _startSession(joinedResult.data);
-    if (sessionResult is! Success<None>) {
-      _logger.w(() => '[reconnect] session start failed: $sessionResult');
-      await _stateManager.onConnectFailed((sessionResult as Failure).error);
-      return;
-    }
-    _logger.v(() => '[reconnect] started session');
+    _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< completed');
     await _stateManager.onConnected();
     await _applyConnectOptions();
-    _logger.v(() => '[reconnect] completed');
+    _status.value = _ConnectionStatus.connected;
+    _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< side effects applied');
+  }
 
-    if (sessionResult.isSuccess) {
-      _status.value = _ConnectionStatus.connected;
+  Duration get _jitter {
+    return Duration(milliseconds: _rnd.nextInt(_maxJitter.inMilliseconds));
+  }
+
+  Duration _calculateDelay(int retryAttempt) {
+    if (retryAttempt == 0) {
+      return Duration.zero;
     }
+    final calculated = _defaultDelay * retryAttempt + _jitter;
+    if (calculated < _retryMaxBackoff) {
+      return calculated;
+    }
+    return _retryMaxBackoff;
   }
 
   Future<Result<None>> _awaitIfNeeded(Duration timeLimit) async {

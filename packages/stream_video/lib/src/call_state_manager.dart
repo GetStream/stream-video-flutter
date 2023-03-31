@@ -140,7 +140,7 @@ class CallStateManagerImpl extends CallStateManager {
     if (event is SfuHealthCheckResponseEvent) {
       return;
     }
-    _logger.d(() => '[onSfuEvent] event: $event');
+    _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
     _postReduced(SfuEventAction(event));
     if (event is SfuJoinResponseEvent) {
       final participants = event.callState.participants;

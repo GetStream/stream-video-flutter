@@ -281,16 +281,13 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
 
     await Future.delayed(delay, () async {
       _logger.v(() => '[reconnect] triggered');
-      // if (refreshToken) {
-      //   await tokenManager.refreshToken();
-      // }
       connectionState = ConnectionState.reconnecting;
       await super.connect();
       _logger.v(() => '[reconnect] completed');
     });
   }
 
-  Duration get jitter {
+  Duration get _jitter {
     return Duration(milliseconds: _rnd.nextInt(_maxJitter.inMilliseconds));
   }
 
@@ -298,7 +295,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     if (retryAttempt == 0) {
       return Duration.zero;
     }
-    final calculated = _defaultDelay * retryAttempt + jitter;
+    final calculated = _defaultDelay * retryAttempt + _jitter;
     if (calculated < _retryMaxBackoff) {
       return calculated;
     }

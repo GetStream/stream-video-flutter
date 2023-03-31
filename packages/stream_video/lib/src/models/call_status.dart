@@ -36,6 +36,10 @@ abstract class CallStatus extends Equatable {
     return CallStatusJoined(credentials: credentials);
   }
 
+  factory CallStatus.connecting() {
+    return CallStatusConnecting();
+  }
+
   factory CallStatus.connected() {
     return CallStatusConnected();
   }
@@ -63,6 +67,8 @@ abstract class CallStatus extends Equatable {
 
   bool get isJoined => this is CallStatusJoined;
 
+  bool get isConnecting => this is CallStatusConnecting;
+
   bool get isConnected => this is CallStatusConnected;
 
   bool get isDrop => this is CallStatusDrop;
@@ -77,9 +83,7 @@ class CallStatusIdle extends CallStatus with CallStatusJoinable {
   const CallStatusIdle._internal();
   static const CallStatusIdle _instance = CallStatusIdle._internal();
   @override
-  String toString() {
-    return 'Idle';
-  }
+  String toString() => 'Created';
 }
 
 abstract class CallStatusActive extends CallStatus {
@@ -93,9 +97,7 @@ class CallStatusCreated extends CallStatusActive with CallStatusJoinable {
   const CallStatusCreated._internal();
   static const CallStatusCreated _instance = CallStatusCreated._internal();
   @override
-  String toString() {
-    return 'Created';
-  }
+  String toString() => 'Idl';
 }
 
 class CallStatusOutgoing extends CallStatusActive with CallStatusJoinable {
@@ -107,9 +109,7 @@ class CallStatusOutgoing extends CallStatusActive with CallStatusJoinable {
   List<Object?> get props => [acceptedByCallee];
 
   @override
-  String toString() {
-    return 'Outgoing{acceptedByCallee: $acceptedByCallee}';
-  }
+  String toString() => 'Outgoing{acceptedByCallee: $acceptedByCallee}';
 }
 
 class CallStatusIncoming extends CallStatusActive with CallStatusJoinable {
@@ -121,9 +121,7 @@ class CallStatusIncoming extends CallStatusActive with CallStatusJoinable {
   List<Object?> get props => [acceptedByMe];
 
   @override
-  String toString() {
-    return 'Incoming{acceptedByMe: $acceptedByMe}';
-  }
+  String toString() => 'Incoming{acceptedByMe: $acceptedByMe}';
 }
 
 class CallStatusJoining extends CallStatusActive {
@@ -133,9 +131,7 @@ class CallStatusJoining extends CallStatusActive {
   const CallStatusJoining._internal();
   static const CallStatusJoining _instance = CallStatusJoining._internal();
   @override
-  String toString() {
-    return 'Joining';
-  }
+  String toString() => 'Joining';
 }
 
 class CallStatusJoined extends CallStatusActive {
@@ -147,9 +143,17 @@ class CallStatusJoined extends CallStatusActive {
   List<Object?> get props => [credentials];
 
   @override
-  String toString() {
-    return 'Joined{credentials: $credentials}';
+  String toString() => 'Joined{credentials: $credentials}';
+}
+
+class CallStatusConnecting extends CallStatusActive {
+  factory CallStatusConnecting() {
+    return _instance;
   }
+  const CallStatusConnecting._internal();
+  static const CallStatusConnecting _instance = CallStatusConnecting._internal();
+  @override
+  String toString() => 'Connecting';
 }
 
 class CallStatusConnected extends CallStatusActive {
@@ -159,9 +163,7 @@ class CallStatusConnected extends CallStatusActive {
   const CallStatusConnected._internal();
   static const CallStatusConnected _instance = CallStatusConnected._internal();
   @override
-  String toString() {
-    return 'Connected';
-  }
+  String toString() => 'Connected';
 }
 
 class CallStatusDrop extends CallStatus {

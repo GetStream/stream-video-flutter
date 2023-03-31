@@ -129,6 +129,7 @@ class CoordinatorCallReducer {
     CallState state,
     CoordinatorCallEndedEvent event,
   ) {
+    _logger.i(() => '[reduceCallCancelled] state: $state');
     final status = state.status;
     if (status is! CallStatusActive) {
       _logger.w(() => '[reduceCallEnded] rejected (status is not Active)');

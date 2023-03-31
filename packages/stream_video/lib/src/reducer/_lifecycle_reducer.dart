@@ -42,6 +42,7 @@ class LifecycleReducer {
     CallState state,
     CallUserIdAction action,
   ) {
+
     return state.copyWith(
       currentUserId: action.userId,
       status: CallStatus.idle(),
@@ -92,10 +93,11 @@ class LifecycleReducer {
     final status = state.status;
     if (status is! CallStatusDrop) {
       _logger.w(
-        () => '[reduceCallDestroyed] rejected (invalid status): $status',
+        () => '[reduceCallDisconnected] rejected (invalid status): $status',
       );
       return state;
     }
+    _logger.w(() => '[reduceCallDisconnected] state: $state');
     return state.copyWith(
       status: CallStatus.idle(),
       sessionId: '',
@@ -107,6 +109,7 @@ class LifecycleReducer {
     CallState state,
     CallTimeoutAction action,
   ) {
+    _logger.e(() => '[reduceCallTimeout] state: $state');
     return state.copyWith(
       status: CallStatus.drop(DropReason.timeout(action.timeLimit)),
     );
@@ -116,6 +119,7 @@ class LifecycleReducer {
     CallState state,
     CallConnectFailedAction action,
   ) {
+    _logger.e(() => '[reduceCallConnectFailed] state: $state');
     return state.copyWith(
       status: CallStatus.drop(DropReason.failure(action.error)),
     );
@@ -125,13 +129,18 @@ class LifecycleReducer {
     CallState state,
     CallSessionStartAction action,
   ) {
-    return state.copyWith(sessionId: action.sessionId);
+    _logger.d(() => '[reduceCallSessionStart] state: $state');
+    return state.copyWith(
+      sessionId: action.sessionId,
+      status: CallStatus.connecting(),
+    );
   }
 
   CallState _reduceCallConnected(
     CallState state,
     CallConnectedAction action,
   ) {
+    _logger.d(() => '[reduceCallConnected] state: $state');
     return state.copyWith(
       status: CallStatus.connected(),
     );

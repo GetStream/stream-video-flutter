@@ -104,14 +104,14 @@ class SfuWebSocket extends StreamWebSocket
 
   @override
   void onError(Object error, [StackTrace? stackTrace]) {
-    _logger.w(() => '[onError] error: $error, stackTrace: $stackTrace');
+    _logger.w(() => '[onError] error: $error');
     healthMonitor.onSocketError(error);
 
     _events.emit(
       SfuSocketFailed(
         sessionId: sessionId,
         url: url,
-        error: VideoErrors.compose(error, stackTrace),
+        error: VideoErrors.compose(error),
       ),
     );
 
@@ -163,8 +163,10 @@ class SfuWebSocket extends StreamWebSocket
       SfuSocketDisconnected(
         sessionId: sessionId,
         url: url,
-        closeCode: closeCode,
-        closeReason: closeReason,
+        reason: DisconnectionReason(
+          closeCode: closeCode,
+          closeReason: closeReason,
+        )
       ),
     );
 

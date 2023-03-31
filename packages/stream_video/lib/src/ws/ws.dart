@@ -67,7 +67,7 @@ abstract class StreamWebSocket {
     } catch (error, stackTrace) {
       _logger.e(() => '[connect] failed: $error');
       onError(error, stackTrace);
-      return Result.failure(VideoErrors.compose(error, stackTrace));
+      return Result.failure(VideoErrors.compose(error));
     } finally {
       _connectRequestInProgress = false;
     }

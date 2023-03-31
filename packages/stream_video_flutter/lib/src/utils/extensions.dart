@@ -73,6 +73,8 @@ extension CallStatusExtension on CallStatus {
       return 'Joining';
     } else if (isJoined) {
       return 'Joined';
+    } else if (isConnecting) {
+      return 'Connecting';
     } else if (isConnected) {
       return 'Connected';
     } else if (isDrop) {

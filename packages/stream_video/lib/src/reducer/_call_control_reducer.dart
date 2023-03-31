@@ -162,6 +162,7 @@ class CallControlReducer {
       );
       return state;
     }
+    _logger.i(() => '[reduceCallRejected] action: $action, state: $state');
     return state.copyWith(
       status: CallStatus.drop(
         DropReason.rejected(
@@ -175,6 +176,7 @@ class CallControlReducer {
     CallState state,
     EndCall action,
   ) {
+    _logger.i(() => '[reduceCallCancelled] action: $action, state: $state');
     return state.copyWith(
       status: CallStatus.drop(
         DropReason.cancelled(

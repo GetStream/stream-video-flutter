@@ -146,10 +146,10 @@ class CallState extends Equatable {
 
   @override
   String toString() {
-    return 'CallState(currentUserId: $currentUserId, callCid: $callCid,'
-        ' createdByUserId: $createdByUserId, sessionId: $sessionId,'
-        ' status: $status, isRecording: $isRecording, settings: $settings,'
-        ' videoInputDevice: $videoInputDevice,'
+    return 'CallState(status: $status, currentUserId: $currentUserId,'
+        ' callCid: $callCid, createdByUserId: $createdByUserId,'
+        ' sessionId: $sessionId, isRecording: $isRecording,'
+        ' settings: $settings, videoInputDevice: $videoInputDevice,'
         ' audioInputDevice: $audioInputDevice,'
         ' audioOutputDevice: $audioOutputDevice,'
         ' ownCapabilities: $ownCapabilities,'
