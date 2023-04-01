@@ -12,10 +12,6 @@ abstract class CallStatus extends Equatable {
     return CallStatusIdle();
   }
 
-  factory CallStatus.created() {
-    return CallStatusCreated();
-  }
-
   factory CallStatus.outgoing({
     bool acceptedByCallee = false,
   }) {
@@ -28,16 +24,12 @@ abstract class CallStatus extends Equatable {
     return CallStatusIncoming(acceptedByMe: acceptedByMe);
   }
 
-  factory CallStatus.joining() {
-    return CallStatusJoining();
-  }
-
-  factory CallStatus.joined(CallCredentials credentials) {
-    return CallStatusJoined(credentials: credentials);
-  }
-
   factory CallStatus.connecting() {
     return CallStatusConnecting();
+  }
+
+  factory CallStatus.reconnecting(int attempt) {
+    return CallStatusReconnecting(attempt: attempt);
   }
 
   factory CallStatus.connected() {
@@ -57,17 +49,13 @@ abstract class CallStatus extends Equatable {
 
   bool get isJoinable => this is CallStatusJoinable;
 
-  bool get isCreated => this is CallStatusCreated;
-
   bool get isOutgoing => this is CallStatusOutgoing;
 
   bool get isIncoming => this is CallStatusIncoming;
 
-  bool get isJoining => this is CallStatusJoining;
-
-  bool get isJoined => this is CallStatusJoined;
-
   bool get isConnecting => this is CallStatusConnecting;
+
+  bool get isReconnecting => this is CallStatusReconnecting;
 
   bool get isConnected => this is CallStatusConnected;
 
@@ -83,21 +71,11 @@ class CallStatusIdle extends CallStatus with CallStatusJoinable {
   const CallStatusIdle._internal();
   static const CallStatusIdle _instance = CallStatusIdle._internal();
   @override
-  String toString() => 'Created';
+  String toString() => 'Idle';
 }
 
 abstract class CallStatusActive extends CallStatus {
   const CallStatusActive();
-}
-
-class CallStatusCreated extends CallStatusActive with CallStatusJoinable {
-  factory CallStatusCreated() {
-    return _instance;
-  }
-  const CallStatusCreated._internal();
-  static const CallStatusCreated _instance = CallStatusCreated._internal();
-  @override
-  String toString() => 'Idl';
 }
 
 class CallStatusOutgoing extends CallStatusActive with CallStatusJoinable {
@@ -124,28 +102,6 @@ class CallStatusIncoming extends CallStatusActive with CallStatusJoinable {
   String toString() => 'Incoming{acceptedByMe: $acceptedByMe}';
 }
 
-class CallStatusJoining extends CallStatusActive {
-  factory CallStatusJoining() {
-    return _instance;
-  }
-  const CallStatusJoining._internal();
-  static const CallStatusJoining _instance = CallStatusJoining._internal();
-  @override
-  String toString() => 'Joining';
-}
-
-class CallStatusJoined extends CallStatusActive {
-  const CallStatusJoined({required this.credentials});
-
-  final CallCredentials credentials;
-
-  @override
-  List<Object?> get props => [credentials];
-
-  @override
-  String toString() => 'Joined{credentials: $credentials}';
-}
-
 class CallStatusConnecting extends CallStatusActive {
   factory CallStatusConnecting() {
     return _instance;
@@ -154,6 +110,20 @@ class CallStatusConnecting extends CallStatusActive {
   static const CallStatusConnecting _instance = CallStatusConnecting._internal();
   @override
   String toString() => 'Connecting';
+}
+
+class CallStatusReconnecting extends CallStatusConnecting {
+  const CallStatusReconnecting({required this.attempt}) : super._internal();
+
+  final int attempt;
+
+  @override
+  List<Object?> get props => [attempt];
+
+  @override
+  String toString() {
+    return 'Reconnecting{attempt: $attempt}';
+  }
 }
 
 class CallStatusConnected extends CallStatusActive {

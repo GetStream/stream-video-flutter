@@ -115,7 +115,8 @@ class SfuWebSocket extends StreamWebSocket
       ),
     );
 
-    _reconnect();
+    //TODO
+    // _reconnect();
   }
 
   @override
@@ -170,7 +171,8 @@ class SfuWebSocket extends StreamWebSocket
       ),
     );
 
-    _reconnect();
+    // TODO
+    // _reconnect();
   }
 
   @override
@@ -248,7 +250,8 @@ class SfuWebSocket extends StreamWebSocket
     _logger.d(() => '[onPongTimeout] timeout: $timeout');
 
     await super.disconnect();
-    unawaited(_reconnect());
+    // TODO
+    //  unawaited(_reconnect());
   }
 
   @override

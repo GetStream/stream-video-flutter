@@ -37,8 +37,8 @@ abstract class CallStateManager implements CoordinatorCallEventListener {
   Future<void> onUserIdSet(String userId);
   Future<void> onCallCreated(CallCreated data);
   Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data);
-  Future<void> onCallJoining();
   Future<void> onCallJoined(CallJoined data);
+  Future<void> onConnecting(int attempt);
   Future<void> onSessionStart(String sessionId);
   Future<void> onConnected();
   Future<void> onDisconnect();
@@ -106,12 +106,6 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  Future<void> onCallJoining() async {
-    _logger.d(() => '[onJoining] no args');
-    _postReduced(const CallJoiningAction());
-  }
-
-  @override
   Future<void> onCallJoined(CallJoined data) async {
     _logger.d(() => '[onJoined] data: $data');
     _postReduced(CallJoinedAction(data));
@@ -121,6 +115,12 @@ class CallStateManagerImpl extends CallStateManager {
   Future<void> onSessionStart(String sessionId) async {
     _logger.d(() => '[onSessionStart] sessionId: $sessionId');
     _postReduced(CallSessionStartAction(sessionId: sessionId));
+  }
+
+  @override
+  Future<void> onConnecting(int attempt) async {
+    _logger.d(() => '[onConnecting] attempt: $attempt');
+    _postReduced(CallConnectingAction(attempt));
   }
 
   @override
@@ -204,6 +204,12 @@ class CallStateManagerImpl extends CallStateManager {
       _logger.v(() => '[postState] state: $state');
       _state.value = state;
     }
+  }
+
+  @override
+  Future<void> onCallConnecting() {
+    // TODO: implement onCallConnecting
+    throw UnimplementedError();
   }
 }
 

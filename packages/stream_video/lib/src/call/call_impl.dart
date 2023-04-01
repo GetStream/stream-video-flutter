@@ -67,17 +67,20 @@ class CallImpl implements Call {
     return CallImpl._(
       streamVideo: finalStreamVideo,
       stateManager: stateManager,
+      credentials: data.credentials,
     );
   }
 
   CallImpl._({
     required StreamVideo streamVideo,
     required CallStateManager stateManager,
+    CallCredentials? credentials,
   })  : _sessionFactory = CallSessionFactory(
           callCid: stateManager.state.value.callCid,
         ),
         _stateManager = stateManager,
-        _streamVideo = streamVideo {
+        _streamVideo = streamVideo,
+        _credentials = credentials {
     streamLog.i(_tag, () => '<init> state: ${stateManager.state.value}');
     _subscriptions.add(
       _idCoordEvents,
@@ -104,6 +107,7 @@ class CallImpl implements Call {
   final CallSessionFactory _sessionFactory;
   final CallStateManager _stateManager;
 
+  CallCredentials? _credentials;
   int _reconnectAttempt = 0;
 
   @override
@@ -152,6 +156,7 @@ class CallImpl implements Call {
       );
       return;
     }
+    _logger.d(() => '[setConnectOptions] connectOptions: $connectOptions)');
     _connectOptions = connectOptions;
   }
 
@@ -215,6 +220,8 @@ class CallImpl implements Call {
       _logger.e(() => '[joinCall] failed: $joinedResult');
       await _stateManager.onConnectFailed(joinedResult.error);
       return joinedResult;
+    } else {
+      _logger.v(() => '[joinCall] completed');
     }
     return Result.success(None());
   }
@@ -263,7 +270,7 @@ class CallImpl implements Call {
 
     final state = this.state.value;
     final status = state.status;
-    if (!status.isJoinable && !status.isJoined && !status.isJoining) {
+    if (!status.isJoinable) {
       _logger
           .w(() => '[connect] rejected (not Joinable/Joining/Joined): $status');
       return Result.error('invalid status: $status');
@@ -276,6 +283,7 @@ class CallImpl implements Call {
       return result;
     }
 
+    await _stateManager.onConnecting(_reconnectAttempt);
     _logger.v(() => '[connect] joining to coordinator');
     final joinedResult = await _joinIfNeeded();
     if (joinedResult is! Success<CallCredentials>) {
@@ -284,10 +292,10 @@ class CallImpl implements Call {
       return result;
     }
 
-    _logger.v(() => '[connect] starting session');
+    _logger.v(() => '[connect] starting sfu session');
     final sessionResult = await _startSession(joinedResult.data);
     if (sessionResult is! Success<None>) {
-      _logger.w(() => '[connect] session start failed: $sessionResult');
+      _logger.w(() => '[connect] sfu session start failed: $sessionResult');
       await _stateManager.onConnectFailed((sessionResult as Failure).error);
       return sessionResult;
     }
@@ -301,13 +309,13 @@ class CallImpl implements Call {
 
   Future<Result<CallCredentials>> _joinIfNeeded() async {
     final state = this.state.value;
-    final status = state.status;
-    if (status is CallStatusJoined) {
-      _logger.w(() => '[joinIfNeeded] rejected (already joined): $status');
-      return Result.success(status.credentials);
+    final creds = _credentials;
+    if (creds != null) {
+      _logger.w(() => '[joinIfNeeded] rejected (already joined): $creds');
+      return Result.success(creds);
     }
     _logger.d(() => '[joinIfNeeded] no args');
-    await _stateManager.onCallJoining();
+    // TODO await _stateManager.onCallJoining();
     final joinedResult = await _streamVideo.joinCall(
       cid: state.callCid,
       onReceivedOrCreated: (data) async {
@@ -317,6 +325,7 @@ class CallImpl implements Call {
     if (joinedResult is Success<CallJoined>) {
       _logger.v(() => '[joinIfNeeded] completed');
       await _stateManager.onCallJoined(joinedResult.data);
+      _credentials = joinedResult.data.credentials;
       return Result.success(joinedResult.data.credentials);
     }
     _logger.e(() => '[joinIfNeeded] failed: $joinedResult');
@@ -325,6 +334,7 @@ class CallImpl implements Call {
 
   Future<Result<None>> _startSession(CallCredentials credentials) async {
     _logger.d(() => '[startSession] credentials: $credentials');
+    _credentials = null;
     final session = await _sessionFactory.makeCallSession(
       credentials: credentials,
       stateManager: _stateManager,
@@ -376,6 +386,7 @@ class CallImpl implements Call {
     final startTime = DateTime.now().toUtc().millisecondsSinceEpoch;
     while (true) {
       _reconnectAttempt++;
+      await _stateManager.onConnecting(_reconnectAttempt);
       if (_status.value == _ConnectionStatus.disconnected) {
         _logger.w(() => '[reconnect] attempt($_reconnectAttempt) rejected (disconnected)');
         _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< rejected');
@@ -449,9 +460,9 @@ class CallImpl implements Call {
       }
       // If we are coming from the pre-joining screen and already
       // started joining the call.
-      if (status is CallStatusJoining) {
-        await _awaitCallToBeJoined();
-      }
+      // if (status is CallStatusJoining) {
+      //   await _awaitCallToBeJoined();
+      // }
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -614,14 +625,14 @@ class CallImpl implements Call {
     );
   }
 
-  Future<void> _awaitCallToBeJoined() async {
-    await state.firstWhere(
-      (state) {
-        return state.status is CallStatusJoined;
-      },
-      timeLimit: const Duration(seconds: 60),
-    );
-  }
+  // Future<void> _awaitCallToBeJoined() async {
+  //   await state.firstWhere(
+  //     (state) {
+  //       return state.status is CallStatusJoined;
+  //     },
+  //     timeLimit: const Duration(seconds: 60),
+  //   );
+  // }
 
   @override
   Future<Result<None>> inviteUsers(List<UserInfo> users) {

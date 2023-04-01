@@ -27,10 +27,6 @@ class CallCreatedAction extends LifecycleAction {
   final CallCreated data;
 }
 
-class CallJoiningAction extends LifecycleAction {
-  const CallJoiningAction();
-}
-
 class CallJoinedAction extends LifecycleAction {
   const CallJoinedAction(this.data);
 
@@ -42,6 +38,13 @@ class CallSessionStartAction extends LifecycleAction {
 
   final String sessionId;
 }
+
+class CallConnectingAction extends LifecycleAction {
+  const CallConnectingAction(this.attempt);
+
+  final int attempt;
+}
+
 
 class CallConnectedAction extends LifecycleAction {
   const CallConnectedAction();

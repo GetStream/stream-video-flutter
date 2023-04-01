@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (call != null) {
       Navigator.of(context).pushNamed(
         Routes.call,
-        arguments: call,
+        arguments: [call, options],
       );
     }
   }

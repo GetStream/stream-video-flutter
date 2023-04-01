@@ -103,8 +103,9 @@ class _StreamCallContentState extends State<StreamCallContent> {
             overlayAppBarBuilder: widget.overlayAppBarBuilder,
           );
     } else {
-      bodyWidget = const Center(
-        child: Text('Connecting'),
+      final isReconnecting = callState.status.isReconnecting;
+      bodyWidget = Center(
+        child: Text(isReconnecting ? 'Reconnecting' : 'Connecting'),
       );
     }
 

@@ -39,7 +39,7 @@ class CallSessionImpl extends CallSession {
     required this.stateManager,
   })  : sfuClient = SfuClientImpl(
           baseUrl: config.sfuUrl,
-          authToken: config.sfuToken,
+          sfuToken: config.sfuToken,
         ),
         sfuWS = SfuWebSocket(
           sessionSeq: sessionSeq,

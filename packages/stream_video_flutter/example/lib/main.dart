@@ -12,7 +12,7 @@ import 'screen/login_screen.dart';
 const _tag = 'MyApp';
 
 Future<void> main() async {
-  useProxy('192.168.1.73:8888');
+  //useProxy('192.168.1.73:8888');
 
   WidgetsFlutterBinding.ensureInitialized();
 

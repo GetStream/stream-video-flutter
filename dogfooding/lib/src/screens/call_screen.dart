@@ -7,9 +7,11 @@ class CallScreen extends StatelessWidget {
   const CallScreen({
     super.key,
     required this.call,
+    this.callConnectOptions = const CallConnectOptions(),
   });
 
   final Call call;
+  final CallConnectOptions callConnectOptions;
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +19,7 @@ class CallScreen extends StatelessWidget {
       usersProvider: MockUsersProvider(),
       child: StreamCallContainer(
         call: call,
+        callConnectOptions: callConnectOptions,
       ),
     );
   }
