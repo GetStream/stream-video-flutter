@@ -20,7 +20,7 @@ class StreamLog {
   }
 
   set priority(Priority priority) {
-    _validator = (priority, _) => priority >= priority;
+    _validator = (logPriority, _) => logPriority >= priority;
   }
 
   set validator(IsLoggableValidator validator) {
