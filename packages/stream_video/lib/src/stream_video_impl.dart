@@ -253,16 +253,6 @@ class StreamVideoImpl implements StreamVideo {
     );
   }
 
-  @override
-  Future<Result<None>> cancelCall({
-    required StreamCallCid cid,
-  }) async {
-    return _sendEvent(
-      cid: cid,
-      eventType: input.EventTypeInput.cancelled,
-    );
-  }
-
   Future<Result<None>> _sendEvent({
     required StreamCallCid cid,
     required input.EventTypeInput eventType,

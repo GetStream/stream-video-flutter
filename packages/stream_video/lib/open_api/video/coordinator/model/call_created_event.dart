@@ -14,6 +14,7 @@ class CallCreatedEvent {
   /// Returns a new [CallCreatedEvent] instance.
   CallCreatedEvent({
     required this.call,
+    required this.callCid,
     required this.createdAt,
     this.members = const [],
     required this.ringing,
@@ -22,17 +23,23 @@ class CallCreatedEvent {
 
   CallResponse call;
 
+  String callCid;
+
   DateTime createdAt;
 
+  /// the members added to this call
   List<MemberResponse> members;
 
+  /// true when the call was created with ring enabled
   bool ringing;
 
+  /// The type of event: \"call.created\" in this case
   String type;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallCreatedEvent &&
      other.call == call &&
+     other.callCid == callCid &&
      other.createdAt == createdAt &&
      other.members == members &&
      other.ringing == ringing &&
@@ -42,17 +49,19 @@ class CallCreatedEvent {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (call.hashCode) +
+    (callCid.hashCode) +
     (createdAt.hashCode) +
     (members.hashCode) +
     (ringing.hashCode) +
     (type.hashCode);
 
   @override
-  String toString() => 'CallCreatedEvent[call=$call, createdAt=$createdAt, members=$members, ringing=$ringing, type=$type]';
+  String toString() => 'CallCreatedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, ringing=$ringing, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'call'] = this.call;
+      json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'members'] = this.members;
       json[r'ringing'] = this.ringing;
@@ -80,6 +89,7 @@ class CallCreatedEvent {
 
       return CallCreatedEvent(
         call: CallResponse.fromJson(json[r'call'])!,
+        callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
         members: MemberResponse.listFromJson(json[r'members'])!,
         ringing: mapValueOfType<bool>(json, r'ringing')!,
@@ -134,6 +144,7 @@ class CallCreatedEvent {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'call',
+    'call_cid',
     'created_at',
     'members',
     'ringing',

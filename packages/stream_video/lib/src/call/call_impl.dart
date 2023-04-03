@@ -180,27 +180,6 @@ class CallImpl implements Call {
     return result;
   }
 
-  Future<Result<None>> _cancelCall(CancelCall action) async {
-    final state = this.state.value;
-    final status = state.status;
-    _logger.d(() => '[cancelCall] status: $status');
-    if (status is! CallStatusActive) {
-      _logger.w(() => '[cancelCall] rejected (invalid status): $status');
-      return Result.error('invalid status: $status');
-    }
-    final result = await _streamVideo.cancelCall(cid: state.callCid);
-    _logger.v(() => '[cancelCall] result: $result');
-    if (result is Success<None>) {
-      _status.value = _ConnectionStatus.cancelled;
-      _subscriptions.cancelAll();
-      await _stateManager.onCallControlAction(action);
-      await _session?.dispose();
-      _session = null;
-    }
-    _logger.v(() => '[cancelCall] completed');
-    return result;
-  }
-
   Future<Result<None>> _endCall(EndCall action) async {
     final state = this.state.value;
     final status = state.status;
@@ -212,7 +191,11 @@ class CallImpl implements Call {
     final result = await _streamVideo.endCall(callCid: state.callCid);
     _logger.v(() => '[endCall] completed: $result');
     if (result is Success<None>) {
+      _status.value = _ConnectionStatus.cancelled;
+      _subscriptions.cancelAll();
       await _stateManager.onCallControlAction(action);
+      await _session?.dispose();
+      _session = null;
     }
     return result;
   }
@@ -406,8 +389,6 @@ class CallImpl implements Call {
   Future<Result<None>> apply(CallControlAction action) async {
     if (action is SessionControlAction) {
       return _applySessionAction(action);
-    } else if (action is CancelCall) {
-      return _cancelCall(action);
     } else if (action is AcceptCall) {
       return _acceptCall(action);
     } else if (action is RejectCall) {

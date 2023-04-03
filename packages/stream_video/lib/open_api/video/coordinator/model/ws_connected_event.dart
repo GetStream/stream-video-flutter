@@ -10,42 +10,56 @@
 
 part of openapi.api;
 
-class AnyEvent {
-  /// Returns a new [AnyEvent] instance.
-  AnyEvent({
+class WSConnectedEvent {
+  /// Returns a new [WSConnectedEvent] instance.
+  WSConnectedEvent({
+    required this.connectionId,
     required this.createdAt,
+    required this.me,
     required this.type,
   });
 
+  /// The connection_id for this client
+  String connectionId;
+
   DateTime createdAt;
 
+  OwnUserResponse me;
+
+  /// The type of event: \"connection.ok\" in this case
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is AnyEvent &&
+  bool operator ==(Object other) => identical(this, other) || other is WSConnectedEvent &&
+     other.connectionId == connectionId &&
      other.createdAt == createdAt &&
+     other.me == me &&
      other.type == type;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (connectionId.hashCode) +
     (createdAt.hashCode) +
+    (me.hashCode) +
     (type.hashCode);
 
   @override
-  String toString() => 'AnyEvent[createdAt=$createdAt, type=$type]';
+  String toString() => 'WSConnectedEvent[connectionId=$connectionId, createdAt=$createdAt, me=$me, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'connection_id'] = this.connectionId;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+      json[r'me'] = this.me;
       json[r'type'] = this.type;
     return json;
   }
 
-  /// Returns a new [AnyEvent] instance and imports its values from
+  /// Returns a new [WSConnectedEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static AnyEvent? fromJson(dynamic value) {
+  static WSConnectedEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -54,25 +68,27 @@ class AnyEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "AnyEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "AnyEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "WSConnectedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "WSConnectedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return AnyEvent(
+      return WSConnectedEvent(
+        connectionId: mapValueOfType<String>(json, r'connection_id')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
+        me: OwnUserResponse.fromJson(json[r'me'])!,
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
     return null;
   }
 
-  static List<AnyEvent>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <AnyEvent>[];
+  static List<WSConnectedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <WSConnectedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = AnyEvent.fromJson(row);
+        final value = WSConnectedEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -81,12 +97,12 @@ class AnyEvent {
     return result.toList(growable: growable);
   }
 
-  static Map<String, AnyEvent> mapFromJson(dynamic json) {
-    final map = <String, AnyEvent>{};
+  static Map<String, WSConnectedEvent> mapFromJson(dynamic json) {
+    final map = <String, WSConnectedEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = AnyEvent.fromJson(entry.value);
+        final value = WSConnectedEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -95,13 +111,13 @@ class AnyEvent {
     return map;
   }
 
-  // maps a json object with a list of AnyEvent-objects as value to a dart map
-  static Map<String, List<AnyEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<AnyEvent>>{};
+  // maps a json object with a list of WSConnectedEvent-objects as value to a dart map
+  static Map<String, List<WSConnectedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<WSConnectedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = AnyEvent.listFromJson(entry.value, growable: growable,);
+        final value = WSConnectedEvent.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -112,7 +128,9 @@ class AnyEvent {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'connection_id',
     'created_at',
+    'me',
     'type',
   };
 }

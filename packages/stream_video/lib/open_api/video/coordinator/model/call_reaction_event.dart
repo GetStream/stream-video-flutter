@@ -25,6 +25,7 @@ class CallReactionEvent {
 
   ReactionResponse reaction;
 
+  /// The type of event: \"call.reaction_new\" in this case
   String type;
 
   @override

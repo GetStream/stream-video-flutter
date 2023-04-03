@@ -24,9 +24,10 @@ class UpdatedCallPermissionsEvent {
 
   DateTime createdAt;
 
-  /// The updated list of capabilities the user has in the call
-  List<String> ownCapabilities;
+  /// The capabilities of the current user
+  List<OwnCapability> ownCapabilities;
 
+  /// The type of event: \"call.permissions_updated\" in this case
   String type;
 
   UserResponse user;
@@ -82,9 +83,7 @@ class UpdatedCallPermissionsEvent {
       return UpdatedCallPermissionsEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
-        ownCapabilities: json[r'own_capabilities'] is List
-            ? (json[r'own_capabilities'] as List).cast<String>()
-            : const [],
+        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
         type: mapValueOfType<String>(json, r'type')!,
         user: UserResponse.fromJson(json[r'user'])!,
       );

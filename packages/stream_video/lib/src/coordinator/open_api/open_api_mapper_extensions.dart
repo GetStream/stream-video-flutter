@@ -1,8 +1,11 @@
+import 'package:collection/collection.dart';
+
 import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../call_permission.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_setting.dart';
+import '../../utils/standard.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_inputs.dart';
 import 'event/event_type.dart';
@@ -15,12 +18,17 @@ extension WebsocketEventMapperExt on OpenApiEvent {
   /// Returns [CoordinatorEvent].
   CoordinatorEvent? toCoordinatorEvent() {
     switch (type) {
+      case EventType.connectionOk:
+        final event = this.connected!;
+        return CoordinatorConnectedEvent(
+          clientId: event.connectionId,
+          userId: event.me.id,
+        );
       case EventType.healthCheck:
         final healthCheck = this.healthCheck!;
 
         return CoordinatorHealthCheckEvent(
-          clientId: healthCheck.connectionId!,
-          userId: healthCheck.me?.id ?? '',
+          clientId: healthCheck.connectionId,
         );
       case EventType.callCreated:
         final callCreated = this.callCreated!;
@@ -40,7 +48,9 @@ extension WebsocketEventMapperExt on OpenApiEvent {
             isBroadcastingEnabled: call.settings.broadcasting.enabled,
             members: callCreated.members.toCallMembers(call.cid),
             isRecordingEnabled: call.settings.recording.audioOnly,
-            ownCapabilities: call.ownCapabilities.map(CallPermission.fromAlias),
+            ownCapabilities: call.ownCapabilities.map(
+              (it) => CallPermission.fromAlias(it.value),
+            ),
             settings: call.settings.toCallSettings(),
           ),
           users: callCreated.members.toCallUsers(),
@@ -85,26 +95,6 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           ),
           users: const {},
         );
-      case EventType.callCancelled:
-        final callCancelled = this.callCancelled!;
-
-        return CoordinatorCallCancelledEvent(
-          callCid: callCancelled.callCid,
-          sentByUserId: callCancelled.user.id,
-          createdAt: callCancelled.createdAt,
-          info: CallInfo(
-            cid: StreamCallCid(cid: callCancelled.callCid),
-            createdByUserId: '',
-          ),
-          details: const CallDetails(
-            isBroadcastingEnabled: false,
-            members: {},
-            isRecordingEnabled: false,
-            ownCapabilities: [],
-            settings: CallSettings.disabled(),
-          ),
-          users: const {},
-        );
       case EventType.callUpdated:
         final callUpdated = this.callUpdated!;
         final call = callUpdated.call;
@@ -121,14 +111,16 @@ extension WebsocketEventMapperExt on OpenApiEvent {
             isBroadcastingEnabled: call.settings.broadcasting.enabled,
             members: const {},
             isRecordingEnabled: call.settings.recording.audioOnly,
-            ownCapabilities: call.ownCapabilities.map(CallPermission.fromAlias),
+            ownCapabilities: call.ownCapabilities.map(
+              (it) => CallPermission.fromAlias(it.value),
+            ),
             settings: call.settings.toCallSettings(),
           ),
           users: const {},
         );
       case EventType.callEnded:
         final callEnded = this.callEnded!;
-
+        final callUser = callEnded.user?.toCallUser();
         return CoordinatorCallEndedEvent(
           callCid: callEnded.callCid,
           sentByUserId: callEnded.user?.id ?? '',
@@ -144,7 +136,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
             ownCapabilities: [],
             settings: CallSettings.disabled(),
           ),
-          users: const {},
+          users: callUser?.let((it) => {it.id : it}) ?? const {},
         );
       case EventType.callPermissionRequest:
         final callPermissionRequest = this.callPermissionRequest!;
@@ -161,8 +153,9 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallPermissionsUpdatedEvent(
           callCid: callPermissionsUpdated.callCid,
           createdAt: callPermissionsUpdated.createdAt,
-          ownCapabilities: callPermissionsUpdated.ownCapabilities
-              .map(CallPermission.fromAlias),
+          ownCapabilities: callPermissionsUpdated.ownCapabilities.map(
+            (it) => CallPermission.fromAlias(it.value),
+          ),
           user: callPermissionsUpdated.user.toCallUser(),
         );
       case EventType.callRecordingStarted:
@@ -185,7 +178,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallUserBlockedEvent(
           callCid: event.callCid,
           createdAt: event.createdAt,
-          userId: event.userId,
+          user: event.user.toCallUser(),
         );
       case EventType.callUserUnblocked:
         final event = callUserUnblocked!;
@@ -193,7 +186,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallUserUnblockedEvent(
           callCid: event.callCid,
           createdAt: event.createdAt,
-          userId: event.userId,
+          user: event.user.toCallUser(),
         );
       case EventType.callReaction:
         final event = callReaction!;
@@ -306,10 +299,15 @@ extension on ScreensharingSettingsInput {
 
 extension on RecordSettingsInput {
   open.RecordSettingsRequest toOpenDto() {
+    // TODO
     return open.RecordSettingsRequest(
       audioOnly: audioOnly,
-      mode: mode,
-      quality: quality,
+      mode: open.RecordSettingsRequestModeEnum.values.firstWhereOrNull(
+        (it) => it.value == mode,
+      ),
+      quality: open.RecordSettingsRequestQualityEnum.values.firstWhereOrNull(
+        (it) => it.value == quality,
+      ),
     );
   }
 }

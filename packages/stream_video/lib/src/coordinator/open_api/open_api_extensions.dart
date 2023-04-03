@@ -68,9 +68,11 @@ extension EnvelopeExt on open.CallResponse {
     return CallMetadata(
       details: CallDetails(
         members: {createdBy.id: createdBy.toCallMember(cid)},
-        isBroadcastingEnabled: settings.broadcasting.enabled,
-        isRecordingEnabled: settings.recording.mode.isNotEmpty,
-        ownCapabilities: ownCapabilities.map(CallPermission.fromAlias),
+        isBroadcastingEnabled: broadcasting,
+        isRecordingEnabled: recording,
+        ownCapabilities: ownCapabilities.map(
+          (it) => CallPermission.fromAlias(it.value),
+        ),
         settings: settings.toCallSettings(),
       ),
       info: CallInfo(
@@ -85,6 +87,7 @@ extension EnvelopeExt on open.CallResponse {
 }
 
 extension CallSettingsExt on open.CallSettingsResponse {
+  // TODO open api provides wider settings options
   CallSettings toCallSettings() {
     return CallSettings(
       audio: AudioSetting(

@@ -22,6 +22,7 @@ class CallRecordingStartedEvent {
 
   DateTime createdAt;
 
+  /// The type of event: \"call.recording_started\" in this case
   String type;
 
   @override
