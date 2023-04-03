@@ -14,6 +14,7 @@ import 'models/call_permission.dart';
 import 'models/call_reaction.dart';
 import 'models/queried_calls.dart';
 import 'models/queried_members.dart';
+import 'retry/retry_policy.dart';
 import 'shared_emitter.dart';
 import 'state_emitter.dart';
 import 'token/token_manager.dart';
@@ -30,12 +31,14 @@ class StreamVideoImpl implements StreamVideo {
     required String coordinatorRpcUrl,
     required String coordinatorWsUrl,
     required int latencyMeasurementRounds,
+    required RetryPolicy retryPolicy,
   }) {
     return StreamVideoImpl._(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
+      retryPolicy: retryPolicy,
     );
   }
 
@@ -44,10 +47,12 @@ class StreamVideoImpl implements StreamVideo {
     required this.coordinatorRpcUrl,
     required this.coordinatorWsUrl,
     required this.latencyMeasurementRounds,
+    required this.retryPolicy,
   }) {
     _client = buildCoordinatorClient(
       apiKey: apiKey,
       tokenManager: _tokenManager,
+      retryPolicy: retryPolicy,
       rpcUrl: coordinatorRpcUrl,
       wsUrl: coordinatorWsUrl,
     );
@@ -59,6 +64,8 @@ class StreamVideoImpl implements StreamVideo {
   final String coordinatorRpcUrl;
   final String coordinatorWsUrl;
   final int latencyMeasurementRounds;
+  @override
+  final RetryPolicy retryPolicy;
 
   final _tokenManager = TokenManager();
   late final CoordinatorClient _client;
@@ -529,14 +536,17 @@ CoordinatorClient buildCoordinatorClient({
   required String wsUrl,
   required String apiKey,
   required TokenManager tokenManager,
+  required RetryPolicy retryPolicy,
 }) {
   streamLog.i(_tag, () => '[buildCoordinatorClient] rpcUrl: $rpcUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] wsUrl: $wsUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] apiKey: $apiKey');
   return CoordinatorClientRetry(
+    retryPolicy: retryPolicy,
     delegate: CoordinatorClientOpenApi(
       apiKey: apiKey,
       tokenManager: tokenManager,
+      retryPolicy: retryPolicy,
       rpcUrl: rpcUrl,
       wsUrl: wsUrl,
     ),

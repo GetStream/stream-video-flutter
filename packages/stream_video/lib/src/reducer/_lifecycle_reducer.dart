@@ -80,13 +80,6 @@ class LifecycleReducer {
     CallState state,
     CallDisconnectedAction action,
   ) {
-    final status = state.status;
-    if (status is! CallStatusDrop) {
-      _logger.w(
-        () => '[reduceCallDisconnected] rejected (invalid status): $status',
-      );
-      return state;
-    }
     _logger.w(() => '[reduceCallDisconnected] state: $state');
     return state.copyWith(
       status: CallStatus.idle(),

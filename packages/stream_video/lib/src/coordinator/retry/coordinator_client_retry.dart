@@ -9,6 +9,7 @@ import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 import '../../models/user_info.dart';
 import '../../retry/retry_manager.dart';
+import '../../retry/retry_policy.dart';
 import '../../shared_emitter.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
@@ -20,11 +21,13 @@ import '../models/coordinator_models.dart';
 class CoordinatorClientRetry extends CoordinatorClient {
   CoordinatorClientRetry({
     required CoordinatorClient delegate,
-  }) : _delegate = delegate;
+    required RetryPolicy retryPolicy,
+  })  : _delegate = delegate,
+        _retryManager = RpcRetryManager(retryPolicy);
 
   final CoordinatorClient _delegate;
+  final RpcRetryManager _retryManager;
 
-  final _retryManager = RetryManager();
   final _logger = taggedLogger(tag: 'SV:CoordinatorClientRetry');
 
   @override

@@ -9,6 +9,7 @@ import 'models/call_permission.dart';
 import 'models/call_reaction.dart';
 import 'models/queried_calls.dart';
 import 'models/queried_members.dart';
+import 'retry/retry_policy.dart';
 import 'shared_emitter.dart';
 import 'stream_video_impl.dart';
 import 'token/token_manager.dart';
@@ -35,17 +36,23 @@ abstract class StreamVideo {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
+    RetryPolicy retryPolicy = const RetryPolicy(),
   }) {
     return StreamVideoImpl(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
+      retryPolicy: retryPolicy,
     );
   }
+
   static final InstanceHolder _instanceHolder = InstanceHolder();
 
   set pushNotificationManager(PushNotificationManager pushNotificationManager);
+
+  /// Returns the current RetryPolicy.
+  RetryPolicy get retryPolicy;
 
   /// Returns the current user if exists.
   UserInfo? get currentUser;
@@ -230,6 +237,7 @@ abstract class StreamVideo {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
+    RetryPolicy retryPolicy = const RetryPolicy(),
     Priority logPriority = Priority.none,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
   }) {
@@ -239,6 +247,7 @@ abstract class StreamVideo {
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
+      retryPolicy: retryPolicy,
     );
   }
 

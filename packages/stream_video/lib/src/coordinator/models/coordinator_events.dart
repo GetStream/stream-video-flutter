@@ -18,7 +18,7 @@ abstract class CoordinatorEvent with EquatableMixin {
   List<Object?> get props => [];
 }
 
-/// Sent periodically by the server to keep the connection alive.
+/// Sent one time after successful connection.
 class CoordinatorConnectedEvent extends CoordinatorEvent {
   const CoordinatorConnectedEvent({
     required this.clientId,
@@ -30,6 +30,24 @@ class CoordinatorConnectedEvent extends CoordinatorEvent {
 
   @override
   List<Object?> get props => [clientId, userId];
+}
+
+/// Fired when web socket is closed.
+class CoordinatorDisconnectedEvent extends CoordinatorEvent {
+  const CoordinatorDisconnectedEvent({
+    this.clientId,
+    this.userId,
+    this.closeCode,
+    this.closeReason,
+  });
+
+  final String? clientId;
+  final String? userId;
+  final int? closeCode;
+  final String? closeReason;
+
+  @override
+  List<Object?> get props => [clientId, userId, closeCode, closeReason];
 }
 
 /// Sent periodically by the server to keep the connection alive.

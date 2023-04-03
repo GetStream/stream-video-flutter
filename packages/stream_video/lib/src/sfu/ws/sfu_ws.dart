@@ -16,16 +16,9 @@ import '../data/events/sfu_events.dart';
 
 const _tag = 'SV:Sfu-WS';
 
-const _maxJitter = Duration(milliseconds: 500);
-const _defaultDelay = Duration(milliseconds: 250);
-const _retryMaxBackoff = Duration(seconds: 5);
-final _rnd = math.Random();
-
-/// TODO
 class SfuWebSocket extends StreamWebSocket
     with ConnectionStateMixin
     implements HealthListener {
-  /// TODO
   factory SfuWebSocket({
     required int sessionSeq,
     required String sessionId,
@@ -67,9 +60,7 @@ class SfuWebSocket extends StreamWebSocket
   }) : super(url, protocols: protocols, tag: '$_tag-$sessionSeq') {
     _logger.i(() => '<init> sessionId: $sessionId');
 
-    onConnectionStateUpdated = (it) {
-
-    };
+    onConnectionStateUpdated = (it) {};
   }
 
   late final _logger = taggedLogger(tag: '$_tag-$sessionSeq');
@@ -97,7 +88,6 @@ class SfuWebSocket extends StreamWebSocket
     _logger.i(() => '[onOpen] url: $url');
     connectionState = ConnectionState.connected;
     healthMonitor.onSocketOpen();
-    _reconnectAttempt = 0;
 
     _events.emit(SfuSocketConnected(sessionId: sessionId, url: url));
   }
@@ -114,9 +104,6 @@ class SfuWebSocket extends StreamWebSocket
         error: VideoErrors.compose(error),
       ),
     );
-
-    //TODO
-    // _reconnect();
   }
 
   @override
@@ -162,17 +149,13 @@ class SfuWebSocket extends StreamWebSocket
 
     _events.emit(
       SfuSocketDisconnected(
-        sessionId: sessionId,
-        url: url,
-        reason: DisconnectionReason(
-          closeCode: closeCode,
-          closeReason: closeReason,
-        )
-      ),
+          sessionId: sessionId,
+          url: url,
+          reason: DisconnectionReason(
+            closeCode: closeCode,
+            closeReason: closeReason,
+          )),
     );
-
-    // TODO
-    // _reconnect();
   }
 
   @override
@@ -213,45 +196,11 @@ class SfuWebSocket extends StreamWebSocket
     super.send(message.writeToBuffer());
   }
 
-  int _reconnectAttempt = 0;
-
-  Future<void> _reconnect() async {
-    if (isConnecting || isReconnecting) return;
-    _logger.d(() => '[_reconnect] _reconnectAttempt: $_reconnectAttempt');
-    _reconnectAttempt += 1;
-
-    final delay = _calculateDelay(_reconnectAttempt);
-
-    Future.delayed(delay, () async {
-      _logger.v(() => '[reconnect] triggered');
-      connectionState = ConnectionState.reconnecting;
-      await super.connect();
-      _logger.v(() => '[reconnect] completed');
-    });
-  }
-
-  Duration get jitter {
-    return Duration(milliseconds: _rnd.nextInt(_maxJitter.inMilliseconds));
-  }
-
-  Duration _calculateDelay(int retryAttempt) {
-    if (retryAttempt == 0) {
-      return Duration.zero;
-    }
-    final calculated = _defaultDelay * retryAttempt + jitter;
-    if (calculated < _retryMaxBackoff) {
-      return calculated;
-    }
-    return _retryMaxBackoff;
-  }
-
   @override
   Future<void> onPongTimeout(Duration timeout) async {
     _logger.d(() => '[onPongTimeout] timeout: $timeout');
 
     await super.disconnect();
-    // TODO
-    //  unawaited(_reconnect());
   }
 
   @override

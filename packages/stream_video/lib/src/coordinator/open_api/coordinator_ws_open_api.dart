@@ -6,6 +6,7 @@ import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../core/video_error.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/user_info.dart';
+import '../../retry/retry_policy.dart';
 import '../../shared_emitter.dart';
 import '../../token/token_manager.dart';
 import '../../types/other.dart';
@@ -25,11 +26,6 @@ import 'open_api_mapper_extensions.dart';
 
 const _tag = 'SV:CoordinatorWS';
 
-const _maxJitter = Duration(milliseconds: 500);
-const _defaultDelay = Duration(milliseconds: 250);
-const _retryMaxBackoff = Duration(seconds: 5);
-final _rnd = math.Random();
-
 String _buildUrl(String baseUrl, String apiKey) {
   return '$baseUrl'
       '?api_key=$apiKey'
@@ -46,6 +42,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     required this.apiKey,
     required this.userInfo,
     required this.tokenManager,
+    required this.retryPolicy,
   }) : super(_buildUrl(url, apiKey), protocols: protocols, tag: _tag);
 
   late final _logger = taggedLogger(tag: _tag);
@@ -60,6 +57,9 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
 
   /// The token manager used to fetch or refresh token.
   final TokenManager tokenManager;
+
+  /// The retry policy is used for reconnection flow.
+  final RetryPolicy retryPolicy;
 
   bool _refreshToken = false;
 
@@ -166,6 +166,15 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     );
     healthMonitor.onSocketClose();
     connectionState = ConnectionState.closed;
+
+    _events.emit(
+      CoordinatorDisconnectedEvent(
+        userId: userId,
+        clientId: clientId,
+        closeCode: closeCode,
+        closeReason: closeReason,
+      ),
+    );
 
     // resetting connection
     userId = null;
@@ -275,7 +284,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     );
     _reconnectAttempt += 1;
 
-    final delay = _calculateDelay(_reconnectAttempt);
+    final delay = retryPolicy.backoff(_reconnectAttempt);
 
     _logger.v(() => '[reconnect] delay: $delay ms');
 
@@ -285,21 +294,6 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       await super.connect();
       _logger.v(() => '[reconnect] completed');
     });
-  }
-
-  Duration get _jitter {
-    return Duration(milliseconds: _rnd.nextInt(_maxJitter.inMilliseconds));
-  }
-
-  Duration _calculateDelay(int retryAttempt) {
-    if (retryAttempt == 0) {
-      return Duration.zero;
-    }
-    final calculated = _defaultDelay * retryAttempt + _jitter;
-    if (calculated < _retryMaxBackoff) {
-      return calculated;
-    }
-    return _retryMaxBackoff;
   }
 
   @override

@@ -13,6 +13,7 @@ import '../../models/call_received_created.dart';
 import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 import '../../models/user_info.dart';
+import '../../retry/retry_policy.dart';
 import '../../shared_emitter.dart';
 import '../../token/token.dart';
 import '../../token/token_manager.dart';
@@ -34,6 +35,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required this.wsUrl,
     required this.apiKey,
     required this.tokenManager,
+    required this.retryPolicy,
   }) : _apiClient = open.ApiClient(
           basePath: rpcUrl,
           authentication:
@@ -44,6 +46,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   final String apiKey;
   final String wsUrl;
   final TokenManager tokenManager;
+  final RetryPolicy retryPolicy;
 
   String? userId;
 
@@ -73,6 +76,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         apiKey: apiKey,
         userInfo: user,
         tokenManager: tokenManager,
+        retryPolicy: retryPolicy,
       );
       _ws = ws;
       _wsSubscription = ws.events.listen((event) {

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import '../../stream_video.dart';
 import '../call_state_manager.dart';
@@ -7,6 +6,7 @@ import '../coordinator/models/coordinator_events.dart';
 import '../errors/video_error_composer.dart';
 import '../models/call_credentials.dart';
 import '../models/call_permission.dart';
+import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
@@ -18,11 +18,6 @@ const _idCoordEvents = 1;
 const _idSessionEvents = 2;
 const _idSessionStats = 3;
 
-const _maxJitter = Duration(milliseconds: 500);
-const _defaultDelay = Duration(milliseconds: 250);
-const _retryMaxBackoff = Duration(seconds: 5);
-final _rnd = math.Random();
-
 const _tag = 'SV:Call';
 
 int _callSeq = 1;
@@ -32,12 +27,15 @@ class CallImpl implements Call {
   factory CallImpl({
     required StreamCallCid callCid,
     StreamVideo? streamVideo,
+    RetryPolicy? retryPolicy,
   }) {
     streamLog.i(_tag, () => '<factory> callCid: $callCid');
     final finalStreamVideo = streamVideo ?? StreamVideo.instance;
+    final finalRetryPolicy = retryPolicy ?? finalStreamVideo.retryPolicy;
     final stateManager = _makeCallStateManager(callCid, finalStreamVideo);
     return CallImpl._(
       streamVideo: finalStreamVideo,
+      retryPolicy: finalRetryPolicy,
       stateManager: stateManager,
     );
   }
@@ -45,13 +43,16 @@ class CallImpl implements Call {
   factory CallImpl.created({
     required CallCreated data,
     StreamVideo? streamVideo,
+    RetryPolicy? retryPolicy,
   }) {
     streamLog.i(_tag, () => '<factory> created: $data');
     final finalStreamVideo = streamVideo ?? StreamVideo.instance;
+    final finalRetryPolicy = retryPolicy ?? finalStreamVideo.retryPolicy;
     final stateManager = _makeCallStateManager(data.callCid, finalStreamVideo);
     stateManager.onCallCreated(data);
     return CallImpl._(
       streamVideo: finalStreamVideo,
+      retryPolicy: finalRetryPolicy,
       stateManager: stateManager,
     );
   }
@@ -59,13 +60,16 @@ class CallImpl implements Call {
   factory CallImpl.joined({
     required CallJoined data,
     StreamVideo? streamVideo,
+    RetryPolicy? retryPolicy,
   }) {
     streamLog.i(_tag, () => '<factory> joined: $data');
     final finalStreamVideo = streamVideo ?? StreamVideo.instance;
+    final finalRetryPolicy = retryPolicy ?? finalStreamVideo.retryPolicy;
     final stateManager = _makeCallStateManager(data.callCid, finalStreamVideo);
     stateManager.onCallJoined(data);
     return CallImpl._(
       streamVideo: finalStreamVideo,
+      retryPolicy: finalRetryPolicy,
       stateManager: stateManager,
       credentials: data.credentials,
     );
@@ -73,6 +77,7 @@ class CallImpl implements Call {
 
   CallImpl._({
     required StreamVideo streamVideo,
+    required RetryPolicy retryPolicy,
     required CallStateManager stateManager,
     CallCredentials? credentials,
   })  : _sessionFactory = CallSessionFactory(
@@ -80,6 +85,7 @@ class CallImpl implements Call {
         ),
         _stateManager = stateManager,
         _streamVideo = streamVideo,
+        _retryPolicy = retryPolicy,
         _credentials = credentials {
     streamLog.i(_tag, () => '<init> state: ${stateManager.state.value}');
     _subscriptions.add(
@@ -104,8 +110,10 @@ class CallImpl implements Call {
   late final _subscriptions = Subscriptions();
 
   final StreamVideo _streamVideo;
+  final RetryPolicy _retryPolicy;
   final CallSessionFactory _sessionFactory;
   final CallStateManager _stateManager;
+
 
   CallCredentials? _credentials;
   int _reconnectAttempt = 0;
@@ -193,6 +201,9 @@ class CallImpl implements Call {
   }
 
   Future<Result<None>> _endCall(EndCall action) async {
+    if (!_hasPermission(CallPermission.endCall)) {
+      return Result.error('has no "end-call" permission');
+    }
     final state = this.state.value;
     final status = state.status;
     _logger.d(() => '[endCall] status: $status');
@@ -393,12 +404,12 @@ class CallImpl implements Call {
         return;
       }
       final elapsed = DateTime.now().toUtc().millisecondsSinceEpoch - startTime;
-      if (elapsed > 15000) {
+      if (elapsed > _retryPolicy.config.callRejoinTimeout.inMilliseconds) {
         _logger.w(() => '[reconnect] timeout exceed');
         result = Result.error('was unable to reconnect in 15 seconds');
         break;
       }
-      final delay = _calculateDelay(_reconnectAttempt);
+      final delay = _retryPolicy.backoff(_reconnectAttempt);
       _logger.v(
         () => '[reconnect] attempt: $_reconnectAttempt, '
             'elapsed: $elapsed, delay: $delay',
@@ -428,24 +439,9 @@ class CallImpl implements Call {
     }
     _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< completed');
     await _stateManager.onConnected();
-    await _applyConnectOptions();
     _status.value = _ConnectionStatus.connected;
+    await _applyConnectOptions();
     _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< side effects applied');
-  }
-
-  Duration get _jitter {
-    return Duration(milliseconds: _rnd.nextInt(_maxJitter.inMilliseconds));
-  }
-
-  Duration _calculateDelay(int retryAttempt) {
-    if (retryAttempt == 0) {
-      return Duration.zero;
-    }
-    final calculated = _defaultDelay * retryAttempt + _jitter;
-    if (calculated < _retryMaxBackoff) {
-      return calculated;
-    }
-    return _retryMaxBackoff;
   }
 
   Future<Result<None>> _awaitIfNeeded(Duration timeLimit) async {
