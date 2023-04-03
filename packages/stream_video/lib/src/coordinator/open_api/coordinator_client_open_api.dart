@@ -598,7 +598,7 @@ class _Authentication extends open.Authentication {
     Map<String, String> headerParams,
   ) async {
     final token = await tokenManager.loadToken();
-    headerParams['api_key'] = apiKey;
+    queryParams.add(open.QueryParam('api_key', apiKey));
     headerParams['Authorization'] = token.rawValue;
     headerParams['stream-auth-type'] = 'jwt';
   }
