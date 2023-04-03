@@ -231,10 +231,10 @@ abstract class StreamVideo {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
-    LogLevel logLevel = LogLevel.off,
+    Priority logPriority = Priority.none,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
   }) {
-    _setupLogger(logLevel, logHandlerFunction);
+    _setupLogger(logPriority, logHandlerFunction);
     return _instanceHolder.init(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
@@ -266,9 +266,9 @@ abstract class StreamVideo {
   }
 }
 
-void _setupLogger(LogLevel logLevel, LogHandlerFunction logHandlerFunction) {
-  if (logLevel != LogLevel.off) {
-    StreamLog().validator = (priority, _) => priority >= logLevel.priority;
+void _setupLogger(Priority logPriority, LogHandlerFunction logHandlerFunction) {
+  if (logPriority != Priority.none) {
+    StreamLog().priority = logPriority;
     StreamLog().logger = CompositeStreamLogger([
       const ConsoleStreamLogger(),
       ExternalStreamLogger(logHandlerFunction),
