@@ -23,6 +23,7 @@ class CallEndedEvent {
 
   DateTime createdAt;
 
+  /// The type of event: \"call.ended\" in this case
   String type;
 
   ///

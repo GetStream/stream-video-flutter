@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
+import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../core/video_error.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/user_info.dart';
@@ -14,7 +15,6 @@ import '../../ws/keep_alive.dart';
 import '../coordinator_ws.dart';
 import '../models/coordinator_events.dart';
 import 'error/open_api_error.dart';
-import 'event/health_check.dart';
 import 'event/open_api_event.dart';
 import 'open_api_mapper_extensions.dart';
 
@@ -166,23 +166,23 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
 
     _logger.v(() => '[onMessage] dtoEvent.type: ${dtoEvent?.type}');
 
-    if (dtoEvent.healthCheck != null) {
-      _handleHealthCheckEvent(dtoEvent.healthCheck!);
+    if (dtoEvent.connected != null) {
+      _handleConnectedEvent(dtoEvent.connected!);
     }
 
     // Parsing
     dtoEvent.toCoordinatorEvent()?.let(_events.emit);
   }
 
-  void _handleHealthCheckEvent(HealthCheck event) {
+  void _handleConnectedEvent(open.WSConnectedEvent event) {
     if (!isKeepAliveStarted) {
       connectionState = ConnectionState.connected;
 
-      _logger.d(() => '[handleHealthCheckEvent] starting ping pong timer');
+      _logger.d(() => '[handleConnectedEvent] starting ping pong timer');
       startPingPong();
     }
     ackPong(event);
-    userId ??= event.me?.id;
+    userId ??= event.me.id;
     clientId ??= event.connectionId;
   }
 

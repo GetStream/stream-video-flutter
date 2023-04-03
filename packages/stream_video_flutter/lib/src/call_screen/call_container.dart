@@ -147,16 +147,16 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
       call.connectOptions = widget.callConnectOptions;
       final result = await call.connect();
       if (result.isFailure) {
-        await _onCancelCall();
+        await _onEndCall();
       }
     } catch (e) {
-      await _onCancelCall();
+      await _onEndCall();
     }
   }
 
-  Future<void> _onCancelCall() async {
-    _logger.d(() => '[onCancelCall] no args');
-    await call.apply(const CancelCall());
+  Future<void> _onEndCall() async {
+    _logger.d(() => '[onEndCall] no args');
+    await call.apply(const EndCall());
     await _disconnect();
   }
 

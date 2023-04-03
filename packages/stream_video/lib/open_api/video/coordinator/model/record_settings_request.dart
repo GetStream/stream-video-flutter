@@ -26,21 +26,9 @@ class RecordSettingsRequest {
   ///
   bool? audioOnly;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? mode;
+  RecordSettingsRequestModeEnum? mode;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? quality;
+  RecordSettingsRequestQualityEnum? quality;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is RecordSettingsRequest &&
@@ -98,8 +86,8 @@ class RecordSettingsRequest {
 
       return RecordSettingsRequest(
         audioOnly: mapValueOfType<bool>(json, r'audio_only'),
-        mode: mapValueOfType<String>(json, r'mode'),
-        quality: mapValueOfType<String>(json, r'quality'),
+        mode: RecordSettingsRequestModeEnum.fromJson(json[r'mode']),
+        quality: RecordSettingsRequestQualityEnum.fromJson(json[r'quality']),
       );
     }
     return null;
@@ -151,4 +139,167 @@ class RecordSettingsRequest {
   static const requiredKeys = <String>{
   };
 }
+
+
+class RecordSettingsRequestModeEnum {
+  /// Instantiate a new enum with the provided [value].
+  const RecordSettingsRequestModeEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const available = RecordSettingsRequestModeEnum._(r'available');
+  static const disabled = RecordSettingsRequestModeEnum._(r'disabled');
+  static const autoOn = RecordSettingsRequestModeEnum._(r'auto-on');
+
+  /// List of all possible values in this [enum][RecordSettingsRequestModeEnum].
+  static const values = <RecordSettingsRequestModeEnum>[
+    available,
+    disabled,
+    autoOn,
+  ];
+
+  static RecordSettingsRequestModeEnum? fromJson(dynamic value) => RecordSettingsRequestModeEnumTypeTransformer().decode(value);
+
+  static List<RecordSettingsRequestModeEnum>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <RecordSettingsRequestModeEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = RecordSettingsRequestModeEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [RecordSettingsRequestModeEnum] to String,
+/// and [decode] dynamic data back to [RecordSettingsRequestModeEnum].
+class RecordSettingsRequestModeEnumTypeTransformer {
+  factory RecordSettingsRequestModeEnumTypeTransformer() => _instance ??= const RecordSettingsRequestModeEnumTypeTransformer._();
+
+  const RecordSettingsRequestModeEnumTypeTransformer._();
+
+  String encode(RecordSettingsRequestModeEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a RecordSettingsRequestModeEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  RecordSettingsRequestModeEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'available': return RecordSettingsRequestModeEnum.available;
+        case r'disabled': return RecordSettingsRequestModeEnum.disabled;
+        case r'auto-on': return RecordSettingsRequestModeEnum.autoOn;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [RecordSettingsRequestModeEnumTypeTransformer] instance.
+  static RecordSettingsRequestModeEnumTypeTransformer? _instance;
+}
+
+
+
+class RecordSettingsRequestQualityEnum {
+  /// Instantiate a new enum with the provided [value].
+  const RecordSettingsRequestQualityEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const audioOnly = RecordSettingsRequestQualityEnum._(r'audio-only');
+  static const n360p = RecordSettingsRequestQualityEnum._(r'360p');
+  static const n480p = RecordSettingsRequestQualityEnum._(r'480p');
+  static const n720p = RecordSettingsRequestQualityEnum._(r'720p');
+  static const n1080p = RecordSettingsRequestQualityEnum._(r'1080p');
+  static const n1440p = RecordSettingsRequestQualityEnum._(r'1440p');
+
+  /// List of all possible values in this [enum][RecordSettingsRequestQualityEnum].
+  static const values = <RecordSettingsRequestQualityEnum>[
+    audioOnly,
+    n360p,
+    n480p,
+    n720p,
+    n1080p,
+    n1440p,
+  ];
+
+  static RecordSettingsRequestQualityEnum? fromJson(dynamic value) => RecordSettingsRequestQualityEnumTypeTransformer().decode(value);
+
+  static List<RecordSettingsRequestQualityEnum>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <RecordSettingsRequestQualityEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = RecordSettingsRequestQualityEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [RecordSettingsRequestQualityEnum] to String,
+/// and [decode] dynamic data back to [RecordSettingsRequestQualityEnum].
+class RecordSettingsRequestQualityEnumTypeTransformer {
+  factory RecordSettingsRequestQualityEnumTypeTransformer() => _instance ??= const RecordSettingsRequestQualityEnumTypeTransformer._();
+
+  const RecordSettingsRequestQualityEnumTypeTransformer._();
+
+  String encode(RecordSettingsRequestQualityEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a RecordSettingsRequestQualityEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  RecordSettingsRequestQualityEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'audio-only': return RecordSettingsRequestQualityEnum.audioOnly;
+        case r'360p': return RecordSettingsRequestQualityEnum.n360p;
+        case r'480p': return RecordSettingsRequestQualityEnum.n480p;
+        case r'720p': return RecordSettingsRequestQualityEnum.n720p;
+        case r'1080p': return RecordSettingsRequestQualityEnum.n1080p;
+        case r'1440p': return RecordSettingsRequestQualityEnum.n1440p;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [RecordSettingsRequestQualityEnumTypeTransformer] instance.
+  static RecordSettingsRequestQualityEnumTypeTransformer? _instance;
+}
+
 

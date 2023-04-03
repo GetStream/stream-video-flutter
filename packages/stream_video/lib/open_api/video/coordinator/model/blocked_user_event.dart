@@ -13,44 +13,61 @@ part of openapi.api;
 class BlockedUserEvent {
   /// Returns a new [BlockedUserEvent] instance.
   BlockedUserEvent({
+    this.blockedByUser,
     required this.callCid,
     required this.createdAt,
     required this.type,
-    required this.userId,
+    required this.user,
   });
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  UserResponse? blockedByUser;
 
   String callCid;
 
   DateTime createdAt;
 
+  /// The type of event: \"call.blocked_user\" in this case
   String type;
 
-  String userId;
+  UserResponse user;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is BlockedUserEvent &&
+     other.blockedByUser == blockedByUser &&
      other.callCid == callCid &&
      other.createdAt == createdAt &&
      other.type == type &&
-     other.userId == userId;
+     other.user == user;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (blockedByUser == null ? 0 : blockedByUser!.hashCode) +
     (callCid.hashCode) +
     (createdAt.hashCode) +
     (type.hashCode) +
-    (userId.hashCode);
+    (user.hashCode);
 
   @override
-  String toString() => 'BlockedUserEvent[callCid=$callCid, createdAt=$createdAt, type=$type, userId=$userId]';
+  String toString() => 'BlockedUserEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.blockedByUser != null) {
+      json[r'blocked_by_user'] = this.blockedByUser;
+    } else {
+      json[r'blocked_by_user'] = null;
+    }
       json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'type'] = this.type;
-      json[r'user_id'] = this.userId;
+      json[r'user'] = this.user;
     return json;
   }
 
@@ -73,10 +90,11 @@ class BlockedUserEvent {
       }());
 
       return BlockedUserEvent(
+        blockedByUser: UserResponse.fromJson(json[r'blocked_by_user']),
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
         type: mapValueOfType<String>(json, r'type')!,
-        userId: mapValueOfType<String>(json, r'user_id')!,
+        user: UserResponse.fromJson(json[r'user'])!,
       );
     }
     return null;
@@ -129,7 +147,7 @@ class BlockedUserEvent {
     'call_cid',
     'created_at',
     'type',
-    'user_id',
+    'user',
   };
 }
 

@@ -14,7 +14,7 @@ class GetOrCreateCallRequest {
   /// Returns a new [GetOrCreateCallRequest] instance.
   GetOrCreateCallRequest({
     this.data,
-    this.members,
+    this.membersLimit,
     this.ring,
   });
 
@@ -26,14 +26,16 @@ class GetOrCreateCallRequest {
   ///
   CallRequest? data;
 
+  /// Maximum value: 100
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  PaginationParamsRequest? members;
+  int? membersLimit;
 
+  /// if provided it overrides the default ring setting for this call
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -45,18 +47,18 @@ class GetOrCreateCallRequest {
   @override
   bool operator ==(Object other) => identical(this, other) || other is GetOrCreateCallRequest &&
      other.data == data &&
-     other.members == members &&
+     other.membersLimit == membersLimit &&
      other.ring == ring;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (data == null ? 0 : data!.hashCode) +
-    (members == null ? 0 : members!.hashCode) +
+    (membersLimit == null ? 0 : membersLimit!.hashCode) +
     (ring == null ? 0 : ring!.hashCode);
 
   @override
-  String toString() => 'GetOrCreateCallRequest[data=$data, members=$members, ring=$ring]';
+  String toString() => 'GetOrCreateCallRequest[data=$data, membersLimit=$membersLimit, ring=$ring]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -65,10 +67,10 @@ class GetOrCreateCallRequest {
     } else {
       json[r'data'] = null;
     }
-    if (this.members != null) {
-      json[r'members'] = this.members;
+    if (this.membersLimit != null) {
+      json[r'members_limit'] = this.membersLimit;
     } else {
-      json[r'members'] = null;
+      json[r'members_limit'] = null;
     }
     if (this.ring != null) {
       json[r'ring'] = this.ring;
@@ -98,7 +100,7 @@ class GetOrCreateCallRequest {
 
       return GetOrCreateCallRequest(
         data: CallRequest.fromJson(json[r'data']),
-        members: PaginationParamsRequest.fromJson(json[r'members']),
+        membersLimit: mapValueOfType<int>(json, r'members_limit'),
         ring: mapValueOfType<bool>(json, r'ring'),
       );
     }

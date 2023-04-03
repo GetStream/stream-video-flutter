@@ -22,6 +22,7 @@ class CallRecordingStoppedEvent {
 
   DateTime createdAt;
 
+  /// The type of event: \"call.recording_stopped\" in this case
   String type;
 
   @override

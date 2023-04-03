@@ -101,17 +101,6 @@ abstract class StreamVideo {
     required StreamCallCid cid,
   });
 
-  /// Signals other users that I have cancelled my call to them before
-  /// they accepted it.
-  /// Causes the [CoordinatorCallCancelledEvent] event to be emitted
-  /// to all the call members.
-  ///
-  /// Cancelling a call is only possible before the local participant
-  /// joined the call.
-  Future<Result<None>> cancelCall({
-    required StreamCallCid cid,
-  });
-
   /// Sends a custom event to the API to notify if we've changed something
   /// in the state of the call.
   Future<Result<None>> sendCustomEvent({
@@ -205,6 +194,13 @@ abstract class StreamVideo {
     required StreamCallCid callCid,
   });
 
+  /// Signals other users that I have cancelled my call to them before
+  /// they accepted it.
+  /// Causes the [CoordinatorCallEndedEvent] event to be emitted
+  /// to all the call members.
+  ///
+  /// Cancelling a call is only possible before the local participant
+  /// joined the call.
   Future<Result<None>> endCall({
     required StreamCallCid callCid,
   });

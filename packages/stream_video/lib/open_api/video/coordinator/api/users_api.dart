@@ -18,21 +18,25 @@ class UsersApi {
 
   /// Video Connect (WebSocket)
   ///
-  /// Establishes WebSocket connection for user to video
+  /// Establishes WebSocket connection for user to video  Sends events: - connection.ok - health.check 
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> videoConnectWithHttpInfo() async {
+  ///
+  /// Parameters:
+  ///
+  /// * [WSAuthMessageRequest] wSAuthMessageRequest (required):
+  Future<Response> videoConnectWithHttpInfo(WSAuthMessageRequest wSAuthMessageRequest,) async {
     // ignore: prefer_const_declarations
     final path = r'/video/connect';
 
     // ignore: prefer_final_locals
-    Object? postBody;
+    Object? postBody = wSAuthMessageRequest;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-    const contentTypes = <String>[];
+    const contentTypes = <String>['application/json'];
 
 
     return apiClient.invokeAPI(
@@ -48,9 +52,13 @@ class UsersApi {
 
   /// Video Connect (WebSocket)
   ///
-  /// Establishes WebSocket connection for user to video
-  Future<void> videoConnect() async {
-    final response = await videoConnectWithHttpInfo();
+  /// Establishes WebSocket connection for user to video  Sends events: - connection.ok - health.check 
+  ///
+  /// Parameters:
+  ///
+  /// * [WSAuthMessageRequest] wSAuthMessageRequest (required):
+  Future<void> videoConnect(WSAuthMessageRequest wSAuthMessageRequest,) async {
+    final response = await videoConnectWithHttpInfo(wSAuthMessageRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

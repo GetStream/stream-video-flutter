@@ -31,7 +31,7 @@ class LeaveCallOption extends StatelessWidget {
     if (onLeaveCallTap != null) {
       onLeaveCallTap!();
     } else {
-      await call.apply(const CancelCall());
+      await call.apply(const EndCall());
       await call.disconnect();
     }
   }

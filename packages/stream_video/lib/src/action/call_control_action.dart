@@ -25,10 +25,6 @@ class RejectCall extends CallControlAction {
   const RejectCall();
 }
 
-class CancelCall extends CallControlAction {
-  const CancelCall();
-}
-
 class EndCall extends CallControlAction {
   const EndCall();
 }

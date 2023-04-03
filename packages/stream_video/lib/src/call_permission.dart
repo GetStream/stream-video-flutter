@@ -16,6 +16,8 @@ enum CallPermission {
   createCall('create-call'),
   updateCall('update-call'),
   updateCallSettings('update-call-settings'),
+  createReaction('create-reaction'),
+  joinBackstage('join-backstage'),
   unknown('unknown');
 
   const CallPermission(this.alias);

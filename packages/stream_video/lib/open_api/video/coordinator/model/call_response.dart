@@ -62,7 +62,7 @@ class CallResponse {
   String id;
 
   /// The capabilities of the current user
-  List<String> ownCapabilities;
+  List<OwnCapability> ownCapabilities;
 
   bool recording;
 
@@ -191,9 +191,7 @@ class CallResponse {
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         endedAt: mapDateTime(json, r'ended_at', ''),
         id: mapValueOfType<String>(json, r'id')!,
-        ownCapabilities: json[r'own_capabilities'] is List
-            ? (json[r'own_capabilities'] as List).cast<String>()
-            : const [],
+        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
         recording: mapValueOfType<bool>(json, r'recording')!,
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,
         startsAt: mapDateTime(json, r'starts_at', ''),

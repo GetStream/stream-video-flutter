@@ -11,14 +11,14 @@
 part of openapi.api;
 
 
-class DefaultApi {
-  DefaultApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+class ModerationApi {
+  ModerationApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
-  /// List recordings
+  /// Block user on a call
   ///
-  /// Lists recordings
+  /// Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user  Required permissions: - BlockUser 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -28,76 +28,15 @@ class DefaultApi {
   ///
   /// * [String] id (required):
   ///
-  /// * [String] session (required):
-  Future<Response> listRecordingsWithHttpInfo(String type, String id, String session,) async {
+  /// * [BlockUserRequest] blockUserRequest (required):
+  Future<Response> blockUserWithHttpInfo(String type, String id, BlockUserRequest blockUserRequest,) async {
     // ignore: prefer_const_declarations
-    final path = r'/call/{type}/{id}/{session}/recordings'
+    final path = r'/call/{type}/{id}/block'
       .replaceAll('{type}', type)
-      .replaceAll('{id}', id)
-      .replaceAll('{session}', session);
+      .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'GET',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// List recordings
-  ///
-  /// Lists recordings
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [String] session (required):
-  Future<ListRecordingsResponse?> listRecordings(String type, String id, String session,) async {
-    final response = await listRecordingsWithHttpInfo(type, id, session,);
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ListRecordingsResponse',) as ListRecordingsResponse;
-    
-    }
-    return null;
-  }
-
-  /// Query call
-  ///
-  /// Query calls with filter query
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [QueryCallsRequest] queryCallsRequest (required):
-  Future<Response> queryCallsWithHttpInfo(QueryCallsRequest queryCallsRequest,) async {
-    // ignore: prefer_const_declarations
-    final path = r'/calls';
-
-    // ignore: prefer_final_locals
-    Object? postBody = queryCallsRequest;
+    Object? postBody = blockUserRequest;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
@@ -117,15 +56,19 @@ class DefaultApi {
     );
   }
 
-  /// Query call
+  /// Block user on a call
   ///
-  /// Query calls with filter query
+  /// Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user  Required permissions: - BlockUser 
   ///
   /// Parameters:
   ///
-  /// * [QueryCallsRequest] queryCallsRequest (required):
-  Future<QueryCallsResponse?> queryCalls(QueryCallsRequest queryCallsRequest,) async {
-    final response = await queryCallsWithHttpInfo(queryCallsRequest,);
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [BlockUserRequest] blockUserRequest (required):
+  Future<BlockUserResponse?> blockUser(String type, String id, BlockUserRequest blockUserRequest,) async {
+    final response = await blockUserWithHttpInfo(type, id, blockUserRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -133,7 +76,73 @@ class DefaultApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'QueryCallsResponse',) as QueryCallsResponse;
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'BlockUserResponse',) as BlockUserResponse;
+    
+    }
+    return null;
+  }
+
+  /// Mute users
+  ///
+  /// Mutes users in a call  Required permissions: - MuteUsers 
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [MuteUsersRequest] muteUsersRequest (required):
+  Future<Response> muteUsersWithHttpInfo(String type, String id, MuteUsersRequest muteUsersRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/call/{type}/{id}/mute_users'
+      .replaceAll('{type}', type)
+      .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody = muteUsersRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Mute users
+  ///
+  /// Mutes users in a call  Required permissions: - MuteUsers 
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [MuteUsersRequest] muteUsersRequest (required):
+  Future<MuteUsersResponse?> muteUsers(String type, String id, MuteUsersRequest muteUsersRequest,) async {
+    final response = await muteUsersWithHttpInfo(type, id, muteUsersRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'MuteUsersResponse',) as MuteUsersResponse;
     
     }
     return null;
@@ -141,7 +150,7 @@ class DefaultApi {
 
   /// Request permission
   ///
-  /// Request permission to perform an action
+  /// Request permission to perform an action  Sends events: - call.permission_request 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -181,7 +190,7 @@ class DefaultApi {
 
   /// Request permission
   ///
-  /// Request permission to perform an action
+  /// Request permission to perform an action  Sends events: - call.permission_request 
   ///
   /// Parameters:
   ///
@@ -205,9 +214,9 @@ class DefaultApi {
     return null;
   }
 
-  /// Send reaction to the call
+  /// Unblocks user on a call
   ///
-  /// Sends reaction to the call
+  /// Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user  Required permissions: - BlockUser 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -217,15 +226,15 @@ class DefaultApi {
   ///
   /// * [String] id (required):
   ///
-  /// * [SendReactionRequest] sendReactionRequest (required):
-  Future<Response> sendVideoReactionWithHttpInfo(String type, String id, SendReactionRequest sendReactionRequest,) async {
+  /// * [UnblockUserRequest] unblockUserRequest (required):
+  Future<Response> unblockUserWithHttpInfo(String type, String id, UnblockUserRequest unblockUserRequest,) async {
     // ignore: prefer_const_declarations
-    final path = r'/call/{type}/{id}/reaction'
+    final path = r'/call/{type}/{id}/unblock'
       .replaceAll('{type}', type)
       .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
-    Object? postBody = sendReactionRequest;
+    Object? postBody = unblockUserRequest;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
@@ -245,9 +254,9 @@ class DefaultApi {
     );
   }
 
-  /// Send reaction to the call
+  /// Unblocks user on a call
   ///
-  /// Sends reaction to the call
+  /// Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user  Required permissions: - BlockUser 
   ///
   /// Parameters:
   ///
@@ -255,9 +264,9 @@ class DefaultApi {
   ///
   /// * [String] id (required):
   ///
-  /// * [SendReactionRequest] sendReactionRequest (required):
-  Future<SendReactionResponse?> sendVideoReaction(String type, String id, SendReactionRequest sendReactionRequest,) async {
-    final response = await sendVideoReactionWithHttpInfo(type, id, sendReactionRequest,);
+  /// * [UnblockUserRequest] unblockUserRequest (required):
+  Future<UnblockUserResponse?> unblockUser(String type, String id, UnblockUserRequest unblockUserRequest,) async {
+    final response = await unblockUserWithHttpInfo(type, id, unblockUserRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -265,231 +274,15 @@ class DefaultApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'SendReactionResponse',) as SendReactionResponse;
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UnblockUserResponse',) as UnblockUserResponse;
     
     }
     return null;
   }
 
-  /// Start broadcasting
-  ///
-  /// Starts broadcasting
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> startBroadcastingWithHttpInfo(String type, String id,) async {
-    // ignore: prefer_const_declarations
-    final path = r'/call/{type}/{id}/start_broadcasting'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Start broadcasting
-  ///
-  /// Starts broadcasting
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<void> startBroadcasting(String type, String id,) async {
-    final response = await startBroadcastingWithHttpInfo(type, id,);
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-  }
-
-  /// Start recording
-  ///
-  /// Starts recording
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> startRecordingWithHttpInfo(String type, String id,) async {
-    // ignore: prefer_const_declarations
-    final path = r'/call/{type}/{id}/start_recording'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Start recording
-  ///
-  /// Starts recording
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<void> startRecording(String type, String id,) async {
-    final response = await startRecordingWithHttpInfo(type, id,);
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-  }
-
-  /// Stop broadcasting
-  ///
-  /// Stops broadcasting
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> stopBroadcastingWithHttpInfo(String type, String id,) async {
-    // ignore: prefer_const_declarations
-    final path = r'/call/{type}/{id}/stop_broadcasting'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Stop broadcasting
-  ///
-  /// Stops broadcasting
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<void> stopBroadcasting(String type, String id,) async {
-    final response = await stopBroadcastingWithHttpInfo(type, id,);
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-  }
-
-  /// Stop recording
-  ///
-  /// Stops recording
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> stopRecordingWithHttpInfo(String type, String id,) async {
-    // ignore: prefer_const_declarations
-    final path = r'/call/{type}/{id}/stop_recording'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Stop recording
-  ///
-  /// Stops recording
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<void> stopRecording(String type, String id,) async {
-    final response = await stopRecordingWithHttpInfo(type, id,);
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-  }
-
   /// Update user permissions
   ///
-  /// Updates user permissions
+  /// Updates user permissions  Sends events: - call.permissions_updated  Required permissions: - UpdateCallPermissions 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -529,7 +322,7 @@ class DefaultApi {
 
   /// Update user permissions
   ///
-  /// Updates user permissions
+  /// Updates user permissions  Sends events: - call.permissions_updated  Required permissions: - UpdateCallPermissions 
   ///
   /// Parameters:
   ///

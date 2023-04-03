@@ -23,6 +23,7 @@ class CallRejectedEvent {
 
   DateTime createdAt;
 
+  /// The type of event: \"call.rejected\" in this case
   String type;
 
   UserResponse user;
