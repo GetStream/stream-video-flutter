@@ -55,14 +55,14 @@ platform :ios do
         notify_external_testers: true,
         groups: ['Internal Testers', 'External Testers'],
         changelog: "Lots of amazing new features to test out!",
-        reject_build_waiting_for_review: true,
+        reject_build_waiting_for_review: false,
         skip_waiting_for_build_processing: false,
       )
     rescue Exception => e
       if e.message.include? "Another build is in review"
         UI.important("Another build is already in beta review. Skipping beta review submission")
       else
-        raise
+        UI.user_error!(e)
       end
     end
   end

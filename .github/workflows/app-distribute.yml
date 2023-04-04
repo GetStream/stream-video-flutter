@@ -25,6 +25,7 @@ jobs:
   build_and_deploy_ios:
     name: Build and Distribute Dogfooding Ios
     runs-on: macos-latest
+    timeout-minutes: 40
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -59,6 +60,7 @@ jobs:
   build_and_deploy_android:
     name: Build and Distribute Dogfooding Android
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -93,6 +95,7 @@ jobs:
   build_and_deploy_web:
     name: Build and Distribute Dogfooding Web
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

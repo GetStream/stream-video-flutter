@@ -7,8 +7,7 @@ end
 
 # Have an easy way to run flutter tasks on the root of the project
 lane :sh_on_root do |options|
-  command = options[:command]
-  sh("cd #{root_path} && #{command}")
+  Dir.chdir(root_path) { sh(options[:command]) }
 end
 
 # Tasks to be reused on each platform flow
