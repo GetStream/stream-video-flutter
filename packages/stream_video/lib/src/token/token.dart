@@ -19,6 +19,17 @@ typedef OnTokenUpdated = Future<void> Function(UserToken token);
 abstract class TokenProvider {
   const TokenProvider();
 
+  factory TokenProvider.static(String token) {
+    return _StaticProvider(token);
+  }
+
+  factory TokenProvider.dynamic(
+    TokenLoader loader, [
+    OnTokenUpdated? onTokenUpdated,
+  ]) {
+    return _DynamicProvider(loader, onTokenUpdated: onTokenUpdated);
+  }
+
   Future<Result<UserToken>> getToken(String userId);
 
   bool get isStatic;
@@ -26,10 +37,10 @@ abstract class TokenProvider {
   set onTokenUpdated(OnTokenUpdated onTokenUpdated);
 }
 
-class StaticToken implements TokenProvider {
-  StaticToken(this.token);
+class _StaticProvider implements TokenProvider {
+  _StaticProvider(this.token);
 
-  final _logger = taggedLogger(tag: 'SV:StaticToken');
+  final _logger = taggedLogger(tag: 'SV:StaticProvider');
 
   final UserToken token;
 
@@ -48,8 +59,8 @@ class StaticToken implements TokenProvider {
   }
 }
 
-class DynamicToken implements TokenProvider {
-  DynamicToken(
+class _DynamicProvider implements TokenProvider {
+  _DynamicProvider(
     this.loader, {
     OnTokenUpdated? onTokenUpdated,
   }) : _onTokenUpdated = onTokenUpdated;

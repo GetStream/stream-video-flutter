@@ -302,7 +302,7 @@ extension StreamVideoX on StreamVideo {
     UserInfo user,
     String token,
   ) {
-    return connectUser(user, tokenProvider: StaticToken(token));
+    return connectUser(user, tokenProvider: TokenProvider.static(token));
   }
 
   /// Connects the [user] to the Stream Video service.

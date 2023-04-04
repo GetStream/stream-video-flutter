@@ -55,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _onLoginSuccess(UserInfo user) async {
     final tokenResult = await StreamVideo.instance.connectUser(
       user,
-      tokenProvider: DynamicToken(_tokenLoader, onTokenUpdated: (token) async {
+      tokenProvider: TokenProvider.dynamic(_tokenLoader, (token) async {
         _logger.d(() => '[onTokenUpdated] token: $token');
         final userCredentials = UserCredentials(
           user: user,
