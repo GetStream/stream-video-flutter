@@ -174,7 +174,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         input.callCid.type,
         input.callCid.id,
         open.JoinCallRequest(
-          ring: input.ringing
+          create: input.create,
+          ring: input.ringing,
         ),
         connectionId: _ws?.clientId,
       );

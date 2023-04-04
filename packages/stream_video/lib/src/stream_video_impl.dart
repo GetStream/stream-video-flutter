@@ -208,11 +208,12 @@ class StreamVideoImpl implements StreamVideo {
   @override
   Future<Result<CallJoined>> joinCall({
     required StreamCallCid cid,
+    bool create = false,
     void Function(CallReceivedOrCreated)? onReceivedOrCreated,
   }) async {
     _logger.d(() => '[joinCall] cid: $cid');
     final joinResult = await _client.joinCall(
-      input.JoinCallInput(callCid: cid),
+      input.JoinCallInput(callCid: cid, create: create),
     );
     if (joinResult is! Success<CoordinatorJoined>) {
       _logger.e(() => '[joinCall] join failed: $joinResult');

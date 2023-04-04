@@ -329,6 +329,7 @@ class CallImpl implements Call {
     // TODO await _stateManager.onCallJoining();
     final joinedResult = await _streamVideo.joinCall(
       cid: state.callCid,
+      create: true,
       onReceivedOrCreated: (data) async {
         await _stateManager.onCallReceivedOrCreated(data);
       },

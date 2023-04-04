@@ -90,6 +90,7 @@ abstract class StreamVideo {
   /// it will join the existing call.
   Future<Result<CallJoined>> joinCall({
     required StreamCallCid cid,
+    bool create = false,
     void Function(CallReceivedOrCreated)? onReceivedOrCreated,
   });
 
