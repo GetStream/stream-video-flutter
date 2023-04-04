@@ -10,7 +10,7 @@ void main() async {
   /// Initialize Stream Video SDK.
   StreamVideo.init(
     Env.streamVideoApiKey,
-    logLevel: LogLevel.info,
+    logPriority: Priority.info,
   );
 
   await StreamVideo.instance.connectUser(

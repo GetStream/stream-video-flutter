@@ -11,7 +11,7 @@
 part of openapi.api;
 
 class ApiClient {
-  ApiClient({this.basePath = 'https://chat.stream-io-api.com', this.authentication,});
+  ApiClient({this.basePath = 'https://video.stream-io-api.com', this.authentication,});
 
   final String basePath;
   final Authentication? authentication;
@@ -183,12 +183,14 @@ class ApiClient {
           return value is DateTime ? value : DateTime.tryParse(value);
         case 'APIError':
           return APIError.fromJson(value);
-        case 'AnyEvent':
-          return AnyEvent.fromJson(value);
         case 'AudioSettings':
           return AudioSettings.fromJson(value);
+        case 'AudioSettingsRequest':
+          return AudioSettingsRequest.fromJson(value);
         case 'BackstageSettings':
           return BackstageSettings.fromJson(value);
+        case 'BackstageSettingsRequest':
+          return BackstageSettingsRequest.fromJson(value);
         case 'BlockUserRequest':
           return BlockUserRequest.fromJson(value);
         case 'BlockUserResponse':
@@ -199,8 +201,6 @@ class ApiClient {
           return BroadcastSettings.fromJson(value);
         case 'CallAcceptedEvent':
           return CallAcceptedEvent.fromJson(value);
-        case 'CallCancelledEvent':
-          return CallCancelledEvent.fromJson(value);
         case 'CallCreatedEvent':
           return CallCreatedEvent.fromJson(value);
         case 'CallEndedEvent':
@@ -225,10 +225,18 @@ class ApiClient {
           return CallSettingsResponse.fromJson(value);
         case 'CallStateResponseFields':
           return CallStateResponseFields.fromJson(value);
+        case 'CallTypeResponse':
+          return CallTypeResponse.fromJson(value);
         case 'CallUpdatedEvent':
           return CallUpdatedEvent.fromJson(value);
+        case 'ConnectUserDetailsRequest':
+          return ConnectUserDetailsRequest.fromJson(value);
         case 'Coordinates':
           return Coordinates.fromJson(value);
+        case 'CreateCallTypeRequest':
+          return CreateCallTypeRequest.fromJson(value);
+        case 'CreateCallTypeResponse':
+          return CreateCallTypeResponse.fromJson(value);
         case 'Credentials':
           return Credentials.fromJson(value);
         case 'CustomVideoEvent':
@@ -237,6 +245,8 @@ class ApiClient {
           return DatacenterResponse.fromJson(value);
         case 'Device':
           return Device.fromJson(value);
+        case 'DeviceFieldsRequest':
+          return DeviceFieldsRequest.fromJson(value);
         case 'EdgeResponse':
           return EdgeResponse.fromJson(value);
         case 'EndCallResponse':
@@ -249,6 +259,10 @@ class ApiClient {
           return GetCallEdgeServerRequest.fromJson(value);
         case 'GetCallEdgeServerResponse':
           return GetCallEdgeServerResponse.fromJson(value);
+        case 'GetCallResponse':
+          return GetCallResponse.fromJson(value);
+        case 'GetCallTypeResponse':
+          return GetCallTypeResponse.fromJson(value);
         case 'GetEdgesResponse':
           return GetEdgesResponse.fromJson(value);
         case 'GetOrCreateCallRequest':
@@ -267,6 +281,8 @@ class ApiClient {
           return JoinCallRequest.fromJson(value);
         case 'JoinCallResponse':
           return JoinCallResponse.fromJson(value);
+        case 'ListCallTypeResponse':
+          return ListCallTypeResponse.fromJson(value);
         case 'ListRecordingsResponse':
           return ListRecordingsResponse.fromJson(value);
         case 'MemberRequest':
@@ -277,10 +293,10 @@ class ApiClient {
           return MuteUsersRequest.fromJson(value);
         case 'MuteUsersResponse':
           return MuteUsersResponse.fromJson(value);
+        case 'OwnCapability':
+          return OwnCapabilityTypeTransformer().decode(value);
         case 'OwnUserResponse':
           return OwnUserResponse.fromJson(value);
-        case 'PaginationParamsRequest':
-          return PaginationParamsRequest.fromJson(value);
         case 'PermissionRequestEvent':
           return PermissionRequestEvent.fromJson(value);
         case 'QueryCallsRequest':
@@ -301,6 +317,10 @@ class ApiClient {
           return RequestPermissionRequest.fromJson(value);
         case 'RequestPermissionResponse':
           return RequestPermissionResponse.fromJson(value);
+        case 'RingSettings':
+          return RingSettings.fromJson(value);
+        case 'RingSettingsRequest':
+          return RingSettingsRequest.fromJson(value);
         case 'SFUResponse':
           return SFUResponse.fromJson(value);
         case 'ScreensharingSettings':
@@ -319,6 +339,10 @@ class ApiClient {
           return SortParamRequest.fromJson(value);
         case 'StopLiveResponse':
           return StopLiveResponse.fromJson(value);
+        case 'TranscriptionSettings':
+          return TranscriptionSettings.fromJson(value);
+        case 'TranscriptionSettingsRequest':
+          return TranscriptionSettingsRequest.fromJson(value);
         case 'UnblockUserRequest':
           return UnblockUserRequest.fromJson(value);
         case 'UnblockUserResponse':
@@ -329,6 +353,10 @@ class ApiClient {
           return UpdateCallRequest.fromJson(value);
         case 'UpdateCallResponse':
           return UpdateCallResponse.fromJson(value);
+        case 'UpdateCallTypeRequest':
+          return UpdateCallTypeRequest.fromJson(value);
+        case 'UpdateCallTypeResponse':
+          return UpdateCallTypeResponse.fromJson(value);
         case 'UpdateUserPermissionsRequest':
           return UpdateUserPermissionsRequest.fromJson(value);
         case 'UpdateUserPermissionsResponse':
@@ -343,6 +371,12 @@ class ApiClient {
           return VideoSettings.fromJson(value);
         case 'VideoSettingsRequest':
           return VideoSettingsRequest.fromJson(value);
+        case 'WSAuthMessageRequest':
+          return WSAuthMessageRequest.fromJson(value);
+        case 'WSConnectedEvent':
+          return WSConnectedEvent.fromJson(value);
+        case 'WSEvent':
+          return WSEvent.fromJson(value);
         default:
           dynamic match;
           if (value is List && (match = _regList.firstMatch(targetType)?.group(1)) != null) {

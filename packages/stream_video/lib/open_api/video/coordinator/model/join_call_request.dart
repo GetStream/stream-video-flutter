@@ -13,20 +13,21 @@ part of openapi.api;
 class JoinCallRequest {
   /// Returns a new [JoinCallRequest] instance.
   JoinCallRequest({
-    this.connectionId,
+    this.create,
     this.data,
     this.datacenterHintedId,
-    this.members,
+    this.membersLimit,
     this.ring,
   });
 
+  /// if true the call will be created if it doesn't exist
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  String? connectionId;
+  bool? create;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -44,14 +45,16 @@ class JoinCallRequest {
   ///
   String? datacenterHintedId;
 
+  /// Maximum value: 100
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  PaginationParamsRequest? members;
+  int? membersLimit;
 
+  /// if true and the call is created, the notification will include ring=true
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -62,30 +65,30 @@ class JoinCallRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is JoinCallRequest &&
-     other.connectionId == connectionId &&
+     other.create == create &&
      other.data == data &&
      other.datacenterHintedId == datacenterHintedId &&
-     other.members == members &&
+     other.membersLimit == membersLimit &&
      other.ring == ring;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (connectionId == null ? 0 : connectionId!.hashCode) +
+    (create == null ? 0 : create!.hashCode) +
     (data == null ? 0 : data!.hashCode) +
     (datacenterHintedId == null ? 0 : datacenterHintedId!.hashCode) +
-    (members == null ? 0 : members!.hashCode) +
+    (membersLimit == null ? 0 : membersLimit!.hashCode) +
     (ring == null ? 0 : ring!.hashCode);
 
   @override
-  String toString() => 'JoinCallRequest[connectionId=$connectionId, data=$data, datacenterHintedId=$datacenterHintedId, members=$members, ring=$ring]';
+  String toString() => 'JoinCallRequest[create=$create, data=$data, datacenterHintedId=$datacenterHintedId, membersLimit=$membersLimit, ring=$ring]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.connectionId != null) {
-      json[r'connection_id'] = this.connectionId;
+    if (this.create != null) {
+      json[r'create'] = this.create;
     } else {
-      json[r'connection_id'] = null;
+      json[r'create'] = null;
     }
     if (this.data != null) {
       json[r'data'] = this.data;
@@ -97,10 +100,10 @@ class JoinCallRequest {
     } else {
       json[r'datacenter_hinted_id'] = null;
     }
-    if (this.members != null) {
-      json[r'members'] = this.members;
+    if (this.membersLimit != null) {
+      json[r'members_limit'] = this.membersLimit;
     } else {
-      json[r'members'] = null;
+      json[r'members_limit'] = null;
     }
     if (this.ring != null) {
       json[r'ring'] = this.ring;
@@ -129,10 +132,10 @@ class JoinCallRequest {
       }());
 
       return JoinCallRequest(
-        connectionId: mapValueOfType<String>(json, r'connection_id'),
+        create: mapValueOfType<bool>(json, r'create'),
         data: CallRequest.fromJson(json[r'data']),
         datacenterHintedId: mapValueOfType<String>(json, r'datacenter_hinted_id'),
-        members: PaginationParamsRequest.fromJson(json[r'members']),
+        membersLimit: mapValueOfType<int>(json, r'members_limit'),
         ring: mapValueOfType<bool>(json, r'ring'),
       );
     }

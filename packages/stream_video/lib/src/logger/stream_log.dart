@@ -19,6 +19,10 @@ class StreamLog {
     _logger = logger;
   }
 
+  set priority(Priority priority) {
+    _validator = (logPriority, _) => logPriority >= priority;
+  }
+
   set validator(IsLoggableValidator validator) {
     _validator = validator;
   }
@@ -38,25 +42,25 @@ class StreamLog {
   }
 
   void d(Tag tag, MessageBuilder message) {
-    if (_validator.call(Priority.verbose, tag)) {
+    if (_validator.call(Priority.debug, tag)) {
       _logger.log(Priority.debug, tag, message);
     }
   }
 
   void i(Tag tag, MessageBuilder message) {
-    if (_validator.call(Priority.verbose, tag)) {
+    if (_validator.call(Priority.info, tag)) {
       _logger.log(Priority.info, tag, message);
     }
   }
 
   void w(Tag tag, MessageBuilder message) {
-    if (_validator.call(Priority.verbose, tag)) {
+    if (_validator.call(Priority.warning, tag)) {
       _logger.log(Priority.warning, tag, message);
     }
   }
 
   void e(Tag tag, MessageBuilder message) {
-    if (_validator.call(Priority.verbose, tag)) {
+    if (_validator.call(Priority.error, tag)) {
       _logger.log(Priority.error, tag, message);
     }
   }

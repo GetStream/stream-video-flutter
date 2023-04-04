@@ -52,8 +52,8 @@ class CoordinatorCallReducer {
       return _reduceCallRejected(state, event);
     } else if (event is CoordinatorCallAcceptedEvent) {
       return _reduceCallAccepted(state, event);
-    } else if (event is CoordinatorCallCancelledEvent) {
-      return _reduceCallCancelled(state, event);
+    } else if (event is CoordinatorCallEndedEvent) {
+      return _reduceCallEnded(state, event);
     } else if (event is CoordinatorCallPermissionsUpdatedEvent) {
       return _reduceCallPermissionsUpdated(state, event);
     } else if (event is CoordinatorCallRecordingStartedEvent) {
@@ -125,13 +125,13 @@ class CoordinatorCallReducer {
     );
   }
 
-  CallState _reduceCallCancelled(
+  CallState _reduceCallEnded(
     CallState state,
-    CoordinatorCallCancelledEvent event,
+    CoordinatorCallEndedEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusActive) {
-      _logger.w(() => '[reduceCallCancelled] rejected (status is not Active)');
+      _logger.w(() => '[reduceCallEnded] rejected (status is not Active)');
       return state;
     }
     final participantIndex = state.callParticipants.indexWhere((participant) {
@@ -139,7 +139,7 @@ class CoordinatorCallReducer {
     });
     if (participantIndex == -1) {
       _logger.w(
-        () => '[reduceCallCancelled] rejected '
+        () => '[reduceCallEnded] rejected '
             '(by unknown user): ${event.sentByUserId}',
       );
       return state;

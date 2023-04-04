@@ -19,8 +19,8 @@ abstract class CoordinatorEvent with EquatableMixin {
 }
 
 /// Sent periodically by the server to keep the connection alive.
-class CoordinatorHealthCheckEvent extends CoordinatorEvent {
-  const CoordinatorHealthCheckEvent({
+class CoordinatorConnectedEvent extends CoordinatorEvent {
+  const CoordinatorConnectedEvent({
     required this.clientId,
     required this.userId,
   });
@@ -30,6 +30,18 @@ class CoordinatorHealthCheckEvent extends CoordinatorEvent {
 
   @override
   List<Object?> get props => [clientId, userId];
+}
+
+/// Sent periodically by the server to keep the connection alive.
+class CoordinatorHealthCheckEvent extends CoordinatorEvent {
+  const CoordinatorHealthCheckEvent({
+    required this.clientId,
+  });
+
+  final String clientId;
+
+  @override
+  List<Object?> get props => [clientId];
 }
 
 abstract class CoordinatorCallEvent extends CoordinatorEvent {
@@ -172,35 +184,6 @@ class CoordinatorCallRejectedEvent extends CoordinatorCallEvent {
       ];
 }
 
-/// Sent when a user cancels the call.
-class CoordinatorCallCancelledEvent extends CoordinatorCallEvent {
-  const CoordinatorCallCancelledEvent({
-    required super.callCid,
-    required this.sentByUserId,
-    required this.createdAt,
-    required this.info,
-    required this.details,
-    required this.users,
-  });
-
-  final String sentByUserId;
-  final DateTime createdAt;
-  // TODO remove props below
-  final CallInfo info;
-  final CallDetails details;
-  final Map<String, CallUser> users;
-
-  @override
-  List<Object?> get props => [
-        ...super.props,
-        sentByUserId,
-        createdAt,
-        info,
-        details,
-        users,
-      ];
-}
-
 /// Sent when call members are updated.
 class CoordinatorCallMembersUpdatedEvent extends CoordinatorCallEvent {
   const CoordinatorCallMembersUpdatedEvent({
@@ -311,28 +294,28 @@ class CoordinatorCallUserBlockedEvent extends CoordinatorCallEvent {
   const CoordinatorCallUserBlockedEvent({
     required super.callCid,
     required this.createdAt,
-    required this.userId,
+    required this.user,
   });
 
   final DateTime createdAt;
-  final String userId;
+  final CallUser user;
 
   @override
-  List<Object?> get props => [...super.props, createdAt, userId];
+  List<Object?> get props => [...super.props, createdAt, user];
 }
 
 class CoordinatorCallUserUnblockedEvent extends CoordinatorCallEvent {
   const CoordinatorCallUserUnblockedEvent({
     required super.callCid,
     required this.createdAt,
-    required this.userId,
+    required this.user,
   });
 
   final DateTime createdAt;
-  final String userId;
+  final CallUser user;
 
   @override
-  List<Object?> get props => [...super.props, createdAt, userId];
+  List<Object?> get props => [...super.props, createdAt, user];
 }
 
 class CoordinatorCallReactionEvent extends CoordinatorCallEvent {

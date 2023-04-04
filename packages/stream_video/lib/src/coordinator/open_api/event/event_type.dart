@@ -1,9 +1,9 @@
 enum EventType {
   healthCheck('health.check'),
+  connectionOk('connection.ok'),
   callCreated('call.created'),
   callAccepted('call.accepted'),
   callRejected('call.rejected'),
-  callCancelled('call.cancelled'),
   callUpdated('call.updated'),
   callEnded('call.ended'),
   callPermissionRequest('call.permission_request'),

@@ -9,7 +9,6 @@ export 'src/events.dart';
 export 'src/logger/impl/console_logger.dart';
 export 'src/logger/impl/file_logger.dart';
 export 'src/logger/impl/tagged_logger.dart';
-export 'src/logger/log_level.dart';
 export 'src/logger/stream_log.dart';
 export 'src/logger/stream_logger.dart';
 export 'src/models/call_cid.dart';

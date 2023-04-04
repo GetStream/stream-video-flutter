@@ -18,7 +18,9 @@ class CallSettingsResponse {
     required this.broadcasting,
     required this.geofencing,
     required this.recording,
+    required this.ring,
     required this.screensharing,
+    required this.transcription,
     required this.video,
   });
 
@@ -32,7 +34,11 @@ class CallSettingsResponse {
 
   RecordSettings recording;
 
+  RingSettings ring;
+
   ScreensharingSettings screensharing;
+
+  TranscriptionSettings transcription;
 
   VideoSettings video;
 
@@ -43,7 +49,9 @@ class CallSettingsResponse {
      other.broadcasting == broadcasting &&
      other.geofencing == geofencing &&
      other.recording == recording &&
+     other.ring == ring &&
      other.screensharing == screensharing &&
+     other.transcription == transcription &&
      other.video == video;
 
   @override
@@ -54,11 +62,13 @@ class CallSettingsResponse {
     (broadcasting.hashCode) +
     (geofencing.hashCode) +
     (recording.hashCode) +
+    (ring.hashCode) +
     (screensharing.hashCode) +
+    (transcription.hashCode) +
     (video.hashCode);
 
   @override
-  String toString() => 'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, recording=$recording, screensharing=$screensharing, video=$video]';
+  String toString() => 'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, recording=$recording, ring=$ring, screensharing=$screensharing, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -67,7 +77,9 @@ class CallSettingsResponse {
       json[r'broadcasting'] = this.broadcasting;
       json[r'geofencing'] = this.geofencing;
       json[r'recording'] = this.recording;
+      json[r'ring'] = this.ring;
       json[r'screensharing'] = this.screensharing;
+      json[r'transcription'] = this.transcription;
       json[r'video'] = this.video;
     return json;
   }
@@ -96,7 +108,9 @@ class CallSettingsResponse {
         broadcasting: BroadcastSettings.fromJson(json[r'broadcasting'])!,
         geofencing: GeofenceSettings.fromJson(json[r'geofencing'])!,
         recording: RecordSettings.fromJson(json[r'recording'])!,
+        ring: RingSettings.fromJson(json[r'ring'])!,
         screensharing: ScreensharingSettings.fromJson(json[r'screensharing'])!,
+        transcription: TranscriptionSettings.fromJson(json[r'transcription'])!,
         video: VideoSettings.fromJson(json[r'video'])!,
       );
     }
@@ -152,7 +166,9 @@ class CallSettingsResponse {
     'broadcasting',
     'geofencing',
     'recording',
+    'ring',
     'screensharing',
+    'transcription',
     'video',
   };
 }

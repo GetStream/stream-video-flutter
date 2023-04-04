@@ -435,8 +435,7 @@ class GeofenceSettingsInput extends FeatureSettingsInput {
 
 enum EventTypeInput {
   accepted('call.accepted'),
-  rejected('call.rejected'),
-  cancelled('call.cancelled');
+  rejected('call.rejected');
 
   const EventTypeInput(this.alias);
 

@@ -12,11 +12,11 @@ const _tag = 'SV:OpenApiEvent';
 class OpenApiEvent with EquatableMixin {
   const OpenApiEvent({
     required this.type,
+    this.connected,
     this.healthCheck,
     this.callCreated,
     this.callAccepted,
     this.callRejected,
-    this.callCancelled,
     this.callUpdated,
     this.callEnded,
     this.callPermissionRequest,
@@ -42,8 +42,11 @@ class OpenApiEvent with EquatableMixin {
     streamLog.i(_tag, () => '[fromJson] rawType; $rawType, type: $type');
     final result = OpenApiEvent(type: type);
     switch (type) {
+      case EventType.connectionOk:
+        final event = open.WSConnectedEvent.fromJson(jsonObj);
+        return result.copyWith(connected: event);
       case EventType.healthCheck:
-        final event = HealthCheck.fromJson(jsonObj);
+        final event = open.HealthCheckEvent.fromJson(jsonObj);
         return result.copyWith(healthCheck: event);
       case EventType.callCreated:
         final event = open.CallCreatedEvent.fromJson(jsonObj);
@@ -54,9 +57,6 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callRejected:
         final event = open.CallRejectedEvent.fromJson(jsonObj);
         return result.copyWith(callRejected: event);
-      case EventType.callCancelled:
-        final event = open.CallCancelledEvent.fromJson(jsonObj);
-        return result.copyWith(callCancelled: event);
       case EventType.callUpdated:
         final event = open.CallUpdatedEvent.fromJson(jsonObj);
         return result.copyWith(callUpdated: event);
@@ -101,11 +101,11 @@ class OpenApiEvent with EquatableMixin {
   }
 
   final EventType type;
-  final HealthCheck? healthCheck;
+  final open.WSConnectedEvent? connected;
+  final open.HealthCheckEvent? healthCheck;
   final open.CallCreatedEvent? callCreated;
   final open.CallAcceptedEvent? callAccepted;
   final open.CallRejectedEvent? callRejected;
-  final open.CallCancelledEvent? callCancelled;
   final open.CallUpdatedEvent? callUpdated;
   final open.CallEndedEvent? callEnded;
   final open.PermissionRequestEvent? callPermissionRequest;
@@ -119,11 +119,11 @@ class OpenApiEvent with EquatableMixin {
 
   OpenApiEvent copyWith({
     EventType? type,
-    HealthCheck? healthCheck,
+    open.WSConnectedEvent? connected,
+    open.HealthCheckEvent? healthCheck,
     open.CallCreatedEvent? callCreated,
     open.CallAcceptedEvent? callAccepted,
     open.CallRejectedEvent? callRejected,
-    open.CallCancelledEvent? callCancelled,
     open.CallUpdatedEvent? callUpdated,
     open.CallEndedEvent? callEnded,
     open.PermissionRequestEvent? callPermissionRequest,
@@ -137,11 +137,11 @@ class OpenApiEvent with EquatableMixin {
   }) {
     return OpenApiEvent(
       type: type ?? this.type,
+      connected: connected ?? this.connected,
       healthCheck: healthCheck ?? this.healthCheck,
       callCreated: callCreated ?? this.callCreated,
       callAccepted: callAccepted ?? this.callAccepted,
       callRejected: callRejected ?? this.callRejected,
-      callCancelled: callCancelled ?? this.callCancelled,
       callUpdated: callUpdated ?? this.callUpdated,
       callEnded: callEnded ?? this.callEnded,
       callPermissionRequest:
@@ -163,11 +163,11 @@ class OpenApiEvent with EquatableMixin {
   @override
   List<Object?> get props => [
         type,
+        connected,
         healthCheck,
         callCreated,
         callAccepted,
         callRejected,
-        callCancelled,
         callUpdated,
         callEnded,
         callPermissionRequest,

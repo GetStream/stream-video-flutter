@@ -47,10 +47,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   String? userId;
 
   final open.ApiClient _apiClient;
-  late final defaultApi = open.DefaultApi(_apiClient);
   late final videoApi = open.VideoCallsApi(_apiClient);
   late final eventsApi = open.EventsApi(_apiClient);
   late final usersApi = open.UsersApi(_apiClient);
+  late final recordingApi = open.RecordingApi(_apiClient);
+  late final livestreamingApi = open.LivestreamingApi(_apiClient);
+  late final moderationApi = open.ModerationApi(_apiClient);
+  late final callTypesApi = open.CallTypesApi(_apiClient);
 
   @override
   SharedEmitter<CoordinatorEvent> get events => _events;
@@ -164,7 +167,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         input.callCid.type,
         input.callCid.id,
         open.JoinCallRequest(
-          connectionId: _ws?.clientId,
+          ring: input.ringing
         ),
         connectionId: _ws?.clientId,
       );
@@ -313,7 +316,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     inputs.RequestPermissionsInput input,
   ) async {
     try {
-      final result = await defaultApi.requestPermission(
+      final result = await moderationApi.requestPermission(
         input.callCid.type,
         input.callCid.id,
         open.RequestPermissionRequest(
@@ -334,7 +337,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     inputs.UpdateUserPermissionsInput input,
   ) async {
     try {
-      final result = await defaultApi.updateUserPermissions(
+      final result = await moderationApi.updateUserPermissions(
         input.callCid.type,
         input.callCid.id,
         open.UpdateUserPermissionsRequest(
@@ -355,7 +358,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> startRecording(StreamCallCid callCid) async {
     try {
-      await defaultApi.startRecording(callCid.type, callCid.id);
+      await recordingApi.startRecording(callCid.type, callCid.id);
       return Result.success(None());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -365,7 +368,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> stopRecording(StreamCallCid callCid) async {
     try {
-      await defaultApi.stopRecording(callCid.type, callCid.id);
+      await recordingApi.stopRecording(callCid.type, callCid.id);
       return Result.success(None());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -375,7 +378,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> startBroadcasting(StreamCallCid callCid) async {
     try {
-      await defaultApi.startBroadcasting(callCid.type, callCid.id);
+      await livestreamingApi.startBroadcasting(callCid.type, callCid.id);
       return Result.success(None());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -385,7 +388,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> stopBroadcasting(StreamCallCid callCid) async {
     try {
-      await defaultApi.stopBroadcasting(callCid.type, callCid.id);
+      await livestreamingApi.stopBroadcasting(callCid.type, callCid.id);
       return Result.success(None());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -395,7 +398,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<CallReaction>> sendReaction(inputs.ReactionInput input) async {
     try {
-      final result = await defaultApi.sendVideoReaction(
+      final result = await videoApi.sendVideoReaction(
         input.callCid.type,
         input.callCid.id,
         open.SendReactionRequest(
@@ -445,7 +448,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     inputs.QueryCallsInput input,
   ) async {
     try {
-      final result = await defaultApi.queryCalls(
+      final result = await videoApi.queryCalls(
         open.QueryCallsRequest(
           filterConditions: input.filterConditions,
           next: input.next,
@@ -466,7 +469,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> blockUser(inputs.BlockUserInput input) async {
     try {
-      final result = await videoApi.blockUser(
+      final result = await moderationApi.blockUser(
         input.callCid.type,
         input.callCid.id,
         open.BlockUserRequest(userId: input.userId),
@@ -483,7 +486,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> unblockUser(inputs.UnblockUserInput input) async {
     try {
-      final result = await videoApi.unblockUser(
+      final result = await moderationApi.unblockUser(
         input.callCid.type,
         input.callCid.id,
         open.UnblockUserRequest(userId: input.userId),
@@ -541,7 +544,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> muteUsers(MuteUsersInput input) async {
     try {
-      final result = await videoApi.muteUsers(
+      final result = await moderationApi.muteUsers(
         input.callCid.type,
         input.callCid.id,
         open.MuteUsersRequest(
@@ -595,7 +598,7 @@ class _Authentication extends open.Authentication {
     Map<String, String> headerParams,
   ) async {
     final token = await tokenManager.loadToken();
-    headerParams['api_key'] = apiKey;
+    queryParams.add(open.QueryParam('api_key', apiKey));
     headerParams['Authorization'] = token.rawValue;
     headerParams['stream-auth-type'] = 'jwt';
   }

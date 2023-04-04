@@ -18,7 +18,7 @@ class EventsApi {
 
   /// Send event
   ///
-  /// Sends event to the call
+  /// Sends event to the call  Sends events: - call.accepted - call.rejected - custom  Required permissions: - SendEvent 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -58,7 +58,7 @@ class EventsApi {
 
   /// Send event
   ///
-  /// Sends event to the call
+  /// Sends event to the call  Sends events: - call.accepted - call.rejected - custom  Required permissions: - SendEvent 
   ///
   /// Parameters:
   ///
