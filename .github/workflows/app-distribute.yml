@@ -6,42 +6,119 @@ on:
       - develop
       - main
 
+env:
+  FLUTTER_VERSION: 3.7.0
+  ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
+  MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+  FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+  MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+  APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+  APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+  APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  build_and_deploy_ios:
+    name: Build and Distribute Dogfooding Ios
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Setup Melos
+        run: flutter pub global activate melos
+
+      - name: Bootstrap workspace
+        run: melos bootstrap
+
+      - name: Prepare environment
+        run: echo "${{ env.ENV_PROPERTIES }}" > .env
+
+      - name: Setup Ruby and Gems
+        uses: ruby/setup-ruby@v1
+        with:
+          working-directory: dogfooding/ios
+          bundler-cache: true
+
+      - name: Build and Distribute
+        run: |
+          cd dogfooding/ios
+          bundle exec fastlane ios build_and_deploy
+
   build_and_deploy_android:
     name: Build and Distribute Dogfooding Android
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - name: Check out code
+      - name: Checkout code
         uses: actions/checkout@v3
-      - name: Set up JDK
-        uses: actions/setup-java@v1
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          java-version: '12.x'
-      - name: Install Flutter
-        uses: subosito/flutter-action@v1
-        with:
-          channel: 'stable'
-      - name: Install Melos
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Setup Melos
         run: flutter pub global activate melos
+
       - name: Bootstrap workspace
         run: melos bootstrap
+
+      - name: Prepare environment
+        run: echo "${{ env.ENV_PROPERTIES }}" > .env
+
+      - name: Setup Ruby and Gems
+        uses: ruby/setup-ruby@v1
+        with:
+          working-directory: dogfooding/android
+          bundler-cache: true
+
+      - name: Build and Distribute
+        run: |
+          cd dogfooding/android
+          bundle exec fastlane android build_and_deploy
+
+  build_and_deploy_web:
+    name: Build and Distribute Dogfooding Web
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Setup Melos
+        run: flutter pub global activate melos
+
+      - name: Bootstrap workspace
+        run: melos bootstrap
+
       - name: Prepare environment
         run: |
-          echo "${{ secrets.ENV_PROPERTIES }}" > .env
-          melos run generate:all
-      - name: Build APK
-        run: flutter build apk
-        working-directory: dogfooding
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
+          echo "${{ env.ENV_PROPERTIES }}" > .env
+          cd dogfooding && flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Build and Distribute
+        uses: bluefireteam/flutter-gh-pages@v7
         with:
-          name: dogfooding
-          path: dogfooding/build/app/outputs/apk/release/app-release.apk
-      - name: Upload artifact to Firebase
-        uses: wzieba/Firebase-Distribution-Github-Action@v1.5.0
-        with:
-          appId: ${{secrets.FIREBASE_ANDROID_APP_ID}}
-          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
-          groups: stream-testers
-          debug: true
-          file: dogfooding/build/app/outputs/apk/release/app-release.apk
+          baseHref: /stream-video-flutter/
+          workingDir: dogfooding

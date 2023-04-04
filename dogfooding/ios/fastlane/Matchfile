@@ -1,0 +1,8 @@
+git_url("https://github.com/GetStream/ios-certificates")
+
+storage_mode("git")
+
+type("appstore") # The default type, can be: appstore, adhoc, enterprise or development
+
+app_identifier(["io.getstream.video.flutter.dogfooding"])
+# username("user@fastlane.tools") # Your Apple Developer Portal username
