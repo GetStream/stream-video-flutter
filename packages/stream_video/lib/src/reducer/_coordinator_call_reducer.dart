@@ -74,7 +74,7 @@ class CoordinatorCallReducer {
       return state;
     }
     final participant = state.callParticipants.firstWhereOrNull((participant) {
-      return participant.userId == event.sentByUserId;
+      return participant.userId == event.acceptedByUserId;
     });
     if (participant == null) {
       _logger.w(() => '[reduceCallAccepted] rejected (accepted by non-Member)');
@@ -98,12 +98,12 @@ class CoordinatorCallReducer {
       return state;
     }
     final participantIndex = state.callParticipants.indexWhere((participant) {
-      return participant.userId == event.sentByUserId;
+      return participant.userId == event.rejectedByUserId;
     });
     if (participantIndex == -1) {
       _logger.w(
         () => '[reduceCallRejected] rejected '
-            '(by unknown user): ${event.sentByUserId}',
+            '(by unknown user): ${event.rejectedByUserId}',
       );
       return state;
     }
@@ -136,12 +136,12 @@ class CoordinatorCallReducer {
       return state;
     }
     final participantIndex = state.callParticipants.indexWhere((participant) {
-      return participant.userId == event.sentByUserId;
+      return participant.userId == event.endedByUserId;
     });
     if (participantIndex == -1) {
       _logger.w(
         () => '[reduceCallEnded] rejected '
-            '(by unknown user): ${event.sentByUserId}',
+            '(by unknown user): ${event.endedByUserId}',
       );
       return state;
     }

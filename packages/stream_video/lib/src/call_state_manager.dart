@@ -42,7 +42,7 @@ abstract class CallStateManager implements CoordinatorCallEventListener {
   Future<void> onDisconnect();
   Future<void> onJoining();
   Future<void> onJoined(CallJoined data);
-  Future<void> onEnd();
+  Future<void> onEnded();
   Future<void> onSessionStart(String sessionId);
   Future<void> onControlAction(CallControlAction action);
   Future<void> onSfuEvent(SfuEvent event);
@@ -146,7 +146,7 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  Future<void> onEnd() async {
+  Future<void> onEnded() async {
     _logger.d(() => '[onEnded] no args');
     _postReduced(const CallEndedAction());
   }

@@ -490,7 +490,7 @@ class CallImpl implements Call {
     }
     _status.value = _ConnectionStatus.disconnected;
     await _clear('end');
-    await _stateManager.onEnd();
+    await _stateManager.onEnded();
     final result = await _streamVideo.endCall(callCid: state.callCid);
     _logger.v(() => '[end] completed: $result');
     return result;

@@ -84,7 +84,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         final rejectedBy = callRejected.user.toCallUser();
         return CoordinatorCallRejectedEvent(
           callCid: StreamCallCid(cid: callRejected.callCid),
-          sentByUserId: callRejected.user.id,
+          rejectedBy: rejectedBy,
           createdAt: callRejected.createdAt,
           details: const CallDetails(
             isBroadcastingEnabled: false,

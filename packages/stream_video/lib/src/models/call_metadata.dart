@@ -18,7 +18,7 @@ class CallMetadata with EquatableMixin {
   final Map<String, CallUser> users;
 
   @override
-  List<Object> get props => [details, info, users];
+  List<Object?> get props => [details, info, users];
 
   @override
   String toString() {
@@ -43,7 +43,7 @@ class CallDetails with EquatableMixin {
   final bool isRecordingEnabled;
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         members,
         ownCapabilities,
         settings,
@@ -53,7 +53,10 @@ class CallDetails with EquatableMixin {
 
   @override
   String toString() {
-    return 'CallDetails{members: $members}';
+    return 'CallDetails{members: $members, '
+        'capabilities: $ownCapabilities, settings: $settings, '
+        'isBroadcastingEnabled: $isBroadcastingEnabled, '
+        'isRecordingEnabled: $isRecordingEnabled}';
   }
 }
 
@@ -74,16 +77,18 @@ class CallInfo with EquatableMixin {
   String get createdByUserId => createdBy.id;
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         cid,
         createdBy,
-        createdAt ?? 0,
-        updatedAt ?? 0,
+        createdAt,
+        updatedAt,
       ];
 
   @override
   String toString() {
-    return 'CallInfo{createdBy: ${createdBy.id}}';
+    return 'CallInfo{cid: $cid, '
+        'createdByUserId: $createdByUserId, createdAt: $createdAt, '
+        'updatedAt: $updatedAt}';
   }
 }
 
@@ -102,16 +107,17 @@ class CallMember with EquatableMixin {
   final DateTime? updatedAt;
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         userId,
         role,
-        createdAt ?? 0,
-        updatedAt ?? 0,
+        createdAt,
+        updatedAt,
       ];
 
   @override
   String toString() {
-    return 'CallMember{userId: $userId, role: $role}';
+    return 'CallMember{userId: $userId, role: $role,'
+        ' createdAt: $createdAt, updatedAt: $updatedAt}';
   }
 }
 
@@ -137,19 +143,21 @@ class CallUser with EquatableMixin {
   final Map<String, Object>? custom;
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         id,
         name,
         role,
         image,
         teams,
-        createdAt ?? 0,
-        updatedAt ?? 0,
-        custom ?? '',
+        createdAt,
+        updatedAt,
+        custom,
       ];
 
   @override
   String toString() {
-    return 'CallUser{id: $id, name: $name, role: $role}';
+    return 'CallUser{id: $id, name: $name, role: $role, image: $image, '
+        'teams: $teams, createdAt: $createdAt, updatedAt: $updatedAt, '
+        'custom: $custom}';
   }
 }

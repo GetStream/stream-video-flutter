@@ -135,7 +135,7 @@ class CoordinatorCallEndedEvent extends CoordinatorCallEvent {
   final DateTime createdAt;
   final Map<String, CallUser> users;
 
-  String? get sentByUserId => endedBy?.id;
+  String? get endedByUserId => endedBy?.id;
 
   @override
   List<Object?> get props => [
@@ -161,7 +161,7 @@ class CoordinatorCallAcceptedEvent extends CoordinatorCallEvent {
   final CallDetails details;
   final Map<String, CallUser> users;
 
-  String get sentByUserId => acceptedBy.id;
+  String get acceptedByUserId => acceptedBy.id;
 
   @override
   List<Object?> get props => [
@@ -177,21 +177,23 @@ class CoordinatorCallAcceptedEvent extends CoordinatorCallEvent {
 class CoordinatorCallRejectedEvent extends CoordinatorCallEvent {
   const CoordinatorCallRejectedEvent({
     required super.callCid,
-    required this.sentByUserId,
+    required this.rejectedBy,
     required this.createdAt,
     required this.details,
     required this.users,
   });
 
-  final String sentByUserId;
+  final CallUser rejectedBy;
   final DateTime createdAt;
   final CallDetails details;
   final Map<String, CallUser> users;
 
+  String get rejectedByUserId => rejectedBy.id;
+
   @override
   List<Object?> get props => [
         ...super.props,
-        sentByUserId,
+        rejectedBy,
         createdAt,
         details,
         users,
