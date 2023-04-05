@@ -61,9 +61,11 @@ abstract class Call {
 
   set connectOptions(CallConnectOptions connectOptions);
 
-  Future<Result<None>> joinCall();
+  Future<Result<None>> join();
 
   Future<Result<None>> connect();
+
+  Future<Result<None>> end();
 
   Future<Result<None>> disconnect();
 

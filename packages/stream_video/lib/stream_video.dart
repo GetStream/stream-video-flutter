@@ -20,7 +20,7 @@ export 'src/models/call_setting.dart';
 export 'src/models/call_stats.dart';
 export 'src/models/call_status.dart';
 export 'src/models/call_track_state.dart';
-export 'src/models/drop_reason.dart';
+export 'src/models/disconnect_reason.dart';
 export 'src/models/user_info.dart';
 export 'src/platform_detector/platform_detector.dart';
 export 'src/push_notification/push_notification_manager.dart';

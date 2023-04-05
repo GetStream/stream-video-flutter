@@ -222,7 +222,11 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     }
 
     // Parsing
-    dtoEvent.toCoordinatorEvent()?.let(_events.emit);
+    final domainEvent = dtoEvent.toCoordinatorEvent();
+    if (domainEvent != null) {
+      _logger.v(() => '[onMessage] domainEvent: $domainEvent');
+      _events.emit(domainEvent);
+    }
   }
 
   void _handleApiError(open.APIError apiError) {

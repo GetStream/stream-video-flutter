@@ -10,9 +10,8 @@ import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 
 extension MemberExt on open.MemberResponse {
-  CallMember toCallMember(String callCid) {
+  CallMember toCallMember() {
     return CallMember(
-      callCid: callCid,
       userId: userId,
       role: role,
       createdAt: createdAt,
@@ -22,10 +21,8 @@ extension MemberExt on open.MemberResponse {
 }
 
 extension MemberListExt on List<open.MemberResponse> {
-  Map<String, CallMember> toCallMembers(String callCid) {
-    return {
-      for (final member in this) member.userId: member.toCallMember(callCid)
-    };
+  Map<String, CallMember> toCallMembers() {
+    return {for (final member in this) member.userId: member.toCallMember()};
   }
 
   Map<String, CallUser> toCallUsers() {
@@ -47,9 +44,8 @@ extension UserExt on open.UserResponse {
     );
   }
 
-  CallMember toCallMember(String callCid) {
+  CallMember toCallMember() {
     return CallMember(
-      callCid: callCid,
       userId: id,
       role: role,
       createdAt: createdAt,
@@ -65,10 +61,13 @@ extension UserListExt on List<open.UserResponse> {
 }
 
 extension EnvelopeExt on open.CallResponse {
-  CallMetadata toCallMetadata() {
+  CallMetadata toCallMetadata([List<open.MemberResponse>? members]) {
     return CallMetadata(
       details: CallDetails(
-        members: {createdBy.id: createdBy.toCallMember(cid)},
+        members: {
+          createdBy.id: createdBy.toCallMember(),
+          ...?members?.toCallMembers(),
+        },
         isBroadcastingEnabled: broadcasting,
         isRecordingEnabled: recording,
         ownCapabilities: ownCapabilities.map(
@@ -78,11 +77,14 @@ extension EnvelopeExt on open.CallResponse {
       ),
       info: CallInfo(
         cid: StreamCallCid(cid: cid),
-        createdByUserId: createdBy.id,
+        createdBy: createdBy.toCallUser(),
         createdAt: createdAt,
         updatedAt: updatedAt,
       ),
-      users: {createdBy.id: createdBy.toCallUser()},
+      users: {
+        createdBy.id: createdBy.toCallUser(),
+        ...?members?.toCallUsers(),
+      },
     );
   }
 }
@@ -139,10 +141,10 @@ extension ReactionExt on open.ReactionResponse {
 extension CallStateResponseFieldsExt on open.CallStateResponseFields {
   QueriedCall toQueriedCall() {
     return QueriedCall(
-      call: call.toCallMetadata(),
+      call: call.toCallMetadata(members),
       blockedUsers: blockedUsers.map((it) => it.toCallUser()).toList(),
-      members: members.map((it) => it.toCallMember(call.cid)).toList(),
-      membership: membership?.toCallMember(call.cid),
+      members: members.map((it) => it.toCallMember()).toList(),
+      membership: membership?.toCallMember(),
     );
   }
 }
@@ -160,7 +162,7 @@ extension QueryCallsResponseExt on open.QueryCallsResponse {
 extension QueryMembersResponseExt on open.QueryMembersResponse {
   QueriedMembers toQueriedMembers(StreamCallCid callCid) {
     return QueriedMembers(
-      members: members.toCallMembers(callCid.value),
+      members: members.toCallMembers(),
       users: members.toCallUsers(),
       next: next,
       prev: prev,

@@ -111,10 +111,11 @@ class StreamVideoImpl implements StreamVideo {
 
     try {
       _eventSubscription = _client.events.listen((event) {
-        _logger.v(() => '[onCoordWsEvent] event.type: ${event.runtimeType}');
-        if (event is CoordinatorCallCreatedEvent) {
+        _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
+        if (event is CoordinatorCallCreatedEvent &&
+            event.info.createdBy.id != user.id) {
           final callCreated = CallCreated(
-            callCid: StreamCallCid(cid: event.callCid),
+            callCid: event.callCid,
             ringing: event.ringing,
             metadata: CallMetadata(
               details: event.details,
@@ -122,7 +123,7 @@ class StreamVideoImpl implements StreamVideo {
               users: event.users,
             ),
           );
-          _logger.v(() => '[onCoordWsEvent] onCallCreated: $callCreated');
+          _logger.v(() => '[onCoordinatorEvent] onCallCreated: $callCreated');
           onCallCreated?.call(callCreated);
         }
       });

@@ -35,19 +35,23 @@ abstract class CallStateManager implements CoordinatorCallEventListener {
   const CallStateManager();
   StateEmitter<CallState> get state;
   Future<void> onUserIdSet(String userId);
-  Future<void> onCallCreated(CallCreated data);
-  Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data);
-  Future<void> onCallJoined(CallJoined data);
+  Future<void> onCreated(CallCreated data);
+  Future<void> onReceivedOrCreated(CallReceivedOrCreated data);
   Future<void> onConnecting(int attempt);
-  Future<void> onSessionStart(String sessionId);
   Future<void> onConnected();
   Future<void> onDisconnect();
-  Future<void> onCallControlAction(CallControlAction action);
+  Future<void> onJoining();
+  Future<void> onJoined(CallJoined data);
+  Future<void> onEnd();
+  Future<void> onSessionStart(String sessionId);
+  Future<void> onControlAction(CallControlAction action);
   Future<void> onSfuEvent(SfuEvent event);
   Future<void> onWaitingTimeout(Duration dropTimeout);
   Future<void> onConnectFailed(VideoError error);
 
   void onSubscriberTrackReceived(String trackIdPrefix, SfuTrackType trackType);
+
+
 }
 
 class CallStateManagerImpl extends CallStateManager {
@@ -76,20 +80,20 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  Future<void> onCallControlAction(CallControlAction action) async {
-    _logger.d(() => '[onCallControlAction] action: $action');
+  Future<void> onControlAction(CallControlAction action) async {
+    _logger.d(() => '[onControlAction] action: $action');
     _postReduced(action);
   }
 
   @override
-  Future<void> onCallCreated(CallCreated data) async {
-    _logger.d(() => '[onCallCreated] data: $data');
+  Future<void> onCreated(CallCreated data) async {
+    _logger.d(() => '[onCreated] data: $data');
     _postReduced(CallCreatedAction(data: data));
   }
 
   @override
-  Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data) async {
-    _logger.d(() => '[onCallReceivedOrCreated] data: $data');
+  Future<void> onReceivedOrCreated(CallReceivedOrCreated data) async {
+    _logger.d(() => '[onReceivedOrCreated] data: $data');
     _postReduced(CallCreatedAction(data: data.data));
   }
 
@@ -106,7 +110,13 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  Future<void> onCallJoined(CallJoined data) async {
+  Future<void> onJoining() async {
+    _logger.d(() => '[onJoining] no args');
+    _postReduced(const CallJoiningAction());
+  }
+
+  @override
+  Future<void> onJoined(CallJoined data) async {
     _logger.d(() => '[onJoined] data: $data');
     _postReduced(CallJoinedAction(data));
   }
@@ -133,6 +143,12 @@ class CallStateManagerImpl extends CallStateManager {
   Future<void> onDisconnect() async {
     _logger.d(() => '[onDisconnect] no args');
     _postReduced(const CallDisconnectedAction());
+  }
+
+  @override
+  Future<void> onEnd() async {
+    _logger.d(() => '[onEnded] no args');
+    _postReduced(const CallEndedAction());
   }
 
   @override
@@ -206,11 +222,6 @@ class CallStateManagerImpl extends CallStateManager {
     }
   }
 
-  @override
-  Future<void> onCallConnecting() {
-    // TODO: implement onCallConnecting
-    throw UnimplementedError();
-  }
 }
 
 extension on List<CallUser> {

@@ -25,10 +25,6 @@ class RejectCall extends CallControlAction {
   const RejectCall();
 }
 
-class EndCall extends CallControlAction {
-  const EndCall();
-}
-
 class RequestPermissions extends CallControlAction {
   const RequestPermissions({
     required this.permissions,

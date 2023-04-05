@@ -155,7 +155,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           data: CallCreated(
             callCid: input.callCid,
             ringing: input.ringing ?? false,
-            metadata: result.call.toCallMetadata(),
+            metadata: result.call.toCallMetadata(result.members),
           ),
         ),
       );
@@ -186,7 +186,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return Result.success(
         CoordinatorJoined(
           wasCreated: result.created,
-          metadata: result.call.toCallMetadata(),
+          metadata: result.call.toCallMetadata(result.members),
           edges: result.edges.map((edge) {
             return SfuEdge(
               name: edge.name,
@@ -248,7 +248,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       }
       return Result.success(
         SfuServerSelected(
-          metadata: result.call.toCallMetadata(),
+          metadata: result.call.toCallMetadata(result.members),
           credentials: result.credentials.toCallCredentials(),
         ),
       );

@@ -46,7 +46,7 @@ class _StaticProvider implements TokenProvider {
 
   @override
   Future<Result<UserToken>> getToken(String userId) async {
-    _logger.e(() => '[getToken] token($userId): $token');
+    _logger.v(() => '[getToken] token($userId): $token');
     return Result.success(token);
   }
 

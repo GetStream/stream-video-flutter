@@ -67,14 +67,18 @@ extension CallStatusExtension on CallStatus {
       return 'Outgoing';
     } else if (isIncoming) {
       return 'Incoming';
+    } else if (isJoining) {
+      return 'Joining';
+    } else if (isJoined) {
+      return 'Joined';
     } else if (isReconnecting) {
       return 'Reconnecting';
     } else if (isConnecting) {
       return 'Connecting';
     } else if (isConnected) {
       return 'Connected';
-    } else if (isDrop) {
-      return 'Drop';
+    } else if (isDisconnected) {
+      return 'Disconnected';
     } else {
       return '';
     }

@@ -6,7 +6,7 @@ import '../coordinator/models/coordinator_events.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_participant_state.dart';
 import '../models/call_status.dart';
-import '../models/drop_reason.dart';
+import '../models/disconnect_reason.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
@@ -112,8 +112,8 @@ class CoordinatorCallReducer {
     if (removed.userId == state.currentUserId ||
         callParticipants.hasSingle(state.currentUserId)) {
       return state.copyWith(
-        status: CallStatus.drop(
-          DropReason.rejected(
+        status: CallStatus.disconnected(
+          DisconnectReason.rejected(
             byUserId: removed.userId,
           ),
         ),
@@ -150,8 +150,8 @@ class CoordinatorCallReducer {
     if (removed.userId == state.currentUserId ||
         callParticipants.hasSingle(state.currentUserId)) {
       return state.copyWith(
-        status: CallStatus.drop(
-          DropReason.cancelled(
+        status: CallStatus.disconnected(
+          DisconnectReason.cancelled(
             byUserId: removed.userId,
           ),
         ),

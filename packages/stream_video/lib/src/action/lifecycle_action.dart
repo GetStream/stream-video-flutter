@@ -15,6 +15,10 @@ class CallUserIdAction extends LifecycleAction {
   final String userId;
 }
 
+class CallEndedAction extends LifecycleAction {
+  const CallEndedAction();
+}
+
 class CallDisconnectedAction extends LifecycleAction {
   const CallDisconnectedAction();
 }
@@ -25,6 +29,10 @@ class CallCreatedAction extends LifecycleAction {
   });
 
   final CallCreated data;
+}
+
+class CallJoiningAction extends LifecycleAction {
+  const CallJoiningAction();
 }
 
 class CallJoinedAction extends LifecycleAction {

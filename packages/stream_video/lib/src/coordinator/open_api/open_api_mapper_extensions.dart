@@ -33,39 +33,43 @@ extension WebsocketEventMapperExt on OpenApiEvent {
       case EventType.callCreated:
         final callCreated = this.callCreated!;
         final call = callCreated.call;
+        final createdBy = call.createdBy.toCallUser();
+        final createdByMember = call.createdBy.toCallMember();
 
         return CoordinatorCallCreatedEvent(
-          callCid: call.cid,
+          callCid: StreamCallCid(cid: call.cid),
           ringing: callCreated.ringing,
           createdAt: callCreated.createdAt,
           info: CallInfo(
             cid: StreamCallCid(cid: call.cid),
-            createdByUserId: call.createdBy.id,
+            createdBy: createdBy,
             createdAt: call.createdAt,
             updatedAt: call.updatedAt,
           ),
           details: CallDetails(
             isBroadcastingEnabled: call.settings.broadcasting.enabled,
-            members: callCreated.members.toCallMembers(call.cid),
+            members: {
+              createdByMember.userId: createdByMember,
+              ...callCreated.members.toCallMembers(),
+            },
             isRecordingEnabled: call.settings.recording.audioOnly,
             ownCapabilities: call.ownCapabilities.map(
               (it) => CallPermission.fromAlias(it.value),
             ),
             settings: call.settings.toCallSettings(),
           ),
-          users: callCreated.members.toCallUsers(),
+          users: {
+            createdBy.id: createdBy,
+            ...callCreated.members.toCallUsers(),
+          },
         );
       case EventType.callAccepted:
         final callAccepted = this.callAccepted!;
-
+        final acceptedBy = callAccepted.user.toCallUser();
         return CoordinatorCallAcceptedEvent(
-          callCid: callAccepted.callCid,
-          sentByUserId: callAccepted.user.id,
+          callCid: StreamCallCid(cid: callAccepted.callCid),
+          acceptedBy: acceptedBy,
           createdAt: callAccepted.createdAt,
-          info: CallInfo(
-            cid: StreamCallCid(cid: callAccepted.callCid),
-            createdByUserId: '',
-          ),
           details: const CallDetails(
             isBroadcastingEnabled: false,
             members: {},
@@ -73,19 +77,15 @@ extension WebsocketEventMapperExt on OpenApiEvent {
             ownCapabilities: [],
             settings: CallSettings.disabled(),
           ),
-          users: const {},
+          users: {acceptedBy.id: acceptedBy},
         );
       case EventType.callRejected:
         final callRejected = this.callRejected!;
-
+        final rejectedBy = callRejected.user.toCallUser();
         return CoordinatorCallRejectedEvent(
-          callCid: callRejected.callCid,
+          callCid: StreamCallCid(cid: callRejected.callCid),
           sentByUserId: callRejected.user.id,
           createdAt: callRejected.createdAt,
-          info: CallInfo(
-            cid: StreamCallCid(cid: callRejected.callCid),
-            createdByUserId: '',
-          ),
           details: const CallDetails(
             isBroadcastingEnabled: false,
             members: {},
@@ -93,17 +93,17 @@ extension WebsocketEventMapperExt on OpenApiEvent {
             ownCapabilities: [],
             settings: CallSettings.disabled(),
           ),
-          users: const {},
+          users: {rejectedBy.id: rejectedBy},
         );
       case EventType.callUpdated:
         final callUpdated = this.callUpdated!;
         final call = callUpdated.call;
-
+        final createdBy = call.createdBy.toCallUser();
         return CoordinatorCallUpdatedEvent(
-          callCid: call.cid,
+          callCid: StreamCallCid(cid: call.cid),
           info: CallInfo(
             cid: StreamCallCid(cid: call.cid),
-            createdByUserId: call.createdBy.id,
+            createdBy: createdBy,
             createdAt: call.createdAt,
             updatedAt: call.updatedAt,
           ),
@@ -116,33 +116,24 @@ extension WebsocketEventMapperExt on OpenApiEvent {
             ),
             settings: call.settings.toCallSettings(),
           ),
-          users: const {},
+          users: {createdBy.id: createdBy},
         );
       case EventType.callEnded:
         final callEnded = this.callEnded!;
-        final callUser = callEnded.user?.toCallUser();
+        final endedBy = callEnded.user?.toCallUser();
         return CoordinatorCallEndedEvent(
-          callCid: callEnded.callCid,
-          sentByUserId: callEnded.user?.id ?? '',
+          callCid: StreamCallCid(cid: callEnded.callCid),
+          endedBy: endedBy,
           createdAt: callEnded.createdAt,
-          info: CallInfo(
-            cid: StreamCallCid(cid: callEnded.callCid),
-            createdByUserId: '',
-          ),
-          details: const CallDetails(
-            isBroadcastingEnabled: false,
-            members: {},
-            isRecordingEnabled: false,
-            ownCapabilities: [],
-            settings: CallSettings.disabled(),
-          ),
-          users: callUser?.let((it) => {it.id : it}) ?? const {},
+          users: {
+            ...?endedBy?.let((it) => {it.id: it})
+          },
         );
       case EventType.callPermissionRequest:
         final callPermissionRequest = this.callPermissionRequest!;
 
         return CoordinatorCallPermissionRequestEvent(
-          callCid: callPermissionRequest.callCid,
+          callCid: StreamCallCid(cid: callPermissionRequest.callCid),
           createdAt: callPermissionRequest.createdAt,
           permissions: callPermissionRequest.permissions,
           user: callPermissionRequest.user.toCallUser(),
@@ -151,7 +142,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         final callPermissionsUpdated = this.callPermissionsUpdated!;
 
         return CoordinatorCallPermissionsUpdatedEvent(
-          callCid: callPermissionsUpdated.callCid,
+          callCid: StreamCallCid(cid: callPermissionsUpdated.callCid),
           createdAt: callPermissionsUpdated.createdAt,
           ownCapabilities: callPermissionsUpdated.ownCapabilities.map(
             (it) => CallPermission.fromAlias(it.value),
@@ -162,21 +153,21 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         final event = callRecordingStarted!;
 
         return CoordinatorCallRecordingStartedEvent(
-          callCid: event.callCid,
+          callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
         );
       case EventType.callRecordingStopped:
         final event = callRecordingStopped!;
 
         return CoordinatorCallRecordingStoppedEvent(
-          callCid: event.callCid,
+          callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
         );
       case EventType.callUserBlocked:
         final event = callUserBlocked!;
 
         return CoordinatorCallUserBlockedEvent(
-          callCid: event.callCid,
+          callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
           user: event.user.toCallUser(),
         );
@@ -184,7 +175,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         final event = callUserUnblocked!;
 
         return CoordinatorCallUserUnblockedEvent(
-          callCid: event.callCid,
+          callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
           user: event.user.toCallUser(),
         );
@@ -192,7 +183,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         final event = callReaction!;
 
         return CoordinatorCallReactionEvent(
-          callCid: event.callCid,
+          callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
           reactionType: event.reaction.type,
           user: event.reaction.user.toCallUser(),
@@ -203,15 +194,11 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         final custom = this.custom!;
 
         return CoordinatorCallCustomEvent(
-          callCid: custom.callCid,
+          callCid: StreamCallCid(cid: custom.callCid),
           senderUserId: custom.user.id,
           createdAt: custom.createdAt,
           eventType: custom.type,
           custom: custom.custom,
-          info: CallInfo(
-            cid: StreamCallCid(cid: custom.callCid),
-            createdByUserId: '',
-          ),
           details: const CallDetails(
             isBroadcastingEnabled: false,
             members: {},

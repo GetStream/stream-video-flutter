@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:async/async.dart' as async;
+
 import '../../stream_video.dart';
 import '../call_state_manager.dart';
 import '../coordinator/models/coordinator_events.dart';
@@ -10,13 +12,18 @@ import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
+import '../utils/cancelables.dart';
 import '../utils/none.dart';
+import '../utils/standard.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 
-const _idCoordEvents = 1;
-const _idSessionEvents = 2;
-const _idSessionStats = 3;
+const _idState = 1;
+const _idCoordEvents = 2;
+const _idSessionEvents = 3;
+const _idSessionStats = 4;
+const _idConnect = 5;
+const _idAwait = 6;
 
 const _tag = 'SV:Call';
 
@@ -49,7 +56,7 @@ class CallImpl implements Call {
     final finalStreamVideo = streamVideo ?? StreamVideo.instance;
     final finalRetryPolicy = retryPolicy ?? finalStreamVideo.retryPolicy;
     final stateManager = _makeCallStateManager(data.callCid, finalStreamVideo);
-    stateManager.onCallCreated(data);
+    stateManager.onCreated(data);
     return CallImpl._(
       streamVideo: finalStreamVideo,
       retryPolicy: finalRetryPolicy,
@@ -66,7 +73,7 @@ class CallImpl implements Call {
     final finalStreamVideo = streamVideo ?? StreamVideo.instance;
     final finalRetryPolicy = retryPolicy ?? finalStreamVideo.retryPolicy;
     final stateManager = _makeCallStateManager(data.callCid, finalStreamVideo);
-    stateManager.onCallJoined(data);
+    stateManager.onJoined(data);
     return CallImpl._(
       streamVideo: finalStreamVideo,
       retryPolicy: finalRetryPolicy,
@@ -89,31 +96,25 @@ class CallImpl implements Call {
         _credentials = credentials {
     streamLog.i(_tag, () => '<init> state: ${stateManager.state.value}');
     _subscriptions.add(
+      _idState,
+      stateManager.state.listen((state) async => _onStateChanged(state)),
+    );
+    _subscriptions.add(
       _idCoordEvents,
-      streamVideo.events.on<CoordinatorCallEvent>((event) {
-        // Return if the event is not for this call.
-        if (event.callCid != state.value.callCid.value) return;
-        _logger.v(() => '[onCallCoordEvent] event.type: ${event.runtimeType}');
-        _logger.v(() => '[onCallCoordEvent] calStatus: ${state.value.status}');
-
-        if (event is CoordinatorCallPermissionRequestEvent) {
-          // Notify the client about the permission request.
-          return onPermissionRequest?.call(event);
-        }
-
-        _stateManager.onCoordinatorEvent(event);
+      streamVideo.events.on<CoordinatorCallEvent>((event) async {
+        await _onCoordinatorEvent(event);
       }),
     );
   }
 
   late final _logger = taggedLogger(tag: '$_tag-${_callSeq++}');
   late final _subscriptions = Subscriptions();
+  late final _cancelables = Cancelables();
 
   final StreamVideo _streamVideo;
   final RetryPolicy _retryPolicy;
   final CallSessionFactory _sessionFactory;
   final CallStateManager _stateManager;
-
 
   CallCredentials? _credentials;
   int _reconnectAttempt = 0;
@@ -168,6 +169,27 @@ class CallImpl implements Call {
     _connectOptions = connectOptions;
   }
 
+  Future<void> _onStateChanged(CallState state) async {
+    final status = state.status;
+    _logger.v(() => '[onStateChanged] status: ${status}');
+    if (status is CallStatusDisconnected) {
+      await _clear('status-disconnected');
+    }
+  }
+
+  Future<void> _onCoordinatorEvent(CoordinatorCallEvent event) async {
+    // Return if the event is not for this call.
+    if (event.callCid != state.value.callCid) return;
+    _logger.v(() => '[onCoordinatorEvent] event.type: ${event.runtimeType}');
+    _logger.v(() => '[onCoordinatorEvent] calStatus: ${state.value.status}');
+
+    if (event is CoordinatorCallPermissionRequestEvent) {
+      // Notify the client about the permission request.
+      return onPermissionRequest?.call(event);
+    }
+    await _stateManager.onCoordinatorEvent(event);
+  }
+
   Future<Result<None>> _acceptCall(AcceptCall action) async {
     final state = this.state.value;
     final status = state.status;
@@ -179,7 +201,7 @@ class CallImpl implements Call {
       cid: state.callCid,
     );
     if (result is Success<None>) {
-      await _stateManager.onCallControlAction(action);
+      await _stateManager.onControlAction(action);
     }
     return result;
   }
@@ -195,50 +217,30 @@ class CallImpl implements Call {
       cid: state.callCid,
     );
     if (result is Success<None>) {
-      await _stateManager.onCallControlAction(action);
-    }
-    return result;
-  }
-
-  Future<Result<None>> _endCall(EndCall action) async {
-    if (!_hasPermission(CallPermission.endCall)) {
-      return Result.error('has no "end-call" permission');
-    }
-    final state = this.state.value;
-    final status = state.status;
-    _logger.d(() => '[endCall] status: $status');
-    if (status is! CallStatusActive) {
-      _logger.w(() => '[endCall] rejected (invalid status): $status');
-      return Result.error('invalid status: $status');
-    }
-    final result = await _streamVideo.endCall(callCid: state.callCid);
-    _logger.v(() => '[endCall] completed: $result');
-    if (result is Success<None>) {
-      _status.value = _ConnectionStatus.cancelled;
-      _subscriptions.cancelAll();
-      await _stateManager.onCallControlAction(action);
-      await _session?.dispose();
-      _session = null;
+      await _stateManager.onControlAction(action);
     }
     return result;
   }
 
   @override
-  Future<Result<None>> joinCall() async {
-    _logger.d(() => '[joinCall] no args');
+  Future<Result<None>> join() async {
+    _logger.d(() => '[join] no args');
+    await _stateManager.onJoining();
     final joinedResult = await _joinIfNeeded();
-    if (joinedResult is Failure) {
-      _logger.e(() => '[joinCall] failed: $joinedResult');
-      await _stateManager.onConnectFailed(joinedResult.error);
-      return joinedResult;
+    if (joinedResult is Success<CallCredentials>) {
+      _logger.v(() => '[join] completed');
+      return Result.success(None());
     } else {
-      _logger.v(() => '[joinCall] completed');
+      final failedResult = joinedResult as Failure;
+      _logger.e(() => '[join] failed: $failedResult');
+      await _stateManager.onConnectFailed(failedResult.error);
+      return failedResult;
     }
-    return Result.success(None());
   }
 
   @override
   Future<Result<None>> connect() async {
+    _logger.i(() => '[connect] status: ${_status.value}');
     if (_status.value == _ConnectionStatus.connected) {
       _logger.w(() => '[connect] rejected (connected)');
       return Result.success(None());
@@ -261,10 +263,15 @@ class CallImpl implements Call {
       Call.onActiveCall?.call(this);
     }
     _status.value = _ConnectionStatus.connecting;
-    final result = await _connect();
+    final result = await _connect()
+        .asCancelable()
+        .storeIn(_idConnect, _cancelables)
+        .valueOrDefault(Result.error('connect cancelled'));
     if (result.isSuccess) {
+      _logger.v(() => '[connect] finished: $result');
       _status.value = _ConnectionStatus.connected;
     } else {
+      _logger.e(() => '[connect] failed: $result');
       await disconnect();
     }
     return result;
@@ -281,9 +288,9 @@ class CallImpl implements Call {
 
     final state = this.state.value;
     final status = state.status;
-    if (!status.isJoinable) {
+    if (!status.isConnectable) {
       _logger
-          .w(() => '[connect] rejected (not Joinable/Joining/Joined): $status');
+          .w(() => '[connect] rejected (not Connectable): $status');
       return Result.error('invalid status: $status');
     }
 
@@ -326,17 +333,16 @@ class CallImpl implements Call {
       return Result.success(creds);
     }
     _logger.d(() => '[joinIfNeeded] no args');
-    // TODO await _stateManager.onCallJoining();
     final joinedResult = await _streamVideo.joinCall(
       cid: state.callCid,
       create: true,
       onReceivedOrCreated: (data) async {
-        await _stateManager.onCallReceivedOrCreated(data);
+        await _stateManager.onReceivedOrCreated(data);
       },
     );
     if (joinedResult is Success<CallJoined>) {
       _logger.v(() => '[joinIfNeeded] completed');
-      await _stateManager.onCallJoined(joinedResult.data);
+      await _stateManager.onJoined(joinedResult.data);
       _credentials = joinedResult.data.credentials;
       return Result.success(joinedResult.data.credentials);
     }
@@ -400,7 +406,8 @@ class CallImpl implements Call {
       _reconnectAttempt++;
       await _stateManager.onConnecting(_reconnectAttempt);
       if (_status.value == _ConnectionStatus.disconnected) {
-        _logger.w(() => '[reconnect] attempt($_reconnectAttempt) rejected (disconnected)');
+        _logger.w(() =>
+            '[reconnect] attempt($_reconnectAttempt) rejected (disconnected)');
         _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< rejected');
         return;
       }
@@ -446,45 +453,81 @@ class CallImpl implements Call {
   }
 
   Future<Result<None>> _awaitIfNeeded(Duration timeLimit) async {
-    try {
-      final state = this.state.value;
-      final status = state.status;
-      if (status is CallStatusOutgoing && !status.acceptedByCallee) {
-        await _awaitOutgoingToBeAccepted(timeLimit);
-      }
-      if (status is CallStatusIncoming && !status.acceptedByMe) {
-        await _awaitIncomingToBeAccepted(timeLimit);
-      }
-      // If we are coming from the pre-joining screen and already
-      // started joining the call.
-      // if (status is CallStatusJoining) {
-      //   await _awaitCallToBeJoined();
-      // }
-    } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+    final state = this.state.value;
+    final status = state.status;
+    Future<Result<None>>? futureResult;
+    if (status is CallStatusOutgoing && !status.acceptedByCallee) {
+      _logger.d(() => '[awaitIfNeeded] outgoing to be accepted by callee');
+      futureResult = _awaitOutgoingToBeAccepted(timeLimit);
+    } else if (status is CallStatusIncoming && !status.acceptedByMe) {
+      _logger.d(() => '[awaitIfNeeded] incoming to be accepted by me');
+      futureResult = _awaitIncomingToBeAccepted(timeLimit);
+    } else if (status is CallStatusJoining) {
+      _logger.d(() => '[awaitIfNeeded] joining to become joined');
+      futureResult = _awaitCallToBeJoined();
+    }
+    if (futureResult != null) {
+      _logger.v(() => '[awaitIfNeeded] return cancelable');
+      return futureResult
+          .asCancelable()
+          .storeIn(_idAwait, _cancelables)
+          .value;
     }
     return Result.success(None());
   }
 
   @override
+  Future<Result<None>> end() async {
+    if (!_hasPermission(CallPermission.endCall)) {
+      return Result.error('has no "end-call" permission');
+    }
+    final state = this.state.value;
+    final status = state.status;
+    _logger.d(() => '[end] status: $status');
+    if (status is! CallStatusActive) {
+      _logger.w(() => '[end] rejected (invalid status): $status');
+      return Result.error('invalid status: $status');
+    }
+    _status.value = _ConnectionStatus.disconnected;
+    await _clear('end');
+    await _stateManager.onEnd();
+    final result = await _streamVideo.endCall(callCid: state.callCid);
+    _logger.v(() => '[end] completed: $result');
+    return result;
+  }
+
+  @override
   Future<Result<None>> disconnect() async {
     final state = this.state.value;
-    _logger.d(() => '[disconnect] ${_status.value}; state: $state');
+    _logger.i(() => '[disconnect] ${_status.value}; state: $state');
+    if (state.status.isDisconnected) {
+      _logger.w(() => '[disconnect] rejected (state.status is disconnected)');
+      return Result.success(None());
+    }
     if (_status.value == _ConnectionStatus.disconnected) {
-      _logger.w(() => '[disconnect] rejected (already disconnected)');
+      _logger.w(() => '[disconnect] rejected (status is disconnected)');
       return Result.success(None());
     }
     _status.value = _ConnectionStatus.disconnected;
-    _subscriptions.cancelAll();
+    await _clear('disconnect');
     await _stateManager.onDisconnect();
+    _logger.v(() => '[disconnect] finished');
+    return Result.success(None());
+  }
+
+  Future<void> _clear(String src) async {
+    _logger.d(() => '[clear] src: $src');
+    _status.value = _ConnectionStatus.disconnected;
+    _subscriptions.cancel(_idSessionEvents);
+    _subscriptions.cancel(_idSessionStats);
+    _cancelables.cancelAll();
     await _session?.dispose();
     _session = null;
     if (Call.activeCall != null) {
       Call.activeCall = null;
       Call.onActiveCall?.call(null);
     }
-    _logger.v(() => '[disconnect] finished');
-    return Result.success(None());
+    _logger.v(() => '[clear] completed');
   }
 
   @override
@@ -510,8 +553,6 @@ class CallImpl implements Call {
       return _acceptCall(action);
     } else if (action is RejectCall) {
       return _rejectCall(action);
-    } else if (action is EndCall) {
-      return _endCall(action);
     } else if (action is BlockUser) {
       return _blockUser(action);
     } else if (action is UnblockUser) {
@@ -546,7 +587,7 @@ class CallImpl implements Call {
     final result = await session.apply(action);
     _logger.v(() => '[apply] completed: $result');
     if (result.isSuccess) {
-      await _stateManager.onCallControlAction(action);
+      await _stateManager.onControlAction(action);
     }
     return result;
   }
@@ -596,40 +637,58 @@ class CallImpl implements Call {
       final action = track.composeControlAction();
       _logger.v(() => '[applyLocalTrack] composed action: $action');
       if (action != null) {
-        await _stateManager.onCallControlAction(action);
+        await _stateManager.onControlAction(action);
       }
     }
     return result;
   }
 
-  Future<void> _awaitIncomingToBeAccepted(Duration timeLimit) async {
-    await state.firstWhere(
+  Future<Result<None>> _awaitIncomingToBeAccepted(Duration timeLimit) async {
+    return state.firstWhere(
       (state) {
         final status = state.status;
         return status is CallStatusIncoming && status.acceptedByMe;
       },
       timeLimit: timeLimit,
-    );
+    ).then((value) {
+      _logger.e(() => '[awaitIncomingToBeAccepted] completed');
+      return Result.success(None());
+    }).onError((e, stk) {
+      _logger.e(() => '[awaitIncomingToBeAccepted] failed: $e');
+      return Result.failure(VideoErrors.compose(e, stk));
+    });
   }
 
-  Future<void> _awaitOutgoingToBeAccepted(Duration timeLimit) async {
-    await state.firstWhere(
+  Future<Result<None>> _awaitOutgoingToBeAccepted(Duration timeLimit) async {
+    return state.firstWhere(
       (state) {
         final status = state.status;
         return status is CallStatusOutgoing && status.acceptedByCallee;
       },
       timeLimit: timeLimit,
-    );
+    ).then((value) {
+      _logger.e(() => '[awaitOutgoingToBeAccepted] completed');
+      return Result.success(None());
+    }).onError((e, stk) {
+      _logger.e(() => '[awaitOutgoingToBeAccepted] failed: $e');
+      return Result.failure(VideoErrors.compose(e, stk));
+    });
   }
 
-  // Future<void> _awaitCallToBeJoined() async {
-  //   await state.firstWhere(
-  //     (state) {
-  //       return state.status is CallStatusJoined;
-  //     },
-  //     timeLimit: const Duration(seconds: 60),
-  //   );
-  // }
+  Future<Result<None>> _awaitCallToBeJoined() async {
+    return state.firstWhere(
+      (state) {
+        return state.status is CallStatusJoined;
+      },
+      timeLimit: const Duration(seconds: 60),
+    ).then((value) {
+      _logger.e(() => '[awaitCallToBeJoined] completed');
+      return Result.success(None());
+    }).onError((e, stk) {
+      _logger.e(() => '[awaitCallToBeJoined] failed: $e');
+      return Result.failure(VideoErrors.compose(e, stk));
+    });
+  }
 
   @override
   Future<Result<None>> inviteUsers(List<UserInfo> users) {
@@ -710,7 +769,7 @@ class CallImpl implements Call {
     );
     _logger.v(() => '[blockUser] result: $result');
     if (result.isSuccess) {
-      await _stateManager.onCallControlAction(action);
+      await _stateManager.onControlAction(action);
     }
     return result;
   }
@@ -727,7 +786,7 @@ class CallImpl implements Call {
     );
     _logger.v(() => '[unblockUser] result: $result');
     if (result.isSuccess) {
-      await _stateManager.onCallControlAction(action);
+      await _stateManager.onControlAction(action);
     }
     return result;
   }
@@ -741,7 +800,7 @@ class CallImpl implements Call {
     final result = await _streamVideo.startRecording(callCid: callCid);
     _logger.v(() => '[startRecording] result: $result');
     if (result.isSuccess) {
-      await _stateManager.onCallControlAction(action);
+      await _stateManager.onControlAction(action);
     }
     return result;
   }
@@ -755,7 +814,7 @@ class CallImpl implements Call {
     final result = await _streamVideo.stopRecording(callCid: callCid);
     _logger.v(() => '[stopRecording] result: $result');
     if (result.isSuccess) {
-      await _stateManager.onCallControlAction(action);
+      await _stateManager.onControlAction(action);
     }
     return result;
   }
@@ -769,7 +828,7 @@ class CallImpl implements Call {
     final result = await _streamVideo.startBroadcasting(callCid: callCid);
     _logger.v(() => '[startBroadcasting] result: $result');
     if (result.isSuccess) {
-      await _stateManager.onCallControlAction(action);
+      await _stateManager.onControlAction(action);
     }
     return result;
   }
@@ -783,7 +842,7 @@ class CallImpl implements Call {
     final result = await _streamVideo.stopBroadcasting(callCid: callCid);
     _logger.v(() => '[stopBroadcasting] result: $result');
     if (result.isSuccess) {
-      await _stateManager.onCallControlAction(action);
+      await _stateManager.onControlAction(action);
     }
     return result;
   }
@@ -800,7 +859,7 @@ class CallImpl implements Call {
     );
     _logger.v(() => '[muteUsers] result: $result');
     if (result.isSuccess) {
-      await _stateManager.onCallControlAction(action);
+      await _stateManager.onControlAction(action);
     }
     return result;
   }
@@ -848,8 +907,8 @@ extension on RtcLocalTrack {
   }
 }
 
+@Deprecated('Rely on CallStatus')
 enum _ConnectionStatus {
-  cancelled,
   disconnected,
   connecting,
   connected;
@@ -857,5 +916,22 @@ enum _ConnectionStatus {
   @override
   String toString() {
     return name;
+  }
+}
+
+extension<T> on async.CancelableOperation<T> {
+  Future<T> valueOrDefault(T cancellationValue) {
+    return valueOrCancellation(cancellationValue).then((value) => value!);
+  }
+
+  async.CancelableOperation<T> storeIn(int id, Cancelables cancelables) {
+    cancelables.add(id, this);
+    return this;
+  }
+}
+
+extension<T> on Future<T> {
+  async.CancelableOperation<T> asCancelable() {
+    return async.CancelableOperation.fromFuture(this);
   }
 }

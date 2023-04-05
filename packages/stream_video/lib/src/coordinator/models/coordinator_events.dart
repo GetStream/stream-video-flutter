@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../../models/call_cid.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
 
@@ -65,7 +66,7 @@ class CoordinatorHealthCheckEvent extends CoordinatorEvent {
 abstract class CoordinatorCallEvent extends CoordinatorEvent {
   const CoordinatorCallEvent({required this.callCid});
 
-  final String callCid;
+  final StreamCallCid callCid;
 
   @override
   List<Object?> get props => [callCid];
@@ -97,6 +98,11 @@ class CoordinatorCallCreatedEvent extends CoordinatorCallEvent {
         details,
         users,
       ];
+
+  @override
+  String toString() {
+    return 'CoordinatorCallCreatedEvent{ringing: $ringing, createdBy: ${info.createdBy.id}, users: $users}';
+  }
 }
 
 /// Sent when a call gets updated.
@@ -120,27 +126,22 @@ class CoordinatorCallUpdatedEvent extends CoordinatorCallEvent {
 class CoordinatorCallEndedEvent extends CoordinatorCallEvent {
   const CoordinatorCallEndedEvent({
     required super.callCid,
-    required this.sentByUserId,
+    required this.endedBy,
     required this.createdAt,
-    required this.info,
-    required this.details,
     required this.users,
   });
 
-  final String sentByUserId;
+  final CallUser? endedBy;
   final DateTime createdAt;
-  // TODO delete props below
-  final CallInfo info;
-  final CallDetails details;
   final Map<String, CallUser> users;
+
+  String? get sentByUserId => endedBy?.id;
 
   @override
   List<Object?> get props => [
         ...super.props,
-        sentByUserId,
+        endedBy,
         createdAt,
-        info,
-        details,
         users,
       ];
 }
@@ -149,25 +150,24 @@ class CoordinatorCallEndedEvent extends CoordinatorCallEvent {
 class CoordinatorCallAcceptedEvent extends CoordinatorCallEvent {
   const CoordinatorCallAcceptedEvent({
     required super.callCid,
-    required this.sentByUserId,
+    required this.acceptedBy,
     required this.createdAt,
-    required this.info,
     required this.details,
     required this.users,
   });
 
-  final String sentByUserId;
+  final CallUser acceptedBy;
   final DateTime createdAt;
-  // TODO delete props below
-  final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
+
+  String get sentByUserId => acceptedBy.id;
 
   @override
   List<Object?> get props => [
         ...super.props,
-        sentByUserId,
-        info,
+        acceptedBy,
+        createdAt,
         details,
         users,
       ];
@@ -178,7 +178,6 @@ class CoordinatorCallRejectedEvent extends CoordinatorCallEvent {
   const CoordinatorCallRejectedEvent({
     required super.callCid,
     required this.sentByUserId,
-    required this.info,
     required this.createdAt,
     required this.details,
     required this.users,
@@ -186,8 +185,6 @@ class CoordinatorCallRejectedEvent extends CoordinatorCallEvent {
 
   final String sentByUserId;
   final DateTime createdAt;
-  // TODO remove props below
-  final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
 
@@ -196,7 +193,6 @@ class CoordinatorCallRejectedEvent extends CoordinatorCallEvent {
         ...super.props,
         sentByUserId,
         createdAt,
-        info,
         details,
         users,
       ];
@@ -362,7 +358,6 @@ class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
     required this.senderUserId,
     required this.createdAt,
     required this.eventType,
-    required this.info,
     required this.details,
     required this.users,
     required this.custom,
@@ -372,8 +367,6 @@ class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
   final DateTime createdAt;
   final String eventType;
   final Map<String, Object>? custom;
-  // TODO remove below
-  final CallInfo info;
   final CallDetails details;
   final Map<String, CallUser> users;
 
@@ -384,7 +377,6 @@ class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
         createdAt,
         eventType,
         custom,
-        info,
         details,
         users,
       ];
