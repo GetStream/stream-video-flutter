@@ -117,6 +117,7 @@ class CoordinatorCallReducer {
             byUserId: removed.userId,
           ),
         ),
+        sessionId: '',
         callParticipants: callParticipants,
       );
     }
@@ -135,31 +136,42 @@ class CoordinatorCallReducer {
       _logger.w(() => '[reduceCallEnded] rejected (status is not Active)');
       return state;
     }
-    final participantIndex = state.callParticipants.indexWhere((participant) {
-      return participant.userId == event.endedByUserId;
-    });
-    if (participantIndex == -1) {
-      _logger.w(
-        () => '[reduceCallEnded] rejected '
-            '(by unknown user): ${event.endedByUserId}',
-      );
+    if (state.callCid != event.callCid) {
+      _logger.w(() => '[reduceCallEnded] rejected (invalid cid): $event');
       return state;
     }
-    final callParticipants = [...state.callParticipants];
-    final removed = callParticipants.removeAt(participantIndex);
-    if (removed.userId == state.currentUserId ||
-        callParticipants.hasSingle(state.currentUserId)) {
-      return state.copyWith(
-        status: CallStatus.disconnected(
-          DisconnectReason.cancelled(
-            byUserId: removed.userId,
-          ),
-        ),
-        callParticipants: callParticipants,
-      );
-    }
+    // final participantIndex = state.callParticipants.indexWhere((participant) {
+    //   return participant.userId == event.endedByUserId;
+    // });
+    // if (participantIndex == -1) {
+    //   _logger.w(
+    //     () => '[reduceCallEnded] rejected '
+    //         '(by unknown user): ${event.endedByUserId}',
+    //   );
+    //   return state;
+    // }
+    // final callParticipants = [...state.callParticipants];
+    // final removed = callParticipants.removeAt(participantIndex);
+    // if (removed.userId == state.currentUserId ||
+    //     callParticipants.hasSingle(state.currentUserId)) {
+    //   return state.copyWith(
+    //     status: CallStatus.disconnected(
+    //       DisconnectReason.cancelled(
+    //         byUserId: removed.userId,
+    //       ),
+    //     ),
+    //     callParticipants: callParticipants,
+    //   );
+    // }
+    // return state.copyWith(
+    //   callParticipants: callParticipants,
+    // );
+
     return state.copyWith(
-      callParticipants: callParticipants,
+      status: CallStatus.disconnected(
+        DisconnectReason.ended(),
+      ),
+      callParticipants: const [],
     );
   }
 

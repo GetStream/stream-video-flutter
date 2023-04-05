@@ -103,6 +103,7 @@ class LifecycleReducer {
       status: CallStatus.disconnected(
         DisconnectReason.ended(),
       ),
+      sessionId: '',
     );
   }
 
@@ -112,7 +113,11 @@ class LifecycleReducer {
   ) {
     _logger.w(() => '[reduceCallDisconnected] state: $state');
     return state.copyWith(
-      status: CallStatus.disconnected(DisconnectReason.manuallyClosed()),
+      status: CallStatus.disconnected(
+        DisconnectReason.cancelled(
+          byUserId: state.currentUserId,
+        ),
+      ),
       sessionId: '',
       callParticipants: const [],
     );
@@ -124,8 +129,10 @@ class LifecycleReducer {
   ) {
     _logger.e(() => '[reduceCallTimeout] state: $state');
     return state.copyWith(
-      status:
-          CallStatus.disconnected(DisconnectReason.timeout(action.timeLimit)),
+      status: CallStatus.disconnected(
+        DisconnectReason.timeout(action.timeLimit),
+      ),
+      sessionId: '',
     );
   }
 
