@@ -13,7 +13,7 @@ extension MemberExt on open.MemberResponse {
   CallMember toCallMember() {
     return CallMember(
       userId: userId,
-      role: role,
+      role: role ?? '',
       createdAt: createdAt,
       updatedAt: updatedAt,
     );

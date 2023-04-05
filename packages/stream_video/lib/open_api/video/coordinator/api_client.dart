@@ -205,6 +205,14 @@ class ApiClient {
           return CallCreatedEvent.fromJson(value);
         case 'CallEndedEvent':
           return CallEndedEvent.fromJson(value);
+        case 'CallMemberAddedEvent':
+          return CallMemberAddedEvent.fromJson(value);
+        case 'CallMemberRemovedEvent':
+          return CallMemberRemovedEvent.fromJson(value);
+        case 'CallMemberUpdatedEvent':
+          return CallMemberUpdatedEvent.fromJson(value);
+        case 'CallMemberUpdatedPermissionEvent':
+          return CallMemberUpdatedPermissionEvent.fromJson(value);
         case 'CallReactionEvent':
           return CallReactionEvent.fromJson(value);
         case 'CallRecording':
@@ -349,6 +357,10 @@ class ApiClient {
           return UnblockUserResponse.fromJson(value);
         case 'UnblockedUserEvent':
           return UnblockedUserEvent.fromJson(value);
+        case 'UpdateCallMembersRequest':
+          return UpdateCallMembersRequest.fromJson(value);
+        case 'UpdateCallMembersResponse':
+          return UpdateCallMembersResponse.fromJson(value);
         case 'UpdateCallRequest':
           return UpdateCallRequest.fromJson(value);
         case 'UpdateCallResponse':

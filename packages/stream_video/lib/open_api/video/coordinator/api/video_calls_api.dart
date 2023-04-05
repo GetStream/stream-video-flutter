@@ -909,4 +909,70 @@ class VideoCallsApi {
     }
     return null;
   }
+
+  /// Update Call Member
+  ///
+  ///   Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [UpdateCallMembersRequest] updateCallMembersRequest (required):
+  Future<Response> updateCallMembersWithHttpInfo(String type, String id, UpdateCallMembersRequest updateCallMembersRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/call/{type}/{id}/members'
+      .replaceAll('{type}', type)
+      .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody = updateCallMembersRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Update Call Member
+  ///
+  ///   Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [UpdateCallMembersRequest] updateCallMembersRequest (required):
+  Future<UpdateCallMembersResponse?> updateCallMembers(String type, String id, UpdateCallMembersRequest updateCallMembersRequest,) async {
+    final response = await updateCallMembersWithHttpInfo(type, id, updateCallMembersRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UpdateCallMembersResponse',) as UpdateCallMembersResponse;
+    
+    }
+    return null;
+  }
 }
