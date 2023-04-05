@@ -71,6 +71,7 @@ class Participant extends $pb.GeneratedMessage {
     ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
     ..aOS(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'image')
     ..aOM<$1.Struct>(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'custom', subBuilder: $1.Struct.create)
+    ..pPS(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'roles')
     ..hasRequiredFields = false
   ;
 
@@ -88,6 +89,7 @@ class Participant extends $pb.GeneratedMessage {
     $core.String? name,
     $core.String? image,
     $1.Struct? custom,
+    $core.Iterable<$core.String>? roles,
   }) {
     final _result = create();
     if (userId != null) {
@@ -125,6 +127,9 @@ class Participant extends $pb.GeneratedMessage {
     }
     if (custom != null) {
       _result.custom = custom;
+    }
+    if (roles != null) {
+      _result.roles.addAll(roles);
     }
     return _result;
   }
@@ -254,6 +259,9 @@ class Participant extends $pb.GeneratedMessage {
   void clearCustom() => clearField(12);
   @$pb.TagNumber(12)
   $1.Struct ensureCustom() => $_ensure(11);
+
+  @$pb.TagNumber(13)
+  $core.List<$core.String> get roles => $_getList(12);
 }
 
 class StreamQuality extends $pb.GeneratedMessage {

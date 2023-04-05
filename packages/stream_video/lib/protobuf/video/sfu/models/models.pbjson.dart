@@ -80,6 +80,19 @@ const ErrorCode$json = const {
 
 /// Descriptor for `ErrorCode`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List errorCodeDescriptor = $convert.base64Decode('CglFcnJvckNvZGUSGgoWRVJST1JfQ09ERV9VTlNQRUNJRklFRBAAEiYKIkVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19OT1RfRk9VTkQQZBImCiJFUlJPUl9DT0RFX1BVQkxJU0hfVFJBQ0tTX01JU01BVENIEGUSKQolRVJST1JfQ09ERV9QVUJMSVNIX1RSQUNLX09VVF9PRl9PUkRFUhBmEjIKLkVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19WSURFT19MQVlFUl9OT1RfRk9VTkQQZxIlCiBFUlJPUl9DT0RFX1BBUlRJQ0lQQU5UX05PVF9GT1VORBDIARIeChlFUlJPUl9DT0RFX0NBTExfTk9UX0ZPVU5EEKwCEikKJEVSUk9SX0NPREVfUkVRVUVTVF9WQUxJREFUSU9OX0ZBSUxFRBCQAxIfChpFUlJPUl9DT0RFX1VOQVVUSEVOVElDQVRFRBCRAxIhChxFUlJPUl9DT0RFX1BFUk1JU1NJT05fREVOSUVEEJMDEiEKHEVSUk9SX0NPREVfVE9PX01BTllfUkVRVUVTVFMQrQMSJQogRVJST1JfQ09ERV9JTlRFUk5BTF9TRVJWRVJfRVJST1IQ9AM=');
+@$core.Deprecated('Use trackUnpublishReasonDescriptor instead')
+const TrackUnpublishReason$json = const {
+  '1': 'TrackUnpublishReason',
+  '2': const [
+    const {'1': 'TRACK_UNPUBLISH_REASON_UNSPECIFIED', '2': 0},
+    const {'1': 'TRACK_UNPUBLISH_REASON_USER_MUTED', '2': 1},
+    const {'1': 'TRACK_UNPUBLISH_REASON_PERMISSION_REVOKED', '2': 2},
+    const {'1': 'TRACK_UNPUBLISH_REASON_MODERATION', '2': 3},
+  ],
+};
+
+/// Descriptor for `TrackUnpublishReason`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List trackUnpublishReasonDescriptor = $convert.base64Decode('ChRUcmFja1VucHVibGlzaFJlYXNvbhImCiJUUkFDS19VTlBVQkxJU0hfUkVBU09OX1VOU1BFQ0lGSUVEEAASJQohVFJBQ0tfVU5QVUJMSVNIX1JFQVNPTl9VU0VSX01VVEVEEAESLQopVFJBQ0tfVU5QVUJMSVNIX1JFQVNPTl9QRVJNSVNTSU9OX1JFVk9LRUQQAhIlCiFUUkFDS19VTlBVQkxJU0hfUkVBU09OX01PREVSQVRJT04QAw==');
 @$core.Deprecated('Use callStateDescriptor instead')
 const CallState$json = const {
   '1': 'CallState',
@@ -106,11 +119,12 @@ const Participant$json = const {
     const {'1': 'name', '3': 10, '4': 1, '5': 9, '10': 'name'},
     const {'1': 'image', '3': 11, '4': 1, '5': 9, '10': 'image'},
     const {'1': 'custom', '3': 12, '4': 1, '5': 11, '6': '.google.protobuf.Struct', '10': 'custom'},
+    const {'1': 'roles', '3': 13, '4': 3, '5': 9, '10': 'roles'},
   ],
 };
 
 /// Descriptor for `Participant`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List participantDescriptor = $convert.base64Decode('CgtQYXJ0aWNpcGFudBIXCgd1c2VyX2lkGAEgASgJUgZ1c2VySWQSHQoKc2Vzc2lvbl9pZBgCIAEoCVIJc2Vzc2lvbklkEk0KEHB1Ymxpc2hlZF90cmFja3MYAyADKA4yIi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5UcmFja1R5cGVSD3B1Ymxpc2hlZFRyYWNrcxI3Cglqb2luZWRfYXQYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUghqb2luZWRBdBIuChN0cmFja19sb29rdXBfcHJlZml4GAUgASgJUhF0cmFja0xvb2t1cFByZWZpeBJZChJjb25uZWN0aW9uX3F1YWxpdHkYBiABKA4yKi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Db25uZWN0aW9uUXVhbGl0eVIRY29ubmVjdGlvblF1YWxpdHkSHwoLaXNfc3BlYWtpbmcYByABKAhSCmlzU3BlYWtpbmcSLgoTaXNfZG9taW5hbnRfc3BlYWtlchgIIAEoCFIRaXNEb21pbmFudFNwZWFrZXISHwoLYXVkaW9fbGV2ZWwYCSABKAJSCmF1ZGlvTGV2ZWwSEgoEbmFtZRgKIAEoCVIEbmFtZRIUCgVpbWFnZRgLIAEoCVIFaW1hZ2USLwoGY3VzdG9tGAwgASgLMhcuZ29vZ2xlLnByb3RvYnVmLlN0cnVjdFIGY3VzdG9t');
+final $typed_data.Uint8List participantDescriptor = $convert.base64Decode('CgtQYXJ0aWNpcGFudBIXCgd1c2VyX2lkGAEgASgJUgZ1c2VySWQSHQoKc2Vzc2lvbl9pZBgCIAEoCVIJc2Vzc2lvbklkEk0KEHB1Ymxpc2hlZF90cmFja3MYAyADKA4yIi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5UcmFja1R5cGVSD3B1Ymxpc2hlZFRyYWNrcxI3Cglqb2luZWRfYXQYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUghqb2luZWRBdBIuChN0cmFja19sb29rdXBfcHJlZml4GAUgASgJUhF0cmFja0xvb2t1cFByZWZpeBJZChJjb25uZWN0aW9uX3F1YWxpdHkYBiABKA4yKi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Db25uZWN0aW9uUXVhbGl0eVIRY29ubmVjdGlvblF1YWxpdHkSHwoLaXNfc3BlYWtpbmcYByABKAhSCmlzU3BlYWtpbmcSLgoTaXNfZG9taW5hbnRfc3BlYWtlchgIIAEoCFIRaXNEb21pbmFudFNwZWFrZXISHwoLYXVkaW9fbGV2ZWwYCSABKAJSCmF1ZGlvTGV2ZWwSEgoEbmFtZRgKIAEoCVIEbmFtZRIUCgVpbWFnZRgLIAEoCVIFaW1hZ2USLwoGY3VzdG9tGAwgASgLMhcuZ29vZ2xlLnByb3RvYnVmLlN0cnVjdFIGY3VzdG9tEhQKBXJvbGVzGA0gAygJUgVyb2xlcw==');
 @$core.Deprecated('Use streamQualityDescriptor instead')
 const StreamQuality$json = const {
   '1': 'StreamQuality',

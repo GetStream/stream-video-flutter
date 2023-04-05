@@ -118,3 +118,22 @@ class ErrorCode extends $pb.ProtobufEnum {
   const ErrorCode._($core.int v, $core.String n) : super(v, n);
 }
 
+class TrackUnpublishReason extends $pb.ProtobufEnum {
+  static const TrackUnpublishReason TRACK_UNPUBLISH_REASON_UNSPECIFIED = TrackUnpublishReason._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRACK_UNPUBLISH_REASON_UNSPECIFIED');
+  static const TrackUnpublishReason TRACK_UNPUBLISH_REASON_USER_MUTED = TrackUnpublishReason._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRACK_UNPUBLISH_REASON_USER_MUTED');
+  static const TrackUnpublishReason TRACK_UNPUBLISH_REASON_PERMISSION_REVOKED = TrackUnpublishReason._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRACK_UNPUBLISH_REASON_PERMISSION_REVOKED');
+  static const TrackUnpublishReason TRACK_UNPUBLISH_REASON_MODERATION = TrackUnpublishReason._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRACK_UNPUBLISH_REASON_MODERATION');
+
+  static const $core.List<TrackUnpublishReason> values = <TrackUnpublishReason> [
+    TRACK_UNPUBLISH_REASON_UNSPECIFIED,
+    TRACK_UNPUBLISH_REASON_USER_MUTED,
+    TRACK_UNPUBLISH_REASON_PERMISSION_REVOKED,
+    TRACK_UNPUBLISH_REASON_MODERATION,
+  ];
+
+  static final $core.Map<$core.int, TrackUnpublishReason> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static TrackUnpublishReason? valueOf($core.int value) => _byValue[value];
+
+  const TrackUnpublishReason._($core.int v, $core.String n) : super(v, n);
+}
+

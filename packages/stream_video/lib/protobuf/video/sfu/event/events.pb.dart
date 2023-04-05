@@ -640,6 +640,7 @@ class TrackUnpublished extends $pb.GeneratedMessage {
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
     ..e<$0.TrackType>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED, valueOf: $0.TrackType.valueOf, enumValues: $0.TrackType.values)
+    ..e<$0.TrackUnpublishReason>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cause', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackUnpublishReason.TRACK_UNPUBLISH_REASON_UNSPECIFIED, valueOf: $0.TrackUnpublishReason.valueOf, enumValues: $0.TrackUnpublishReason.values)
     ..hasRequiredFields = false
   ;
 
@@ -648,6 +649,7 @@ class TrackUnpublished extends $pb.GeneratedMessage {
     $core.String? userId,
     $core.String? sessionId,
     $0.TrackType? type,
+    $0.TrackUnpublishReason? cause,
   }) {
     final _result = create();
     if (userId != null) {
@@ -658,6 +660,9 @@ class TrackUnpublished extends $pb.GeneratedMessage {
     }
     if (type != null) {
       _result.type = type;
+    }
+    if (cause != null) {
+      _result.cause = cause;
     }
     return _result;
   }
@@ -708,6 +713,15 @@ class TrackUnpublished extends $pb.GeneratedMessage {
   $core.bool hasType() => $_has(2);
   @$pb.TagNumber(3)
   void clearType() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $0.TrackUnpublishReason get cause => $_getN(3);
+  @$pb.TagNumber(4)
+  set cause($0.TrackUnpublishReason v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasCause() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCause() => clearField(4);
 }
 
 class JoinRequest extends $pb.GeneratedMessage {
