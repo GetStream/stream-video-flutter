@@ -25,9 +25,9 @@ typedef LogHandlerFunction = void Function(
 ]);
 
 const _defaultCoordinatorRpcUrl =
-    'https://video-edge-frankfurt-ce1.stream-io-api.com/video';
+    'https://video.stream-io-api.com/video';
 const _defaultCoordinatorWsUrl =
-    'wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect';
+    'wss://video.stream-io-api.com/video/connect';
 
 /// The client responsible for handling config and maintaining calls
 abstract class StreamVideo {
