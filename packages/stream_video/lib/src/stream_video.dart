@@ -24,10 +24,8 @@ typedef LogHandlerFunction = void Function(
   StackTrace? stk,
 ]);
 
-const _defaultCoordinatorRpcUrl =
-    'https://video.stream-io-api.com/video';
-const _defaultCoordinatorWsUrl =
-    'wss://video.stream-io-api.com/video/connect';
+const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com/video';
+const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
 
 /// The client responsible for handling config and maintaining calls
 abstract class StreamVideo {

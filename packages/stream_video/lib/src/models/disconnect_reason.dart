@@ -27,10 +27,6 @@ abstract class DisconnectReason extends Equatable {
     return DisconnectReasonCancelled(byUserId: byUserId);
   }
 
-  factory DisconnectReason.manuallyClosed() {
-    return DisconnectReasonManuallyClosed();
-  }
-
   factory DisconnectReason.ended() {
     return DisconnectReasonEnded();
   }

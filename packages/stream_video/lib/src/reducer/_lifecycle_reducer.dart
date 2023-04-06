@@ -158,7 +158,9 @@ class LifecycleReducer {
   ) {
     _logger.e(() => '[reduceCallConnectFailed] state: $state');
     return state.copyWith(
-      status: CallStatus.disconnected(DisconnectReason.failure(action.error)),
+      status: CallStatus.disconnected(
+        DisconnectReason.failure(action.error),
+      ),
     );
   }
 
