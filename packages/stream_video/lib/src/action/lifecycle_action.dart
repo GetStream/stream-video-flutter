@@ -15,6 +15,10 @@ class CallUserIdAction extends LifecycleAction {
   final String userId;
 }
 
+class CallEndedAction extends LifecycleAction {
+  const CallEndedAction();
+}
+
 class CallDisconnectedAction extends LifecycleAction {
   const CallDisconnectedAction();
 }
@@ -42,6 +46,13 @@ class CallSessionStartAction extends LifecycleAction {
 
   final String sessionId;
 }
+
+class CallConnectingAction extends LifecycleAction {
+  const CallConnectingAction(this.attempt);
+
+  final int attempt;
+}
+
 
 class CallConnectedAction extends LifecycleAction {
   const CallConnectedAction();

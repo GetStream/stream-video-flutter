@@ -16,8 +16,7 @@ class MemberResponse {
     required this.createdAt,
     this.custom = const {},
     this.deletedAt,
-    required this.duration,
-    required this.role,
+    this.role,
     required this.updatedAt,
     required this.user,
     required this.userId,
@@ -38,9 +37,13 @@ class MemberResponse {
   ///
   DateTime? deletedAt;
 
-  String duration;
-
-  String role;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? role;
 
   /// Date/time of the last update
   DateTime updatedAt;
@@ -54,7 +57,6 @@ class MemberResponse {
      other.createdAt == createdAt &&
      other.custom == custom &&
      other.deletedAt == deletedAt &&
-     other.duration == duration &&
      other.role == role &&
      other.updatedAt == updatedAt &&
      other.user == user &&
@@ -66,14 +68,13 @@ class MemberResponse {
     (createdAt.hashCode) +
     (custom.hashCode) +
     (deletedAt == null ? 0 : deletedAt!.hashCode) +
-    (duration.hashCode) +
-    (role.hashCode) +
+    (role == null ? 0 : role!.hashCode) +
     (updatedAt.hashCode) +
     (user.hashCode) +
     (userId.hashCode);
 
   @override
-  String toString() => 'MemberResponse[createdAt=$createdAt, custom=$custom, deletedAt=$deletedAt, duration=$duration, role=$role, updatedAt=$updatedAt, user=$user, userId=$userId]';
+  String toString() => 'MemberResponse[createdAt=$createdAt, custom=$custom, deletedAt=$deletedAt, role=$role, updatedAt=$updatedAt, user=$user, userId=$userId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -84,8 +85,11 @@ class MemberResponse {
     } else {
       json[r'deleted_at'] = null;
     }
-      json[r'duration'] = this.duration;
+    if (this.role != null) {
       json[r'role'] = this.role;
+    } else {
+      json[r'role'] = null;
+    }
       json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
       json[r'user'] = this.user;
       json[r'user_id'] = this.userId;
@@ -114,8 +118,7 @@ class MemberResponse {
         createdAt: mapDateTime(json, r'created_at', '')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         deletedAt: mapDateTime(json, r'deleted_at', ''),
-        duration: mapValueOfType<String>(json, r'duration')!,
-        role: mapValueOfType<String>(json, r'role')!,
+        role: mapValueOfType<String>(json, r'role'),
         updatedAt: mapDateTime(json, r'updated_at', '')!,
         user: UserResponse.fromJson(json[r'user'])!,
         userId: mapValueOfType<String>(json, r'user_id')!,
@@ -170,8 +173,6 @@ class MemberResponse {
   static const requiredKeys = <String>{
     'created_at',
     'custom',
-    'duration',
-    'role',
     'updated_at',
     'user',
     'user_id',

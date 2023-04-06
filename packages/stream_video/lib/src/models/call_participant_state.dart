@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import 'models/call_track_state.dart';
-import 'sfu/data/models/sfu_connection_quality.dart';
-import 'sfu/data/models/sfu_track_type.dart';
+import '../sfu/data/models/sfu_connection_quality.dart';
+import '../sfu/data/models/sfu_track_type.dart';
+import 'call_track_state.dart';
 
 @immutable
 class CallParticipantState

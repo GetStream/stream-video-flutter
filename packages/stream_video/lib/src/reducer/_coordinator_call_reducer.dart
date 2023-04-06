@@ -1,12 +1,12 @@
 import 'package:collection/collection.dart';
 
 import '../action/coordinator_call_action.dart';
-import '../call_participant_state.dart';
 import '../call_state.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../logger/impl/tagged_logger.dart';
+import '../models/call_participant_state.dart';
 import '../models/call_status.dart';
-import '../models/drop_reason.dart';
+import '../models/disconnect_reason.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
@@ -74,7 +74,7 @@ class CoordinatorCallReducer {
       return state;
     }
     final participant = state.callParticipants.firstWhereOrNull((participant) {
-      return participant.userId == event.sentByUserId;
+      return participant.userId == event.acceptedByUserId;
     });
     if (participant == null) {
       _logger.w(() => '[reduceCallAccepted] rejected (accepted by non-Member)');
@@ -98,12 +98,12 @@ class CoordinatorCallReducer {
       return state;
     }
     final participantIndex = state.callParticipants.indexWhere((participant) {
-      return participant.userId == event.sentByUserId;
+      return participant.userId == event.rejectedByUserId;
     });
     if (participantIndex == -1) {
       _logger.w(
         () => '[reduceCallRejected] rejected '
-            '(by unknown user): ${event.sentByUserId}',
+            '(by unknown user): ${event.rejectedByUserId}',
       );
       return state;
     }
@@ -112,11 +112,12 @@ class CoordinatorCallReducer {
     if (removed.userId == state.currentUserId ||
         callParticipants.hasSingle(state.currentUserId)) {
       return state.copyWith(
-        status: CallStatus.drop(
-          DropReason.rejected(
+        status: CallStatus.disconnected(
+          DisconnectReason.rejected(
             byUserId: removed.userId,
           ),
         ),
+        sessionId: '',
         callParticipants: callParticipants,
       );
     }
@@ -129,36 +130,48 @@ class CoordinatorCallReducer {
     CallState state,
     CoordinatorCallEndedEvent event,
   ) {
+    _logger.i(() => '[reduceCallCancelled] state: $state');
     final status = state.status;
     if (status is! CallStatusActive) {
       _logger.w(() => '[reduceCallEnded] rejected (status is not Active)');
       return state;
     }
-    final participantIndex = state.callParticipants.indexWhere((participant) {
-      return participant.userId == event.sentByUserId;
-    });
-    if (participantIndex == -1) {
-      _logger.w(
-        () => '[reduceCallEnded] rejected '
-            '(by unknown user): ${event.sentByUserId}',
-      );
+    if (state.callCid != event.callCid) {
+      _logger.w(() => '[reduceCallEnded] rejected (invalid cid): $event');
       return state;
     }
-    final callParticipants = [...state.callParticipants];
-    final removed = callParticipants.removeAt(participantIndex);
-    if (removed.userId == state.currentUserId ||
-        callParticipants.hasSingle(state.currentUserId)) {
-      return state.copyWith(
-        status: CallStatus.drop(
-          DropReason.cancelled(
-            byUserId: removed.userId,
-          ),
-        ),
-        callParticipants: callParticipants,
-      );
-    }
+    // final participantIndex = state.callParticipants.indexWhere((participant) {
+    //   return participant.userId == event.endedByUserId;
+    // });
+    // if (participantIndex == -1) {
+    //   _logger.w(
+    //     () => '[reduceCallEnded] rejected '
+    //         '(by unknown user): ${event.endedByUserId}',
+    //   );
+    //   return state;
+    // }
+    // final callParticipants = [...state.callParticipants];
+    // final removed = callParticipants.removeAt(participantIndex);
+    // if (removed.userId == state.currentUserId ||
+    //     callParticipants.hasSingle(state.currentUserId)) {
+    //   return state.copyWith(
+    //     status: CallStatus.disconnected(
+    //       DisconnectReason.cancelled(
+    //         byUserId: removed.userId,
+    //       ),
+    //     ),
+    //     callParticipants: callParticipants,
+    //   );
+    // }
+    // return state.copyWith(
+    //   callParticipants: callParticipants,
+    // );
+
     return state.copyWith(
-      callParticipants: callParticipants,
+      status: CallStatus.disconnected(
+        DisconnectReason.ended(),
+      ),
+      callParticipants: const [],
     );
   }
 

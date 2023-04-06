@@ -13,8 +13,6 @@ class CallControlReducer {
       return _reduceCallAccepted(state, action);
     } else if (action is RejectCall) {
       return _reduceCallRejected(state, action);
-    } else if (action is EndCall) {
-      return _reduceCallEnded(state, action);
     } else if (action is SetCameraEnabled) {
       return _reduceCameraEnabled(state, action);
     } else if (action is SetMicrophoneEnabled) {
@@ -162,22 +160,10 @@ class CallControlReducer {
       );
       return state;
     }
+    _logger.i(() => '[reduceCallRejected] action: $action, state: $state');
     return state.copyWith(
-      status: CallStatus.drop(
-        DropReason.rejected(
-          byUserId: state.currentUserId,
-        ),
-      ),
-    );
-  }
-
-  CallState _reduceCallEnded(
-    CallState state,
-    EndCall action,
-  ) {
-    return state.copyWith(
-      status: CallStatus.drop(
-        DropReason.cancelled(
+      status: CallStatus.disconnected(
+        DisconnectReason.rejected(
           byUserId: state.currentUserId,
         ),
       ),

@@ -6,11 +6,14 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'env/env.dart';
 import 'log_config.dart';
+import 'proxy/proxy.dart';
 import 'screen/login_screen.dart';
 
 const _tag = 'MyApp';
 
 Future<void> main() async {
+  //useProxy('192.168.1.73:8888');
+
   WidgetsFlutterBinding.ensureInitialized();
 
   StreamVideo.init(

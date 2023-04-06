@@ -28,4 +28,8 @@ class TaggedLogger {
   void e(MessageBuilder message) {
     streamLog.e(tag, message);
   }
+
+  void log(Priority priority, MessageBuilder message) {
+    streamLog.log(priority, tag, message);
+  }
 }

@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../call_permission.dart';
 import 'call_cid.dart';
+import 'call_permission.dart';
 import 'call_setting.dart';
 
 @immutable
@@ -12,12 +12,13 @@ class CallMetadata with EquatableMixin {
     required this.info,
     required this.users,
   });
+
   final CallDetails details;
   final CallInfo info;
   final Map<String, CallUser> users;
 
   @override
-  List<Object> get props => [details, info, users];
+  List<Object?> get props => [details, info, users];
 
   @override
   String toString() {
@@ -42,7 +43,7 @@ class CallDetails with EquatableMixin {
   final bool isRecordingEnabled;
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         members,
         ownCapabilities,
         settings,
@@ -63,22 +64,24 @@ class CallDetails with EquatableMixin {
 class CallInfo with EquatableMixin {
   const CallInfo({
     required this.cid,
-    required this.createdByUserId,
+    required this.createdBy,
     this.createdAt,
     this.updatedAt,
   });
 
   final StreamCallCid cid;
-  final String createdByUserId;
+  final CallUser createdBy;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
+  String get createdByUserId => createdBy.id;
+
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         cid,
-        createdByUserId,
-        createdAt ?? 0,
-        updatedAt ?? 0,
+        createdBy,
+        createdAt,
+        updatedAt,
       ];
 
   @override
@@ -92,31 +95,28 @@ class CallInfo with EquatableMixin {
 @immutable
 class CallMember with EquatableMixin {
   const CallMember({
-    required this.callCid,
     required this.userId,
     required this.role,
     this.createdAt,
     this.updatedAt,
   });
 
-  final String callCid;
   final String userId;
   final String role;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
   @override
-  List<Object> get props => [
-        callCid,
+  List<Object?> get props => [
         userId,
         role,
-        createdAt ?? 0,
-        updatedAt ?? 0,
+        createdAt,
+        updatedAt,
       ];
 
   @override
   String toString() {
-    return 'CallMember{callCid: $callCid, userId: $userId, role: $role,'
+    return 'CallMember{userId: $userId, role: $role,'
         ' createdAt: $createdAt, updatedAt: $updatedAt}';
   }
 }
@@ -143,15 +143,15 @@ class CallUser with EquatableMixin {
   final Map<String, Object>? custom;
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         id,
         name,
         role,
         image,
         teams,
-        createdAt ?? 0,
-        updatedAt ?? 0,
-        custom ?? '',
+        createdAt,
+        updatedAt,
+        custom,
       ];
 
   @override

@@ -29,11 +29,13 @@ mixin AppRoutes {
           builder: (_) => const HomeScreen(),
         );
       case Routes.call:
+        final args = settings.arguments! as List;
         return MaterialPageRoute(
           settings: const RouteSettings(name: Routes.call),
           builder: (context) {
-            final call = settings.arguments! as Call;
-            return CallScreen(call: call);
+            final call = args[0];
+            final options = args[1];
+            return CallScreen(call: call, callConnectOptions: options);
           },
         );
       case Routes.lobby:

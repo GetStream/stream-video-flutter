@@ -21,8 +21,8 @@ class WSEvent {
     required this.call,
     this.members = const [],
     required this.ringing,
-    required this.reaction,
     this.capabilitiesByRole = const {},
+    required this.reaction,
     this.custom = const {},
     required this.connectionId,
     this.permissions = const [],
@@ -49,16 +49,16 @@ class WSEvent {
 
   CallResponse call;
 
-  /// the members added to this call
+  /// The list of members that were updated
   List<MemberResponse> members;
 
   /// true when the call was created with ring enabled
   bool ringing;
 
-  ReactionResponse reaction;
-
   /// The capabilities by role for this call
   Map<String, List<String>> capabilitiesByRole;
+
+  ReactionResponse reaction;
 
   /// Custom data for this object
   Map<String, Object> custom;
@@ -84,8 +84,8 @@ class WSEvent {
      other.call == call &&
      other.members == members &&
      other.ringing == ringing &&
-     other.reaction == reaction &&
      other.capabilitiesByRole == capabilitiesByRole &&
+     other.reaction == reaction &&
      other.custom == custom &&
      other.connectionId == connectionId &&
      other.permissions == permissions &&
@@ -103,8 +103,8 @@ class WSEvent {
     (call.hashCode) +
     (members.hashCode) +
     (ringing.hashCode) +
-    (reaction.hashCode) +
     (capabilitiesByRole.hashCode) +
+    (reaction.hashCode) +
     (custom.hashCode) +
     (connectionId.hashCode) +
     (permissions.hashCode) +
@@ -112,7 +112,7 @@ class WSEvent {
     (me.hashCode);
 
   @override
-  String toString() => 'WSEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, call=$call, members=$members, ringing=$ringing, reaction=$reaction, capabilitiesByRole=$capabilitiesByRole, custom=$custom, connectionId=$connectionId, permissions=$permissions, ownCapabilities=$ownCapabilities, me=$me]';
+  String toString() => 'WSEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, call=$call, members=$members, ringing=$ringing, capabilitiesByRole=$capabilitiesByRole, reaction=$reaction, custom=$custom, connectionId=$connectionId, permissions=$permissions, ownCapabilities=$ownCapabilities, me=$me]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -128,8 +128,8 @@ class WSEvent {
       json[r'call'] = this.call;
       json[r'members'] = this.members;
       json[r'ringing'] = this.ringing;
-      json[r'reaction'] = this.reaction;
       json[r'capabilities_by_role'] = this.capabilitiesByRole;
+      json[r'reaction'] = this.reaction;
       json[r'custom'] = this.custom;
       json[r'connection_id'] = this.connectionId;
       json[r'permissions'] = this.permissions;
@@ -165,10 +165,10 @@ class WSEvent {
         call: CallResponse.fromJson(json[r'call'])!,
         members: MemberResponse.listFromJson(json[r'members'])!,
         ringing: mapValueOfType<bool>(json, r'ringing')!,
-        reaction: ReactionResponse.fromJson(json[r'reaction'])!,
         capabilitiesByRole: json[r'capabilities_by_role'] == null
           ? const {}
             : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
+        reaction: ReactionResponse.fromJson(json[r'reaction'])!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
         permissions: json[r'permissions'] is List
@@ -232,8 +232,8 @@ class WSEvent {
     'call',
     'members',
     'ringing',
-    'reaction',
     'capabilities_by_role',
+    'reaction',
     'custom',
     'connection_id',
     'permissions',

@@ -1,87 +1,84 @@
+import '../logger/impl/tagged_logger.dart';
+import '../utils/result.dart';
 import 'token.dart';
 
-/// A function which can be used to request a Stream Video API token from your
-/// own backend server.
-/// Function requires a single [userId].
-typedef TokenProvider = Future<String> Function(String userId);
+const _emptyUserId = 'stream:none';
 
 /// Handles common token operations
 class TokenManager {
   /// Initialize a new token manager
-  TokenManager({
-    String? userId,
-    Token? token,
-    TokenProvider? tokenProvider,
-  })  : _userId = userId,
-        _token = token,
-        _provider = tokenProvider;
+  TokenManager();
 
-  String? _type;
-  Token? _token;
+  final _logger = taggedLogger(tag: 'SV:TokenManager');
 
-  TokenProvider? _provider;
+  String _userId = _emptyUserId;
 
-  String? _userId;
+  TokenProvider _provider = _StubTokenProvider();
+
+  String? _token;
 
   /// User id to which this TokenManager is configured to
-  String? get userId => _userId;
+  String get userId => _userId;
 
-  /// True if it's a static token
-  bool get isStatic => _type == 'static';
-
-  /// Set a token or a token provider
-  Future<Token> setTokenOrProvider(
+  /// Sets a token provider
+  Future<Result<UserToken>> setTokenProvider(
     String userId, {
-    Token? token,
-    TokenProvider? provider,
+    required TokenProvider tokenProvider,
   }) async {
-    assert(
-      () {
-        if (token == null && provider == null) {
-          throw AssertionError('Provide at-least token or provider');
-        }
-        if (token != null && provider != null) {
-          throw AssertionError("Can't set both token and provider");
-        }
-        return true;
-      }(),
-      '',
-    );
-
+    _logger.d(() => '[setProvider] userId: $userId, provider: $tokenProvider');
     _userId = userId;
-
-    if (token != null) {
-      _type = 'static';
-      _token = token;
-    }
-    if (provider != null) {
-      _type = 'provider';
-      _provider = provider;
-    }
-
-    return loadToken();
+    _provider = tokenProvider;
+    return getToken();
   }
 
   /// Returns the token refreshing the existing one if [refresh] is true
-  Future<Token> loadToken({bool refresh = false}) async {
-    assert(
-      _userId != null && _type != null,
-      'Please call `setTokenOrProvider` before calling `loadToken`',
-    );
+  Future<Result<UserToken>> getToken({bool refresh = false}) async {
+    _logger.d(() => '[getToken] refresh: $refresh, _token: $_token');
     if (refresh || _token == null) {
-      final rawValue = await _provider!(_userId!);
-      _token = Token(rawValue);
+      final result = await _provider.getToken(_userId);
+      _logger.v(() => '[getToken] completed: $result');
+      if (result is! Success<UserToken>) {
+        return result;
+      }
+      _token = result.data;
     }
-    return _token!;
+    return Result.success(_token!);
   }
 
   /// Returns the token refreshing the existing one.
-  Future<Token> refreshToken() => loadToken(refresh: true);
+  Future<Result<UserToken>> refreshToken() {
+    _logger.d(() => '[refreshToken] no args');
+    return getToken(refresh: true);
+  }
 
   /// Resets the token manager
   void reset() {
-    _userId = null;
+    _logger.d(() => '[reset] no args');
+    _userId = _emptyUserId;
+    _provider = _StubTokenProvider();
     _token = null;
-    _provider = null;
+  }
+}
+
+class _StubTokenProvider implements TokenProvider {
+  factory _StubTokenProvider() {
+    return _instance;
+  }
+
+  const _StubTokenProvider._();
+
+  static const _StubTokenProvider _instance = _StubTokenProvider._();
+
+  @override
+  bool get isStatic => true;
+
+  @override
+  Future<Result<UserToken>> getToken(String userId) async {
+    return Result.error('StubTokenProvider is unable to provide a real token');
+  }
+
+  @override
+  set onTokenUpdated(OnTokenUpdated onTokenUpdated) {
+    /* no-op */
   }
 }

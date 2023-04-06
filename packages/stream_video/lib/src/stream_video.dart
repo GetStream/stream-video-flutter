@@ -1,14 +1,15 @@
 import 'dart:async';
 
 import '../stream_video.dart';
-import 'call_permission.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'internal/_instance_holder.dart';
 import 'logger/impl/external_logger.dart';
 import 'models/call_device.dart';
+import 'models/call_permission.dart';
 import 'models/call_reaction.dart';
 import 'models/queried_calls.dart';
 import 'models/queried_members.dart';
+import 'retry/retry_policy.dart';
 import 'shared_emitter.dart';
 import 'stream_video_impl.dart';
 import 'token/token_manager.dart';
@@ -23,10 +24,8 @@ typedef LogHandlerFunction = void Function(
   StackTrace? stk,
 ]);
 
-const _defaultCoordinatorRpcUrl =
-    'https://video-edge-frankfurt-ce1.stream-io-api.com/video';
-const _defaultCoordinatorWsUrl =
-    'wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect';
+const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com/video';
+const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
 
 /// The client responsible for handling config and maintaining calls
 abstract class StreamVideo {
@@ -35,17 +34,23 @@ abstract class StreamVideo {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
+    RetryPolicy retryPolicy = const RetryPolicy(),
   }) {
     return StreamVideoImpl(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
+      retryPolicy: retryPolicy,
     );
   }
+
   static final InstanceHolder _instanceHolder = InstanceHolder();
 
   set pushNotificationManager(PushNotificationManager pushNotificationManager);
+
+  /// Returns the current RetryPolicy.
+  RetryPolicy get retryPolicy;
 
   /// Returns the current user if exists.
   UserInfo? get currentUser;
@@ -60,10 +65,9 @@ abstract class StreamVideo {
   void Function(CallCreated)? onCallCreated;
 
   /// Connects the [user] to the Stream Video service.
-  Future<Result<None>> connectUser(
+  Future<Result<String>> connectUser(
     UserInfo user, {
-    Token? token,
-    TokenProvider? provider,
+    required TokenProvider tokenProvider,
   });
 
   /// Disconnects the user from the Stream Video service.
@@ -84,6 +88,7 @@ abstract class StreamVideo {
   /// it will join the existing call.
   Future<Result<CallJoined>> joinCall({
     required StreamCallCid cid,
+    bool create = false,
     void Function(CallReceivedOrCreated)? onReceivedOrCreated,
   });
 
@@ -231,6 +236,7 @@ abstract class StreamVideo {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
+    RetryPolicy retryPolicy = const RetryPolicy(),
     Priority logPriority = Priority.none,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
   }) {
@@ -240,6 +246,7 @@ abstract class StreamVideo {
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
+      retryPolicy: retryPolicy,
     );
   }
 
@@ -289,19 +296,19 @@ void _defaultLogHandler(
 
 extension StreamVideoX on StreamVideo {
   /// Connects the [user] to the Stream Video service.
-  Future<Result<None>> connectUserWithToken(
+  Future<Result<String>> connectUserWithToken(
     UserInfo user,
-    Token token,
+    String token,
   ) {
-    return connectUser(user, token: token);
+    return connectUser(user, tokenProvider: TokenProvider.static(token));
   }
 
   /// Connects the [user] to the Stream Video service.
-  Future<Result<None>> connectUserWithProvider(
+  Future<Result<String>> connectUserWithProvider(
     UserInfo user,
     TokenProvider provider,
   ) {
-    return connectUser(user, provider: provider);
+    return connectUser(user, tokenProvider: provider);
   }
 
   /// Grants the [permissions] to the [userId] in the [callCid].

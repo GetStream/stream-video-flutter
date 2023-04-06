@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../../call_permission.dart';
 import '../../models/call_cid.dart';
+import '../../models/call_permission.dart';
 
 @immutable
 abstract class CoordinatorInput with EquatableMixin {
@@ -75,15 +75,17 @@ class JoinCallInput extends CoordinatorInput {
     this.datacenterId,
     this.members,
     this.ringing,
+    this.create,
   });
 
   final StreamCallCid callCid;
   final String? datacenterId;
   final Iterable<MemberInput>? members;
   final bool? ringing;
+  final bool? create;
 
   @override
-  List<Object?> get props => [datacenterId, callCid, ringing, members];
+  List<Object?> get props => [datacenterId, callCid, ringing, create, members];
 }
 
 class RequestPermissionsInput extends CoordinatorInput {

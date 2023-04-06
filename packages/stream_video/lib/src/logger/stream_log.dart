@@ -65,6 +65,12 @@ class StreamLog {
     }
   }
 
+  void log(Priority priority, Tag tag, MessageBuilder message) {
+    if (_validator.call(Priority.verbose, tag)) {
+      _logger.log(priority, tag, message);
+    }
+  }
+
   static T? _defaultFinder<T extends StreamLogger>([dynamic criteria]) {
     final logger = _instance._logger;
     if (logger is T) return logger;

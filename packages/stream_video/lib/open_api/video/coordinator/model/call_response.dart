@@ -26,7 +26,7 @@ class CallResponse {
     required this.recording,
     required this.settings,
     this.startsAt,
-    required this.team,
+    this.team,
     required this.transcribing,
     required this.type,
     required this.updatedAt,
@@ -77,7 +77,13 @@ class CallResponse {
   ///
   DateTime? startsAt;
 
-  String team;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? team;
 
   bool transcribing;
 
@@ -123,7 +129,7 @@ class CallResponse {
     (recording.hashCode) +
     (settings.hashCode) +
     (startsAt == null ? 0 : startsAt!.hashCode) +
-    (team.hashCode) +
+    (team == null ? 0 : team!.hashCode) +
     (transcribing.hashCode) +
     (type.hashCode) +
     (updatedAt.hashCode);
@@ -154,7 +160,11 @@ class CallResponse {
     } else {
       json[r'starts_at'] = null;
     }
+    if (this.team != null) {
       json[r'team'] = this.team;
+    } else {
+      json[r'team'] = null;
+    }
       json[r'transcribing'] = this.transcribing;
       json[r'type'] = this.type;
       json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
@@ -195,7 +205,7 @@ class CallResponse {
         recording: mapValueOfType<bool>(json, r'recording')!,
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,
         startsAt: mapDateTime(json, r'starts_at', ''),
-        team: mapValueOfType<String>(json, r'team')!,
+        team: mapValueOfType<String>(json, r'team'),
         transcribing: mapValueOfType<bool>(json, r'transcribing')!,
         type: mapValueOfType<String>(json, r'type')!,
         updatedAt: mapDateTime(json, r'updated_at', '')!,
@@ -259,7 +269,6 @@ class CallResponse {
     'own_capabilities',
     'recording',
     'settings',
-    'team',
     'transcribing',
     'type',
     'updated_at',

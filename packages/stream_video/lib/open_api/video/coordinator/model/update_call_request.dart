@@ -17,7 +17,7 @@ class UpdateCallRequest {
     this.settingsOverride,
   });
 
-  /// call custom data
+  /// Custom data for this object
   Map<String, Object> custom;
 
   ///

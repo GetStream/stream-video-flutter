@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  async: ^2.10.0
   equatable: ^2.0.3
   http: ^0.13.4
   protobuf: ^2.1.0
@@ -16,6 +17,7 @@ dependencies:
   uuid: ^3.0.6
   rxdart: ^0.27.5
   web_socket_channel: ^2.2.0
+  connectivity_plus: ^3.0.3
   collection: ^1.16.0
   flutter_webrtc: ^0.9.23
   intl: ^0.17.0

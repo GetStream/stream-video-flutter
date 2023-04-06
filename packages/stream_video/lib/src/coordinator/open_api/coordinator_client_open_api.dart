@@ -13,7 +13,9 @@ import '../../models/call_received_created.dart';
 import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 import '../../models/user_info.dart';
+import '../../retry/retry_policy.dart';
 import '../../shared_emitter.dart';
+import '../../token/token.dart';
 import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
@@ -33,6 +35,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required this.wsUrl,
     required this.apiKey,
     required this.tokenManager,
+    required this.retryPolicy,
   }) : _apiClient = open.ApiClient(
           basePath: rpcUrl,
           authentication:
@@ -43,6 +46,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   final String apiKey;
   final String wsUrl;
   final TokenManager tokenManager;
+  final RetryPolicy retryPolicy;
 
   String? userId;
 
@@ -72,6 +76,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         apiKey: apiKey,
         userInfo: user,
         tokenManager: tokenManager,
+        retryPolicy: retryPolicy,
       );
       _ws = ws;
       _wsSubscription = ws.events.listen((event) {
@@ -90,7 +95,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
   @override
   Future<Result<None>> onUserLogout() async {
+    _logger.d(() => '[onUserLogout] userId: $userId');
     if (_ws == null) {
+      _logger.w(() => '[onUserLogout] rejected (ws is null)');
       return Result.success(None());
     }
     try {
@@ -148,7 +155,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           data: CallCreated(
             callCid: input.callCid,
             ringing: input.ringing ?? false,
-            metadata: result.call.toCallMetadata(),
+            metadata: result.call.toCallMetadata(result.members),
           ),
         ),
       );
@@ -167,7 +174,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         input.callCid.type,
         input.callCid.id,
         open.JoinCallRequest(
-          ring: input.ringing
+          create: input.create,
+          ring: input.ringing,
         ),
         connectionId: _ws?.clientId,
       );
@@ -178,7 +186,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return Result.success(
         CoordinatorJoined(
           wasCreated: result.created,
-          metadata: result.call.toCallMetadata(),
+          metadata: result.call.toCallMetadata(result.members),
           edges: result.edges.map((edge) {
             return SfuEdge(
               name: edge.name,
@@ -240,7 +248,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       }
       return Result.success(
         SfuServerSelected(
-          metadata: result.call.toCallMetadata(),
+          metadata: result.call.toCallMetadata(result.members),
           credentials: result.credentials.toCallCredentials(),
         ),
       );
@@ -597,9 +605,12 @@ class _Authentication extends open.Authentication {
     List<open.QueryParam> queryParams,
     Map<String, String> headerParams,
   ) async {
-    final token = await tokenManager.loadToken();
+    final tokenResult = await tokenManager.getToken();
+    if (tokenResult is! Success<UserToken>) {
+      throw (tokenResult as Failure).error;
+    }
     queryParams.add(open.QueryParam('api_key', apiKey));
-    headerParams['Authorization'] = token.rawValue;
+    headerParams['Authorization'] = tokenResult.data;
     headerParams['stream-auth-type'] = 'jwt';
   }
 }

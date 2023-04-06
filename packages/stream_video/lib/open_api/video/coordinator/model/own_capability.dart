@@ -32,14 +32,18 @@ class OwnCapability {
   static const joinEndedCall = OwnCapability._(r'join-ended-call');
   static const muteUsers = OwnCapability._(r'mute-users');
   static const readCall = OwnCapability._(r'read-call');
+  static const removeCallMember = OwnCapability._(r'remove-call-member');
   static const screenshare = OwnCapability._(r'screenshare');
   static const sendAudio = OwnCapability._(r'send-audio');
   static const sendVideo = OwnCapability._(r'send-video');
   static const startBroadcastCall = OwnCapability._(r'start-broadcast-call');
   static const startRecordCall = OwnCapability._(r'start-record-call');
+  static const startTranscriptionCall = OwnCapability._(r'start-transcription-call');
   static const stopBroadcastCall = OwnCapability._(r'stop-broadcast-call');
   static const stopRecordCall = OwnCapability._(r'stop-record-call');
+  static const stopTranscriptionCall = OwnCapability._(r'stop-transcription-call');
   static const updateCall = OwnCapability._(r'update-call');
+  static const updateCallMember = OwnCapability._(r'update-call-member');
   static const updateCallPermissions = OwnCapability._(r'update-call-permissions');
   static const updateCallSettings = OwnCapability._(r'update-call-settings');
 
@@ -54,14 +58,18 @@ class OwnCapability {
     joinEndedCall,
     muteUsers,
     readCall,
+    removeCallMember,
     screenshare,
     sendAudio,
     sendVideo,
     startBroadcastCall,
     startRecordCall,
+    startTranscriptionCall,
     stopBroadcastCall,
     stopRecordCall,
+    stopTranscriptionCall,
     updateCall,
+    updateCallMember,
     updateCallPermissions,
     updateCallSettings,
   ];
@@ -111,14 +119,18 @@ class OwnCapabilityTypeTransformer {
         case r'join-ended-call': return OwnCapability.joinEndedCall;
         case r'mute-users': return OwnCapability.muteUsers;
         case r'read-call': return OwnCapability.readCall;
+        case r'remove-call-member': return OwnCapability.removeCallMember;
         case r'screenshare': return OwnCapability.screenshare;
         case r'send-audio': return OwnCapability.sendAudio;
         case r'send-video': return OwnCapability.sendVideo;
         case r'start-broadcast-call': return OwnCapability.startBroadcastCall;
         case r'start-record-call': return OwnCapability.startRecordCall;
+        case r'start-transcription-call': return OwnCapability.startTranscriptionCall;
         case r'stop-broadcast-call': return OwnCapability.stopBroadcastCall;
         case r'stop-record-call': return OwnCapability.stopRecordCall;
+        case r'stop-transcription-call': return OwnCapability.stopTranscriptionCall;
         case r'update-call': return OwnCapability.updateCall;
+        case r'update-call-member': return OwnCapability.updateCallMember;
         case r'update-call-permissions': return OwnCapability.updateCallPermissions;
         case r'update-call-settings': return OwnCapability.updateCallSettings;
         default:
