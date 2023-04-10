@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-class WSConnectedEvent {
-  /// Returns a new [WSConnectedEvent] instance.
-  WSConnectedEvent({
+class ConnectedEvent {
+  /// Returns a new [ConnectedEvent] instance.
+  ConnectedEvent({
     required this.connectionId,
     required this.createdAt,
     required this.me,
@@ -30,7 +30,7 @@ class WSConnectedEvent {
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is WSConnectedEvent &&
+  bool operator ==(Object other) => identical(this, other) || other is ConnectedEvent &&
      other.connectionId == connectionId &&
      other.createdAt == createdAt &&
      other.me == me &&
@@ -45,7 +45,7 @@ class WSConnectedEvent {
     (type.hashCode);
 
   @override
-  String toString() => 'WSConnectedEvent[connectionId=$connectionId, createdAt=$createdAt, me=$me, type=$type]';
+  String toString() => 'ConnectedEvent[connectionId=$connectionId, createdAt=$createdAt, me=$me, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -56,10 +56,10 @@ class WSConnectedEvent {
     return json;
   }
 
-  /// Returns a new [WSConnectedEvent] instance and imports its values from
+  /// Returns a new [ConnectedEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static WSConnectedEvent? fromJson(dynamic value) {
+  static ConnectedEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -68,13 +68,13 @@ class WSConnectedEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "WSConnectedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "WSConnectedEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "ConnectedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "ConnectedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return WSConnectedEvent(
+      return ConnectedEvent(
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
         me: OwnUserResponse.fromJson(json[r'me'])!,
@@ -84,11 +84,11 @@ class WSConnectedEvent {
     return null;
   }
 
-  static List<WSConnectedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <WSConnectedEvent>[];
+  static List<ConnectedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <ConnectedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = WSConnectedEvent.fromJson(row);
+        final value = ConnectedEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -97,12 +97,12 @@ class WSConnectedEvent {
     return result.toList(growable: growable);
   }
 
-  static Map<String, WSConnectedEvent> mapFromJson(dynamic json) {
-    final map = <String, WSConnectedEvent>{};
+  static Map<String, ConnectedEvent> mapFromJson(dynamic json) {
+    final map = <String, ConnectedEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = WSConnectedEvent.fromJson(entry.value);
+        final value = ConnectedEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -111,13 +111,13 @@ class WSConnectedEvent {
     return map;
   }
 
-  // maps a json object with a list of WSConnectedEvent-objects as value to a dart map
-  static Map<String, List<WSConnectedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<WSConnectedEvent>>{};
+  // maps a json object with a list of ConnectedEvent-objects as value to a dart map
+  static Map<String, List<ConnectedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<ConnectedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = WSConnectedEvent.listFromJson(entry.value, growable: growable,);
+        final value = ConnectedEvent.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }

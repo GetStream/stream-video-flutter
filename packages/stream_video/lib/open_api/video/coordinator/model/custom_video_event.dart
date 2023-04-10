@@ -27,7 +27,7 @@ class CustomVideoEvent {
   /// Custom data for this object
   Map<String, Object> custom;
 
-  /// The type of event (custom value in this case)
+  /// The type of event, \"custom\" in this case
   String type;
 
   UserResponse user;

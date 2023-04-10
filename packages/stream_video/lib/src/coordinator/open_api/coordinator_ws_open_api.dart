@@ -236,7 +236,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     }
   }
 
-  void _handleConnectedEvent(open.WSConnectedEvent event) {
+  void _handleConnectedEvent(open.ConnectedEvent event) {
     _logger.i(() => '[handleConnectedEvent] no args');
     _reconnectAttempt = 0;
     _refreshToken = false;
