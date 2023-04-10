@@ -239,6 +239,8 @@ class ApiClient {
           return CallUpdatedEvent.fromJson(value);
         case 'ConnectUserDetailsRequest':
           return ConnectUserDetailsRequest.fromJson(value);
+        case 'ConnectedEvent':
+          return ConnectedEvent.fromJson(value);
         case 'Coordinates':
           return Coordinates.fromJson(value);
         case 'CreateCallTypeRequest':
@@ -379,16 +381,18 @@ class ApiClient {
           return UserRequest.fromJson(value);
         case 'UserResponse':
           return UserResponse.fromJson(value);
+        case 'VideoEvent':
+          return VideoEvent.fromJson(value);
         case 'VideoSettings':
           return VideoSettings.fromJson(value);
         case 'VideoSettingsRequest':
           return VideoSettingsRequest.fromJson(value);
         case 'WSAuthMessageRequest':
           return WSAuthMessageRequest.fromJson(value);
-        case 'WSConnectedEvent':
-          return WSConnectedEvent.fromJson(value);
-        case 'WSEvent':
-          return WSEvent.fromJson(value);
+        case 'WSCallEvent':
+          return WSCallEvent.fromJson(value);
+        case 'WSClientEvent':
+          return WSClientEvent.fromJson(value);
         default:
           dynamic match;
           if (value is List && (match = _regList.firstMatch(targetType)?.group(1)) != null) {

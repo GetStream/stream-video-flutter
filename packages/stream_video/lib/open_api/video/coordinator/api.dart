@@ -65,6 +65,7 @@ part 'model/call_state_response_fields.dart';
 part 'model/call_type_response.dart';
 part 'model/call_updated_event.dart';
 part 'model/connect_user_details_request.dart';
+part 'model/connected_event.dart';
 part 'model/coordinates.dart';
 part 'model/create_call_type_request.dart';
 part 'model/create_call_type_response.dart';
@@ -135,11 +136,12 @@ part 'model/update_user_permissions_response.dart';
 part 'model/updated_call_permissions_event.dart';
 part 'model/user_request.dart';
 part 'model/user_response.dart';
+part 'model/video_event.dart';
 part 'model/video_settings.dart';
 part 'model/video_settings_request.dart';
 part 'model/ws_auth_message_request.dart';
-part 'model/ws_connected_event.dart';
-part 'model/ws_event.dart';
+part 'model/ws_call_event.dart';
+part 'model/ws_client_event.dart';
 
 
 const _delimiters = {'csv': ',', 'ssv': ' ', 'tsv': '\t', 'pipes': '|'};

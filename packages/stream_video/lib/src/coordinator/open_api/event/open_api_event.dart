@@ -43,7 +43,7 @@ class OpenApiEvent with EquatableMixin {
     final result = OpenApiEvent(type: type);
     switch (type) {
       case EventType.connectionOk:
-        final event = open.WSConnectedEvent.fromJson(jsonObj);
+        final event = open.ConnectedEvent.fromJson(jsonObj);
         return result.copyWith(connected: event);
       case EventType.healthCheck:
         final event = open.HealthCheckEvent.fromJson(jsonObj);
@@ -101,7 +101,7 @@ class OpenApiEvent with EquatableMixin {
   }
 
   final EventType type;
-  final open.WSConnectedEvent? connected;
+  final open.ConnectedEvent? connected;
   final open.HealthCheckEvent? healthCheck;
   final open.CallCreatedEvent? callCreated;
   final open.CallAcceptedEvent? callAccepted;
@@ -119,7 +119,7 @@ class OpenApiEvent with EquatableMixin {
 
   OpenApiEvent copyWith({
     EventType? type,
-    open.WSConnectedEvent? connected,
+    open.ConnectedEvent? connected,
     open.HealthCheckEvent? healthCheck,
     open.CallCreatedEvent? callCreated,
     open.CallAcceptedEvent? callAccepted,

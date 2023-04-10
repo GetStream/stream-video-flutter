@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-class WSEvent {
-  /// Returns a new [WSEvent] instance.
-  WSEvent({
+class VideoEvent {
+  /// Returns a new [VideoEvent] instance.
+  VideoEvent({
     this.blockedByUser,
     required this.callCid,
     required this.createdAt,
@@ -23,11 +23,11 @@ class WSEvent {
     required this.ringing,
     this.capabilitiesByRole = const {},
     required this.reaction,
-    this.custom = const {},
     required this.connectionId,
+    required this.me,
+    this.custom = const {},
     this.permissions = const [],
     this.ownCapabilities = const [],
-    required this.me,
   });
 
   ///
@@ -42,7 +42,7 @@ class WSEvent {
 
   DateTime createdAt;
 
-  /// The type of event: \"connection.ok\" in this case
+  /// The type of event: \"call.permissions_updated\" in this case
   String type;
 
   UserResponse user;
@@ -60,11 +60,13 @@ class WSEvent {
 
   ReactionResponse reaction;
 
-  /// Custom data for this object
-  Map<String, Object> custom;
-
   /// The connection_id for this client
   String connectionId;
+
+  OwnUserResponse me;
+
+  /// Custom data for this object
+  Map<String, Object> custom;
 
   /// The list of permissions requested by the user
   List<String> permissions;
@@ -72,10 +74,8 @@ class WSEvent {
   /// The capabilities of the current user
   List<OwnCapability> ownCapabilities;
 
-  OwnUserResponse me;
-
   @override
-  bool operator ==(Object other) => identical(this, other) || other is WSEvent &&
+  bool operator ==(Object other) => identical(this, other) || other is VideoEvent &&
      other.blockedByUser == blockedByUser &&
      other.callCid == callCid &&
      other.createdAt == createdAt &&
@@ -86,11 +86,11 @@ class WSEvent {
      other.ringing == ringing &&
      other.capabilitiesByRole == capabilitiesByRole &&
      other.reaction == reaction &&
-     other.custom == custom &&
      other.connectionId == connectionId &&
+     other.me == me &&
+     other.custom == custom &&
      other.permissions == permissions &&
-     other.ownCapabilities == ownCapabilities &&
-     other.me == me;
+     other.ownCapabilities == ownCapabilities;
 
   @override
   int get hashCode =>
@@ -105,14 +105,14 @@ class WSEvent {
     (ringing.hashCode) +
     (capabilitiesByRole.hashCode) +
     (reaction.hashCode) +
-    (custom.hashCode) +
     (connectionId.hashCode) +
+    (me.hashCode) +
+    (custom.hashCode) +
     (permissions.hashCode) +
-    (ownCapabilities.hashCode) +
-    (me.hashCode);
+    (ownCapabilities.hashCode);
 
   @override
-  String toString() => 'WSEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, call=$call, members=$members, ringing=$ringing, capabilitiesByRole=$capabilitiesByRole, reaction=$reaction, custom=$custom, connectionId=$connectionId, permissions=$permissions, ownCapabilities=$ownCapabilities, me=$me]';
+  String toString() => 'VideoEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, call=$call, members=$members, ringing=$ringing, capabilitiesByRole=$capabilitiesByRole, reaction=$reaction, connectionId=$connectionId, me=$me, custom=$custom, permissions=$permissions, ownCapabilities=$ownCapabilities]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -130,18 +130,18 @@ class WSEvent {
       json[r'ringing'] = this.ringing;
       json[r'capabilities_by_role'] = this.capabilitiesByRole;
       json[r'reaction'] = this.reaction;
-      json[r'custom'] = this.custom;
       json[r'connection_id'] = this.connectionId;
+      json[r'me'] = this.me;
+      json[r'custom'] = this.custom;
       json[r'permissions'] = this.permissions;
       json[r'own_capabilities'] = this.ownCapabilities;
-      json[r'me'] = this.me;
     return json;
   }
 
-  /// Returns a new [WSEvent] instance and imports its values from
+  /// Returns a new [VideoEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static WSEvent? fromJson(dynamic value) {
+  static VideoEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -150,13 +150,13 @@ class WSEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "WSEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "WSEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "VideoEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "VideoEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return WSEvent(
+      return VideoEvent(
         blockedByUser: UserResponse.fromJson(json[r'blocked_by_user']),
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
@@ -169,23 +169,23 @@ class WSEvent {
           ? const {}
             : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
         reaction: ReactionResponse.fromJson(json[r'reaction'])!,
-        custom: mapCastOfType<String, Object>(json, r'custom')!,
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
+        me: OwnUserResponse.fromJson(json[r'me'])!,
+        custom: mapCastOfType<String, Object>(json, r'custom')!,
         permissions: json[r'permissions'] is List
             ? (json[r'permissions'] as List).cast<String>()
             : const [],
         ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
-        me: OwnUserResponse.fromJson(json[r'me'])!,
       );
     }
     return null;
   }
 
-  static List<WSEvent>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <WSEvent>[];
+  static List<VideoEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <VideoEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = WSEvent.fromJson(row);
+        final value = VideoEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -194,12 +194,12 @@ class WSEvent {
     return result.toList(growable: growable);
   }
 
-  static Map<String, WSEvent> mapFromJson(dynamic json) {
-    final map = <String, WSEvent>{};
+  static Map<String, VideoEvent> mapFromJson(dynamic json) {
+    final map = <String, VideoEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = WSEvent.fromJson(entry.value);
+        final value = VideoEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -208,13 +208,13 @@ class WSEvent {
     return map;
   }
 
-  // maps a json object with a list of WSEvent-objects as value to a dart map
-  static Map<String, List<WSEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<WSEvent>>{};
+  // maps a json object with a list of VideoEvent-objects as value to a dart map
+  static Map<String, List<VideoEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<VideoEvent>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = WSEvent.listFromJson(entry.value, growable: growable,);
+        final value = VideoEvent.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -234,11 +234,11 @@ class WSEvent {
     'ringing',
     'capabilities_by_role',
     'reaction',
-    'custom',
     'connection_id',
+    'me',
+    'custom',
     'permissions',
     'own_capabilities',
-    'me',
   };
 }
 
