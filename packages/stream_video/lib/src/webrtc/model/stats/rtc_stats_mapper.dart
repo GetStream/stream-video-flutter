@@ -1,4 +1,4 @@
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_webrtc_flutter/flutter_webrtc.dart' as rtc;
 
 import '../../../logger/stream_log.dart';
 import '../../../utils/standard.dart';

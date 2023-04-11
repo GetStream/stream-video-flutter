@@ -1,4 +1,4 @@
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_webrtc_flutter/flutter_webrtc.dart' as rtc;
 
 void startAudio(String id, rtc.MediaStreamTrack track) {
   // We don't need to do anything here, because the audio automatically starts

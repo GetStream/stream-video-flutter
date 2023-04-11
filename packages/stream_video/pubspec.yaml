@@ -19,7 +19,8 @@ dependencies:
   web_socket_channel: ^2.2.0
   connectivity_plus: ^3.0.3
   collection: ^1.16.0
-  flutter_webrtc: ^0.9.23
+  stream_webrtc_flutter:
+    path: /Users/kanat/Projects/webrtc/webrtc_stream_flutter/
   intl: ^0.17.0
   meta: ^1.8.0
   sdp_transform: ^0.3.2

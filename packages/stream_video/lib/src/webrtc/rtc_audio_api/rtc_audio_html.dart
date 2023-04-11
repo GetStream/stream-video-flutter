@@ -2,7 +2,7 @@ import 'dart:html' as html;
 import 'dart:js_util' as jsutil;
 
 import 'package:dart_webrtc/src/media_stream_track_impl.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_webrtc_flutter/flutter_webrtc.dart' as rtc;
 
 const audioContainerId = 'stream_audio_container';
 const audioPrefix = 'stream_audio_';

@@ -33,7 +33,6 @@ dependencies:
     sdk: flutter
   http: ^0.13.5
   flutter_svg: ^2.0.4
-  flutter_webrtc: ^0.9.23
   google_fonts: ^3.0.1
   path_provider: ^2.0.14
   share_plus: ^6.3.1

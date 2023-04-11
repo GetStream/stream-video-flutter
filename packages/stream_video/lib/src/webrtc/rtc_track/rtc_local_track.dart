@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_webrtc_flutter/flutter_webrtc.dart' as rtc;
 
 import '../../exceptions/video_exception.dart';
 import '../../logger/stream_log.dart';

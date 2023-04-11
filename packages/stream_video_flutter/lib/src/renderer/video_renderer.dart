@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_webrtc_flutter/flutter_webrtc.dart' as rtc;
 
 import '../../stream_video_flutter.dart';
 import '../widgets/size_change_listener.dart';
