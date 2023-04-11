@@ -1,4 +1,4 @@
-import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_webrtc_flutter/flutter_webrtc.dart' as rtc;
 import 'package:webrtc_interface/webrtc_interface.dart' as rtc_interface;
 
 import 'screen_share_constraints.dart';
