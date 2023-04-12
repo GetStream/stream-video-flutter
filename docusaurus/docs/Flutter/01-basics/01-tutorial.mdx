@@ -1,3 +1,35 @@
-## Tutorial
+# Build a Flutter App with Video and Audio Calling with the Stream SDK
 
-// TODO Write the content
+Welcome to this tutorial on adding the Stream Video SDK to your Flutter app.
+Stream Video is a Video and Audio calling SDK that enables developers to create immersive video and
+audio experiences that allow users to connect with each other in real-time.
+Whether you are building a social app, a collaboration tool, or an e-learning platform,
+the Stream Video SDK makes it easy to add reliable and high-quality video and audio communication to your app.
+
+## Flutter Video SDK Setup
+
+First of all we need to setup our new project and have a working development environment for Flutter.
+If you do not have Flutter or an IDE configured to work with it, we highly recommend following the [Install]() and [Set up]() an editor steps from the official documentation.
+
+Please make sure you are using the latest version of Flutter from the stable channel:
+
+```dart
+flutter channel stable
+flutter upgrade
+```
+
+Now open your IDE and start a new Flutter application called awesome_flutter_video.
+If you are using Android Studio (recommended) make sure to create the project as a Flutter application and keep all default settings.
+
+// TODO: Add image
+
+Next step is to add stream_video_flutter to your dependencies, to do that just open `pubspec.yaml` and add it inside the dependencies section:
+
+```dart
+dependencies:
+  flutter:
+    sdk: flutter
+
+  stream_video_flutter: ^0.1.0
+```
+
