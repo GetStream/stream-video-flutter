@@ -4,8 +4,8 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
-  flutter_webrtc
   share_plus
+  stream_webrtc_flutter
   url_launcher_windows
 )
 
