@@ -3,16 +3,19 @@ import '../models/call_cid.dart';
 import '../types/other.dart';
 import 'peer_connection_factory.dart';
 import 'rtc_manager.dart';
+import 'sdp/editor/sdp_editor.dart';
 
 class RtcManagerFactory {
   RtcManagerFactory({
     required this.sessionId,
     required this.callCid,
     required this.configuration,
+    required SdpEditor sdpEditor,
     this.mediaConstraints = const {},
   }) : pcFactory = StreamPeerConnectionFactory(
           sessionId: sessionId,
           callCid: callCid,
+          sdpEditor: sdpEditor,
         );
 
   final _logger = taggedLogger(tag: 'SV:RtcManagerFactory');

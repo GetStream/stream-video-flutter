@@ -25,6 +25,7 @@ import '../../webrtc/model/stats/rtc_raw_stats.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
+import '../../webrtc/sdp/editor/sdp_editor.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
 
@@ -37,6 +38,7 @@ class CallSessionImpl extends CallSession {
     required this.sessionId,
     required this.config,
     required this.stateManager,
+    required SdpEditor sdpEditor,
   })  : sfuClient = SfuClientImpl(
           baseUrl: config.sfuUrl,
           sfuToken: config.sfuToken,
@@ -50,6 +52,7 @@ class CallSessionImpl extends CallSession {
           sessionId: sessionId,
           callCid: callCid,
           configuration: config.rtcConfig,
+          sdpEditor: sdpEditor,
         ) {
     _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
   }

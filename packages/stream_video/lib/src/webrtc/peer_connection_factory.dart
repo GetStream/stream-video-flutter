@@ -3,16 +3,22 @@ import 'package:stream_video/src/types/other.dart';
 import 'package:stream_video/src/webrtc/peer_type.dart';
 import 'package:stream_video/src/webrtc/peer_connection.dart';
 
+import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
+import 'sdp/editor/sdp_editor.dart';
 
 class StreamPeerConnectionFactory {
-  const StreamPeerConnectionFactory({
+  StreamPeerConnectionFactory({
     required this.sessionId,
     required this.callCid,
+    required this.sdpEditor,
   });
+
+  final _logger = taggedLogger(tag: 'SV:PeerConnectionFactory');
 
   final String sessionId;
   final StreamCallCid callCid;
+  final SdpEditor sdpEditor;
 
   Future<StreamPeerConnection> makeSubscriber(
     RTCConfiguration configuration, [
@@ -41,6 +47,8 @@ class StreamPeerConnectionFactory {
     required RTCConfiguration configuration,
     Map<String, dynamic> mediaConstraints = const {},
   }) async {
+    _logger.i(() => '[createPeerConnection] #$type; configuration: '
+        '${configuration.toMap()}, mediaConstraints: $mediaConstraints');
     final pc = await rtc.createPeerConnection(
       configuration.toMap(),
       mediaConstraints,
@@ -51,6 +59,7 @@ class StreamPeerConnectionFactory {
       callCid: callCid,
       type: type,
       pc: pc,
+      sdpEditor: sdpEditor,
     );
   }
 }

@@ -10,6 +10,8 @@ export 'constraints/facing_mode.dart';
 export 'screen_share_constraints.dart';
 export 'video_constraints.dart';
 
+import '../../logger/stream_log.dart';
+
 abstract class MediaConstraints {
   const MediaConstraints({this.deviceId});
 
@@ -32,6 +34,7 @@ abstract class MediaConstraints {
 extension MediaDevices on rtc_interface.MediaDevices {
   Future<rtc.MediaStream> getMedia(MediaConstraints constraints) {
     final constraintsMap = constraints.toMap();
+    streamLog.i('SV:MediaDevices', () => '[getMedia] #${constraints.runtimeType}; constraintsMap: $constraintsMap');
     if (constraints is ScreenShareConstraints) {
       return rtc.navigator.mediaDevices.getDisplayMedia(
         constraintsMap,
