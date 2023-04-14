@@ -13,6 +13,7 @@ class CallJoined with EquatableMixin {
     required this.metadata,
     required this.credentials,
   });
+
   final StreamCallCid callCid;
   final bool wasCreated;
   final CallMetadata metadata;

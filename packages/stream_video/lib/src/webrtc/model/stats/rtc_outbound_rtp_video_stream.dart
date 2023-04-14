@@ -40,7 +40,7 @@ import 'rtc_outbound_rtp.dart';
 import 'rtc_writable.dart';
 
 class RTCOutboundRTPVideoStream implements RtcOutboundRtp, RtcWritable {
-  RTCOutboundRTPVideoStream({
+  const RTCOutboundRTPVideoStream({
     this.id,
     this.type,
     this.timestamp,

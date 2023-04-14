@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'platform_detector.dart';
 
 /// Version running on native systems

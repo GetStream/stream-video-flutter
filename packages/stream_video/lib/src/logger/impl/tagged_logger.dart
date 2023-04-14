@@ -7,6 +7,7 @@ TaggedLogger taggedLogger({required Tag tag}) {
 
 class TaggedLogger {
   const TaggedLogger(this.tag);
+
   final Tag tag;
 
   void v(MessageBuilder message) {

@@ -6,18 +6,27 @@ import '../../logger/impl/tagged_logger.dart';
 
 abstract class HealthMonitor {
   bool get isStarted;
+
   void start();
+
   void onPongReceived();
+
   void onSocketOpen();
+
   void onSocketClose();
+
   void onSocketError(Object error);
+
   void stop();
 }
 
 abstract class HealthListener {
   void onPingRequested();
+
   void onPongTimeout(Duration timeout);
+
   void onNetworkConnected();
+
   void onNetworkDisconnected();
 }
 
@@ -67,7 +76,6 @@ class HealthMonitorImpl implements HealthMonitor {
     });
     _startPinging();
   }
-
 
   @override
   void onSocketOpen() {

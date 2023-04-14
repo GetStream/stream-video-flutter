@@ -13,7 +13,7 @@
 import 'rtc_media_source.dart';
 
 class RtcVideoSource extends RtcMediaSource {
-  RtcVideoSource({
+  const RtcVideoSource({
     super.id,
     super.type,
     super.timestamp,

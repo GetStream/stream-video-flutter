@@ -8,9 +8,12 @@ import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
+import '../utils/standard.dart';
 import 'model/stats/rtc_printable_stats.dart';
 import 'model/stats/rtc_stats_mapper.dart';
 import 'peer_type.dart';
+import 'sdp/editor/sdp_editor.dart';
+import 'sdp/sdp.dart';
 
 /// {@template onStreamAdded}
 /// Handler when a new [rtc.MediaStream] gets added.
@@ -54,6 +57,7 @@ class StreamPeerConnection extends Disposable {
     required this.callCid,
     required this.type,
     required this.pc,
+    required this.sdpEditor,
   }) {
     _initRtcCallbacks();
   }
@@ -64,6 +68,7 @@ class StreamPeerConnection extends Disposable {
   final StreamCallCid callCid;
   final StreamPeerType type;
   final rtc.RTCPeerConnection pc;
+  final SdpEditor sdpEditor;
 
   /// {@macro onStreamAdded}
   OnStreamAdded? onStreamAdded;
@@ -87,10 +92,16 @@ class StreamPeerConnection extends Disposable {
     Map<String, dynamic> mediaConstraints = const {},
   ]) async {
     try {
-      final offer = await pc.createOffer(mediaConstraints);
-      _logger.i(() => '[createLocalOffer] #$type; offerSdp:\n${offer.sdp}');
-      await pc.setLocalDescription(offer);
-      return Result.success(offer);
+      _logger.i(() =>
+          '[createLocalOffer] >>> #$type; mediaConstraints: $mediaConstraints');
+      final localOffer = await pc.createOffer(mediaConstraints);
+      final modifiedSdp = sdpEditor.edit(localOffer.sdp?.let(Sdp.localOffer));
+      final modifiedOffer = localOffer.copyWith(sdp: modifiedSdp);
+      _logger.i(
+        () => '[createLocalOffer] <<< #$type; sdp:\n"${modifiedOffer.sdp}"',
+      );
+      await pc.setLocalDescription(modifiedOffer);
+      return Result.success(modifiedOffer);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -103,10 +114,17 @@ class StreamPeerConnection extends Disposable {
     Map<String, dynamic> mediaConstraints = const {},
   ]) async {
     try {
-      final answer = await pc.createAnswer(mediaConstraints);
-      _logger.i(() => '[createLocalAnswer] #$type; answerSdp:\n${answer.sdp}');
-      await pc.setLocalDescription(answer);
-      return Result.success(answer);
+      _logger.i(
+        () => '[createLocalAnswer] #$type; mediaConstraints: $mediaConstraints',
+      );
+      final localAnswer = await pc.createAnswer(mediaConstraints);
+      final modifiedSdp = sdpEditor.edit(localAnswer.sdp?.let(Sdp.localAnswer));
+      final modifiedAnswer = localAnswer.copyWith(sdp: modifiedSdp);
+      _logger.i(
+        () => '[createLocalAnswer] #$type; sdp:\n${modifiedAnswer.sdp}',
+      );
+      await pc.setLocalDescription(modifiedAnswer);
+      return Result.success(modifiedAnswer);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -114,21 +132,23 @@ class StreamPeerConnection extends Disposable {
 
   /// Sets the offer session description.
   Future<Result<void>> setRemoteOffer(
-    String offerSdp,
+    String remoteOfferSdp,
   ) async {
-    _logger.i(() => '[setRemoteOffer] #$type; answerSdp:\n$offerSdp');
+    final modifiedSdp = sdpEditor.edit(Sdp.remoteOffer(remoteOfferSdp));
+    _logger.i(() => '[setRemoteOffer] #$type; sdp:\n$modifiedSdp');
     return setRemoteDescription(
-      rtc.RTCSessionDescription(offerSdp, 'offer'),
+      rtc.RTCSessionDescription(modifiedSdp, 'offer'),
     );
   }
 
   /// Sets the answer session description.
   Future<Result<void>> setRemoteAnswer(
-    String answerSdp,
+    String remoteAnswerSdp,
   ) async {
-    _logger.i(() => '[setRemoteAnswer] #$type; answerSdp:\n$answerSdp');
+    final modifiedSdp = sdpEditor.edit(Sdp.remoteAnswer(remoteAnswerSdp));
+    _logger.i(() => '[setRemoteAnswer] #$type; sdp:\n$modifiedSdp');
     return setRemoteDescription(
-      rtc.RTCSessionDescription(answerSdp, 'answer'),
+      rtc.RTCSessionDescription(modifiedSdp, 'answer'),
     );
   }
 
@@ -333,5 +353,17 @@ class StreamPeerConnection extends Disposable {
 extension on rtc.StatsReport {
   String stringify() {
     return 'ts: $timestamp, id: $id, type: $type, values: $values';
+  }
+}
+
+extension on rtc.RTCSessionDescription {
+  rtc.RTCSessionDescription copyWith({
+    String? type,
+    String? sdp,
+  }) {
+    return rtc.RTCSessionDescription(
+      sdp ?? this.sdp,
+      type ?? this.type,
+    );
   }
 }

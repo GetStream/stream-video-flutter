@@ -65,7 +65,6 @@ class CallConnectingAction extends LifecycleAction {
   final int attempt;
 }
 
-
 class CallConnectedAction extends LifecycleAction {
   const CallConnectedAction();
 }

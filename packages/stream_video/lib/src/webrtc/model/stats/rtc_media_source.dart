@@ -1,7 +1,7 @@
 import 'rtc_writable.dart';
 
 abstract class RtcMediaSource implements RtcWritable {
-  RtcMediaSource({
+  const RtcMediaSource({
     this.id,
     this.type,
     this.timestamp,
@@ -14,5 +14,4 @@ abstract class RtcMediaSource implements RtcWritable {
   final double? timestamp;
   final String? kind;
   final String? trackIdentifier;
-
 }

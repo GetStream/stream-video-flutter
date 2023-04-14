@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+
 import '../../../errors/video_error.dart';
 import '../../../logger/stream_logger.dart';
 import '../../../webrtc/peer_type.dart';

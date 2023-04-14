@@ -1,5 +1,7 @@
-class RtcPrintableStats {
-  RtcPrintableStats({
+import 'package:equatable/equatable.dart';
+
+class RtcPrintableStats with EquatableMixin {
+  const RtcPrintableStats({
     required this.local,
     required this.remote,
   });
@@ -13,13 +15,5 @@ class RtcPrintableStats {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is RtcPrintableStats &&
-          runtimeType == other.runtimeType &&
-          local == other.local &&
-          remote == other.remote;
-
-  @override
-  int get hashCode => local.hashCode ^ remote.hashCode;
+  List<Object?> get props => [local, remote];
 }

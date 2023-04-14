@@ -6,7 +6,9 @@ class StreamLog {
   factory StreamLog() {
     return _instance;
   }
+
   StreamLog._();
+
   static final StreamLog _instance = StreamLog._();
 
   StreamLogger _logger = const SilentStreamLogger();

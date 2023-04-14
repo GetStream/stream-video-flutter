@@ -9,6 +9,7 @@ class CallReceivedOrCreated with EquatableMixin {
     required this.wasCreated,
     required this.data,
   });
+
   final bool wasCreated;
   final CallCreated data;
 

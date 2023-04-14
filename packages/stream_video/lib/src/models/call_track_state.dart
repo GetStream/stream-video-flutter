@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import '../webrtc/media/constraints/camera_position.dart';
 
+import '../webrtc/media/constraints/camera_position.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
 

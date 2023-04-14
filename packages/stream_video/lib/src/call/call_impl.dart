@@ -14,7 +14,8 @@ import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../utils/cancelables.dart';
 import '../utils/none.dart';
-import '../utils/standard.dart';
+import '../webrtc/sdp/editor/sdp_editor_impl.dart';
+import '../webrtc/sdp/policy/sdp_policy.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 
@@ -89,6 +90,7 @@ class CallImpl implements Call {
     CallCredentials? credentials,
   })  : _sessionFactory = CallSessionFactory(
           callCid: stateManager.state.value.callCid,
+          sdpEditor: SdpEditorImpl(streamVideo.sdpPolicy),
         ),
         _stateManager = stateManager,
         _streamVideo = streamVideo,
@@ -171,9 +173,12 @@ class CallImpl implements Call {
 
   Future<void> _onStateChanged(CallState state) async {
     final status = state.status;
-    _logger.v(() => '[onStateChanged] status: ${status}');
+    _logger.v(() => '[onStateChanged] status: $status');
     if (status is CallStatusDisconnected) {
       await _clear('status-disconnected');
+    }
+    if (state.settings.audio.opusDtxEnabled) {
+      _sessionFactory.sdpEditor.addRule(const EnableOpusDtxRule());
     }
   }
 

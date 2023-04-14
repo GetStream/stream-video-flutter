@@ -14,7 +14,7 @@
 import 'rtc_media_source.dart';
 
 class RtcAudioSource extends RtcMediaSource {
-  RtcAudioSource({
+  const RtcAudioSource({
     super.id,
     super.type,
     super.timestamp,

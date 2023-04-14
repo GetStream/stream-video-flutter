@@ -19,6 +19,7 @@ import 'shared_emitter.dart';
 import 'state_emitter.dart';
 import 'token/token_manager.dart';
 import 'utils/none.dart';
+import 'webrtc/sdp/policy/sdp_policy.dart';
 
 const _tag = 'SV:Client';
 
@@ -32,6 +33,7 @@ class StreamVideoImpl implements StreamVideo {
     required String coordinatorWsUrl,
     required int latencyMeasurementRounds,
     required RetryPolicy retryPolicy,
+    required SdpPolicy sdpPolicy,
   }) {
     return StreamVideoImpl._(
       apiKey,
@@ -39,6 +41,7 @@ class StreamVideoImpl implements StreamVideo {
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
       retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
     );
   }
 
@@ -48,6 +51,7 @@ class StreamVideoImpl implements StreamVideo {
     required this.coordinatorWsUrl,
     required this.latencyMeasurementRounds,
     required this.retryPolicy,
+    required this.sdpPolicy,
   }) {
     _client = buildCoordinatorClient(
       apiKey: apiKey,
@@ -66,6 +70,8 @@ class StreamVideoImpl implements StreamVideo {
   final int latencyMeasurementRounds;
   @override
   final RetryPolicy retryPolicy;
+  @override
+  final SdpPolicy sdpPolicy;
 
   final _tokenManager = TokenManager();
   late final CoordinatorClient _client;
