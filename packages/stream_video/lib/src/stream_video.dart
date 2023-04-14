@@ -14,6 +14,7 @@ import 'shared_emitter.dart';
 import 'stream_video_impl.dart';
 import 'utils/none.dart';
 import 'webrtc/sdp/codec/sdp_codec.dart';
+import 'webrtc/sdp/policy/rule/sdp_munging_rule.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
 import 'webrtc/sdp/sdp.dart';
 
@@ -306,7 +307,7 @@ void _defaultLogHandler(
 const _defaultSdpPolicy = SdpPolicy(
   mungingEnabled: true,
   rules: [
-    PrioritizeCodecRule(
+    SdpMungingRule.prioritizeCodec(
       platforms: [PlatformType.android],
       types: [SdpType.localOffer],
       codec: VideoCodec.vp8,

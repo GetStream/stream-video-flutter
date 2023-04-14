@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../../../stream_video.dart';
+import '../policy/rule/sdp_munging_rule.dart';
 import '../policy/sdp_policy.dart';
 import '../sdp.dart';
 import 'action/sdp_edit_action_factory.dart';
@@ -21,7 +22,6 @@ class SdpEditorImpl implements SdpEditor {
 
   @override
   void addRule(SdpMungingRule rule) {
-    _logger.d(() => '[addRule] rule: ${rule.runtimeType}');
     if (!policy.rules.contains(rule)) {
       _policy = policy.copyWith(
         rules: [...policy.rules, rule],
@@ -32,7 +32,6 @@ class SdpEditorImpl implements SdpEditor {
 
   @override
   void removeRule<T extends SdpMungingRule>() {
-    _logger.d(() => '[removeRule] rule: ${T.runtimeType}');
     final ruleIndex = policy.rules.indexWhere((it) => it is T);
     if (ruleIndex != -1) {
       final rules = [...policy.rules];
@@ -55,9 +54,10 @@ class SdpEditorImpl implements SdpEditor {
       return sdp.value;
     }
 
+    _logger.i(() => '[edit] sdp.type: ${sdp.type}');
     final lines = sdp.value.split('\r\n');
     for (final rule in policy.rules) {
-      _logger.i(() => '[edit] rule: $rule');
+      _logger.d(() => '[edit] rule: $rule');
 
       if (rule.platforms.isNotEmpty && !rule.platforms.contains(platform)) {
         _logger.w(() => '[edit] rejected (mismatched platform): $platform');
@@ -67,7 +67,6 @@ class SdpEditorImpl implements SdpEditor {
         _logger.w(() => '[edit] rejected (mismatched sdpType): ${sdp.type}');
         continue;
       }
-      _logger.w(() => '[edit] apply rule: $rule');
       _actionFactory.create(rule)?.execute(lines);
     }
 
@@ -78,7 +77,7 @@ class SdpEditorImpl implements SdpEditor {
 }
 
 extension on StringBuffer {
-  void writeLines(List<String> sdpLines) {
+  void writeLines(List<SdpLine> sdpLines) {
     for (var index = 0; index < sdpLines.length; index++) {
       final line = sdpLines[index];
       write(line);

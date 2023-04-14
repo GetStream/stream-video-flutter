@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../policy/sdp_policy.dart';
+import '../policy/rule/sdp_munging_rule.dart';
 import '../sdp.dart';
 
 @internal

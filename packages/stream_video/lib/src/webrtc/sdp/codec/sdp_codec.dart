@@ -1,4 +1,5 @@
 abstract class SdpCodec {
+  MediaType get type;
   String get alias;
 }
 
@@ -13,15 +14,34 @@ enum VideoCodec implements SdpCodec {
   final String alias;
 
   @override
+  MediaType get type => MediaType.video;
+
+  @override
   String toString() => alias;
 }
 
 enum AudioCodec implements SdpCodec {
-  opus('opus');
+  opus('opus'),
+  red('red');
 
   const AudioCodec(this.alias);
 
   @override
+  final String alias;
+
+  @override
+  MediaType get type => MediaType.audio;
+
+  @override
+  String toString() => alias;
+}
+
+enum MediaType {
+  audio('audio'),
+  video('video');
+
+  const MediaType(this.alias);
+
   final String alias;
 
   @override
