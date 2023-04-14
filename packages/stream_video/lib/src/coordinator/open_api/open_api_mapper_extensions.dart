@@ -4,7 +4,6 @@ import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../models/call_cid.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
-import '../../models/call_setting.dart';
 import '../../utils/standard.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_inputs.dart';

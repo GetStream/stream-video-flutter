@@ -16,7 +16,6 @@ import '../utils/cancelables.dart';
 import '../utils/none.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
-import '../webrtc/sdp/sdp.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 

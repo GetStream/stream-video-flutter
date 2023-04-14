@@ -26,8 +26,10 @@ class Rtpmap with EquatableMixin {
         clockRate,
         encodingParameters,
       ];
+}
 
-  static bool isRtpmap(String sdpLine) => sdpLine.startsWith('a=rtpmap');
+extension RtpmapExtension on String {
+  bool get isRtpmap => startsWith('a=rtpmap');
 }
 
 class RtpmapParser {

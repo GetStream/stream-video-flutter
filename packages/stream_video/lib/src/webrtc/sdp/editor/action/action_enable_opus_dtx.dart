@@ -2,7 +2,6 @@ import '../../../../logger/impl/tagged_logger.dart';
 import '../../attributes/fmtp.dart';
 import '../../attributes/rtpmap.dart';
 import '../../codec/sdp_codec.dart';
-import '../../specification/media_description.dart';
 import 'sdp_edit_action.dart';
 
 final _logger = taggedLogger(tag: 'SV:EnableOpusDtx');
@@ -18,10 +17,10 @@ class EnableOpusDtxAction implements SdpEditAction {
 
   @override
   void execute(List<String> sdpLines) {
-    String? opusPayloadType = null;
+    String? opusPayloadType;
     for (var index = 0; index < sdpLines.length; index++) {
       final sdpLine = sdpLines[index];
-      if (Rtpmap.isRtpmap(sdpLine)) {
+      if (sdpLine.isRtpmap) {
         final rtpmap = rtpmapParser.parse(sdpLine);
         if (rtpmap == null) continue;
         if (rtpmap.encodingName.toUpperCase() ==

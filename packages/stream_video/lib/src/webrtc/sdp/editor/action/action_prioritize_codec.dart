@@ -45,7 +45,8 @@ class PrioritizeCodecAction implements SdpEditAction {
     }
 
     final modified = original.copyWith(
-        fmt: original.fmt.movedToFront(rtpmap.payloadType));
+      fmt: original.fmt.movedToFront(rtpmap.payloadType),
+    );
     _logger.v(() => '[prioritizeCodec] original: "$original"');
     _logger.v(() => '[prioritizeCodec] modified: "$modified"');
     sdpLines[mdIndex] = modified.toSdpLine();
