@@ -247,6 +247,10 @@ class ApiClient {
           return CreateCallTypeRequest.fromJson(value);
         case 'CreateCallTypeResponse':
           return CreateCallTypeResponse.fromJson(value);
+        case 'CreateGuestRequest':
+          return CreateGuestRequest.fromJson(value);
+        case 'CreateGuestResponse':
+          return CreateGuestResponse.fromJson(value);
         case 'Credentials':
           return Credentials.fromJson(value);
         case 'CustomVideoEvent':

@@ -200,6 +200,7 @@ class UserResponse {
     'custom',
     'id',
     'role',
+    'teams',
     'updated_at',
   };
 }
