@@ -91,18 +91,15 @@ class SfuReducer {
           final trackState = participant.publishedTracks[event.trackType]
               ?.copyWith(muted: true);
 
-          final publishedTracks = {
-            ...participant.publishedTracks,
-          };
-          if (trackState != null) {
-            publishedTracks[event.trackType] = trackState;
-          }
           return participant.copyWith(
-            publishedTracks: publishedTracks,
+            publishedTracks: {
+              ...participant.publishedTracks,
+              if (trackState != null) event.trackType: trackState,
+            },
           );
-        } else {
-          return participant;
         }
+
+        return participant;
       }).toList(),
     );
   }

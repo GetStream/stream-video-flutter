@@ -34,28 +34,28 @@ class HealthMonitorImpl implements HealthMonitor {
   final _pingPeriod = const Duration(seconds: 7);
   final _pongTimeout = const Duration(seconds: 35);
 
-  bool started = false;
+  bool _started = false;
   Timer? _pingTimer;
   Timer? _pongTimer;
   StreamSubscription<ConnectivityResult>? _networkChangeSubscription;
 
   @override
-  bool get isStarted => started;
+  bool get isStarted => _started;
 
   @override
   void start() {
-    if (started) {
+    if (_started) {
       _logger.w(() => '[start] rejected (already started)');
       return;
     }
     _logger.d(() => '[start] no args');
-    started = true;
+    _started = true;
     _listenNetworkChanges();
   }
 
   @override
   void onPongReceived() {
-    if (!started) {
+    if (!_started) {
       _logger.w(() => '[onPongReceived] rejected (not started)');
       return;
     }
@@ -76,7 +76,7 @@ class HealthMonitorImpl implements HealthMonitor {
 
   @override
   void onSocketClose() {
-    if (!started) {
+    if (!_started) {
       _logger.w(() => '[onSocketClose] rejected (not started)');
       return;
     }
@@ -86,7 +86,7 @@ class HealthMonitorImpl implements HealthMonitor {
 
   @override
   void onSocketError(Object error) {
-    if (!started) {
+    if (!_started) {
       _logger.w(() => '[onSocketError] rejected (not started)');
       return;
     }
@@ -96,12 +96,12 @@ class HealthMonitorImpl implements HealthMonitor {
 
   @override
   void stop() {
-    if (!started) {
+    if (!_started) {
       _logger.w(() => '[stop] rejected (not started)');
       return;
     }
     _logger.d(() => '[stop] no args');
-    started = false;
+    _started = false;
     _stopPinging();
     _stopPongTimer();
     _stopListeningNetworkChanges();
