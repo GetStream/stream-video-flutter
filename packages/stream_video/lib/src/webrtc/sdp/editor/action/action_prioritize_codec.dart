@@ -7,7 +7,7 @@ import '../../codec/sdp_codec.dart';
 import '../../specification/media_description.dart';
 import 'sdp_edit_action.dart';
 
-final _logger = taggedLogger(tag: 'SV:PreferCodec');
+final _logger = taggedLogger(tag: 'SV:PrioritizeCodec');
 
 @internal
 class PrioritizeCodecAction implements SdpEditAction {
@@ -35,8 +35,8 @@ class PrioritizeCodecAction implements SdpEditAction {
     }
     final mdLine = sdpLines[mdIndex];
     final rtpmapLine = sdpLines[rtpmapIndex];
-    final mediaDescription = mediaDescriptionParser.parse(mdLine);
-    if (mediaDescription == null) {
+    final original = mediaDescriptionParser.parse(mdLine);
+    if (original == null) {
       return;
     }
     final rtpmap = rtpmapParser.parse(rtpmapLine);
@@ -44,12 +44,11 @@ class PrioritizeCodecAction implements SdpEditAction {
       return;
     }
 
-    final modifiedMediaDescription = mediaDescription.copyWith(
-        fmt: mediaDescription.fmt.movedToFront(rtpmap.payloadType));
-    _logger.v(() => '[preferCodec] mediaDescription: "$mediaDescription"');
-    _logger.v(() =>
-        '[preferCodec] modifiedMediaDescription: "$modifiedMediaDescription"');
-    sdpLines[mdIndex] = modifiedMediaDescription.toSdpLine();
+    final modified = original.copyWith(
+        fmt: original.fmt.movedToFront(rtpmap.payloadType));
+    _logger.v(() => '[prioritizeCodec] original: "$original"');
+    _logger.v(() => '[prioritizeCodec] modified: "$modified"');
+    sdpLines[mdIndex] = modified.toSdpLine();
   }
 
   int indexOfMediaDescription(List<String> sdpLines) {
@@ -68,7 +67,7 @@ class PrioritizeCodecAction implements SdpEditAction {
     for (var index = 0; index < sdpLines.length; index++) {
       final line = sdpLines[index];
       final rtpmap = rtpmapParser.parse(line);
-      if (rtpmap?.encodingName.toUpperCase() == codec.alias) {
+      if (rtpmap?.encodingName.toUpperCase() == codec.alias.toUpperCase()) {
         return index;
       }
     }

@@ -10,13 +10,38 @@ import 'sdp_editor.dart';
 class SdpEditorImpl implements SdpEditor {
   SdpEditorImpl(this.policy);
 
-  final SdpPolicy policy;
+  SdpPolicy policy;
 
   final _actionFactory = SdpEditActionFactory();
 
   final _logger = taggedLogger(tag: 'SV:SdpEditor');
 
   late final platform = CurrentPlatform.type;
+
+  @override
+  void addRule(SdpMungingRule rule) {
+    _logger.d(() => '[addRule] rule: ${rule.runtimeType}');
+    if (!policy.rules.contains(rule)) {
+      policy = policy.copyWith(
+        rules: [...policy.rules, rule],
+      );
+      _logger.v(() => '[addRule] added: $rule');
+    }
+  }
+
+  @override
+  void removeRule<T extends SdpMungingRule>() {
+    _logger.d(() => '[removeRule] rule: ${T.runtimeType}');
+    final ruleIndex = policy.rules.indexWhere((it) => it is T);
+    if (ruleIndex != -1) {
+      final rules = [...policy.rules];
+      final removed = rules.removeAt(ruleIndex);
+      policy = policy.copyWith(
+        rules: rules,
+      );
+      _logger.v(() => '[removeRule] removed: $removed');
+    }
+  }
 
   @override
   String? edit(Sdp? sdp) {
@@ -41,6 +66,7 @@ class SdpEditorImpl implements SdpEditor {
         _logger.w(() => '[edit] rejected (mismatched sdpType): ${sdp.type}');
         continue;
       }
+      _logger.w(() => '[edit] apply rule: $rule');
       _actionFactory.create(rule)?.execute(lines);
     }
 

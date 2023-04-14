@@ -70,13 +70,6 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: callAccepted.callCid),
           acceptedBy: acceptedBy,
           createdAt: callAccepted.createdAt,
-          details: const CallDetails(
-            isBroadcastingEnabled: false,
-            members: {},
-            isRecordingEnabled: false,
-            ownCapabilities: [],
-            settings: CallSettings.disabled(),
-          ),
           users: {acceptedBy.id: acceptedBy},
         );
       case EventType.callRejected:
@@ -86,13 +79,6 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: callRejected.callCid),
           rejectedBy: rejectedBy,
           createdAt: callRejected.createdAt,
-          details: const CallDetails(
-            isBroadcastingEnabled: false,
-            members: {},
-            isRecordingEnabled: false,
-            ownCapabilities: [],
-            settings: CallSettings.disabled(),
-          ),
           users: {rejectedBy.id: rejectedBy},
         );
       case EventType.callUpdated:
@@ -199,13 +185,6 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           createdAt: custom.createdAt,
           eventType: custom.type,
           custom: custom.custom,
-          details: const CallDetails(
-            isBroadcastingEnabled: false,
-            members: {},
-            isRecordingEnabled: false,
-            ownCapabilities: [],
-            settings: CallSettings.disabled(),
-          ),
           users: {custom.user.id: custom.user.toCallUser()},
         );
       case EventType.unknown:

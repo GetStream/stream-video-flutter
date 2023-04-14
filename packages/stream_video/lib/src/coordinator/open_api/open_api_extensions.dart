@@ -1,4 +1,5 @@
 import '../../../../open_api/video/coordinator/api.dart' as open;
+import '../../logger/stream_log.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_credentials.dart';
 import '../../models/call_metadata.dart';
@@ -91,9 +92,11 @@ extension EnvelopeExt on open.CallResponse {
 extension CallSettingsExt on open.CallSettingsResponse {
   // TODO open api provides wider settings options
   CallSettings toCallSettings() {
+    streamLog.i("CallSettingsExt", () => '[toCallSettings] settings: $this');
     return CallSettings(
       audio: AudioSetting(
         accessRequestEnabled: audio.accessRequestEnabled,
+        opusDtxEnabled: audio.opusDtxEnabled,
       ),
       video: VideoSetting(
         accessRequestEnabled: video.accessRequestEnabled,

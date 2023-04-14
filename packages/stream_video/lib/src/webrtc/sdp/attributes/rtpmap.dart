@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 /// Represents 'rtpmap' attribute
-/// Reference: https://www.rfc-editor.org/rfc/rfc4566#section-5.13.
+/// Reference: https://www.rfc-editor.org/rfc/rfc4566#section-6.
 /// Format: a=rtpmap:<payload type> <encoding name>/<clock rate> [/<encoding parameters>]
 class Rtpmap with EquatableMixin {
   Rtpmap({
@@ -26,6 +26,8 @@ class Rtpmap with EquatableMixin {
         clockRate,
         encodingParameters,
       ];
+
+  static bool isRtpmap(String sdpLine) => sdpLine.startsWith('a=rtpmap');
 }
 
 class RtpmapParser {
