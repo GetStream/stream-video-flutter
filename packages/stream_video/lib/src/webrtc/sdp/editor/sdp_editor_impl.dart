@@ -31,11 +31,13 @@ class SdpEditorImpl implements SdpEditor {
 
     final lines = sdp.value.split('\r\n');
     for (final rule in policy.rules) {
-      if (!rule.platforms.contains(platform)) {
+      _logger.i(() => '[edit] rule: $rule');
+
+      if (rule.platforms.isNotEmpty && !rule.platforms.contains(platform)) {
         _logger.w(() => '[edit] rejected (mismatched platform): $platform');
         continue;
       }
-      if (!rule.types.contains(sdp.type)) {
+      if (rule.types.isNotEmpty && !rule.types.contains(sdp.type)) {
         _logger.w(() => '[edit] rejected (mismatched sdpType): ${sdp.type}');
         continue;
       }
