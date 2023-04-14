@@ -1,20 +1,13 @@
-import 'package:equatable/equatable.dart';
-
 import '../models/call_permission.dart';
+import '../models/viewport_visibility.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../webrtc/media/constraints/camera_position.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
 import 'action.dart';
 
-abstract class CallControlAction extends StreamAction with EquatableMixin {
+abstract class CallControlAction extends StreamAction {
   const CallControlAction();
-
-  @override
-  List<Object?> get props => [];
-
-  @override
-  bool? get stringify => true;
 }
 
 class AcceptCall extends CallControlAction {

@@ -13,6 +13,9 @@ class CallUserIdAction extends LifecycleAction {
   });
 
   final String userId;
+
+  @override
+  List<Object?> get props => [userId];
 }
 
 class CallEndedAction extends LifecycleAction {
@@ -29,6 +32,9 @@ class CallCreatedAction extends LifecycleAction {
   });
 
   final CallCreated data;
+
+  @override
+  List<Object?> get props => [data];
 }
 
 class CallJoiningAction extends LifecycleAction {
@@ -39,12 +45,18 @@ class CallJoinedAction extends LifecycleAction {
   const CallJoinedAction(this.data);
 
   final CallJoined data;
+
+  @override
+  List<Object?> get props => [data];
 }
 
 class CallSessionStartAction extends LifecycleAction {
   const CallSessionStartAction({required this.sessionId});
 
   final String sessionId;
+
+  @override
+  List<Object?> get props => [sessionId];
 }
 
 class CallConnectingAction extends LifecycleAction {
@@ -60,10 +72,18 @@ class CallConnectedAction extends LifecycleAction {
 
 class CallTimeoutAction extends LifecycleAction {
   const CallTimeoutAction(this.timeLimit);
+
   final Duration timeLimit;
+
+  @override
+  List<Object?> get props => [timeLimit];
 }
 
 class CallConnectFailedAction extends LifecycleAction {
   const CallConnectFailedAction(this.error);
+
   final VideoError error;
+
+  @override
+  List<Object?> get props => [error];
 }

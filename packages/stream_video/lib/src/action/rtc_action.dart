@@ -16,8 +16,5 @@ class SubscriberTrackReceivedAction extends RtcAction {
   final SfuTrackType trackType;
 
   @override
-  String toString() {
-    return 'RtcRemoteTrackPublishedAction{trackType: $trackType, '
-        'trackId: $trackIdPrefix}';
-  }
+  List<Object?> get props => [trackIdPrefix, trackType];
 }

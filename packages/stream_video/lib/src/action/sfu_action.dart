@@ -9,4 +9,7 @@ class SfuEventAction extends SfuAction {
   const SfuEventAction(this.event);
 
   final SfuEvent event;
+
+  @override
+  List<Object?> get props => [event];
 }

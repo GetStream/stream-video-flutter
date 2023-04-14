@@ -10,6 +10,9 @@ class CoordinatorCallEventAction extends CoordinatorCallAction {
   const CoordinatorCallEventAction(this.event);
 
   final CoordinatorCallEvent event;
+
+  @override
+  List<Object?> get props => [event];
 }
 
 class CoordinatorCallUsersAction extends CoordinatorCallAction {
@@ -18,4 +21,7 @@ class CoordinatorCallUsersAction extends CoordinatorCallAction {
   });
 
   final Map<String, CallUser> users;
+
+  @override
+  List<Object?> get props => [users];
 }
