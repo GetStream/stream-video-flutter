@@ -62,7 +62,7 @@ class SdpEditorImpl implements SdpEditor {
         _logger.w(() => '[edit] rejected (mismatched platform): $platform');
         continue;
       }
-      if (rule.types.isNotEmpty && !rule.types.contains(sdp.type)) {
+      if (!rule.types.contains(sdp.type)) {
         _logger.w(() => '[edit] rejected (mismatched sdpType): ${sdp.type}');
         continue;
       }
