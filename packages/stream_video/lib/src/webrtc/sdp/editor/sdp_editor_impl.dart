@@ -8,9 +8,10 @@ import 'sdp_editor.dart';
 
 @internal
 class SdpEditorImpl implements SdpEditor {
-  SdpEditorImpl(this.policy);
+  SdpEditorImpl(this._policy);
 
-  SdpPolicy policy;
+  SdpPolicy get policy => _policy;
+  SdpPolicy _policy;
 
   final _actionFactory = SdpEditActionFactory();
 
@@ -22,7 +23,7 @@ class SdpEditorImpl implements SdpEditor {
   void addRule(SdpMungingRule rule) {
     _logger.d(() => '[addRule] rule: ${rule.runtimeType}');
     if (!policy.rules.contains(rule)) {
-      policy = policy.copyWith(
+      _policy = policy.copyWith(
         rules: [...policy.rules, rule],
       );
       _logger.v(() => '[addRule] added: $rule');
@@ -36,7 +37,7 @@ class SdpEditorImpl implements SdpEditor {
     if (ruleIndex != -1) {
       final rules = [...policy.rules];
       final removed = rules.removeAt(ruleIndex);
-      policy = policy.copyWith(
+      _policy = policy.copyWith(
         rules: rules,
       );
       _logger.v(() => '[removeRule] removed: $removed');
