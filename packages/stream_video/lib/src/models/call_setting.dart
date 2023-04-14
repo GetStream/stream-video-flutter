@@ -8,12 +8,18 @@ class CallSettings with EquatableMixin {
   });
 
   const CallSettings.disabled()
-      : audio = const AudioSetting(accessRequestEnabled: false),
+      : audio = const AudioSetting(
+          accessRequestEnabled: false,
+          opusDtxEnabled: false,
+        ),
         video = const VideoSetting(accessRequestEnabled: false),
         screenShare = const ScreenShareSetting(accessRequestEnabled: false);
 
   const CallSettings.enabled()
-      : audio = const AudioSetting(accessRequestEnabled: true),
+      : audio = const AudioSetting(
+          accessRequestEnabled: true,
+          opusDtxEnabled: false,
+        ),
         video = const VideoSetting(accessRequestEnabled: true),
         screenShare = const ScreenShareSetting(accessRequestEnabled: true);
 
@@ -38,7 +44,12 @@ abstract class CallSetting with EquatableMixin {
 }
 
 class AudioSetting extends CallSetting {
-  const AudioSetting({required super.accessRequestEnabled});
+  const AudioSetting({
+    required super.accessRequestEnabled,
+    required this.opusDtxEnabled,
+  });
+
+  final bool opusDtxEnabled;
 }
 
 class VideoSetting extends CallSetting {

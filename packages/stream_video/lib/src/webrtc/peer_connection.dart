@@ -96,10 +96,7 @@ class StreamPeerConnection extends Disposable {
           '[createLocalOffer] >>> #$type; mediaConstraints: $mediaConstraints');
       final localOffer = await pc.createOffer(mediaConstraints);
       final modifiedSdp = sdpEditor.edit(localOffer.sdp?.let(Sdp.localOffer));
-      final modifiedOffer = rtc.RTCSessionDescription(
-        modifiedSdp,
-        localOffer.type,
-      );
+      final modifiedOffer = localOffer.copyWith(sdp: modifiedSdp);
       _logger.i(
         () => '[createLocalOffer] <<< #$type; sdp:\n"${modifiedOffer.sdp}"',
       );
@@ -122,10 +119,7 @@ class StreamPeerConnection extends Disposable {
       );
       final localAnswer = await pc.createAnswer(mediaConstraints);
       final modifiedSdp = sdpEditor.edit(localAnswer.sdp?.let(Sdp.localAnswer));
-      final modifiedAnswer = rtc.RTCSessionDescription(
-        modifiedSdp,
-        localAnswer.type,
-      );
+      final modifiedAnswer = localAnswer.copyWith(sdp: modifiedSdp);
       _logger.i(
         () => '[createLocalAnswer] #$type; sdp:\n${modifiedAnswer.sdp}',
       );
@@ -359,5 +353,17 @@ class StreamPeerConnection extends Disposable {
 extension on rtc.StatsReport {
   String stringify() {
     return 'ts: $timestamp, id: $id, type: $type, values: $values';
+  }
+}
+
+extension on rtc.RTCSessionDescription {
+  rtc.RTCSessionDescription copyWith({
+    String? type,
+    String? sdp,
+  }) {
+    return rtc.RTCSessionDescription(
+      sdp ?? this.sdp,
+      type ?? this.type,
+    );
   }
 }

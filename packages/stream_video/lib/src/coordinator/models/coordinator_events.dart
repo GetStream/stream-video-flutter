@@ -152,13 +152,11 @@ class CoordinatorCallAcceptedEvent extends CoordinatorCallEvent {
     required super.callCid,
     required this.acceptedBy,
     required this.createdAt,
-    required this.details,
     required this.users,
   });
 
   final CallUser acceptedBy;
   final DateTime createdAt;
-  final CallDetails details;
   final Map<String, CallUser> users;
 
   String get acceptedByUserId => acceptedBy.id;
@@ -168,7 +166,6 @@ class CoordinatorCallAcceptedEvent extends CoordinatorCallEvent {
         ...super.props,
         acceptedBy,
         createdAt,
-        details,
         users,
       ];
 }
@@ -179,13 +176,11 @@ class CoordinatorCallRejectedEvent extends CoordinatorCallEvent {
     required super.callCid,
     required this.rejectedBy,
     required this.createdAt,
-    required this.details,
     required this.users,
   });
 
   final CallUser rejectedBy;
   final DateTime createdAt;
-  final CallDetails details;
   final Map<String, CallUser> users;
 
   String get rejectedByUserId => rejectedBy.id;
@@ -195,7 +190,6 @@ class CoordinatorCallRejectedEvent extends CoordinatorCallEvent {
         ...super.props,
         rejectedBy,
         createdAt,
-        details,
         users,
       ];
 }
@@ -360,7 +354,6 @@ class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
     required this.senderUserId,
     required this.createdAt,
     required this.eventType,
-    required this.details,
     required this.users,
     required this.custom,
   });
@@ -369,7 +362,6 @@ class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
   final DateTime createdAt;
   final String eventType;
   final Map<String, Object>? custom;
-  final CallDetails details;
   final Map<String, CallUser> users;
 
   @override
@@ -379,7 +371,6 @@ class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
         createdAt,
         eventType,
         custom,
-        details,
         users,
       ];
 }
