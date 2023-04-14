@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:rate_limiter/rate_limiter.dart';
 
 /// The action to perform when the size of child widget changes.
 typedef OnSizeChanged = void Function(Size size);
@@ -12,24 +13,37 @@ class SizeChangeListener extends SingleChildRenderObjectWidget {
     super.key,
     super.child,
     required this.onSizeChanged,
+    this.debounceDuration = const Duration(milliseconds: 300),
   });
+
+  /// The duration to debounce the size change event.
+  final Duration debounceDuration;
 
   /// The action to perform when the size of child widget changes.
   final OnSizeChanged onSizeChanged;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderSizeChangedWithCallback(onSizeChanged: onSizeChanged);
+    return _RenderSizeChangedWithCallback(
+      onSizeChanged: onSizeChanged,
+      debounceDuration: debounceDuration,
+    );
   }
 }
 
 class _RenderSizeChangedWithCallback extends RenderProxyBox {
   _RenderSizeChangedWithCallback({
     RenderBox? child,
-    required this.onSizeChanged,
-  }) : super(child);
+    required Duration debounceDuration,
+    required OnSizeChanged onSizeChanged,
+  }) : super(child) {
+    this.onSizeChanged = debounce(
+      onSizeChanged,
+      debounceDuration,
+    );
+  }
 
-  final OnSizeChanged onSizeChanged;
+  late final Debounce onSizeChanged;
 
   Size? _oldSize;
 
@@ -37,7 +51,7 @@ class _RenderSizeChangedWithCallback extends RenderProxyBox {
   void performLayout() {
     super.performLayout();
     if (size != _oldSize) {
-      onSizeChanged.call(size);
+      onSizeChanged.call([size]);
     }
     _oldSize = size;
   }
@@ -46,7 +60,13 @@ class _RenderSizeChangedWithCallback extends RenderProxyBox {
   void dispose() {
     _oldSize = null;
     // Call the callback with zero size to indicate that the widget is disposed.
-    onSizeChanged.call(Size.zero);
+    onSizeChanged.call([Size.zero]);
+    if (onSizeChanged.isPending) {
+      onSizeChanged.flush();
+    }
+
+    // Cancel the debounced callback.
+    onSizeChanged.cancel();
     super.dispose();
   }
 }

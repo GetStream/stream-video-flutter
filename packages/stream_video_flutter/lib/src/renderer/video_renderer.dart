@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
 import '../../stream_video_flutter.dart';
-import '../widgets/size_change_listener.dart';
 
 /// A builder for the widget that is displayed when there's no video stream.
 Widget _defaultPlaceholderBuilder(BuildContext context) => Container();
@@ -16,6 +15,8 @@ class StreamVideoRenderer extends StatelessWidget {
     required this.participant,
     required this.videoTrackType,
     this.placeholderBuilder = _defaultPlaceholderBuilder,
+    this.videoFit = VideoFit.cover,
+    this.onSizeChanged,
   });
 
   /// Represents a call.
@@ -30,47 +31,39 @@ class StreamVideoRenderer extends StatelessWidget {
   /// A builder for the placeholder.
   final WidgetBuilder placeholderBuilder;
 
+  /// The scale type to use for the video renderer.
+  final VideoFit videoFit;
+
+  /// Called when the size of the widget changes.
+  final ValueSetter<Size>? onSizeChanged;
+
   @override
   Widget build(BuildContext context) {
     final trackState = participant.publishedTracks[videoTrackType];
 
-    // The video track hasn't been published yet.
-    if (trackState == null) {
-      return placeholderBuilder.call(context);
-    }
-    // The video track is local and shouldn't send size notifications..
-    if (trackState is! RemoteTrackState) {
-      return _buildVideoTrackRenderer(context, trackState);
-    }
-
     final Widget child;
-    if (trackState.received) {
+    if (trackState == null) {
+      // The video track hasn't been published or subscribed yet.
+      child = placeholderBuilder.call(context);
+    } else if (trackState is! RemoteTrackState) {
+      // The video track is local and is already published.
+      child = _buildVideoTrackRenderer(context, trackState);
+    } else if (trackState.received) {
+      // The video track is remote and has been received.
       child = _buildVideoTrackRenderer(context, trackState);
     } else {
+      // The video track is remote and hasn't been received yet.
       child = placeholderBuilder.call(context);
     }
+
     return SizeChangeListener(
-      onSizeChanged: (size) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          call.apply(
-            UpdateSubscription(
-              userId: participant.userId,
-              sessionId: participant.sessionId,
-              trackIdPrefix: participant.trackIdPrefix,
-              trackType: videoTrackType,
-              videoDimension: RtcVideoDimension(
-                width: size.width.toInt(),
-                height: size.height.toInt(),
-              ),
-            ),
-          );
-        });
-      },
+      onSizeChanged: _onSizeChanged,
       child: child,
     );
   }
 
   Widget _buildVideoTrackRenderer(BuildContext context, TrackState trackState) {
+    // If the track is muted, display the placeholder.
     if (trackState.muted) return placeholderBuilder.call(context);
 
     final videoTrack = call.getTrack(
@@ -78,10 +71,43 @@ class StreamVideoRenderer extends StatelessWidget {
       videoTrackType,
     )!;
     return VideoTrackRenderer(
+      videoFit: videoFit,
       videoTrack: videoTrack,
       mirror: participant.isLocal,
       placeholderBuilder: placeholderBuilder,
     );
+  }
+
+  void _onSizeChanged(Size size) {
+    print('Video size changed: $size');
+
+    // Notify the listener.
+    if (onSizeChanged != null) {
+      onSizeChanged!.call(size);
+    }
+
+    // call
+    //   // Update the viewport visibility of the participant.
+    //   ..apply(
+    //     SetParticipantViewportVisibility(
+    //       userId: participant.userId,
+    //       sessionId: participant.sessionId,
+    //       visibility: ViewportVisibility(size: size),
+    //     ),
+    //   )
+    //   // Update the video subscription of the track.
+    //   ..apply(
+    //     UpdateSubscription(
+    //       userId: participant.userId,
+    //       sessionId: participant.sessionId,
+    //       trackIdPrefix: participant.trackIdPrefix,
+    //       trackType: videoTrackType,
+    //       videoDimension: RtcVideoDimension(
+    //         width: size.width.toInt(),
+    //         height: size.height.toInt(),
+    //       ),
+    //     ),
+    //   );
   }
 }
 
@@ -102,7 +128,7 @@ class VideoTrackRenderer extends StatefulWidget {
     super.key,
     required this.videoTrack,
     this.mirror = false,
-    this.videoFit = VideoFit.contain,
+    this.videoFit = VideoFit.cover,
     this.placeholderBuilder = _defaultPlaceholderBuilder,
   });
 
