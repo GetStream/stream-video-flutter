@@ -24,7 +24,6 @@ dependencies:
   meta: ^1.8.0
   sdp_transform: ^0.3.2
   synchronized: ^3.0.0+3
-  rate_limiter: ^1.0.0
 
 dev_dependencies:
   flutter_test:

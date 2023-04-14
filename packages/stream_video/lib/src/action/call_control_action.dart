@@ -93,6 +93,21 @@ class StopBroadcasting extends CallControlAction {
   const StopBroadcasting();
 }
 
+class SendReaction extends CallControlAction {
+  const SendReaction({
+    required this.reactionType,
+    this.emojiCode,
+    this.custom = const {},
+  });
+
+  final String reactionType;
+  final String? emojiCode;
+  final Map<String, Object> custom;
+
+  @override
+  List<Object?> get props => [reactionType, emojiCode, custom];
+}
+
 abstract class SessionControlAction extends CallControlAction {
   const SessionControlAction();
 }
@@ -251,4 +266,34 @@ class RemoveSubscription extends SubscriptionAction {
         trackIdPrefix,
         trackType,
       ];
+}
+
+class SetParticipantViewportVisibility extends CallControlAction {
+  const SetParticipantViewportVisibility({
+    required this.userId,
+    required this.sessionId,
+    required this.visibility,
+  });
+
+  final String userId;
+  final String sessionId;
+  final ViewportVisibility visibility;
+
+  @override
+  List<Object?> get props => [userId, sessionId, visibility];
+}
+
+class SetParticipantPinned extends CallControlAction {
+  const SetParticipantPinned({
+    required this.userId,
+    required this.sessionId,
+    required this.pinned,
+  });
+
+  final String userId;
+  final String sessionId;
+  final bool pinned;
+
+  @override
+  List<Object?> get props => [userId, sessionId, pinned];
 }
