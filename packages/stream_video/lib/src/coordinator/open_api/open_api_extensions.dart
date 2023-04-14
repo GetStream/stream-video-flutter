@@ -130,7 +130,7 @@ extension CredentialsExt on open.Credentials {
 extension ReactionExt on open.ReactionResponse {
   CallReaction toCallReaction() {
     return CallReaction(
-      reactionType: type,
+      type: type,
       user: user.toCallUser(),
       emojiCode: emojiCode,
       custom: custom,
