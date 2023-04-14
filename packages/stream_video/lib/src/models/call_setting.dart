@@ -27,6 +27,7 @@ class CallSettings with EquatableMixin {
 
 abstract class CallSetting with EquatableMixin {
   const CallSetting({required this.accessRequestEnabled});
+
   final bool accessRequestEnabled;
 
   @override

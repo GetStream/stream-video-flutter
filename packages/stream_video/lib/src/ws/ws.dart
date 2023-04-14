@@ -96,7 +96,7 @@ abstract class StreamWebSocket {
   Future<Result<None>> disconnect([int? closeCode, String? closeReason]) async {
     try {
       _logger.i(
-            () => '[disconnect] connectRequestInProgress: '
+        () => '[disconnect] connectRequestInProgress: '
             '$_connectRequestInProgress, url: $url',
       );
       await _ws?.sink.close(closeCode, closeReason);

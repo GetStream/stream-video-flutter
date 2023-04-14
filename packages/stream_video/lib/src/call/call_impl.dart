@@ -14,7 +14,7 @@ import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../utils/cancelables.dart';
 import '../utils/none.dart';
-import '../utils/standard.dart';
+import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 
@@ -89,6 +89,7 @@ class CallImpl implements Call {
     CallCredentials? credentials,
   })  : _sessionFactory = CallSessionFactory(
           callCid: stateManager.state.value.callCid,
+          sdpEditor: SdpEditorImpl(streamVideo.sdpPolicy),
         ),
         _stateManager = stateManager,
         _streamVideo = streamVideo,
@@ -289,8 +290,7 @@ class CallImpl implements Call {
     final state = this.state.value;
     final status = state.status;
     if (!status.isConnectable) {
-      _logger
-          .w(() => '[connect] rejected (not Connectable): $status');
+      _logger.w(() => '[connect] rejected (not Connectable): $status');
       return Result.error('invalid status: $status');
     }
 
@@ -468,10 +468,7 @@ class CallImpl implements Call {
     }
     if (futureResult != null) {
       _logger.v(() => '[awaitIfNeeded] return cancelable');
-      return futureResult
-          .asCancelable()
-          .storeIn(_idAwait, _cancelables)
-          .value;
+      return futureResult.asCancelable().storeIn(_idAwait, _cancelables).value;
     }
     return Result.success(None());
   }

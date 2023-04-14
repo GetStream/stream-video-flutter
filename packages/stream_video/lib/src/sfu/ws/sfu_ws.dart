@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../errors/video_error_composer.dart';

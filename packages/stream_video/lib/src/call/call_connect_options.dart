@@ -68,6 +68,7 @@ abstract class TrackOption with EquatableMixin {
 
 class TrackDisabled extends TrackOption {
   const TrackDisabled._();
+
   static const TrackDisabled _instance = TrackDisabled._();
 
   @override
@@ -76,6 +77,7 @@ class TrackDisabled extends TrackOption {
 
 class TrackEnabled extends TrackOption {
   const TrackEnabled._();
+
   static const TrackEnabled _instance = TrackEnabled._();
 
   @override

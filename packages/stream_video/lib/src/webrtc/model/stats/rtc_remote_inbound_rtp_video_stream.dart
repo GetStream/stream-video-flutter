@@ -18,7 +18,7 @@
 import 'rtc_remote_inbound_rtp.dart';
 
 class RtcRemoteInboundRtpVideoStream extends RtcRemoteInboundRtp {
-  RtcRemoteInboundRtpVideoStream({
+  const RtcRemoteInboundRtpVideoStream({
     super.id,
     super.type,
     super.timestamp,

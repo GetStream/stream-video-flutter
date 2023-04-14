@@ -18,7 +18,7 @@
 import 'rtc_remote_inbound_rtp.dart';
 
 class RtcRemoteInboundRtpAudioStream extends RtcRemoteInboundRtp {
-  RtcRemoteInboundRtpAudioStream({
+  const RtcRemoteInboundRtpAudioStream({
     super.id,
     super.type,
     super.timestamp,

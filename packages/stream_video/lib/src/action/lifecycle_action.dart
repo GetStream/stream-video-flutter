@@ -53,17 +53,18 @@ class CallConnectingAction extends LifecycleAction {
   final int attempt;
 }
 
-
 class CallConnectedAction extends LifecycleAction {
   const CallConnectedAction();
 }
 
 class CallTimeoutAction extends LifecycleAction {
   const CallTimeoutAction(this.timeLimit);
+
   final Duration timeLimit;
 }
 
 class CallConnectFailedAction extends LifecycleAction {
   const CallConnectFailedAction(this.error);
+
   final VideoError error;
 }

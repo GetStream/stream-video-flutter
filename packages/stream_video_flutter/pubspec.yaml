@@ -14,7 +14,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_background: ^1.1.0
-  flutter_webrtc: ^0.9.24
+  flutter_webrtc: ^0.9.25
   google_fonts: ^3.0.1
   stream_video:
     path: ../stream_video

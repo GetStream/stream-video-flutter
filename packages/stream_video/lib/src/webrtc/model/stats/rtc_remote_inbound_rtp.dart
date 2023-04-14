@@ -19,7 +19,7 @@ import 'rtc_inbound_rtp.dart';
 import 'rtc_writable.dart';
 
 class RtcRemoteInboundRtp implements RtcInboundRtp, RtcWritable {
-  RtcRemoteInboundRtp({
+  const RtcRemoteInboundRtp({
     this.id,
     this.type,
     this.timestamp,

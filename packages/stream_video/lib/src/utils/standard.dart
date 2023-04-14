@@ -7,5 +7,4 @@ extension Standard<T extends Object> on T {
     block(this);
     return this;
   }
-
 }

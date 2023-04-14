@@ -1,6 +1,5 @@
 import '../../stream_video.dart';
 import '../errors/video_error_composer.dart';
-import 'token_manager.dart';
 
 /// A function which can be used to request a Stream Video API token from your
 /// own backend server

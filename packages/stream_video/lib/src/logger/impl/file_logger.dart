@@ -253,9 +253,13 @@ class FileStreamLogger extends StreamLogger {
 
 abstract class FileLogConfig {
   int get maxLogSize => _defaultSize;
+
   Future<Directory> get filesDir;
+
   Future<Directory> get tempsDir;
+
   Future<String> get appVersion;
+
   Future<dynamic> get deviceInfo;
 }
 
@@ -297,6 +301,7 @@ extension on Priority {
 
 class FileLoggerException implements Exception {
   const FileLoggerException([this.message]);
+
   final dynamic message;
 
   @override

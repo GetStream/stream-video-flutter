@@ -12,8 +12,10 @@ import 'models/queried_members.dart';
 import 'retry/retry_policy.dart';
 import 'shared_emitter.dart';
 import 'stream_video_impl.dart';
-import 'token/token_manager.dart';
 import 'utils/none.dart';
+import 'webrtc/sdp/codec/sdp_codec.dart';
+import 'webrtc/sdp/policy/sdp_policy.dart';
+import 'webrtc/sdp/sdp.dart';
 
 /// Handler function used for logging.
 typedef LogHandlerFunction = void Function(
@@ -35,6 +37,7 @@ abstract class StreamVideo {
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
     RetryPolicy retryPolicy = const RetryPolicy(),
+    SdpPolicy sdpPolicy = _defaultSdpPolicy,
   }) {
     return StreamVideoImpl(
       apiKey,
@@ -42,6 +45,7 @@ abstract class StreamVideo {
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
       retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
     );
   }
 
@@ -49,8 +53,11 @@ abstract class StreamVideo {
 
   set pushNotificationManager(PushNotificationManager pushNotificationManager);
 
-  /// Returns the current RetryPolicy.
+  /// Returns the current [RetryPolicy].
   RetryPolicy get retryPolicy;
+
+  /// Returns the current [SdpPolicy].
+  SdpPolicy get sdpPolicy;
 
   /// Returns the current user if exists.
   UserInfo? get currentUser;
@@ -239,6 +246,7 @@ abstract class StreamVideo {
     RetryPolicy retryPolicy = const RetryPolicy(),
     Priority logPriority = Priority.none,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
+    SdpPolicy sdpPolicy = _defaultSdpPolicy,
   }) {
     _setupLogger(logPriority, logHandlerFunction);
     return _instanceHolder.init(
@@ -247,6 +255,7 @@ abstract class StreamVideo {
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
       retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
     );
   }
 
@@ -293,6 +302,17 @@ void _defaultLogHandler(
 ]) {
   /* no-op */
 }
+
+const _defaultSdpPolicy = SdpPolicy(
+  mungingEnabled: true,
+  rules: [
+    PrioritizeCodecRule(
+      platforms: [PlatformType.android],
+      types: [SdpType.localOffer],
+      codec: VideoCodec.vp8,
+    ),
+  ],
+);
 
 extension StreamVideoX on StreamVideo {
   /// Connects the [user] to the Stream Video service.
