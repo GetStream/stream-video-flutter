@@ -11,7 +11,6 @@ class SdpEditActionFactory {
   final _rtpmapParser = RtpmapParser();
   final _mediaDescriptionParser = MediaDescriptionParser();
 
-
   SdpEditAction? create(SdpMungingRule rule) {
     if (rule is PrioritizeCodecRule) {
       return PrioritizeCodecAction(

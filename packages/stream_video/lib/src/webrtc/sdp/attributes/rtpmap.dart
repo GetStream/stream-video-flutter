@@ -28,7 +28,6 @@ class Rtpmap with EquatableMixin {
       ];
 }
 
-
 class RtpmapParser {
   final _regex = RegExp(r'^a=rtpmap:(\d+) ([\w-]+)/(\d+)(?:/([\w-]+))?$');
   final _groupPayloadType = 1;

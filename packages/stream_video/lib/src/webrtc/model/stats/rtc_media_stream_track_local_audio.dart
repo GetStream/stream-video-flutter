@@ -15,7 +15,7 @@ import 'rtc_writable.dart';
 
 class RtcMediaStreamTrackLocalAudio
     implements RtcMediaStreamTrack, RtcWritable {
-  RtcMediaStreamTrackLocalAudio({
+  const RtcMediaStreamTrackLocalAudio({
     this.id,
     this.type,
     this.timestamp,

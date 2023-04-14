@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class TokenService {
-
   Future<String> loadToken({
     required String apiKey,
     required String userId,
@@ -18,11 +17,10 @@ class TokenService {
     }
 
     final uri = Uri(
-      scheme: 'https',
-      host: 'stream-calls-dogfood.vercel.app',
-      path: '/api/auth/create-token',
-      queryParameters: queryParameters
-    );
+        scheme: 'https',
+        host: 'stream-calls-dogfood.vercel.app',
+        path: '/api/auth/create-token',
+        queryParameters: queryParameters);
 
     final response = await http.get(uri);
     final body = json.decode(response.body) as Map<String, dynamic>;

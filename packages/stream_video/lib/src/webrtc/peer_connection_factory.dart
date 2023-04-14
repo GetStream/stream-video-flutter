@@ -1,7 +1,7 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:stream_video/src/types/other.dart';
-import 'package:stream_video/src/webrtc/peer_type.dart';
 import 'package:stream_video/src/webrtc/peer_connection.dart';
+import 'package:stream_video/src/webrtc/peer_type.dart';
 
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';

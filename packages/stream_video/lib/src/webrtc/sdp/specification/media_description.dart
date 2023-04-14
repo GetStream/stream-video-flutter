@@ -40,6 +40,7 @@ class MediaDescription with EquatableMixin {
   List<Object?> get props => [media, port, numberOfPorts, proto, fmt];
 
   static bool isVideo(String sdpLine) => sdpLine.startsWith('m=video');
+
   static bool isAudio(String sdpLine) => sdpLine.startsWith('m=audio');
 }
 

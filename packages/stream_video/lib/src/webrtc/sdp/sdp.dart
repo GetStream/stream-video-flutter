@@ -1,17 +1,16 @@
 class Sdp {
   const Sdp(this.type, this.value);
 
-  factory Sdp.localOffer(String sdp) => Sdp(SdpType.localOffer, sdp);
+  const Sdp.localOffer(String sdp) : this(SdpType.localOffer, sdp);
 
-  factory Sdp.localAnswer(String sdp) => Sdp(SdpType.localAnswer, sdp);
+  const Sdp.localAnswer(String sdp) : this(SdpType.localAnswer, sdp);
 
-  factory Sdp.remoteOffer(String sdp) => Sdp(SdpType.remoteOffer, sdp);
+  const Sdp.remoteOffer(String sdp) : this(SdpType.remoteOffer, sdp);
 
-  factory Sdp.remoteAnswer(String sdp) => Sdp(SdpType.remoteAnswer, sdp);
+  const Sdp.remoteAnswer(String sdp) : this(SdpType.remoteAnswer, sdp);
 
   final SdpType type;
   final String value;
-
 }
 
 enum SdpType {

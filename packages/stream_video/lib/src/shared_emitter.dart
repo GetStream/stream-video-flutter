@@ -25,6 +25,7 @@ abstract class SharedEmitter<T> {
 
 abstract class MutableSharedEmitter<T> extends SharedEmitter<T> {
   void emit(T value);
+
   Future<dynamic> close();
 }
 

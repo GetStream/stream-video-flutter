@@ -31,7 +31,7 @@ import 'rtc_writable.dart';
 
 class RtcMediaStreamTrackRemoteAudio
     implements RtcMediaStreamTrack, RtcWritable {
-  RtcMediaStreamTrackRemoteAudio({
+  const RtcMediaStreamTrackRemoteAudio({
     this.id,
     this.type,
     this.timestamp,

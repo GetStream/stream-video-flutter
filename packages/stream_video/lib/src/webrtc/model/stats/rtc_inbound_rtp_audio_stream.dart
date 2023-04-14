@@ -35,8 +35,7 @@ import 'rtc_inbound_rtp.dart';
 import 'rtc_writable.dart';
 
 class RtcInboundRtpAudioStream implements RtcInboundRtp, RtcWritable {
-
-  RtcInboundRtpAudioStream({
+  const RtcInboundRtpAudioStream({
     this.id,
     this.type,
     this.timestamp,
@@ -134,7 +133,6 @@ class RtcInboundRtpAudioStream implements RtcInboundRtp, RtcWritable {
     }
     return null;
   }
-
 
   @override
   String toString() {

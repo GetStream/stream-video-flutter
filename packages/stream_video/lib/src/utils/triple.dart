@@ -7,6 +7,7 @@ class Triple<T1, T2, T3> {
     required this.second,
     required this.third,
   });
+
   final T1 first;
   final T2 second;
   final T3 third;

@@ -19,7 +19,7 @@ import 'rtc_writable.dart';
 
 class RtcMediaStreamTrackLocalVideo
     implements RtcMediaStreamTrack, RtcWritable {
-  RtcMediaStreamTrackLocalVideo({
+  const RtcMediaStreamTrackLocalVideo({
     this.id,
     this.type,
     this.timestamp,

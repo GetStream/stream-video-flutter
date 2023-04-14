@@ -1,4 +1,3 @@
-
 // {
 //   id: RTCCodec_0_Inbound_101,
 //   type: codec,
@@ -11,7 +10,7 @@
 // }
 
 class RtcCodec {
-  RtcCodec({
+  const RtcCodec({
     this.id,
     this.type,
     this.timestamp,

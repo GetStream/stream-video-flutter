@@ -5,7 +5,6 @@ import 'package:equatable/equatable.dart';
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../../logger/stream_log.dart';
 import 'event_type.dart';
-import 'health_check.dart';
 
 const _tag = 'SV:OpenApiEvent';
 

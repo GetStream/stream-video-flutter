@@ -24,7 +24,7 @@
 // }
 
 class RtcIceCandidatePair {
-  RtcIceCandidatePair({
+  const RtcIceCandidatePair({
     this.id,
     this.type,
     this.timestamp,

@@ -16,6 +16,7 @@ final _priorityNameMapper = {
 
 abstract class StreamLogger {
   const StreamLogger();
+
   String emoji(Priority priority) => _priorityEmojiMapper[priority] ?? '📣';
 
   String name(Priority priority) => _priorityNameMapper[priority] ?? '*';

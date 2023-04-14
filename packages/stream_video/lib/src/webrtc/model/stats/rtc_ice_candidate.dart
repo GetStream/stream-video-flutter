@@ -20,7 +20,7 @@
 import 'rtc_writable.dart';
 
 class RtcIceCandidate implements RtcWritable {
-  RtcIceCandidate({
+  const RtcIceCandidate({
     this.id,
     this.type,
     this.timestamp,

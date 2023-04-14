@@ -33,25 +33,38 @@ abstract class CoordinatorCallEventListener extends CoordinatorEventListener {
 
 abstract class CallStateManager implements CoordinatorCallEventListener {
   const CallStateManager();
+
   StateEmitter<CallState> get state;
+
   Future<void> onUserIdSet(String userId);
+
   Future<void> onCreated(CallCreated data);
+
   Future<void> onReceivedOrCreated(CallReceivedOrCreated data);
+
   Future<void> onConnecting(int attempt);
+
   Future<void> onConnected();
+
   Future<void> onDisconnect();
+
   Future<void> onJoining();
+
   Future<void> onJoined(CallJoined data);
+
   Future<void> onEnded();
+
   Future<void> onSessionStart(String sessionId);
+
   Future<void> onControlAction(CallControlAction action);
+
   Future<void> onSfuEvent(SfuEvent event);
+
   Future<void> onWaitingTimeout(Duration dropTimeout);
+
   Future<void> onConnectFailed(VideoError error);
 
   void onSubscriberTrackReceived(String trackIdPrefix, SfuTrackType trackType);
-
-
 }
 
 class CallStateManagerImpl extends CallStateManager {
@@ -221,7 +234,6 @@ class CallStateManagerImpl extends CallStateManager {
       _state.value = state;
     }
   }
-
 }
 
 extension on List<CallUser> {

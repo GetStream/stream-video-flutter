@@ -11,6 +11,7 @@ class CallCreated with EquatableMixin {
     required this.ringing,
     required this.metadata,
   });
+
   final StreamCallCid callCid;
   final bool ringing;
   final CallMetadata metadata;

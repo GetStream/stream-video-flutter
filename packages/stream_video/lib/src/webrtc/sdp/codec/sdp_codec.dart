@@ -1,5 +1,5 @@
 abstract class SdpCodec {
-  abstract final String alias;
+  String get alias;
 }
 
 enum VideoCodec implements SdpCodec {
@@ -9,6 +9,7 @@ enum VideoCodec implements SdpCodec {
 
   const VideoCodec(this.alias);
 
+  @override
   final String alias;
 
   @override
@@ -20,6 +21,7 @@ enum AudioCodec implements SdpCodec {
 
   const AudioCodec(this.alias);
 
+  @override
   final String alias;
 
   @override

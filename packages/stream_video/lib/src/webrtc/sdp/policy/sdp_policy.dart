@@ -23,7 +23,11 @@ abstract class SdpMungingRule {
     List<PlatformType> platforms = const [],
     List<SdpType> types = const [],
   }) {
-    return PrioritizeCodecRule(codec: codec, platforms: platforms, types: types);
+    return PrioritizeCodecRule(
+      codec: codec,
+      platforms: platforms,
+      types: types,
+    );
   }
 
   final List<SdpType> types;
