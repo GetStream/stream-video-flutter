@@ -205,6 +205,7 @@ class OwnUserResponse {
     'devices',
     'id',
     'role',
+    'teams',
     'updated_at',
   };
 }
