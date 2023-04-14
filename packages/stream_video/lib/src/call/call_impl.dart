@@ -289,8 +289,7 @@ class CallImpl implements Call {
     final state = this.state.value;
     final status = state.status;
     if (!status.isConnectable) {
-      _logger
-          .w(() => '[connect] rejected (not Connectable): $status');
+      _logger.w(() => '[connect] rejected (not Connectable): $status');
       return Result.error('invalid status: $status');
     }
 
@@ -468,10 +467,7 @@ class CallImpl implements Call {
     }
     if (futureResult != null) {
       _logger.v(() => '[awaitIfNeeded] return cancelable');
-      return futureResult
-          .asCancelable()
-          .storeIn(_idAwait, _cancelables)
-          .value;
+      return futureResult.asCancelable().storeIn(_idAwait, _cancelables).value;
     }
     return Result.success(None());
   }
@@ -565,6 +561,8 @@ class CallImpl implements Call {
       return _startBroadcasting(action);
     } else if (action is StopBroadcasting) {
       return _stopBroadcasting(action);
+    } else if (action is SendReaction) {
+      return _sendReaction(action);
     } else if (action is MuteUsers) {
       return _muteUsers(action);
     } else if (action is RequestPermissions) {
@@ -845,6 +843,25 @@ class CallImpl implements Call {
       await _stateManager.onControlAction(action);
     }
     return result;
+  }
+
+  Future<Result<None>> _sendReaction(SendReaction action) async {
+    if (!_hasPermission(CallPermission.createReaction)) {
+      _logger.w(() => '[sendReaction] rejected (no permission)');
+      return Result.error('Cannot send reaction (no permission)');
+    }
+    _logger.d(() => '[sendReaction] action: $action');
+    final result = await _streamVideo.sendReaction(
+      callCid: callCid,
+      reactionType: action.reactionType,
+      emojiCode: action.emojiCode,
+      custom: action.custom,
+    );
+    _logger.v(() => '[sendReaction] result: $result');
+    if (result.isSuccess) {
+      await _stateManager.onControlAction(action);
+    }
+    return result.map((_) => None());
   }
 
   Future<Result<None>> _muteUsers(MuteUsers action) async {
