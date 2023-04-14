@@ -28,6 +28,7 @@ part 'auth/http_basic_auth.dart';
 part 'auth/http_bearer_auth.dart';
 
 part 'api/call_types_api.dart';
+part 'api/default_api.dart';
 part 'api/events_api.dart';
 part 'api/livestreaming_api.dart';
 part 'api/moderation_api.dart';
@@ -69,6 +70,8 @@ part 'model/connected_event.dart';
 part 'model/coordinates.dart';
 part 'model/create_call_type_request.dart';
 part 'model/create_call_type_response.dart';
+part 'model/create_guest_request.dart';
+part 'model/create_guest_response.dart';
 part 'model/credentials.dart';
 part 'model/custom_video_event.dart';
 part 'model/datacenter_response.dart';
