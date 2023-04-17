@@ -18,7 +18,7 @@ class CallMemberUpdatedPermissionEvent {
     this.capabilitiesByRole = const {},
     required this.createdAt,
     this.members = const [],
-    required this.type,
+    this.type = 'call.updated_permission',
   });
 
   CallResponse call;

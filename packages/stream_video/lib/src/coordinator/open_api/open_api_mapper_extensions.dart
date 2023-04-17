@@ -148,6 +148,20 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
         );
+
+      case EventType.callBroadcastingStarted:
+        final event = callBroadcastingStarted!;
+        return CoordinatorCallBroadcastingStartedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          hlsPlaylistUrl: event.hlsPlaylistUrl,
+          createdAt: event.createdAt,
+        );
+      case EventType.callBroadcastingStopped:
+        final event = callBroadcastingStopped!;
+        return CoordinatorCallBroadcastingStoppedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+        );
       case EventType.callUserBlocked:
         final event = callUserBlocked!;
 
