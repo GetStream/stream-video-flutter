@@ -19,3 +19,5 @@ browsable
 keystore
 keystores
 Xcode
+melos
+env
