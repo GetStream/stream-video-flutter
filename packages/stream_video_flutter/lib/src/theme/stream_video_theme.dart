@@ -156,12 +156,15 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           selectionThickness: 4,
         ),
         audioLevelIndicatorColor: colorTheme.accentPrimary,
+        audioLevelIndicatorSize: 24,
         participantLabelTextStyle:
             textTheme.footnote.copyWith(color: Colors.white),
         disabledMicrophoneColor: colorTheme.accentError,
         enabledMicrophoneColor: Colors.white,
+        audioIndicatorSize: 16,
         connectionLevelActiveColor: colorTheme.accentPrimary,
         connectionLevelInactiveColor: Colors.white,
+        connectionLevelIndicatorSize: 24,
       ),
       localVideoTheme: const StreamLocalVideoThemeData(
         localVideoHeight: 150,

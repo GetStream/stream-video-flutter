@@ -8,6 +8,7 @@ packages:
   - dogfooding
   - packages/**
   - examples/**
+  - stream_video_widgetbook
 
 command:
   bootstrap:

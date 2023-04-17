@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
-import '../../theme/stream_video_theme.dart';
+import '../../theme/call_participant_theme.dart';
 
 /// Widget used to indicate the audio levels of a given participant.
 class StreamAudioLevelIndicator extends StatefulWidget {
@@ -9,10 +8,16 @@ class StreamAudioLevelIndicator extends StatefulWidget {
   const StreamAudioLevelIndicator({
     super.key,
     this.color,
+    this.size,
   });
 
   /// The color of an audio level.
   final Color? color;
+
+  /// The size of the audio level indicator.
+  ///
+  /// Defaults to 24.
+  final double? size;
 
   @override
   State<StreamAudioLevelIndicator> createState() =>
@@ -40,22 +45,17 @@ class _StreamAudioLevelIndicatorState extends State<StreamAudioLevelIndicator>
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context).callParticipantTheme;
+    final theme = StreamCallParticipantTheme.of(context);
+    final color = widget.color ?? theme.audioLevelIndicatorColor;
 
     return SizedBox(
       width: 24,
       height: 24,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (_, child) {
-          return CustomPaint(
-            size: const Size.square(24),
-            painter: _AudioLevelIndicatorPainter(
-              animationValue: _controller.value,
-              color: widget.color ?? theme.audioLevelIndicatorColor,
-            ),
-          );
-        },
+      child: CustomPaint(
+        painter: _AudioLevelIndicatorPainter(
+          controller: _controller,
+          color: color,
+        ),
       ),
     );
   }
@@ -65,12 +65,12 @@ class _StreamAudioLevelIndicatorState extends State<StreamAudioLevelIndicator>
 class _AudioLevelIndicatorPainter extends CustomPainter {
   /// Constructor for creating a [_AudioLevelIndicatorPainter].
   const _AudioLevelIndicatorPainter({
-    required this.animationValue,
+    required this.controller,
     required this.color,
-  });
+  }) : super(repaint: controller);
 
   /// The current value of the animation.
-  final double animationValue;
+  final AnimationController controller;
 
   /// The color of an audio level.
   final Color color;
@@ -82,7 +82,7 @@ class _AudioLevelIndicatorPainter extends CustomPainter {
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
 
-    final offset = 4 * animationValue;
+    final offset = 4 * controller.value;
 
     canvas.drawLine(
       Offset(7, 10 - offset),

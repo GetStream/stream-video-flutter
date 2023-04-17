@@ -56,6 +56,12 @@ class _SimpleFloatingViewState extends State<SimpleFloatingView> {
   }
 
   @override
+  void dispose() {
+    bottomRightOffset.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {

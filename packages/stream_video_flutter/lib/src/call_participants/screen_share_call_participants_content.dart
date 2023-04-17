@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'layout/call_participants_spotlight_view.dart';
 
 /// A widget that represents the main area of the call when somebody is
 /// sharing their screen.
@@ -108,7 +107,7 @@ class ScreenShareContent extends StatelessWidget {
     super.key,
     required this.call,
     required this.participant,
-    this.backgroundColor = const Color(0xFF272A30),
+    this.backgroundColor,
     this.borderRadius = const BorderRadius.all(Radius.circular(8)),
   });
 
@@ -119,30 +118,22 @@ class ScreenShareContent extends StatelessWidget {
   final CallParticipantState participant;
 
   /// The background color for the video.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// The border radius to apply to the content.
   final BorderRadius borderRadius;
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context);
-    final screenShareTrack = participant.screenShareTrack;
+    final videoTheme = StreamVideoTheme.of(context);
+    final colorTheme = videoTheme.colorTheme;
 
     return ClipRRect(
       borderRadius: borderRadius,
       child: ColoredBox(
-        color: backgroundColor,
+        color: backgroundColor ?? colorTheme.disabled,
         child: Builder(
           builder: (context) {
-            if (screenShareTrack == null) {
-              return Center(
-                child: CircularProgressIndicator(
-                  color: theme.colorTheme.accentPrimary,
-                ),
-              );
-            }
-
             return InteractiveViewer(
               child: StreamVideoRenderer(
                 call: call,

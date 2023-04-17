@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../call_participant.dart';
 import '../call_participants.dart';
 
-const _kSpacing = 16.0;
+const _kSpacing = 8.0;
 
 /// Defines the alignment of the participants bar.
 enum ParticipantsBarAlignment { top, bottom, left, right }
@@ -15,8 +16,10 @@ class CallParticipantsSpotlightView extends StatelessWidget {
     required this.spotlight,
     CallParticipantBuilder? spotlightBuilder,
     required this.participants,
-    required this.participantBuilder,
+    this.participantBuilder = _defaultParticipantBuilder,
     this.padding = const EdgeInsets.all(_kSpacing),
+    this.mainAxisSpacing = _kSpacing,
+    this.crossAxisSpacing = _kSpacing,
     this.barAlignment = ParticipantsBarAlignment.bottom,
   }) : spotlightBuilder = spotlightBuilder ?? participantBuilder;
 
@@ -40,31 +43,55 @@ class CallParticipantsSpotlightView extends StatelessWidget {
   /// Padding around the spotlight and participants bar.
   final EdgeInsets padding;
 
+  /// Spacing between the [spotlight] and [participants].
+  final double mainAxisSpacing;
+
+  /// Space between the [participants] in the cross axis.
+  final double crossAxisSpacing;
+
   /// The alignment of the participants bar.
   final ParticipantsBarAlignment barAlignment;
+
+  // The default participant builder.
+  static Widget _defaultParticipantBuilder(
+    BuildContext context,
+    Call call,
+    CallParticipantState participant,
+  ) {
+    return StreamCallParticipant(
+      // We use the sessionId as the key to avoid rebuilding the widget
+      // when the participant changes.
+      key: ValueKey(participant.sessionId),
+      call: call,
+      participant: participant,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final spotlight = _buildSpotlight(context);
     final participantsBar = _buildParticipantsBar(context);
+    final spacing = barAlignment.toMainAxisSpacing(mainAxisSpacing);
 
     Widget child;
     switch (barAlignment) {
       case ParticipantsBarAlignment.top:
-        child = Column(children: [participantsBar, spotlight]);
+        child = Column(children: [participantsBar, spacing, spotlight]);
         break;
       case ParticipantsBarAlignment.bottom:
-        child = Column(children: [spotlight, participantsBar]);
+        child = Column(children: [spotlight, spacing, participantsBar]);
         break;
       case ParticipantsBarAlignment.left:
-        child = Row(children: [participantsBar, spotlight]);
+        child = Row(children: [participantsBar, spacing, spotlight]);
         break;
       case ParticipantsBarAlignment.right:
-        child = Row(children: [spotlight, participantsBar]);
+        child = Row(children: [spotlight, spacing, participantsBar]);
         break;
     }
 
-    return Center(child: child);
+    return Center(
+      child: child,
+    );
   }
 
   Widget _buildSpotlight(BuildContext context) {
@@ -80,7 +107,7 @@ class CallParticipantsSpotlightView extends StatelessWidget {
       child: AspectRatio(
         aspectRatio: aspectRatio,
         child: Padding(
-          padding: padding,
+          padding: barAlignment.toSpotlightPadding(padding),
           child: spotlightBuilder.call(context, call, spotlight),
         ),
       ),
@@ -91,8 +118,8 @@ class CallParticipantsSpotlightView extends StatelessWidget {
     if (participants.isEmpty) return const SizedBox.shrink();
 
     final scrollDirection = barAlignment.toAxis();
-    final spacer = barAlignment.toSpacer(this.padding);
-    final padding = barAlignment.toPadding(this.padding);
+    final padding = barAlignment.toBarPadding(this.padding);
+    final spacer = barAlignment.toCrossAxisSpacing(crossAxisSpacing);
 
     const aspectRatio = 4 / 3;
 
@@ -117,6 +144,26 @@ class CallParticipantsSpotlightView extends StatelessWidget {
 }
 
 extension on ParticipantsBarAlignment {
+  SizedBox toCrossAxisSpacing(double spacing) {
+    switch (toAxis()) {
+      case Axis.horizontal:
+        return SizedBox(width: spacing);
+      case Axis.vertical:
+        return SizedBox(height: spacing);
+    }
+  }
+
+  SizedBox toMainAxisSpacing(double spacing) {
+    switch (this) {
+      case ParticipantsBarAlignment.top:
+      case ParticipantsBarAlignment.bottom:
+        return SizedBox(height: spacing);
+      case ParticipantsBarAlignment.left:
+      case ParticipantsBarAlignment.right:
+        return SizedBox(width: spacing);
+    }
+  }
+
   Axis toAxis() {
     switch (this) {
       case ParticipantsBarAlignment.top:
@@ -128,18 +175,7 @@ extension on ParticipantsBarAlignment {
     }
   }
 
-  SizedBox toSpacer(EdgeInsets padding) {
-    switch (this) {
-      case ParticipantsBarAlignment.top:
-      case ParticipantsBarAlignment.bottom:
-        return SizedBox(width: padding.right);
-      case ParticipantsBarAlignment.left:
-      case ParticipantsBarAlignment.right:
-        return SizedBox(height: padding.bottom);
-    }
-  }
-
-  EdgeInsets toPadding(EdgeInsets padding) {
+  EdgeInsets toBarPadding(EdgeInsets padding) {
     switch (this) {
       case ParticipantsBarAlignment.top:
         return padding - EdgeInsets.only(bottom: padding.bottom);
@@ -149,6 +185,19 @@ extension on ParticipantsBarAlignment {
         return padding - EdgeInsets.only(right: padding.right);
       case ParticipantsBarAlignment.right:
         return padding - EdgeInsets.only(left: padding.left);
+    }
+  }
+
+  EdgeInsets toSpotlightPadding(EdgeInsets padding) {
+    switch (this) {
+      case ParticipantsBarAlignment.top:
+        return padding - EdgeInsets.only(top: padding.top);
+      case ParticipantsBarAlignment.bottom:
+        return padding - EdgeInsets.only(bottom: padding.bottom);
+      case ParticipantsBarAlignment.left:
+        return padding - EdgeInsets.only(left: padding.left);
+      case ParticipantsBarAlignment.right:
+        return padding - EdgeInsets.only(right: padding.right);
     }
   }
 }

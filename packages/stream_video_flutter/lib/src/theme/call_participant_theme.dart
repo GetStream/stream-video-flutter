@@ -36,11 +36,14 @@ class StreamCallParticipantThemeData with Diagnosticable {
     ),
     this.participantLabelAlignment = Alignment.bottomLeft,
     this.audioLevelIndicatorColor = const Color(0xff005FFF),
+    this.audioLevelIndicatorSize = 24,
     this.enabledMicrophoneColor = Colors.white,
     this.disabledMicrophoneColor = const Color(0xffFF3842),
+    this.audioIndicatorSize = 16,
     this.showConnectionQualityIndicator = true,
     this.connectionLevelActiveColor = const Color(0xff005FFF),
     this.connectionLevelInactiveColor = Colors.white,
+    this.connectionLevelIndicatorSize = 24,
     this.connectionLevelAlignment = Alignment.bottomRight,
   });
 
@@ -74,11 +77,17 @@ class StreamCallParticipantThemeData with Diagnosticable {
   /// The color of an audio level indicator.
   final Color audioLevelIndicatorColor;
 
+  /// The size of an audio level indicator.
+  final double audioLevelIndicatorSize;
+
   /// The color of an enabled microphone icon.
   final Color enabledMicrophoneColor;
 
   /// The color of a disabled microphone icon.
   final Color disabledMicrophoneColor;
+
+  /// The size of an audio indicator.
+  final double audioIndicatorSize;
 
   /// Whether to show the connection quality indicator.
   final bool showConnectionQualityIndicator;
@@ -88,6 +97,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
 
   /// The color of an inactive connection quality level.
   final Color connectionLevelInactiveColor;
+
+  /// The size of an connection quality indicator.
+  final double connectionLevelIndicatorSize;
 
   /// Alignment for the connection level.
   final AlignmentGeometry connectionLevelAlignment;

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import 'audio_level_indicator.dart';
 
 /// Widget used to indicate the audio state of a given participant.
 /// Either shows a mute icon or audio levels.
@@ -14,6 +13,7 @@ class StreamAudioIndicator extends StatelessWidget {
     this.audioLevelIndicatorColor,
     this.enabledMicrophoneColor,
     this.disabledMicrophoneColor,
+    this.size,
   });
 
   /// If the participant has microphone enabled.
@@ -31,15 +31,21 @@ class StreamAudioIndicator extends StatelessWidget {
   /// The color of a disabled microphone icon.
   final Color? disabledMicrophoneColor;
 
+  /// The size of the audio indicator.
+  final double? size;
+
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context).callParticipantTheme;
+    final theme = StreamCallParticipantTheme.of(context);
 
     if (isAudioEnabled && isSpeaking) {
       return StreamAudioLevelIndicator(
+        size: 16,
         color: audioLevelIndicatorColor,
       );
-    } else if (isAudioEnabled && !isSpeaking) {
+    }
+
+    if (isAudioEnabled && !isSpeaking) {
       return Padding(
         padding: const EdgeInsets.all(4),
         child: Icon(
@@ -48,15 +54,15 @@ class StreamAudioIndicator extends StatelessWidget {
           color: enabledMicrophoneColor ?? theme.enabledMicrophoneColor,
         ),
       );
-    } else {
-      return Padding(
-        padding: const EdgeInsets.all(4),
-        child: Icon(
-          Icons.mic_off,
-          size: 16,
-          color: disabledMicrophoneColor ?? theme.disabledMicrophoneColor,
-        ),
-      );
     }
+
+    return Padding(
+      padding: const EdgeInsets.all(4),
+      child: Icon(
+        Icons.mic_off,
+        size: 16,
+        color: disabledMicrophoneColor ?? theme.disabledMicrophoneColor,
+      ),
+    );
   }
 }

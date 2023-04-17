@@ -2,8 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'layout/participant_layout_mode.dart';
-import 'regular_call_participants_content.dart';
 import 'screen_share_call_participants_content.dart';
 
 /// Builder function used to build a participant item.
@@ -33,6 +31,8 @@ typedef Filter<T> = bool Function(T element);
 /// Comparator used to sort the participants.
 typedef Sort<T> = Comparator<T>;
 
+const _kDefaultSpacing = 8.0;
+
 /// Widget that renders all the [StreamCallParticipant], based on the number
 /// of people in a call.
 class StreamCallParticipants extends StatelessWidget {
@@ -49,7 +49,11 @@ class StreamCallParticipants extends StatelessWidget {
     this.screenShareContentBuilder,
     this.screenShareParticipantBuilder = _defaultParticipantBuilder,
     this.layoutMode = ParticipantLayoutMode.grid,
-  }) : sort = sort ?? layoutMode.sorting;
+    this.padding = const EdgeInsets.all(_kDefaultSpacing),
+    this.mainAxisSpacing = _kDefaultSpacing,
+    this.crossAxisSpacing = _kDefaultSpacing,
+  })  : assert(participants.isNotEmpty, 'Participants cannot be empty'),
+        sort = sort ?? layoutMode.sorting;
 
   /// Represents a call.
   final Call call;
@@ -81,6 +85,15 @@ class StreamCallParticipants extends StatelessWidget {
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
 
+  /// Space between the items in the main axis.
+  final double mainAxisSpacing;
+
+  /// Space between the items in the cross axis.
+  final double crossAxisSpacing;
+
+  /// Padding around the content.
+  final EdgeInsets padding;
+
   // The default participant filter.
   static bool _defaultFilter(CallParticipantState participant) => true;
 
@@ -99,125 +112,9 @@ class StreamCallParticipants extends StatelessWidget {
     );
   }
 
-  final _participants = [
-    CallParticipantState(
-      name: 'A',
-      userId: '1',
-      sessionId: '1',
-      role: 'admin',
-      trackIdPrefix: '123',
-      // publishedTracks: {
-      //   SfuTrackType.audio: TrackState.remote(),
-      //   SfuTrackType.video: TrackState.remote(),
-      // },
-      connectionQuality: SfuConnectionQuality.excellent,
-      isSpeaking: false,
-      isDominantSpeaker: false,
-      audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
-      isPinned: false,
-      isLocal: false,
-    ),
-
-    // Presenter, video, audio
-    CallParticipantState(
-      name: 'B',
-      userId: '2',
-      sessionId: '2',
-      role: 'admin',
-      trackIdPrefix: '123',
-      // publishedTracks: {
-      //   SfuTrackType.audio: TrackState.remote(),
-      //   SfuTrackType.video: TrackState.remote(),
-      //   SfuTrackType.screenShare: TrackState.remote(),
-      // },
-      connectionQuality: SfuConnectionQuality.excellent,
-      isSpeaking: false,
-      isDominantSpeaker: false,
-      audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
-      isPinned: false,
-      isLocal: false,
-    ),
-
-    // Muted
-    const CallParticipantState(
-      name: 'C',
-      userId: '3',
-      sessionId: '3',
-      role: 'admin',
-      trackIdPrefix: '123',
-      // publishedTracks: const {},
-      connectionQuality: SfuConnectionQuality.excellent,
-      isSpeaking: false,
-      isDominantSpeaker: false,
-      audioLevel: 0,
-      viewportVisibility: ViewportVisibility.visible(size: Size(50, 50)),
-      isPinned: false,
-      isLocal: false,
-    ),
-
-    // Dominant speaker
-    CallParticipantState(
-      name: 'D',
-      userId: '4',
-      sessionId: '4',
-      role: 'admin',
-      trackIdPrefix: '123',
-      // publishedTracks: {SfuTrackType.audio: TrackState.remote()},
-      connectionQuality: SfuConnectionQuality.excellent,
-      isSpeaking: false,
-      isDominantSpeaker: true,
-      audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
-      isPinned: false,
-      isLocal: false,
-    ),
-
-    // Presenter only
-    CallParticipantState(
-      name: 'E',
-      userId: '5',
-      sessionId: '5',
-      role: 'admin',
-      trackIdPrefix: '123',
-      // publishedTracks: {SfuTrackType.screenShare: TrackState.remote()},
-      connectionQuality: SfuConnectionQuality.excellent,
-      isSpeaking: false,
-      isDominantSpeaker: false,
-      audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
-      isPinned: false,
-      isLocal: false,
-    ),
-
-    // pinned
-    CallParticipantState(
-      name: 'F',
-      userId: '6',
-      sessionId: '6',
-      role: 'admin',
-      trackIdPrefix: '123',
-      // publishedTracks: {
-      //   SfuTrackType.audio: TrackState.remote(),
-      //   SfuTrackType.video: TrackState.remote()
-      // },
-      connectionQuality: SfuConnectionQuality.excellent,
-      isSpeaking: false,
-      isDominantSpeaker: false,
-      audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
-      isPinned: true,
-      isLocal: false,
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final participants = [
-      ...this.participants,
-      ..._participants,
-    ].take(5).where(filter).sorted(sort);
+    final participants = [...this.participants].where(filter).sorted(sort);
 
     final screenShareParticipant = participants.firstWhereOrNull(
       (it) {
@@ -252,8 +149,11 @@ class StreamCallParticipants extends StatelessWidget {
 
     return RegularCallParticipantsContent(
       call: call,
+      padding: padding,
       participants: participants,
       layoutMode: layoutMode,
+      mainAxisSpacing: mainAxisSpacing,
+      crossAxisSpacing: crossAxisSpacing,
       enableLocalVideo: enableLocalVideo,
       callParticipantBuilder: callParticipantBuilder,
       localVideoParticipantBuilder: localVideoParticipantBuilder,

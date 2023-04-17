@@ -138,6 +138,7 @@ extension SfuCallStateExtension on sfu_models.CallState {
 /// TODO
 extension SfuParticipantExtension on sfu_models.Participant {
   SfuParticipant toDomain() {
+    print('toDomain: audioLevel -> $audioLevel');
     return SfuParticipant(
       userId: userId,
       userName: name,

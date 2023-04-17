@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/extensions.dart';
-import 'indicators/connection_quality_indicator.dart';
 import 'participant_label.dart';
 
 /// Builder function used to build a video placeholder.
@@ -17,6 +16,7 @@ typedef VideoRendererBuilder = Widget Function(
   BuildContext context,
   Call call,
   CallParticipantState participant,
+  Widget videoPlaceholder,
 );
 
 /// A widget that represents a single participant in a call.
@@ -175,25 +175,24 @@ class StreamCallParticipant extends StatelessWidget {
             };
 
             var videoRendererBuilder = this.videoRendererBuilder;
-            videoRendererBuilder ??= (context, call, participant) {
+            videoRendererBuilder ??= (context, call, participant, placeholder) {
               return StreamVideoRenderer(
                 call: call,
                 participant: participant,
                 videoTrackType: SfuTrackType.video,
                 onSizeChanged: onSizeChanged,
-                placeholderBuilder: (context) {
-                  return videoPlaceholderBuilder!(
-                    context,
-                    call,
-                    participant,
-                  );
-                },
+                placeholderBuilder: (context) => placeholder,
               );
             };
 
             return Stack(
               children: [
-                videoRendererBuilder(context, call, participant),
+                videoRendererBuilder(
+                  context,
+                  call,
+                  participant,
+                  videoPlaceholderBuilder(context, call, participant),
+                ),
                 if (showParticipantLabel)
                   Align(
                     alignment: participantLabelAlignment,
@@ -220,10 +219,16 @@ class StreamCallParticipant extends StatelessWidget {
                     alignment: connectionLevelAlignment,
                     child: Padding(
                       padding: const EdgeInsets.all(8),
-                      child: StreamConnectionQualityIndicator(
-                        connectionQuality: participant.connectionQuality,
-                        activeColor: connectionLevelActiveColor,
-                        inactiveColor: connectionLevelInactiveColor,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.85),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: StreamConnectionQualityIndicator(
+                          connectionQuality: participant.connectionQuality,
+                          activeColor: connectionLevelActiveColor,
+                          inactiveColor: connectionLevelInactiveColor,
+                        ),
                       ),
                     ),
                   ),

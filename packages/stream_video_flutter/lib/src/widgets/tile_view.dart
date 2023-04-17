@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-const _kDefaultSpacing = 16.0;
+const _kDefaultSpacing = 8.0;
 
 /// A widget that places children in a two dimensional arrangement
 /// and stretches them evenly to occupy full width and full height.

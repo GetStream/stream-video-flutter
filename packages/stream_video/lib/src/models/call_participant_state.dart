@@ -29,7 +29,10 @@ class CallParticipantState
     this.isPinned = false,
     this.reaction,
     this.viewportVisibility = const ViewportVisibility.unknown(),
-  });
+  }) : assert(
+          !isDominantSpeaker || isSpeaking,
+          'isDominantSpeaker is true but isSpeaking is false',
+        );
 
   final String userId;
   final String role;
@@ -41,7 +44,7 @@ class CallParticipantState
   final bool isLocal;
   final SfuConnectionQuality connectionQuality;
   final bool isOnline;
-  final double audioLevel;
+  final double? audioLevel;
   final bool isSpeaking;
   final bool isDominantSpeaker;
   final bool isPinned;

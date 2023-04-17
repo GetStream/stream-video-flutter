@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'layout/call_participants_grid_view.dart';
-import 'layout/call_participants_spotlight_view.dart';
-import 'layout/participant_layout_mode.dart';
+
+const _kDefaultSpacing = 8.0;
 
 /// A widget that represents the main area of the call when nobody is
 /// sharing their screen.
@@ -17,6 +16,9 @@ class RegularCallParticipantsContent extends StatelessWidget {
     this.enableLocalVideo,
     this.localVideoParticipantBuilder,
     this.layoutMode = ParticipantLayoutMode.grid,
+    this.padding = const EdgeInsets.all(_kDefaultSpacing),
+    this.mainAxisSpacing = _kDefaultSpacing,
+    this.crossAxisSpacing = _kDefaultSpacing,
   });
 
   /// Represents a call.
@@ -36,6 +38,15 @@ class RegularCallParticipantsContent extends StatelessWidget {
 
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
+
+  /// Space between the items in the main axis.
+  final double mainAxisSpacing;
+
+  /// Space between the items in the cross axis.
+  final double crossAxisSpacing;
+
+  /// Padding around the view.
+  final EdgeInsets padding;
 
   // The default participant builder.
   static Widget _defaultParticipantBuilder(
@@ -65,13 +76,17 @@ class RegularCallParticipantsContent extends StatelessWidget {
         spotlight = remoteParticipants.first;
       }
 
-      final barParticipants = [...participants]..remove(spotlight);
+      final barParticipants = [...participants]
+        ..removeWhere((it) => it.sessionId == spotlight.sessionId);
 
       return CallParticipantsSpotlightView(
         call: call,
         spotlight: spotlight,
         participants: barParticipants,
         participantBuilder: callParticipantBuilder,
+        padding: padding,
+        mainAxisSpacing: mainAxisSpacing,
+        crossAxisSpacing: crossAxisSpacing,
       );
     }
 
@@ -88,6 +103,9 @@ class RegularCallParticipantsContent extends StatelessWidget {
       call: call,
       participants: gridParticipants,
       itemBuilder: callParticipantBuilder,
+      padding: padding,
+      mainAxisSpacing: mainAxisSpacing,
+      crossAxisSpacing: crossAxisSpacing,
     );
 
     if (showLocalVideo) {

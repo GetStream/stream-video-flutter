@@ -6,16 +6,18 @@ import 'package:stream_video/stream_video.dart';
 
 import '../../theme/stream_video_theme.dart';
 import '../../widgets/tile_view.dart';
+import '../call_participant.dart';
 import '../call_participants.dart';
 
-const _kDefaultSpacing = 16.0;
+const _kDefaultSpacing = 8.0;
 
 class CallParticipantsGridView extends StatelessWidget {
   const CallParticipantsGridView({
     super.key,
     required this.call,
     required this.participants,
-    required this.itemBuilder,
+    this.itemBuilder = _defaultParticipantBuilder,
+    this.pageSize = 16,
     this.padding = const EdgeInsets.all(_kDefaultSpacing),
     this.mainAxisSpacing = _kDefaultSpacing,
     this.crossAxisSpacing = _kDefaultSpacing,
@@ -30,6 +32,11 @@ class CallParticipantsGridView extends StatelessWidget {
   /// Builder function used to build a participant item.
   final CallParticipantBuilder itemBuilder;
 
+  /// Page size for the grid.
+  ///
+  /// Only used for Desktop GridView.
+  final int pageSize;
+
   /// Space between the items in the main axis.
   final double mainAxisSpacing;
 
@@ -39,10 +46,27 @@ class CallParticipantsGridView extends StatelessWidget {
   /// Padding around the grid.
   final EdgeInsets padding;
 
+  // The default participant builder.
+  static Widget _defaultParticipantBuilder(
+    BuildContext context,
+    Call call,
+    CallParticipantState participant,
+  ) {
+    return StreamCallParticipant(
+      // We use the sessionId as the key to avoid rebuilding the widget
+      // when the participant changes.
+      key: ValueKey(participant.sessionId),
+      call: call,
+      participant: participant,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (CurrentPlatform.isIos || CurrentPlatform.isAndroid || false) {
-      return MobileCallParticipantsGrid(
+    final platform = Theme.of(context).platform;
+
+    if (platform == TargetPlatform.android || platform == TargetPlatform.iOS) {
+      return MobileCallParticipantsGridView(
         call: call,
         participants: participants,
         itemBuilder: itemBuilder,
@@ -52,19 +76,20 @@ class CallParticipantsGridView extends StatelessWidget {
       );
     }
 
-    return DesktopCallParticipantsGrid(
+    return DesktopCallParticipantsGridView(
       call: call,
       participants: participants,
       itemBuilder: itemBuilder,
       padding: padding,
+      pageSize: pageSize,
       mainAxisSpacing: mainAxisSpacing,
       crossAxisSpacing: crossAxisSpacing,
     );
   }
 }
 
-class MobileCallParticipantsGrid extends StatelessWidget {
-  const MobileCallParticipantsGrid({
+class MobileCallParticipantsGridView extends StatelessWidget {
+  const MobileCallParticipantsGridView({
     super.key,
     required this.call,
     required this.participants,
@@ -216,9 +241,6 @@ class MobileCallParticipantsGrid extends StatelessWidget {
           crossAxisCount = temp;
         }
 
-        print('Main axis count: $mainAxisCount');
-        print('Cross axis count: $crossAxisCount');
-
         return PageView.builder(
           itemCount: pages.length,
           scrollDirection: Axis.vertical,
@@ -246,8 +268,8 @@ class MobileCallParticipantsGrid extends StatelessWidget {
   }
 }
 
-class DesktopCallParticipantsGrid extends StatefulWidget {
-  const DesktopCallParticipantsGrid({
+class DesktopCallParticipantsGridView extends StatefulWidget {
+  const DesktopCallParticipantsGridView({
     super.key,
     required this.call,
     required this.participants,
@@ -280,18 +302,18 @@ class DesktopCallParticipantsGrid extends StatefulWidget {
   final EdgeInsetsGeometry padding;
 
   @override
-  State<DesktopCallParticipantsGrid> createState() =>
-      _DesktopCallParticipantsGridState();
+  State<DesktopCallParticipantsGridView> createState() =>
+      _DesktopCallParticipantsGridViewState();
 }
 
-class _DesktopCallParticipantsGridState
-    extends State<DesktopCallParticipantsGrid> {
+class _DesktopCallParticipantsGridViewState
+    extends State<DesktopCallParticipantsGridView> {
   late final _pageController = PageController();
   late final _currentPage = ValueNotifier<int>(0);
   late var _pages = widget.participants.slices(widget.pageSize);
 
   @override
-  void didUpdateWidget(covariant DesktopCallParticipantsGrid oldWidget) {
+  void didUpdateWidget(covariant DesktopCallParticipantsGridView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.participants != widget.participants ||
         oldWidget.pageSize != widget.pageSize) {

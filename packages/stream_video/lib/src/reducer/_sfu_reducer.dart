@@ -144,9 +144,16 @@ class SfuReducer {
               level.sessionId == participant.sessionId;
         });
         if (levelInfo != null) {
+          // If the participant is not speaking, they cannot be the dominant speaker.
+          var isDominantSpeaker = participant.isDominantSpeaker;
+          if (!levelInfo.isSpeaking) {
+            isDominantSpeaker = false;
+          }
+
           return participant.copyWith(
             audioLevel: levelInfo.level,
             isSpeaking: levelInfo.isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
           );
         } else {
           return participant;
@@ -164,7 +171,9 @@ class SfuReducer {
         // Mark the new dominant speaker
         if (participant.userId == event.userId &&
             participant.sessionId == event.sessionId) {
+          print(participant.audioLevel);
           return participant.copyWith(
+            isSpeaking: true,
             isDominantSpeaker: true,
           );
         }

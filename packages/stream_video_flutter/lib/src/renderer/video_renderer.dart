@@ -4,7 +4,14 @@ import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import '../../stream_video_flutter.dart';
 
 /// A builder for the widget that is displayed when there's no video stream.
-Widget _defaultPlaceholderBuilder(BuildContext context) => Container();
+Widget _defaultPlaceholderBuilder(BuildContext context) {
+  final videoTheme = StreamVideoTheme.of(context);
+  return Center(
+    child: CircularProgressIndicator(
+      color: videoTheme.colorTheme.accentPrimary,
+    ),
+  );
+}
 
 /// Widget that renders a single video track for a call participant.
 class StreamVideoRenderer extends StatelessWidget {
@@ -79,7 +86,7 @@ class StreamVideoRenderer extends StatelessWidget {
   }
 
   void _onSizeChanged(Size size) {
-    print('Video size changed: $size');
+    // print('Video size changed: $size');
 
     // Notify the listener.
     if (onSizeChanged != null) {
