@@ -89,7 +89,9 @@ class VideoCallsApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> getCallWithHttpInfo(String type, String id,) async {
+  ///
+  /// * [String] connectionId:
+  Future<Response> getCallWithHttpInfo(String type, String id, { String? connectionId, }) async {
     // ignore: prefer_const_declarations
     final path = r'/call/{type}/{id}'
       .replaceAll('{type}', type)
@@ -101,6 +103,10 @@ class VideoCallsApi {
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
+
+    if (connectionId != null) {
+      queryParams.addAll(_queryParams('', 'connection_id', connectionId));
+    }
 
     const contentTypes = <String>[];
 
@@ -125,8 +131,10 @@ class VideoCallsApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<GetCallResponse?> getCall(String type, String id,) async {
-    final response = await getCallWithHttpInfo(type, id,);
+  ///
+  /// * [String] connectionId:
+  Future<GetCallResponse?> getCall(String type, String id, { String? connectionId, }) async {
+    final response = await getCallWithHttpInfo(type, id,  connectionId: connectionId, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -267,7 +275,9 @@ class VideoCallsApi {
   /// * [String] id (required):
   ///
   /// * [GetOrCreateCallRequest] getOrCreateCallRequest (required):
-  Future<Response> getOrCreateCallWithHttpInfo(String type, String id, GetOrCreateCallRequest getOrCreateCallRequest,) async {
+  ///
+  /// * [String] connectionId:
+  Future<Response> getOrCreateCallWithHttpInfo(String type, String id, GetOrCreateCallRequest getOrCreateCallRequest, { String? connectionId, }) async {
     // ignore: prefer_const_declarations
     final path = r'/call/{type}/{id}'
       .replaceAll('{type}', type)
@@ -279,6 +289,10 @@ class VideoCallsApi {
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
+
+    if (connectionId != null) {
+      queryParams.addAll(_queryParams('', 'connection_id', connectionId));
+    }
 
     const contentTypes = <String>['application/json'];
 
@@ -305,8 +319,10 @@ class VideoCallsApi {
   /// * [String] id (required):
   ///
   /// * [GetOrCreateCallRequest] getOrCreateCallRequest (required):
-  Future<GetOrCreateCallResponse?> getOrCreateCall(String type, String id, GetOrCreateCallRequest getOrCreateCallRequest,) async {
-    final response = await getOrCreateCallWithHttpInfo(type, id, getOrCreateCallRequest,);
+  ///
+  /// * [String] connectionId:
+  Future<GetOrCreateCallResponse?> getOrCreateCall(String type, String id, GetOrCreateCallRequest getOrCreateCallRequest, { String? connectionId, }) async {
+    final response = await getOrCreateCallWithHttpInfo(type, id, getOrCreateCallRequest,  connectionId: connectionId, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -382,7 +398,7 @@ class VideoCallsApi {
     return null;
   }
 
-  /// Join call (type, id)
+  /// Join call
   ///
   /// Request to join a call  Required permissions: - CreateCall - JoinCall 
   ///
@@ -397,81 +413,7 @@ class VideoCallsApi {
   /// * [JoinCallRequest] joinCallRequest (required):
   ///
   /// * [String] connectionId:
-  Future<Response> joinCallTypeId0WithHttpInfo(String type, String id, JoinCallRequest joinCallRequest, { String? connectionId, }) async {
-    // ignore: prefer_const_declarations
-    final path = r'/join_call/{type}/{id}'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = joinCallRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    if (connectionId != null) {
-      queryParams.addAll(_queryParams('', 'connection_id', connectionId));
-    }
-
-    const contentTypes = <String>['application/json'];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Join call (type, id)
-  ///
-  /// Request to join a call  Required permissions: - CreateCall - JoinCall 
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [JoinCallRequest] joinCallRequest (required):
-  ///
-  /// * [String] connectionId:
-  Future<JoinCallResponse?> joinCallTypeId0(String type, String id, JoinCallRequest joinCallRequest, { String? connectionId, }) async {
-    final response = await joinCallTypeId0WithHttpInfo(type, id, joinCallRequest,  connectionId: connectionId, );
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'JoinCallResponse',) as JoinCallResponse;
-    
-    }
-    return null;
-  }
-
-  /// Join call (type, id)
-  ///
-  /// Request to join a call  Required permissions: - CreateCall - JoinCall 
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [JoinCallRequest] joinCallRequest (required):
-  ///
-  /// * [String] connectionId:
-  Future<Response> joinCallTypeId1WithHttpInfo(String type, String id, JoinCallRequest joinCallRequest, { String? connectionId, }) async {
+  Future<Response> joinCallWithHttpInfo(String type, String id, JoinCallRequest joinCallRequest, { String? connectionId, }) async {
     // ignore: prefer_const_declarations
     final path = r'/call/{type}/{id}/join'
       .replaceAll('{type}', type)
@@ -502,7 +444,7 @@ class VideoCallsApi {
     );
   }
 
-  /// Join call (type, id)
+  /// Join call
   ///
   /// Request to join a call  Required permissions: - CreateCall - JoinCall 
   ///
@@ -515,8 +457,8 @@ class VideoCallsApi {
   /// * [JoinCallRequest] joinCallRequest (required):
   ///
   /// * [String] connectionId:
-  Future<JoinCallResponse?> joinCallTypeId1(String type, String id, JoinCallRequest joinCallRequest, { String? connectionId, }) async {
-    final response = await joinCallTypeId1WithHttpInfo(type, id, joinCallRequest,  connectionId: connectionId, );
+  Future<JoinCallResponse?> joinCall(String type, String id, JoinCallRequest joinCallRequest, { String? connectionId, }) async {
+    final response = await joinCallWithHttpInfo(type, id, joinCallRequest,  connectionId: connectionId, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

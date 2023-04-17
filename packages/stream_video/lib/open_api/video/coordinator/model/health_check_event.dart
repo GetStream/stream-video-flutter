@@ -15,7 +15,7 @@ class HealthCheckEvent {
   HealthCheckEvent({
     required this.connectionId,
     required this.createdAt,
-    required this.type,
+    this.type = 'health.check',
   });
 
   /// The connection_id for this client

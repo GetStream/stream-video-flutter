@@ -15,7 +15,7 @@ class UnblockedUserEvent {
   UnblockedUserEvent({
     required this.callCid,
     required this.createdAt,
-    required this.type,
+    this.type = 'call.unblocked_user',
     required this.user,
   });
 

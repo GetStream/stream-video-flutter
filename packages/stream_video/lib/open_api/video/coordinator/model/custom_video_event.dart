@@ -16,7 +16,7 @@ class CustomVideoEvent {
     required this.callCid,
     required this.createdAt,
     this.custom = const {},
-    required this.type,
+    this.type = 'custom',
     required this.user,
   });
 

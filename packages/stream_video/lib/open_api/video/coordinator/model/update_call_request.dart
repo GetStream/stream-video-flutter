@@ -15,6 +15,7 @@ class UpdateCallRequest {
   UpdateCallRequest({
     this.custom = const {},
     this.settingsOverride,
+    this.startsAt,
   });
 
   /// Custom data for this object
@@ -28,19 +29,30 @@ class UpdateCallRequest {
   ///
   CallSettingsRequest? settingsOverride;
 
+  /// the time the call is scheduled to start
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? startsAt;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is UpdateCallRequest &&
      other.custom == custom &&
-     other.settingsOverride == settingsOverride;
+     other.settingsOverride == settingsOverride &&
+     other.startsAt == startsAt;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (custom.hashCode) +
-    (settingsOverride == null ? 0 : settingsOverride!.hashCode);
+    (settingsOverride == null ? 0 : settingsOverride!.hashCode) +
+    (startsAt == null ? 0 : startsAt!.hashCode);
 
   @override
-  String toString() => 'UpdateCallRequest[custom=$custom, settingsOverride=$settingsOverride]';
+  String toString() => 'UpdateCallRequest[custom=$custom, settingsOverride=$settingsOverride, startsAt=$startsAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -49,6 +61,11 @@ class UpdateCallRequest {
       json[r'settings_override'] = this.settingsOverride;
     } else {
       json[r'settings_override'] = null;
+    }
+    if (this.startsAt != null) {
+      json[r'starts_at'] = this.startsAt!.toUtc().toIso8601String();
+    } else {
+      json[r'starts_at'] = null;
     }
     return json;
   }
@@ -74,6 +91,7 @@ class UpdateCallRequest {
       return UpdateCallRequest(
         custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
         settingsOverride: CallSettingsRequest.fromJson(json[r'settings_override']),
+        startsAt: mapDateTime(json, r'starts_at', ''),
       );
     }
     return null;

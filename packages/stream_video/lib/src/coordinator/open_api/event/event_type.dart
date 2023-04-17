@@ -12,6 +12,8 @@ enum EventType {
   callUserUnblocked('call.unblocked_user'),
   callRecordingStarted('call.recording_started'),
   callRecordingStopped('call.recording_stopped'),
+  callBroadcastingStarted('call.broadcasting_started'),
+  callBroadcastingStopped('call.broadcasting_stopped'),
   callReaction('call.reaction_new'),
   custom('custom'),
   unknown('unknown');

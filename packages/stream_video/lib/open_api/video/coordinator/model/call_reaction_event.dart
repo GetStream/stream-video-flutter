@@ -16,7 +16,7 @@ class CallReactionEvent {
     required this.callCid,
     required this.createdAt,
     required this.reaction,
-    required this.type,
+    this.type = 'call.reaction_new',
   });
 
   String callCid;
