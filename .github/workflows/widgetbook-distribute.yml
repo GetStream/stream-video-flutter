@@ -3,7 +3,6 @@ name: Distribute Widgetbook
 on:
   push:
     branches:
-      - develop
       - main
 
 env:
