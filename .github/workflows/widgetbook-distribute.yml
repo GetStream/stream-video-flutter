@@ -37,13 +37,13 @@ jobs:
           flutter build web --release --web-renderer=canvaskit
 
       - name: Publish Widgetbook
-        uses: cpina/github-action-push-to-another-repository@v1
+        uses: cpina/github-action-push-to-another-repository@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           source-directory: ./stream_video_widgetbook/build/web
-          destination-github-username: 'GetStream'
-          destination-repository-name: 'stream-video-widgetbook'
-          user-name: 'xsahil03x'
           user-email: 'xdsahil@gmail.com'
+          destination-github-username: 'xsahil03x'
+          destination-repository-name: 'stream-video-widgetbook'
+          destination-repository-username: 'GetStream'
           target-branch: main
