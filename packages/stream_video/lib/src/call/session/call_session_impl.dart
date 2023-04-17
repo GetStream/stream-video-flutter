@@ -17,7 +17,7 @@ import '../../sfu/sfu_client.dart';
 import '../../sfu/sfu_client_impl.dart';
 import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
-import '../../utils/debouncer.dart';
+import '../../utils/debounce_buffer.dart';
 import '../../utils/none.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
@@ -81,7 +81,7 @@ class CallSessionImpl extends CallSession {
   @override
   SharedEmitter<SfuEvent> get events => sfuWS.events;
 
-  late final _saDebouncer = Debouncer<SubscriptionAction, Result<None>>(
+  late final _saBuffer = DebounceBuffer<SubscriptionAction, Result<None>>(
     duration: _debounceDuration,
     consumer: _updateSubscriptions,
   );
@@ -492,7 +492,7 @@ class CallSessionImpl extends CallSession {
     SubscriptionAction action,
   ) async {
     _logger.d(() => '[updateSubscription] action: $action');
-    return _saDebouncer.post(action);
+    return _saBuffer.post(action);
   }
 
   Future<Result<None>> _updateSubscriptions(

@@ -2,24 +2,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/logger/impl/tagged_logger.dart';
 import 'package:stream_video/src/logger/stream_log.dart';
 import 'package:stream_video/src/logger/stream_logger.dart';
-import 'package:stream_video/src/utils/debouncer.dart';
+import 'package:stream_video/src/utils/debounce_buffer.dart';
 
 import '../logger/impl/test_logger.dart';
 
-final _logger = taggedLogger(tag: 'SV:DebouncerTest');
+final _logger = taggedLogger(tag: 'SV:DebounceBufferTest');
 
 Future<void> main() async {
   StreamLog().logger = const TestStreamLogger();
   StreamLog().priority = Priority.verbose;
 
-  late Debouncer<int, List<int>> debouncer;
+  late DebounceBuffer<int, List<int>> buffer;
 
   setUp(() {
     _logger.i(() => '[setUp]');
-    debouncer = Debouncer<int, List<int>>(
+    buffer = DebounceBuffer<int, List<int>>(
       duration: const Duration(milliseconds: 200),
       consumer: (items) async {
-        _logger.d(() => '[debouncer.consumer] completed: $items');
+        _logger.d(() => '[buffer.consumer] completed: $items');
         return items;
       },
     );
@@ -29,7 +29,7 @@ Future<void> main() async {
     final futures = <Future<List<int>>>[];
     for (var i = 0; i < 4; i++) {
       futures.add(
-        debouncer
+        buffer
             .post(i)
             .whenComplete(() => _logger.v(() => '[test] completed: $i')),
       );
