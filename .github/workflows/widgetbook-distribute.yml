@@ -36,7 +36,7 @@ jobs:
           cd stream_video_widgetbook
           flutter build web --release --web-renderer=canvaskit --base-href /stream-video-widgetbook/
 
-      - name: Publish Widgetbook
+      - name: Distribute Widgetbook
         uses: cpina/github-action-push-to-another-repository@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
