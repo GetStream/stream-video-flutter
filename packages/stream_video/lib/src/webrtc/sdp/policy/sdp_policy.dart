@@ -1,23 +1,21 @@
-import 'package:equatable/equatable.dart';
+import '../sdp.dart';
 
-import 'rule/sdp_munging_rule.dart';
-
-class SdpPolicy with EquatableMixin {
+class SdpPolicy {
   const SdpPolicy({
     this.mungingEnabled = false,
-    this.rules = const {},
+    this.munging = _defaultMunging,
   });
 
   final bool mungingEnabled;
-  final Set<SdpMungingRule> rules;
+  final SdpMunging munging;
 
   SdpPolicy copyWith({
     bool? mungingEnabled,
-    Set<SdpMungingRule>? rules,
+    SdpMunging? munging,
   }) {
     return SdpPolicy(
       mungingEnabled: mungingEnabled ?? this.mungingEnabled,
-      rules: rules ?? this.rules,
+      munging: munging ?? this.munging,
     );
   }
 
@@ -25,5 +23,16 @@ class SdpPolicy with EquatableMixin {
   bool? get stringify => true;
 
   @override
-  List<Object?> get props => [mungingEnabled, rules];
+  List<Object?> get props => [mungingEnabled, munging];
+
+  @override
+  String toString() {
+    return 'SdpPolicy{mungingEnabled: $mungingEnabled, munging: $munging}';
+  }
+}
+
+typedef SdpMunging = void Function(SdpType sdpType, List<SdpLine> sdpLines);
+
+void _defaultMunging(SdpType sdpType, List<SdpLine> sdpLines) {
+  /* no op */
 }

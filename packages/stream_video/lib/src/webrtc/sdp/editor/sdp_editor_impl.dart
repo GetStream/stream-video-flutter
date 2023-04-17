@@ -59,14 +59,16 @@ class SdpEditorImpl implements SdpEditor {
       return null;
     }
     if (!policy.mungingEnabled && internalRules.isEmpty) {
-      _logger.w(() => '[edit] rejected (munging disabled)');
+      _logger.w(() => '[edit] rejected (disabled & no-internal-rules)');
       return sdp.value;
     }
 
     _logger.i(() => '[edit] sdp.type: ${sdp.type}');
     final lines = sdp.value.split('\r\n');
     applyRules(sdp.type, lines, internalRules.values);
-    applyRules(sdp.type, lines, policy.rules);
+    if (policy.mungingEnabled) {
+      policy.munging(sdp.type, lines);
+    }
 
     final buffer = StringBuffer();
     buffer.writeLines(lines);
