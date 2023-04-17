@@ -42,8 +42,8 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           source-directory: ./stream_video_widgetbook/build/web
-          destination-github-username: 'xsahil03x'
+          destination-github-username: 'GetStream'
           destination-repository-name: 'stream-video-widgetbook'
-          destination-repository-username: 'GetStream'
+          user-name: 'xsahil03x'
           user-email: 'xdsahil@gmail.com'
           target-branch: main
