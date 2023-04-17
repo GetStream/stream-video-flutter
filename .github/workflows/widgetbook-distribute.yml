@@ -1,9 +1,6 @@
 name: Distribute Widgetbook
 
-on:
-  push:
-    branches:
-      - main
+on: [pull_request]
 
 env:
   FLUTTER_VERSION: 3.7.0
