@@ -5,15 +5,15 @@ import 'rule/sdp_munging_rule.dart';
 class SdpPolicy with EquatableMixin {
   const SdpPolicy({
     this.mungingEnabled = false,
-    this.rules = const [],
+    this.rules = const {},
   });
 
   final bool mungingEnabled;
-  final List<SdpMungingRule> rules;
+  final Set<SdpMungingRule> rules;
 
   SdpPolicy copyWith({
     bool? mungingEnabled,
-    List<SdpMungingRule>? rules,
+    Set<SdpMungingRule>? rules,
   }) {
     return SdpPolicy(
       mungingEnabled: mungingEnabled ?? this.mungingEnabled,

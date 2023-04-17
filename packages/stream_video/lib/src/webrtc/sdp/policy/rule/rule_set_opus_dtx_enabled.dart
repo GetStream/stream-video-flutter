@@ -11,5 +11,11 @@ class SetOpusDtxEnabledRule extends SdpMungingRule {
   final bool enabled;
 
   @override
-  List<Object> get props => [enabled, types, platforms];
+  String get key => 'set-opus-dtx-enabled';
+
+  @override
+  String toString() {
+    return 'SetOpusDtxEnabledRule{enabled: $enabled, '
+        'types: $types, platforms: $platforms}';
+  }
 }

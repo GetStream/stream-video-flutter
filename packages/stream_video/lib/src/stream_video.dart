@@ -13,10 +13,7 @@ import 'retry/retry_policy.dart';
 import 'shared_emitter.dart';
 import 'stream_video_impl.dart';
 import 'utils/none.dart';
-import 'webrtc/sdp/codec/sdp_codec.dart';
-import 'webrtc/sdp/policy/rule/sdp_munging_rule.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
-import 'webrtc/sdp/sdp.dart';
 
 /// Handler function used for logging.
 typedef LogHandlerFunction = void Function(
@@ -304,16 +301,7 @@ void _defaultLogHandler(
   /* no-op */
 }
 
-const _defaultSdpPolicy = SdpPolicy(
-  mungingEnabled: true,
-  rules: [
-    SdpMungingRule.prioritizeCodec(
-      platforms: [PlatformType.android],
-      types: [SdpType.localOffer],
-      codec: VideoCodec.vp8,
-    ),
-  ],
-);
+const _defaultSdpPolicy = SdpPolicy();
 
 extension StreamVideoX on StreamVideo {
   /// Connects the [user] to the Stream Video service.

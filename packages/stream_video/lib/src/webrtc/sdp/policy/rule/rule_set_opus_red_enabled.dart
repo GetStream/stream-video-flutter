@@ -11,5 +11,11 @@ class SetOpusRedEnabledRule extends SdpMungingRule {
   final bool enabled;
 
   @override
-  List<Object> get props => [enabled, types, platforms];
+  String get key => 'set-opus-red-enabled';
+
+  @override
+  String toString() {
+    return 'SetOpusRedEnabledRule{enabled: $enabled, '
+        'types: $types, platforms: $platforms}';
+  }
 }

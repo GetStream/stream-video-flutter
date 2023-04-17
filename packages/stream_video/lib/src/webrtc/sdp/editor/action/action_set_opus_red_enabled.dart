@@ -9,7 +9,7 @@ import '../../sdp.dart';
 import '../../specification/media_description.dart';
 import 'sdp_edit_action.dart';
 
-final _logger = taggedLogger(tag: 'SV:PrioritizeCodec');
+final _logger = taggedLogger(tag: 'SV:SetOpusRedEnabled');
 
 @internal
 class SetOpusRedEnabledAction implements SdpEditAction {

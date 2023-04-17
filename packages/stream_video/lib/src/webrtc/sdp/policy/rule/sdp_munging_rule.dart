@@ -31,6 +31,7 @@ abstract class SdpMungingRule with EquatableMixin {
     List<SdpType> types,
   }) = SetOpusRedEnabledRule;
 
+  String get key;
   final List<SdpType> types;
   final List<PlatformType> platforms;
 
@@ -38,5 +39,5 @@ abstract class SdpMungingRule with EquatableMixin {
   bool? get stringify => true;
 
   @override
-  List<Object> get props => [types, platforms];
+  List<Object> get props => [key];
 }

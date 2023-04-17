@@ -1,6 +1,9 @@
 import 'package:meta/meta.dart';
 
-import '../../../../stream_video.dart';
+import '../../../logger/impl/tagged_logger.dart';
+import '../../../platform_detector/platform_detector.dart';
+import '../../../utils/standard.dart';
+import '../codec/sdp_codec.dart';
 import '../policy/rule/sdp_munging_rule.dart';
 import '../policy/sdp_policy.dart';
 import '../sdp.dart';
@@ -9,38 +12,44 @@ import 'sdp_editor.dart';
 
 @internal
 class SdpEditorImpl implements SdpEditor {
-  SdpEditorImpl(this._policy);
+  SdpEditorImpl(this.policy) {
+    const rule = SdpMungingRule.prioritizeCodec(
+      platforms: [PlatformType.android],
+      types: [SdpType.localOffer],
+      codec: VideoCodec.vp8,
+    );
+    internalRules[rule.key] = rule;
+  }
 
-  SdpPolicy get policy => _policy;
-  SdpPolicy _policy;
+  final SdpPolicy policy;
+
+  final _logger = taggedLogger(tag: 'SV:SdpEditor');
 
   final _actionFactory = SdpEditActionFactory();
 
-  final _logger = taggedLogger(tag: 'SV:SdpEditor');
+  final Map<String, SdpMungingRule> internalRules = <String, SdpMungingRule>{};
 
   late final platform = CurrentPlatform.type;
 
   @override
-  void addRule(SdpMungingRule rule) {
-    if (!policy.rules.contains(rule)) {
-      _policy = policy.copyWith(
-        rules: [...policy.rules, rule],
-      );
-      _logger.v(() => '[addRule] added: $rule');
+  void upsert(SdpMungingRule rule) {
+    final removed = internalRules[rule.key];
+    internalRules[rule.key] = rule;
+    if (removed != null) {
+      _logger.v(() => '[add] replaced: $removed');
     }
+    _logger.v(() => '[add] added: $rule');
   }
 
   @override
-  void removeRule<T extends SdpMungingRule>() {
-    final ruleIndex = policy.rules.indexWhere((it) => it is T);
-    if (ruleIndex != -1) {
-      final rules = [...policy.rules];
-      final removed = rules.removeAt(ruleIndex);
-      _policy = policy.copyWith(
-        rules: rules,
-      );
-      _logger.v(() => '[removeRule] removed: $removed');
-    }
+  void removeWhereType<T extends SdpMungingRule>() {
+    internalRules.removeWhere((key, rule) {
+      return (rule is T).also((removed) {
+        if (removed) {
+          _logger.v(() => '[removeWhereType] removed: $rule');
+        }
+      });
+    });
   }
 
   @override
@@ -49,30 +58,38 @@ class SdpEditorImpl implements SdpEditor {
       _logger.w(() => '[edit] rejected (sdp is null)');
       return null;
     }
-    if (!policy.mungingEnabled) {
+    if (!policy.mungingEnabled && internalRules.isEmpty) {
       _logger.w(() => '[edit] rejected (munging disabled)');
       return sdp.value;
     }
 
     _logger.i(() => '[edit] sdp.type: ${sdp.type}');
     final lines = sdp.value.split('\r\n');
-    for (final rule in policy.rules) {
-      _logger.d(() => '[edit] rule: $rule');
-
-      if (rule.platforms.isNotEmpty && !rule.platforms.contains(platform)) {
-        _logger.w(() => '[edit] rejected (mismatched platform): $platform');
-        continue;
-      }
-      if (rule.types.isNotEmpty && !rule.types.contains(sdp.type)) {
-        _logger.w(() => '[edit] rejected (mismatched sdpType): ${sdp.type}');
-        continue;
-      }
-      _actionFactory.create(rule)?.execute(lines);
-    }
+    applyRules(sdp.type, lines, internalRules.values);
+    applyRules(sdp.type, lines, policy.rules);
 
     final buffer = StringBuffer();
     buffer.writeLines(lines);
     return buffer.toString();
+  }
+
+  void applyRules(
+    SdpType sdpType,
+    List<SdpLine> lines,
+    Iterable<SdpMungingRule> rules,
+  ) {
+    for (final rule in rules) {
+      _logger.d(() => '[edit] rule: $rule');
+      if (rule.platforms.isNotEmpty && !rule.platforms.contains(platform)) {
+        _logger.w(() => '[edit] rejected (mismatched platform): $platform');
+        continue;
+      }
+      if (rule.types.isNotEmpty && !rule.types.contains(sdpType)) {
+        _logger.w(() => '[edit] rejected (mismatched sdpType): $sdpType');
+        continue;
+      }
+      _actionFactory.create(rule)?.execute(lines);
+    }
   }
 }
 

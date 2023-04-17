@@ -5,7 +5,7 @@ import '../../codec/sdp_codec.dart';
 import '../../sdp.dart';
 import 'sdp_edit_action.dart';
 
-final _logger = taggedLogger(tag: 'SV:EnableOpusDtx');
+final _logger = taggedLogger(tag: 'SV:SetOpusDtxEnabled');
 
 class SetOpusDtxEnabledAction implements SdpEditAction {
   const SetOpusDtxEnabledAction({
@@ -33,12 +33,12 @@ class SetOpusDtxEnabledAction implements SdpEditAction {
       } else if (sdpLine.isFmtp) {
         final original = fmtpParser.parse(sdpLine);
         if (original == null || original.payloadType != opusPayloadType) {
-          _logger.w(() => '[enableOpusDtx] rejected (not opus): "$original"');
+          _logger.w(() => '[setOpusDtxEnabled] rejected (not opus): "$original"');
           continue;
         }
         final modified = original.setDtxEnabled(enabled);
-        _logger.v(() => '[enableOpusDtx] original: "$original"');
-        _logger.v(() => '[enableOpusDtx] modified: "$modified"');
+        _logger.v(() => '[setOpusDtxEnabled] original: "$original"');
+        _logger.v(() => '[setOpusDtxEnabled] modified: "$modified"');
         sdpLines[index] = modified.toSdpLine();
       }
     }

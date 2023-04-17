@@ -12,5 +12,11 @@ class PrioritizeCodecRule extends SdpMungingRule {
   final SdpCodec codec;
 
   @override
-  List<Object> get props => [types, platforms, codec];
+  String get key => 'prioritize-codec-${codec.type}';
+
+  @override
+  String toString() {
+    return 'PrioritizeCodecRule{codec: $codec, '
+        'types: $types, platforms: $platforms}';
+  }
 }

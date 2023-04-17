@@ -15,8 +15,6 @@ import '../state_emitter.dart';
 import '../utils/cancelables.dart';
 import '../utils/none.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
-import '../webrtc/sdp/policy/rule/rule_set_opus_dtx_enabled.dart';
-import '../webrtc/sdp/policy/rule/rule_set_opus_red_enabled.dart';
 import '../webrtc/sdp/policy/rule/sdp_munging_rule.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
@@ -122,7 +120,7 @@ class CallImpl implements Call {
 
   CallCredentials? _credentials;
   int _reconnectAttempt = 0;
-  CallState? _state;
+  CallState? _prevState;
 
   @override
   StreamCallCid get callCid => state.value.callCid;
@@ -181,26 +179,24 @@ class CallImpl implements Call {
       await _clear('status-disconnected');
     }
 
-    if (_state?.settings.audio.opusDtxEnabled !=
+    if (_prevState?.settings.audio.opusDtxEnabled !=
         state.settings.audio.opusDtxEnabled) {
-      _sessionFactory.sdpEditor.removeRule<SetOpusDtxEnabledRule>();
-      _sessionFactory.sdpEditor.addRule(
+      _sessionFactory.sdpEditor.upsert(
         SdpMungingRule.setOpusDtxEnabled(
           enabled: state.settings.audio.opusDtxEnabled,
         ),
       );
     }
-    if (_state?.settings.audio.redundantCodingEnabled !=
+    if (_prevState?.settings.audio.redundantCodingEnabled !=
         state.settings.audio.redundantCodingEnabled) {
-      _sessionFactory.sdpEditor.removeRule<SetOpusRedEnabledRule>();
-      _sessionFactory.sdpEditor.addRule(
+      _sessionFactory.sdpEditor.upsert(
         SdpMungingRule.setOpusRedEnabled(
           enabled: state.settings.audio.redundantCodingEnabled,
         ),
       );
     }
 
-    _state = state;
+    _prevState = state;
   }
 
   Future<void> _onCoordinatorEvent(CoordinatorCallEvent event) async {
