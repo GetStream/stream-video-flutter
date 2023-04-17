@@ -40,7 +40,7 @@ You can see that as a first step, we need to create a `StreamCallCid` object bas
   call.connect();
 ```
 
-That's it! From that point, we can start listening to call state updates. The easiest way to do that is by listening to the stream that can be accessed from the `Call` object:
+That's it. From that point, we can start listening to call state updates. The easiest way to do that is by listening to the stream that can be accessed from the `Call` object:
 
 ```dart
     _subscription = widget.call.state.listen((callState) {
@@ -51,7 +51,7 @@ That's it! From that point, we can start listening to call state updates. The ea
 The `CallState` class contains all of the information about the current call, for example: a list of participants, status, capabilities, etc. You can find more information about the call state itself [here](../04-client/03-call-state.mdx)
 
 :::note
-Remember about disposing the subscription if it's no longer needed!
+Remember about disposing the subscription if it's no longer needed.
 :::
 
 Let's combine the snippets presented above into a single `StatefulWidget`:
@@ -205,7 +205,7 @@ class _ParticipantListScreenState extends State<ParticipantListScreen> {
 
 You can note that we are checking if the call is already connected, by checking `_callState.status.isConnected`, before showing the actual participant list.
 
-That's it! The list is implemented and will be automatically refreshed once the call status changes, for example: when participant joins or leaves. The code above renders the following screen:
+That's it. The list is implemented and will be automatically refreshed once the call status changes, for example: when participant joins or leaves. The code above renders the following screen:
 
 |![Participant List Without Muting](../assets/ui_cookbook_participant_list_without_muting.png)|
 |---|
@@ -245,7 +245,7 @@ class CallParticipantWidget extends StatelessWidget {
 }
 ```
 
-The snippet above utilizes information provided by `callParticipantState` and renders different icons at the bottom right corner based on particular participant audio enablement status.
+The snippet above utilizes information provided by `callParticipantState` and renders different icons at the bottom right corner based on particular participant audio status.
 
 You can check the result below:
 
@@ -256,7 +256,7 @@ As the last step, let's add a blue highlight for the participant who is currentl
 
 Start with adding `avatar_glow: ^2.0.2` to the dependencies in `pubspec.yaml` file.
 
-Next, let's slightingly modify our `CallParticipantWidget`:
+Next, let's slightly modify our `CallParticipantWidget`:
 
 ```dart
 class CallParticipantWidget extends StatelessWidget {
@@ -303,4 +303,4 @@ Now, you're ready to experiment more and add feature to your custom participants
 - Connection quality
 - Participant's video track
 
-and much more!
+and much more.
