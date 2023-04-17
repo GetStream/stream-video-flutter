@@ -1,6 +1,12 @@
-name: Distribute Widgetbook
+name: Deploy Widgetbook
 
-on: [pull_request]
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - packages/**
+      - stream_video_widgetbook/**
 
 env:
   FLUTTER_VERSION: 3.7.0
@@ -10,8 +16,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build_and_distribute_widgetbook:
-    name: Build and Distribute Widgetbook
+  build_and_deploy_widgetbook:
+    name: Build and Deploy Widgetbook
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -36,7 +42,7 @@ jobs:
           cd stream_video_widgetbook
           flutter build web --release --web-renderer=canvaskit --base-href /stream-video-widgetbook/
 
-      - name: Distribute Widgetbook
+      - name: Deploy Widgetbook
         uses: cpina/github-action-push-to-another-repository@main
         env:
           SSH_DEPLOY_KEY: ${{ secrets.WIDGETBOOK_DEPLOY_KEY }}
