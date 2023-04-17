@@ -16,7 +16,7 @@ class PermissionRequestEvent {
     required this.callCid,
     required this.createdAt,
     this.permissions = const [],
-    required this.type,
+    this.type = 'call.permission_request',
     required this.user,
   });
 

@@ -15,7 +15,7 @@ class CallRecordingStartedEvent {
   CallRecordingStartedEvent({
     required this.callCid,
     required this.createdAt,
-    required this.type,
+    this.type = 'call.recording_started',
   });
 
   String callCid;

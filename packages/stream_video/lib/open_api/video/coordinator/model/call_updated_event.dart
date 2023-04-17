@@ -17,7 +17,7 @@ class CallUpdatedEvent {
     required this.callCid,
     this.capabilitiesByRole = const {},
     required this.createdAt,
-    required this.type,
+    this.type = 'call.updated',
   });
 
   CallResponse call;

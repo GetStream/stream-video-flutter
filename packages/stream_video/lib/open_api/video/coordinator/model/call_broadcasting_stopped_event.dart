@@ -10,62 +10,49 @@
 
 part of openapi.api;
 
-class CallMemberRemovedEvent {
-  /// Returns a new [CallMemberRemovedEvent] instance.
-  CallMemberRemovedEvent({
-    required this.call,
+class CallBroadcastingStoppedEvent {
+  /// Returns a new [CallBroadcastingStoppedEvent] instance.
+  CallBroadcastingStoppedEvent({
     required this.callCid,
     required this.createdAt,
-    this.members = const [],
-    this.type = 'call.member_removed',
+    this.type = 'call.broadcasting_stopped',
   });
-
-  CallResponse call;
 
   String callCid;
 
   DateTime createdAt;
 
-  /// the list of member IDs removed from the call
-  List<String> members;
-
-  /// The type of event: \"call.member_added\" in this case
+  /// The type of event: \"call.broadcasting_stopped\" in this case
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallMemberRemovedEvent &&
-     other.call == call &&
+  bool operator ==(Object other) => identical(this, other) || other is CallBroadcastingStoppedEvent &&
      other.callCid == callCid &&
      other.createdAt == createdAt &&
-     other.members == members &&
      other.type == type;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (call.hashCode) +
     (callCid.hashCode) +
     (createdAt.hashCode) +
-    (members.hashCode) +
     (type.hashCode);
 
   @override
-  String toString() => 'CallMemberRemovedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, type=$type]';
+  String toString() => 'CallBroadcastingStoppedEvent[callCid=$callCid, createdAt=$createdAt, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call'] = this.call;
       json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'members'] = this.members;
       json[r'type'] = this.type;
     return json;
   }
 
-  /// Returns a new [CallMemberRemovedEvent] instance and imports its values from
+  /// Returns a new [CallBroadcastingStoppedEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static CallMemberRemovedEvent? fromJson(dynamic value) {
+  static CallBroadcastingStoppedEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -74,30 +61,26 @@ class CallMemberRemovedEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallMemberRemovedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallMemberRemovedEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "CallBroadcastingStoppedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "CallBroadcastingStoppedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return CallMemberRemovedEvent(
-        call: CallResponse.fromJson(json[r'call'])!,
+      return CallBroadcastingStoppedEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
-        members: json[r'members'] is List
-            ? (json[r'members'] as List).cast<String>()
-            : const [],
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
     return null;
   }
 
-  static List<CallMemberRemovedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <CallMemberRemovedEvent>[];
+  static List<CallBroadcastingStoppedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <CallBroadcastingStoppedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CallMemberRemovedEvent.fromJson(row);
+        final value = CallBroadcastingStoppedEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -106,12 +89,12 @@ class CallMemberRemovedEvent {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallMemberRemovedEvent> mapFromJson(dynamic json) {
-    final map = <String, CallMemberRemovedEvent>{};
+  static Map<String, CallBroadcastingStoppedEvent> mapFromJson(dynamic json) {
+    final map = <String, CallBroadcastingStoppedEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallMemberRemovedEvent.fromJson(entry.value);
+        final value = CallBroadcastingStoppedEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -120,13 +103,13 @@ class CallMemberRemovedEvent {
     return map;
   }
 
-  // maps a json object with a list of CallMemberRemovedEvent-objects as value to a dart map
-  static Map<String, List<CallMemberRemovedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<CallMemberRemovedEvent>>{};
+  // maps a json object with a list of CallBroadcastingStoppedEvent-objects as value to a dart map
+  static Map<String, List<CallBroadcastingStoppedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<CallBroadcastingStoppedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallMemberRemovedEvent.listFromJson(entry.value, growable: growable,);
+        final value = CallBroadcastingStoppedEvent.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -137,10 +120,8 @@ class CallMemberRemovedEvent {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'call',
     'call_cid',
     'created_at',
-    'members',
     'type',
   };
 }

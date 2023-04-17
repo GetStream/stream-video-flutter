@@ -201,10 +201,16 @@ class ApiClient {
           return BroadcastSettings.fromJson(value);
         case 'CallAcceptedEvent':
           return CallAcceptedEvent.fromJson(value);
+        case 'CallBroadcastingStartedEvent':
+          return CallBroadcastingStartedEvent.fromJson(value);
+        case 'CallBroadcastingStoppedEvent':
+          return CallBroadcastingStoppedEvent.fromJson(value);
         case 'CallCreatedEvent':
           return CallCreatedEvent.fromJson(value);
         case 'CallEndedEvent':
           return CallEndedEvent.fromJson(value);
+        case 'CallIngressResponse':
+          return CallIngressResponse.fromJson(value);
         case 'CallMemberAddedEvent':
           return CallMemberAddedEvent.fromJson(value);
         case 'CallMemberRemovedEvent':
@@ -321,6 +327,8 @@ class ApiClient {
           return QueryMembersRequest.fromJson(value);
         case 'QueryMembersResponse':
           return QueryMembersResponse.fromJson(value);
+        case 'RTMPIngress':
+          return RTMPIngress.fromJson(value);
         case 'ReactionResponse':
           return ReactionResponse.fromJson(value);
         case 'RecordSettings':
