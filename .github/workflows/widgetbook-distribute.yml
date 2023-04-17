@@ -42,7 +42,7 @@ jobs:
       - name: Distribute Widgetbook
         uses: cpina/github-action-push-to-another-repository@main
         env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+          SSH_DEPLOY_KEY: ${{ secrets.WIDGETBOOK_DEPLOY_KEY }}
         with:
           source-directory: ./stream_video_widgetbook/build/web
           user-email: 'xdsahil@gmail.com'
