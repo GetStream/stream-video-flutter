@@ -1,0 +1,49 @@
+name: Distribute Widgetbook
+
+on: [pull_request]
+
+env:
+  FLUTTER_VERSION: 3.7.0
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_and_distribute_widgetbook:
+    name: Build and Distribute Widgetbook
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Setup Melos
+        run: flutter pub global activate melos
+
+      - name: Bootstrap workspace
+        run: melos bootstrap
+
+      - name: Build Widgetbook
+        run: |
+          cd stream_video_widgetbook
+          flutter build web --release --web-renderer=canvaskit
+
+      - name: Publish Widgetbook
+        uses: cpina/github-action-push-to-another-repository@v1
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source-directory: ./stream_video_widgetbook/build/web
+          destination-github-username: 'xsahil03x'
+          destination-repository-name: 'stream-video-widgetbook'
+          destination-repository-username: 'GetStream'
+          user-email: 'xdsahil@gmail.com'
+          target-branch: main
