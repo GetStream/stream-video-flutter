@@ -83,7 +83,8 @@ class CallSessionImpl extends CallSession {
 
   late final _saBuffer = DebounceBuffer<SubscriptionAction, Result<None>>(
     duration: _debounceDuration,
-    consumer: _updateSubscriptions,
+    onComplete: _updateSubscriptions,
+    onCancel: (_) async => Result.error('SubscriptionAction cancelled'),
   );
 
   @override
@@ -144,6 +145,7 @@ class CallSessionImpl extends CallSession {
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
     await _stats.close();
+    await _saBuffer.cancel();
     await eventsSubscription?.cancel();
     eventsSubscription = null;
     await sfuWS.disconnect();

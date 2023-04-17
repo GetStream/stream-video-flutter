@@ -14,35 +14,115 @@ Future<void> main() async {
 
   late DebounceBuffer<int, List<int>> buffer;
 
+  var failOnCancellation = false;
+  Future<List<int>> onCancel(_) async {
+    if (failOnCancellation) {
+      throw TestFailure('failed on cancellation');
+    } else {
+      return [];
+    }
+  }
+
   setUp(() {
     _logger.i(() => '[setUp]');
     buffer = DebounceBuffer<int, List<int>>(
       duration: const Duration(milliseconds: 200),
-      consumer: (items) async {
+      onComplete: (items) async {
         _logger.d(() => '[buffer.consumer] completed: $items');
         return items;
       },
+      //onCancel: (_) async => [],
+      onCancel: onCancel,
     );
   });
 
+  tearDown(() {
+    _logger.i(() => '[tearDown]');
+    buffer.cancel();
+  });
+
   test('test debouncing', () async {
+    failOnCancellation = false;
     final futures = <Future<List<int>>>[];
     for (var i = 0; i < 4; i++) {
       futures.add(
         buffer
             .post(i)
-            .whenComplete(() => _logger.v(() => '[test] completed: $i')),
+            .whenComplete(() => _logger.v(() => '[debouncing] completed: $i')),
       );
-      _logger.v(() => '[test] posted: $i');
+      _logger.v(() => '[debouncing] posted: $i');
       await Future.delayed(const Duration(milliseconds: 100));
     }
 
     final results = await Future.wait(futures);
-    _logger.v(() => '[test] results: $results');
+    _logger.v(() => '[debouncing] results: $results');
 
     final firstResult = results.first;
     for (final eachResult in results) {
+      expect(eachResult.length, 4);
       expect(identical(firstResult, eachResult), true);
+    }
+  });
+
+  test('test cancellation fallback', () async {
+    failOnCancellation = false;
+    final futures = <Future<List<int>>>[];
+    try {
+      for (var i = 0; i < 4; i++) {
+        futures.add(
+          buffer
+              .post(i)
+              .whenComplete(() => _logger.v(() => '[cFallback] completed: $i')),
+        );
+        _logger.v(() => '[cFallback] posted: $i');
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
+    } catch (e, stk) {
+      _logger.e(() => '[cFallback] failed: $e');
+    }
+
+    await buffer.cancel();
+    _logger.v(() => '[cFallback] canceled');
+
+    final results = await Future.wait(futures);
+    _logger.v(() => '[cFallback] results: $results');
+
+    final firstResult = results.first;
+    for (final eachResult in results) {
+      expect(eachResult.length, 0);
+      expect(identical(firstResult, eachResult), true);
+    }
+  });
+
+  test('test cancellation failure', () async {
+    failOnCancellation = true;
+    final futures = <Future<List<int>>>[];
+    try {
+      for (var i = 0; i < 4; i++) {
+        futures.add(
+          buffer.post(i).onError((error, stackTrace) {
+            _logger.e(() => '[cFailure] failed: $i = $error');
+            return [-1];
+          }).whenComplete(() => _logger.v(() => '[cFailure] completed: $i')),
+        );
+        _logger.v(() => '[cFailure] posted: $i');
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
+    } catch (e) {
+      _logger.e(() => '[cFailure] failed: $e');
+    }
+
+    await buffer.cancel();
+    _logger.v(() => '[cFailure] canceled');
+
+    final results = await Future.wait(futures);
+    _logger.v(() => '[cFailure] results: $results');
+
+    final firstResult = results.first;
+    for (final eachResult in results) {
+      expect(eachResult.length, 1);
+      expect(eachResult.first, -1);
+      expect(firstResult, eachResult);
     }
   });
 }
