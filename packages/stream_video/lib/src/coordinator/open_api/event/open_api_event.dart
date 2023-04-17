@@ -24,8 +24,11 @@ class OpenApiEvent with EquatableMixin {
     this.callUserUnblocked,
     this.callRecordingStarted,
     this.callRecordingStopped,
+    this.callBroadcastingStarted,
+    this.callBroadcastingStopped,
     this.callReaction,
     this.custom,
+    this.unknown,
   });
 
   static OpenApiEvent? fromRawJson(String rawJson) {
@@ -80,22 +83,26 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callRecordingStopped:
         final event = open.CallRecordingStoppedEvent.fromJson(jsonObj);
         return result.copyWith(callRecordingStopped: event);
+      case EventType.callBroadcastingStarted:
+        final event = open.CallBroadcastingStartedEvent.fromJson(jsonObj);
+        return result.copyWith(callBroadcastingStarted: event);
+      case EventType.callBroadcastingStopped:
+        final event = open.CallBroadcastingStoppedEvent.fromJson(jsonObj);
+        return result.copyWith(callBroadcastingStopped: event);
       case EventType.callReaction:
         final event = open.CallReactionEvent.fromJson(jsonObj);
         return result.copyWith(callReaction: event);
       case EventType.custom:
-        /* no-op */
-        break;
+        final event = open.CustomVideoEvent.fromJson(jsonObj);
+        return result.copyWith(custom: event);
       case EventType.unknown:
-        /* no-op */
-        break;
-    }
-    try {
-      final event = open.CustomVideoEvent.fromJson(jsonObj);
-      return result.copyWith(type: EventType.custom, custom: event);
-    } catch (e, stk) {
-      streamLog.e(_tag, () => '[fromJson] failed: $e; $stk');
-      return result.copyWith(type: EventType.unknown);
+        try {
+          final event = open.VideoEvent.fromJson(jsonObj);
+          return result.copyWith(unknown: event);
+        } catch (e, stk) {
+          streamLog.e(_tag, () => '[fromJson] failed: $e; $stk');
+          return result;
+        }
     }
   }
 
@@ -113,8 +120,11 @@ class OpenApiEvent with EquatableMixin {
   final open.UnblockedUserEvent? callUserUnblocked;
   final open.CallRecordingStartedEvent? callRecordingStarted;
   final open.CallRecordingStoppedEvent? callRecordingStopped;
+  final open.CallBroadcastingStartedEvent? callBroadcastingStarted;
+  final open.CallBroadcastingStoppedEvent? callBroadcastingStopped;
   final open.CallReactionEvent? callReaction;
   final open.CustomVideoEvent? custom;
+  final open.VideoEvent? unknown;
 
   OpenApiEvent copyWith({
     EventType? type,
@@ -131,8 +141,11 @@ class OpenApiEvent with EquatableMixin {
     open.UnblockedUserEvent? callUserUnblocked,
     open.CallRecordingStartedEvent? callRecordingStarted,
     open.CallRecordingStoppedEvent? callRecordingStopped,
+    open.CallBroadcastingStartedEvent? callBroadcastingStarted,
+    open.CallBroadcastingStoppedEvent? callBroadcastingStopped,
     open.CallReactionEvent? callReaction,
     open.CustomVideoEvent? custom,
+    open.VideoEvent? unknown,
   }) {
     return OpenApiEvent(
       type: type ?? this.type,
@@ -151,8 +164,13 @@ class OpenApiEvent with EquatableMixin {
       callUserUnblocked: callUserUnblocked ?? this.callUserUnblocked,
       callRecordingStarted: callRecordingStarted ?? this.callRecordingStarted,
       callRecordingStopped: callRecordingStopped ?? this.callRecordingStopped,
+      callBroadcastingStarted:
+          callBroadcastingStarted ?? this.callBroadcastingStarted,
+      callBroadcastingStopped:
+          callBroadcastingStopped ?? this.callBroadcastingStopped,
       callReaction: callReaction ?? this.callReaction,
       custom: custom ?? this.custom,
+      unknown: unknown ?? this.unknown,
     );
   }
 
@@ -171,11 +189,14 @@ class OpenApiEvent with EquatableMixin {
         callEnded,
         callPermissionRequest,
         callPermissionsUpdated,
-        callRecordingStarted,
         callUserBlocked,
         callUserUnblocked,
+        callRecordingStarted,
         callRecordingStopped,
+        callBroadcastingStarted,
+        callBroadcastingStopped,
         callReaction,
         custom,
+        unknown,
       ];
 }

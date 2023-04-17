@@ -16,7 +16,7 @@ class ConnectedEvent {
     required this.connectionId,
     required this.createdAt,
     required this.me,
-    required this.type,
+    this.type = 'connection.ok',
   });
 
   /// The connection_id for this client

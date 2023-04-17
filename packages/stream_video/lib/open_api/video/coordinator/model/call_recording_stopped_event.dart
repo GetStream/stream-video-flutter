@@ -15,7 +15,7 @@ class CallRecordingStoppedEvent {
   CallRecordingStoppedEvent({
     required this.callCid,
     required this.createdAt,
-    required this.type,
+    this.type = 'call.recording_stopped',
   });
 
   String callCid;

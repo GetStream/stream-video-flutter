@@ -16,7 +16,7 @@ class BlockedUserEvent {
     this.blockedByUser,
     required this.callCid,
     required this.createdAt,
-    required this.type,
+    this.type = 'call.blocked_user',
     required this.user,
   });
 

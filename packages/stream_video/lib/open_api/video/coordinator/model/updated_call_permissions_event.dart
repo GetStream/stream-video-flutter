@@ -16,7 +16,7 @@ class UpdatedCallPermissionsEvent {
     required this.callCid,
     required this.createdAt,
     this.ownCapabilities = const [],
-    required this.type,
+    this.type = 'call.permissions_updated',
     required this.user,
   });
 

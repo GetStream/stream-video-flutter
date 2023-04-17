@@ -17,7 +17,7 @@ class CallMemberUpdatedEvent {
     required this.callCid,
     required this.createdAt,
     this.members = const [],
-    required this.type,
+    this.type = 'call.member_updated',
   });
 
   CallResponse call;

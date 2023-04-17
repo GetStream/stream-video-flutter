@@ -15,7 +15,7 @@ class CallRejectedEvent {
   CallRejectedEvent({
     required this.callCid,
     required this.createdAt,
-    required this.type,
+    this.type = 'call.rejected',
     required this.user,
   });
 
