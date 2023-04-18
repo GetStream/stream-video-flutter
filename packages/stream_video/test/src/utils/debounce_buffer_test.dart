@@ -31,7 +31,6 @@ Future<void> main() async {
         _logger.d(() => '[buffer.consumer] completed: $items');
         return items;
       },
-      //onCancel: (_) async => [],
       onCancel: onCancel,
     );
   });
@@ -46,12 +45,12 @@ Future<void> main() async {
     final futures = <Future<List<int>>>[];
     for (var i = 0; i < 4; i++) {
       futures.add(
-        buffer
-            .post(i)
-            .whenComplete(() => _logger.v(() => '[debouncing] completed: $i')),
+        buffer.post(i).whenComplete(() {
+          _logger.v(() => '[debouncing] completed: $i');
+        }),
       );
       _logger.v(() => '[debouncing] posted: $i');
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
     }
 
     final results = await Future.wait(futures);
@@ -67,18 +66,14 @@ Future<void> main() async {
   test('test cancellation fallback', () async {
     failOnCancellation = false;
     final futures = <Future<List<int>>>[];
-    try {
-      for (var i = 0; i < 4; i++) {
-        futures.add(
-          buffer
-              .post(i)
-              .whenComplete(() => _logger.v(() => '[cFallback] completed: $i')),
-        );
-        _logger.v(() => '[cFallback] posted: $i');
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
-    } catch (e, stk) {
-      _logger.e(() => '[cFallback] failed: $e');
+    for (var i = 0; i < 4; i++) {
+      futures.add(
+        buffer.post(i).whenComplete(() {
+          _logger.v(() => '[cFallback] completed: $i');
+        }),
+      );
+      _logger.v(() => '[cFallback] posted: $i');
+      await Future<void>.delayed(const Duration(milliseconds: 100));
     }
 
     await buffer.cancel();
@@ -97,19 +92,15 @@ Future<void> main() async {
   test('test cancellation failure', () async {
     failOnCancellation = true;
     final futures = <Future<List<int>>>[];
-    try {
-      for (var i = 0; i < 4; i++) {
-        futures.add(
-          buffer.post(i).onError((error, stackTrace) {
-            _logger.e(() => '[cFailure] failed: $i = $error');
-            return [-1];
-          }).whenComplete(() => _logger.v(() => '[cFailure] completed: $i')),
-        );
-        _logger.v(() => '[cFailure] posted: $i');
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
-    } catch (e) {
-      _logger.e(() => '[cFailure] failed: $e');
+    for (var i = 0; i < 4; i++) {
+      futures.add(
+        buffer.post(i).onError((error, stackTrace) {
+          _logger.e(() => '[cFailure] failed: $i = $error');
+          return [-1];
+        }).whenComplete(() => _logger.v(() => '[cFailure] completed: $i')),
+      );
+      _logger.v(() => '[cFailure] posted: $i');
+      await Future<void>.delayed(const Duration(milliseconds: 100));
     }
 
     await buffer.cancel();
