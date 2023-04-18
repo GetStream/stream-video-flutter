@@ -27,13 +27,13 @@ class SdpEditorImpl implements SdpEditor {
 
   final _actionFactory = SdpEditActionFactory();
 
-  final Map<String, SdpMungingRule> internalRules = <String, SdpMungingRule>{};
+  final internalRules = <String, SdpMungingRule>{};
 
   late final platform = CurrentPlatform.type;
 
   @override
   void upsert(SdpMungingRule rule) {
-    final removed = internalRules[rule.key];
+    final removed = internalRules.remove(rule.key);
     internalRules[rule.key] = rule;
     if (removed != null) {
       _logger.v(() => '[add] replaced: $removed');
@@ -66,6 +66,7 @@ class SdpEditorImpl implements SdpEditor {
     _logger.i(() => '[edit] sdp.type: ${sdp.type}');
     final lines = sdp.value.split('\r\n');
     applyRules(sdp.type, lines, internalRules.values);
+
     if (policy.mungingEnabled) {
       policy.munging(sdp.type, lines);
     }

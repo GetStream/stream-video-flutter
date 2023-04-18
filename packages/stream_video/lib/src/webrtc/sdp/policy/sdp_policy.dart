@@ -1,6 +1,8 @@
+import 'package:equatable/equatable.dart';
+
 import '../sdp.dart';
 
-class SdpPolicy {
+class SdpPolicy with EquatableMixin {
   const SdpPolicy({
     this.mungingEnabled = false,
     this.munging = _defaultMunging,

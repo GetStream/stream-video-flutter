@@ -33,7 +33,8 @@ class SetOpusDtxEnabledAction implements SdpEditAction {
       } else if (sdpLine.isFmtp) {
         final original = fmtpParser.parse(sdpLine);
         if (original == null || original.payloadType != opusPayloadType) {
-          _logger.w(() => '[setOpusDtxEnabled] rejected (not opus): "$original"');
+          _logger
+              .w(() => '[setOpusDtxEnabled] rejected (not opus): "$original"');
           continue;
         }
         final modified = original.setDtxEnabled(enabled);

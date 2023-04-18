@@ -120,7 +120,6 @@ class CallImpl implements Call {
 
   CallCredentials? _credentials;
   int _reconnectAttempt = 0;
-  CallState? _prevState;
 
   @override
   StreamCallCid get callCid => state.value.callCid;
@@ -171,6 +170,11 @@ class CallImpl implements Call {
     _logger.d(() => '[setConnectOptions] connectOptions: $connectOptions)');
     _connectOptions = connectOptions;
   }
+
+  // This is only used in [_onStateChanged] to determine the difference between
+  // the previous and current state. It should not be used for any other
+  // purpose. It is not guaranteed to be the latest, Use [state] instead.
+  CallState? _prevState;
 
   Future<void> _onStateChanged(CallState state) async {
     final status = state.status;

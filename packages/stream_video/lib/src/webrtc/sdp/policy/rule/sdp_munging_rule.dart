@@ -32,6 +32,7 @@ abstract class SdpMungingRule with EquatableMixin {
   }) = SetOpusRedEnabledRule;
 
   String get key;
+
   final List<SdpType> types;
   final List<PlatformType> platforms;
 

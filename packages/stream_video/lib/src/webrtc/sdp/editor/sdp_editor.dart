@@ -5,7 +5,6 @@ import '../sdp.dart';
 
 @internal
 abstract class SdpEditor {
-
   void upsert(SdpMungingRule rule);
 
   void removeWhereType<T extends SdpMungingRule>();

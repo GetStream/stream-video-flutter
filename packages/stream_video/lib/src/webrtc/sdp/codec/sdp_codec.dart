@@ -1,5 +1,6 @@
 abstract class SdpCodec {
   MediaType get type;
+
   String get alias;
 }
 
