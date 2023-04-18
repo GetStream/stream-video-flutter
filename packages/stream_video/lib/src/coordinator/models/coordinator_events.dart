@@ -300,6 +300,39 @@ class CoordinatorCallRecordingStoppedEvent extends CoordinatorCallEvent {
       ];
 }
 
+class CoordinatorCallBroadcastingStartedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallBroadcastingStartedEvent({
+    required super.callCid,
+    required this.hlsPlaylistUrl,
+    required this.createdAt,
+  });
+
+  final String hlsPlaylistUrl;
+  final DateTime createdAt;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        hlsPlaylistUrl,
+        createdAt,
+      ];
+}
+
+class CoordinatorCallBroadcastingStoppedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallBroadcastingStoppedEvent({
+    required super.callCid,
+    required this.createdAt,
+  });
+
+  final DateTime createdAt;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+      ];
+}
+
 class CoordinatorCallUserBlockedEvent extends CoordinatorCallEvent {
   const CoordinatorCallUserBlockedEvent({
     required super.callCid,

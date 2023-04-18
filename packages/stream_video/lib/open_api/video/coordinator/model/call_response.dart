@@ -22,6 +22,7 @@ class CallResponse {
     this.custom = const {},
     this.endedAt,
     required this.id,
+    required this.ingress,
     this.ownCapabilities = const [],
     required this.recording,
     required this.settings,
@@ -60,6 +61,8 @@ class CallResponse {
 
   /// Call ID
   String id;
+
+  CallIngressResponse ingress;
 
   /// The capabilities of the current user
   List<OwnCapability> ownCapabilities;
@@ -104,6 +107,7 @@ class CallResponse {
      other.custom == custom &&
      other.endedAt == endedAt &&
      other.id == id &&
+     other.ingress == ingress &&
      other.ownCapabilities == ownCapabilities &&
      other.recording == recording &&
      other.settings == settings &&
@@ -125,6 +129,7 @@ class CallResponse {
     (custom.hashCode) +
     (endedAt == null ? 0 : endedAt!.hashCode) +
     (id.hashCode) +
+    (ingress.hashCode) +
     (ownCapabilities.hashCode) +
     (recording.hashCode) +
     (settings.hashCode) +
@@ -135,7 +140,7 @@ class CallResponse {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcasting=$broadcasting, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, endedAt=$endedAt, id=$id, ownCapabilities=$ownCapabilities, recording=$recording, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
+  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcasting=$broadcasting, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, endedAt=$endedAt, id=$id, ingress=$ingress, ownCapabilities=$ownCapabilities, recording=$recording, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -152,6 +157,7 @@ class CallResponse {
       json[r'ended_at'] = null;
     }
       json[r'id'] = this.id;
+      json[r'ingress'] = this.ingress;
       json[r'own_capabilities'] = this.ownCapabilities;
       json[r'recording'] = this.recording;
       json[r'settings'] = this.settings;
@@ -201,6 +207,7 @@ class CallResponse {
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         endedAt: mapDateTime(json, r'ended_at', ''),
         id: mapValueOfType<String>(json, r'id')!,
+        ingress: CallIngressResponse.fromJson(json[r'ingress'])!,
         ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
         recording: mapValueOfType<bool>(json, r'recording')!,
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,
@@ -266,6 +273,7 @@ class CallResponse {
     'created_by',
     'custom',
     'id',
+    'ingress',
     'own_capabilities',
     'recording',
     'settings',

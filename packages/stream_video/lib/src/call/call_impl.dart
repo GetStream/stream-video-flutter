@@ -15,7 +15,7 @@ import '../state_emitter.dart';
 import '../utils/cancelables.dart';
 import '../utils/none.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
-import '../webrtc/sdp/policy/sdp_policy.dart';
+import '../webrtc/sdp/policy/rule/sdp_munging_rule.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 
@@ -171,15 +171,36 @@ class CallImpl implements Call {
     _connectOptions = connectOptions;
   }
 
+  // This is only used in [_onStateChanged] to determine the difference between
+  // the previous and current state. It should not be used for any other
+  // purpose. It is not guaranteed to be the latest, Use [state] instead.
+  CallState? _prevState;
+
   Future<void> _onStateChanged(CallState state) async {
     final status = state.status;
     _logger.v(() => '[onStateChanged] status: $status');
     if (status is CallStatusDisconnected) {
       await _clear('status-disconnected');
     }
-    if (state.settings.audio.opusDtxEnabled) {
-      _sessionFactory.sdpEditor.addRule(const EnableOpusDtxRule());
+
+    if (_prevState?.settings.audio.opusDtxEnabled !=
+        state.settings.audio.opusDtxEnabled) {
+      _sessionFactory.sdpEditor.upsert(
+        SdpMungingRule.setOpusDtxEnabled(
+          enabled: state.settings.audio.opusDtxEnabled,
+        ),
+      );
     }
+    if (_prevState?.settings.audio.redundantCodingEnabled !=
+        state.settings.audio.redundantCodingEnabled) {
+      _sessionFactory.sdpEditor.upsert(
+        SdpMungingRule.setOpusRedEnabled(
+          enabled: state.settings.audio.redundantCodingEnabled,
+        ),
+      );
+    }
+
+    _prevState = state;
   }
 
   Future<void> _onCoordinatorEvent(CoordinatorCallEvent event) async {

@@ -10,62 +10,55 @@
 
 part of openapi.api;
 
-class CallMemberRemovedEvent {
-  /// Returns a new [CallMemberRemovedEvent] instance.
-  CallMemberRemovedEvent({
-    required this.call,
+class CallBroadcastingStartedEvent {
+  /// Returns a new [CallBroadcastingStartedEvent] instance.
+  CallBroadcastingStartedEvent({
     required this.callCid,
     required this.createdAt,
-    this.members = const [],
-    this.type = 'call.member_removed',
+    required this.hlsPlaylistUrl,
+    this.type = 'call.broadcasting_started',
   });
-
-  CallResponse call;
 
   String callCid;
 
   DateTime createdAt;
 
-  /// the list of member IDs removed from the call
-  List<String> members;
+  String hlsPlaylistUrl;
 
-  /// The type of event: \"call.member_added\" in this case
+  /// The type of event: \"call.broadcasting_started\" in this case
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallMemberRemovedEvent &&
-     other.call == call &&
+  bool operator ==(Object other) => identical(this, other) || other is CallBroadcastingStartedEvent &&
      other.callCid == callCid &&
      other.createdAt == createdAt &&
-     other.members == members &&
+     other.hlsPlaylistUrl == hlsPlaylistUrl &&
      other.type == type;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (call.hashCode) +
     (callCid.hashCode) +
     (createdAt.hashCode) +
-    (members.hashCode) +
+    (hlsPlaylistUrl.hashCode) +
     (type.hashCode);
 
   @override
-  String toString() => 'CallMemberRemovedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, type=$type]';
+  String toString() => 'CallBroadcastingStartedEvent[callCid=$callCid, createdAt=$createdAt, hlsPlaylistUrl=$hlsPlaylistUrl, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call'] = this.call;
       json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'members'] = this.members;
+      json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
       json[r'type'] = this.type;
     return json;
   }
 
-  /// Returns a new [CallMemberRemovedEvent] instance and imports its values from
+  /// Returns a new [CallBroadcastingStartedEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static CallMemberRemovedEvent? fromJson(dynamic value) {
+  static CallBroadcastingStartedEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -74,30 +67,27 @@ class CallMemberRemovedEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallMemberRemovedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallMemberRemovedEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "CallBroadcastingStartedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "CallBroadcastingStartedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return CallMemberRemovedEvent(
-        call: CallResponse.fromJson(json[r'call'])!,
+      return CallBroadcastingStartedEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
-        members: json[r'members'] is List
-            ? (json[r'members'] as List).cast<String>()
-            : const [],
+        hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
     return null;
   }
 
-  static List<CallMemberRemovedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <CallMemberRemovedEvent>[];
+  static List<CallBroadcastingStartedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <CallBroadcastingStartedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CallMemberRemovedEvent.fromJson(row);
+        final value = CallBroadcastingStartedEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -106,12 +96,12 @@ class CallMemberRemovedEvent {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallMemberRemovedEvent> mapFromJson(dynamic json) {
-    final map = <String, CallMemberRemovedEvent>{};
+  static Map<String, CallBroadcastingStartedEvent> mapFromJson(dynamic json) {
+    final map = <String, CallBroadcastingStartedEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallMemberRemovedEvent.fromJson(entry.value);
+        final value = CallBroadcastingStartedEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -120,13 +110,13 @@ class CallMemberRemovedEvent {
     return map;
   }
 
-  // maps a json object with a list of CallMemberRemovedEvent-objects as value to a dart map
-  static Map<String, List<CallMemberRemovedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<CallMemberRemovedEvent>>{};
+  // maps a json object with a list of CallBroadcastingStartedEvent-objects as value to a dart map
+  static Map<String, List<CallBroadcastingStartedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<CallBroadcastingStartedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallMemberRemovedEvent.listFromJson(entry.value, growable: growable,);
+        final value = CallBroadcastingStartedEvent.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -137,10 +127,9 @@ class CallMemberRemovedEvent {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'call',
     'call_cid',
     'created_at',
-    'members',
+    'hls_playlist_url',
     'type',
   };
 }

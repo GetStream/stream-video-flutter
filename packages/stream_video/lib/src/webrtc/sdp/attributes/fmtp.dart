@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../sdp.dart';
+
 /// Represents 'fmtp' attribute
 /// Reference: https://www.rfc-editor.org/rfc/rfc4566#section-6.
 /// Format: a=fmtp:<format> <format specific parameters>
@@ -27,8 +29,10 @@ class Fmtp with EquatableMixin {
 
   @override
   List<Object?> get props => [payloadType, parameters];
+}
 
-  static bool isFmtp(String sdpLine) => sdpLine.startsWith('a=fmtp');
+extension FmtpSdpUtils on SdpLine {
+  bool get isFmtp => startsWith('a=fmtp');
 }
 
 class FmtpParser {
@@ -37,7 +41,7 @@ class FmtpParser {
   final _groupPayloadType = 1;
   final _groupFormatParameters = 2;
 
-  Fmtp? parse(String sdpLine) {
+  Fmtp? parse(SdpLine sdpLine) {
     final match = _regex.firstMatch(sdpLine);
     if (match == null) {
       return null;
@@ -66,7 +70,7 @@ class FmtpParser {
 }
 
 extension FmtpLineComposer on Fmtp {
-  String toSdpLine() {
+  SdpLine toSdpLine() {
     final buffer = StringBuffer()
       ..write('a=fmtp:')
       ..write(payloadType)

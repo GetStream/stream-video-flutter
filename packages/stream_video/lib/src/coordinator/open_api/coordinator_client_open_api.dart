@@ -170,7 +170,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<CoordinatorJoined>> joinCall(inputs.JoinCallInput input) async {
     try {
-      final result = await videoApi.joinCallTypeId0(
+      final result = await videoApi.joinCall(
         input.callCid.type,
         input.callCid.id,
         open.JoinCallRequest(

@@ -15,7 +15,7 @@ class CallAcceptedEvent {
   CallAcceptedEvent({
     required this.callCid,
     required this.createdAt,
-    required this.type,
+    this.type = 'call.accepted',
     required this.user,
   });
 

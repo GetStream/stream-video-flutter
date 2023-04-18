@@ -17,7 +17,7 @@ class CallMemberAddedEvent {
     required this.callCid,
     required this.createdAt,
     this.members = const [],
-    required this.type,
+    this.type = 'call.member_added',
   });
 
   CallResponse call;
