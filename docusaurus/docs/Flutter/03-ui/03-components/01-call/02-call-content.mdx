@@ -1,0 +1,113 @@
+# StreamCallContent
+
+The StreamCallContent widget displays the ongoing call which includes the user grid, call controls,
+`AppBar` with call information, and the local user. The widget can be used on its own or as a part of
+`StreamCallContainer`.
+
+## Usage
+
+```dart
+    StreamCallContent(
+      call: call,
+      callState: callState,
+    ),
+```
+
+## Customisation
+
+There are various aspects of the `StreamCallContent` widget that can be modified including the various
+components that make up the screen as well as the actions available on the screen.
+
+### Handling actions
+
+You can provide a callback to run when the user presses the back button or leaves the call by providing
+the `onBackPressed` and `onLeaveCallTap` respectively:
+
+```dart
+    StreamCallContent(
+      call: call,
+      callState: callState,
+      onLeaveCallTap: () {},
+      onBackPressed: () {},
+    ),
+```
+
+### Customising the AppBar
+
+You can use the `callAppBarBuilder` parameter to customise the existing `AppBar` or to provide an entirely
+new one. To use and modify the `AppBar` that the SDK provides, you can use the `CallAppBar` widget:
+
+```dart
+    StreamCallContent(
+      call: call,
+      callState: callState,
+      callAppBarBuilder: (context, call, callState) {
+        return CallAppBar(
+          call: call,
+        );
+      },
+    ),
+```
+
+You can modify the `CallAppBar` to change styles, add/remove leading and trailing elements, as well as
+change the information displayed on the bar. Here are a few properties you can change:
+
+```dart
+    StreamCallContent(
+      call: call,
+      callState: callState,
+      callAppBarBuilder: (a, b, c) {
+        return CallAppBar(
+          call: call,
+          backgroundColor: Colors.blue,
+          title: const Text('Demo title'),
+          onParticipantsInfoTap: () {},
+        );
+      },
+    ),
+```
+
+### Customising the users display
+
+The default widget comes with a grid of call participants displayed at the center. If you want to modify
+the properties of the grid or supply your own implementation, you can use the `callParticipantsBuilder` to
+do it. To use the default grid, use the `StreamCallParticipants` widget:
+
+```dart
+    StreamCallContent(
+      call: call,
+      callState: callState,
+      callParticipantsBuilder: (context, call, callState) {
+        return StreamCallParticipants(
+          call: call,
+          participants: callState.callParticipants,
+        );
+      },
+    ),
+```
+
+You can then change aspects of this grid such as changing the participants to display, changing the
+individual participant view, changing actions, etc.
+
+### Customising the call controls
+
+The call controls are controls for the participant to modify their video and audio state, leave call,
+share screen, etc. These can be changed via the `callControlsBuilder` parameter. The default controls
+can be used by using the `StreamCallControls.withDefaultOptions()` widget constructor. You can then modify
+aspects of this widget like this:
+
+```dart
+    StreamCallContent(
+      call: call,
+      callState: callState,
+      callControlsBuilder: (context, call, callState) {
+        return StreamCallControls.withDefaultOptions(
+          call: call,
+          localParticipant: callState.localParticipant!,
+          backgroundColor: Colors.blue,
+          elevation: 24.0,
+          spacing: 4.0,
+        );
+      },
+    ),
+```
