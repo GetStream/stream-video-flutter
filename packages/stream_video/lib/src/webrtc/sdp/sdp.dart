@@ -22,3 +22,5 @@ enum SdpType {
   @override
   String toString() => name;
 }
+
+typedef SdpLine = String;

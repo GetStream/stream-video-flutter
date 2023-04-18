@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
 
+import '../codec/sdp_codec.dart';
+import '../sdp.dart';
+
 /// Represents 'rtpmap' attribute
 /// Reference: https://www.rfc-editor.org/rfc/rfc4566#section-6.
 /// Format: a=rtpmap:<payload type> <encoding name>/<clock rate> [/<encoding parameters>]
@@ -28,7 +31,12 @@ class Rtpmap with EquatableMixin {
       ];
 }
 
-extension RtpmapExtension on String {
+extension RtpmapUtils on Rtpmap {
+  bool hasCodec(SdpCodec codec) =>
+      encodingName.toUpperCase() == codec.alias.toUpperCase();
+}
+
+extension RtpmapSdpUtils on SdpLine {
   bool get isRtpmap => startsWith('a=rtpmap');
 }
 
@@ -39,7 +47,7 @@ class RtpmapParser {
   final _groupClockRate = 3;
   final _groupEncodingParameters = 4;
 
-  Rtpmap? parse(String sdpLine) {
+  Rtpmap? parse(SdpLine sdpLine) {
     final match = _regex.firstMatch(sdpLine);
     if (match == null) {
       return null;

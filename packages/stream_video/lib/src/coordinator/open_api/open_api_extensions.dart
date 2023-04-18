@@ -94,11 +94,12 @@ extension CallSettingsExt on open.CallSettingsResponse {
   CallSettings toCallSettings() {
     streamLog.i("CallSettingsExt", () => '[toCallSettings] settings: $this');
     return CallSettings(
-      audio: AudioSetting(
+      audio: AudioSettings(
         accessRequestEnabled: audio.accessRequestEnabled,
         opusDtxEnabled: audio.opusDtxEnabled,
+        redundantCodingEnabled: audio.redundantCodingEnabled,
       ),
-      video: VideoSetting(
+      video: VideoSettings(
         accessRequestEnabled: video.accessRequestEnabled,
       ),
       screenShare: ScreenShareSetting(
