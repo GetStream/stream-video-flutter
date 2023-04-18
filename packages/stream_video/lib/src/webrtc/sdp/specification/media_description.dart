@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
 
+import '../codec/sdp_codec.dart';
+import '../sdp.dart';
+
 // https://www.rfc-editor.org/rfc/rfc4566#section-5.14
 // m=<media> <port>/<number of ports> <proto> <fmt>
 class MediaDescription with EquatableMixin {
@@ -38,10 +41,25 @@ class MediaDescription with EquatableMixin {
 
   @override
   List<Object?> get props => [media, port, numberOfPorts, proto, fmt];
+}
 
-  static bool isVideo(String sdpLine) => sdpLine.startsWith('m=video');
+extension MediaDescriptionUtils on MediaDescription {
+  bool get isAudio =>
+      media.toUpperCase() == MediaType.audio.alias.toUpperCase();
 
-  static bool isAudio(String sdpLine) => sdpLine.startsWith('m=audio');
+  bool get isVideo =>
+      media.toUpperCase() == MediaType.video.alias.toUpperCase();
+
+  bool isTypeOf(MediaType type) =>
+      media.toUpperCase() == type.alias.toUpperCase();
+}
+
+extension MediaDescriptionSdpUtils on SdpLine {
+  bool get isMediaDescription => startsWith('m=');
+
+  bool get isVideoDescription => startsWith('m=video');
+
+  bool get isAudioDescription => startsWith('m=audio');
 }
 
 class MediaDescriptionParser {
@@ -54,7 +72,7 @@ class MediaDescriptionParser {
   final _groupProto = 4;
   final _groupFmt = 5;
 
-  MediaDescription? parse(String sdpLine) {
+  MediaDescription? parse(SdpLine sdpLine) {
     final match = _regex.firstMatch(sdpLine);
     if (match == null) {
       return null;
@@ -78,7 +96,7 @@ class MediaDescriptionParser {
 }
 
 extension MediaDescriptionLineComposer on MediaDescription {
-  String toSdpLine() {
+  SdpLine toSdpLine() {
     final buffer = StringBuffer()
       ..write('m=')
       ..write(media)

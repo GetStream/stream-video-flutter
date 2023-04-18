@@ -2,10 +2,14 @@ import 'package:meta/meta.dart';
 
 import '../../attributes/fmtp.dart';
 import '../../attributes/rtpmap.dart';
-import '../../policy/sdp_policy.dart';
+import '../../policy/rule/rule_prioritize_codec.dart';
+import '../../policy/rule/rule_set_opus_dtx_enabled.dart';
+import '../../policy/rule/rule_set_opus_red_enabled.dart';
+import '../../policy/rule/sdp_munging_rule.dart';
 import '../../specification/media_description.dart';
-import 'action_enable_opus_dtx.dart';
 import 'action_prioritize_codec.dart';
+import 'action_set_opus_dtx_enabled.dart';
+import 'action_set_opus_red_enabled.dart';
 import 'sdp_edit_action.dart';
 
 @internal
@@ -21,8 +25,16 @@ class SdpEditActionFactory {
         mediaDescriptionParser: _mediaDescriptionParser,
         rtpmapParser: _rtpmapParser,
       );
-    } else if (rule is EnableOpusDtxRule) {
-      return EnableOpusDtxAction(
+    } else if (rule is SetOpusDtxEnabledRule) {
+      return SetOpusDtxEnabledAction(
+        enabled: rule.enabled,
+        rtpmapParser: _rtpmapParser,
+        fmtpParser: _fmtpParser,
+      );
+    } else if (rule is SetOpusRedEnabledRule) {
+      return SetOpusRedEnabledAction(
+        enabled: rule.enabled,
+        mediaDescriptionParser: _mediaDescriptionParser,
         rtpmapParser: _rtpmapParser,
         fmtpParser: _fmtpParser,
       );
