@@ -15,7 +15,7 @@ class CallEndedEvent {
   CallEndedEvent({
     required this.callCid,
     required this.createdAt,
-    required this.type,
+    this.type = 'call.ended',
     this.user,
   });
 

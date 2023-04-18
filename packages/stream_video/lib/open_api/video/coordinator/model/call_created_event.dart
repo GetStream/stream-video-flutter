@@ -18,7 +18,7 @@ class CallCreatedEvent {
     required this.createdAt,
     this.members = const [],
     required this.ringing,
-    required this.type,
+    this.type = 'call.created',
   });
 
   CallResponse call;

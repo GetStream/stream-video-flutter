@@ -17,6 +17,7 @@ import '../../sfu/sfu_client.dart';
 import '../../sfu/sfu_client_impl.dart';
 import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
+import '../../utils/debounce_buffer.dart';
 import '../../utils/none.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
@@ -30,6 +31,8 @@ import 'call_session.dart';
 import 'call_session_config.dart';
 
 const _tag = 'SV:CallSession';
+
+const _debounceDuration = Duration(milliseconds: 200);
 
 class CallSessionImpl extends CallSession {
   CallSessionImpl({
@@ -77,6 +80,12 @@ class CallSessionImpl extends CallSession {
 
   @override
   SharedEmitter<SfuEvent> get events => sfuWS.events;
+
+  late final _saBuffer = DebounceBuffer<SubscriptionAction, Result<None>>(
+    duration: _debounceDuration,
+    onComplete: _updateSubscriptions,
+    onCancel: (_) async => Result.error('SubscriptionAction cancelled'),
+  );
 
   @override
   Future<Result<None>> start() async {
@@ -136,6 +145,7 @@ class CallSessionImpl extends CallSession {
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
     await _stats.close();
+    await _saBuffer.cancel();
     await eventsSubscription?.cancel();
     eventsSubscription = null;
     await sfuWS.disconnect();
@@ -188,9 +198,9 @@ class CallSessionImpl extends CallSession {
     } else if (action is UpdateSubscriptions) {
       return _updateSubscriptions(action.actions);
     } else if (action is UpdateSubscription) {
-      return _updateSubscriptions([action]);
+      return _updateSubscription(action);
     } else if (action is RemoveSubscription) {
-      return _updateSubscriptions([action]);
+      return _updateSubscription(action);
     } else if (action is SetSubscription) {
       return _setSubscriptions([action]);
     } else if (action is SetSubscriptions) {
@@ -478,6 +488,13 @@ class CallSessionImpl extends CallSession {
     );
     _logger.v(() => '[setSubscriptions] result: $result');
     return result;
+  }
+
+  Future<Result<None>> _updateSubscription(
+    SubscriptionAction action,
+  ) async {
+    _logger.d(() => '[updateSubscription] action: $action');
+    return _saBuffer.post(action);
   }
 
   Future<Result<None>> _updateSubscriptions(
