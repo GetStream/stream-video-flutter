@@ -14,7 +14,7 @@ class CallSettings with EquatableMixin {
           redundantCodingEnabled: false,
         ),
         video = const VideoSettings(accessRequestEnabled: false),
-        screenShare = const ScreenShareSetting(accessRequestEnabled: false);
+        screenShare = const ScreenShareSettings(accessRequestEnabled: false);
 
   const CallSettings.enabled()
       : audio = const AudioSettings(
@@ -23,18 +23,18 @@ class CallSettings with EquatableMixin {
           redundantCodingEnabled: false,
         ),
         video = const VideoSettings(accessRequestEnabled: true),
-        screenShare = const ScreenShareSetting(accessRequestEnabled: true);
+        screenShare = const ScreenShareSettings(accessRequestEnabled: true);
 
   final AudioSettings audio;
   final VideoSettings video;
-  final ScreenShareSetting screenShare;
+  final ScreenShareSettings screenShare;
 
   @override
   List<Object?> get props => [audio, video, screenShare];
 }
 
-abstract class CallSetting with EquatableMixin {
-  const CallSetting({required this.accessRequestEnabled});
+abstract class MediaSettings with EquatableMixin {
+  const MediaSettings({required this.accessRequestEnabled});
 
   final bool accessRequestEnabled;
 
@@ -45,7 +45,7 @@ abstract class CallSetting with EquatableMixin {
   List<Object?> get props => [accessRequestEnabled];
 }
 
-class AudioSettings extends CallSetting {
+class AudioSettings extends MediaSettings {
   const AudioSettings({
     required super.accessRequestEnabled,
     required this.opusDtxEnabled,
@@ -56,10 +56,10 @@ class AudioSettings extends CallSetting {
   final bool redundantCodingEnabled;
 }
 
-class VideoSettings extends CallSetting {
+class VideoSettings extends MediaSettings {
   const VideoSettings({required super.accessRequestEnabled});
 }
 
-class ScreenShareSetting extends CallSetting {
-  const ScreenShareSetting({required super.accessRequestEnabled});
+class ScreenShareSettings extends MediaSettings {
+  const ScreenShareSettings({required super.accessRequestEnabled});
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:async/async.dart' as async;
 
 import '../../stream_video.dart';
+import '../action/internal/lifecycle_action.dart';
 import '../call_state_manager.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../errors/video_error_composer.dart';
@@ -14,8 +15,11 @@ import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../utils/cancelables.dart';
 import '../utils/none.dart';
+import '../utils/standard.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import '../webrtc/sdp/policy/rule/sdp_munging_rule.dart';
+import 'permissions/permissions_manager.dart';
+import 'permissions/permissions_manager_impl.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 
@@ -38,13 +42,10 @@ class CallImpl implements Call {
     RetryPolicy? retryPolicy,
   }) {
     streamLog.i(_tag, () => '<factory> callCid: $callCid');
-    final finalStreamVideo = streamVideo ?? StreamVideo.instance;
-    final finalRetryPolicy = retryPolicy ?? finalStreamVideo.retryPolicy;
-    final stateManager = _makeCallStateManager(callCid, finalStreamVideo);
-    return CallImpl._(
-      streamVideo: finalStreamVideo,
-      retryPolicy: finalRetryPolicy,
-      stateManager: stateManager,
+    return CallImpl._internal(
+      callCid: callCid,
+      streamVideo: streamVideo,
+      retryPolicy: retryPolicy,
     );
   }
 
@@ -54,15 +55,11 @@ class CallImpl implements Call {
     RetryPolicy? retryPolicy,
   }) {
     streamLog.i(_tag, () => '<factory> created: $data');
-    final finalStreamVideo = streamVideo ?? StreamVideo.instance;
-    final finalRetryPolicy = retryPolicy ?? finalStreamVideo.retryPolicy;
-    final stateManager = _makeCallStateManager(data.callCid, finalStreamVideo);
-    stateManager.onCreated(data);
-    return CallImpl._(
-      streamVideo: finalStreamVideo,
-      retryPolicy: finalRetryPolicy,
-      stateManager: stateManager,
-    );
+    return CallImpl._internal(
+      callCid: data.callCid,
+      streamVideo: streamVideo,
+      retryPolicy: retryPolicy,
+    ).also((it) => it._stateManager.onCreated(data));
   }
 
   factory CallImpl.joined({
@@ -71,15 +68,34 @@ class CallImpl implements Call {
     RetryPolicy? retryPolicy,
   }) {
     streamLog.i(_tag, () => '<factory> joined: $data');
+    return CallImpl._internal(
+      callCid: data.callCid,
+      streamVideo: streamVideo,
+      retryPolicy: retryPolicy,
+      credentials: data.credentials,
+    ).also((it) => it._stateManager.onJoined(data));
+  }
+
+  factory CallImpl._internal({
+    required StreamCallCid callCid,
+    StreamVideo? streamVideo,
+    RetryPolicy? retryPolicy,
+    CallCredentials? credentials,
+  }) {
     final finalStreamVideo = streamVideo ?? StreamVideo.instance;
     final finalRetryPolicy = retryPolicy ?? finalStreamVideo.retryPolicy;
-    final stateManager = _makeCallStateManager(data.callCid, finalStreamVideo);
-    stateManager.onJoined(data);
+    final stateManager = _makeStateManager(callCid, finalStreamVideo);
+    final permissionManager = _makePermissionAwareManager(
+      callCid,
+      finalStreamVideo,
+      stateManager,
+    );
     return CallImpl._(
       streamVideo: finalStreamVideo,
       retryPolicy: finalRetryPolicy,
       stateManager: stateManager,
-      credentials: data.credentials,
+      credentials: credentials,
+      permissionManager: permissionManager,
     );
   }
 
@@ -87,12 +103,14 @@ class CallImpl implements Call {
     required StreamVideo streamVideo,
     required RetryPolicy retryPolicy,
     required CallStateManager stateManager,
+    required PermissionsManager permissionManager,
     CallCredentials? credentials,
   })  : _sessionFactory = CallSessionFactory(
           callCid: stateManager.state.value.callCid,
           sdpEditor: SdpEditorImpl(streamVideo.sdpPolicy),
         ),
         _stateManager = stateManager,
+        _permissionsManager = permissionManager,
         _streamVideo = streamVideo,
         _retryPolicy = retryPolicy,
         _credentials = credentials {
@@ -117,6 +135,7 @@ class CallImpl implements Call {
   final RetryPolicy _retryPolicy;
   final CallSessionFactory _sessionFactory;
   final CallStateManager _stateManager;
+  final PermissionsManager _permissionsManager;
 
   CallCredentials? _credentials;
   int _reconnectAttempt = 0;
@@ -216,7 +235,8 @@ class CallImpl implements Call {
     await _stateManager.onCoordinatorEvent(event);
   }
 
-  Future<Result<None>> _acceptCall(AcceptCall action) async {
+  @override
+  Future<Result<None>> accept() async {
     final state = this.state.value;
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
@@ -227,12 +247,13 @@ class CallImpl implements Call {
       cid: state.callCid,
     );
     if (result is Success<None>) {
-      await _stateManager.onControlAction(action);
+      _stateManager.onAction(const CallAcceptedAction());
     }
     return result;
   }
 
-  Future<Result<None>> _rejectCall(RejectCall action) async {
+  @override
+  Future<Result<None>> reject() async {
     final state = this.state.value;
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
@@ -243,7 +264,7 @@ class CallImpl implements Call {
       cid: state.callCid,
     );
     if (result is Success<None>) {
-      await _stateManager.onControlAction(action);
+      _stateManager.onAction(const CallRejectedAction());
     }
     return result;
   }
@@ -331,6 +352,9 @@ class CallImpl implements Call {
     final joinedResult = await _joinIfNeeded();
     if (joinedResult is! Success<CallCredentials>) {
       _logger.e(() => '[connect] joining failed: $joinedResult');
+      _stateManager.onAction(
+        ConnectFailedAction((joinedResult as Failure).error),
+      );
       await _stateManager.onConnectFailed((joinedResult as Failure).error);
       return result;
     }
@@ -499,26 +523,6 @@ class CallImpl implements Call {
   }
 
   @override
-  Future<Result<None>> end() async {
-    if (!_hasPermission(CallPermission.endCall)) {
-      return Result.error('has no "end-call" permission');
-    }
-    final state = this.state.value;
-    final status = state.status;
-    _logger.d(() => '[end] status: $status');
-    if (status is! CallStatusActive) {
-      _logger.w(() => '[end] rejected (invalid status): $status');
-      return Result.error('invalid status: $status');
-    }
-    _status.value = _ConnectionStatus.disconnected;
-    await _clear('end');
-    await _stateManager.onEnded();
-    final result = await _streamVideo.endCall(callCid: state.callCid);
-    _logger.v(() => '[end] completed: $result');
-    return result;
-  }
-
-  @override
   Future<Result<None>> disconnect() async {
     final state = this.state.value;
     _logger.i(() => '[disconnect] ${_status.value}; state: $state');
@@ -554,7 +558,7 @@ class CallImpl implements Call {
 
   @override
   Future<Result<None>> setLocalTrack(RtcLocalTrack track) async {
-    return _applyLocalTrack(track);
+    return _setLocalTrack(track);
   }
 
   @override
@@ -568,38 +572,7 @@ class CallImpl implements Call {
   }
 
   @override
-  Future<Result<None>> apply(CallControlAction action) async {
-    if (action is SessionControlAction) {
-      return _applySessionAction(action);
-    } else if (action is AcceptCall) {
-      return _acceptCall(action);
-    } else if (action is RejectCall) {
-      return _rejectCall(action);
-    } else if (action is BlockUser) {
-      return _blockUser(action);
-    } else if (action is UnblockUser) {
-      return _unblockUser(action);
-    } else if (action is StartRecording) {
-      return _startRecording(action);
-    } else if (action is StopRecording) {
-      return _stopRecording(action);
-    } else if (action is StartBroadcasting) {
-      return _startBroadcasting(action);
-    } else if (action is StopBroadcasting) {
-      return _stopBroadcasting(action);
-    } else if (action is MuteUsers) {
-      return _muteUsers(action);
-    } else if (action is RequestPermissions) {
-      return _requestPermissions(action);
-    } else if (action is UpdateUserPermissions) {
-      return _updateUserPermissions(action);
-    }
-    return Result.error('Action not supported: $action');
-  }
-
-  Future<Result<None>> _applySessionAction(
-    SessionControlAction action,
-  ) async {
+  Future<Result<None>> apply(ParticipantAction action) async {
     _logger.d(() => '[apply] action: $action');
     final session = _session;
     if (session == null) {
@@ -609,7 +582,7 @@ class CallImpl implements Call {
     final result = await session.apply(action);
     _logger.v(() => '[apply] completed: $result');
     if (result.isSuccess) {
-      await _stateManager.onControlAction(action);
+      _stateManager.onAction(action);
     }
     return result;
   }
@@ -624,42 +597,42 @@ class CallImpl implements Call {
 
   Future<void> _applyCameraOption(TrackOption cameraOption) async {
     if (cameraOption is TrackProvided) {
-      await _applyLocalTrack(cameraOption.track);
+      await _setLocalTrack(cameraOption.track);
     } else if (cameraOption is TrackEnabled) {
-      await _applySessionAction(const SetCameraEnabled(enabled: true));
+      await setCameraEnabled(enabled: true);
     }
   }
 
   Future<void> _applyMicrophoneOption(TrackOption microphoneOption) async {
     if (microphoneOption is TrackProvided) {
-      await _applyLocalTrack(microphoneOption.track);
+      await _setLocalTrack(microphoneOption.track);
     } else if (microphoneOption is TrackEnabled) {
-      await _applySessionAction(const SetMicrophoneEnabled(enabled: true));
+      await setMicrophoneEnabled(enabled: true);
     }
   }
 
   Future<void> _applyScreenShareOption(TrackOption screenShareOption) async {
     if (screenShareOption is TrackProvided) {
-      await _applyLocalTrack(screenShareOption.track);
+      await _setLocalTrack(screenShareOption.track);
     } else if (screenShareOption is TrackEnabled) {
-      await _applySessionAction(const SetScreenShareEnabled(enabled: true));
+      await setScreenShareEnabled(enabled: true);
     }
   }
 
-  Future<Result<None>> _applyLocalTrack(RtcLocalTrack track) async {
-    _logger.d(() => '[applyLocalTrack] localTrack: $track');
+  Future<Result<None>> _setLocalTrack(RtcLocalTrack track) async {
+    _logger.d(() => '[setLocalTrack] localTrack: $track');
     final session = _session;
     if (session == null) {
-      _logger.w(() => '[applyLocalTrack] rejected (session is null);');
+      _logger.w(() => '[setLocalTrack] rejected (session is null);');
       return Result.error('no call session');
     }
     final result = await session.setLocalTrack(track);
-    _logger.v(() => '[applyLocalTrack] completed: $result');
+    _logger.v(() => '[setLocalTrack] completed: $result');
     if (result.isSuccess) {
       final action = track.composeControlAction();
-      _logger.v(() => '[applyLocalTrack] composed action: $action');
+      _logger.v(() => '[setLocalTrack] composed action: $action');
       if (action != null) {
-        await _stateManager.onControlAction(action);
+        _stateManager.onAction(action);
       }
     }
     return result;
@@ -717,177 +690,69 @@ class CallImpl implements Call {
     return _streamVideo.inviteUsers(callCid: callCid.value, users: users);
   }
 
-  bool _canRequestPermission(CallPermission permission) {
-    final settings = state.valueOrNull?.settings;
-    if (settings == null) {
-      _logger.w(() => 'canRequestPermission: no settings');
-      return false;
-    }
-
-    if (permission == CallPermission.sendAudio) {
-      return settings.audio.accessRequestEnabled;
-    } else if (permission == CallPermission.sendVideo) {
-      return settings.video.accessRequestEnabled;
-    } else if (permission == CallPermission.screenshare) {
-      return settings.screenShare.accessRequestEnabled;
-    }
-
-    _logger.w(() => 'canRequestPermission: unknown permission: $permission');
-    return false;
+  @override
+  Future<Result<None>> end() async {
+    return _permissionsManager.endCall();
   }
 
-  Future<Result<None>> _requestPermissions(
-    RequestPermissions action,
-  ) async {
-    final canRequest = action.permissions.every(_canRequestPermission);
-    if (!canRequest) {
-      return Result.error(
-        'Some permissions cannot be requested (see canRequestPermission method)',
-      );
-    }
-
-    return _streamVideo.requestPermissions(
-      callCid: callCid,
-      permissions: action.permissions,
-    );
+  @override
+  Future<Result<None>> requestPermissions(List<CallPermission> permissions) {
+    return _permissionsManager.request(permissions);
   }
 
-  bool _hasPermission(CallPermission permission) {
-    final capabilities = state.valueOrNull?.ownCapabilities;
-    if (capabilities == null || capabilities.isEmpty) {
-      _logger.w(() => '[hasPermission] rejected (no capabilities)');
-      return false;
-    }
-    return capabilities.contains(permission);
+  @override
+  Future<Result<None>> grantPermissions({
+    required String userId,
+    List<CallPermission> permissions = const [],
+  }) {
+    return _permissionsManager.grant(userId: userId, permissions: permissions);
   }
 
-  Future<Result<None>> _updateUserPermissions(
-    UpdateUserPermissions action,
-  ) async {
-    final canUpdate = _hasPermission(CallPermission.updateCallPermissions);
-    if (!canUpdate) {
-      return Result.error(
-        'Cannot update permissions (see canUpdatePermission method)',
-      );
-    }
-
-    return _streamVideo.updateUserPermissions(
-      callCid: callCid,
-      userId: action.userId,
-      grantPermissions: action.grantPermissions,
-      revokePermissions: action.revokePermissions,
-    );
+  @override
+  Future<Result<None>> revokePermissions({
+    required String userId,
+    List<CallPermission> permissions = const [],
+  }) async {
+    return _permissionsManager.revoke(userId: userId, permissions: permissions);
   }
 
-  Future<Result<None>> _blockUser(BlockUser action) async {
-    if (!_hasPermission(CallPermission.blockUsers)) {
-      _logger.w(() => '[blockUser] rejected (no permission)');
-      return Result.error('Cannot block user (no permission)');
-    }
-    _logger.d(() => '[blockUser] action: $action');
-    final result = await _streamVideo.blockUser(
-      callCid: callCid,
-      userId: action.userId,
-    );
-    _logger.v(() => '[blockUser] result: $result');
-    if (result.isSuccess) {
-      await _stateManager.onControlAction(action);
-    }
-    return result;
+  @override
+  Future<Result<None>> blockUser(String userId) async {
+    return _permissionsManager.blockUser(userId);
   }
 
-  Future<Result<None>> _unblockUser(UnblockUser action) async {
-    if (!_hasPermission(CallPermission.blockUsers)) {
-      _logger.w(() => '[unblockUser] rejected (no permission)');
-      return Result.error('Cannot unblock user (no permission)');
-    }
-    _logger.d(() => '[unblockUser] action: $action');
-    final result = await _streamVideo.unblockUser(
-      callCid: callCid,
-      userId: action.userId,
-    );
-    _logger.v(() => '[unblockUser] result: $result');
-    if (result.isSuccess) {
-      await _stateManager.onControlAction(action);
-    }
-    return result;
+  @override
+  Future<Result<None>> unblockUser(String userId) async {
+    return _permissionsManager.unblockUser(userId);
   }
 
-  Future<Result<None>> _startRecording(StartRecording action) async {
-    if (!_hasPermission(CallPermission.startRecordCall)) {
-      _logger.w(() => '[startRecording] rejected (no permission)');
-      return Result.error('Cannot start recording (no permission)');
-    }
-    _logger.d(() => '[startRecording] action: $action');
-    final result = await _streamVideo.startRecording(callCid: callCid);
-    _logger.v(() => '[startRecording] result: $result');
-    if (result.isSuccess) {
-      await _stateManager.onControlAction(action);
-    }
-    return result;
+  @override
+  Future<Result<None>> startRecording() async {
+    return _permissionsManager.startRecording();
   }
 
-  Future<Result<None>> _stopRecording(StopRecording action) async {
-    if (!_hasPermission(CallPermission.stopRecordCall)) {
-      _logger.w(() => '[stopRecording] rejected (no permission)');
-      return Result.error('Cannot stop recording (no permission)');
-    }
-    _logger.d(() => '[stopRecording] action: $action');
-    final result = await _streamVideo.stopRecording(callCid: callCid);
-    _logger.v(() => '[stopRecording] result: $result');
-    if (result.isSuccess) {
-      await _stateManager.onControlAction(action);
-    }
-    return result;
+  @override
+  Future<Result<None>> stopRecording() async {
+    return _permissionsManager.stopRecording();
   }
 
-  Future<Result<None>> _startBroadcasting(StartBroadcasting action) async {
-    if (!_hasPermission(CallPermission.startBroadcastCall)) {
-      _logger.w(() => '[startBroadcasting] rejected (no permission)');
-      return Result.error('Cannot start broadcasting (no permission)');
-    }
-    _logger.d(() => '[startBroadcasting] action: $action');
-    final result = await _streamVideo.startBroadcasting(callCid: callCid);
-    _logger.v(() => '[startBroadcasting] result: $result');
-    if (result.isSuccess) {
-      await _stateManager.onControlAction(action);
-    }
-    return result;
+  @override
+  Future<Result<None>> startBroadcasting() async {
+    return _permissionsManager.startBroadcasting();
   }
 
-  Future<Result<None>> _stopBroadcasting(StopBroadcasting action) async {
-    if (!_hasPermission(CallPermission.stopBroadcastCall)) {
-      _logger.w(() => '[stopBroadcasting] rejected (no permission)');
-      return Result.error('Cannot stop broadcasting (no permission)');
-    }
-    _logger.d(() => '[stopBroadcasting] action: $action');
-    final result = await _streamVideo.stopBroadcasting(callCid: callCid);
-    _logger.v(() => '[stopBroadcasting] result: $result');
-    if (result.isSuccess) {
-      await _stateManager.onControlAction(action);
-    }
-    return result;
+  @override
+  Future<Result<None>> stopBroadcasting() async {
+    return _permissionsManager.stopBroadcasting();
   }
 
-  Future<Result<None>> _muteUsers(MuteUsers action) async {
-    if (!_hasPermission(CallPermission.muteUsers)) {
-      _logger.w(() => '[muteUsers] rejected (no permission)');
-      return Result.error('Cannot start mute users (no permission)');
-    }
-    _logger.d(() => '[muteUsers] action: $action');
-    final result = await _streamVideo.muteUsers(
-      callCid: callCid,
-      userIds: action.userIds,
-    );
-    _logger.v(() => '[muteUsers] result: $result');
-    if (result.isSuccess) {
-      await _stateManager.onControlAction(action);
-    }
-    return result;
+  @override
+  Future<Result<None>> muteUsers(List<String> userIds) async {
+    return _permissionsManager.muteUsers(userIds);
   }
 }
 
-CallStateManager _makeCallStateManager(
+CallStateManager _makeStateManager(
   StreamCallCid callCid,
   StreamVideo streamVideo,
 ) {
@@ -898,6 +763,18 @@ CallStateManager _makeCallStateManager(
       callCid: callCid,
     ),
     streamVideo: streamVideo,
+  );
+}
+
+PermissionsManager _makePermissionAwareManager(
+  StreamCallCid callCid,
+  StreamVideo streamVideo,
+  CallStateManager stateManager,
+) {
+  return PermissionsManagerImpl(
+    callCid: callCid,
+    streamVideo: streamVideo,
+    stateManager: stateManager,
   );
 }
 
@@ -916,7 +793,7 @@ extension on CallStateManager {
 }
 
 extension on RtcLocalTrack {
-  SessionControlAction? composeControlAction() {
+  ParticipantAction? composeControlAction() {
     if (mediaConstraints is AudioConstraints) {
       return const SetMicrophoneEnabled(enabled: true);
     } else if (mediaConstraints is CameraConstraints) {

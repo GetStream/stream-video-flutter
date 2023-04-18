@@ -122,9 +122,7 @@ class _MuteToggleState extends State<_MuteToggle> {
         minimumSize: const Size(144, 48),
       ),
       onPressed: () {
-        widget.call.apply(
-          SetMicrophoneEnabled(enabled: !enabled),
-        );
+        widget.call.setMicrophoneEnabled(enabled: !enabled);
       },
       child: Text(
         enabled ? widget.titles.muteTitle : widget.titles.unmuteTitle,

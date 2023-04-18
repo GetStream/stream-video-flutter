@@ -1,9 +1,12 @@
-import '../errors/video_error.dart';
-import '../models/call_created.dart';
-import '../models/call_joined.dart';
-import 'action.dart';
+import 'package:meta/meta.dart';
 
-abstract class LifecycleAction extends StreamAction {
+import '../../errors/video_error.dart';
+import '../../models/call_created.dart';
+import '../../models/call_joined.dart';
+import '../internal_action.dart';
+
+@internal
+abstract class LifecycleAction extends StreamInternalAction {
   const LifecycleAction();
 }
 
@@ -15,8 +18,12 @@ class CallUserIdAction extends LifecycleAction {
   final String userId;
 }
 
-class CallEndedAction extends LifecycleAction {
-  const CallEndedAction();
+class CallAcceptedAction extends LifecycleAction {
+  const CallAcceptedAction();
+}
+
+class CallRejectedAction extends LifecycleAction {
+  const CallRejectedAction();
 }
 
 class CallDisconnectedAction extends LifecycleAction {
@@ -39,18 +46,27 @@ class CallJoinedAction extends LifecycleAction {
   const CallJoinedAction(this.data);
 
   final CallJoined data;
+
+  @override
+  List<Object?> get props => [data];
 }
 
 class CallSessionStartAction extends LifecycleAction {
   const CallSessionStartAction({required this.sessionId});
 
   final String sessionId;
+
+  @override
+  List<Object?> get props => [sessionId];
 }
 
 class CallConnectingAction extends LifecycleAction {
   const CallConnectingAction(this.attempt);
 
   final int attempt;
+
+  @override
+  List<Object?> get props => [attempt];
 }
 
 class CallConnectedAction extends LifecycleAction {
@@ -61,10 +77,16 @@ class CallTimeoutAction extends LifecycleAction {
   const CallTimeoutAction(this.timeLimit);
 
   final Duration timeLimit;
+
+  @override
+  List<Object?> get props => [timeLimit];
 }
 
-class CallConnectFailedAction extends LifecycleAction {
-  const CallConnectFailedAction(this.error);
+class ConnectFailedAction extends LifecycleAction {
+  const ConnectFailedAction(this.error);
 
   final VideoError error;
+
+  @override
+  List<Object?> get props => [error];
 }

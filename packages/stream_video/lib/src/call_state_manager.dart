@@ -1,9 +1,8 @@
 import 'action/action.dart';
-import 'action/call_control_action.dart';
-import 'action/coordinator_call_action.dart';
-import 'action/lifecycle_action.dart';
-import 'action/rtc_action.dart';
-import 'action/sfu_action.dart';
+import 'action/internal/coordinator_action.dart';
+import 'action/internal/lifecycle_action.dart';
+import 'action/internal/rtc_action.dart';
+import 'action/internal/sfu_action.dart';
 import 'call_state.dart';
 import 'coordinator/coordinator_socket_listener.dart';
 import 'coordinator/models/coordinator_events.dart';
@@ -52,11 +51,9 @@ abstract class CallStateManager implements CoordinatorCallEventListener {
 
   Future<void> onJoined(CallJoined data);
 
-  Future<void> onEnded();
-
   Future<void> onSessionStart(String sessionId);
 
-  Future<void> onControlAction(CallControlAction action);
+  void onAction(StreamAction action);
 
   Future<void> onSfuEvent(SfuEvent event);
 
@@ -93,8 +90,8 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  Future<void> onControlAction(CallControlAction action) async {
-    _logger.d(() => '[onControlAction] action: $action');
+  void onAction(StreamAction action) {
+    _logger.d(() => '[onAction] action: $action');
     _postReduced(action);
   }
 
@@ -119,7 +116,7 @@ class CallStateManagerImpl extends CallStateManager {
   @override
   Future<void> onConnectFailed(VideoError error) async {
     _logger.e(() => '[onConnectFailed] error: $error');
-    _postReduced(CallConnectFailedAction(error));
+    _postReduced(ConnectFailedAction(error));
   }
 
   @override
@@ -159,12 +156,6 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  Future<void> onEnded() async {
-    _logger.d(() => '[onEnded] no args');
-    _postReduced(const CallEndedAction());
-  }
-
-  @override
   Future<void> onSfuEvent(SfuEvent event) async {
     if (event is SfuHealthCheckResponseEvent) {
       return;
@@ -173,18 +164,18 @@ class CallStateManagerImpl extends CallStateManager {
     _postReduced(SfuEventAction(event));
     if (event is SfuJoinResponseEvent) {
       final participants = event.callState.participants;
-      final users = await _queryUsersByIds(
+      final users = await _queryMembersByIds(
         participants.map((it) => it.userId).toSet(),
       );
       _logger.v(() => '[onSfuEvent] received coord users: $users');
       _postReduced(
-        CoordinatorCallUsersAction(users: users.toUnmodifiableMap()),
+        UsersReceived(users: users.toUnmodifiableMap()),
       );
     } else if (event is SfuParticipantJoinedEvent) {
-      final users = await _queryUsersByIds({event.participant.userId});
+      final users = await _queryMembersByIds({event.participant.userId});
       _logger.v(() => '[onSfuEvent] received coord users: $users');
       _postReduced(
-        CoordinatorCallUsersAction(users: users.toUnmodifiableMap()),
+        UsersReceived(users: users.toUnmodifiableMap()),
       );
     }
   }
@@ -192,7 +183,7 @@ class CallStateManagerImpl extends CallStateManager {
   @override
   Future<void> onCoordinatorEvent(CoordinatorCallEvent event) async {
     _logger.d(() => '[onCoordinatorEvent] event: $event');
-    _postReduced(CoordinatorCallEventAction(event));
+    _postReduced(CoordinatorEventAction(event));
   }
 
   @override
@@ -209,7 +200,7 @@ class CallStateManagerImpl extends CallStateManager {
     );
   }
 
-  Future<List<CallUser>> _queryUsersByIds(
+  Future<List<CallUser>> _queryMembersByIds(
     Set<String> userIds,
   ) async {
     final callCid = state.value.callCid;

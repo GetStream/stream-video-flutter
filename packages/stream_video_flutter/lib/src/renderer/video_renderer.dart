@@ -52,16 +52,14 @@ class StreamVideoRenderer extends StatelessWidget {
     return SizeChangeListener(
       onSizeChanged: (size) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          call.apply(
-            UpdateSubscription(
-              userId: participant.userId,
-              sessionId: participant.sessionId,
-              trackIdPrefix: participant.trackIdPrefix,
-              trackType: videoTrackType,
-              videoDimension: RtcVideoDimension(
-                width: size.width.toInt(),
-                height: size.height.toInt(),
-              ),
+          call.updateSubscription(
+            userId: participant.userId,
+            sessionId: participant.sessionId,
+            trackIdPrefix: participant.trackIdPrefix,
+            trackType: videoTrackType,
+            videoDimension: RtcVideoDimension(
+              width: size.width.toInt(),
+              height: size.height.toInt(),
             ),
           );
         });

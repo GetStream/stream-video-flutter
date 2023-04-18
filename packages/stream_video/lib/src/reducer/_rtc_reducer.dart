@@ -1,4 +1,4 @@
-import '../action/rtc_action.dart';
+import '../action/internal/rtc_action.dart';
 import '../call_state.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_track_state.dart';
