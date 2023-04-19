@@ -67,7 +67,7 @@ abstract class StreamVideo {
   SharedEmitter<CoordinatorEvent> get events;
 
   /// Invoked when a call was created by another user.
-  void Function(CallCreated)? onCallCreated;
+  void Function(CallCreatedData)? onCallCreated;
 
   /// Connects the [user] to the Stream Video service.
   Future<Result<String>> connectUser(
@@ -79,8 +79,8 @@ abstract class StreamVideo {
   Future<Result<None>> disconnectUser();
 
   /// Receives a call or creates it with given information. You can then use
-  /// the [CallReceivedOrCreated] in order to create a [Call] object.
-  Future<Result<CallReceivedOrCreated>> getOrCreateCall({
+  /// the [CallReceivedOrCreatedData] in order to create a [Call] object.
+  Future<Result<CallReceivedOrCreatedData>> getOrCreateCall({
     required StreamCallCid cid,
     List<String> participantIds = const [],
     bool ringing = false,
@@ -91,10 +91,10 @@ abstract class StreamVideo {
   ///
   /// If a call with the same [cid] already exists,
   /// it will join the existing call.
-  Future<Result<CallJoined>> joinCall({
+  Future<Result<CallJoinedData>> joinCall({
     required StreamCallCid cid,
     bool create = false,
-    void Function(CallReceivedOrCreated)? onReceivedOrCreated,
+    void Function(CallReceivedOrCreatedData)? onReceivedOrCreated,
   });
 
   /// Signals other users that I have accepted the incoming call.
@@ -234,7 +234,7 @@ abstract class StreamVideo {
 
   Future<bool> handlePushNotification(Map<String, dynamic> payload);
 
-  Future<CallCreated?> consumeIncomingCall();
+  Future<CallCreatedData?> consumeIncomingCall();
 
   static StreamVideo init(
     String apiKey, {

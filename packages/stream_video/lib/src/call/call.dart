@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import '../../stream_video.dart';
-import '../action/participant_action.dart';
 import '../coordinator/models/coordinator_events.dart';
+import '../models/call_created_data.dart';
+import '../models/call_joined_data.dart';
 import '../models/call_permission.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
@@ -27,7 +28,7 @@ abstract class Call {
   }
 
   factory Call.fromCreated({
-    required CallCreated data,
+    required CallCreatedData data,
     StreamVideo? streamVideo,
   }) {
     return CallImpl.created(
@@ -37,7 +38,7 @@ abstract class Call {
   }
 
   factory Call.fromJoined({
-    required CallJoined data,
+    required CallJoinedData data,
     StreamVideo? streamVideo,
   }) {
     return CallImpl.joined(

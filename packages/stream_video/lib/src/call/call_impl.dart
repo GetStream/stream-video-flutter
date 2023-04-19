@@ -7,7 +7,9 @@ import '../action/internal/lifecycle_action.dart';
 import '../call_state_manager.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../errors/video_error_composer.dart';
+import '../models/call_created_data.dart';
 import '../models/call_credentials.dart';
+import '../models/call_joined_data.dart';
 import '../models/call_permission.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
@@ -50,7 +52,7 @@ class CallImpl implements Call {
   }
 
   factory CallImpl.created({
-    required CallCreated data,
+    required CallCreatedData data,
     StreamVideo? streamVideo,
     RetryPolicy? retryPolicy,
   }) {
@@ -63,7 +65,7 @@ class CallImpl implements Call {
   }
 
   factory CallImpl.joined({
-    required CallJoined data,
+    required CallJoinedData data,
     StreamVideo? streamVideo,
     RetryPolicy? retryPolicy,
   }) {
@@ -247,7 +249,7 @@ class CallImpl implements Call {
       cid: state.callCid,
     );
     if (result is Success<None>) {
-      _stateManager.onAction(const CallAcceptedAction());
+      _stateManager.onAction(const CallAccepted());
     }
     return result;
   }
@@ -264,7 +266,7 @@ class CallImpl implements Call {
       cid: state.callCid,
     );
     if (result is Success<None>) {
-      _stateManager.onAction(const CallRejectedAction());
+      _stateManager.onAction(const CallRejected());
     }
     return result;
   }
@@ -353,7 +355,7 @@ class CallImpl implements Call {
     if (joinedResult is! Success<CallCredentials>) {
       _logger.e(() => '[connect] joining failed: $joinedResult');
       _stateManager.onAction(
-        ConnectFailedAction((joinedResult as Failure).error),
+        ConnectFailed((joinedResult as Failure).error),
       );
       await _stateManager.onConnectFailed((joinedResult as Failure).error);
       return result;
@@ -389,7 +391,7 @@ class CallImpl implements Call {
         await _stateManager.onReceivedOrCreated(data);
       },
     );
-    if (joinedResult is Success<CallJoined>) {
+    if (joinedResult is Success<CallJoinedData>) {
       _logger.v(() => '[joinIfNeeded] completed');
       await _stateManager.onJoined(joinedResult.data);
       _credentials = joinedResult.data.credentials;

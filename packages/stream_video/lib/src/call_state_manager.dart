@@ -9,10 +9,10 @@ import 'coordinator/models/coordinator_events.dart';
 import 'errors/video_error.dart';
 import 'logger/impl/tagged_logger.dart';
 import 'logger/stream_log.dart';
-import 'models/call_created.dart';
-import 'models/call_joined.dart';
+import 'models/call_created_data.dart';
+import 'models/call_joined_data.dart';
 import 'models/call_metadata.dart';
-import 'models/call_received_created.dart';
+import 'models/call_received_created_data.dart';
 import 'models/queried_members.dart';
 import 'reducer/call_state_reducer.dart';
 import 'sfu/data/events/sfu_events.dart';
@@ -37,9 +37,9 @@ abstract class CallStateManager implements CoordinatorCallEventListener {
 
   Future<void> onUserIdSet(String userId);
 
-  Future<void> onCreated(CallCreated data);
+  Future<void> onCreated(CallCreatedData data);
 
-  Future<void> onReceivedOrCreated(CallReceivedOrCreated data);
+  Future<void> onReceivedOrCreated(CallReceivedOrCreatedData data);
 
   Future<void> onConnecting(int attempt);
 
@@ -49,7 +49,7 @@ abstract class CallStateManager implements CoordinatorCallEventListener {
 
   Future<void> onJoining();
 
-  Future<void> onJoined(CallJoined data);
+  Future<void> onJoined(CallJoinedData data);
 
   Future<void> onSessionStart(String sessionId);
 
@@ -86,7 +86,7 @@ class CallStateManagerImpl extends CallStateManager {
   @override
   Future<void> onUserIdSet(String userId) async {
     _logger.d(() => '[onUserIdSet] userId: $userId');
-    _postReduced(CallUserIdAction(userId: userId));
+    _postReduced(SetUserId(userId: userId));
   }
 
   @override
@@ -96,63 +96,63 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  Future<void> onCreated(CallCreated data) async {
+  Future<void> onCreated(CallCreatedData data) async {
     _logger.d(() => '[onCreated] data: $data');
-    _postReduced(CallCreatedAction(data: data));
+    _postReduced(CallCreated(data: data));
   }
 
   @override
-  Future<void> onReceivedOrCreated(CallReceivedOrCreated data) async {
+  Future<void> onReceivedOrCreated(CallReceivedOrCreatedData data) async {
     _logger.d(() => '[onReceivedOrCreated] data: $data');
-    _postReduced(CallCreatedAction(data: data.data));
+    _postReduced(CallCreated(data: data.data));
   }
 
   @override
   Future<void> onWaitingTimeout(Duration dropTimeout) async {
     _logger.d(() => '[onWaitingTimeout] dropTimeout: $dropTimeout');
-    _postReduced(CallTimeoutAction(dropTimeout));
+    _postReduced(CallTimeout(dropTimeout));
   }
 
   @override
   Future<void> onConnectFailed(VideoError error) async {
     _logger.e(() => '[onConnectFailed] error: $error');
-    _postReduced(ConnectFailedAction(error));
+    _postReduced(ConnectFailed(error));
   }
 
   @override
   Future<void> onJoining() async {
     _logger.d(() => '[onJoining] no args');
-    _postReduced(const CallJoiningAction());
+    _postReduced(const CallJoining());
   }
 
   @override
-  Future<void> onJoined(CallJoined data) async {
+  Future<void> onJoined(CallJoinedData data) async {
     _logger.d(() => '[onJoined] data: $data');
-    _postReduced(CallJoinedAction(data));
+    _postReduced(CallJoined(data));
   }
 
   @override
   Future<void> onSessionStart(String sessionId) async {
     _logger.d(() => '[onSessionStart] sessionId: $sessionId');
-    _postReduced(CallSessionStartAction(sessionId: sessionId));
+    _postReduced(CallSessionStart(sessionId: sessionId));
   }
 
   @override
   Future<void> onConnecting(int attempt) async {
     _logger.d(() => '[onConnecting] attempt: $attempt');
-    _postReduced(CallConnectingAction(attempt));
+    _postReduced(CallConnecting(attempt));
   }
 
   @override
   Future<void> onConnected() async {
     _logger.d(() => '[onConnected] no args');
-    _postReduced(const CallConnectedAction());
+    _postReduced(const CallConnected());
   }
 
   @override
   Future<void> onDisconnect() async {
     _logger.d(() => '[onDisconnect] no args');
-    _postReduced(const CallDisconnectedAction());
+    _postReduced(const CallDisconnected());
   }
 
   @override
@@ -193,7 +193,7 @@ class CallStateManagerImpl extends CallStateManager {
           ' trackType: $trackType',
     );
     _postReduced(
-      SubscriberTrackReceivedAction(
+      SubscriberTrackReceived(
         trackIdPrefix: trackIdPrefix,
         trackType: trackType,
       ),

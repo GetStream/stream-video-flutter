@@ -16,7 +16,7 @@ Future<void> main() async {
   final streamVideoEventChannel =
       StreamVideoPushNotificationEventChannel(eventChannel: eventChannelMock);
   final StreamCallCid streamCallCid = StreamCallCid(cid: 'call:123');
-  final callCreatedData = CallCreated(
+  final callCreatedData = CallCreatedData(
     callCid: streamCallCid,
     ringing: true,
     metadata: CallMetadata(
@@ -47,7 +47,7 @@ Future<void> main() async {
       },
     ),
   );
-  final callReceivedOrCreated = CallReceivedOrCreated(
+  final callReceivedOrCreated = CallReceivedOrCreatedData(
     wasCreated: true,
     data: callCreatedData,
   );

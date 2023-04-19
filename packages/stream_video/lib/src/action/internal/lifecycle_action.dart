@@ -1,8 +1,8 @@
 import 'package:meta/meta.dart';
 
 import '../../errors/video_error.dart';
-import '../../models/call_created.dart';
-import '../../models/call_joined.dart';
+import '../../models/call_created_data.dart';
+import '../../models/call_joined_data.dart';
 import '../internal_action.dart';
 
 @internal
@@ -10,49 +10,49 @@ abstract class LifecycleAction extends StreamInternalAction {
   const LifecycleAction();
 }
 
-class CallUserIdAction extends LifecycleAction {
-  const CallUserIdAction({
+class SetUserId extends LifecycleAction {
+  const SetUserId({
     required this.userId,
   });
 
   final String userId;
 }
 
-class CallAcceptedAction extends LifecycleAction {
-  const CallAcceptedAction();
+class CallAccepted extends LifecycleAction {
+  const CallAccepted();
 }
 
-class CallRejectedAction extends LifecycleAction {
-  const CallRejectedAction();
+class CallRejected extends LifecycleAction {
+  const CallRejected();
 }
 
-class CallDisconnectedAction extends LifecycleAction {
-  const CallDisconnectedAction();
+class CallDisconnected extends LifecycleAction {
+  const CallDisconnected();
 }
 
-class CallCreatedAction extends LifecycleAction {
-  const CallCreatedAction({
+class CallCreated extends LifecycleAction {
+  const CallCreated({
     required this.data,
   });
 
-  final CallCreated data;
+  final CallCreatedData data;
 }
 
-class CallJoiningAction extends LifecycleAction {
-  const CallJoiningAction();
+class CallJoining extends LifecycleAction {
+  const CallJoining();
 }
 
-class CallJoinedAction extends LifecycleAction {
-  const CallJoinedAction(this.data);
+class CallJoined extends LifecycleAction {
+  const CallJoined(this.data);
 
-  final CallJoined data;
+  final CallJoinedData data;
 
   @override
   List<Object?> get props => [data];
 }
 
-class CallSessionStartAction extends LifecycleAction {
-  const CallSessionStartAction({required this.sessionId});
+class CallSessionStart extends LifecycleAction {
+  const CallSessionStart({required this.sessionId});
 
   final String sessionId;
 
@@ -60,8 +60,8 @@ class CallSessionStartAction extends LifecycleAction {
   List<Object?> get props => [sessionId];
 }
 
-class CallConnectingAction extends LifecycleAction {
-  const CallConnectingAction(this.attempt);
+class CallConnecting extends LifecycleAction {
+  const CallConnecting(this.attempt);
 
   final int attempt;
 
@@ -69,12 +69,12 @@ class CallConnectingAction extends LifecycleAction {
   List<Object?> get props => [attempt];
 }
 
-class CallConnectedAction extends LifecycleAction {
-  const CallConnectedAction();
+class CallConnected extends LifecycleAction {
+  const CallConnected();
 }
 
-class CallTimeoutAction extends LifecycleAction {
-  const CallTimeoutAction(this.timeLimit);
+class CallTimeout extends LifecycleAction {
+  const CallTimeout(this.timeLimit);
 
   final Duration timeLimit;
 
@@ -82,8 +82,8 @@ class CallTimeoutAction extends LifecycleAction {
   List<Object?> get props => [timeLimit];
 }
 
-class ConnectFailedAction extends LifecycleAction {
-  const ConnectFailedAction(this.error);
+class ConnectFailed extends LifecycleAction {
+  const ConnectFailed(this.error);
 
   final VideoError error;
 

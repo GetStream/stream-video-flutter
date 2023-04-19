@@ -6,8 +6,8 @@ import 'call_credentials.dart';
 import 'call_metadata.dart';
 
 @immutable
-class CallJoined with EquatableMixin {
-  const CallJoined({
+class CallJoinedData with EquatableMixin {
+  const CallJoinedData({
     required this.callCid,
     required this.wasCreated,
     required this.metadata,

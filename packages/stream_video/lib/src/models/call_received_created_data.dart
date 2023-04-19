@@ -1,17 +1,17 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import 'call_created.dart';
+import 'call_created_data.dart';
 
 @immutable
-class CallReceivedOrCreated with EquatableMixin {
-  const CallReceivedOrCreated({
+class CallReceivedOrCreatedData with EquatableMixin {
+  const CallReceivedOrCreatedData({
     required this.wasCreated,
     required this.data,
   });
 
   final bool wasCreated;
-  final CallCreated data;
+  final CallCreatedData data;
 
   @override
   List<Object?> get props => [wasCreated, data];
