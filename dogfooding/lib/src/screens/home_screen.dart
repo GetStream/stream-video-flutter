@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide StreamUserAvatar;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../routes/routes.dart';
@@ -46,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (call != null) {
       Navigator.of(context).pushNamed(
         Routes.call,
-        arguments: [call, options],
+        arguments: [call, options, chatChannel],
       );
     }
   }
@@ -59,6 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final callCid = StreamCallCid.from(type: 'default', id: callId);
       final data = await streamVideoClient.getOrCreateCall(cid: callCid);
       call = Call.fromCreated(data: data.getDataOrNull()!.data);
+      chatChannel =  await _initChatChannel(channelId: call!.callCid.id);
 
       if (mounted) {
         await Navigator.of(context).pushNamed(
