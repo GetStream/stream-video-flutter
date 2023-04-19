@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide Success;
 import 'package:stream_video/stream_video.dart';
 
 import '../../env/env.dart';
@@ -9,6 +12,8 @@ import '../../user_repository.dart';
 import '../model/user_credentials.dart';
 import '../routes/routes.dart';
 import '../utils/assets.dart';
+
+import 'package:crypto/crypto.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -53,6 +58,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _onLoginSuccess(UserInfo user) async {
+    final chatClient = StreamChat.of(context);
+
     final tokenResult = await StreamVideo.instance.connectUser(
       user,
       tokenProvider: TokenProvider.dynamic(_tokenLoader, (token) async {
@@ -62,6 +69,8 @@ class _LoginScreenState extends State<LoginScreen> {
           token: token,
         );
         await UserRepository.instance.saveUserCredentials(userCredentials);
+        final chatUID = md5.convert(utf8.encode(user.id)).toString();
+        await chatClient.client.connectUser(User(id: chatUID), token);
       }),
     );
     _logger.d(() => '[onLoginSuccess] tokenResult: $tokenResult');
