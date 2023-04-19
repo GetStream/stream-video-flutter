@@ -9,16 +9,15 @@ import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
 import '../../call_state_manager.dart';
-import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
 import '../../sfu/sfu_client.dart';
 import '../../sfu/sfu_client_impl.dart';
-import '../../sfu/ws/sfu_event_listener.dart';
 import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
+import '../../utils/debounce_buffer.dart';
 import '../../utils/none.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
@@ -27,24 +26,28 @@ import '../../webrtc/model/stats/rtc_raw_stats.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
+import '../../webrtc/sdp/editor/sdp_editor.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
 
 const _tag = 'SV:CallSession';
 
-int _sessionSeq = 1;
+const _debounceDuration = Duration(milliseconds: 200);
 
-class CallSessionImpl extends CallSession implements SfuEventListener {
+class CallSessionImpl extends CallSession {
   CallSessionImpl({
     required this.callCid,
+    required this.sessionSeq,
     required this.sessionId,
     required this.config,
     required this.stateManager,
+    required SdpEditor sdpEditor,
   })  : sfuClient = SfuClientImpl(
           baseUrl: config.sfuUrl,
-          authToken: config.sfuToken,
+          sfuToken: config.sfuToken,
         ),
         sfuWS = SfuWebSocket(
+          sessionSeq: sessionSeq,
           sfuUrl: config.sfuUrl,
           sessionId: sessionId,
         ),
@@ -52,13 +55,15 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
           sessionId: sessionId,
           callCid: callCid,
           configuration: config.rtcConfig,
+          sdpEditor: sdpEditor,
         ) {
     _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
   }
 
-  final _logger = taggedLogger(tag: '$_tag-${_sessionSeq++}');
+  late final _logger = taggedLogger(tag: '$_tag-$sessionSeq');
 
   final StreamCallCid callCid;
+  final int sessionSeq;
   @override
   final String sessionId;
   final CallSessionConfig config;
@@ -67,6 +72,7 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
   RtcManager? rtcManager;
+  StreamSubscription<SfuEvent>? eventsSubscription;
 
   @override
   SharedEmitter<CallStats> get stats => _stats;
@@ -75,12 +81,23 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   @override
   SharedEmitter<SfuEvent> get events => sfuWS.events;
 
+  late final _saBuffer = DebounceBuffer<SubscriptionAction, Result<None>>(
+    duration: _debounceDuration,
+    onComplete: _updateSubscriptions,
+    onCancel: (_) async => Result.error('SubscriptionAction cancelled'),
+  );
+
   @override
   Future<Result<None>> start() async {
     try {
       _logger.d(() => '[start] no args');
-      sfuWS.addEventListener(this);
-      await sfuWS.connect();
+      await eventsSubscription?.cancel();
+      eventsSubscription = sfuWS.events.listen(_onSfuEvent);
+      final wsResult = await sfuWS.connect();
+      if (wsResult.isFailure) {
+        _logger.e(() => '[start] ws connect failed: $wsResult');
+        return wsResult;
+      }
       _logger.v(() => '[start] sfu connected');
       final genericSdp = await RtcManager.getGenericSdp();
       _logger.v(() => '[start] genericSdp.len: ${genericSdp.length}');
@@ -138,7 +155,9 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
     await _stats.close();
-    sfuWS.removeEventListener(this);
+    await _saBuffer.cancel();
+    await eventsSubscription?.cancel();
+    eventsSubscription = null;
     await sfuWS.disconnect();
     await rtcManager?.dispose();
     rtcManager = null;
@@ -189,9 +208,9 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     } else if (action is UpdateSubscriptions) {
       return _updateSubscriptions(action.actions);
     } else if (action is UpdateSubscription) {
-      return _updateSubscriptions([action]);
+      return _updateSubscription(action);
     } else if (action is RemoveSubscription) {
-      return _updateSubscriptions([action]);
+      return _updateSubscription(action);
     } else if (action is SetSubscription) {
       return _setSubscriptions([action]);
     } else if (action is SetSubscriptions) {
@@ -202,15 +221,8 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     return Result.error('Action not supported: $action');
   }
 
-  @override
-  Future<void> onSfuError(VideoError error) async {
-    _logger.e(() => '[onSfuError] error: $error');
-    // TODO: implement onError
-  }
-
-  @override
-  Future<void> onSfuEvent(SfuEvent event) async {
-    _logger.v(() => '[onSfuEvent] event: $event');
+  Future<void> _onSfuEvent(SfuEvent event) async {
+    _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
     if (event is SfuSubscriberOfferEvent) {
       await _onSubscriberOffer(event);
     } else if (event is SfuIceTrickleEvent) {
@@ -488,6 +500,13 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     return result;
   }
 
+  Future<Result<None>> _updateSubscription(
+    SubscriptionAction action,
+  ) async {
+    _logger.d(() => '[updateSubscription] action: $action');
+    return _saBuffer.post(action);
+  }
+
   Future<Result<None>> _updateSubscriptions(
     List<SubscriptionAction> actions,
   ) async {
@@ -590,6 +609,9 @@ class CallSessionImpl extends CallSession implements SfuEventListener {
     final result = await rtcManager.setCameraPosition(cameraPosition: position);
     return result.map((_) => None());
   }
+
+  @override
+  String toString() => 'CallSession{seq: $sessionSeq, id: $sessionId}';
 }
 
 extension RtcTracksInfoMapper on List<RtcTrackInfo> {

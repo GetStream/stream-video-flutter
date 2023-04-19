@@ -6,18 +6,23 @@ import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_credentials.dart';
 import '../../types/other.dart';
+import '../../webrtc/sdp/editor/sdp_editor.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
 import 'call_session_impl.dart';
 
+int _sessionSeq = 1;
+
 class CallSessionFactory {
   CallSessionFactory({
     required this.callCid,
+    required this.sdpEditor,
   });
 
   late final _logger = taggedLogger(tag: 'SV:CallSessionFactory');
 
   final StreamCallCid callCid;
+  final SdpEditor sdpEditor;
 
   Future<CallSession> makeCallSession({
     required CallCredentials credentials,
@@ -34,10 +39,12 @@ class CallSessionFactory {
     );
     _logger.v(() => '[makeCallSession] sfuUrl: ${sessionConfig.sfuUrl}');
     return CallSessionImpl(
+      sessionSeq: _sessionSeq++,
       callCid: callCid,
       sessionId: sessionId,
       config: sessionConfig,
       stateManager: stateManager,
+      sdpEditor: sdpEditor,
     );
   }
 

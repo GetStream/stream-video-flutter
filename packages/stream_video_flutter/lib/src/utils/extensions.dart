@@ -63,8 +63,6 @@ extension CallStatusExtension on CallStatus {
   String toStatusString() {
     if (isIdle) {
       return 'Idle';
-    } else if (isCreated) {
-      return 'Created';
     } else if (isOutgoing) {
       return 'Outgoing';
     } else if (isIncoming) {
@@ -73,10 +71,14 @@ extension CallStatusExtension on CallStatus {
       return 'Joining';
     } else if (isJoined) {
       return 'Joined';
+    } else if (isReconnecting) {
+      return 'Reconnecting';
+    } else if (isConnecting) {
+      return 'Connecting';
     } else if (isConnected) {
       return 'Connected';
-    } else if (isDrop) {
-      return 'Drop';
+    } else if (isDisconnected) {
+      return 'Disconnected';
     } else {
       return '';
     }

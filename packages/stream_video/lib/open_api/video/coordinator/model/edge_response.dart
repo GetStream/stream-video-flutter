@@ -13,14 +13,21 @@ part of openapi.api;
 class EdgeResponse {
   /// Returns a new [EdgeResponse] instance.
   EdgeResponse({
+    required this.continentCode,
+    required this.countryIsoCode,
     required this.green,
     required this.id,
     required this.latencyTestUrl,
     required this.latitude,
     required this.longitude,
     required this.red,
+    required this.subdivisionIsoCode,
     required this.yellow,
   });
+
+  String continentCode;
+
+  String countryIsoCode;
 
   int green;
 
@@ -34,40 +41,51 @@ class EdgeResponse {
 
   int red;
 
+  String subdivisionIsoCode;
+
   int yellow;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is EdgeResponse &&
+     other.continentCode == continentCode &&
+     other.countryIsoCode == countryIsoCode &&
      other.green == green &&
      other.id == id &&
      other.latencyTestUrl == latencyTestUrl &&
      other.latitude == latitude &&
      other.longitude == longitude &&
      other.red == red &&
+     other.subdivisionIsoCode == subdivisionIsoCode &&
      other.yellow == yellow;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (continentCode.hashCode) +
+    (countryIsoCode.hashCode) +
     (green.hashCode) +
     (id.hashCode) +
     (latencyTestUrl.hashCode) +
     (latitude.hashCode) +
     (longitude.hashCode) +
     (red.hashCode) +
+    (subdivisionIsoCode.hashCode) +
     (yellow.hashCode);
 
   @override
-  String toString() => 'EdgeResponse[green=$green, id=$id, latencyTestUrl=$latencyTestUrl, latitude=$latitude, longitude=$longitude, red=$red, yellow=$yellow]';
+  String toString() => 'EdgeResponse[continentCode=$continentCode, countryIsoCode=$countryIsoCode, green=$green, id=$id, latencyTestUrl=$latencyTestUrl, latitude=$latitude, longitude=$longitude, red=$red, subdivisionIsoCode=$subdivisionIsoCode, yellow=$yellow]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'continent_code'] = this.continentCode;
+      json[r'country_iso_code'] = this.countryIsoCode;
       json[r'green'] = this.green;
       json[r'id'] = this.id;
       json[r'latency_test_url'] = this.latencyTestUrl;
       json[r'latitude'] = this.latitude;
       json[r'longitude'] = this.longitude;
       json[r'red'] = this.red;
+      json[r'subdivision_iso_code'] = this.subdivisionIsoCode;
       json[r'yellow'] = this.yellow;
     return json;
   }
@@ -91,12 +109,15 @@ class EdgeResponse {
       }());
 
       return EdgeResponse(
+        continentCode: mapValueOfType<String>(json, r'continent_code')!,
+        countryIsoCode: mapValueOfType<String>(json, r'country_iso_code')!,
         green: mapValueOfType<int>(json, r'green')!,
         id: mapValueOfType<String>(json, r'id')!,
         latencyTestUrl: mapValueOfType<String>(json, r'latency_test_url')!,
         latitude: mapValueOfType<double>(json, r'latitude')!,
         longitude: mapValueOfType<double>(json, r'longitude')!,
         red: mapValueOfType<int>(json, r'red')!,
+        subdivisionIsoCode: mapValueOfType<String>(json, r'subdivision_iso_code')!,
         yellow: mapValueOfType<int>(json, r'yellow')!,
       );
     }
@@ -147,12 +168,15 @@ class EdgeResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'continent_code',
+    'country_iso_code',
     'green',
     'id',
     'latency_test_url',
     'latitude',
     'longitude',
     'red',
+    'subdivision_iso_code',
     'yellow',
   };
 }

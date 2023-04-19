@@ -125,7 +125,7 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
     if (widget.onCancelCallTap != null) {
       widget.onCancelCallTap!();
     } else {
-      await widget.call.apply(const CancelCall());
+      await widget.call.end();
       await widget.call.disconnect();
     }
   }

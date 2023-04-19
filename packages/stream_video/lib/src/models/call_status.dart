@@ -1,8 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
-import 'call_credentials.dart';
-import 'drop_reason.dart';
+import 'disconnect_reason.dart';
 
 @immutable
 abstract class CallStatus extends Equatable {
@@ -10,10 +9,6 @@ abstract class CallStatus extends Equatable {
 
   factory CallStatus.idle() {
     return CallStatusIdle();
-  }
-
-  factory CallStatus.created() {
-    return CallStatusCreated();
   }
 
   factory CallStatus.outgoing({
@@ -28,20 +23,28 @@ abstract class CallStatus extends Equatable {
     return CallStatusIncoming(acceptedByMe: acceptedByMe);
   }
 
-  factory CallStatus.joining() {
-    return CallStatusJoining();
+  factory CallStatus.connecting() {
+    return CallStatusConnecting();
   }
 
-  factory CallStatus.joined(CallCredentials credentials) {
-    return CallStatusJoined(credentials: credentials);
+  factory CallStatus.reconnecting(int attempt) {
+    return CallStatusReconnecting(attempt: attempt);
   }
 
   factory CallStatus.connected() {
     return CallStatusConnected();
   }
 
-  factory CallStatus.drop(DropReason reason) {
-    return CallStatusDrop(reason: reason);
+  factory CallStatus.disconnected(DisconnectReason reason) {
+    return CallStatusDisconnected(reason: reason);
+  }
+
+  factory CallStatus.joining() {
+    return CallStatusJoining();
+  }
+
+  factory CallStatus.joined() {
+    return CallStatusJoined();
   }
 
   @override
@@ -51,54 +54,45 @@ abstract class CallStatus extends Equatable {
 
   bool get isActive => this is CallStatusActive;
 
-  bool get isJoinable => this is CallStatusJoinable;
-
-  bool get isCreated => this is CallStatusCreated;
+  bool get isConnectable => this is CallStatusConnectable;
 
   bool get isOutgoing => this is CallStatusOutgoing;
 
   bool get isIncoming => this is CallStatusIncoming;
 
-  bool get isJoining => this is CallStatusJoining;
+  bool get isConnecting => this is CallStatusConnecting;
 
-  bool get isJoined => this is CallStatusJoined;
+  bool get isReconnecting => this is CallStatusReconnecting;
 
   bool get isConnected => this is CallStatusConnected;
 
-  bool get isDrop => this is CallStatusDrop;
+  bool get isDisconnected => this is CallStatusDisconnected;
+
+  bool get isJoining => this is CallStatusJoining;
+
+  bool get isJoined => this is CallStatusJoined;
 }
 
-mixin CallStatusJoinable implements CallStatus {}
+mixin CallStatusConnectable implements CallStatus {}
 
-class CallStatusIdle extends CallStatus with CallStatusJoinable {
+class CallStatusIdle extends CallStatus with CallStatusConnectable {
   factory CallStatusIdle() {
     return _instance;
   }
+
   const CallStatusIdle._internal();
+
   static const CallStatusIdle _instance = CallStatusIdle._internal();
+
   @override
-  String toString() {
-    return 'Idle';
-  }
+  String toString() => 'Idle';
 }
 
 abstract class CallStatusActive extends CallStatus {
   const CallStatusActive();
 }
 
-class CallStatusCreated extends CallStatusActive with CallStatusJoinable {
-  factory CallStatusCreated() {
-    return _instance;
-  }
-  const CallStatusCreated._internal();
-  static const CallStatusCreated _instance = CallStatusCreated._internal();
-  @override
-  String toString() {
-    return 'Created';
-  }
-}
-
-class CallStatusOutgoing extends CallStatusActive with CallStatusJoinable {
+class CallStatusOutgoing extends CallStatusActive with CallStatusConnectable {
   const CallStatusOutgoing({required this.acceptedByCallee});
 
   final bool acceptedByCallee;
@@ -107,12 +101,10 @@ class CallStatusOutgoing extends CallStatusActive with CallStatusJoinable {
   List<Object?> get props => [acceptedByCallee];
 
   @override
-  String toString() {
-    return 'Outgoing{acceptedByCallee: $acceptedByCallee}';
-  }
+  String toString() => 'Outgoing{acceptedByCallee: $acceptedByCallee}';
 }
 
-class CallStatusIncoming extends CallStatusActive with CallStatusJoinable {
+class CallStatusIncoming extends CallStatusActive with CallStatusConnectable {
   const CallStatusIncoming({required this.acceptedByMe});
 
   final bool acceptedByMe;
@@ -121,34 +113,34 @@ class CallStatusIncoming extends CallStatusActive with CallStatusJoinable {
   List<Object?> get props => [acceptedByMe];
 
   @override
-  String toString() {
-    return 'Incoming{acceptedByMe: $acceptedByMe}';
-  }
+  String toString() => 'Incoming{acceptedByMe: $acceptedByMe}';
 }
 
-class CallStatusJoining extends CallStatusActive {
-  factory CallStatusJoining() {
+class CallStatusConnecting extends CallStatusActive {
+  factory CallStatusConnecting() {
     return _instance;
   }
-  const CallStatusJoining._internal();
-  static const CallStatusJoining _instance = CallStatusJoining._internal();
+
+  const CallStatusConnecting._internal();
+
+  static const CallStatusConnecting _instance =
+      CallStatusConnecting._internal();
+
   @override
-  String toString() {
-    return 'Joining';
-  }
+  String toString() => 'Connecting';
 }
 
-class CallStatusJoined extends CallStatusActive {
-  const CallStatusJoined({required this.credentials});
+class CallStatusReconnecting extends CallStatusConnecting {
+  const CallStatusReconnecting({required this.attempt}) : super._internal();
 
-  final CallCredentials credentials;
+  final int attempt;
 
   @override
-  List<Object?> get props => [credentials];
+  List<Object?> get props => [attempt];
 
   @override
   String toString() {
-    return 'Joined{credentials: $credentials}';
+    return 'Reconnecting{attempt: $attempt}';
   }
 }
 
@@ -156,24 +148,53 @@ class CallStatusConnected extends CallStatusActive {
   factory CallStatusConnected() {
     return _instance;
   }
+
   const CallStatusConnected._internal();
+
   static const CallStatusConnected _instance = CallStatusConnected._internal();
+
   @override
-  String toString() {
-    return 'Connected';
-  }
+  String toString() => 'Connected';
 }
 
-class CallStatusDrop extends CallStatus {
-  const CallStatusDrop({required this.reason});
+class CallStatusDisconnected extends CallStatus {
+  const CallStatusDisconnected({required this.reason});
 
-  final DropReason reason;
+  final DisconnectReason reason;
 
   @override
   List<Object?> get props => [reason];
 
   @override
   String toString() {
-    return 'Drop{reason: $reason}';
+    return 'Disconnected{reason: $reason}';
   }
+}
+
+class CallStatusJoining extends CallStatusActive
+    implements CallStatusConnectable {
+  factory CallStatusJoining() {
+    return _instance;
+  }
+
+  const CallStatusJoining._internal();
+
+  static const CallStatusJoining _instance = CallStatusJoining._internal();
+
+  @override
+  String toString() => 'Joining';
+}
+
+class CallStatusJoined extends CallStatusActive
+    implements CallStatusConnectable {
+  factory CallStatusJoined() {
+    return _instance;
+  }
+
+  const CallStatusJoined._internal();
+
+  static const CallStatusJoined _instance = CallStatusJoined._internal();
+
+  @override
+  String toString() => 'Joined';
 }

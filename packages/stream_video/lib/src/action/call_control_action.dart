@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../call_permission.dart';
+import '../models/call_permission.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../webrtc/media/constraints/camera_position.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
@@ -23,14 +23,6 @@ class AcceptCall extends CallControlAction {
 
 class RejectCall extends CallControlAction {
   const RejectCall();
-}
-
-class CancelCall extends CallControlAction {
-  const CancelCall();
-}
-
-class EndCall extends CallControlAction {
-  const EndCall();
 }
 
 class RequestPermissions extends CallControlAction {
@@ -122,6 +114,7 @@ abstract class SessionControlAction extends CallControlAction {
 
 class SetCameraPosition extends SessionControlAction {
   const SetCameraPosition({required this.cameraPosition});
+
   final CameraPosition cameraPosition;
 
   @override
@@ -134,6 +127,7 @@ class FlipCamera extends SessionControlAction {
 
 class SetVideoInputDevice extends SessionControlAction {
   const SetVideoInputDevice({required this.device});
+
   final RtcMediaDevice device;
 
   @override
@@ -142,6 +136,7 @@ class SetVideoInputDevice extends SessionControlAction {
 
 class SetCameraEnabled extends SessionControlAction {
   const SetCameraEnabled({required this.enabled});
+
   final bool enabled;
 
   @override
@@ -150,6 +145,7 @@ class SetCameraEnabled extends SessionControlAction {
 
 class SetAudioInputDevice extends SessionControlAction {
   const SetAudioInputDevice({required this.device});
+
   final RtcMediaDevice device;
 
   @override
@@ -158,6 +154,7 @@ class SetAudioInputDevice extends SessionControlAction {
 
 class SetMicrophoneEnabled extends SessionControlAction {
   const SetMicrophoneEnabled({required this.enabled});
+
   final bool enabled;
 
   @override
@@ -166,6 +163,7 @@ class SetMicrophoneEnabled extends SessionControlAction {
 
 class SetScreenShareEnabled extends SessionControlAction {
   const SetScreenShareEnabled({required this.enabled});
+
   final bool enabled;
 
   @override
@@ -174,6 +172,7 @@ class SetScreenShareEnabled extends SessionControlAction {
 
 class SetAudioOutputDevice extends SessionControlAction {
   const SetAudioOutputDevice({required this.device});
+
   final RtcMediaDevice device;
 
   @override

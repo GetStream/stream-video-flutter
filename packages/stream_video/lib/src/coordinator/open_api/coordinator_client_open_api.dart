@@ -13,7 +13,9 @@ import '../../models/call_received_created.dart';
 import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 import '../../models/user_info.dart';
+import '../../retry/retry_policy.dart';
 import '../../shared_emitter.dart';
+import '../../token/token.dart';
 import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
@@ -33,6 +35,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required this.wsUrl,
     required this.apiKey,
     required this.tokenManager,
+    required this.retryPolicy,
   }) : _apiClient = open.ApiClient(
           basePath: rpcUrl,
           authentication:
@@ -43,14 +46,18 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   final String apiKey;
   final String wsUrl;
   final TokenManager tokenManager;
+  final RetryPolicy retryPolicy;
 
   String? userId;
 
   final open.ApiClient _apiClient;
-  late final defaultApi = open.DefaultApi(_apiClient);
   late final videoApi = open.VideoCallsApi(_apiClient);
   late final eventsApi = open.EventsApi(_apiClient);
   late final usersApi = open.UsersApi(_apiClient);
+  late final recordingApi = open.RecordingApi(_apiClient);
+  late final livestreamingApi = open.LivestreamingApi(_apiClient);
+  late final moderationApi = open.ModerationApi(_apiClient);
+  late final callTypesApi = open.CallTypesApi(_apiClient);
 
   @override
   SharedEmitter<CoordinatorEvent> get events => _events;
@@ -69,6 +76,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         apiKey: apiKey,
         userInfo: user,
         tokenManager: tokenManager,
+        retryPolicy: retryPolicy,
       );
       _ws = ws;
       _wsSubscription = ws.events.listen((event) {
@@ -87,7 +95,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
   @override
   Future<Result<None>> onUserLogout() async {
+    _logger.d(() => '[onUserLogout] userId: $userId');
     if (_ws == null) {
+      _logger.w(() => '[onUserLogout] rejected (ws is null)');
       return Result.success(None());
     }
     try {
@@ -145,7 +155,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           data: CallCreated(
             callCid: input.callCid,
             ringing: input.ringing ?? false,
-            metadata: result.call.toCallMetadata(),
+            metadata: result.call.toCallMetadata(result.members),
           ),
         ),
       );
@@ -160,11 +170,12 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<CoordinatorJoined>> joinCall(inputs.JoinCallInput input) async {
     try {
-      final result = await videoApi.joinCallTypeId0(
+      final result = await videoApi.joinCall(
         input.callCid.type,
         input.callCid.id,
         open.JoinCallRequest(
-          connectionId: _ws?.clientId,
+          create: input.create,
+          ring: input.ringing,
         ),
         connectionId: _ws?.clientId,
       );
@@ -175,7 +186,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return Result.success(
         CoordinatorJoined(
           wasCreated: result.created,
-          metadata: result.call.toCallMetadata(),
+          metadata: result.call.toCallMetadata(result.members),
           edges: result.edges.map((edge) {
             return SfuEdge(
               name: edge.name,
@@ -237,7 +248,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       }
       return Result.success(
         SfuServerSelected(
-          metadata: result.call.toCallMetadata(),
+          metadata: result.call.toCallMetadata(result.members),
           credentials: result.credentials.toCallCredentials(),
         ),
       );
@@ -313,7 +324,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     inputs.RequestPermissionsInput input,
   ) async {
     try {
-      final result = await defaultApi.requestPermission(
+      final result = await moderationApi.requestPermission(
         input.callCid.type,
         input.callCid.id,
         open.RequestPermissionRequest(
@@ -334,7 +345,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     inputs.UpdateUserPermissionsInput input,
   ) async {
     try {
-      final result = await defaultApi.updateUserPermissions(
+      final result = await moderationApi.updateUserPermissions(
         input.callCid.type,
         input.callCid.id,
         open.UpdateUserPermissionsRequest(
@@ -365,7 +376,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> startRecording(StreamCallCid callCid) async {
     try {
-      await defaultApi.startRecording(callCid.type, callCid.id);
+      await recordingApi.startRecording(callCid.type, callCid.id);
       return Result.success(None());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -375,7 +386,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> stopRecording(StreamCallCid callCid) async {
     try {
-      await defaultApi.stopRecording(callCid.type, callCid.id);
+      await recordingApi.stopRecording(callCid.type, callCid.id);
       return Result.success(None());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -385,7 +396,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> startBroadcasting(StreamCallCid callCid) async {
     try {
-      await defaultApi.startBroadcasting(callCid.type, callCid.id);
+      await livestreamingApi.startBroadcasting(callCid.type, callCid.id);
       return Result.success(None());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -395,7 +406,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> stopBroadcasting(StreamCallCid callCid) async {
     try {
-      await defaultApi.stopBroadcasting(callCid.type, callCid.id);
+      await livestreamingApi.stopBroadcasting(callCid.type, callCid.id);
       return Result.success(None());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -405,7 +416,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<CallReaction>> sendReaction(inputs.ReactionInput input) async {
     try {
-      final result = await defaultApi.sendVideoReaction(
+      final result = await videoApi.sendVideoReaction(
         input.callCid.type,
         input.callCid.id,
         open.SendReactionRequest(
@@ -455,7 +466,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     inputs.QueryCallsInput input,
   ) async {
     try {
-      final result = await defaultApi.queryCalls(
+      final result = await videoApi.queryCalls(
         open.QueryCallsRequest(
           filterConditions: input.filterConditions,
           next: input.next,
@@ -476,7 +487,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> blockUser(inputs.BlockUserInput input) async {
     try {
-      final result = await videoApi.blockUser(
+      final result = await moderationApi.blockUser(
         input.callCid.type,
         input.callCid.id,
         open.BlockUserRequest(userId: input.userId),
@@ -493,7 +504,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> unblockUser(inputs.UnblockUserInput input) async {
     try {
-      final result = await videoApi.unblockUser(
+      final result = await moderationApi.unblockUser(
         input.callCid.type,
         input.callCid.id,
         open.UnblockUserRequest(userId: input.userId),
@@ -551,7 +562,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> muteUsers(MuteUsersInput input) async {
     try {
-      final result = await videoApi.muteUsers(
+      final result = await moderationApi.muteUsers(
         input.callCid.type,
         input.callCid.id,
         open.MuteUsersRequest(
@@ -614,9 +625,12 @@ class _Authentication extends open.Authentication {
     List<open.QueryParam> queryParams,
     Map<String, String> headerParams,
   ) async {
-    final token = await tokenManager.loadToken();
-    headerParams['api_key'] = apiKey;
-    headerParams['Authorization'] = token.rawValue;
+    final tokenResult = await tokenManager.getToken();
+    if (tokenResult is! Success<UserToken>) {
+      throw (tokenResult as Failure).error;
+    }
+    queryParams.add(open.QueryParam('api_key', apiKey));
+    headerParams['Authorization'] = tokenResult.data;
     headerParams['stream-auth-type'] = 'jwt';
   }
 }

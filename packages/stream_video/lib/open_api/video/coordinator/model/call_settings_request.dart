@@ -13,11 +13,31 @@ part of openapi.api;
 class CallSettingsRequest {
   /// Returns a new [CallSettingsRequest] instance.
   CallSettingsRequest({
+    this.audio,
+    this.backstage,
     this.geofencing,
     this.recording,
+    this.ring,
     this.screensharing,
+    this.transcription,
     this.video,
   });
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  AudioSettingsRequest? audio;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  BackstageSettingsRequest? backstage;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -41,7 +61,23 @@ class CallSettingsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
+  RingSettingsRequest? ring;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
   ScreensharingSettingsRequest? screensharing;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  TranscriptionSettingsRequest? transcription;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -53,24 +89,42 @@ class CallSettingsRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallSettingsRequest &&
+     other.audio == audio &&
+     other.backstage == backstage &&
      other.geofencing == geofencing &&
      other.recording == recording &&
+     other.ring == ring &&
      other.screensharing == screensharing &&
+     other.transcription == transcription &&
      other.video == video;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (audio == null ? 0 : audio!.hashCode) +
+    (backstage == null ? 0 : backstage!.hashCode) +
     (geofencing == null ? 0 : geofencing!.hashCode) +
     (recording == null ? 0 : recording!.hashCode) +
+    (ring == null ? 0 : ring!.hashCode) +
     (screensharing == null ? 0 : screensharing!.hashCode) +
+    (transcription == null ? 0 : transcription!.hashCode) +
     (video == null ? 0 : video!.hashCode);
 
   @override
-  String toString() => 'CallSettingsRequest[geofencing=$geofencing, recording=$recording, screensharing=$screensharing, video=$video]';
+  String toString() => 'CallSettingsRequest[audio=$audio, backstage=$backstage, geofencing=$geofencing, recording=$recording, ring=$ring, screensharing=$screensharing, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.audio != null) {
+      json[r'audio'] = this.audio;
+    } else {
+      json[r'audio'] = null;
+    }
+    if (this.backstage != null) {
+      json[r'backstage'] = this.backstage;
+    } else {
+      json[r'backstage'] = null;
+    }
     if (this.geofencing != null) {
       json[r'geofencing'] = this.geofencing;
     } else {
@@ -81,10 +135,20 @@ class CallSettingsRequest {
     } else {
       json[r'recording'] = null;
     }
+    if (this.ring != null) {
+      json[r'ring'] = this.ring;
+    } else {
+      json[r'ring'] = null;
+    }
     if (this.screensharing != null) {
       json[r'screensharing'] = this.screensharing;
     } else {
       json[r'screensharing'] = null;
+    }
+    if (this.transcription != null) {
+      json[r'transcription'] = this.transcription;
+    } else {
+      json[r'transcription'] = null;
     }
     if (this.video != null) {
       json[r'video'] = this.video;
@@ -113,9 +177,13 @@ class CallSettingsRequest {
       }());
 
       return CallSettingsRequest(
+        audio: AudioSettingsRequest.fromJson(json[r'audio']),
+        backstage: BackstageSettingsRequest.fromJson(json[r'backstage']),
         geofencing: GeofenceSettingsRequest.fromJson(json[r'geofencing']),
         recording: RecordSettingsRequest.fromJson(json[r'recording']),
+        ring: RingSettingsRequest.fromJson(json[r'ring']),
         screensharing: ScreensharingSettingsRequest.fromJson(json[r'screensharing']),
+        transcription: TranscriptionSettingsRequest.fromJson(json[r'transcription']),
         video: VideoSettingsRequest.fromJson(json[r'video']),
       );
     }

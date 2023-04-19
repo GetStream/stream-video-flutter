@@ -18,6 +18,7 @@ class QueryCallsRequest {
     this.next,
     this.prev,
     this.sort = const [],
+    this.watch,
   });
 
   Map<String, Object> filterConditions;
@@ -50,13 +51,22 @@ class QueryCallsRequest {
 
   List<SortParamRequest> sort;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? watch;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is QueryCallsRequest &&
      other.filterConditions == filterConditions &&
      other.limit == limit &&
      other.next == next &&
      other.prev == prev &&
-     other.sort == sort;
+     other.sort == sort &&
+     other.watch == watch;
 
   @override
   int get hashCode =>
@@ -65,10 +75,11 @@ class QueryCallsRequest {
     (limit == null ? 0 : limit!.hashCode) +
     (next == null ? 0 : next!.hashCode) +
     (prev == null ? 0 : prev!.hashCode) +
-    (sort.hashCode);
+    (sort.hashCode) +
+    (watch == null ? 0 : watch!.hashCode);
 
   @override
-  String toString() => 'QueryCallsRequest[filterConditions=$filterConditions, limit=$limit, next=$next, prev=$prev, sort=$sort]';
+  String toString() => 'QueryCallsRequest[filterConditions=$filterConditions, limit=$limit, next=$next, prev=$prev, sort=$sort, watch=$watch]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -89,6 +100,11 @@ class QueryCallsRequest {
       json[r'prev'] = null;
     }
       json[r'sort'] = this.sort;
+    if (this.watch != null) {
+      json[r'watch'] = this.watch;
+    } else {
+      json[r'watch'] = null;
+    }
     return json;
   }
 
@@ -116,6 +132,7 @@ class QueryCallsRequest {
         next: mapValueOfType<String>(json, r'next'),
         prev: mapValueOfType<String>(json, r'prev'),
         sort: SortParamRequest.listFromJson(json[r'sort'])!,
+        watch: mapValueOfType<bool>(json, r'watch'),
       );
     }
     return null;

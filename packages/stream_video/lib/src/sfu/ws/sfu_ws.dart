@@ -1,82 +1,84 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
-import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../logger/stream_log.dart';
 import '../../shared_emitter.dart';
 import '../../types/other.dart';
-import '../../ws/keep_alive.dart';
+import '../../utils/none.dart';
+import '../../utils/result.dart';
+import '../../ws/health/health_monitor.dart';
 import '../../ws/ws.dart';
 import '../data/events/sfu_event_mapper_extensions.dart';
 import '../data/events/sfu_events.dart';
-import 'sfu_event_listener.dart';
 
 const _tag = 'SV:Sfu-WS';
-int _sfuSeq = 1;
 
-/// TODO
 class SfuWebSocket extends StreamWebSocket
-    with KeepAlive, ConnectionStateMixin {
-  /// TODO
+    with ConnectionStateMixin
+    implements HealthListener {
   factory SfuWebSocket({
+    required int sessionSeq,
     required String sessionId,
     required String sfuUrl,
     Iterable<String>? protocols,
   }) {
-    streamLog.i(_tag, () => '<factory> sessionId: $sessionId');
-    var wsEndpoint = 'ws://$sfuUrl:3031/ws';
-    if (!['localhost', '127.0.0.1'].contains(sfuUrl)) {
-      final wsUrl = Uri.parse(sfuUrl);
-      wsEndpoint = wsUrl
+    final tag = '$_tag-$sessionSeq';
+    streamLog.i(tag, () => '<factory> sessionId: $sessionId');
+    final sfuUri = Uri.parse(sfuUrl);
+    streamLog.i(tag, () => '<factory> sfuUri: $sfuUri');
+    final String wsEndpoint;
+    if (sfuUri.host.startsWith('localhost') ||
+        sfuUri.host.startsWith('127.0.0.1') ||
+        sfuUri.host.startsWith('192.')) {
+      wsEndpoint = 'ws://${sfuUri.host}:3031/ws';
+    } else {
+      wsEndpoint = sfuUri
           .replace(
             scheme: 'wss',
             path: '/ws',
           )
           .toString();
     }
+    streamLog.i(tag, () => '<factory> wsEndpoint: $wsEndpoint');
     return SfuWebSocket._(
       wsEndpoint,
       protocols: protocols,
+      sessionSeq: sessionSeq,
       sessionId: sessionId,
     );
   }
 
   /// TODO
   SfuWebSocket._(
-    super.url, {
-    super.protocols,
+    String url, {
+    Iterable<String>? protocols,
+    required this.sessionSeq,
     required this.sessionId,
-  }) {
+  }) : super(url, protocols: protocols, tag: '$_tag-$sessionSeq') {
     _logger.i(() => '<init> sessionId: $sessionId');
+
+    onConnectionStateUpdated = (it) {};
   }
 
-  final _logger = taggedLogger(tag: '$_tag-${_sfuSeq++}');
+  late final _logger = taggedLogger(tag: '$_tag-$sessionSeq');
 
+  late final HealthMonitor healthMonitor = HealthMonitorImpl('Sfu', this);
+
+  final int sessionSeq;
   final String sessionId;
 
-  final Set<SfuEventListener> _eventListeners = {};
   bool _manuallyClosed = false;
 
   SharedEmitter<SfuEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<SfuEvent>();
 
-  void addEventListener(SfuEventListener listener) {
-    _eventListeners.add(listener);
-  }
-
-  void removeEventListener(SfuEventListener listener) {
-    _eventListeners.remove(listener);
-  }
-
   @override
-  Future<void> connect({bool reconnect = false}) {
-    connectionState = reconnect //
-        ? ConnectionState.reconnecting
-        : ConnectionState.connecting;
-
+  Future<Result<None>> connect() {
+    _logger.i(() => '[connect] connectionState: $connectionState');
+    connectionState = ConnectionState.connecting;
+    healthMonitor.start();
     return super.connect();
   }
 
@@ -84,16 +86,23 @@ class SfuWebSocket extends StreamWebSocket
   void onOpen() {
     _logger.i(() => '[onOpen] url: $url');
     connectionState = ConnectionState.connected;
-    _reconnectAttempt = 0;
+    healthMonitor.onSocketOpen();
+
+    _events.emit(SfuSocketConnected(sessionId: sessionId, url: url));
   }
 
   @override
   void onError(Object error, [StackTrace? stackTrace]) {
-    _logger.w(() => '[onError] error: $error, stackTrace: $stackTrace');
+    _logger.w(() => '[onError] error: $error');
+    healthMonitor.onSocketError(error);
 
-    _notifyError(VideoErrors.compose(error, stackTrace));
-
-    _reconnect();
+    _events.emit(
+      SfuSocketFailed(
+        sessionId: sessionId,
+        url: url,
+        error: VideoErrors.compose(error),
+      ),
+    );
   }
 
   @override
@@ -111,18 +120,17 @@ class SfuWebSocket extends StreamWebSocket
 
     final event = rawEvent.toDomain();
     _handleEvent(event);
-    _notifyEvent(event);
+    _events.emit(event);
   }
 
   void _handleEvent(SfuEvent event) {
     if (event is SfuJoinResponseEvent) {
-      if (!isKeepAliveStarted) {
-        _logger.d(() => '[handleEvent] start PingPong');
-        startPingPong();
-      }
+      _logger.d(() => '[handleEvent] event.type: SfuJoinResponseEvent');
+      connectionState = ConnectionState.connected;
+      healthMonitor.onPongReceived();
     } else if (event is SfuHealthCheckResponseEvent) {
-      _logger.d(() => '[handleEvent] ack Pong');
-      ackPong(event);
+      _logger.d(() => '[handleEvent] event.type: SfuHealthCheckResponseEvent');
+      healthMonitor.onPongReceived();
     }
   }
 
@@ -132,28 +140,35 @@ class SfuWebSocket extends StreamWebSocket
       () => '[onClose] closeCode: $closeCode, closeReason: $closeReason, '
           'manuallyClosed: $_manuallyClosed',
     );
-
+    healthMonitor.onSocketClose();
     if (_manuallyClosed) {
       connectionState = ConnectionState.disconnected;
       return;
     }
 
-    _reconnect();
+    _events.emit(
+      SfuSocketDisconnected(
+          sessionId: sessionId,
+          url: url,
+          reason: DisconnectionReason(
+            closeCode: closeCode,
+            closeReason: closeReason,
+          )),
+    );
   }
 
   @override
-  Future<void> disconnect([int? closeCode, String? closeReason]) async {
+  Future<Result<None>> disconnect([int? closeCode, String? closeReason]) async {
     _logger.i(
       () => '[disconnect] closeCode: $closeCode, closeReason: $closeReason',
     );
-    // return if already disconnected.
     if (connectionState == ConnectionState.disconnected) {
       _logger.w(() => '[disconnect] rejected (already disconnected)');
-      return;
+      return Result.success(None());
     }
 
     // Stop sending keep alive messages.
-    stopPingPong();
+    healthMonitor.stop();
 
     // If no close code is provided,
     // means we are manually closing the connection.
@@ -165,13 +180,6 @@ class SfuWebSocket extends StreamWebSocket
     return super.disconnect(closeCode, closeReason);
   }
 
-  @override
-  void send(sfu_events.SfuRequest request) {
-    _logger.d(() => '[send] request: $request');
-    super.send(request.writeToBuffer());
-  }
-
-  @override
   void sendPing() {
     _logger.d(() => '[sendPing] no args');
     send(
@@ -181,40 +189,32 @@ class SfuWebSocket extends StreamWebSocket
     );
   }
 
-  int _reconnectAttempt = 0;
-
-  Future<void> _reconnect() async {
-    if (isConnecting || isReconnecting) return;
-    _logger.d(() => '[_reconnect] _reconnectAttempt: $_reconnectAttempt');
-    _reconnectAttempt += 1;
-
-    final delay = _getReconnectInterval(_reconnectAttempt);
-
-    Future.delayed(
-      Duration(milliseconds: delay),
-      () => connect(reconnect: true),
-    );
+  @override
+  void send(sfu_events.SfuRequest message) {
+    _logger.d(() => '[send] message: $message');
+    super.send(message.writeToBuffer());
   }
 
-  // returns the reconnect interval based on `reconnectAttempt` in milliseconds
-  int _getReconnectInterval(int reconnectAttempt) {
-    // try to reconnect in 0.25-25 seconds
-    // (random to spread out the load from failures)
-    final max = math.min(500 + reconnectAttempt * 2000, 25000);
-    final min = math.min(math.max(250, (reconnectAttempt - 1) * 2000), 25000);
-    return (math.Random().nextDouble() * (max - min) + min).floor();
+  @override
+  Future<void> onPongTimeout(Duration timeout) async {
+    _logger.d(() => '[onPongTimeout] timeout: $timeout');
+
+    await super.disconnect();
   }
 
-  void _notifyEvent(SfuEvent event) {
-    _events.emit(event);
-    for (final listener in _eventListeners) {
-      listener.onSfuEvent(event);
-    }
+  @override
+  void onPingRequested() {
+    _logger.d(() => '[onPingRequested] no args');
+    sendPing();
   }
 
-  void _notifyError(VideoError error) {
-    for (final listener in _eventListeners) {
-      listener.onSfuError(error);
-    }
+  @override
+  void onNetworkDisconnected() {
+    _logger.i(() => '[onNetworkDisconnected] no args');
+  }
+
+  @override
+  void onNetworkConnected() {
+    _logger.i(() => '[onNetworkConnected] no args');
   }
 }

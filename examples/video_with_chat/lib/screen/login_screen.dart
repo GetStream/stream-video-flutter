@@ -53,7 +53,7 @@ class LoginScreen extends StatelessWidget {
 
     await videoClient.connectUser(
       user.toVideoUser(),
-      token: Token(user.videoToken),
+      tokenProvider: TokenProvider.static(user.videoToken),
     );
   }
 

@@ -16,7 +16,7 @@ class CustomVideoEvent {
     required this.callCid,
     required this.createdAt,
     this.custom = const {},
-    required this.type,
+    this.type = 'custom',
     required this.user,
   });
 
@@ -27,6 +27,7 @@ class CustomVideoEvent {
   /// Custom data for this object
   Map<String, Object> custom;
 
+  /// The type of event, \"custom\" in this case
   String type;
 
   UserResponse user;

@@ -3,10 +3,12 @@ import '../logger/stream_log.dart';
 
 /// Connection state type used throughout the SDK.
 enum ConnectionState {
+  connected,
   disconnected,
+  failed,
+  closed,
   connecting,
   reconnecting,
-  connected,
 }
 
 /// The iceTransportPolicy used for [RTCConfiguration].

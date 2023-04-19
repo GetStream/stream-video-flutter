@@ -22,11 +22,12 @@ class CallResponse {
     this.custom = const {},
     this.endedAt,
     required this.id,
+    required this.ingress,
     this.ownCapabilities = const [],
     required this.recording,
     required this.settings,
     this.startsAt,
-    required this.team,
+    this.team,
     required this.transcribing,
     required this.type,
     required this.updatedAt,
@@ -61,8 +62,10 @@ class CallResponse {
   /// Call ID
   String id;
 
+  CallIngressResponse ingress;
+
   /// The capabilities of the current user
-  List<String> ownCapabilities;
+  List<OwnCapability> ownCapabilities;
 
   bool recording;
 
@@ -77,7 +80,13 @@ class CallResponse {
   ///
   DateTime? startsAt;
 
-  String team;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? team;
 
   bool transcribing;
 
@@ -98,6 +107,7 @@ class CallResponse {
      other.custom == custom &&
      other.endedAt == endedAt &&
      other.id == id &&
+     other.ingress == ingress &&
      other.ownCapabilities == ownCapabilities &&
      other.recording == recording &&
      other.settings == settings &&
@@ -119,17 +129,18 @@ class CallResponse {
     (custom.hashCode) +
     (endedAt == null ? 0 : endedAt!.hashCode) +
     (id.hashCode) +
+    (ingress.hashCode) +
     (ownCapabilities.hashCode) +
     (recording.hashCode) +
     (settings.hashCode) +
     (startsAt == null ? 0 : startsAt!.hashCode) +
-    (team.hashCode) +
+    (team == null ? 0 : team!.hashCode) +
     (transcribing.hashCode) +
     (type.hashCode) +
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcasting=$broadcasting, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, endedAt=$endedAt, id=$id, ownCapabilities=$ownCapabilities, recording=$recording, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
+  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcasting=$broadcasting, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, endedAt=$endedAt, id=$id, ingress=$ingress, ownCapabilities=$ownCapabilities, recording=$recording, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -146,6 +157,7 @@ class CallResponse {
       json[r'ended_at'] = null;
     }
       json[r'id'] = this.id;
+      json[r'ingress'] = this.ingress;
       json[r'own_capabilities'] = this.ownCapabilities;
       json[r'recording'] = this.recording;
       json[r'settings'] = this.settings;
@@ -154,7 +166,11 @@ class CallResponse {
     } else {
       json[r'starts_at'] = null;
     }
+    if (this.team != null) {
       json[r'team'] = this.team;
+    } else {
+      json[r'team'] = null;
+    }
       json[r'transcribing'] = this.transcribing;
       json[r'type'] = this.type;
       json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
@@ -191,13 +207,12 @@ class CallResponse {
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         endedAt: mapDateTime(json, r'ended_at', ''),
         id: mapValueOfType<String>(json, r'id')!,
-        ownCapabilities: json[r'own_capabilities'] is List
-            ? (json[r'own_capabilities'] as List).cast<String>()
-            : const [],
+        ingress: CallIngressResponse.fromJson(json[r'ingress'])!,
+        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
         recording: mapValueOfType<bool>(json, r'recording')!,
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,
         startsAt: mapDateTime(json, r'starts_at', ''),
-        team: mapValueOfType<String>(json, r'team')!,
+        team: mapValueOfType<String>(json, r'team'),
         transcribing: mapValueOfType<bool>(json, r'transcribing')!,
         type: mapValueOfType<String>(json, r'type')!,
         updatedAt: mapDateTime(json, r'updated_at', '')!,
@@ -258,10 +273,10 @@ class CallResponse {
     'created_by',
     'custom',
     'id',
+    'ingress',
     'own_capabilities',
     'recording',
     'settings',
-    'team',
     'transcribing',
     'type',
     'updated_at',

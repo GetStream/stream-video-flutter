@@ -33,18 +33,35 @@ abstract class CoordinatorCallEventListener extends CoordinatorEventListener {
 
 abstract class CallStateManager implements CoordinatorCallEventListener {
   const CallStateManager();
+
   StateEmitter<CallState> get state;
+
   Future<void> onUserIdSet(String userId);
-  Future<void> onCallCreated(CallCreated data);
-  Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data);
-  Future<void> onCallJoining();
-  Future<void> onCallJoined(CallJoined data);
-  Future<void> onSessionStart(String sessionId);
+
+  Future<void> onCreated(CallCreated data);
+
+  Future<void> onReceivedOrCreated(CallReceivedOrCreated data);
+
+  Future<void> onConnecting(int attempt);
+
   Future<void> onConnected();
+
   Future<void> onDisconnect();
-  Future<void> onCallControlAction(CallControlAction action);
+
+  Future<void> onJoining();
+
+  Future<void> onJoined(CallJoined data);
+
+  Future<void> onEnded();
+
+  Future<void> onSessionStart(String sessionId);
+
+  Future<void> onControlAction(CallControlAction action);
+
   Future<void> onSfuEvent(SfuEvent event);
+
   Future<void> onWaitingTimeout(Duration dropTimeout);
+
   Future<void> onConnectFailed(VideoError error);
 
   void onSubscriberTrackReceived(String trackIdPrefix, SfuTrackType trackType);
@@ -76,20 +93,20 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  Future<void> onCallControlAction(CallControlAction action) async {
-    _logger.d(() => '[onCallControlAction] action: $action');
+  Future<void> onControlAction(CallControlAction action) async {
+    _logger.d(() => '[onControlAction] action: $action');
     _postReduced(action);
   }
 
   @override
-  Future<void> onCallCreated(CallCreated data) async {
-    _logger.d(() => '[onCallCreated] data: $data');
+  Future<void> onCreated(CallCreated data) async {
+    _logger.d(() => '[onCreated] data: $data');
     _postReduced(CallCreatedAction(data: data));
   }
 
   @override
-  Future<void> onCallReceivedOrCreated(CallReceivedOrCreated data) async {
-    _logger.d(() => '[onCallReceivedOrCreated] data: $data');
+  Future<void> onReceivedOrCreated(CallReceivedOrCreated data) async {
+    _logger.d(() => '[onReceivedOrCreated] data: $data');
     _postReduced(CallCreatedAction(data: data.data));
   }
 
@@ -106,13 +123,13 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
-  Future<void> onCallJoining() async {
+  Future<void> onJoining() async {
     _logger.d(() => '[onJoining] no args');
     _postReduced(const CallJoiningAction());
   }
 
   @override
-  Future<void> onCallJoined(CallJoined data) async {
+  Future<void> onJoined(CallJoined data) async {
     _logger.d(() => '[onJoined] data: $data');
     _postReduced(CallJoinedAction(data));
   }
@@ -121,6 +138,12 @@ class CallStateManagerImpl extends CallStateManager {
   Future<void> onSessionStart(String sessionId) async {
     _logger.d(() => '[onSessionStart] sessionId: $sessionId');
     _postReduced(CallSessionStartAction(sessionId: sessionId));
+  }
+
+  @override
+  Future<void> onConnecting(int attempt) async {
+    _logger.d(() => '[onConnecting] attempt: $attempt');
+    _postReduced(CallConnectingAction(attempt));
   }
 
   @override
@@ -136,11 +159,17 @@ class CallStateManagerImpl extends CallStateManager {
   }
 
   @override
+  Future<void> onEnded() async {
+    _logger.d(() => '[onEnded] no args');
+    _postReduced(const CallEndedAction());
+  }
+
+  @override
   Future<void> onSfuEvent(SfuEvent event) async {
     if (event is SfuHealthCheckResponseEvent) {
       return;
     }
-    _logger.d(() => '[onSfuEvent] event: $event');
+    _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
     _postReduced(SfuEventAction(event));
     if (event is SfuJoinResponseEvent) {
       final participants = event.callState.participants;

@@ -102,11 +102,12 @@ const TrackUnpublished$json = const {
     const {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
     const {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
     const {'1': 'type', '3': 3, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackType', '10': 'type'},
+    const {'1': 'cause', '3': 4, '4': 1, '5': 14, '6': '.stream.video.sfu.models.TrackUnpublishReason', '10': 'cause'},
   ],
 };
 
 /// Descriptor for `TrackUnpublished`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List trackUnpublishedDescriptor = $convert.base64Decode('ChBUcmFja1VucHVibGlzaGVkEhcKB3VzZXJfaWQYASABKAlSBnVzZXJJZBIdCgpzZXNzaW9uX2lkGAIgASgJUglzZXNzaW9uSWQSNgoEdHlwZRgDIAEoDjIiLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlRyYWNrVHlwZVIEdHlwZQ==');
+final $typed_data.Uint8List trackUnpublishedDescriptor = $convert.base64Decode('ChBUcmFja1VucHVibGlzaGVkEhcKB3VzZXJfaWQYASABKAlSBnVzZXJJZBIdCgpzZXNzaW9uX2lkGAIgASgJUglzZXNzaW9uSWQSNgoEdHlwZRgDIAEoDjIiLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlRyYWNrVHlwZVIEdHlwZRJDCgVjYXVzZRgEIAEoDjItLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlRyYWNrVW5wdWJsaXNoUmVhc29uUgVjYXVzZQ==');
 @$core.Deprecated('Use joinRequestDescriptor instead')
 const JoinRequest$json = const {
   '1': 'JoinRequest',
@@ -114,11 +115,12 @@ const JoinRequest$json = const {
     const {'1': 'token', '3': 1, '4': 1, '5': 9, '10': 'token'},
     const {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
     const {'1': 'subscriber_sdp', '3': 3, '4': 1, '5': 9, '10': 'subscriberSdp'},
+    const {'1': 'client_details', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.models.ClientDetails', '10': 'clientDetails'},
   ],
 };
 
 /// Descriptor for `JoinRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List joinRequestDescriptor = $convert.base64Decode('CgtKb2luUmVxdWVzdBIUCgV0b2tlbhgBIAEoCVIFdG9rZW4SHQoKc2Vzc2lvbl9pZBgCIAEoCVIJc2Vzc2lvbklkEiUKDnN1YnNjcmliZXJfc2RwGAMgASgJUg1zdWJzY3JpYmVyU2Rw');
+final $typed_data.Uint8List joinRequestDescriptor = $convert.base64Decode('CgtKb2luUmVxdWVzdBIUCgV0b2tlbhgBIAEoCVIFdG9rZW4SHQoKc2Vzc2lvbl9pZBgCIAEoCVIJc2Vzc2lvbklkEiUKDnN1YnNjcmliZXJfc2RwGAMgASgJUg1zdWJzY3JpYmVyU2RwEk0KDmNsaWVudF9kZXRhaWxzGAQgASgLMiYuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuQ2xpZW50RGV0YWlsc1INY2xpZW50RGV0YWlscw==');
 @$core.Deprecated('Use joinResponseDescriptor instead')
 const JoinResponse$json = const {
   '1': 'JoinResponse',

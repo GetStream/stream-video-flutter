@@ -13,60 +13,39 @@ part of openapi.api;
 class HealthCheckEvent {
   /// Returns a new [HealthCheckEvent] instance.
   HealthCheckEvent({
-    required this.cid,
     required this.connectionId,
     required this.createdAt,
-    this.me,
-    required this.type,
+    this.type = 'health.check',
   });
 
-  /// The unique identifier for a call (<type>:<id>)
-  String cid;
-
+  /// The connection_id for this client
   String connectionId;
 
   DateTime createdAt;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  OwnUserResponse? me;
-
+  /// The type of event: \"health.check\" in this case
   String type;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is HealthCheckEvent &&
-     other.cid == cid &&
      other.connectionId == connectionId &&
      other.createdAt == createdAt &&
-     other.me == me &&
      other.type == type;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (cid.hashCode) +
     (connectionId.hashCode) +
     (createdAt.hashCode) +
-    (me == null ? 0 : me!.hashCode) +
     (type.hashCode);
 
   @override
-  String toString() => 'HealthCheckEvent[cid=$cid, connectionId=$connectionId, createdAt=$createdAt, me=$me, type=$type]';
+  String toString() => 'HealthCheckEvent[connectionId=$connectionId, createdAt=$createdAt, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'cid'] = this.cid;
       json[r'connection_id'] = this.connectionId;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    if (this.me != null) {
-      json[r'me'] = this.me;
-    } else {
-      json[r'me'] = null;
-    }
       json[r'type'] = this.type;
     return json;
   }
@@ -90,10 +69,8 @@ class HealthCheckEvent {
       }());
 
       return HealthCheckEvent(
-        cid: mapValueOfType<String>(json, r'cid')!,
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
-        me: OwnUserResponse.fromJson(json[r'me']),
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
@@ -144,7 +121,6 @@ class HealthCheckEvent {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'cid',
     'connection_id',
     'created_at',
     'type',

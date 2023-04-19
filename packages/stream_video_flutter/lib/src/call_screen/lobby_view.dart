@@ -104,7 +104,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
     super.initState();
     // Obtains SFU credentials and picks the best server, but doesn't
     // connect to the call yet.
-    widget.call.joinCall();
+    widget.call.join();
   }
 
   @override

@@ -27,7 +27,7 @@ import 'rtc_writable.dart';
 
 class RtcMediaStreamTrackRemoteVideo
     implements RtcMediaStreamTrack, RtcWritable {
-  RtcMediaStreamTrackRemoteVideo({
+  const RtcMediaStreamTrackRemoteVideo({
     this.id,
     this.type,
     this.timestamp,

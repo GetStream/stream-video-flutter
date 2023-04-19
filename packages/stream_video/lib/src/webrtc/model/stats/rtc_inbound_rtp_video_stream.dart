@@ -42,8 +42,7 @@ import 'rtc_inbound_rtp.dart';
 import 'rtc_writable.dart';
 
 class RtcInboundRtpVideoStream implements RtcInboundRtp, RtcWritable {
-
-  RtcInboundRtpVideoStream({
+  const RtcInboundRtpVideoStream({
     this.id,
     this.type,
     this.timestamp,
@@ -159,7 +158,6 @@ class RtcInboundRtpVideoStream implements RtcInboundRtp, RtcWritable {
     return null;
   }
 
-
   @override
   String toString() {
     return 'RTCInboundRTPVideoStream{id: $id, type: $type, '
@@ -212,7 +210,6 @@ class RtcInboundRtpVideoStream implements RtcInboundRtp, RtcWritable {
       ..write('\n')
       ..write('framesPerSecond: ')
       ..write(framesPerSecond)
-      ..write('\n')
-    ;
+      ..write('\n');
   }
 }

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 /// Represents an SDK error that contains a message.
-class VideoError extends Equatable {
+class VideoError with EquatableMixin implements Error {
   /// TODO
   const VideoError({required this.message, this.stackTrace});
 

@@ -8,17 +8,25 @@ class CallSettings with EquatableMixin {
   });
 
   const CallSettings.disabled()
-      : audio = const AudioSetting(accessRequestEnabled: false),
-        video = const VideoSetting(accessRequestEnabled: false),
+      : audio = const AudioSettings(
+          accessRequestEnabled: false,
+          opusDtxEnabled: false,
+          redundantCodingEnabled: false,
+        ),
+        video = const VideoSettings(accessRequestEnabled: false),
         screenShare = const ScreenShareSetting(accessRequestEnabled: false);
 
   const CallSettings.enabled()
-      : audio = const AudioSetting(accessRequestEnabled: true),
-        video = const VideoSetting(accessRequestEnabled: true),
+      : audio = const AudioSettings(
+          accessRequestEnabled: true,
+          opusDtxEnabled: false,
+          redundantCodingEnabled: false,
+        ),
+        video = const VideoSettings(accessRequestEnabled: true),
         screenShare = const ScreenShareSetting(accessRequestEnabled: true);
 
-  final AudioSetting audio;
-  final VideoSetting video;
+  final AudioSettings audio;
+  final VideoSettings video;
   final ScreenShareSetting screenShare;
 
   @override
@@ -27,6 +35,7 @@ class CallSettings with EquatableMixin {
 
 abstract class CallSetting with EquatableMixin {
   const CallSetting({required this.accessRequestEnabled});
+
   final bool accessRequestEnabled;
 
   @override
@@ -36,12 +45,19 @@ abstract class CallSetting with EquatableMixin {
   List<Object?> get props => [accessRequestEnabled];
 }
 
-class AudioSetting extends CallSetting {
-  const AudioSetting({required super.accessRequestEnabled});
+class AudioSettings extends CallSetting {
+  const AudioSettings({
+    required super.accessRequestEnabled,
+    required this.opusDtxEnabled,
+    required this.redundantCodingEnabled,
+  });
+
+  final bool opusDtxEnabled;
+  final bool redundantCodingEnabled;
 }
 
-class VideoSetting extends CallSetting {
-  const VideoSetting({required super.accessRequestEnabled});
+class VideoSettings extends CallSetting {
+  const VideoSettings({required super.accessRequestEnabled});
 }
 
 class ScreenShareSetting extends CallSetting {

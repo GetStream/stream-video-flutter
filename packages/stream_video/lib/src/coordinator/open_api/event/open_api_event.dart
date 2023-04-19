@@ -5,18 +5,17 @@ import 'package:equatable/equatable.dart';
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../../logger/stream_log.dart';
 import 'event_type.dart';
-import 'health_check.dart';
 
 const _tag = 'SV:OpenApiEvent';
 
 class OpenApiEvent with EquatableMixin {
   const OpenApiEvent({
     required this.type,
+    this.connected,
     this.healthCheck,
     this.callCreated,
     this.callAccepted,
     this.callRejected,
-    this.callCancelled,
     this.callUpdated,
     this.callEnded,
     this.callPermissionRequest,
@@ -25,8 +24,11 @@ class OpenApiEvent with EquatableMixin {
     this.callUserUnblocked,
     this.callRecordingStarted,
     this.callRecordingStopped,
+    this.callBroadcastingStarted,
+    this.callBroadcastingStopped,
     this.callReaction,
     this.custom,
+    this.unknown,
   });
 
   static OpenApiEvent? fromRawJson(String rawJson) {
@@ -42,8 +44,11 @@ class OpenApiEvent with EquatableMixin {
     streamLog.i(_tag, () => '[fromJson] rawType; $rawType, type: $type');
     final result = OpenApiEvent(type: type);
     switch (type) {
+      case EventType.connectionOk:
+        final event = open.ConnectedEvent.fromJson(jsonObj);
+        return result.copyWith(connected: event);
       case EventType.healthCheck:
-        final event = HealthCheck.fromJson(jsonObj);
+        final event = open.HealthCheckEvent.fromJson(jsonObj);
         return result.copyWith(healthCheck: event);
       case EventType.callCreated:
         final event = open.CallCreatedEvent.fromJson(jsonObj);
@@ -54,9 +59,6 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callRejected:
         final event = open.CallRejectedEvent.fromJson(jsonObj);
         return result.copyWith(callRejected: event);
-      case EventType.callCancelled:
-        final event = open.CallCancelledEvent.fromJson(jsonObj);
-        return result.copyWith(callCancelled: event);
       case EventType.callUpdated:
         final event = open.CallUpdatedEvent.fromJson(jsonObj);
         return result.copyWith(callUpdated: event);
@@ -81,31 +83,35 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callRecordingStopped:
         final event = open.CallRecordingStoppedEvent.fromJson(jsonObj);
         return result.copyWith(callRecordingStopped: event);
+      case EventType.callBroadcastingStarted:
+        final event = open.CallBroadcastingStartedEvent.fromJson(jsonObj);
+        return result.copyWith(callBroadcastingStarted: event);
+      case EventType.callBroadcastingStopped:
+        final event = open.CallBroadcastingStoppedEvent.fromJson(jsonObj);
+        return result.copyWith(callBroadcastingStopped: event);
       case EventType.callReaction:
         final event = open.CallReactionEvent.fromJson(jsonObj);
         return result.copyWith(callReaction: event);
       case EventType.custom:
-        /* no-op */
-        break;
+        final event = open.CustomVideoEvent.fromJson(jsonObj);
+        return result.copyWith(custom: event);
       case EventType.unknown:
-        /* no-op */
-        break;
-    }
-    try {
-      final event = open.CustomVideoEvent.fromJson(jsonObj);
-      return result.copyWith(type: EventType.custom, custom: event);
-    } catch (e, stk) {
-      streamLog.e(_tag, () => '[fromJson] failed: $e; $stk');
-      return result.copyWith(type: EventType.unknown);
+        try {
+          final event = open.VideoEvent.fromJson(jsonObj);
+          return result.copyWith(unknown: event);
+        } catch (e, stk) {
+          streamLog.e(_tag, () => '[fromJson] failed: $e; $stk');
+          return result;
+        }
     }
   }
 
   final EventType type;
-  final HealthCheck? healthCheck;
+  final open.ConnectedEvent? connected;
+  final open.HealthCheckEvent? healthCheck;
   final open.CallCreatedEvent? callCreated;
   final open.CallAcceptedEvent? callAccepted;
   final open.CallRejectedEvent? callRejected;
-  final open.CallCancelledEvent? callCancelled;
   final open.CallUpdatedEvent? callUpdated;
   final open.CallEndedEvent? callEnded;
   final open.PermissionRequestEvent? callPermissionRequest;
@@ -114,16 +120,19 @@ class OpenApiEvent with EquatableMixin {
   final open.UnblockedUserEvent? callUserUnblocked;
   final open.CallRecordingStartedEvent? callRecordingStarted;
   final open.CallRecordingStoppedEvent? callRecordingStopped;
+  final open.CallBroadcastingStartedEvent? callBroadcastingStarted;
+  final open.CallBroadcastingStoppedEvent? callBroadcastingStopped;
   final open.CallReactionEvent? callReaction;
   final open.CustomVideoEvent? custom;
+  final open.VideoEvent? unknown;
 
   OpenApiEvent copyWith({
     EventType? type,
-    HealthCheck? healthCheck,
+    open.ConnectedEvent? connected,
+    open.HealthCheckEvent? healthCheck,
     open.CallCreatedEvent? callCreated,
     open.CallAcceptedEvent? callAccepted,
     open.CallRejectedEvent? callRejected,
-    open.CallCancelledEvent? callCancelled,
     open.CallUpdatedEvent? callUpdated,
     open.CallEndedEvent? callEnded,
     open.PermissionRequestEvent? callPermissionRequest,
@@ -132,16 +141,19 @@ class OpenApiEvent with EquatableMixin {
     open.UnblockedUserEvent? callUserUnblocked,
     open.CallRecordingStartedEvent? callRecordingStarted,
     open.CallRecordingStoppedEvent? callRecordingStopped,
+    open.CallBroadcastingStartedEvent? callBroadcastingStarted,
+    open.CallBroadcastingStoppedEvent? callBroadcastingStopped,
     open.CallReactionEvent? callReaction,
     open.CustomVideoEvent? custom,
+    open.VideoEvent? unknown,
   }) {
     return OpenApiEvent(
       type: type ?? this.type,
+      connected: connected ?? this.connected,
       healthCheck: healthCheck ?? this.healthCheck,
       callCreated: callCreated ?? this.callCreated,
       callAccepted: callAccepted ?? this.callAccepted,
       callRejected: callRejected ?? this.callRejected,
-      callCancelled: callCancelled ?? this.callCancelled,
       callUpdated: callUpdated ?? this.callUpdated,
       callEnded: callEnded ?? this.callEnded,
       callPermissionRequest:
@@ -152,8 +164,13 @@ class OpenApiEvent with EquatableMixin {
       callUserUnblocked: callUserUnblocked ?? this.callUserUnblocked,
       callRecordingStarted: callRecordingStarted ?? this.callRecordingStarted,
       callRecordingStopped: callRecordingStopped ?? this.callRecordingStopped,
+      callBroadcastingStarted:
+          callBroadcastingStarted ?? this.callBroadcastingStarted,
+      callBroadcastingStopped:
+          callBroadcastingStopped ?? this.callBroadcastingStopped,
       callReaction: callReaction ?? this.callReaction,
       custom: custom ?? this.custom,
+      unknown: unknown ?? this.unknown,
     );
   }
 
@@ -163,20 +180,23 @@ class OpenApiEvent with EquatableMixin {
   @override
   List<Object?> get props => [
         type,
+        connected,
         healthCheck,
         callCreated,
         callAccepted,
         callRejected,
-        callCancelled,
         callUpdated,
         callEnded,
         callPermissionRequest,
         callPermissionsUpdated,
-        callRecordingStarted,
         callUserBlocked,
         callUserUnblocked,
+        callRecordingStarted,
         callRecordingStopped,
+        callBroadcastingStarted,
+        callBroadcastingStopped,
         callReaction,
         custom,
+        unknown,
       ];
 }

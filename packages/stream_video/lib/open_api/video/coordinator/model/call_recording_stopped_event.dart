@@ -15,13 +15,14 @@ class CallRecordingStoppedEvent {
   CallRecordingStoppedEvent({
     required this.callCid,
     required this.createdAt,
-    required this.type,
+    this.type = 'call.recording_stopped',
   });
 
   String callCid;
 
   DateTime createdAt;
 
+  /// The type of event: \"call.recording_stopped\" in this case
   String type;
 
   @override

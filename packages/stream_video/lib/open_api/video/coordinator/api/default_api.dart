@@ -16,88 +16,21 @@ class DefaultApi {
 
   final ApiClient apiClient;
 
-  /// List recordings
+  /// Create Guest
   ///
-  /// Lists recordings
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [String] session (required):
-  Future<Response> listRecordingsWithHttpInfo(String type, String id, String session,) async {
-    // ignore: prefer_const_declarations
-    final path = r'/call/{type}/{id}/{session}/recordings'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id)
-      .replaceAll('{session}', session);
-
-    // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'GET',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// List recordings
-  ///
-  /// Lists recordings
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [String] session (required):
-  Future<ListRecordingsResponse?> listRecordings(String type, String id, String session,) async {
-    final response = await listRecordingsWithHttpInfo(type, id, session,);
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ListRecordingsResponse',) as ListRecordingsResponse;
-    
-    }
-    return null;
-  }
-
-  /// Query call
-  ///
-  /// Query calls with filter query
+  ///  
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
-  /// * [QueryCallsRequest] queryCallsRequest (required):
-  Future<Response> queryCallsWithHttpInfo(QueryCallsRequest queryCallsRequest,) async {
+  /// * [CreateGuestRequest] createGuestRequest (required):
+  Future<Response> createGuestWithHttpInfo(CreateGuestRequest createGuestRequest,) async {
     // ignore: prefer_const_declarations
-    final path = r'/calls';
+    final path = r'/guest';
 
     // ignore: prefer_final_locals
-    Object? postBody = queryCallsRequest;
+    Object? postBody = createGuestRequest;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
@@ -117,15 +50,15 @@ class DefaultApi {
     );
   }
 
-  /// Query call
+  /// Create Guest
   ///
-  /// Query calls with filter query
+  ///  
   ///
   /// Parameters:
   ///
-  /// * [QueryCallsRequest] queryCallsRequest (required):
-  Future<QueryCallsResponse?> queryCalls(QueryCallsRequest queryCallsRequest,) async {
-    final response = await queryCallsWithHttpInfo(queryCallsRequest,);
+  /// * [CreateGuestRequest] createGuestRequest (required):
+  Future<CreateGuestResponse?> createGuest(CreateGuestRequest createGuestRequest,) async {
+    final response = await createGuestWithHttpInfo(createGuestRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

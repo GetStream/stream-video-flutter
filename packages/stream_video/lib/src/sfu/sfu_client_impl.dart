@@ -9,12 +9,10 @@ import '../logger/impl/tagged_logger.dart';
 import '../utils/result.dart';
 import 'sfu_client.dart';
 
-/// TODO
 class SfuClientImpl extends SfuClient {
-  /// TODO
   SfuClientImpl({
     required String baseUrl,
-    required this.authToken,
+    required this.sfuToken,
     String prefix = '',
     ClientHooks? hooks,
     List<Interceptor> interceptors = const [],
@@ -27,8 +25,7 @@ class SfuClientImpl extends SfuClient {
 
   final _logger = taggedLogger(tag: 'SV:SfuClient');
 
-  /// TODO
-  final String authToken;
+  final String sfuToken;
 
   final signal_twirp.SignalServer _client;
 
@@ -61,8 +58,9 @@ class SfuClientImpl extends SfuClient {
     sfu.SetPublisherRequest request,
   ) async {
     try {
-      _logger.i(() => '[setPublisher] request: ${request.stringify()}');
+      _logger.d(() => '[setPublisher] request: ${request.stringify()}');
       final response = await _client.setPublisher(_withAuthHeaders(), request);
+      _logger.v(() => '[setPublisher] response: ${response.stringify()}');
       return Result.success(response);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -74,10 +72,12 @@ class SfuClientImpl extends SfuClient {
     sfu.UpdateMuteStatesRequest request,
   ) async {
     try {
+      _logger.d(() => '[updateMuteState] request: $request');
       final response = await _client.updateMuteStates(
         _withAuthHeaders(),
         request,
       );
+      _logger.v(() => '[updateMuteState] response: $response');
       return Result.success(response);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -89,10 +89,12 @@ class SfuClientImpl extends SfuClient {
     sfu.UpdateSubscriptionsRequest request,
   ) async {
     try {
+      _logger.d(() => '[updateSubscriptions] request: $request');
       final response = await _client.updateSubscriptions(
         _withAuthHeaders(),
         request,
       );
+      _logger.v(() => '[updateSubscriptions] response: $response');
       return Result.success(response);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -102,13 +104,21 @@ class SfuClientImpl extends SfuClient {
   Context _withAuthHeaders([Context? ctx]) {
     ctx ??= Context();
     return withHttpRequestHeaders(ctx, {
-      'Authorization': 'Bearer $authToken',
+      'Authorization': 'Bearer $sfuToken',
     });
   }
 }
 
 extension on sfu.SetPublisherRequest {
   String stringify() {
-    return 'SetPublisherRequest(sessionId: $sessionId, tracks: $tracks)';
+    return 'SetPublisherRequest(sessionId: $sessionId, tracks: $tracks, '
+        'sdp.length: ${sdp.length})';
+  }
+}
+
+extension on sfu.SetPublisherResponse {
+  String stringify() {
+    return 'SetPublisherResponse(sessionId: $sessionId, '
+        'iceRestart: $iceRestart, error: $error, sdp.length: ${sdp.length})';
   }
 }

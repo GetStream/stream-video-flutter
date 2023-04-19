@@ -8,6 +8,7 @@ class CallCredentials with EquatableMixin {
     required this.sfuToken,
     required this.iceServers,
   });
+
   final CallSfuServer sfuServer;
   final String sfuToken;
   final List<CallIceServer> iceServers;
@@ -28,6 +29,7 @@ class CallSfuServer with EquatableMixin {
     required this.name,
     required this.url,
   });
+
   final String name;
   final String url;
 
@@ -47,6 +49,7 @@ class CallIceServer with EquatableMixin {
     required this.password,
     required this.urls,
   });
+
   final String username;
   final String password;
   final List<String> urls;

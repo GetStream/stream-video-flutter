@@ -106,8 +106,8 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     setState(() {
       _callState = callState;
     });
-    if (callState.status.isDrop) {
-      _disconnect();
+    if (callState.status.isDisconnected) {
+      _leave();
     }
   }
 
@@ -144,31 +144,25 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
 
   Future<void> _connect() async {
     try {
+      _logger.d(() => '[connect] no args');
       call.connectOptions = widget.callConnectOptions;
       final result = await call.connect();
-      if (result.isFailure) {
-        await _onCancelCall();
-      }
+      _logger.v(() => '[connect] completed: $result');
     } catch (e) {
-      await _onCancelCall();
+      _logger.v(() => '[connect] failed: $e');
+      await _leave();
     }
   }
 
-  Future<void> _onCancelCall() async {
-    _logger.d(() => '[onCancelCall] no args');
-    await call.apply(const CancelCall());
-    await _disconnect();
-  }
-
-  Future<void> _disconnect() async {
-    _logger.d(() => '[disconnect] no args');
-    await call.disconnect();
+  Future<void> _leave() async {
+    _logger.d(() => '[leave] no args');
+    // play tone
     final bool popped;
     if (mounted) {
       popped = await Navigator.maybePop(context);
     } else {
       popped = false;
     }
-    _logger.v(() => '[disconnect] popped: $popped');
+    _logger.v(() => '[leave] popped: $popped');
   }
 }

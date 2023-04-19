@@ -15,7 +15,7 @@ class CallRejectedEvent {
   CallRejectedEvent({
     required this.callCid,
     required this.createdAt,
-    required this.type,
+    this.type = 'call.rejected',
     required this.user,
   });
 
@@ -23,6 +23,7 @@ class CallRejectedEvent {
 
   DateTime createdAt;
 
+  /// The type of event: \"call.rejected\" in this case
   String type;
 
   UserResponse user;

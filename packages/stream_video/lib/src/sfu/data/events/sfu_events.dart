@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+
+import '../../../errors/video_error.dart';
+import '../../../logger/stream_logger.dart';
 import '../../../webrtc/peer_type.dart';
 import '../models/sfu_audio_level.dart';
 import '../models/sfu_audio_sender.dart';
@@ -188,4 +191,81 @@ class SfuErrorEvent extends SfuEvent {
 
   @override
   List<Object> get props => [error];
+}
+
+abstract class SfuSocketEvent extends SfuEvent {
+  const SfuSocketEvent();
+}
+
+class SfuSocketConnected extends SfuSocketEvent {
+  const SfuSocketConnected({
+    required this.sessionId,
+    required this.url,
+  });
+
+  final String sessionId;
+  final String url;
+
+  @override
+  List<Object?> get props => [sessionId, url];
+}
+
+class SfuSocketDisconnected extends SfuSocketEvent {
+  const SfuSocketDisconnected({
+    required this.sessionId,
+    required this.url,
+    required this.reason,
+  });
+
+  final String sessionId;
+  final String url;
+  final DisconnectionReason reason;
+
+  @override
+  List<Object?> get props => [sessionId, url, reason];
+}
+
+class SfuSocketFailed extends SfuSocketEvent {
+  const SfuSocketFailed({
+    required this.sessionId,
+    required this.url,
+    required this.error,
+  });
+
+  final String sessionId;
+  final String url;
+  final VideoError error;
+
+  @override
+  List<Object?> get props => [sessionId, url, error];
+}
+
+class DisconnectionReason with EquatableMixin {
+  DisconnectionReason({
+    this.closeCode,
+    this.closeReason,
+  });
+
+  final int? closeCode;
+  final String? closeReason;
+
+  @override
+  String toString() {
+    return 'DisconnectionReason{code: $closeCode, reason: $closeReason}';
+  }
+
+  @override
+  List<Object?> get props => [closeCode, closeReason];
+}
+
+extension LogPriority on SfuEvent {
+  Priority get logPriority {
+    if (this is SfuSocketFailed) {
+      return Priority.error;
+    } else if (this is SfuSocketDisconnected) {
+      return Priority.warning;
+    } else {
+      return Priority.verbose;
+    }
+  }
 }

@@ -91,6 +91,10 @@ class ErrorCode extends $pb.ProtobufEnum {
   static const ErrorCode ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND = ErrorCode._(103, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND');
   static const ErrorCode ERROR_CODE_PARTICIPANT_NOT_FOUND = ErrorCode._(200, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PARTICIPANT_NOT_FOUND');
   static const ErrorCode ERROR_CODE_CALL_NOT_FOUND = ErrorCode._(300, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_CALL_NOT_FOUND');
+  static const ErrorCode ERROR_CODE_REQUEST_VALIDATION_FAILED = ErrorCode._(400, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_REQUEST_VALIDATION_FAILED');
+  static const ErrorCode ERROR_CODE_UNAUTHENTICATED = ErrorCode._(401, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_UNAUTHENTICATED');
+  static const ErrorCode ERROR_CODE_PERMISSION_DENIED = ErrorCode._(403, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PERMISSION_DENIED');
+  static const ErrorCode ERROR_CODE_TOO_MANY_REQUESTS = ErrorCode._(429, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_TOO_MANY_REQUESTS');
   static const ErrorCode ERROR_CODE_INTERNAL_SERVER_ERROR = ErrorCode._(500, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_INTERNAL_SERVER_ERROR');
 
   static const $core.List<ErrorCode> values = <ErrorCode> [
@@ -101,6 +105,10 @@ class ErrorCode extends $pb.ProtobufEnum {
     ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND,
     ERROR_CODE_PARTICIPANT_NOT_FOUND,
     ERROR_CODE_CALL_NOT_FOUND,
+    ERROR_CODE_REQUEST_VALIDATION_FAILED,
+    ERROR_CODE_UNAUTHENTICATED,
+    ERROR_CODE_PERMISSION_DENIED,
+    ERROR_CODE_TOO_MANY_REQUESTS,
     ERROR_CODE_INTERNAL_SERVER_ERROR,
   ];
 
@@ -108,5 +116,24 @@ class ErrorCode extends $pb.ProtobufEnum {
   static ErrorCode? valueOf($core.int value) => _byValue[value];
 
   const ErrorCode._($core.int v, $core.String n) : super(v, n);
+}
+
+class TrackUnpublishReason extends $pb.ProtobufEnum {
+  static const TrackUnpublishReason TRACK_UNPUBLISH_REASON_UNSPECIFIED = TrackUnpublishReason._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRACK_UNPUBLISH_REASON_UNSPECIFIED');
+  static const TrackUnpublishReason TRACK_UNPUBLISH_REASON_USER_MUTED = TrackUnpublishReason._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRACK_UNPUBLISH_REASON_USER_MUTED');
+  static const TrackUnpublishReason TRACK_UNPUBLISH_REASON_PERMISSION_REVOKED = TrackUnpublishReason._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRACK_UNPUBLISH_REASON_PERMISSION_REVOKED');
+  static const TrackUnpublishReason TRACK_UNPUBLISH_REASON_MODERATION = TrackUnpublishReason._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRACK_UNPUBLISH_REASON_MODERATION');
+
+  static const $core.List<TrackUnpublishReason> values = <TrackUnpublishReason> [
+    TRACK_UNPUBLISH_REASON_UNSPECIFIED,
+    TRACK_UNPUBLISH_REASON_USER_MUTED,
+    TRACK_UNPUBLISH_REASON_PERMISSION_REVOKED,
+    TRACK_UNPUBLISH_REASON_MODERATION,
+  ];
+
+  static final $core.Map<$core.int, TrackUnpublishReason> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static TrackUnpublishReason? valueOf($core.int value) => _byValue[value];
+
+  const TrackUnpublishReason._($core.int v, $core.String n) : super(v, n);
 }
 

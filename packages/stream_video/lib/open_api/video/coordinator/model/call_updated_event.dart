@@ -14,22 +14,28 @@ class CallUpdatedEvent {
   /// Returns a new [CallUpdatedEvent] instance.
   CallUpdatedEvent({
     required this.call,
+    required this.callCid,
     this.capabilitiesByRole = const {},
     required this.createdAt,
-    required this.type,
+    this.type = 'call.updated',
   });
 
   CallResponse call;
 
+  String callCid;
+
+  /// The capabilities by role for this call
   Map<String, List<String>> capabilitiesByRole;
 
   DateTime createdAt;
 
+  /// The type of event: \"call.ended\" in this case
   String type;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallUpdatedEvent &&
      other.call == call &&
+     other.callCid == callCid &&
      other.capabilitiesByRole == capabilitiesByRole &&
      other.createdAt == createdAt &&
      other.type == type;
@@ -38,16 +44,18 @@ class CallUpdatedEvent {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (call.hashCode) +
+    (callCid.hashCode) +
     (capabilitiesByRole.hashCode) +
     (createdAt.hashCode) +
     (type.hashCode);
 
   @override
-  String toString() => 'CallUpdatedEvent[call=$call, capabilitiesByRole=$capabilitiesByRole, createdAt=$createdAt, type=$type]';
+  String toString() => 'CallUpdatedEvent[call=$call, callCid=$callCid, capabilitiesByRole=$capabilitiesByRole, createdAt=$createdAt, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'call'] = this.call;
+      json[r'call_cid'] = this.callCid;
       json[r'capabilities_by_role'] = this.capabilitiesByRole;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'type'] = this.type;
@@ -74,6 +82,7 @@ class CallUpdatedEvent {
 
       return CallUpdatedEvent(
         call: CallResponse.fromJson(json[r'call'])!,
+        callCid: mapValueOfType<String>(json, r'call_cid')!,
         capabilitiesByRole: json[r'capabilities_by_role'] == null
           ? const {}
             : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
@@ -129,6 +138,7 @@ class CallUpdatedEvent {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'call',
+    'call_cid',
     'capabilities_by_role',
     'created_at',
     'type',

@@ -1,7 +1,9 @@
 import 'package:meta/meta.dart';
 
+import '../retry/retry_policy.dart';
 import '../stream_video.dart';
 import '../stream_video_impl.dart';
+import '../webrtc/sdp/policy/sdp_policy.dart';
 
 @internal
 class InstanceHolder {
@@ -12,6 +14,8 @@ class InstanceHolder {
     required String coordinatorRpcUrl,
     required String coordinatorWsUrl,
     required int latencyMeasurementRounds,
+    required RetryPolicy retryPolicy,
+    required SdpPolicy sdpPolicy,
   }) {
     if (_instance != null) {
       throw Exception('''
@@ -25,6 +29,8 @@ class InstanceHolder {
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
+      retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
     );
     return _instance!;
   }

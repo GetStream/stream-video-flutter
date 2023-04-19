@@ -40,9 +40,6 @@ class FileStreamLogger extends StreamLogger {
   late final File _file0;
   late final File _file1;
 
-  bool _swapping = false;
-  bool _clearing = false;
-
   File? _currentFile;
   IOSink? _currentIO;
 
@@ -121,7 +118,6 @@ class FileStreamLogger extends StreamLogger {
 
   Future<void> clear() async {
     try {
-      _clearing = true;
       _logD(
         () => '[clear] before; file0: ${_file0.lengthSync()}, '
             'file1: ${_file1.lengthSync()}',
@@ -145,8 +141,9 @@ class FileStreamLogger extends StreamLogger {
         () => '[clear] after; file0: ${_file0.lengthSync()}, '
             'file1: ${_file1.lengthSync()}',
       );
-    } finally {
-      _clearing = false;
+    } catch (e, stk) {
+      _logE(() => '[clear] failed: $e; $stk');
+      rethrow;
     }
   }
 
@@ -158,7 +155,7 @@ class FileStreamLogger extends StreamLogger {
       throw const FileLoggerException('Sender is not provided');
     }
     try {
-      final shareable = await _prepareShareable();
+      final shareable = await prepareShareable();
       _logV(() => '[share] shareable: $shareable(${shareable.existsSync()})');
       return await sender.call(shareable);
     } catch (e, stk) {
@@ -167,14 +164,12 @@ class FileStreamLogger extends StreamLogger {
     }
   }
 
-  Future<File> _prepareShareable() async {
+  Future<File> prepareShareable() async {
     final filename = '$_shareableFilePrefix'
         '${_dateFormat.format(DateTime.now())}.txt';
-    final tempsDir = await config.filesDir;
-    final out = File('${tempsDir.path}$pathSeparator$filename');
-    console?.log(
-        Priority.debug, _tag, () => '[prepareShareable] file0: $_file0');
-    console?.log(Priority.debug, _tag, () => '[prepareShareable] out: $out');
+    final out = File('${_tempsDir.path}$pathSeparator$filename')
+      ..createSync(recursive: true);
+    _logD(() => '[prepareShareable] out: $out');
 
     IOSink? writer;
     try {
@@ -233,14 +228,6 @@ class FileStreamLogger extends StreamLogger {
       ..write('|');
 
     return buffer.toString();
-    // return '''
-    // |======================================================================
-    // |Logs Collected: ${_timeFormat.format(DateTime.now())}
-    // |App Version: ${await config.appVersion}
-    // |Device Info: ${await config.deviceInfo}
-    // |======================================================================
-    // |
-    // ''';
   }
 
   void _logV(MessageBuilder message) {
@@ -266,9 +253,13 @@ class FileStreamLogger extends StreamLogger {
 
 abstract class FileLogConfig {
   int get maxLogSize => _defaultSize;
+
   Future<Directory> get filesDir;
+
   Future<Directory> get tempsDir;
+
   Future<String> get appVersion;
+
   Future<dynamic> get deviceInfo;
 }
 
@@ -310,6 +301,7 @@ extension on Priority {
 
 class FileLoggerException implements Exception {
   const FileLoggerException([this.message]);
+
   final dynamic message;
 
   @override

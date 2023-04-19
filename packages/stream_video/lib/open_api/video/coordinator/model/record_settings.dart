@@ -20,9 +20,9 @@ class RecordSettings {
 
   bool audioOnly;
 
-  String mode;
+  RecordSettingsModeEnum mode;
 
-  String quality;
+  RecordSettingsQualityEnum quality;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is RecordSettings &&
@@ -68,8 +68,8 @@ class RecordSettings {
 
       return RecordSettings(
         audioOnly: mapValueOfType<bool>(json, r'audio_only')!,
-        mode: mapValueOfType<String>(json, r'mode')!,
-        quality: mapValueOfType<String>(json, r'quality')!,
+        mode: RecordSettingsModeEnum.fromJson(json[r'mode'])!,
+        quality: RecordSettingsQualityEnum.fromJson(json[r'quality'])!,
       );
     }
     return null;
@@ -124,4 +124,167 @@ class RecordSettings {
     'quality',
   };
 }
+
+
+class RecordSettingsModeEnum {
+  /// Instantiate a new enum with the provided [value].
+  const RecordSettingsModeEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const available = RecordSettingsModeEnum._(r'available');
+  static const disabled = RecordSettingsModeEnum._(r'disabled');
+  static const autoOn = RecordSettingsModeEnum._(r'auto-on');
+
+  /// List of all possible values in this [enum][RecordSettingsModeEnum].
+  static const values = <RecordSettingsModeEnum>[
+    available,
+    disabled,
+    autoOn,
+  ];
+
+  static RecordSettingsModeEnum? fromJson(dynamic value) => RecordSettingsModeEnumTypeTransformer().decode(value);
+
+  static List<RecordSettingsModeEnum>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <RecordSettingsModeEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = RecordSettingsModeEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [RecordSettingsModeEnum] to String,
+/// and [decode] dynamic data back to [RecordSettingsModeEnum].
+class RecordSettingsModeEnumTypeTransformer {
+  factory RecordSettingsModeEnumTypeTransformer() => _instance ??= const RecordSettingsModeEnumTypeTransformer._();
+
+  const RecordSettingsModeEnumTypeTransformer._();
+
+  String encode(RecordSettingsModeEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a RecordSettingsModeEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  RecordSettingsModeEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'available': return RecordSettingsModeEnum.available;
+        case r'disabled': return RecordSettingsModeEnum.disabled;
+        case r'auto-on': return RecordSettingsModeEnum.autoOn;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [RecordSettingsModeEnumTypeTransformer] instance.
+  static RecordSettingsModeEnumTypeTransformer? _instance;
+}
+
+
+
+class RecordSettingsQualityEnum {
+  /// Instantiate a new enum with the provided [value].
+  const RecordSettingsQualityEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const audioOnly = RecordSettingsQualityEnum._(r'audio-only');
+  static const n360p = RecordSettingsQualityEnum._(r'360p');
+  static const n480p = RecordSettingsQualityEnum._(r'480p');
+  static const n720p = RecordSettingsQualityEnum._(r'720p');
+  static const n1080p = RecordSettingsQualityEnum._(r'1080p');
+  static const n1440p = RecordSettingsQualityEnum._(r'1440p');
+
+  /// List of all possible values in this [enum][RecordSettingsQualityEnum].
+  static const values = <RecordSettingsQualityEnum>[
+    audioOnly,
+    n360p,
+    n480p,
+    n720p,
+    n1080p,
+    n1440p,
+  ];
+
+  static RecordSettingsQualityEnum? fromJson(dynamic value) => RecordSettingsQualityEnumTypeTransformer().decode(value);
+
+  static List<RecordSettingsQualityEnum>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <RecordSettingsQualityEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = RecordSettingsQualityEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [RecordSettingsQualityEnum] to String,
+/// and [decode] dynamic data back to [RecordSettingsQualityEnum].
+class RecordSettingsQualityEnumTypeTransformer {
+  factory RecordSettingsQualityEnumTypeTransformer() => _instance ??= const RecordSettingsQualityEnumTypeTransformer._();
+
+  const RecordSettingsQualityEnumTypeTransformer._();
+
+  String encode(RecordSettingsQualityEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a RecordSettingsQualityEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  RecordSettingsQualityEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'audio-only': return RecordSettingsQualityEnum.audioOnly;
+        case r'360p': return RecordSettingsQualityEnum.n360p;
+        case r'480p': return RecordSettingsQualityEnum.n480p;
+        case r'720p': return RecordSettingsQualityEnum.n720p;
+        case r'1080p': return RecordSettingsQualityEnum.n1080p;
+        case r'1440p': return RecordSettingsQualityEnum.n1440p;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [RecordSettingsQualityEnumTypeTransformer] instance.
+  static RecordSettingsQualityEnumTypeTransformer? _instance;
+}
+
 

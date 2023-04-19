@@ -16,7 +16,7 @@ class CallReactionEvent {
     required this.callCid,
     required this.createdAt,
     required this.reaction,
-    required this.type,
+    this.type = 'call.reaction_new',
   });
 
   String callCid;
@@ -25,6 +25,7 @@ class CallReactionEvent {
 
   ReactionResponse reaction;
 
+  /// The type of event: \"call.reaction_new\" in this case
   String type;
 
   @override

@@ -23,7 +23,10 @@ enum PlatformType {
   linux,
 
   /// Fuchsia: <https://fuchsia.dev/fuchsia-src/concepts>
-  fuchsia,
+  fuchsia;
+
+  @override
+  String toString() => name;
 }
 
 /// Utility class that provides information on the current platform

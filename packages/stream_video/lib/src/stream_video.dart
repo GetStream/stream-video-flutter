@@ -1,18 +1,19 @@
 import 'dart:async';
 
 import '../stream_video.dart';
-import 'call_permission.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'internal/_instance_holder.dart';
 import 'logger/impl/external_logger.dart';
 import 'models/call_device.dart';
+import 'models/call_permission.dart';
 import 'models/call_reaction.dart';
 import 'models/queried_calls.dart';
 import 'models/queried_members.dart';
+import 'retry/retry_policy.dart';
 import 'shared_emitter.dart';
 import 'stream_video_impl.dart';
-import 'token/token_manager.dart';
 import 'utils/none.dart';
+import 'webrtc/sdp/policy/sdp_policy.dart';
 
 /// Handler function used for logging.
 typedef LogHandlerFunction = void Function(
@@ -23,10 +24,8 @@ typedef LogHandlerFunction = void Function(
   StackTrace? stk,
 ]);
 
-const _defaultCoordinatorRpcUrl =
-    'https://video-edge-frankfurt-ce1.stream-io-api.com/video';
-const _defaultCoordinatorWsUrl =
-    'wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect';
+const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com/video';
+const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
 
 /// The client responsible for handling config and maintaining calls
 abstract class StreamVideo {
@@ -35,17 +34,28 @@ abstract class StreamVideo {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
+    RetryPolicy retryPolicy = const RetryPolicy(),
+    SdpPolicy sdpPolicy = _defaultSdpPolicy,
   }) {
     return StreamVideoImpl(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
+      retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
     );
   }
+
   static final InstanceHolder _instanceHolder = InstanceHolder();
 
   set pushNotificationManager(PushNotificationManager pushNotificationManager);
+
+  /// Returns the current [RetryPolicy].
+  RetryPolicy get retryPolicy;
+
+  /// Returns the current [SdpPolicy].
+  SdpPolicy get sdpPolicy;
 
   /// Returns the current user if exists.
   UserInfo? get currentUser;
@@ -60,10 +70,9 @@ abstract class StreamVideo {
   void Function(CallCreated)? onCallCreated;
 
   /// Connects the [user] to the Stream Video service.
-  Future<Result<None>> connectUser(
+  Future<Result<String>> connectUser(
     UserInfo user, {
-    Token? token,
-    TokenProvider? provider,
+    required TokenProvider tokenProvider,
   });
 
   /// Disconnects the user from the Stream Video service.
@@ -84,6 +93,7 @@ abstract class StreamVideo {
   /// it will join the existing call.
   Future<Result<CallJoined>> joinCall({
     required StreamCallCid cid,
+    bool create = false,
     void Function(CallReceivedOrCreated)? onReceivedOrCreated,
   });
 
@@ -98,17 +108,6 @@ abstract class StreamVideo {
   /// Causes the [CoordinatorCallRejectedEvent] event to be emitted
   /// to all the call members.
   Future<Result<None>> rejectCall({
-    required StreamCallCid cid,
-  });
-
-  /// Signals other users that I have cancelled my call to them before
-  /// they accepted it.
-  /// Causes the [CoordinatorCallCancelledEvent] event to be emitted
-  /// to all the call members.
-  ///
-  /// Cancelling a call is only possible before the local participant
-  /// joined the call.
-  Future<Result<None>> cancelCall({
     required StreamCallCid cid,
   });
 
@@ -212,6 +211,13 @@ abstract class StreamVideo {
     required StreamCallCid callCid,
   });
 
+  /// Signals other users that I have cancelled my call to them before
+  /// they accepted it.
+  /// Causes the [CoordinatorCallEndedEvent] event to be emitted
+  /// to all the call members.
+  ///
+  /// Cancelling a call is only possible before the local participant
+  /// joined the call.
   Future<Result<None>> endCall({
     required StreamCallCid callCid,
   });
@@ -242,15 +248,19 @@ abstract class StreamVideo {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     int latencyMeasurementRounds = 3,
-    LogLevel logLevel = LogLevel.off,
+    RetryPolicy retryPolicy = const RetryPolicy(),
+    Priority logPriority = Priority.none,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
+    SdpPolicy sdpPolicy = _defaultSdpPolicy,
   }) {
-    _setupLogger(logLevel, logHandlerFunction);
+    _setupLogger(logPriority, logHandlerFunction);
     return _instanceHolder.init(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
+      retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
     );
   }
 
@@ -277,9 +287,9 @@ abstract class StreamVideo {
   }
 }
 
-void _setupLogger(LogLevel logLevel, LogHandlerFunction logHandlerFunction) {
-  if (logLevel != LogLevel.off) {
-    StreamLog().validator = (priority, _) => priority >= logLevel.priority;
+void _setupLogger(Priority logPriority, LogHandlerFunction logHandlerFunction) {
+  if (logPriority != Priority.none) {
+    StreamLog().priority = logPriority;
     StreamLog().logger = CompositeStreamLogger([
       const ConsoleStreamLogger(),
       ExternalStreamLogger(logHandlerFunction),
@@ -298,21 +308,23 @@ void _defaultLogHandler(
   /* no-op */
 }
 
+const _defaultSdpPolicy = SdpPolicy();
+
 extension StreamVideoX on StreamVideo {
   /// Connects the [user] to the Stream Video service.
-  Future<Result<None>> connectUserWithToken(
+  Future<Result<String>> connectUserWithToken(
     UserInfo user,
-    Token token,
+    String token,
   ) {
-    return connectUser(user, token: token);
+    return connectUser(user, tokenProvider: TokenProvider.static(token));
   }
 
   /// Connects the [user] to the Stream Video service.
-  Future<Result<None>> connectUserWithProvider(
+  Future<Result<String>> connectUserWithProvider(
     UserInfo user,
     TokenProvider provider,
   ) {
-    return connectUser(user, provider: provider);
+    return connectUser(user, tokenProvider: provider);
   }
 
   /// Grants the [permissions] to the [userId] in the [callCid].

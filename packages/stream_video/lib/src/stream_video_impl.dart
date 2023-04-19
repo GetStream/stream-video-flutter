@@ -1,22 +1,27 @@
 import 'dart:async';
 
 import '../stream_video.dart';
-import 'call_permission.dart';
 import 'coordinator/coordinator_client.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/models/coordinator_inputs.dart' as input;
 import 'coordinator/models/coordinator_inputs.dart';
 import 'coordinator/models/coordinator_models.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
+import 'coordinator/retry/coordinator_client_retry.dart';
 import 'errors/video_error_composer.dart';
 import 'models/call_device.dart';
+import 'models/call_permission.dart';
 import 'models/call_reaction.dart';
 import 'models/queried_calls.dart';
 import 'models/queried_members.dart';
+import 'retry/retry_policy.dart';
 import 'shared_emitter.dart';
 import 'state_emitter.dart';
 import 'token/token_manager.dart';
 import 'utils/none.dart';
+import 'webrtc/sdp/policy/sdp_policy.dart';
+
+const _tag = 'SV:Client';
 
 /// The client responsible for handling config and maintaining calls
 class StreamVideoImpl implements StreamVideo {
@@ -27,12 +32,16 @@ class StreamVideoImpl implements StreamVideo {
     required String coordinatorRpcUrl,
     required String coordinatorWsUrl,
     required int latencyMeasurementRounds,
+    required RetryPolicy retryPolicy,
+    required SdpPolicy sdpPolicy,
   }) {
     return StreamVideoImpl._(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
       latencyMeasurementRounds: latencyMeasurementRounds,
+      retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
     );
   }
 
@@ -41,21 +50,28 @@ class StreamVideoImpl implements StreamVideo {
     required this.coordinatorRpcUrl,
     required this.coordinatorWsUrl,
     required this.latencyMeasurementRounds,
+    required this.retryPolicy,
+    required this.sdpPolicy,
   }) {
     _client = buildCoordinatorClient(
       apiKey: apiKey,
       tokenManager: _tokenManager,
+      retryPolicy: retryPolicy,
       rpcUrl: coordinatorRpcUrl,
       wsUrl: coordinatorWsUrl,
     );
   }
 
-  final _logger = taggedLogger(tag: 'SV:Client');
+  final _logger = taggedLogger(tag: _tag);
 
   final String apiKey;
   final String coordinatorRpcUrl;
   final String coordinatorWsUrl;
   final int latencyMeasurementRounds;
+  @override
+  final RetryPolicy retryPolicy;
+  @override
+  final SdpPolicy sdpPolicy;
 
   final _tokenManager = TokenManager();
   late final CoordinatorClient _client;
@@ -81,29 +97,31 @@ class StreamVideoImpl implements StreamVideo {
 
   /// Connects the [user] to the Stream Video service.
   @override
-  Future<Result<None>> connectUser(
+  Future<Result<String>> connectUser(
     UserInfo user, {
-    Token? token,
-    TokenProvider? provider,
+    required TokenProvider tokenProvider,
   }) async {
     _logger.i(() => '[connectUser] user.id : ${user.id}');
     if (currentUser != null) {
       _logger.w(() => '[connectUser] rejected (already set): $currentUser');
-      return Result.success(None());
+      return _tokenManager.getToken();
+    }
+    final tokenResult = await _tokenManager.setTokenProvider(
+      user.id,
+      tokenProvider: tokenProvider,
+    );
+    if (tokenResult.isFailure) {
+      return tokenResult;
     }
     _state.currentUser.value = user;
-    await _tokenManager.setTokenOrProvider(
-      user.id,
-      token: token,
-      provider: provider,
-    );
 
     try {
       _eventSubscription = _client.events.listen((event) {
-        _logger.v(() => '[onCoordWsEvent] event.type: ${event.runtimeType}');
-        if (event is CoordinatorCallCreatedEvent) {
+        _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
+        if (event is CoordinatorCallCreatedEvent &&
+            event.info.createdBy.id != user.id) {
           final callCreated = CallCreated(
-            callCid: StreamCallCid(cid: event.callCid),
+            callCid: event.callCid,
             ringing: event.ringing,
             metadata: CallMetadata(
               details: event.details,
@@ -111,14 +129,17 @@ class StreamVideoImpl implements StreamVideo {
               users: event.users,
             ),
           );
-          _logger.v(() => '[onCoordWsEvent] onCallCreated: $callCreated');
+          _logger.v(() => '[onCoordinatorEvent] onCallCreated: $callCreated');
           onCallCreated?.call(callCreated);
         }
       });
 
       final result = await _client.onUserLogin(user);
       await _pushNotificationManager?.onUserLoggedIn();
-      return result;
+      if (result is Failure) {
+        return result;
+      }
+      return tokenResult;
     } catch (e, stk) {
       _logger.e(() => '[connectUser] failed(${user.id}): $e');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -194,11 +215,12 @@ class StreamVideoImpl implements StreamVideo {
   @override
   Future<Result<CallJoined>> joinCall({
     required StreamCallCid cid,
+    bool create = false,
     void Function(CallReceivedOrCreated)? onReceivedOrCreated,
   }) async {
     _logger.d(() => '[joinCall] cid: $cid');
     final joinResult = await _client.joinCall(
-      input.JoinCallInput(callCid: cid),
+      input.JoinCallInput(callCid: cid, create: create),
     );
     if (joinResult is! Success<CoordinatorJoined>) {
       _logger.e(() => '[joinCall] join failed: $joinResult');
@@ -250,16 +272,6 @@ class StreamVideoImpl implements StreamVideo {
     return _sendEvent(
       cid: cid,
       eventType: input.EventTypeInput.rejected,
-    );
-  }
-
-  @override
-  Future<Result<None>> cancelCall({
-    required StreamCallCid cid,
-  }) async {
-    return _sendEvent(
-      cid: cid,
-      eventType: input.EventTypeInput.cancelled,
     );
   }
 
@@ -547,11 +559,19 @@ CoordinatorClient buildCoordinatorClient({
   required String wsUrl,
   required String apiKey,
   required TokenManager tokenManager,
+  required RetryPolicy retryPolicy,
 }) {
-  return CoordinatorClientOpenApi(
-    apiKey: apiKey,
-    tokenManager: tokenManager,
-    rpcUrl: rpcUrl,
-    wsUrl: wsUrl,
+  streamLog.i(_tag, () => '[buildCoordinatorClient] rpcUrl: $rpcUrl');
+  streamLog.i(_tag, () => '[buildCoordinatorClient] wsUrl: $wsUrl');
+  streamLog.i(_tag, () => '[buildCoordinatorClient] apiKey: $apiKey');
+  return CoordinatorClientRetry(
+    retryPolicy: retryPolicy,
+    delegate: CoordinatorClientOpenApi(
+      apiKey: apiKey,
+      tokenManager: tokenManager,
+      retryPolicy: retryPolicy,
+      rpcUrl: rpcUrl,
+      wsUrl: wsUrl,
+    ),
   );
 }

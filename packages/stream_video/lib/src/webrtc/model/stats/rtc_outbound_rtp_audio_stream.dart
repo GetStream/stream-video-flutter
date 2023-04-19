@@ -24,7 +24,7 @@ import 'rtc_outbound_rtp.dart';
 import 'rtc_writable.dart';
 
 class RtcOutboundRtpAudioStream implements RtcOutboundRtp, RtcWritable {
-  RtcOutboundRtpAudioStream({
+  const RtcOutboundRtpAudioStream({
     this.id,
     this.type,
     this.timestamp,

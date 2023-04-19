@@ -15,24 +15,25 @@ class UnblockedUserEvent {
   UnblockedUserEvent({
     required this.callCid,
     required this.createdAt,
-    required this.type,
-    required this.userId,
+    this.type = 'call.unblocked_user',
+    required this.user,
   });
 
   String callCid;
 
   DateTime createdAt;
 
+  /// The type of event: \"call.unblocked_user\" in this case
   String type;
 
-  String userId;
+  UserResponse user;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UnblockedUserEvent &&
      other.callCid == callCid &&
      other.createdAt == createdAt &&
      other.type == type &&
-     other.userId == userId;
+     other.user == user;
 
   @override
   int get hashCode =>
@@ -40,17 +41,17 @@ class UnblockedUserEvent {
     (callCid.hashCode) +
     (createdAt.hashCode) +
     (type.hashCode) +
-    (userId.hashCode);
+    (user.hashCode);
 
   @override
-  String toString() => 'UnblockedUserEvent[callCid=$callCid, createdAt=$createdAt, type=$type, userId=$userId]';
+  String toString() => 'UnblockedUserEvent[callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'type'] = this.type;
-      json[r'user_id'] = this.userId;
+      json[r'user'] = this.user;
     return json;
   }
 
@@ -76,7 +77,7 @@ class UnblockedUserEvent {
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
         type: mapValueOfType<String>(json, r'type')!,
-        userId: mapValueOfType<String>(json, r'user_id')!,
+        user: UserResponse.fromJson(json[r'user'])!,
       );
     }
     return null;
@@ -129,7 +130,7 @@ class UnblockedUserEvent {
     'call_cid',
     'created_at',
     'type',
-    'user_id',
+    'user',
   };
 }
 
