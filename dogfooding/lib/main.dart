@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -43,6 +44,7 @@ Future<void> _initStreamVideo() async {
       Env.apiKey,
       coordinatorRpcUrl: Env.coordinatorRpcUrl,
       coordinatorWsUrl: Env.coordinatorWsUrl,
+      logPriority: Priority.info
     );
     // TODO throws MissingPluginException (No implementation found for method listen on channel stream_video_push_notification_events)
     // client.pushNotificationManager =
@@ -90,6 +92,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
         WidgetsBindingObserver {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late StreamSubscription<Uri?> _subscription;
+  late final StreamChatClient chatClient;
 
   @override
   void initState() {
@@ -99,7 +102,17 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
     _tryConsumingIncomingCallFromTerminatedState();
     _observeDeepLinks();
+    chatClient = _initChat();
   }
+
+  StreamChatClient _initChat()  {
+    final chatClient = StreamChatClient(
+      Env.apiKey,
+      logLevel: Level.INFO,
+    );
+    return chatClient;
+  }
+
 
   Future<void> _observeDeepLinks() async {
     // The app was terminated.
@@ -224,6 +237,12 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
         ),
       ),
       onGenerateRoute: AppRoutes.generateRoute,
+      builder: (BuildContext context, Widget? child){
+        return StreamChat(
+          client: chatClient,
+          child: child,
+        );
+      },
     );
   }
 }

@@ -1,9 +1,12 @@
-import '../errors/video_error.dart';
-import '../models/call_created.dart';
-import '../models/call_joined.dart';
-import 'action.dart';
+import 'package:meta/meta.dart';
 
-abstract class LifecycleAction extends StreamAction {
+import '../../errors/video_error.dart';
+import '../../models/call_created.dart';
+import '../../models/call_joined.dart';
+import '../internal_action.dart';
+
+@internal
+abstract class LifecycleAction extends StreamInternalAction {
   const LifecycleAction();
 }
 
@@ -18,8 +21,12 @@ class CallUserIdAction extends LifecycleAction {
   List<Object?> get props => [userId];
 }
 
-class CallEndedAction extends LifecycleAction {
-  const CallEndedAction();
+class CallAcceptedAction extends LifecycleAction {
+  const CallAcceptedAction();
+}
+
+class CallRejectedAction extends LifecycleAction {
+  const CallRejectedAction();
 }
 
 class CallDisconnectedAction extends LifecycleAction {
@@ -63,6 +70,9 @@ class CallConnectingAction extends LifecycleAction {
   const CallConnectingAction(this.attempt);
 
   final int attempt;
+
+  @override
+  List<Object?> get props => [attempt];
 }
 
 class CallConnectedAction extends LifecycleAction {
@@ -78,8 +88,8 @@ class CallTimeoutAction extends LifecycleAction {
   List<Object?> get props => [timeLimit];
 }
 
-class CallConnectFailedAction extends LifecycleAction {
-  const CallConnectFailedAction(this.error);
+class ConnectFailedAction extends LifecycleAction {
+  const ConnectFailedAction(this.error);
 
   final VideoError error;
 

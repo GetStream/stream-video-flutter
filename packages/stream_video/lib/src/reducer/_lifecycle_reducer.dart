@@ -1,4 +1,4 @@
-import '../action/lifecycle_action.dart';
+import '../action/internal/lifecycle_action.dart';
 import '../call_state.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_created.dart';
@@ -18,6 +18,10 @@ class LifecycleReducer {
   ) {
     if (action is CallUserIdAction) {
       return _reduceUserId(state, action);
+    } else if (action is CallAcceptedAction) {
+      return _reduceCallAccepted(state, action);
+    } else if (action is CallRejectedAction) {
+      return _reduceCallRejected(state, action);
     } else if (action is CallCreatedAction) {
       return _reduceCallCreated(state, action);
     } else if (action is CallJoiningAction) {
@@ -26,13 +30,11 @@ class LifecycleReducer {
       return _reduceCallJoined(state, action);
     } else if (action is CallDisconnectedAction) {
       return _reduceCallDisconnected(state, action);
-    } else if (action is CallEndedAction) {
-      return _reduceCallEnded(state, action);
     } else if (action is CallTimeoutAction) {
       return _reduceCallTimeout(state, action);
     } else if (action is CallConnectingAction) {
       return _reduceCallConnectingAction(state, action);
-    } else if (action is CallConnectFailedAction) {
+    } else if (action is ConnectFailedAction) {
       return _reduceCallConnectFailed(state, action);
     } else if (action is CallSessionStartAction) {
       return _reduceCallSessionStart(state, action);
@@ -52,6 +54,43 @@ class LifecycleReducer {
       status: CallStatus.idle(),
       sessionId: '',
       callParticipants: const [],
+    );
+  }
+
+  CallState _reduceCallAccepted(
+    CallState state,
+    CallAcceptedAction action,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusIncoming || status.acceptedByMe) {
+      _logger.w(
+        () => '[reduceCallAccepted] rejected (invalid status): $status',
+      );
+      return state;
+    }
+    return state.copyWith(
+      status: CallStatus.incoming(acceptedByMe: true),
+    );
+  }
+
+  CallState _reduceCallRejected(
+    CallState state,
+    CallRejectedAction action,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusIncoming || status.acceptedByMe) {
+      _logger.w(
+        () => '[reduceCallRejected] rejected (invalid status): $status',
+      );
+      return state;
+    }
+    _logger.i(() => '[reduceCallRejected] action: $action, state: $state');
+    return state.copyWith(
+      status: CallStatus.disconnected(
+        DisconnectReason.rejected(
+          byUserId: state.currentUserId,
+        ),
+      ),
     );
   }
 
@@ -91,19 +130,6 @@ class LifecycleReducer {
       settings: action.data.metadata.details.settings,
       ownCapabilities: action.data.metadata.details.ownCapabilities.toList(),
       callParticipants: action.data.metadata.toCallParticipants(state),
-    );
-  }
-
-  CallState _reduceCallEnded(
-    CallState state,
-    CallEndedAction action,
-  ) {
-    _logger.i(() => '[reduceCallEnded] action: $action, state: $state');
-    return state.copyWith(
-      status: CallStatus.disconnected(
-        DisconnectReason.ended(),
-      ),
-      sessionId: '',
     );
   }
 
@@ -154,7 +180,7 @@ class LifecycleReducer {
 
   CallState _reduceCallConnectFailed(
     CallState state,
-    CallConnectFailedAction action,
+    ConnectFailedAction action,
   ) {
     _logger.e(() => '[reduceCallConnectFailed] state: $state');
     return state.copyWith(

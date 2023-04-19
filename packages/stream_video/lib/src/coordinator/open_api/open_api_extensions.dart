@@ -5,7 +5,7 @@ import '../../models/call_credentials.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
 import '../../models/call_reaction.dart';
-import '../../models/call_setting.dart';
+import '../../models/call_settings.dart';
 import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 
@@ -102,7 +102,7 @@ extension CallSettingsExt on open.CallSettingsResponse {
       video: VideoSettings(
         accessRequestEnabled: video.accessRequestEnabled,
       ),
-      screenShare: ScreenShareSetting(
+      screenShare: ScreenShareSettings(
         accessRequestEnabled: screensharing.accessRequestEnabled,
       ),
     );

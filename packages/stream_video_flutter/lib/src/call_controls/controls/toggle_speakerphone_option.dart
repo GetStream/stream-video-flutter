@@ -68,7 +68,7 @@ class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
     if (device == null) return;
 
     // Set the device as the current audio output.
-    await widget.call.apply(SetAudioOutputDevice(device: device));
+    await widget.call.setAudioOutputDevice(device);
   }
 
   @override

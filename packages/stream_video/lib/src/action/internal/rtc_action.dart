@@ -1,13 +1,15 @@
 import 'package:meta/meta.dart';
 
-import '../../stream_video.dart';
-import 'action.dart';
+import '../../../stream_video.dart';
+import '../internal_action.dart';
 
 @internal
-abstract class RtcAction extends StreamAction {}
+abstract class RtcAction extends StreamInternalAction {
+  const RtcAction();
+}
 
 class SubscriberTrackReceivedAction extends RtcAction {
-  SubscriberTrackReceivedAction({
+  const SubscriberTrackReceivedAction({
     required this.trackIdPrefix,
     required this.trackType,
   });
