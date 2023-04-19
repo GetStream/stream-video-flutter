@@ -31,7 +31,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await AppRepository.instance.init();
+  await AppRepository.instance.beginSession();
   runApp(const StreamDogFoodingApp());
 }
 
@@ -58,7 +58,7 @@ class _StreamDogFoodingAppState
     FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
     _tryConsumingIncomingCallFromTerminatedState();
     _observeDeepLinks();
-    AppRepository.instance.init();
+    AppRepository.instance.beginSession();
   }
 
   Future<void> _observeDeepLinks() async {

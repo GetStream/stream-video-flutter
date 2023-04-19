@@ -17,7 +17,7 @@ class AppRepository {
   StreamVideo? streamVideoClient;
   StreamChatClient? streamChatClient;
 
-  Future<void> init() async {
+  Future<void> beginSession() async {
     await initStreamVideo();
     initChat();
     return;
