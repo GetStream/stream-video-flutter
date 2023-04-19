@@ -35,7 +35,12 @@ mixin AppRoutes {
           builder: (context) {
             final call = args[0];
             final options = args[1];
-            return CallScreen(call: call, callConnectOptions: options);
+            final chat = args[2];
+            return CallScreen(
+              call: call,
+              callConnectOptions: options,
+              chatChannel: chat,
+            );
           },
         );
       case Routes.lobby:
