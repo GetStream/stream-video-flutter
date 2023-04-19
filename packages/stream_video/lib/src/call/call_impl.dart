@@ -826,7 +826,7 @@ class CallImpl implements Call {
     final result = await _streamVideo.startTranscription(callCid: callCid);
     _logger.v(() => '[startTranscription] result: $result');
     if (result.isSuccess) {
-      await _stateManager.onCallControlAction(action);
+      await _stateManager.onControlAction(action);
     }
     return result;
   }
@@ -840,7 +840,7 @@ class CallImpl implements Call {
     final result = await _streamVideo.stopTranscription(callCid: callCid);
     _logger.v(() => '[stopTranscription] result: $result');
     if (result.isSuccess) {
-      await _stateManager.onCallControlAction(action);
+      await _stateManager.onControlAction(action);
     }
     return result;
   }

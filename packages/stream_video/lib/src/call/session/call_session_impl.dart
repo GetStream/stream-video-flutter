@@ -9,6 +9,7 @@ import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
 import '../../call_state_manager.dart';
+import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
