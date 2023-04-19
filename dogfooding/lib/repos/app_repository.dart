@@ -19,7 +19,7 @@ class AppRepository {
 
   Future<void> beginSession() async {
     await initStreamVideo();
-    initChat();
+    _initChat();
     return;
   }
 
@@ -43,7 +43,7 @@ class AppRepository {
     }
   }
 
-  StreamChatClient initChat() {
+  StreamChatClient _initChat() {
     streamChatClient = StreamChatClient(
       Env.apiKey,
       logLevel: Level.INFO,
