@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide StreamUserAvatar;
+import 'package:stream_chat_flutter/stream_chat_flutter.dart'
+    hide StreamUserAvatar;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../../repos/app_repository.dart';
 import '../routes/routes.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,30 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final _callIdController = TextEditingController();
 
-  Future<Channel> _initChatChannel({required String channelId}) async {
-    final chatClient = StreamChat.of(context).client;
-
-    final currentUserId = chatClient.state.currentUser?.id;
-
-    final callMemberIDs = call?.state.value.callParticipants
-        .map((CallParticipantState participant) => participant.userId)
-        .where((id) => id != currentUserId)
-        .toList(growable: false);
-
-    /// TODO: check if can use "livestream" channel type here.
-    final channel = chatClient.channel(
-      'messaging',
-      id: channelId,
-      extraData: {
-        'name': '${call?.state.value.callCid} Chat',
-        'members': callMemberIDs,
-      },
-    );
-
-    await channel.watch();
-    return channel;
-  }
-
   void _handleCallNavigation(CallConnectOptions options) {
     if (call != null) {
       Navigator.of(context).pushNamed(
@@ -54,13 +34,28 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _joinOrCreateCall() async {
     final callId = _callIdController.text;
+    final chatClient = AppRepository.instance.streamChatClient;
     if (callId.isEmpty) return debugPrint('Call ID is empty');
 
     try {
       final callCid = StreamCallCid.from(type: 'default', id: callId);
       final data = await streamVideoClient.getOrCreateCall(cid: callCid);
       call = Call.fromCreated(data: data.getDataOrNull()!.data);
-      chatChannel =  await _initChatChannel(channelId: call!.callCid.id);
+
+      final callMemberIDs = call?.state.value.callParticipants
+          .map((CallParticipantState participant) => participant.userId)
+          .where((id) => id != chatClient?.state.currentUser?.id)
+          .toList(
+            growable: false,
+          );
+
+      final channelName = call?.state.value.callCid;
+
+      chatChannel = await AppRepository.instance.createChatChannel(
+        channelId: call!.callCid.id,
+        channelMembers: callMemberIDs!,
+        channelName: '$channelName Chat',
+      );
 
       if (mounted) {
         await Navigator.of(context).pushNamed(
@@ -72,6 +67,13 @@ class _HomeScreenState extends State<HomeScreen> {
       debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());
     } finally {}
+  }
+
+  Future<void> _logout() async {
+    await AppRepository.instance.endSession();
+    if (mounted) {
+      unawaited(Navigator.of(context).pushReplacementNamed(Routes.login));
+    }
   }
 
   @override
@@ -97,12 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await streamVideoClient.disconnectUser();
-              if (mounted) {
-                await Navigator.of(context).pushReplacementNamed(Routes.login);
-              }
-            },
+            onPressed: _logout,
           ),
         ],
       ),
