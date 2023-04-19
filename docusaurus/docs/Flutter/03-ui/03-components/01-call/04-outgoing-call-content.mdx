@@ -1,16 +1,48 @@
-# OutgoingCallContent
+# StreamOutgoingCallContent
 
-The `OutgoingCallContent` widget displays the outgoing call which includes information about the call
+The `StreamOutgoingCallContent` widget displays the outgoing call which includes information about the call
 and options to cancel it. The widget can be used on its own or as a part of `StreamCallContainer`.
 
 ## Usage
 
+To use `StreamOutgoingCallContent`, pass in the call and call state using the respective parameters.
+
 ```dart
-    OutgoingCallContent(
+    StreamOutgoingCallContent(
       call: call,
       callState: callState,
-      onCancelCallTap: () {},
     ),
 ```
 
 ## Customisation
+
+### Modify event behaviour
+
+You can modify behaviours such as accepting and declining a call, as well as what happens when the
+microphone or camera buttons are tapped.
+
+```dart
+    StreamOutgoingCallContent(
+      call: call,
+      callState: callState,
+      onCancelCallTap: () {},
+      onCameraTap: () {},
+      onMicrophoneTap: () {},
+    ),
+```
+
+### Changing avatar and text styles
+
+The avatar and name styles when calling a user or a group of users can be customised via the single participant
+or multiple participant style parameters available.
+
+```dart
+    StreamOutgoingCallContent(
+      call: call,
+      callState: callState,
+      singleParticipantAvatarTheme: StreamUserAvatarThemeData(),
+      singleParticipantTextStyle: TextStyle(),
+      multipleParticipantAvatarTheme: StreamUserAvatarThemeData(),
+      multipleParticipantTextStyle: TextStyle(),
+    ),
+```
