@@ -16,7 +16,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
-  final auth = AuthRepo.instance;
+  final auth = AuthRepository.instance;
 
   Future<void> _loginWithGoogle() async {
     final googleUser = await auth.signInWithGoogle();

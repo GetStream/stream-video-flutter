@@ -10,12 +10,12 @@ import '../src/model/user_credentials.dart';
 import 'app_repository.dart';
 import 'user_repository.dart';
 
-class AuthRepo {
-  AuthRepo._singleton();
+class AuthRepository {
+  AuthRepository._singleton();
 
-  static final AuthRepo _instance = AuthRepo._singleton();
+  static final AuthRepository _instance = AuthRepository._singleton();
 
-  static AuthRepo get instance => _instance;
+  static AuthRepository get instance => _instance;
 
   final _logger = taggedLogger(tag: 'SV:LoginViewState');
 
