@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 import 'call_cid.dart';
 import 'call_permission.dart';
-import 'call_setting.dart';
+import 'call_settings.dart';
 
 @immutable
 class CallMetadata with EquatableMixin {

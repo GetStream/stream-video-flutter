@@ -130,7 +130,7 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
     if (widget.onDeclineCallTap != null) {
       widget.onDeclineCallTap!();
     } else {
-      await widget.call.apply(const RejectCall());
+      await widget.call.reject();
       await widget.call.disconnect();
     }
   }
@@ -139,7 +139,7 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
     if (widget.onAcceptCallTap != null) {
       widget.onAcceptCallTap!();
     } else {
-      await widget.call.apply(const AcceptCall());
+      await widget.call.accept();
     }
   }
 

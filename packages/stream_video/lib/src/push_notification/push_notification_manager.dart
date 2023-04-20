@@ -7,5 +7,5 @@ abstract class PushNotificationManager {
 
   Future<bool> handlePushNotification(Map<String, dynamic> payload);
 
-  Future<CallCreated?> consumeIncomingCall();
+  Future<CallCreatedData?> consumeIncomingCall();
 }

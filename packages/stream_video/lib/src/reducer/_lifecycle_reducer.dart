@@ -1,7 +1,7 @@
-import '../action/lifecycle_action.dart';
+import '../action/internal/lifecycle_action.dart';
 import '../call_state.dart';
 import '../logger/impl/tagged_logger.dart';
-import '../models/call_created.dart';
+import '../models/call_created_data.dart';
 import '../models/call_metadata.dart';
 import '../models/call_participant_state.dart';
 import '../models/call_status.dart';
@@ -16,27 +16,29 @@ class LifecycleReducer {
     CallState state,
     LifecycleAction action,
   ) {
-    if (action is CallUserIdAction) {
+    if (action is SetUserId) {
       return _reduceUserId(state, action);
-    } else if (action is CallCreatedAction) {
+    } else if (action is CallAccepted) {
+      return _reduceCallAccepted(state, action);
+    } else if (action is CallRejected) {
+      return _reduceCallRejected(state, action);
+    } else if (action is CallCreated) {
       return _reduceCallCreated(state, action);
-    } else if (action is CallJoiningAction) {
+    } else if (action is CallJoining) {
       return _reduceCallJoining(state, action);
-    } else if (action is CallJoinedAction) {
+    } else if (action is CallJoined) {
       return _reduceCallJoined(state, action);
-    } else if (action is CallDisconnectedAction) {
+    } else if (action is CallDisconnected) {
       return _reduceCallDisconnected(state, action);
-    } else if (action is CallEndedAction) {
-      return _reduceCallEnded(state, action);
-    } else if (action is CallTimeoutAction) {
+    } else if (action is CallTimeout) {
       return _reduceCallTimeout(state, action);
-    } else if (action is CallConnectingAction) {
+    } else if (action is CallConnecting) {
       return _reduceCallConnectingAction(state, action);
-    } else if (action is CallConnectFailedAction) {
+    } else if (action is ConnectFailed) {
       return _reduceCallConnectFailed(state, action);
-    } else if (action is CallSessionStartAction) {
+    } else if (action is CallSessionStart) {
       return _reduceCallSessionStart(state, action);
-    } else if (action is CallConnectedAction) {
+    } else if (action is CallConnected) {
       return _reduceCallConnected(state, action);
     }
     return state;
@@ -44,7 +46,7 @@ class LifecycleReducer {
 
   CallState _reduceUserId(
     CallState state,
-    CallUserIdAction action,
+    SetUserId action,
   ) {
     _logger.d(() => '[reduceUserId] state: $state');
     return state.copyWith(
@@ -55,9 +57,46 @@ class LifecycleReducer {
     );
   }
 
+  CallState _reduceCallAccepted(
+    CallState state,
+    CallAccepted action,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusIncoming || status.acceptedByMe) {
+      _logger.w(
+        () => '[reduceCallAccepted] rejected (invalid status): $status',
+      );
+      return state;
+    }
+    return state.copyWith(
+      status: CallStatus.incoming(acceptedByMe: true),
+    );
+  }
+
+  CallState _reduceCallRejected(
+    CallState state,
+    CallRejected action,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusIncoming || status.acceptedByMe) {
+      _logger.w(
+        () => '[reduceCallRejected] rejected (invalid status): $status',
+      );
+      return state;
+    }
+    _logger.i(() => '[reduceCallRejected] action: $action, state: $state');
+    return state.copyWith(
+      status: CallStatus.disconnected(
+        DisconnectReason.rejected(
+          byUserId: state.currentUserId,
+        ),
+      ),
+    );
+  }
+
   CallState _reduceCallCreated(
     CallState state,
-    CallCreatedAction action,
+    CallCreated action,
   ) {
     _logger.d(() => '[reduceCallCreated] state: $state');
     return state.copyWith(
@@ -71,7 +110,7 @@ class LifecycleReducer {
 
   CallState _reduceCallJoining(
     CallState state,
-    CallJoiningAction action,
+    CallJoining action,
   ) {
     _logger.d(() => '[reduceCallJoining] state: $state');
     return state.copyWith(
@@ -81,7 +120,7 @@ class LifecycleReducer {
 
   CallState _reduceCallJoined(
     CallState state,
-    CallJoinedAction action,
+    CallJoined action,
   ) {
     final status = state.status.isJoining ? CallStatus.joined() : state.status;
     _logger.d(() => '[reduceCallJoined] state: $state;\nnewStatus: $status');
@@ -94,22 +133,9 @@ class LifecycleReducer {
     );
   }
 
-  CallState _reduceCallEnded(
-    CallState state,
-    CallEndedAction action,
-  ) {
-    _logger.i(() => '[reduceCallEnded] action: $action, state: $state');
-    return state.copyWith(
-      status: CallStatus.disconnected(
-        DisconnectReason.ended(),
-      ),
-      sessionId: '',
-    );
-  }
-
   CallState _reduceCallDisconnected(
     CallState state,
-    CallDisconnectedAction action,
+    CallDisconnected action,
   ) {
     _logger.w(() => '[reduceCallDisconnected] state: $state');
     return state.copyWith(
@@ -125,7 +151,7 @@ class LifecycleReducer {
 
   CallState _reduceCallTimeout(
     CallState state,
-    CallTimeoutAction action,
+    CallTimeout action,
   ) {
     _logger.e(() => '[reduceCallTimeout] state: $state');
     return state.copyWith(
@@ -138,7 +164,7 @@ class LifecycleReducer {
 
   CallState _reduceCallConnectingAction(
     CallState state,
-    CallConnectingAction action,
+    CallConnecting action,
   ) {
     _logger.d(() => '[reduceCallConnectingAction] state: $state');
     final CallStatus status;
@@ -154,7 +180,7 @@ class LifecycleReducer {
 
   CallState _reduceCallConnectFailed(
     CallState state,
-    CallConnectFailedAction action,
+    ConnectFailed action,
   ) {
     _logger.e(() => '[reduceCallConnectFailed] state: $state');
     return state.copyWith(
@@ -166,7 +192,7 @@ class LifecycleReducer {
 
   CallState _reduceCallSessionStart(
     CallState state,
-    CallSessionStartAction action,
+    CallSessionStart action,
   ) {
     _logger.d(() => '[reduceCallSessionStart] state: $state');
     return state.copyWith(
@@ -177,7 +203,7 @@ class LifecycleReducer {
 
   CallState _reduceCallConnected(
     CallState state,
-    CallConnectedAction action,
+    CallConnected action,
   ) {
     _logger.d(() => '[reduceCallConnected] state: $state');
     return state.copyWith(
@@ -186,7 +212,7 @@ class LifecycleReducer {
   }
 }
 
-extension on CallCreated {
+extension on CallCreatedData {
   CallStatus toCallStatus({
     required CallState state,
   }) {

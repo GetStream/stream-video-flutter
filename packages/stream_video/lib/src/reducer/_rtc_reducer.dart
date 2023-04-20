@@ -1,4 +1,4 @@
-import '../action/rtc_action.dart';
+import '../action/internal/rtc_action.dart';
 import '../call_state.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_track_state.dart';
@@ -12,7 +12,7 @@ class RtcReducer {
     CallState state,
     RtcAction action,
   ) {
-    if (action is SubscriberTrackReceivedAction) {
+    if (action is SubscriberTrackReceived) {
       return _reduceSubscriberTrackReceived(state, action);
     }
     return state;
@@ -20,7 +20,7 @@ class RtcReducer {
 
   CallState _reduceSubscriberTrackReceived(
     CallState state,
-    SubscriberTrackReceivedAction action,
+    SubscriberTrackReceived action,
   ) {
     _logger.d(
       () => '[reduceSubTrackReceived] ${state.sessionId}; action: $action',

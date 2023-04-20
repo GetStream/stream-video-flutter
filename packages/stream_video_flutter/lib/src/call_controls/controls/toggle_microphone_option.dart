@@ -34,9 +34,7 @@ class ToggleMicrophoneOption extends StatelessWidget {
       icon:
           enabled ? Icon(enabledMicrophoneIcon) : Icon(disabledMicrophoneIcon),
       onPressed: () {
-        call.apply(
-          SetMicrophoneEnabled(enabled: !enabled),
-        );
+        call.setMicrophoneEnabled(enabled: !enabled);
       },
     );
   }

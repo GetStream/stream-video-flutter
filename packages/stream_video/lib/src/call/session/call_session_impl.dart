@@ -8,6 +8,7 @@ import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
+import '../../action/participant_action.dart';
 import '../../call_state_manager.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
@@ -179,7 +180,7 @@ class CallSessionImpl extends CallSession {
   }
 
   @override
-  Future<Result<None>> apply(SessionControlAction action) async {
+  Future<Result<None>> apply(ParticipantAction action) async {
     _logger.d(() => '[apply] action: $action');
     if (action is SetCameraEnabled) {
       return _onSetCameraEnabled(action.enabled);

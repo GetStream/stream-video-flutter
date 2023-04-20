@@ -2,7 +2,7 @@ import '../models/call_cid.dart';
 import '../models/call_device.dart';
 import '../models/call_metadata.dart';
 import '../models/call_reaction.dart';
-import '../models/call_received_created.dart';
+import '../models/call_received_created_data.dart';
 import '../models/queried_calls.dart';
 import '../models/queried_members.dart';
 import '../models/user_info.dart';
@@ -26,7 +26,7 @@ abstract class CoordinatorClient {
 
   Future<Result<None>> deleteDevice(inputs.DeleteDeviceInput input);
 
-  Future<Result<CallReceivedOrCreated>> getOrCreateCall(
+  Future<Result<CallReceivedOrCreatedData>> getOrCreateCall(
     inputs.GetOrCreateCallInput input,
   );
 

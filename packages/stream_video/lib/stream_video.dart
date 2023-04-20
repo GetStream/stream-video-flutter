@@ -1,8 +1,9 @@
 library stream_video;
 
-export 'src/action/call_control_action.dart';
+export 'src/action/participant_action.dart';
 export 'src/call/call.dart';
 export 'src/call/call_connect_options.dart';
+export 'src/call/participant/participants_extension.dart';
 export 'src/call_state.dart';
 export 'src/events.dart';
 export 'src/logger/impl/console_logger.dart';
@@ -11,12 +12,12 @@ export 'src/logger/impl/tagged_logger.dart';
 export 'src/logger/stream_log.dart';
 export 'src/logger/stream_logger.dart';
 export 'src/models/call_cid.dart';
-export 'src/models/call_created.dart';
-export 'src/models/call_joined.dart';
+export 'src/models/call_created_data.dart';
+export 'src/models/call_joined_data.dart';
 export 'src/models/call_metadata.dart';
 export 'src/models/call_participant_state.dart';
-export 'src/models/call_received_created.dart';
-export 'src/models/call_setting.dart';
+export 'src/models/call_received_created_data.dart';
+export 'src/models/call_settings.dart';
 export 'src/models/call_stats.dart';
 export 'src/models/call_status.dart';
 export 'src/models/call_track_state.dart';
