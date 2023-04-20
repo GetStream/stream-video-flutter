@@ -10,17 +10,16 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:uni_links/uni_links.dart';
 
-import 'env/env.dart';
 import 'firebase_options.dart';
-import 'log_config.dart';
+import 'repos/app_repository.dart';
+import 'repos/user_repository.dart';
 import 'src/routes/app_routes.dart';
 import 'src/routes/routes.dart';
-import 'user_repository.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  await _initStreamVideo();
+  await AppRepository.instance.initStreamVideo();
   await _handleRemoteMessage(message);
 }
 
@@ -33,50 +32,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await _initStreamVideo();
+  await AppRepository.instance.beginSession();
   runApp(const StreamDogFoodingApp());
-}
-
-Future<void> _initStreamVideo() async {
-  if (!StreamVideo.isInitialized()) {
-    await _setupLogger();
-    final client = StreamVideo.init(
-      Env.apiKey,
-      coordinatorRpcUrl: Env.coordinatorRpcUrl,
-      coordinatorWsUrl: Env.coordinatorWsUrl,
-      logPriority: Priority.info
-    );
-    // TODO throws MissingPluginException (No implementation found for method listen on channel stream_video_push_notification_events)
-    // client.pushNotificationManager =
-    //     await StreamVideoPushNotificationManager.create(client);
-  }
-}
-
-Future<void> _setupLogger() async {
-  const consoleLogger = ConsoleStreamLogger();
-  final children = <StreamLogger>[consoleLogger];
-  FileStreamLogger? fileLogger;
-  if (!kIsWeb) {
-    fileLogger = FileStreamLogger(
-      AppFileLogConfig('1.0.0'),
-      sender: (logFile) async {
-        consoleLogger.log(
-          Priority.debug,
-          'DogFoodingApp',
-          () => '[send] logFile: $logFile(${logFile.existsSync()})',
-        );
-        await Share.shareXFiles(
-          [XFile(logFile.path)],
-          subject: 'Share Logs',
-          text: 'Stream Flutter Dogfooding Logs',
-        );
-      },
-      console: consoleLogger,
-    );
-    children.add(fileLogger);
-  }
-  StreamLog().validator = (priority, _) => true;
-  StreamLog().logger = CompositeStreamLogger(children);
 }
 
 class StreamDogFoodingApp extends StatefulWidget {
@@ -86,9 +43,10 @@ class StreamDogFoodingApp extends StatefulWidget {
   State<StreamDogFoodingApp> createState() => _StreamDogFoodingAppState();
 }
 
-class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
-    //ignore:prefer_mixin
+class _StreamDogFoodingAppState
+    extends State<StreamDogFoodingApp>
     with
+        //ignore:prefer_mixin
         WidgetsBindingObserver {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late StreamSubscription<Uri?> _subscription;
@@ -102,17 +60,8 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
     _tryConsumingIncomingCallFromTerminatedState();
     _observeDeepLinks();
-    chatClient = _initChat();
+    AppRepository.instance.beginSession();
   }
-
-  StreamChatClient _initChat()  {
-    final chatClient = StreamChatClient(
-      Env.apiKey,
-      logLevel: Level.INFO,
-    );
-    return chatClient;
-  }
-
 
   Future<void> _observeDeepLinks() async {
     // The app was terminated.
@@ -237,9 +186,9 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
         ),
       ),
       onGenerateRoute: AppRoutes.generateRoute,
-      builder: (BuildContext context, Widget? child){
+      builder: (BuildContext context, Widget? child) {
         return StreamChat(
-          client: chatClient,
+          client: AppRepository.instance.streamChatClient!,
           child: child,
         );
       },

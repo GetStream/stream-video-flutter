@@ -3,13 +3,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide Success;
 import 'package:stream_video/stream_video.dart';
 
-import '../../env/env.dart';
-import '../../user_repository.dart';
-import '../model/user_credentials.dart';
+import '../../repos/auth_repo.dart';
 import '../routes/routes.dart';
 import '../utils/assets.dart';
 
@@ -23,15 +19,11 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-
-  final _logger = taggedLogger(tag: 'SV:LoginViewState');
-
-  late final _googleSignIn = GoogleSignIn(hostedDomain: 'getstream.io');
-
-  late final _tokenService = TokenService();
+  final _emailController = TextEditingController();
+  final auth = AuthRepository.instance;
 
   Future<void> _loginWithGoogle() async {
-    final googleUser = await _googleSignIn.signIn();
+    final googleUser = await auth.signInWithGoogle();
     if (googleUser == null) return debugPrint('Google login cancelled');
 
     final user = UserInfo(
@@ -41,7 +33,9 @@ class _LoginScreenState extends State<LoginScreen> {
       image: googleUser.photoUrl,
     );
 
-    return _onLoginSuccess(user);
+    await auth.loginWithUserInfo(user);
+    if (mounted) await Navigator.of(context).pushReplacementNamed(Routes.home);
+    return;
   }
 
   Future<void> _loginWithEmail() async {
@@ -54,44 +48,10 @@ class _LoginScreenState extends State<LoginScreen> {
       name: email,
     );
 
-    return _onLoginSuccess(user);
+    await auth.loginWithUserInfo(user);
+    if (mounted) await Navigator.of(context).pushReplacementNamed(Routes.home);
+    return;
   }
-
-  Future<void> _onLoginSuccess(UserInfo user) async {
-    final chatClient = StreamChat.of(context);
-
-    final tokenResult = await StreamVideo.instance.connectUser(
-      user,
-      tokenProvider: TokenProvider.dynamic(_tokenLoader, (token) async {
-        _logger.d(() => '[onTokenUpdated] token: $token');
-        final userCredentials = UserCredentials(
-          user: user,
-          token: token,
-        );
-        await UserRepository.instance.saveUserCredentials(userCredentials);
-        final chatUID = md5.convert(utf8.encode(user.id)).toString();
-        await chatClient.client.connectUser(User(id: chatUID), token);
-      }),
-    );
-    _logger.d(() => '[onLoginSuccess] tokenResult: $tokenResult');
-    if (tokenResult is! Success<String>) {
-      // TODO show error
-      return;
-    }
-
-    if (mounted) {
-      await Navigator.of(context).pushReplacementNamed(Routes.home);
-    }
-  }
-
-  Future<String> _tokenLoader(String userId) async {
-    return _tokenService.loadToken(
-        apiKey: Env.apiKey,
-        userId: userId,
-    );
-  }
-
-  final _emailController = TextEditingController();
 
   @override
   void dispose() {
@@ -121,7 +81,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 36),
                 Text('Stream Meetings', style: theme.textTheme.bodyLarge),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
                   child: Text(
                     'Please sign in with your Google Stream account.',
                     textAlign: TextAlign.center,
