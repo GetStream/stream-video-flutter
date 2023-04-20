@@ -4,7 +4,32 @@ A `CallControlOption` widget represents a single option in the `CallControls` wi
 
 ## Usage
 
+To use a `CallControlOption`, you need to provide the icon to be displayed as well as a callback
+to define what happens when the icon is tapped.
+
+```dart
+    CallControlOption(
+      icon: const Icon(Icons.chat_outlined),
+      onPressed: () async {},
+    ),
+```
+
 ## Customisation
 
 ### Modifying visual properties
+
+You can modify the color, shape, elevation, background color, and padding of the widget using the
+`iconColor`, `shape`, `elevation`, `backgroundColor`, and `padding` properties.
+
+As an example, if you want a black chat icon with a blue background and a padding of 12.0:
+
+```dart
+    CallControlOption(
+      icon: const Icon(Icons.chat_outlined),
+      onPressed: () async {},
+      iconColor: Colors.black,
+      backgroundColor: Colors.blue,
+      padding: EdgeInsets.all(12),
+    ),
+```
 
