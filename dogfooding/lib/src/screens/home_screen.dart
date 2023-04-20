@@ -23,6 +23,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final _callIdController = TextEditingController();
 
+  Future<Channel> _initChatChannel({required String channelId}) async {
+    final chatClient = StreamChat.of(context).client;
+
+    final currentUserId = chatClient.state.currentUser?.id;
+
+    final callMemberIDs = call?.state.value.callParticipants
+        .map((CallParticipantState participant) => participant.userId)
+        .where((id) => id != currentUserId)
+        .toList(growable: false);
+
+    /// TODO: check if can use "livestream" channel type here.
+    final channel = chatClient.channel(
+      'messaging',
+      id: channelId,
+      extraData: {
+        'name': '${call?.state.value.callCid} Chat',
+        'members': callMemberIDs,
+      },
+    );
+
+    await channel.watch();
+    return channel;
+  }
+
   void _handleCallNavigation(CallConnectOptions options) {
     if (call != null) {
       Navigator.of(context).pushNamed(
@@ -41,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final callCid = StreamCallCid.from(type: 'default', id: callId);
       final data = await streamVideoClient.getOrCreateCall(cid: callCid);
       call = Call.fromCreated(data: data.getDataOrNull()!.data);
+      chatChannel =  await _initChatChannel(channelId: call!.callCid.id);
 
       final callMemberIDs = call?.state.value.callParticipants
           .map((CallParticipantState participant) => participant.userId)
