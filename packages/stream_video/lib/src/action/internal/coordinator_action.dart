@@ -23,8 +23,8 @@ class CoordinatorEventAction extends CoordinatorAction {
   final CoordinatorCallEvent event;
 }
 
-class UsersReceived extends CoordinatorAction {
-  const UsersReceived({
+class UpdateUsers extends CoordinatorAction {
+  const UpdateUsers({
     required this.users,
   });
 

@@ -17,17 +17,17 @@ class CoordinatorReducer {
     CallState state,
     CoordinatorAction action,
   ) {
-    if (action is UsersReceived) {
-      return _reduceUsersReceived(state, action);
+    if (action is UpdateUsers) {
+      return _reduceUsers(state, action);
     } else if (action is CoordinatorEventAction) {
       return _reduceCoordinatorEvent(state, action.event);
     }
     return state;
   }
 
-  CallState _reduceUsersReceived(
+  CallState _reduceUsers(
     CallState state,
-    UsersReceived action,
+    UpdateUsers action,
   ) {
     return state.copyWith(
       callParticipants: state.callParticipants.map(

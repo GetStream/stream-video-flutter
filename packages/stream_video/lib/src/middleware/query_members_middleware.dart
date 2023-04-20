@@ -28,13 +28,13 @@ class QueryMembersMiddleware extends Middleware {
         participants.map((it) => it.userId).toSet(),
       );
       reduce(
-        UsersReceived(users: users.toUnmodifiableMap()),
+        UpdateUsers(users: users.toUnmodifiableMap()),
       );
     } else if (event is SfuParticipantJoinedEvent) {
       _logger.d(() => '[execute] event: $event');
       final users = await _queryMembersByIds({event.participant.userId});
       reduce(
-        UsersReceived(users: users.toUnmodifiableMap()),
+        UpdateUsers(users: users.toUnmodifiableMap()),
       );
     }
     next.dispatch(action);

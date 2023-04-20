@@ -12,15 +12,15 @@ class RtcReducer {
     CallState state,
     RtcAction action,
   ) {
-    if (action is SubscriberTrackReceived) {
-      return _reduceSubscriberTrackReceived(state, action);
+    if (action is UpdateSubscriberTrack) {
+      return _reduceSubscriberTrack(state, action);
     }
     return state;
   }
 
-  CallState _reduceSubscriberTrackReceived(
+  CallState _reduceSubscriberTrack(
     CallState state,
-    SubscriberTrackReceived action,
+    UpdateSubscriberTrack action,
   ) {
     _logger.d(
       () => '[reduceSubTrackReceived] ${state.sessionId}; action: $action',

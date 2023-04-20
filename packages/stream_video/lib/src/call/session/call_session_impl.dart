@@ -453,7 +453,7 @@ class CallSessionImpl extends CallSession {
       await _applyCurrentAudioOutputDevice();
     }
     return stateManager.dispatch(
-      SubscriberTrackReceived(
+      UpdateSubscriberTrack(
         trackIdPrefix: remoteTrack.trackIdPrefix,
         trackType: remoteTrack.trackType,
       ),
