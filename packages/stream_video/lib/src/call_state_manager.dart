@@ -1,22 +1,17 @@
 import 'action/action.dart';
 import 'action/internal/coordinator_action.dart';
-import 'action/internal/lifecycle_action.dart';
-import 'action/internal/rtc_action.dart';
 import 'action/internal/sfu_action.dart';
 import 'call_state.dart';
 import 'coordinator/coordinator_socket_listener.dart';
 import 'coordinator/models/coordinator_events.dart';
-import 'errors/video_error.dart';
 import 'logger/impl/tagged_logger.dart';
 import 'logger/stream_log.dart';
-import 'models/call_created_data.dart';
-import 'models/call_joined_data.dart';
+import 'middleware/middleware.dart';
+import 'middleware/root_middleware.dart';
 import 'models/call_metadata.dart';
-import 'models/call_received_created_data.dart';
 import 'models/queried_members.dart';
-import 'reducer/call_state_reducer.dart';
+import 'reducer/root_reducer.dart';
 import 'sfu/data/events/sfu_events.dart';
-import 'sfu/data/models/sfu_track_type.dart';
 import 'state_emitter.dart';
 import 'stream_video.dart';
 import 'utils/result.dart';
@@ -30,192 +25,47 @@ abstract class CoordinatorCallEventListener extends CoordinatorEventListener {
   Future<void> onCoordinatorEvent(CoordinatorCallEvent event);
 }
 
-abstract class CallStateManager implements CoordinatorCallEventListener {
+abstract class CallStateManager {
   const CallStateManager();
 
   StateEmitter<CallState> get state;
 
-  Future<void> onUserIdSet(String userId);
-
-  Future<void> onCreated(CallCreatedData data);
-
-  Future<void> onReceivedOrCreated(CallReceivedOrCreatedData data);
-
-  Future<void> onConnecting(int attempt);
-
-  Future<void> onConnected();
-
-  Future<void> onDisconnect();
-
-  Future<void> onJoining();
-
-  Future<void> onJoined(CallJoinedData data);
-
-  Future<void> onSessionStart(String sessionId);
-
-  void onAction(StreamAction action);
-
-  Future<void> onSfuEvent(SfuEvent event);
-
-  Future<void> onWaitingTimeout(Duration dropTimeout);
-
-  Future<void> onConnectFailed(VideoError error);
-
-  void onSubscriberTrackReceived(String trackIdPrefix, SfuTrackType trackType);
+  void dispatch(StreamAction action);
 }
 
 class CallStateManagerImpl extends CallStateManager {
   CallStateManagerImpl({
     required CallState initialState,
-    required StreamVideo streamVideo,
-  })  : _streamVideo = streamVideo,
-        _state = MutableStateEmitterImpl(initialState),
-        _stateReducer = CallStateReducer() {
+    required List<Middleware> middlewares,
+  })  : _state = MutableStateEmitterImpl(initialState),
+        _rootReducer = RootReducer() {
     streamLog.i(_tag, () => '<init> initialState: $initialState');
+    _rootMiddleware = RootMiddleware(
+      getState: () => state.value,
+      reduce: _reduce,
+      middlewares: middlewares,
+    );
   }
 
   late final _logger = taggedLogger(tag: '$_tag-$_stateSeq');
 
-  final StreamVideo _streamVideo;
-  final CallStateReducer _stateReducer;
+  final RootReducer _rootReducer;
   final MutableStateEmitter<CallState> _state;
+  late final Middleware _rootMiddleware;
 
   @override
   StateEmitter<CallState> get state => _state;
 
   @override
-  Future<void> onUserIdSet(String userId) async {
-    _logger.d(() => '[onUserIdSet] userId: $userId');
-    _postReduced(SetUserId(userId: userId));
+  void dispatch(StreamAction action) {
+    _logger.d(() => '[dispatch] action: $action');
+    _rootMiddleware.dispatch(action);
   }
 
-  @override
-  void onAction(StreamAction action) {
-    _logger.d(() => '[onAction] action: $action');
-    _postReduced(action);
-  }
-
-  @override
-  Future<void> onCreated(CallCreatedData data) async {
-    _logger.d(() => '[onCreated] data: $data');
-    _postReduced(CallCreated(data: data));
-  }
-
-  @override
-  Future<void> onReceivedOrCreated(CallReceivedOrCreatedData data) async {
-    _logger.d(() => '[onReceivedOrCreated] data: $data');
-    _postReduced(CallCreated(data: data.data));
-  }
-
-  @override
-  Future<void> onWaitingTimeout(Duration dropTimeout) async {
-    _logger.d(() => '[onWaitingTimeout] dropTimeout: $dropTimeout');
-    _postReduced(CallTimeout(dropTimeout));
-  }
-
-  @override
-  Future<void> onConnectFailed(VideoError error) async {
-    _logger.e(() => '[onConnectFailed] error: $error');
-    _postReduced(ConnectFailed(error));
-  }
-
-  @override
-  Future<void> onJoining() async {
-    _logger.d(() => '[onJoining] no args');
-    _postReduced(const CallJoining());
-  }
-
-  @override
-  Future<void> onJoined(CallJoinedData data) async {
-    _logger.d(() => '[onJoined] data: $data');
-    _postReduced(CallJoined(data));
-  }
-
-  @override
-  Future<void> onSessionStart(String sessionId) async {
-    _logger.d(() => '[onSessionStart] sessionId: $sessionId');
-    _postReduced(CallSessionStart(sessionId: sessionId));
-  }
-
-  @override
-  Future<void> onConnecting(int attempt) async {
-    _logger.d(() => '[onConnecting] attempt: $attempt');
-    _postReduced(CallConnecting(attempt));
-  }
-
-  @override
-  Future<void> onConnected() async {
-    _logger.d(() => '[onConnected] no args');
-    _postReduced(const CallConnected());
-  }
-
-  @override
-  Future<void> onDisconnect() async {
-    _logger.d(() => '[onDisconnect] no args');
-    _postReduced(const CallDisconnected());
-  }
-
-  @override
-  Future<void> onSfuEvent(SfuEvent event) async {
-    if (event is SfuHealthCheckResponseEvent) {
-      return;
-    }
-    _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
-    _postReduced(SfuEventAction(event));
-    if (event is SfuJoinResponseEvent) {
-      final participants = event.callState.participants;
-      final users = await _queryMembersByIds(
-        participants.map((it) => it.userId).toSet(),
-      );
-      _logger.v(() => '[onSfuEvent] received coord users: $users');
-      _postReduced(
-        UsersReceived(users: users.toUnmodifiableMap()),
-      );
-    } else if (event is SfuParticipantJoinedEvent) {
-      final users = await _queryMembersByIds({event.participant.userId});
-      _logger.v(() => '[onSfuEvent] received coord users: $users');
-      _postReduced(
-        UsersReceived(users: users.toUnmodifiableMap()),
-      );
-    }
-  }
-
-  @override
-  Future<void> onCoordinatorEvent(CoordinatorCallEvent event) async {
-    _logger.d(() => '[onCoordinatorEvent] event: $event');
-    _postReduced(CoordinatorEventAction(event));
-  }
-
-  @override
-  void onSubscriberTrackReceived(String trackIdPrefix, SfuTrackType trackType) {
-    _logger.d(
-      () => '[onSubscriberTrackReceived] trackIdPrefix: $trackIdPrefix,'
-          ' trackType: $trackType',
-    );
-    _postReduced(
-      SubscriberTrackReceived(
-        trackIdPrefix: trackIdPrefix,
-        trackType: trackType,
-      ),
-    );
-  }
-
-  Future<List<CallUser>> _queryMembersByIds(
-    Set<String> userIds,
-  ) async {
-    final callCid = state.value.callCid;
-    final usersResult =
-        await _streamVideo.queryMembers(callCid: callCid, userIds: userIds);
-    if (usersResult is! Success<QueriedMembers>) {
-      return List.empty();
-    }
-    return usersResult.data.users.values.toList();
-  }
-
-  void _postReduced(StreamAction action) {
-    if (_verbose) _logger.v(() => '[postReduced] state: ${_state.value}');
-    final reduced = _stateReducer.reduce(_state.value, action);
-    if (_verbose) _logger.v(() => '[postReduced] reduced: $reduced');
+  void _reduce(StreamAction action) {
+    if (_verbose) _logger.v(() => '[reduce] state: ${_state.value}');
+    final reduced = _rootReducer.reduce(_state.value, action);
+    if (_verbose) _logger.v(() => '[reduce] reduced: $reduced');
     _postState(state: reduced);
   }
 

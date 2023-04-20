@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import '../../stream_video.dart';
+import '../action/external_action.dart';
 import '../coordinator/models/coordinator_events.dart';
-import '../models/call_created_data.dart';
-import '../models/call_joined_data.dart';
 import '../models/call_permission.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
@@ -70,39 +69,13 @@ abstract class Call {
 
   Future<Result<None>> reject();
 
+  Future<Result<None>> end();
+
   Future<Result<None>> connect();
 
   Future<Result<None>> disconnect();
 
-  Future<Result<None>> end();
-
-  Future<Result<None>> requestPermissions(List<CallPermission> permissions);
-
-  Future<Result<None>> grantPermissions({
-    required String userId,
-    List<CallPermission> permissions = const [],
-  });
-
-  Future<Result<None>> revokePermissions({
-    required String userId,
-    List<CallPermission> permissions = const [],
-  });
-
-  Future<Result<None>> blockUser(String userId);
-
-  Future<Result<None>> unblockUser(String userId);
-
-  Future<Result<None>> startRecording();
-
-  Future<Result<None>> stopRecording();
-
-  Future<Result<None>> startBroadcasting();
-
-  Future<Result<None>> stopBroadcasting();
-
-  Future<Result<None>> muteUsers(List<String> userIds);
-
-  Future<Result<None>> apply(ParticipantAction action);
+  Future<Result<None>> apply(StreamExternalAction action);
 
   Future<Result<None>> inviteUsers(List<UserInfo> users);
 

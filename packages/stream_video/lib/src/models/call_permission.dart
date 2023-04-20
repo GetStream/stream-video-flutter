@@ -1,3 +1,7 @@
+import '../logger/stream_log.dart';
+
+const _tag = 'SV:CallPermission';
+
 enum CallPermission {
   joinCall('join-call'),
   stopRecordCall('stop-record-call'),
@@ -25,7 +29,10 @@ enum CallPermission {
   factory CallPermission.fromAlias(String alias) {
     return CallPermission.values.firstWhere(
       (e) => e.alias == alias,
-      orElse: () => CallPermission.unknown,
+      orElse: () {
+        streamLog.w(_tag, () => '[fromAlias] unexpected alias: $alias');
+        return CallPermission.unknown;
+      },
     );
   }
 

@@ -11,38 +11,98 @@ abstract class LifecycleAction extends StreamInternalAction {
 }
 
 class SetUserId extends LifecycleAction {
-  const SetUserId({
-    required this.userId,
-  });
+  const SetUserId(this.userId);
 
   final String userId;
 }
 
-class CallAccepted extends LifecycleAction {
+class SetLifecycleStage extends LifecycleAction {
+  const SetLifecycleStage(this.stage);
+
+  factory SetLifecycleStage.accepted() {
+    return const SetLifecycleStage(CallAccepted());
+  }
+
+  factory SetLifecycleStage.rejected() {
+    return const SetLifecycleStage(CallRejected());
+  }
+
+  factory SetLifecycleStage.ended() {
+    return const SetLifecycleStage(CallEnded());
+  }
+
+  factory SetLifecycleStage.disconnected() {
+    return const SetLifecycleStage(CallDisconnected());
+  }
+
+  factory SetLifecycleStage.created(CallCreatedData data) {
+    return SetLifecycleStage(CallCreated(data));
+  }
+
+  factory SetLifecycleStage.joining() {
+    return const SetLifecycleStage(CallJoining());
+  }
+
+  factory SetLifecycleStage.joined(CallJoinedData data) {
+    return SetLifecycleStage(CallJoined(data));
+  }
+
+  factory SetLifecycleStage.sessionStart(String sessionId) {
+    return SetLifecycleStage(CallSessionStart(sessionId));
+  }
+
+  factory SetLifecycleStage.connecting(int attempt) {
+    return SetLifecycleStage(CallConnecting(attempt));
+  }
+
+  factory SetLifecycleStage.connected() {
+    return const SetLifecycleStage(CallConnected());
+  }
+
+  factory SetLifecycleStage.timeout(Duration duration) {
+    return SetLifecycleStage(CallTimeout(duration));
+  }
+
+  factory SetLifecycleStage.connectFailed(VideoError error) {
+    return SetLifecycleStage(ConnectFailed(error));
+  }
+
+  final LifecycleStage stage;
+}
+
+abstract class LifecycleStage {
+  const LifecycleStage();
+
+  const factory LifecycleStage.accepted() = CallAccepted;
+}
+
+class CallAccepted extends LifecycleStage {
   const CallAccepted();
 }
 
-class CallRejected extends LifecycleAction {
+class CallRejected extends LifecycleStage {
   const CallRejected();
 }
 
-class CallDisconnected extends LifecycleAction {
+class CallEnded extends LifecycleStage {
+  const CallEnded();
+}
+
+class CallDisconnected extends LifecycleStage {
   const CallDisconnected();
 }
 
-class CallCreated extends LifecycleAction {
-  const CallCreated({
-    required this.data,
-  });
+class CallCreated extends LifecycleStage {
+  const CallCreated(this.data);
 
   final CallCreatedData data;
 }
 
-class CallJoining extends LifecycleAction {
+class CallJoining extends LifecycleStage {
   const CallJoining();
 }
 
-class CallJoined extends LifecycleAction {
+class CallJoined extends LifecycleStage {
   const CallJoined(this.data);
 
   final CallJoinedData data;
@@ -51,8 +111,8 @@ class CallJoined extends LifecycleAction {
   List<Object?> get props => [data];
 }
 
-class CallSessionStart extends LifecycleAction {
-  const CallSessionStart({required this.sessionId});
+class CallSessionStart extends LifecycleStage {
+  const CallSessionStart(this.sessionId);
 
   final String sessionId;
 
@@ -60,7 +120,7 @@ class CallSessionStart extends LifecycleAction {
   List<Object?> get props => [sessionId];
 }
 
-class CallConnecting extends LifecycleAction {
+class CallConnecting extends LifecycleStage {
   const CallConnecting(this.attempt);
 
   final int attempt;
@@ -69,11 +129,11 @@ class CallConnecting extends LifecycleAction {
   List<Object?> get props => [attempt];
 }
 
-class CallConnected extends LifecycleAction {
+class CallConnected extends LifecycleStage {
   const CallConnected();
 }
 
-class CallTimeout extends LifecycleAction {
+class CallTimeout extends LifecycleStage {
   const CallTimeout(this.timeLimit);
 
   final Duration timeLimit;
@@ -82,7 +142,7 @@ class CallTimeout extends LifecycleAction {
   List<Object?> get props => [timeLimit];
 }
 
-class ConnectFailed extends LifecycleAction {
+class ConnectFailed extends LifecycleStage {
   const ConnectFailed(this.error);
 
   final VideoError error;

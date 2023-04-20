@@ -3,14 +3,15 @@ import 'dart:async';
 import 'package:async/async.dart' as async;
 
 import '../../stream_video.dart';
+import '../action/call_action.dart';
+import '../action/external_action.dart';
+import '../action/internal/coordinator_action.dart';
 import '../action/internal/lifecycle_action.dart';
 import '../call_state_manager.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../errors/video_error_composer.dart';
-import '../models/call_created_data.dart';
+import '../middleware/query_members_middleware.dart';
 import '../models/call_credentials.dart';
-import '../models/call_joined_data.dart';
-import '../models/call_permission.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
@@ -61,7 +62,7 @@ class CallImpl implements Call {
       callCid: data.callCid,
       streamVideo: streamVideo,
       retryPolicy: retryPolicy,
-    ).also((it) => it._stateManager.onCreated(data));
+    ).also((it) => it._stateManager.dispatch(SetLifecycleStage.created(data)));
   }
 
   factory CallImpl.joined({
@@ -75,7 +76,7 @@ class CallImpl implements Call {
       streamVideo: streamVideo,
       retryPolicy: retryPolicy,
       credentials: data.credentials,
-    ).also((it) => it._stateManager.onJoined(data));
+    ).also((it) => it._stateManager.dispatch(SetLifecycleStage.joined(data)));
   }
 
   factory CallImpl._internal({
@@ -234,7 +235,7 @@ class CallImpl implements Call {
       // Notify the client about the permission request.
       return onPermissionRequest?.call(event);
     }
-    await _stateManager.onCoordinatorEvent(event);
+    _stateManager.dispatch(CoordinatorEventAction(event));
   }
 
   @override
@@ -249,7 +250,7 @@ class CallImpl implements Call {
       cid: state.callCid,
     );
     if (result is Success<None>) {
-      _stateManager.onAction(const CallAccepted());
+      _stateManager.dispatch(SetLifecycleStage.accepted());
     }
     return result;
   }
@@ -266,15 +267,32 @@ class CallImpl implements Call {
       cid: state.callCid,
     );
     if (result is Success<None>) {
-      _stateManager.onAction(const CallRejected());
+      _stateManager.dispatch(SetLifecycleStage.rejected());
     }
+    return result;
+  }
+
+  @override
+  Future<Result<None>> end() async {
+    _logger.d(() => '[end] no args');
+    final state = this.state.value;
+    _logger.d(() => '[end] status: ${state.status}');
+    if (state.status is! CallStatusActive) {
+      _logger.w(() => '[end] rejected (invalid status): ${state.status}');
+      return Result.error('invalid status: ${state.status}');
+    }
+    _status.value = _ConnectionStatus.disconnected;
+    await _clear('end');
+    final result = await _permissionsManager.endCall();
+    _stateManager.dispatch(SetLifecycleStage.ended());
+    _logger.v(() => '[end] completed: $result');
     return result;
   }
 
   @override
   Future<Result<None>> join() async {
     _logger.d(() => '[join] no args');
-    await _stateManager.onJoining();
+    _stateManager.dispatch(SetLifecycleStage.joining());
     final joinedResult = await _joinIfNeeded();
     if (joinedResult is Success<CallCredentials>) {
       _logger.v(() => '[join] completed');
@@ -282,7 +300,8 @@ class CallImpl implements Call {
     } else {
       final failedResult = joinedResult as Failure;
       _logger.e(() => '[join] failed: $failedResult');
-      await _stateManager.onConnectFailed(failedResult.error);
+      final error = failedResult.error;
+      _stateManager.dispatch(SetLifecycleStage.connectFailed(error));
       return failedResult;
     }
   }
@@ -341,23 +360,21 @@ class CallImpl implements Call {
       _logger.w(() => '[connect] rejected (not Connectable): $status');
       return Result.error('invalid status: $status');
     }
-
-    final result = await _awaitIfNeeded(_connectOptions.dropTimeout);
+    final timeout = _connectOptions.dropTimeout;
+    final result = await _awaitIfNeeded(timeout);
     if (result.isFailure) {
       _logger.e(() => '[connect] waiting failed: $result');
-      await _stateManager.onWaitingTimeout(_connectOptions.dropTimeout);
+      _stateManager.dispatch(SetLifecycleStage.timeout(timeout));
       return result;
     }
 
-    await _stateManager.onConnecting(_reconnectAttempt);
+    _stateManager.dispatch(SetLifecycleStage.connecting(_reconnectAttempt));
     _logger.v(() => '[connect] joining to coordinator');
     final joinedResult = await _joinIfNeeded();
     if (joinedResult is! Success<CallCredentials>) {
       _logger.e(() => '[connect] joining failed: $joinedResult');
-      _stateManager.onAction(
-        ConnectFailed((joinedResult as Failure).error),
-      );
-      await _stateManager.onConnectFailed((joinedResult as Failure).error);
+      final error = (joinedResult as Failure).error;
+      _stateManager.dispatch(SetLifecycleStage.connectFailed(error));
       return result;
     }
 
@@ -365,11 +382,12 @@ class CallImpl implements Call {
     final sessionResult = await _startSession(joinedResult.data);
     if (sessionResult is! Success<None>) {
       _logger.w(() => '[connect] sfu session start failed: $sessionResult');
-      await _stateManager.onConnectFailed((sessionResult as Failure).error);
+      final error = (sessionResult as Failure).error;
+      _stateManager.dispatch(SetLifecycleStage.connectFailed(error));
       return sessionResult;
     }
     _logger.v(() => '[connect] started session');
-    await _stateManager.onConnected();
+    _stateManager.dispatch(SetLifecycleStage.connected());
     await _applyConnectOptions();
 
     _logger.v(() => '[connect] completed');
@@ -388,12 +406,12 @@ class CallImpl implements Call {
       cid: state.callCid,
       create: true,
       onReceivedOrCreated: (data) async {
-        await _stateManager.onReceivedOrCreated(data);
+        _stateManager.dispatch(SetLifecycleStage.created(data.data));
       },
     );
     if (joinedResult is Success<CallJoinedData>) {
       _logger.v(() => '[joinIfNeeded] completed');
-      await _stateManager.onJoined(joinedResult.data);
+      _stateManager.dispatch(SetLifecycleStage.joined(joinedResult.data));
       _credentials = joinedResult.data.credentials;
       return Result.success(joinedResult.data.credentials);
     }
@@ -422,7 +440,7 @@ class CallImpl implements Call {
       }),
     );
     _subscriptions.add(_idSessionStats, session.stats.listen(_stats.emit));
-    await _stateManager.onSessionStart(session.sessionId);
+    _stateManager.dispatch(SetLifecycleStage.sessionStart(session.sessionId));
     final result = await session.start();
     _logger.v(() => '[startSession] completed: $result');
     return result;
@@ -455,7 +473,7 @@ class CallImpl implements Call {
     final startTime = DateTime.now().toUtc().millisecondsSinceEpoch;
     while (true) {
       _reconnectAttempt++;
-      await _stateManager.onConnecting(_reconnectAttempt);
+      _stateManager.dispatch(SetLifecycleStage.connecting(_reconnectAttempt));
       if (_status.value == _ConnectionStatus.disconnected) {
         _logger.w(() =>
             '[reconnect] attempt($_reconnectAttempt) rejected (disconnected)');
@@ -493,11 +511,12 @@ class CallImpl implements Call {
     if (result.isFailure) {
       _logger.e(() => '[reconnect] <<<<<<<<<<<<<<< failed: $result');
       _status.value = _ConnectionStatus.disconnected;
-      await _stateManager.onConnectFailed((result as Failure).error);
+      final error = (result as Failure).error;
+      _stateManager.dispatch(SetLifecycleStage.connectFailed(error));
       return;
     }
     _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< completed');
-    await _stateManager.onConnected();
+    _stateManager.dispatch(SetLifecycleStage.connected());
     _status.value = _ConnectionStatus.connected;
     await _applyConnectOptions();
     _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< side effects applied');
@@ -538,7 +557,7 @@ class CallImpl implements Call {
     }
     _status.value = _ConnectionStatus.disconnected;
     await _clear('disconnect');
-    await _stateManager.onDisconnect();
+    _stateManager.dispatch(SetLifecycleStage.disconnected());
     _logger.v(() => '[disconnect] finished');
     return Result.success(None());
   }
@@ -574,19 +593,23 @@ class CallImpl implements Call {
   }
 
   @override
-  Future<Result<None>> apply(ParticipantAction action) async {
+  Future<Result<None>> apply(StreamExternalAction action) async {
     _logger.d(() => '[apply] action: $action');
-    final session = _session;
-    if (session == null) {
-      _logger.w(() => '[apply] rejected (session is null);');
-      return Result.error('no call session');
-    }
-    final result = await session.apply(action);
-    _logger.v(() => '[apply] completed: $result');
+    final result = await _apply(action);
+    _logger.v(() => '[apply] result: $result');
     if (result.isSuccess) {
-      _stateManager.onAction(action);
+      _stateManager.dispatch(action);
     }
     return result;
+  }
+
+  Future<Result<None>> _apply(StreamExternalAction action) async {
+    if (action is CallAction) {
+      return _permissionsManager.apply(action);
+    } else if (action is ParticipantAction) {
+      return _session.apply(action);
+    }
+    return Result.error('unsupported action: $action');
   }
 
   Future<void> _applyConnectOptions() async {
@@ -634,7 +657,7 @@ class CallImpl implements Call {
       final action = track.composeControlAction();
       _logger.v(() => '[setLocalTrack] composed action: $action');
       if (action != null) {
-        _stateManager.onAction(action);
+        _stateManager.dispatch(action);
       }
     }
     return result;
@@ -691,67 +714,6 @@ class CallImpl implements Call {
   Future<Result<None>> inviteUsers(List<UserInfo> users) {
     return _streamVideo.inviteUsers(callCid: callCid.value, users: users);
   }
-
-  @override
-  Future<Result<None>> end() async {
-    return _permissionsManager.endCall();
-  }
-
-  @override
-  Future<Result<None>> requestPermissions(List<CallPermission> permissions) {
-    return _permissionsManager.request(permissions);
-  }
-
-  @override
-  Future<Result<None>> grantPermissions({
-    required String userId,
-    List<CallPermission> permissions = const [],
-  }) {
-    return _permissionsManager.grant(userId: userId, permissions: permissions);
-  }
-
-  @override
-  Future<Result<None>> revokePermissions({
-    required String userId,
-    List<CallPermission> permissions = const [],
-  }) async {
-    return _permissionsManager.revoke(userId: userId, permissions: permissions);
-  }
-
-  @override
-  Future<Result<None>> blockUser(String userId) async {
-    return _permissionsManager.blockUser(userId);
-  }
-
-  @override
-  Future<Result<None>> unblockUser(String userId) async {
-    return _permissionsManager.unblockUser(userId);
-  }
-
-  @override
-  Future<Result<None>> startRecording() async {
-    return _permissionsManager.startRecording();
-  }
-
-  @override
-  Future<Result<None>> stopRecording() async {
-    return _permissionsManager.stopRecording();
-  }
-
-  @override
-  Future<Result<None>> startBroadcasting() async {
-    return _permissionsManager.startBroadcasting();
-  }
-
-  @override
-  Future<Result<None>> stopBroadcasting() async {
-    return _permissionsManager.stopBroadcasting();
-  }
-
-  @override
-  Future<Result<None>> muteUsers(List<String> userIds) async {
-    return _permissionsManager.muteUsers(userIds);
-  }
 }
 
 CallStateManager _makeStateManager(
@@ -759,12 +721,13 @@ CallStateManager _makeStateManager(
   StreamVideo streamVideo,
 ) {
   final currentUserId = streamVideo.currentUser?.id ?? '';
+  final middlewares = [QueryMembersMiddleware(streamVideo: streamVideo)];
   return CallStateManagerImpl(
     initialState: CallState(
       currentUserId: currentUserId,
       callCid: callCid,
     ),
-    streamVideo: streamVideo,
+    middlewares: middlewares,
   );
 }
 
@@ -788,7 +751,7 @@ extension on CallStateManager {
       return Result.error('no userId');
     }
     if (stateUserId.isEmpty) {
-      await onUserIdSet(currentUserId);
+      dispatch(SetUserId(currentUserId));
     }
     return Result.success(None());
   }
@@ -834,5 +797,19 @@ extension<T> on async.CancelableOperation<T> {
 extension<T> on Future<T> {
   async.CancelableOperation<T> asCancelable() {
     return async.CancelableOperation.fromFuture(this);
+  }
+}
+
+extension on CallSession? {
+  Future<Result<None>> apply(ParticipantAction action) async {
+    final tag = '$_tag-$_callSeq';
+    final session = this;
+    if (session == null) {
+      streamLog.w(tag, () => '[apply] rejected (session is null);');
+      return Result.error('no call session');
+    }
+    final result = await session.apply(action);
+    streamLog.v(tag, () => '[apply] completed: $result');
+    return result;
   }
 }
