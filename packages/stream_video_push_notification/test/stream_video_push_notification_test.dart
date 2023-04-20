@@ -29,7 +29,13 @@ Future<void> main() async {
       ),
       info: CallInfo(
         cid: streamCallCid,
-        createdByUserId: 'Jc',
+        createdBy: const CallUser(
+          id: "jc",
+          name: "JC M",
+          role: 'admin',
+          image: '',
+          teams: [],
+        ),
       ),
       users: const {
         'jc': CallUser(
