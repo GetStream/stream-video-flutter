@@ -22,6 +22,10 @@ enum CallPermission {
   updateCallSettings('update-call-settings'),
   createReaction('create-reaction'),
   joinBackstage('join-backstage'),
+  removeCallMember('remove-call-member'),
+  updateCallMember('update-call-member'),
+  startTranscriptionCall('start-transcription-call'),
+  stopTranscriptionCall('stop-transcription-call'),
   unknown('unknown');
 
   const CallPermission(this.alias);

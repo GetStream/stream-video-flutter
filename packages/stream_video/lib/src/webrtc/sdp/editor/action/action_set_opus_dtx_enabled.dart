@@ -30,7 +30,7 @@ class SetOpusDtxEnabledAction implements SdpEditAction {
             AudioCodec.opus.alias.toUpperCase()) {
           opusPayloadType = rtpmap.payloadType;
         }
-      } else if (sdpLine.isFmtp) {
+      } else if (opusPayloadType != null && sdpLine.isFmtp) {
         final original = fmtpParser.parse(sdpLine);
         if (original == null || original.payloadType != opusPayloadType) {
           _logger
