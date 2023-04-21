@@ -26,8 +26,9 @@ Future<void> main() async {
   setUp(() {
     _logger.i(() => '[setUp]');
     buffer = DebounceBuffer<int, List<int>>(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(seconds: 1),
       onComplete: (items) async {
+        await Future.delayed(const Duration(seconds: 1));
         _logger.d(() => '[buffer.consumer] completed: $items');
         return items;
       },

@@ -63,7 +63,7 @@ Future<void> _setupLogger() async {
     );
     children.add(fileLogger);
   }
-  StreamLog().validator = (priority, _) => true;
+  StreamLog().validator = (priority, _) => false;
   StreamLog().logger = CompositeStreamLogger(children);
 }
 

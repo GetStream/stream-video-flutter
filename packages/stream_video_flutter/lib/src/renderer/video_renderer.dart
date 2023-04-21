@@ -79,35 +79,47 @@ class StreamVideoRenderer extends StatelessWidget {
   }
 
   void _onSizeChanged(Size size) {
-    print('Video size changed: $size');
+
+    print('Participant ${participant.userId} size changed to $size');
 
     // Notify the listener.
     if (onSizeChanged != null) {
       onSizeChanged!.call(size);
     }
 
-    // call
-    //   // Update the viewport visibility of the participant.
-    //   ..apply(
-    //     SetParticipantViewportVisibility(
-    //       userId: participant.userId,
-    //       sessionId: participant.sessionId,
-    //       visibility: ViewportVisibility(size: size),
-    //     ),
-    //   )
-    //   // Update the video subscription of the track.
-    //   ..apply(
-    //     UpdateSubscription(
-    //       userId: participant.userId,
-    //       sessionId: participant.sessionId,
-    //       trackIdPrefix: participant.trackIdPrefix,
-    //       trackType: videoTrackType,
-    //       videoDimension: RtcVideoDimension(
-    //         width: size.width.toInt(),
-    //         height: size.height.toInt(),
-    //       ),
-    //     ),
-    //   );
+    // Update the viewport visibility of the participant.
+    // call.apply(
+    //   SetParticipantViewportVisibility(
+    //     userId: participant.userId,
+    //     sessionId: participant.sessionId,
+    //     visibility: ViewportVisibility(size: size),
+    //   ),
+    // );
+
+    // Update the video subscription of the track.
+
+    // We only subscribe to remote participant tracks.
+    if (participant.isLocal) return;
+
+    if (size.isEmpty) {
+      call.removeSubscription(
+        userId: participant.userId,
+        sessionId: participant.sessionId,
+        trackIdPrefix: participant.trackIdPrefix,
+        trackType: videoTrackType,
+      );
+    } else {
+      call.updateSubscription(
+        userId: participant.userId,
+        sessionId: participant.sessionId,
+        trackIdPrefix: participant.trackIdPrefix,
+        trackType: videoTrackType,
+        videoDimension: RtcVideoDimension(
+          width: size.width.toInt(),
+          height: size.height.toInt(),
+        ),
+      );
+    }
   }
 }
 

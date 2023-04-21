@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:synchronized/extension.dart';
+
 typedef Consumer<T, R> = Future<R> Function(List<T> items);
 
 class DebounceBuffer<T, R> {
@@ -17,18 +19,21 @@ class DebounceBuffer<T, R> {
 
   final _items = <T>[];
 
-  Future<R> post(T item) async {
-    if (completer.isCompleted) {
-      completer = Completer<R>();
-    }
-    _items.add(item);
-    if (_timer?.isActive ?? false) {
-      _timer?.cancel();
-    }
-    _timer = Timer(duration, () async {
-      await _complete(onComplete);
-    });
-    return completer.future;
+  Future<R> post(T item) {
+    // return synchronized(() {
+      if (completer.isCompleted) {
+        completer = Completer<R>();
+      }
+      _items.add(item);
+      if (_timer?.isActive ?? false) {
+        _timer?.cancel();
+      }
+      _timer = Timer(duration, () async {
+        await _complete(onComplete);
+      });
+
+      return completer.future;
+    // });
   }
 
   Future<void> cancel() async {

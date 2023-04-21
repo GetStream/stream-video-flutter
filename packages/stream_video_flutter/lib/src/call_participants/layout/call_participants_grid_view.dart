@@ -216,9 +216,6 @@ class MobileCallParticipantsGrid extends StatelessWidget {
           crossAxisCount = temp;
         }
 
-        print('Main axis count: $mainAxisCount');
-        print('Cross axis count: $crossAxisCount');
-
         return PageView.builder(
           itemCount: pages.length,
           scrollDirection: Axis.vertical,
@@ -252,7 +249,7 @@ class DesktopCallParticipantsGrid extends StatefulWidget {
     required this.call,
     required this.participants,
     required this.itemBuilder,
-    this.pageSize = 16,
+    this.pageSize = 2,
     this.padding = const EdgeInsets.all(_kDefaultSpacing),
     this.mainAxisSpacing = _kDefaultSpacing,
     this.crossAxisSpacing = _kDefaultSpacing,
@@ -295,8 +292,8 @@ class _DesktopCallParticipantsGridState
     super.didUpdateWidget(oldWidget);
     if (oldWidget.participants != widget.participants ||
         oldWidget.pageSize != widget.pageSize) {
-      _currentPage.value = 0;
-      _pageController.jumpToPage(0);
+      // _currentPage.value = 0;
+      // _pageController.jumpToPage(0);
       _pages = widget.participants.slices(widget.pageSize);
     }
   }
@@ -319,7 +316,8 @@ class _DesktopCallParticipantsGridState
             if (_pages.length > 1)
               Padding(
                 padding: widget.padding,
-                child: Center(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
                   child: Row(
                     children: [
                       AnimatedScale(

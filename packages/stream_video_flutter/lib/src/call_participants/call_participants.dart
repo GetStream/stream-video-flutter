@@ -105,7 +105,7 @@ class StreamCallParticipants extends StatelessWidget {
       userId: '1',
       sessionId: '1',
       role: 'admin',
-      trackIdPrefix: '123',
+      trackIdPrefix: '1',
       // publishedTracks: {
       //   SfuTrackType.audio: TrackState.remote(),
       //   SfuTrackType.video: TrackState.remote(),
@@ -125,7 +125,7 @@ class StreamCallParticipants extends StatelessWidget {
       userId: '2',
       sessionId: '2',
       role: 'admin',
-      trackIdPrefix: '123',
+      trackIdPrefix: '2',
       // publishedTracks: {
       //   SfuTrackType.audio: TrackState.remote(),
       //   SfuTrackType.video: TrackState.remote(),
@@ -146,7 +146,7 @@ class StreamCallParticipants extends StatelessWidget {
       userId: '3',
       sessionId: '3',
       role: 'admin',
-      trackIdPrefix: '123',
+      trackIdPrefix: '3',
       // publishedTracks: const {},
       connectionQuality: SfuConnectionQuality.excellent,
       isSpeaking: false,
@@ -163,7 +163,7 @@ class StreamCallParticipants extends StatelessWidget {
       userId: '4',
       sessionId: '4',
       role: 'admin',
-      trackIdPrefix: '123',
+      trackIdPrefix: '4',
       // publishedTracks: {SfuTrackType.audio: TrackState.remote()},
       connectionQuality: SfuConnectionQuality.excellent,
       isSpeaking: false,
@@ -180,7 +180,7 @@ class StreamCallParticipants extends StatelessWidget {
       userId: '5',
       sessionId: '5',
       role: 'admin',
-      trackIdPrefix: '123',
+      trackIdPrefix: '5',
       // publishedTracks: {SfuTrackType.screenShare: TrackState.remote()},
       connectionQuality: SfuConnectionQuality.excellent,
       isSpeaking: false,
@@ -197,7 +197,7 @@ class StreamCallParticipants extends StatelessWidget {
       userId: '6',
       sessionId: '6',
       role: 'admin',
-      trackIdPrefix: '123',
+      trackIdPrefix: '6',
       // publishedTracks: {
       //   SfuTrackType.audio: TrackState.remote(),
       //   SfuTrackType.video: TrackState.remote()
@@ -214,10 +214,7 @@ class StreamCallParticipants extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final participants = [
-      ...this.participants,
-      ..._participants,
-    ].take(5).where(filter).sorted(sort);
+    final participants = [...this.participants].where(filter);
 
     final screenShareParticipant = participants.firstWhereOrNull(
       (it) {

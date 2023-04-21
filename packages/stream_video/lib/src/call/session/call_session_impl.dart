@@ -8,7 +8,6 @@ import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
-import '../../action/participant_action.dart';
 import '../../call_state_manager.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
@@ -33,7 +32,7 @@ import 'call_session_config.dart';
 
 const _tag = 'SV:CallSession';
 
-const _debounceDuration = Duration(milliseconds: 200);
+const _debounceDuration = Duration(milliseconds: 300);
 
 class CallSessionImpl extends CallSession {
   CallSessionImpl({
@@ -473,20 +472,26 @@ class CallSessionImpl extends CallSession {
   Future<Result<None>> _setSubscriptions(
     List<SetSubscription> actions,
   ) async {
-    final participants = stateManager.state.value.callParticipants;
     _logger.d(() => '[setSubscriptions] actions: $actions');
-    final subscriptions = <String, SfuSubscriptionDetails>{};
+
+    final participants = stateManager.state.value.callParticipants;
     final exclude = {SfuTrackType.video, SfuTrackType.screenShare};
-    participants.getSubscriptions(subscriptions, exclude);
+    final subscriptions = <String, SfuSubscriptionDetails>{
+      ...participants.getSubscriptions(exclude: exclude),
+    };
+
     _logger.v(() => '[setSubscriptions] source: $subscriptions');
     for (final action in actions) {
-      action.getSubscriptions(subscriptions);
+      final actionSubscriptions = action.getSubscriptions();
+      subscriptions.addAll(actionSubscriptions);
     }
+
     _logger.v(() => '[setSubscriptions] updated: $subscriptions');
     final result = await sfuClient.update(
       sessionId: sessionId,
       subscriptions: subscriptions.values,
     );
+
     _logger.v(() => '[setSubscriptions] result: $result');
     return result;
   }
@@ -495,16 +500,19 @@ class CallSessionImpl extends CallSession {
     SubscriptionAction action,
   ) async {
     _logger.d(() => '[updateSubscription] action: $action');
-    return _saBuffer.post(action);
+    return _updateSubscriptions([action]);
   }
 
   Future<Result<None>> _updateSubscriptions(
     List<SubscriptionAction> actions,
   ) async {
     _logger.d(() => '[updateSubscriptions] actions: $actions');
+
     final participants = stateManager.state.value.callParticipants;
-    final subscriptions = <String, SfuSubscriptionDetails>{};
-    participants.getSubscriptions(subscriptions);
+    final subscriptions = <String, SfuSubscriptionDetails>{
+      ...participants.getSubscriptions(),
+    };
+
     _logger.v(() => '[updateSubscriptions] source: $subscriptions');
     for (final action in actions) {
       if (action is UpdateSubscription) {
@@ -513,11 +521,13 @@ class CallSessionImpl extends CallSession {
         subscriptions.remove(action.trackId);
       }
     }
+
     _logger.v(() => '[updateSubscriptions] updated: $subscriptions');
     final result = await sfuClient.update(
       sessionId: sessionId,
       subscriptions: subscriptions.values,
     );
+
     _logger.v(() => '[updateSubscriptions] result: $result');
     return result;
   }
@@ -673,61 +683,89 @@ extension on UpdateSubscription {
 }
 
 extension on SetSubscription {
-  void getSubscriptions(Map<String, SfuSubscriptionDetails> output) {
-    trackTypes.forEach((trackType, videoDimension) {
-      final trackId = '$trackIdPrefix:$trackType';
-      output[trackId] = SfuSubscriptionDetails(
+  Map<String, SfuSubscriptionDetails> getSubscriptions() {
+    final subscriptions = <String, SfuSubscriptionDetails>{};
+
+    for (final trackType in trackTypes.keys) {
+      final dimension = trackTypes[trackType];
+
+      final detail = SfuSubscriptionDetails(
         userId: userId,
         sessionId: sessionId,
         trackIdPrefix: trackIdPrefix,
         trackType: trackType,
-        dimension: videoDimension,
+        dimension: dimension,
       );
-    });
+
+      subscriptions[detail.trackId] = detail;
+    }
+
+    return subscriptions;
   }
 }
 
 extension on List<CallParticipantState> {
-  void getSubscriptions(
-    Map<String, SfuSubscriptionDetails> output, [
-    Set<SfuTrackType>? exclude,
-  ]) {
+  Map<String, SfuSubscriptionDetails> getSubscriptions({
+    Set<SfuTrackType> exclude = const {},
+  }) {
+    final subscriptions = <String, SfuSubscriptionDetails>{};
+
     for (final participant in this) {
+      // We only care about remote participants.
       if (participant.isLocal) continue;
+
       streamLog.v(
         _tag,
         () => '[getSubscriptions] userId: ${participant.userId}, '
             'published: ${participant.publishedTracks.keys}',
       );
-      participant.getSubscriptions(output, exclude);
+
+      subscriptions.addAll(
+        participant.getSubscriptions(exclude: exclude),
+      );
     }
+
+    return subscriptions;
   }
 }
 
 extension on CallParticipantState {
-  void getSubscriptions(
-    Map<String, SfuSubscriptionDetails> output, [
-    Set<SfuTrackType>? exclude,
-  ]) {
-    publishedTracks.forEach((trackType, trackState) {
-      final atLeastSubscribed = trackState is RemoteTrackState &&
-          (trackState.subscribed || trackState.received);
+  Map<String, SfuSubscriptionDetails> getSubscriptions({
+    Set<SfuTrackType> exclude = const {},
+  }) {
+    final subscriptions = <String, SfuSubscriptionDetails>{};
+
+    for (final trackType in publishedTracks.keys) {
+      final trackState = publishedTracks[trackType];
+
       streamLog.v(
         _tag,
         () => '[getSubscriptions] trackType: $trackType, '
             'trackState: $trackState',
       );
-      final shouldExclude = exclude != null && exclude.contains(trackType);
-      if (atLeastSubscribed && !shouldExclude) {
-        final detail = SfuSubscriptionDetails(
-          userId: userId,
-          sessionId: sessionId,
-          trackIdPrefix: trackIdPrefix,
-          trackType: trackType,
-          dimension: trackState.videoDimension,
-        );
-        output[detail.trackId] = detail;
-      }
-    });
+
+      // We only care about remote tracks.
+      if (trackState is! RemoteTrackState) continue;
+
+      // Continue if we should exclude this trackType.
+      final shouldExclude = exclude.contains(trackType);
+      if (shouldExclude) continue;
+
+      // We only care about tracks that are subscribed or received.
+      final atLeastSubscribed = trackState.subscribed || trackState.received;
+      if (!atLeastSubscribed) continue;
+
+      final detail = SfuSubscriptionDetails(
+        userId: userId,
+        sessionId: sessionId,
+        trackIdPrefix: trackIdPrefix,
+        trackType: trackType,
+        dimension: trackState.videoDimension,
+      );
+
+      subscriptions[detail.trackId] = detail;
+    }
+
+    return subscriptions;
   }
 }
