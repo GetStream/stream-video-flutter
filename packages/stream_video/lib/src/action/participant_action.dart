@@ -4,9 +4,10 @@ import '../sfu/data/models/sfu_track_type.dart';
 import '../webrtc/media/constraints/camera_position.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
-import 'action.dart';
+import 'external_action.dart';
 
-abstract class ParticipantAction extends StreamAction with EquatableMixin {
+abstract class ParticipantAction extends StreamExternalAction
+    with EquatableMixin {
   const ParticipantAction();
 
   @override

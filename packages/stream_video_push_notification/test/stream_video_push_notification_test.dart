@@ -16,7 +16,7 @@ Future<void> main() async {
   final streamVideoEventChannel =
       StreamVideoPushNotificationEventChannel(eventChannel: eventChannelMock);
   final StreamCallCid streamCallCid = StreamCallCid(cid: 'call:123');
-  final callCreatedData = CallCreated(
+  final callCreatedData = CallCreatedData(
     callCid: streamCallCid,
     ringing: true,
     metadata: CallMetadata(
@@ -29,7 +29,13 @@ Future<void> main() async {
       ),
       info: CallInfo(
         cid: streamCallCid,
-        createdByUserId: 'Jc',
+        createdBy: const CallUser(
+          id: "jc",
+          name: "JC M",
+          role: 'admin',
+          image: '',
+          teams: [],
+        ),
       ),
       users: const {
         'jc': CallUser(
@@ -47,7 +53,7 @@ Future<void> main() async {
       },
     ),
   );
-  final callReceivedOrCreated = CallReceivedOrCreated(
+  final callReceivedOrCreated = CallReceivedOrCreatedData(
     wasCreated: true,
     data: callCreatedData,
   );

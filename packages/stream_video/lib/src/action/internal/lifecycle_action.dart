@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 import '../../errors/video_error.dart';
-import '../../models/call_created.dart';
-import '../../models/call_joined.dart';
+import '../../models/call_created_data.dart';
+import '../../models/call_joined_data.dart';
 import '../internal_action.dart';
 
 @internal
@@ -10,55 +11,113 @@ abstract class LifecycleAction extends StreamInternalAction {
   const LifecycleAction();
 }
 
-class CallUserIdAction extends LifecycleAction {
-  const CallUserIdAction({
-    required this.userId,
-  });
+class SetUserId extends LifecycleAction {
+  const SetUserId(this.userId);
 
   final String userId;
+}
+
+class SetLifecycleStage extends LifecycleAction {
+  const SetLifecycleStage(this.stage);
+
+  factory SetLifecycleStage.accepted() {
+    return const SetLifecycleStage(CallAccepted());
+  }
+
+  factory SetLifecycleStage.rejected() {
+    return const SetLifecycleStage(CallRejected());
+  }
+
+  factory SetLifecycleStage.ended() {
+    return const SetLifecycleStage(CallEnded());
+  }
+
+  factory SetLifecycleStage.disconnected() {
+    return const SetLifecycleStage(CallDisconnected());
+  }
+
+  factory SetLifecycleStage.created(CallCreatedData data) {
+    return SetLifecycleStage(CallCreated(data));
+  }
+
+  factory SetLifecycleStage.joining() {
+    return const SetLifecycleStage(CallJoining());
+  }
+
+  factory SetLifecycleStage.joined(CallJoinedData data) {
+    return SetLifecycleStage(CallJoined(data));
+  }
+
+  factory SetLifecycleStage.sessionStart(String sessionId) {
+    return SetLifecycleStage(CallSessionStart(sessionId));
+  }
+
+  factory SetLifecycleStage.connecting(int attempt) {
+    return SetLifecycleStage(CallConnecting(attempt));
+  }
+
+  factory SetLifecycleStage.connected() {
+    return const SetLifecycleStage(CallConnected());
+  }
+
+  factory SetLifecycleStage.timeout(Duration duration) {
+    return SetLifecycleStage(CallTimeout(duration));
+  }
+
+  factory SetLifecycleStage.connectFailed(VideoError error) {
+    return SetLifecycleStage(ConnectFailed(error));
+  }
+
+  final LifecycleStage stage;
+}
+
+abstract class LifecycleStage with EquatableMixin {
+  const LifecycleStage();
 
   @override
-  List<Object?> get props => [userId];
+  bool? get stringify => true;
+
+  @override
+  List<Object?> get props => [];
 }
 
-class CallAcceptedAction extends LifecycleAction {
-  const CallAcceptedAction();
+class CallAccepted extends LifecycleStage {
+  const CallAccepted();
 }
 
-class CallRejectedAction extends LifecycleAction {
-  const CallRejectedAction();
+class CallRejected extends LifecycleStage {
+  const CallRejected();
 }
 
-class CallDisconnectedAction extends LifecycleAction {
-  const CallDisconnectedAction();
+class CallEnded extends LifecycleStage {
+  const CallEnded();
 }
 
-class CallCreatedAction extends LifecycleAction {
-  const CallCreatedAction({
-    required this.data,
-  });
+class CallDisconnected extends LifecycleStage {
+  const CallDisconnected();
+}
 
-  final CallCreated data;
+class CallCreated extends LifecycleStage {
+  const CallCreated(this.data);
+
+  final CallCreatedData data;
+}
+
+class CallJoining extends LifecycleStage {
+  const CallJoining();
+}
+
+class CallJoined extends LifecycleStage {
+  const CallJoined(this.data);
+
+  final CallJoinedData data;
 
   @override
   List<Object?> get props => [data];
 }
 
-class CallJoiningAction extends LifecycleAction {
-  const CallJoiningAction();
-}
-
-class CallJoinedAction extends LifecycleAction {
-  const CallJoinedAction(this.data);
-
-  final CallJoined data;
-
-  @override
-  List<Object?> get props => [data];
-}
-
-class CallSessionStartAction extends LifecycleAction {
-  const CallSessionStartAction({required this.sessionId});
+class CallSessionStart extends LifecycleStage {
+  const CallSessionStart(this.sessionId);
 
   final String sessionId;
 
@@ -66,8 +125,8 @@ class CallSessionStartAction extends LifecycleAction {
   List<Object?> get props => [sessionId];
 }
 
-class CallConnectingAction extends LifecycleAction {
-  const CallConnectingAction(this.attempt);
+class CallConnecting extends LifecycleStage {
+  const CallConnecting(this.attempt);
 
   final int attempt;
 
@@ -75,12 +134,12 @@ class CallConnectingAction extends LifecycleAction {
   List<Object?> get props => [attempt];
 }
 
-class CallConnectedAction extends LifecycleAction {
-  const CallConnectedAction();
+class CallConnected extends LifecycleStage {
+  const CallConnected();
 }
 
-class CallTimeoutAction extends LifecycleAction {
-  const CallTimeoutAction(this.timeLimit);
+class CallTimeout extends LifecycleStage {
+  const CallTimeout(this.timeLimit);
 
   final Duration timeLimit;
 
@@ -88,8 +147,8 @@ class CallTimeoutAction extends LifecycleAction {
   List<Object?> get props => [timeLimit];
 }
 
-class ConnectFailedAction extends LifecycleAction {
-  const ConnectFailedAction(this.error);
+class ConnectFailed extends LifecycleStage {
+  const ConnectFailed(this.error);
 
   final VideoError error;
 

@@ -5,30 +5,31 @@ import '../call_state.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_participant_state.dart';
-import '../models/call_reaction.dart';
 import '../models/call_status.dart';
 import '../models/disconnect_reason.dart';
+import '../store/store.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
-class CoordinatorReducer {
+class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
   const CoordinatorReducer();
 
+  @override
   CallState reduce(
     CallState state,
     CoordinatorAction action,
   ) {
-    if (action is UsersReceived) {
-      return _reduceUsersReceived(state, action);
+    if (action is UpdateUsers) {
+      return _reduceUsers(state, action);
     } else if (action is CoordinatorEventAction) {
       return _reduceCoordinatorEvent(state, action.event);
     }
     return state;
   }
 
-  CallState _reduceUsersReceived(
+  CallState _reduceUsers(
     CallState state,
-    UsersReceived action,
+    UpdateUsers action,
   ) {
     return state.copyWith(
       callParticipants: state.callParticipants.map(
@@ -61,8 +62,6 @@ class CoordinatorReducer {
       return _reduceCallRecordingStarted(state, event);
     } else if (event is CoordinatorCallRecordingStoppedEvent) {
       return _reduceCallRecordingStopped(state, event);
-    } else if (event is CoordinatorCallReactionEvent) {
-      return _reduceCallReaction(state, event);
     }
     return state;
   }
@@ -228,41 +227,6 @@ class CoordinatorReducer {
 
     return state.copyWith(
       isRecording: false,
-    );
-  }
-
-  CallState _reduceCallReaction(
-    CallState state,
-    CoordinatorCallReactionEvent event,
-  ) {
-    final status = state.status;
-    if (status is! CallStatusActive) {
-      _logger.w(
-        () => '[reduceCallReaction] rejected (status is not Active)',
-      );
-      return state;
-    }
-
-    return state.copyWith(
-      callParticipants: state.callParticipants.map((participant) {
-        // skip if the reaction is not for this participant
-        if (participant.userId != event.user.id) return participant;
-
-        // skip if the reaction is not for this session
-        final sessionId = event.custom?['sessionId'];
-        if (sessionId != null && participant.sessionId != sessionId) {
-          return participant;
-        }
-
-        return participant.copyWith(
-          reaction: CallReaction(
-            user: event.user,
-            type: event.reactionType,
-            emojiCode: event.emojiCode,
-            custom: event.custom,
-          ),
-        );
-      }).toList(),
     );
   }
 }
