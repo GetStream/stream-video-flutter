@@ -16,50 +16,51 @@ class QueryMembersMiddleware extends Middleware<CallState, StreamAction> {
   late final _logger = taggedLogger(tag: 'SV:QueryMembersMW');
 
   @override
-  Future<void> intercept(
+  void intercept(
     Store<CallState, StreamAction> store,
     StreamAction action,
     NextDispatcher<StreamAction> next,
-  ) async {
+  ) {
     if (action is! SfuEventAction) {
-      return next(action);
+      // Ignore non-SFU events.
+      next(action);
+      return;
     }
 
     final event = action.event;
     if (event is SfuJoinResponseEvent) {
       _logger.d(() => '[execute] event: $event');
 
-      // Update the state before querying members.
-      next(action);
-
       final cid = store.state.value.callCid;
       final participants = event.callState.participants;
-      final users = await _queryMembersByIds(
+
+      _queryMembersByIds(
         cid: cid,
         userIds: {...participants.map((it) => it.userId)},
-      );
+      ).then((users) {
+        if (users.isEmpty) return;
 
-      // Update the state after querying members.
-      return next(UpdateUsers(users: users.toUnmodifiableMap()));
-    }
-
-    if (event is SfuParticipantJoinedEvent) {
+        // Update the store after querying members.
+        store.dispatch(UpdateUsers(users: users.toUnmodifiableMap()));
+      }).catchError((_) {});
+    } else if (event is SfuParticipantJoinedEvent) {
       _logger.d(() => '[execute] event: $event');
 
-      // Update the state before querying members.
-      next(action);
-
       final cid = store.state.value.callCid;
-      final users = await _queryMembersByIds(
+      _queryMembersByIds(
         cid: cid,
         userIds: {event.participant.userId},
-      );
+      ).then((users) {
+        if (users.isEmpty) return;
 
-      // Update the state after querying members.
-      return next(UpdateUsers(users: users.toUnmodifiableMap()));
+        // Update the store after querying members.
+        store.dispatch(UpdateUsers(users: users.toUnmodifiableMap()));
+      }).catchError((_) {});
     }
 
-    return next(action);
+    // Continue the action chain.
+    next(action);
+    return;
   }
 
   Future<List<CallUser>> _queryMembersByIds({
