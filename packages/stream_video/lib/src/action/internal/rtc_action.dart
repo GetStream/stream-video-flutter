@@ -8,8 +8,8 @@ abstract class RtcAction extends StreamInternalAction {
   const RtcAction();
 }
 
-class SubscriberTrackReceived extends RtcAction {
-  const SubscriberTrackReceived({
+class UpdateSubscriberTrack extends RtcAction {
+  const UpdateSubscriberTrack({
     required this.trackIdPrefix,
     required this.trackType,
   });

@@ -532,7 +532,8 @@ class StreamVideoImpl implements StreamVideo {
 }
 
 class _StreamVideoState {
-  final MutableStateEmitter<UserInfo?> currentUser = MutableStateEmitterImpl();
+  final MutableStateEmitter<UserInfo?> currentUser =
+      MutableStateEmitterImpl(null);
 
   Future<void> close() async {
     await currentUser.close();

@@ -7,27 +7,29 @@ import '../logger/impl/tagged_logger.dart';
 import '../models/call_participant_state.dart';
 import '../models/call_status.dart';
 import '../models/disconnect_reason.dart';
+import '../store/store.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
-class CoordinatorReducer {
+class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
   const CoordinatorReducer();
 
+  @override
   CallState reduce(
     CallState state,
     CoordinatorAction action,
   ) {
-    if (action is UsersReceived) {
-      return _reduceUsersReceived(state, action);
+    if (action is UpdateUsers) {
+      return _reduceUsers(state, action);
     } else if (action is CoordinatorEventAction) {
       return _reduceCoordinatorEvent(state, action.event);
     }
     return state;
   }
 
-  CallState _reduceUsersReceived(
+  CallState _reduceUsers(
     CallState state,
-    UsersReceived action,
+    UpdateUsers action,
   ) {
     return state.copyWith(
       callParticipants: state.callParticipants.map(
