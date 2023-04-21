@@ -1,10 +1,5 @@
-import '../action/participant_action.dart';
-import '../call_state.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../models/call_track_state.dart';
+import '../../stream_video.dart';
 import '../store/store.dart';
-import '../sfu/data/models/sfu_track_type.dart';
-import '../webrtc/media/constraints/camera_position.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-Participant');
 
@@ -16,7 +11,11 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
     CallState state,
     ParticipantAction action,
   ) {
-    if (action is SetCameraEnabled) {
+    if (action is SetParticipantPinned) {
+      return _reduceSetParticipantPinned(state, action);
+    } else if (action is SetParticipantViewportVisibility) {
+      return _reduceSetParticipantViewportVisibility(state, action);
+    } else if (action is SetCameraEnabled) {
       return _reduceCameraEnabled(state, action);
     } else if (action is SetMicrophoneEnabled) {
       return _reduceMicrophoneEnabled(state, action);
@@ -40,6 +39,38 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
       return _reduceSetAudioOutputDevice(state, action);
     }
     return state;
+  }
+
+  CallState _reduceSetParticipantPinned(
+    CallState state,
+    SetParticipantPinned action,
+  ) {
+    return state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.sessionId == action.sessionId) {
+          return participant.copyWith(isPinned: action.pinned);
+        }
+
+        return participant;
+      }).toList(),
+    );
+  }
+
+  CallState _reduceSetParticipantViewportVisibility(
+    CallState state,
+    SetParticipantViewportVisibility action,
+  ) {
+    return state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.sessionId == action.sessionId) {
+          return participant.copyWith(
+            viewportVisibility: action.visibility,
+          );
+        }
+
+        return participant;
+      }).toList(),
+    );
   }
 
   CallState _reduceUpdateSubscriptions(
@@ -102,6 +133,7 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
                 ...participant.publishedTracks,
                 action.trackType: trackState.copyWith(
                   subscribed: false,
+                  videoDimension: const RtcVideoDimension.zero(),
                 ),
               },
             );

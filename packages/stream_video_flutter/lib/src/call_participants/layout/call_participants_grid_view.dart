@@ -382,6 +382,7 @@ class _DesktopCallParticipantsGridState
               }
 
               return TileView(
+                key: ValueKey(index),
                 padding: widget.padding,
                 mainAxisSpacing: widget.mainAxisSpacing,
                 crossAxisSpacing: widget.crossAxisSpacing,

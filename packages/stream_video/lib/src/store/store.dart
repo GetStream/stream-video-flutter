@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../disposable.dart';
 import '../state_emitter.dart';
 

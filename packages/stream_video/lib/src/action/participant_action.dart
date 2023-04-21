@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../models/viewport_visibility.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../webrtc/media/constraints/camera_position.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
@@ -15,6 +16,32 @@ abstract class ParticipantAction extends StreamExternalAction
 
   @override
   bool? get stringify => true;
+}
+
+class SetParticipantPinned extends ParticipantAction {
+  const SetParticipantPinned({
+    required this.sessionId,
+    required this.pinned,
+  });
+
+  final String sessionId;
+  final bool pinned;
+
+  @override
+  List<Object?> get props => [sessionId, pinned];
+}
+
+class SetParticipantViewportVisibility extends ParticipantAction {
+  const SetParticipantViewportVisibility({
+    required this.sessionId,
+    required this.visibility,
+  });
+
+  final String sessionId;
+  final ViewportVisibility visibility;
+
+  @override
+  List<Object?> get props => [sessionId, visibility];
 }
 
 abstract class LocalParticipantAction extends ParticipantAction {

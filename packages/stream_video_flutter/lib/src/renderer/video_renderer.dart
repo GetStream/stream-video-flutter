@@ -79,7 +79,6 @@ class StreamVideoRenderer extends StatelessWidget {
   }
 
   void _onSizeChanged(Size size) {
-
     print('Participant ${participant.userId} size changed to $size');
 
     // Notify the listener.
@@ -87,39 +86,47 @@ class StreamVideoRenderer extends StatelessWidget {
       onSizeChanged!.call(size);
     }
 
-    // Update the viewport visibility of the participant.
-    // call.apply(
-    //   SetParticipantViewportVisibility(
-    //     userId: participant.userId,
-    //     sessionId: participant.sessionId,
-    //     visibility: ViewportVisibility(size: size),
-    //   ),
-    // );
-
-    // Update the video subscription of the track.
-
-    // We only subscribe to remote participant tracks.
-    if (participant.isLocal) return;
-
-    if (size.isEmpty) {
-      call.removeSubscription(
-        userId: participant.userId,
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Update the viewport visibility of the participant.
+      call.setParticipantViewportVisibility(
         sessionId: participant.sessionId,
-        trackIdPrefix: participant.trackIdPrefix,
-        trackType: videoTrackType,
+        visibility: ViewportVisibility(size: size),
       );
-    } else {
-      call.updateSubscription(
-        userId: participant.userId,
-        sessionId: participant.sessionId,
-        trackIdPrefix: participant.trackIdPrefix,
-        trackType: videoTrackType,
-        videoDimension: RtcVideoDimension(
-          width: size.width.toInt(),
-          height: size.height.toInt(),
-        ),
+
+      // Update the video subscription of the track.
+      final state = participant.publishedTracks[videoTrackType];
+
+      // We only subscribe to remote participant tracks.
+      if (state is! RemoteTrackState) return;
+
+      final prevDim = state.videoDimension;
+      final newDim = RtcVideoDimension(
+        width: size.width.toInt(),
+        height: size.height.toInt(),
       );
-    }
+
+      // If the dimensions haven't changed, don't update the subscription.
+      if (prevDim == newDim) return;
+
+      // If the new dimensions are zero, remove the subscription.
+      if (newDim.area == 0) {
+        call.removeSubscription(
+          userId: participant.userId,
+          sessionId: participant.sessionId,
+          trackIdPrefix: participant.trackIdPrefix,
+          trackType: videoTrackType,
+        );
+      } else {
+        // Update the subscription.
+        call.updateSubscription(
+          userId: participant.userId,
+          sessionId: participant.sessionId,
+          trackIdPrefix: participant.trackIdPrefix,
+          trackType: videoTrackType,
+          videoDimension: newDim,
+        );
+      }
+    });
   }
 }
 

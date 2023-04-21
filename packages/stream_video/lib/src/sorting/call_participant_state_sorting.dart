@@ -1,5 +1,4 @@
 import '../models/call_participant_state.dart';
-import '../models/viewport_visibility.dart';
 
 /// A comparator which sorts participants by the fact that they are the
 /// dominant speaker or not.
@@ -68,39 +67,6 @@ Comparator<CallParticipantState> role(List<String> roles) {
 //
 // const hasAnyRole = (p: StreamVideoParticipant, roles: string[]) =>
 //   (p.roles || []).some((r) => roles.includes(r));
-
-/// The default sorting preset.
-final defaultSortPreset = combineComparators<CallParticipantState>([
-  pinned,
-  screenSharing,
-  ifInvisibleBy(dominantSpeaker),
-  ifInvisibleBy(speaking),
-  ifInvisibleBy(reactionType('raised-hand')),
-  ifInvisibleBy(publishingVideo),
-  ifInvisibleBy(publishingAudio),
-]);
-
-/// The sorting preset for speaker layout.
-final speakerLayoutSortPreset = combineComparators<CallParticipantState>([
-  pinned,
-  screenSharing,
-  dominantSpeaker,
-  ifInvisibleBy(speaking),
-  ifInvisibleBy(reactionType('raised-hand')),
-  ifInvisibleBy(publishingVideo),
-  ifInvisibleBy(publishingAudio),
-]);
-
-/// The sorting preset for livestreams and audio rooms.
-final livestreamOrAudioRoomSortPreset =
-    combineComparators<CallParticipantState>([
-  ifInvisibleBy(dominantSpeaker),
-  ifInvisibleBy(speaking),
-  ifInvisibleBy(reactionType('raised-hand')),
-  ifInvisibleBy(publishingVideo),
-  ifInvisibleBy(publishingAudio),
-  role(['admin', 'host', 'speaker']),
-]);
 
 /// Creates a new combined [Comparator] which sorts items
 /// by the given [comparators].

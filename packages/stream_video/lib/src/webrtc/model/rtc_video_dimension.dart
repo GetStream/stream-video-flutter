@@ -10,6 +10,11 @@ class RtcVideoDimension with EquatableMixin {
     required this.height,
   }) : area = width * height;
 
+  const RtcVideoDimension.zero()
+      : width = 0,
+        height = 0,
+        area = 0;
+
   final int width;
   final int height;
   final int area;

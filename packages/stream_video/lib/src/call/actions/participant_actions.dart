@@ -1,4 +1,5 @@
 import '../../action/participant_action.dart';
+import '../../models/viewport_visibility.dart';
 import '../../sfu/data/models/sfu_track_type.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
@@ -6,6 +7,32 @@ import '../../webrtc/media/constraints/camera_position.dart';
 import '../../webrtc/model/rtc_video_dimension.dart';
 import '../../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../call.dart';
+
+extension ParticipantExtensions on Call {
+  Future<Result<None>> setParticipantPinned({
+    required String sessionId,
+    required bool pinned,
+  }) {
+    return apply(
+      SetParticipantPinned(
+        sessionId: sessionId,
+        pinned: pinned,
+      ),
+    );
+  }
+
+  Future<Result<None>> setParticipantViewportVisibility({
+    required String sessionId,
+    required ViewportVisibility visibility,
+  }) {
+    return apply(
+      SetParticipantViewportVisibility(
+        sessionId: sessionId,
+        visibility: visibility,
+      ),
+    );
+  }
+}
 
 extension LocalParticipantExtensions on Call {
   Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) {
