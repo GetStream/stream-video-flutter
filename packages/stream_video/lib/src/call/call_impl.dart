@@ -491,7 +491,7 @@ class CallImpl implements Call {
         () => '[reconnect] attempt: $_reconnectAttempt, '
             'elapsed: $elapsed, delay: $delay',
       );
-      await Future.delayed(delay);
+      await Future<void>.delayed(delay);
       _logger.v(() => '[reconnect] joining to coordinator');
       final joinedResult = await _joinIfNeeded();
       if (joinedResult is! Success<CallCredentials>) {
@@ -721,7 +721,10 @@ CallStateManager _makeStateManager(
   StreamVideo streamVideo,
 ) {
   final currentUserId = streamVideo.currentUser?.id ?? '';
-  final middlewares = [QueryMembersMiddleware(streamVideo: streamVideo)];
+  final middlewares = [
+    QueryMembersMiddleware(streamVideo: streamVideo),
+  ];
+
   return CallStateManagerImpl(
     initialState: CallState(
       currentUserId: currentUserId,

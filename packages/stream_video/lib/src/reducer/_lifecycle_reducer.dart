@@ -6,12 +6,14 @@ import '../models/call_metadata.dart';
 import '../models/call_participant_state.dart';
 import '../models/call_status.dart';
 import '../models/disconnect_reason.dart';
+import '../store/store.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-Lifecycle');
 
-class LifecycleReducer {
+class LifecycleReducer extends Reducer<CallState, LifecycleAction> {
   const LifecycleReducer();
 
+  @override
   CallState reduce(
     CallState state,
     LifecycleAction action,

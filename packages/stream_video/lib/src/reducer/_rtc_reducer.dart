@@ -2,12 +2,14 @@ import '../action/internal/rtc_action.dart';
 import '../call_state.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_track_state.dart';
+import '../store/store.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-RTC');
 
-class RtcReducer {
+class RtcReducer extends Reducer<CallState, RtcAction> {
   const RtcReducer();
 
+  @override
   CallState reduce(
     CallState state,
     RtcAction action,

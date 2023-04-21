@@ -7,12 +7,14 @@ import '../logger/impl/tagged_logger.dart';
 import '../models/call_participant_state.dart';
 import '../models/call_status.dart';
 import '../models/disconnect_reason.dart';
+import '../store/store.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
-class CoordinatorReducer {
+class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
   const CoordinatorReducer();
 
+  @override
   CallState reduce(
     CallState state,
     CoordinatorAction action,

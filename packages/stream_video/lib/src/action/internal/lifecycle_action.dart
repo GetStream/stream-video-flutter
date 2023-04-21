@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 import '../../errors/video_error.dart';
@@ -70,10 +71,14 @@ class SetLifecycleStage extends LifecycleAction {
   final LifecycleStage stage;
 }
 
-abstract class LifecycleStage {
+abstract class LifecycleStage with EquatableMixin {
   const LifecycleStage();
 
-  const factory LifecycleStage.accepted() = CallAccepted;
+  @override
+  bool? get stringify => true;
+
+  @override
+  List<Object?> get props => [];
 }
 
 class CallAccepted extends LifecycleStage {
