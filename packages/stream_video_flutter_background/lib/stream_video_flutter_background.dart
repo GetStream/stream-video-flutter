@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:stream_video_flutter_background/model/notification_options.dart';
 
+import 'model/notification_payload.dart';
 import 'stream_video_flutter_background_platform_interface.dart';
 
 typedef OnNotificationContentClick = Function(String callCid);
@@ -12,14 +13,14 @@ typedef OnNotificationButtonClick = Function(String buttonType, String callCid);
 typedef OnPlatformUiLayerDestroyed = Function(String callCid);
 
 class StreamVideoFlutterBackground {
-  static Future<bool> startService(NotificationOptions options) async {
+  static Future<bool> startService(NotificationPayload options) async {
     if (!isAndroid) {
       return false;
     }
     return StreamVideoFlutterBackgroundPlatform.instance.startService(options);
   }
 
-  static Future<bool> updateService(NotificationOptions options) async {
+  static Future<bool> updateService(NotificationPayload options) async {
     if (!isAndroid) {
       return false;
     }

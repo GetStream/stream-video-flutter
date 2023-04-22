@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter_background/model/notification_options.dart';
+import 'package:stream_video_flutter_background/model/notification_payload.dart';
 import 'package:stream_video_flutter_background/stream_video_flutter_background.dart';
 
 void main() {
@@ -18,6 +19,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _buttonType = '<button_type>';
   String _callCid = '<call_cid>';
+
+  int _counter = 0;
 
   @override
   void initState() {
@@ -60,25 +63,47 @@ class _MyAppState extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                  child: const Text('Start Service'),
-                  onPressed: () async {
-                    await StreamVideoFlutterBackground.startService(
-                      NotificationOptions.from(
-                        callCid: "call328",
-                        contentTitle: "call328: Connected",
-                        contentText: "John & Kevin",
-                      ),
-                    );
-                  }),
+                child: const Text('Start Service'),
+                onPressed: () async {
+                  await StreamVideoFlutterBackground.startService(
+                    _buildPayload(_counter++),
+                  );
+                },
+              ),
               ElevatedButton(
-                  child: const Text('Stop Service'),
-                  onPressed: () async {
-                    await StreamVideoFlutterBackground.stopService();
-                  }),
+                child: const Text('Update Service'),
+                onPressed: () async {
+                  await StreamVideoFlutterBackground.updateService(
+                    _buildPayload(_counter++),
+                  );
+                },
+              ),
+              ElevatedButton(
+                child: const Text('Stop Service'),
+                onPressed: () async {
+                  await StreamVideoFlutterBackground.stopService();
+                },
+              ),
               const SizedBox(height: 20),
               Text('On Button Click: $_buttonType(callCid=$_callCid)\n')
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  NotificationPayload _buildPayload(counter) {
+    return NotificationPayload(
+      callCid: "call328",
+      options: NotificationOptions(
+        content: NotificationContent(
+          title: "call328: Connected($counter)",
+          text: "John & Kevin",
+        ),
+        avatar: const NotificationAvatar(
+          url:
+              "https://getstream.io/chat/docs/sdk/avatars/jpg/Willard%20Hessel.jpg",
         ),
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-import 'model/notification_options.dart';
+import 'model/notification_payload.dart';
 import 'stream_video_flutter_background_method_channel.dart';
 
 abstract class StreamVideoFlutterBackgroundPlatform extends PlatformInterface {
@@ -31,11 +31,11 @@ abstract class StreamVideoFlutterBackgroundPlatform extends PlatformInterface {
 
   Function(String callCid)? onUiLayerDestroyed;
 
-  Future<bool> startService(NotificationOptions options) {
+  Future<bool> startService(NotificationPayload payload) {
     throw UnimplementedError('startService() has not been implemented.');
   }
 
-  Future<bool> updateService(NotificationOptions options) {
+  Future<bool> updateService(NotificationPayload payload) {
     throw UnimplementedError('updateService() has not been implemented.');
   }
 

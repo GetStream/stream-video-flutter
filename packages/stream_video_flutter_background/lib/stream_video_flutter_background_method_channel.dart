@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'model/notification_options.dart';
+import 'model/notification_payload.dart';
 import 'stream_video_flutter_background_platform_interface.dart';
 
 /// An implementation of [StreamVideoFlutterBackgroundPlatform] that uses method channels.
@@ -44,19 +44,19 @@ class MethodChannelStreamVideoFlutterBackground
   }
 
   @override
-  Future<bool> startService(NotificationOptions options) async {
+  Future<bool> startService(NotificationPayload payload) async {
     if (await isServiceRunning == false) {
-      return await methodChannel.invokeMethod('startService', options.toJson());
+      return await methodChannel.invokeMethod('startService', payload.toJson());
     }
     return false;
   }
 
   @override
-  Future<bool> updateService(NotificationOptions options) async {
+  Future<bool> updateService(NotificationPayload payload) async {
     if (await isServiceRunning == true) {
       return await methodChannel.invokeMethod(
         'updateService',
-        options.toJson(),
+        payload.toJson(),
       );
     }
     return false;
