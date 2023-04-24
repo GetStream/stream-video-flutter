@@ -97,6 +97,7 @@ class _MyAppState extends State<MyApp> {
     return NotificationPayload(
       callCid: "call328",
       options: NotificationOptions(
+        useCustomLayout: true,
         content: NotificationContent(
           title: "call328: Connected($counter)",
           text: "John & Kevin",

@@ -22,7 +22,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.View
 import android.widget.RemoteViews
@@ -30,15 +29,19 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
-import com.squareup.picasso.Target
+import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.flutter.background.stream_video_flutter_background.R
 import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.image.CircleTransform
+import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.image.CustomTarget
+import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.image.DefaultTarget
 import io.getstream.video.flutter.background.stream_video_flutter_background.service.utils.applicationName
 import io.getstream.video.flutter.background.stream_video_flutter_background.service.utils.notificationManager
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Headers
 import okhttp3.OkHttpClient
+
+private const val TAG = "StreamNtfBuilder"
 
 internal class StreamNotificationBuilderImpl(
     private val context: Context,
@@ -47,7 +50,7 @@ internal class StreamNotificationBuilderImpl(
     private val onUpdate: (IdentifiedNotification) -> Unit,
 ) : StreamNotificationBuilder {
 
-    private val logger by taggedLogger("StreamNtfBuilder")
+    private val logger by taggedLogger(TAG)
 
     private val actionBuilder: NotificationActionBuilder by lazy {
         NotificationActionBuilderImpl(
@@ -55,9 +58,9 @@ internal class StreamNotificationBuilderImpl(
         )
     }
 
-    private val defaultPicassoTarget = DefaultPicassoTarget(getNotificationId, onUpdate)
+    private val defaultTarget = DefaultTarget(getNotificationId, onUpdate)
 
-    private val customPicassoTarget = CustomPicassoTarget(getNotificationId, onUpdate)
+    private val customTarget = CustomTarget(getNotificationId, onUpdate)
 
     init {
         initNotificationChannel()
@@ -80,15 +83,6 @@ internal class StreamNotificationBuilderImpl(
         return IdentifiedNotification(notificationId, builder.build())
     }
 
-    private fun buildNotificationActions(
-        notificationId: Int,
-        callCid: StreamCallCid,
-    ): Array<NotificationCompat.Action> {
-        return arrayOf(
-            actionBuilder.createCancelAction(notificationId, callCid)
-        )
-    }
-
     private fun getNotificationBuilder(
         payload: NotificationPayload,
         intent: Intent,
@@ -106,7 +100,11 @@ internal class StreamNotificationBuilderImpl(
             flags,
         )
         return NotificationCompat.Builder(context, getNotificationChannelId()).apply {
-            enrichCustom(payload, contentIntent)
+            if (payload.options?.useCustomLayout == true) {
+                enrichCustom(payload, contentIntent)
+            } else {
+                enrichDefault(payload, contentIntent)
+            }
         }
     }
 
@@ -123,17 +121,14 @@ internal class StreamNotificationBuilderImpl(
         setCategory(NotificationCompat.CATEGORY_CALL)
         setDefaults(NotificationCompat.DEFAULT_ALL)
         setAutoCancel(false)
-        setSmallIcon(R.drawable.baseline_call_stream_24dp)
+        setSmallIcon(R.drawable.stream_baseline_call_stream_24dp)
         setContentTitle(contentTitle)
         if (!contentText.isNullOrEmpty()) {
             setContentText(contentText)
         }
         priority = NotificationCompat.PRIORITY_MAX
 
-        val notificationId = getNotificationId()
-        buildNotificationActions(notificationId, payload.callCid).forEach {
-            addAction(it)
-        }
+        addAction(actionBuilder.createCancelAction(getNotificationId(), payload.callCid))
 
         val avatarUrl = payload.options?.avatar?.url
         if (!avatarUrl.isNullOrEmpty()) {
@@ -142,8 +137,9 @@ internal class StreamNotificationBuilderImpl(
             context.getPicassoInstance(headers)
                 .load(avatarUrl)
                 .transform(CircleTransform())
-                .into(defaultPicassoTarget(builder = this))
+                .into(defaultTarget(builder = this))
         }
+
     }
 
     private fun NotificationCompat.Builder.enrichCustom(
@@ -155,28 +151,21 @@ internal class StreamNotificationBuilderImpl(
         setCategory(NotificationCompat.CATEGORY_CALL)
         setDefaults(NotificationCompat.DEFAULT_ALL)
         setAutoCancel(false)
-        setSmallIcon(R.drawable.baseline_call_stream_24dp)
+        setSmallIcon(R.drawable.stream_baseline_call_stream_24dp)
 
         priority = NotificationCompat.PRIORITY_MAX
 
-        val isCustomSmallExNotification = false
+        val notificationLargeLayout = NotificationLayout(
+            context, R.layout.stream_notification_large,
+        ).setPayload(payload)
 
-        val notificationLargeLayout = RemoteViews(context.packageName, R.layout.layout_custom_notification)
+        val notificationSmallLayout = NotificationLayout(
+            context, when (useSmallExLayout()) {
+                true -> R.layout.stream_notification_small_ex
+                else -> R.layout.stream_notification_small
+            }
+        ).setPayload(payload)
 
-        initNotificationViews(notificationLargeLayout, payload)
-
-        val notificationSmallLayout: RemoteViews
-        if ((Build.MANUFACTURER.equals(
-                "Samsung",
-                ignoreCase = true
-            ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) || isCustomSmallExNotification
-        ) {
-            notificationSmallLayout = RemoteViews(context.packageName, R.layout.layout_custom_small_ex_notification)
-            initNotificationViews(notificationSmallLayout, payload)
-        } else {
-            notificationSmallLayout = RemoteViews(context.packageName, R.layout.layout_custom_small_notification)
-            initNotificationViews(notificationSmallLayout, payload)
-        }
         setStyle(NotificationCompat.DecoratedCustomViewStyle())
         setCustomContentView(notificationSmallLayout)
         setCustomBigContentView(notificationLargeLayout)
@@ -190,7 +179,7 @@ internal class StreamNotificationBuilderImpl(
                 .load(avatarUrl)
                 .transform(CircleTransform())
                 .into(
-                    customPicassoTarget(
+                    customTarget(
                         builder = this,
                         notificationLargeLayout = notificationLargeLayout,
                         notificationSmallLayout = notificationSmallLayout
@@ -218,129 +207,78 @@ internal class StreamNotificationBuilderImpl(
         }
     }
 
-    private fun initNotificationViews(remoteViews: RemoteViews, payload: NotificationPayload) {
+    private fun NotificationLayout.setPayload(payload: NotificationPayload): NotificationLayout {
         val contentTitle = payload.options?.content?.title ?: context.applicationName
         val contentText = payload.options?.content?.text
-        remoteViews.setTextViewText(R.id.tvNameCaller, contentTitle)
-        remoteViews.setTextViewText(R.id.tvNumber, contentText)
-//        remoteViews.setOnClickPendingIntent(
-//            R.id.llDecline,
-//            getDeclinePendingIntent(notificationId, data)
-//        )
+        setContentTitle(contentTitle)
+        setContentText(contentText)
 
-        remoteViews.setTextViewText(
-            R.id.tvDecline,
-            context.getString(R.string.text_decline)
-        )
-//        remoteViews.setOnClickPendingIntent(
-//            R.id.llAccept,
-//            getAcceptPendingIntent(notificationId, data)
-//        )
+        val cancelAction = actionBuilder.createCancelAction(getNotificationId(), payload.callCid)
+        cancelAction.actionIntent
 
-        remoteViews.setTextViewText(
-            R.id.tvAccept,
-            context.getString(R.string.text_accept)
+        setCancelButton(cancelAction.title)
+        setOnClickPendingIntent(
+            R.id.cancelLayout,
+            cancelAction.actionIntent
         )
+
         val avatarUrl = payload.options?.avatar?.url
         if (!avatarUrl.isNullOrEmpty()) {
             val headers = payload.options.avatar.httpHeaders
             context.getPicassoInstance(headers).load(avatarUrl)
                 .transform(CircleTransform())
-                .into(customPicassoTarget)
+                .into(customTarget)
         }
-    }
-
-    private fun Context.getPicassoInstance(headers: Map<String, String>): Picasso {
-        logger.d { "[interceptRequest] headers: $headers" }
-        val client = OkHttpClient.Builder()
-            .addInterceptor { chain ->
-                logger.v { "[interceptRequest] request: ${chain.request()}" }
-                val newRequest = chain.request()
-                    .newBuilder()
-                    .headers(Headers.of(headers))
-                    .build()
-                chain.proceed(newRequest)
-            }
-            .build()
-        return Picasso.Builder(this)
-            .downloader(OkHttp3Downloader(client))
-            .build()
-    }
-}
-
-private class DefaultPicassoTarget(
-    private val getNotificationId: () -> Int,
-    private val onUpdate: (IdentifiedNotification) -> Unit,
-) : Target, Function1<NotificationCompat.Builder, DefaultPicassoTarget> {
-
-    private val logger by taggedLogger("StreamPicassoTarget")
-
-    private var builder: NotificationCompat.Builder? = null
-    override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
-        logger.v { "[onBitmapLoaded] bitmap.byteCount: ${bitmap?.byteCount}" }
-        val builder = builder ?: return
-        val icon = bitmap ?: return
-        builder.setLargeIcon(icon)
-        val notification = IdentifiedNotification(getNotificationId(), builder.build())
-        logger.v { "[onBitmapLoaded] notification: $notification" }
-        onUpdate(notification)
-    }
-
-    override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
-        logger.e { "[onBitmapFailed] error: $e" }
-    }
-
-    override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
-        logger.d { "[onPrepareLoad] placeHolderDrawable: $placeHolderDrawable" }
-    }
-
-    override fun invoke(builder: NotificationCompat.Builder): DefaultPicassoTarget {
-        this.builder = builder
         return this
     }
+
 }
 
-private class CustomPicassoTarget(
-    private val getNotificationId: () -> Int,
-    private val onUpdate: (IdentifiedNotification) -> Unit,
-) : Target, Function3<NotificationCompat.Builder, RemoteViews, RemoteViews, CustomPicassoTarget> {
+private fun useSmallExLayout(): Boolean {
+    val isCustomSmallExNotification = false
+    return Build.MANUFACTURER.equals(
+        "Samsung",
+        ignoreCase = true
+    ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S || isCustomSmallExNotification
+}
 
-    private val logger by taggedLogger("StreamPicassoTarget")
+private fun Context.getPicassoInstance(headers: Map<String, String>): Picasso {
+    StreamLog.d(TAG) { "[interceptRequest] headers: $headers" }
+    val client = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            StreamLog.v(TAG) { "[interceptRequest] request: ${chain.request()}" }
+            val newRequest = chain.request()
+                .newBuilder()
+                .headers(Headers.of(headers))
+                .build()
+            chain.proceed(newRequest)
+        }
+        .build()
+    return Picasso.Builder(this)
+        .downloader(OkHttp3Downloader(client))
+        .build()
+}
 
-    private var builder: NotificationCompat.Builder? = null
-    private var notificationSmallLayout: RemoteViews? = null
-    private var notificationLargeLayout: RemoteViews? = null
+class NotificationLayout(
+    private val context: Context,
+    layoutId: Int,
+) : RemoteViews(context.packageName, layoutId) {
 
-    override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
-        logger.v { "[onBitmapLoaded] bitmap.byteCount: ${bitmap?.byteCount}" }
-        val builder = builder ?: return
-        val icon = bitmap ?: return
-        notificationLargeLayout?.setImageViewBitmap(R.id.ivAvatar, icon)
-        notificationLargeLayout?.setViewVisibility(R.id.ivAvatar, View.VISIBLE)
-        notificationSmallLayout?.setImageViewBitmap(R.id.ivAvatar, icon)
-        notificationSmallLayout?.setViewVisibility(R.id.ivAvatar, View.VISIBLE)
-
-        val notification = IdentifiedNotification(getNotificationId(), builder.build())
-        logger.v { "[onBitmapLoaded] notification: $notification" }
-        onUpdate(notification)
+    fun setContentTitle(contentTitle: CharSequence?) {
+        setTextViewText(R.id.contentTitle, contentTitle)
     }
 
-    override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
-        logger.e { "[onBitmapFailed] error: $e" }
+    fun setContentText(contentText: CharSequence?) {
+        setTextViewText(R.id.contentText, contentText)
     }
 
-    override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
-        logger.d { "[onPrepareLoad] placeHolderDrawable: $placeHolderDrawable" }
+    fun setCancelButton(text: CharSequence?) {
+        setTextViewText(R.id.cancelText, text)
     }
 
-    override fun invoke(
-        builder: NotificationCompat.Builder,
-        notificationLargeLayout: RemoteViews,
-        notificationSmallLayout: RemoteViews,
-    ): CustomPicassoTarget {
-        this.builder = builder
-        this.notificationLargeLayout = notificationLargeLayout
-        this.notificationSmallLayout = notificationSmallLayout
-        return this
+    fun setAvatar(bitmap: Bitmap) {
+        setImageViewBitmap(R.id.avatar, bitmap)
+        setViewVisibility(R.id.avatar, View.VISIBLE)
     }
+
 }
