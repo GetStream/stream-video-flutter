@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import '../disposable.dart';
 import '../state_emitter.dart';
 
@@ -69,7 +67,7 @@ class Store<State, Action> extends Disposable {
     return (Action action) {
       final state = reducer.reduce(_state.value, action);
 
-      if (distinct && state == _state) return;
+      if (distinct && state == _state.value) return;
 
       _state.value = state;
     };

@@ -102,10 +102,18 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
             participant.sessionId == action.sessionId &&
             trackState is RemoteTrackState) {
           _logger.v(() => '[updateSub] pFound: $participant');
+
+          var muted = trackState.muted;
+          if (trackState.received) {
+            // if the track is already received, we should unmute it.
+            muted = false;
+          }
+
           return participant.copyWith(
             publishedTracks: {
               ...participant.publishedTracks,
               action.trackType: trackState.copyWith(
+                muted: muted,
                 subscribed: true,
                 videoDimension: action.videoDimension,
               ),
@@ -132,6 +140,7 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
               publishedTracks: {
                 ...participant.publishedTracks,
                 action.trackType: trackState.copyWith(
+                  muted: true,
                   subscribed: false,
                   videoDimension: const RtcVideoDimension.zero(),
                 ),

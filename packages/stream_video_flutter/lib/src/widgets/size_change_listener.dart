@@ -55,18 +55,4 @@ class _RenderSizeChangedWithCallback extends RenderProxyBox {
     }
     _oldSize = size;
   }
-
-  @override
-  void dispose() {
-    _oldSize = null;
-    // Call the callback with zero size to indicate that the widget is disposed.
-    onSizeChanged.call([Size.zero]);
-    if (onSizeChanged.isPending) {
-      onSizeChanged.flush();
-    }
-
-    // Cancel the debounced callback.
-    onSizeChanged.cancel();
-    super.dispose();
-  }
 }

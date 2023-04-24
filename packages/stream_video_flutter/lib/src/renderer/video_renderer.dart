@@ -7,7 +7,7 @@ import '../../stream_video_flutter.dart';
 Widget _defaultPlaceholderBuilder(BuildContext context) => Container();
 
 /// Widget that renders a single video track for a call participant.
-class StreamVideoRenderer extends StatelessWidget {
+class StreamVideoRenderer extends StatefulWidget {
   /// Creates a new instance of [StreamVideoRenderer].
   const StreamVideoRenderer({
     super.key,
@@ -38,13 +38,24 @@ class StreamVideoRenderer extends StatelessWidget {
   final ValueSetter<Size>? onSizeChanged;
 
   @override
+  State<StreamVideoRenderer> createState() => _StreamVideoRendererState();
+}
+
+class _StreamVideoRendererState extends State<StreamVideoRenderer> {
+  Call get call => widget.call;
+
+  CallParticipantState get participant => widget.participant;
+
+  SfuTrackTypeVideo get videoTrackType => widget.videoTrackType;
+
+  @override
   Widget build(BuildContext context) {
-    final trackState = participant.publishedTracks[videoTrackType];
+    final trackState = participant.publishedTracks[widget.videoTrackType];
 
     final Widget child;
     if (trackState == null) {
       // The video track hasn't been published or subscribed yet.
-      child = placeholderBuilder.call(context);
+      child = widget.placeholderBuilder.call(context);
     } else if (trackState is! RemoteTrackState) {
       // The video track is local and is already published.
       child = _buildVideoTrackRenderer(context, trackState);
@@ -53,7 +64,7 @@ class StreamVideoRenderer extends StatelessWidget {
       child = _buildVideoTrackRenderer(context, trackState);
     } else {
       // The video track is remote and hasn't been received yet.
-      child = placeholderBuilder.call(context);
+      child = widget.placeholderBuilder.call(context);
     }
 
     return SizeChangeListener(
@@ -64,69 +75,76 @@ class StreamVideoRenderer extends StatelessWidget {
 
   Widget _buildVideoTrackRenderer(BuildContext context, TrackState trackState) {
     // If the track is muted, display the placeholder.
-    if (trackState.muted) return placeholderBuilder.call(context);
+    if (trackState.muted) return widget.placeholderBuilder.call(context);
 
-    final videoTrack = call.getTrack(
-      participant.trackIdPrefix,
-      videoTrackType,
+    final videoTrack = widget.call.getTrack(
+      widget.participant.trackIdPrefix,
+      widget.videoTrackType,
     )!;
     return VideoTrackRenderer(
-      videoFit: videoFit,
+      videoFit: widget.videoFit,
       videoTrack: videoTrack,
-      mirror: participant.isLocal,
-      placeholderBuilder: placeholderBuilder,
+      mirror: widget.participant.isLocal,
+      placeholderBuilder: widget.placeholderBuilder,
     );
   }
 
   void _onSizeChanged(Size size) {
-    print('Participant ${participant.userId} size changed to $size');
-
     // Notify the listener.
-    if (onSizeChanged != null) {
-      onSizeChanged!.call(size);
+    if (widget.onSizeChanged != null) {
+      widget.onSizeChanged!.call(size);
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final prevSize = participant.viewportVisibility.size;
+
+      print('Prev Size: $prevSize');
+      print('New Size: $size');
+
+      // If the size hasn't changed, don't update the viewport visibility.
+      if (size == prevSize) return;
+
       // Update the viewport visibility of the participant.
       call.setParticipantViewportVisibility(
         sessionId: participant.sessionId,
         visibility: ViewportVisibility(size: size),
       );
 
-      // Update the video subscription of the track.
-      final state = participant.publishedTracks[videoTrackType];
-
-      // We only subscribe to remote participant tracks.
-      if (state is! RemoteTrackState) return;
-
-      final prevDim = state.videoDimension;
-      final newDim = RtcVideoDimension(
-        width: size.width.toInt(),
-        height: size.height.toInt(),
-      );
-
-      // If the dimensions haven't changed, don't update the subscription.
-      if (prevDim == newDim) return;
-
-      // If the new dimensions are zero, remove the subscription.
-      if (newDim.area == 0) {
-        call.removeSubscription(
-          userId: participant.userId,
-          sessionId: participant.sessionId,
-          trackIdPrefix: participant.trackIdPrefix,
-          trackType: videoTrackType,
-        );
-      } else {
-        // Update the subscription.
+      if (!participant.isLocal) {
+        // Update the video subscription of the track.
         call.updateSubscription(
           userId: participant.userId,
           sessionId: participant.sessionId,
           trackIdPrefix: participant.trackIdPrefix,
           trackType: videoTrackType,
-          videoDimension: newDim,
+          videoDimension: RtcVideoDimension(
+            width: size.width.toInt(),
+            height: size.height.toInt(),
+          ),
         );
       }
     });
+  }
+
+  @override
+  void dispose() {
+    // Update the viewport visibility of the participant.
+    call.setParticipantViewportVisibility(
+      sessionId: participant.sessionId,
+      visibility: const ViewportVisibility.hidden(),
+    );
+
+    if (!participant.isLocal) {
+      // Remove the subscription.
+      call.removeSubscription(
+        userId: participant.userId,
+        sessionId: participant.sessionId,
+        trackIdPrefix: participant.trackIdPrefix,
+        trackType: videoTrackType,
+      );
+    }
+
+    super.dispose();
   }
 }
 
