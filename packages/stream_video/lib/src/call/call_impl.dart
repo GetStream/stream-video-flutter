@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:async/async.dart' as async;
-
 import '../../stream_video.dart';
 import '../action/call_action.dart';
 import '../action/external_action.dart';
@@ -16,7 +14,9 @@ import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
+import '../utils/cancelable_operation.dart';
 import '../utils/cancelables.dart';
+import '../utils/future.dart';
 import '../utils/none.dart';
 import '../utils/standard.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
@@ -783,23 +783,6 @@ enum _ConnectionStatus {
   @override
   String toString() {
     return name;
-  }
-}
-
-extension<T> on async.CancelableOperation<T> {
-  Future<T> valueOrDefault(T cancellationValue) {
-    return valueOrCancellation(cancellationValue).then((value) => value!);
-  }
-
-  async.CancelableOperation<T> storeIn(int id, Cancelables cancelables) {
-    cancelables.add(id, this);
-    return this;
-  }
-}
-
-extension<T> on Future<T> {
-  async.CancelableOperation<T> asCancelable() {
-    return async.CancelableOperation.fromFuture(this);
   }
 }
 
