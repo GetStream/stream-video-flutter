@@ -96,19 +96,3 @@ data class NotificationAvatar(
         }
     }
 }
-
-/*data class NotificationOptions(
-    val callCid: String = "",
-    val contentTitle: String? = null,
-    val contentText: String? = null,
-    val avatarUrl: String? = null,
-) {
-
-    companion object {
-        const val CALL_CID = "call_cid"
-        const val CONTENT_TITLE = "content_title"
-        const val CONTENT_TEXT = "content_text"
-        const val AVATAR_URL = "avatar_url"
-    }
-
-}*/
