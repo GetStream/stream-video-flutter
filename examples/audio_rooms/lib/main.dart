@@ -1,4 +1,4 @@
-import 'package:audio_rooms/screens/audio_room_screen.dart';
+import 'package:audio_rooms/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -47,7 +47,7 @@ class AudioRooms extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFFDDDDDD),
         primaryColor: const Color(0xFF005FFF),
       ),
-      home: const AudioRoomScreen(),
+      home: const LoginScreen(),
     );
   }
 }
