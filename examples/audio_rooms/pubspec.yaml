@@ -1,0 +1,30 @@
+name: audio_rooms
+description: A new Flutter project.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.19.6 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  flutter_svg: 2.0.4
+  google_fonts: ^3.0.1
+  stream_video:
+    path: ../../packages/stream_video
+  stream_video_flutter:
+    path: ../../packages/stream_video_flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
