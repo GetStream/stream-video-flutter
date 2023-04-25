@@ -2,9 +2,10 @@ import '../action/participant_action.dart';
 import '../call_state.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_track_state.dart';
-import '../store/store.dart';
 import '../sfu/data/models/sfu_track_type.dart';
+import '../store/store.dart';
 import '../webrtc/media/constraints/camera_position.dart';
+import '../webrtc/model/rtc_video_dimension.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-Participant');
 
@@ -147,6 +148,7 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
                 action.trackType: trackState.copyWith(
                   muted: true,
                   subscribed: false,
+                  // TODO: Should be null, but copyWith doesn't allow it.
                   videoDimension: const RtcVideoDimension.zero(),
                 ),
               },

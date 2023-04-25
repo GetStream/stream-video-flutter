@@ -290,23 +290,6 @@ class CallImpl implements Call {
   }
 
   @override
-  Future<Result<None>> end() async {
-    _logger.d(() => '[end] no args');
-    final state = this.state.value;
-    _logger.d(() => '[end] status: ${state.status}');
-    if (state.status is! CallStatusActive) {
-      _logger.w(() => '[end] rejected (invalid status): ${state.status}');
-      return Result.error('invalid status: ${state.status}');
-    }
-    _status.value = _ConnectionStatus.disconnected;
-    await _clear('end');
-    final result = await _permissionsManager.endCall();
-    _stateManager.dispatch(SetLifecycleStage.ended());
-    _logger.v(() => '[end] completed: $result');
-    return result;
-  }
-
-  @override
   Future<Result<None>> join() async {
     _logger.d(() => '[join] no args');
     _stateManager.dispatch(SetLifecycleStage.joining());
@@ -806,20 +789,6 @@ enum _ConnectionStatus {
   @override
   String toString() {
     return name;
-  }
-}
-
-extension on CallSession? {
-  Future<Result<None>> apply(ParticipantAction action) async {
-    final tag = '$_tag-$_callSeq';
-    final session = this;
-    if (session == null) {
-      streamLog.w(tag, () => '[apply] rejected (session is null);');
-      return Result.error('no call session');
-    }
-    final result = await session.apply(action);
-    streamLog.v(tag, () => '[apply] completed: $result');
-    return result;
   }
 }
 
