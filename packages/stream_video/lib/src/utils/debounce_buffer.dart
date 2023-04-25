@@ -1,58 +1,52 @@
 import 'dart:async';
 
-import 'completer.dart';
-import 'future.dart';
+import 'package:rxdart/rxdart.dart';
 
-typedef OnBuffered<T, R> = Future<R> Function(List<T> items);
-typedef OnCancel<R> = R Function();
+import 'completer.dart';
+
+typedef OnBuffered<T, R> = FutureOr<R> Function(List<T> items);
+typedef OnCancel<R> = FutureOr<R> Function();
 
 class DebounceBuffer<T, R> {
   DebounceBuffer({
     required this.duration,
     required this.onBuffered,
     required this.onCancel,
-  });
+  }) {
+    _subscription = _eventsSubject
+        .buffer(_eventsSubject.debounceTime(duration))
+        .asyncMap(onBuffered)
+        .listen(
+          _completer.completeSafely,
+          onError: _completer.completeErrorSafely,
+        );
+  }
 
   final Duration duration;
   final OnBuffered<T, R> onBuffered;
   final OnCancel<R> onCancel;
-  Completer<R> _completer = Completer<R>();
-  Timer? _timer;
-  StreamSubscription<R>? _subscription;
 
-  final _items = <T>[];
+  final _eventsSubject = BehaviorSubject<T>();
+  late final StreamSubscription<R> _subscription;
+
+  late Completer<R> _completer = Completer<R>();
 
   Future<R> post(T item) async {
     if (_completer.isCompleted) {
       _completer = Completer<R>();
     }
-    _items.add(item);
-    _timer?.cancel();
-    _timer = Timer(duration, () async {
-      await _complete();
-    });
+    _eventsSubject.add(item);
     return _completer.future;
   }
 
   Future<void> cancel() async {
-    _timer?.cancel();
-    await _subscription?.cancel();
+    await _subscription.cancel();
+    await _eventsSubject.close();
     try {
-      _completer.completeSafely(onCancel());
+      final cancelResult = await onCancel();
+      _completer.completeSafely(cancelResult);
     } catch (e, stk) {
       _completer.completeErrorSafely(e, stk);
-    }
-  }
-
-  Future<void> _complete() async {
-    final isCompleted = _completer.isCompleted;
-    if (!isCompleted) {
-      await _subscription?.cancel();
-      _subscription = onBuffered([..._items]).listenFirst(
-        _completer.completeSafely,
-        onError: _completer.completeErrorSafely,
-      );
-      _items.clear();
     }
   }
 }
