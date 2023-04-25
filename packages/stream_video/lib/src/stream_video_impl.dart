@@ -119,15 +119,11 @@ class StreamVideoImpl implements StreamVideo {
       _eventSubscription = _client.events.listen((event) {
         _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
         if (event is CoordinatorCallCreatedEvent &&
-            event.info.createdBy.id != user.id) {
+            event.metadata.details.createdBy.id != user.id) {
           final callCreated = CallCreatedData(
             callCid: event.callCid,
             ringing: event.ringing,
-            metadata: CallMetadata(
-              details: event.details,
-              info: event.info,
-              users: event.users,
-            ),
+            metadata: event.metadata,
           );
           _logger.v(() => '[onCoordinatorEvent] onCallCreated: $callCreated');
           onCallCreated?.call(callCreated);
