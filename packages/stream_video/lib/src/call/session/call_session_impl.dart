@@ -86,8 +86,8 @@ class CallSessionImpl extends CallSession {
 
   late final _saBuffer = DebounceBuffer<SubscriptionAction, Result<None>>(
     duration: _debounceDuration,
-    onComplete: _updateSubscriptions,
-    onCancel: (_) async => Result.error('SubscriptionAction cancelled'),
+    onBuffered: _updateSubscriptions,
+    onCancel: () => Result.error('SubscriptionAction cancelled'),
   );
 
   @override

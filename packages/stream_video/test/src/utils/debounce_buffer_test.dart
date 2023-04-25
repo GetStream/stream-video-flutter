@@ -9,13 +9,10 @@ import '../logger/impl/test_logger.dart';
 final _logger = taggedLogger(tag: 'SV:DebounceBufferTest');
 
 Future<void> main() async {
-  StreamLog().logger = const TestStreamLogger();
-  StreamLog().priority = Priority.verbose;
-
   late DebounceBuffer<int, List<int>> buffer;
 
   var failOnCancellation = false;
-  Future<List<int>> onCancel(_) async {
+  List<int> onCancel() {
     if (failOnCancellation) {
       throw TestFailure('failed on cancellation');
     } else {
@@ -24,13 +21,13 @@ Future<void> main() async {
   }
 
   setUp(() {
+    StreamLog().logger = TestStreamLogger();
+    StreamLog().priority = Priority.verbose;
     _logger.i(() => '[setUp]');
     buffer = DebounceBuffer<int, List<int>>(
-      duration: const Duration(seconds: 1),
-      onComplete: (items) async {
-        await Future.delayed(const Duration(seconds: 1));
-        _logger.d(() => '[buffer.consumer] completed: $items');
-        return items;
+      duration: const Duration(milliseconds: 200),
+      onBuffered: (items) async {
+        return Future.delayed(const Duration(milliseconds: 100), () => items);
       },
       onCancel: onCancel,
     );
@@ -39,6 +36,34 @@ Future<void> main() async {
   tearDown(() {
     _logger.i(() => '[tearDown]');
     buffer.cancel();
+  });
+
+  test('test already completed', () async {
+    failOnCancellation = false;
+    final futures = <Future<List<int>>>[];
+    const number = 7;
+    futures.add(
+      buffer.post(number).onError((error, stackTrace) {
+        _logger.e(() => '[alreadyCompleted] failed: $number = $error');
+        return [-1];
+      }).whenComplete(() {
+        _logger.v(() => '[alreadyCompleted] completed: $number');
+      }),
+    );
+    _logger.v(() => '[alreadyCompleted] posted: $number');
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    await buffer.cancel();
+    final results = await Future.wait(futures);
+    _logger.v(() => '[alreadyCompleted] results: $results');
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    _logger.v(() => '[alreadyCompleted] completed');
+
+
+    final firstResult = results.first;
+    for (final eachResult in results) {
+      expect(eachResult.length, 0);
+      expect(identical(firstResult, eachResult), true);
+    }
   });
 
   test('test debouncing', () async {

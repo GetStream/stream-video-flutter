@@ -1,7 +1,9 @@
 import 'package:stream_video/src/logger/stream_logger.dart';
 
 class TestStreamLogger extends StreamLogger {
-  const TestStreamLogger();
+  int startTimeMs = DateTime.now().millisecondsSinceEpoch;
+
+  int get nowMs => DateTime.now().millisecondsSinceEpoch;
 
   @override
   void log(
@@ -11,8 +13,9 @@ class TestStreamLogger extends StreamLogger {
     Object? error,
     StackTrace? stk,
   ]) {
+    final elapsed = Duration(milliseconds: nowMs - startTimeMs);
     final emoji = super.emoji(priority);
     final name = super.name(priority);
-    print('${DateTime.now()} $emoji ($name/$tag): ${message()}');
+    print('$elapsed $emoji ($name/$tag): ${message()}');
   }
 }

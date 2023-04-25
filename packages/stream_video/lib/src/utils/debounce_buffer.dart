@@ -1,55 +1,52 @@
 import 'dart:async';
 
-import 'package:synchronized/extension.dart';
+import 'package:rxdart/rxdart.dart';
 
-typedef Consumer<T, R> = Future<R> Function(List<T> items);
+import 'completer.dart';
+
+typedef OnBuffered<T, R> = FutureOr<R> Function(List<T> items);
+typedef OnCancel<R> = FutureOr<R> Function();
 
 class DebounceBuffer<T, R> {
   DebounceBuffer({
     required this.duration,
-    required this.onComplete,
+    required this.onBuffered,
     required this.onCancel,
-  });
+  }) {
+    _subscription = _eventsSubject
+        .buffer(_eventsSubject.debounceTime(duration))
+        .asyncMap(onBuffered)
+        .listen(
+          _completer.completeSafely,
+          onError: _completer.completeErrorSafely,
+        );
+  }
 
   final Duration duration;
-  final Consumer<T, R> onComplete;
-  final Consumer<T, R> onCancel;
-  Completer<R> completer = Completer<R>();
-  Timer? _timer;
+  final OnBuffered<T, R> onBuffered;
+  final OnCancel<R> onCancel;
 
-  final _items = <T>[];
+  final _eventsSubject = BehaviorSubject<T>();
+  late final StreamSubscription<R> _subscription;
 
-  Future<R> post(T item) {
-    // return synchronized(() {
-      if (completer.isCompleted) {
-        completer = Completer<R>();
-      }
-      _items.add(item);
-      if (_timer?.isActive ?? false) {
-        _timer?.cancel();
-      }
-      _timer = Timer(duration, () async {
-        await _complete(onComplete);
-      });
+  late Completer<R> _completer = Completer<R>();
 
-      return completer.future;
-    // });
+  Future<R> post(T item) async {
+    if (_completer.isCompleted) {
+      _completer = Completer<R>();
+    }
+    _eventsSubject.add(item);
+    return _completer.future;
   }
 
   Future<void> cancel() async {
-    _timer?.cancel();
-    await _complete(onCancel);
-  }
-
-  Future<void> _complete(Consumer<T, R> consumer) async {
-    if (!completer.isCompleted) {
-      try {
-        final result = await consumer([..._items]);
-        completer.complete(result);
-      } catch (e, stk) {
-        completer.completeError(e, stk);
-      }
-      _items.clear();
+    await _subscription.cancel();
+    await _eventsSubject.close();
+    try {
+      final cancelResult = await onCancel();
+      _completer.completeSafely(cancelResult);
+    } catch (e, stk) {
+      _completer.completeErrorSafely(e, stk);
     }
   }
 }
