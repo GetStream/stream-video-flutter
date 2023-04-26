@@ -96,13 +96,8 @@ class OpenApiEvent with EquatableMixin {
         final event = open.CustomVideoEvent.fromJson(jsonObj);
         return result.copyWith(custom: event);
       case EventType.unknown:
-        try {
-          final event = open.VideoEvent.fromJson(jsonObj);
-          return result.copyWith(unknown: event);
-        } catch (e, stk) {
-          streamLog.e(_tag, () => '[fromJson] failed: $e; $stk');
-          return result;
-        }
+        streamLog.e(_tag, () => '[fromJson] unexpected event: $jsonObj');
+        return result.copyWith(unknown: jsonObj);
     }
   }
 
@@ -124,7 +119,7 @@ class OpenApiEvent with EquatableMixin {
   final open.CallBroadcastingStoppedEvent? callBroadcastingStopped;
   final open.CallReactionEvent? callReaction;
   final open.CustomVideoEvent? custom;
-  final open.VideoEvent? unknown;
+  final Object? unknown;
 
   OpenApiEvent copyWith({
     EventType? type,
@@ -145,7 +140,7 @@ class OpenApiEvent with EquatableMixin {
     open.CallBroadcastingStoppedEvent? callBroadcastingStopped,
     open.CallReactionEvent? callReaction,
     open.CustomVideoEvent? custom,
-    open.VideoEvent? unknown,
+    Object? unknown,
   }) {
     return OpenApiEvent(
       type: type ?? this.type,

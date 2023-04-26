@@ -2,9 +2,7 @@ import 'package:collection/collection.dart';
 
 import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../models/call_cid.dart';
-import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
-import '../../utils/standard.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_inputs.dart';
 import 'event/event_type.dart';
@@ -18,7 +16,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
   CoordinatorEvent? toCoordinatorEvent() {
     switch (type) {
       case EventType.connectionOk:
-        final event = this.connected!;
+        final event = connected!;
         return CoordinatorConnectedEvent(
           clientId: event.connectionId,
           userId: event.me.id,
@@ -30,109 +28,62 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           clientId: healthCheck.connectionId,
         );
       case EventType.callCreated:
-        final callCreated = this.callCreated!;
-        final call = callCreated.call;
-        final createdBy = call.createdBy.toCallUser();
-        final createdByMember = call.createdBy.toCallMember();
-
+        final event = callCreated!;
+        final call = event.call;
         return CoordinatorCallCreatedEvent(
           callCid: StreamCallCid(cid: call.cid),
-          ringing: callCreated.ringing,
-          createdAt: callCreated.createdAt,
-          info: CallInfo(
-            cid: StreamCallCid(cid: call.cid),
-            createdBy: createdBy,
-            createdAt: call.createdAt,
-            updatedAt: call.updatedAt,
-          ),
-          details: CallDetails(
-            isBroadcastingEnabled: call.settings.broadcasting.enabled,
-            members: {
-              createdByMember.userId: createdByMember,
-              ...callCreated.members.toCallMembers(),
-            },
-            isRecordingEnabled: call.settings.recording.audioOnly,
-            ownCapabilities: call.ownCapabilities.map(
-              (it) => CallPermission.fromAlias(it.value),
-            ),
-            settings: call.settings.toCallSettings(),
-          ),
-          users: {
-            createdBy.id: createdBy,
-            ...callCreated.members.toCallUsers(),
-          },
+          ringing: event.ringing,
+          createdAt: event.createdAt,
+          metadata: call.toCallMetadata(event.members),
         );
       case EventType.callAccepted:
-        final callAccepted = this.callAccepted!;
-        final acceptedBy = callAccepted.user.toCallUser();
+        final event = callAccepted!;
+        final acceptedBy = event.user.toCallUser();
         return CoordinatorCallAcceptedEvent(
-          callCid: StreamCallCid(cid: callAccepted.callCid),
+          callCid: StreamCallCid(cid: event.callCid),
           acceptedBy: acceptedBy,
-          createdAt: callAccepted.createdAt,
-          users: {acceptedBy.id: acceptedBy},
+          createdAt: event.createdAt,
         );
       case EventType.callRejected:
-        final callRejected = this.callRejected!;
-        final rejectedBy = callRejected.user.toCallUser();
+        final event = callRejected!;
         return CoordinatorCallRejectedEvent(
-          callCid: StreamCallCid(cid: callRejected.callCid),
-          rejectedBy: rejectedBy,
-          createdAt: callRejected.createdAt,
-          users: {rejectedBy.id: rejectedBy},
+          callCid: StreamCallCid(cid: event.callCid),
+          rejectedBy: event.user.toCallUser(),
+          createdAt: event.createdAt,
         );
       case EventType.callUpdated:
-        final callUpdated = this.callUpdated!;
-        final call = callUpdated.call;
-        final createdBy = call.createdBy.toCallUser();
+        final event = callUpdated!;
         return CoordinatorCallUpdatedEvent(
-          callCid: StreamCallCid(cid: call.cid),
-          info: CallInfo(
-            cid: StreamCallCid(cid: call.cid),
-            createdBy: createdBy,
-            createdAt: call.createdAt,
-            updatedAt: call.updatedAt,
-          ),
-          details: CallDetails(
-            isBroadcastingEnabled: call.settings.broadcasting.enabled,
-            members: const {},
-            isRecordingEnabled: call.settings.recording.audioOnly,
-            ownCapabilities: call.ownCapabilities.map(
-              (it) => CallPermission.fromAlias(it.value),
-            ),
-            settings: call.settings.toCallSettings(),
-          ),
-          users: {createdBy.id: createdBy},
+          callCid: StreamCallCid(cid: event.call.cid),
+          capabilitiesByRole: Map.unmodifiable(event.capabilitiesByRole),
+          metadata: event.call.toCallMetadata(),
+          createdAt: event.createdAt,
         );
       case EventType.callEnded:
-        final callEnded = this.callEnded!;
-        final endedBy = callEnded.user?.toCallUser();
+        final event = callEnded!;
+        final endedBy = event.user?.toCallUser();
         return CoordinatorCallEndedEvent(
-          callCid: StreamCallCid(cid: callEnded.callCid),
+          callCid: StreamCallCid(cid: event.callCid),
           endedBy: endedBy,
-          createdAt: callEnded.createdAt,
-          users: {
-            ...?endedBy?.let((it) => {it.id: it})
-          },
+          createdAt: event.createdAt,
         );
       case EventType.callPermissionRequest:
-        final callPermissionRequest = this.callPermissionRequest!;
-
+        final event = callPermissionRequest!;
         return CoordinatorCallPermissionRequestEvent(
-          callCid: StreamCallCid(cid: callPermissionRequest.callCid),
-          createdAt: callPermissionRequest.createdAt,
-          permissions: callPermissionRequest.permissions,
-          user: callPermissionRequest.user.toCallUser(),
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          permissions: event.permissions,
+          user: event.user.toCallUser(),
         );
       case EventType.callPermissionsUpdated:
-        final callPermissionsUpdated = this.callPermissionsUpdated!;
-
+        final event = callPermissionsUpdated!;
         return CoordinatorCallPermissionsUpdatedEvent(
-          callCid: StreamCallCid(cid: callPermissionsUpdated.callCid),
-          createdAt: callPermissionsUpdated.createdAt,
-          ownCapabilities: callPermissionsUpdated.ownCapabilities.map(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          ownCapabilities: event.ownCapabilities.map(
             (it) => CallPermission.fromAlias(it.value),
           ),
-          user: callPermissionsUpdated.user.toCallUser(),
+          user: event.user.toCallUser(),
         );
       case EventType.callRecordingStarted:
         final event = callRecordingStarted!;

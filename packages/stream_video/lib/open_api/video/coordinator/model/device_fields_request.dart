@@ -13,21 +13,15 @@ part of openapi.api;
 class DeviceFieldsRequest {
   /// Returns a new [DeviceFieldsRequest] instance.
   DeviceFieldsRequest({
-    this.id,
-    this.pushProvider,
+    required this.id,
+    required this.pushProvider,
     this.pushProviderName,
   });
 
   /// Device ID
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? id;
+  String id;
 
-  DeviceFieldsRequestPushProviderEnum? pushProvider;
+  DeviceFieldsRequestPushProviderEnum pushProvider;
 
   /// Name of the push provider configuration
   ///
@@ -47,8 +41,8 @@ class DeviceFieldsRequest {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (id == null ? 0 : id!.hashCode) +
-    (pushProvider == null ? 0 : pushProvider!.hashCode) +
+    (id.hashCode) +
+    (pushProvider.hashCode) +
     (pushProviderName == null ? 0 : pushProviderName!.hashCode);
 
   @override
@@ -56,16 +50,8 @@ class DeviceFieldsRequest {
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.id != null) {
       json[r'id'] = this.id;
-    } else {
-      json[r'id'] = null;
-    }
-    if (this.pushProvider != null) {
       json[r'push_provider'] = this.pushProvider;
-    } else {
-      json[r'push_provider'] = null;
-    }
     if (this.pushProviderName != null) {
       json[r'push_provider_name'] = this.pushProviderName;
     } else {
@@ -93,8 +79,8 @@ class DeviceFieldsRequest {
       }());
 
       return DeviceFieldsRequest(
-        id: mapValueOfType<String>(json, r'id'),
-        pushProvider: DeviceFieldsRequestPushProviderEnum.fromJson(json[r'push_provider']),
+        id: mapValueOfType<String>(json, r'id')!,
+        pushProvider: DeviceFieldsRequestPushProviderEnum.fromJson(json[r'push_provider'])!,
         pushProviderName: mapValueOfType<String>(json, r'push_provider_name'),
       );
     }
@@ -145,6 +131,8 @@ class DeviceFieldsRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'id',
+    'push_provider',
   };
 }
 
