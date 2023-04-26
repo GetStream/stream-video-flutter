@@ -24,7 +24,7 @@ class CallState extends Equatable {
       sessionId: '',
       status: CallStatus.idle(),
       isRecording: false,
-      settings: const CallSettings.disabled(),
+      settings: const CallSettings(),
       videoInputDevice: null,
       audioInputDevice: null,
       audioOutputDevice: null,
@@ -42,11 +42,11 @@ class CallState extends Equatable {
     return CallState._(
       currentUserId: currentUserId,
       callCid: callCid,
-      createdByUserId: metadata.info.createdByUserId,
+      createdByUserId: metadata.details.createdBy.id,
       sessionId: '',
       status: metadata.toCallStatus(currentUserId, ringing: ringing),
-      isRecording: false,
-      settings: metadata.details.settings,
+      isRecording: metadata.details.recording,
+      settings: metadata.settings,
       videoInputDevice: null,
       audioInputDevice: null,
       audioOutputDevice: null,
@@ -162,7 +162,7 @@ extension on CallMetadata {
     String currentUserId, {
     required bool ringing,
   }) {
-    final createdByMe = currentUserId == info.createdByUserId;
+    final createdByMe = currentUserId == details.createdBy.id;
     if (createdByMe && ringing) {
       return CallStatus.outgoing();
     } else if (!createdByMe && ringing) {
@@ -174,8 +174,8 @@ extension on CallMetadata {
 
   List<CallParticipantState> toCallParticipants(String currentUserId) {
     final result = <CallParticipantState>[];
-    for (final userId in details.members.keys) {
-      final member = details.members[userId];
+    for (final userId in members.keys) {
+      final member = members[userId];
       final user = users[userId];
       final isLocal = currentUserId == userId;
       result.add(

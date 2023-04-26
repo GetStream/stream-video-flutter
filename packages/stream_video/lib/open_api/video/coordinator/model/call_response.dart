@@ -21,6 +21,7 @@ class CallResponse {
     required this.createdBy,
     this.custom = const {},
     this.endedAt,
+    required this.hlsPlaylistUrl,
     required this.id,
     required this.ingress,
     this.ownCapabilities = const [],
@@ -58,6 +59,8 @@ class CallResponse {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   DateTime? endedAt;
+
+  String hlsPlaylistUrl;
 
   /// Call ID
   String id;
@@ -106,6 +109,7 @@ class CallResponse {
      other.createdBy == createdBy &&
      other.custom == custom &&
      other.endedAt == endedAt &&
+     other.hlsPlaylistUrl == hlsPlaylistUrl &&
      other.id == id &&
      other.ingress == ingress &&
      other.ownCapabilities == ownCapabilities &&
@@ -128,6 +132,7 @@ class CallResponse {
     (createdBy.hashCode) +
     (custom.hashCode) +
     (endedAt == null ? 0 : endedAt!.hashCode) +
+    (hlsPlaylistUrl.hashCode) +
     (id.hashCode) +
     (ingress.hashCode) +
     (ownCapabilities.hashCode) +
@@ -140,7 +145,7 @@ class CallResponse {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcasting=$broadcasting, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, endedAt=$endedAt, id=$id, ingress=$ingress, ownCapabilities=$ownCapabilities, recording=$recording, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
+  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcasting=$broadcasting, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, endedAt=$endedAt, hlsPlaylistUrl=$hlsPlaylistUrl, id=$id, ingress=$ingress, ownCapabilities=$ownCapabilities, recording=$recording, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -156,6 +161,7 @@ class CallResponse {
     } else {
       json[r'ended_at'] = null;
     }
+      json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
       json[r'id'] = this.id;
       json[r'ingress'] = this.ingress;
       json[r'own_capabilities'] = this.ownCapabilities;
@@ -206,6 +212,7 @@ class CallResponse {
         createdBy: UserResponse.fromJson(json[r'created_by'])!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         endedAt: mapDateTime(json, r'ended_at', ''),
+        hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
         id: mapValueOfType<String>(json, r'id')!,
         ingress: CallIngressResponse.fromJson(json[r'ingress'])!,
         ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
@@ -272,6 +279,7 @@ class CallResponse {
     'created_at',
     'created_by',
     'custom',
+    'hls_playlist_url',
     'id',
     'ingress',
     'own_capabilities',
