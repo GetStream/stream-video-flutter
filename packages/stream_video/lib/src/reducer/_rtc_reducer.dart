@@ -1,26 +1,28 @@
-import '../action/rtc_action.dart';
+import '../action/internal/rtc_action.dart';
 import '../call_state.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_track_state.dart';
+import '../store/store.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-RTC');
 
-class RtcReducer {
+class RtcReducer extends Reducer<CallState, RtcAction> {
   const RtcReducer();
 
+  @override
   CallState reduce(
     CallState state,
     RtcAction action,
   ) {
-    if (action is SubscriberTrackReceivedAction) {
-      return _reduceSubscriberTrackReceived(state, action);
+    if (action is UpdateSubscriberTrack) {
+      return _reduceSubscriberTrack(state, action);
     }
     return state;
   }
 
-  CallState _reduceSubscriberTrackReceived(
+  CallState _reduceSubscriberTrack(
     CallState state,
-    SubscriberTrackReceivedAction action,
+    UpdateSubscriberTrack action,
   ) {
     _logger.d(
       () => '[reduceSubTrackReceived] ${state.sessionId}; action: $action',

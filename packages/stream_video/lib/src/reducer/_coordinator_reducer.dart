@@ -1,33 +1,35 @@
 import 'package:collection/collection.dart';
 
-import '../action/coordinator_call_action.dart';
+import '../action/internal/coordinator_action.dart';
 import '../call_state.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_participant_state.dart';
 import '../models/call_status.dart';
 import '../models/disconnect_reason.dart';
+import '../store/store.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
-class CoordinatorCallReducer {
-  const CoordinatorCallReducer();
+class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
+  const CoordinatorReducer();
 
+  @override
   CallState reduce(
     CallState state,
-    CoordinatorCallAction action,
+    CoordinatorAction action,
   ) {
-    if (action is CoordinatorCallUsersAction) {
-      return _reduceCallCoordinatorUsers(state, action);
-    } else if (action is CoordinatorCallEventAction) {
-      return _reduceCoordinatorCallEvent(state, action.event);
+    if (action is UpdateUsers) {
+      return _reduceUsers(state, action);
+    } else if (action is CoordinatorEventAction) {
+      return _reduceCoordinatorEvent(state, action.event);
     }
     return state;
   }
 
-  CallState _reduceCallCoordinatorUsers(
+  CallState _reduceUsers(
     CallState state,
-    CoordinatorCallUsersAction action,
+    UpdateUsers action,
   ) {
     return state.copyWith(
       callParticipants: state.callParticipants.map(
@@ -44,7 +46,7 @@ class CoordinatorCallReducer {
     );
   }
 
-  CallState _reduceCoordinatorCallEvent(
+  CallState _reduceCoordinatorEvent(
     CallState state,
     CoordinatorCallEvent event,
   ) {

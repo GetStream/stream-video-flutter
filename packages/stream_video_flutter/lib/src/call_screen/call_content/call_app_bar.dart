@@ -149,8 +149,8 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
                   
                   Navigator.of(context).pop();
                   call.state.value.isTranscribing
-                      ? await call.apply(const StopTranscription())
-                      : await call.apply(const StartTranscription());
+                      ? await call.stopTranscription()
+                      : await call.startTranscription();
                   //transcribe call
                 },
               ),

@@ -1,14 +1,16 @@
 import 'package:collection/collection.dart';
 
 import '../../stream_video.dart';
-import '../action/sfu_action.dart';
+import '../action/internal/sfu_action.dart';
+import '../store/store.dart';
 import '../sfu/data/events/sfu_events.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-SFU');
 
-class SfuReducer {
+class SfuReducer extends Reducer<CallState, SfuAction> {
   const SfuReducer();
 
+  @override
   CallState reduce(
     CallState state,
     SfuAction action,

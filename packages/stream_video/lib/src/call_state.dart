@@ -6,7 +6,7 @@ import 'models/call_cid.dart';
 import 'models/call_metadata.dart';
 import 'models/call_participant_state.dart';
 import 'models/call_permission.dart';
-import 'models/call_setting.dart';
+import 'models/call_settings.dart';
 import 'models/call_status.dart';
 import 'webrtc/rtc_media_device/rtc_media_device.dart';
 
@@ -24,13 +24,13 @@ class CallState extends Equatable {
       sessionId: '',
       status: CallStatus.idle(),
       isRecording: false,
-      isTranscribing: false,
-      settings: const CallSettings.disabled(),
+      settings: const CallSettings(),
       videoInputDevice: null,
       audioInputDevice: null,
       audioOutputDevice: null,
       ownCapabilities: List.unmodifiable(const []),
       callParticipants: List.unmodifiable(const []),
+      isTranscribing: false,
     );
   }
 
@@ -43,12 +43,11 @@ class CallState extends Equatable {
     return CallState._(
       currentUserId: currentUserId,
       callCid: callCid,
-      createdByUserId: metadata.info.createdByUserId,
+      createdByUserId: metadata.details.createdBy.id,
       sessionId: '',
       status: metadata.toCallStatus(currentUserId, ringing: ringing),
-      isRecording: false,
-      isTranscribing: false,
-      settings: metadata.details.settings,
+      isRecording: metadata.details.recording,
+      settings: metadata.settings,
       videoInputDevice: null,
       audioInputDevice: null,
       audioOutputDevice: null,
@@ -58,6 +57,7 @@ class CallState extends Equatable {
           currentUserId,
         ),
       ),
+      isTranscribing: metadata.details.transcribing,
     );
   }
 
@@ -171,7 +171,7 @@ extension on CallMetadata {
     String currentUserId, {
     required bool ringing,
   }) {
-    final createdByMe = currentUserId == info.createdByUserId;
+    final createdByMe = currentUserId == details.createdBy.id;
     if (createdByMe && ringing) {
       return CallStatus.outgoing();
     } else if (!createdByMe && ringing) {
@@ -183,8 +183,8 @@ extension on CallMetadata {
 
   List<CallParticipantState> toCallParticipants(String currentUserId) {
     final result = <CallParticipantState>[];
-    for (final userId in details.members.keys) {
-      final member = details.members[userId];
+    for (final userId in members.keys) {
+      final member = members[userId];
       final user = users[userId];
       final isLocal = currentUserId == userId;
       result.add(

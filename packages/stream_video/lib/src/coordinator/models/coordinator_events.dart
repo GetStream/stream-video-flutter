@@ -5,8 +5,6 @@ import '../../models/call_cid.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
 
-// TODO: Should we call it VideoEvent or CoordinatorEvent?
-
 /// Represents the events coming in from the socket.
 @immutable
 abstract class CoordinatorEvent with EquatableMixin {
@@ -78,48 +76,42 @@ class CoordinatorCallCreatedEvent extends CoordinatorCallEvent {
     required super.callCid,
     required this.ringing,
     required this.createdAt,
-    required this.info,
-    required this.details,
-    required this.users,
+    required this.metadata,
   });
 
   final bool ringing;
   final DateTime createdAt;
-  final CallInfo info;
-  final CallDetails details;
-  final Map<String, CallUser> users;
+  final CallMetadata metadata;
 
   @override
   List<Object?> get props => [
         ...super.props,
         ringing,
         createdAt,
-        info,
-        details,
-        users,
+        metadata,
       ];
-
-  @override
-  String toString() {
-    return 'CoordinatorCallCreatedEvent{ringing: $ringing, createdBy: ${info.createdBy.id}, users: $users}';
-  }
 }
 
 /// Sent when a call gets updated.
 class CoordinatorCallUpdatedEvent extends CoordinatorCallEvent {
   const CoordinatorCallUpdatedEvent({
     required super.callCid,
-    required this.info,
-    required this.details,
-    required this.users,
+    required this.metadata,
+    required this.capabilitiesByRole,
+    required this.createdAt,
   });
 
-  final CallInfo info;
-  final CallDetails details;
-  final Map<String, CallUser> users;
+  final CallMetadata metadata;
+  final Map<String, List<String>> capabilitiesByRole;
+  final DateTime createdAt;
 
   @override
-  List<Object?> get props => [...super.props, info, details, users];
+  List<Object?> get props => [
+        ...super.props,
+        metadata,
+        capabilitiesByRole,
+        createdAt,
+      ];
 }
 
 /// Sent when a calls gets ended.
@@ -128,12 +120,10 @@ class CoordinatorCallEndedEvent extends CoordinatorCallEvent {
     required super.callCid,
     required this.endedBy,
     required this.createdAt,
-    required this.users,
   });
 
   final CallUser? endedBy;
   final DateTime createdAt;
-  final Map<String, CallUser> users;
 
   String? get endedByUserId => endedBy?.id;
 
@@ -142,7 +132,6 @@ class CoordinatorCallEndedEvent extends CoordinatorCallEvent {
         ...super.props,
         endedBy,
         createdAt,
-        users,
       ];
 }
 
@@ -152,12 +141,10 @@ class CoordinatorCallAcceptedEvent extends CoordinatorCallEvent {
     required super.callCid,
     required this.acceptedBy,
     required this.createdAt,
-    required this.users,
   });
 
   final CallUser acceptedBy;
   final DateTime createdAt;
-  final Map<String, CallUser> users;
 
   String get acceptedByUserId => acceptedBy.id;
 
@@ -166,7 +153,6 @@ class CoordinatorCallAcceptedEvent extends CoordinatorCallEvent {
         ...super.props,
         acceptedBy,
         createdAt,
-        users,
       ];
 }
 
@@ -176,12 +162,10 @@ class CoordinatorCallRejectedEvent extends CoordinatorCallEvent {
     required super.callCid,
     required this.rejectedBy,
     required this.createdAt,
-    required this.users,
   });
 
   final CallUser rejectedBy;
   final DateTime createdAt;
-  final Map<String, CallUser> users;
 
   String get rejectedByUserId => rejectedBy.id;
 
@@ -190,42 +174,7 @@ class CoordinatorCallRejectedEvent extends CoordinatorCallEvent {
         ...super.props,
         rejectedBy,
         createdAt,
-        users,
       ];
-}
-
-/// Sent when call members are updated.
-class CoordinatorCallMembersUpdatedEvent extends CoordinatorCallEvent {
-  const CoordinatorCallMembersUpdatedEvent({
-    required super.callCid,
-    required this.info,
-    required this.details,
-    required this.users,
-  });
-
-  final CallInfo info;
-  final CallDetails details;
-  final Map<String, CallUser> users;
-
-  @override
-  List<Object?> get props => [...super.props, info, details, users];
-}
-
-/// Sent when call members are deleted.
-class CoordinatorCallMembersDeletedEvent extends CoordinatorCallEvent {
-  const CoordinatorCallMembersDeletedEvent({
-    required super.callCid,
-    required this.info,
-    required this.details,
-    required this.users,
-  });
-
-  final CallInfo info;
-  final CallDetails details;
-  final Map<String, CallUser> users;
-
-  @override
-  List<Object?> get props => [...super.props, info, details, users];
 }
 
 class CoordinatorCallPermissionRequestEvent extends CoordinatorCallEvent {

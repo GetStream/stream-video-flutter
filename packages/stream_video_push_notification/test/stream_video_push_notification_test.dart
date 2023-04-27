@@ -16,38 +16,48 @@ Future<void> main() async {
   final streamVideoEventChannel =
       StreamVideoPushNotificationEventChannel(eventChannel: eventChannelMock);
   final StreamCallCid streamCallCid = StreamCallCid(cid: 'call:123');
-  final callCreatedData = CallCreated(
+  final callCreatedData = CallCreatedData(
     callCid: streamCallCid,
     ringing: true,
     metadata: CallMetadata(
+      cid: streamCallCid,
       details: const CallDetails(
-        members: {},
+        hlsPlaylistUrl: '',
+        createdBy: CallUser(
+          id: "jc",
+          name: "JC M",
+          role: 'admin',
+          image: '',
+        ),
+        team: '',
         ownCapabilities: [],
-        settings: CallSettings.enabled(),
-        isBroadcastingEnabled: false,
-        isRecordingEnabled: false,
+        blockedUserIds: [],
+        broadcasting: false,
+        recording: false,
+        backstage: false,
+        transcribing: false,
+        custom: {},
+        rtmpIngress: '',
       ),
-      info: CallInfo(
-        cid: streamCallCid,
-        createdByUserId: 'Jc',
-      ),
+      settings: const CallSettings(),
       users: const {
         'jc': CallUser(
-            id: "jc",
-            name: "Jc",
-            role: "role",
-            image: "https://mydomain.io/jc.png",
-            teams: []),
+          id: "jc",
+          name: "Jc",
+          role: "role",
+          image: "https://mydomain.io/jc.png",
+        ),
         'isa': CallUser(
-            id: "isa",
-            name: "Isa",
-            role: "role",
-            image: "https://mydomain.io/isa.png",
-            teams: []),
+          id: "isa",
+          name: "Isa",
+          role: "role",
+          image: "https://mydomain.io/isa.png",
+        ),
       },
+      members: const {},
     ),
   );
-  final callReceivedOrCreated = CallReceivedOrCreated(
+  final callReceivedOrCreated = CallReceivedOrCreatedData(
     wasCreated: true,
     data: callCreatedData,
   );

@@ -93,7 +93,7 @@ class StreamVideoImpl implements StreamVideo {
   SharedEmitter<CoordinatorEvent> get events => _client.events;
 
   @override
-  void Function(CallCreated)? onCallCreated;
+  void Function(CallCreatedData)? onCallCreated;
 
   /// Connects the [user] to the Stream Video service.
   @override
@@ -119,15 +119,11 @@ class StreamVideoImpl implements StreamVideo {
       _eventSubscription = _client.events.listen((event) {
         _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
         if (event is CoordinatorCallCreatedEvent &&
-            event.info.createdBy.id != user.id) {
-          final callCreated = CallCreated(
+            event.metadata.details.createdBy.id != user.id) {
+          final callCreated = CallCreatedData(
             callCid: event.callCid,
             ringing: event.ringing,
-            metadata: CallMetadata(
-              details: event.details,
-              info: event.info,
-              users: event.users,
-            ),
+            metadata: event.metadata,
           );
           _logger.v(() => '[onCoordinatorEvent] onCallCreated: $callCreated');
           onCallCreated?.call(callCreated);
@@ -171,7 +167,7 @@ class StreamVideoImpl implements StreamVideo {
   }
 
   @override
-  Future<Result<CallReceivedOrCreated>> getOrCreateCall({
+  Future<Result<CallReceivedOrCreatedData>> getOrCreateCall({
     required StreamCallCid cid,
     List<String> participantIds = const [],
     bool ringing = false,
@@ -213,10 +209,10 @@ class StreamVideoImpl implements StreamVideo {
   }
 
   @override
-  Future<Result<CallJoined>> joinCall({
+  Future<Result<CallJoinedData>> joinCall({
     required StreamCallCid cid,
     bool create = false,
-    void Function(CallReceivedOrCreated)? onReceivedOrCreated,
+    void Function(CallReceivedOrCreatedData)? onReceivedOrCreated,
   }) async {
     _logger.d(() => '[joinCall] cid: $cid');
     final joinResult = await _client.joinCall(
@@ -227,9 +223,9 @@ class StreamVideoImpl implements StreamVideo {
       return joinResult as Failure;
     }
     onReceivedOrCreated?.call(
-      CallReceivedOrCreated(
+      CallReceivedOrCreatedData(
         wasCreated: joinResult.data.wasCreated,
-        data: CallCreated(
+        data: CallCreatedData(
           callCid: cid,
           ringing: false,
           metadata: joinResult.data.metadata,
@@ -245,7 +241,7 @@ class StreamVideoImpl implements StreamVideo {
       _logger.e(() => '[joinCall] edge finding failed: $joinResult');
       return joinResult as Failure;
     }
-    final call = CallJoined(
+    final call = CallJoinedData(
       callCid: cid,
       wasCreated: joinResult.data.wasCreated,
       metadata: edgeResult.data.metadata,
@@ -541,13 +537,14 @@ class StreamVideoImpl implements StreamVideo {
   }
 
   @override
-  Future<CallCreated?> consumeIncomingCall() {
+  Future<CallCreatedData?> consumeIncomingCall() {
     return _pushNotificationManager?.consumeIncomingCall() ?? Future.value();
   }
 }
 
 class _StreamVideoState {
-  final MutableStateEmitter<UserInfo?> currentUser = MutableStateEmitterImpl();
+  final MutableStateEmitter<UserInfo?> currentUser =
+      MutableStateEmitterImpl(null);
 
   Future<void> close() async {
     await currentUser.close();

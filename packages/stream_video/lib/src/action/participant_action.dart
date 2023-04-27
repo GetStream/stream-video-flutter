@@ -1,14 +1,14 @@
 import 'package:equatable/equatable.dart';
 
-import '../models/call_permission.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../webrtc/media/constraints/camera_position.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
-import 'action.dart';
+import 'external_action.dart';
 
-abstract class CallControlAction extends StreamAction with EquatableMixin {
-  const CallControlAction();
+abstract class ParticipantAction extends StreamExternalAction
+    with EquatableMixin {
+  const ParticipantAction();
 
   @override
   List<Object?> get props => [];
@@ -17,102 +17,41 @@ abstract class CallControlAction extends StreamAction with EquatableMixin {
   bool? get stringify => true;
 }
 
-class AcceptCall extends CallControlAction {
-  const AcceptCall();
+abstract class LocalParticipantAction extends ParticipantAction {
+  const LocalParticipantAction();
+
+  const factory LocalParticipantAction.setCameraPosition({
+    required CameraPosition cameraPosition,
+  }) = SetCameraPosition;
+
+  const factory LocalParticipantAction.flipCamera() = FlipCamera;
+
+  const factory LocalParticipantAction.setVideoInputDevice({
+    required RtcMediaDevice device,
+  }) = SetVideoInputDevice;
+
+  const factory LocalParticipantAction.setCameraEnabled({
+    required bool enabled,
+  }) = SetCameraEnabled;
+
+  const factory LocalParticipantAction.setAudioInputDevice({
+    required RtcMediaDevice device,
+  }) = SetAudioInputDevice;
+
+  const factory LocalParticipantAction.setMicrophoneEnabled({
+    required bool enabled,
+  }) = SetMicrophoneEnabled;
+
+  const factory LocalParticipantAction.setScreenShareEnabled({
+    required bool enabled,
+  }) = SetScreenShareEnabled;
+
+  const factory LocalParticipantAction.setAudioOutputDevice({
+    required RtcMediaDevice device,
+  }) = SetAudioOutputDevice;
 }
 
-class RejectCall extends CallControlAction {
-  const RejectCall();
-}
-
-class RequestPermissions extends CallControlAction {
-  const RequestPermissions({
-    required this.permissions,
-  });
-
-  final List<CallPermission> permissions;
-
-  @override
-  List<Object?> get props => [permissions];
-}
-
-class UpdateUserPermissions extends CallControlAction {
-  const UpdateUserPermissions({
-    required this.userId,
-    this.grantPermissions = const [],
-    this.revokePermissions = const [],
-  });
-
-  final String userId;
-  final List<CallPermission> grantPermissions;
-  final List<CallPermission> revokePermissions;
-
-  @override
-  List<Object?> get props => [userId, grantPermissions, revokePermissions];
-}
-
-class BlockUser extends CallControlAction {
-  const BlockUser({
-    required this.userId,
-  });
-
-  final String userId;
-
-  @override
-  List<Object?> get props => [userId];
-}
-
-class UnblockUser extends CallControlAction {
-  const UnblockUser({
-    required this.userId,
-  });
-
-  final String userId;
-
-  @override
-  List<Object?> get props => [userId];
-}
-
-class MuteUsers extends CallControlAction {
-  const MuteUsers({
-    required this.userIds,
-  });
-
-  final List<String> userIds;
-
-  @override
-  List<Object?> get props => [userIds];
-}
-
-class StartTranscription extends CallControlAction {
-  const StartTranscription();
-}
-
-class StopTranscription extends CallControlAction {
-  const StopTranscription();
-}
-
-class StartRecording extends CallControlAction {
-  const StartRecording();
-}
-
-class StopRecording extends CallControlAction {
-  const StopRecording();
-}
-
-class StartBroadcasting extends CallControlAction {
-  const StartBroadcasting();
-}
-
-class StopBroadcasting extends CallControlAction {
-  const StopBroadcasting();
-}
-
-abstract class SessionControlAction extends CallControlAction {
-  const SessionControlAction();
-}
-
-class SetCameraPosition extends SessionControlAction {
+class SetCameraPosition extends LocalParticipantAction {
   const SetCameraPosition({required this.cameraPosition});
 
   final CameraPosition cameraPosition;
@@ -121,11 +60,11 @@ class SetCameraPosition extends SessionControlAction {
   List<Object?> get props => [cameraPosition];
 }
 
-class FlipCamera extends SessionControlAction {
+class FlipCamera extends LocalParticipantAction {
   const FlipCamera();
 }
 
-class SetVideoInputDevice extends SessionControlAction {
+class SetVideoInputDevice extends LocalParticipantAction {
   const SetVideoInputDevice({required this.device});
 
   final RtcMediaDevice device;
@@ -134,7 +73,7 @@ class SetVideoInputDevice extends SessionControlAction {
   List<Object?> get props => [device];
 }
 
-class SetCameraEnabled extends SessionControlAction {
+class SetCameraEnabled extends LocalParticipantAction {
   const SetCameraEnabled({required this.enabled});
 
   final bool enabled;
@@ -143,7 +82,7 @@ class SetCameraEnabled extends SessionControlAction {
   List<Object?> get props => [enabled];
 }
 
-class SetAudioInputDevice extends SessionControlAction {
+class SetAudioInputDevice extends LocalParticipantAction {
   const SetAudioInputDevice({required this.device});
 
   final RtcMediaDevice device;
@@ -152,7 +91,7 @@ class SetAudioInputDevice extends SessionControlAction {
   List<Object?> get props => [device];
 }
 
-class SetMicrophoneEnabled extends SessionControlAction {
+class SetMicrophoneEnabled extends LocalParticipantAction {
   const SetMicrophoneEnabled({required this.enabled});
 
   final bool enabled;
@@ -161,7 +100,7 @@ class SetMicrophoneEnabled extends SessionControlAction {
   List<Object?> get props => [enabled];
 }
 
-class SetScreenShareEnabled extends SessionControlAction {
+class SetScreenShareEnabled extends LocalParticipantAction {
   const SetScreenShareEnabled({required this.enabled});
 
   final bool enabled;
@@ -170,7 +109,7 @@ class SetScreenShareEnabled extends SessionControlAction {
   List<Object?> get props => [enabled];
 }
 
-class SetAudioOutputDevice extends SessionControlAction {
+class SetAudioOutputDevice extends LocalParticipantAction {
   const SetAudioOutputDevice({required this.device});
 
   final RtcMediaDevice device;
@@ -179,7 +118,41 @@ class SetAudioOutputDevice extends SessionControlAction {
   List<Object?> get props => [device];
 }
 
-class SetSubscription extends SessionControlAction {
+abstract class RemoteParticipantAction extends ParticipantAction {
+  const RemoteParticipantAction();
+
+  const factory RemoteParticipantAction.setSubscription({
+    required String userId,
+    required String sessionId,
+    required String trackIdPrefix,
+    required Map<SfuTrackTypeVideo, RtcVideoDimension> trackTypes,
+  }) = SetSubscription;
+
+  const factory RemoteParticipantAction.setSubscriptions(
+    List<SetSubscription> actions,
+  ) = SetSubscriptions;
+
+  const factory RemoteParticipantAction.updateSubscriptions(
+    List<SubscriptionAction> actions,
+  ) = UpdateSubscriptions;
+
+  const factory RemoteParticipantAction.updateSubscription({
+    required String userId,
+    required String sessionId,
+    required String trackIdPrefix,
+    required SfuTrackTypeVideo trackType,
+    RtcVideoDimension? videoDimension,
+  }) = UpdateSubscription;
+
+  const factory RemoteParticipantAction.removeSubscription({
+    required String userId,
+    required String sessionId,
+    required String trackIdPrefix,
+    required SfuTrackTypeVideo trackType,
+  }) = RemoveSubscription;
+}
+
+class SetSubscription extends RemoteParticipantAction {
   const SetSubscription({
     required this.userId,
     required this.sessionId,
@@ -196,7 +169,7 @@ class SetSubscription extends SessionControlAction {
   List<Object?> get props => [userId, sessionId, trackIdPrefix, trackTypes];
 }
 
-class SetSubscriptions extends SessionControlAction {
+class SetSubscriptions extends RemoteParticipantAction {
   const SetSubscriptions(this.actions);
 
   final List<SetSubscription> actions;
@@ -205,7 +178,7 @@ class SetSubscriptions extends SessionControlAction {
   List<Object?> get props => [actions];
 }
 
-class UpdateSubscriptions extends SessionControlAction {
+class UpdateSubscriptions extends RemoteParticipantAction {
   const UpdateSubscriptions(this.actions);
 
   final List<SubscriptionAction> actions;
@@ -214,7 +187,7 @@ class UpdateSubscriptions extends SessionControlAction {
   List<Object?> get props => [actions];
 }
 
-abstract class SubscriptionAction extends SessionControlAction {
+abstract class SubscriptionAction extends RemoteParticipantAction {
   const SubscriptionAction({
     required this.userId,
     required this.sessionId,

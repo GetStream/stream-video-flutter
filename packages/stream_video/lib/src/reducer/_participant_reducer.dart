@@ -1,19 +1,22 @@
-import '../../stream_video.dart';
+import '../action/participant_action.dart';
+import '../call_state.dart';
+import '../logger/impl/tagged_logger.dart';
+import '../models/call_track_state.dart';
+import '../store/store.dart';
+import '../sfu/data/models/sfu_track_type.dart';
+import '../webrtc/media/constraints/camera_position.dart';
 
-final _logger = taggedLogger(tag: 'SV:Reducer-Control');
+final _logger = taggedLogger(tag: 'SV:Reducer-Participant');
 
-class CallControlReducer {
-  const CallControlReducer();
+class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
+  const ParticipantReducer();
 
+  @override
   CallState reduce(
     CallState state,
-    CallControlAction action,
+    ParticipantAction action,
   ) {
-    if (action is AcceptCall) {
-      return _reduceCallAccepted(state, action);
-    } else if (action is RejectCall) {
-      return _reduceCallRejected(state, action);
-    } else if (action is SetCameraEnabled) {
+    if (action is SetCameraEnabled) {
       return _reduceCameraEnabled(state, action);
     } else if (action is SetMicrophoneEnabled) {
       return _reduceMicrophoneEnabled(state, action);
@@ -130,43 +133,6 @@ class CallControlReducer {
           },
         );
       }).toList(),
-    );
-  }
-
-  CallState _reduceCallAccepted(
-    CallState state,
-    AcceptCall action,
-  ) {
-    final status = state.status;
-    if (status is! CallStatusIncoming || status.acceptedByMe) {
-      _logger.w(
-        () => '[reduceCallAccepted] rejected (invalid status): $status',
-      );
-      return state;
-    }
-    return state.copyWith(
-      status: CallStatus.incoming(acceptedByMe: true),
-    );
-  }
-
-  CallState _reduceCallRejected(
-    CallState state,
-    RejectCall action,
-  ) {
-    final status = state.status;
-    if (status is! CallStatusIncoming || status.acceptedByMe) {
-      _logger.w(
-        () => '[reduceCallRejected] rejected (invalid status): $status',
-      );
-      return state;
-    }
-    _logger.i(() => '[reduceCallRejected] action: $action, state: $state');
-    return state.copyWith(
-      status: CallStatus.disconnected(
-        DisconnectReason.rejected(
-          byUserId: state.currentUserId,
-        ),
-      ),
     );
   }
 

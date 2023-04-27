@@ -8,6 +8,9 @@ import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
+import '../../action/internal/rtc_action.dart';
+import '../../action/internal/sfu_action.dart';
+import '../../action/participant_action.dart';
 import '../../call_state_manager.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
@@ -84,8 +87,8 @@ class CallSessionImpl extends CallSession {
 
   late final _saBuffer = DebounceBuffer<SubscriptionAction, Result<None>>(
     duration: _debounceDuration,
-    onComplete: _updateSubscriptions,
-    onCancel: (_) async => Result.error('SubscriptionAction cancelled'),
+    onBuffered: _updateSubscriptions,
+    onCancel: () => Result.error('SubscriptionAction cancelled'),
   );
 
   @override
@@ -190,7 +193,16 @@ class CallSessionImpl extends CallSession {
   }
 
   @override
-  Future<Result<None>> apply(SessionControlAction action) async {
+  Future<Result<None>> apply(ParticipantAction action) async {
+    _logger.d(() => '[apply] action: $action');
+    final result = await _apply(action);
+    if (result.isSuccess) {
+      stateManager.dispatch(action);
+    }
+    return result;
+  }
+
+  Future<Result<None>> _apply(ParticipantAction action) async {
     _logger.d(() => '[apply] action: $action');
     if (action is SetCameraEnabled) {
       return _onSetCameraEnabled(action.enabled);
@@ -236,7 +248,7 @@ class CallSessionImpl extends CallSession {
       await _onTrackUnpublished(event);
     }
 
-    return stateManager.onSfuEvent(event);
+    return stateManager.dispatch(SfuEventAction(event));
   }
 
   Future<void> _onParticipantLeft(SfuParticipantLeftEvent event) async {
@@ -451,10 +463,11 @@ class CallSessionImpl extends CallSession {
     if (remoteTrack.isAudioTrack) {
       await _applyCurrentAudioOutputDevice();
     }
-
-    return stateManager.onSubscriberTrackReceived(
-      remoteTrack.trackIdPrefix,
-      remoteTrack.trackType,
+    return stateManager.dispatch(
+      UpdateSubscriberTrack(
+        trackIdPrefix: remoteTrack.trackIdPrefix,
+        trackType: remoteTrack.trackType,
+      ),
     );
   }
 

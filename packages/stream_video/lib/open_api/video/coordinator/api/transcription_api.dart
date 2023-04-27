@@ -81,7 +81,7 @@ class TranscriptionApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> stoptranscriptionWithHttpInfo(String type, String id,) async {
+  Future<Response> stopTranscriptionWithHttpInfo(String type, String id,) async {
     // ignore: prefer_const_declarations
     final path = r'/call/{type}/{id}/stop_transcription'
       .replaceAll('{type}', type)
@@ -117,8 +117,8 @@ class TranscriptionApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<void> stoptranscription(String type, String id,) async {
-    final response = await stoptranscriptionWithHttpInfo(type, id,);
+  Future<void> stopTranscription(String type, String id,) async {
+    final response = await stopTranscriptionWithHttpInfo(type, id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

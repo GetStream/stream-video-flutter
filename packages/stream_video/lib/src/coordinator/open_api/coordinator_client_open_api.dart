@@ -5,11 +5,11 @@ import '../../errors/video_error_composer.dart';
 import '../../latency_service/latency.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
-import '../../models/call_created.dart';
+import '../../models/call_created_data.dart';
 import '../../models/call_device.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_reaction.dart';
-import '../../models/call_received_created.dart';
+import '../../models/call_received_created_data.dart';
 import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 import '../../models/user_info.dart';
@@ -130,7 +130,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
   /// Gets the call if already exists or attempts to create a new call.
   @override
-  Future<Result<CallReceivedOrCreated>> getOrCreateCall(
+  Future<Result<CallReceivedOrCreatedData>> getOrCreateCall(
     inputs.GetOrCreateCallInput input,
   ) async {
     try {
@@ -151,9 +151,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       }
 
       return Result.success(
-        CallReceivedOrCreated(
+        CallReceivedOrCreatedData(
           wasCreated: result.created,
-          data: CallCreated(
+          data: CallCreatedData(
             callCid: input.callCid,
             ringing: input.ringing ?? false,
             metadata: result.call.toCallMetadata(result.members),

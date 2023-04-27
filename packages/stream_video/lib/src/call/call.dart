@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import '../../stream_video.dart';
+import '../action/external_action.dart';
 import '../coordinator/models/coordinator_events.dart';
+import '../models/call_permission.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
@@ -25,7 +27,7 @@ abstract class Call {
   }
 
   factory Call.fromCreated({
-    required CallCreated data,
+    required CallCreatedData data,
     StreamVideo? streamVideo,
   }) {
     return CallImpl.created(
@@ -35,7 +37,7 @@ abstract class Call {
   }
 
   factory Call.fromJoined({
-    required CallJoined data,
+    required CallJoinedData data,
     StreamVideo? streamVideo,
   }) {
     return CallImpl.joined(
@@ -63,13 +65,17 @@ abstract class Call {
 
   Future<Result<None>> join();
 
-  Future<Result<None>> connect();
+  Future<Result<None>> accept();
+
+  Future<Result<None>> reject();
 
   Future<Result<None>> end();
 
+  Future<Result<None>> connect();
+
   Future<Result<None>> disconnect();
 
-  Future<Result<None>> apply(CallControlAction action);
+  Future<Result<None>> apply(StreamExternalAction action);
 
   Future<Result<None>> inviteUsers(List<UserInfo> users);
 

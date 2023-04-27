@@ -1,3 +1,7 @@
+import '../../../logger/stream_log.dart';
+
+const _tag = 'SV:EventType';
+
 enum EventType {
   healthCheck('health.check'),
   connectionOk('connection.ok'),
@@ -23,7 +27,10 @@ enum EventType {
   factory EventType.fromAlias(dynamic alias) {
     return EventType.values.firstWhere(
       (e) => e.alias == alias,
-      orElse: () => EventType.unknown,
+      orElse: () {
+        streamLog.w(_tag, () => '[fromAlias] unexpected alias: $alias');
+        return EventType.unknown;
+      },
     );
   }
 

@@ -125,13 +125,13 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     return Firebase.apps.isNotEmpty;
   }
 
-  Future<CallCreated?> _from(StreamCallCid streamCallCid) async {
+  Future<CallCreatedData?> _from(StreamCallCid streamCallCid) async {
     return (await _client.getOrCreateCall(cid: streamCallCid))
         .getDataOrNull()
         ?.data;
   }
 
-  Future<CallCreated?> consumeIncomingCall() async {
+  Future<CallCreatedData?> consumeIncomingCall() async {
     // We need to wait for a second to be sure sharedPreferences has been updated
     await _sharedPreferences.reload();
     final incomingCallCid = _sharedPreferences.getString('incomingCallCid');
