@@ -105,7 +105,12 @@ class _StreamCallContentState extends State<StreamCallContent> {
     } else {
       final isReconnecting = callState.status.isReconnecting;
       bodyWidget = Center(
-        child: Text(isReconnecting ? 'Reconnecting' : 'Connecting'),
+        child: Row(
+          children: [
+            Text('${callState.callType}: '),
+            Text(isReconnecting ? 'Reconnecting' : 'Connecting'),
+          ],
+        ),
       );
     }
 
