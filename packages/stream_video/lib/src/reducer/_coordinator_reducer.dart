@@ -62,6 +62,10 @@ class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
       return _reduceCallRecordingStarted(state, event);
     } else if (event is CoordinatorCallRecordingStoppedEvent) {
       return _reduceCallRecordingStopped(state, event);
+    } else if (event is CoordinatorCallBroadcastingStartedEvent) {
+      return _reduceCallBroadcastingStarted(state, event);
+    } else if (event is CoordinatorCallBroadcastingStoppedEvent) {
+      return _reduceCallBroadcastingStopped(state, event);
     }
     return state;
   }
@@ -227,6 +231,40 @@ class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
 
     return state.copyWith(
       isRecording: false,
+    );
+  }
+
+  CallState _reduceCallBroadcastingStarted(
+    CallState state,
+    CoordinatorCallBroadcastingStartedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () => '[reduceCallBroadcastingStarted] rejected (status is not Active)',
+      );
+      return state;
+    }
+
+    return state.copyWith(
+      isBroadcasting: true,
+    );
+  }
+
+  CallState _reduceCallBroadcastingStopped(
+    CallState state,
+    CoordinatorCallBroadcastingStoppedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () => '[reduceCallBroadcastingStopped] rejected (status is not Active)',
+      );
+      return state;
+    }
+
+    return state.copyWith(
+      isBroadcasting: false,
     );
   }
 }

@@ -129,6 +129,7 @@ class LifecycleReducer extends Reducer<CallState, LifecycleAction> {
     return state.copyWith(
       status: stage.data.toCallStatus(state: state),
       createdByUserId: stage.data.metadata.details.createdBy.id,
+      isRingingFlow: stage.data.ringing,
       settings: stage.data.metadata.settings,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
       callParticipants: stage.data.metadata.toCallParticipants(state),
@@ -183,7 +184,7 @@ class LifecycleReducer extends Reducer<CallState, LifecycleAction> {
     _logger.e(() => '[reduceCallTimeout] state: $state');
     return state.copyWith(
       status: CallStatus.disconnected(
-        DisconnectReason.timeout(stage.timeLimit),
+        DisconnectReason.timeout(),
       ),
       sessionId: '',
     );

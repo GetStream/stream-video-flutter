@@ -64,8 +64,7 @@ class CallAttachment extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
-                    final callCid = StreamCallCid(cid: cid);
-                    final call = Call.fromCid(callCid: callCid);
+                    final call = Call.fromCid(cid: cid);
 
                     Navigator.push(
                       context,

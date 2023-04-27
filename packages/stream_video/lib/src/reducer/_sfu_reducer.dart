@@ -2,13 +2,16 @@ import 'package:collection/collection.dart';
 
 import '../../stream_video.dart';
 import '../action/internal/sfu_action.dart';
+import '../models/call_preferences.dart';
 import '../store/store.dart';
 import '../sfu/data/events/sfu_events.dart';
 
 final _logger = taggedLogger(tag: 'SV:Reducer-SFU');
 
 class SfuReducer extends Reducer<CallState, SfuAction> {
-  const SfuReducer();
+  const SfuReducer(this.preferences);
+
+  final CallPreferences preferences;
 
   @override
   CallState reduce(
@@ -235,12 +238,25 @@ class SfuReducer extends Reducer<CallState, SfuAction> {
     CallState state,
     SfuParticipantLeftEvent event,
   ) {
-    return state.copyWith(
-      callParticipants: [...state.callParticipants]..removeWhere(
-          (participant) =>
-              participant.userId == event.participant.userId &&
-              participant.sessionId == event.participant.sessionId,
+    final callParticipants = [...state.callParticipants]..removeWhere(
+        (participant) =>
+            participant.userId == event.participant.userId &&
+            participant.sessionId == event.participant.sessionId,
+      );
+
+    if (callParticipants.length == 1 &&
+        callParticipants.first.userId == state.currentUserId &&
+        state.isRingingFlow &&
+        preferences.dropIfAloneInRingingFlow) {
+      return state.copyWith(
+        status: CallStatus.disconnected(
+          DisconnectReason.lastParticipantLeft(),
         ),
+        callParticipants: callParticipants,
+      );
+    }
+    return state.copyWith(
+      callParticipants: callParticipants,
     );
   }
 }

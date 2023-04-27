@@ -2,10 +2,10 @@ import 'package:equatable/equatable.dart';
 
 import '../../../../platform_detector/platform_detector.dart';
 import '../../codec/sdp_codec.dart';
+import '../../editor/rule/rule_set_opus_red_enabled.dart';
 import '../../sdp.dart';
 import 'rule_prioritize_codec.dart';
 import 'rule_set_opus_dtx_enabled.dart';
-import 'rule_set_opus_red_enabled.dart';
 
 abstract class SdpMungingRule with EquatableMixin {
   const SdpMungingRule({

@@ -60,8 +60,8 @@ class SetLifecycleStage extends LifecycleAction {
     return const SetLifecycleStage(CallConnected());
   }
 
-  factory SetLifecycleStage.timeout(Duration duration) {
-    return SetLifecycleStage(CallTimeout(duration));
+  factory SetLifecycleStage.timeout() {
+    return const SetLifecycleStage(CallTimeout());
   }
 
   factory SetLifecycleStage.connectFailed(VideoError error) {
@@ -139,12 +139,7 @@ class CallConnected extends LifecycleStage {
 }
 
 class CallTimeout extends LifecycleStage {
-  const CallTimeout(this.timeLimit);
-
-  final Duration timeLimit;
-
-  @override
-  List<Object?> get props => [timeLimit];
+  const CallTimeout();
 }
 
 class ConnectFailed extends LifecycleStage {

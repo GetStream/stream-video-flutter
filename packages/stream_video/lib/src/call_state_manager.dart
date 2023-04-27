@@ -3,6 +3,7 @@ import 'call_state.dart';
 import 'coordinator/coordinator_socket_listener.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'logger/impl/tagged_logger.dart';
+import 'models/call_preferences.dart';
 import 'reducer/call_state_reducer.dart';
 import 'state_emitter.dart';
 import 'store/store.dart';
@@ -28,8 +29,9 @@ class CallStateManagerImpl extends CallStateManager {
   CallStateManagerImpl({
     required CallState initialState,
     required List<Middleware<CallState, StreamAction>> middlewares,
+    required CallPreferences callPreferences,
   }) : _store = Store(
-          CallStateReducer(),
+          CallStateReducer(callPreferences),
           initialState: initialState,
           middlewares: middlewares,
         );
