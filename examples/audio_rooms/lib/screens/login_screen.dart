@@ -1,10 +1,37 @@
+import 'dart:async';
+
 import 'package:audio_rooms/assets.dart';
+import 'package:audio_rooms/repositories/repository.dart';
 import 'package:audio_rooms/screens/dashboard_screen.dart';
 import 'package:audio_rooms/widgets/google_sign_in_button.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_video/stream_video.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  Future<void> _handleLogin() async {
+    await StreamVideo.instance.connectUser(
+      const UserInfo(
+        id: "nash@getstream.io",
+        role: "admin",
+        name: "Nash",
+      ),
+      tokenProvider: TokenProvider.dynamic(
+        (uid) => context.auth.fetchAuthTokenForUser(userId: uid),
+      ),
+    );
+    unawaited(
+      Navigator.of(context).push(
+        DashboardScreen.routeTo(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +66,7 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 48),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: GoogleLoginButton(
-                    onPressed: () {
-                      Navigator.of(context).push(DashboardScreen.routeTo());
-                    },
-                  ),
+                  child: GoogleLoginButton(onPressed: _handleLogin),
                 ),
               ],
             ),
