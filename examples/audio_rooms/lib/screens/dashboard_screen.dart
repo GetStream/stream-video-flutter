@@ -25,67 +25,81 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final height = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: const Color(0xFFDDDDDD),
       appBar: const StreamAudioRoomsAppBar(),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 24.0,
-              horizontal: 12.0,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12.0,
+              ),
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: 24.0,
+                        bottom: 12.0,
+                      ),
+                      child: Text(
+                        'Available Audio Rooms',
+                        style: theme.textTheme.displayLarge,
+                      ),
+                    ),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      childCount: 12,
+                      (context, index) => OpenContainer(
+                        openBuilder: (context, action) => AudioRoomScreen(
+                          audioRoom: Call.fromCid(
+                            callCid: StreamCallCid.from(type: "type", id: "id"),
+                          ),
+                        ),
+                        closedBuilder: (context, action) => _RoomCard(
+                          roomTitle: 'Audio Room O1',
+                          onRoomTap: (_) => action.call(),
+                          users: const [
+                            "Deven",
+                            "Nash",
+                            "Thierry",
+                            "Tommaso",
+                          ],
+                        ),
+                        closedColor: const Color(0xFFDDDDDD),
+                      ),
+                    ),
+                  )
+                ],
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Available Audio Rooms',
-                  style: theme.textTheme.displayLarge,
-                ),
-                const SizedBox(height: 12.0),
-                _RoomCard(
-                  roomTitle: 'Audio Room O1',
-                  onRoomTap: _handleRoomTap,
-                  users: const [
-                    "Deven",
-                    "Nash",
-                    "Thierry",
-                    "Tommaso",
-                  ],
-                ),
-                _RoomCard(
-                  roomTitle: 'Audio Room O1',
-                  onRoomTap: _handleRoomTap,
-                  users: const [
-                    "Deven",
-                    "Nash",
-                    "Thierry",
-                    "Tommaso",
-                  ],
-                ),
-                _RoomCard(
-                  roomTitle: 'Audio Room O1',
-                  onRoomTap: _handleRoomTap,
-                  users: const [
-                    "Deven",
-                    "Nash",
-                    "Thierry",
-                    "Tommaso",
-                  ],
-                ),
-                _RoomCard(
-                  roomTitle: 'Audio Room O1',
-                  onRoomTap: _handleRoomTap,
-                  users: const [
-                    "Deven",
-                    "Nash",
-                    "Thierry",
-                    "Tommaso",
-                  ],
-                ),
-              ],
+            Positioned.fill(
+              bottom: 0.0,
+              left: 0.0,
+              right: 0.0,
+              top: height * 0.72,
+              child: const Scrim(
+                applied: true,
+                child: SizedBox.expand(),
+              ),
             ),
-          ),
+            Positioned.fill(
+              bottom: 24.0,
+              left: 24.0,
+              right: 24.0,
+              top: height * 0.75,
+              child: StreamButton(
+                onTap: _createRoom,
+                child: const Text(
+                  "New Room",
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
