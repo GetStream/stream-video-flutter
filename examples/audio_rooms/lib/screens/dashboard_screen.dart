@@ -1,6 +1,9 @@
+import 'package:animations/animations.dart';
 import 'package:audio_rooms/screens/audio_room_screen.dart';
 import 'package:audio_rooms/widgets/stream_audio_appbar.dart';
+import 'package:audio_rooms/widgets/stream_button.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_video/stream_video.dart';
 
 class DashboardScreen extends StatefulWidget {
   static Route<dynamic> routeTo() {
@@ -18,8 +21,15 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  void _handleRoomTap(String room) {
-    Navigator.of(context).push(AudioRoomScreen.routeTo());
+  Future<void> _createRoom() async {
+    final result = await StreamVideo.instance.getOrCreateCall(
+      cid: StreamCallCid.from(type: "audio_room", id: "testing"),
+    );
+    print("Call Result ${result.isSuccess}");
+    print("Call Result ${result.isFailure}");
+
+    final call = Call.fromCid(callCid: result.getDataOrNull()!.data.callCid);
+    Navigator.of(context).push(AudioRoomScreen.routeTo(call));
   }
 
   @override
