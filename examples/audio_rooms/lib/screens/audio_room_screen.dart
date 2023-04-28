@@ -1,19 +1,29 @@
+import 'dart:async';
+
+import 'package:animations/animations.dart';
 import 'package:audio_rooms/widgets/stream_audio_appbar.dart';
 import 'package:audio_rooms/widgets/stream_button.dart';
 import 'package:flutter/material.dart';
 
 import 'dart:ui' as ui;
 
+import 'package:stream_video_flutter/stream_video_flutter.dart';
+
 class AudioRoomScreen extends StatefulWidget {
-  static Route<dynamic> routeTo() {
+  static Route<dynamic> routeTo(Call audioRoom) {
     return MaterialPageRoute(
       builder: (BuildContext context) {
-        return const AudioRoomScreen();
+        return AudioRoomScreen(audioRoom: audioRoom);
       },
     );
   }
 
-  const AudioRoomScreen({Key? key}) : super(key: key);
+  const AudioRoomScreen({
+    Key? key,
+    required this.audioRoom,
+  }) : super(key: key);
+
+  final Call audioRoom;
 
   @override
   State<AudioRoomScreen> createState() => _AudioRoomScreenState();
@@ -28,14 +38,16 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 10.0),
+          Padding(
+            padding: const EdgeInsets.only(top: 10.0),
             child: Material(
-              borderRadius: BorderRadius.only(
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(24.0),
                 topRight: Radius.circular(24.0),
               ),
-              child: _RoomScrollBody(),
+              child: _RoomScrollBody(
+                call: widget.audioRoom,
+              ),
             ),
           ),
           Positioned.fill(
@@ -74,7 +86,11 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> {
                 StreamButton(
                   backgroundColor: const Color(0xff1E262E),
                   borderRadius: 7.0,
-                  onTap: () {},
+                  onTap: () {
+                    widget.audioRoom.end();
+                    widget.audioRoom.disconnect();
+                    Navigator.of(context).pop();
+                  },
                   child: const Icon(
                     Icons.back_hand,
                     color: Colors.white,
@@ -90,20 +106,58 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> {
 }
 
 // TODO(Nash): Refactor to slivers and a custom scroll view
-class _RoomScrollBody extends StatelessWidget {
-  const _RoomScrollBody({Key? key}) : super(key: key);
+class _RoomScrollBody extends StatefulWidget {
+  const _RoomScrollBody({
+    Key? key,
+    required this.call,
+  }) : super(key: key);
+
+  final Call call;
+
+  @override
+  State<_RoomScrollBody> createState() => _RoomScrollBodyState();
+}
+
+class _RoomScrollBodyState extends State<_RoomScrollBody> {
+  List<CallParticipantState> hosts = [];
+  List<CallParticipantState> listeners = [];
+
+  late final StreamSubscription<CallState> callStateSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    callStateSubscription = widget.call.state.valueStream.listen(
+      (callState) {
+        setState(() {
+          hosts = callState.callParticipants
+              .where((element) => element.isAudioEnabled)
+              .toList(growable: false);
+          listeners = callState.callParticipants
+              .where((element) => !element.isAudioEnabled)
+              .toList(growable: false);
+        });
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    callStateSubscription.cancel();
+    super.dispose();
+  }
 
   Widget _buildIndicatorText() {
-    return const Text.rich(
+    return  Text.rich(
       TextSpan(
-        style: TextStyle(
+        style: const TextStyle(
           fontWeight: FontWeight.w500,
           fontSize: 16,
           color: Color(0xFF999999),
         ),
         children: [
-          TextSpan(text: ' 126 '),
-          WidgetSpan(
+          TextSpan(text: ' ${hosts.length + listeners.length} '),
+          const WidgetSpan(
             alignment: ui.PlaceholderAlignment.middle,
             child: Icon(
               Icons.account_circle,
@@ -111,9 +165,9 @@ class _RoomScrollBody extends StatelessWidget {
               color: Color(0xFF999999),
             ),
           ),
-          TextSpan(text: ' / '),
-          TextSpan(text: ' 26 '),
-          WidgetSpan(
+          const TextSpan(text: ' / '),
+          const TextSpan(text: ' 26 '),
+          const  WidgetSpan(
             alignment: ui.PlaceholderAlignment.middle,
             child: Icon(
               Icons.message,
@@ -134,19 +188,32 @@ class _RoomScrollBody extends StatelessWidget {
       child: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: Text('Audio Room Number 01',
-                style: theme.textTheme.displayLarge),
+            child: Text(
+              widget.call.state.value.callCid.value,
+              style: theme.textTheme.displayLarge,
+            ),
           ),
-          const SliverPadding(padding: EdgeInsets.only(top: 10.0)),
+          const SliverPadding(
+            padding: EdgeInsets.only(top: 10.0),
+          ),
           SliverToBoxAdapter(
             child: _buildIndicatorText(),
           ),
-          const SliverPadding(padding: EdgeInsets.only(top: 36.0)),
+          const SliverPadding(
+            padding: EdgeInsets.only(top: 36.0),
+          ),
           SliverToBoxAdapter(
-            child: Text(
-              'Hosts (3)',
-              style: theme.textTheme.displayMedium,
-            ),
+            child: StreamBuilder<CallState>(
+                stream: widget.call.state.valueStream,
+                builder: (context, snapshot) {
+                  final numberOfSpeakers = snapshot.data?.callParticipants
+                      .where((element) => element.isAudioEnabled)
+                      .length;
+                  return Text(
+                    'Hosts ($numberOfSpeakers)',
+                    style: theme.textTheme.displayMedium,
+                  );
+                }),
           ),
           const SliverPadding(padding: EdgeInsets.only(top: 12.0)),
           SliverGrid(
@@ -156,14 +223,14 @@ class _RoomScrollBody extends StatelessWidget {
                   widthFactor: 0.8,
                   child: CircleAvatar(
                     radius: 52,
-                    child: CircleAvatar(
-                      radius: 48,
-                      backgroundColor: Colors.pink.withOpacity(index / 5),
+                    child: StreamCallParticipant(
+                      call: widget.call,
+                      participant: hosts[index],
                     ),
                   ),
                 );
               },
-              childCount: 3,
+              childCount: hosts.length,
             ),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
@@ -172,27 +239,34 @@ class _RoomScrollBody extends StatelessWidget {
           SliverPadding(
             padding: const EdgeInsets.only(top: 36, bottom: 12),
             sliver: SliverToBoxAdapter(
-              child: Text(
-                'Listeners (123)',
-                style: theme.textTheme.displayMedium,
-              ),
+              child: StreamBuilder<CallState>(
+                  stream: widget.call.state.valueStream,
+                  builder: (context, snapshot) {
+                    final numberOfSpeakers = snapshot.data?.callParticipants
+                        .where((element) => !element.isAudioEnabled)
+                        .length;
+                    return Text(
+                      'Listeners ($numberOfSpeakers)',
+                      style: theme.textTheme.displayMedium,
+                    );
+                  }),
             ),
           ),
           SliverGrid(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
-                return const Align(
+                return Align(
                   widthFactor: 0.8,
                   child: CircleAvatar(
                     radius: 36,
-                    child: CircleAvatar(
-                      radius: 48,
-                      backgroundColor: Colors.pink,
+                    child: StreamCallParticipant(
+                      call: widget.call,
+                      participant: listeners[index],
                     ),
                   ),
                 );
               },
-              childCount: 123,
+              childCount: listeners.length,
             ),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
