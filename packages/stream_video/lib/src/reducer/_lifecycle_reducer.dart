@@ -128,8 +128,8 @@ class LifecycleReducer extends Reducer<CallState, LifecycleAction> {
     _logger.d(() => '[reduceCallCreated] state: $state');
     return state.copyWith(
       status: stage.data.toCallStatus(state: state),
-      createdByUserId: stage.data.metadata.info.createdByUserId,
-      settings: stage.data.metadata.details.settings,
+      createdByUserId: stage.data.metadata.details.createdBy.id,
+      settings: stage.data.metadata.settings,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
       callParticipants: stage.data.metadata.toCallParticipants(state),
     );
@@ -153,8 +153,8 @@ class LifecycleReducer extends Reducer<CallState, LifecycleAction> {
     _logger.d(() => '[reduceCallJoined] state: $state;\nnewStatus: $status');
     return state.copyWith(
       status: status,
-      createdByUserId: stage.data.metadata.info.createdByUserId,
-      settings: stage.data.metadata.details.settings,
+      createdByUserId: stage.data.metadata.details.createdBy.id,
+      settings: stage.data.metadata.settings,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
       callParticipants: stage.data.metadata.toCallParticipants(state),
     );
@@ -244,7 +244,7 @@ extension on CallCreatedData {
     required CallState state,
   }) {
     final status = state.status;
-    final createdByMe = state.currentUserId == metadata.info.createdByUserId;
+    final createdByMe = state.currentUserId == metadata.details.createdBy.id;
     if (ringing && !status.isOutgoing && createdByMe) {
       return CallStatus.outgoing();
     } else if (ringing && !status.isIncoming && !createdByMe) {
@@ -258,8 +258,8 @@ extension on CallCreatedData {
 extension on CallMetadata {
   List<CallParticipantState> toCallParticipants(CallState state) {
     final result = <CallParticipantState>[];
-    for (final userId in details.members.keys) {
-      final member = details.members[userId];
+    for (final userId in members.keys) {
+      final member = members[userId];
       final user = users[userId];
       final isLocal = state.currentUserId == userId;
       result.add(
