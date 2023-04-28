@@ -1,3 +1,5 @@
+import 'package:audio_rooms/env.dart';
+import 'package:audio_rooms/repositories/repository.dart';
 import 'package:audio_rooms/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -53,6 +55,10 @@ class AudioRooms extends StatelessWidget {
         primaryColor: const Color(0xFF005FFF),
       ),
       home: const LoginScreen(),
+      builder: (context, child) => AuthProvider(
+        auth: AuthRepo(),
+        child: child!,
+      ),
     );
   }
 }
