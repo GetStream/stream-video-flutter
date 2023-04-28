@@ -55,6 +55,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   late final eventsApi = open.EventsApi(_apiClient);
   late final usersApi = open.UsersApi(_apiClient);
   late final recordingApi = open.RecordingApi(_apiClient);
+  late final transcriptionApi = open.TranscriptionApi(_apiClient);
   late final livestreamingApi = open.LivestreamingApi(_apiClient);
   late final moderationApi = open.ModerationApi(_apiClient);
   late final callTypesApi = open.CallTypesApi(_apiClient);
@@ -364,6 +365,16 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   @override
+  Future<Result<None>> startTranscription(StreamCallCid callCid) async {
+    try {
+      await transcriptionApi.startTranscription(callCid.type, callCid.id);
+      return Result.success(None());
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
   Future<Result<None>> startRecording(StreamCallCid callCid) async {
     try {
       await recordingApi.startRecording(callCid.type, callCid.id);
@@ -588,6 +599,16 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return Result.error('updateCall result is null');
       }
       return Result.success(result.call.toCallMetadata());
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  Future<Result<None>> stopTranscription(StreamCallCid callCid) async {
+    try {
+      await transcriptionApi.stoptranscription(callCid.type, callCid.id);
+      return Result.success(None());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }

@@ -317,4 +317,24 @@ class CoordinatorClientRetry extends CoordinatorClient {
           'retrying in ${nextAttemptDelay.inMilliseconds} ms',
     );
   }
+
+  @override
+  Future<Result<None>> startTranscription(StreamCallCid callCid) {
+    return _retryManager.execute(
+      () => _delegate.startTranscription(callCid),
+      (error, nextAttemptDelay) async {
+        _logRetry('startTranscription', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> stopTranscription(StreamCallCid callCid) {
+    return _retryManager.execute(
+      () => _delegate.stopTranscription(callCid),
+      (error, nextAttemptDelay) async {
+        _logRetry('stopTranscription', error, nextAttemptDelay);
+      },
+    );
+  }
 }

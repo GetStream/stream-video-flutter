@@ -5,6 +5,7 @@ const _tag = 'SV:CallPermission';
 enum CallPermission {
   joinCall('join-call'),
   stopRecordCall('stop-record-call'),
+  stopTranscribeCall('start-transcription-call'),
   endCall('end-call'),
   muteUsers('mute-users'),
   startBroadcastCall('start-broadcast-call'),
@@ -16,6 +17,7 @@ enum CallPermission {
   sendAudio('send-audio'),
   screenshare('screenshare'),
   startRecordCall('start-record-call'),
+  startTranscribeCall('start-transcription-call'),
   updateCallPermissions('update-call-permissions'),
   createCall('create-call'),
   updateCall('update-call'),

@@ -2,7 +2,6 @@ import 'package:meta/meta.dart';
 
 import '../../../stream_video.dart';
 import '../../action/call_action.dart';
-import '../../action/internal/lifecycle_action.dart';
 import '../../call_state_manager.dart';
 import '../../models/call_permission.dart';
 import '../../utils/none.dart';
@@ -49,6 +48,11 @@ class PermissionsManagerImpl implements PermissionsManager {
       return _unblockUser(action.userId);
     } else if (action is MuteUsers) {
       return _muteUsers(action.userIds);
+      //start trranscription
+    } else if (action is StartTranscription) {
+      return _startTranscription();
+    } else if (action is StopTranscription) {
+      return _stopTranscription();
     } else if (action is StartRecording) {
       return _startRecording();
     } else if (action is StopRecording) {
@@ -133,6 +137,32 @@ class PermissionsManagerImpl implements PermissionsManager {
       userId: userId,
     );
     _logger.v(() => '[blockUser] result: $result');
+    return result;
+  }
+
+  Future<Result<None>> _startTranscription() async {
+    // if (!_hasPermission(CallPermission.startTranscribeCall)) {
+    //   _logger.w(() => '[startTranscription] rejected (no permission)');
+    //   return Result.error('Cannot start transcription (no permission)');
+    // }
+    _logger.d(() => '[startTranscription] no args');
+    final result = await streamVideo.startTranscription(
+      callCid: callCid,
+    );
+    _logger.v(() => '[startTranscription] result: $result');
+    return result;
+  }
+
+  Future<Result<None>> _stopTranscription() async {
+    // if (!_hasPermission(CallPermission.stopTranscribeCall)) {
+    //   _logger.w(() => '[stopTranscription] rejected (no permission)');
+    //   return Result.error('Cannot stop transcription (no permission)');
+    // }
+    _logger.d(() => '[stopTranscription] no args');
+    final result = await streamVideo.stopTranscription(
+      callCid: callCid,
+    );
+    _logger.v(() => '[stopTranscription] result: $result');
     return result;
   }
 

@@ -88,3 +88,11 @@ class StartBroadcasting extends CallAction {
 class StopBroadcasting extends CallAction {
   const StopBroadcasting();
 }
+
+class StartTranscription extends CallAction {
+  const StartTranscription();
+}
+
+class StopTranscription extends CallAction {
+  const StopTranscription();
+}

@@ -166,7 +166,14 @@ abstract class StreamVideo {
     List<CallPermission> revokePermissions = const [],
   });
 
-  /// Starts recording for the call described by the given [callCid].
+  Future<Result<None>> startTranscription({
+    required StreamCallCid callCid,
+  });
+
+  Future<Result<None>> stopTranscription({
+    required StreamCallCid callCid,
+  });
+
   Future<Result<None>> startRecording({
     required StreamCallCid callCid,
   });

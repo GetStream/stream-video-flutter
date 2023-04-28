@@ -39,6 +39,14 @@ extension PermissionsExtensions on Call {
     return apply(const StopRecording());
   }
 
+  Future<Result<None>> startTranscription() {
+    return apply(const StartTranscription());
+  }
+
+  Future<Result<None>> stopTranscription() {
+    return apply(const StopTranscription());
+  }
+
   Future<Result<None>> startBroadcasting() {
     return apply(const StartBroadcasting());
   }

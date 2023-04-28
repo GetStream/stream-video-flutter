@@ -4,6 +4,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';
+import '../logger/stream_log.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
 import 'connect/connect.dart'
@@ -53,7 +54,12 @@ abstract class StreamWebSocket {
       }
       _connectRequestInProgress = true;
 
-      final uri = Uri.parse(url);
+      var uri = Uri.parse(url);
+      //useful for local development
+      if (uri.scheme == 'wss' && uri.host == '127.0.0.1') {
+        uri = Uri.parse(url.replaceFirst('wss', 'ws'));
+      }
+      streamLog.i('SV:AbstractWS', () => '[connect] with new url: $url');
       _ws = await platform.connect(uri, protocols: protocols);
 
       onOpen();
