@@ -1,8 +1,13 @@
 import 'package:audio_rooms/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 void main() {
+  StreamVideo.init(
+    Env.streamVideoApiKey,
+    logPriority: Priority.info,
+  );
   runApp(const AudioRooms());
 }
 
