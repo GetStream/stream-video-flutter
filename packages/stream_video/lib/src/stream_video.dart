@@ -69,15 +69,9 @@ abstract class StreamVideo {
   /// Invoked when a call was created by another user.
   void Function(CallCreatedData)? onCallCreated;
 
-  /// Connects the [user] to the Stream Video service using a static token.
-  /// Both the [user] and [token] must not be null.
-  Future<Result<String>> connectUser(
-    UserInfo user,
-    String token,
-  );
-
   /// Connects the [user] to the Stream Video service using a [TokenProvider].
-  /// This method is great if your serivce requires tokens to be refreshed.
+  /// This method is great if your service requires tokens to be refreshed.
+  ///
   /// For applications outside of test and development, this method may be more
   /// suitable as token refreshes are handled for you.
   Future<Result<String>> connectUserWithProvider(
@@ -314,6 +308,17 @@ void _defaultLogHandler(
 const _defaultSdpPolicy = SdpPolicy();
 
 extension StreamVideoX on StreamVideo {
+  /// Connects the [user] to the Stream Video service using a static token.
+  Future<Result<String>> connectUser(
+    UserInfo user,
+    String token,
+  ) {
+    return connectUserWithProvider(
+      user,
+      tokenProvider: TokenProvider.static(token),
+    );
+  }
+
   /// Grants the [permissions] to the [userId] in the [callCid].
   Future<Result<None>> grantUserPermissions({
     required StreamCallCid callCid,

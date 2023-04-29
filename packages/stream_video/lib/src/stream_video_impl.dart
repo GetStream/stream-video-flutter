@@ -97,52 +97,10 @@ class StreamVideoImpl implements StreamVideo {
 
   /// Connects the [user] to the Stream Video service.
   @override
-  Future<Result<String>> connectUser(
-    UserInfo user,
-    String token,
-    ) async {
-    _logger.i(() => '[connectUser] user.id : ${user.id}');
-    if (currentUser != null) {
-      _logger.w(() => '[connectUser] rejected (already set): $currentUser');
-      return _tokenManager.getToken();
-    }
-    final tokenResult = await _tokenManager.setTokenProvider(
-      user.id,
-      tokenProvider: TokenProvider.static(token),
-    );
-    if (tokenResult.isFailure) {
-      return tokenResult;
-    }
-    _state.currentUser.value = user;
-
-    try {
-      _eventSubscription = _client.events.listen((event) {
-        _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
-        if (event is CoordinatorCallCreatedEvent &&
-            event.metadata.details.createdBy.id != user.id) {
-          _logger.v(() => '[onCoordinatorEvent] onCallCreated: ${event.data}');
-          onCallCreated?.call(event.data);
-        }
-      });
-
-      final result = await _client.onUserLogin(user);
-      await _pushNotificationManager?.onUserLoggedIn();
-      if (result is Failure) {
-        return result;
-      }
-      return tokenResult;
-    } catch (e, stk) {
-      _logger.e(() => '[connectUser] failed(${user.id}): $e');
-      return Result.failure(VideoErrors.compose(e, stk));
-    }
-  }
-
-  /// Connects the [user] to the Stream Video service.
-  @override
   Future<Result<String>> connectUserWithProvider(
-      UserInfo user, {
-        required TokenProvider tokenProvider,
-      }) async {
+    UserInfo user, {
+    required TokenProvider tokenProvider,
+  }) async {
     _logger.i(() => '[connectUser] user.id : ${user.id}');
     if (currentUser != null) {
       _logger.w(() => '[connectUser] rejected (already set): $currentUser');
