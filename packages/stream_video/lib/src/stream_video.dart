@@ -304,22 +304,6 @@ void _defaultLogHandler(
 const _defaultSdpPolicy = SdpPolicy();
 
 extension StreamVideoX on StreamVideo {
-  /// Connects the [user] to the Stream Video service.
-  Future<Result<String>> connectUserWithToken(
-    UserInfo user,
-    String token,
-  ) {
-    return connectUser(user, tokenProvider: TokenProvider.static(token));
-  }
-
-  /// Connects the [user] to the Stream Video service.
-  Future<Result<String>> connectUserWithProvider(
-    UserInfo user,
-    TokenProvider provider,
-  ) {
-    return connectUser(user, tokenProvider: provider);
-  }
-
   /// Grants the [permissions] to the [userId] in the [callCid].
   Future<Result<None>> grantUserPermissions({
     required StreamCallCid callCid,
