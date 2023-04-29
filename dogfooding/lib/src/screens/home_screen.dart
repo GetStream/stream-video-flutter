@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
     hide StreamUserAvatar;
@@ -28,9 +30,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final currentUserId = chatClient.state.currentUser?.id;
 
+    //FIXME(team): Chat does not allow emails as UIDs where as video does. Passing UIDs to chat directly causes a crash as they can be emails (which) are valid in video.
     final callMemberIDs = call?.state.value.callParticipants
         .map((CallParticipantState participant) => participant.userId)
         .where((id) => id != currentUserId)
+        .map((e) => md5.convert(utf8.encode(e)).toString())
         .toList(growable: false);
 
     /// TODO: check if can use "livestream" channel type here.

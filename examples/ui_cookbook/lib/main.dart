@@ -20,7 +20,7 @@ void main() async {
       name: Env.sampleUserName00,
       image: Env.sampleUserImage00,
     ),
-    tokenProvider: TokenProvider.static(Env.sampleUserVideoToken00),
+    Env.sampleUserVideoToken00,
   );
 
   runApp(const UICookbook());
