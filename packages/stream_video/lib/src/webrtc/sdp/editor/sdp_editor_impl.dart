@@ -2,54 +2,48 @@ import 'package:meta/meta.dart';
 
 import '../../../logger/impl/tagged_logger.dart';
 import '../../../platform_detector/platform_detector.dart';
-import '../../../utils/standard.dart';
 import '../codec/sdp_codec.dart';
-import '../policy/rule/sdp_munging_rule.dart';
 import '../policy/sdp_policy.dart';
 import '../sdp.dart';
 import 'action/sdp_edit_action_factory.dart';
+import 'rule/rule_set_opus_dtx_enabled.dart';
+import 'rule/rule_set_opus_red_enabled.dart';
+import 'rule/rule_toggle.dart';
+import 'rule/sdp_munging_rule.dart';
 import 'sdp_editor.dart';
 
 @internal
 class SdpEditorImpl implements SdpEditor {
-  SdpEditorImpl(this.policy) {
-    const rule = SdpMungingRule.prioritizeCodec(
-      platforms: [PlatformType.android],
-      types: [SdpType.localOffer],
-      codec: VideoCodec.vp8,
-    );
-    internalRules[rule.key] = rule;
-  }
+  SdpEditorImpl(this.policy);
 
   final SdpPolicy policy;
 
-  final _logger = taggedLogger(tag: 'SV:SdpEditor');
+  late final _logger = taggedLogger(tag: 'SV:SdpEditor');
 
-  final _actionFactory = SdpEditActionFactory();
+  late final _actionFactory = SdpEditActionFactory();
 
-  final internalRules = <String, SdpMungingRule>{};
+  late final internalRules = _createRules();
 
-  late final platform = CurrentPlatform.type;
+  PlatformType get platform => CurrentPlatform.type;
 
   @override
-  void upsert(SdpMungingRule rule) {
-    final removed = internalRules.remove(rule.key);
-    internalRules[rule.key] = rule;
-    if (removed != null) {
-      _logger.v(() => '[add] replaced: $removed');
+  set opusDtxEnabled(bool value) {
+    for (final toggle in internalRules) {
+      if (toggle.rule is SetOpusDtxEnabledRule) {
+        toggle.enabled = value;
+        break;
+      }
     }
-    _logger.v(() => '[add] added: $rule');
   }
 
   @override
-  void removeWhereType<T extends SdpMungingRule>() {
-    internalRules.removeWhere((key, rule) {
-      return (rule is T).also((removed) {
-        if (removed) {
-          _logger.v(() => '[removeWhereType] removed: $rule');
-        }
-      });
-    });
+  set opusRedEnabled(bool value) {
+    for (final toggle in internalRules) {
+      if (toggle.rule is SetOpusRedEnabledRule) {
+        toggle.enabled = value;
+        break;
+      }
+    }
   }
 
   @override
@@ -65,7 +59,7 @@ class SdpEditorImpl implements SdpEditor {
 
     _logger.i(() => '[edit] sdp.type: ${sdp.type}');
     final lines = sdp.value.split('\r\n');
-    applyRules(sdp.type, lines, internalRules.values);
+    applyRules(sdp.type, lines);
 
     if (policy.mungingEnabled) {
       policy.munging(sdp.type, lines);
@@ -79,10 +73,14 @@ class SdpEditorImpl implements SdpEditor {
   void applyRules(
     SdpType sdpType,
     List<SdpLine> lines,
-    Iterable<SdpMungingRule> rules,
   ) {
-    for (final rule in rules) {
-      _logger.d(() => '[edit] rule: $rule');
+    for (final toggle in internalRules) {
+      _logger.d(() => '[edit] rule: $toggle');
+      if (!toggle.enabled) {
+        _logger.w(() => '[edit] rejected (rule is disabled)');
+        continue;
+      }
+      final rule = toggle.rule;
       if (rule.platforms.isNotEmpty && !rule.platforms.contains(platform)) {
         _logger.w(() => '[edit] rejected (mismatched platform): $platform');
         continue;
@@ -91,7 +89,7 @@ class SdpEditorImpl implements SdpEditor {
         _logger.w(() => '[edit] rejected (mismatched sdpType): $sdpType');
         continue;
       }
-      _actionFactory.create(rule)?.execute(lines);
+      _actionFactory.create(rule).execute(lines);
     }
   }
 }
@@ -106,4 +104,29 @@ extension on StringBuffer {
       }
     }
   }
+}
+
+List<SdpRuleToggle> _createRules() {
+  return <SdpRuleToggle>[
+    SdpRuleToggle(
+      enabled: true,
+      rule: const SdpMungingRule.prioritizeCodec(
+        platforms: [PlatformType.android],
+        types: [SdpType.localOffer],
+        codec: VideoCodec.vp8,
+      ),
+    ),
+    SdpRuleToggle(
+      rule: const SdpMungingRule.setOpusDtxEnabled(
+        enabled: true,
+        types: [SdpType.localOffer],
+      ),
+    ),
+    SdpRuleToggle(
+      rule: const SdpMungingRule.setOpusRedEnabled(
+        enabled: true,
+        types: [SdpType.localOffer],
+      ),
+    ),
+  ];
 }

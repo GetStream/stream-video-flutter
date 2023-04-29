@@ -20,7 +20,6 @@ import '../utils/future.dart';
 import '../utils/none.dart';
 import '../utils/standard.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
-import '../webrtc/sdp/policy/rule/sdp_munging_rule.dart';
 import 'permissions/permissions_manager.dart';
 import 'permissions/permissions_manager_impl.dart';
 import 'session/call_session.dart';
@@ -42,39 +41,39 @@ class CallImpl implements Call {
   factory CallImpl({
     required StreamCallCid callCid,
     StreamVideo? streamVideo,
-    RetryPolicy? retryPolicy,
+    CallPreferences? preferences,
   }) {
     streamLog.i(_tag, () => '<factory> callCid: $callCid');
     return CallImpl._internal(
       callCid: callCid,
       streamVideo: streamVideo,
-      retryPolicy: retryPolicy,
+      preferences: preferences,
     );
   }
 
   factory CallImpl.created({
     required CallCreatedData data,
     StreamVideo? streamVideo,
-    RetryPolicy? retryPolicy,
+    CallPreferences? preferences,
   }) {
     streamLog.i(_tag, () => '<factory> created: $data');
     return CallImpl._internal(
       callCid: data.callCid,
       streamVideo: streamVideo,
-      retryPolicy: retryPolicy,
+      preferences: preferences,
     ).also((it) => it._stateManager.dispatch(SetLifecycleStage.created(data)));
   }
 
   factory CallImpl.joined({
     required CallJoinedData data,
     StreamVideo? streamVideo,
-    RetryPolicy? retryPolicy,
+    CallPreferences? preferences,
   }) {
     streamLog.i(_tag, () => '<factory> joined: $data');
     return CallImpl._internal(
       callCid: data.callCid,
       streamVideo: streamVideo,
-      retryPolicy: retryPolicy,
+      preferences: preferences,
       credentials: data.credentials,
     ).also((it) => it._stateManager.dispatch(SetLifecycleStage.joined(data)));
   }
@@ -82,12 +81,16 @@ class CallImpl implements Call {
   factory CallImpl._internal({
     required StreamCallCid callCid,
     StreamVideo? streamVideo,
-    RetryPolicy? retryPolicy,
+    CallPreferences? preferences,
     CallCredentials? credentials,
   }) {
     final finalStreamVideo = streamVideo ?? StreamVideo.instance;
-    final finalRetryPolicy = retryPolicy ?? finalStreamVideo.retryPolicy;
-    final stateManager = _makeStateManager(callCid, finalStreamVideo);
+    final finalCallPreferences = preferences ?? DefaultCallPreferences();
+    final stateManager = _makeStateManager(
+      callCid,
+      finalStreamVideo,
+      finalCallPreferences,
+    );
     final permissionManager = _makePermissionAwareManager(
       callCid,
       finalStreamVideo,
@@ -95,7 +98,7 @@ class CallImpl implements Call {
     );
     return CallImpl._(
       streamVideo: finalStreamVideo,
-      retryPolicy: finalRetryPolicy,
+      preferences: finalCallPreferences,
       stateManager: stateManager,
       credentials: credentials,
       permissionManager: permissionManager,
@@ -104,7 +107,7 @@ class CallImpl implements Call {
 
   CallImpl._({
     required StreamVideo streamVideo,
-    required RetryPolicy retryPolicy,
+    required CallPreferences preferences,
     required CallStateManager stateManager,
     required PermissionsManager permissionManager,
     CallCredentials? credentials,
@@ -115,7 +118,8 @@ class CallImpl implements Call {
         _stateManager = stateManager,
         _permissionsManager = permissionManager,
         _streamVideo = streamVideo,
-        _retryPolicy = retryPolicy,
+        _preferences = preferences,
+        _retryPolicy = streamVideo.retryPolicy,
         _credentials = credentials {
     streamLog.i(_tag, () => '<init> state: ${stateManager.state.value}');
     _subscriptions.add(
@@ -136,6 +140,7 @@ class CallImpl implements Call {
 
   final StreamVideo _streamVideo;
   final RetryPolicy _retryPolicy;
+  final CallPreferences _preferences;
   final CallSessionFactory _sessionFactory;
   final CallStateManager _stateManager;
   final PermissionsManager _permissionsManager;
@@ -145,6 +150,12 @@ class CallImpl implements Call {
 
   @override
   StreamCallCid get callCid => state.value.callCid;
+
+  @override
+  String get type => state.value.callType;
+
+  @override
+  String get id => state.value.callId;
 
   @override
   StateEmitter<CallState> get state => _stateManager.state;
@@ -204,23 +215,10 @@ class CallImpl implements Call {
     if (status is CallStatusDisconnected) {
       await _clear('status-disconnected');
     }
-
-    if (_prevState?.settings.audio.opusDtxEnabled !=
-        state.settings.audio.opusDtxEnabled) {
-      _sessionFactory.sdpEditor.upsert(
-        SdpMungingRule.setOpusDtxEnabled(
-          enabled: state.settings.audio.opusDtxEnabled,
-        ),
-      );
-    }
-    if (_prevState?.settings.audio.redundantCodingEnabled !=
-        state.settings.audio.redundantCodingEnabled) {
-      _sessionFactory.sdpEditor.upsert(
-        SdpMungingRule.setOpusRedEnabled(
-          enabled: state.settings.audio.redundantCodingEnabled,
-        ),
-      );
-    }
+    _sessionFactory.sdpEditor.opusDtxEnabled =
+        state.settings.audio.opusDtxEnabled;
+    _sessionFactory.sdpEditor.opusRedEnabled =
+        state.settings.audio.redundantCodingEnabled;
 
     _prevState = state;
   }
@@ -317,7 +315,7 @@ class CallImpl implements Call {
       _logger.v(() => '[connect] await "connecting" change');
       final status = await _status.firstWhere(
         (it) => it != _ConnectionStatus.connecting,
-        timeLimit: _connectOptions.dropTimeout,
+        timeLimit: _preferences.connectTimeout,
       );
       if (status == _ConnectionStatus.connected) {
         return Result.success(None());
@@ -360,11 +358,10 @@ class CallImpl implements Call {
       _logger.w(() => '[connect] rejected (not Connectable): $status');
       return Result.error('invalid status: $status');
     }
-    final timeout = _connectOptions.dropTimeout;
-    final result = await _awaitIfNeeded(timeout);
+    final result = await _awaitIfNeeded();
     if (result.isFailure) {
       _logger.e(() => '[connect] waiting failed: $result');
-      _stateManager.dispatch(SetLifecycleStage.timeout(timeout));
+      _stateManager.dispatch(SetLifecycleStage.timeout());
       return result;
     }
 
@@ -481,12 +478,13 @@ class CallImpl implements Call {
         return;
       }
       final elapsed = DateTime.now().toUtc().millisecondsSinceEpoch - startTime;
-      if (elapsed > _retryPolicy.config.callRejoinTimeout.inMilliseconds) {
+      final retryPolicy = _streamVideo.retryPolicy;
+      if (elapsed > retryPolicy.config.callRejoinTimeout.inMilliseconds) {
         _logger.w(() => '[reconnect] timeout exceed');
         result = Result.error('was unable to reconnect in 15 seconds');
         break;
       }
-      final delay = _retryPolicy.backoff(_reconnectAttempt);
+      final delay = retryPolicy.backoff(_reconnectAttempt);
       _logger.v(
         () => '[reconnect] attempt: $_reconnectAttempt, '
             'elapsed: $elapsed, delay: $delay',
@@ -522,16 +520,19 @@ class CallImpl implements Call {
     _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< side effects applied');
   }
 
-  Future<Result<None>> _awaitIfNeeded(Duration timeLimit) async {
+  Future<Result<None>> _awaitIfNeeded() async {
     final state = this.state.value;
     final status = state.status;
+    final settings = state.settings;
     Future<Result<None>>? futureResult;
     if (status is CallStatusOutgoing && !status.acceptedByCallee) {
-      _logger.d(() => '[awaitIfNeeded] outgoing to be accepted by callee');
-      futureResult = _awaitOutgoingToBeAccepted(timeLimit);
+      final timeout = settings.ring.autoCancelTimeout;
+      _logger.d(() => '[awaitIfNeeded] outgoing timeout: $timeout');
+      futureResult = _awaitOutgoingToBeAccepted(timeout);
     } else if (status is CallStatusIncoming && !status.acceptedByMe) {
-      _logger.d(() => '[awaitIfNeeded] incoming to be accepted by me');
-      futureResult = _awaitIncomingToBeAccepted(timeLimit);
+      final timeout = settings.ring.autoRejectTimeout;
+      _logger.d(() => '[awaitIfNeeded] incoming timeout: $timeout');
+      futureResult = _awaitIncomingToBeAccepted(timeout);
     } else if (status is CallStatusJoining) {
       _logger.d(() => '[awaitIfNeeded] joining to become joined');
       futureResult = _awaitCallToBeJoined();
@@ -671,7 +672,7 @@ class CallImpl implements Call {
       },
       timeLimit: timeLimit,
     ).then((value) {
-      _logger.e(() => '[awaitIncomingToBeAccepted] completed');
+      _logger.i(() => '[awaitIncomingToBeAccepted] completed');
       return Result.success(None());
     }).onError((e, stk) {
       _logger.e(() => '[awaitIncomingToBeAccepted] failed: $e');
@@ -687,7 +688,7 @@ class CallImpl implements Call {
       },
       timeLimit: timeLimit,
     ).then((value) {
-      _logger.e(() => '[awaitOutgoingToBeAccepted] completed');
+      _logger.i(() => '[awaitOutgoingToBeAccepted] completed');
       return Result.success(None());
     }).onError((e, stk) {
       _logger.e(() => '[awaitOutgoingToBeAccepted] failed: $e');
@@ -719,6 +720,7 @@ class CallImpl implements Call {
 CallStateManager _makeStateManager(
   StreamCallCid callCid,
   StreamVideo streamVideo,
+  CallPreferences callPreferences,
 ) {
   final currentUserId = streamVideo.currentUser?.id ?? '';
   final middlewares = [
@@ -731,6 +733,7 @@ CallStateManager _makeStateManager(
       callCid: callCid,
     ),
     middlewares: middlewares,
+    callPreferences: callPreferences,
   );
 }
 

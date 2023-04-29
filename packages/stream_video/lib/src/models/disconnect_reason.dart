@@ -7,28 +7,25 @@ import '../errors/video_error.dart';
 abstract class DisconnectReason extends Equatable {
   const DisconnectReason();
 
-  factory DisconnectReason.timeout(Duration timeLimit) {
-    return DisconnectReasonTimeout(timeLimit);
-  }
+  const factory DisconnectReason.timeout() = DisconnectReasonTimeout;
 
-  factory DisconnectReason.failure(VideoError error) {
-    return DisconnectReasonFailure(error);
-  }
+  const factory DisconnectReason.failure(
+      VideoError error) = DisconnectReasonFailure;
 
-  factory DisconnectReason.rejected({
+  const factory DisconnectReason.rejected({
     required String byUserId,
-  }) {
-    return DisconnectReasonRejected(byUserId: byUserId);
-  }
+  }) = DisconnectReasonRejected;
 
-  factory DisconnectReason.cancelled({
+  const factory DisconnectReason.cancelled({
     required String byUserId,
-  }) {
-    return DisconnectReasonCancelled(byUserId: byUserId);
-  }
+  }) = DisconnectReasonCancelled;
 
   factory DisconnectReason.ended() {
     return DisconnectReasonEnded();
+  }
+
+  factory DisconnectReason.lastParticipantLeft() {
+    return DisconnectReasonLastParticipantLeft();
   }
 
   @override
@@ -36,16 +33,11 @@ abstract class DisconnectReason extends Equatable {
 }
 
 class DisconnectReasonTimeout extends DisconnectReason {
-  const DisconnectReasonTimeout(this.timeLimit);
-
-  final Duration timeLimit;
-
-  @override
-  List<Object?> get props => [timeLimit];
+  const DisconnectReasonTimeout();
 
   @override
   String toString() {
-    return 'Timeout{timeLimit: $timeLimit}';
+    return 'Timeout';
   }
 }
 
@@ -103,11 +95,27 @@ class DisconnectReasonEnded extends DisconnectReason {
   const DisconnectReasonEnded._internal();
 
   static const DisconnectReasonEnded _instance =
-      DisconnectReasonEnded._internal();
+  DisconnectReasonEnded._internal();
 
   @override
   String toString() {
     return 'Ended';
+  }
+}
+
+class DisconnectReasonLastParticipantLeft extends DisconnectReason {
+  factory DisconnectReasonLastParticipantLeft() {
+    return _instance;
+  }
+
+  const DisconnectReasonLastParticipantLeft._internal();
+
+  static const DisconnectReasonLastParticipantLeft _instance =
+  DisconnectReasonLastParticipantLeft._internal();
+
+  @override
+  String toString() {
+    return 'LastParticipantLeft';
   }
 }
 
@@ -119,7 +127,7 @@ class DisconnectReasonManuallyClosed extends DisconnectReason {
   const DisconnectReasonManuallyClosed._internal();
 
   static const DisconnectReasonManuallyClosed _instance =
-      DisconnectReasonManuallyClosed._internal();
+  DisconnectReasonManuallyClosed._internal();
 
   @override
   String toString() {
