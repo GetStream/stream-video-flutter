@@ -30,7 +30,7 @@ class AuthRepository {
   Future<void> loginWithUserInfo(UserInfo user) async {
     final chatClient = AppRepository.instance.streamChatClient;
 
-    final tokenResult = await StreamVideo.instance.connectUser(
+    final tokenResult = await StreamVideo.instance.connectUserWithProvider(
       user,
       tokenProvider: TokenProvider.dynamic(_tokenLoader, (token) async {
         _logger.d(() => '[onTokenUpdated] token: $token');
