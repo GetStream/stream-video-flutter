@@ -179,7 +179,7 @@ class StreamVideoImpl implements StreamVideo {
     }
   }
 
-  /// Disconnects the [user] from the Stream Video service.
+  /// Disconnects the `user` from the Stream Video service.
   @override
   Future<Result<None>> disconnectUser() async {
     _logger.i(() => '[disconnectUser] currentUser.id: ${currentUser?.id}');
