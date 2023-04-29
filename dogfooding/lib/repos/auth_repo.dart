@@ -29,7 +29,6 @@ class AuthRepository {
 
   Future<void> loginWithUserInfo(UserInfo user) async {
     final chatClient = AppRepository.instance.streamChatClient;
-
     final tokenResult = await StreamVideo.instance.connectUserWithProvider(
       user,
       tokenProvider: TokenProvider.dynamic(_tokenLoader, (token) async {
@@ -39,10 +38,11 @@ class AuthRepository {
           token: token,
         );
         await UserRepository.instance.saveUserCredentials(userCredentials);
-        final chatUID = md5.convert(utf8.encode(user.id)).toString();
-        await chatClient?.connectUser(User(id: chatUID), token);
       }),
     );
+
+    final chatUID = md5.convert(utf8.encode(user.id)).toString();
+    await chatClient?.connectUserWithProvider(User(id: chatUID), _tokenLoader);
     _logger.d(() => '[onLoginSuccess] tokenResult: $tokenResult');
     if (tokenResult is! Success<String>) {
       // TODO show error
@@ -51,9 +51,11 @@ class AuthRepository {
   }
 
   Future<String> _tokenLoader(String userId) async {
-    return _tokenService.loadToken(
+    final token = await _tokenService.loadToken(
       apiKey: Env.apiKey,
       userId: userId,
     );
+    _logger.d(() => '[_tokenLoader] loading...: $token');
+    return token;
   }
 }
