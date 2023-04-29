@@ -69,8 +69,18 @@ abstract class StreamVideo {
   /// Invoked when a call was created by another user.
   void Function(CallCreatedData)? onCallCreated;
 
-  /// Connects the [user] to the Stream Video service.
+  /// Connects the [user] to the Stream Video service using a static token.
+  /// Both the [user] and [token] must not be null.
   Future<Result<String>> connectUser(
+    UserInfo user,
+    String token,
+  );
+
+  /// Connects the [user] to the Stream Video service using a [TokenProvider].
+  /// This method is great if your serivce requires tokens to be refreshed.
+  /// For applications outside of test and development, this method may be more
+  /// suitable as token refreshes are handled for you.
+  Future<Result<String>> connectUserWithProvider(
     UserInfo user, {
     required TokenProvider tokenProvider,
   });
