@@ -63,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     await StreamVideo.instance.connectUser(
       user.userInfo,
-      tokenProvider: TokenProvider.static(user.token),
+      user.token,
     );
     setState(() {
       loggingIn = false;

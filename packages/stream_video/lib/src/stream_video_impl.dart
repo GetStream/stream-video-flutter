@@ -97,7 +97,7 @@ class StreamVideoImpl implements StreamVideo {
 
   /// Connects the [user] to the Stream Video service.
   @override
-  Future<Result<String>> connectUser(
+  Future<Result<String>> connectUserWithProvider(
     UserInfo user, {
     required TokenProvider tokenProvider,
   }) async {
@@ -137,7 +137,7 @@ class StreamVideoImpl implements StreamVideo {
     }
   }
 
-  /// Disconnects the [user] from the Stream Video service.
+  /// Disconnects the `user` from the Stream Video service.
   @override
   Future<Result<None>> disconnectUser() async {
     _logger.i(() => '[disconnectUser] currentUser.id: ${currentUser?.id}');
