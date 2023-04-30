@@ -3,6 +3,9 @@ import 'dart:async';
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../errors/video_error_composer.dart';
 import '../../latency_service/latency.dart';
+import '../../lifecycle/lifecycle_state.dart';
+import '../../lifecycle/lifecycle_utils.dart'
+    if (dart.library.io) '../../lifecycle/lifecycle_utils_io.dart' as lifecycle;
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_created_data.dart';
@@ -19,6 +22,8 @@ import '../../token/token.dart';
 import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
+import '../../utils/standard.dart';
+import '../../utils/subscriptions.dart';
 import '../coordinator_client.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_inputs.dart' as inputs;
@@ -27,6 +32,9 @@ import '../models/coordinator_models.dart';
 import 'coordinator_ws_open_api.dart';
 import 'open_api_extensions.dart';
 import 'open_api_mapper_extensions.dart';
+
+const _idEvents = 1;
+const _idAppState = 2;
 
 /// An accessor that allows us to communicate with the API around video calls.
 class CoordinatorClientOpenApi extends CoordinatorClient {
@@ -48,8 +56,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   final TokenManager tokenManager;
   final RetryPolicy retryPolicy;
 
-  String? userId;
-
   final open.ApiClient _apiClient;
   late final videoApi = open.VideoCallsApi(_apiClient);
   late final eventsApi = open.EventsApi(_apiClient);
@@ -63,54 +69,75 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   SharedEmitter<CoordinatorEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
 
+  final _subscriptions = Subscriptions();
+
+  UserInfo? _user;
+  StreamCallCid? _activeCallCid;
   CoordinatorWebSocketOpenApi? _ws;
-  StreamSubscription<CoordinatorEvent>? _wsSubscription;
 
   @override
-  Future<Result<None>> onUserLogin(UserInfo user) async {
+  Future<Result<None>> connectUser(UserInfo user) async {
     try {
-      _logger.d(() => '[onUserLogin] user: $user');
-      userId = user.id;
-      final ws = CoordinatorWebSocketOpenApi(
-        wsUrl,
-        apiKey: apiKey,
-        userInfo: user,
-        tokenManager: tokenManager,
-        retryPolicy: retryPolicy,
-      );
-      _ws = ws;
-      _wsSubscription = ws.events.listen((event) {
-        _logger.v(() => '[onWsEvent] event.type: ${event.runtimeType}');
-
-        _events.emit(event);
-      });
-
-      await ws.connect();
+      _logger.d(() => '[connectUser] user: $user');
+      _user = user;
+      _ws = _createWebSocket(user);
+      await _ws!.connect();
+      _subscriptions.add(_idEvents, _ws!.events.listen(_events.emit));
+      _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
+      _logger.v(() => '[connectUser] completed');
       return Result.success(None());
     } catch (e, stk) {
-      _logger.e(() => '[onUserLogin] failed(${user.id}): $e');
+      _logger.e(() => '[connectUser] failed(${user.id}): $e');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
   @override
-  Future<Result<None>> onUserLogout() async {
-    _logger.d(() => '[onUserLogout] userId: $userId');
+  Future<Result<None>> disconnectUser() async {
+    _logger.d(() => '[disconnectUser] userId: ${_user?.id}');
     if (_ws == null) {
-      _logger.w(() => '[onUserLogout] rejected (ws is null)');
+      _logger.w(() => '[disconnectUser] rejected (ws is null)');
       return Result.success(None());
     }
     try {
-      userId = null;
+      _subscriptions.cancelAll();
       await _ws?.disconnect();
+      _user = null;
       _ws = null;
-      await _wsSubscription?.cancel();
-      _wsSubscription = null;
       return Result.success(None());
     } catch (e, stk) {
-      _logger.e(() => '[onUserLogout] failed: $e');
+      _logger.e(() => '[disconnectUser] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
     }
+  }
+
+  Future<void> _onAppState(LifecycleState state) async {
+    _logger.d(() => '[onAppState] state: $state');
+    try {
+      if (state.isPaused && _ws != null && _activeCallCid == null) {
+        _logger.i(() => '[onAppState] close WS');
+        _subscriptions.cancel(_idEvents);
+        await _ws?.disconnect();
+        _ws = null;
+      } else if (state.isResumed && _ws == null && _user != null) {
+        _logger.i(() => '[onAppState] open WS');
+        _ws = _createWebSocket(_user!);
+        await _ws!.connect();
+        _subscriptions.add(_idEvents, _ws!.events.listen(_events.emit));
+      }
+    } catch (e) {
+      _logger.e(() => '[onAppState] failed: $e');
+    }
+  }
+
+  CoordinatorWebSocketOpenApi _createWebSocket(UserInfo user) {
+    return CoordinatorWebSocketOpenApi(
+      wsUrl,
+      apiKey: apiKey,
+      userInfo: user,
+      tokenManager: tokenManager,
+      retryPolicy: retryPolicy,
+    );
   }
 
   /// Create a new Device used to receive Push Notifications.
@@ -591,6 +618,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
+  }
+
+  @override
+  set activeCallCid(StreamCallCid? activeCallCid) {
+    _activeCallCid = activeCallCid;
   }
 }
 

@@ -39,6 +39,9 @@ class CurrentPlatform {
   /// True if the app is running on ios
   static bool get isIos => type == PlatformType.ios;
 
+  /// True if the app is running on mobile
+  static bool get isMobile => isAndroid || isIos;
+
   /// True if the app is running on web
   static bool get isWeb => type == PlatformType.web;
 

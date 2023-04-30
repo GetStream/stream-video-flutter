@@ -22,6 +22,7 @@ import 'open_api_mapper_extensions.dart';
 
 // TODO: The class needs further refactor. Some parts can be abstracted.
 
+var _seq = 0;
 const _tag = 'SV:CoordinatorWS';
 
 String _buildUrl(String baseUrl, String apiKey) {
@@ -41,9 +42,13 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     required this.userInfo,
     required this.tokenManager,
     required this.retryPolicy,
-  }) : super(_buildUrl(url, apiKey), protocols: protocols, tag: _tag);
+  }) : super(
+          _buildUrl(url, apiKey),
+          protocols: protocols,
+          tag: '$_tag-${++_seq}',
+        );
 
-  late final _logger = taggedLogger(tag: _tag);
+  late final _logger = taggedLogger(tag: '$_tag-$_seq');
 
   late final HealthMonitor healthMonitor = HealthMonitorImpl('Coord', this);
 

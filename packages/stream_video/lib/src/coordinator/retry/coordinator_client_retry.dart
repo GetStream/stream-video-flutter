@@ -1,4 +1,5 @@
 import '../../errors/video_error.dart';
+import '../../lifecycle/lifecycle_state.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_device.dart';
@@ -29,6 +30,11 @@ class CoordinatorClientRetry extends CoordinatorClient {
   final RpcRetryManager _retryManager;
 
   final _logger = taggedLogger(tag: 'SV:CoordinatorClientRetry');
+
+  @override
+  set activeCallCid(StreamCallCid? activeCallCid) {
+    _delegate.activeCallCid = activeCallCid;
+  }
 
   @override
   Future<Result<None>> blockUser(BlockUserInput input) {
@@ -142,13 +148,13 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<None>> onUserLogin(UserInfo user) {
-    return _delegate.onUserLogin(user);
+  Future<Result<None>> connectUser(UserInfo user) {
+    return _delegate.connectUser(user);
   }
 
   @override
-  Future<Result<None>> onUserLogout() {
-    return _delegate.onUserLogout();
+  Future<Result<None>> disconnectUser() {
+    return _delegate.disconnectUser();
   }
 
   @override
