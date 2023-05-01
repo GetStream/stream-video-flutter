@@ -24,12 +24,12 @@ import android.app.Notification
 interface StreamNotificationBuilder {
 
     /**
-     * Shows a notification for the given [NotificationOptions].
+     * Shows a notification for the given [NotificationPayload].
      */
-    fun build(options: NotificationOptions): IdentifiedNotification
+    fun build(payload: NotificationPayload): IdentifiedNotification
 }
 
-data class IdentifiedNotification(val id: Int, val value: Notification) {
+data class IdentifiedNotification(val id: Int, val notification: Notification) {
     companion object {
         const val ACTION_CALL_SUFFIX = "intent.action.STREAM_CALL"
     }

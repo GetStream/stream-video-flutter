@@ -97,7 +97,7 @@ class StreamVideoImpl implements StreamVideo {
 
   /// Connects the [user] to the Stream Video service.
   @override
-  Future<Result<String>> connectUser(
+  Future<Result<String>> connectUserWithProvider(
     UserInfo user, {
     required TokenProvider tokenProvider,
   }) async {
@@ -120,13 +120,8 @@ class StreamVideoImpl implements StreamVideo {
         _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
         if (event is CoordinatorCallCreatedEvent &&
             event.metadata.details.createdBy.id != user.id) {
-          final callCreated = CallCreatedData(
-            callCid: event.callCid,
-            ringing: event.ringing,
-            metadata: event.metadata,
-          );
-          _logger.v(() => '[onCoordinatorEvent] onCallCreated: $callCreated');
-          onCallCreated?.call(callCreated);
+          _logger.v(() => '[onCoordinatorEvent] onCallCreated: ${event.data}');
+          onCallCreated?.call(event.data);
         }
       });
 
@@ -142,7 +137,7 @@ class StreamVideoImpl implements StreamVideo {
     }
   }
 
-  /// Disconnects the [user] from the Stream Video service.
+  /// Disconnects the `user` from the Stream Video service.
   @override
   Future<Result<None>> disconnectUser() async {
     _logger.i(() => '[disconnectUser] currentUser.id: ${currentUser?.id}');

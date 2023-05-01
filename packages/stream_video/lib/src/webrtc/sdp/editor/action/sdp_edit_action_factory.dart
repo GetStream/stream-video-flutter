@@ -2,11 +2,11 @@ import 'package:meta/meta.dart';
 
 import '../../attributes/fmtp.dart';
 import '../../attributes/rtpmap.dart';
-import '../../policy/rule/rule_prioritize_codec.dart';
-import '../../policy/rule/rule_set_opus_dtx_enabled.dart';
-import '../../policy/rule/rule_set_opus_red_enabled.dart';
-import '../../policy/rule/sdp_munging_rule.dart';
 import '../../specification/media_description.dart';
+import '../rule/rule_prioritize_codec.dart';
+import '../rule/rule_set_opus_dtx_enabled.dart';
+import '../rule/rule_set_opus_red_enabled.dart';
+import '../rule/sdp_munging_rule.dart';
 import 'action_prioritize_codec.dart';
 import 'action_set_opus_dtx_enabled.dart';
 import 'action_set_opus_red_enabled.dart';
@@ -18,7 +18,7 @@ class SdpEditActionFactory {
   final _rtpmapParser = RtpmapParser();
   final _fmtpParser = FmtpParser();
 
-  SdpEditAction? create(SdpMungingRule rule) {
+  SdpEditAction create(SdpMungingRule rule) {
     if (rule is PrioritizeCodecRule) {
       return PrioritizeCodecAction(
         codec: rule.codec,
@@ -39,6 +39,6 @@ class SdpEditActionFactory {
         fmtpParser: _fmtpParser,
       );
     }
-    return null;
+    throw UnsupportedError('Not supported: $rule');
   }
 }

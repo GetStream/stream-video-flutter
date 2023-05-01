@@ -4,6 +4,7 @@ import '../../stream_video.dart';
 import '../action/external_action.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../models/call_permission.dart';
+import '../models/call_preferences.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
@@ -16,33 +17,52 @@ typedef OnCallPermissionRequest = void Function(
 
 /// Represents a [Call] in which you can connect to.
 abstract class Call {
-  factory Call.fromCid({
-    required StreamCallCid callCid,
+  factory Call.from({
+    required String type,
+    required String id,
     StreamVideo? streamVideo,
+    CallPreferences? preferences,
   }) {
     return CallImpl(
-      callCid: callCid,
+      callCid: StreamCallCid.from(type: type, id: id),
       streamVideo: streamVideo,
+      preferences: preferences,
+    );
+  }
+
+  factory Call.fromCid({
+    required String cid,
+    StreamVideo? streamVideo,
+    CallPreferences? preferences,
+  }) {
+    return CallImpl(
+      callCid: StreamCallCid(cid: cid),
+      streamVideo: streamVideo,
+      preferences: preferences,
     );
   }
 
   factory Call.fromCreated({
     required CallCreatedData data,
     StreamVideo? streamVideo,
+    CallPreferences? preferences,
   }) {
     return CallImpl.created(
       data: data,
       streamVideo: streamVideo,
+      preferences: preferences,
     );
   }
 
   factory Call.fromJoined({
     required CallJoinedData data,
     StreamVideo? streamVideo,
+    CallPreferences? preferences,
   }) {
     return CallImpl.joined(
       data: data,
       streamVideo: streamVideo,
+      preferences: preferences,
     );
   }
 
@@ -50,6 +70,10 @@ abstract class Call {
   static void Function(Call?)? onActiveCall;
 
   StreamCallCid get callCid;
+
+  String get type;
+
+  String get id;
 
   StateEmitter<CallState> get state;
 

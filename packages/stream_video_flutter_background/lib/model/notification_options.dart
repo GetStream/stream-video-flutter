@@ -1,33 +1,21 @@
 import 'package:equatable/equatable.dart';
 
 class NotificationOptions with EquatableMixin {
-  NotificationOptions({
-    required this.callCid,
+  const NotificationOptions({
     this.content,
+    this.avatar,
+    this.useCustomLayout = false,
   });
 
-  factory NotificationOptions.from({
-    required String callCid,
-    String? contentTitle,
-    String? contentText,
-  }) {
-    return NotificationOptions(
-      callCid: callCid,
-      content: ContentOptions(
-        title: contentTitle,
-        text: contentText,
-      ),
-    );
-  }
-
-  final String callCid;
-  ContentOptions? content;
+  final NotificationContent? content;
+  final NotificationAvatar? avatar;
+  final bool useCustomLayout;
 
   Map<String, Object?> toJson() {
     return {
-      'call_cid': callCid,
-      'content_title': content?.title,
-      'content_text': content?.text,
+      'content': content?.toJson(),
+      'avatar': avatar?.toJson(),
+      'use_custom_layout' : useCustomLayout,
     };
   }
 
@@ -35,21 +23,51 @@ class NotificationOptions with EquatableMixin {
   bool? get stringify => true;
 
   @override
-  List<Object?> get props => [callCid, content];
+  List<Object?> get props => [content, avatar, useCustomLayout];
 }
 
-class ContentOptions with EquatableMixin {
-  String? title;
-  String? text;
-
-  ContentOptions({
+class NotificationContent with EquatableMixin {
+  const NotificationContent({
     this.title,
     this.text,
   });
+
+  final String? title;
+  final String? text;
+
+  Map<String, Object?> toJson() {
+    return {
+      'title': title,
+      'text': text,
+    };
+  }
 
   @override
   bool? get stringify => true;
 
   @override
   List<Object?> get props => [title, text];
+}
+
+class NotificationAvatar with EquatableMixin {
+  const NotificationAvatar({
+    required this.url,
+    this.httpHeaders = const {},
+  });
+
+  final String url;
+  final Map<String, String> httpHeaders;
+
+  Map<String, Object?> toJson() {
+    return {
+      'url': url,
+      'http_headers': httpHeaders,
+    };
+  }
+
+  @override
+  bool? get stringify => true;
+
+  @override
+  List<Object?> get props => [url, httpHeaders];
 }

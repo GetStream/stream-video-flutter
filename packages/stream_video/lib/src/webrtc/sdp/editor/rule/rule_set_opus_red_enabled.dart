@@ -1,5 +1,5 @@
+import '../../editor/rule/sdp_munging_rule.dart';
 import '../../sdp.dart';
-import 'sdp_munging_rule.dart';
 
 class SetOpusRedEnabledRule extends SdpMungingRule {
   const SetOpusRedEnabledRule({

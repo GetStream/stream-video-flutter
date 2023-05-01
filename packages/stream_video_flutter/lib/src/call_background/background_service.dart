@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_flutter_background/model/notification_options.dart';
+import 'package:stream_video_flutter_background/model/notification_payload.dart';
 import 'package:stream_video_flutter_background/stream_video_flutter_background.dart';
 
 const _tag = 'SV:Background';
@@ -11,7 +12,7 @@ enum ButtonType {
   cancel;
 }
 
-typedef ContentOptionsBuilder = ContentOptions Function(Call);
+typedef NotificationOptionsBuilder = NotificationOptions Function(Call);
 
 typedef OnButtonClick = Future<void> Function(Call, ButtonType);
 typedef OnNotificationClick = Future<void> Function(Call);
@@ -21,11 +22,13 @@ class StreamBackgroundService {
   factory StreamBackgroundService() {
     return _instance;
   }
+
   StreamBackgroundService._();
+
   static final StreamBackgroundService _instance = StreamBackgroundService._();
 
   static void init({
-    ContentOptionsBuilder optionsBuilder = _defaultOptions,
+    NotificationOptionsBuilder optionsBuilder = _defaultOptions,
     OnNotificationClick? onNotificationClick,
     OnButtonClick? onButtonClick,
     OnUiLayerDestroyed? onPlatformUiLayerDestroyed,
@@ -46,7 +49,7 @@ class StreamBackgroundService {
 
   Future<void> onActiveCall({
     Call? call,
-    ContentOptionsBuilder optionsBuilder = _defaultOptions,
+    NotificationOptionsBuilder optionsBuilder = _defaultOptions,
     OnNotificationClick? onNotificationClick,
     OnButtonClick? onButtonClick,
     OnUiLayerDestroyed? onUiLayerDestroyed,
@@ -71,16 +74,16 @@ class StreamBackgroundService {
 
   Future<void> _onConnected({
     required Call call,
-    required ContentOptionsBuilder optionsBuilder,
+    required NotificationOptionsBuilder optionsBuilder,
     OnNotificationClick? onNotificationClick,
     OnButtonClick? onButtonClick,
     OnUiLayerDestroyed? onUiLayerDestroyed,
   }) async {
     try {
       final result = await StreamVideoFlutterBackground.startService(
-        NotificationOptions(
+        NotificationPayload(
           callCid: call.callCid.value,
-          content: optionsBuilder.call(call),
+          options: optionsBuilder.call(call),
         ),
       );
       _logger.d(() => '[onConnected] service start result: $result');
@@ -168,14 +171,14 @@ class StreamBackgroundService {
 
   StreamSubscription<CallState> _listenState(
     Call call,
-    ContentOptionsBuilder optionsBuilder,
+    NotificationOptionsBuilder optionsBuilder,
   ) {
     return call.state.listen((value) async {
       try {
         final result = await StreamVideoFlutterBackground.updateService(
-          NotificationOptions(
+          NotificationPayload(
             callCid: call.callCid.value,
-            content: optionsBuilder.call(call),
+            options: optionsBuilder.call(call),
           ),
         );
         _logger.v(() => '[listenState] service update result: $result');
@@ -186,12 +189,14 @@ class StreamBackgroundService {
   }
 }
 
-ContentOptions _defaultOptions(Call call) {
+NotificationOptions _defaultOptions(Call call) {
   final users = call.state.valueOrNull?.callParticipants
           .map((it) => it.userId)
           .join(', ') ??
       '';
-  return ContentOptions(
-    text: '${call.callCid.id}: $users',
+  return NotificationOptions(
+    content: NotificationContent(
+      text: '${call.callCid.id}: $users',
+    ),
   );
 }

@@ -95,7 +95,7 @@ class _StreamDogFoodingAppState
 
       await StreamVideo.instance.connectUser(
         user,
-        tokenProvider: TokenProvider.static(token),
+        token,
       );
 
       final callCid = StreamCallCid.from(type: 'default', id: callId);

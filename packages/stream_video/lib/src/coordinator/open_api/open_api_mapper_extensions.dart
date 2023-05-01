@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 
 import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../models/call_cid.dart';
+import '../../models/call_created_data.dart';
 import '../../models/call_permission.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_inputs.dart';
@@ -31,10 +32,12 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         final event = callCreated!;
         final call = event.call;
         return CoordinatorCallCreatedEvent(
-          callCid: StreamCallCid(cid: call.cid),
-          ringing: event.ringing,
+          data: CallCreatedData(
+            callCid: StreamCallCid(cid: call.cid),
+            ringing: event.ringing,
+            metadata: call.toCallMetadata(event.members),
+          ),
           createdAt: event.createdAt,
-          metadata: call.toCallMetadata(event.members),
         );
       case EventType.callAccepted:
         final event = callAccepted!;
