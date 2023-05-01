@@ -3,9 +3,6 @@ import 'dart:async';
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../errors/video_error_composer.dart';
 import '../../latency_service/latency.dart';
-import '../../lifecycle/lifecycle_state.dart';
-import '../../lifecycle/lifecycle_utils.dart'
-    if (dart.library.io) '../../lifecycle/lifecycle_utils_io.dart' as lifecycle;
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_created_data.dart';
@@ -22,7 +19,6 @@ import '../../token/token.dart';
 import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
-import '../../utils/standard.dart';
 import '../../utils/subscriptions.dart';
 import '../coordinator_client.dart';
 import '../models/coordinator_events.dart';
@@ -34,7 +30,6 @@ import 'open_api_extensions.dart';
 import 'open_api_mapper_extensions.dart';
 
 const _idEvents = 1;
-const _idAppState = 2;
 
 /// An accessor that allows us to communicate with the API around video calls.
 class CoordinatorClientOpenApi extends CoordinatorClient {
@@ -72,7 +67,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   final _subscriptions = Subscriptions();
 
   UserInfo? _user;
-  StreamCallCid? _activeCallCid;
   CoordinatorWebSocketOpenApi? _ws;
 
   @override
@@ -83,11 +77,50 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       _ws = _createWebSocket(user);
       await _ws!.connect();
       _subscriptions.add(_idEvents, _ws!.events.listen(_events.emit));
-      _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
       _logger.v(() => '[connectUser] completed');
       return Result.success(None());
     } catch (e, stk) {
       _logger.e(() => '[connectUser] failed(${user.id}): $e');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  Future<Result<None>> openConnection() async {
+    try {
+      if (_ws != null) {
+        _logger.w(() => '[openConnection] rejected (already open)');
+        return Result.error('WS is already open');
+      }
+      if (_user == null) {
+        _logger.w(() => '[openConnection] rejected (no logged in user)');
+        return Result.error('No logged in user');
+      }
+      _logger.i(() => '[openConnection] no args');
+      _ws = _createWebSocket(_user!);
+      await _ws!.connect();
+      _subscriptions.add(_idEvents, _ws!.events.listen(_events.emit));
+      return Result.success(None());
+    } catch (e, stk) {
+      _logger.e(() => '[openConnection] failed: $e');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  Future<Result<None>> closeConnection() async {
+    try {
+      if (_ws == null) {
+        _logger.w(() => '[closeConnection] rejected (already closed)');
+        return Result.error('WS is already closed');
+      }
+      _logger.i(() => '[closeConnection] no args');
+      _subscriptions.cancel(_idEvents);
+      await _ws?.disconnect();
+      _ws = null;
+      return Result.success(None());
+    } catch (e, stk) {
+      _logger.e(() => '[closeConnection] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -108,25 +141,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     } catch (e, stk) {
       _logger.e(() => '[disconnectUser] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
-    }
-  }
-
-  Future<void> _onAppState(LifecycleState state) async {
-    _logger.d(() => '[onAppState] state: $state');
-    try {
-      if (state.isPaused && _ws != null && _activeCallCid == null) {
-        _logger.i(() => '[onAppState] close WS');
-        _subscriptions.cancel(_idEvents);
-        await _ws?.disconnect();
-        _ws = null;
-      } else if (state.isResumed && _ws == null && _user != null) {
-        _logger.i(() => '[onAppState] open WS');
-        _ws = _createWebSocket(_user!);
-        await _ws!.connect();
-        _subscriptions.add(_idEvents, _ws!.events.listen(_events.emit));
-      }
-    } catch (e) {
-      _logger.e(() => '[onAppState] failed: $e');
     }
   }
 
@@ -618,11 +632,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
-  }
-
-  @override
-  set activeCallCid(StreamCallCid? activeCallCid) {
-    _activeCallCid = activeCallCid;
   }
 }
 

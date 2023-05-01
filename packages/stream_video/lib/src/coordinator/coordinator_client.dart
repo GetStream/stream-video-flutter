@@ -16,11 +16,13 @@ import 'models/coordinator_models.dart' as models;
 
 abstract class CoordinatorClient {
 
-  set activeCallCid(StreamCallCid? activeCallCid);
-
   SharedEmitter<CoordinatorEvent> get events;
 
   Future<Result<None>> connectUser(UserInfo user);
+
+  Future<Result<None>> openConnection();
+
+  Future<Result<None>> closeConnection();
 
   Future<Result<None>> disconnectUser();
 
