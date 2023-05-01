@@ -71,18 +71,14 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
   @override
   Future<Result<None>> connectUser(UserInfo user) async {
-    try {
-      _logger.d(() => '[connectUser] user: $user');
-      _user = user;
-      _ws = _createWebSocket(user);
-      await _ws!.connect();
-      _subscriptions.add(_idEvents, _ws!.events.listen(_events.emit));
-      _logger.v(() => '[connectUser] completed');
-      return Result.success(None());
-    } catch (e, stk) {
-      _logger.e(() => '[connectUser] failed(${user.id}): $e');
-      return Result.failure(VideoErrors.compose(e, stk));
+    _logger.d(() => '[connectUser] user: $user');
+    if (_user != null) {
+      _logger.w(() => '[connectUser] rejected (another user in use): $_user');
+      return Result.error('Another user is in use, '
+          'please call "disconnectUser" first');
     }
+    _user = user;
+    return openConnection();
   }
 
   @override
@@ -128,20 +124,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> disconnectUser() async {
     _logger.d(() => '[disconnectUser] userId: ${_user?.id}');
-    if (_ws == null) {
-      _logger.w(() => '[disconnectUser] rejected (ws is null)');
+    if (_user == null) {
+      _logger.w(() => '[disconnectUser] rejected (user is null)');
       return Result.success(None());
     }
-    try {
-      _subscriptions.cancelAll();
-      await _ws?.disconnect();
-      _user = null;
-      _ws = null;
-      return Result.success(None());
-    } catch (e, stk) {
-      _logger.e(() => '[disconnectUser] failed: $e');
-      return Result.failure(VideoErrors.compose(e, stk));
-    }
+    _user = null;
+    _subscriptions.cancelAll();
+    return closeConnection();
   }
 
   CoordinatorWebSocketOpenApi _createWebSocket(UserInfo user) {
