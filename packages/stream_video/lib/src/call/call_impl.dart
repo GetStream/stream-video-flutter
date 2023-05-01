@@ -607,13 +607,7 @@ class CallImpl implements Call {
     if (action is CallAction) {
       return _permissionsManager.apply(action);
     } else if (action is ParticipantAction) {
-      if (action is LocalParticipantAction ||
-          action is RemoteParticipantAction) {
-        return _session.apply(action);
-      }
-
-      _stateManager.dispatch(action);
-      return Result.success(None());
+      return _session.apply(action);
     }
     return Result.error('unsupported action: $action');
   }

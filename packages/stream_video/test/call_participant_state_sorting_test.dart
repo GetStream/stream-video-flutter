@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/models/call_participant_state.dart';
 import 'package:stream_video/src/models/call_track_state.dart';
@@ -24,7 +22,7 @@ void main() {
       isSpeaking: true,
       isDominantSpeaker: false,
       audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
+      viewportVisibility: ViewportVisibility.visible,
       isPinned: false,
     ),
 
@@ -44,7 +42,7 @@ void main() {
       isSpeaking: false,
       isDominantSpeaker: false,
       audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
+      viewportVisibility: ViewportVisibility.visible,
       isPinned: false,
     ),
 
@@ -60,7 +58,7 @@ void main() {
       isSpeaking: true,
       isDominantSpeaker: false,
       audioLevel: 0,
-      viewportVisibility: ViewportVisibility.visible(size: Size(50, 50)),
+      viewportVisibility: ViewportVisibility.visible,
       isPinned: false,
     ),
 
@@ -76,7 +74,7 @@ void main() {
       isSpeaking: true,
       isDominantSpeaker: true,
       audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
+      viewportVisibility: ViewportVisibility.visible,
       isPinned: false,
     ),
 
@@ -92,7 +90,7 @@ void main() {
       isSpeaking: false,
       isDominantSpeaker: false,
       audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
+      viewportVisibility: ViewportVisibility.visible,
       isPinned: false,
     ),
 
@@ -111,7 +109,7 @@ void main() {
       isSpeaking: false,
       isDominantSpeaker: false,
       audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
+      viewportVisibility: ViewportVisibility.visible,
       isPinned: true,
     ),
   ];

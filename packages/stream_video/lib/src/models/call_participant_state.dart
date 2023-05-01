@@ -28,7 +28,7 @@ class CallParticipantState
     this.isDominantSpeaker = false,
     this.isPinned = false,
     this.reaction,
-    this.viewportVisibility = const ViewportVisibility.unknown(),
+    this.viewportVisibility = ViewportVisibility.unknown,
   });
 
   final String userId;

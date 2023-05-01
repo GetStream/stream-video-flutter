@@ -39,6 +39,7 @@ class RtcReducer extends Reducer<CallState, RtcAction> {
             publishedTracks: {
               ...participant.publishedTracks,
               action.trackType: trackState.copyWith(
+                muted: false,
                 subscribed: true,
                 received: true,
               )

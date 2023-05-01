@@ -31,8 +31,8 @@ class SetParticipantPinned extends ParticipantAction {
   List<Object?> get props => [sessionId, pinned];
 }
 
-class SetParticipantViewportVisibility extends ParticipantAction {
-  const SetParticipantViewportVisibility({
+class UpdateViewportVisibility extends ParticipantAction {
+  const UpdateViewportVisibility({
     required this.sessionId,
     required this.visibility,
   });
@@ -42,6 +42,15 @@ class SetParticipantViewportVisibility extends ParticipantAction {
 
   @override
   List<Object?> get props => [sessionId, visibility];
+}
+
+class UpdateViewportVisibilities extends ParticipantAction {
+  const UpdateViewportVisibilities(this.actions);
+
+  final List<UpdateViewportVisibility> actions;
+
+  @override
+  List<Object?> get props => [actions];
 }
 
 abstract class LocalParticipantAction extends ParticipantAction {

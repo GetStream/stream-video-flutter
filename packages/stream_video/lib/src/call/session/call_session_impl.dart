@@ -10,7 +10,6 @@ import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
 import '../../action/internal/rtc_action.dart';
 import '../../action/internal/sfu_action.dart';
-import '../../action/participant_action.dart';
 import '../../call_state_manager.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
@@ -35,7 +34,7 @@ import 'call_session_config.dart';
 
 const _tag = 'SV:CallSession';
 
-const _debounceDuration = Duration(milliseconds: 300);
+const _debounceDuration = Duration(milliseconds: 200);
 
 class CallSessionImpl extends CallSession {
   CallSessionImpl({
@@ -88,6 +87,12 @@ class CallSessionImpl extends CallSession {
     duration: _debounceDuration,
     onBuffered: _updateSubscriptions,
     onCancel: () => Result.error('SubscriptionAction cancelled'),
+  );
+
+  late final _vvBuffer = DebounceBuffer<UpdateViewportVisibility, Result<None>>(
+    duration: _debounceDuration,
+    onBuffered: _updateViewportVisibilities,
+    onCancel: () => Result.error('UpdateViewportVisibility cancelled'),
   );
 
   @override
@@ -193,6 +198,25 @@ class CallSessionImpl extends CallSession {
 
   Future<Result<None>> _apply(ParticipantAction action) async {
     _logger.d(() => '[apply] action: $action');
+
+    if (action is LocalParticipantAction) {
+      return _applyLocalParticipantAction(action);
+    } else if (action is RemoteParticipantAction) {
+      return _applyRemoteParticipantAction(action);
+    } else if (action is SetParticipantPinned) {
+      return _setParticipantPinned(action);
+    } else if (action is UpdateViewportVisibility) {
+      return _updateViewportVisibility(action);
+    } else if (action is UpdateViewportVisibilities) {
+      return _updateViewportVisibilities(action.actions);
+    }
+
+    return Result.error('Action not supported: $action');
+  }
+
+  Future<Result<None>> _applyLocalParticipantAction(
+    LocalParticipantAction action,
+  ) async {
     if (action is SetCameraEnabled) {
       return _onSetCameraEnabled(action.enabled);
     } else if (action is SetMicrophoneEnabled) {
@@ -207,7 +231,16 @@ class CallSessionImpl extends CallSession {
       return _onSetVideoInputDevice(action.device);
     } else if (action is SetCameraPosition) {
       return _onSetCameraPosition(action.cameraPosition);
-    } else if (action is UpdateSubscriptions) {
+    } else if (action is SetAudioOutputDevice) {
+      return _onSetAudioOutputDevice(action.device);
+    }
+    return Result.error('Action not supported: $action');
+  }
+
+  Future<Result<None>> _applyRemoteParticipantAction(
+    RemoteParticipantAction action,
+  ) async {
+    if (action is UpdateSubscriptions) {
       return _updateSubscriptions(action.actions);
     } else if (action is UpdateSubscription) {
       return _updateSubscription(action);
@@ -217,9 +250,8 @@ class CallSessionImpl extends CallSession {
       return _setSubscriptions([action]);
     } else if (action is SetSubscriptions) {
       return _setSubscriptions(action.actions);
-    } else if (action is SetAudioOutputDevice) {
-      return _onSetAudioOutputDevice(action.device);
     }
+
     return Result.error('Action not supported: $action');
   }
 
@@ -482,6 +514,29 @@ class CallSessionImpl extends CallSession {
     );
   }
 
+  Future<Result<None>> _setParticipantPinned(
+    SetParticipantPinned action,
+  ) async {
+    _logger.d(() => '[setParticipantPinned] action: $action');
+    // Nothing to do here, this is handled by the UI
+    return Result.success(None());
+  }
+
+  Future<Result<None>> _updateViewportVisibility(
+    UpdateViewportVisibility action,
+  ) async {
+    _logger.d(() => '[updateViewportVisibility] action: $action');
+    return _vvBuffer.post(action);
+  }
+
+  Future<Result<None>> _updateViewportVisibilities(
+    List<UpdateViewportVisibility> actions,
+  ) async {
+    _logger.d(() => '[updateViewportVisibilities] actions: $actions');
+    // Nothing to do here, this is handled by the UI
+    return Result.success(None());
+  }
+
   Future<Result<None>> _setSubscriptions(
     List<SetSubscription> actions,
   ) async {
@@ -513,7 +568,7 @@ class CallSessionImpl extends CallSession {
     SubscriptionAction action,
   ) async {
     _logger.d(() => '[updateSubscription] action: $action');
-    return _updateSubscriptions([action]);
+    return _saBuffer.post(action);
   }
 
   Future<Result<None>> _updateSubscriptions(
@@ -764,9 +819,8 @@ extension on CallParticipantState {
       final shouldExclude = exclude.contains(trackType);
       if (shouldExclude) continue;
 
-      // We only care about tracks that are subscribed or received.
-      final atLeastSubscribed = trackState.subscribed || trackState.received;
-      if (!atLeastSubscribed) continue;
+      // We only care about tracks that are subscribed.
+      if (!trackState.subscribed) continue;
 
       final detail = SfuSubscriptionDetails(
         userId: userId,

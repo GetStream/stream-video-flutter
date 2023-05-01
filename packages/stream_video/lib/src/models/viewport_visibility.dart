@@ -1,58 +1,25 @@
-import 'dart:ui';
+/// The visibility of a widget in the viewport.
+enum ViewportVisibility {
+  /// Unknown, not yet determined.
+  unknown,
 
-import 'package:equatable/equatable.dart';
+  /// Visible in the viewport.
+  visible,
 
-abstract class ViewportVisibility extends Equatable {
-  factory ViewportVisibility({Size? size}) {
-    if (size == null) return const ViewportVisibility.unknown();
-    if (size == Size.zero) return const ViewportVisibility.hidden();
-    return ViewportVisibility.visible(size: size);
+  /// Hidden from the viewport.
+  hidden;
+
+  /// Returns the [ViewportVisibility] for the given [visibleFraction].
+  static ViewportVisibility fromVisibleFraction(double visibleFraction) {
+    // We mark the visibility as visible if the visible fraction is greater
+    // than 0.3 i;e. 30% of the widget is visible.
+    if (visibleFraction > 0.3) return ViewportVisibility.visible;
+    return ViewportVisibility.hidden;
   }
 
-  const factory ViewportVisibility.unknown() = Unknown._;
+  bool get isUnknown => this == ViewportVisibility.unknown;
 
-  const factory ViewportVisibility.visible({required Size size}) = Visible._;
+  bool get isVisible => this == ViewportVisibility.visible;
 
-  const factory ViewportVisibility.hidden() = Hidden._;
-
-  const ViewportVisibility._({required this.size});
-
-  /// Size of the element in the viewport.
-  final Size? size;
-
-  bool get isUnknown => this is Unknown;
-
-  bool get isVisible => this is Visible;
-
-  bool get isHidden => this is Hidden;
-
-  @override
-  List<Object?> get props => [size];
-
-  @override
-  bool? get stringify => true;
-}
-
-/// Unknown, not yet determined.
-class Unknown extends ViewportVisibility {
-  const Unknown._() : super._(size: null);
-
-  @override
-  String toString() => 'Unknown';
-}
-
-/// Visible in the viewport.
-class Visible extends ViewportVisibility {
-  const Visible._({required Size size}) : super._(size: size);
-
-  @override
-  String toString() => 'Visible(size: $size)';
-}
-
-/// Hidden from the viewport.
-class Hidden extends ViewportVisibility {
-  const Hidden._() : super._(size: Size.zero);
-
-  @override
-  String toString() => 'Hidden';
+  bool get isHidden => this == ViewportVisibility.hidden;
 }

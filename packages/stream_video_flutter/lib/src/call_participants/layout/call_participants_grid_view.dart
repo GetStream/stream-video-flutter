@@ -249,7 +249,7 @@ class DesktopCallParticipantsGrid extends StatefulWidget {
     required this.call,
     required this.participants,
     required this.itemBuilder,
-    this.pageSize = 2,
+    this.pageSize = 16,
     this.padding = const EdgeInsets.all(_kDefaultSpacing),
     this.mainAxisSpacing = _kDefaultSpacing,
     this.crossAxisSpacing = _kDefaultSpacing,
@@ -292,8 +292,6 @@ class _DesktopCallParticipantsGridState
     super.didUpdateWidget(oldWidget);
     if (oldWidget.participants != widget.participants ||
         oldWidget.pageSize != widget.pageSize) {
-      // _currentPage.value = 0;
-      // _pageController.jumpToPage(0);
       _pages = widget.participants.slices(widget.pageSize);
     }
   }
@@ -316,8 +314,7 @@ class _DesktopCallParticipantsGridState
             if (_pages.length > 1)
               Padding(
                 padding: widget.padding,
-                child: Align(
-                  alignment: Alignment.bottomCenter,
+                child: Center(
                   child: Row(
                     children: [
                       AnimatedScale(
@@ -325,12 +322,16 @@ class _DesktopCallParticipantsGridState
                         duration: kThemeAnimationDuration,
                         child: PageNavigationButton(
                           icon: const Icon(Icons.chevron_left_rounded),
-                          onPressed: () {
-                            _currentPage.value--;
-                            _pageController.previousPage(
+                          onPressed: () async {
+                            final previousPage = currentPage - 1;
+                            await _pageController.animateToPage(
+                              previousPage,
                               duration: const Duration(milliseconds: 300),
                               curve: Curves.easeInOut,
                             );
+
+                            // We need to set the value after the animation
+                            _currentPage.value = previousPage;
                           },
                         ),
                       ),
@@ -340,12 +341,16 @@ class _DesktopCallParticipantsGridState
                         duration: kThemeAnimationDuration,
                         child: PageNavigationButton(
                           icon: const Icon(Icons.chevron_right_rounded),
-                          onPressed: () {
-                            _currentPage.value++;
-                            _pageController.nextPage(
+                          onPressed: () async {
+                            final nextPage = currentPage + 1;
+                            await _pageController.animateToPage(
+                              nextPage,
                               duration: const Duration(milliseconds: 300),
                               curve: Curves.easeInOut,
                             );
+
+                            // We need to set the value after the animation
+                            _currentPage.value = nextPage;
                           },
                         ),
                       ),

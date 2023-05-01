@@ -21,12 +21,12 @@ extension ParticipantExtensions on Call {
     );
   }
 
-  Future<Result<None>> setParticipantViewportVisibility({
+  Future<Result<None>> updateViewportVisibility({
     required String sessionId,
     required ViewportVisibility visibility,
   }) {
     return apply(
-      SetParticipantViewportVisibility(
+      UpdateViewportVisibility(
         sessionId: sessionId,
         visibility: visibility,
       ),

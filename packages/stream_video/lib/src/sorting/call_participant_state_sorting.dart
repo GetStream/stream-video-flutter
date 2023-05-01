@@ -1,4 +1,5 @@
 import '../models/call_participant_state.dart';
+import '../models/viewport_visibility.dart';
 
 /// A comparator which sorts participants by the fact that they are the
 /// dominant speaker or not.
@@ -64,10 +65,6 @@ Comparator<CallParticipantState> role(List<String> roles) {
   };
 }
 
-//
-// const hasAnyRole = (p: StreamVideoParticipant, roles: string[]) =>
-//   (p.roles || []).some((r) => roles.includes(r));
-
 /// Creates a new combined [Comparator] which sorts items
 /// by the given [comparators].
 Comparator<T> combineComparators<T>(List<Comparator<T>> comparators) {
@@ -94,8 +91,10 @@ extension ConditionalComparator<T> on Comparator<T> {
 Comparator<CallParticipantState> ifInvisibleBy(
   Comparator<CallParticipantState> comparator,
 ) {
-  return comparator.conditional((a, b) {
-    return (a.viewportVisibility.isHidden || a.viewportVisibility.isUnknown) ||
-        (b.viewportVisibility.isHidden || b.viewportVisibility.isUnknown);
-  });
+  return comparator.conditional(
+    (a, b) {
+      return a.viewportVisibility != ViewportVisibility.visible ||
+          b.viewportVisibility != ViewportVisibility.visible;
+    },
+  );
 }

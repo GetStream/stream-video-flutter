@@ -91,130 +91,16 @@ class StreamCallParticipants extends StatelessWidget {
     CallParticipantState participant,
   ) {
     return StreamCallParticipant(
-      // We use the sessionId as the key to avoid rebuilding the widget
-      // when the participant changes.
-      key: ValueKey(participant.sessionId),
+      // We use the sessionId as the key to map the state to the participant.
+      key: Key(participant.sessionId),
       call: call,
       participant: participant,
     );
   }
 
-  final _participants = [
-    CallParticipantState(
-      name: 'A',
-      userId: '1',
-      sessionId: '1',
-      role: 'admin',
-      trackIdPrefix: '1',
-      // publishedTracks: {
-      //   SfuTrackType.audio: TrackState.remote(),
-      //   SfuTrackType.video: TrackState.remote(),
-      // },
-      connectionQuality: SfuConnectionQuality.excellent,
-      isSpeaking: false,
-      isDominantSpeaker: false,
-      audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
-      isPinned: false,
-      isLocal: false,
-    ),
-
-    // Presenter, video, audio
-    CallParticipantState(
-      name: 'B',
-      userId: '2',
-      sessionId: '2',
-      role: 'admin',
-      trackIdPrefix: '2',
-      // publishedTracks: {
-      //   SfuTrackType.audio: TrackState.remote(),
-      //   SfuTrackType.video: TrackState.remote(),
-      //   SfuTrackType.screenShare: TrackState.remote(),
-      // },
-      connectionQuality: SfuConnectionQuality.excellent,
-      isSpeaking: false,
-      isDominantSpeaker: false,
-      audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
-      isPinned: false,
-      isLocal: false,
-    ),
-
-    // Muted
-    const CallParticipantState(
-      name: 'C',
-      userId: '3',
-      sessionId: '3',
-      role: 'admin',
-      trackIdPrefix: '3',
-      // publishedTracks: const {},
-      connectionQuality: SfuConnectionQuality.excellent,
-      isSpeaking: false,
-      isDominantSpeaker: false,
-      audioLevel: 0,
-      viewportVisibility: ViewportVisibility.visible(size: Size(50, 50)),
-      isPinned: false,
-      isLocal: false,
-    ),
-
-    // Dominant speaker
-    CallParticipantState(
-      name: 'D',
-      userId: '4',
-      sessionId: '4',
-      role: 'admin',
-      trackIdPrefix: '4',
-      // publishedTracks: {SfuTrackType.audio: TrackState.remote()},
-      connectionQuality: SfuConnectionQuality.excellent,
-      isSpeaking: false,
-      isDominantSpeaker: true,
-      audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
-      isPinned: false,
-      isLocal: false,
-    ),
-
-    // Presenter only
-    CallParticipantState(
-      name: 'E',
-      userId: '5',
-      sessionId: '5',
-      role: 'admin',
-      trackIdPrefix: '5',
-      // publishedTracks: {SfuTrackType.screenShare: TrackState.remote()},
-      connectionQuality: SfuConnectionQuality.excellent,
-      isSpeaking: false,
-      isDominantSpeaker: false,
-      audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
-      isPinned: false,
-      isLocal: false,
-    ),
-
-    // pinned
-    CallParticipantState(
-      name: 'F',
-      userId: '6',
-      sessionId: '6',
-      role: 'admin',
-      trackIdPrefix: '6',
-      // publishedTracks: {
-      //   SfuTrackType.audio: TrackState.remote(),
-      //   SfuTrackType.video: TrackState.remote()
-      // },
-      connectionQuality: SfuConnectionQuality.excellent,
-      isSpeaking: false,
-      isDominantSpeaker: false,
-      audioLevel: 0,
-      viewportVisibility: const ViewportVisibility.visible(size: Size(50, 50)),
-      isPinned: true,
-      isLocal: false,
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final participants = [...this.participants].where(filter);
+    final participants = [...this.participants].where(filter).sorted(sort);
 
     final screenShareParticipant = participants.firstWhereOrNull(
       (it) {

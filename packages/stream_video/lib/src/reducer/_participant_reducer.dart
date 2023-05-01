@@ -17,11 +17,26 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
     CallState state,
     ParticipantAction action,
   ) {
-    if (action is SetParticipantPinned) {
+    if (action is LocalParticipantAction) {
+      return _reduceLocalParticipantAction(state, action);
+    } else if (action is RemoteParticipantAction) {
+      return _reduceRemoteParticipantAction(state, action);
+    } else if (action is SetParticipantPinned) {
       return _reduceSetParticipantPinned(state, action);
-    } else if (action is SetParticipantViewportVisibility) {
-      return _reduceSetParticipantViewportVisibility(state, action);
-    } else if (action is SetCameraEnabled) {
+    } else if (action is UpdateViewportVisibility) {
+      return _reduceUpdateViewportVisibility(state, action);
+    } else if (action is UpdateViewportVisibilities) {
+      return _reduceUpdateViewportVisibilities(state, action);
+    }
+
+    return state;
+  }
+
+  CallState _reduceLocalParticipantAction(
+    CallState state,
+    LocalParticipantAction action,
+  ) {
+    if (action is SetCameraEnabled) {
       return _reduceCameraEnabled(state, action);
     } else if (action is SetMicrophoneEnabled) {
       return _reduceMicrophoneEnabled(state, action);
@@ -35,15 +50,25 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
       return _reduceSetVideoInputDevice(state, action);
     } else if (action is SetCameraPosition) {
       return _reduceCameraPosition(state, action);
-    } else if (action is UpdateSubscriptions) {
+    } else if (action is SetAudioOutputDevice) {
+      return _reduceSetAudioOutputDevice(state, action);
+    }
+
+    return state;
+  }
+
+  CallState _reduceRemoteParticipantAction(
+    CallState state,
+    RemoteParticipantAction action,
+  ) {
+    if (action is UpdateSubscriptions) {
       return _reduceUpdateSubscriptions(state, action);
     } else if (action is UpdateSubscription) {
       return _reduceUpdateSubscription(state, action);
     } else if (action is RemoveSubscription) {
       return _reduceRemoveSubscription(state, action);
-    } else if (action is SetAudioOutputDevice) {
-      return _reduceSetAudioOutputDevice(state, action);
     }
+
     return state;
   }
 
@@ -62,9 +87,9 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
     );
   }
 
-  CallState _reduceSetParticipantViewportVisibility(
+  CallState _reduceUpdateViewportVisibility(
     CallState state,
-    SetParticipantViewportVisibility action,
+    UpdateViewportVisibility action,
   ) {
     return state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
@@ -77,6 +102,17 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
         return participant;
       }).toList(),
     );
+  }
+
+  CallState _reduceUpdateViewportVisibilities(
+    CallState state,
+    UpdateViewportVisibilities action,
+  ) {
+    var newState = state;
+    for (final action in action.actions) {
+      newState = _reduceUpdateViewportVisibility(newState, action);
+    }
+    return newState;
   }
 
   CallState _reduceUpdateSubscriptions(

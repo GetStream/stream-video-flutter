@@ -19,6 +19,9 @@ class RtcVideoDimension with EquatableMixin {
   final int height;
   final int area;
 
+  /// Returns true if the area is zero or negative.
+  bool get isEmpty => area <= 0;
+
   RtcVideoDimension copyWith({
     int? width,
     int? height,
