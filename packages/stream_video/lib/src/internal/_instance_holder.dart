@@ -2,7 +2,6 @@ import 'package:meta/meta.dart';
 
 import '../retry/retry_policy.dart';
 import '../stream_video.dart';
-import '../stream_video.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
 
 @internal
