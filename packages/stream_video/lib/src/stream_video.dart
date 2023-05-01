@@ -29,12 +29,12 @@ const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
 
 /// Handler function used for logging.
 typedef LogHandlerFunction = void Function(
-    Priority priority,
-    String tag,
-    MessageBuilder message, [
-    Object? error,
-    StackTrace? stk,
-    ]);
+  Priority priority,
+  String tag,
+  MessageBuilder message, [
+  Object? error,
+  StackTrace? stk,
+]);
 
 /// The client responsible for handling config and maintaining calls
 class StreamVideo {
