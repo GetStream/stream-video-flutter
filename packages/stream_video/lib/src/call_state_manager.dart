@@ -17,16 +17,8 @@ abstract class CoordinatorCallEventListener extends CoordinatorEventListener {
   Future<void> onCoordinatorEvent(CoordinatorCallEvent event);
 }
 
-abstract class CallStateManager {
-  const CallStateManager();
-
-  StateEmitter<CallState> get state;
-
-  void dispatch(StreamAction action);
-}
-
-class CallStateManagerImpl extends CallStateManager {
-  CallStateManagerImpl({
+class CallStateManager {
+  CallStateManager({
     required CallState initialState,
     required List<Middleware<CallState, StreamAction>> middlewares,
     required CallPreferences callPreferences,
@@ -38,11 +30,9 @@ class CallStateManagerImpl extends CallStateManager {
 
   late final _logger = taggedLogger(tag: '$_tag-$_stateSeq');
 
-  @override
   StateEmitter<CallState> get state => _store.state;
   final Store<CallState, StreamAction> _store;
 
-  @override
   void dispatch(StreamAction action) {
     _logger.d(() => '[dispatch] action: $action');
     _store.dispatch(action);

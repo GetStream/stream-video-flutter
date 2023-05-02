@@ -21,7 +21,6 @@ import '../utils/none.dart';
 import '../utils/standard.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import 'permissions/permissions_manager.dart';
-import 'permissions/permissions_manager.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 
@@ -730,7 +729,7 @@ CallStateManager _makeStateManager(
     QueryMembersMiddleware(streamVideo: streamVideo),
   ];
 
-  return CallStateManagerImpl(
+  return CallStateManager(
     initialState: CallState(
       currentUserId: currentUserId,
       callCid: callCid,
