@@ -21,7 +21,7 @@ import '../utils/none.dart';
 import '../utils/standard.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import 'permissions/permissions_manager.dart';
-import 'permissions/permissions_manager_impl.dart';
+import 'permissions/permissions_manager.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 
@@ -745,7 +745,7 @@ PermissionsManager _makePermissionAwareManager(
   StreamVideo streamVideo,
   CallStateManager stateManager,
 ) {
-  return PermissionsManagerImpl(
+  return PermissionsManager(
     callCid: callCid,
     streamVideo: streamVideo,
     stateManager: stateManager,
