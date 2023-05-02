@@ -14,7 +14,7 @@ import 'src/stream_video_push_notification_method_channel.dart';
 
 class StreamVideoPushNotificationManager implements PushNotificationManager {
   StreamVideoPushNotificationManager._create({
-    required StreamVideo client,
+    required CoordinatorClient client,
     required SharedPreferences sharedPreferences,
     required CallNotificationWrapper callNotification,
     required StreamVideoPushNotificationMethodChannel methodChannel,
@@ -31,8 +31,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     });
   }
 
-  final _logger = taggedLogger(tag: 'PNManager');
-  final StreamVideo _client;
+  final _logger = taggedLogger(tag: 'SV:PNManager');
+  final CoordinatorClient _client;
   final CallNotificationWrapper _callNotification;
   final SharedPreferences _sharedPreferences;
   final StreamVideoPushNotificationMethodChannel _methodChannel;
@@ -65,13 +65,23 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     final token = await _methodChannel.getDevicePushTokenVoIP();
     _logger.d(() => 'New PushTokenVoIP: $token');
     if (token != null) {
-      await _client.createDevice(token: token, pushProviderId: 'apn');
+      await _client.createDevice(
+        CreateDeviceInput(
+          pushToken: token,
+          pushProviderId: 'apn',
+        ),
+      );
     }
   }
 
   Future<void> _registerFirebaseToken(String token) async {
     _logger.d(() => 'New Firebase Token: $token');
-    await _client.createDevice(token: token, pushProviderId: 'firebase');
+    await _client.createDevice(
+      CreateDeviceInput(
+        pushToken: token,
+        pushProviderId: 'firebase',
+      ),
+    );
   }
 
   Future<bool> _showCall(String cid) async {
@@ -126,11 +136,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   Future<CallCreatedData?> _from(StreamCallCid streamCallCid) async {
-    return (await _client.getOrCreateCall(cid: streamCallCid))
-        .getDataOrNull()
-        ?.data;
+    final input = GetOrCreateCallInput(callCid: streamCallCid);
+    return (await _client.getOrCreateCall(input)).getDataOrNull()?.data;
   }
 
+  @override
   Future<CallCreatedData?> consumeIncomingCall() async {
     // We need to wait for a second to be sure sharedPreferences has been updated
     await _sharedPreferences.reload();
@@ -142,22 +152,23 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     return Future.value();
   }
 
-  static Future<StreamVideoPushNotificationManager> create(
-    StreamVideo client, {
+  static PushNotificationManagerFactory factory({
     SharedPreferences? sharedPreferences,
     CallNotificationWrapper? callNotification,
     StreamVideoPushNotificationMethodChannel? methodChannel,
     StreamVideoPushNotificationEventChannel? eventChannel,
-  }) async {
-    return StreamVideoPushNotificationManager._create(
-      client: client,
-      sharedPreferences:
-          sharedPreferences ?? await SharedPreferences.getInstance(),
-      callNotification: callNotification ?? const CallNotificationWrapper(),
-      methodChannel:
-          methodChannel ?? const StreamVideoPushNotificationMethodChannel(),
-      eventChannel:
-          eventChannel ?? const StreamVideoPushNotificationEventChannel(),
-    );
+  }) {
+    return (client) async {
+      return StreamVideoPushNotificationManager._create(
+        client: client,
+        sharedPreferences:
+            sharedPreferences ?? await SharedPreferences.getInstance(),
+        callNotification: callNotification ?? const CallNotificationWrapper(),
+        methodChannel:
+            methodChannel ?? const StreamVideoPushNotificationMethodChannel(),
+        eventChannel:
+            eventChannel ?? const StreamVideoPushNotificationEventChannel(),
+      );
+    };
   }
 }

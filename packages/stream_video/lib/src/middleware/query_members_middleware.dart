@@ -8,10 +8,10 @@ import '../store/store.dart';
 
 class QueryMembersMiddleware extends Middleware<CallState, StreamAction> {
   QueryMembersMiddleware({
-    required StreamVideo streamVideo,
-  }) : _streamVideo = streamVideo;
+    required CoordinatorClient client,
+  }) : _client = client;
 
-  final StreamVideo _streamVideo;
+  final CoordinatorClient _client;
 
   late final _logger = taggedLogger(tag: 'SV:QueryMembersMW');
 
@@ -68,10 +68,17 @@ class QueryMembersMiddleware extends Middleware<CallState, StreamAction> {
     required Set<String> userIds,
   }) async {
     _logger.d(() => '[queryMembersByIds] userIds: $userIds');
-    final result = await _streamVideo.queryMembers(
+    final input = QueryUsersInput(
       callCid: cid,
-      userIds: userIds,
+      filterConditions: {
+        'user_id': {r'$in': userIds.toList()},
+      },
+      sorts: const [
+        SortInput(field: 'user_id', direction: DirectionInput.asc)
+      ],
+      limit: userIds.length,
     );
+    final result = await _client.queryMembers(input);
     _logger.v(() => '[queryMembersByIds] result: $result');
     if (result is! Success<QueriedMembers>) {
       return List.empty();

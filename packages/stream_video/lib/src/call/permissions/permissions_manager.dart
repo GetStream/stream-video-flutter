@@ -3,6 +3,8 @@ import 'package:meta/meta.dart';
 import '../../../stream_video.dart';
 import '../../action/call_action.dart';
 import '../../call_state_manager.dart';
+import '../../coordinator/coordinator_client.dart';
+import '../../coordinator/models/coordinator_inputs.dart';
 import '../../models/call_permission.dart';
 import '../../utils/none.dart';
 
@@ -12,14 +14,14 @@ typedef GetStateOrNull = CallState? Function();
 class PermissionsManager {
   const PermissionsManager({
     required this.callCid,
-    required this.streamVideo,
+    required this.coordinatorClient,
     required this.stateManager,
   });
 
   TaggedLogger get _logger => const TaggedLogger('SV:PermissionsManager');
 
   final StreamCallCid callCid;
-  final StreamVideo streamVideo;
+  final CoordinatorClient coordinatorClient;
   final CallStateManager stateManager;
 
   Future<Result<None>> endCall() async {
@@ -27,7 +29,7 @@ class PermissionsManager {
       return Result.error('has no "end-call" permission');
     }
     _logger.d(() => '[endCall] callCid: $callCid');
-    final result = await streamVideo.endCall(callCid: callCid);
+    final result = await coordinatorClient.endCall(callCid);
     _logger.v(() => '[endCall] result: $result');
     return result;
   }
@@ -68,14 +70,17 @@ class PermissionsManager {
       );
     }
     _logger.d(() => '[request] permissions: $permissions');
-    final result = await streamVideo.requestPermissions(
-      callCid: callCid,
-      permissions: permissions,
+    final result = coordinatorClient.requestPermissions(
+      RequestPermissionsInput(
+        callCid: callCid,
+        permissions: permissions,
+      ),
     );
     _logger.v(() => '[request] result: $result');
     return result;
   }
 
+  /// Grants the [permissions] to the [userId] in the [callCid].
   Future<Result<None>> _grant({
     required String userId,
     List<CallPermission> permissions = const [],
@@ -88,15 +93,19 @@ class PermissionsManager {
       );
     }
     _logger.d(() => '[grant] userId: $userId, permissions: $permissions');
-    final result = await streamVideo.updateUserPermissions(
-      callCid: callCid,
-      userId: userId,
-      grantPermissions: permissions,
+    final result = await coordinatorClient.updateUserPermissions(
+      UpdateUserPermissionsInput(
+        callCid: callCid,
+        userId: userId,
+        grantPermissions: permissions,
+        revokePermissions: const [],
+      ),
     );
     _logger.v(() => '[grant] result: $result');
     return result;
   }
 
+  /// Revokes the [permissions] from the [userId] in the [callCid].
   Future<Result<None>> _revoke({
     required String userId,
     List<CallPermission> permissions = const [],
@@ -109,10 +118,13 @@ class PermissionsManager {
       );
     }
     _logger.d(() => '[revoke] userId: $userId, permissions: $permissions');
-    final result = await streamVideo.updateUserPermissions(
-      callCid: callCid,
-      userId: userId,
-      revokePermissions: permissions,
+    final result = await coordinatorClient.updateUserPermissions(
+      UpdateUserPermissionsInput(
+        callCid: callCid,
+        userId: userId,
+        grantPermissions: const [],
+        revokePermissions: permissions,
+      ),
     );
     _logger.v(() => '[revoke] result: $result');
     return result;
@@ -124,9 +136,11 @@ class PermissionsManager {
       return Result.error('Cannot block user (no permission)');
     }
     _logger.d(() => '[blockUser] userId: $userId');
-    final result = await streamVideo.blockUser(
-      callCid: callCid,
-      userId: userId,
+    final result = await coordinatorClient.blockUser(
+      BlockUserInput(
+        callCid: callCid,
+        userId: userId,
+      ),
     );
     _logger.v(() => '[blockUser] result: $result');
     return result;
@@ -138,9 +152,11 @@ class PermissionsManager {
       return Result.error('Cannot unblock user (no permission)');
     }
     _logger.d(() => '[unblockUser] userId: $userId');
-    final result = await streamVideo.unblockUser(
-      callCid: callCid,
-      userId: userId,
+    final result = coordinatorClient.unblockUser(
+      UnblockUserInput(
+        callCid: callCid,
+        userId: userId,
+      ),
     );
     _logger.v(() => '[unblockUser] result: $result');
     return result;
@@ -152,7 +168,7 @@ class PermissionsManager {
       return Result.error('Cannot start recording (no permission)');
     }
     _logger.d(() => '[startRecording] no args');
-    final result = await streamVideo.startRecording(callCid: callCid);
+    final result = await coordinatorClient.startRecording(callCid);
     _logger.v(() => '[startRecording] result: $result');
     return result;
   }
@@ -163,7 +179,7 @@ class PermissionsManager {
       return Result.error('Cannot stop recording (no permission)');
     }
     _logger.d(() => '[stopRecording] no args');
-    final result = await streamVideo.stopRecording(callCid: callCid);
+    final result = await coordinatorClient.stopRecording(callCid);
     _logger.v(() => '[stopRecording] result: $result');
     return result;
   }
@@ -174,7 +190,7 @@ class PermissionsManager {
       return Result.error('Cannot start broadcasting (no permission)');
     }
     _logger.d(() => '[startBroadcasting] no args');
-    final result = await streamVideo.startBroadcasting(callCid: callCid);
+    final result = await coordinatorClient.startBroadcasting(callCid);
     _logger.v(() => '[startBroadcasting] result: $result');
     return result;
   }
@@ -185,7 +201,7 @@ class PermissionsManager {
       return Result.error('Cannot stop broadcasting (no permission)');
     }
     _logger.d(() => '[stopBroadcasting] no args');
-    final result = await streamVideo.stopBroadcasting(callCid: callCid);
+    final result = await coordinatorClient.stopBroadcasting(callCid);
     _logger.v(() => '[stopBroadcasting] result: $result');
     return result;
   }
@@ -196,9 +212,11 @@ class PermissionsManager {
       return Result.error('Cannot mute users (no permission)');
     }
     _logger.d(() => '[muteUsers] userIds: $userIds');
-    final result = await streamVideo.muteUsers(
-      callCid: callCid,
-      userIds: userIds,
+    final result = await coordinatorClient.muteUsers(
+      MuteUsersInput(
+        callCid: callCid,
+        userIds: userIds,
+      ),
     );
     _logger.v(() => '[muteUsers] result: $result');
     return result;

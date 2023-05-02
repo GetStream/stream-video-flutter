@@ -27,13 +27,17 @@ class StreamBackgroundService {
 
   static final StreamBackgroundService _instance = StreamBackgroundService._();
 
-  static void init({
+  static StreamSubscription<Call?>? _activeCalSubscription;
+
+  static void init(
+    StreamVideo streamVideo, {
     NotificationOptionsBuilder optionsBuilder = _defaultOptions,
     OnNotificationClick? onNotificationClick,
     OnButtonClick? onButtonClick,
     OnUiLayerDestroyed? onPlatformUiLayerDestroyed,
   }) {
-    Call.onActiveCall = (call) async {
+    _activeCalSubscription?.cancel();
+    _activeCalSubscription = streamVideo.listenActiveCall((call) async {
       await _instance.onActiveCall(
         call: call,
         optionsBuilder: optionsBuilder,
@@ -41,7 +45,7 @@ class StreamBackgroundService {
         onButtonClick: onButtonClick,
         onUiLayerDestroyed: onPlatformUiLayerDestroyed,
       );
-    };
+    });
   }
 
   final _logger = taggedLogger(tag: _tag);

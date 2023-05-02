@@ -66,9 +66,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (callId.isEmpty) return debugPrint('Call ID is empty');
 
     try {
-      final callCid = StreamCallCid.from(type: 'default', id: callId);
-      final data = await streamVideoClient.getOrCreateCall(cid: callCid);
-      call = Call.fromCreated(data: data.getDataOrNull()!.data);
+      call = streamVideoClient.makeCall(type: 'default', id: callId);
+      await call?.getOrCreateCall();
       chatChannel =  await _initChatChannel(channelId: call!.callCid.id);
 
       final callMemberIDs = call?.state.value.callParticipants

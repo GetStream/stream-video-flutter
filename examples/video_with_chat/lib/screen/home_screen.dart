@@ -144,9 +144,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<Call> _initVideoCall({required String callId}) async {
-    final callCid = StreamCallCid.from(type: "default", id: callId);
-    final data = await videoClient.getOrCreateCall(cid: callCid);
-    return Call.fromCreated(data: data.getDataOrNull()!.data);
+    final call = videoClient.makeCall(type: 'default', id: callId);
+    await call.getOrCreateCall();
+    return call;
   }
 
   Future<Channel> _initChatChannel({required String channelId}) async {
