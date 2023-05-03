@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../retry/retry_policy.dart';
 import '../stream_video.dart';
-import '../stream_video_impl.dart';
+import '../stream_video.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
 
 @internal
@@ -24,7 +24,7 @@ class InstanceHolder {
         If you want to use multiple instances of the SDK, use StreamVideo.new() instead.
         ''');
     }
-    _instance = StreamVideoImpl(
+    _instance = StreamVideo(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
