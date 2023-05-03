@@ -15,7 +15,6 @@ dependencies:
   stream_video:
     path: ../stream_video
   flutter_callkit_incoming: ^1.0.3+3
-  uuid: ^3.0.7
 
 dev_dependencies:
   flutter_test:
