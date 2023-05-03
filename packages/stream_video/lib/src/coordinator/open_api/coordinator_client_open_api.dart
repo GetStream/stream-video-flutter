@@ -19,6 +19,7 @@ import '../../token/token.dart';
 import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
+import '../../utils/standard.dart';
 import '../../utils/subscriptions.dart';
 import '../coordinator_client.dart';
 import '../models/coordinator_events.dart';
@@ -64,10 +65,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   SharedEmitter<CoordinatorEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
 
-  final _subscriptions = Subscriptions();
-
   UserInfo? _user;
   CoordinatorWebSocketOpenApi? _ws;
+  StreamSubscription<CoordinatorEvent>? _wsSubscription;
 
   @override
   Future<Result<None>> connectUser(UserInfo user) async {
@@ -78,24 +78,26 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           'please call "disconnectUser" first');
     }
     _user = user;
+    _ws = _createWebSocket(user).also((ws) {
+      _wsSubscription = ws.events.listen(_events.emit);
+    });
     return openConnection();
   }
 
   @override
   Future<Result<None>> openConnection() async {
     try {
-      if (_ws != null) {
-        _logger.w(() => '[openConnection] rejected (already open)');
-        return Result.error('WS is already open');
+      final ws = _ws;
+      if (ws == null) {
+        _logger.w(() => '[openConnection] rejected (no WS)');
+        return Result.error('WS is not initialized');
       }
-      if (_user == null) {
-        _logger.w(() => '[openConnection] rejected (no logged in user)');
-        return Result.error('No logged in user');
+      if (!ws.isDisconnected) {
+        _logger.w(() => '[openConnection] rejected (not closed)');
+        return Result.error('WS is not closed');
       }
       _logger.i(() => '[openConnection] no args');
-      _ws = _createWebSocket(_user!);
-      await _ws!.connect();
-      _subscriptions.add(_idEvents, _ws!.events.listen(_events.emit));
+      await ws.connect();
       return Result.success(None());
     } catch (e, stk) {
       _logger.e(() => '[openConnection] failed: $e');
@@ -106,14 +108,17 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> closeConnection() async {
     try {
-      if (_ws == null) {
+      final ws = _ws;
+      if (ws == null) {
+        _logger.w(() => '[openConnection] rejected (no WS)');
+        return Result.error('WS is not initialized');
+      }
+      if (ws.isDisconnected) {
         _logger.w(() => '[closeConnection] rejected (already closed)');
         return Result.error('WS is already closed');
       }
       _logger.i(() => '[closeConnection] no args');
-      _subscriptions.cancel(_idEvents);
-      await _ws?.disconnect();
-      _ws = null;
+      await ws.disconnect();
       return Result.success(None());
     } catch (e, stk) {
       _logger.e(() => '[closeConnection] failed: $e');
@@ -129,7 +134,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return Result.success(None());
     }
     _user = null;
-    _subscriptions.cancelAll();
+    await _wsSubscription?.cancel();
+    _wsSubscription = null;
     return closeConnection();
   }
 

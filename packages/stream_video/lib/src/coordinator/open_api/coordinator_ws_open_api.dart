@@ -73,13 +73,6 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   String? userId;
   String? clientId;
 
-  set callInfo(CallInfo? info) => _callInfo = info;
-  CallInfo? _callInfo;
-
-  // Do we need that? Cannot we just pass events to the listeners?
-  // @override
-  // OnConnectionStateUpdated get onConnectionStateUpdated => events.emit;
-
   @override
   Future<Result<None>> connect() {
     _logger.v(() => '[connect] no args');
@@ -98,6 +91,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       _logger.w(() => '[disconnect] rejected (already disconnected)');
       return Result.success(None());
     }
+    connectionState = ConnectionState.disconnected;
 
     healthMonitor.stop();
 
@@ -168,7 +162,6 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       () => '[onClose] closeCode: "$closeCode", closeReason: "$closeReason"',
     );
     healthMonitor.onSocketClose();
-    connectionState = ConnectionState.closed;
 
     _events.emit(
       CoordinatorDisconnectedEvent(
@@ -188,6 +181,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       connectionState = ConnectionState.disconnected;
       return;
     }
+    connectionState = ConnectionState.closed;
 
     _reconnect();
   }
