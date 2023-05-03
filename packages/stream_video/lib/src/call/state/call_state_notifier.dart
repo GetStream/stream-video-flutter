@@ -22,6 +22,8 @@ class CallStateNotifier extends StateNotifier<CallState>
 
   final CallPreferences callPreferences;
 
+  CallState get callState => state;
+
   // TODO: This method is here to access preferences which can't be done in mixins -
   // TODO: find a better way to do this.
   void sfuParticipantLeft(
