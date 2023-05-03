@@ -6,6 +6,7 @@ import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_callkit_incoming/entities/ios_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:uuid/uuid.dart';
 
 StreamSubscription<CallEvent?>? _streamSubscription;
 
@@ -20,9 +21,10 @@ class CallNotificationWrapper {
     required void Function(StreamCallCid streamCallCid) onCallRejected,
     String? avatarUrl,
   }) async {
+    var uuid = const Uuid();
     final callKitParams = CallKitParams(
-      id: streamCallCid.value,
-      nameCaller: callers,
+      id: uuid.v4(),
+      nameCaller: 'Demo Call',
       avatar: avatarUrl,
       type: isVideoCall ? 1 : 0,
       textAccept: 'Accept',
