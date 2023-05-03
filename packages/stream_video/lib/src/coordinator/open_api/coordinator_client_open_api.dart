@@ -2,7 +2,7 @@ import 'dart:async';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../errors/video_error_composer.dart';
-import '../../latency_service/latency.dart';
+import '../../latency/latency_service.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_created_data.dart';
@@ -38,6 +38,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required this.wsUrl,
     required this.apiKey,
     required this.tokenManager,
+    required this.latencyService,
     required this.retryPolicy,
   }) : _apiClient = open.ApiClient(
           basePath: rpcUrl,
@@ -49,6 +50,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   final String apiKey;
   final String wsUrl;
   final TokenManager tokenManager;
+  final LatencyService latencyService;
   final RetryPolicy retryPolicy;
 
   final open.ApiClient _apiClient;
@@ -253,7 +255,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       () => '[findBestCallEdgeServer] callCid: $callCid, '
           'edges.length: ${edges.length}',
     );
-    final latencyByEdge = await measureEdgeLatencies(edges: edges);
+    final latencyByEdge = await latencyService.measureEdgeLatencies(edges);
     _logger.v(() => '[findBestCallEdgeServer] latencyByEdge: $latencyByEdge');
     final response = await selectCallEdgeServer(
       callCid: callCid,
@@ -278,6 +280,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required Map<String, SfuLatency> latencyByEdge,
   }) async {
     try {
+      _logger.d(() => '[selectCallEdgeServer] callCid: $callCid, '
+          'latencyByEdge.length: ${latencyByEdge.length}');
       final result = await videoApi.getCallEdgeServer(
         callCid.type,
         callCid.id,
@@ -287,6 +291,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           ),
         ),
       );
+      _logger.v(() => '[selectCallEdgeServer] completed: $result');
       if (result == null) {
         return Result.error('selectCallEdgeServer result is null');
       }
@@ -297,6 +302,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
     } catch (e, stk) {
+      _logger.e(() => '[selectCallEdgeServer] failed: $e; $stk');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }

@@ -78,14 +78,9 @@ class CoordinatorClientRetry extends CoordinatorClient {
     required StreamCallCid callCid,
     required List<SfuEdge> edges,
   }) {
-    return _retryManager.execute(
-      () => _delegate.findBestCallEdgeServer(
-        callCid: callCid,
-        edges: edges,
-      ),
-      (error, nextAttemptDelay) async {
-        _logRetry('findBestCallEdgeServer', error, nextAttemptDelay);
-      },
+    return _delegate.findBestCallEdgeServer(
+      callCid: callCid,
+      edges: edges,
     );
   }
 
