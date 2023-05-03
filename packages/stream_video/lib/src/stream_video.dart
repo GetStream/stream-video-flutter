@@ -7,6 +7,9 @@ import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'coordinator/retry/coordinator_client_retry.dart';
 import 'errors/video_error_composer.dart';
 import 'internal/_instance_holder.dart';
+import 'lifecycle/lifecycle_state.dart';
+import 'lifecycle/lifecycle_utils.dart'
+if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
 import 'logger/impl/external_logger.dart';
 import 'models/queried_calls.dart';
 import 'retry/retry_policy.dart';
@@ -18,6 +21,10 @@ import 'utils/standard.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
 
 const _tag = 'SV:Client';
+
+const _idEvents = 1;
+const _idAppState = 2;
+
 const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com/video';
 const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
 
@@ -129,12 +136,11 @@ class StreamVideo {
   final SdpPolicy sdpPolicy;
 
   final _tokenManager = TokenManager();
+  final _subscriptions = Subscriptions();
   late final CoordinatorClient _client;
   PushNotificationManager? _pushNotificationManager;
 
   var _state = _StreamVideoState();
-
-  StreamSubscription<CoordinatorEvent>? _eventSubscription;
 
   Future<void> initPushNotificationManager(
     PushNotificationManagerFactory factory,
@@ -181,25 +187,48 @@ class StreamVideo {
     _state.currentUser.value = user;
 
     try {
-      _eventSubscription = _client.events.listen((event) {
-        _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
-        if (event is CoordinatorCallCreatedEvent &&
-            event.metadata.details.createdBy.id != user.id &&
-            event.data.ringing) {
-          _logger.v(() => '[onCoordinatorEvent] onCallCreated: ${event.data}');
-          onIncomingCall?.call(_makeCallFromCreated(data: event.data));
-        }
-      });
-
-      final result = await _client.onUserLogin(user);
-      await _pushNotificationManager?.onUserLoggedIn();
+      final result = await _client.connectUser(user);
+      _logger.v(() => '[connectUser] completed: $result');
       if (result is Failure) {
         return result;
       }
+      _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
+      _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
+      await _pushNotificationManager?.onUserLoggedIn();
       return tokenResult;
     } catch (e, stk) {
       _logger.e(() => '[connectUser] failed(${user.id}): $e');
       return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  void _onEvent(CoordinatorEvent event) {
+    final currentUserId = _state.getCurrentUserId();
+    _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
+    if (event is CoordinatorCallCreatedEvent &&
+        event.metadata.details.createdBy.id != currentUserId &&
+        event.data.ringing) {
+      _logger.v(() => '[onCoordinatorEvent] onCallCreated: ${event.data}');
+      onIncomingCall?.call(_makeCallFromCreated(data: event.data));
+    }
+  }
+
+  Future<void> _onAppState(LifecycleState state) async {
+    _logger.d(() => '[onAppState] state: $state');
+    try {
+      final loggedIn = currentUser != null;
+      final activeCallCid = _state.activeCall.valueOrNull?.callCid;
+      if (loggedIn && state.isPaused && activeCallCid == null) {
+        _logger.i(() => '[onAppState] close connection');
+        _subscriptions.cancel(_idEvents);
+        await _client.closeConnection();
+      } else if (loggedIn && state.isResumed) {
+        _logger.i(() => '[onAppState] open connection');
+        await _client.openConnection();
+        _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
+      }
+    } catch (e) {
+      _logger.e(() => '[onAppState] failed: $e');
     }
   }
 
@@ -211,9 +240,8 @@ class StreamVideo {
       return Result.success(None());
     }
     try {
-      await _client.onUserLogout();
-      await _eventSubscription?.cancel();
-      _eventSubscription = null;
+      await _client.disconnectUser();
+      _subscriptions.cancelAll();
       _tokenManager.reset();
 
       // Resetting the state.
