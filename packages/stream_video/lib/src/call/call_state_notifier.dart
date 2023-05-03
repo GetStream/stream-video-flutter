@@ -30,7 +30,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
 
   //////////// Coordinator Actions ////////////
 
-  void updateUsers(
+  void coordinatorUpdateUsers(
     UpdateUsers action,
   ) {
     state = state.copyWith(
@@ -48,7 +48,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCoordinatorCallAccepted(
+  void coordinatorUpdateCallAccepted(
     CoordinatorCallAcceptedEvent event,
   ) {
     final status = state.status;
@@ -68,7 +68,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCoordinatorCallRejected(
+  void coordinatorUpdateCallRejected(
     CoordinatorCallRejectedEvent event,
   ) {
     final status = state.status;
@@ -108,7 +108,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCoordinatorCallEnded(
+  void coordinatorCallEnded(
     CoordinatorCallEndedEvent event,
   ) {
     _logger.i(() => '[reduceCallCancelled] state: $state');
@@ -156,7 +156,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCoordinatorCallPermissionsUpdated(
+  void coordinatorCallPermissionsUpdated(
     CoordinatorCallPermissionsUpdatedEvent event,
   ) {
     final status = state.status;
@@ -174,7 +174,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCoordinatorCallRecordingStarted(
+  void coordinatorCallRecordingStarted(
     CoordinatorCallRecordingStartedEvent event,
   ) {
     final status = state.status;
@@ -190,7 +190,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCoordinatorCallRecordingStopped(
+  void coordinatorCallRecordingStopped(
     CoordinatorCallRecordingStoppedEvent event,
   ) {
     final status = state.status;
@@ -206,7 +206,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCoordinatorCallBroadcastingStarted(
+  void coordinatorCallBroadcastingStarted(
     CoordinatorCallBroadcastingStartedEvent event,
   ) {
     final status = state.status;
@@ -222,7 +222,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCoordinatorCallBroadcastingStopped(
+  void coordinatorCallBroadcastingStopped(
     CoordinatorCallBroadcastingStoppedEvent event,
   ) {
     final status = state.status;
@@ -240,7 +240,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
 
   //////////// Lifecycle Actions ////////////
 
-  void updateUserId(
+  void lifecycleUpdateUserId(
     SetUserId action,
   ) {
     _logger.d(() => '[reduceUserId] state: $state');
@@ -252,7 +252,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCallAccepted(
+  void lifecycleCallAccepted(
     CallAccepted action,
   ) {
     final status = state.status;
@@ -267,7 +267,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void reduceCallRejected(
+  void lifecycleCallRejected(
     CallRejected stage,
   ) {
     final status = state.status;
@@ -287,7 +287,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCallEnded(
+  void lifecycleCallEnded(
     CallEnded stage,
   ) {
     _logger.i(() => '[reduceCallEnded] stage: $stage, state: $state');
@@ -299,7 +299,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCallCreated(
+  void lifecycleCallCreated(
     CallCreated stage,
   ) {
     _logger.d(() => '[reduceCallCreated] state: $state');
@@ -313,7 +313,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCallJoining(
+  void lifecycleCallJoining(
     CallJoining stage,
   ) {
     _logger.d(() => '[reduceCallJoining] state: $state');
@@ -322,7 +322,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCallJoined(
+  void lifecycleCallJoined(
     CallJoined stage,
   ) {
     final status = state.status.isJoining ? CallStatus.joined() : state.status;
@@ -336,7 +336,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCallDisconnected(
+  void lifecycleCallDisconnected(
     CallDisconnected stage,
   ) {
     _logger.w(() => '[reduceCallDisconnected] state: $state');
@@ -351,7 +351,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCallTimeout(
+  void lifecycleCallTimeout(
     CallTimeout stage,
   ) {
     _logger.e(() => '[reduceCallTimeout] state: $state');
@@ -363,7 +363,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCallConnectingAction(
+  void lifecycleCallConnectingAction(
     CallConnecting stage,
   ) {
     _logger.d(() => '[reduceCallConnectingAction] state: $state');
@@ -378,7 +378,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCallConnectFailed(
+  void lifecycleCallConnectFailed(
     ConnectFailed stage,
   ) {
     _logger.e(() => '[reduceCallConnectFailed] state: $state');
@@ -389,7 +389,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCallSessionStart(
+  void lifecycleCallSessionStart(
     CallSessionStart action,
   ) {
     _logger.d(() => '[reduceCallSessionStart] state: $state');
@@ -399,7 +399,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCallConnected(
+  void lifecycleCallConnected(
     CallConnected stage,
   ) {
     _logger.d(() => '[reduceCallConnected] state: $state');
@@ -410,21 +410,21 @@ class CallStateNotifier extends StateNotifier<CallState> {
 
   //////////// Participant Actions ////////////
 
-  void updateSubscriptions(
+  void participantUpdateSubscriptions(
     UpdateSubscriptions action,
   ) {
     final sessionId = state.sessionId;
     _logger.d(() => '[reduceSubscriptions] #$sessionId; action: $action');
     for (final child in action.actions) {
       if (child is UpdateSubscription) {
-        updateSubscription(child);
+        participantUpdateSubscription(child);
       } else if (child is RemoveSubscription) {
-        removeSubscription(child);
+        participantRemoveSubscription(child);
       }
     }
   }
 
-  void updateSubscription(
+  void participantUpdateSubscription(
     UpdateSubscription action,
   ) {
     _logger.d(() => '[updateSub] #${state.sessionId}; action: $action');
@@ -451,7 +451,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void removeSubscription(
+  void participantRemoveSubscription(
     RemoveSubscription action,
   ) {
     state = state.copyWith(
@@ -475,7 +475,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void setAudioOutputDevice(
+  void participantSetAudioOutputDevice(
     SetAudioOutputDevice action,
   ) {
     state = state.copyWith(
@@ -498,7 +498,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateCameraPosition(
+  void participantUpdateCameraPosition(
     SetCameraPosition action,
   ) {
     state = state.copyWith(
@@ -526,7 +526,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void flipCamera(
+  void participantFlipCamera(
     FlipCamera action,
   ) {
     state = state.copyWith(
@@ -554,7 +554,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void setVideoInputDevice(
+  void participantSetVideoInputDevice(
     SetVideoInputDevice action,
   ) {
     state = state.copyWith(
@@ -580,7 +580,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void setAudioInputDevice(
+  void participantSetAudioInputDevice(
     SetAudioInputDevice action,
   ) {
     state = state.copyWith(
@@ -604,19 +604,19 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void setCameraEnabled(
+  void participantSetCameraEnabled(
     SetCameraEnabled action,
   ) {
     return _toggleTrackType(SfuTrackType.video, action.enabled);
   }
 
-  void setMicrophoneEnabled(
+  void participantSetMicrophoneEnabled(
     SetMicrophoneEnabled action,
   ) {
     return _toggleTrackType(SfuTrackType.audio, action.enabled);
   }
 
-  void setScreenShareEnabled(
+  void participantSetScreenShareEnabled(
     SetScreenShareEnabled action,
   ) {
     return _toggleTrackType(SfuTrackType.screenShare, action.enabled);
@@ -654,7 +654,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
 
   //////////// RTC Actions ////////////
 
-  void updateSubscriberTrack(
+  void rtcUpdateSubscriberTrack(
     UpdateSubscriberTrack action,
   ) {
     _logger.d(
@@ -687,7 +687,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
 
   //////////// SFU Actions ////////////
 
-  void updateJoinResponse(
+  void sfuJoinResponse(
       SfuJoinResponseEvent event,
       ) {
     _logger.d(() => '[reduceJoinResponse] ${state.sessionId}; event: $event');
@@ -723,7 +723,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateTrackUnpublished(
+  void sfuTrackUnpublished(
       SfuTrackUnpublishedEvent event,
       ) {
     _logger.d(
@@ -752,7 +752,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void reduceTrackPublished(
+  void sfuTrackPublished(
       SfuTrackPublishedEvent event,
       ) {
     _logger.d(() => '[reduceTrackPublished] ${state.sessionId}; event: $event');
@@ -780,7 +780,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateAudioLevelChanged(
+  void sfuUpdateAudioLevelChanged(
       SfuAudioLevelChangedEvent event,
       ) {
     state = state.copyWith(
@@ -801,7 +801,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateDominantSpeakerChanged(
+  void sfuDominantSpeakerChanged(
       SfuDominantSpeakerChangedEvent event,
       ) {
     state = state.copyWith(
@@ -824,7 +824,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateConnectionQualityChanged(
+  void sfuConnectionQualityChanged(
       SfuConnectionQualityChangedEvent event,
       ) {
     state = state.copyWith(
@@ -844,7 +844,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateParticipantJoined(
+  void sfuParticipantJoined(
       SfuParticipantJoinedEvent event,
       ) {
     _logger.d(
@@ -869,7 +869,7 @@ class CallStateNotifier extends StateNotifier<CallState> {
     );
   }
 
-  void updateParticipantLeft(
+  void sfuParticipantLeft(
       SfuParticipantLeftEvent event,
       ) {
     final callParticipants = [...state.callParticipants]..removeWhere(
