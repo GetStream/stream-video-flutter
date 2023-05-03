@@ -9,7 +9,7 @@ import '../../types/other.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
-import 'call_session_impl.dart';
+import 'call_session.dart';
 
 int _sessionSeq = 1;
 
@@ -38,7 +38,7 @@ class CallSessionFactory {
       rtcConfig: rtcConfig,
     );
     _logger.v(() => '[makeCallSession] sfuUrl: ${sessionConfig.sfuUrl}');
-    return CallSessionImpl(
+    return CallSession(
       sessionSeq: _sessionSeq++,
       callCid: callCid,
       sessionId: sessionId,
