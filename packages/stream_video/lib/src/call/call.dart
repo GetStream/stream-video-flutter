@@ -586,8 +586,7 @@ class Call {
   Future<void> _clear(String src) async {
     _logger.d(() => '[clear] src: $src');
     _status.value = _ConnectionStatus.disconnected;
-    _subscriptions.cancel(_idSessionEvents);
-    _subscriptions.cancel(_idSessionStats);
+    _subscriptions.cancelAll();
     _cancelables.cancelAll();
     await _session?.dispose();
     _session = null;
