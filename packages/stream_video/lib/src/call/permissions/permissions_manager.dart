@@ -32,35 +32,10 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> apply(CallAction action) async {
-    if (action is RequestPermissions) {
-      return _request(action.permissions);
-    } else if (action is GrantPermissions) {
-      return _grant(userId: action.userId, permissions: action.permissions);
-    } else if (action is RevokePermissions) {
-      return _revoke(userId: action.userId, permissions: action.permissions);
-    } else if (action is BlockUser) {
-      return _blockUser(action.userId);
-    } else if (action is UnblockUser) {
-      return _unblockUser(action.userId);
-    } else if (action is MuteUsers) {
-      return _muteUsers(action.userIds);
-    } else if (action is StartRecording) {
-      return _startRecording();
-    } else if (action is StopRecording) {
-      return _stopRecording();
-    } else if (action is StartBroadcasting) {
-      return _startBroadcasting();
-    } else if (action is StopBroadcasting) {
-      return _stopBroadcasting();
-    }
-    return Result.error('Action not supported: $action');
-  }
-
-  Future<Result<None>> _request(
+  Future<Result<None>> request(
     List<CallPermission> permissions,
   ) async {
-    final canRequest = permissions.every(_canRequestPermission);
+    final canRequest = permissions.every(canRequestPermission);
     if (!canRequest) {
       _logger.w(() => '[request] rejected (no permission)');
       return Result.error(
@@ -76,7 +51,7 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> _grant({
+  Future<Result<None>> grant({
     required String userId,
     List<CallPermission> permissions = const [],
   }) async {
@@ -97,7 +72,7 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> _revoke({
+  Future<Result<None>> revoke({
     required String userId,
     List<CallPermission> permissions = const [],
   }) async {
@@ -118,7 +93,7 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> _blockUser(String userId) async {
+  Future<Result<None>> blockUser(String userId) async {
     if (!_hasPermission(CallPermission.blockUsers)) {
       _logger.w(() => '[blockUser] rejected (no permission)');
       return Result.error('Cannot block user (no permission)');
@@ -132,7 +107,7 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> _unblockUser(String userId) async {
+  Future<Result<None>> unblockUser(String userId) async {
     if (!_hasPermission(CallPermission.blockUsers)) {
       _logger.w(() => '[unblockUser] rejected (no permission)');
       return Result.error('Cannot unblock user (no permission)');
@@ -146,7 +121,7 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> _startRecording() async {
+  Future<Result<None>> startRecording() async {
     if (!_hasPermission(CallPermission.startRecordCall)) {
       _logger.w(() => '[startRecording] rejected (no permission)');
       return Result.error('Cannot start recording (no permission)');
@@ -157,7 +132,7 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> _stopRecording() async {
+  Future<Result<None>> stopRecording() async {
     if (!_hasPermission(CallPermission.stopRecordCall)) {
       _logger.w(() => '[stopRecording] rejected (no permission)');
       return Result.error('Cannot stop recording (no permission)');
@@ -168,7 +143,7 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> _startBroadcasting() async {
+  Future<Result<None>> startBroadcasting() async {
     if (!_hasPermission(CallPermission.startBroadcastCall)) {
       _logger.w(() => '[startBroadcasting] rejected (no permission)');
       return Result.error('Cannot start broadcasting (no permission)');
@@ -179,7 +154,7 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> _stopBroadcasting() async {
+  Future<Result<None>> stopBroadcasting() async {
     if (!_hasPermission(CallPermission.stopBroadcastCall)) {
       _logger.w(() => '[stopBroadcasting] rejected (no permission)');
       return Result.error('Cannot stop broadcasting (no permission)');
@@ -190,7 +165,7 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> _muteUsers(List<String> userIds) async {
+  Future<Result<None>> muteUsers(List<String> userIds) async {
     if (!_hasPermission(CallPermission.muteUsers)) {
       _logger.w(() => '[muteUsers] rejected (no permission)');
       return Result.error('Cannot mute users (no permission)');
@@ -204,7 +179,7 @@ class PermissionsManager {
     return result;
   }
 
-  bool _canRequestPermission(CallPermission permission) {
+  bool canRequestPermission(CallPermission permission) {
     final settings = stateManager.callStateStream.valueOrNull?.settings;
     if (settings == null) {
       _logger.w(() => 'canRequestPermission: no settings');

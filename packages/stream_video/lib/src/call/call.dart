@@ -757,51 +757,49 @@ class Call {
   }
 
   Future<Result<None>> requestPermissions(List<CallPermission> permissions) {
-    return _permissionsManager.apply(RequestPermissions(permissions));
+    return _permissionsManager.request(permissions);
   }
 
   Future<Result<None>> grantPermissions({
     required String userId,
     List<CallPermission> permissions = const [],
   }) {
-    return _permissionsManager
-        .apply(GrantPermissions(userId: userId, permissions: permissions));
+    return _permissionsManager.grant(userId: userId, permissions: permissions);
   }
 
   Future<Result<None>> revokePermissions({
     required String userId,
     List<CallPermission> permissions = const [],
   }) {
-    return _permissionsManager
-        .apply(RevokePermissions(userId: userId, permissions: permissions));
+    return _permissionsManager.revoke(userId: userId, permissions: permissions);
   }
 
   Future<Result<None>> blockUser(String userId) {
-    return _permissionsManager.apply(BlockUser(userId: userId));
+    return _permissionsManager.blockUser(userId);
   }
 
   Future<Result<None>> unblockUser(String userId) {
-    return _permissionsManager.apply(UnblockUser(userId: userId));
+    return _permissionsManager.unblockUser(userId);
   }
 
   Future<Result<None>> startRecording() {
-    return _permissionsManager.apply(const StartRecording());
+    return _permissionsManager.startRecording();
   }
 
   Future<Result<None>> stopRecording() {
-    return _permissionsManager.apply(const StopRecording());
+    return _permissionsManager.stopRecording();
   }
 
   Future<Result<None>> startBroadcasting() {
-    return _permissionsManager.apply(const StartBroadcasting());
+    return _permissionsManager.startBroadcasting();
   }
 
   Future<Result<None>> stopBroadcasting() {
-    return _permissionsManager.apply(const StopBroadcasting());
+    return _permissionsManager.stopBroadcasting();
   }
 
   Future<Result<None>> muteUsers(List<String> userIds) {
-    return _permissionsManager.apply(MuteUsers(userIds: userIds));
+    return _permissionsManager.muteUsers(userIds);
   }
 
   Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) {
