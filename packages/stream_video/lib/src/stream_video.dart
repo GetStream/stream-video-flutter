@@ -9,11 +9,10 @@ import 'errors/video_error_composer.dart';
 import 'internal/_instance_holder.dart';
 import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
-if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
+    if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
 import 'logger/impl/external_logger.dart';
 import 'models/queried_calls.dart';
 import 'retry/retry_policy.dart';
-import 'shared_emitter.dart';
 import 'state_emitter.dart';
 import 'token/token_manager.dart';
 import 'utils/none.dart';
