@@ -4,6 +4,7 @@ import 'package:state_notifier/state_notifier.dart';
 import '../../../call_state.dart';
 import '../../../logger/impl/tagged_logger.dart';
 import '../../../models/call_participant_state.dart';
+import '../../../models/call_preferences.dart';
 import '../../../models/call_status.dart';
 import '../../../models/call_track_state.dart';
 import '../../../models/disconnect_reason.dart';
@@ -13,6 +14,34 @@ import '../../../utils/string.dart';
 final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
 mixin StateSfuMixin on StateNotifier<CallState> {
+
+  CallPreferences get callPreferences;
+
+  void sfuParticipantLeft(
+      SfuParticipantLeftEvent event,
+      ) {
+    final callParticipants = [...state.callParticipants]..removeWhere(
+          (participant) =>
+      participant.userId == event.participant.userId &&
+          participant.sessionId == event.participant.sessionId,
+    );
+
+    if (callParticipants.length == 1 &&
+        callParticipants.first.userId == state.currentUserId &&
+        state.isRingingFlow &&
+        callPreferences.dropIfAloneInRingingFlow) {
+      state = state.copyWith(
+        status: CallStatus.disconnected(
+          DisconnectReason.lastParticipantLeft(),
+        ),
+        callParticipants: callParticipants,
+      );
+    }
+    state = state.copyWith(
+      callParticipants: callParticipants,
+    );
+  }
+
   void sfuJoinResponse(
     SfuJoinResponseEvent event,
   ) {
