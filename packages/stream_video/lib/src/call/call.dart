@@ -5,7 +5,6 @@ import '../action/call_action.dart';
 import '../action/external_action.dart';
 import '../action/internal/coordinator_action.dart';
 import '../action/internal/lifecycle_action.dart';
-import '../call_state_manager.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../errors/video_error_composer.dart';
 import '../models/call_credentials.dart';
@@ -161,6 +160,7 @@ class Call {
   late final _cancelables = Cancelables();
 
   final StreamVideo _streamVideo;
+  //FIXME(Deven+Nash): What do we want to do about this?
   final RetryPolicy _retryPolicy;
   final CallPreferences _preferences;
   final CallSessionFactory _sessionFactory;
@@ -246,6 +246,7 @@ class Call {
       // Notify the client about the permission request.
       return onPermissionRequest?.call(event);
     }
+    // FIXME(Deven+Nash)
     _stateManager.dispatch(CoordinatorEventAction(event));
   }
 
@@ -369,17 +370,19 @@ class Call {
     final result = await _awaitIfNeeded();
     if (result.isFailure) {
       _logger.e(() => '[connect] waiting failed: $result');
-      _stateManager.dispatch(SetLifecycleStage.timeout());
+
+      _stateManager.lifecycleCallTimeout(const CallTimeout());
+
       return result;
     }
 
-    _stateManager.dispatch(SetLifecycleStage.connecting(_reconnectAttempt));
+    _stateManager.lifecycleCallConnectingAction(CallConnecting(_reconnectAttempt));
     _logger.v(() => '[connect] joining to coordinator');
     final joinedResult = await _joinIfNeeded();
     if (joinedResult is! Success<CallCredentials>) {
       _logger.e(() => '[connect] joining failed: $joinedResult');
       final error = (joinedResult as Failure).error;
-      _stateManager.dispatch(SetLifecycleStage.connectFailed(error));
+      _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
       return result;
     }
 
@@ -392,7 +395,7 @@ class Call {
       return sessionResult;
     }
     _logger.v(() => '[connect] started session');
-    _stateManager.dispatch(SetLifecycleStage.connected());
+    _stateManager.lifecycleCallConnected(const CallConnected());
     await _applyConnectOptions();
 
     _logger.v(() => '[connect] completed');
@@ -410,13 +413,13 @@ class Call {
     final joinedResult = await _streamVideo.joinCall(
       cid: state.callCid,
       create: true,
-      onReceivedOrCreated: (data) async {
-        _stateManager.dispatch(SetLifecycleStage.created(data.data));
+      onReceivedOrCreated: (call) async {
+        _stateManager.lifecycleCallCreated(CallCreated(call.data));
       },
     );
     if (joinedResult is Success<CallJoinedData>) {
       _logger.v(() => '[joinIfNeeded] completed');
-      _stateManager.dispatch(SetLifecycleStage.joined(joinedResult.data));
+      _stateManager.lifecycleCallJoined(CallJoined(joinedResult.data));
       _credentials = joinedResult.data.credentials;
       return Result.success(joinedResult.data.credentials);
     }
@@ -445,7 +448,7 @@ class Call {
       }),
     );
     _subscriptions.add(_idSessionStats, session.stats.listen(_stats.emit));
-    _stateManager.dispatch(SetLifecycleStage.sessionStart(session.sessionId));
+    _stateManager.lifecycleCallSessionStart(CallSessionStart(session.sessionId));
     final result = await session.start();
     _logger.v(() => '[startSession] completed: $result');
     return result;
