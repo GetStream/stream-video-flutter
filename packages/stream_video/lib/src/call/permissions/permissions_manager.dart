@@ -1,7 +1,6 @@
 import 'package:meta/meta.dart';
 
 import '../../../stream_video.dart';
-import '../../action/call_action.dart';
 import '../../models/call_permission.dart';
 import '../../utils/none.dart';
 import '../state/call_state_notifier.dart';
