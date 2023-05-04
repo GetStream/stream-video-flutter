@@ -192,8 +192,8 @@ class Call {
 
   OnCallPermissionRequest? onPermissionRequest;
 
-  final _status = MutableStateEmitterImpl<_ConnectionStatus>(
-    _ConnectionStatus.disconnected,
+  final _status = MutableStateEmitterImpl<CallStatus>(
+    CallStatus.disconnected(const DisconnectReason.timeout()),
   );
 
   CallSession? _session;
@@ -211,8 +211,7 @@ class Call {
 
   set connectOptions(CallConnectOptions connectOptions) {
     final status = _status.value;
-    if (status == _ConnectionStatus.connecting ||
-        status == _ConnectionStatus.connected) {
+    if (status == CallStatusConnecting() || status == CallStatusConnecting()) {
       _logger.w(
         () => '[setConnectOptions] rejected (connectOptions must be'
             ' set before invoking `connect`)',
@@ -325,7 +324,7 @@ class Call {
       _logger.w(() => '[end] rejected (invalid status): ${state.status}');
       return Result.error('invalid status: ${state.status}');
     }
-    _status.value = _ConnectionStatus.disconnected;
+    _status.value = CallStatusDisconnected(reason: DisconnectReason.ended());
     await _clear('end');
     final result = await _permissionsManager.endCall();
     _stateManager.lifecycleCallEnded(const CallEnded());
@@ -351,31 +350,31 @@ class Call {
 
   Future<Result<None>> connect() async {
     _logger.i(() => '[connect] status: ${_status.value}');
-    if (_status.value == _ConnectionStatus.connected) {
+    if (_status.value == CallStatusConnected()) {
       _logger.w(() => '[connect] rejected (connected)');
       return Result.success(None());
     }
-    if (_status.value == _ConnectionStatus.connecting) {
+    if (_status.value == CallStatusConnecting()) {
       _logger.v(() => '[connect] await "connecting" change');
       final status = await _status.firstWhere(
-        (it) => it != _ConnectionStatus.connecting,
+        (it) => it != CallStatusConnecting(),
         timeLimit: _preferences.connectTimeout,
       );
-      if (status == _ConnectionStatus.connected) {
+      if (status == CallStatusConnected()) {
         return Result.success(None());
       } else {
         return Result.error('original "connect" failed');
       }
     }
     await _setActiveCall(this);
-    _status.value = _ConnectionStatus.connecting;
+    _status.value = CallStatusConnecting();
     final result = await _connect()
         .asCancelable()
         .storeIn(_idConnect, _cancelables)
         .valueOrDefault(Result.error('connect cancelled'));
     if (result.isSuccess) {
       _logger.v(() => '[connect] finished: $result');
-      _status.value = _ConnectionStatus.connected;
+      _status.value = CallStatusConnected();
     } else {
       _logger.e(() => '[connect] failed: $result');
       await disconnect();
@@ -491,15 +490,19 @@ class Call {
   }
 
   Future<void> _reconnect(dynamic reason) async {
-    if (_status.value == _ConnectionStatus.disconnected) {
+    //FIXME: How do we get the UID
+    if (_status.value ==
+        const CallStatusDisconnected(
+          reason: DisconnectReason.rejected(byUserId: ''),
+        )) {
       _logger.w(() => '[reconnect] rejected (disconnected)');
       return;
     }
-    if (_status.value == _ConnectionStatus.connecting) {
+    if (_status.value == CallStatusConnecting()) {
       _logger.w(() => '[reconnect] rejected (connecting)');
       return;
     }
-    _status.value = _ConnectionStatus.connecting;
+    _status.value = CallStatusConnecting();
     _logger.w(() => '[reconnect] >>>>>>>>>>>>>>>> reason: $reason');
     _subscriptions.cancel(_idSessionEvents);
     await _session?.dispose();
@@ -511,7 +514,8 @@ class Call {
       _reconnectAttempt++;
       _stateManager
           .lifecycleCallConnectingAction(CallConnecting(_reconnectAttempt));
-      if (_status.value == _ConnectionStatus.disconnected) {
+      if (_status.value ==
+          const CallStatusDisconnected(reason: DisconnectReason.timeout())) {
         _logger.w(() =>
             '[reconnect] attempt($_reconnectAttempt) rejected (disconnected)');
         _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< rejected');
@@ -548,14 +552,16 @@ class Call {
     _reconnectAttempt = 0;
     if (result.isFailure) {
       _logger.e(() => '[reconnect] <<<<<<<<<<<<<<< failed: $result');
-      _status.value = _ConnectionStatus.disconnected;
+      _status.value = const CallStatusDisconnected(
+        reason: DisconnectReason.timeout(),
+      );
       final error = (result as Failure).error;
       _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
       return;
     }
     _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< completed');
     _stateManager.lifecycleCallConnected(const CallConnected());
-    _status.value = _ConnectionStatus.connected;
+    _status.value = CallStatusConnected();
     await _applyConnectOptions();
     _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< side effects applied');
   }
@@ -591,11 +597,12 @@ class Call {
       _logger.w(() => '[disconnect] rejected (state.status is disconnected)');
       return Result.success(None());
     }
-    if (_status.value == _ConnectionStatus.disconnected) {
+    if (_status.value ==
+        CallStatusDisconnected(reason: DisconnectReason.ended())) {
       _logger.w(() => '[disconnect] rejected (status is disconnected)');
       return Result.success(None());
     }
-    _status.value = _ConnectionStatus.disconnected;
+    _status.value = CallStatusDisconnected(reason: DisconnectReason.ended());
     await _clear('disconnect');
     _stateManager.lifecycleCallDisconnected(const CallDisconnected());
     _logger.v(() => '[disconnect] finished');
@@ -604,7 +611,7 @@ class Call {
 
   Future<void> _clear(String src) async {
     _logger.d(() => '[clear] src: $src');
-    _status.value = _ConnectionStatus.disconnected;
+    _status.value = CallStatusDisconnected(reason: DisconnectReason.ended());
     _subscriptions.cancelAll();
     _cancelables.cancelAll();
     await _session?.dispose();
@@ -1133,17 +1140,5 @@ extension on CallStateNotifier {
       lifecycleUpdateUserId(SetUserId(currentUserId));
     }
     return Result.success(None());
-  }
-}
-
-@Deprecated('Rely on CallStatus')
-enum _ConnectionStatus {
-  disconnected,
-  connecting,
-  connected;
-
-  @override
-  String toString() {
-    return name;
   }
 }
