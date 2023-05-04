@@ -19,6 +19,7 @@ import '../../token/token.dart';
 import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
+import '../../utils/standard.dart';
 import '../coordinator_client.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_inputs.dart' as inputs;
@@ -27,6 +28,8 @@ import '../models/coordinator_models.dart';
 import 'coordinator_ws_open_api.dart';
 import 'open_api_extensions.dart';
 import 'open_api_mapper_extensions.dart';
+
+const _idEvents = 1;
 
 /// An accessor that allows us to communicate with the API around video calls.
 class CoordinatorClientOpenApi extends CoordinatorClient {
@@ -48,8 +51,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   final TokenManager tokenManager;
   final RetryPolicy retryPolicy;
 
-  String? userId;
-
   final open.ApiClient _apiClient;
   late final videoApi = open.VideoCallsApi(_apiClient);
   late final eventsApi = open.EventsApi(_apiClient);
@@ -63,54 +64,97 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   SharedEmitter<CoordinatorEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
 
+  UserInfo? _user;
   CoordinatorWebSocketOpenApi? _ws;
   StreamSubscription<CoordinatorEvent>? _wsSubscription;
 
   @override
-  Future<Result<None>> onUserLogin(UserInfo user) async {
-    try {
-      _logger.d(() => '[onUserLogin] user: $user');
-      userId = user.id;
-      final ws = CoordinatorWebSocketOpenApi(
-        wsUrl,
-        apiKey: apiKey,
-        userInfo: user,
-        tokenManager: tokenManager,
-        retryPolicy: retryPolicy,
+  Future<Result<None>> connectUser(UserInfo user) async {
+    _logger.d(() => '[connectUser] user: $user');
+    if (_user != null) {
+      _logger.w(() => '[connectUser] rejected (another user in use): $_user');
+      return Result.error(
+        'Another user is in use, please call "disconnectUser" first',
       );
-      _ws = ws;
-      _wsSubscription = ws.events.listen((event) {
-        _logger.v(() => '[onWsEvent] event.type: ${event.runtimeType}');
+    }
+    _user = user;
+    _ws = _createWebSocket(user).also((ws) {
+      _wsSubscription = ws.events.listen(_events.emit);
+    });
+    return openConnection();
+  }
 
-        _events.emit(event);
-      });
-
+  @override
+  Future<Result<None>> openConnection() async {
+    try {
+      final ws = _ws;
+      if (ws == null) {
+        _logger.w(() => '[openConnection] rejected (no WS)');
+        return Result.error('WS is not initialized, call "connectUser" first');
+      }
+      if (!ws.isDisconnected) {
+        _logger.w(() => '[openConnection] rejected (not closed)');
+        return Result.error('WS is not closed');
+      }
+      _logger.i(() => '[openConnection] no args');
       await ws.connect();
       return Result.success(None());
     } catch (e, stk) {
-      _logger.e(() => '[onUserLogin] failed(${user.id}): $e');
+      _logger.e(() => '[openConnection] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
   @override
-  Future<Result<None>> onUserLogout() async {
-    _logger.d(() => '[onUserLogout] userId: $userId');
-    if (_ws == null) {
-      _logger.w(() => '[onUserLogout] rejected (ws is null)');
-      return Result.success(None());
-    }
+  Future<Result<None>> closeConnection() async {
     try {
-      userId = null;
-      await _ws?.disconnect();
-      _ws = null;
-      await _wsSubscription?.cancel();
-      _wsSubscription = null;
+      final ws = _ws;
+      if (ws == null) {
+        _logger.w(() => '[openConnection] rejected (no WS)');
+        return Result.error('WS is not initialized');
+      }
+      if (ws.isDisconnected) {
+        _logger.w(() => '[closeConnection] rejected (already closed)');
+        return Result.error('WS is already closed');
+      }
+      _logger.i(() => '[closeConnection] no args');
+      await ws.disconnect();
       return Result.success(None());
     } catch (e, stk) {
-      _logger.e(() => '[onUserLogout] failed: $e');
+      _logger.e(() => '[closeConnection] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
     }
+  }
+
+  @override
+  Future<Result<None>> disconnectUser() async {
+    _logger.d(() => '[disconnectUser] userId: ${_user?.id}');
+    if (_user == null) {
+      _logger.w(() => '[disconnectUser] rejected (user is null)');
+      return Result.success(None());
+    }
+    _user = null;
+
+    final closedResult = await closeConnection();
+    return closedResult.when(
+      success: (_) async {
+        _ws = null;
+        await _wsSubscription?.cancel();
+        _wsSubscription = null;
+        return Result.success(None());
+      },
+      failure: Result.failure,
+    );
+  }
+
+  CoordinatorWebSocketOpenApi _createWebSocket(UserInfo user) {
+    return CoordinatorWebSocketOpenApi(
+      wsUrl,
+      apiKey: apiKey,
+      userInfo: user,
+      tokenManager: tokenManager,
+      retryPolicy: retryPolicy,
+    );
   }
 
   /// Create a new Device used to receive Push Notifications.

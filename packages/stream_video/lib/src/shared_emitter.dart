@@ -21,6 +21,8 @@ abstract class SharedEmitter<T> {
     void Function()? onDone,
     bool? cancelOnError,
   });
+
+  Stream<T> asStream();
 }
 
 abstract class MutableSharedEmitter<T> extends SharedEmitter<T> {
@@ -84,4 +86,7 @@ class MutableSharedEmitterImpl<T> extends MutableSharedEmitter<T> {
       cancelOnError: cancelOnError,
     );
   }
+
+  @override
+  Stream<T> asStream() => _shared;
 }

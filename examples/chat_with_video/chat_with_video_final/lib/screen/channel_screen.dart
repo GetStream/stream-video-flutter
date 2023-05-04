@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'attachment/call_attachment.dart';
 
@@ -62,16 +61,6 @@ class ChannelScreen extends StatelessWidget {
     final currentUser = StreamChat.of(context).currentUser;
     final channel = StreamChannel.of(context).channel;
 
-    final callCid = StreamCallCid.from(
-      type: "default",
-      id: "call${Random().nextInt(10000)}",
-    );
-    await StreamVideo.instance.getOrCreateCall(
-      cid: callCid,
-      ringing: false,
-      participantIds: [],
-    );
-
     channel.sendMessage(
       Message(
         attachments: [
@@ -80,7 +69,8 @@ class ChannelScreen extends StatelessWidget {
             authorName: currentUser?.name ?? "",
             uploadState: UploadState.success(),
             extraData: {
-              "callCid": callCid.value,
+              'callType': 'default',
+              'callId': 'call${Random().nextInt(10000)}',
             },
           )
         ],
