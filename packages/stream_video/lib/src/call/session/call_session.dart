@@ -131,7 +131,7 @@ class CallSession extends Disposable {
         ..onStatsReceived = _onStatsReceived;
 
       _logger.v(() => '[start] completed');
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[start] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -160,7 +160,7 @@ class CallSession extends Disposable {
     }
 
     final result = await rtcManager.publishTrack(track);
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
   RtcTrack? getTrack(String trackIdPrefix, SfuTrackType trackType) {
@@ -516,7 +516,7 @@ class CallSession extends Disposable {
     }
 
     final result = await rtcManager.setCameraEnabled(enabled: enabled);
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
   Future<Result<None>> setMicrophoneEnabled(bool enabled) async {
@@ -526,7 +526,7 @@ class CallSession extends Disposable {
     }
 
     final result = await rtcManager.setMicrophoneEnabled(enabled: enabled);
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
   Future<Result<None>> setAudioInputDevice(RtcMediaDevice device) async {
@@ -536,7 +536,7 @@ class CallSession extends Disposable {
     }
 
     final result = await rtcManager.setAudioInputDevice(device: device);
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
   Future<Result<None>> setScreenShareEnabled(bool enabled) async {
@@ -546,7 +546,7 @@ class CallSession extends Disposable {
     }
 
     final result = await rtcManager.setScreenShareEnabled(enabled: enabled);
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
   Future<Result<None>> flipCamera() async {
@@ -556,7 +556,7 @@ class CallSession extends Disposable {
     }
 
     final result = await rtcManager.flipCamera();
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
   Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) async {
@@ -566,7 +566,7 @@ class CallSession extends Disposable {
     }
 
     final result = await rtcManager.setVideoInputDevice(device: device);
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
   Future<Result<None>> setCameraPosition(CameraPosition position) async {
@@ -576,7 +576,7 @@ class CallSession extends Disposable {
     }
 
     final result = await rtcManager.setCameraPosition(cameraPosition: position);
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
   @override
@@ -632,7 +632,7 @@ extension on SfuClient {
           final error = it.data.error;
           return Result.error('${error.code} - ${error.message}');
         }
-        return Result.success(None());
+        return const Result.success(none);
       },
     );
   }

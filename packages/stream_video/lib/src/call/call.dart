@@ -339,7 +339,7 @@ class Call {
     final joinedResult = await _joinIfNeeded();
     if (joinedResult is Success<CallCredentials>) {
       _logger.v(() => '[join] completed');
-      return Result.success(None());
+      return const Result.success(none);
     } else {
       final failedResult = joinedResult as Failure;
       _logger.e(() => '[join] failed: $failedResult');
@@ -353,7 +353,7 @@ class Call {
     _logger.i(() => '[connect] status: ${_status.value}');
     if (_status.value == _ConnectionStatus.connected) {
       _logger.w(() => '[connect] rejected (connected)');
-      return Result.success(None());
+      return const Result.success(none);
     }
     if (_status.value == _ConnectionStatus.connecting) {
       _logger.v(() => '[connect] await "connecting" change');
@@ -362,7 +362,7 @@ class Call {
         timeLimit: _preferences.connectTimeout,
       );
       if (status == _ConnectionStatus.connected) {
-        return Result.success(None());
+        return const Result.success(none);
       } else {
         return Result.error('original "connect" failed');
       }
@@ -433,7 +433,7 @@ class Call {
     await _applyConnectOptions();
 
     _logger.v(() => '[connect] completed');
-    return Result.success(None());
+    return const Result.success(none);
   }
 
   Future<Result<CallCredentials>> _joinIfNeeded() async {
@@ -581,7 +581,7 @@ class Call {
       _logger.v(() => '[awaitIfNeeded] return cancelable');
       return futureResult.asCancelable().storeIn(_idAwait, _cancelables).value;
     }
-    return Result.success(None());
+    return const Result.success(none);
   }
 
   Future<Result<None>> disconnect() async {
@@ -589,17 +589,17 @@ class Call {
     _logger.i(() => '[disconnect] ${_status.value}; state: $state');
     if (state.status.isDisconnected) {
       _logger.w(() => '[disconnect] rejected (state.status is disconnected)');
-      return Result.success(None());
+      return const Result.success(none);
     }
     if (_status.value == _ConnectionStatus.disconnected) {
       _logger.w(() => '[disconnect] rejected (status is disconnected)');
-      return Result.success(None());
+      return const Result.success(none);
     }
     _status.value = _ConnectionStatus.disconnected;
     await _clear('disconnect');
     _stateManager.lifecycleCallDisconnected(const CallDisconnected());
     _logger.v(() => '[disconnect] finished');
-    return Result.success(None());
+    return const Result.success(none);
   }
 
   Future<void> _clear(String src) async {
@@ -699,7 +699,7 @@ class Call {
       timeLimit: timeLimit,
     ).then((value) {
       _logger.i(() => '[awaitIncomingToBeAccepted] completed');
-      return Result.success(None());
+      return const Result.success(none);
     }).onError((e, stk) {
       _logger.e(() => '[awaitIncomingToBeAccepted] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -715,7 +715,7 @@ class Call {
       timeLimit: timeLimit,
     ).then((value) {
       _logger.i(() => '[awaitOutgoingToBeAccepted] completed');
-      return Result.success(None());
+      return const Result.success(none);
     }).onError((e, stk) {
       _logger.e(() => '[awaitOutgoingToBeAccepted] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -730,7 +730,7 @@ class Call {
       timeLimit: const Duration(seconds: 60),
     ).then((value) {
       _logger.e(() => '[awaitCallToBeJoined] completed');
-      return Result.success(None());
+      return const Result.success(none);
     }).onError((e, stk) {
       _logger.e(() => '[awaitCallToBeJoined] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -1132,7 +1132,7 @@ extension on CallStateNotifier {
     if (stateUserId.isEmpty) {
       lifecycleUpdateUserId(SetUserId(currentUserId));
     }
-    return Result.success(None());
+    return const Result.success(none);
   }
 }
 

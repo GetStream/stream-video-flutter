@@ -100,7 +100,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       }
       _logger.i(() => '[openConnection] no args');
       await ws.connect();
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[openConnection] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -121,7 +121,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       }
       _logger.i(() => '[closeConnection] no args');
       await ws.disconnect();
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[closeConnection] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -133,7 +133,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     _logger.d(() => '[disconnectUser] userId: ${_user?.id}');
     if (_user == null) {
       _logger.w(() => '[disconnectUser] rejected (user is null)');
-      return Result.success(None());
+      return const Result.success(none);
     }
     _user = null;
 
@@ -143,7 +143,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         _ws = null;
         await _wsSubscription?.cancel();
         _wsSubscription = null;
-        return Result.success(None());
+        return const Result.success(none);
       },
       failure: Result.failure,
     );
@@ -324,7 +324,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('sendUserEvent result is null');
       }
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[sendUserEvent] failed: $e; $stk');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -350,7 +350,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('sendCustomEvent result is null');
       }
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[sendCustomEvent] failed: $e; $stk');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -363,7 +363,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     try {
       // TODO
 
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -384,7 +384,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('requestPermissions result is null');
       }
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -407,7 +407,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('updateUserPermissions result is null');
       }
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -417,7 +417,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<None>> startRecording(StreamCallCid callCid) async {
     try {
       await recordingApi.startRecording(callCid.type, callCid.id);
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -427,7 +427,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<None>> stopRecording(StreamCallCid callCid) async {
     try {
       await recordingApi.stopRecording(callCid.type, callCid.id);
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -437,7 +437,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<None>> startBroadcasting(StreamCallCid callCid) async {
     try {
       await livestreamingApi.startBroadcasting(callCid.type, callCid.id);
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -447,7 +447,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<None>> stopBroadcasting(StreamCallCid callCid) async {
     try {
       await livestreamingApi.stopBroadcasting(callCid.type, callCid.id);
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -535,7 +535,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('blockUser result is null');
       }
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -552,7 +552,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('unblockUser result is null');
       }
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -565,7 +565,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('endCall result is null');
       }
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -617,7 +617,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return Result.error('stopLive result is null');
       }
 
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }

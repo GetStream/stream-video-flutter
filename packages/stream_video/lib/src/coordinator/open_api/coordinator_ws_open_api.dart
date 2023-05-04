@@ -89,7 +89,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     );
     if (connectionState == ConnectionState.disconnected) {
       _logger.w(() => '[disconnect] rejected (already disconnected)');
-      return Result.success(None());
+      return const Result.success(none);
     }
     connectionState = ConnectionState.disconnected;
 
