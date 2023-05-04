@@ -1,3 +1,4 @@
+import '../lifecycle/lifecycle_state.dart';
 import '../models/call_cid.dart';
 import '../models/call_device.dart';
 import '../models/call_metadata.dart';
@@ -14,11 +15,16 @@ import 'models/coordinator_inputs.dart' as inputs;
 import 'models/coordinator_models.dart' as models;
 
 abstract class CoordinatorClient {
+
   SharedEmitter<CoordinatorEvent> get events;
 
-  Future<Result<None>> onUserLogin(UserInfo user);
+  Future<Result<None>> connectUser(UserInfo user);
 
-  Future<Result<None>> onUserLogout();
+  Future<Result<None>> openConnection();
+
+  Future<Result<None>> closeConnection();
+
+  Future<Result<None>> disconnectUser();
 
   Future<Result<CallDevice>> createDevice(
     inputs.CreateDeviceInput input,
