@@ -14,21 +14,29 @@ import 'latency_client_mock.dart';
 
 final _logger = taggedLogger(tag: 'SV:DebounceBufferTest');
 
+class UriFake extends Fake implements Uri {}
+
 Future<void> main() async {
-  const settings =
-      LatencySettings(measurementTimeout: Duration(milliseconds: 400));
+  const settings = LatencySettings(
+    measurementRounds: 3,
+    measurementTimeout: Duration(milliseconds: 400),
+  );
+
   late LatencyService service;
   late LatencyClient client;
 
-  setUp(() {
+  setUpAll(() {
     StreamLog().logger = TestStreamLogger();
     StreamLog().priority = Priority.verbose;
     //_logger.i(() => '[setUp] edges: $edges');
     client = LatencyClientMock();
     service = LatencyService(settings: settings, client: client);
+
+    // Needed for Mocktail to work with Uri.
+    registerFallbackValue(UriFake());
   });
 
-  tearDown(() {
+  tearDownAll(() {
     _logger.i(() => '[tearDown]');
   });
 
@@ -61,14 +69,14 @@ Future<void> main() async {
 
   test(
     'When finished due to request failure, all latencies should be filled with fallback values',
-        () async {
+    () async {
       /* Given */
       const fetchDuration = Duration(milliseconds: 100);
       const edgeCount = 4;
       final measurementCount = edgeCount * settings.measurementRounds;
       final edges = _generateEdges(count: edgeCount);
       when(
-            () => client.fetch(any()),
+        () => client.fetch(any()),
       ).thenThrow(TestFailure('request failed'));
 
       /* When */
@@ -106,12 +114,11 @@ Future<void> main() async {
       /* Then */
       expect(latencies.flattened.length, measurementCount);
 
-      verify(() => client.fetch(any()))
-          .called(measurementCount);
+      verify(() => client.fetch(any())).called(measurementCount);
 
       for (final edgeLatencies in latencies) {
         final lastIndex = edgeLatencies.length - 1;
-        for (var index = 0; index< edgeLatencies.length; index++) {
+        for (var index = 0; index < edgeLatencies.length; index++) {
           if (index == lastIndex) {
             expect(edgeLatencies[index], double.maxFinite);
           } else {
