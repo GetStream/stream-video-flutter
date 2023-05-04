@@ -7,6 +7,8 @@ import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'coordinator/retry/coordinator_client_retry.dart';
 import 'errors/video_error_composer.dart';
 import 'internal/_instance_holder.dart';
+import 'latency/latency_service.dart';
+import 'latency/latency_settings.dart';
 import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
@@ -47,7 +49,7 @@ class StreamVideo {
     String apiKey, {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
-    int latencyMeasurementRounds = 3,
+    LatencySettings latencySettings = const LatencySettings(),
     RetryPolicy retryPolicy = const RetryPolicy(),
     SdpPolicy sdpPolicy = _defaultSdpPolicy,
   }) {
@@ -55,7 +57,7 @@ class StreamVideo {
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
-      latencyMeasurementRounds: latencyMeasurementRounds,
+      latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
     );
@@ -65,13 +67,14 @@ class StreamVideo {
     this.apiKey, {
     required this.coordinatorRpcUrl,
     required this.coordinatorWsUrl,
-    required this.latencyMeasurementRounds,
+    required this.latencySettings,
     required this.retryPolicy,
     required this.sdpPolicy,
   }) {
     _client = buildCoordinatorClient(
       apiKey: apiKey,
       tokenManager: _tokenManager,
+      latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       rpcUrl: coordinatorRpcUrl,
       wsUrl: coordinatorWsUrl,
@@ -84,18 +87,18 @@ class StreamVideo {
     String apiKey, {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
-    int latencyMeasurementRounds = 3,
+    LatencySettings latencySettings = const LatencySettings(),
     RetryPolicy retryPolicy = const RetryPolicy(),
+    SdpPolicy sdpPolicy = _defaultSdpPolicy,
     Priority logPriority = Priority.none,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
-    SdpPolicy sdpPolicy = _defaultSdpPolicy,
   }) {
     _setupLogger(logPriority, logHandlerFunction);
     return _instanceHolder.init(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
-      latencyMeasurementRounds: latencyMeasurementRounds,
+      latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
     );
@@ -126,7 +129,7 @@ class StreamVideo {
   final String apiKey;
   final String coordinatorRpcUrl;
   final String coordinatorWsUrl;
-  final int latencyMeasurementRounds;
+  final LatencySettings latencySettings;
 
   /// Returns the current [RetryPolicy].
   final RetryPolicy retryPolicy;
@@ -346,6 +349,7 @@ CoordinatorClient buildCoordinatorClient({
   required String apiKey,
   required TokenManager tokenManager,
   required RetryPolicy retryPolicy,
+  required LatencySettings latencySettings
 }) {
   streamLog.i(_tag, () => '[buildCoordinatorClient] rpcUrl: $rpcUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] wsUrl: $wsUrl');
@@ -355,6 +359,7 @@ CoordinatorClient buildCoordinatorClient({
     delegate: CoordinatorClientOpenApi(
       apiKey: apiKey,
       tokenManager: tokenManager,
+      latencyService: LatencyService(settings: latencySettings),
       retryPolicy: retryPolicy,
       rpcUrl: rpcUrl,
       wsUrl: wsUrl,

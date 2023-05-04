@@ -808,8 +808,8 @@ class Call {
       edges: joinResult.data.edges,
     );
     if (edgeResult is! Success<SfuServerSelected>) {
-      _logger.e(() => '[joinCall] edge finding failed: $joinResult');
-      return joinResult as Failure;
+      _logger.e(() => '[joinCall] edge finding failed: $edgeResult');
+      return edgeResult as Failure;
     }
     final joined = CallJoinedData(
       callCid: callCid,
