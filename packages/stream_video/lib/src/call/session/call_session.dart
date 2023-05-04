@@ -9,8 +9,6 @@ import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
 import '../../action/internal/rtc_action.dart';
-import '../../action/internal/sfu_action.dart';
-import '../../call_state_manager.dart';
 import '../../disposable.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
@@ -178,7 +176,29 @@ class CallSession extends Disposable {
     _logger.d(() => '[apply] action: $action');
     final result = await _apply(action);
     if (result.isSuccess) {
-      stateManager.dispatch(action);
+      if (action is SetCameraEnabled) {
+        stateManager.participantSetCameraEnabled(action);
+      } else if (action is SetMicrophoneEnabled) {
+        stateManager.participantSetMicrophoneEnabled(action);
+      } else if (action is SetAudioInputDevice) {
+        stateManager.participantSetAudioInputDevice(action);
+      } else if (action is SetScreenShareEnabled) {
+        stateManager.participantSetScreenShareEnabled(action);
+      } else if (action is FlipCamera) {
+        stateManager.participantFlipCamera(action);
+      } else if (action is SetVideoInputDevice) {
+        stateManager.participantSetVideoInputDevice(action);
+      } else if (action is SetCameraPosition) {
+        stateManager.participantUpdateCameraPosition(action);
+      } else if (action is UpdateSubscriptions) {
+        stateManager.participantUpdateSubscriptions(action);
+      } else if (action is UpdateSubscription) {
+        stateManager.participantUpdateSubscription(action);
+      } else if (action is RemoveSubscription) {
+        stateManager.participantRemoveSubscription(action);
+      } else if (action is SetAudioOutputDevice) {
+        stateManager.participantSetAudioOutputDevice(action);
+      }
     }
     return result;
   }
@@ -229,7 +249,23 @@ class CallSession extends Disposable {
       await _onTrackUnpublished(event);
     }
 
-    return stateManager.dispatch(SfuEventAction(event));
+    if (event is SfuJoinResponseEvent) {
+      stateManager.sfuJoinResponse(event);
+    } else if (event is SfuParticipantJoinedEvent) {
+      stateManager.sfuParticipantJoined(event);
+    } else if (event is SfuParticipantLeftEvent) {
+      stateManager.sfuParticipantLeft(event);
+    } else if (event is SfuConnectionQualityChangedEvent) {
+      stateManager.sfuConnectionQualityChanged(event);
+    } else if (event is SfuAudioLevelChangedEvent) {
+      stateManager.sfuUpdateAudioLevelChanged(event);
+    } else if (event is SfuTrackPublishedEvent) {
+      stateManager.sfuTrackPublished(event);
+    } else if (event is SfuTrackUnpublishedEvent) {
+      stateManager.sfuTrackUnpublished(event);
+    } else if (event is SfuDominantSpeakerChangedEvent) {
+      stateManager.sfuDominantSpeakerChanged(event);
+    }
   }
 
   Future<void> _onParticipantLeft(SfuParticipantLeftEvent event) async {

@@ -2,12 +2,11 @@ import 'dart:async';
 
 import '../../stream_video.dart';
 import '../action/call_action.dart';
-import '../action/external_action.dart';
-import '../action/internal/coordinator_action.dart';
 import '../action/internal/lifecycle_action.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../errors/video_error_composer.dart';
 import '../models/call_credentials.dart';
+import '../models/call_permission.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
@@ -142,7 +141,8 @@ class Call {
     streamLog.i(_tag, () => '<init> state: ${stateManager.callState}');
     _subscriptions.add(
       _idState,
-      stateManager.callStateStream.listen((state) async => _onStateChanged(state)),
+      stateManager.callStateStream
+          .listen((state) async => _onStateChanged(state)),
     );
     _subscriptions.add(
       _idCoordEvents,
@@ -246,8 +246,24 @@ class Call {
       // Notify the client about the permission request.
       return onPermissionRequest?.call(event);
     }
-    // FIXME(Deven+Nash)
-    _stateManager.dispatch(CoordinatorEventAction(event));
+
+    if (event is CoordinatorCallRejectedEvent) {
+      return _stateManager.coordinatorUpdateCallRejected(event);
+    } else if (event is CoordinatorCallAcceptedEvent) {
+      return _stateManager.coordinatorUpdateCallAccepted(event);
+    } else if (event is CoordinatorCallEndedEvent) {
+      return _stateManager.coordinatorCallEnded(event);
+    } else if (event is CoordinatorCallPermissionsUpdatedEvent) {
+      return _stateManager.coordinatorCallPermissionsUpdated(event);
+    } else if (event is CoordinatorCallRecordingStartedEvent) {
+      return _stateManager.coordinatorCallRecordingStarted(event);
+    } else if (event is CoordinatorCallRecordingStoppedEvent) {
+      return _stateManager.coordinatorCallRecordingStopped(event);
+    } else if (event is CoordinatorCallBroadcastingStartedEvent) {
+      return _stateManager.coordinatorCallBroadcastingStarted(event);
+    } else if (event is CoordinatorCallBroadcastingStoppedEvent) {
+      return _stateManager.coordinatorCallBroadcastingStopped(event);
+    }
   }
 
   Future<Result<None>> accept() async {
@@ -376,7 +392,8 @@ class Call {
       return result;
     }
 
-    _stateManager.lifecycleCallConnectingAction(CallConnecting(_reconnectAttempt));
+    _stateManager
+        .lifecycleCallConnectingAction(CallConnecting(_reconnectAttempt));
     _logger.v(() => '[connect] joining to coordinator');
     final joinedResult = await _joinIfNeeded();
     if (joinedResult is! Success<CallCredentials>) {
@@ -448,7 +465,8 @@ class Call {
       }),
     );
     _subscriptions.add(_idSessionStats, session.stats.listen(_stats.emit));
-    _stateManager.lifecycleCallSessionStart(CallSessionStart(session.sessionId));
+    _stateManager
+        .lifecycleCallSessionStart(CallSessionStart(session.sessionId));
     final result = await session.start();
     _logger.v(() => '[startSession] completed: $result');
     return result;
@@ -481,7 +499,8 @@ class Call {
     final startTime = DateTime.now().toUtc().millisecondsSinceEpoch;
     while (true) {
       _reconnectAttempt++;
-      _stateManager.lifecycleCallConnectingAction(CallConnecting(_reconnectAttempt));
+      _stateManager
+          .lifecycleCallConnectingAction(CallConnecting(_reconnectAttempt));
       if (_status.value == _ConnectionStatus.disconnected) {
         _logger.w(() =>
             '[reconnect] attempt($_reconnectAttempt) rejected (disconnected)');
@@ -568,7 +587,7 @@ class Call {
     }
     _status.value = _ConnectionStatus.disconnected;
     await _clear('disconnect');
-    _stateManager.lifecycleCallDisconnected(CallDisconnected());
+    _stateManager.lifecycleCallDisconnected(const CallDisconnected());
     _logger.v(() => '[disconnect] finished');
     return Result.success(None());
   }
@@ -600,24 +619,24 @@ class Call {
     return [...?_session?.getTracks(trackIdPrefix)];
   }
 
-  Future<Result<None>> apply(StreamExternalAction action) async {
-    _logger.d(() => '[apply] action: $action');
-    final result = await _apply(action);
-    _logger.v(() => '[apply] result: $result');
-    if (result.isSuccess) {
-      _stateManager.dispatch(action);
-    }
-    return result;
-  }
-
-  Future<Result<None>> _apply(StreamExternalAction action) async {
-    if (action is CallAction) {
-      return _permissionsManager.apply(action);
-    } else if (action is ParticipantAction) {
-      return _session.apply(action);
-    }
-    return Result.error('unsupported action: $action');
-  }
+  // Future<Result<None>> apply(StreamExternalAction action) async {
+  //   _logger.d(() => '[apply] action: $action');
+  //   final result = await _apply(action);
+  //   _logger.v(() => '[apply] result: $result');
+  //   if (result.isSuccess) {
+  //     _stateManager.dispatch(action);
+  //   }
+  //   return result;
+  // }
+  //
+  // Future<Result<None>> _apply(StreamExternalAction action) async {
+  //   if (action is CallAction) {
+  //     return _permissionsManager.apply(action);
+  //   } else if (action is ParticipantAction) {
+  //     return _session.apply(action);
+  //   }
+  //   return Result.error('unsupported action: $action');
+  // }
 
   Future<void> _applyConnectOptions() async {
     _logger.d(() => '[applyConnectOptions] connectOptions: $_connectOptions');
@@ -661,11 +680,27 @@ class Call {
     final result = await session.setLocalTrack(track);
     _logger.v(() => '[setLocalTrack] completed: $result');
     if (result.isSuccess) {
-      final action = track.composeControlAction();
-      _logger.v(() => '[setLocalTrack] composed action: $action');
-      if (action != null) {
-        _stateManager.dispatch(action);
+      final mediaConstraints = track.mediaConstraints;
+      if (mediaConstraints is AudioConstraints) {
+        const action = SetMicrophoneEnabled(enabled: true);
+        _logger.v(() => '[setLocalTrack] composed action: $action');
+        await setMicrophoneEnabled(enabled: true);
+      } else if (mediaConstraints is CameraConstraints) {
+        const action = SetCameraEnabled(enabled: true);
+        _logger.v(() => '[setLocalTrack] composed action: $action');
+        await setCameraEnabled(enabled: true);
+      } else if (mediaConstraints is ScreenShareConstraints) {
+        const action = SetScreenShareEnabled(enabled: true);
+        _logger.v(() => '[setLocalTrack] composed action: $action');
+        await setScreenShareEnabled(enabled: true);
+      } else {
+        streamLog.e(
+            _tag, () => '[composeControlAction] failed: $mediaConstraints');
       }
+
+      // if (action != null) {
+      //   _stateManager.dispatch(action);
+      // }
     }
     return result;
   }
@@ -719,6 +754,154 @@ class Call {
 
   Future<Result<None>> inviteUsers(List<UserInfo> users) {
     return _streamVideo.inviteUsers(callCid: callCid.value, users: users);
+  }
+
+  Future<Result<None>> requestPermissions(List<CallPermission> permissions) {
+    return _permissionsManager.apply(RequestPermissions(permissions));
+  }
+
+  Future<Result<None>> grantPermissions({
+    required String userId,
+    List<CallPermission> permissions = const [],
+  }) {
+    return _permissionsManager
+        .apply(GrantPermissions(userId: userId, permissions: permissions));
+  }
+
+  Future<Result<None>> revokePermissions({
+    required String userId,
+    List<CallPermission> permissions = const [],
+  }) {
+    return _permissionsManager
+        .apply(RevokePermissions(userId: userId, permissions: permissions));
+  }
+
+  Future<Result<None>> blockUser(String userId) {
+    return _permissionsManager.apply(BlockUser(userId: userId));
+  }
+
+  Future<Result<None>> unblockUser(String userId) {
+    return _permissionsManager.apply(UnblockUser(userId: userId));
+  }
+
+  Future<Result<None>> startRecording() {
+    return _permissionsManager.apply(const StartRecording());
+  }
+
+  Future<Result<None>> stopRecording() {
+    return _permissionsManager.apply(const StopRecording());
+  }
+
+  Future<Result<None>> startBroadcasting() {
+    return _permissionsManager.apply(const StartBroadcasting());
+  }
+
+  Future<Result<None>> stopBroadcasting() {
+    return _permissionsManager.apply(const StopBroadcasting());
+  }
+
+  Future<Result<None>> muteUsers(List<String> userIds) {
+    return _permissionsManager.apply(MuteUsers(userIds: userIds));
+  }
+
+  Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) {
+    return _session.apply(
+      LocalParticipantAction.setCameraPosition(cameraPosition: cameraPosition),
+    );
+  }
+
+  Future<Result<None>> flipCamera() {
+    return _session.apply(const LocalParticipantAction.flipCamera());
+  }
+
+  Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) {
+    return _session
+        .apply(LocalParticipantAction.setVideoInputDevice(device: device));
+  }
+
+  Future<Result<None>> setCameraEnabled({required bool enabled}) {
+    return _session
+        .apply(LocalParticipantAction.setCameraEnabled(enabled: enabled));
+  }
+
+  Future<Result<None>> setMicrophoneEnabled({required bool enabled}) {
+    return _session
+        .apply(LocalParticipantAction.setMicrophoneEnabled(enabled: enabled));
+  }
+
+  Future<Result<None>> setScreenShareEnabled({required bool enabled}) {
+    return _session.apply(
+      LocalParticipantAction.setScreenShareEnabled(enabled: enabled),
+    );
+  }
+
+  Future<Result<None>> setAudioInputDevice(RtcMediaDevice device) {
+    return _session
+        .apply(LocalParticipantAction.setAudioInputDevice(device: device));
+  }
+
+  Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) {
+    return _session
+        .apply(LocalParticipantAction.setAudioOutputDevice(device: device));
+  }
+
+  Future<Result<None>> setSubscriptions(List<SetSubscription> actions) {
+    return _session.apply(RemoteParticipantAction.setSubscriptions(actions));
+  }
+
+  Future<Result<None>> updateSubscriptions(List<SubscriptionAction> actions) {
+    return _session.apply(RemoteParticipantAction.updateSubscriptions(actions));
+  }
+
+  Future<Result<None>> setSubscription({
+    required String userId,
+    required String sessionId,
+    required String trackIdPrefix,
+    required Map<SfuTrackTypeVideo, RtcVideoDimension> trackTypes,
+  }) {
+    return _session.apply(
+      RemoteParticipantAction.setSubscription(
+        userId: userId,
+        sessionId: sessionId,
+        trackIdPrefix: trackIdPrefix,
+        trackTypes: trackTypes,
+      ),
+    );
+  }
+
+  Future<Result<None>> updateSubscription({
+    required String userId,
+    required String sessionId,
+    required String trackIdPrefix,
+    required SfuTrackTypeVideo trackType,
+    RtcVideoDimension? videoDimension,
+  }) {
+    return _session.apply(
+      RemoteParticipantAction.updateSubscription(
+        userId: userId,
+        sessionId: sessionId,
+        trackIdPrefix: trackIdPrefix,
+        trackType: trackType,
+        videoDimension: videoDimension,
+      ),
+    );
+  }
+
+  Future<Result<None>> removeSubscription({
+    required String userId,
+    required String sessionId,
+    required String trackIdPrefix,
+    required SfuTrackTypeVideo trackType,
+    RtcVideoDimension? videoDimension,
+  }) {
+    return _session.apply(
+      RemoteParticipantAction.removeSubscription(
+        userId: userId,
+        sessionId: sessionId,
+        trackIdPrefix: trackIdPrefix,
+        trackType: trackType,
+      ),
+    );
   }
 }
 
