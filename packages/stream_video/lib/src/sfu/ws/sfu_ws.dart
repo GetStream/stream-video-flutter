@@ -164,7 +164,7 @@ class SfuWebSocket extends StreamWebSocket
     );
     if (connectionState == ConnectionState.disconnected) {
       _logger.w(() => '[disconnect] rejected (already disconnected)');
-      return Result.success(None());
+      return const Result.success(none);
     }
 
     // Stop sending keep alive messages.

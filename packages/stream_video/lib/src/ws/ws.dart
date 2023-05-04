@@ -49,7 +49,7 @@ abstract class StreamWebSocket {
     );
     try {
       if (_connectRequestInProgress) {
-        return Result.success(None());
+        return const Result.success(none);
       }
       _connectRequestInProgress = true;
 
@@ -63,7 +63,7 @@ abstract class StreamWebSocket {
         onError: onError,
         onDone: () => onClose(_ws?.closeCode, _ws?.closeReason),
       );
-      return Result.success(None());
+      return const Result.success(none);
     } catch (error, stackTrace) {
       _logger.e(() => '[connect] failed: $error');
       onError(error, stackTrace);
@@ -103,7 +103,7 @@ abstract class StreamWebSocket {
       _ws = null;
       await _wsSubscription?.cancel();
       _wsSubscription = null;
-      return Result.success(None());
+      return const Result.success(none);
     } catch (error, stackTrace) {
       _logger.e(() => '[disconnect] failed: $error');
       return Result.failure(VideoErrors.compose(error, stackTrace));

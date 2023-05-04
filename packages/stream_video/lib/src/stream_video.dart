@@ -239,7 +239,7 @@ class StreamVideo {
     _logger.i(() => '[disconnectUser] currentUser.id: ${currentUser?.id}');
     if (currentUser == null) {
       _logger.w(() => '[disconnectUser] rejected (no user): $currentUser');
-      return Result.success(None());
+      return const Result.success(none);
     }
     try {
       await _client.disconnectUser();
@@ -249,7 +249,7 @@ class StreamVideo {
       // Resetting the state.
       await _state.close();
       _state = _StreamVideoState();
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[disconnectUser] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -343,14 +343,13 @@ class _StreamVideoState {
   }
 }
 
-CoordinatorClient buildCoordinatorClient({
-  required String rpcUrl,
-  required String wsUrl,
-  required String apiKey,
-  required TokenManager tokenManager,
-  required RetryPolicy retryPolicy,
-  required LatencySettings latencySettings
-}) {
+CoordinatorClient buildCoordinatorClient(
+    {required String rpcUrl,
+    required String wsUrl,
+    required String apiKey,
+    required TokenManager tokenManager,
+    required RetryPolicy retryPolicy,
+    required LatencySettings latencySettings}) {
   streamLog.i(_tag, () => '[buildCoordinatorClient] rpcUrl: $rpcUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] wsUrl: $wsUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] apiKey: $apiKey');

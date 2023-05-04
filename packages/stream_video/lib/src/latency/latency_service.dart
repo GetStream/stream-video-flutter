@@ -100,6 +100,6 @@ class LatencyClient {
   const LatencyClient();
 
   Future<None> fetch(Uri url) {
-    return http.get(url).then((_) => None());
+    return http.get(url).then((_) => none);
   }
 }

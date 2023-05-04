@@ -70,10 +70,10 @@ Future<void> main() async {
       )).thenAnswer((_) => Future.value(Result.success(callReceivedOrCreated)));
   when(() => client.sendUserEvent(
         EventInput(callCid: streamCallCid, eventType: EventTypeInput.accepted),
-      )).thenAnswer((invocation) => Future.value(Result.success(None())));
+      )).thenAnswer((invocation) => Future.value(const Result.success(none)));
   when(() => client.sendUserEvent(
         EventInput(callCid: streamCallCid, eventType: EventTypeInput.rejected),
-      )).thenAnswer((invocation) => Future.value(Result.success(None())));
+      )).thenAnswer((invocation) => Future.value(const Result.success(none)));
   registerFallbackValue(streamCallCid);
   when(() => callNotificationWrapper.showCallNotification(
         streamCallCid: any(named: 'streamCallCid'),
