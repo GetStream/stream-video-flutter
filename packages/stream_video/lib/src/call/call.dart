@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import '../../stream_video.dart';
-import '../action/call_action.dart';
 import '../action/internal/lifecycle_action.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../errors/video_error_composer.dart';
@@ -802,53 +801,126 @@ class Call {
     return _permissionsManager.muteUsers(userIds);
   }
 
-  Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) {
-    return _session.apply(
-      LocalParticipantAction.setCameraPosition(cameraPosition: cameraPosition),
-    );
+  Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) async {
+    final result = await _session?.setCameraPosition(cameraPosition) ??
+        Result.error('Session is null');
+
+    if (result.isSuccess) {
+      _stateManager.participantUpdateCameraPosition(
+          SetCameraPosition(cameraPosition: cameraPosition));
+    }
+
+    return result;
   }
 
-  Future<Result<None>> flipCamera() {
-    return _session.apply(const LocalParticipantAction.flipCamera());
+  Future<Result<None>> flipCamera() async {
+    final result =
+        await _session?.flipCamera() ?? Result.error('Session is null');
+
+    if (result.isSuccess) {
+      _stateManager.participantFlipCamera(const FlipCamera());
+    }
+
+    return result;
   }
 
-  Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) {
-    return _session
-        .apply(LocalParticipantAction.setVideoInputDevice(device: device));
+  Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) async {
+    final result = await _session?.setVideoInputDevice(device) ??
+        Result.error('Session is null');
+
+    if (result.isSuccess) {
+      _stateManager
+          .participantSetVideoInputDevice(SetVideoInputDevice(device: device));
+    }
+
+    return result;
   }
 
-  Future<Result<None>> setCameraEnabled({required bool enabled}) {
-    return _session
-        .apply(LocalParticipantAction.setCameraEnabled(enabled: enabled));
+  Future<Result<None>> setCameraEnabled({required bool enabled}) async {
+    final result = await _session?.setCameraEnabled(enabled) ??
+        Result.error('Session is null');
+
+    if (result.isSuccess) {
+      _stateManager
+          .participantSetCameraEnabled(SetCameraEnabled(enabled: enabled));
+    }
+
+    return result;
   }
 
-  Future<Result<None>> setMicrophoneEnabled({required bool enabled}) {
-    return _session
-        .apply(LocalParticipantAction.setMicrophoneEnabled(enabled: enabled));
+  Future<Result<None>> setMicrophoneEnabled({required bool enabled}) async {
+    final result = await _session?.setMicrophoneEnabled(enabled) ??
+        Result.error('Session is null');
+
+    if (result.isSuccess) {
+      _stateManager.participantSetMicrophoneEnabled(
+          SetMicrophoneEnabled(enabled: enabled));
+    }
+
+    return result;
   }
 
-  Future<Result<None>> setScreenShareEnabled({required bool enabled}) {
-    return _session.apply(
-      LocalParticipantAction.setScreenShareEnabled(enabled: enabled),
-    );
+  Future<Result<None>> setScreenShareEnabled({required bool enabled}) async {
+    final result = await _session?.setScreenShareEnabled(enabled) ??
+        Result.error('Session is null');
+
+    if (result.isSuccess) {
+      _stateManager.participantSetScreenShareEnabled(
+          SetScreenShareEnabled(enabled: enabled));
+    }
+
+    return result;
   }
 
-  Future<Result<None>> setAudioInputDevice(RtcMediaDevice device) {
-    return _session
-        .apply(LocalParticipantAction.setAudioInputDevice(device: device));
+  Future<Result<None>> setAudioInputDevice(RtcMediaDevice device) async {
+    final result = await _session?.setAudioInputDevice(device) ??
+        Result.error('Session is null');
+
+    if (result.isSuccess) {
+      _stateManager
+          .participantSetAudioInputDevice(SetAudioInputDevice(device: device));
+    }
+
+    return result;
   }
 
-  Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) {
-    return _session
-        .apply(LocalParticipantAction.setAudioOutputDevice(device: device));
+  Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) async {
+    final result = await _session?.setAudioOutputDevice(device) ??
+        Result.error('Session is null');
+
+    if (result.isSuccess) {
+      _stateManager.participantSetAudioOutputDevice(
+          SetAudioOutputDevice(device: device));
+    }
+
+    return result;
   }
 
-  Future<Result<None>> setSubscriptions(List<SetSubscription> actions) {
-    return _session.apply(RemoteParticipantAction.setSubscriptions(actions));
+  Future<Result<None>> setSubscriptions(List<SetSubscription> actions) async {
+    final result = await _session?.setSubscriptions(actions) ??
+        Result.error('Session is null');
+
+    // TODO: Verify this is not needed
+    // if (result.isSuccess) {
+    //   _stateManager
+    //       .participantUpdateSubscriptions();
+    // }
+
+    return result;
+    // return _session.apply(RemoteParticipantAction.setSubscriptions(actions));
   }
 
-  Future<Result<None>> updateSubscriptions(List<SubscriptionAction> actions) {
-    return _session.apply(RemoteParticipantAction.updateSubscriptions(actions));
+  Future<Result<None>> updateSubscriptions(
+      List<SubscriptionAction> actions) async {
+    final result = await _session?.updateSubscriptions(actions) ??
+        Result.error('Session is null');
+
+    if (result.isSuccess) {
+      _stateManager
+          .participantUpdateSubscriptions(UpdateSubscriptions(actions));
+    }
+
+    return result;
   }
 
   Future<Result<None>> setSubscription({
@@ -856,15 +928,34 @@ class Call {
     required String sessionId,
     required String trackIdPrefix,
     required Map<SfuTrackTypeVideo, RtcVideoDimension> trackTypes,
-  }) {
-    return _session.apply(
-      RemoteParticipantAction.setSubscription(
-        userId: userId,
-        sessionId: sessionId,
-        trackIdPrefix: trackIdPrefix,
-        trackTypes: trackTypes,
-      ),
+  }) async {
+    final action = SetSubscription(
+      userId: userId,
+      sessionId: sessionId,
+      trackIdPrefix: trackIdPrefix,
+      trackTypes: trackTypes,
     );
+
+    final result = await _session?.setSubscriptions([
+          action,
+        ]) ??
+        Result.error('Session is null');
+
+    // TODO: Verify this is not needed
+    // if (result.isSuccess) {
+    //   _stateManager.participantUpdateSubscriptions(
+    //     UpdateSubscriptions([
+    //       UpdateSubscription(
+    //         userId: userId,
+    //         sessionId: sessionId,
+    //         trackIdPrefix: trackIdPrefix,
+    //         trackType: trackTypes.keys.first,
+    //       ),
+    //     ]),
+    //   );
+    // }
+
+    return result;
   }
 
   Future<Result<None>> updateSubscription({
@@ -873,16 +964,23 @@ class Call {
     required String trackIdPrefix,
     required SfuTrackTypeVideo trackType,
     RtcVideoDimension? videoDimension,
-  }) {
-    return _session.apply(
-      RemoteParticipantAction.updateSubscription(
-        userId: userId,
-        sessionId: sessionId,
-        trackIdPrefix: trackIdPrefix,
-        trackType: trackType,
-        videoDimension: videoDimension,
-      ),
+  }) async {
+    final action = UpdateSubscription(
+      userId: userId,
+      sessionId: sessionId,
+      trackIdPrefix: trackIdPrefix,
+      trackType: trackType,
+      videoDimension: videoDimension,
     );
+
+    final result = await _session?.updateSubscription(action) ??
+        Result.error('Session is null');
+
+    if (result.isSuccess) {
+      _stateManager.participantUpdateSubscription(action);
+    }
+
+    return result;
   }
 
   Future<Result<None>> removeSubscription({
@@ -891,15 +989,22 @@ class Call {
     required String trackIdPrefix,
     required SfuTrackTypeVideo trackType,
     RtcVideoDimension? videoDimension,
-  }) {
-    return _session.apply(
-      RemoteParticipantAction.removeSubscription(
-        userId: userId,
-        sessionId: sessionId,
-        trackIdPrefix: trackIdPrefix,
-        trackType: trackType,
-      ),
+  }) async {
+    final action = RemoveSubscription(
+      userId: userId,
+      sessionId: sessionId,
+      trackIdPrefix: trackIdPrefix,
+      trackType: trackType,
     );
+
+    final result = await _session?.updateSubscription(action) ??
+        Result.error('Session is null');
+
+    if (result.isSuccess) {
+      _stateManager.participantRemoveSubscription(action);
+    }
+
+    return result;
   }
 }
 
