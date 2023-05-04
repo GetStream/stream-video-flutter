@@ -1,70 +1,34 @@
-import '../action/participant_action.dart';
-import '../call_state.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../models/call_track_state.dart';
-import '../store/store.dart';
-import '../sfu/data/models/sfu_track_type.dart';
-import '../webrtc/media/constraints/camera_position.dart';
+import 'package:state_notifier/state_notifier.dart';
+import 'package:stream_video/src/models/call_track_state.dart';
 
-final _logger = taggedLogger(tag: 'SV:Reducer-Participant');
+import '../../../action/participant_action.dart';
+import '../../../call_state.dart';
+import '../../../logger/impl/tagged_logger.dart';
+import '../../../sfu/data/models/sfu_track_type.dart';
+import '../../../webrtc/media/constraints/camera_position.dart';
 
-class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
-  const ParticipantReducer();
+final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
-  @override
-  CallState reduce(
-    CallState state,
-    ParticipantAction action,
-  ) {
-    if (action is SetCameraEnabled) {
-      return _reduceCameraEnabled(state, action);
-    } else if (action is SetMicrophoneEnabled) {
-      return _reduceMicrophoneEnabled(state, action);
-    } else if (action is SetAudioInputDevice) {
-      return _reduceSetAudioInputDevice(state, action);
-    } else if (action is SetScreenShareEnabled) {
-      return _reduceScreenShareEnabled(state, action);
-    } else if (action is FlipCamera) {
-      return _reduceFlipCamera(state, action);
-    } else if (action is SetVideoInputDevice) {
-      return _reduceSetVideoInputDevice(state, action);
-    } else if (action is SetCameraPosition) {
-      return _reduceCameraPosition(state, action);
-    } else if (action is UpdateSubscriptions) {
-      return _reduceUpdateSubscriptions(state, action);
-    } else if (action is UpdateSubscription) {
-      return _reduceUpdateSubscription(state, action);
-    } else if (action is RemoveSubscription) {
-      return _reduceRemoveSubscription(state, action);
-    } else if (action is SetAudioOutputDevice) {
-      return _reduceSetAudioOutputDevice(state, action);
-    }
-    return state;
-  }
-
-  CallState _reduceUpdateSubscriptions(
-    CallState state,
+mixin StateParticipantMixin on StateNotifier<CallState> {
+  void participantUpdateSubscriptions(
     UpdateSubscriptions action,
   ) {
     final sessionId = state.sessionId;
     _logger.d(() => '[reduceSubscriptions] #$sessionId; action: $action');
-    var newState = state;
     for (final child in action.actions) {
       if (child is UpdateSubscription) {
-        newState = _reduceUpdateSubscription(newState, child);
+        participantUpdateSubscription(child);
       } else if (child is RemoveSubscription) {
-        newState = _reduceRemoveSubscription(newState, child);
+        participantRemoveSubscription(child);
       }
     }
-    return newState;
   }
 
-  CallState _reduceUpdateSubscription(
-    CallState state,
+  void participantUpdateSubscription(
     UpdateSubscription action,
   ) {
     _logger.d(() => '[updateSub] #${state.sessionId}; action: $action');
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         final trackState = participant.publishedTracks[action.trackType];
         if (participant.userId == action.userId &&
@@ -87,11 +51,10 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
     );
   }
 
-  CallState _reduceRemoveSubscription(
-    CallState state,
+  void participantRemoveSubscription(
     RemoveSubscription action,
   ) {
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         if (participant.userId == action.userId &&
             participant.sessionId == action.sessionId) {
@@ -112,11 +75,10 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
     );
   }
 
-  CallState _reduceSetAudioOutputDevice(
-    CallState state,
+  void participantSetAudioOutputDevice(
     SetAudioOutputDevice action,
   ) {
-    return state.copyWith(
+    state = state.copyWith(
       audioOutputDevice: action.device,
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) return participant;
@@ -136,11 +98,10 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
     );
   }
 
-  CallState _reduceCameraPosition(
-    CallState state,
+  void participantUpdateCameraPosition(
     SetCameraPosition action,
   ) {
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
           final trackState = participant.publishedTracks[SfuTrackType.video];
@@ -165,11 +126,10 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
     );
   }
 
-  CallState _reduceFlipCamera(
-    CallState state,
+  void participantFlipCamera(
     FlipCamera action,
   ) {
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
           final trackState = participant.publishedTracks[SfuTrackType.video];
@@ -194,11 +154,10 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
     );
   }
 
-  CallState _reduceSetVideoInputDevice(
-    CallState state,
+  void participantSetVideoInputDevice(
     SetVideoInputDevice action,
   ) {
-    return state.copyWith(
+    state = state.copyWith(
       videoInputDevice: action.device,
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
@@ -221,11 +180,10 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
     );
   }
 
-  CallState _reduceSetAudioInputDevice(
-    CallState state,
+  void participantSetAudioInputDevice(
     SetAudioInputDevice action,
   ) {
-    return state.copyWith(
+    state = state.copyWith(
       audioInputDevice: action.device,
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
@@ -246,33 +204,29 @@ class ParticipantReducer extends Reducer<CallState, ParticipantAction> {
     );
   }
 
-  CallState _reduceCameraEnabled(
-    CallState state,
+  void participantSetCameraEnabled(
     SetCameraEnabled action,
   ) {
-    return _toggleTrackType(state, SfuTrackType.video, action.enabled);
+    return _toggleTrackType(SfuTrackType.video, action.enabled);
   }
 
-  CallState _reduceMicrophoneEnabled(
-    CallState state,
+  void participantSetMicrophoneEnabled(
     SetMicrophoneEnabled action,
   ) {
-    return _toggleTrackType(state, SfuTrackType.audio, action.enabled);
+    return _toggleTrackType(SfuTrackType.audio, action.enabled);
   }
 
-  CallState _reduceScreenShareEnabled(
-    CallState state,
+  void participantSetScreenShareEnabled(
     SetScreenShareEnabled action,
   ) {
-    return _toggleTrackType(state, SfuTrackType.screenShare, action.enabled);
+    return _toggleTrackType(SfuTrackType.screenShare, action.enabled);
   }
 
-  CallState _toggleTrackType(
-    CallState state,
+  void _toggleTrackType(
     SfuTrackType trackType,
     bool enabled,
   ) {
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         if (participant.isLocal) {
           final publishedTracks = participant.publishedTracks;

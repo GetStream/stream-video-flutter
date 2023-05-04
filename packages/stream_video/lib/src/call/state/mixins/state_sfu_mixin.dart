@@ -1,52 +1,47 @@
 import 'package:collection/collection.dart';
+import 'package:state_notifier/state_notifier.dart';
 
-import '../../stream_video.dart';
-import '../action/internal/sfu_action.dart';
-import '../models/call_preferences.dart';
-import '../store/store.dart';
-import '../sfu/data/events/sfu_events.dart';
+import '../../../call_state.dart';
+import '../../../logger/impl/tagged_logger.dart';
+import '../../../models/call_participant_state.dart';
+import '../../../models/call_preferences.dart';
+import '../../../models/call_status.dart';
+import '../../../models/call_track_state.dart';
+import '../../../models/disconnect_reason.dart';
+import '../../../sfu/data/events/sfu_events.dart';
+import '../../../utils/string.dart';
 
-final _logger = taggedLogger(tag: 'SV:Reducer-SFU');
+final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
-class SfuReducer extends Reducer<CallState, SfuAction> {
-  const SfuReducer(this.preferences);
+mixin StateSfuMixin on StateNotifier<CallState> {
+  CallPreferences get callPreferences;
 
-  final CallPreferences preferences;
-
-  @override
-  CallState reduce(
-    CallState state,
-    SfuAction action,
+  void sfuParticipantLeft(
+    SfuParticipantLeftEvent event,
   ) {
-    if (action is SfuEventAction) {
-      return _reduceSfuEvent(state, action.event);
+    final callParticipants = [...state.callParticipants]..removeWhere(
+        (participant) =>
+            participant.userId == event.participant.userId &&
+            participant.sessionId == event.participant.sessionId,
+      );
+
+    if (callParticipants.length == 1 &&
+        callParticipants.first.userId == state.currentUserId &&
+        state.isRingingFlow &&
+        callPreferences.dropIfAloneInRingingFlow) {
+      state = state.copyWith(
+        status: CallStatus.disconnected(
+          DisconnectReason.lastParticipantLeft(),
+        ),
+        callParticipants: callParticipants,
+      );
     }
-    return state;
+    state = state.copyWith(
+      callParticipants: callParticipants,
+    );
   }
 
-  CallState _reduceSfuEvent(CallState state, SfuEvent event) {
-    if (event is SfuJoinResponseEvent) {
-      return _reduceJoinResponse(state, event);
-    } else if (event is SfuParticipantJoinedEvent) {
-      return _reduceParticipantJoined(state, event);
-    } else if (event is SfuParticipantLeftEvent) {
-      return _reduceParticipantLeft(state, event);
-    } else if (event is SfuConnectionQualityChangedEvent) {
-      return _reduceConnectionQualityChanged(state, event);
-    } else if (event is SfuAudioLevelChangedEvent) {
-      return _reduceAudioLevelChanged(state, event);
-    } else if (event is SfuTrackPublishedEvent) {
-      return _reduceTrackPublished(state, event);
-    } else if (event is SfuTrackUnpublishedEvent) {
-      return _reduceTrackUnpublished(state, event);
-    } else if (event is SfuDominantSpeakerChangedEvent) {
-      return _reduceDominantSpeakerChanged(state, event);
-    }
-    return state;
-  }
-
-  CallState _reduceJoinResponse(
-    CallState state,
+  void sfuJoinResponse(
     SfuJoinResponseEvent event,
   ) {
     _logger.d(() => '[reduceJoinResponse] ${state.sessionId}; event: $event');
@@ -77,19 +72,18 @@ class SfuReducer extends Reducer<CallState, SfuAction> {
       );
     }).toList();
 
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: participants,
     );
   }
 
-  CallState _reduceTrackUnpublished(
-    CallState state,
+  void sfuTrackUnpublished(
     SfuTrackUnpublishedEvent event,
   ) {
     _logger.d(
       () => '[reduceTrackUnpublished] ${state.sessionId}; event: $event',
     );
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         if (participant.userId == event.userId &&
             participant.sessionId == event.sessionId) {
@@ -112,13 +106,12 @@ class SfuReducer extends Reducer<CallState, SfuAction> {
     );
   }
 
-  CallState _reduceTrackPublished(
-    CallState state,
+  void sfuTrackPublished(
     SfuTrackPublishedEvent event,
   ) {
     _logger.d(() => '[reduceTrackPublished] ${state.sessionId}; event: $event');
 
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         if (participant.userId == event.userId &&
             participant.sessionId == event.sessionId) {
@@ -141,11 +134,10 @@ class SfuReducer extends Reducer<CallState, SfuAction> {
     );
   }
 
-  CallState _reduceAudioLevelChanged(
-    CallState state,
+  void sfuUpdateAudioLevelChanged(
     SfuAudioLevelChangedEvent event,
   ) {
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         final levelInfo = event.audioLevels.firstWhereOrNull((level) {
           return level.userId == participant.userId &&
@@ -163,11 +155,10 @@ class SfuReducer extends Reducer<CallState, SfuAction> {
     );
   }
 
-  CallState _reduceDominantSpeakerChanged(
-    CallState state,
+  void sfuDominantSpeakerChanged(
     SfuDominantSpeakerChangedEvent event,
   ) {
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         // Mark the new dominant speaker
         if (participant.userId == event.userId &&
@@ -187,11 +178,10 @@ class SfuReducer extends Reducer<CallState, SfuAction> {
     );
   }
 
-  CallState _reduceConnectionQualityChanged(
-    CallState state,
+  void sfuConnectionQualityChanged(
     SfuConnectionQualityChangedEvent event,
   ) {
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         final update = event.connectionQualityUpdates.firstWhereOrNull((it) {
           return it.userId == participant.userId &&
@@ -208,8 +198,7 @@ class SfuReducer extends Reducer<CallState, SfuAction> {
     );
   }
 
-  CallState _reduceParticipantJoined(
-    CallState state,
+  void sfuParticipantJoined(
     SfuParticipantJoinedEvent event,
   ) {
     _logger.d(
@@ -226,37 +215,11 @@ class SfuReducer extends Reducer<CallState, SfuAction> {
       isLocal: isLocal,
       isOnline: !isLocal,
     );
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: [
         ...state.callParticipants,
         participant,
       ],
-    );
-  }
-
-  CallState _reduceParticipantLeft(
-    CallState state,
-    SfuParticipantLeftEvent event,
-  ) {
-    final callParticipants = [...state.callParticipants]..removeWhere(
-        (participant) =>
-            participant.userId == event.participant.userId &&
-            participant.sessionId == event.participant.sessionId,
-      );
-
-    if (callParticipants.length == 1 &&
-        callParticipants.first.userId == state.currentUserId &&
-        state.isRingingFlow &&
-        preferences.dropIfAloneInRingingFlow) {
-      return state.copyWith(
-        status: CallStatus.disconnected(
-          DisconnectReason.lastParticipantLeft(),
-        ),
-        callParticipants: callParticipants,
-      );
-    }
-    return state.copyWith(
-      callParticipants: callParticipants,
     );
   }
 }
