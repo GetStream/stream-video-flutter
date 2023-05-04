@@ -1,8 +1,11 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../../stream_video.dart';
 import '../action/internal/lifecycle_action.dart';
 import '../coordinator/models/coordinator_events.dart';
+import '../coordinator/models/coordinator_models.dart';
 import '../errors/video_error_composer.dart';
 import '../models/call_credentials.dart';
 import '../models/call_permission.dart';
@@ -16,6 +19,7 @@ import '../utils/future.dart';
 import '../utils/none.dart';
 import '../utils/standard.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
+import '../webrtc/sdp/policy/sdp_policy.dart';
 import 'permissions/permissions_manager.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
@@ -24,6 +28,10 @@ import 'state/call_state_notifier.dart';
 typedef OnCallPermissionRequest = void Function(
   CoordinatorCallPermissionRequestEvent,
 );
+
+typedef GetCurrentUserId = String? Function();
+
+typedef SetActiveCall = Future<void> Function(Call?);
 
 const _idState = 1;
 const _idCoordEvents = 2;
@@ -38,128 +46,127 @@ int _callSeq = 1;
 
 /// Represents a [Call] in which you can connect to.
 class Call {
-  factory Call.from({
-    required String type,
-    required String id,
-    StreamVideo? streamVideo,
+  /// Do not use the factory directly,
+  /// use the [StreamVideo.makeCall] method to construct a `Call` instance.
+  @internal
+  factory Call({
+    required StreamCallCid callCid,
+    required CoordinatorClient coordinatorClient,
+    required GetCurrentUserId getCurrentUserId,
+    required SetActiveCall setActiveCall,
+    RetryPolicy? retryPolicy,
+    SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
   }) {
-    final callCid = StreamCallCid.from(type: type, id: id);
     streamLog.i(_tag, () => '<factory> callCid: $callCid');
     return Call._internal(
       callCid: callCid,
-      streamVideo: streamVideo,
+      coordinatorClient: coordinatorClient,
+      getCurrentUserId: getCurrentUserId,
+      setActiveCall: setActiveCall,
+      retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
       preferences: preferences,
     );
   }
 
-  factory Call.fromCid({
-    required String cid,
-    StreamVideo? streamVideo,
-    CallPreferences? preferences,
-  }) {
-    final callCid = StreamCallCid(cid: cid);
-    streamLog.i(_tag, () => '<factory> callCid: $callCid');
-    return Call._internal(
-      callCid: callCid,
-      streamVideo: streamVideo,
-      preferences: preferences,
-    );
-  }
-
+  /// Do not use the factory directly,
+  /// use the [StreamVideo.makeCall] method to construct a `Call` instance.
+  @internal
   factory Call.fromCreated({
     required CallCreatedData data,
-    StreamVideo? streamVideo,
+    required CoordinatorClient coordinatorClient,
+    required GetCurrentUserId getCurrentUserId,
+    required SetActiveCall setActiveCall,
+    RetryPolicy? retryPolicy,
+    SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
   }) {
     streamLog.i(_tag, () => '<factory> created: $data');
     return Call._internal(
       callCid: data.callCid,
-      streamVideo: streamVideo,
+      coordinatorClient: coordinatorClient,
+      getCurrentUserId: getCurrentUserId,
+      setActiveCall: setActiveCall,
+      retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
       preferences: preferences,
     ).also((it) => it._stateManager.lifecycleCallCreated(CallCreated(data)));
   }
 
-  factory Call.fromJoined({
-    required CallJoinedData data,
-    StreamVideo? streamVideo,
-    CallPreferences? preferences,
-  }) {
-    streamLog.i(_tag, () => '<factory> joined: $data');
-    return Call._internal(
-      callCid: data.callCid,
-      streamVideo: streamVideo,
-      preferences: preferences,
-      credentials: data.credentials,
-    ).also((it) => it._stateManager.lifecycleCallJoined(CallJoined(data)));
-  }
-
   factory Call._internal({
     required StreamCallCid callCid,
-    StreamVideo? streamVideo,
+    required CoordinatorClient coordinatorClient,
+    required GetCurrentUserId getCurrentUserId,
+    required SetActiveCall setActiveCall,
+    RetryPolicy? retryPolicy,
+    SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
     CallCredentials? credentials,
   }) {
-    final finalStreamVideo = streamVideo ?? StreamVideo.instance;
     final finalCallPreferences = preferences ?? DefaultCallPreferences();
+    final finalRetryPolicy = retryPolicy ?? const RetryPolicy();
+    final finalSdpPolicy = sdpPolicy ?? const SdpPolicy();
     final stateManager = _makeStateManager(
       callCid,
-      finalStreamVideo,
+      coordinatorClient,
+      getCurrentUserId,
       finalCallPreferences,
     );
     final permissionManager = _makePermissionAwareManager(
       callCid,
-      finalStreamVideo,
+      coordinatorClient,
       stateManager,
     );
     return Call._(
-      streamVideo: finalStreamVideo,
+      coordinatorClient: coordinatorClient,
+      getCurrentUserId: getCurrentUserId,
+      setActiveCall: setActiveCall,
       preferences: finalCallPreferences,
       stateManager: stateManager,
       credentials: credentials,
+      retryPolicy: finalRetryPolicy,
+      sdpPolicy: finalSdpPolicy,
       permissionManager: permissionManager,
     );
   }
 
   Call._({
-    required StreamVideo streamVideo,
+    required GetCurrentUserId getCurrentUserId,
+    required SetActiveCall setActiveCall,
+    required CoordinatorClient coordinatorClient,
     required CallPreferences preferences,
     required CallStateNotifier stateManager,
     required PermissionsManager permissionManager,
+    required RetryPolicy retryPolicy,
+    required SdpPolicy sdpPolicy,
     CallCredentials? credentials,
   })  : _sessionFactory = CallSessionFactory(
           callCid: stateManager.callState.callCid,
-          sdpEditor: SdpEditorImpl(streamVideo.sdpPolicy),
+          sdpEditor: SdpEditorImpl(sdpPolicy),
         ),
         _stateManager = stateManager,
         _permissionsManager = permissionManager,
-        _streamVideo = streamVideo,
+        _getCurrentUserId = getCurrentUserId,
+        _setActiveCall = setActiveCall,
+        _coordinatorClient = coordinatorClient,
         _preferences = preferences,
-        _retryPolicy = streamVideo.retryPolicy,
+        _retryPolicy = retryPolicy,
         _credentials = credentials {
     streamLog.i(_tag, () => '<init> state: ${stateManager.callState}');
-    _subscriptions.add(
-      _idState,
-      stateManager.callStateStream
-          .listen((state) async => _onStateChanged(state)),
-    );
-    _subscriptions.add(
-      _idCoordEvents,
-      streamVideo.events.on<CoordinatorCallEvent>((event) async {
-        await _onCoordinatorEvent(event);
-      }),
-    );
+    if (stateManager.callState.isRingingFlow) {
+      _observeState();
+      _observeEvents();
+    }
   }
-
-  static Call? activeCall;
-  static void Function(Call?)? onActiveCall;
 
   late final _logger = taggedLogger(tag: '$_tag-${_callSeq++}');
   late final _subscriptions = Subscriptions();
   late final _cancelables = Cancelables();
 
-  final StreamVideo _streamVideo;
-  //FIXME(Deven+Nash): What do we want to do about this?
+  final GetCurrentUserId _getCurrentUserId;
+  final SetActiveCall _setActiveCall;
+  final CoordinatorClient _coordinatorClient;
   final RetryPolicy _retryPolicy;
   final CallPreferences _preferences;
   final CallSessionFactory _sessionFactory;
@@ -221,6 +228,23 @@ class Call {
   // purpose. It is not guaranteed to be the latest, Use [state] instead.
   CallState? _prevState;
 
+  void _observeState() {
+    _subscriptions.add(
+      _idState,
+      _stateManager.callStateStream
+          .listen((state) async => _onStateChanged(state)),
+    );
+  }
+
+  void _observeEvents() {
+    _subscriptions.add(
+      _idCoordEvents,
+      _coordinatorClient.events.on<CoordinatorCallEvent>((event) async {
+        await _onCoordinatorEvent(event);
+      }),
+    );
+  }
+
   Future<void> _onStateChanged(CallState state) async {
     final status = state.status;
     _logger.v(() => '[onStateChanged] status: $status');
@@ -272,9 +296,7 @@ class Call {
       _logger.w(() => '[acceptCall] rejected (invalid status): $status');
       return Result.error('invalid status: $status');
     }
-    final result = await _streamVideo.acceptCall(
-      cid: state.callCid,
-    );
+    final result = await _coordinatorClient.acceptCall(cid: state.callCid);
     if (result is Success<None>) {
       _stateManager.lifecycleCallAccepted(const CallAccepted());
     }
@@ -288,9 +310,7 @@ class Call {
       _logger.w(() => '[rejectCall] rejected (invalid status): $status');
       return Result.error('invalid status: $status');
     }
-    final result = await _streamVideo.rejectCall(
-      cid: state.callCid,
-    );
+    final result = await _coordinatorClient.rejectCall(cid: state.callCid);
     if (result is Success<None>) {
       _stateManager.lifecycleCallRejected(const CallRejected());
     }
@@ -347,11 +367,7 @@ class Call {
         return Result.error('original "connect" failed');
       }
     }
-    await Call.activeCall?.disconnect();
-    if (Call.activeCall == null) {
-      Call.activeCall = this;
-      Call.onActiveCall?.call(this);
-    }
+    await _setActiveCall(this);
     _status.value = _ConnectionStatus.connecting;
     final result = await _connect()
         .asCancelable()
@@ -369,7 +385,7 @@ class Call {
 
   Future<Result<None>> _connect() async {
     _logger.d(() => '[connect] options: $_connectOptions');
-    final validation = await _stateManager.validateUserId(_streamVideo);
+    final validation = await _stateManager.validateUserId(_getCurrentUserId);
     if (validation.isFailure) {
       _logger.w(() => '[connect] rejected (validation): $validation');
       return validation;
@@ -382,6 +398,8 @@ class Call {
       _logger.w(() => '[connect] rejected (not Connectable): $status');
       return Result.error('invalid status: $status');
     }
+    _observeState();
+    _observeEvents();
     final result = await _awaitIfNeeded();
     if (result.isFailure) {
       _logger.e(() => '[connect] waiting failed: $result');
@@ -426,16 +444,9 @@ class Call {
       return Result.success(creds);
     }
     _logger.d(() => '[joinIfNeeded] no args');
-    final joinedResult = await _streamVideo.joinCall(
-      cid: state.callCid,
-      create: true,
-      onReceivedOrCreated: (call) async {
-        _stateManager.lifecycleCallCreated(CallCreated(call.data));
-      },
-    );
+    final joinedResult = await _joinCall(create: true);
     if (joinedResult is Success<CallJoinedData>) {
       _logger.v(() => '[joinIfNeeded] completed');
-      _stateManager.lifecycleCallJoined(CallJoined(joinedResult.data));
       _credentials = joinedResult.data.credentials;
       return Result.success(joinedResult.data.credentials);
     }
@@ -507,7 +518,7 @@ class Call {
         return;
       }
       final elapsed = DateTime.now().toUtc().millisecondsSinceEpoch - startTime;
-      final retryPolicy = _streamVideo.retryPolicy;
+      final retryPolicy = _retryPolicy;
       if (elapsed > retryPolicy.config.callRejoinTimeout.inMilliseconds) {
         _logger.w(() => '[reconnect] timeout exceed');
         result = Result.error('was unable to reconnect in 15 seconds');
@@ -594,15 +605,11 @@ class Call {
   Future<void> _clear(String src) async {
     _logger.d(() => '[clear] src: $src');
     _status.value = _ConnectionStatus.disconnected;
-    _subscriptions.cancel(_idSessionEvents);
-    _subscriptions.cancel(_idSessionStats);
+    _subscriptions.cancelAll();
     _cancelables.cancelAll();
     await _session?.dispose();
     _session = null;
-    if (Call.activeCall != null) {
-      Call.activeCall = null;
-      Call.onActiveCall?.call(null);
-    }
+    await _setActiveCall(null);
     _logger.v(() => '[clear] completed');
   }
 
@@ -731,7 +738,102 @@ class Call {
   }
 
   Future<Result<None>> inviteUsers(List<UserInfo> users) {
-    return _streamVideo.inviteUsers(callCid: callCid.value, users: users);
+    return _coordinatorClient.inviteUsers(
+      UpsertCallMembersInput(
+        callCid: callCid,
+        members: users.map((user) {
+          return MemberInput(userId: user.id, role: user.role);
+        }).toList(),
+      ),
+    );
+  }
+
+  /// Receives a call or creates it with given information. You can then use
+  /// the [CallReceivedOrCreatedData] in order to create a [Call] object.
+  Future<Result<CallReceivedOrCreatedData>> getOrCreateCall({
+    List<String> participantIds = const [],
+    bool ringing = false,
+  }) async {
+    _logger.d(
+      () => '[getOrCreateCall] cid: $callCid, ringing: $ringing, '
+          'participantIds: $participantIds',
+    );
+
+    final currentUserId = _getCurrentUserId();
+    if (currentUserId == null) {
+      _logger.e(() => '[getOrCreateCall] failed (no userId)');
+      return Result.error('[createCall] failed; no user_id found');
+    }
+
+    final response = await _coordinatorClient.getOrCreateCall(
+      GetOrCreateCallInput(
+        callCid: callCid,
+        ringing: ringing,
+        members: participantIds.map((id) {
+          return MemberInput(
+            userId: id,
+            role: 'admin',
+          );
+        }),
+      ),
+    );
+
+    return response.fold(
+      success: (it) {
+        _stateManager.lifecycleCallCreated(CallCreated(it.data.data));
+        _logger.v(() => '[getOrCreateCall] completed: ${it.data}');
+        return it;
+      },
+      failure: (it) {
+        _logger.e(() => '[getOrCreateCall] failed: ${it.error}');
+        return it;
+      },
+    );
+  }
+
+  /// Allows you to create a new call with the given parameters
+  /// and joins the call immediately.
+  ///
+  /// If a call with the same [cid] already exists,
+  /// it will join the existing call.
+  Future<Result<CallJoinedData>> _joinCall({
+    bool create = false,
+  }) async {
+    _logger.d(() => '[joinCall] cid: $callCid');
+    final joinResult = await _coordinatorClient.joinCall(
+      JoinCallInput(callCid: callCid, create: create),
+    );
+    if (joinResult is! Success<CoordinatorJoined>) {
+      _logger.e(() => '[joinCall] join failed: $joinResult');
+      return joinResult as Failure;
+    }
+    final receivedOrCreated = CallReceivedOrCreatedData(
+      wasCreated: joinResult.data.wasCreated,
+      data: CallCreatedData(
+        callCid: callCid,
+        ringing: false,
+        metadata: joinResult.data.metadata,
+      ),
+    );
+    _stateManager.lifecycleCallCreated(CallCreated(receivedOrCreated.data));
+    _logger.v(() => '[joinCall] joinedMetadata: ${joinResult.data.metadata}');
+    final edgeResult = await _coordinatorClient.findBestCallEdgeServer(
+      callCid: callCid,
+      edges: joinResult.data.edges,
+    );
+    if (edgeResult is! Success<SfuServerSelected>) {
+      _logger.e(() => '[joinCall] edge finding failed: $joinResult');
+      return joinResult as Failure;
+    }
+    final joined = CallJoinedData(
+      callCid: callCid,
+      wasCreated: joinResult.data.wasCreated,
+      metadata: edgeResult.data.metadata,
+      credentials: edgeResult.data.credentials,
+    );
+    _stateManager.lifecycleCallJoined(CallJoined(joined));
+    _logger.v(() => '[joinCall] completed: $joined');
+    return Result.success(joined);
   }
 
   Future<Result<None>> requestPermissions(List<CallPermission> permissions) {
@@ -993,10 +1095,11 @@ class Call {
 
 CallStateNotifier _makeStateManager(
   StreamCallCid callCid,
-  StreamVideo streamVideo,
+  CoordinatorClient coordinatorClient,
+  GetCurrentUserId getCurrentUserId,
   CallPreferences callPreferences,
 ) {
-  final currentUserId = streamVideo.currentUser?.id ?? '';
+  final currentUserId = getCurrentUserId() ?? '';
 
   return CallStateNotifier(
     CallState(
@@ -1009,20 +1112,20 @@ CallStateNotifier _makeStateManager(
 
 PermissionsManager _makePermissionAwareManager(
   StreamCallCid callCid,
-  StreamVideo streamVideo,
+  CoordinatorClient coordinatorClient,
   CallStateNotifier stateManager,
 ) {
   return PermissionsManager(
     callCid: callCid,
-    streamVideo: streamVideo,
+    coordinatorClient: coordinatorClient,
     stateManager: stateManager,
   );
 }
 
 extension on CallStateNotifier {
-  Future<Result<None>> validateUserId(StreamVideo streamVideo) async {
+  Future<Result<None>> validateUserId(GetCurrentUserId getCurrentUserId) async {
     final stateUserId = callState.currentUserId;
-    final currentUserId = streamVideo.currentUser?.id ?? '';
+    final currentUserId = getCurrentUserId() ?? '';
     if (currentUserId.isEmpty) {
       return Result.error('no userId');
     }

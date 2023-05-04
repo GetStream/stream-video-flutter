@@ -142,13 +142,23 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<None>> onUserLogin(UserInfo user) {
-    return _delegate.onUserLogin(user);
+  Future<Result<None>> connectUser(UserInfo user) {
+    return _delegate.connectUser(user);
   }
 
   @override
-  Future<Result<None>> onUserLogout() {
-    return _delegate.onUserLogout();
+  Future<Result<None>> openConnection() {
+    return _delegate.openConnection();
+  }
+
+  @override
+  Future<Result<None>> closeConnection() {
+    return _delegate.closeConnection();
+  }
+
+  @override
+  Future<Result<None>> disconnectUser() {
+    return _delegate.disconnectUser();
   }
 
   @override

@@ -19,18 +19,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _streamVideo.onCallCreated = (data) {
-      if (data.ringing) {
-        final call = Call.fromCreated(data: data);
-        _onNavigateToCall(call);
-      }
-    };
+    _streamVideo.onIncomingCall = _onNavigateToCall;
   }
 
   @override
   void dispose() {
     super.dispose();
-    _streamVideo.onCallCreated = null;
+    _streamVideo.onIncomingCall = null;
   }
 
   @override

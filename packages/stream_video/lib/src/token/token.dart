@@ -18,7 +18,7 @@ typedef OnTokenUpdated = Future<void> Function(UserToken token);
 abstract class TokenProvider {
   const TokenProvider();
 
-  factory TokenProvider.static(String token) {
+  factory TokenProvider.static(UserToken token) {
     return _StaticProvider(token);
   }
 

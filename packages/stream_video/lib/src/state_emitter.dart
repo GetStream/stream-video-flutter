@@ -27,6 +27,8 @@ abstract class StateEmitter<T> {
     T Function()? orElse,
     required Duration timeLimit,
   });
+
+  Stream<T> asStream();
 }
 
 abstract class MutableStateEmitter<T> extends StateEmitter<T> {
@@ -108,4 +110,7 @@ class MutableStateEmitterImpl<T> extends MutableStateEmitter<T> {
       cancelOnError: cancelOnError,
     );
   }
+
+  @override
+  Stream<T> asStream() => _state;
 }
