@@ -81,7 +81,7 @@ class CallSession extends Disposable {
 
   late final _saBuffer = DebounceBuffer<SubscriptionAction, Result<None>>(
     duration: _debounceDuration,
-    onBuffered: _updateSubscriptions,
+    onBuffered: updateSubscriptions,
     onCancel: () => Result.error('SubscriptionAction cancelled'),
   );
 
@@ -206,31 +206,31 @@ class CallSession extends Disposable {
   Future<Result<None>> _apply(ParticipantAction action) async {
     _logger.d(() => '[apply] action: $action');
     if (action is SetCameraEnabled) {
-      return _onSetCameraEnabled(action.enabled);
+      return setCameraEnabled(action.enabled);
     } else if (action is SetMicrophoneEnabled) {
-      return _onSetMicrophoneEnabled(action.enabled);
+      return setMicrophoneEnabled(action.enabled);
     } else if (action is SetAudioInputDevice) {
-      return _onSetAudioInputDevice(action.device);
+      return setAudioInputDevice(action.device);
     } else if (action is SetScreenShareEnabled) {
-      return _onSetScreenShareEnabled(action.enabled);
+      return setScreenShareEnabled(action.enabled);
     } else if (action is FlipCamera) {
-      return _onFlipCamera();
+      return flipCamera();
     } else if (action is SetVideoInputDevice) {
-      return _onSetVideoInputDevice(action.device);
+      return setVideoInputDevice(action.device);
     } else if (action is SetCameraPosition) {
-      return _onSetCameraPosition(action.cameraPosition);
+      return setCameraPosition(action.cameraPosition);
     } else if (action is UpdateSubscriptions) {
-      return _updateSubscriptions(action.actions);
+      return updateSubscriptions(action.actions);
     } else if (action is UpdateSubscription) {
-      return _updateSubscription(action);
+      return updateSubscription(action);
     } else if (action is RemoveSubscription) {
-      return _updateSubscription(action);
+      return updateSubscription(action);
     } else if (action is SetSubscription) {
-      return _setSubscriptions([action]);
+      return  setSubscriptions([action]);
     } else if (action is SetSubscriptions) {
-      return _setSubscriptions(action.actions);
+      return setSubscriptions(action.actions);
     } else if (action is SetAudioOutputDevice) {
-      return _onSetAudioOutputDevice(action.device);
+      return setAudioOutputDevice(action.device);
     }
     return Result.error('Action not supported: $action');
   }
@@ -493,7 +493,7 @@ class CallSession extends Disposable {
     final state = stateManager.callStateStream.valueOrNull;
     final audioOutputDevice = state?.audioOutputDevice;
     if (audioOutputDevice != null) {
-      await _onSetAudioOutputDevice(audioOutputDevice);
+      await setAudioOutputDevice(audioOutputDevice);
     }
   }
 
@@ -511,7 +511,7 @@ class CallSession extends Disposable {
     );
   }
 
-  Future<Result<None>> _setSubscriptions(
+  Future<Result<None>> setSubscriptions(
     List<SetSubscription> actions,
   ) async {
     final participants = stateManager.callState.callParticipants;
@@ -532,14 +532,14 @@ class CallSession extends Disposable {
     return result;
   }
 
-  Future<Result<None>> _updateSubscription(
+  Future<Result<None>> updateSubscription(
     SubscriptionAction action,
   ) async {
     _logger.d(() => '[updateSubscription] action: $action');
     return _saBuffer.post(action);
   }
 
-  Future<Result<None>> _updateSubscriptions(
+  Future<Result<None>> updateSubscriptions(
     List<SubscriptionAction> actions,
   ) async {
     _logger.d(() => '[updateSubscriptions] actions: $actions');
@@ -563,7 +563,7 @@ class CallSession extends Disposable {
     return result;
   }
 
-  Future<Result<None>> _onSetAudioOutputDevice(RtcMediaDevice device) async {
+  Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set speaker device, Call not connected');
@@ -572,7 +572,7 @@ class CallSession extends Disposable {
     return rtcManager.setAudioOutputDevice(device: device);
   }
 
-  Future<Result<None>> _onSetCameraEnabled(bool enabled) async {
+  Future<Result<None>> setCameraEnabled(bool enabled) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set camera, Call not connected');
@@ -582,7 +582,7 @@ class CallSession extends Disposable {
     return result.map((_) => None());
   }
 
-  Future<Result<None>> _onSetMicrophoneEnabled(bool enabled) async {
+  Future<Result<None>> setMicrophoneEnabled(bool enabled) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set microphone, Call not connected');
@@ -592,7 +592,7 @@ class CallSession extends Disposable {
     return result.map((_) => None());
   }
 
-  Future<Result<None>> _onSetAudioInputDevice(RtcMediaDevice device) async {
+  Future<Result<None>> setAudioInputDevice(RtcMediaDevice device) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set audioInput, Call not connected');
@@ -602,7 +602,7 @@ class CallSession extends Disposable {
     return result.map((_) => None());
   }
 
-  Future<Result<None>> _onSetScreenShareEnabled(bool enabled) async {
+  Future<Result<None>> setScreenShareEnabled(bool enabled) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set ScreenShare, Call not connected');
@@ -612,7 +612,7 @@ class CallSession extends Disposable {
     return result.map((_) => None());
   }
 
-  Future<Result<None>> _onFlipCamera() async {
+  Future<Result<None>> flipCamera() async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to flip camera, Call not connected');
@@ -622,7 +622,7 @@ class CallSession extends Disposable {
     return result.map((_) => None());
   }
 
-  Future<Result<None>> _onSetVideoInputDevice(RtcMediaDevice device) async {
+  Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set video input, Call not connected');
@@ -632,7 +632,7 @@ class CallSession extends Disposable {
     return result.map((_) => None());
   }
 
-  Future<Result<None>> _onSetCameraPosition(CameraPosition position) async {
+  Future<Result<None>> setCameraPosition(CameraPosition position) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set camera position, Call not connected');
