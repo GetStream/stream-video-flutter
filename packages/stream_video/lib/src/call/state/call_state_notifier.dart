@@ -5,6 +5,7 @@ import '../../models/call_preferences.dart';
 import '../../models/call_status.dart';
 import '../../models/disconnect_reason.dart';
 import '../../sfu/data/events/sfu_events.dart';
+import '../../state_emitter.dart';
 import 'mixins/state_coordinator_mixin.dart';
 import 'mixins/state_lifecycle_mixin.dart';
 import 'mixins/state_participant_mixin.dart';
@@ -18,11 +19,15 @@ class CallStateNotifier extends StateNotifier<CallState>
         StateParticipantMixin,
         StateRtcMixin,
         StateSfuMixin {
-  CallStateNotifier(super.initialState, this.callPreferences);
+  CallStateNotifier(CallState initialState, this.callPreferences)
+      : super(initialState) {
+    callStateStream = MutableStateEmitterImpl<CallState>(initialState, sync: true);
+  }
 
   final CallPreferences callPreferences;
 
-  CallState get callState => state;
+  late final MutableStateEmitterImpl<CallState> callStateStream;
+  CallState get callState => callStateStream.value;
 
   // TODO: This method is here to access preferences which can't be done in mixins -
   // TODO: find a better way to do this.
@@ -49,5 +54,17 @@ class CallStateNotifier extends StateNotifier<CallState>
     state = state.copyWith(
       callParticipants: callParticipants,
     );
+  }
+
+  @override
+  set state(CallState value) {
+    super.state = value;
+    callStateStream.value = value;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    callStateStream.close();
   }
 }
