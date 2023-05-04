@@ -14,17 +14,16 @@ import '../../../utils/string.dart';
 final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
 mixin StateSfuMixin on StateNotifier<CallState> {
-
   CallPreferences get callPreferences;
 
   void sfuParticipantLeft(
-      SfuParticipantLeftEvent event,
-      ) {
+    SfuParticipantLeftEvent event,
+  ) {
     final callParticipants = [...state.callParticipants]..removeWhere(
-          (participant) =>
-      participant.userId == event.participant.userId &&
-          participant.sessionId == event.participant.sessionId,
-    );
+        (participant) =>
+            participant.userId == event.participant.userId &&
+            participant.sessionId == event.participant.sessionId,
+      );
 
     if (callParticipants.length == 1 &&
         callParticipants.first.userId == state.currentUserId &&

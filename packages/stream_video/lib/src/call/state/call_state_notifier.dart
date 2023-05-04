@@ -21,7 +21,8 @@ class CallStateNotifier extends StateNotifier<CallState>
         StateSfuMixin {
   CallStateNotifier(CallState initialState, this.callPreferences)
       : super(initialState) {
-    callStateStream = MutableStateEmitterImpl<CallState>(initialState, sync: true);
+    callStateStream =
+        MutableStateEmitterImpl<CallState>(initialState, sync: true);
   }
 
   final CallPreferences callPreferences;

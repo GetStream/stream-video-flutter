@@ -198,7 +198,8 @@ class PermissionsManager {
   }
 
   bool _hasPermission(CallPermission permission) {
-    final capabilities = stateManager.callStateStream.valueOrNull?.ownCapabilities;
+    final capabilities =
+        stateManager.callStateStream.valueOrNull?.ownCapabilities;
     if (capabilities == null || capabilities.isEmpty) {
       _logger.w(() => '[hasPermission] rejected (no capabilities)');
       return false;

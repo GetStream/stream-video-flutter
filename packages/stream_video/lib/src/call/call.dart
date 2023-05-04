@@ -618,25 +618,6 @@ class Call {
     return [...?_session?.getTracks(trackIdPrefix)];
   }
 
-  // Future<Result<None>> apply(StreamExternalAction action) async {
-  //   _logger.d(() => '[apply] action: $action');
-  //   final result = await _apply(action);
-  //   _logger.v(() => '[apply] result: $result');
-  //   if (result.isSuccess) {
-  //     _stateManager.dispatch(action);
-  //   }
-  //   return result;
-  // }
-  //
-  // Future<Result<None>> _apply(StreamExternalAction action) async {
-  //   if (action is CallAction) {
-  //     return _permissionsManager.apply(action);
-  //   } else if (action is ParticipantAction) {
-  //     return _session.apply(action);
-  //   }
-  //   return Result.error('unsupported action: $action');
-  // }
-
   Future<void> _applyConnectOptions() async {
     _logger.d(() => '[applyConnectOptions] connectOptions: $_connectOptions');
     await _applyCameraOption(_connectOptions.camera);
@@ -694,12 +675,10 @@ class Call {
         await setScreenShareEnabled(enabled: true);
       } else {
         streamLog.e(
-            _tag, () => '[composeControlAction] failed: $mediaConstraints');
+          _tag,
+          () => '[composeControlAction] failed: $mediaConstraints',
+        );
       }
-
-      // if (action != null) {
-      //   _stateManager.dispatch(action);
-      // }
     }
     return result;
   }
@@ -807,7 +786,8 @@ class Call {
 
     if (result.isSuccess) {
       _stateManager.participantUpdateCameraPosition(
-          SetCameraPosition(cameraPosition: cameraPosition));
+        SetCameraPosition(cameraPosition: cameraPosition),
+      );
     }
 
     return result;
@@ -854,7 +834,8 @@ class Call {
 
     if (result.isSuccess) {
       _stateManager.participantSetMicrophoneEnabled(
-          SetMicrophoneEnabled(enabled: enabled));
+        SetMicrophoneEnabled(enabled: enabled),
+      );
     }
 
     return result;
@@ -866,7 +847,8 @@ class Call {
 
     if (result.isSuccess) {
       _stateManager.participantSetScreenShareEnabled(
-          SetScreenShareEnabled(enabled: enabled));
+        SetScreenShareEnabled(enabled: enabled),
+      );
     }
 
     return result;
@@ -890,7 +872,8 @@ class Call {
 
     if (result.isSuccess) {
       _stateManager.participantSetAudioOutputDevice(
-          SetAudioOutputDevice(device: device));
+        SetAudioOutputDevice(device: device),
+      );
     }
 
     return result;
@@ -907,11 +890,11 @@ class Call {
     // }
 
     return result;
-    // return _session.apply(RemoteParticipantAction.setSubscriptions(actions));
   }
 
   Future<Result<None>> updateSubscriptions(
-      List<SubscriptionAction> actions) async {
+    List<SubscriptionAction> actions,
+  ) async {
     final result = await _session?.updateSubscriptions(actions) ??
         Result.error('Session is null');
 
@@ -1050,20 +1033,6 @@ extension on CallStateNotifier {
   }
 }
 
-extension on RtcLocalTrack {
-  ParticipantAction? composeControlAction() {
-    if (mediaConstraints is AudioConstraints) {
-      return const SetMicrophoneEnabled(enabled: true);
-    } else if (mediaConstraints is CameraConstraints) {
-      return const SetCameraEnabled(enabled: true);
-    } else if (mediaConstraints is ScreenShareConstraints) {
-      return const SetScreenShareEnabled(enabled: true);
-    }
-    streamLog.e(_tag, () => '[composeControlAction] failed: $mediaConstraints');
-    return null;
-  }
-}
-
 @Deprecated('Rely on CallStatus')
 enum _ConnectionStatus {
   disconnected,
@@ -1073,19 +1042,5 @@ enum _ConnectionStatus {
   @override
   String toString() {
     return name;
-  }
-}
-
-extension on CallSession? {
-  Future<Result<None>> apply(ParticipantAction action) async {
-    final tag = '$_tag-$_callSeq';
-    final session = this;
-    if (session == null) {
-      streamLog.w(tag, () => '[apply] rejected (session is null);');
-      return Result.error('no call session');
-    }
-    final result = await session.apply(action);
-    streamLog.v(tag, () => '[apply] completed: $result');
-    return result;
   }
 }
