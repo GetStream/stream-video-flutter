@@ -172,69 +172,6 @@ class CallSession extends Disposable {
     return [...?rtcManager?.getTracks(trackIdPrefix)];
   }
 
-  Future<Result<None>> apply(ParticipantAction action) async {
-    _logger.d(() => '[apply] action: $action');
-    final result = await _apply(action);
-    if (result.isSuccess) {
-      if (action is SetCameraEnabled) {
-        stateManager.participantSetCameraEnabled(action);
-      } else if (action is SetMicrophoneEnabled) {
-        stateManager.participantSetMicrophoneEnabled(action);
-      } else if (action is SetAudioInputDevice) {
-        stateManager.participantSetAudioInputDevice(action);
-      } else if (action is SetScreenShareEnabled) {
-        stateManager.participantSetScreenShareEnabled(action);
-      } else if (action is FlipCamera) {
-        stateManager.participantFlipCamera(action);
-      } else if (action is SetVideoInputDevice) {
-        stateManager.participantSetVideoInputDevice(action);
-      } else if (action is SetCameraPosition) {
-        stateManager.participantUpdateCameraPosition(action);
-      } else if (action is UpdateSubscriptions) {
-        stateManager.participantUpdateSubscriptions(action);
-      } else if (action is UpdateSubscription) {
-        stateManager.participantUpdateSubscription(action);
-      } else if (action is RemoveSubscription) {
-        stateManager.participantRemoveSubscription(action);
-      } else if (action is SetAudioOutputDevice) {
-        stateManager.participantSetAudioOutputDevice(action);
-      }
-    }
-    return result;
-  }
-
-  Future<Result<None>> _apply(ParticipantAction action) async {
-    _logger.d(() => '[apply] action: $action');
-    if (action is SetCameraEnabled) {
-      return setCameraEnabled(action.enabled);
-    } else if (action is SetMicrophoneEnabled) {
-      return setMicrophoneEnabled(action.enabled);
-    } else if (action is SetAudioInputDevice) {
-      return setAudioInputDevice(action.device);
-    } else if (action is SetScreenShareEnabled) {
-      return setScreenShareEnabled(action.enabled);
-    } else if (action is FlipCamera) {
-      return flipCamera();
-    } else if (action is SetVideoInputDevice) {
-      return setVideoInputDevice(action.device);
-    } else if (action is SetCameraPosition) {
-      return setCameraPosition(action.cameraPosition);
-    } else if (action is UpdateSubscriptions) {
-      return updateSubscriptions(action.actions);
-    } else if (action is UpdateSubscription) {
-      return updateSubscription(action);
-    } else if (action is RemoveSubscription) {
-      return updateSubscription(action);
-    } else if (action is SetSubscription) {
-      return  setSubscriptions([action]);
-    } else if (action is SetSubscriptions) {
-      return setSubscriptions(action.actions);
-    } else if (action is SetAudioOutputDevice) {
-      return setAudioOutputDevice(action.device);
-    }
-    return Result.error('Action not supported: $action');
-  }
-
   Future<void> _onSfuEvent(SfuEvent event) async {
     _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
     if (event is SfuSubscriberOfferEvent) {
