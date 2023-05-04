@@ -1,6 +1,5 @@
 import 'package:uuid/uuid.dart';
 
-import '../../call_state_manager.dart';
 import '../../core/utils.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
@@ -10,7 +9,6 @@ import '../../webrtc/sdp/editor/sdp_editor.dart';
 import '../state/call_state_notifier.dart';
 import 'call_session.dart';
 import 'call_session_config.dart';
-import 'call_session.dart';
 
 int _sessionSeq = 1;
 
