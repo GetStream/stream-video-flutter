@@ -22,6 +22,7 @@ import 'open_api_mapper_extensions.dart';
 
 // TODO: The class needs further refactor. Some parts can be abstracted.
 
+var _seq = 0;
 const _tag = 'SV:CoordinatorWS';
 
 String _buildUrl(String baseUrl, String apiKey) {
@@ -41,9 +42,13 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     required this.userInfo,
     required this.tokenManager,
     required this.retryPolicy,
-  }) : super(_buildUrl(url, apiKey), protocols: protocols, tag: _tag);
+  }) : super(
+          _buildUrl(url, apiKey),
+          protocols: protocols,
+          tag: '$_tag-${++_seq}',
+        );
 
-  late final _logger = taggedLogger(tag: _tag);
+  late final _logger = taggedLogger(tag: '$_tag-$_seq');
 
   late final HealthMonitor healthMonitor = HealthMonitorImpl('Coord', this);
 
@@ -68,13 +73,6 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   String? userId;
   String? clientId;
 
-  set callInfo(CallInfo? info) => _callInfo = info;
-  CallInfo? _callInfo;
-
-  // Do we need that? Cannot we just pass events to the listeners?
-  // @override
-  // OnConnectionStateUpdated get onConnectionStateUpdated => events.emit;
-
   @override
   Future<Result<None>> connect() {
     _logger.v(() => '[connect] no args');
@@ -93,6 +91,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       _logger.w(() => '[disconnect] rejected (already disconnected)');
       return Result.success(None());
     }
+    connectionState = ConnectionState.disconnected;
 
     healthMonitor.stop();
 
@@ -163,7 +162,6 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       () => '[onClose] closeCode: "$closeCode", closeReason: "$closeReason"',
     );
     healthMonitor.onSocketClose();
-    connectionState = ConnectionState.closed;
 
     _events.emit(
       CoordinatorDisconnectedEvent(
@@ -183,6 +181,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       connectionState = ConnectionState.disconnected;
       return;
     }
+    connectionState = ConnectionState.closed;
 
     _reconnect();
   }

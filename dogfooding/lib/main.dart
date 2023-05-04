@@ -98,9 +98,8 @@ class _StreamDogFoodingAppState
         token,
       );
 
-      final callCid = StreamCallCid.from(type: 'default', id: callId);
-      final data = await StreamVideo.instance.getOrCreateCall(cid: callCid);
-      final call = Call.fromCreated(data: data.getDataOrNull()!.data);
+      final call = StreamVideo.instance.makeCall(type: 'default', id: callId);
+      await call.getOrCreateCall();
 
       await _navigatorKey.currentState?.pushNamed(
         Routes.call,
@@ -128,7 +127,7 @@ class _StreamDogFoodingAppState
     if (incomingCall != null) {
       await Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
         Routes.call,
-        arguments: Call.fromCreated(data: incomingCall),
+        arguments: incomingCall,
       );
     }
   }

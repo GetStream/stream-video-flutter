@@ -27,6 +27,7 @@ Future<void> main() async {
   await _setupLogger();
 
   StreamBackgroundService.init(
+    StreamVideo.instance,
     onNotificationClick: (call) async {
       streamLog.i(_tag, () => '[onNotificationClick] call: $call');
       // TODO navigate to call
@@ -72,7 +73,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    streamLog.i(_tag, () => '[build] activeCall: ${Call.activeCall}');
+    final activeCall = StreamVideo.instance.activeCall;
+    streamLog.i(_tag, () => '[build] activeCall: $activeCall');
 
     final darkAppTheme = StreamVideoTheme.dark();
     final lightAppTheme = StreamVideoTheme.light();

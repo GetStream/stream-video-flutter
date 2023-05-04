@@ -9,3 +9,6 @@ abstract class PushNotificationManager {
 
   Future<CallCreatedData?> consumeIncomingCall();
 }
+
+typedef PushNotificationManagerFactory = Future<PushNotificationManager>
+    Function(CoordinatorClient client);
