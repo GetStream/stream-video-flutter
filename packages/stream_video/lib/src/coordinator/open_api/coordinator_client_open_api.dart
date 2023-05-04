@@ -19,8 +19,6 @@ import '../../token/token.dart';
 import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
-import '../../utils/standard.dart';
-import '../../utils/subscriptions.dart';
 import '../coordinator_client.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_inputs.dart' as inputs;
@@ -74,8 +72,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     _logger.d(() => '[connectUser] user: $user');
     if (_user != null) {
       _logger.w(() => '[connectUser] rejected (another user in use): $_user');
-      return Result.error('Another user is in use, '
-          'please call "disconnectUser" first');
+      return Result.error(
+        'Another user is in use, please call "disconnectUser" first',
+      );
     }
     _user = user;
     _ws = _createWebSocket(user).also((ws) {
@@ -90,7 +89,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       final ws = _ws;
       if (ws == null) {
         _logger.w(() => '[openConnection] rejected (no WS)');
-        return Result.error('WS is not initialized');
+        return Result.error('WS is not initialized, call "connectUser" first');
       }
       if (!ws.isDisconnected) {
         _logger.w(() => '[openConnection] rejected (not closed)');
@@ -134,9 +133,17 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return Result.success(None());
     }
     _user = null;
-    await _wsSubscription?.cancel();
-    _wsSubscription = null;
-    return closeConnection();
+
+    final closedResult = await closeConnection();
+    return closedResult.when(
+      success: (_) async {
+        _ws = null;
+        await _wsSubscription?.cancel();
+        _wsSubscription = null;
+        return Result.success(None());
+      },
+      failure: Result.failure,
+    );
   }
 
   CoordinatorWebSocketOpenApi _createWebSocket(UserInfo user) {
