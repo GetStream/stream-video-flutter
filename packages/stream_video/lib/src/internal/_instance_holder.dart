@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../latency/latency_settings.dart';
 import '../retry/retry_policy.dart';
 import '../stream_video.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
@@ -12,7 +13,7 @@ class InstanceHolder {
     String apiKey, {
     required String coordinatorRpcUrl,
     required String coordinatorWsUrl,
-    required int latencyMeasurementRounds,
+    required LatencySettings latencySettings,
     required RetryPolicy retryPolicy,
     required SdpPolicy sdpPolicy,
   }) {
@@ -27,7 +28,7 @@ class InstanceHolder {
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
-      latencyMeasurementRounds: latencyMeasurementRounds,
+      latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
     );

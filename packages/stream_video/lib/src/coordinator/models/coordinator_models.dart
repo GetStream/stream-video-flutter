@@ -76,6 +76,12 @@ class SfuLatency extends CoordinatorModel {
     required this.measurementsSeconds,
   });
 
+  factory SfuLatency.maxFinite(int rounds) {
+    return SfuLatency(
+      measurementsSeconds: List.filled(rounds, double.maxFinite),
+    );
+  }
+
   final List<double> measurementsSeconds;
 
   @override
