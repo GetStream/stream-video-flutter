@@ -2,9 +2,9 @@ import 'package:meta/meta.dart';
 
 import '../../../stream_video.dart';
 import '../../action/call_action.dart';
-import '../../call_state_manager.dart';
 import '../../models/call_permission.dart';
 import '../../utils/none.dart';
+import '../state/call_state_notifier.dart';
 
 typedef GetStateOrNull = CallState? Function();
 
@@ -20,7 +20,7 @@ class PermissionsManager {
 
   final StreamCallCid callCid;
   final StreamVideo streamVideo;
-  final CallStateManager stateManager;
+  final CallStateNotifier stateManager;
 
   Future<Result<None>> endCall() async {
     if (!_hasPermission(CallPermission.endCall)) {
@@ -205,7 +205,7 @@ class PermissionsManager {
   }
 
   bool _canRequestPermission(CallPermission permission) {
-    final settings = stateManager.state.valueOrNull?.settings;
+    final settings = stateManager.callStateStream.valueOrNull?.settings;
     if (settings == null) {
       _logger.w(() => 'canRequestPermission: no settings');
       return false;
@@ -224,7 +224,7 @@ class PermissionsManager {
   }
 
   bool _hasPermission(CallPermission permission) {
-    final capabilities = stateManager.state.valueOrNull?.ownCapabilities;
+    final capabilities = stateManager.callStateStream.valueOrNull?.ownCapabilities;
     if (capabilities == null || capabilities.isEmpty) {
       _logger.w(() => '[hasPermission] rejected (no capabilities)');
       return false;

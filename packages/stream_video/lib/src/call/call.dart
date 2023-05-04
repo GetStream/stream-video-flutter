@@ -8,7 +8,6 @@ import '../action/internal/lifecycle_action.dart';
 import '../call_state_manager.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../errors/video_error_composer.dart';
-import '../middleware/query_members_middleware.dart';
 import '../models/call_credentials.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
@@ -23,6 +22,7 @@ import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import 'permissions/permissions_manager.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
+import 'state/call_state_notifier.dart';
 
 typedef OnCallPermissionRequest = void Function(
   CoordinatorCallPermissionRequestEvent,
@@ -80,7 +80,7 @@ class Call {
       callCid: data.callCid,
       streamVideo: streamVideo,
       preferences: preferences,
-    ).also((it) => it._stateManager.dispatch(SetLifecycleStage.created(data)));
+    ).also((it) => it._stateManager.lifecycleCallCreated(CallCreated(data)));
   }
 
   factory Call.fromJoined({
@@ -94,7 +94,7 @@ class Call {
       streamVideo: streamVideo,
       preferences: preferences,
       credentials: data.credentials,
-    ).also((it) => it._stateManager.dispatch(SetLifecycleStage.joined(data)));
+    ).also((it) => it._stateManager.lifecycleCallJoined(CallJoined(data)));
   }
 
   factory Call._internal({
@@ -127,11 +127,11 @@ class Call {
   Call._({
     required StreamVideo streamVideo,
     required CallPreferences preferences,
-    required CallStateManager stateManager,
+    required CallStateNotifier stateManager,
     required PermissionsManager permissionManager,
     CallCredentials? credentials,
   })  : _sessionFactory = CallSessionFactory(
-          callCid: stateManager.state.value.callCid,
+          callCid: stateManager.callState.callCid,
           sdpEditor: SdpEditorImpl(streamVideo.sdpPolicy),
         ),
         _stateManager = stateManager,
@@ -140,10 +140,10 @@ class Call {
         _preferences = preferences,
         _retryPolicy = streamVideo.retryPolicy,
         _credentials = credentials {
-    streamLog.i(_tag, () => '<init> state: ${stateManager.state.value}');
+    streamLog.i(_tag, () => '<init> state: ${stateManager.callState}');
     _subscriptions.add(
       _idState,
-      stateManager.state.listen((state) async => _onStateChanged(state)),
+      stateManager.callStateStream.listen((state) async => _onStateChanged(state)),
     );
     _subscriptions.add(
       _idCoordEvents,
@@ -164,7 +164,7 @@ class Call {
   final RetryPolicy _retryPolicy;
   final CallPreferences _preferences;
   final CallSessionFactory _sessionFactory;
-  final CallStateManager _stateManager;
+  final CallStateNotifier _stateManager;
   final PermissionsManager _permissionsManager;
 
   CallCredentials? _credentials;
@@ -176,7 +176,7 @@ class Call {
 
   String get id => state.value.callId;
 
-  StateEmitter<CallState> get state => _stateManager.state;
+  StateEmitter<CallState> get state => _stateManager.callStateStream;
 
   SharedEmitter<CallStats> get stats => _stats;
   late final _stats = MutableSharedEmitterImpl<CallStats>();
@@ -260,7 +260,7 @@ class Call {
       cid: state.callCid,
     );
     if (result is Success<None>) {
-      _stateManager.dispatch(SetLifecycleStage.accepted());
+      _stateManager.lifecycleCallAccepted(const CallAccepted());
     }
     return result;
   }
@@ -276,7 +276,7 @@ class Call {
       cid: state.callCid,
     );
     if (result is Success<None>) {
-      _stateManager.dispatch(SetLifecycleStage.rejected());
+      _stateManager.lifecycleCallRejected(const CallRejected());
     }
     return result;
   }
@@ -292,14 +292,14 @@ class Call {
     _status.value = _ConnectionStatus.disconnected;
     await _clear('end');
     final result = await _permissionsManager.endCall();
-    _stateManager.dispatch(SetLifecycleStage.ended());
+    _stateManager.lifecycleCallEnded(const CallEnded());
     _logger.v(() => '[end] completed: $result');
     return result;
   }
 
   Future<Result<None>> join() async {
     _logger.d(() => '[join] no args');
-    _stateManager.dispatch(SetLifecycleStage.joining());
+    _stateManager.lifecycleCallJoining(const CallJoining());
     final joinedResult = await _joinIfNeeded();
     if (joinedResult is Success<CallCredentials>) {
       _logger.v(() => '[join] completed');
@@ -308,7 +308,7 @@ class Call {
       final failedResult = joinedResult as Failure;
       _logger.e(() => '[join] failed: $failedResult');
       final error = failedResult.error;
-      _stateManager.dispatch(SetLifecycleStage.connectFailed(error));
+      _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
       return failedResult;
     }
   }
@@ -388,7 +388,7 @@ class Call {
     if (sessionResult is! Success<None>) {
       _logger.w(() => '[connect] sfu session start failed: $sessionResult');
       final error = (sessionResult as Failure).error;
-      _stateManager.dispatch(SetLifecycleStage.connectFailed(error));
+      _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
       return sessionResult;
     }
     _logger.v(() => '[connect] started session');
@@ -478,7 +478,7 @@ class Call {
     final startTime = DateTime.now().toUtc().millisecondsSinceEpoch;
     while (true) {
       _reconnectAttempt++;
-      _stateManager.dispatch(SetLifecycleStage.connecting(_reconnectAttempt));
+      _stateManager.lifecycleCallConnectingAction(CallConnecting(_reconnectAttempt));
       if (_status.value == _ConnectionStatus.disconnected) {
         _logger.w(() =>
             '[reconnect] attempt($_reconnectAttempt) rejected (disconnected)');
@@ -518,11 +518,11 @@ class Call {
       _logger.e(() => '[reconnect] <<<<<<<<<<<<<<< failed: $result');
       _status.value = _ConnectionStatus.disconnected;
       final error = (result as Failure).error;
-      _stateManager.dispatch(SetLifecycleStage.connectFailed(error));
+      _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
       return;
     }
     _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< completed');
-    _stateManager.dispatch(SetLifecycleStage.connected());
+    _stateManager.lifecycleCallConnected(const CallConnected());
     _status.value = _ConnectionStatus.connected;
     await _applyConnectOptions();
     _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< side effects applied');
@@ -565,7 +565,7 @@ class Call {
     }
     _status.value = _ConnectionStatus.disconnected;
     await _clear('disconnect');
-    _stateManager.dispatch(SetLifecycleStage.disconnected());
+    _stateManager.lifecycleCallDisconnected(CallDisconnected());
     _logger.v(() => '[disconnect] finished');
     return Result.success(None());
   }
@@ -719,30 +719,26 @@ class Call {
   }
 }
 
-CallStateManager _makeStateManager(
+CallStateNotifier _makeStateManager(
   StreamCallCid callCid,
   StreamVideo streamVideo,
   CallPreferences callPreferences,
 ) {
   final currentUserId = streamVideo.currentUser?.id ?? '';
-  final middlewares = [
-    QueryMembersMiddleware(streamVideo: streamVideo),
-  ];
 
-  return CallStateManager(
-    initialState: CallState(
+  return CallStateNotifier(
+    CallState(
       currentUserId: currentUserId,
       callCid: callCid,
     ),
-    middlewares: middlewares,
-    callPreferences: callPreferences,
+    callPreferences,
   );
 }
 
 PermissionsManager _makePermissionAwareManager(
   StreamCallCid callCid,
   StreamVideo streamVideo,
-  CallStateManager stateManager,
+  CallStateNotifier stateManager,
 ) {
   return PermissionsManager(
     callCid: callCid,
@@ -751,15 +747,15 @@ PermissionsManager _makePermissionAwareManager(
   );
 }
 
-extension on CallStateManager {
+extension on CallStateNotifier {
   Future<Result<None>> validateUserId(StreamVideo streamVideo) async {
-    final stateUserId = state.value.currentUserId;
+    final stateUserId = callState.currentUserId;
     final currentUserId = streamVideo.currentUser?.id ?? '';
     if (currentUserId.isEmpty) {
       return Result.error('no userId');
     }
     if (stateUserId.isEmpty) {
-      dispatch(SetUserId(currentUserId));
+      lifecycleUpdateUserId(SetUserId(currentUserId));
     }
     return Result.success(None());
   }

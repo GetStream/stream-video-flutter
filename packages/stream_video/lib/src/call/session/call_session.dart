@@ -30,6 +30,7 @@ import '../../webrtc/peer_connection.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
+import '../state/call_state_notifier.dart';
 import 'call_session_config.dart';
 
 const _tag = 'SV:CallSession';
@@ -68,7 +69,7 @@ class CallSession extends Disposable {
   final int sessionSeq;
   final String sessionId;
   final CallSessionConfig config;
-  final CallStateManager stateManager;
+  final CallStateNotifier stateManager;
   final SfuClient sfuClient;
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
@@ -114,7 +115,7 @@ class CallSession extends Disposable {
       );
 
       _logger.v(() => '[start] sfu joined: $event');
-      final currentUserId = stateManager.state.value.currentUserId;
+      final currentUserId = stateManager.callState.currentUserId;
       final localParticipant = event.callState.participants.firstWhere(
         (it) => it.userId == currentUserId,
       );
@@ -247,7 +248,7 @@ class CallSession extends Disposable {
       return participant.userId == userId && participant.sessionId == sessionId;
     }
 
-    final callParticipants = stateManager.state.value.callParticipants;
+    final callParticipants = stateManager.callState.callParticipants;
     final participant = callParticipants.firstWhereOrNull(matchParticipant);
 
     if (participant == null) {
@@ -443,7 +444,8 @@ class CallSession extends Disposable {
     if (remoteTrack.isAudioTrack) {
       await _applyCurrentAudioOutputDevice();
     }
-    return stateManager.dispatch(
+
+    return stateManager.rtcUpdateSubscriberTrack(
       UpdateSubscriberTrack(
         trackIdPrefix: remoteTrack.trackIdPrefix,
         trackType: remoteTrack.trackType,
@@ -452,7 +454,7 @@ class CallSession extends Disposable {
   }
 
   Future<void> _applyCurrentAudioOutputDevice() async {
-    final state = stateManager.state.valueOrNull;
+    final state = stateManager.callStateStream.valueOrNull;
     final audioOutputDevice = state?.audioOutputDevice;
     if (audioOutputDevice != null) {
       await _onSetAudioOutputDevice(audioOutputDevice);
@@ -476,7 +478,7 @@ class CallSession extends Disposable {
   Future<Result<None>> _setSubscriptions(
     List<SetSubscription> actions,
   ) async {
-    final participants = stateManager.state.value.callParticipants;
+    final participants = stateManager.callState.callParticipants;
     _logger.d(() => '[setSubscriptions] actions: $actions');
     final subscriptions = <String, SfuSubscriptionDetails>{};
     final exclude = {SfuTrackType.video, SfuTrackType.screenShare};
@@ -505,7 +507,7 @@ class CallSession extends Disposable {
     List<SubscriptionAction> actions,
   ) async {
     _logger.d(() => '[updateSubscriptions] actions: $actions');
-    final participants = stateManager.state.value.callParticipants;
+    final participants = stateManager.callState.callParticipants;
     final subscriptions = <String, SfuSubscriptionDetails>{};
     participants.getSubscriptions(subscriptions);
     _logger.v(() => '[updateSubscriptions] source: $subscriptions');
