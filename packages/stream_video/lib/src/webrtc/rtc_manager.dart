@@ -615,7 +615,7 @@ extension RtcManagerTrackHelper on RtcManager {
         publishedTracks[updatedTrack.trackId] = updatedTrack;
       }
 
-      return Result.success(None());
+      return const Result.success(none);
     }
 
     try {
@@ -626,7 +626,7 @@ extension RtcManagerTrackHelper on RtcManager {
         publishedTracks[updatedTrack.trackId] = updatedTrack;
       }
 
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[setAudioOutputDevice] rejected: $e');
       return Result.failure(VideoErrors.compose(e, stk));

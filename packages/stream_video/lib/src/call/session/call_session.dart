@@ -9,8 +9,6 @@ import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
 import '../../action/internal/rtc_action.dart';
-import '../../action/internal/sfu_action.dart';
-import '../../call_state_manager.dart';
 import '../../disposable.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
@@ -30,6 +28,7 @@ import '../../webrtc/peer_connection.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
+import '../state/call_state_notifier.dart';
 import 'call_session_config.dart';
 
 const _tag = 'SV:CallSession';
@@ -68,7 +67,7 @@ class CallSession extends Disposable {
   final int sessionSeq;
   final String sessionId;
   final CallSessionConfig config;
-  final CallStateManager stateManager;
+  final CallStateNotifier stateManager;
   final SfuClient sfuClient;
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
@@ -82,7 +81,7 @@ class CallSession extends Disposable {
 
   late final _saBuffer = DebounceBuffer<SubscriptionAction, Result<None>>(
     duration: _debounceDuration,
-    onBuffered: _updateSubscriptions,
+    onBuffered: updateSubscriptions,
     onCancel: () => Result.error('SubscriptionAction cancelled'),
   );
 
@@ -120,7 +119,7 @@ class CallSession extends Disposable {
       );
 
       _logger.v(() => '[start] sfu joined: $event');
-      final currentUserId = stateManager.state.value.currentUserId;
+      final currentUserId = stateManager.callState.currentUserId;
       final localParticipant = event.callState.participants.firstWhere(
         (it) => it.userId == currentUserId,
       );
@@ -138,7 +137,7 @@ class CallSession extends Disposable {
         ..onStatsReceived = _onStatsReceived;
 
       _logger.v(() => '[start] completed');
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[start] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -167,7 +166,7 @@ class CallSession extends Disposable {
     }
 
     final result = await rtcManager.publishTrack(track);
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
   RtcTrack? getTrack(String trackIdPrefix, SfuTrackType trackType) {
@@ -177,53 +176,6 @@ class CallSession extends Disposable {
 
   List<RtcTrack> getTracks(String trackIdPrefix) {
     return [...?rtcManager?.getTracks(trackIdPrefix)];
-  }
-
-  Future<Result<None>> apply(ParticipantAction action) async {
-    _logger.d(() => '[apply] action: $action');
-    final result = await _apply(action);
-    if (result.isSuccess) {
-      stateManager.dispatch(action);
-    }
-    return result;
-  }
-
-  Future<Result<None>> _apply(ParticipantAction action) async {
-    _logger.d(() => '[apply] action: $action');
-    if (action is SetCameraEnabled) {
-      return _onSetCameraEnabled(action.enabled);
-    } else if (action is SetMicrophoneEnabled) {
-      return _onSetMicrophoneEnabled(action.enabled);
-    } else if (action is SetAudioInputDevice) {
-      return _onSetAudioInputDevice(action.device);
-    } else if (action is SetScreenShareEnabled) {
-      return _onSetScreenShareEnabled(action.enabled);
-    } else if (action is FlipCamera) {
-      return _onFlipCamera();
-    } else if (action is SetVideoInputDevice) {
-      return _onSetVideoInputDevice(action.device);
-    } else if (action is SetCameraPosition) {
-      return _onSetCameraPosition(action.cameraPosition);
-    } else if (action is UpdateSubscriptions) {
-      return _updateSubscriptions(action.actions);
-    } else if (action is UpdateSubscription) {
-      return _updateSubscription(action);
-    } else if (action is RemoveSubscription) {
-      return _updateSubscription(action);
-    } else if (action is SetSubscription) {
-      return _setSubscriptions([action]);
-    } else if (action is SetSubscriptions) {
-      return _setSubscriptions(action.actions);
-    } else if (action is SetAudioOutputDevice) {
-      return _onSetAudioOutputDevice(action.device);
-    } else if (action is SetParticipantPinned) {
-      return _setParticipantPinned(action);
-    } else if (action is UpdateViewportVisibility) {
-      return _updateViewportVisibility(action);
-    } else if (action is UpdateViewportVisibilities) {
-      return _updateViewportVisibilities(action.actions);
-    }
-    return Result.error('Action not supported: $action');
   }
 
   Future<void> _onSfuEvent(SfuEvent event) async {
@@ -240,7 +192,23 @@ class CallSession extends Disposable {
       await _onTrackUnpublished(event);
     }
 
-    return stateManager.dispatch(SfuEventAction(event));
+    if (event is SfuJoinResponseEvent) {
+      stateManager.sfuJoinResponse(event);
+    } else if (event is SfuParticipantJoinedEvent) {
+      stateManager.sfuParticipantJoined(event);
+    } else if (event is SfuParticipantLeftEvent) {
+      stateManager.sfuParticipantLeft(event);
+    } else if (event is SfuConnectionQualityChangedEvent) {
+      stateManager.sfuConnectionQualityChanged(event);
+    } else if (event is SfuAudioLevelChangedEvent) {
+      stateManager.sfuUpdateAudioLevelChanged(event);
+    } else if (event is SfuTrackPublishedEvent) {
+      stateManager.sfuTrackPublished(event);
+    } else if (event is SfuTrackUnpublishedEvent) {
+      stateManager.sfuTrackUnpublished(event);
+    } else if (event is SfuDominantSpeakerChangedEvent) {
+      stateManager.sfuDominantSpeakerChanged(event);
+    }
   }
 
   Future<void> _onParticipantLeft(SfuParticipantLeftEvent event) async {
@@ -259,7 +227,7 @@ class CallSession extends Disposable {
       return participant.userId == userId && participant.sessionId == sessionId;
     }
 
-    final callParticipants = stateManager.state.value.callParticipants;
+    final callParticipants = stateManager.callState.callParticipants;
     final participant = callParticipants.firstWhereOrNull(matchParticipant);
 
     if (participant == null) {
@@ -455,7 +423,8 @@ class CallSession extends Disposable {
     if (remoteTrack.isAudioTrack) {
       await _applyCurrentAudioOutputDevice();
     }
-    return stateManager.dispatch(
+
+    return stateManager.rtcUpdateSubscriberTrack(
       UpdateSubscriberTrack(
         trackIdPrefix: remoteTrack.trackIdPrefix,
         trackType: remoteTrack.trackType,
@@ -464,10 +433,10 @@ class CallSession extends Disposable {
   }
 
   Future<void> _applyCurrentAudioOutputDevice() async {
-    final state = stateManager.state.valueOrNull;
+    final state = stateManager.callStateStream.valueOrNull;
     final audioOutputDevice = state?.audioOutputDevice;
     if (audioOutputDevice != null) {
-      await _onSetAudioOutputDevice(audioOutputDevice);
+      await setAudioOutputDevice(audioOutputDevice);
     }
   }
 
@@ -508,12 +477,12 @@ class CallSession extends Disposable {
     return Result.success(None());
   }
 
-  Future<Result<None>> _setSubscriptions(
+  Future<Result<None>> setSubscriptions(
     List<SetSubscription> actions,
   ) async {
     _logger.d(() => '[setSubscriptions] actions: $actions');
 
-    final participants = stateManager.state.value.callParticipants;
+    final participants = stateManager.callState.callParticipants;
     final exclude = {SfuTrackType.video, SfuTrackType.screenShare};
     final subscriptions = <String, SfuSubscriptionDetails>{
       ...participants.getSubscriptions(exclude: exclude),
@@ -534,18 +503,18 @@ class CallSession extends Disposable {
     return result;
   }
 
-  Future<Result<None>> _updateSubscription(
+  Future<Result<None>> updateSubscription(
     SubscriptionAction action,
   ) async {
     _logger.d(() => '[updateSubscription] action: $action');
     return _saBuffer.post(action);
   }
 
-  Future<Result<None>> _updateSubscriptions(
+  Future<Result<None>> updateSubscriptions(
     List<SubscriptionAction> actions,
   ) async {
     _logger.d(() => '[updateSubscriptions] actions: $actions');
-    final participants = stateManager.state.value.callParticipants;
+    final participants = stateManager.callState.callParticipants;
     final subscriptions = <String, SfuSubscriptionDetails>{
       ...participants.getSubscriptions(),
     };
@@ -566,7 +535,7 @@ class CallSession extends Disposable {
     return result;
   }
 
-  Future<Result<None>> _onSetAudioOutputDevice(RtcMediaDevice device) async {
+  Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set speaker device, Call not connected');
@@ -575,74 +544,74 @@ class CallSession extends Disposable {
     return rtcManager.setAudioOutputDevice(device: device);
   }
 
-  Future<Result<None>> _onSetCameraEnabled(bool enabled) async {
+  Future<Result<None>> setCameraEnabled(bool enabled) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set camera, Call not connected');
     }
 
     final result = await rtcManager.setCameraEnabled(enabled: enabled);
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
-  Future<Result<None>> _onSetMicrophoneEnabled(bool enabled) async {
+  Future<Result<None>> setMicrophoneEnabled(bool enabled) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set microphone, Call not connected');
     }
 
     final result = await rtcManager.setMicrophoneEnabled(enabled: enabled);
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
-  Future<Result<None>> _onSetAudioInputDevice(RtcMediaDevice device) async {
+  Future<Result<None>> setAudioInputDevice(RtcMediaDevice device) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set audioInput, Call not connected');
     }
 
     final result = await rtcManager.setAudioInputDevice(device: device);
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
-  Future<Result<None>> _onSetScreenShareEnabled(bool enabled) async {
+  Future<Result<None>> setScreenShareEnabled(bool enabled) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set ScreenShare, Call not connected');
     }
 
     final result = await rtcManager.setScreenShareEnabled(enabled: enabled);
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
-  Future<Result<None>> _onFlipCamera() async {
+  Future<Result<None>> flipCamera() async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to flip camera, Call not connected');
     }
 
     final result = await rtcManager.flipCamera();
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
-  Future<Result<None>> _onSetVideoInputDevice(RtcMediaDevice device) async {
+  Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set video input, Call not connected');
     }
 
     final result = await rtcManager.setVideoInputDevice(device: device);
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
-  Future<Result<None>> _onSetCameraPosition(CameraPosition position) async {
+  Future<Result<None>> setCameraPosition(CameraPosition position) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set camera position, Call not connected');
     }
 
     final result = await rtcManager.setCameraPosition(cameraPosition: position);
-    return result.map((_) => None());
+    return result.map((_) => none);
   }
 
   @override
@@ -698,7 +667,7 @@ extension on SfuClient {
           final error = it.data.error;
           return Result.error('${error.code} - ${error.message}');
         }
-        return Result.success(None());
+        return const Result.success(none);
       },
     );
   }

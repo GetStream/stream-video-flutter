@@ -50,7 +50,7 @@ Future<void> main() async {
       final edges = _generateEdges(count: edgeCount);
       when(
         () => client.fetch(any()),
-      ).thenAnswer((_) => Future.delayed(fetchDuration, None.new));
+      ).thenAnswer((_) => Future.delayed(fetchDuration, () => none));
 
       /* When */
       final latencies = (await service.measureEdgeLatencies(edges))
@@ -104,7 +104,7 @@ Future<void> main() async {
       final edges = _generateEdges(count: edgeCount);
       when(
         () => client.fetch(any()),
-      ).thenAnswer((_) => Future.delayed(fetchDuration, None.new));
+      ).thenAnswer((_) => Future.delayed(fetchDuration, () => none));
 
       /* When */
       final latencies = (await service.measureEdgeLatencies(edges))

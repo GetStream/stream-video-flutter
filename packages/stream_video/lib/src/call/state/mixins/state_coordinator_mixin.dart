@@ -1,37 +1,21 @@
 import 'package:collection/collection.dart';
+import 'package:state_notifier/state_notifier.dart';
 
-import '../action/internal/coordinator_action.dart';
-import '../call_state.dart';
-import '../coordinator/models/coordinator_events.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../models/call_participant_state.dart';
-import '../models/call_status.dart';
-import '../models/disconnect_reason.dart';
-import '../store/store.dart';
+import '../../../action/internal/coordinator_action.dart';
+import '../../../call_state.dart';
+import '../../../coordinator/models/coordinator_events.dart';
+import '../../../logger/impl/tagged_logger.dart';
+import '../../../models/call_participant_state.dart';
+import '../../../models/call_status.dart';
+import '../../../models/disconnect_reason.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
-class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
-  const CoordinatorReducer();
-
-  @override
-  CallState reduce(
-    CallState state,
-    CoordinatorAction action,
-  ) {
-    if (action is UpdateUsers) {
-      return _reduceUsers(state, action);
-    } else if (action is CoordinatorEventAction) {
-      return _reduceCoordinatorEvent(state, action.event);
-    }
-    return state;
-  }
-
-  CallState _reduceUsers(
-    CallState state,
+mixin StateCoordinatorMixin on StateNotifier<CallState> {
+  void coordinatorUpdateUsers(
     UpdateUsers action,
   ) {
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: state.callParticipants.map(
         (participant) {
           final user = action.users[participant.userId];
@@ -46,53 +30,27 @@ class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
     );
   }
 
-  CallState _reduceCoordinatorEvent(
-    CallState state,
-    CoordinatorCallEvent event,
-  ) {
-    if (event is CoordinatorCallRejectedEvent) {
-      return _reduceCallRejected(state, event);
-    } else if (event is CoordinatorCallAcceptedEvent) {
-      return _reduceCallAccepted(state, event);
-    } else if (event is CoordinatorCallEndedEvent) {
-      return _reduceCallEnded(state, event);
-    } else if (event is CoordinatorCallPermissionsUpdatedEvent) {
-      return _reduceCallPermissionsUpdated(state, event);
-    } else if (event is CoordinatorCallRecordingStartedEvent) {
-      return _reduceCallRecordingStarted(state, event);
-    } else if (event is CoordinatorCallRecordingStoppedEvent) {
-      return _reduceCallRecordingStopped(state, event);
-    } else if (event is CoordinatorCallBroadcastingStartedEvent) {
-      return _reduceCallBroadcastingStarted(state, event);
-    } else if (event is CoordinatorCallBroadcastingStoppedEvent) {
-      return _reduceCallBroadcastingStopped(state, event);
-    }
-    return state;
-  }
-
-  CallState _reduceCallAccepted(
-    CallState state,
+  void coordinatorUpdateCallAccepted(
     CoordinatorCallAcceptedEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusOutgoing) {
       _logger.w(() => '[reduceCallAccepted] rejected (status is not Outgoing)');
-      return state;
+      return;
     }
     final participant = state.callParticipants.firstWhereOrNull((participant) {
       return participant.userId == event.acceptedByUserId;
     });
     if (participant == null) {
       _logger.w(() => '[reduceCallAccepted] rejected (accepted by non-Member)');
-      return state;
+      return;
     }
-    return state.copyWith(
+    state = state.copyWith(
       status: CallStatus.outgoing(acceptedByCallee: true),
     );
   }
 
-  CallState _reduceCallRejected(
-    CallState state,
+  void coordinatorUpdateCallRejected(
     CoordinatorCallRejectedEvent event,
   ) {
     final status = state.status;
@@ -101,7 +59,7 @@ class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
       _logger.w(
         () => '[reduceCallRejected] rejected (status is not Active): $status',
       );
-      return state;
+      return;
     }
     final participantIndex = state.callParticipants.indexWhere((participant) {
       return participant.userId == event.rejectedByUserId;
@@ -111,13 +69,13 @@ class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
         () => '[reduceCallRejected] rejected '
             '(by unknown user): ${event.rejectedByUserId}',
       );
-      return state;
+      return;
     }
     final callParticipants = [...state.callParticipants];
     final removed = callParticipants.removeAt(participantIndex);
     if (removed.userId == state.currentUserId ||
         callParticipants.hasSingle(state.currentUserId)) {
-      return state.copyWith(
+      state = state.copyWith(
         status: CallStatus.disconnected(
           DisconnectReason.rejected(
             byUserId: removed.userId,
@@ -127,24 +85,23 @@ class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
         callParticipants: callParticipants,
       );
     }
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: callParticipants,
     );
   }
 
-  CallState _reduceCallEnded(
-    CallState state,
+  void coordinatorCallEnded(
     CoordinatorCallEndedEvent event,
   ) {
     _logger.i(() => '[reduceCallCancelled] state: $state');
     final status = state.status;
     if (status is! CallStatusActive) {
       _logger.w(() => '[reduceCallEnded] rejected (status is not Active)');
-      return state;
+      return;
     }
     if (state.callCid != event.callCid) {
       _logger.w(() => '[reduceCallEnded] rejected (invalid cid): $event');
-      return state;
+      return;
     }
     // final participantIndex = state.callParticipants.indexWhere((participant) {
     //   return participant.userId == event.endedByUserId;
@@ -173,7 +130,7 @@ class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
     //   callParticipants: callParticipants,
     // );
 
-    return state.copyWith(
+    state = state.copyWith(
       status: CallStatus.disconnected(
         DisconnectReason.ended(),
       ),
@@ -181,8 +138,7 @@ class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
     );
   }
 
-  CallState _reduceCallPermissionsUpdated(
-    CallState state,
+  void coordinatorCallPermissionsUpdated(
     CoordinatorCallPermissionsUpdatedEvent event,
   ) {
     final status = state.status;
@@ -190,18 +146,17 @@ class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
       _logger.w(
         () => '[reduceCallPermissionsUpdated] rejected (status is not Active)',
       );
-      return state;
+      return;
     }
 
-    return state.copyWith(
+    state = state.copyWith(
       ownCapabilities: List.unmodifiable(
         event.ownCapabilities,
       ),
     );
   }
 
-  CallState _reduceCallRecordingStarted(
-    CallState state,
+  void coordinatorCallRecordingStarted(
     CoordinatorCallRecordingStartedEvent event,
   ) {
     final status = state.status;
@@ -209,16 +164,15 @@ class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
       _logger.w(
         () => '[reduceCallRecordingStarted] rejected (status is not Active)',
       );
-      return state;
+      return;
     }
 
-    return state.copyWith(
+    state = state.copyWith(
       isRecording: true,
     );
   }
 
-  CallState _reduceCallRecordingStopped(
-    CallState state,
+  void coordinatorCallRecordingStopped(
     CoordinatorCallRecordingStoppedEvent event,
   ) {
     final status = state.status;
@@ -226,16 +180,15 @@ class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
       _logger.w(
         () => '[reduceCallRecordingStopped] rejected (status is not Active)',
       );
-      return state;
+      return;
     }
 
-    return state.copyWith(
+    state = state.copyWith(
       isRecording: false,
     );
   }
 
-  CallState _reduceCallBroadcastingStarted(
-    CallState state,
+  void coordinatorCallBroadcastingStarted(
     CoordinatorCallBroadcastingStartedEvent event,
   ) {
     final status = state.status;
@@ -243,16 +196,15 @@ class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
       _logger.w(
         () => '[reduceCallBroadcastingStarted] rejected (status is not Active)',
       );
-      return state;
+      return;
     }
 
-    return state.copyWith(
+    state = state.copyWith(
       isBroadcasting: true,
     );
   }
 
-  CallState _reduceCallBroadcastingStopped(
-    CallState state,
+  void coordinatorCallBroadcastingStopped(
     CoordinatorCallBroadcastingStoppedEvent event,
   ) {
     final status = state.status;
@@ -260,10 +212,10 @@ class CoordinatorReducer extends Reducer<CallState, CoordinatorAction> {
       _logger.w(
         () => '[reduceCallBroadcastingStopped] rejected (status is not Active)',
       );
-      return state;
+      return;
     }
 
-    return state.copyWith(
+    state = state.copyWith(
       isBroadcasting: false,
     );
   }

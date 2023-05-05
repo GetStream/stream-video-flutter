@@ -1,8 +1,6 @@
 library stream_video;
 
 export 'src/action/participant_action.dart';
-export 'src/call/actions/call_actions.dart';
-export 'src/call/actions/participant_actions.dart';
 export 'src/call/call.dart';
 export 'src/call/call_connect_options.dart';
 export 'src/call_state.dart';

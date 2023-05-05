@@ -1,33 +1,20 @@
-import '../action/internal/rtc_action.dart';
-import '../call_state.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../models/call_track_state.dart';
-import '../store/store.dart';
+import 'package:state_notifier/state_notifier.dart';
 
-final _logger = taggedLogger(tag: 'SV:Reducer-RTC');
+import '../../../action/internal/rtc_action.dart';
+import '../../../call_state.dart';
+import '../../../logger/impl/tagged_logger.dart';
+import '../../../models/call_track_state.dart';
 
-class RtcReducer extends Reducer<CallState, RtcAction> {
-  const RtcReducer();
+final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
-  @override
-  CallState reduce(
-    CallState state,
-    RtcAction action,
-  ) {
-    if (action is UpdateSubscriberTrack) {
-      return _reduceSubscriberTrack(state, action);
-    }
-    return state;
-  }
-
-  CallState _reduceSubscriberTrack(
-    CallState state,
+mixin StateRtcMixin on StateNotifier<CallState> {
+  void rtcUpdateSubscriberTrack(
     UpdateSubscriberTrack action,
   ) {
     _logger.d(
       () => '[reduceSubTrackReceived] ${state.sessionId}; action: $action',
     );
-    return state.copyWith(
+    state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         final trackState = participant.publishedTracks[action.trackType];
         if (participant.trackIdPrefix == action.trackIdPrefix &&
