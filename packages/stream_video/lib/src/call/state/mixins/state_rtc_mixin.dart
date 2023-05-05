@@ -5,14 +5,14 @@ import '../../../call_state.dart';
 import '../../../logger/impl/tagged_logger.dart';
 import '../../../models/call_track_state.dart';
 
-final _logger = taggedLogger(tag: 'SV:CoordReducer');
+final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
 mixin StateRtcMixin on StateNotifier<CallState> {
   void rtcUpdateSubscriberTrack(
     UpdateSubscriberTrack action,
   ) {
     _logger.d(
-      () => '[reduceSubTrackReceived] ${state.sessionId}; action: $action',
+      () => '[rtcUpdateSubscriberTrack] ${state.sessionId}; action: $action',
     );
     state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
@@ -20,7 +20,7 @@ mixin StateRtcMixin on StateNotifier<CallState> {
         if (participant.trackIdPrefix == action.trackIdPrefix &&
             trackState is RemoteTrackState) {
           _logger.v(
-            () => '[reduceSubTrackReceived] pFound: $participant',
+            () => '[rtcUpdateSubscriberTrack] pFound: $participant',
           );
           return participant.copyWith(
             publishedTracks: {
@@ -33,7 +33,7 @@ mixin StateRtcMixin on StateNotifier<CallState> {
             },
           );
         } else {
-          _logger.v(() => '[reduceSubTrackReceived] pSame: $participant');
+          _logger.v(() => '[rtcUpdateSubscriberTrack] pSame: $participant');
           return participant;
         }
       }).toList(),

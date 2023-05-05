@@ -11,7 +11,7 @@ import '../../../models/disconnect_reason.dart';
 import '../../../sfu/data/events/sfu_events.dart';
 import '../../../utils/string.dart';
 
-final _logger = taggedLogger(tag: 'SV:CoordReducer');
+final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
 mixin StateSfuMixin on StateNotifier<CallState> {
   CallPreferences get callPreferences;
@@ -44,7 +44,7 @@ mixin StateSfuMixin on StateNotifier<CallState> {
   void sfuJoinResponse(
     SfuJoinResponseEvent event,
   ) {
-    _logger.d(() => '[reduceJoinResponse] ${state.sessionId}; event: $event');
+    _logger.d(() => '[sfuJoinResponse] ${state.sessionId}; event: $event');
     final participants = event.callState.participants.map((aParticipant) {
       final isLocal = aParticipant.userId == state.currentUserId;
       final existing = state.callParticipants.firstWhereOrNull(
@@ -81,7 +81,7 @@ mixin StateSfuMixin on StateNotifier<CallState> {
     SfuTrackUnpublishedEvent event,
   ) {
     _logger.d(
-      () => '[reduceTrackUnpublished] ${state.sessionId}; event: $event',
+      () => '[sfuTrackUnpublished] ${state.sessionId}; event: $event',
     );
     state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
@@ -106,13 +106,13 @@ mixin StateSfuMixin on StateNotifier<CallState> {
   void sfuTrackPublished(
     SfuTrackPublishedEvent event,
   ) {
-    _logger.d(() => '[reduceTrackPublished] ${state.sessionId}; event: $event');
+    _logger.d(() => '[sfuTrackPublished] ${state.sessionId}; event: $event');
 
     state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         if (participant.userId == event.userId &&
             participant.sessionId == event.sessionId) {
-          _logger.v(() => '[reduceTrackPublished] pFound: $participant');
+          _logger.v(() => '[sfuTrackPublished] pFound: $participant');
 
           final trackState = participant.publishedTracks[event.trackType]
                   ?.copyWith(muted: false) ??
@@ -124,7 +124,7 @@ mixin StateSfuMixin on StateNotifier<CallState> {
             },
           );
         } else {
-          _logger.v(() => '[reduceTrackPublished] pSame: $participant');
+          _logger.v(() => '[sfuTrackPublished] pSame: $participant');
           return participant;
         }
       }).toList(),
@@ -199,7 +199,7 @@ mixin StateSfuMixin on StateNotifier<CallState> {
     SfuParticipantJoinedEvent event,
   ) {
     _logger.d(
-      () => '[reduceParticipantJoined] ${state.sessionId}; event: $event',
+      () => '[sfuParticipantJoined] ${state.sessionId}; event: $event',
     );
     final isLocal = state.currentUserId == event.participant.userId;
     final participant = CallParticipantState(

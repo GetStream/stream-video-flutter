@@ -8,7 +8,7 @@ import '../../../sfu/data/models/sfu_track_type.dart';
 import '../../../webrtc/media/constraints/camera_position.dart';
 import '../../../webrtc/model/rtc_video_dimension.dart';
 
-final _logger = taggedLogger(tag: 'SV:CoordReducer');
+final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
 mixin StateParticipantMixin on StateNotifier<CallState> {
   void setParticipantPinned(
@@ -53,7 +53,8 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
     UpdateSubscriptions action,
   ) {
     final sessionId = state.sessionId;
-    _logger.d(() => '[reduceSubscriptions] #$sessionId; action: $action');
+    _logger.d(
+        () => '[participantUpdateSubscriptions] #$sessionId; action: $action');
     for (final action in action.actions) {
       if (action is UpdateSubscription) {
         participantUpdateSubscription(action);
@@ -66,21 +67,22 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
   void participantUpdateSubscription(
     UpdateSubscription action,
   ) {
-    _logger.d(() => '[updateSub] #${state.sessionId}; action: $action');
+    _logger.d(() =>
+        '[participantUpdateSubscription] #${state.sessionId}; action: $action');
     state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         final trackState = participant.publishedTracks[action.trackType];
         if (participant.userId == action.userId &&
             participant.sessionId == action.sessionId &&
             trackState is RemoteTrackState) {
-          _logger.v(() => '[updateSub] pFound: $participant');
+          _logger
+              .v(() => '[participantUpdateSubscription] pFound: $participant');
 
           var muted = trackState.muted;
           if (trackState.received) {
             // if the track is already received, we should unmute it.
             muted = false;
           }
-
           return participant.copyWith(
             publishedTracks: {
               ...participant.publishedTracks,
@@ -92,7 +94,7 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
             },
           );
         }
-        _logger.v(() => '[updateSub] pSame: $participant');
+        _logger.v(() => '[participantUpdateSubscription] pSame: $participant');
         return participant;
       }).toList(),
     );

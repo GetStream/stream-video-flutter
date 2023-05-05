@@ -271,9 +271,9 @@ class Call {
     }
 
     if (event is CoordinatorCallRejectedEvent) {
-      return _stateManager.coordinatorUpdateCallRejected(event);
+      return _stateManager.coordinatorCallRejected(event);
     } else if (event is CoordinatorCallAcceptedEvent) {
-      return _stateManager.coordinatorUpdateCallAccepted(event);
+      return _stateManager.coordinatorCallAccepted(event);
     } else if (event is CoordinatorCallEndedEvent) {
       return _stateManager.coordinatorCallEnded(event);
     } else if (event is CoordinatorCallPermissionsUpdatedEvent) {
