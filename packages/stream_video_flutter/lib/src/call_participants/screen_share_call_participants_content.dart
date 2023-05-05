@@ -86,6 +86,7 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
                       color: colorTheme.textHighEmphasis,
                     ),
                     const SizedBox(width: 8),
+                    // TODO localize hardcoded text
                     Text(
                       '$participantName is sharing their screen',
                       style: videoTheme.textTheme.footnote,
