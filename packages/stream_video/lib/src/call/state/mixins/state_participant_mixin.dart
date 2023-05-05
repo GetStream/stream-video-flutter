@@ -1,20 +1,21 @@
 import 'package:state_notifier/state_notifier.dart';
-import 'package:stream_video/src/models/call_track_state.dart';
 
 import '../../../action/participant_action.dart';
 import '../../../call_state.dart';
 import '../../../logger/impl/tagged_logger.dart';
+import '../../../models/call_track_state.dart';
 import '../../../sfu/data/models/sfu_track_type.dart';
 import '../../../webrtc/media/constraints/camera_position.dart';
 
-final _logger = taggedLogger(tag: 'SV:CoordReducer');
+final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
 mixin StateParticipantMixin on StateNotifier<CallState> {
   void participantUpdateSubscriptions(
     UpdateSubscriptions action,
   ) {
     final sessionId = state.sessionId;
-    _logger.d(() => '[reduceSubscriptions] #$sessionId; action: $action');
+    _logger.d(
+        () => '[participantUpdateSubscriptions] #$sessionId; action: $action');
     for (final child in action.actions) {
       if (child is UpdateSubscription) {
         participantUpdateSubscription(child);
@@ -27,14 +28,16 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
   void participantUpdateSubscription(
     UpdateSubscription action,
   ) {
-    _logger.d(() => '[updateSub] #${state.sessionId}; action: $action');
+    _logger.d(() =>
+        '[participantUpdateSubscription] #${state.sessionId}; action: $action');
     state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         final trackState = participant.publishedTracks[action.trackType];
         if (participant.userId == action.userId &&
             participant.sessionId == action.sessionId &&
             trackState is RemoteTrackState) {
-          _logger.v(() => '[updateSub] pFound: $participant');
+          _logger
+              .v(() => '[participantUpdateSubscription] pFound: $participant');
           return participant.copyWith(
             publishedTracks: {
               ...participant.publishedTracks,
@@ -45,7 +48,7 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
             },
           );
         }
-        _logger.v(() => '[updateSub] pSame: $participant');
+        _logger.v(() => '[participantUpdateSubscription] pSame: $participant');
         return participant;
       }).toList(),
     );

@@ -9,13 +9,13 @@ import '../../../models/call_participant_state.dart';
 import '../../../models/call_status.dart';
 import '../../../models/disconnect_reason.dart';
 
-final _logger = taggedLogger(tag: 'SV:CoordReducer');
+final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
 mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleUpdateUserId(
     SetUserId action,
   ) {
-    _logger.d(() => '[reduceUserId] state: $state');
+    _logger.d(() => '[lifecycleUpdateUserId] state: $state');
     state = state.copyWith(
       currentUserId: action.userId,
       status: CallStatus.idle(),
@@ -30,7 +30,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
       _logger.w(
-        () => '[reduceCallAccepted] rejected (invalid status): $status',
+        () => '[lifecycleCallAccepted] rejected (invalid status): $status',
       );
       return;
     }
@@ -45,11 +45,11 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
       _logger.w(
-        () => '[reduceCallRejected] rejected (invalid status): $status',
+        () => '[lifecycleCallRejected] rejected (invalid status): $status',
       );
       return;
     }
-    _logger.i(() => '[reduceCallRejected] stage: $stage, state: $state');
+    _logger.i(() => '[lifecycleCallRejected] stage: $stage, state: $state');
     state = state.copyWith(
       status: CallStatus.disconnected(
         DisconnectReason.rejected(
@@ -62,7 +62,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleCallEnded(
     CallEnded stage,
   ) {
-    _logger.i(() => '[reduceCallEnded] stage: $stage, state: $state');
+    _logger.i(() => '[lifecycleCallEnded] stage: $stage, state: $state');
     state = state.copyWith(
       status: CallStatus.disconnected(
         DisconnectReason.ended(),
@@ -74,7 +74,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleCallCreated(
     CallCreated stage,
   ) {
-    _logger.d(() => '[reduceCallCreated] state: $state');
+    _logger.d(() => '[lifecycleCallCreated] state: $state');
     state = state.copyWith(
       status: stage.data.toCallStatus(state: state),
       createdByUserId: stage.data.metadata.details.createdBy.id,
@@ -88,7 +88,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleCallJoining(
     CallJoining stage,
   ) {
-    _logger.d(() => '[reduceCallJoining] state: $state');
+    _logger.d(() => '[lifecycleCallJoining] state: $state');
     state = state.copyWith(
       status: CallStatus.joining(),
     );
@@ -98,7 +98,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     CallJoined stage,
   ) {
     final status = state.status.isJoining ? CallStatus.joined() : state.status;
-    _logger.d(() => '[reduceCallJoined] state: $state;\nnewStatus: $status');
+    _logger.d(() => '[lifecycleCallJoined] state: $state;\nnewStatus: $status');
     state = state.copyWith(
       status: status,
       createdByUserId: stage.data.metadata.details.createdBy.id,
@@ -111,7 +111,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleCallDisconnected(
     CallDisconnected stage,
   ) {
-    _logger.w(() => '[reduceCallDisconnected] state: $state');
+    _logger.w(() => '[lifecycleCallDisconnected] state: $state');
     state = state.copyWith(
       status: CallStatus.disconnected(
         DisconnectReason.cancelled(
@@ -126,7 +126,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleCallTimeout(
     CallTimeout stage,
   ) {
-    _logger.e(() => '[reduceCallTimeout] state: $state');
+    _logger.e(() => '[lifecycleCallTimeout] state: $state');
     state = state.copyWith(
       status: CallStatus.disconnected(
         const DisconnectReason.timeout(),
@@ -138,7 +138,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleCallConnectingAction(
     CallConnecting stage,
   ) {
-    _logger.d(() => '[reduceCallConnectingAction] state: $state');
+    _logger.d(() => '[lifecycleCallConnectingAction] state: $state');
     final CallStatus status;
     if (stage.attempt > 0) {
       status = CallStatus.reconnecting(stage.attempt);
@@ -153,7 +153,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleCallConnectFailed(
     ConnectFailed stage,
   ) {
-    _logger.e(() => '[reduceCallConnectFailed] state: $state');
+    _logger.e(() => '[lifecycleCallConnectFailed] state: $state');
     state = state.copyWith(
       status: CallStatus.disconnected(
         DisconnectReason.failure(stage.error),
@@ -164,7 +164,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleCallSessionStart(
     CallSessionStart action,
   ) {
-    _logger.d(() => '[reduceCallSessionStart] state: $state');
+    _logger.d(() => '[lifecycleCallSessionStart] state: $state');
     state = state.copyWith(
       sessionId: action.sessionId,
       //status: CallStatus.connecting(),
@@ -174,7 +174,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleCallConnected(
     CallConnected stage,
   ) {
-    _logger.d(() => '[reduceCallConnected] state: $state');
+    _logger.d(() => '[lifecycleCallConnected] state: $state');
     state = state.copyWith(
       status: CallStatus.connected(),
     );

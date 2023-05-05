@@ -2,9 +2,6 @@ import 'package:state_notifier/state_notifier.dart';
 
 import '../../call_state.dart';
 import '../../models/call_preferences.dart';
-import '../../models/call_status.dart';
-import '../../models/disconnect_reason.dart';
-import '../../sfu/data/events/sfu_events.dart';
 import '../../state_emitter.dart';
 import 'mixins/state_coordinator_mixin.dart';
 import 'mixins/state_lifecycle_mixin.dart';
@@ -25,6 +22,7 @@ class CallStateNotifier extends StateNotifier<CallState>
         MutableStateEmitterImpl<CallState>(initialState, sync: true);
   }
 
+  @override
   final CallPreferences callPreferences;
 
   late final MutableStateEmitterImpl<CallState> callStateStream;
