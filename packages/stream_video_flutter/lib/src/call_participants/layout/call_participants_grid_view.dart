@@ -41,7 +41,7 @@ class CallParticipantsGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (CurrentPlatform.isIos || CurrentPlatform.isAndroid || false) {
+    if (CurrentPlatform.isIos || CurrentPlatform.isAndroid) {
       return MobileCallParticipantsGrid(
         call: call,
         participants: participants,
