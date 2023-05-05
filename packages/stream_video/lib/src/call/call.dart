@@ -981,6 +981,53 @@ class Call {
     return result;
   }
 
+  Future<Result<None>> setParticipantPinned(
+    SetParticipantPinned action,
+  ) async {
+    final result = await _session?.setParticipantPinned(action) ??
+        Result.error('Session is null');
+
+    if (result.isSuccess) {
+      _stateManager.setParticipantPinned(action);
+    }
+
+    return result;
+  }
+
+  Future<Result<None>> updateViewportVisibility({
+    required String sessionId,
+    required ViewportVisibility visibility,
+  }) async {
+    final action = UpdateViewportVisibility(
+      sessionId: sessionId,
+      visibility: visibility,
+    );
+
+    final result = await _session?.updateViewportVisibility(action) ??
+        Result.error('Session is null');
+
+    if (result.isSuccess) {
+      _stateManager.participantUpdateViewportVisibility(action);
+    }
+
+    return result;
+  }
+
+  Future<Result<None>> updateViewportVisibilities(
+    List<UpdateViewportVisibility> actions,
+  ) async {
+    final result = await _session?.updateViewportVisibilities(actions) ??
+        Result.error('Session is null');
+
+    if (result.isSuccess) {
+      _stateManager.participantUpdateViewportVisibilities(
+        UpdateViewportVisibilities(actions),
+      );
+    }
+
+    return result;
+  }
+
   Future<Result<None>> setSubscriptions(List<SetSubscription> actions) async {
     final result = await _session?.setSubscriptions(actions) ??
         Result.error('Session is null');

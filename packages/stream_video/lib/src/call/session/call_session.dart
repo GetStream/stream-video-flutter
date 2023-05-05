@@ -87,7 +87,7 @@ class CallSession extends Disposable {
 
   late final _vvBuffer = DebounceBuffer<UpdateViewportVisibility, Result<None>>(
     duration: _debounceDuration,
-    onBuffered: _updateViewportVisibilities,
+    onBuffered: updateViewportVisibilities,
     onCancel: () => Result.error('UpdateViewportVisibility cancelled'),
   );
 
@@ -454,27 +454,27 @@ class CallSession extends Disposable {
     );
   }
 
-  Future<Result<None>> _setParticipantPinned(
-      SetParticipantPinned action,
-      ) async {
+  Future<Result<None>> setParticipantPinned(
+    SetParticipantPinned action,
+  ) async {
     _logger.d(() => '[setParticipantPinned] action: $action');
     // Nothing to do here, this is handled by the UI
-    return Result.success(None());
+    return const Result.success(none);
   }
 
-  Future<Result<None>> _updateViewportVisibility(
-      UpdateViewportVisibility action,
-      ) async {
+  Future<Result<None>> updateViewportVisibility(
+    UpdateViewportVisibility action,
+  ) async {
     _logger.d(() => '[updateViewportVisibility] action: $action');
     return _vvBuffer.post(action);
   }
 
-  Future<Result<None>> _updateViewportVisibilities(
-      List<UpdateViewportVisibility> actions,
-      ) async {
+  Future<Result<None>> updateViewportVisibilities(
+    List<UpdateViewportVisibility> actions,
+  ) async {
     _logger.d(() => '[updateViewportVisibilities] actions: $actions');
     // Nothing to do here, this is handled by the UI
-    return Result.success(None());
+    return const Result.success(none);
   }
 
   Future<Result<None>> setSubscriptions(
@@ -719,7 +719,7 @@ extension on List<CallParticipantState> {
 
       streamLog.v(
         _tag,
-            () => '[getSubscriptions] userId: ${participant.userId}, '
+        () => '[getSubscriptions] userId: ${participant.userId}, '
             'published: ${participant.publishedTracks.keys}',
       );
 
@@ -743,7 +743,7 @@ extension on CallParticipantState {
 
       streamLog.v(
         _tag,
-            () => '[getSubscriptions] trackType: $trackType, '
+        () => '[getSubscriptions] trackType: $trackType, '
             'trackState: $trackState',
       );
 

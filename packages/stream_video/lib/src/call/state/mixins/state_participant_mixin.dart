@@ -1,25 +1,64 @@
 import 'package:state_notifier/state_notifier.dart';
-import 'package:stream_video/src/models/call_track_state.dart';
 
 import '../../../action/participant_action.dart';
 import '../../../call_state.dart';
 import '../../../logger/impl/tagged_logger.dart';
+import '../../../models/call_track_state.dart';
 import '../../../sfu/data/models/sfu_track_type.dart';
 import '../../../webrtc/media/constraints/camera_position.dart';
+import '../../../webrtc/model/rtc_video_dimension.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordReducer');
 
 mixin StateParticipantMixin on StateNotifier<CallState> {
+  void setParticipantPinned(
+    SetParticipantPinned action,
+  ) {
+    state = state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.sessionId == action.sessionId) {
+          return participant.copyWith(isPinned: action.pinned);
+        }
+
+        return participant;
+      }).toList(),
+    );
+  }
+
+  void participantUpdateViewportVisibility(
+    UpdateViewportVisibility action,
+  ) {
+    state = state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.sessionId == action.sessionId) {
+          return participant.copyWith(
+            viewportVisibility: action.visibility,
+          );
+        }
+
+        return participant;
+      }).toList(),
+    );
+  }
+
+  void participantUpdateViewportVisibilities(
+    UpdateViewportVisibilities action,
+  ) {
+    for (final action in action.actions) {
+      participantUpdateViewportVisibility(action);
+    }
+  }
+
   void participantUpdateSubscriptions(
     UpdateSubscriptions action,
   ) {
     final sessionId = state.sessionId;
     _logger.d(() => '[reduceSubscriptions] #$sessionId; action: $action');
-    for (final child in action.actions) {
-      if (child is UpdateSubscription) {
-        participantUpdateSubscription(child);
-      } else if (child is RemoveSubscription) {
-        participantRemoveSubscription(child);
+    for (final action in action.actions) {
+      if (action is UpdateSubscription) {
+        participantUpdateSubscription(action);
+      } else if (action is RemoveSubscription) {
+        participantRemoveSubscription(action);
       }
     }
   }
