@@ -9,7 +9,7 @@ import '../../../models/call_participant_state.dart';
 import '../../../models/call_status.dart';
 import '../../../models/disconnect_reason.dart';
 
-final _logger = taggedLogger(tag: 'SV:CoordReducer');
+final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
 mixin StateCoordinatorMixin on StateNotifier<CallState> {
   void coordinatorUpdateUsers(
@@ -30,19 +30,21 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     );
   }
 
-  void coordinatorUpdateCallAccepted(
+  void coordinatorCallAccepted(
     CoordinatorCallAcceptedEvent event,
   ) {
     final status = state.status;
     if (status is! CallStatusOutgoing) {
-      _logger.w(() => '[reduceCallAccepted] rejected (status is not Outgoing)');
+      _logger.w(() =>
+          '[coordinatorUpdateCallAccepted] rejected (status is not Outgoing)');
       return;
     }
     final participant = state.callParticipants.firstWhereOrNull((participant) {
       return participant.userId == event.acceptedByUserId;
     });
     if (participant == null) {
-      _logger.w(() => '[reduceCallAccepted] rejected (accepted by non-Member)');
+      _logger.w(() =>
+          '[coordinatorUpdateCallAccepted] rejected (accepted by non-Member)');
       return;
     }
     state = state.copyWith(
@@ -50,14 +52,15 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     );
   }
 
-  void coordinatorUpdateCallRejected(
+  void coordinatorCallRejected(
     CoordinatorCallRejectedEvent event,
   ) {
     final status = state.status;
-    _logger.d(() => '[reduceCallRejected] state: $state');
+    _logger.d(() => '[coordinatorCallRejected] state: $state');
     if (status is! CallStatusActive) {
       _logger.w(
-        () => '[reduceCallRejected] rejected (status is not Active): $status',
+        () =>
+            '[coordinatorCallRejected] rejected (status is not Active): $status',
       );
       return;
     }
@@ -66,7 +69,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     });
     if (participantIndex == -1) {
       _logger.w(
-        () => '[reduceCallRejected] rejected '
+        () => '[coordinatorCallRejected] rejected '
             '(by unknown user): ${event.rejectedByUserId}',
       );
       return;
@@ -93,14 +96,14 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   void coordinatorCallEnded(
     CoordinatorCallEndedEvent event,
   ) {
-    _logger.i(() => '[reduceCallCancelled] state: $state');
+    _logger.i(() => '[coordinatorCallEnded] state: $state');
     final status = state.status;
     if (status is! CallStatusActive) {
-      _logger.w(() => '[reduceCallEnded] rejected (status is not Active)');
+      _logger.w(() => '[coordinatorCallEnded] rejected (status is not Active)');
       return;
     }
     if (state.callCid != event.callCid) {
-      _logger.w(() => '[reduceCallEnded] rejected (invalid cid): $event');
+      _logger.w(() => '[coordinatorCallEnded] rejected (invalid cid): $event');
       return;
     }
     // final participantIndex = state.callParticipants.indexWhere((participant) {
@@ -144,7 +147,8 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     final status = state.status;
     if (status is! CallStatusActive) {
       _logger.w(
-        () => '[reduceCallPermissionsUpdated] rejected (status is not Active)',
+        () =>
+            '[coordinatorCallPermissionsUpdated] rejected (status is not Active)',
       );
       return;
     }
@@ -162,7 +166,8 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     final status = state.status;
     if (status is! CallStatusActive) {
       _logger.w(
-        () => '[reduceCallRecordingStarted] rejected (status is not Active)',
+        () =>
+            '[coordinatorCallRecordingStarted] rejected (status is not Active)',
       );
       return;
     }
@@ -178,7 +183,8 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     final status = state.status;
     if (status is! CallStatusActive) {
       _logger.w(
-        () => '[reduceCallRecordingStopped] rejected (status is not Active)',
+        () =>
+            '[coordinatorCallRecordingStopped] rejected (status is not Active)',
       );
       return;
     }
@@ -194,7 +200,8 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     final status = state.status;
     if (status is! CallStatusActive) {
       _logger.w(
-        () => '[reduceCallBroadcastingStarted] rejected (status is not Active)',
+        () =>
+            '[coordinatorCallBroadcastingStarted] rejected (status is not Active)',
       );
       return;
     }
@@ -210,7 +217,8 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     final status = state.status;
     if (status is! CallStatusActive) {
       _logger.w(
-        () => '[reduceCallBroadcastingStopped] rejected (status is not Active)',
+        () =>
+            '[coordinatorCallBroadcastingStopped] rejected (status is not Active)',
       );
       return;
     }
