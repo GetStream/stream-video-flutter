@@ -878,6 +878,12 @@ class Call {
     return _permissionsManager.stopBroadcasting();
   }
 
+  /// Allows for the muting of a or group of users as indicated by [userIds].
+  /// By default the function will mute the audio tracks of the user but this
+  /// can be override by passing a [track] to the function.
+  ///
+  /// Note: The user calling this function must have permission to perform the
+  /// action else it will result in an error.
   Future<Result<None>> muteUsers({
     required List<String> userIds,
     TrackType track = TrackType.audio,
@@ -885,14 +891,30 @@ class Call {
     return _permissionsManager.muteUsers(userIds: userIds, track: track);
   }
 
+  /// Allows for the muting of the current user.
+  ///
+  /// By default the function will mute the audio tracks of the user but this
+  /// can be override by passing a [track] to the function.
   Future<Result<None>> muteSelf({TrackType track = TrackType.audio}) {
     return _permissionsManager.muteSelf(track: track);
   }
 
+  /// Allows for the muting of all users except current user calling the function.
+  ///
+  /// By default the function will mute the audio tracks of the user but this
+  /// can be override by passing a [track] to the function.
+  ///
+  /// Note: The user calling this function must have permission to perform the
+  //  action else it will result in an error.
   Future<Result<None>> muteOthers({TrackType track = TrackType.audio}) {
     return _permissionsManager.muteOthers(track: track);
   }
 
+  /// Allows for the muting of all users on a call including the current user
+  /// calling the function.
+  ///
+  /// Note: The user calling this function must have permission to perform the
+  //  action else it will result in an error.
   Future<Result<None>> muteAllUsers() {
     return _permissionsManager.muteAllUsers();
   }
