@@ -211,6 +211,17 @@ class PermissionsManager {
     _logger.v(() => '[muteUsers] result: $result');
     return result;
   }
+
+  Future<Result<None>> muteSelf(TrackType track) async {
+    if (!_hasPermission(CallPermission.muteUsers)) {
+      _logger.w(() => '[muteSelf] rejected (no permission)');
+      return Result.error('Cannot mute self (no permission)');
+    }
+    _logger.d(() => '[muteSelf] muting current user');
+
+    final selfUID = stateManager.callState.currentUserId;
+    return muteUsers([selfUID], track);
+  }
       MuteUsersInput(
         callCid: callCid,
         userIds: userIds,
