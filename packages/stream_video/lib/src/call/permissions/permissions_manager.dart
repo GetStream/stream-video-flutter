@@ -233,9 +233,7 @@ class PermissionsManager {
     }
     _logger.d(() => '[muteOthers] muting other users');
 
-    final selfUID = stateManager.callState.currentUserId;
     final usersToMute = <String>[];
-
     for (final participant in stateManager.callState.otherParticipants) {
       if (participant.publishedTracks.containsKey(track.toSFUTrackType())) {
         usersToMute.add(participant.userId);
