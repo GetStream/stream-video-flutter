@@ -241,13 +241,24 @@ class PermissionsManager {
     }
     return muteUsers([selfUID], track);
   }
+
+  Future<Result<None>> muteAllUsers(TrackType track) async {
+    if (!_hasPermission(CallPermission.muteUsers)) {
+      _logger.w(() => '[muteAllUsers] rejected (no permission)');
+      return Result.error('Cannot mute users (no permission)');
+    }
+    _logger.d(() => '[muteAllUsers] muting all users');
+
+    return coordinatorClient.muteUsers(
       MuteUsersInput(
         callCid: callCid,
-        userIds: userIds,
+        muteAllUsers: true,
+        userIds: const [],
+        audio: true,
+        video: true,
+        screenshare: true,
       ),
     );
-    _logger.v(() => '[muteUsers] result: $result');
-    return result;
   }
 
   bool canRequestPermission(CallPermission permission) {
