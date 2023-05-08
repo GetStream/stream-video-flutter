@@ -178,7 +178,10 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> muteUsers(List<String> userIds, TrackType track) async {
+  Future<Result<None>> muteUsers({
+    required List<String> userIds,
+    TrackType track = TrackType.audio,
+  }) async {
     if (!_hasPermission(CallPermission.muteUsers)) {
       _logger.w(() => '[muteUsers] rejected (no permission)');
       return Result.error('Cannot mute users (no permission)');
@@ -212,7 +215,7 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> muteSelf(TrackType track) async {
+  Future<Result<None>> muteSelf({TrackType track = TrackType.audio}) async {
     if (!_hasPermission(CallPermission.muteUsers)) {
       _logger.w(() => '[muteSelf] rejected (no permission)');
       return Result.error('Cannot mute self (no permission)');
@@ -220,10 +223,10 @@ class PermissionsManager {
     _logger.d(() => '[muteSelf] muting current user');
 
     final selfUID = stateManager.callState.currentUserId;
-    return muteUsers([selfUID], track);
+    return muteUsers(userIds: [selfUID], track: track);
   }
 
-  Future<Result<None>> muteOthers(TrackType track) async {
+  Future<Result<None>> muteOthers({TrackType track = TrackType.audio}) async {
     if (!_hasPermission(CallPermission.muteUsers)) {
       _logger.w(() => '[muteOthers] rejected (no permission)');
       return Result.error('Cannot mute other users (no permission)');
@@ -238,10 +241,10 @@ class PermissionsManager {
         usersToMute.add(participant.userId);
       }
     }
-    return muteUsers([selfUID], track);
+    return muteUsers(userIds: [selfUID], track: track);
   }
 
-  Future<Result<None>> muteAllUsers(TrackType track) async {
+  Future<Result<None>> muteAllUsers() async {
     if (!_hasPermission(CallPermission.muteUsers)) {
       _logger.w(() => '[muteAllUsers] rejected (no permission)');
       return Result.error('Cannot mute users (no permission)');

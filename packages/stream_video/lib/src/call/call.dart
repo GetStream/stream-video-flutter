@@ -878,8 +878,11 @@ class Call {
     return _permissionsManager.stopBroadcasting();
   }
 
-  Future<Result<None>> muteUsers(List<String> userIds, TrackType track) {
-    return _permissionsManager.muteUsers(userIds, track);
+  Future<Result<None>> muteUsers({
+    required List<String> userIds,
+    TrackType track = TrackType.audio,
+  }) {
+    return _permissionsManager.muteUsers(userIds: userIds, track: track);
   }
 
   Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) async {
