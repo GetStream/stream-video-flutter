@@ -1158,4 +1158,18 @@ enum TrackType {
   String toString() {
     return name;
   }
+
+  SfuTrackType toSFUTrackType() {
+    switch (this) {
+      case TrackType.audio:
+        return SfuTrackType.audio;
+      case TrackType.video:
+        return SfuTrackType.video;
+      case TrackType.screenshare:
+        return SfuTrackType.screenShare;
+    //ignore:no_default_cases
+      default:
+        throw Exception('Unknown mute type: $this');
+    }
+  }
 }

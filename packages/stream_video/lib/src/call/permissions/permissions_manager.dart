@@ -231,11 +231,10 @@ class PermissionsManager {
     _logger.d(() => '[muteOthers] muting other users');
 
     final selfUID = stateManager.callState.currentUserId;
-    final sfuTrackType = muteTypeToTrackType(track);
     final usersToMute = <String>[];
 
     for (final participant in stateManager.callState.otherParticipants) {
-      if (participant.publishedTracks.containsKey(sfuTrackType)) {
+      if (participant.publishedTracks.containsKey(track.toSFUTrackType())) {
         usersToMute.add(participant.userId);
       }
     }
@@ -288,19 +287,5 @@ class PermissionsManager {
       return false;
     }
     return capabilities.contains(permission);
-  }
-
-  SfuTrackType muteTypeToTrackType(TrackType muteType) {
-    switch (muteType) {
-      case TrackType.audio:
-        return SfuTrackType.audio;
-      case TrackType.video:
-        return SfuTrackType.video;
-      case TrackType.screenshare:
-        return SfuTrackType.screenShare;
-      //ignore:no_default_cases
-      default:
-        throw Exception('Unknown mute type: $muteType');
-    }
   }
 }
