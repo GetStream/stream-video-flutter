@@ -885,6 +885,18 @@ class Call {
     return _permissionsManager.muteUsers(userIds: userIds, track: track);
   }
 
+  Future<Result<None>> muteSelf({TrackType track = TrackType.audio}) {
+    return _permissionsManager.muteSelf(track: track);
+  }
+
+  Future<Result<None>> muteOthers({TrackType track = TrackType.audio}) {
+    return _permissionsManager.muteOthers(track: track);
+  }
+
+  Future<Result<None>> muteAllUsers() {
+    return _permissionsManager.muteAllUsers();
+  }
+
   Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) async {
     final result = await _session?.setCameraPosition(cameraPosition) ??
         Result.error('Session is null');
