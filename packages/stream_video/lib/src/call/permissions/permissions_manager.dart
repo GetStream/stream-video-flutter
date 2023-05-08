@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../../stream_video.dart';
 import '../../models/call_permission.dart';
+import '../../models/call_reaction.dart';
 import '../../utils/none.dart';
 import '../state/call_state_notifier.dart';
 
@@ -188,6 +189,27 @@ class PermissionsManager {
       MuteUsersInput(
         callCid: callCid,
         userIds: userIds,
+      ),
+    );
+    _logger.v(() => '[muteUsers] result: $result');
+    return result;
+  }
+
+  Future<Result<CallReaction>> sendReaction({
+    required String reactionType,
+    String? emojiCode,
+    Map<String, Object> custom = const {},
+  }) async {
+    if (!_hasPermission(CallPermission.createReaction)) {
+      _logger.w(() => '[sendReaction] rejected (no permission)');
+      return Result.error('Cannot send reaction (no permission)');
+    }
+    final result = await coordinatorClient.sendReaction(
+      ReactionInput(
+        callCid: callCid,
+        reactionType: reactionType,
+        emojiCode: emojiCode,
+        custom: custom,
       ),
     );
     _logger.v(() => '[muteUsers] result: $result');

@@ -903,21 +903,6 @@ class Call {
     return _permissionsManager.muteUsers(userIds);
   }
 
-  Future<Result<CallReaction>> sendReaction({
-    required String reactionType,
-    String? emojiCode,
-    Map<String, Object> custom = const {},
-  }) {
-    return _coordinatorClient.sendReaction(
-      ReactionInput(
-        callCid: callCid,
-        reactionType: reactionType,
-        emojiCode: emojiCode,
-        custom: custom,
-      ),
-    );
-  }
-
   Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) async {
     final result = await _session?.setCameraPosition(cameraPosition) ??
         Result.error('Session is null');
