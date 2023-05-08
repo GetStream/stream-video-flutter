@@ -241,7 +241,7 @@ class PermissionsManager {
         usersToMute.add(participant.userId);
       }
     }
-    return muteUsers(userIds: [selfUID], track: track);
+    return muteUsers(userIds: usersToMute, track: track);
   }
 
   Future<Result<None>> muteAllUsers() async {
