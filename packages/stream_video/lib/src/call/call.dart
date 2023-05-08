@@ -878,8 +878,8 @@ class Call {
     return _permissionsManager.stopBroadcasting();
   }
 
-  Future<Result<None>> muteUsers(List<String> userIds) {
-    return _permissionsManager.muteUsers(userIds);
+  Future<Result<None>> muteUsers(List<String> userIds, TrackType track) {
+    return _permissionsManager.muteUsers(userIds, track);
   }
 
   Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) async {
@@ -1141,6 +1141,18 @@ enum _ConnectionStatus {
   disconnected,
   connecting,
   connected;
+
+  @override
+  String toString() {
+    return name;
+  }
+}
+
+enum TrackType {
+  audio,
+  video,
+  screenshare,
+  all;
 
   @override
   String toString() {

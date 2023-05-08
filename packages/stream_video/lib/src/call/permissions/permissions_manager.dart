@@ -178,7 +178,7 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> muteUsers(List<String> userIds) async {
+  Future<Result<None>> muteUsers(List<String> userIds, TrackType track) async {
     if (!_hasPermission(CallPermission.muteUsers)) {
       _logger.w(() => '[muteUsers] rejected (no permission)');
       return Result.error('Cannot mute users (no permission)');
