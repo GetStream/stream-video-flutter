@@ -98,7 +98,7 @@ const _chars = 'abcdefghijklmnopqrstuvwxyz1234567890';
 Random _rnd = Random();
 
 Future<Call> generateCall(String type, String id) async {
-  final call = StreamVideo.instance.makeCall(
+  final call = StreamVideo.instance.call(
     type: type,
     id: id,
   );

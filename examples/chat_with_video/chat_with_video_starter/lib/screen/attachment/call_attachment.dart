@@ -65,7 +65,7 @@ class CallAttachment extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
-                    final call = StreamVideo.instance.makeCall(
+                    final call = StreamVideo.instance.call(
                       type: callType,
                       id: callId,
                     );

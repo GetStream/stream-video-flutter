@@ -9,6 +9,8 @@ import '../coordinator/models/coordinator_models.dart';
 import '../errors/video_error_composer.dart';
 import '../models/call_credentials.dart';
 import '../models/call_permission.dart';
+import '../models/call_reaction.dart';
+import '../models/queried_members.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
@@ -47,7 +49,7 @@ int _callSeq = 1;
 /// Represents a [Call] in which you can connect to.
 class Call {
   /// Do not use the factory directly,
-  /// use the [StreamVideo.makeCall] method to construct a `Call` instance.
+  /// use the [StreamVideo.call] method to construct a `Call` instance.
   @internal
   factory Call({
     required StreamCallCid callCid,
@@ -71,7 +73,7 @@ class Call {
   }
 
   /// Do not use the factory directly,
-  /// use the [StreamVideo.makeCall] method to construct a `Call` instance.
+  /// use the [StreamVideo.call] method to construct a `Call` instance.
   @internal
   factory Call.fromCreated({
     required CallCreatedData data,
@@ -836,6 +838,25 @@ class Call {
     return Result.success(joined);
   }
 
+  Future<Result<QueriedMembers>> queryMembers({
+    required Map<String, Object> filterConditions,
+    String? next,
+    String? prev,
+    List<SortInput> sorts = const [],
+    int? limit,
+  }) async {
+    return _coordinatorClient.queryMembers(
+      QueryUsersInput(
+        callCid: callCid,
+        filterConditions: filterConditions,
+        next: next,
+        prev: prev,
+        sorts: sorts,
+        limit: limit,
+      ),
+    );
+  }
+
   Future<Result<None>> requestPermissions(List<CallPermission> permissions) {
     return _permissionsManager.request(permissions);
   }
@@ -880,6 +901,21 @@ class Call {
 
   Future<Result<None>> muteUsers(List<String> userIds) {
     return _permissionsManager.muteUsers(userIds);
+  }
+
+  Future<Result<CallReaction>> sendReaction({
+    required String reactionType,
+    String? emojiCode,
+    Map<String, Object> custom = const {},
+  }) {
+    return _coordinatorClient.sendReaction(
+      ReactionInput(
+        callCid: callCid,
+        reactionType: reactionType,
+        emojiCode: emojiCode,
+        custom: custom,
+      ),
+    );
   }
 
   Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) async {

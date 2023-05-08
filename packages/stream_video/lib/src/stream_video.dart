@@ -262,7 +262,7 @@ class StreamVideo {
     return _state.activeCall.listen(onActiveCall);
   }
 
-  Call makeCall({
+  Call call({
     required String type,
     required String id,
     CallPreferences? preferences,

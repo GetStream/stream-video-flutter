@@ -144,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<Call> _initVideoCall({required String callId}) async {
-    final call = videoClient.makeCall(type: 'default', id: callId);
+    final call = videoClient.call(type: 'default', id: callId);
     await call.getOrCreateCall();
     return call;
   }

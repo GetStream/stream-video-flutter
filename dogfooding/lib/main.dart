@@ -98,7 +98,7 @@ class _StreamDogFoodingAppState
         token,
       );
 
-      final call = StreamVideo.instance.makeCall(type: 'default', id: callId);
+      final call = StreamVideo.instance.call(type: 'default', id: callId);
       await call.getOrCreateCall();
 
       await _navigatorKey.currentState?.pushNamed(
