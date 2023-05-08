@@ -184,7 +184,33 @@ class PermissionsManager {
       return Result.error('Cannot mute users (no permission)');
     }
     _logger.d(() => '[muteUsers] userIds: $userIds');
-    final result = await coordinatorClient.muteUsers(
+
+    late final Result<None> result;
+    if (track == TrackType.all) {
+      result = await coordinatorClient.muteUsers(
+        MuteUsersInput(
+          callCid: callCid,
+          userIds: userIds,
+          audio: true,
+          video: true,
+          screenshare: true,
+        ),
+      );
+    } else {
+      result = await coordinatorClient.muteUsers(
+        MuteUsersInput(
+          callCid: callCid,
+          userIds: userIds,
+          audio: track == TrackType.audio,
+          video: track == TrackType.video,
+          screenshare: track == TrackType.screenshare,
+        ),
+      );
+    }
+
+    _logger.v(() => '[muteUsers] result: $result');
+    return result;
+  }
       MuteUsersInput(
         callCid: callCid,
         userIds: userIds,
