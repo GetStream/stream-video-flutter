@@ -179,20 +179,87 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> muteUsers(List<String> userIds) async {
+  Future<Result<None>> muteUsers({
+    required List<String> userIds,
+    TrackType track = TrackType.audio,
+  }) async {
     if (!_hasPermission(CallPermission.muteUsers)) {
       _logger.w(() => '[muteUsers] rejected (no permission)');
       return Result.error('Cannot mute users (no permission)');
     }
     _logger.d(() => '[muteUsers] userIds: $userIds');
-    final result = await coordinatorClient.muteUsers(
-      MuteUsersInput(
-        callCid: callCid,
-        userIds: userIds,
-      ),
-    );
+
+    late final Result<None> result;
+    if (track == TrackType.all) {
+      result = await coordinatorClient.muteUsers(
+        MuteUsersInput(
+          callCid: callCid,
+          userIds: userIds,
+          audio: true,
+          video: true,
+          screenshare: true,
+        ),
+      );
+    } else {
+      result = await coordinatorClient.muteUsers(
+        MuteUsersInput(
+          callCid: callCid,
+          userIds: userIds,
+          audio: track == TrackType.audio,
+          video: track == TrackType.video,
+          screenshare: track == TrackType.screenshare,
+        ),
+      );
+    }
+
     _logger.v(() => '[muteUsers] result: $result');
     return result;
+  }
+
+  Future<Result<None>> muteSelf({TrackType track = TrackType.audio}) async {
+    if (!_hasPermission(CallPermission.muteUsers)) {
+      _logger.w(() => '[muteSelf] rejected (no permission)');
+      return Result.error('Cannot mute self (no permission)');
+    }
+    _logger.d(() => '[muteSelf] muting current user');
+
+    final selfUID = stateManager.callState.currentUserId;
+    return muteUsers(userIds: [selfUID], track: track);
+  }
+
+  Future<Result<None>> muteOthers({TrackType track = TrackType.audio}) async {
+    if (!_hasPermission(CallPermission.muteUsers)) {
+      _logger.w(() => '[muteOthers] rejected (no permission)');
+      return Result.error('Cannot mute other users (no permission)');
+    }
+    _logger.d(() => '[muteOthers] muting other users');
+
+    final usersToMute = <String>[];
+    for (final participant in stateManager.callState.otherParticipants) {
+      if (participant.publishedTracks.containsKey(track.toSFUTrackType())) {
+        usersToMute.add(participant.userId);
+      }
+    }
+    return muteUsers(userIds: usersToMute, track: track);
+  }
+
+  Future<Result<None>> muteAllUsers() async {
+    if (!_hasPermission(CallPermission.muteUsers)) {
+      _logger.w(() => '[muteAllUsers] rejected (no permission)');
+      return Result.error('Cannot mute users (no permission)');
+    }
+    _logger.d(() => '[muteAllUsers] muting all users');
+
+    return coordinatorClient.muteUsers(
+      MuteUsersInput(
+        callCid: callCid,
+        muteAllUsers: true,
+        userIds: const [],
+        audio: true,
+        video: true,
+        screenshare: true,
+      ),
+    );
   }
 
   Future<Result<CallReaction>> sendReaction({
