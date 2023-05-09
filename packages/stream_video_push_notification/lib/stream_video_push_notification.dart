@@ -50,20 +50,22 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   Future<void> _registerAndroidDevice() async {
     if (_isFirebaseInitialized()) {
       FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
+        _logger.d(() => '[registerAndroidDevice] refreshedToken: $token');
         await _registerFirebaseToken(token);
       });
       final token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
+        _logger.d(() => '[registerAndroidDevice] token: $token');
         await _registerFirebaseToken(token);
       } else {
-        _logger.w(() => 'Firebase Token was null');
+        _logger.w(() => '[registerAndroidDevice] Firebase Token was null');
       }
     }
   }
 
   Future<void> _registerIOSDevice() async {
     final token = await _methodChannel.getDevicePushTokenVoIP();
-    _logger.d(() => 'New PushTokenVoIP: $token');
+    _logger.d(() => '[registerIOSDevice] token: $token');
     if (token != null) {
       await _client.createDevice(
         CreateDeviceInput(
@@ -75,7 +77,6 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   Future<void> _registerFirebaseToken(String token) async {
-    _logger.d(() => 'New Firebase Token: $token');
     await _client.createDevice(
       CreateDeviceInput(
         pushToken: token,

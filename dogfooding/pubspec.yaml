@@ -13,7 +13,7 @@ dependencies:
   envied: ^0.3.0
   firebase_auth: ^4.2.5
   firebase_core: ^2.4.1
-  firebase_messaging: ^14.2.1
+  firebase_messaging: ^14.5.0
   flutter:
     sdk: flutter
   flutter_svg: 2.0.4
