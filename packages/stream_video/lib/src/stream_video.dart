@@ -308,6 +308,22 @@ class StreamVideo {
     );
   }
 
+  Future<Result<CallMetadata>> updateCall({
+    required String callCid,
+    required List<String> userIds,
+    Map<String, Object>? custom,
+    CallSettingsInput? settingsOverride,
+  }) {
+    return _client.updateCall(
+      input.UpdateCallInput(
+        callCid: StreamCallCid(cid: callCid),
+        userIds: userIds,
+        custom: custom ?? {},
+        settingsOverride: settingsOverride,
+      ),
+    );
+  }
+
   Future<bool> handlePushNotification(Map<String, dynamic> payload) {
     return _pushNotificationManager?.handlePushNotification(payload) ??
         Future.value(false);
