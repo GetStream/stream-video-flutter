@@ -26,6 +26,7 @@ mixin StateRtcMixin on StateNotifier<CallState> {
             publishedTracks: {
               ...participant.publishedTracks,
               action.trackType: trackState.copyWith(
+                muted: false,
                 subscribed: true,
                 received: true,
               )

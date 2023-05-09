@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide ConnectionState;
 
 import '../../../stream_video_flutter.dart';
+import '../../call_participants/layout/participant_layout_mode.dart';
 import '../../utils/extensions.dart';
 
 /// Builder used to create a custom participants info widget.
@@ -19,12 +20,13 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.elevation = 1,
     this.backgroundColor,
     this.onBackPressed,
+    this.onLayoutModeChanged,
     this.onParticipantsInfoTap,
     this.participantsInfoBuilder,
     this.leading,
     this.title,
     this.actions,
-  }) : preferredSize = const Size.fromHeight(kToolbarHeight);
+  });
 
   /// Represents a call.
   final Call call;
@@ -44,6 +46,8 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// The action to perform when the participants info button is tapped.
   final VoidCallback? onParticipantsInfoTap;
 
+  final ValueSetter<ParticipantLayoutMode>? onLayoutModeChanged;
+
   /// Builder used to create a custom participants info screen.
   final CallParticipantsInfoBuilder? participantsInfoBuilder;
 
@@ -57,7 +61,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
 
   @override
-  final Size preferredSize;
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +91,9 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: false,
       actions: actions ??
           <Widget>[
+            ParticipantLayoutModeButton(
+              onLayoutModeChanged: onLayoutModeChanged,
+            ),
             IconButton(
               icon: Icon(
                 Icons.group_rounded,
@@ -129,5 +136,42 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       );
     }
+  }
+}
+
+class ParticipantLayoutModeButton extends StatefulWidget {
+  const ParticipantLayoutModeButton({
+    super.key,
+    this.onLayoutModeChanged,
+  });
+
+  final ValueSetter<ParticipantLayoutMode>? onLayoutModeChanged;
+
+  @override
+  State<ParticipantLayoutModeButton> createState() =>
+      _ParticipantLayoutModeButtonState();
+}
+
+class _ParticipantLayoutModeButtonState
+    extends State<ParticipantLayoutModeButton> {
+  ParticipantLayoutMode _layoutMode = ParticipantLayoutMode.grid;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(
+        _layoutMode == ParticipantLayoutMode.grid
+            ? Icons.highlight_rounded
+            : Icons.grid_view_rounded,
+      ),
+      onPressed: () {
+        _layoutMode = _layoutMode == ParticipantLayoutMode.grid
+            ? ParticipantLayoutMode.spotlight
+            : ParticipantLayoutMode.grid;
+
+        widget.onLayoutModeChanged?.call(_layoutMode);
+        setState(() {});
+      },
+    );
   }
 }

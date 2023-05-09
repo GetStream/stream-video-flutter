@@ -30,7 +30,7 @@ class RtcAudioSource extends RtcMediaSource {
   final double? audioLevel;
   final double? totalAudioEnergy;
   final double? totalSamplesDuration;
-  final int? echoReturnLoss;
+  final double? echoReturnLoss;
   final double? echoReturnLossEnhancement;
 
   String? get codecId => id;
