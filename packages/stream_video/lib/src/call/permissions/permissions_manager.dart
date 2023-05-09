@@ -2,6 +2,8 @@ import 'package:meta/meta.dart';
 
 import '../../../stream_video.dart';
 import '../../models/call_permission.dart';
+import '../../models/call_reaction.dart';
+import '../../models/queried_members.dart';
 import '../../utils/none.dart';
 import '../state/call_state_notifier.dart';
 
@@ -259,6 +261,52 @@ class PermissionsManager {
         screenshare: true,
       ),
     );
+  }
+
+  Future<Result<CallReaction>> sendReaction({
+    required String reactionType,
+    String? emojiCode,
+    Map<String, Object> custom = const {},
+  }) async {
+    if (!_hasPermission(CallPermission.createReaction)) {
+      _logger.w(() => '[sendReaction] rejected (no permission)');
+      return Result.error('Cannot send reaction (no permission)');
+    }
+    final result = await coordinatorClient.sendReaction(
+      ReactionInput(
+        callCid: callCid,
+        reactionType: reactionType,
+        emojiCode: emojiCode,
+        custom: custom,
+      ),
+    );
+    _logger.v(() => '[sendReaction] result: $result');
+    return result;
+  }
+
+  Future<Result<QueriedMembers>> queryMembers({
+    required Map<String, Object> filterConditions,
+    String? next,
+    String? prev,
+    List<SortInput> sorts = const [],
+    int? limit,
+  }) async {
+    if (!_hasPermission(CallPermission.readCall)) {
+      _logger.w(() => '[queryMembers] rejected (no permission)');
+      return Result.error('Cannot query members (no permission)');
+    }
+    final result = coordinatorClient.queryMembers(
+      QueryUsersInput(
+        callCid: callCid,
+        filterConditions: filterConditions,
+        next: next,
+        prev: prev,
+        sorts: sorts,
+        limit: limit,
+      ),
+    );
+    _logger.v(() => '[queryMembers] result: $result');
+    return result;
   }
 
   bool canRequestPermission(CallPermission permission) {
