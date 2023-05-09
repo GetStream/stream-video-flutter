@@ -133,7 +133,7 @@ class QueryMembersRequest {
       }());
 
       return QueryMembersRequest(
-        filterConditions: mapCastOfType<String, Object>(json, r'filter_conditions')!,
+        filterConditions: mapCastOfType<String, Object>(json, r'filter_conditions') ?? const {},
         id: mapValueOfType<String>(json, r'id'),
         limit: mapValueOfType<int>(json, r'limit'),
         next: mapValueOfType<String>(json, r'next'),
@@ -189,7 +189,6 @@ class QueryMembersRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'filter_conditions',
     'type',
   };
 }
