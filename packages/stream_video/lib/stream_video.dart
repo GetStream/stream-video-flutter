@@ -17,6 +17,7 @@ export 'src/models/call_created_data.dart';
 export 'src/models/call_joined_data.dart';
 export 'src/models/call_metadata.dart';
 export 'src/models/call_participant_state.dart';
+export 'src/models/call_permission.dart';
 export 'src/models/call_preferences.dart';
 export 'src/models/call_received_created_data.dart';
 export 'src/models/call_settings.dart';
