@@ -10,9 +10,17 @@ class RtcVideoDimension with EquatableMixin {
     required this.height,
   }) : area = width * height;
 
+  const RtcVideoDimension.zero()
+      : width = 0,
+        height = 0,
+        area = 0;
+
   final int width;
   final int height;
   final int area;
+
+  /// Returns true if the area is zero or negative.
+  bool get isEmpty => area <= 0;
 
   RtcVideoDimension copyWith({
     int? width,

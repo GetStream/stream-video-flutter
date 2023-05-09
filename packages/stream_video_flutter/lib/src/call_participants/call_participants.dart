@@ -2,28 +2,15 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import 'layout/participant_layout_mode.dart';
 import 'regular_call_participants_content.dart';
 import 'screen_share_call_participants_content.dart';
-
-/// The maximum number of participants displayed in a grid on mobile.
-const maxRemoteParticipantsMobile = 3;
-
-/// The maximum number of participants displayed in a grid on desktop.
-const maxRemoteParticipantsDesktop = 24;
 
 /// Builder function used to build a participant item.
 typedef CallParticipantBuilder = Widget Function(
   BuildContext context,
   Call call,
   CallParticipantState participant,
-);
-
-/// Builder function used to build a local video widget.
-typedef LocalVideoBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallParticipantState participant,
-  Widget localVideoChild,
 );
 
 /// Builder function used to build a screen sharing content.
@@ -46,37 +33,23 @@ typedef Filter<T> = bool Function(T element);
 /// Comparator used to sort the participants.
 typedef Sort<T> = Comparator<T>;
 
-/// The default participant filter.
-bool _defaultFilter(CallParticipantState participant) => true;
-
-/// The default participant sort.
-///
-/// Participants that have recently been dominant speakers go first.
-/// The only exception is the local participant who always goes last.
-int _defaultSort(CallParticipantState previous, CallParticipantState current) {
-  return previous.compareTo(current);
-}
-
 /// Widget that renders all the [StreamCallParticipant], based on the number
 /// of people in a call.
 class StreamCallParticipants extends StatelessWidget {
   /// Creates a new instance of [StreamCallParticipant].
-  const StreamCallParticipants({
+  StreamCallParticipants({
+    super.key,
     required this.call,
     required this.participants,
     this.filter = _defaultFilter,
-    this.sort = _defaultSort,
+    Sort<CallParticipantState>? sort,
     this.enableLocalVideo,
-    this.onLeaveCallTap,
-    this.onBackPressed,
-    this.callParticipantBuilder,
-    this.localVideoBuilder,
+    this.callParticipantBuilder = _defaultParticipantBuilder,
+    this.localVideoParticipantBuilder,
     this.screenShareContentBuilder,
-    this.screenShareParticipantBuilder,
-    this.callControlsBuilder,
-    this.overlayAppBarBuilder,
-    super.key,
-  });
+    this.screenShareParticipantBuilder = _defaultParticipantBuilder,
+    this.layoutMode = ParticipantLayoutMode.grid,
+  }) : sort = sort ?? layoutMode.sorting;
 
   /// Represents a call.
   final Call call;
@@ -93,61 +66,80 @@ class StreamCallParticipants extends StatelessWidget {
   /// Enable local video view for the local participant.
   final bool? enableLocalVideo;
 
-  /// The action to perform when the leave call button is tapped.
-  final VoidCallback? onLeaveCallTap;
-
-  /// The action to perform when the back button is pressed.
-  final VoidCallback? onBackPressed;
-
   /// Builder function used to build a participant grid item.
-  final CallParticipantBuilder? callParticipantBuilder;
+  final CallParticipantBuilder callParticipantBuilder;
 
-  /// Builder function used to build a local video widget.
-  final LocalVideoBuilder? localVideoBuilder;
+  /// Builder function used to build a local video participant widget.
+  final CallParticipantBuilder? localVideoParticipantBuilder;
 
   /// Builder function used to build a screen sharing item.
   final ScreenShareContentBuilder? screenShareContentBuilder;
 
   /// Builder function used to build participant item in screen sharing mode.
-  final ScreenShareParticipantBuilder? screenShareParticipantBuilder;
+  final ScreenShareParticipantBuilder screenShareParticipantBuilder;
 
-  /// Builder used to create a custom call controls panel.
-  final CallControlsBuilder? callControlsBuilder;
+  /// The layout mode used to display the participants.
+  final ParticipantLayoutMode layoutMode;
 
-  /// Builder used to create a custom call app bar in landscape mode.
-  final OverlayAppBarBuilder? overlayAppBarBuilder;
+  // The default participant filter.
+  static bool _defaultFilter(CallParticipantState participant) => true;
+
+  // The default participant builder.
+  static Widget _defaultParticipantBuilder(
+    BuildContext context,
+    Call call,
+    CallParticipantState participant,
+  ) {
+    return StreamCallParticipant(
+      // We use the sessionId as the key to map the state to the participant.
+      key: Key(participant.sessionId),
+      call: call,
+      participant: participant,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final participants = this.participants.where(filter).sorted(sort);
+    final participants = [...this.participants].where(filter).sorted(sort);
 
     final screenShareParticipant = participants.firstWhereOrNull(
-      (element) => element.screenShareTrack != null,
+      (it) {
+        final screenShareTrack = it.screenShareTrack;
+        final isScreenShareEnabled = it.isScreenShareEnabled;
+
+        // If the screen share track is local, we don't have to subscribe to
+        // anything and we can directly use the mute state.
+        if (screenShareTrack is! RemoteTrackState) return isScreenShareEnabled;
+
+        // If the screen share track is remote and already subscribed and
+        // received, we can directly use the mute state.
+        if (screenShareTrack.subscribed && screenShareTrack.received) {
+          return isScreenShareEnabled;
+        }
+
+        // If it's not yet subscribed, we have to show it in order for it to
+        // start the subscription process.
+        return true;
+      },
     );
 
-    if (screenShareParticipant == null) {
-      return RegularCallParticipantsContent(
-        call: call,
-        participants: participants,
-        enableLocalVideo: enableLocalVideo,
-        onLeaveCallTap: onLeaveCallTap,
-        onBackPressed: onBackPressed,
-        callParticipantBuilder: callParticipantBuilder,
-        localVideoBuilder: localVideoBuilder,
-        callControlsBuilder: callControlsBuilder,
-        overlayAppBarBuilder: overlayAppBarBuilder,
-      );
-    } else {
+    if (screenShareParticipant != null) {
       return ScreenShareCallParticipantsContent(
         call: call,
         participants: participants,
         screenSharingParticipant: screenShareParticipant,
-        onLeaveCallTap: onLeaveCallTap,
-        onBackPressed: onBackPressed,
         screenShareContentBuilder: screenShareContentBuilder,
-        callControlsBuilder: callControlsBuilder,
-        overlayAppBarBuilder: overlayAppBarBuilder,
+        screenShareParticipantBuilder: screenShareParticipantBuilder,
       );
     }
+
+    return RegularCallParticipantsContent(
+      call: call,
+      participants: participants,
+      layoutMode: layoutMode,
+      enableLocalVideo: enableLocalVideo,
+      callParticipantBuilder: callParticipantBuilder,
+      localVideoParticipantBuilder: localVideoParticipantBuilder,
+    );
   }
 }

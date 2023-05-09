@@ -6,21 +6,60 @@ import '../../../logger/impl/tagged_logger.dart';
 import '../../../models/call_track_state.dart';
 import '../../../sfu/data/models/sfu_track_type.dart';
 import '../../../webrtc/media/constraints/camera_position.dart';
+import '../../../webrtc/model/rtc_video_dimension.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
 mixin StateParticipantMixin on StateNotifier<CallState> {
+  void setParticipantPinned(
+    SetParticipantPinned action,
+  ) {
+    state = state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.sessionId == action.sessionId) {
+          return participant.copyWith(isPinned: action.pinned);
+        }
+
+        return participant;
+      }).toList(),
+    );
+  }
+
+  void participantUpdateViewportVisibility(
+    UpdateViewportVisibility action,
+  ) {
+    state = state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.sessionId == action.sessionId) {
+          return participant.copyWith(
+            viewportVisibility: action.visibility,
+          );
+        }
+
+        return participant;
+      }).toList(),
+    );
+  }
+
+  void participantUpdateViewportVisibilities(
+    UpdateViewportVisibilities action,
+  ) {
+    for (final action in action.actions) {
+      participantUpdateViewportVisibility(action);
+    }
+  }
+
   void participantUpdateSubscriptions(
     UpdateSubscriptions action,
   ) {
     final sessionId = state.sessionId;
     _logger.d(
         () => '[participantUpdateSubscriptions] #$sessionId; action: $action');
-    for (final child in action.actions) {
-      if (child is UpdateSubscription) {
-        participantUpdateSubscription(child);
-      } else if (child is RemoveSubscription) {
-        participantRemoveSubscription(child);
+    for (final action in action.actions) {
+      if (action is UpdateSubscription) {
+        participantUpdateSubscription(action);
+      } else if (action is RemoveSubscription) {
+        participantRemoveSubscription(action);
       }
     }
   }
@@ -38,10 +77,17 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
             trackState is RemoteTrackState) {
           _logger
               .v(() => '[participantUpdateSubscription] pFound: $participant');
+
+          var muted = trackState.muted;
+          if (trackState.received) {
+            // if the track is already received, we should unmute it.
+            muted = false;
+          }
           return participant.copyWith(
             publishedTracks: {
               ...participant.publishedTracks,
               action.trackType: trackState.copyWith(
+                muted: muted,
                 subscribed: true,
                 videoDimension: action.videoDimension,
               ),
@@ -67,7 +113,10 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
               publishedTracks: {
                 ...participant.publishedTracks,
                 action.trackType: trackState.copyWith(
+                  muted: true,
                   subscribed: false,
+                  // TODO: Should be null, but copyWith doesn't allow it.
+                  videoDimension: const RtcVideoDimension.zero(),
                 ),
               },
             );

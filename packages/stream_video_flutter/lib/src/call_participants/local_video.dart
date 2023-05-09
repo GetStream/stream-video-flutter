@@ -10,7 +10,7 @@ class StreamLocalVideo extends StatelessWidget {
     super.key,
     required this.child,
     required this.call,
-    required this.localParticipant,
+    required this.participant,
     this.localVideoWidth,
     this.localVideoHeight,
     this.localVideoPadding,
@@ -19,6 +19,7 @@ class StreamLocalVideo extends StatelessWidget {
     this.userAvatarTheme,
     this.borderRadius,
     this.shadowColor,
+    this.participantBuilder,
   });
 
   /// The widget below this widget in the tree.
@@ -28,7 +29,7 @@ class StreamLocalVideo extends StatelessWidget {
   final Call call;
 
   /// The current local participant.
-  final CallParticipantState localParticipant;
+  final CallParticipantState participant;
 
   /// The width of the local video view.
   final double? localVideoWidth;
@@ -55,6 +56,9 @@ class StreamLocalVideo extends StatelessWidget {
   /// The color of shadow.
   final Color? shadowColor;
 
+  /// Builder function used to build the local participant.
+  final CallParticipantBuilder? participantBuilder;
+
   @override
   Widget build(BuildContext context) {
     final theme = StreamLocalVideoTheme.of(context);
@@ -67,6 +71,18 @@ class StreamLocalVideo extends StatelessWidget {
     final userAvatarTheme = this.userAvatarTheme ?? theme.userAvatarTheme;
     final borderRadius = this.borderRadius ?? theme.borderRadius;
     final shadowColor = this.shadowColor ?? theme.shadowColor;
+
+    var callParticipantBuilder = participantBuilder;
+    callParticipantBuilder ??= (context, call, participant) {
+      return StreamCallParticipant(
+        call: call,
+        participant: participant,
+        borderRadius: borderRadius,
+        userAvatarTheme: userAvatarTheme,
+        showParticipantLabel: false,
+        showSpeakerBorder: false,
+      );
+    };
 
     return FloatingViewContainer(
       floatingViewWidth: localVideoWidth,
@@ -87,13 +103,10 @@ class StreamLocalVideo extends StatelessWidget {
             )
           ],
         ),
-        child: StreamCallParticipant(
-          call: call,
-          participant: localParticipant,
-          borderRadius: borderRadius,
-          userAvatarTheme: userAvatarTheme,
-          showParticipantLabel: false,
-          showDominantSpeakerBorder: false,
+        child: callParticipantBuilder(
+          context,
+          call,
+          participant,
         ),
       ),
       child: child,

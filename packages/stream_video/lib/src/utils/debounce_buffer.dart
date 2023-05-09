@@ -16,10 +16,7 @@ class DebounceBuffer<T, R> {
     _subscription = _eventsSubject
         .buffer(_eventsSubject.debounceTime(duration))
         .asyncMap(onBuffered)
-        .listen(
-          _completer.completeSafely,
-          onError: _completer.completeErrorSafely,
-        );
+        .listen(_complete, onError: _completeError);
   }
 
   final Duration duration;
@@ -35,8 +32,22 @@ class DebounceBuffer<T, R> {
     if (_completer.isCompleted) {
       _completer = Completer<R>();
     }
-    _eventsSubject.add(item);
+
+    try {
+      _eventsSubject.add(item);
+    } catch (e, stk) {
+      _completeError(e, stk);
+    }
+
     return _completer.future;
+  }
+
+  void _complete(R result) {
+    _completer.completeSafely(result);
+  }
+
+  void _completeError(Object error, [StackTrace? stackTrace]) {
+    _completer.completeErrorSafely(error, stackTrace);
   }
 
   Future<void> cancel() async {
@@ -44,9 +55,9 @@ class DebounceBuffer<T, R> {
     await _eventsSubject.close();
     try {
       final cancelResult = await onCancel();
-      _completer.completeSafely(cancelResult);
+      _complete(cancelResult);
     } catch (e, stk) {
-      _completer.completeErrorSafely(e, stk);
+      _completeError(e, stk);
     }
   }
 }

@@ -39,12 +39,12 @@ class _CallDiagnosticsContentState extends State<CallDiagnosticsContent> {
   void initState() {
     super.initState();
     _subscription = widget.call.stats.listen((stats) {
-      final local = stats.printable.local.substring(0, 28);
-      final remote = stats.printable.remote.substring(0, 28);
-      _logger.v(
-        () => '[listenStats] #${stats.peerType}; '
-            'local: $local, remote: $remote <<<<<<<<<<<<<<<<<<<<<<<<<<',
-      );
+      // final local = stats.printable.local.substring(0, 28);
+      // final remote = stats.printable.remote.substring(0, 28);
+      // _logger.v(
+      //   () => '[listenStats] #${stats.peerType}; '
+      //       'local: $local, remote: $remote <<<<<<<<<<<<<<<<<<<<<<<<<<',
+      // );
       switch (stats.peerType) {
         case StreamPeerType.publisher:
           _publisherStats = stats;

@@ -3,62 +3,32 @@ import 'package:meta/meta.dart';
 
 import '../sfu/data/models/sfu_connection_quality.dart';
 import '../sfu/data/models/sfu_track_type.dart';
+import '../sorting/call_participant_sorting_presets.dart';
+import 'call_reaction.dart';
 import 'call_track_state.dart';
+import 'viewport_visibility.dart';
 
 @immutable
 class CallParticipantState
     with EquatableMixin
     implements Comparable<CallParticipantState> {
-  factory CallParticipantState({
-    required String userId,
-    required String role,
-    required String name,
-    String? image,
-    required String sessionId,
-    required String trackIdPrefix,
-    Map<SfuTrackType, TrackState> publishedTracks = const {},
-    bool isLocal = false,
-    SfuConnectionQuality connectionQuality = SfuConnectionQuality.unspecified,
-    bool isOnline = false,
-    double audioLevel = 0,
-    bool isSpeaking = false,
-    bool isDominantSpeaker = false,
-    DateTime? dominantSpeakerAt,
-  }) {
-    return CallParticipantState._(
-      userId: userId,
-      role: role,
-      name: name,
-      image: image,
-      sessionId: sessionId,
-      trackIdPrefix: trackIdPrefix,
-      publishedTracks: Map.unmodifiable(publishedTracks),
-      isLocal: isLocal,
-      connectionQuality: connectionQuality,
-      isOnline: isOnline,
-      audioLevel: audioLevel,
-      isSpeaking: isSpeaking,
-      isDominantSpeaker: isDominantSpeaker,
-      dominantSpeakerAt: dominantSpeakerAt,
-    );
-  }
-
-  /// TODO: Documentation
-  const CallParticipantState._({
+  const CallParticipantState({
     required this.userId,
     required this.role,
     required this.name,
     this.image,
     required this.sessionId,
     required this.trackIdPrefix,
-    required this.publishedTracks,
+    this.publishedTracks = const {},
     this.isLocal = false,
     this.connectionQuality = SfuConnectionQuality.unspecified,
     this.isOnline = false,
     this.audioLevel = 0,
     this.isSpeaking = false,
     this.isDominantSpeaker = false,
-    this.dominantSpeakerAt,
+    this.isPinned = false,
+    this.reaction,
+    this.viewportVisibility = ViewportVisibility.unknown,
   });
 
   final String userId;
@@ -74,9 +44,9 @@ class CallParticipantState
   final double audioLevel;
   final bool isSpeaking;
   final bool isDominantSpeaker;
-
-  /// When the participant has last been a dominant speaker.
-  final DateTime? dominantSpeakerAt;
+  final bool isPinned;
+  final CallReaction? reaction;
+  final ViewportVisibility viewportVisibility;
 
   /// Returns a copy of this [CallParticipantState] with the given fields
   /// replaced with the new values.
@@ -94,7 +64,9 @@ class CallParticipantState
     double? audioLevel,
     bool? isSpeaking,
     bool? isDominantSpeaker,
-    DateTime? dominantSpeakerAt,
+    bool? isPinned,
+    CallReaction? reaction,
+    ViewportVisibility? viewportVisibility,
   }) {
     return CallParticipantState(
       userId: userId ?? this.userId,
@@ -110,10 +82,64 @@ class CallParticipantState
       audioLevel: audioLevel ?? this.audioLevel,
       isSpeaking: isSpeaking ?? this.isSpeaking,
       isDominantSpeaker: isDominantSpeaker ?? this.isDominantSpeaker,
-      dominantSpeakerAt: dominantSpeakerAt ?? this.dominantSpeakerAt,
+      isPinned: isPinned ?? this.isPinned,
+      reaction: reaction ?? this.reaction,
+      viewportVisibility: viewportVisibility ?? this.viewportVisibility,
     );
   }
 
+  /// Compares two participants.
+  ///
+  /// The comparison is based on the [CallParticipantSortingPresets.regular].
+  ///
+  /// Returns a negative integer, zero, or a positive integer as this object is
+  /// less than, equal to, or greater than [other].
+  ///
+  /// See also:
+  ///
+  /// * [CallParticipantSortingPresets.regular]
+  /// * [CallParticipantSortingPresets.speaker]
+  /// * [CallParticipantSortingPresets.livestreamOrAudioRoom]
+  @override
+  int compareTo(CallParticipantState other) {
+    return CallParticipantSortingPresets.regular(this, other);
+  }
+
+  @override
+  String toString() {
+    return 'CallParticipantState{userId: $userId, role: $role, name: $name, '
+        'sessionId: $sessionId, '
+        'trackId: $trackIdPrefix, image: $image, '
+        'publishedTracks: $publishedTracks, '
+        'isLocal: $isLocal, '
+        'connectionQuality: $connectionQuality, isOnline: $isOnline, '
+        'audioLevel: $audioLevel, isSpeaking: $isSpeaking, '
+        'isDominantSpeaker: $isDominantSpeaker, isPinned: $isPinned, '
+        'reaction: $reaction, viewportVisibility: $viewportVisibility}';
+  }
+
+  @override
+  List<Object?> get props => [
+        userId,
+        role,
+        name,
+        image,
+        sessionId,
+        trackIdPrefix,
+        publishedTracks,
+        isLocal,
+        connectionQuality,
+        isOnline,
+        audioLevel,
+        isSpeaking,
+        isDominantSpeaker,
+        isPinned,
+        reaction,
+        viewportVisibility,
+      ];
+}
+
+extension TrackHelperX on CallParticipantState {
   TrackState? get videoTrack {
     return publishedTracks[SfuTrackType.video];
   }
@@ -134,61 +160,7 @@ class CallParticipantState
     return !(videoTrack?.muted ?? true);
   }
 
-  /// Compares two participants.
-  ///
-  /// Participants that have recently been dominant speakers go first.
-  /// The only exception is the local participant who always goes last.
-  @override
-  int compareTo(CallParticipantState other) {
-    if (isDominantSpeaker && !other.isDominantSpeaker) {
-      return -1;
-    } else if (!isDominantSpeaker && other.isDominantSpeaker) {
-      return 1;
-    }
-
-    final speakerAt = dominantSpeakerAt?.millisecondsSinceEpoch ?? 0;
-    final otherSpeakerAt = other.dominantSpeakerAt?.millisecondsSinceEpoch ?? 0;
-    if (speakerAt != otherSpeakerAt) {
-      return speakerAt > otherSpeakerAt ? -1 : 1;
-    }
-
-    if (!isLocal && other.isLocal) {
-      return -1;
-    } else if (isLocal && !other.isLocal) {
-      return 1;
-    }
-
-    return 0;
+  bool get isScreenShareEnabled {
+    return !(screenShareTrack?.muted ?? true);
   }
-
-  @override
-  String toString() {
-    return 'CallParticipantState{userId: $userId, role: $role, name: $name, '
-        'sessionId: $sessionId, '
-        'trackId: $trackIdPrefix, image: $image, '
-        'publishedTracks: $publishedTracks, '
-        'isLocal: $isLocal, '
-        'connectionQuality: $connectionQuality, isOnline: $isOnline, '
-        'audioLevel: $audioLevel, isSpeaking: $isSpeaking, '
-        'isDominantSpeaker: $isDominantSpeaker}, '
-        'dominantSpeakerAt: $dominantSpeakerAt}';
-  }
-
-  @override
-  List<Object?> get props => [
-        userId,
-        role,
-        name,
-        image,
-        sessionId,
-        trackIdPrefix,
-        publishedTracks,
-        isLocal,
-        connectionQuality,
-        isOnline,
-        audioLevel,
-        isSpeaking,
-        isDominantSpeaker,
-        dominantSpeakerAt,
-      ];
 }

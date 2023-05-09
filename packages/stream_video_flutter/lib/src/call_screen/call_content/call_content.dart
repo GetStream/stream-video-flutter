@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../../call_participants/layout/participant_layout_mode.dart';
 import '../call_diagnostics_content/call_diagnostics_content.dart';
 
 /// Builder used to create a custom call app bar.
@@ -83,8 +84,10 @@ class _StreamCallContentState extends State<StreamCallContent> {
   /// Holds information about the call.
   CallState get callState => widget.callState;
 
-  /// Controls the visibility of [CallStatsContent].
+  /// Controls the visibility of [CallDiagnosticsContent].
   bool _isStatsVisible = false;
+
+  ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
 
   @override
   Widget build(BuildContext context) {
@@ -98,9 +101,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
           StreamCallParticipants(
             call: call,
             participants: callState.callParticipants,
-            onBackPressed: widget.onBackPressed,
-            onLeaveCallTap: widget.onLeaveCallTap,
-            overlayAppBarBuilder: widget.overlayAppBarBuilder,
+            layoutMode: _currentLayoutMode,
           );
     } else {
       final isReconnecting = callState.status.isReconnecting;
@@ -113,11 +114,15 @@ class _StreamCallContentState extends State<StreamCallContent> {
     final isDesktopOrPortrait = !isMobileLandscape(context);
 
     return Scaffold(
+      backgroundColor: const Color(0XFF272A30),
       appBar: isDesktopOrPortrait
           ? widget.callAppBarBuilder?.call(context, call, callState) ??
               CallAppBar(
                 call: call,
                 onBackPressed: widget.onBackPressed,
+                onLayoutModeChanged: (mode) {
+                  setState(() => _currentLayoutMode = mode);
+                },
               )
           : null,
       body: Stack(
@@ -144,11 +149,6 @@ class _StreamCallContentState extends State<StreamCallContent> {
               )
           : null,
     );
-  }
-
-  @override
-  Future<void> dispose() async {
-    super.dispose();
   }
 
   void _toggleStatsVisibility() {

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -74,11 +76,20 @@ class MyApp extends StatelessWidget {
     final activeCall = StreamVideo.instance.activeCall;
     streamLog.i(_tag, () => '[build] activeCall: $activeCall');
 
+    final darkAppTheme = StreamVideoTheme.dark();
+    final lightAppTheme = StreamVideoTheme.light();
+
     return MaterialApp(
       title: 'Stream Video UI Example',
       theme: ThemeData(
         textTheme: GoogleFonts.robotoMonoTextTheme(),
+        extensions: <ThemeExtension<dynamic>>[lightAppTheme],
       ),
+      darkTheme: ThemeData(
+        textTheme: GoogleFonts.robotoMonoTextTheme(),
+        extensions: <ThemeExtension<dynamic>>[darkAppTheme],
+      ),
+      themeMode: ThemeMode.dark,
       home: const LoginScreen(),
       debugShowCheckedModeBanner: false,
     );

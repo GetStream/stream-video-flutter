@@ -1,10 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../widgets/tile_view.dart';
-import 'overlay_app_bar.dart';
+import 'layout/call_participants_grid_view.dart';
+import 'layout/call_participants_spotlight_view.dart';
+import 'layout/participant_layout_mode.dart';
 
 /// A widget that represents the main area of the call when nobody is
 /// sharing their screen.
@@ -14,13 +13,10 @@ class RegularCallParticipantsContent extends StatelessWidget {
     super.key,
     required this.call,
     required this.participants,
+    this.callParticipantBuilder = _defaultParticipantBuilder,
     this.enableLocalVideo,
-    this.onLeaveCallTap,
-    this.onBackPressed,
-    this.callParticipantBuilder,
-    this.localVideoBuilder,
-    this.callControlsBuilder,
-    this.overlayAppBarBuilder,
+    this.localVideoParticipantBuilder,
+    this.layoutMode = ParticipantLayoutMode.grid,
   });
 
   /// Represents a call.
@@ -32,259 +28,77 @@ class RegularCallParticipantsContent extends StatelessWidget {
   /// Enable local video view for the local participant.
   final bool? enableLocalVideo;
 
-  /// The action to perform when the leave call button is tapped.
-  final VoidCallback? onLeaveCallTap;
-
-  /// The action to perform when the back button is pressed.
-  final VoidCallback? onBackPressed;
-
   /// Builder function used to build a participant grid item.
-  final CallParticipantBuilder? callParticipantBuilder;
+  final CallParticipantBuilder callParticipantBuilder;
 
-  /// Builder function used to build a local video widget.
-  final LocalVideoBuilder? localVideoBuilder;
+  /// Builder function used to build a local video participant widget.
+  final CallParticipantBuilder? localVideoParticipantBuilder;
 
-  /// Builder used to create a custom call controls panel.
-  final CallControlsBuilder? callControlsBuilder;
+  /// The layout mode used to display the participants.
+  final ParticipantLayoutMode layoutMode;
 
-  /// Builder used to create a custom call app bar in landscape mode.
-  final OverlayAppBarBuilder? overlayAppBarBuilder;
+  // The default participant builder.
+  static Widget _defaultParticipantBuilder(
+    BuildContext context,
+    Call call,
+    CallParticipantState participant,
+  ) {
+    return StreamCallParticipant(
+      // We use the sessionId as the key to avoid rebuilding the widget
+      // when the participant changes.
+      key: ValueKey(participant.sessionId),
+      call: call,
+      participant: participant,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final remoteParticipants = participants.where((e) => !e.isLocal).toList();
+    final remoteParticipants = participants.where((e) => !e.isLocal);
     final localParticipant = participants.where((e) => e.isLocal).first;
-    final remoteParticipantCount = remoteParticipants.length;
+
+    if (layoutMode == ParticipantLayoutMode.spotlight) {
+      var spotlight = participants.first;
+
+      // In a 1-on-1 call we don't spotlight the local participant.
+      if (remoteParticipants.length == 1) {
+        spotlight = remoteParticipants.first;
+      }
+
+      final barParticipants = [...participants]..remove(spotlight);
+
+      return CallParticipantsSpotlightView(
+        call: call,
+        spotlight: spotlight,
+        participants: barParticipants,
+        participantBuilder: callParticipantBuilder,
+      );
+    }
+
     // By default we don't show local video on desktop devices.
     final enableLocalVideo = this.enableLocalVideo ?? !isDesktopDevice;
+    final showLocalVideo = enableLocalVideo && remoteParticipants.isNotEmpty;
 
-    final showLocalVideo = enableLocalVideo &&
-        (isDesktopDevice
-            ? (remoteParticipantCount >= 1)
-            : (remoteParticipantCount == 1 || remoteParticipantCount == 2));
-
-    final gridParticipants = <CallParticipantState>[
-      ...remoteParticipants.take(
-        isDesktopDevice
-            ? maxRemoteParticipantsDesktop
-            : maxRemoteParticipantsMobile,
-      ),
-      if (!showLocalVideo) localParticipant
-    ];
-
-    final itemBuilder = callParticipantBuilder ??
-        (context, call, participant) {
-          return StreamCallParticipant(
-            call: call,
-            participant: participant,
-          );
-        };
-
-    Widget participantsWidget = isDesktopDevice
-        ? DesktopParticipantGrid(
-            call: call,
-            participants: gridParticipants,
-            itemBuilder: itemBuilder,
-          )
-        : OrientationBuilder(
-            builder: (context, orientation) {
-              if (orientation == Orientation.portrait) {
-                return PortraitParticipantGrid(
-                  call: call,
-                  participants: gridParticipants,
-                  itemBuilder: itemBuilder,
-                );
-              } else {
-                return LandscapeParticipantGrid(
-                  call: call,
-                  participants: gridParticipants,
-                  itemBuilder: itemBuilder,
-                );
-              }
-            },
-          );
-
-    participantsWidget = !showLocalVideo
-        ? participantsWidget
-        : localVideoBuilder?.call(
-              context,
-              call,
-              localParticipant,
-              participantsWidget,
-            ) ??
-            StreamLocalVideo(
-              call: call,
-              localParticipant: localParticipant,
-              child: participantsWidget,
-            );
-
-    final callState = call.state.value;
-    if (isMobileLandscape(context)) {
-      return Row(
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                participantsWidget,
-                overlayAppBarBuilder?.call(context, call, callState) ??
-                    OverlayAppBar(
-                      call: call,
-                      onBackPressed: onBackPressed,
-                    ),
-              ],
-            ),
-          ),
-          callControlsBuilder?.call(context, call, callState) ??
-              StreamCallControls.withDefaultOptions(
-                call: call,
-                localParticipant: callState.localParticipant!,
-                onLeaveCallTap: onLeaveCallTap,
-              )
-        ],
-      );
-    } else {
-      return participantsWidget;
+    final gridParticipants = [...participants];
+    if (showLocalVideo) {
+      gridParticipants.remove(localParticipant);
     }
-  }
-}
 
-/// Represents the arrangement of participants on desktop devices.
-class DesktopParticipantGrid extends StatelessWidget {
-  /// Creates a new instance of [DesktopParticipantGrid].
-  const DesktopParticipantGrid({
-    super.key,
-    required this.call,
-    required this.participants,
-    required this.itemBuilder,
-  });
-
-  /// Represents a call.
-  final Call call;
-
-  /// The list of participants display.
-  final List<CallParticipantState> participants;
-
-  /// Builder function used to build a participant item.
-  final CallParticipantBuilder itemBuilder;
-
-  @override
-  Widget build(BuildContext context) {
-    final columnCount = sqrt(participants.length - 1).floor() + 1;
-
-    return TileView(
-      columnCount: columnCount,
-      itemSpacing: 16,
-      edgeInsets: const EdgeInsets.all(16),
-      children: participants
-          .map((participant) => itemBuilder(context, call, participant))
-          .toList(),
+    Widget child = CallParticipantsGridView(
+      call: call,
+      participants: gridParticipants,
+      itemBuilder: callParticipantBuilder,
     );
-  }
-}
 
-/// Represents the arrangement of participants on mobile phones in portrait
-/// mode.
-class PortraitParticipantGrid extends StatelessWidget {
-  /// Creates a new instance of [PortraitParticipantGrid].
-  const PortraitParticipantGrid({
-    super.key,
-    required this.call,
-    required this.participants,
-    required this.itemBuilder,
-  });
-
-  /// Represents a call.
-  final Call call;
-
-  /// The widgets to display.
-  final List<CallParticipantState> participants;
-
-  /// Builder function used to build a participant item.
-  final CallParticipantBuilder itemBuilder;
-
-  @override
-  Widget build(BuildContext context) {
-    final participantsCount = participants.length;
-    if (participantsCount == 1) {
-      return itemBuilder(context, call, participants[0]);
-    } else if (participantsCount == 2) {
-      return Column(
-        children: [
-          Expanded(child: itemBuilder(context, call, participants[0])),
-          Expanded(child: itemBuilder(context, call, participants[1])),
-        ],
+    if (showLocalVideo) {
+      child = StreamLocalVideo(
+        call: call,
+        participant: localParticipant,
+        participantBuilder: localVideoParticipantBuilder,
+        child: child,
       );
-    } else if (participantsCount == 3) {
-      return Column(
-        children: [
-          Expanded(child: itemBuilder(context, call, participants[0])),
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(child: itemBuilder(context, call, participants[1])),
-                Expanded(child: itemBuilder(context, call, participants[2])),
-              ],
-            ),
-          ),
-        ],
-      );
-    } else if (participantsCount == 4) {
-      return Column(
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(child: itemBuilder(context, call, participants[0])),
-                Expanded(child: itemBuilder(context, call, participants[1])),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(child: itemBuilder(context, call, participants[2])),
-                Expanded(child: itemBuilder(context, call, participants[3])),
-              ],
-            ),
-          ),
-        ],
-      );
-    } else {
-      return Container();
     }
-  }
-}
 
-/// Represents the arrangement of participants on mobile phones in landscape
-/// mode.
-class LandscapeParticipantGrid extends StatelessWidget {
-  /// Creates a new instance of [LandscapeParticipantGrid].
-  const LandscapeParticipantGrid({
-    super.key,
-    required this.call,
-    required this.participants,
-    required this.itemBuilder,
-  });
-
-  /// Represents a call.
-  final Call call;
-
-  /// The widgets to display.
-  final List<CallParticipantState> participants;
-
-  /// Builder function used to build a participant item.
-  final CallParticipantBuilder itemBuilder;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: participants
-          .map(
-            (participant) => Expanded(
-              child: itemBuilder(context, call, participant),
-            ),
-          )
-          .toList(),
-    );
+    return child;
   }
 }
