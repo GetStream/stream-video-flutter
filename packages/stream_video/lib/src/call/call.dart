@@ -880,10 +880,10 @@ class Call {
   }
 
   Future<Result<List<CallRecording>>> listRecordings(
-    StreamCallCid callCid,
+    String type,
+    String id,
     String session,
   ) {
-    return _permissionsManager.listRecordings(callCid, session);
   }
 
   Future<Result<None>> stopRecording() {

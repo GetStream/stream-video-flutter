@@ -253,15 +253,15 @@ class CoordinatorClientRetry extends CoordinatorClient {
     );
   }
 
-
   @override
   Future<Result<List<CallRecording>>> listRecordings(
-      StreamCallCid callCid,
-      String session,
-      ) {
+    String type,
+    String id,
+    String session,
+  ) {
     return _retryManager.execute(
-          () => _delegate.listRecordings(callCid, session),
-          (error, nextAttemptDelay) async {
+      () => _delegate.listRecordings(type, id, session),
+      (error, nextAttemptDelay) async {
         _logRetry('listRecordings', error, nextAttemptDelay);
       },
     );

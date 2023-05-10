@@ -87,7 +87,8 @@ abstract class CoordinatorClient {
 
   /// Returns a list of recording for the associated [callCid] and session.
   Future<Result<List<CallRecording>>> listRecordings(
-    StreamCallCid callCid,
+    String type,
+    String id,
     String session,
   );
 

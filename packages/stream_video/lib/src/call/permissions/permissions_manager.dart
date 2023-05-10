@@ -147,11 +147,16 @@ class PermissionsManager {
   }
 
   Future<Result<List<CallRecording>>> listRecordings(
-    StreamCallCid callCid,
+    String type,
+    String id,
     String session,
   ) async {
     _logger.d(() => '[queryRecordings] Call $callCid Session $session');
-    final result = await coordinatorClient.listRecordings(callCid, session);
+    final result = await coordinatorClient.listRecordings(
+      type,
+      id,
+      session,
+    );
     _logger.v(() => '[queryRecordings] result: $result');
     return result;
   }
