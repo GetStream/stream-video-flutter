@@ -382,7 +382,7 @@ class Call {
     return result;
   }
 
-  Future<Result<CallMetadata>> updateCall({
+  Future<Result<CallMetadata>> update({
     required String callCid,
     required List<String> userIds,
     Map<String, Object>? custom,
