@@ -32,7 +32,6 @@ class AppRepository {
         coordinatorWsUrl: Env.coordinatorWsUrl,
         logPriority: Priority.info,
       );
-      // TODO throws MissingPluginException (No implementation found for method listen on channel stream_video_push_notification_events)
       await streamVideoClient?.initPushNotificationManager(
           StreamVideoPushNotificationManager.factory(),
       );
