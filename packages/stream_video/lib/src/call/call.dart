@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../../open_api/video/coordinator/api.dart';
 import '../../stream_video.dart';
 import '../action/internal/lifecycle_action.dart';
 import '../coordinator/models/coordinator_events.dart';
@@ -876,6 +877,13 @@ class Call {
 
   Future<Result<None>> startRecording() {
     return _permissionsManager.startRecording();
+  }
+
+  Future<Result<List<CallRecording>>> listRecordings(
+    StreamCallCid callCid,
+    String session,
+  ) {
+    return _permissionsManager.listRecordings(callCid, session);
   }
 
   Future<Result<None>> stopRecording() {
