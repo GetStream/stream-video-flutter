@@ -8,7 +8,6 @@ import '../coordinator/models/coordinator_events.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../errors/video_error_composer.dart';
 import '../models/call_credentials.dart';
-import '../models/call_permission.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
@@ -381,6 +380,21 @@ class Call {
       await disconnect();
     }
     return result;
+  }
+
+  Future<Result<CallMetadata>> updateCall({
+    required String callCid,
+    required List<String> userIds,
+    Map<String, Object>? custom,
+    CallSettingsInput? settingsOverride,
+  }) {
+    return _coordinatorClient.updateCall(
+      UpdateCallInput(
+        callCid: StreamCallCid(cid: callCid),
+        custom: custom ?? {},
+        settingsOverride: settingsOverride,
+      ),
+    );
   }
 
   Future<Result<None>> _connect() async {
@@ -1251,7 +1265,7 @@ enum TrackType {
         return SfuTrackType.video;
       case TrackType.screenshare:
         return SfuTrackType.screenShare;
-    //ignore:no_default_cases
+      //ignore:no_default_cases
       default:
         throw Exception('Unknown mute type: $this');
     }
