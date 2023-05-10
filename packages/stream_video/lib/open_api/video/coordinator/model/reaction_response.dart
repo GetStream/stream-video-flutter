@@ -83,7 +83,7 @@ class ReactionResponse {
       }());
 
       return ReactionResponse(
-        custom: mapCastOfType<String, Object>(json, r'custom')!,
+        custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
         emojiCode: mapValueOfType<String>(json, r'emoji_code'),
         type: mapValueOfType<String>(json, r'type')!,
         user: UserResponse.fromJson(json[r'user'])!,
@@ -136,7 +136,6 @@ class ReactionResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'custom',
     'type',
     'user',
   };
