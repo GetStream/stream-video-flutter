@@ -253,6 +253,8 @@ class ApiClient {
           return CreateCallTypeRequest.fromJson(value);
         case 'CreateCallTypeResponse':
           return CreateCallTypeResponse.fromJson(value);
+        case 'CreateDeviceRequest':
+          return CreateDeviceRequest.fromJson(value);
         case 'CreateGuestRequest':
           return CreateGuestRequest.fromJson(value);
         case 'CreateGuestResponse':
@@ -303,6 +305,8 @@ class ApiClient {
           return JoinCallResponse.fromJson(value);
         case 'ListCallTypeResponse':
           return ListCallTypeResponse.fromJson(value);
+        case 'ListDevicesResponse':
+          return ListDevicesResponse.fromJson(value);
         case 'ListRecordingsResponse':
           return ListRecordingsResponse.fromJson(value);
         case 'MemberRequest':
@@ -339,6 +343,8 @@ class ApiClient {
           return RequestPermissionRequest.fromJson(value);
         case 'RequestPermissionResponse':
           return RequestPermissionResponse.fromJson(value);
+        case 'Response':
+          return DurationResponse.fromJson(value);
         case 'RingSettings':
           return RingSettings.fromJson(value);
         case 'RingSettingsRequest':

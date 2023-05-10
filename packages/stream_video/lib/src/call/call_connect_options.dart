@@ -8,13 +8,11 @@ class CallConnectOptions with EquatableMixin {
     this.camera = TrackDisabled._instance,
     this.microphone = TrackDisabled._instance,
     this.screenShare = TrackDisabled._instance,
-    this.dropTimeout = const Duration(seconds: 30),
   });
 
   final TrackOption camera;
   final TrackOption microphone;
   final TrackOption screenShare;
-  final Duration dropTimeout;
 
   CallConnectOptions copyWith({
     TrackOption? camera,
@@ -26,12 +24,11 @@ class CallConnectOptions with EquatableMixin {
       camera: camera ?? this.camera,
       microphone: microphone ?? this.microphone,
       screenShare: screenShare ?? this.screenShare,
-      dropTimeout: dropTimeout ?? this.dropTimeout,
     );
   }
 
   @override
-  List<Object> get props => [camera, microphone, screenShare, dropTimeout];
+  List<Object> get props => [camera, microphone, screenShare];
 
   @override
   String toString() {
@@ -39,7 +36,6 @@ class CallConnectOptions with EquatableMixin {
         'camera: $camera,'
         ' microphone: $microphone,'
         ' screenShare: $screenShare,'
-        ' dropTimeout: $dropTimeout'
         '}';
   }
 }

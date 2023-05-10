@@ -10,7 +10,7 @@ class StreamColorTheme {
   const StreamColorTheme.light({
     this.textHighEmphasis = const Color(0xff000000),
     this.textLowEmphasis = const Color(0xff7a7a7a),
-    this.disabled = const Color(0xffdbdbdb),
+    this.disabled = const Color(0xffB4B7BB),
     this.borders = const Color(0xffecebeb),
     this.inputBg = const Color(0xfff2f2f2),
     this.appBg = const Color(0xfffcfcfc),
@@ -62,7 +62,7 @@ class StreamColorTheme {
   const StreamColorTheme.dark({
     this.textHighEmphasis = const Color(0xffffffff),
     this.textLowEmphasis = const Color(0xff7a7a7a),
-    this.disabled = const Color(0xff2d2f2f),
+    this.disabled = const Color(0xff4C525C),
     this.borders = const Color(0xff1c1e22),
     this.inputBg = const Color(0xff13151b),
     this.appBg = const Color(0xff070A0D),

@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import io.getstream.log.taggedLogger
-import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.NotificationOptions
+import io.getstream.video.flutter.background.stream_video_flutter_background.service.notification.NotificationPayload
 
 interface ServiceManager {
-    fun start(options: NotificationOptions): Boolean
-    fun update(options: NotificationOptions): Boolean
+    fun start(payload: NotificationPayload): Boolean
+    fun update(payload: NotificationPayload): Boolean
     fun stop(): Boolean
 }
 
@@ -21,9 +21,9 @@ class ServiceManagerImpl(
     /**
      * Start the foreground service.
      */
-    override fun start(options: NotificationOptions): Boolean {
-        logger.d { "[start] options: $options" }
-        StreamCallService.notificationOptions = options
+    override fun start(payload: NotificationPayload): Boolean {
+        logger.d { "[start] payload: $payload" }
+        StreamCallService.notificationPayload = payload
         try {
             val nIntent = Intent(appContext, StreamCallService::class.java)
 
@@ -39,9 +39,9 @@ class ServiceManagerImpl(
         return true
     }
 
-    override fun update(options: NotificationOptions): Boolean {
-        logger.d { "[update] options: $options" }
-        StreamCallService.notificationOptions = options
+    override fun update(payload: NotificationPayload): Boolean {
+        logger.d { "[update] payload: $payload" }
+        StreamCallService.notificationPayload = payload
         try {
             val nIntent = Intent(appContext, StreamCallService::class.java).apply {
                 action = StreamCallService.ACTION_UPDATE

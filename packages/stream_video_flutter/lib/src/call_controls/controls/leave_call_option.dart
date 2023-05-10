@@ -8,11 +8,15 @@ class LeaveCallOption extends StatelessWidget {
   const LeaveCallOption({
     super.key,
     required this.call,
+    this.icon = Icons.call_end_rounded,
     this.onLeaveCallTap,
   });
 
   /// Represents a call.
   final Call call;
+
+  /// The icon of the leave call button.
+  final IconData icon;
 
   /// The action to perform when the leave call button is tapped.
   final VoidCallback? onLeaveCallTap;
@@ -20,18 +24,10 @@ class LeaveCallOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CallControlOption(
-      icon: const Icon(Icons.call_rounded),
+      icon: Icon(icon),
       iconColor: Colors.white,
       backgroundColor: Colors.red,
-      onPressed: () => _onLeaveCallTap(context),
+      onPressed: onLeaveCallTap ?? call.disconnect,
     );
-  }
-
-  Future<void> _onLeaveCallTap(BuildContext context) async {
-    if (onLeaveCallTap != null) {
-      onLeaveCallTap!();
-    } else {
-      await call.disconnect();
-    }
   }
 }

@@ -78,14 +78,9 @@ class CoordinatorClientRetry extends CoordinatorClient {
     required StreamCallCid callCid,
     required List<SfuEdge> edges,
   }) {
-    return _retryManager.execute(
-      () => _delegate.findBestCallEdgeServer(
-        callCid: callCid,
-        edges: edges,
-      ),
-      (error, nextAttemptDelay) async {
-        _logRetry('findBestCallEdgeServer', error, nextAttemptDelay);
-      },
+    return _delegate.findBestCallEdgeServer(
+      callCid: callCid,
+      edges: edges,
     );
   }
 
@@ -142,13 +137,23 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<None>> onUserLogin(UserInfo user) {
-    return _delegate.onUserLogin(user);
+  Future<Result<None>> connectUser(UserInfo user) {
+    return _delegate.connectUser(user);
   }
 
   @override
-  Future<Result<None>> onUserLogout() {
-    return _delegate.onUserLogout();
+  Future<Result<None>> openConnection() {
+    return _delegate.openConnection();
+  }
+
+  @override
+  Future<Result<None>> closeConnection() {
+    return _delegate.closeConnection();
+  }
+
+  @override
+  Future<Result<None>> disconnectUser() {
+    return _delegate.disconnectUser();
   }
 
   @override

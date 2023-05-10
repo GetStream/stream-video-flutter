@@ -10,7 +10,7 @@ import '../../stream_video_flutter.dart';
 class StreamCallParticipantThemeData with Diagnosticable {
   /// Creates a new instance of [StreamCallParticipantThemeData].
   const StreamCallParticipantThemeData({
-    this.backgroundColor = const Color(0xFF272A30),
+    this.backgroundColor = const Color(0xffB4B7BB),
     this.borderRadius = BorderRadius.zero,
     this.userAvatarTheme = const StreamUserAvatarThemeData(
       constraints: BoxConstraints.tightFor(
@@ -26,9 +26,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
       selectionColor: const Color(0xFF005FFF),
       selectionThickness: 4,
     ),
-    this.showDominantSpeakerBorder = true,
-    this.dominantSpeakerBorderThickness = 4,
-    this.dominantSpeakerBorderColor = const Color(0xFF20E070),
+    this.showSpeakerBorder = true,
+    this.speakerBorderThickness = 4,
+    this.speakerBorderColor = const Color(0xff005FFF),
     this.showParticipantLabel = true,
     this.participantLabelTextStyle = const TextStyle(
       fontSize: 12,
@@ -53,14 +53,14 @@ class StreamCallParticipantThemeData with Diagnosticable {
   /// The theme for the avatar.
   final StreamUserAvatarThemeData userAvatarTheme;
 
-  /// Whether to highlight the dominant speaker.
-  final bool showDominantSpeakerBorder;
+  /// Whether to highlight the participant when he/she is speaking.
+  final bool showSpeakerBorder;
 
-  /// The thickness of the dominant speaker border.
-  final double dominantSpeakerBorderThickness;
+  /// The thickness of the speaker border.
+  final double speakerBorderThickness;
 
-  /// The color of the dominant speaker border.
-  final Color dominantSpeakerBorderColor;
+  /// The color of the speaker border.
+  final Color speakerBorderColor;
 
   /// Whether to show the label with participant name and mute status.
   final bool showParticipantLabel;
@@ -116,12 +116,10 @@ class StreamCallParticipantThemeData with Diagnosticable {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       borderRadius: borderRadius ?? this.borderRadius,
       userAvatarTheme: userAvatarTheme ?? this.userAvatarTheme,
-      showDominantSpeakerBorder:
-          showDominantSpeakerBorder ?? this.showDominantSpeakerBorder,
-      dominantSpeakerBorderThickness:
-          dominantSpeakerBorderThickness ?? this.dominantSpeakerBorderThickness,
-      dominantSpeakerBorderColor:
-          dominantSpeakerBorderColor ?? this.dominantSpeakerBorderColor,
+      showSpeakerBorder: showDominantSpeakerBorder ?? this.showSpeakerBorder,
+      speakerBorderThickness:
+          dominantSpeakerBorderThickness ?? this.speakerBorderThickness,
+      speakerBorderColor: dominantSpeakerBorderColor ?? this.speakerBorderColor,
       showParticipantLabel: showParticipantLabel ?? this.showParticipantLabel,
       participantLabelTextStyle:
           participantLabelTextStyle ?? this.participantLabelTextStyle,
@@ -155,16 +153,15 @@ class StreamCallParticipantThemeData with Diagnosticable {
       backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t)!,
       borderRadius: BorderRadius.lerp(borderRadius, other.borderRadius, t)!,
       userAvatarTheme: userAvatarTheme.lerp(other.userAvatarTheme, t),
-      showDominantSpeakerBorder:
-          t < 0.5 ? showDominantSpeakerBorder : other.showDominantSpeakerBorder,
-      dominantSpeakerBorderThickness: lerpDouble(
-        dominantSpeakerBorderThickness,
-        other.dominantSpeakerBorderThickness,
+      showSpeakerBorder: t < 0.5 ? showSpeakerBorder : other.showSpeakerBorder,
+      speakerBorderThickness: lerpDouble(
+        speakerBorderThickness,
+        other.speakerBorderThickness,
         t,
       )!,
-      dominantSpeakerBorderColor: Color.lerp(
-        dominantSpeakerBorderColor,
-        other.dominantSpeakerBorderColor,
+      speakerBorderColor: Color.lerp(
+        speakerBorderColor,
+        other.speakerBorderColor,
         t,
       )!,
       showParticipantLabel:
@@ -217,9 +214,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
         backgroundColor,
         borderRadius,
         userAvatarTheme,
-        showDominantSpeakerBorder,
-        dominantSpeakerBorderThickness,
-        dominantSpeakerBorderColor,
+        showSpeakerBorder,
+        speakerBorderThickness,
+        speakerBorderColor,
         showParticipantLabel,
         participantLabelTextStyle,
         participantLabelAlignment,
@@ -244,10 +241,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
         other.backgroundColor == backgroundColor &&
         other.borderRadius == borderRadius &&
         other.userAvatarTheme == userAvatarTheme &&
-        other.showDominantSpeakerBorder == showDominantSpeakerBorder &&
-        other.dominantSpeakerBorderThickness ==
-            dominantSpeakerBorderThickness &&
-        other.dominantSpeakerBorderColor == dominantSpeakerBorderColor &&
+        other.showSpeakerBorder == showSpeakerBorder &&
+        other.speakerBorderThickness == speakerBorderThickness &&
+        other.speakerBorderColor == speakerBorderColor &&
         other.showParticipantLabel == showParticipantLabel &&
         other.participantLabelTextStyle == participantLabelTextStyle &&
         other.participantLabelAlignment == participantLabelAlignment &&
@@ -271,19 +267,19 @@ class StreamCallParticipantThemeData with Diagnosticable {
       ..add(
         DiagnosticsProperty(
           'showDominantSpeakerBorder',
-          showDominantSpeakerBorder,
+          showSpeakerBorder,
         ),
       )
       ..add(
         DiagnosticsProperty(
           'dominantSpeakerBorderThickness',
-          dominantSpeakerBorderThickness,
+          speakerBorderThickness,
         ),
       )
       ..add(
         DiagnosticsProperty(
           'dominantSpeakerBorderColor',
-          dominantSpeakerBorderColor,
+          speakerBorderColor,
         ),
       )
       ..add(DiagnosticsProperty('showParticipantLabel', showParticipantLabel))
@@ -347,9 +343,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
       backgroundColor: other.backgroundColor,
       borderRadius: other.borderRadius,
       userAvatarTheme: other.userAvatarTheme,
-      showDominantSpeakerBorder: other.showDominantSpeakerBorder,
-      dominantSpeakerBorderThickness: other.dominantSpeakerBorderThickness,
-      dominantSpeakerBorderColor: other.dominantSpeakerBorderColor,
+      showDominantSpeakerBorder: other.showSpeakerBorder,
+      dominantSpeakerBorderThickness: other.speakerBorderThickness,
+      dominantSpeakerBorderColor: other.speakerBorderColor,
       showParticipantLabel: other.showParticipantLabel,
       participantLabelTextStyle: other.participantLabelTextStyle,
       participantLabelAlignment: other.participantLabelAlignment,

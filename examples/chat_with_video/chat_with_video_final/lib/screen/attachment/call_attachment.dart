@@ -20,7 +20,8 @@ class CallAttachment extends StatelessWidget {
     final colorTheme = chatTheme.colorTheme;
     final textTheme = chatTheme.textTheme;
 
-    final cid = attachment.extraData["callCid"] as String;
+    final callType = attachment.extraData["callType"] as String;
+    final callId = attachment.extraData["callId"] as String;
 
     return Container(
       constraints: BoxConstraints(
@@ -64,8 +65,11 @@ class CallAttachment extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
-                    final callCid = StreamCallCid(cid: cid);
-                    final call = Call.fromCid(callCid: callCid);
+                    final call = StreamVideo.instance.makeCall(
+                      type: callType,
+                      id: callId,
+                    );
+                    await call.getOrCreateCall();
 
                     Navigator.push(
                       context,

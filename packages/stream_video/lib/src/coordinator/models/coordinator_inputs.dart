@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 
 import '../../models/call_cid.dart';
 import '../../models/call_permission.dart';
+import '../../models/call_settings.dart';
 
 @immutable
 abstract class CoordinatorInput with EquatableMixin {
@@ -338,20 +339,17 @@ class MuteUsersInput extends CoordinatorInput {
 class UpdateCallInput extends CoordinatorInput {
   const UpdateCallInput({
     required this.callCid,
-    required this.userIds,
     this.custom = const {},
     this.settingsOverride,
   });
 
   final StreamCallCid callCid;
-  final List<String> userIds;
   final Map<String, Object> custom;
   final CallSettingsInput? settingsOverride;
 
   @override
   List<Object?> get props => [
         callCid,
-        userIds,
         custom,
         settingsOverride,
       ];
@@ -359,80 +357,36 @@ class UpdateCallInput extends CoordinatorInput {
 
 class CallSettingsInput extends CoordinatorInput {
   const CallSettingsInput({
+    this.ring,
+    this.audio,
     this.video,
-    this.screensharing,
+    this.screenShare,
     this.recording,
+    this.transcription,
+    this.backstage,
     this.geofencing,
   });
 
-  final VideoSettingsInput? video;
-  final ScreensharingSettingsInput? screensharing;
-  final RecordSettingsInput? recording;
-  final GeofenceSettingsInput? geofencing;
+  final RingSettings? ring;
+  final AudioSettings? audio;
+  final VideoSettings? video;
+  final ScreenShareSettings? screenShare;
+  final RecordingSettings? recording;
+  final TranscriptionSettings? transcription;
+  final BackstageSettings? backstage;
+  final GeofencingSettings? geofencing;
 
   @override
   List<Object?> get props => [
+        ring,
+        audio,
         video,
-        screensharing,
+        screenShare,
         recording,
+        transcription,
+        backstage,
         geofencing,
       ];
-}
-
-abstract class FeatureSettingsInput extends CoordinatorInput {
-  const FeatureSettingsInput();
-}
-
-class VideoSettingsInput extends FeatureSettingsInput {
-  const VideoSettingsInput({
-    this.enabled,
-    this.accessRequestEnabled,
-  });
-
-  final bool? enabled;
-  final bool? accessRequestEnabled;
-
-  @override
-  List<Object?> get props => [enabled, accessRequestEnabled];
-}
-
-class ScreensharingSettingsInput extends FeatureSettingsInput {
-  const ScreensharingSettingsInput({
-    this.enabled,
-    this.accessRequestEnabled,
-  });
-
-  final bool? enabled;
-  final bool? accessRequestEnabled;
-
-  @override
-  List<Object?> get props => [enabled, accessRequestEnabled];
-}
-
-class RecordSettingsInput extends FeatureSettingsInput {
-  const RecordSettingsInput({
-    this.audioOnly,
-    this.mode,
-    this.quality,
-  });
-
-  final bool? audioOnly;
-  final String? mode;
-  final String? quality;
-
-  @override
-  List<Object?> get props => [audioOnly, mode, quality];
-}
-
-class GeofenceSettingsInput extends FeatureSettingsInput {
-  const GeofenceSettingsInput({
-    this.names = const [],
-  });
-
-  final List<String> names;
-
-  @override
-  List<Object?> get props => [names];
 }
 
 enum EventTypeInput {

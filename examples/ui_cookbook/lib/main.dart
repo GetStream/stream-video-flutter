@@ -20,7 +20,7 @@ void main() async {
       name: Env.sampleUserName00,
       image: Env.sampleUserImage00,
     ),
-    tokenProvider: TokenProvider.static(Env.sampleUserVideoToken00),
+    Env.sampleUserVideoToken00,
   );
 
   runApp(const UICookbook());
@@ -98,12 +98,11 @@ const _chars = 'abcdefghijklmnopqrstuvwxyz1234567890';
 Random _rnd = Random();
 
 Future<Call> generateCall(String type, String id) async {
-  final callCid = StreamCallCid.from(
+  final call = StreamVideo.instance.makeCall(
     type: type,
     id: id,
   );
-  final data = await StreamVideo.instance.getOrCreateCall(cid: callCid);
-  final call = Call.fromCreated(data: data.getDataOrNull()!.data);
+  await call.getOrCreateCall();
 
   return call;
 }

@@ -96,16 +96,16 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           topLeft: Radius.circular(32),
           topRight: Radius.circular(32),
         ),
-        backgroundColor: colorTheme.appBg,
+        backgroundColor: colorTheme.barsBg,
         elevation: 8,
         padding: EdgeInsets.all(14),
         spacing: 10,
         optionIconColor: Colors.black,
-        inactiveOptionIconColor: Colors.black,
+        inactiveOptionIconColor: Colors.white,
         optionElevation: 2,
         inactiveOptionElevation: 2,
         optionBackgroundColor: Colors.white,
-        inactiveOptionBackgroundColor: Colors.white,
+        inactiveOptionBackgroundColor: colorTheme.overlay.withOpacity(0.4),
         optionShape: CircleBorder(),
         optionPadding: EdgeInsets.all(16),
       ),
@@ -138,13 +138,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         ),
       ),
       callParticipantTheme: StreamCallParticipantThemeData(
-        showDominantSpeakerBorder: true,
+        showSpeakerBorder: true,
         borderRadius: isDesktopDevice
             ? const BorderRadius.all(Radius.circular(12))
             : BorderRadius.zero,
-        dominantSpeakerBorderColor: colorTheme.accentInfo,
-        dominantSpeakerBorderThickness: 4,
-        backgroundColor: const Color(0xFF272A30),
+        speakerBorderColor: colorTheme.accentPrimary,
+        speakerBorderThickness: 4,
+        backgroundColor: colorTheme.disabled,
         userAvatarTheme: StreamUserAvatarThemeData(
           constraints: const BoxConstraints.tightFor(
             height: 100,

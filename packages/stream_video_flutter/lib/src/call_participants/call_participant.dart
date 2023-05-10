@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/extensions.dart';
@@ -20,13 +19,6 @@ typedef VideoRendererBuilder = Widget Function(
   CallParticipantState participant,
 );
 
-/// Builder function used to build an overlay with indicators.
-typedef ParticipantOverlayBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallParticipantState participant,
-);
-
 /// A widget that represents a single participant in a call.
 class StreamCallParticipant extends StatelessWidget {
   /// Creates a new instance of [StreamCallParticipant].
@@ -37,9 +29,9 @@ class StreamCallParticipant extends StatelessWidget {
     this.backgroundColor,
     this.borderRadius,
     this.userAvatarTheme,
-    this.showDominantSpeakerBorder,
-    this.dominantSpeakerBorderThickness,
-    this.dominantSpeakerBorderColor,
+    this.showSpeakerBorder,
+    this.speakerBorderThickness,
+    this.speakerBorderColor,
     this.showParticipantLabel,
     this.participantLabelTextStyle,
     this.participantLabelAlignment,
@@ -52,7 +44,7 @@ class StreamCallParticipant extends StatelessWidget {
     this.connectionLevelAlignment,
     this.videoPlaceholderBuilder,
     this.videoRendererBuilder,
-    this.participantOverlayBuilder,
+    this.onSizeChanged,
   });
 
   /// Represents a call.
@@ -70,14 +62,14 @@ class StreamCallParticipant extends StatelessWidget {
   /// The theme for the avatar.
   final StreamUserAvatarThemeData? userAvatarTheme;
 
-  /// Whether to highlight the dominant speaker.
-  final bool? showDominantSpeakerBorder;
+  /// Whether to highlight the participant when he/she is speaking.
+  final bool? showSpeakerBorder;
 
-  /// The thickness of the dominant speaker border.
-  final double? dominantSpeakerBorderThickness;
+  /// The thickness of the speaker border.
+  final double? speakerBorderThickness;
 
-  /// The color of the dominant speaker border.
-  final Color? dominantSpeakerBorderColor;
+  /// The color of the speaker border.
+  final Color? speakerBorderColor;
 
   /// Whether to show the label with participant name and mute status.
   final bool? showParticipantLabel;
@@ -115,8 +107,8 @@ class StreamCallParticipant extends StatelessWidget {
   /// Builder function used to build a video renderer.
   final VideoRendererBuilder? videoRendererBuilder;
 
-  /// Builder function used to build an overlay with indicators.
-  final ParticipantOverlayBuilder? participantOverlayBuilder;
+  /// Callback that is called when the size of the participant widget changes.
+  final ValueSetter<Size>? onSizeChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -125,13 +117,11 @@ class StreamCallParticipant extends StatelessWidget {
     final backgroundColor = this.backgroundColor ?? theme.backgroundColor;
     final borderRadius = this.borderRadius ?? theme.borderRadius;
     final userAvatarTheme = this.userAvatarTheme ?? theme.userAvatarTheme;
-    final showDominantSpeakerBorder =
-        this.showDominantSpeakerBorder ?? theme.showDominantSpeakerBorder;
-    final dominantSpeakerBorderThickness =
-        this.dominantSpeakerBorderThickness ??
-            theme.dominantSpeakerBorderThickness;
-    final dominantSpeakerBorderColor =
-        this.dominantSpeakerBorderColor ?? theme.dominantSpeakerBorderColor;
+    final showSpeakerBorder = this.showSpeakerBorder ?? theme.showSpeakerBorder;
+    final speakerBorderThickness =
+        this.speakerBorderThickness ?? theme.speakerBorderThickness;
+    final speakerBorderColor =
+        this.speakerBorderColor ?? theme.speakerBorderColor;
     final showParticipantLabel =
         this.showParticipantLabel ?? theme.showParticipantLabel;
     final participantLabelTextStyle =
@@ -157,90 +147,89 @@ class StreamCallParticipant extends StatelessWidget {
     return ClipRRect(
       borderRadius: borderRadius,
       child: Container(
-        foregroundDecoration: BoxDecoration(
-          border: participant.isDominantSpeaker && showDominantSpeakerBorder
-              ? Border.all(
-                  width: dominantSpeakerBorderThickness,
-                  color: dominantSpeakerBorderColor,
-                )
-              : null,
-          borderRadius: theme.borderRadius,
-        ),
         decoration: BoxDecoration(
           color: backgroundColor,
+          borderRadius: borderRadius,
         ),
-        child: Stack(
-          children: [
-            videoRendererBuilder?.call(
-                  context,
-                  call,
-                  participant,
-                ) ??
-                StreamVideoRenderer(
-                  call: call,
-                  participant: participant,
-                  videoTrackType: SfuTrackType.video,
-                  placeholderBuilder: (context) {
-                    return videoPlaceholderBuilder?.call(
-                          context,
-                          call,
-                          participant,
-                        ) ??
-                        Center(
-                          child: StreamUserAvatarTheme(
-                            data: userAvatarTheme,
-                            child: StreamUserAvatar(
-                              user: participant.toUserInfo(),
-                            ),
-                          ),
-                        );
-                  },
-                ),
-            participantOverlayBuilder?.call(
-                  context,
-                  call,
-                  participant,
-                ) ??
-                Stack(
-                  children: [
-                    if (showParticipantLabel)
-                      Align(
-                        alignment: participantLabelAlignment,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: StreamParticipantLabel.fromParticipant(
-                                participant: participant,
-                                audioLevelIndicatorColor:
-                                    audioLevelIndicatorColor,
-                                disabledMicrophoneColor:
-                                    disabledMicrophoneColor,
-                                enabledMicrophoneColor: enabledMicrophoneColor,
-                                participantLabelTextStyle:
-                                    participantLabelTextStyle,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    if (showConnectionQualityIndicator)
-                      Align(
-                        alignment: connectionLevelAlignment,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: StreamConnectionQualityIndicator(
-                            connectionQuality: participant.connectionQuality,
-                            activeColor: connectionLevelActiveColor,
-                            inactiveColor: connectionLevelInactiveColor,
-                          ),
-                        ),
-                      ),
-                  ],
+        foregroundDecoration: BoxDecoration(
+          borderRadius: borderRadius,
+          border: participant.isSpeaking && showSpeakerBorder
+              ? Border.all(
+                  color: speakerBorderColor,
+                  width: speakerBorderThickness,
                 )
-          ],
+              : null,
+        ),
+        child: Builder(
+          builder: (context) {
+            var videoPlaceholderBuilder = this.videoPlaceholderBuilder;
+            videoPlaceholderBuilder ??= (context, call, participant) {
+              return Center(
+                child: StreamUserAvatarTheme(
+                  data: userAvatarTheme,
+                  child: StreamUserAvatar(
+                    user: participant.toUserInfo(),
+                  ),
+                ),
+              );
+            };
+
+            var videoRendererBuilder = this.videoRendererBuilder;
+            videoRendererBuilder ??= (context, call, participant) {
+              return StreamVideoRenderer(
+                call: call,
+                participant: participant,
+                videoTrackType: SfuTrackType.video,
+                onSizeChanged: onSizeChanged,
+                placeholderBuilder: (context) {
+                  return videoPlaceholderBuilder!(
+                    context,
+                    call,
+                    participant,
+                  );
+                },
+              );
+            };
+
+            return Stack(
+              children: [
+                videoRendererBuilder(context, call, participant),
+                if (showParticipantLabel)
+                  Align(
+                    alignment: participantLabelAlignment,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: StreamParticipantLabel.fromParticipant(
+                            participant: participant,
+                            audioLevelIndicatorColor: audioLevelIndicatorColor,
+                            disabledMicrophoneColor: disabledMicrophoneColor,
+                            enabledMicrophoneColor: enabledMicrophoneColor,
+                            participantLabelTextStyle:
+                                participantLabelTextStyle,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (showConnectionQualityIndicator)
+                  Align(
+                    alignment: connectionLevelAlignment,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: StreamConnectionQualityIndicator(
+                        connectionQuality: participant.connectionQuality,
+                        activeColor: connectionLevelActiveColor,
+                        inactiveColor: connectionLevelInactiveColor,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );

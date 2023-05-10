@@ -73,8 +73,7 @@ class _JoinCallTabState extends State<JoinCallTab> {
       return;
     }
 
-    final callCid = StreamCallCid.from(type: 'default', id: callId);
-    final call = Call.fromCid(callCid: callCid);
+    final call = StreamVideo.instance.makeCall(type: 'default', id: callId);
 
     if (!_useLobby) {
       widget.onNavigateToCall(call);

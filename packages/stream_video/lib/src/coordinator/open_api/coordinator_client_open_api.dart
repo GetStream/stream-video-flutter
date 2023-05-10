@@ -2,7 +2,7 @@ import 'dart:async';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../errors/video_error_composer.dart';
-import '../../latency_service/latency.dart';
+import '../../latency/latency_service.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_created_data.dart';
@@ -19,6 +19,7 @@ import '../../token/token.dart';
 import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
+import '../../utils/standard.dart';
 import '../coordinator_client.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_inputs.dart' as inputs;
@@ -28,6 +29,8 @@ import 'coordinator_ws_open_api.dart';
 import 'open_api_extensions.dart';
 import 'open_api_mapper_extensions.dart';
 
+const _idEvents = 1;
+
 /// An accessor that allows us to communicate with the API around video calls.
 class CoordinatorClientOpenApi extends CoordinatorClient {
   CoordinatorClientOpenApi({
@@ -35,6 +38,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required this.wsUrl,
     required this.apiKey,
     required this.tokenManager,
+    required this.latencyService,
     required this.retryPolicy,
   }) : _apiClient = open.ApiClient(
           basePath: rpcUrl,
@@ -46,9 +50,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   final String apiKey;
   final String wsUrl;
   final TokenManager tokenManager;
+  final LatencyService latencyService;
   final RetryPolicy retryPolicy;
-
-  String? userId;
 
   final open.ApiClient _apiClient;
   late final videoApi = open.VideoCallsApi(_apiClient);
@@ -63,54 +66,97 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   SharedEmitter<CoordinatorEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
 
+  UserInfo? _user;
   CoordinatorWebSocketOpenApi? _ws;
   StreamSubscription<CoordinatorEvent>? _wsSubscription;
 
   @override
-  Future<Result<None>> onUserLogin(UserInfo user) async {
-    try {
-      _logger.d(() => '[onUserLogin] user: $user');
-      userId = user.id;
-      final ws = CoordinatorWebSocketOpenApi(
-        wsUrl,
-        apiKey: apiKey,
-        userInfo: user,
-        tokenManager: tokenManager,
-        retryPolicy: retryPolicy,
+  Future<Result<None>> connectUser(UserInfo user) async {
+    _logger.d(() => '[connectUser] user: $user');
+    if (_user != null) {
+      _logger.w(() => '[connectUser] rejected (another user in use): $_user');
+      return Result.error(
+        'Another user is in use, please call "disconnectUser" first',
       );
-      _ws = ws;
-      _wsSubscription = ws.events.listen((event) {
-        _logger.v(() => '[onWsEvent] event.type: ${event.runtimeType}');
+    }
+    _user = user;
+    _ws = _createWebSocket(user).also((ws) {
+      _wsSubscription = ws.events.listen(_events.emit);
+    });
+    return openConnection();
+  }
 
-        _events.emit(event);
-      });
-
+  @override
+  Future<Result<None>> openConnection() async {
+    try {
+      final ws = _ws;
+      if (ws == null) {
+        _logger.w(() => '[openConnection] rejected (no WS)');
+        return Result.error('WS is not initialized, call "connectUser" first');
+      }
+      if (!ws.isDisconnected) {
+        _logger.w(() => '[openConnection] rejected (not closed)');
+        return Result.error('WS is not closed');
+      }
+      _logger.i(() => '[openConnection] no args');
       await ws.connect();
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
-      _logger.e(() => '[onUserLogin] failed(${user.id}): $e');
+      _logger.e(() => '[openConnection] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
   @override
-  Future<Result<None>> onUserLogout() async {
-    _logger.d(() => '[onUserLogout] userId: $userId');
-    if (_ws == null) {
-      _logger.w(() => '[onUserLogout] rejected (ws is null)');
-      return Result.success(None());
-    }
+  Future<Result<None>> closeConnection() async {
     try {
-      userId = null;
-      await _ws?.disconnect();
-      _ws = null;
-      await _wsSubscription?.cancel();
-      _wsSubscription = null;
-      return Result.success(None());
+      final ws = _ws;
+      if (ws == null) {
+        _logger.w(() => '[openConnection] rejected (no WS)');
+        return Result.error('WS is not initialized');
+      }
+      if (ws.isDisconnected) {
+        _logger.w(() => '[closeConnection] rejected (already closed)');
+        return Result.error('WS is already closed');
+      }
+      _logger.i(() => '[closeConnection] no args');
+      await ws.disconnect();
+      return const Result.success(none);
     } catch (e, stk) {
-      _logger.e(() => '[onUserLogout] failed: $e');
+      _logger.e(() => '[closeConnection] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
     }
+  }
+
+  @override
+  Future<Result<None>> disconnectUser() async {
+    _logger.d(() => '[disconnectUser] userId: ${_user?.id}');
+    if (_user == null) {
+      _logger.w(() => '[disconnectUser] rejected (user is null)');
+      return const Result.success(none);
+    }
+    _user = null;
+
+    final closedResult = await closeConnection();
+    return closedResult.when(
+      success: (_) async {
+        _ws = null;
+        await _wsSubscription?.cancel();
+        _wsSubscription = null;
+        return const Result.success(none);
+      },
+      failure: Result.failure,
+    );
+  }
+
+  CoordinatorWebSocketOpenApi _createWebSocket(UserInfo user) {
+    return CoordinatorWebSocketOpenApi(
+      wsUrl,
+      apiKey: apiKey,
+      userInfo: user,
+      tokenManager: tokenManager,
+      retryPolicy: retryPolicy,
+    );
   }
 
   /// Create a new Device used to receive Push Notifications.
@@ -209,7 +255,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       () => '[findBestCallEdgeServer] callCid: $callCid, '
           'edges.length: ${edges.length}',
     );
-    final latencyByEdge = await measureEdgeLatencies(edges: edges);
+    final latencyByEdge = await latencyService.measureEdgeLatencies(edges);
     _logger.v(() => '[findBestCallEdgeServer] latencyByEdge: $latencyByEdge');
     final response = await selectCallEdgeServer(
       callCid: callCid,
@@ -234,6 +280,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required Map<String, SfuLatency> latencyByEdge,
   }) async {
     try {
+      _logger.d(() => '[selectCallEdgeServer] callCid: $callCid, '
+          'latencyByEdge.length: ${latencyByEdge.length}');
       final result = await videoApi.getCallEdgeServer(
         callCid.type,
         callCid.id,
@@ -243,6 +291,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           ),
         ),
       );
+      _logger.v(() => '[selectCallEdgeServer] completed: $result');
       if (result == null) {
         return Result.error('selectCallEdgeServer result is null');
       }
@@ -253,6 +302,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
     } catch (e, stk) {
+      _logger.e(() => '[selectCallEdgeServer] failed: $e; $stk');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -274,7 +324,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('sendUserEvent result is null');
       }
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[sendUserEvent] failed: $e; $stk');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -300,7 +350,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('sendCustomEvent result is null');
       }
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[sendCustomEvent] failed: $e; $stk');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -313,7 +363,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     try {
       // TODO
 
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -334,7 +384,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('requestPermissions result is null');
       }
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -357,7 +407,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('updateUserPermissions result is null');
       }
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -367,7 +417,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<None>> startRecording(StreamCallCid callCid) async {
     try {
       await recordingApi.startRecording(callCid.type, callCid.id);
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -377,7 +427,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<None>> stopRecording(StreamCallCid callCid) async {
     try {
       await recordingApi.stopRecording(callCid.type, callCid.id);
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -387,7 +437,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<None>> startBroadcasting(StreamCallCid callCid) async {
     try {
       await livestreamingApi.startBroadcasting(callCid.type, callCid.id);
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -397,7 +447,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<None>> stopBroadcasting(StreamCallCid callCid) async {
     try {
       await livestreamingApi.stopBroadcasting(callCid.type, callCid.id);
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -485,7 +535,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('blockUser result is null');
       }
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -502,7 +552,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('unblockUser result is null');
       }
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -515,7 +565,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('endCall result is null');
       }
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
@@ -567,7 +617,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return Result.error('stopLive result is null');
       }
 
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
