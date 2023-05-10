@@ -383,14 +383,12 @@ class Call {
   }
 
   Future<Result<CallMetadata>> update({
-    required String callCid,
-    required List<String> userIds,
     Map<String, Object>? custom,
     CallSettingsInput? settingsOverride,
   }) {
     return _coordinatorClient.updateCall(
       UpdateCallInput(
-        callCid: StreamCallCid(cid: callCid),
+        callCid: callCid,
         custom: custom ?? {},
         settingsOverride: settingsOverride,
       ),
