@@ -884,6 +884,8 @@ class Call {
     String id,
     String session,
   ) {
+    //FIXME(team): This is a temporary setting to take call ID as session ID
+    return _permissionsManager.listRecordings(type, id, id);
   }
 
   Future<Result<None>> stopRecording() {
