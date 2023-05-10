@@ -1,3 +1,4 @@
+import '../../../open_api/video/coordinator/api.dart';
 import '../../errors/video_error.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
@@ -248,6 +249,20 @@ class CoordinatorClientRetry extends CoordinatorClient {
       () => _delegate.startRecording(callCid),
       (error, nextAttemptDelay) async {
         _logRetry('startRecording', error, nextAttemptDelay);
+      },
+    );
+  }
+
+
+  @override
+  Future<Result<List<CallRecording>>> listRecordings(
+      StreamCallCid callCid,
+      String session,
+      ) {
+    return _retryManager.execute(
+          () => _delegate.listRecordings(callCid, session),
+          (error, nextAttemptDelay) async {
+        _logRetry('listRecordings', error, nextAttemptDelay);
       },
     );
   }
