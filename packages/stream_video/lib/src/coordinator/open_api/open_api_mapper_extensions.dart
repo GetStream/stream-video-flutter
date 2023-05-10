@@ -4,6 +4,7 @@ import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../models/call_cid.dart';
 import '../../models/call_created_data.dart';
 import '../../models/call_permission.dart';
+import '../../models/call_settings.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_inputs.dart';
 import 'event/event_type.dart';
@@ -204,15 +205,38 @@ extension SortListExt on Iterable<SortInput> {
 extension CallSettingsInputExt on CallSettingsInput {
   open.CallSettingsRequest toOpenDto() {
     return open.CallSettingsRequest(
+      ring: ring?.toOpenDto(),
+      audio: audio?.toOpenDto(),
       video: video?.toOpenDto(),
-      screensharing: screensharing?.toOpenDto(),
+      screensharing: screenShare?.toOpenDto(),
       recording: recording?.toOpenDto(),
+      transcription: transcription?.toOpenDto(),
+      backstage: backstage?.toOpenDto(),
       geofencing: geofencing?.toOpenDto(),
     );
   }
 }
 
-extension on VideoSettingsInput {
+extension on RingSettings {
+  open.RingSettingsRequest toOpenDto() {
+    return open.RingSettingsRequest(
+      autoCancelTimeoutMs: autoCancelTimeout.inMilliseconds,
+      autoRejectTimeoutMs: autoRejectTimeout.inMilliseconds,
+    );
+  }
+}
+
+extension on AudioSettings {
+  open.AudioSettingsRequest toOpenDto() {
+    return open.AudioSettingsRequest(
+      accessRequestEnabled: accessRequestEnabled,
+      opusDtxEnabled: opusDtxEnabled,
+      redundantCodingEnabled: redundantCodingEnabled,
+    );
+  }
+}
+
+extension on VideoSettings {
   open.VideoSettingsRequest toOpenDto() {
     return open.VideoSettingsRequest(
       enabled: enabled,
@@ -221,7 +245,7 @@ extension on VideoSettingsInput {
   }
 }
 
-extension on ScreensharingSettingsInput {
+extension on ScreenShareSettings {
   open.ScreensharingSettingsRequest toOpenDto() {
     return open.ScreensharingSettingsRequest(
       enabled: enabled,
@@ -230,25 +254,83 @@ extension on ScreensharingSettingsInput {
   }
 }
 
-extension on RecordSettingsInput {
+extension on RecordingSettings {
   open.RecordSettingsRequest toOpenDto() {
-    // TODO
     return open.RecordSettingsRequest(
       audioOnly: audioOnly,
-      mode: open.RecordSettingsRequestModeEnum.values.firstWhereOrNull(
-        (it) => it.value == mode,
-      ),
-      quality: open.RecordSettingsRequestQualityEnum.values.firstWhereOrNull(
-        (it) => it.value == quality,
-      ),
+      mode: mode.toOpenDto(),
+      quality: quality.toOpenDto(),
     );
   }
 }
 
-extension on GeofenceSettingsInput {
+extension on TranscriptionSettings {
+  open.TranscriptionSettingsRequest toOpenDto() {
+    return open.TranscriptionSettingsRequest(
+      closedCaptionMode: closedCaptionMode,
+      mode: mode.toOpenDto(),
+    );
+  }
+}
+
+extension on BackstageSettings {
+  open.BackstageSettingsRequest toOpenDto() {
+    return open.BackstageSettingsRequest(
+      enabled: enabled,
+    );
+  }
+}
+
+extension on GeofencingSettings {
   open.GeofenceSettingsRequest toOpenDto() {
     return open.GeofenceSettingsRequest(
       names: names,
     );
   }
 }
+
+extension on RecordSettingsMode {
+  open.RecordSettingsRequestModeEnum toOpenDto() {
+    switch (this) {
+      case RecordSettingsMode.available:
+        return open.RecordSettingsRequestModeEnum.available;
+      case RecordSettingsMode.disabled:
+        return open.RecordSettingsRequestModeEnum.disabled;
+      case RecordSettingsMode.autoOn:
+        return open.RecordSettingsRequestModeEnum.autoOn;
+    }
+  }
+}
+
+extension on RecordSettingsQuality {
+  open.RecordSettingsRequestQualityEnum toOpenDto() {
+    switch (this) {
+      case RecordSettingsQuality.audioOnly:
+        return open.RecordSettingsRequestQualityEnum.audioOnly;
+      case RecordSettingsQuality.n360p:
+        return open.RecordSettingsRequestQualityEnum.n360p;
+      case RecordSettingsQuality.n480p:
+        return open.RecordSettingsRequestQualityEnum.n480p;
+      case RecordSettingsQuality.n720p:
+        return open.RecordSettingsRequestQualityEnum.n720p;
+      case RecordSettingsQuality.n1080p:
+        return open.RecordSettingsRequestQualityEnum.n1080p;
+      case RecordSettingsQuality.n1440p:
+        return open.RecordSettingsRequestQualityEnum.n1440p;
+    }
+  }
+}
+
+extension on TranscriptionSettingsMode {
+  open.TranscriptionSettingsRequestModeEnum toOpenDto() {
+    switch (this) {
+      case TranscriptionSettingsMode.available:
+        return open.TranscriptionSettingsRequestModeEnum.available;
+      case TranscriptionSettingsMode.disabled:
+        return open.TranscriptionSettingsRequestModeEnum.disabled;
+      case TranscriptionSettingsMode.autoOn:
+        return open.TranscriptionSettingsRequestModeEnum.autoOn;
+    }
+  }
+}
+

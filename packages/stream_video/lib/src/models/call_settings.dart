@@ -33,22 +33,22 @@ class CallSettings with EquatableMixin {
     AudioSettings? audio,
     VideoSettings? video,
     ScreenShareSettings? screenShare,
-    RecordingSettings? record,
-    BroadcastingSettings? broadcast,
+    RecordingSettings? recording,
+    BroadcastingSettings? broadcasting,
     TranscriptionSettings? transcription,
     BackstageSettings? backstage,
-    GeofencingSettings? geofence,
+    GeofencingSettings? geofencing,
   }) {
     return CallSettings(
       ring: ring ?? this.ring,
       audio: audio ?? this.audio,
       video: video ?? this.video,
       screenShare: screenShare ?? this.screenShare,
-      recording: record ?? this.recording,
-      broadcasting: broadcast ?? this.broadcasting,
+      recording: recording ?? this.recording,
+      broadcasting: broadcasting ?? this.broadcasting,
       transcription: transcription ?? this.transcription,
       backstage: backstage ?? this.backstage,
-      geofencing: geofence ?? this.geofencing,
+      geofencing: geofencing ?? this.geofencing,
     );
   }
 }
