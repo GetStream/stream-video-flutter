@@ -317,7 +317,6 @@ class StreamVideo {
     return _client.updateCall(
       input.UpdateCallInput(
         callCid: StreamCallCid(cid: callCid),
-        userIds: userIds,
         custom: custom ?? {},
         settingsOverride: settingsOverride,
       ),
