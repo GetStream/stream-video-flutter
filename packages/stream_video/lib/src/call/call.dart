@@ -879,13 +879,13 @@ class Call {
     return _permissionsManager.startRecording();
   }
 
-  Future<Result<List<CallRecording>>> listRecordings(
-    String type,
-    String id,
-    String session,
-  ) {
-    //FIXME(team): This is a temporary setting to take call ID as session ID
-    return _permissionsManager.listRecordings(type, id, id);
+  Future<Result<List<CallRecording>>> listRecordings() async {
+    final sessionId = _session?.sessionId;
+    if (sessionId == null) {
+      return Result.error('Session not found');
+    }
+
+    return _permissionsManager.listRecordings(sessionId);
   }
 
   Future<Result<None>> stopRecording() {

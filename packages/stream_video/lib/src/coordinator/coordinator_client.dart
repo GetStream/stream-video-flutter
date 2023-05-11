@@ -1,5 +1,4 @@
 import '../../open_api/video/coordinator/api.dart';
-
 import '../models/call_cid.dart';
 import '../models/call_device.dart';
 import '../models/call_metadata.dart';
@@ -85,11 +84,10 @@ abstract class CoordinatorClient {
   /// Starts recording for the call described by the given [callCid].
   Future<Result<None>> startRecording(StreamCallCid callCid);
 
-  /// Returns a list of recording for the associated [callCid] and session.
+  /// Returns a list of recording for the associated [callCid] and [sessionId].
   Future<Result<List<CallRecording>>> listRecordings(
-    String type,
-    String id,
-    String session,
+    StreamCallCid callCid,
+    String sessionId,
   );
 
   /// Stops recording for the call described by the given [callCid].

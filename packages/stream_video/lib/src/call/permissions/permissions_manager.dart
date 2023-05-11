@@ -2,7 +2,6 @@ import 'package:meta/meta.dart';
 
 import '../../../open_api/video/coordinator/api.dart';
 import '../../../stream_video.dart';
-import '../../models/call_permission.dart';
 import '../../utils/none.dart';
 import '../state/call_state_notifier.dart';
 
@@ -146,17 +145,9 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<List<CallRecording>>> listRecordings(
-    String type,
-    String id,
-    String session,
-  ) async {
-    _logger.d(() => '[queryRecordings] Call $callCid Session $session');
-    final result = await coordinatorClient.listRecordings(
-      type,
-      id,
-      session,
-    );
+  Future<Result<List<CallRecording>>> listRecordings(String sessionId) async {
+    _logger.d(() => '[queryRecordings] Call $callCid Session $sessionId');
+    final result = await coordinatorClient.listRecordings(callCid, sessionId);
     _logger.v(() => '[queryRecordings] result: $result');
     return result;
   }
