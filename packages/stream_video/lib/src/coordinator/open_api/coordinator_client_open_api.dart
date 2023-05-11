@@ -424,6 +424,23 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   @override
+  Future<Result<List<open.CallRecording>>> listRecordings(
+    StreamCallCid callCid,
+    String sessionId,
+  ) async {
+    try {
+      final result = await recordingApi.listRecordings(
+        callCid.type,
+        callCid.id,
+        sessionId,
+      );
+      return Result.success(result?.recordings ?? []);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
   Future<Result<None>> stopRecording(StreamCallCid callCid) async {
     try {
       await recordingApi.stopRecording(callCid.type, callCid.id);

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../../open_api/video/coordinator/api.dart';
 import '../../stream_video.dart';
 import '../action/internal/lifecycle_action.dart';
 import '../coordinator/models/coordinator_events.dart';
@@ -876,6 +877,15 @@ class Call {
 
   Future<Result<None>> startRecording() {
     return _permissionsManager.startRecording();
+  }
+
+  Future<Result<List<CallRecording>>> listRecordings() async {
+    final sessionId = _session?.sessionId;
+    if (sessionId == null) {
+      return Result.error('Session not found');
+    }
+
+    return _permissionsManager.listRecordings(sessionId);
   }
 
   Future<Result<None>> stopRecording() {
