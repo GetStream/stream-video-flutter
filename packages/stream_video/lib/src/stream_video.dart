@@ -297,13 +297,17 @@ class StreamVideo {
   Future<Result<QueriedCalls>> queryCalls({
     required Map<String, Object> filterConditions,
     String? next,
+    String? prev,
     int? limit,
+    List<SortInput>? sorts,
   }) {
     return _client.queryCalls(
       input.QueryCallsInput(
         filterConditions: filterConditions,
         next: next,
         limit: limit,
+        prev: prev,
+        sorts: sorts ?? [],
       ),
     );
   }
