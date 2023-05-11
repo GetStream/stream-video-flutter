@@ -7,29 +7,32 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../env/env.dart';
 import '../src/model/user_credentials.dart';
-import 'app_repository.dart';
 import 'user_repository.dart';
 
 class AuthRepository {
-  AuthRepository._singleton();
+  AuthRepository({
+    required this.tokenService,
+    required this.streamVideo,
+    required this.streamChat,
+    required this.googleSignIn,
+  });
 
-  static final AuthRepository _instance = AuthRepository._singleton();
-
-  static AuthRepository get instance => _instance;
+  final TokenService tokenService;
+  final StreamVideo streamVideo;
+  final StreamChatClient streamChat;
+  final GoogleSignIn googleSignIn;
 
   final _logger = taggedLogger(tag: 'SV:LoginViewState');
+  // late final _googleSignIn = GoogleSignIn(hostedDomain: 'getstream.io');
 
-  late final _googleSignIn = GoogleSignIn(hostedDomain: 'getstream.io');
-
-  late final _tokenService = TokenService();
+  String? _userToken;
 
   Future<GoogleSignInAccount?> signInWithGoogle() {
-    return _googleSignIn.signIn();
+    return googleSignIn.signIn();
   }
 
   Future<void> loginWithUserInfo(UserInfo user) async {
-    final chatClient = AppRepository.instance.streamChatClient;
-    final tokenResult = await StreamVideo.instance.connectUserWithProvider(
+    final tokenResult = await streamVideo.connectUserWithProvider(
       user,
       tokenProvider: TokenProvider.dynamic(_tokenLoader, (token) async {
         _logger.d(() => '[onTokenUpdated] token: $token');
@@ -37,21 +40,41 @@ class AuthRepository {
           user: user,
           token: token,
         );
+        _userToken = token;
         await UserRepository.instance.saveUserCredentials(userCredentials);
       }),
     );
 
     final chatUID = md5.convert(utf8.encode(user.id)).toString();
-    await chatClient?.connectUserWithProvider(User(id: chatUID), _tokenLoader);
+
+    final chatUser = User(
+      id: chatUID,
+      extraData: {
+        'name': user.name,
+        'image': user.image,
+      },
+    );
+
+    if (_userToken != null) {
+      print("[loginWithUserInfo] Logging in with $_userToken");
+      await streamChat.connectUserWithProvider(chatUser, _tokenLoader);
+    } else {
+      print("[loginWithUserInfo] Logging in with token provider");
+      await streamChat.connectUserWithProvider(chatUser, _tokenLoader);
+    }
+
     _logger.d(() => '[onLoginSuccess] tokenResult: $tokenResult');
+
     if (tokenResult is! Success<String>) {
       // TODO show error
       return;
     }
+
+    return;
   }
 
   Future<String> _tokenLoader(String userId) async {
-    final token = await _tokenService.loadToken(
+    final token = await tokenService.loadToken(
       apiKey: Env.apiKey,
       userId: userId,
     );

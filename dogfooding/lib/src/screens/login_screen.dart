@@ -1,15 +1,11 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_video/stream_video.dart';
 
-import '../../repos/auth_repo.dart';
 import '../routes/routes.dart';
 import '../utils/assets.dart';
-
-import 'package:crypto/crypto.dart';
+import '../utils/providers.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,10 +16,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
-  final auth = AuthRepository.instance;
 
   Future<void> _loginWithGoogle() async {
-    final googleUser = await auth.signInWithGoogle();
+    final googleUser = await context.authRepo.signInWithGoogle();
     if (googleUser == null) return debugPrint('Google login cancelled');
 
     final user = UserInfo(
@@ -32,8 +27,8 @@ class _LoginScreenState extends State<LoginScreen> {
       name: googleUser.displayName ?? '',
       image: googleUser.photoUrl,
     );
-
-    await auth.loginWithUserInfo(user);
+    if (mounted) return;
+    await context.authRepo.loginWithUserInfo(user);
     if (mounted) await Navigator.of(context).pushReplacementNamed(Routes.home);
     return;
   }
@@ -48,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
       name: email,
     );
 
-    await auth.loginWithUserInfo(user);
+    await context.authRepo.loginWithUserInfo(user);
     if (mounted) await Navigator.of(context).pushReplacementNamed(Routes.home);
     return;
   }

@@ -5,21 +5,24 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:uni_links/uni_links.dart';
 
 import 'firebase_options.dart';
 import 'repos/app_repository.dart';
+import 'repos/auth_repo.dart';
 import 'repos/user_repository.dart';
 import 'src/routes/app_routes.dart';
 import 'src/routes/routes.dart';
+import 'src/utils/consts.dart';
+import 'src/utils/providers.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  await AppRepository.instance.initStreamVideo();
+  await AppRepository.initStreamVideo();
   await _handleRemoteMessage(message);
 }
 
@@ -29,28 +32,45 @@ Future<void> _handleRemoteMessage(RemoteMessage message) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  final appRepo = AppRepository();
+  await appRepo.beginSession();
+  final authRepo = AuthRepository(
+    tokenService: TokenService(),
+    streamVideo: appRepo.videoClient,
+    streamChat: appRepo.chatClient,
+    googleSignIn: GoogleSignIn(hostedDomain: 'getstream.io'),
   );
-  await AppRepository.instance.beginSession();
-  runApp(const StreamDogFoodingApp());
+
+  runApp(
+    StreamDogFoodingApp(
+      appRepository: appRepo,
+      authRepository: authRepo,
+    ),
+  );
 }
 
 class StreamDogFoodingApp extends StatefulWidget {
-  const StreamDogFoodingApp({super.key});
+  const StreamDogFoodingApp({
+    super.key,
+    required this.appRepository,
+    required this.authRepository,
+  });
+
+  final AppRepository appRepository;
+  final AuthRepository authRepository;
 
   @override
   State<StreamDogFoodingApp> createState() => _StreamDogFoodingAppState();
 }
 
-class _StreamDogFoodingAppState
-    extends State<StreamDogFoodingApp>
+class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     with
         //ignore:prefer_mixin
         WidgetsBindingObserver {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late StreamSubscription<Uri?> _subscription;
-  late final StreamChatClient chatClient;
 
   @override
   void initState() {
@@ -60,7 +80,6 @@ class _StreamDogFoodingAppState
     FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
     _tryConsumingIncomingCallFromTerminatedState();
     _observeDeepLinks();
-    AppRepository.instance.beginSession();
   }
 
   Future<void> _observeDeepLinks() async {
@@ -98,7 +117,7 @@ class _StreamDogFoodingAppState
         token,
       );
 
-      final call = StreamVideo.instance.makeCall(type: 'default', id: callId);
+      final call = StreamVideo.instance.makeCall(type: kCallType, id: callId);
       await call.getOrCreateCall();
 
       await _navigatorKey.currentState?.pushNamed(
@@ -163,7 +182,7 @@ class _StreamDogFoodingAppState
     final appTheme = StreamVideoTheme.dark();
     return MaterialApp(
       navigatorKey: _navigatorKey,
-      title: 'Stream Dog Fooding',
+      title: kAppName,
       theme: ThemeData(
         textTheme: GoogleFonts.interTextTheme().copyWith(
           bodyLarge: const TextStyle(
@@ -186,9 +205,15 @@ class _StreamDogFoodingAppState
       ),
       onGenerateRoute: AppRoutes.generateRoute,
       builder: (BuildContext context, Widget? child) {
-        return StreamChat(
-          client: AppRepository.instance.streamChatClient!,
-          child: child,
+        return AppProvider(
+          appRepo: widget.appRepository,
+          child: AuthenticationProvider(
+            auth: widget.authRepository,
+            child: StreamChat(
+              client: widget.appRepository.chatClient,
+              child: child,
+            ),
+          ),
         );
       },
     );
