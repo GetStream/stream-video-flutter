@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
       name: googleUser.displayName ?? '',
       image: googleUser.photoUrl,
     );
-    if (mounted) return;
+    if (!mounted) return;
     await context.authRepo.loginWithUserInfo(user);
     if (mounted) await Navigator.of(context).pushReplacementNamed(Routes.home);
     return;

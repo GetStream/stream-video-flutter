@@ -44,8 +44,11 @@ class _CallScreenState extends State<CallScreen> {
           body: StreamCallContainer(
             call: widget.call,
             callConnectOptions: widget.callConnectOptions,
-            callContentBuilder:
-                (BuildContext context, Call call, CallState callState) {
+            callContentBuilder: (
+              BuildContext context,
+              Call call,
+              CallState callState,
+            ) {
               return StreamCallContent(
                 call: call,
                 callState: callState,

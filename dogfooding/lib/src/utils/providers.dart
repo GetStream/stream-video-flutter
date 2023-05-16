@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_dogfooding/repos/auth_repo.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../repos/app_repository.dart';
+import '../../repos/auth_repo.dart';
 
 class MockUsersProvider extends StreamUsersProvider {
   @override
