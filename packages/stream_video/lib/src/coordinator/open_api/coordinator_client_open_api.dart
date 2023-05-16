@@ -228,6 +228,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           create: input.create,
           ring: input.ringing,
           //location: location,
+          // TODO hardcoded 'AMS' due to other locations not being supported]
           location: 'AMS',
         ),
         connectionId: _ws?.clientId,
