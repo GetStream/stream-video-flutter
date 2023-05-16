@@ -56,10 +56,8 @@ class AuthRepository {
     );
 
     if (_userToken != null) {
-      print("[loginWithUserInfo] Logging in with $_userToken");
       await streamChat.connectUserWithProvider(chatUser, _tokenLoader);
     } else {
-      print("[loginWithUserInfo] Logging in with token provider");
       await streamChat.connectUserWithProvider(chatUser, _tokenLoader);
     }
 
