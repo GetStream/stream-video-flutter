@@ -33,6 +33,7 @@ class CallSessionFactory {
         defaultRtcConfiguration(credentials.sfuServer.url);
     final sessionConfig = CallSessionConfig(
       sfuUrl: credentials.sfuServer.url,
+      sfuWsEndpoint: credentials.sfuServer.wsEndpoint,
       sfuToken: credentials.sfuToken,
       rtcConfig: rtcConfig,
     );

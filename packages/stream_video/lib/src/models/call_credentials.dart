@@ -28,17 +28,19 @@ class CallSfuServer with EquatableMixin {
   const CallSfuServer({
     required this.name,
     required this.url,
+    required this.wsEndpoint,
   });
 
   final String name;
   final String url;
+  final String wsEndpoint;
 
   @override
-  List<Object> get props => [name, url];
+  List<Object> get props => [name, url, wsEndpoint];
 
   @override
   String toString() {
-    return 'CallSfuServer{name: $name, url: $url}';
+    return 'CallSfuServer{name: $name, url: $url, wsEndpoint: $wsEndpoint}';
   }
 }
 

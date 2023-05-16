@@ -338,7 +338,7 @@ class VideoCallsApi {
 
   /// Set call as live
   ///
-  ///   Sends events: - call.updated  Required permissions: - UpdateCall 
+  ///   Sends events: - call.live_started  Required permissions: - UpdateCall 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -376,7 +376,7 @@ class VideoCallsApi {
 
   /// Set call as live
   ///
-  ///   Sends events: - call.updated  Required permissions: - UpdateCall 
+  ///   Sends events: - call.live_started  Required permissions: - UpdateCall 
   ///
   /// Parameters:
   ///
@@ -854,7 +854,7 @@ class VideoCallsApi {
 
   /// Update Call Member
   ///
-  ///   Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
+  ///   Sends events: - call.member_added - call.member_removed - call.member_updated  Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -894,7 +894,7 @@ class VideoCallsApi {
 
   /// Update Call Member
   ///
-  ///   Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
+  ///   Sends events: - call.member_added - call.member_removed - call.member_updated  Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
   ///
   /// Parameters:
   ///

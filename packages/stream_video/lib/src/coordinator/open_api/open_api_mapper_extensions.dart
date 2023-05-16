@@ -71,6 +71,42 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           endedBy: endedBy,
           createdAt: event.createdAt,
         );
+      case EventType.callSessionStarted:
+        final event = callSessionStarted!;
+
+        return CoordinatorCallSessionStartedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          sessionId: event.sessionId,
+          metadata: event.call.toCallMetadata(),
+        );
+      case EventType.callSessionEnded:
+        final event = callSessionEnded!;
+
+        return CoordinatorCallSessionEndedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          sessionId: event.sessionId,
+          metadata: event.call.toCallMetadata(),
+        );
+      case EventType.callSessionParticipantJoined:
+        final event = callSessionParticipantJoined!;
+
+        return CoordinatorCallSessionParticipantJoinedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          sessionId: event.sessionId,
+          user: event.user.toCallUser(),
+        );
+      case EventType.callSessionParticipantLeft:
+        final event = callSessionParticipantLeft!;
+
+        return CoordinatorCallSessionParticipantLeftEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          sessionId: event.sessionId,
+          user: event.user.toCallUser(),
+        );
       case EventType.callPermissionRequest:
         final event = callPermissionRequest!;
         return CoordinatorCallPermissionRequestEvent(
@@ -117,6 +153,26 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
         );
+      case EventType.callLiveStarted:
+        final event = callLiveStarted;
+        // TODO: Handle this case.
+        break;
+      case EventType.callMemberAdded:
+        final event = callMemberAdded;
+        // TODO: Handle this case.
+        break;
+      case EventType.callMemberRemoved:
+        final event = callMemberRemoved;
+        // TODO: Handle this case.
+        break;
+      case EventType.callMemberUpdated:
+        final event = callMemberUpdated;
+        // TODO: Handle this case.
+        break;
+      case EventType.callMemberUpdatedPermission:
+        final event = callMemberUpdatedPermission;
+        // TODO: Handle this case.
+        break;
       case EventType.callUserBlocked:
         final event = callUserBlocked!;
 

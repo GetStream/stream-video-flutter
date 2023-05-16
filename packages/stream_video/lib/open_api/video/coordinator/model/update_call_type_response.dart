@@ -17,6 +17,7 @@ class UpdateCallTypeResponse {
     required this.duration,
     this.grants = const {},
     required this.name,
+    required this.notificationSettings,
     required this.settings,
     required this.updatedAt,
   });
@@ -29,6 +30,8 @@ class UpdateCallTypeResponse {
 
   String name;
 
+  NotificationSettings notificationSettings;
+
   CallSettingsResponse settings;
 
   DateTime updatedAt;
@@ -39,6 +42,7 @@ class UpdateCallTypeResponse {
      other.duration == duration &&
      other.grants == grants &&
      other.name == name &&
+     other.notificationSettings == notificationSettings &&
      other.settings == settings &&
      other.updatedAt == updatedAt;
 
@@ -49,11 +53,12 @@ class UpdateCallTypeResponse {
     (duration.hashCode) +
     (grants.hashCode) +
     (name.hashCode) +
+    (notificationSettings.hashCode) +
     (settings.hashCode) +
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'UpdateCallTypeResponse[createdAt=$createdAt, duration=$duration, grants=$grants, name=$name, settings=$settings, updatedAt=$updatedAt]';
+  String toString() => 'UpdateCallTypeResponse[createdAt=$createdAt, duration=$duration, grants=$grants, name=$name, notificationSettings=$notificationSettings, settings=$settings, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -61,6 +66,7 @@ class UpdateCallTypeResponse {
       json[r'duration'] = this.duration;
       json[r'grants'] = this.grants;
       json[r'name'] = this.name;
+      json[r'notification_settings'] = this.notificationSettings;
       json[r'settings'] = this.settings;
       json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
     return json;
@@ -91,6 +97,7 @@ class UpdateCallTypeResponse {
           ? const {}
             : mapCastOfType<String, List<String>>(json, r'grants') ?? const {},
         name: mapValueOfType<String>(json, r'name')!,
+        notificationSettings: NotificationSettings.fromJson(json[r'notification_settings'])!,
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,
         updatedAt: mapDateTime(json, r'updated_at', '')!,
       );
@@ -146,6 +153,7 @@ class UpdateCallTypeResponse {
     'duration',
     'grants',
     'name',
+    'notification_settings',
     'settings',
     'updated_at',
   };

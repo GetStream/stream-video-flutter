@@ -10,15 +10,20 @@
 
 part of openapi.api;
 
-class UpdateCallTypeRequest {
-  /// Returns a new [UpdateCallTypeRequest] instance.
-  UpdateCallTypeRequest({
-    this.grants = const {},
-    this.notificationSettings,
-    this.settings,
+class APNSRequest {
+  /// Returns a new [APNSRequest] instance.
+  APNSRequest({
+    this.body,
+    this.title,
   });
 
-  Map<String, List<String>> grants;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? body;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -26,52 +31,41 @@ class UpdateCallTypeRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  NotificationSettingsRequest? notificationSettings;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  CallSettingsRequest? settings;
+  String? title;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is UpdateCallTypeRequest &&
-     other.grants == grants &&
-     other.notificationSettings == notificationSettings &&
-     other.settings == settings;
+  bool operator ==(Object other) => identical(this, other) || other is APNSRequest &&
+     other.body == body &&
+     other.title == title;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (grants.hashCode) +
-    (notificationSettings == null ? 0 : notificationSettings!.hashCode) +
-    (settings == null ? 0 : settings!.hashCode);
+    (body == null ? 0 : body!.hashCode) +
+    (title == null ? 0 : title!.hashCode);
 
   @override
-  String toString() => 'UpdateCallTypeRequest[grants=$grants, notificationSettings=$notificationSettings, settings=$settings]';
+  String toString() => 'APNSRequest[body=$body, title=$title]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'grants'] = this.grants;
-    if (this.notificationSettings != null) {
-      json[r'notification_settings'] = this.notificationSettings;
+    if (this.body != null) {
+      json[r'body'] = this.body;
     } else {
-      json[r'notification_settings'] = null;
+      json[r'body'] = null;
     }
-    if (this.settings != null) {
-      json[r'settings'] = this.settings;
+    if (this.title != null) {
+      json[r'title'] = this.title;
     } else {
-      json[r'settings'] = null;
+      json[r'title'] = null;
     }
     return json;
   }
 
-  /// Returns a new [UpdateCallTypeRequest] instance and imports its values from
+  /// Returns a new [APNSRequest] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static UpdateCallTypeRequest? fromJson(dynamic value) {
+  static APNSRequest? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -80,28 +74,25 @@ class UpdateCallTypeRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "UpdateCallTypeRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "UpdateCallTypeRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "APNSRequest[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "APNSRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return UpdateCallTypeRequest(
-        grants: json[r'grants'] == null
-          ? const {}
-            : mapCastOfType<String, List<String>>(json, r'grants') ?? const {},
-        notificationSettings: NotificationSettingsRequest.fromJson(json[r'notification_settings']),
-        settings: CallSettingsRequest.fromJson(json[r'settings']),
+      return APNSRequest(
+        body: mapValueOfType<String>(json, r'body'),
+        title: mapValueOfType<String>(json, r'title'),
       );
     }
     return null;
   }
 
-  static List<UpdateCallTypeRequest>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <UpdateCallTypeRequest>[];
+  static List<APNSRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <APNSRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = UpdateCallTypeRequest.fromJson(row);
+        final value = APNSRequest.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -110,12 +101,12 @@ class UpdateCallTypeRequest {
     return result.toList(growable: growable);
   }
 
-  static Map<String, UpdateCallTypeRequest> mapFromJson(dynamic json) {
-    final map = <String, UpdateCallTypeRequest>{};
+  static Map<String, APNSRequest> mapFromJson(dynamic json) {
+    final map = <String, APNSRequest>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = UpdateCallTypeRequest.fromJson(entry.value);
+        final value = APNSRequest.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -124,13 +115,13 @@ class UpdateCallTypeRequest {
     return map;
   }
 
-  // maps a json object with a list of UpdateCallTypeRequest-objects as value to a dart map
-  static Map<String, List<UpdateCallTypeRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<UpdateCallTypeRequest>>{};
+  // maps a json object with a list of APNSRequest-objects as value to a dart map
+  static Map<String, List<APNSRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<APNSRequest>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = UpdateCallTypeRequest.listFromJson(entry.value, growable: growable,);
+        final value = APNSRequest.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }

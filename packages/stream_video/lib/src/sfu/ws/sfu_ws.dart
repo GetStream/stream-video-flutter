@@ -22,6 +22,7 @@ class SfuWebSocket extends StreamWebSocket
     required int sessionSeq,
     required String sessionId,
     required String sfuUrl,
+    required String sfuWsEndpoint,
     Iterable<String>? protocols,
   }) {
     final tag = '$_tag-$sessionSeq';
@@ -42,8 +43,9 @@ class SfuWebSocket extends StreamWebSocket
           .toString();
     }
     streamLog.i(tag, () => '<factory> wsEndpoint: $wsEndpoint');
+    streamLog.i(tag, () => '<factory> sfuWsEndpoint: $sfuWsEndpoint');
     return SfuWebSocket._(
-      wsEndpoint,
+      sfuWsEndpoint,
       protocols: protocols,
       sessionSeq: sessionSeq,
       sessionId: sessionId,

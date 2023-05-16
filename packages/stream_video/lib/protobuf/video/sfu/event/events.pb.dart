@@ -31,6 +31,7 @@ enum SfuEvent_EventPayload {
   trackPublished, 
   trackUnpublished, 
   error, 
+  callGrantsUpdated, 
   notSet
 }
 
@@ -50,10 +51,11 @@ class SfuEvent extends $pb.GeneratedMessage {
     16 : SfuEvent_EventPayload.trackPublished,
     17 : SfuEvent_EventPayload.trackUnpublished,
     18 : SfuEvent_EventPayload.error,
+    19 : SfuEvent_EventPayload.callGrantsUpdated,
     0 : SfuEvent_EventPayload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SfuEvent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 19])
     ..aOM<SubscriberOffer>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscriberOffer', subBuilder: SubscriberOffer.create)
     ..aOM<PublisherAnswer>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'publisherAnswer', subBuilder: PublisherAnswer.create)
     ..aOM<ConnectionQualityChanged>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionQualityChanged', subBuilder: ConnectionQualityChanged.create)
@@ -68,6 +70,7 @@ class SfuEvent extends $pb.GeneratedMessage {
     ..aOM<TrackPublished>(16, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackPublished', subBuilder: TrackPublished.create)
     ..aOM<TrackUnpublished>(17, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackUnpublished', subBuilder: TrackUnpublished.create)
     ..aOM<Error>(18, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error', subBuilder: Error.create)
+    ..aOM<CallGrantsUpdated>(19, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callGrantsUpdated', subBuilder: CallGrantsUpdated.create)
     ..hasRequiredFields = false
   ;
 
@@ -87,6 +90,7 @@ class SfuEvent extends $pb.GeneratedMessage {
     TrackPublished? trackPublished,
     TrackUnpublished? trackUnpublished,
     Error? error,
+    CallGrantsUpdated? callGrantsUpdated,
   }) {
     final _result = create();
     if (subscriberOffer != null) {
@@ -130,6 +134,9 @@ class SfuEvent extends $pb.GeneratedMessage {
     }
     if (error != null) {
       _result.error = error;
+    }
+    if (callGrantsUpdated != null) {
+      _result.callGrantsUpdated = callGrantsUpdated;
     }
     return _result;
   }
@@ -310,6 +317,17 @@ class SfuEvent extends $pb.GeneratedMessage {
   void clearError() => clearField(18);
   @$pb.TagNumber(18)
   Error ensureError() => $_ensure(13);
+
+  @$pb.TagNumber(19)
+  CallGrantsUpdated get callGrantsUpdated => $_getN(14);
+  @$pb.TagNumber(19)
+  set callGrantsUpdated(CallGrantsUpdated v) { setField(19, v); }
+  @$pb.TagNumber(19)
+  $core.bool hasCallGrantsUpdated() => $_has(14);
+  @$pb.TagNumber(19)
+  void clearCallGrantsUpdated() => clearField(19);
+  @$pb.TagNumber(19)
+  CallGrantsUpdated ensureCallGrantsUpdated() => $_ensure(14);
 }
 
 class Error extends $pb.GeneratedMessage {
@@ -533,11 +551,20 @@ class HealthCheckRequest extends $pb.GeneratedMessage {
 
 class HealthCheckResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'HealthCheckResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOM<$0.ParticipantCount>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participantCount', subBuilder: $0.ParticipantCount.create)
     ..hasRequiredFields = false
   ;
 
   HealthCheckResponse._() : super();
-  factory HealthCheckResponse() => create();
+  factory HealthCheckResponse({
+    $0.ParticipantCount? participantCount,
+  }) {
+    final _result = create();
+    if (participantCount != null) {
+      _result.participantCount = participantCount;
+    }
+    return _result;
+  }
   factory HealthCheckResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory HealthCheckResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
@@ -558,6 +585,17 @@ class HealthCheckResponse extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static HealthCheckResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<HealthCheckResponse>(create);
   static HealthCheckResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $0.ParticipantCount get participantCount => $_getN(0);
+  @$pb.TagNumber(1)
+  set participantCount($0.ParticipantCount v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasParticipantCount() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearParticipantCount() => clearField(1);
+  @$pb.TagNumber(1)
+  $0.ParticipantCount ensureParticipantCount() => $_ensure(0);
 }
 
 class TrackPublished extends $pb.GeneratedMessage {
@@ -565,6 +603,7 @@ class TrackPublished extends $pb.GeneratedMessage {
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
     ..e<$0.TrackType>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED, valueOf: $0.TrackType.valueOf, enumValues: $0.TrackType.values)
+    ..aOM<$0.Participant>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $0.Participant.create)
     ..hasRequiredFields = false
   ;
 
@@ -573,6 +612,7 @@ class TrackPublished extends $pb.GeneratedMessage {
     $core.String? userId,
     $core.String? sessionId,
     $0.TrackType? type,
+    $0.Participant? participant,
   }) {
     final _result = create();
     if (userId != null) {
@@ -583,6 +623,9 @@ class TrackPublished extends $pb.GeneratedMessage {
     }
     if (type != null) {
       _result.type = type;
+    }
+    if (participant != null) {
+      _result.participant = participant;
     }
     return _result;
   }
@@ -633,6 +676,17 @@ class TrackPublished extends $pb.GeneratedMessage {
   $core.bool hasType() => $_has(2);
   @$pb.TagNumber(3)
   void clearType() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $0.Participant get participant => $_getN(3);
+  @$pb.TagNumber(4)
+  set participant($0.Participant v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasParticipant() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearParticipant() => clearField(4);
+  @$pb.TagNumber(4)
+  $0.Participant ensureParticipant() => $_ensure(3);
 }
 
 class TrackUnpublished extends $pb.GeneratedMessage {
@@ -641,6 +695,7 @@ class TrackUnpublished extends $pb.GeneratedMessage {
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
     ..e<$0.TrackType>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackType.TRACK_TYPE_UNSPECIFIED, valueOf: $0.TrackType.valueOf, enumValues: $0.TrackType.values)
     ..e<$0.TrackUnpublishReason>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cause', $pb.PbFieldType.OE, defaultOrMaker: $0.TrackUnpublishReason.TRACK_UNPUBLISH_REASON_UNSPECIFIED, valueOf: $0.TrackUnpublishReason.valueOf, enumValues: $0.TrackUnpublishReason.values)
+    ..aOM<$0.Participant>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $0.Participant.create)
     ..hasRequiredFields = false
   ;
 
@@ -650,6 +705,7 @@ class TrackUnpublished extends $pb.GeneratedMessage {
     $core.String? sessionId,
     $0.TrackType? type,
     $0.TrackUnpublishReason? cause,
+    $0.Participant? participant,
   }) {
     final _result = create();
     if (userId != null) {
@@ -663,6 +719,9 @@ class TrackUnpublished extends $pb.GeneratedMessage {
     }
     if (cause != null) {
       _result.cause = cause;
+    }
+    if (participant != null) {
+      _result.participant = participant;
     }
     return _result;
   }
@@ -722,6 +781,17 @@ class TrackUnpublished extends $pb.GeneratedMessage {
   $core.bool hasCause() => $_has(3);
   @$pb.TagNumber(4)
   void clearCause() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $0.Participant get participant => $_getN(4);
+  @$pb.TagNumber(5)
+  set participant($0.Participant v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasParticipant() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearParticipant() => clearField(5);
+  @$pb.TagNumber(5)
+  $0.Participant ensureParticipant() => $_ensure(4);
 }
 
 class JoinRequest extends $pb.GeneratedMessage {
@@ -1831,5 +1901,68 @@ class ChangePublishQuality extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(2)
   $core.List<VideoSender> get videoSenders => $_getList(1);
+}
+
+class CallGrantsUpdated extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallGrantsUpdated', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOM<$0.CallGrants>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'currentGrants', subBuilder: $0.CallGrants.create)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message')
+    ..hasRequiredFields = false
+  ;
+
+  CallGrantsUpdated._() : super();
+  factory CallGrantsUpdated({
+    $0.CallGrants? currentGrants,
+    $core.String? message,
+  }) {
+    final _result = create();
+    if (currentGrants != null) {
+      _result.currentGrants = currentGrants;
+    }
+    if (message != null) {
+      _result.message = message;
+    }
+    return _result;
+  }
+  factory CallGrantsUpdated.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CallGrantsUpdated.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CallGrantsUpdated clone() => CallGrantsUpdated()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CallGrantsUpdated copyWith(void Function(CallGrantsUpdated) updates) => super.copyWith((message) => updates(message as CallGrantsUpdated)) as CallGrantsUpdated; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CallGrantsUpdated create() => CallGrantsUpdated._();
+  CallGrantsUpdated createEmptyInstance() => create();
+  static $pb.PbList<CallGrantsUpdated> createRepeated() => $pb.PbList<CallGrantsUpdated>();
+  @$core.pragma('dart2js:noInline')
+  static CallGrantsUpdated getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallGrantsUpdated>(create);
+  static CallGrantsUpdated? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $0.CallGrants get currentGrants => $_getN(0);
+  @$pb.TagNumber(1)
+  set currentGrants($0.CallGrants v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCurrentGrants() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCurrentGrants() => clearField(1);
+  @$pb.TagNumber(1)
+  $0.CallGrants ensureCurrentGrants() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.String get message => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set message($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasMessage() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMessage() => clearField(2);
 }
 

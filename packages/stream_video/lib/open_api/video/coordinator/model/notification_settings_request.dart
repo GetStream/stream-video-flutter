@@ -10,24 +10,22 @@
 
 part of openapi.api;
 
-class JoinCallRequest {
-  /// Returns a new [JoinCallRequest] instance.
-  JoinCallRequest({
-    this.create,
-    this.data,
-    required this.location,
-    this.membersLimit,
-    this.ring,
+class NotificationSettingsRequest {
+  /// Returns a new [NotificationSettingsRequest] instance.
+  NotificationSettingsRequest({
+    this.callCreated,
+    this.callLiveStarted,
+    this.enabled,
+    this.sessionStarted,
   });
 
-  /// if true the call will be created if it doesn't exist
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  bool? create;
+  EventNotificationSettingsRequest? callCreated;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -35,78 +33,71 @@ class JoinCallRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  CallRequest? data;
+  EventNotificationSettingsRequest? callLiveStarted;
 
-  String location;
-
-  /// Maximum value: 100
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  int? membersLimit;
+  bool? enabled;
 
-  /// if true and the call is created, the notification will include ring=true
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  bool? ring;
+  EventNotificationSettingsRequest? sessionStarted;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is JoinCallRequest &&
-     other.create == create &&
-     other.data == data &&
-     other.location == location &&
-     other.membersLimit == membersLimit &&
-     other.ring == ring;
+  bool operator ==(Object other) => identical(this, other) || other is NotificationSettingsRequest &&
+     other.callCreated == callCreated &&
+     other.callLiveStarted == callLiveStarted &&
+     other.enabled == enabled &&
+     other.sessionStarted == sessionStarted;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (create == null ? 0 : create!.hashCode) +
-    (data == null ? 0 : data!.hashCode) +
-    (location.hashCode) +
-    (membersLimit == null ? 0 : membersLimit!.hashCode) +
-    (ring == null ? 0 : ring!.hashCode);
+    (callCreated == null ? 0 : callCreated!.hashCode) +
+    (callLiveStarted == null ? 0 : callLiveStarted!.hashCode) +
+    (enabled == null ? 0 : enabled!.hashCode) +
+    (sessionStarted == null ? 0 : sessionStarted!.hashCode);
 
   @override
-  String toString() => 'JoinCallRequest[create=$create, data=$data, location=$location, membersLimit=$membersLimit, ring=$ring]';
+  String toString() => 'NotificationSettingsRequest[callCreated=$callCreated, callLiveStarted=$callLiveStarted, enabled=$enabled, sessionStarted=$sessionStarted]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.create != null) {
-      json[r'create'] = this.create;
+    if (this.callCreated != null) {
+      json[r'call_created'] = this.callCreated;
     } else {
-      json[r'create'] = null;
+      json[r'call_created'] = null;
     }
-    if (this.data != null) {
-      json[r'data'] = this.data;
+    if (this.callLiveStarted != null) {
+      json[r'call_live_started'] = this.callLiveStarted;
     } else {
-      json[r'data'] = null;
+      json[r'call_live_started'] = null;
     }
-      json[r'location'] = this.location;
-    if (this.membersLimit != null) {
-      json[r'members_limit'] = this.membersLimit;
+    if (this.enabled != null) {
+      json[r'enabled'] = this.enabled;
     } else {
-      json[r'members_limit'] = null;
+      json[r'enabled'] = null;
     }
-    if (this.ring != null) {
-      json[r'ring'] = this.ring;
+    if (this.sessionStarted != null) {
+      json[r'session_started'] = this.sessionStarted;
     } else {
-      json[r'ring'] = null;
+      json[r'session_started'] = null;
     }
     return json;
   }
 
-  /// Returns a new [JoinCallRequest] instance and imports its values from
+  /// Returns a new [NotificationSettingsRequest] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static JoinCallRequest? fromJson(dynamic value) {
+  static NotificationSettingsRequest? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -115,28 +106,27 @@ class JoinCallRequest {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "JoinCallRequest[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "JoinCallRequest[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "NotificationSettingsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "NotificationSettingsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return JoinCallRequest(
-        create: mapValueOfType<bool>(json, r'create'),
-        data: CallRequest.fromJson(json[r'data']),
-        location: mapValueOfType<String>(json, r'location')!,
-        membersLimit: mapValueOfType<int>(json, r'members_limit'),
-        ring: mapValueOfType<bool>(json, r'ring'),
+      return NotificationSettingsRequest(
+        callCreated: EventNotificationSettingsRequest.fromJson(json[r'call_created']),
+        callLiveStarted: EventNotificationSettingsRequest.fromJson(json[r'call_live_started']),
+        enabled: mapValueOfType<bool>(json, r'enabled'),
+        sessionStarted: EventNotificationSettingsRequest.fromJson(json[r'session_started']),
       );
     }
     return null;
   }
 
-  static List<JoinCallRequest>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <JoinCallRequest>[];
+  static List<NotificationSettingsRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <NotificationSettingsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = JoinCallRequest.fromJson(row);
+        final value = NotificationSettingsRequest.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -145,12 +135,12 @@ class JoinCallRequest {
     return result.toList(growable: growable);
   }
 
-  static Map<String, JoinCallRequest> mapFromJson(dynamic json) {
-    final map = <String, JoinCallRequest>{};
+  static Map<String, NotificationSettingsRequest> mapFromJson(dynamic json) {
+    final map = <String, NotificationSettingsRequest>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = JoinCallRequest.fromJson(entry.value);
+        final value = NotificationSettingsRequest.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -159,13 +149,13 @@ class JoinCallRequest {
     return map;
   }
 
-  // maps a json object with a list of JoinCallRequest-objects as value to a dart map
-  static Map<String, List<JoinCallRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<JoinCallRequest>>{};
+  // maps a json object with a list of NotificationSettingsRequest-objects as value to a dart map
+  static Map<String, List<NotificationSettingsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<NotificationSettingsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = JoinCallRequest.listFromJson(entry.value, growable: growable,);
+        final value = NotificationSettingsRequest.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -176,7 +166,6 @@ class JoinCallRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'location',
   };
 }
 

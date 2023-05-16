@@ -205,6 +205,7 @@ extension CredentialsExt on open.Credentials {
       sfuServer: CallSfuServer(
         url: server.url,
         name: server.edgeName,
+        wsEndpoint: server.wsEndpoint,
       ),
       iceServers: iceServers
           .map(

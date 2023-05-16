@@ -183,6 +183,10 @@ class ApiClient {
           return value is DateTime ? value : DateTime.tryParse(value);
         case 'APIError':
           return APIError.fromJson(value);
+        case 'APNS':
+          return APNS.fromJson(value);
+        case 'APNSRequest':
+          return APNSRequest.fromJson(value);
         case 'AudioSettings':
           return AudioSettings.fromJson(value);
         case 'AudioSettingsRequest':
@@ -211,6 +215,8 @@ class ApiClient {
           return CallEndedEvent.fromJson(value);
         case 'CallIngressResponse':
           return CallIngressResponse.fromJson(value);
+        case 'CallLiveStartedEvent':
+          return CallLiveStartedEvent.fromJson(value);
         case 'CallMemberAddedEvent':
           return CallMemberAddedEvent.fromJson(value);
         case 'CallMemberRemovedEvent':
@@ -233,6 +239,14 @@ class ApiClient {
           return CallRequest.fromJson(value);
         case 'CallResponse':
           return CallResponse.fromJson(value);
+        case 'CallSessionEndedEvent':
+          return CallSessionEndedEvent.fromJson(value);
+        case 'CallSessionParticipantJoinedEvent':
+          return CallSessionParticipantJoinedEvent.fromJson(value);
+        case 'CallSessionParticipantLeftEvent':
+          return CallSessionParticipantLeftEvent.fromJson(value);
+        case 'CallSessionStartedEvent':
+          return CallSessionStartedEvent.fromJson(value);
         case 'CallSettingsRequest':
           return CallSettingsRequest.fromJson(value);
         case 'CallSettingsResponse':
@@ -247,8 +261,6 @@ class ApiClient {
           return ConnectUserDetailsRequest.fromJson(value);
         case 'ConnectedEvent':
           return ConnectedEvent.fromJson(value);
-        case 'Coordinates':
-          return Coordinates.fromJson(value);
         case 'CreateCallTypeRequest':
           return CreateCallTypeRequest.fromJson(value);
         case 'CreateCallTypeResponse':
@@ -263,16 +275,16 @@ class ApiClient {
           return Credentials.fromJson(value);
         case 'CustomVideoEvent':
           return CustomVideoEvent.fromJson(value);
-        case 'DatacenterResponse':
-          return DatacenterResponse.fromJson(value);
         case 'Device':
           return Device.fromJson(value);
-        case 'DeviceFieldsRequest':
-          return DeviceFieldsRequest.fromJson(value);
         case 'EdgeResponse':
           return EdgeResponse.fromJson(value);
         case 'EndCallResponse':
           return EndCallResponse.fromJson(value);
+        case 'EventNotificationSettings':
+          return EventNotificationSettings.fromJson(value);
+        case 'EventNotificationSettingsRequest':
+          return EventNotificationSettingsRequest.fromJson(value);
         case 'GeofenceSettings':
           return GeofenceSettings.fromJson(value);
         case 'GeofenceSettingsRequest':
@@ -317,6 +329,10 @@ class ApiClient {
           return MuteUsersRequest.fromJson(value);
         case 'MuteUsersResponse':
           return MuteUsersResponse.fromJson(value);
+        case 'NotificationSettings':
+          return NotificationSettings.fromJson(value);
+        case 'NotificationSettingsRequest':
+          return NotificationSettingsRequest.fromJson(value);
         case 'OwnCapability':
           return OwnCapabilityTypeTransformer().decode(value);
         case 'OwnUserResponse':
@@ -367,6 +383,10 @@ class ApiClient {
           return SortParamRequest.fromJson(value);
         case 'StopLiveResponse':
           return StopLiveResponse.fromJson(value);
+        case 'TargetResolution':
+          return TargetResolution.fromJson(value);
+        case 'TargetResolutionRequest':
+          return TargetResolutionRequest.fromJson(value);
         case 'TranscriptionSettings':
           return TranscriptionSettings.fromJson(value);
         case 'TranscriptionSettingsRequest':

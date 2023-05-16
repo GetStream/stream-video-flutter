@@ -1,27 +1,29 @@
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 import 'sfu_participant.dart';
 
 @immutable
-class SfuCallState {
+class SfuCallState with EquatableMixin {
   const SfuCallState({
     required this.participants,
+    required this.participantCount,
+    required this.startedAt,
   });
 
   final List<SfuParticipant> participants;
+  final SfuParticipantCount participantCount;
+  final DateTime startedAt;
 
   @override
   String toString() {
-    return 'SfuCallState{participants: $participants}';
+    return 'SfuCallState{participants: $participants, '
+        'participantCount: $participantCount}';
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SfuCallState &&
-          runtimeType == other.runtimeType &&
-          participants == other.participants;
+  bool? get stringify => true;
 
   @override
-  int get hashCode => participants.hashCode;
+  List<Object> get props => [participants, participantCount];
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../errors/video_error_composer.dart';
 import '../../latency/latency_service.dart';
+import '../../location/location_service.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_created_data.dart';
@@ -61,6 +62,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   late final livestreamingApi = open.LivestreamingApi(_apiClient);
   late final moderationApi = open.ModerationApi(_apiClient);
   late final callTypesApi = open.CallTypesApi(_apiClient);
+  late final locationService = LocationService();
 
   @override
   SharedEmitter<CoordinatorEvent> get events => _events;
@@ -216,12 +218,18 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<CoordinatorJoined>> joinCall(inputs.JoinCallInput input) async {
     try {
+      _logger.d(() => '[joinCall] input: $input');
+      final location = await locationService.getLocation();
+      _logger.v(() => '[joinCall] location: $location');
       final result = await videoApi.joinCall(
         input.callCid.type,
         input.callCid.id,
         open.JoinCallRequest(
           create: input.create,
           ring: input.ringing,
+          //location: location,
+          // TODO hardcoded 'AMS' due to other locations not being supported]
+          location: 'AMS',
         ),
         connectionId: _ws?.clientId,
       );
@@ -233,12 +241,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         CoordinatorJoined(
           wasCreated: result.created,
           metadata: result.call.toCallMetadata(result.members),
-          edges: result.edges.map((edge) {
-            return SfuEdge(
-              name: edge.name,
-              latencyUrl: edge.latencyUrl,
-            );
-          }).toList(),
+          credentials: result.credentials.toCallCredentials(),
+          members: result.members.toCallMembers(),
+          users: result.members.toCallUsers(),
+          duration: result.duration,
         ),
       );
     } catch (e, stk) {

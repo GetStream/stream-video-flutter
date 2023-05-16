@@ -33,3 +33,5 @@ class SfuConnectionQualityInfo {
   int get hashCode =>
       userId.hashCode ^ sessionId.hashCode ^ connectionQuality.hashCode;
 }
+
+

@@ -50,6 +50,7 @@ class CallSession extends Disposable {
         sfuWS = SfuWebSocket(
           sessionSeq: sessionSeq,
           sfuUrl: config.sfuUrl,
+          sfuWsEndpoint: config.sfuWsEndpoint,
           sessionId: sessionId,
         ),
         rtcManagerFactory = RtcManagerFactory(
