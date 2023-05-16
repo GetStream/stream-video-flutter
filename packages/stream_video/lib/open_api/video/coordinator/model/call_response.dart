@@ -19,6 +19,7 @@ class CallResponse {
     required this.cid,
     required this.createdAt,
     required this.createdBy,
+    required this.currentSessionId,
     this.custom = const {},
     this.endedAt,
     required this.hlsPlaylistUrl,
@@ -47,6 +48,8 @@ class CallResponse {
   DateTime createdAt;
 
   UserResponse createdBy;
+
+  String currentSessionId;
 
   /// Custom data for this object
   Map<String, Object> custom;
@@ -107,6 +110,7 @@ class CallResponse {
      other.cid == cid &&
      other.createdAt == createdAt &&
      other.createdBy == createdBy &&
+     other.currentSessionId == currentSessionId &&
      other.custom == custom &&
      other.endedAt == endedAt &&
      other.hlsPlaylistUrl == hlsPlaylistUrl &&
@@ -130,6 +134,7 @@ class CallResponse {
     (cid.hashCode) +
     (createdAt.hashCode) +
     (createdBy.hashCode) +
+    (currentSessionId.hashCode) +
     (custom.hashCode) +
     (endedAt == null ? 0 : endedAt!.hashCode) +
     (hlsPlaylistUrl.hashCode) +
@@ -145,7 +150,7 @@ class CallResponse {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcasting=$broadcasting, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, endedAt=$endedAt, hlsPlaylistUrl=$hlsPlaylistUrl, id=$id, ingress=$ingress, ownCapabilities=$ownCapabilities, recording=$recording, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
+  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcasting=$broadcasting, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, endedAt=$endedAt, hlsPlaylistUrl=$hlsPlaylistUrl, id=$id, ingress=$ingress, ownCapabilities=$ownCapabilities, recording=$recording, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -155,6 +160,7 @@ class CallResponse {
       json[r'cid'] = this.cid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'created_by'] = this.createdBy;
+      json[r'current_session_id'] = this.currentSessionId;
       json[r'custom'] = this.custom;
     if (this.endedAt != null) {
       json[r'ended_at'] = this.endedAt!.toUtc().toIso8601String();
@@ -210,6 +216,7 @@ class CallResponse {
         cid: mapValueOfType<String>(json, r'cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
         createdBy: UserResponse.fromJson(json[r'created_by'])!,
+        currentSessionId: mapValueOfType<String>(json, r'current_session_id')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         endedAt: mapDateTime(json, r'ended_at', ''),
         hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
@@ -278,6 +285,7 @@ class CallResponse {
     'cid',
     'created_at',
     'created_by',
+    'current_session_id',
     'custom',
     'hls_playlist_url',
     'id',

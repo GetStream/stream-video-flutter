@@ -19,6 +19,7 @@ class Device {
     required this.id,
     required this.pushProvider,
     this.pushProviderName,
+    this.voip,
   });
 
   /// Date/time of creation
@@ -54,6 +55,15 @@ class Device {
   ///
   String? pushProviderName;
 
+  /// When true the token is for Apple VoIP push notifications
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? voip;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is Device &&
      other.createdAt == createdAt &&
@@ -61,7 +71,8 @@ class Device {
      other.disabledReason == disabledReason &&
      other.id == id &&
      other.pushProvider == pushProvider &&
-     other.pushProviderName == pushProviderName;
+     other.pushProviderName == pushProviderName &&
+     other.voip == voip;
 
   @override
   int get hashCode =>
@@ -71,10 +82,11 @@ class Device {
     (disabledReason == null ? 0 : disabledReason!.hashCode) +
     (id.hashCode) +
     (pushProvider.hashCode) +
-    (pushProviderName == null ? 0 : pushProviderName!.hashCode);
+    (pushProviderName == null ? 0 : pushProviderName!.hashCode) +
+    (voip == null ? 0 : voip!.hashCode);
 
   @override
-  String toString() => 'Device[createdAt=$createdAt, disabled=$disabled, disabledReason=$disabledReason, id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName]';
+  String toString() => 'Device[createdAt=$createdAt, disabled=$disabled, disabledReason=$disabledReason, id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, voip=$voip]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -95,6 +107,11 @@ class Device {
       json[r'push_provider_name'] = this.pushProviderName;
     } else {
       json[r'push_provider_name'] = null;
+    }
+    if (this.voip != null) {
+      json[r'voip'] = this.voip;
+    } else {
+      json[r'voip'] = null;
     }
     return json;
   }
@@ -124,6 +141,7 @@ class Device {
         id: mapValueOfType<String>(json, r'id')!,
         pushProvider: mapValueOfType<String>(json, r'push_provider')!,
         pushProviderName: mapValueOfType<String>(json, r'push_provider_name'),
+        voip: mapValueOfType<bool>(json, r'voip'),
       );
     }
     return null;

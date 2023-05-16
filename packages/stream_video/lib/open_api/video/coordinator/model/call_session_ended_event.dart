@@ -10,39 +10,34 @@
 
 part of openapi.api;
 
-class CallMemberUpdatedPermissionEvent {
-  /// Returns a new [CallMemberUpdatedPermissionEvent] instance.
-  CallMemberUpdatedPermissionEvent({
+class CallSessionEndedEvent {
+  /// Returns a new [CallSessionEndedEvent] instance.
+  CallSessionEndedEvent({
     required this.call,
     required this.callCid,
-    this.capabilitiesByRole = const {},
     required this.createdAt,
-    this.members = const [],
-    this.type = 'call.member_updated_permission',
+    required this.sessionId,
+    this.type = 'call.session_ended',
   });
 
   CallResponse call;
 
   String callCid;
 
-  /// The capabilities by role for this call
-  Map<String, List<String>> capabilitiesByRole;
-
   DateTime createdAt;
 
-  /// The list of members that were updated
-  List<MemberResponse> members;
+  /// Call session ID
+  String sessionId;
 
-  /// The type of event: \"call.member_added\" in this case
+  /// The type of event: \"call.session_ended\" in this case
   String type;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallMemberUpdatedPermissionEvent &&
+  bool operator ==(Object other) => identical(this, other) || other is CallSessionEndedEvent &&
      other.call == call &&
      other.callCid == callCid &&
-     other.capabilitiesByRole == capabilitiesByRole &&
      other.createdAt == createdAt &&
-     other.members == members &&
+     other.sessionId == sessionId &&
      other.type == type;
 
   @override
@@ -50,29 +45,27 @@ class CallMemberUpdatedPermissionEvent {
     // ignore: unnecessary_parenthesis
     (call.hashCode) +
     (callCid.hashCode) +
-    (capabilitiesByRole.hashCode) +
     (createdAt.hashCode) +
-    (members.hashCode) +
+    (sessionId.hashCode) +
     (type.hashCode);
 
   @override
-  String toString() => 'CallMemberUpdatedPermissionEvent[call=$call, callCid=$callCid, capabilitiesByRole=$capabilitiesByRole, createdAt=$createdAt, members=$members, type=$type]';
+  String toString() => 'CallSessionEndedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, sessionId=$sessionId, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'call'] = this.call;
       json[r'call_cid'] = this.callCid;
-      json[r'capabilities_by_role'] = this.capabilitiesByRole;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'members'] = this.members;
+      json[r'session_id'] = this.sessionId;
       json[r'type'] = this.type;
     return json;
   }
 
-  /// Returns a new [CallMemberUpdatedPermissionEvent] instance and imports its values from
+  /// Returns a new [CallSessionEndedEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static CallMemberUpdatedPermissionEvent? fromJson(dynamic value) {
+  static CallSessionEndedEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -81,31 +74,28 @@ class CallMemberUpdatedPermissionEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallMemberUpdatedPermissionEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallMemberUpdatedPermissionEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "CallSessionEndedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "CallSessionEndedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return CallMemberUpdatedPermissionEvent(
+      return CallSessionEndedEvent(
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
-        capabilitiesByRole: json[r'capabilities_by_role'] == null
-          ? const {}
-            : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
         createdAt: mapDateTime(json, r'created_at', '')!,
-        members: MemberResponse.listFromJson(json[r'members'])!,
+        sessionId: mapValueOfType<String>(json, r'session_id')!,
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
     return null;
   }
 
-  static List<CallMemberUpdatedPermissionEvent>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <CallMemberUpdatedPermissionEvent>[];
+  static List<CallSessionEndedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <CallSessionEndedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CallMemberUpdatedPermissionEvent.fromJson(row);
+        final value = CallSessionEndedEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -114,12 +104,12 @@ class CallMemberUpdatedPermissionEvent {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallMemberUpdatedPermissionEvent> mapFromJson(dynamic json) {
-    final map = <String, CallMemberUpdatedPermissionEvent>{};
+  static Map<String, CallSessionEndedEvent> mapFromJson(dynamic json) {
+    final map = <String, CallSessionEndedEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallMemberUpdatedPermissionEvent.fromJson(entry.value);
+        final value = CallSessionEndedEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -128,13 +118,13 @@ class CallMemberUpdatedPermissionEvent {
     return map;
   }
 
-  // maps a json object with a list of CallMemberUpdatedPermissionEvent-objects as value to a dart map
-  static Map<String, List<CallMemberUpdatedPermissionEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<CallMemberUpdatedPermissionEvent>>{};
+  // maps a json object with a list of CallSessionEndedEvent-objects as value to a dart map
+  static Map<String, List<CallSessionEndedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<CallSessionEndedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallMemberUpdatedPermissionEvent.listFromJson(entry.value, growable: growable,);
+        final value = CallSessionEndedEvent.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -147,9 +137,8 @@ class CallMemberUpdatedPermissionEvent {
   static const requiredKeys = <String>{
     'call',
     'call_cid',
-    'capabilities_by_role',
     'created_at',
-    'members',
+    'session_id',
     'type',
   };
 }

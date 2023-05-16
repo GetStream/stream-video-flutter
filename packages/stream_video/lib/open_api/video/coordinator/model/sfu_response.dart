@@ -15,30 +15,36 @@ class SFUResponse {
   SFUResponse({
     required this.edgeName,
     required this.url,
+    required this.wsEndpoint,
   });
 
   String edgeName;
 
   String url;
 
+  String wsEndpoint;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is SFUResponse &&
      other.edgeName == edgeName &&
-     other.url == url;
+     other.url == url &&
+     other.wsEndpoint == wsEndpoint;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (edgeName.hashCode) +
-    (url.hashCode);
+    (url.hashCode) +
+    (wsEndpoint.hashCode);
 
   @override
-  String toString() => 'SFUResponse[edgeName=$edgeName, url=$url]';
+  String toString() => 'SFUResponse[edgeName=$edgeName, url=$url, wsEndpoint=$wsEndpoint]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'edge_name'] = this.edgeName;
       json[r'url'] = this.url;
+      json[r'ws_endpoint'] = this.wsEndpoint;
     return json;
   }
 
@@ -63,6 +69,7 @@ class SFUResponse {
       return SFUResponse(
         edgeName: mapValueOfType<String>(json, r'edge_name')!,
         url: mapValueOfType<String>(json, r'url')!,
+        wsEndpoint: mapValueOfType<String>(json, r'ws_endpoint')!,
       );
     }
     return null;
@@ -114,6 +121,7 @@ class SFUResponse {
   static const requiredKeys = <String>{
     'edge_name',
     'url',
+    'ws_endpoint',
   };
 }
 

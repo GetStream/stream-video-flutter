@@ -16,8 +16,8 @@ class JoinCallResponse {
     this.blockedUsers = const [],
     required this.call,
     required this.created,
+    required this.credentials,
     required this.duration,
-    this.edges = const [],
     this.members = const [],
     this.membership,
   });
@@ -28,9 +28,9 @@ class JoinCallResponse {
 
   bool created;
 
-  String duration;
+  Credentials credentials;
 
-  List<DatacenterResponse> edges;
+  String duration;
 
   List<MemberResponse> members;
 
@@ -47,8 +47,8 @@ class JoinCallResponse {
      other.blockedUsers == blockedUsers &&
      other.call == call &&
      other.created == created &&
+     other.credentials == credentials &&
      other.duration == duration &&
-     other.edges == edges &&
      other.members == members &&
      other.membership == membership;
 
@@ -58,21 +58,21 @@ class JoinCallResponse {
     (blockedUsers.hashCode) +
     (call.hashCode) +
     (created.hashCode) +
+    (credentials.hashCode) +
     (duration.hashCode) +
-    (edges.hashCode) +
     (members.hashCode) +
     (membership == null ? 0 : membership!.hashCode);
 
   @override
-  String toString() => 'JoinCallResponse[blockedUsers=$blockedUsers, call=$call, created=$created, duration=$duration, edges=$edges, members=$members, membership=$membership]';
+  String toString() => 'JoinCallResponse[blockedUsers=$blockedUsers, call=$call, created=$created, credentials=$credentials, duration=$duration, members=$members, membership=$membership]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'blocked_users'] = this.blockedUsers;
       json[r'call'] = this.call;
       json[r'created'] = this.created;
+      json[r'credentials'] = this.credentials;
       json[r'duration'] = this.duration;
-      json[r'edges'] = this.edges;
       json[r'members'] = this.members;
     if (this.membership != null) {
       json[r'membership'] = this.membership;
@@ -104,8 +104,8 @@ class JoinCallResponse {
         blockedUsers: UserResponse.listFromJson(json[r'blocked_users'])!,
         call: CallResponse.fromJson(json[r'call'])!,
         created: mapValueOfType<bool>(json, r'created')!,
+        credentials: Credentials.fromJson(json[r'credentials'])!,
         duration: mapValueOfType<String>(json, r'duration')!,
-        edges: DatacenterResponse.listFromJson(json[r'edges'])!,
         members: MemberResponse.listFromJson(json[r'members'])!,
         membership: MemberResponse.fromJson(json[r'membership']),
       );
@@ -160,8 +160,8 @@ class JoinCallResponse {
     'blocked_users',
     'call',
     'created',
+    'credentials',
     'duration',
-    'edges',
     'members',
   };
 }

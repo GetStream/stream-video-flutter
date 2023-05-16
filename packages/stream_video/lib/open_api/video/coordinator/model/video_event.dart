@@ -24,6 +24,7 @@ class VideoEvent {
     required this.ringing,
     this.capabilitiesByRole = const {},
     required this.reaction,
+    required this.sessionId,
     required this.connectionId,
     required this.me,
     this.custom = const {},
@@ -63,6 +64,9 @@ class VideoEvent {
 
   ReactionResponse reaction;
 
+  /// Call session ID
+  String sessionId;
+
   /// The connection_id for this client
   String connectionId;
 
@@ -90,6 +94,7 @@ class VideoEvent {
      other.ringing == ringing &&
      other.capabilitiesByRole == capabilitiesByRole &&
      other.reaction == reaction &&
+     other.sessionId == sessionId &&
      other.connectionId == connectionId &&
      other.me == me &&
      other.custom == custom &&
@@ -110,6 +115,7 @@ class VideoEvent {
     (ringing.hashCode) +
     (capabilitiesByRole.hashCode) +
     (reaction.hashCode) +
+    (sessionId.hashCode) +
     (connectionId.hashCode) +
     (me.hashCode) +
     (custom.hashCode) +
@@ -117,7 +123,7 @@ class VideoEvent {
     (ownCapabilities.hashCode);
 
   @override
-  String toString() => 'VideoEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, hlsPlaylistUrl=$hlsPlaylistUrl, call=$call, members=$members, ringing=$ringing, capabilitiesByRole=$capabilitiesByRole, reaction=$reaction, connectionId=$connectionId, me=$me, custom=$custom, permissions=$permissions, ownCapabilities=$ownCapabilities]';
+  String toString() => 'VideoEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, hlsPlaylistUrl=$hlsPlaylistUrl, call=$call, members=$members, ringing=$ringing, capabilitiesByRole=$capabilitiesByRole, reaction=$reaction, sessionId=$sessionId, connectionId=$connectionId, me=$me, custom=$custom, permissions=$permissions, ownCapabilities=$ownCapabilities]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -136,6 +142,7 @@ class VideoEvent {
       json[r'ringing'] = this.ringing;
       json[r'capabilities_by_role'] = this.capabilitiesByRole;
       json[r'reaction'] = this.reaction;
+      json[r'session_id'] = this.sessionId;
       json[r'connection_id'] = this.connectionId;
       json[r'me'] = this.me;
       json[r'custom'] = this.custom;
@@ -176,6 +183,7 @@ class VideoEvent {
           ? const {}
             : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
         reaction: ReactionResponse.fromJson(json[r'reaction'])!,
+        sessionId: mapValueOfType<String>(json, r'session_id')!,
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
         me: OwnUserResponse.fromJson(json[r'me'])!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
@@ -242,6 +250,7 @@ class VideoEvent {
     'ringing',
     'capabilities_by_role',
     'reaction',
+    'session_id',
     'connection_id',
     'me',
     'custom',

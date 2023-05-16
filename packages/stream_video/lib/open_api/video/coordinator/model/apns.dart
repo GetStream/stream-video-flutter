@@ -10,42 +10,42 @@
 
 part of openapi.api;
 
-class Coordinates {
-  /// Returns a new [Coordinates] instance.
-  Coordinates({
-    required this.latitude,
-    required this.longitude,
+class APNS {
+  /// Returns a new [APNS] instance.
+  APNS({
+    required this.body,
+    required this.title,
   });
 
-  double latitude;
+  String body;
 
-  double longitude;
+  String title;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Coordinates &&
-     other.latitude == latitude &&
-     other.longitude == longitude;
+  bool operator ==(Object other) => identical(this, other) || other is APNS &&
+     other.body == body &&
+     other.title == title;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (latitude.hashCode) +
-    (longitude.hashCode);
+    (body.hashCode) +
+    (title.hashCode);
 
   @override
-  String toString() => 'Coordinates[latitude=$latitude, longitude=$longitude]';
+  String toString() => 'APNS[body=$body, title=$title]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'latitude'] = this.latitude;
-      json[r'longitude'] = this.longitude;
+      json[r'body'] = this.body;
+      json[r'title'] = this.title;
     return json;
   }
 
-  /// Returns a new [Coordinates] instance and imports its values from
+  /// Returns a new [APNS] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static Coordinates? fromJson(dynamic value) {
+  static APNS? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -54,25 +54,25 @@ class Coordinates {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Coordinates[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Coordinates[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "APNS[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "APNS[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return Coordinates(
-        latitude: mapValueOfType<double>(json, r'latitude')!,
-        longitude: mapValueOfType<double>(json, r'longitude')!,
+      return APNS(
+        body: mapValueOfType<String>(json, r'body')!,
+        title: mapValueOfType<String>(json, r'title')!,
       );
     }
     return null;
   }
 
-  static List<Coordinates>? listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <Coordinates>[];
+  static List<APNS>? listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <APNS>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = Coordinates.fromJson(row);
+        final value = APNS.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -81,12 +81,12 @@ class Coordinates {
     return result.toList(growable: growable);
   }
 
-  static Map<String, Coordinates> mapFromJson(dynamic json) {
-    final map = <String, Coordinates>{};
+  static Map<String, APNS> mapFromJson(dynamic json) {
+    final map = <String, APNS>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = Coordinates.fromJson(entry.value);
+        final value = APNS.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -95,13 +95,13 @@ class Coordinates {
     return map;
   }
 
-  // maps a json object with a list of Coordinates-objects as value to a dart map
-  static Map<String, List<Coordinates>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<Coordinates>>{};
+  // maps a json object with a list of APNS-objects as value to a dart map
+  static Map<String, List<APNS>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<APNS>>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = Coordinates.listFromJson(entry.value, growable: growable,);
+        final value = APNS.listFromJson(entry.value, growable: growable,);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -112,8 +112,8 @@ class Coordinates {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'latitude',
-    'longitude',
+    'body',
+    'title',
   };
 }
 
