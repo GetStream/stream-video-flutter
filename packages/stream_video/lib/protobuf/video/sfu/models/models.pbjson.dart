@@ -80,6 +80,22 @@ const ErrorCode$json = const {
 
 /// Descriptor for `ErrorCode`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List errorCodeDescriptor = $convert.base64Decode('CglFcnJvckNvZGUSGgoWRVJST1JfQ09ERV9VTlNQRUNJRklFRBAAEiYKIkVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19OT1RfRk9VTkQQZBImCiJFUlJPUl9DT0RFX1BVQkxJU0hfVFJBQ0tTX01JU01BVENIEGUSKQolRVJST1JfQ09ERV9QVUJMSVNIX1RSQUNLX09VVF9PRl9PUkRFUhBmEjIKLkVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19WSURFT19MQVlFUl9OT1RfRk9VTkQQZxIlCiBFUlJPUl9DT0RFX1BBUlRJQ0lQQU5UX05PVF9GT1VORBDIARIeChlFUlJPUl9DT0RFX0NBTExfTk9UX0ZPVU5EEKwCEikKJEVSUk9SX0NPREVfUkVRVUVTVF9WQUxJREFUSU9OX0ZBSUxFRBCQAxIfChpFUlJPUl9DT0RFX1VOQVVUSEVOVElDQVRFRBCRAxIhChxFUlJPUl9DT0RFX1BFUk1JU1NJT05fREVOSUVEEJMDEiEKHEVSUk9SX0NPREVfVE9PX01BTllfUkVRVUVTVFMQrQMSJQogRVJST1JfQ09ERV9JTlRFUk5BTF9TRVJWRVJfRVJST1IQ9AM=');
+@$core.Deprecated('Use sdkTypeDescriptor instead')
+const SdkType$json = const {
+  '1': 'SdkType',
+  '2': const [
+    const {'1': 'SDK_TYPE_UNSPECIFIED', '2': 0},
+    const {'1': 'SDK_TYPE_REACT', '2': 1},
+    const {'1': 'SDK_TYPE_ANGULAR', '2': 2},
+    const {'1': 'SDK_TYPE_ANDROID', '2': 3},
+    const {'1': 'SDK_TYPE_IOS', '2': 4},
+    const {'1': 'SDK_TYPE_FLUTTER', '2': 5},
+    const {'1': 'SDK_TYPE_REACT_NATIVE', '2': 6},
+  ],
+};
+
+/// Descriptor for `SdkType`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List sdkTypeDescriptor = $convert.base64Decode('CgdTZGtUeXBlEhgKFFNES19UWVBFX1VOU1BFQ0lGSUVEEAASEgoOU0RLX1RZUEVfUkVBQ1QQARIUChBTREtfVFlQRV9BTkdVTEFSEAISFAoQU0RLX1RZUEVfQU5EUk9JRBADEhAKDFNES19UWVBFX0lPUxAEEhQKEFNES19UWVBFX0ZMVVRURVIQBRIZChVTREtfVFlQRV9SRUFDVF9OQVRJVkUQBg==');
 @$core.Deprecated('Use trackUnpublishReasonDescriptor instead')
 const TrackUnpublishReason$json = const {
   '1': 'TrackUnpublishReason',
@@ -98,11 +114,24 @@ const CallState$json = const {
   '1': 'CallState',
   '2': const [
     const {'1': 'participants', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Participant', '10': 'participants'},
+    const {'1': 'started_at', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'startedAt'},
+    const {'1': 'participant_count', '3': 3, '4': 1, '5': 11, '6': '.stream.video.sfu.models.ParticipantCount', '10': 'participantCount'},
   ],
 };
 
 /// Descriptor for `CallState`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callStateDescriptor = $convert.base64Decode('CglDYWxsU3RhdGUSSAoMcGFydGljaXBhbnRzGAEgAygLMiQuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGFydGljaXBhbnRSDHBhcnRpY2lwYW50cw==');
+final $typed_data.Uint8List callStateDescriptor = $convert.base64Decode('CglDYWxsU3RhdGUSSAoMcGFydGljaXBhbnRzGAEgAygLMiQuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGFydGljaXBhbnRSDHBhcnRpY2lwYW50cxI5CgpzdGFydGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJc3RhcnRlZEF0ElYKEXBhcnRpY2lwYW50X2NvdW50GAMgASgLMikuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGFydGljaXBhbnRDb3VudFIQcGFydGljaXBhbnRDb3VudA==');
+@$core.Deprecated('Use participantCountDescriptor instead')
+const ParticipantCount$json = const {
+  '1': 'ParticipantCount',
+  '2': const [
+    const {'1': 'total', '3': 1, '4': 1, '5': 13, '10': 'total'},
+    const {'1': 'anonymous', '3': 2, '4': 1, '5': 13, '10': 'anonymous'},
+  ],
+};
+
+/// Descriptor for `ParticipantCount`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List participantCountDescriptor = $convert.base64Decode('ChBQYXJ0aWNpcGFudENvdW50EhQKBXRvdGFsGAEgASgNUgV0b3RhbBIcCglhbm9ueW1vdXMYAiABKA1SCWFub255bW91cw==');
 @$core.Deprecated('Use participantDescriptor instead')
 const Participant$json = const {
   '1': 'Participant',
@@ -236,11 +265,71 @@ final $typed_data.Uint8List errorDescriptor = $convert.base64Decode('CgVFcnJvchI
 const ClientDetails$json = const {
   '1': 'ClientDetails',
   '2': const [
-    const {'1': 'version', '3': 1, '4': 1, '5': 5, '10': 'version'},
-    const {'1': 'os', '3': 2, '4': 1, '5': 9, '10': 'os'},
-    const {'1': 'browser', '3': 3, '4': 1, '5': 9, '10': 'browser'},
+    const {'1': 'sdk', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Sdk', '10': 'sdk'},
+    const {'1': 'os', '3': 2, '4': 1, '5': 11, '6': '.stream.video.sfu.models.OS', '10': 'os'},
+    const {'1': 'browser', '3': 3, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Browser', '10': 'browser'},
+    const {'1': 'device', '3': 4, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Device', '10': 'device'},
   ],
 };
 
 /// Descriptor for `ClientDetails`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List clientDetailsDescriptor = $convert.base64Decode('Cg1DbGllbnREZXRhaWxzEhgKB3ZlcnNpb24YASABKAVSB3ZlcnNpb24SDgoCb3MYAiABKAlSAm9zEhgKB2Jyb3dzZXIYAyABKAlSB2Jyb3dzZXI=');
+final $typed_data.Uint8List clientDetailsDescriptor = $convert.base64Decode('Cg1DbGllbnREZXRhaWxzEi4KA3NkaxgBIAEoCzIcLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlNka1IDc2RrEisKAm9zGAIgASgLMhsuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuT1NSAm9zEjoKB2Jyb3dzZXIYAyABKAsyIC5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Ccm93c2VyUgdicm93c2VyEjcKBmRldmljZRgEIAEoCzIfLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkRldmljZVIGZGV2aWNl');
+@$core.Deprecated('Use sdkDescriptor instead')
+const Sdk$json = const {
+  '1': 'Sdk',
+  '2': const [
+    const {'1': 'type', '3': 1, '4': 1, '5': 14, '6': '.stream.video.sfu.models.SdkType', '10': 'type'},
+    const {'1': 'major', '3': 2, '4': 1, '5': 9, '10': 'major'},
+    const {'1': 'minor', '3': 3, '4': 1, '5': 9, '10': 'minor'},
+    const {'1': 'patch', '3': 4, '4': 1, '5': 9, '10': 'patch'},
+  ],
+};
+
+/// Descriptor for `Sdk`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sdkDescriptor = $convert.base64Decode('CgNTZGsSNAoEdHlwZRgBIAEoDjIgLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlNka1R5cGVSBHR5cGUSFAoFbWFqb3IYAiABKAlSBW1ham9yEhQKBW1pbm9yGAMgASgJUgVtaW5vchIUCgVwYXRjaBgEIAEoCVIFcGF0Y2g=');
+@$core.Deprecated('Use oSDescriptor instead')
+const OS$json = const {
+  '1': 'OS',
+  '2': const [
+    const {'1': 'name', '3': 1, '4': 1, '5': 9, '10': 'name'},
+    const {'1': 'version', '3': 2, '4': 1, '5': 9, '10': 'version'},
+    const {'1': 'architecture', '3': 3, '4': 1, '5': 9, '10': 'architecture'},
+  ],
+};
+
+/// Descriptor for `OS`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List oSDescriptor = $convert.base64Decode('CgJPUxISCgRuYW1lGAEgASgJUgRuYW1lEhgKB3ZlcnNpb24YAiABKAlSB3ZlcnNpb24SIgoMYXJjaGl0ZWN0dXJlGAMgASgJUgxhcmNoaXRlY3R1cmU=');
+@$core.Deprecated('Use browserDescriptor instead')
+const Browser$json = const {
+  '1': 'Browser',
+  '2': const [
+    const {'1': 'name', '3': 1, '4': 1, '5': 9, '10': 'name'},
+    const {'1': 'version', '3': 2, '4': 1, '5': 9, '10': 'version'},
+  ],
+};
+
+/// Descriptor for `Browser`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List browserDescriptor = $convert.base64Decode('CgdCcm93c2VyEhIKBG5hbWUYASABKAlSBG5hbWUSGAoHdmVyc2lvbhgCIAEoCVIHdmVyc2lvbg==');
+@$core.Deprecated('Use deviceDescriptor instead')
+const Device$json = const {
+  '1': 'Device',
+  '2': const [
+    const {'1': 'name', '3': 1, '4': 1, '5': 9, '10': 'name'},
+    const {'1': 'version', '3': 2, '4': 1, '5': 9, '10': 'version'},
+  ],
+};
+
+/// Descriptor for `Device`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List deviceDescriptor = $convert.base64Decode('CgZEZXZpY2USEgoEbmFtZRgBIAEoCVIEbmFtZRIYCgd2ZXJzaW9uGAIgASgJUgd2ZXJzaW9u');
+@$core.Deprecated('Use callGrantsDescriptor instead')
+const CallGrants$json = const {
+  '1': 'CallGrants',
+  '2': const [
+    const {'1': 'can_publish_audio', '3': 1, '4': 1, '5': 8, '10': 'canPublishAudio'},
+    const {'1': 'can_publish_video', '3': 2, '4': 1, '5': 8, '10': 'canPublishVideo'},
+    const {'1': 'can_screenshare', '3': 3, '4': 1, '5': 8, '10': 'canScreenshare'},
+  ],
+};
+
+/// Descriptor for `CallGrants`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List callGrantsDescriptor = $convert.base64Decode('CgpDYWxsR3JhbnRzEioKEWNhbl9wdWJsaXNoX2F1ZGlvGAEgASgIUg9jYW5QdWJsaXNoQXVkaW8SKgoRY2FuX3B1Ymxpc2hfdmlkZW8YAiABKAhSD2NhblB1Ymxpc2hWaWRlbxInCg9jYW5fc2NyZWVuc2hhcmUYAyABKAhSDmNhblNjcmVlbnNoYXJl');

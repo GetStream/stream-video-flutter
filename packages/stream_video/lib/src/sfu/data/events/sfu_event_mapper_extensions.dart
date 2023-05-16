@@ -2,14 +2,16 @@ import '../../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../models/sfu_audio_level.dart';
 import '../models/sfu_audio_sender.dart';
+import '../models/sfu_call_grants.dart';
 import '../models/sfu_call_state.dart';
 import '../models/sfu_codec.dart';
+import '../models/sfu_connection_info.dart';
 import '../models/sfu_connection_quality.dart';
 import '../models/sfu_error.dart';
 import '../models/sfu_model_mapper_extensions.dart';
-import '../models/sfu_models.dart';
 import '../models/sfu_participant.dart';
 import '../models/sfu_track_type.dart';
+import '../models/sfu_video_layer_setting.dart';
 import '../models/sfu_video_sender.dart';
 import 'sfu_events.dart';
 
@@ -104,21 +106,36 @@ extension SfuEventMapper on sfu_events.SfuEvent {
           userId: trackPublished.userId,
           sessionId: trackPublished.sessionId,
           trackType: trackPublished.type.toDomain(),
+          participant: trackPublished.participant.toDomain(),
         );
       case sfu_events.SfuEvent_EventPayload.trackUnpublished:
         return SfuTrackUnpublishedEvent(
           userId: trackUnpublished.userId,
           sessionId: trackUnpublished.sessionId,
           trackType: trackUnpublished.type.toDomain(),
+          participant: trackUnpublished.participant.toDomain(),
         );
       case sfu_events.SfuEvent_EventPayload.healthCheckResponse:
-        return SfuHealthCheckResponseEvent();
+        return SfuHealthCheckResponseEvent(
+          healthCheckResponse.participantCount.toDomain(),
+        );
       case sfu_events.SfuEvent_EventPayload.error:
         return SfuErrorEvent(
           error: SfuError(
             code: error.error.code.toDomain(),
             message: error.error.message,
+            shouldRetry: error.error.shouldRetry,
           ),
+        );
+      case sfu_events.SfuEvent_EventPayload.callGrantsUpdated:
+        final payload = callGrantsUpdated;
+        return SfuCallGrantsUpdated(
+          currentGrants: SfuCallGrants(
+            canPublishAudio: payload.currentGrants.canPublishAudio,
+            canPublishVideo: payload.currentGrants.canPublishVideo,
+            canScreenShare: payload.currentGrants.canScreenshare,
+          ),
+          message: payload.message,
         );
       default:
         return SfuUnknownEvent();
@@ -131,6 +148,17 @@ extension SfuCallStateExtension on sfu_models.CallState {
   SfuCallState toDomain() {
     return SfuCallState(
       participants: participants.map((it) => it.toDomain()).toList(),
+      participantCount: participantCount.toDomain(),
+      startedAt: startedAt.toDateTime(),
+    );
+  }
+}
+
+extension on sfu_models.ParticipantCount {
+  SfuParticipantCount toDomain() {
+    return SfuParticipantCount(
+      total: total,
+      anonymous: anonymous,
     );
   }
 }
@@ -154,6 +182,8 @@ extension SfuParticipantExtension on sfu_models.Participant {
       isSpeaking: isSpeaking,
       isDominantSpeaker: isDominantSpeaker,
       audioLevel: audioLevel,
+      roles: roles,
+      //TODO custom: custom.toDomain(),
     );
   }
 }
@@ -216,6 +246,14 @@ extension SfuErrorCodeExtension on sfu_models.ErrorCode {
         return SfuErrorCode.internalServerError;
       case sfu_models.ErrorCode.ERROR_CODE_UNSPECIFIED:
         return SfuErrorCode.unspecified;
+      case sfu_models.ErrorCode.ERROR_CODE_PERMISSION_DENIED:
+        return SfuErrorCode.permissionDenied;
+      case sfu_models.ErrorCode.ERROR_CODE_REQUEST_VALIDATION_FAILED:
+        return SfuErrorCode.requestValidationFailed;
+      case sfu_models.ErrorCode.ERROR_CODE_TOO_MANY_REQUESTS:
+        return SfuErrorCode.tooManyRequests;
+      case sfu_models.ErrorCode.ERROR_CODE_UNAUTHENTICATED:
+        return SfuErrorCode.unauthenticated;
       default:
         throw StateError('unexpected error code: $this');
     }
@@ -244,6 +282,7 @@ extension SfuVideoSenderExtension on sfu_events.VideoSender {
         idealFrameRate: mediaRequest.idealFrameRate,
       ),
       codec: codec.toDomain(),
+      layers: layers.map((it) => it.toDomain()).toList(),
     );
   }
 }
@@ -259,5 +298,35 @@ extension SfuCodecExtension on sfu_models.Codec {
       encodingParameters: encodingParameters,
       feedbacks: feedbacks,
     );
+  }
+}
+
+extension on sfu_events.VideoLayerSetting {
+  SfuVideoLayerSetting toDomain() {
+    return SfuVideoLayerSetting(
+      name: name,
+      active: active,
+      maxBitrate: maxBitrate,
+      scaleResolutionDownBy: scaleResolutionDownBy,
+      priority: priority.toDomain(),
+      codec: codec.toDomain(),
+    );
+  }
+}
+
+extension on sfu_events.VideoLayerSetting_Priority {
+  SfuVideoLayerSettingPriority toDomain() {
+    switch (this) {
+      case sfu_events.VideoLayerSetting_Priority.PRIORITY_HIGH_UNSPECIFIED:
+        return SfuVideoLayerSettingPriority.high;
+      case sfu_events.VideoLayerSetting_Priority.PRIORITY_LOW:
+        return SfuVideoLayerSettingPriority.low;
+      case sfu_events.VideoLayerSetting_Priority.PRIORITY_MEDIUM:
+        return SfuVideoLayerSettingPriority.medium;
+      case sfu_events.VideoLayerSetting_Priority.PRIORITY_VERY_LOW:
+        return SfuVideoLayerSettingPriority.veryLow;
+      default:
+        throw StateError('unexpected VideoLayerSetting_Priority: $this');
+    }
   }
 }

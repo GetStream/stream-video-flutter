@@ -118,6 +118,31 @@ class ErrorCode extends $pb.ProtobufEnum {
   const ErrorCode._($core.int v, $core.String n) : super(v, n);
 }
 
+class SdkType extends $pb.ProtobufEnum {
+  static const SdkType SDK_TYPE_UNSPECIFIED = SdkType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SDK_TYPE_UNSPECIFIED');
+  static const SdkType SDK_TYPE_REACT = SdkType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SDK_TYPE_REACT');
+  static const SdkType SDK_TYPE_ANGULAR = SdkType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SDK_TYPE_ANGULAR');
+  static const SdkType SDK_TYPE_ANDROID = SdkType._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SDK_TYPE_ANDROID');
+  static const SdkType SDK_TYPE_IOS = SdkType._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SDK_TYPE_IOS');
+  static const SdkType SDK_TYPE_FLUTTER = SdkType._(5, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SDK_TYPE_FLUTTER');
+  static const SdkType SDK_TYPE_REACT_NATIVE = SdkType._(6, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SDK_TYPE_REACT_NATIVE');
+
+  static const $core.List<SdkType> values = <SdkType> [
+    SDK_TYPE_UNSPECIFIED,
+    SDK_TYPE_REACT,
+    SDK_TYPE_ANGULAR,
+    SDK_TYPE_ANDROID,
+    SDK_TYPE_IOS,
+    SDK_TYPE_FLUTTER,
+    SDK_TYPE_REACT_NATIVE,
+  ];
+
+  static final $core.Map<$core.int, SdkType> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static SdkType? valueOf($core.int value) => _byValue[value];
+
+  const SdkType._($core.int v, $core.String n) : super(v, n);
+}
+
 class TrackUnpublishReason extends $pb.ProtobufEnum {
   static const TrackUnpublishReason TRACK_UNPUBLISH_REASON_UNSPECIFIED = TrackUnpublishReason._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRACK_UNPUBLISH_REASON_UNSPECIFIED');
   static const TrackUnpublishReason TRACK_UNPUBLISH_REASON_USER_MUTED = TrackUnpublishReason._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRACK_UNPUBLISH_REASON_USER_MUTED');
