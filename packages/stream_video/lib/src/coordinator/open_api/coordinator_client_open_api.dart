@@ -227,9 +227,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         open.JoinCallRequest(
           create: input.create,
           ring: input.ringing,
-          //location: location,
-          // TODO hardcoded 'AMS' due to other locations not being supported]
-          location: 'AMS',
+          location: location,
         ),
         connectionId: _ws?.clientId,
       );
