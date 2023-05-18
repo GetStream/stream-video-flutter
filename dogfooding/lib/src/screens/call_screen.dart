@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../routes/routes.dart';
 import '../utils/providers.dart';
 import 'chat_screen.dart';
 
@@ -21,7 +22,44 @@ class CallScreen extends StatefulWidget {
   State<CallScreen> createState() => _CallScreenState();
 }
 
-class _CallScreenState extends State<CallScreen> {
+class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    _leaveCall();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  void _disableCameraOnBackground() {
+    widget.call.muteSelf(track: TrackType.video);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      _disableCameraOnBackground();
+    }
+  }
+
+  void _leaveCall() {
+    widget.call.end();
+    widget.call.disconnect();
+  }
+
+  void _handleBackPress() {
+    _leaveCall();
+    Navigator.of(context)
+        .popUntil((route) => route.settings.name == Routes.home);
+  }
+
   void showChatDialog(BuildContext context) {
     showBottomSheet<dynamic>(
       context: context,
@@ -42,6 +80,7 @@ class _CallScreenState extends State<CallScreen> {
         channel: widget.chatChannel,
         child: Scaffold(
           body: StreamCallContainer(
+            onBackPressed: _handleBackPress,
             call: widget.call,
             callConnectOptions: widget.callConnectOptions,
             callContentBuilder: (
@@ -77,10 +116,7 @@ class _CallScreenState extends State<CallScreen> {
                       ),
                       LeaveCallOption(
                         call: call,
-                        onLeaveCallTap: () {
-                          call.end();
-                          call.disconnect();
-                        },
+                        onLeaveCallTap: _leaveCall,
                       ),
                     ],
                   );
