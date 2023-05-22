@@ -323,6 +323,14 @@ class CallSession extends Disposable {
     );
   }
 
+  Future<void> _applyCurrentVideoInputDevice() async {
+    final state = stateManager.callStateStream.valueOrNull;
+    final videoInputDevice = state?.videoInputDevice;
+    if (videoInputDevice != null) {
+      await setVideoInputDevice(videoInputDevice);
+    }
+  }
+
   Future<void> _onLocalTrackPublished(RtcLocalTrack track) async {
     _logger.d(() => '[onPublisherTrackPublished] track: $track');
 
@@ -332,6 +340,10 @@ class CallSession extends Disposable {
     // If the track is an audioTrack, apply the current audio output device.
     if (track.isAudioTrack) {
       await _applyCurrentAudioOutputDevice();
+    }
+
+    if(track.isVideoTrack) {
+      await _applyCurrentVideoInputDevice();
     }
 
     // Send a mute state update to the server.
