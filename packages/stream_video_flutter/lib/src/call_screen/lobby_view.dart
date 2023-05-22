@@ -137,6 +137,8 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
     final cameraEnabled = _cameraTrack != null;
     final microphoneEnabled = _microphoneTrack != null;
 
+    final callParticipantsNo = widget.call.state.value.callParticipants.length;
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -273,7 +275,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                                 horizontal: 16,
                               ),
                               child: Text(
-                                'You are about to join a call. 0 more people are in the call.',
+                                'You are about to join a call. $callParticipantsNo more people are in the call.',
                                 style: textTheme.title3,
                               ),
                             ),
