@@ -39,7 +39,7 @@ typedef LogHandlerFunction = void Function(
 ]);
 
 /// The client responsible for handling config and maintaining calls
-class StreamVideo {
+class StreamVideo with RtcMediaDeviceNotifier{
   /// The singleton instance of the Stream Video client.
   factory StreamVideo() => instance;
 
@@ -60,7 +60,7 @@ class StreamVideo {
       latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
-    );
+    ) ;
   }
 
   StreamVideo._(
@@ -79,6 +79,7 @@ class StreamVideo {
       rpcUrl: coordinatorRpcUrl,
       wsUrl: coordinatorWsUrl,
     );
+    rtcMediaDeviceListener();
   }
 
   static final InstanceHolder _instanceHolder = InstanceHolder();
