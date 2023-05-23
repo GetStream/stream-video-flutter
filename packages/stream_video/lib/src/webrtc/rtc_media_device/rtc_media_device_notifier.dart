@@ -5,15 +5,12 @@ import '../../errors/video_error_composer.dart';
 import '../../utils/result.dart';
 import 'rtc_media_device.dart';
 
-class RtcMediaDeviceNotifier {
-  RtcMediaDeviceNotifier._internal() {
-    // Debounce call the onDeviceChange callback.
+mixin RtcMediaDeviceNotifier {
+  void rtcMediaDeviceListener() {
     rtc.navigator.mediaDevices.ondevicechange = _onDeviceChange;
     // Triggers the initial device change event to get the devices list.
     _onDeviceChange(null);
   }
-
-  static final instance = RtcMediaDeviceNotifier._internal();
 
   Stream<List<RtcMediaDevice>> get onDeviceChange => _devicesController.stream;
   final _devicesController = BehaviorSubject<List<RtcMediaDevice>>();
