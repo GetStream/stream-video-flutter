@@ -37,7 +37,7 @@ class ToggleSpeakerphoneOption extends StatefulWidget {
 }
 
 class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
-  final _deviceNotifier = RtcMediaDeviceNotifier.instance;
+  final _deviceNotifier = StreamVideo.instance.onDeviceChange;
   StreamSubscription<List<RtcMediaDevice>>? _deviceChangeSubscription;
 
   var _audioOutputs = <RtcMediaDevice>[];
@@ -75,7 +75,7 @@ class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
   void initState() {
     super.initState();
     _deviceChangeSubscription =
-        _deviceNotifier.onDeviceChange.listen((devices) {
+        _deviceNotifier.listen((devices) {
       final audioOutputs = devices.where(
         (it) => it.kind == RtcMediaDeviceKind.audioOutput,
       );
