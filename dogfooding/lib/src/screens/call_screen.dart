@@ -4,6 +4,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../utils/providers.dart';
 import 'chat_screen.dart';
+import 'device_selection_screen.dart';
 
 class CallScreen extends StatefulWidget {
   const CallScreen({
@@ -82,6 +83,16 @@ class _CallScreenState extends State<CallScreen> {
                           call.disconnect();
                         },
                       ),
+                      CallControlOption(
+                        icon: const Icon(Icons.abc),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (context) => const DeviceScreen(),
+                            ),
+                          );
+                        },
+                      )
                     ],
                   );
                 },
