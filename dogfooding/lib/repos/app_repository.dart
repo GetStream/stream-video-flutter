@@ -73,7 +73,6 @@ class AppRepository {
       );
       children.add(fileLogger);
     }
-    StreamLog().validator = (priority, _) => true;
     StreamLog().logger = CompositeStreamLogger(children);
   }
 
