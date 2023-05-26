@@ -3,6 +3,7 @@ import 'package:state_notifier/state_notifier.dart';
 import '../../call_state.dart';
 import '../../models/call_preferences.dart';
 import '../../state_emitter.dart';
+import 'mixins/state_call_actions_mixin.dart';
 import 'mixins/state_coordinator_mixin.dart';
 import 'mixins/state_lifecycle_mixin.dart';
 import 'mixins/state_participant_mixin.dart';
@@ -15,7 +16,8 @@ class CallStateNotifier extends StateNotifier<CallState>
         StateLifecycleMixin,
         StateParticipantMixin,
         StateRtcMixin,
-        StateSfuMixin {
+        StateSfuMixin,
+        StateCallActionsMixin {
   CallStateNotifier(CallState initialState, this.callPreferences)
       : super(initialState) {
     callStateStream =

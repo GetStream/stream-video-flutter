@@ -1045,6 +1045,26 @@ class Call {
     return result;
   }
 
+  Future<Result<CallMetadata>> goLive() async {
+    final result = await _coordinatorClient.goLive(callCid);
+
+    if(result.isSuccess) {
+      _stateManager.setCallLive(isLive: true);
+    }
+
+    return result;
+  }
+
+  Future<Result<CallMetadata>> stopLive() async {
+    final result = await _coordinatorClient.stopLive(callCid);
+
+    if(result.isSuccess) {
+      _stateManager.setCallLive(isLive: false);
+    }
+
+    return result;
+  }
+
   Future<Result<None>> updateViewportVisibility({
     required String sessionId,
     required ViewportVisibility visibility,

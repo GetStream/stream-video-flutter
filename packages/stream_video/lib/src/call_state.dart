@@ -27,6 +27,7 @@ class CallState extends Equatable {
       isRecording: false,
       isBroadcasting: false,
       isTranscribing: false,
+      isBackstage: false,
       settings: const CallSettings(),
       videoInputDevice: null,
       audioInputDevice: null,
@@ -52,6 +53,7 @@ class CallState extends Equatable {
       isRecording: metadata.details.recording,
       isBroadcasting: metadata.details.broadcasting,
       isTranscribing: metadata.details.transcribing,
+      isBackstage: metadata.details.backstage,
       settings: metadata.settings,
       videoInputDevice: null,
       audioInputDevice: null,
@@ -76,6 +78,7 @@ class CallState extends Equatable {
     required this.isRecording,
     required this.isBroadcasting,
     required this.isTranscribing,
+    required this.isBackstage,
     required this.settings,
     required this.ownCapabilities,
     required this.callParticipants,
@@ -94,6 +97,7 @@ class CallState extends Equatable {
   final bool isRecording;
   final bool isBroadcasting;
   final bool isTranscribing;
+  final bool isBackstage;
   final RtcMediaDevice? videoInputDevice;
   final RtcMediaDevice? audioInputDevice;
   final RtcMediaDevice? audioOutputDevice;
@@ -124,6 +128,7 @@ class CallState extends Equatable {
     bool? isRecording,
     bool? isBroadcasting,
     bool? isTranscribing,
+    bool? isBackstage,
     CallSettings? settings,
     RtcMediaDevice? videoInputDevice,
     RtcMediaDevice? audioInputDevice,
@@ -141,6 +146,7 @@ class CallState extends Equatable {
       isRecording: isRecording ?? this.isRecording,
       isBroadcasting: isBroadcasting ?? this.isBroadcasting,
       isTranscribing: isTranscribing ?? this.isTranscribing,
+      isBackstage: isBackstage ?? this.isBackstage,
       settings: settings ?? this.settings,
       videoInputDevice: videoInputDevice ?? this.videoInputDevice,
       audioInputDevice: audioInputDevice ?? this.audioInputDevice,
@@ -158,6 +164,9 @@ class CallState extends Equatable {
         sessionId,
         status,
         isRecording,
+        isTranscribing,
+        isBroadcasting,
+        isBackstage,
         settings,
         videoInputDevice,
         audioInputDevice,
