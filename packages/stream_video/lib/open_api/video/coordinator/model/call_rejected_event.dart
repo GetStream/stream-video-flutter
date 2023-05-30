@@ -13,11 +13,14 @@ part of openapi.api;
 class CallRejectedEvent {
   /// Returns a new [CallRejectedEvent] instance.
   CallRejectedEvent({
+    required this.call,
     required this.callCid,
     required this.createdAt,
     this.type = 'call.rejected',
     required this.user,
   });
+
+  CallResponse call;
 
   String callCid;
 
@@ -30,6 +33,7 @@ class CallRejectedEvent {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallRejectedEvent &&
+     other.call == call &&
      other.callCid == callCid &&
      other.createdAt == createdAt &&
      other.type == type &&
@@ -38,16 +42,18 @@ class CallRejectedEvent {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (call.hashCode) +
     (callCid.hashCode) +
     (createdAt.hashCode) +
     (type.hashCode) +
     (user.hashCode);
 
   @override
-  String toString() => 'CallRejectedEvent[callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
+  String toString() => 'CallRejectedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'call'] = this.call;
       json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'type'] = this.type;
@@ -74,6 +80,7 @@ class CallRejectedEvent {
       }());
 
       return CallRejectedEvent(
+        call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
         type: mapValueOfType<String>(json, r'type')!,
@@ -127,6 +134,7 @@ class CallRejectedEvent {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'call',
     'call_cid',
     'created_at',
     'type',

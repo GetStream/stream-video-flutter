@@ -13,15 +13,18 @@ part of openapi.api;
 class NotificationSettings {
   /// Returns a new [NotificationSettings] instance.
   NotificationSettings({
-    required this.callCreated,
     required this.callLiveStarted,
+    required this.callNotification,
+    required this.callRing,
     required this.enabled,
     required this.sessionStarted,
   });
 
-  EventNotificationSettings callCreated;
-
   EventNotificationSettings callLiveStarted;
+
+  EventNotificationSettings callNotification;
+
+  EventNotificationSettings callRing;
 
   bool enabled;
 
@@ -29,26 +32,29 @@ class NotificationSettings {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is NotificationSettings &&
-     other.callCreated == callCreated &&
      other.callLiveStarted == callLiveStarted &&
+     other.callNotification == callNotification &&
+     other.callRing == callRing &&
      other.enabled == enabled &&
      other.sessionStarted == sessionStarted;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (callCreated.hashCode) +
     (callLiveStarted.hashCode) +
+    (callNotification.hashCode) +
+    (callRing.hashCode) +
     (enabled.hashCode) +
     (sessionStarted.hashCode);
 
   @override
-  String toString() => 'NotificationSettings[callCreated=$callCreated, callLiveStarted=$callLiveStarted, enabled=$enabled, sessionStarted=$sessionStarted]';
+  String toString() => 'NotificationSettings[callLiveStarted=$callLiveStarted, callNotification=$callNotification, callRing=$callRing, enabled=$enabled, sessionStarted=$sessionStarted]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'call_created'] = this.callCreated;
       json[r'call_live_started'] = this.callLiveStarted;
+      json[r'call_notification'] = this.callNotification;
+      json[r'call_ring'] = this.callRing;
       json[r'enabled'] = this.enabled;
       json[r'session_started'] = this.sessionStarted;
     return json;
@@ -73,8 +79,9 @@ class NotificationSettings {
       }());
 
       return NotificationSettings(
-        callCreated: EventNotificationSettings.fromJson(json[r'call_created'])!,
         callLiveStarted: EventNotificationSettings.fromJson(json[r'call_live_started'])!,
+        callNotification: EventNotificationSettings.fromJson(json[r'call_notification'])!,
+        callRing: EventNotificationSettings.fromJson(json[r'call_ring'])!,
         enabled: mapValueOfType<bool>(json, r'enabled')!,
         sessionStarted: EventNotificationSettings.fromJson(json[r'session_started'])!,
       );
@@ -126,8 +133,9 @@ class NotificationSettings {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'call_created',
     'call_live_started',
+    'call_notification',
+    'call_ring',
     'enabled',
     'session_started',
   };

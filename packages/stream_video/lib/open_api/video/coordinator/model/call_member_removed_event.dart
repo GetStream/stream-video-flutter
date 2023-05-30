@@ -29,7 +29,7 @@ class CallMemberRemovedEvent {
   /// the list of member IDs removed from the call
   List<String> members;
 
-  /// The type of event: \"call.member_added\" in this case
+  /// The type of event: \"call.member_removed\" in this case
   String type;
 
   @override
