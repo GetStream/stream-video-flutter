@@ -29,7 +29,7 @@ class CallMemberUpdatedEvent {
   /// The list of members that were updated
   List<MemberResponse> members;
 
-  /// The type of event: \"call.member_added\" in this case
+  /// The type of event: \"call.member_updated\" in this case
   String type;
 
   @override

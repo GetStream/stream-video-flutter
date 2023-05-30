@@ -27,6 +27,7 @@ class CallResponse {
     required this.ingress,
     this.ownCapabilities = const [],
     required this.recording,
+    this.session,
     required this.settings,
     this.startsAt,
     this.team,
@@ -75,6 +76,14 @@ class CallResponse {
 
   bool recording;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  CallSessionResponse? session;
+
   CallSettingsResponse settings;
 
   /// Date/time when the call will start
@@ -118,6 +127,7 @@ class CallResponse {
      other.ingress == ingress &&
      other.ownCapabilities == ownCapabilities &&
      other.recording == recording &&
+     other.session == session &&
      other.settings == settings &&
      other.startsAt == startsAt &&
      other.team == team &&
@@ -142,6 +152,7 @@ class CallResponse {
     (ingress.hashCode) +
     (ownCapabilities.hashCode) +
     (recording.hashCode) +
+    (session == null ? 0 : session!.hashCode) +
     (settings.hashCode) +
     (startsAt == null ? 0 : startsAt!.hashCode) +
     (team == null ? 0 : team!.hashCode) +
@@ -150,7 +161,7 @@ class CallResponse {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcasting=$broadcasting, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, endedAt=$endedAt, hlsPlaylistUrl=$hlsPlaylistUrl, id=$id, ingress=$ingress, ownCapabilities=$ownCapabilities, recording=$recording, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
+  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcasting=$broadcasting, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, endedAt=$endedAt, hlsPlaylistUrl=$hlsPlaylistUrl, id=$id, ingress=$ingress, ownCapabilities=$ownCapabilities, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -172,6 +183,11 @@ class CallResponse {
       json[r'ingress'] = this.ingress;
       json[r'own_capabilities'] = this.ownCapabilities;
       json[r'recording'] = this.recording;
+    if (this.session != null) {
+      json[r'session'] = this.session;
+    } else {
+      json[r'session'] = null;
+    }
       json[r'settings'] = this.settings;
     if (this.startsAt != null) {
       json[r'starts_at'] = this.startsAt!.toUtc().toIso8601String();
@@ -224,6 +240,7 @@ class CallResponse {
         ingress: CallIngressResponse.fromJson(json[r'ingress'])!,
         ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
         recording: mapValueOfType<bool>(json, r'recording')!,
+        session: CallSessionResponse.fromJson(json[r'session']),
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,
         startsAt: mapDateTime(json, r'starts_at', ''),
         team: mapValueOfType<String>(json, r'team'),

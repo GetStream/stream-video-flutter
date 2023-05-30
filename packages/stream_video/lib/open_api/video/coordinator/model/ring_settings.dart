@@ -14,31 +14,31 @@ class RingSettings {
   /// Returns a new [RingSettings] instance.
   RingSettings({
     required this.autoCancelTimeoutMs,
-    required this.autoRejectTimeoutMs,
+    required this.incomingCallTimeoutMs,
   });
 
   int autoCancelTimeoutMs;
 
-  int autoRejectTimeoutMs;
+  int incomingCallTimeoutMs;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is RingSettings &&
      other.autoCancelTimeoutMs == autoCancelTimeoutMs &&
-     other.autoRejectTimeoutMs == autoRejectTimeoutMs;
+     other.incomingCallTimeoutMs == incomingCallTimeoutMs;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (autoCancelTimeoutMs.hashCode) +
-    (autoRejectTimeoutMs.hashCode);
+    (incomingCallTimeoutMs.hashCode);
 
   @override
-  String toString() => 'RingSettings[autoCancelTimeoutMs=$autoCancelTimeoutMs, autoRejectTimeoutMs=$autoRejectTimeoutMs]';
+  String toString() => 'RingSettings[autoCancelTimeoutMs=$autoCancelTimeoutMs, incomingCallTimeoutMs=$incomingCallTimeoutMs]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'auto_cancel_timeout_ms'] = this.autoCancelTimeoutMs;
-      json[r'auto_reject_timeout_ms'] = this.autoRejectTimeoutMs;
+      json[r'incoming_call_timeout_ms'] = this.incomingCallTimeoutMs;
     return json;
   }
 
@@ -62,7 +62,7 @@ class RingSettings {
 
       return RingSettings(
         autoCancelTimeoutMs: mapValueOfType<int>(json, r'auto_cancel_timeout_ms')!,
-        autoRejectTimeoutMs: mapValueOfType<int>(json, r'auto_reject_timeout_ms')!,
+        incomingCallTimeoutMs: mapValueOfType<int>(json, r'incoming_call_timeout_ms')!,
       );
     }
     return null;
@@ -113,7 +113,7 @@ class RingSettings {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'auto_cancel_timeout_ms',
-    'auto_reject_timeout_ms',
+    'incoming_call_timeout_ms',
   };
 }
 

@@ -37,19 +37,10 @@ abstract class CoordinatorClient {
 
   Future<Result<models.CoordinatorJoined>> joinCall(inputs.JoinCallInput input);
 
-  Future<Result<models.SfuServerSelected>> findBestCallEdgeServer({
-    required StreamCallCid callCid,
-    required List<models.SfuEdge> edges,
-  });
+  Future<Result<None>> acceptCall({required StreamCallCid cid});
 
-  Future<Result<models.SfuServerSelected>> selectCallEdgeServer({
-    required StreamCallCid callCid,
-    required Map<String, models.SfuLatency> latencyByEdge,
-  });
+  Future<Result<None>> rejectCall({required StreamCallCid cid});
 
-  Future<Result<None>> sendUserEvent(
-    inputs.EventInput input,
-  );
 
   /// Sends a custom event to the API to notify if we've changed something
   /// in the state of the call.
@@ -126,34 +117,4 @@ abstract class CoordinatorClient {
   Future<Result<None>> muteUsers(inputs.MuteUsersInput input);
 
   Future<Result<CallMetadata>> updateCall(inputs.UpdateCallInput input);
-}
-
-extension CoordinatorClientX on CoordinatorClient {
-  /// Signals other users that I have accepted the incoming call.
-  /// Causes the [CoordinatorCallAcceptedEvent] event to be emitted
-  /// to all the call members.
-  Future<Result<None>> acceptCall({
-    required StreamCallCid cid,
-  }) async {
-    return sendUserEvent(
-      inputs.EventInput(
-        callCid: cid,
-        eventType: inputs.EventTypeInput.accepted,
-      ),
-    );
-  }
-
-  /// Signals other users that I have rejected the incoming call.
-  /// Causes the [CoordinatorCallRejectedEvent] event to be emitted
-  /// to all the call members.
-  Future<Result<None>> rejectCall({
-    required StreamCallCid cid,
-  }) async {
-    return sendUserEvent(
-      inputs.EventInput(
-        callCid: cid,
-        eventType: inputs.EventTypeInput.rejected,
-      ),
-    );
-  }
 }

@@ -108,7 +108,7 @@ extension CallSettingsExt on open.CallSettingsResponse {
     return CallSettings(
       ring: RingSettings(
         autoCancelTimeout: Duration(milliseconds: ring.autoCancelTimeoutMs),
-        autoRejectTimeout: Duration(milliseconds: ring.autoRejectTimeoutMs),
+        autoRejectTimeout: Duration(milliseconds: ring.incomingCallTimeoutMs),
       ),
       audio: AudioSettings(
         accessRequestEnabled: audio.accessRequestEnabled,

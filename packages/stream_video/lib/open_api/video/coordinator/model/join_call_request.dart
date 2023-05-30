@@ -17,6 +17,7 @@ class JoinCallRequest {
     this.data,
     required this.location,
     this.membersLimit,
+    this.notify,
     this.ring,
   });
 
@@ -48,6 +49,14 @@ class JoinCallRequest {
   ///
   int? membersLimit;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? notify;
+
   /// if true and the call is created, the notification will include ring=true
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -63,6 +72,7 @@ class JoinCallRequest {
      other.data == data &&
      other.location == location &&
      other.membersLimit == membersLimit &&
+     other.notify == notify &&
      other.ring == ring;
 
   @override
@@ -72,10 +82,11 @@ class JoinCallRequest {
     (data == null ? 0 : data!.hashCode) +
     (location.hashCode) +
     (membersLimit == null ? 0 : membersLimit!.hashCode) +
+    (notify == null ? 0 : notify!.hashCode) +
     (ring == null ? 0 : ring!.hashCode);
 
   @override
-  String toString() => 'JoinCallRequest[create=$create, data=$data, location=$location, membersLimit=$membersLimit, ring=$ring]';
+  String toString() => 'JoinCallRequest[create=$create, data=$data, location=$location, membersLimit=$membersLimit, notify=$notify, ring=$ring]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -94,6 +105,11 @@ class JoinCallRequest {
       json[r'members_limit'] = this.membersLimit;
     } else {
       json[r'members_limit'] = null;
+    }
+    if (this.notify != null) {
+      json[r'notify'] = this.notify;
+    } else {
+      json[r'notify'] = null;
     }
     if (this.ring != null) {
       json[r'ring'] = this.ring;
@@ -126,6 +142,7 @@ class JoinCallRequest {
         data: CallRequest.fromJson(json[r'data']),
         location: mapValueOfType<String>(json, r'location')!,
         membersLimit: mapValueOfType<int>(json, r'members_limit'),
+        notify: mapValueOfType<bool>(json, r'notify'),
         ring: mapValueOfType<bool>(json, r'ring'),
       );
     }

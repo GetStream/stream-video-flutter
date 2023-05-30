@@ -13,8 +13,9 @@ part of openapi.api;
 class NotificationSettingsRequest {
   /// Returns a new [NotificationSettingsRequest] instance.
   NotificationSettingsRequest({
-    this.callCreated,
     this.callLiveStarted,
+    this.callNotification,
+    this.callRing,
     this.enabled,
     this.sessionStarted,
   });
@@ -25,7 +26,7 @@ class NotificationSettingsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  EventNotificationSettingsRequest? callCreated;
+  EventNotificationSettingsRequest? callLiveStarted;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -33,7 +34,15 @@ class NotificationSettingsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  EventNotificationSettingsRequest? callLiveStarted;
+  EventNotificationSettingsRequest? callNotification;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  EventNotificationSettingsRequest? callRing;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -53,33 +62,40 @@ class NotificationSettingsRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is NotificationSettingsRequest &&
-     other.callCreated == callCreated &&
      other.callLiveStarted == callLiveStarted &&
+     other.callNotification == callNotification &&
+     other.callRing == callRing &&
      other.enabled == enabled &&
      other.sessionStarted == sessionStarted;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (callCreated == null ? 0 : callCreated!.hashCode) +
     (callLiveStarted == null ? 0 : callLiveStarted!.hashCode) +
+    (callNotification == null ? 0 : callNotification!.hashCode) +
+    (callRing == null ? 0 : callRing!.hashCode) +
     (enabled == null ? 0 : enabled!.hashCode) +
     (sessionStarted == null ? 0 : sessionStarted!.hashCode);
 
   @override
-  String toString() => 'NotificationSettingsRequest[callCreated=$callCreated, callLiveStarted=$callLiveStarted, enabled=$enabled, sessionStarted=$sessionStarted]';
+  String toString() => 'NotificationSettingsRequest[callLiveStarted=$callLiveStarted, callNotification=$callNotification, callRing=$callRing, enabled=$enabled, sessionStarted=$sessionStarted]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.callCreated != null) {
-      json[r'call_created'] = this.callCreated;
-    } else {
-      json[r'call_created'] = null;
-    }
     if (this.callLiveStarted != null) {
       json[r'call_live_started'] = this.callLiveStarted;
     } else {
       json[r'call_live_started'] = null;
+    }
+    if (this.callNotification != null) {
+      json[r'call_notification'] = this.callNotification;
+    } else {
+      json[r'call_notification'] = null;
+    }
+    if (this.callRing != null) {
+      json[r'call_ring'] = this.callRing;
+    } else {
+      json[r'call_ring'] = null;
     }
     if (this.enabled != null) {
       json[r'enabled'] = this.enabled;
@@ -113,8 +129,9 @@ class NotificationSettingsRequest {
       }());
 
       return NotificationSettingsRequest(
-        callCreated: EventNotificationSettingsRequest.fromJson(json[r'call_created']),
         callLiveStarted: EventNotificationSettingsRequest.fromJson(json[r'call_live_started']),
+        callNotification: EventNotificationSettingsRequest.fromJson(json[r'call_notification']),
+        callRing: EventNotificationSettingsRequest.fromJson(json[r'call_ring']),
         enabled: mapValueOfType<bool>(json, r'enabled'),
         sessionStarted: EventNotificationSettingsRequest.fromJson(json[r'session_started']),
       );

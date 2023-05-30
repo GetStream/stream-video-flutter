@@ -14,7 +14,7 @@ class RingSettingsRequest {
   /// Returns a new [RingSettingsRequest] instance.
   RingSettingsRequest({
     this.autoCancelTimeoutMs,
-    this.autoRejectTimeoutMs,
+    this.incomingCallTimeoutMs,
   });
 
   ///
@@ -31,21 +31,21 @@ class RingSettingsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  int? autoRejectTimeoutMs;
+  int? incomingCallTimeoutMs;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is RingSettingsRequest &&
      other.autoCancelTimeoutMs == autoCancelTimeoutMs &&
-     other.autoRejectTimeoutMs == autoRejectTimeoutMs;
+     other.incomingCallTimeoutMs == incomingCallTimeoutMs;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (autoCancelTimeoutMs == null ? 0 : autoCancelTimeoutMs!.hashCode) +
-    (autoRejectTimeoutMs == null ? 0 : autoRejectTimeoutMs!.hashCode);
+    (incomingCallTimeoutMs == null ? 0 : incomingCallTimeoutMs!.hashCode);
 
   @override
-  String toString() => 'RingSettingsRequest[autoCancelTimeoutMs=$autoCancelTimeoutMs, autoRejectTimeoutMs=$autoRejectTimeoutMs]';
+  String toString() => 'RingSettingsRequest[autoCancelTimeoutMs=$autoCancelTimeoutMs, incomingCallTimeoutMs=$incomingCallTimeoutMs]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -54,10 +54,10 @@ class RingSettingsRequest {
     } else {
       json[r'auto_cancel_timeout_ms'] = null;
     }
-    if (this.autoRejectTimeoutMs != null) {
-      json[r'auto_reject_timeout_ms'] = this.autoRejectTimeoutMs;
+    if (this.incomingCallTimeoutMs != null) {
+      json[r'incoming_call_timeout_ms'] = this.incomingCallTimeoutMs;
     } else {
-      json[r'auto_reject_timeout_ms'] = null;
+      json[r'incoming_call_timeout_ms'] = null;
     }
     return json;
   }
@@ -82,7 +82,7 @@ class RingSettingsRequest {
 
       return RingSettingsRequest(
         autoCancelTimeoutMs: mapValueOfType<int>(json, r'auto_cancel_timeout_ms'),
-        autoRejectTimeoutMs: mapValueOfType<int>(json, r'auto_reject_timeout_ms'),
+        incomingCallTimeoutMs: mapValueOfType<int>(json, r'incoming_call_timeout_ms'),
       );
     }
     return null;

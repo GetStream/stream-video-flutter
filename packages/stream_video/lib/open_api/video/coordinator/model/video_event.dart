@@ -18,13 +18,12 @@ class VideoEvent {
     required this.createdAt,
     this.type = 'call.permissions_updated',
     required this.user,
-    required this.hlsPlaylistUrl,
     required this.call,
+    required this.hlsPlaylistUrl,
     this.members = const [],
-    required this.ringing,
     this.capabilitiesByRole = const {},
-    required this.reaction,
     required this.sessionId,
+    required this.reaction,
     required this.connectionId,
     required this.me,
     this.custom = const {},
@@ -49,23 +48,20 @@ class VideoEvent {
 
   UserResponse user;
 
-  String hlsPlaylistUrl;
-
   CallResponse call;
 
-  /// The list of members that were updated
-  List<MemberResponse> members;
+  String hlsPlaylistUrl;
 
-  /// true when the call was created with ring enabled
-  bool ringing;
+  /// Call members
+  List<MemberResponse> members;
 
   /// The capabilities by role for this call
   Map<String, List<String>> capabilitiesByRole;
 
-  ReactionResponse reaction;
-
   /// Call session ID
   String sessionId;
+
+  ReactionResponse reaction;
 
   /// The connection_id for this client
   String connectionId;
@@ -88,13 +84,12 @@ class VideoEvent {
      other.createdAt == createdAt &&
      other.type == type &&
      other.user == user &&
-     other.hlsPlaylistUrl == hlsPlaylistUrl &&
      other.call == call &&
+     other.hlsPlaylistUrl == hlsPlaylistUrl &&
      other.members == members &&
-     other.ringing == ringing &&
      other.capabilitiesByRole == capabilitiesByRole &&
-     other.reaction == reaction &&
      other.sessionId == sessionId &&
+     other.reaction == reaction &&
      other.connectionId == connectionId &&
      other.me == me &&
      other.custom == custom &&
@@ -109,13 +104,12 @@ class VideoEvent {
     (createdAt.hashCode) +
     (type.hashCode) +
     (user.hashCode) +
-    (hlsPlaylistUrl.hashCode) +
     (call.hashCode) +
+    (hlsPlaylistUrl.hashCode) +
     (members.hashCode) +
-    (ringing.hashCode) +
     (capabilitiesByRole.hashCode) +
-    (reaction.hashCode) +
     (sessionId.hashCode) +
+    (reaction.hashCode) +
     (connectionId.hashCode) +
     (me.hashCode) +
     (custom.hashCode) +
@@ -123,7 +117,7 @@ class VideoEvent {
     (ownCapabilities.hashCode);
 
   @override
-  String toString() => 'VideoEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, hlsPlaylistUrl=$hlsPlaylistUrl, call=$call, members=$members, ringing=$ringing, capabilitiesByRole=$capabilitiesByRole, reaction=$reaction, sessionId=$sessionId, connectionId=$connectionId, me=$me, custom=$custom, permissions=$permissions, ownCapabilities=$ownCapabilities]';
+  String toString() => 'VideoEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, call=$call, hlsPlaylistUrl=$hlsPlaylistUrl, members=$members, capabilitiesByRole=$capabilitiesByRole, sessionId=$sessionId, reaction=$reaction, connectionId=$connectionId, me=$me, custom=$custom, permissions=$permissions, ownCapabilities=$ownCapabilities]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -136,13 +130,12 @@ class VideoEvent {
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'type'] = this.type;
       json[r'user'] = this.user;
-      json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
       json[r'call'] = this.call;
+      json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
       json[r'members'] = this.members;
-      json[r'ringing'] = this.ringing;
       json[r'capabilities_by_role'] = this.capabilitiesByRole;
-      json[r'reaction'] = this.reaction;
       json[r'session_id'] = this.sessionId;
+      json[r'reaction'] = this.reaction;
       json[r'connection_id'] = this.connectionId;
       json[r'me'] = this.me;
       json[r'custom'] = this.custom;
@@ -175,10 +168,9 @@ class VideoEvent {
         createdAt: mapDateTime(json, r'created_at', '')!,
         type: mapValueOfType<String>(json, r'type')!,
         user: UserResponse.fromJson(json[r'user'])!,
-        hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
         call: CallResponse.fromJson(json[r'call'])!,
+        hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
         members: MemberResponse.listFromJson(json[r'members'])!,
-        ringing: mapValueOfType<bool>(json, r'ringing')!,
         capabilitiesByRole: json[r'capabilities_by_role'] == null
           ? const {}
             : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
@@ -244,13 +236,12 @@ class VideoEvent {
     'created_at',
     'type',
     'user',
-    'hls_playlist_url',
     'call',
+    'hls_playlist_url',
     'members',
-    'ringing',
     'capabilities_by_role',
-    'reaction',
     'session_id',
+    'reaction',
     'connection_id',
     'me',
     'custom',
