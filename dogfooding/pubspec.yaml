@@ -11,14 +11,14 @@ dependencies:
   cupertino_icons: ^1.0.2
   device_info_plus: ^8.1.0
   envied: ^0.3.0
-  firebase_auth: ^4.2.5
-  firebase_core: ^2.4.1
-  firebase_messaging: ^14.5.0
+  firebase_auth: ^4.6.1
+  firebase_core: ^2.13.0
+  firebase_messaging: ^14.6.1
   flutter:
     sdk: flutter
   flutter_svg: 2.0.4
   google_fonts: ^4.0.4
-  google_sign_in: ^5.4.4
+  google_sign_in: ^6.1.1
   http: ^0.13.5
   path_provider: ^2.0.14
   share_plus: ^6.3.1
