@@ -35,7 +35,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallCreatedEvent(
           data: CallCreatedData(
             callCid: StreamCallCid(cid: call.cid),
-            ringing: event.ringing,
+            ringing: false,
             metadata: call.toCallMetadata(event.members),
           ),
           createdAt: event.createdAt,
@@ -277,7 +277,7 @@ extension on RingSettings {
   open.RingSettingsRequest toOpenDto() {
     return open.RingSettingsRequest(
       autoCancelTimeoutMs: autoCancelTimeout.inMilliseconds,
-      autoRejectTimeoutMs: autoRejectTimeout.inMilliseconds,
+      incomingCallTimeoutMs: autoRejectTimeout.inMilliseconds,
     );
   }
 }
