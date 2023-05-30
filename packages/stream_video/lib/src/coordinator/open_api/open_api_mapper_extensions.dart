@@ -277,7 +277,7 @@ extension on RingSettings {
   open.RingSettingsRequest toOpenDto() {
     return open.RingSettingsRequest(
       autoCancelTimeoutMs: autoCancelTimeout.inMilliseconds,
-      autoRejectTimeoutMs: autoRejectTimeout.inMilliseconds,
+      incomingCallTimeoutMs: autoRejectTimeout.inMilliseconds,
     );
   }
 }
