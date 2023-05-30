@@ -34,10 +34,23 @@ scripts:
       Run `dart analyze` in all packages.
        - Note: you can also rely on your IDEs Dart Analysis / Issues window.
 
+  analyze:warnings:
+    run: |
+      melos exec -c 5 --ignore="*example*" -- \
+        dart analyze --fatal-warnings .
+    description: |
+      Run `dart analyze` in all packages.
+       Flags all compiler `errors` in the project.
+
   format:
     run: flutter format --set-exit-if-changed .
     description: |
-      Run `flutter format --set-exit-if-changed .` in all packages.
+      Run `flutter format --set-exit-if-changed .` in all packages.  
+
+  build:example:android:
+    run:  melos bs &&  cd ./packages/stream_video_flutter/example && flutter build apk --verbose
+    description: |
+      Run `flutter build apk --verbose` in the example app.
 
   metrics:
     run: |
