@@ -406,4 +406,3 @@ extension on TranscriptionSettingsMode {
     }
   }
 }
-
