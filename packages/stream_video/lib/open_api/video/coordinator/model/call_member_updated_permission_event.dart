@@ -94,14 +94,14 @@ class CallMemberUpdatedPermissionEvent {
           ? const {}
             : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
         createdAt: mapDateTime(json, r'created_at', '')!,
-        members: MemberResponse.listFromJson(json[r'members'])!,
+        members: MemberResponse.listFromJson(json[r'members']),
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
     return null;
   }
 
-  static List<CallMemberUpdatedPermissionEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallMemberUpdatedPermissionEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallMemberUpdatedPermissionEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -132,12 +132,10 @@ class CallMemberUpdatedPermissionEvent {
   static Map<String, List<CallMemberUpdatedPermissionEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallMemberUpdatedPermissionEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CallMemberUpdatedPermissionEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CallMemberUpdatedPermissionEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

@@ -83,7 +83,7 @@ class CallLiveStartedEvent {
     return null;
   }
 
-  static List<CallLiveStartedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallLiveStartedEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallLiveStartedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -114,12 +114,10 @@ class CallLiveStartedEvent {
   static Map<String, List<CallLiveStartedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallLiveStartedEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CallLiveStartedEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CallLiveStartedEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

@@ -76,7 +76,7 @@ class CallRecordingStoppedEvent {
     return null;
   }
 
-  static List<CallRecordingStoppedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallRecordingStoppedEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallRecordingStoppedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -107,12 +107,10 @@ class CallRecordingStoppedEvent {
   static Map<String, List<CallRecordingStoppedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallRecordingStoppedEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CallRecordingStoppedEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CallRecordingStoppedEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
