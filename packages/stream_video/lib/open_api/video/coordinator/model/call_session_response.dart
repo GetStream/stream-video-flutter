@@ -111,12 +111,12 @@ class CallSessionResponse {
       }());
 
       return CallSessionResponse(
-        acceptedBy: DateTime.mapFromJson(json[r'accepted_by']),
+        acceptedBy: Map<String, DateTime>.from(json[r'accepted_by'])!,
         endedAt: mapDateTime(json, r'ended_at', ''),
         id: mapValueOfType<String>(json, r'id')!,
         participants: CallParticipantResponse.listFromJson(json[r'participants']),
         participantsCountByRole: mapCastOfType<String, int>(json, r'participants_count_by_role')!,
-        rejectedBy: DateTime.mapFromJson(json[r'rejected_by']),
+        rejectedBy: Map<String, DateTime>.from(json[r'rejected_by'])!,
         startedAt: mapDateTime(json, r'started_at', ''),
       );
     }

@@ -88,7 +88,7 @@ class CallTypeResponse {
         createdAt: mapDateTime(json, r'created_at', '')!,
         grants: json[r'grants'] == null
           ? const {}
-            : mapCastOfType<String, List>(json, r'grants'),
+            : mapCastOfType<String, List<String>>(json, r'grants') ?? const {},
         name: mapValueOfType<String>(json, r'name')!,
         notificationSettings: NotificationSettings.fromJson(json[r'notification_settings'])!,
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,

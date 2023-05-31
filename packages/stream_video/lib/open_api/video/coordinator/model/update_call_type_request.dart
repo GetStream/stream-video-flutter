@@ -89,7 +89,7 @@ class UpdateCallTypeRequest {
       return UpdateCallTypeRequest(
         grants: json[r'grants'] == null
           ? const {}
-            : mapCastOfType<String, List>(json, r'grants'),
+            : mapCastOfType<String, List<String>>(json, r'grants') ?? const {},
         notificationSettings: NotificationSettingsRequest.fromJson(json[r'notification_settings']),
         settings: CallSettingsRequest.fromJson(json[r'settings']),
       );

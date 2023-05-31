@@ -173,7 +173,7 @@ class VideoEvent {
         members: MemberResponse.listFromJson(json[r'members']),
         capabilitiesByRole: json[r'capabilities_by_role'] == null
           ? const {}
-            : mapCastOfType<String, List>(json, r'capabilities_by_role'),
+            : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
         sessionId: mapValueOfType<String>(json, r'session_id')!,
         reaction: ReactionResponse.fromJson(json[r'reaction'])!,
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
