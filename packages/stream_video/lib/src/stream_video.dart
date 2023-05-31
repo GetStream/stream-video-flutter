@@ -13,6 +13,7 @@ import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
 import 'logger/impl/external_logger.dart';
+import 'models/guest_created_data.dart';
 import 'models/queried_calls.dart';
 import 'retry/retry_policy.dart';
 import 'state_emitter.dart';
@@ -308,6 +309,26 @@ class StreamVideo {
         limit: limit,
         prev: prev,
         sorts: sorts ?? [],
+      ),
+    );
+  }
+
+  Future<Result<GuestCreatedData>> createGuest({
+    required String id,
+    String? name,
+    String? role,
+    String? image,
+    List<String>? teams,
+    Map<String, Object>? custom,
+  }) {
+    return _client.createGuest(
+      UserInput(
+        id: id,
+        name: name,
+        role: role,
+        image: image,
+        teams: teams,
+        custom: custom ?? {},
       ),
     );
   }

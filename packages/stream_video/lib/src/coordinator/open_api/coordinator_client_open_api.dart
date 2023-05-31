@@ -12,6 +12,7 @@ import '../../models/call_device.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_reaction.dart';
 import '../../models/call_received_created_data.dart';
+import '../../models/guest_created_data.dart';
 import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 import '../../models/user_info.dart';
@@ -63,6 +64,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   late final livestreamingApi = open.LivestreamingApi(_apiClient);
   late final moderationApi = open.ModerationApi(_apiClient);
   late final callTypesApi = open.CallTypesApi(_apiClient);
+  late final defaultApi = open.DefaultApi(_apiClient);
   late final locationService = LocationService();
 
   @override
@@ -589,7 +591,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     try {
       await videoApi.acceptCall(cid.type, cid.id);
       return const Result.success(none);
-    } catch(e) {
+    } catch (e) {
       return Result.failure(VideoErrors.compose(e));
     }
   }
@@ -604,7 +606,28 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     try {
       await videoApi.rejectCall(cid.type, cid.id);
       return const Result.success(none);
-    } catch(e) {
+    } catch (e) {
+      return Result.failure(VideoErrors.compose(e));
+    }
+  }
+
+  @override
+  Future<Result<GuestCreatedData>> createGuest(inputs.UserInput input) async {
+    try {
+      final res = await defaultApi.createGuest(
+        open.CreateGuestRequest(
+          user: open.UserRequest(
+            id: input.id,
+            custom: input.custom,
+            image: input.image,
+            name: input.name,
+            role: input.role,
+            teams: input.teams ?? [],
+          ),
+        ),
+      );
+      return Result.success(res.toGuestCreatedData());
+    } catch (e) {
       return Result.failure(VideoErrors.compose(e));
     }
   }

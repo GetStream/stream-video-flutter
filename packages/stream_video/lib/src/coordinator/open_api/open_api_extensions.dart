@@ -6,6 +6,7 @@ import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
 import '../../models/call_reaction.dart';
 import '../../models/call_settings.dart';
+import '../../models/guest_created_data.dart';
 import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 
@@ -59,6 +60,26 @@ extension UserExt on open.UserResponse {
   }
 }
 
+extension GuessExt on open.CreateGuestResponse {
+  GuestCreatedData toGuestCreatedData() {
+    return GuestCreatedData(
+      accessToken: accessToken,
+      duration: duration,
+      user: UserResponseData(
+        createdAt: user.createdAt,
+        id: user.id,
+        role: user.role,
+        updatedAt: user.updatedAt,
+        custom: user.custom,
+        deletedAt: user.deletedAt,
+        image: user.image,
+        name: user.name,
+        teams: user.teams,
+      ),
+    );
+  }
+}
+
 extension UserListExt on List<open.UserResponse> {
   List<CallUser> toCallUsers() {
     return map((it) => it.toCallUser()).toList();
@@ -74,7 +95,7 @@ extension EnvelopeExt on open.CallResponse {
         createdBy: createdBy.toCallUser(),
         team: team ?? '',
         ownCapabilities: ownCapabilities.map(
-              (it) => CallPermission.fromAlias(it.value),
+          (it) => CallPermission.fromAlias(it.value),
         ),
         blockedUserIds: List.unmodifiable(blockedUserIds),
         broadcasting: broadcasting,
