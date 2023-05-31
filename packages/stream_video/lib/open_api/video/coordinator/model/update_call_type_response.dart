@@ -95,7 +95,7 @@ class UpdateCallTypeResponse {
         duration: mapValueOfType<String>(json, r'duration')!,
         grants: json[r'grants'] == null
           ? const {}
-            : mapCastOfType<String, List<String>>(json, r'grants') ?? const {},
+            : mapCastOfType<String, List>(json, r'grants'),
         name: mapValueOfType<String>(json, r'name')!,
         notificationSettings: NotificationSettings.fromJson(json[r'notification_settings'])!,
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,
@@ -105,7 +105,7 @@ class UpdateCallTypeResponse {
     return null;
   }
 
-  static List<UpdateCallTypeResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UpdateCallTypeResponse> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <UpdateCallTypeResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -136,12 +136,10 @@ class UpdateCallTypeResponse {
   static Map<String, List<UpdateCallTypeResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<UpdateCallTypeResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = UpdateCallTypeResponse.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = UpdateCallTypeResponse.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

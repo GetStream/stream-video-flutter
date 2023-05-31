@@ -142,7 +142,7 @@ class OwnUserResponse {
         createdAt: mapDateTime(json, r'created_at', '')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         deletedAt: mapDateTime(json, r'deleted_at', ''),
-        devices: Device.listFromJson(json[r'devices'])!,
+        devices: Device.listFromJson(json[r'devices']),
         id: mapValueOfType<String>(json, r'id')!,
         image: mapValueOfType<String>(json, r'image'),
         name: mapValueOfType<String>(json, r'name'),
@@ -156,7 +156,7 @@ class OwnUserResponse {
     return null;
   }
 
-  static List<OwnUserResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<OwnUserResponse> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <OwnUserResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -187,12 +187,10 @@ class OwnUserResponse {
   static Map<String, List<OwnUserResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<OwnUserResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = OwnUserResponse.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = OwnUserResponse.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

@@ -73,9 +73,7 @@ extension EnvelopeExt on open.CallResponse {
         hlsPlaylistUrl: hlsPlaylistUrl,
         createdBy: createdBy.toCallUser(),
         team: team ?? '',
-        ownCapabilities: ownCapabilities.map(
-              (it) => CallPermission.fromAlias(it.value),
-        ),
+        ownCapabilities: [],
         blockedUserIds: List.unmodifiable(blockedUserIds),
         broadcasting: broadcasting,
         recording: recording,

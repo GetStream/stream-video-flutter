@@ -95,7 +95,7 @@ class CreateCallTypeRequest {
       return CreateCallTypeRequest(
         grants: json[r'grants'] == null
           ? const {}
-            : mapCastOfType<String, List<String>>(json, r'grants') ?? const {},
+            : mapCastOfType<String, List>(json, r'grants'),
         name: mapValueOfType<String>(json, r'name')!,
         notificationSettings: NotificationSettingsRequest.fromJson(json[r'notification_settings']),
         settings: CallSettingsRequest.fromJson(json[r'settings']),
@@ -104,7 +104,7 @@ class CreateCallTypeRequest {
     return null;
   }
 
-  static List<CreateCallTypeRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CreateCallTypeRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CreateCallTypeRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -135,12 +135,10 @@ class CreateCallTypeRequest {
   static Map<String, List<CreateCallTypeRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CreateCallTypeRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CreateCallTypeRequest.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CreateCallTypeRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

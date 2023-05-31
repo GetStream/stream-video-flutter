@@ -20,20 +20,21 @@ class DurationResponse {
   String duration;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is DurationResponse &&
-     other.duration == duration;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DurationResponse && other.duration == duration;
 
   @override
   int get hashCode =>
-    // ignore: unnecessary_parenthesis
-    (duration.hashCode);
+      // ignore: unnecessary_parenthesis
+      (duration.hashCode);
 
   @override
   String toString() => 'DurationResponse[duration=$duration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'duration'] = this.duration;
+    json[r'duration'] = this.duration;
     return json;
   }
 
@@ -49,8 +50,10 @@ class DurationResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "DurationResponse[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "DurationResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key),
+              'Required key "Response[$key]" is missing from JSON.');
+          assert(json[key] != null,
+              'Required key "Response[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -62,7 +65,10 @@ class DurationResponse {
     return null;
   }
 
-  static List<DurationResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<DurationResponse> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <DurationResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -90,15 +96,19 @@ class DurationResponse {
   }
 
   // maps a json object with a list of DurationResponse-objects as value to a dart map
-  static Map<String, List<DurationResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<DurationResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<DurationResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = DurationResponse.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = DurationResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -109,4 +119,3 @@ class DurationResponse {
     'duration',
   };
 }
-

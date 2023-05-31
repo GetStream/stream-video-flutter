@@ -131,14 +131,14 @@ class QueryCallsRequest {
         limit: mapValueOfType<int>(json, r'limit'),
         next: mapValueOfType<String>(json, r'next'),
         prev: mapValueOfType<String>(json, r'prev'),
-        sort: SortParamRequest.listFromJson(json[r'sort'])!,
+        sort: SortParamRequest.listFromJson(json[r'sort']),
         watch: mapValueOfType<bool>(json, r'watch'),
       );
     }
     return null;
   }
 
-  static List<QueryCallsRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<QueryCallsRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <QueryCallsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -169,12 +169,10 @@ class QueryCallsRequest {
   static Map<String, List<QueryCallsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<QueryCallsRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = QueryCallsRequest.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = QueryCallsRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

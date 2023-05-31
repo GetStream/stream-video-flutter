@@ -170,25 +170,25 @@ class VideoEvent {
         user: UserResponse.fromJson(json[r'user'])!,
         call: CallResponse.fromJson(json[r'call'])!,
         hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
-        members: MemberResponse.listFromJson(json[r'members'])!,
+        members: MemberResponse.listFromJson(json[r'members']),
         capabilitiesByRole: json[r'capabilities_by_role'] == null
           ? const {}
-            : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
-        reaction: ReactionResponse.fromJson(json[r'reaction'])!,
+            : mapCastOfType<String, List>(json, r'capabilities_by_role'),
         sessionId: mapValueOfType<String>(json, r'session_id')!,
+        reaction: ReactionResponse.fromJson(json[r'reaction'])!,
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
         me: OwnUserResponse.fromJson(json[r'me'])!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         permissions: json[r'permissions'] is List
             ? (json[r'permissions'] as List).cast<String>()
             : const [],
-        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
+        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
       );
     }
     return null;
   }
 
-  static List<VideoEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<VideoEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <VideoEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -219,12 +219,10 @@ class VideoEvent {
   static Map<String, List<VideoEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<VideoEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = VideoEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = VideoEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

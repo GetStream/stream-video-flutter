@@ -100,7 +100,7 @@ class BlockedUserEvent {
     return null;
   }
 
-  static List<BlockedUserEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<BlockedUserEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <BlockedUserEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -131,12 +131,10 @@ class BlockedUserEvent {
   static Map<String, List<BlockedUserEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<BlockedUserEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = BlockedUserEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = BlockedUserEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

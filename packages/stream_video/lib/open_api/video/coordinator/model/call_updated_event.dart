@@ -85,7 +85,7 @@ class CallUpdatedEvent {
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         capabilitiesByRole: json[r'capabilities_by_role'] == null
           ? const {}
-            : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
+            : mapCastOfType<String, List>(json, r'capabilities_by_role'),
         createdAt: mapDateTime(json, r'created_at', '')!,
         type: mapValueOfType<String>(json, r'type')!,
       );
@@ -93,7 +93,7 @@ class CallUpdatedEvent {
     return null;
   }
 
-  static List<CallUpdatedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallUpdatedEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallUpdatedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -124,12 +124,10 @@ class CallUpdatedEvent {
   static Map<String, List<CallUpdatedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallUpdatedEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CallUpdatedEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CallUpdatedEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
