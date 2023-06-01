@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../utils/users_provider.dart';
+import '../utils/providers.dart';
 import 'chat_screen.dart';
 
-class CallScreen extends StatelessWidget {
+class CallScreen extends StatefulWidget {
   const CallScreen({
     super.key,
     required this.call,
@@ -18,17 +18,38 @@ class CallScreen extends StatelessWidget {
   final Channel chatChannel;
 
   @override
+  State<CallScreen> createState() => _CallScreenState();
+}
+
+class _CallScreenState extends State<CallScreen> {
+  void showChatDialog(BuildContext context) {
+    showBottomSheet<dynamic>(
+      context: context,
+      backgroundColor: const Color(0xFF101418),
+      builder: (_) {
+        return const FractionallySizedBox(
+          heightFactor: 0.8,
+          child: ChatScreen(),
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return StreamUsersConfiguration(
       usersProvider: MockUsersProvider(),
       child: StreamChannel(
-        channel: chatChannel,
+        channel: widget.chatChannel,
         child: Scaffold(
           body: StreamCallContainer(
-            call: call,
-            callConnectOptions: callConnectOptions,
-            callContentBuilder:
-                (BuildContext context, Call call, CallState callState) {
+            call: widget.call,
+            callConnectOptions: widget.callConnectOptions,
+            callContentBuilder: (
+              BuildContext context,
+              Call call,
+              CallState callState,
+            ) {
               return StreamCallContent(
                 call: call,
                 callState: callState,
@@ -42,29 +63,26 @@ class CallScreen extends StatelessWidget {
                     options: [
                       CallControlOption(
                         icon: const Icon(Icons.chat_outlined),
-                        onPressed: () async {
-                          await showBottomSheet(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return const FractionallySizedBox(
-                                heightFactor: 0.8,
-                                child: ChatScreen(),
-                              );
-                            },
-                          );
+                        onPressed: () {
+                          showChatDialog(context);
                         },
                       ),
                       ToggleSpeakerphoneOption(call: call),
                       ToggleMicrophoneOption(
-                          call: call, localParticipant: localParticipant),
+                        call: call,
+                        localParticipant: localParticipant,
+                      ),
                       ToggleCameraOption(
-                          call: call, localParticipant: localParticipant),
+                        call: call,
+                        localParticipant: localParticipant,
+                      ),
                       LeaveCallOption(
-                          call: call,
-                          onLeaveCallTap: () {
-                            call.end();
-                            call.disconnect();
-                          }),
+                        call: call,
+                        onLeaveCallTap: () {
+                          call.end();
+                          call.disconnect();
+                        },
+                      ),
                     ],
                   );
                 },

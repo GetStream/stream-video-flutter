@@ -180,7 +180,7 @@ class StreamPeerConnection extends Disposable {
         return Result.error('no remoteDescription set');
       }
       await pc.addCandidate(candidate);
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }

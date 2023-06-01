@@ -19,16 +19,26 @@ export 'models.pbenum.dart';
 class CallState extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallState', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
     ..pc<Participant>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participants', $pb.PbFieldType.PM, subBuilder: Participant.create)
+    ..aOM<$0.Timestamp>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startedAt', subBuilder: $0.Timestamp.create)
+    ..aOM<ParticipantCount>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participantCount', subBuilder: ParticipantCount.create)
     ..hasRequiredFields = false
   ;
 
   CallState._() : super();
   factory CallState({
     $core.Iterable<Participant>? participants,
+    $0.Timestamp? startedAt,
+    ParticipantCount? participantCount,
   }) {
     final _result = create();
     if (participants != null) {
       _result.participants.addAll(participants);
+    }
+    if (startedAt != null) {
+      _result.startedAt = startedAt;
+    }
+    if (participantCount != null) {
+      _result.participantCount = participantCount;
     }
     return _result;
   }
@@ -55,6 +65,89 @@ class CallState extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   $core.List<Participant> get participants => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $0.Timestamp get startedAt => $_getN(1);
+  @$pb.TagNumber(2)
+  set startedAt($0.Timestamp v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasStartedAt() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearStartedAt() => clearField(2);
+  @$pb.TagNumber(2)
+  $0.Timestamp ensureStartedAt() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  ParticipantCount get participantCount => $_getN(2);
+  @$pb.TagNumber(3)
+  set participantCount(ParticipantCount v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasParticipantCount() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearParticipantCount() => clearField(3);
+  @$pb.TagNumber(3)
+  ParticipantCount ensureParticipantCount() => $_ensure(2);
+}
+
+class ParticipantCount extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ParticipantCount', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'total', $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'anonymous', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false
+  ;
+
+  ParticipantCount._() : super();
+  factory ParticipantCount({
+    $core.int? total,
+    $core.int? anonymous,
+  }) {
+    final _result = create();
+    if (total != null) {
+      _result.total = total;
+    }
+    if (anonymous != null) {
+      _result.anonymous = anonymous;
+    }
+    return _result;
+  }
+  factory ParticipantCount.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ParticipantCount.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ParticipantCount clone() => ParticipantCount()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ParticipantCount copyWith(void Function(ParticipantCount) updates) => super.copyWith((message) => updates(message as ParticipantCount)) as ParticipantCount; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ParticipantCount create() => ParticipantCount._();
+  ParticipantCount createEmptyInstance() => create();
+  static $pb.PbList<ParticipantCount> createRepeated() => $pb.PbList<ParticipantCount>();
+  @$core.pragma('dart2js:noInline')
+  static ParticipantCount getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ParticipantCount>(create);
+  static ParticipantCount? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get total => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set total($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasTotal() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTotal() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get anonymous => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set anonymous($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasAnonymous() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearAnonymous() => clearField(2);
 }
 
 class Participant extends $pb.GeneratedMessage {
@@ -1016,27 +1109,32 @@ class Error extends $pb.GeneratedMessage {
 
 class ClientDetails extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ClientDetails', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'version', $pb.PbFieldType.O3)
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'os')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'browser')
+    ..aOM<Sdk>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sdk', subBuilder: Sdk.create)
+    ..aOM<OS>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'os', subBuilder: OS.create)
+    ..aOM<Browser>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'browser', subBuilder: Browser.create)
+    ..aOM<Device>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'device', subBuilder: Device.create)
     ..hasRequiredFields = false
   ;
 
   ClientDetails._() : super();
   factory ClientDetails({
-    $core.int? version,
-    $core.String? os,
-    $core.String? browser,
+    Sdk? sdk,
+    OS? os,
+    Browser? browser,
+    Device? device,
   }) {
     final _result = create();
-    if (version != null) {
-      _result.version = version;
+    if (sdk != null) {
+      _result.sdk = sdk;
     }
     if (os != null) {
       _result.os = os;
     }
     if (browser != null) {
       _result.browser = browser;
+    }
+    if (device != null) {
+      _result.device = device;
     }
     return _result;
   }
@@ -1062,30 +1160,408 @@ class ClientDetails extends $pb.GeneratedMessage {
   static ClientDetails? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.int get version => $_getIZ(0);
+  Sdk get sdk => $_getN(0);
   @$pb.TagNumber(1)
-  set version($core.int v) { $_setSignedInt32(0, v); }
+  set sdk(Sdk v) { setField(1, v); }
   @$pb.TagNumber(1)
-  $core.bool hasVersion() => $_has(0);
+  $core.bool hasSdk() => $_has(0);
   @$pb.TagNumber(1)
-  void clearVersion() => clearField(1);
+  void clearSdk() => clearField(1);
+  @$pb.TagNumber(1)
+  Sdk ensureSdk() => $_ensure(0);
 
   @$pb.TagNumber(2)
-  $core.String get os => $_getSZ(1);
+  OS get os => $_getN(1);
   @$pb.TagNumber(2)
-  set os($core.String v) { $_setString(1, v); }
+  set os(OS v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasOs() => $_has(1);
   @$pb.TagNumber(2)
   void clearOs() => clearField(2);
+  @$pb.TagNumber(2)
+  OS ensureOs() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  $core.String get browser => $_getSZ(2);
+  Browser get browser => $_getN(2);
   @$pb.TagNumber(3)
-  set browser($core.String v) { $_setString(2, v); }
+  set browser(Browser v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasBrowser() => $_has(2);
   @$pb.TagNumber(3)
   void clearBrowser() => clearField(3);
+  @$pb.TagNumber(3)
+  Browser ensureBrowser() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  Device get device => $_getN(3);
+  @$pb.TagNumber(4)
+  set device(Device v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasDevice() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearDevice() => clearField(4);
+  @$pb.TagNumber(4)
+  Device ensureDevice() => $_ensure(3);
+}
+
+class Sdk extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Sdk', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
+    ..e<SdkType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: SdkType.SDK_TYPE_UNSPECIFIED, valueOf: SdkType.valueOf, enumValues: SdkType.values)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'major')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'minor')
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'patch')
+    ..hasRequiredFields = false
+  ;
+
+  Sdk._() : super();
+  factory Sdk({
+    SdkType? type,
+    $core.String? major,
+    $core.String? minor,
+    $core.String? patch,
+  }) {
+    final _result = create();
+    if (type != null) {
+      _result.type = type;
+    }
+    if (major != null) {
+      _result.major = major;
+    }
+    if (minor != null) {
+      _result.minor = minor;
+    }
+    if (patch != null) {
+      _result.patch = patch;
+    }
+    return _result;
+  }
+  factory Sdk.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Sdk.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Sdk clone() => Sdk()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Sdk copyWith(void Function(Sdk) updates) => super.copyWith((message) => updates(message as Sdk)) as Sdk; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Sdk create() => Sdk._();
+  Sdk createEmptyInstance() => create();
+  static $pb.PbList<Sdk> createRepeated() => $pb.PbList<Sdk>();
+  @$core.pragma('dart2js:noInline')
+  static Sdk getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Sdk>(create);
+  static Sdk? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  SdkType get type => $_getN(0);
+  @$pb.TagNumber(1)
+  set type(SdkType v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearType() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get major => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set major($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasMajor() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMajor() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get minor => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set minor($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasMinor() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearMinor() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get patch => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set patch($core.String v) { $_setString(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasPatch() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearPatch() => clearField(4);
+}
+
+class OS extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'OS', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'version')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'architecture')
+    ..hasRequiredFields = false
+  ;
+
+  OS._() : super();
+  factory OS({
+    $core.String? name,
+    $core.String? version,
+    $core.String? architecture,
+  }) {
+    final _result = create();
+    if (name != null) {
+      _result.name = name;
+    }
+    if (version != null) {
+      _result.version = version;
+    }
+    if (architecture != null) {
+      _result.architecture = architecture;
+    }
+    return _result;
+  }
+  factory OS.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory OS.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  OS clone() => OS()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  OS copyWith(void Function(OS) updates) => super.copyWith((message) => updates(message as OS)) as OS; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static OS create() => OS._();
+  OS createEmptyInstance() => create();
+  static $pb.PbList<OS> createRepeated() => $pb.PbList<OS>();
+  @$core.pragma('dart2js:noInline')
+  static OS getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<OS>(create);
+  static OS? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get name => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set name($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasName() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearName() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get version => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set version($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasVersion() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearVersion() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get architecture => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set architecture($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasArchitecture() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearArchitecture() => clearField(3);
+}
+
+class Browser extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Browser', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'version')
+    ..hasRequiredFields = false
+  ;
+
+  Browser._() : super();
+  factory Browser({
+    $core.String? name,
+    $core.String? version,
+  }) {
+    final _result = create();
+    if (name != null) {
+      _result.name = name;
+    }
+    if (version != null) {
+      _result.version = version;
+    }
+    return _result;
+  }
+  factory Browser.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Browser.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Browser clone() => Browser()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Browser copyWith(void Function(Browser) updates) => super.copyWith((message) => updates(message as Browser)) as Browser; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Browser create() => Browser._();
+  Browser createEmptyInstance() => create();
+  static $pb.PbList<Browser> createRepeated() => $pb.PbList<Browser>();
+  @$core.pragma('dart2js:noInline')
+  static Browser getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Browser>(create);
+  static Browser? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get name => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set name($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasName() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearName() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get version => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set version($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasVersion() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearVersion() => clearField(2);
+}
+
+class Device extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Device', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'version')
+    ..hasRequiredFields = false
+  ;
+
+  Device._() : super();
+  factory Device({
+    $core.String? name,
+    $core.String? version,
+  }) {
+    final _result = create();
+    if (name != null) {
+      _result.name = name;
+    }
+    if (version != null) {
+      _result.version = version;
+    }
+    return _result;
+  }
+  factory Device.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Device.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Device clone() => Device()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Device copyWith(void Function(Device) updates) => super.copyWith((message) => updates(message as Device)) as Device; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Device create() => Device._();
+  Device createEmptyInstance() => create();
+  static $pb.PbList<Device> createRepeated() => $pb.PbList<Device>();
+  @$core.pragma('dart2js:noInline')
+  static Device getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Device>(create);
+  static Device? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get name => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set name($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasName() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearName() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get version => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set version($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasVersion() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearVersion() => clearField(2);
+}
+
+class CallGrants extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallGrants', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
+    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canPublishAudio')
+    ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canPublishVideo')
+    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'canScreenshare')
+    ..hasRequiredFields = false
+  ;
+
+  CallGrants._() : super();
+  factory CallGrants({
+    $core.bool? canPublishAudio,
+    $core.bool? canPublishVideo,
+    $core.bool? canScreenshare,
+  }) {
+    final _result = create();
+    if (canPublishAudio != null) {
+      _result.canPublishAudio = canPublishAudio;
+    }
+    if (canPublishVideo != null) {
+      _result.canPublishVideo = canPublishVideo;
+    }
+    if (canScreenshare != null) {
+      _result.canScreenshare = canScreenshare;
+    }
+    return _result;
+  }
+  factory CallGrants.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CallGrants.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CallGrants clone() => CallGrants()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CallGrants copyWith(void Function(CallGrants) updates) => super.copyWith((message) => updates(message as CallGrants)) as CallGrants; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CallGrants create() => CallGrants._();
+  CallGrants createEmptyInstance() => create();
+  static $pb.PbList<CallGrants> createRepeated() => $pb.PbList<CallGrants>();
+  @$core.pragma('dart2js:noInline')
+  static CallGrants getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallGrants>(create);
+  static CallGrants? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get canPublishAudio => $_getBF(0);
+  @$pb.TagNumber(1)
+  set canPublishAudio($core.bool v) { $_setBool(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCanPublishAudio() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCanPublishAudio() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get canPublishVideo => $_getBF(1);
+  @$pb.TagNumber(2)
+  set canPublishVideo($core.bool v) { $_setBool(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCanPublishVideo() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCanPublishVideo() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get canScreenshare => $_getBF(2);
+  @$pb.TagNumber(3)
+  set canScreenshare($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasCanScreenshare() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearCanScreenshare() => clearField(3);
 }
 

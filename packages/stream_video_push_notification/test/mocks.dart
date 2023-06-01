@@ -6,6 +6,8 @@ import 'package:stream_video_push_notification/src/call_notification_wrapper.dar
 
 class StreamVideoMock extends Mock implements StreamVideo {}
 
+class CoordinatorClientMock extends Mock implements CoordinatorClient {}
+
 class CallNotificationWrapperMock extends Mock
     implements CallNotificationWrapper {}
 

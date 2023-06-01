@@ -1,8 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide StreamUserAvatar;
+import 'package:stream_chat_flutter/stream_chat_flutter.dart'
+    hide StreamUserAvatar;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../../repos/app_repository.dart';
 import '../routes/routes.dart';
+import '../utils/consts.dart';
+import '../utils/loading_dialog.dart';
+import '../utils/providers.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,30 +24,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Call? call;
   Channel? chatChannel;
 
+  AppRepository? appRepo;
   final _callIdController = TextEditingController();
 
-  Future<Channel> _initChatChannel({required String channelId}) async {
-    final chatClient = StreamChat.of(context).client;
-
-    final currentUserId = chatClient.state.currentUser?.id;
-
-    final callMemberIDs = call?.state.value.callParticipants
-        .map((CallParticipantState participant) => participant.userId)
-        .where((id) => id != currentUserId)
-        .toList(growable: false);
-
-    /// TODO: check if can use "livestream" channel type here.
-    final channel = chatClient.channel(
-      'messaging',
-      id: channelId,
-      extraData: {
-        'name': '${call?.state.value.callCid} Chat',
-        'members': callMemberIDs,
-      },
-    );
-
-    await channel.watch();
-    return channel;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    appRepo = context.appRepo;
   }
 
   void _handleCallNavigation(CallConnectOptions options) {
@@ -55,23 +45,32 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _joinOrCreateCall() async {
     final callId = _callIdController.text;
     if (callId.isEmpty) return debugPrint('Call ID is empty');
-
+    unawaited(showLoadingIndicator(context));
     try {
-      final callCid = StreamCallCid.from(type: 'default', id: callId);
-      final data = await streamVideoClient.getOrCreateCall(cid: callCid);
-      call = Call.fromCreated(data: data.getDataOrNull()!.data);
-      chatChannel =  await _initChatChannel(channelId: call!.callCid.id);
+      call = streamVideoClient.makeCall(type: kCallType, id: callId);
+      await call?.getOrCreateCall();
+      chatChannel = await appRepo?.createChatChannel(
+        channelId: call!.callCid.id,
+      );
 
       if (mounted) {
+        unawaited(hideLoadingIndicator(context));
         await Navigator.of(context).pushNamed(
           Routes.lobby,
           arguments: [call, _handleCallNavigation],
         );
       }
     } catch (e, stk) {
+      unawaited(hideLoadingIndicator(context));
       debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());
     } finally {}
+  }
+
+  Future<void> _logout() async {
+    await appRepo?.endSession();
+    if (!mounted) return;
+    unawaited(Navigator.of(context).pushReplacementNamed(Routes.login));
   }
 
   @override
@@ -97,12 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await streamVideoClient.disconnectUser();
-              if (mounted) {
-                await Navigator.of(context).pushReplacementNamed(Routes.login);
-              }
-            },
+            onPressed: _logout,
           ),
         ],
       ),

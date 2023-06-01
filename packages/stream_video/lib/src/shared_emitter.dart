@@ -21,6 +21,8 @@ abstract class SharedEmitter<T> {
     void Function()? onDone,
     bool? cancelOnError,
   });
+
+  Stream<T> asStream();
 }
 
 abstract class MutableSharedEmitter<T> extends SharedEmitter<T> {
@@ -32,7 +34,8 @@ abstract class MutableSharedEmitter<T> extends SharedEmitter<T> {
 /// TODO
 class MutableSharedEmitterImpl<T> extends MutableSharedEmitter<T> {
   /// Creates a new instance.
-  MutableSharedEmitterImpl() : _shared = PublishSubject();
+  MutableSharedEmitterImpl({bool sync = false})
+      : _shared = PublishSubject(sync: sync);
 
   final PublishSubject<T> _shared;
 
@@ -83,4 +86,7 @@ class MutableSharedEmitterImpl<T> extends MutableSharedEmitter<T> {
       cancelOnError: cancelOnError,
     );
   }
+
+  @override
+  Stream<T> asStream() => _shared;
 }

@@ -29,7 +29,7 @@ class CallMemberRemovedEvent {
   /// the list of member IDs removed from the call
   List<String> members;
 
-  /// The type of event: \"call.member_added\" in this case
+  /// The type of event: \"call.member_removed\" in this case
   String type;
 
   @override
@@ -93,7 +93,7 @@ class CallMemberRemovedEvent {
     return null;
   }
 
-  static List<CallMemberRemovedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallMemberRemovedEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallMemberRemovedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -124,12 +124,10 @@ class CallMemberRemovedEvent {
   static Map<String, List<CallMemberRemovedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallMemberRemovedEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CallMemberRemovedEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CallMemberRemovedEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

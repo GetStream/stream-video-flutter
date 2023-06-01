@@ -4,13 +4,13 @@ import 'call_metadata.dart';
 
 class CallReaction with EquatableMixin {
   const CallReaction({
-    required this.reactionType,
+    required this.type,
     required this.user,
     this.emojiCode,
     this.custom = const {},
   });
 
-  final String reactionType;
+  final String type;
   final String? emojiCode;
   final CallUser user;
   final Map<String, Object>? custom;
@@ -19,5 +19,5 @@ class CallReaction with EquatableMixin {
   bool? get stringify => true;
 
   @override
-  List<Object?> get props => [reactionType, user, emojiCode, custom];
+  List<Object?> get props => [type, user, emojiCode, custom];
 }

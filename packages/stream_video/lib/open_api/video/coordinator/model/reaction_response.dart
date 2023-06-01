@@ -83,7 +83,7 @@ class ReactionResponse {
       }());
 
       return ReactionResponse(
-        custom: mapCastOfType<String, Object>(json, r'custom')!,
+        custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
         emojiCode: mapValueOfType<String>(json, r'emoji_code'),
         type: mapValueOfType<String>(json, r'type')!,
         user: UserResponse.fromJson(json[r'user'])!,
@@ -92,7 +92,7 @@ class ReactionResponse {
     return null;
   }
 
-  static List<ReactionResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ReactionResponse> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ReactionResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -123,12 +123,10 @@ class ReactionResponse {
   static Map<String, List<ReactionResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<ReactionResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = ReactionResponse.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = ReactionResponse.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -136,7 +134,6 @@ class ReactionResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'custom',
     'type',
     'user',
   };

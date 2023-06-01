@@ -204,9 +204,9 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                             children: [
                               if (cameraEnabled)
                                 VideoTrackRenderer(
-                                  videoTrack: _cameraTrack!,
                                   mirror: true,
                                   videoFit: VideoFit.cover,
+                                  videoTrack: _cameraTrack!,
                                   placeholderBuilder: placeHolderBuilder,
                                 )
                               else

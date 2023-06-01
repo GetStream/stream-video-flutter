@@ -2,9 +2,9 @@ import 'package:collection/collection.dart';
 
 import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../models/call_cid.dart';
-import '../../models/call_metadata.dart';
+import '../../models/call_created_data.dart';
 import '../../models/call_permission.dart';
-import '../../utils/standard.dart';
+import '../../models/call_settings.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_inputs.dart';
 import 'event/event_type.dart';
@@ -18,7 +18,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
   CoordinatorEvent? toCoordinatorEvent() {
     switch (type) {
       case EventType.connectionOk:
-        final event = this.connected!;
+        final event = connected!;
         return CoordinatorConnectedEvent(
           clientId: event.connectionId,
           userId: event.me.id,
@@ -30,109 +30,101 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           clientId: healthCheck.connectionId,
         );
       case EventType.callCreated:
-        final callCreated = this.callCreated!;
-        final call = callCreated.call;
-        final createdBy = call.createdBy.toCallUser();
-        final createdByMember = call.createdBy.toCallMember();
-
+        final event = callCreated!;
+        final call = event.call;
         return CoordinatorCallCreatedEvent(
-          callCid: StreamCallCid(cid: call.cid),
-          ringing: callCreated.ringing,
-          createdAt: callCreated.createdAt,
-          info: CallInfo(
-            cid: StreamCallCid(cid: call.cid),
-            createdBy: createdBy,
-            createdAt: call.createdAt,
-            updatedAt: call.updatedAt,
+          data: CallCreatedData(
+            callCid: StreamCallCid(cid: call.cid),
+            // TODO: Remove ringing property from call created event
+            ringing: false,
+            metadata: call.toCallMetadata(event.members),
           ),
-          details: CallDetails(
-            isBroadcastingEnabled: call.settings.broadcasting.enabled,
-            members: {
-              createdByMember.userId: createdByMember,
-              ...callCreated.members.toCallMembers(),
-            },
-            isRecordingEnabled: call.settings.recording.audioOnly,
-            ownCapabilities: call.ownCapabilities.map(
-              (it) => CallPermission.fromAlias(it.value),
-            ),
-            settings: call.settings.toCallSettings(),
-          ),
-          users: {
-            createdBy.id: createdBy,
-            ...callCreated.members.toCallUsers(),
-          },
+          createdAt: event.createdAt,
         );
       case EventType.callAccepted:
-        final callAccepted = this.callAccepted!;
-        final acceptedBy = callAccepted.user.toCallUser();
+        final event = callAccepted!;
+        final acceptedBy = event.user.toCallUser();
         return CoordinatorCallAcceptedEvent(
-          callCid: StreamCallCid(cid: callAccepted.callCid),
+          callCid: StreamCallCid(cid: event.callCid),
           acceptedBy: acceptedBy,
-          createdAt: callAccepted.createdAt,
-          users: {acceptedBy.id: acceptedBy},
+          createdAt: event.createdAt,
         );
       case EventType.callRejected:
-        final callRejected = this.callRejected!;
-        final rejectedBy = callRejected.user.toCallUser();
+        final event = callRejected!;
         return CoordinatorCallRejectedEvent(
-          callCid: StreamCallCid(cid: callRejected.callCid),
-          rejectedBy: rejectedBy,
-          createdAt: callRejected.createdAt,
-          users: {rejectedBy.id: rejectedBy},
+          callCid: StreamCallCid(cid: event.callCid),
+          rejectedBy: event.user.toCallUser(),
+          createdAt: event.createdAt,
         );
       case EventType.callUpdated:
-        final callUpdated = this.callUpdated!;
-        final call = callUpdated.call;
-        final createdBy = call.createdBy.toCallUser();
+        final event = callUpdated!;
         return CoordinatorCallUpdatedEvent(
-          callCid: StreamCallCid(cid: call.cid),
-          info: CallInfo(
-            cid: StreamCallCid(cid: call.cid),
-            createdBy: createdBy,
-            createdAt: call.createdAt,
-            updatedAt: call.updatedAt,
-          ),
-          details: CallDetails(
-            isBroadcastingEnabled: call.settings.broadcasting.enabled,
-            members: const {},
-            isRecordingEnabled: call.settings.recording.audioOnly,
-            ownCapabilities: call.ownCapabilities.map(
-              (it) => CallPermission.fromAlias(it.value),
-            ),
-            settings: call.settings.toCallSettings(),
-          ),
-          users: {createdBy.id: createdBy},
+          callCid: StreamCallCid(cid: event.call.cid),
+          capabilitiesByRole: Map.unmodifiable(event.capabilitiesByRole),
+          metadata: event.call.toCallMetadata(),
+          createdAt: event.createdAt,
         );
       case EventType.callEnded:
-        final callEnded = this.callEnded!;
-        final endedBy = callEnded.user?.toCallUser();
+        final event = callEnded!;
+        final endedBy = event.user?.toCallUser();
         return CoordinatorCallEndedEvent(
-          callCid: StreamCallCid(cid: callEnded.callCid),
+          callCid: StreamCallCid(cid: event.callCid),
           endedBy: endedBy,
-          createdAt: callEnded.createdAt,
-          users: {
-            ...?endedBy?.let((it) => {it.id: it})
-          },
+          createdAt: event.createdAt,
+        );
+      case EventType.callSessionStarted:
+        final event = callSessionStarted!;
+
+        return CoordinatorCallSessionStartedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          sessionId: event.sessionId,
+          metadata: event.call.toCallMetadata(),
+        );
+      case EventType.callSessionEnded:
+        final event = callSessionEnded!;
+
+        return CoordinatorCallSessionEndedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          sessionId: event.sessionId,
+          metadata: event.call.toCallMetadata(),
+        );
+      case EventType.callSessionParticipantJoined:
+        final event = callSessionParticipantJoined!;
+
+        return CoordinatorCallSessionParticipantJoinedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          sessionId: event.sessionId,
+          user: event.user.toCallUser(),
+        );
+      case EventType.callSessionParticipantLeft:
+        final event = callSessionParticipantLeft!;
+
+        return CoordinatorCallSessionParticipantLeftEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          sessionId: event.sessionId,
+          user: event.user.toCallUser(),
         );
       case EventType.callPermissionRequest:
-        final callPermissionRequest = this.callPermissionRequest!;
-
+        final event = callPermissionRequest!;
         return CoordinatorCallPermissionRequestEvent(
-          callCid: StreamCallCid(cid: callPermissionRequest.callCid),
-          createdAt: callPermissionRequest.createdAt,
-          permissions: callPermissionRequest.permissions,
-          user: callPermissionRequest.user.toCallUser(),
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          permissions: event.permissions,
+          user: event.user.toCallUser(),
         );
       case EventType.callPermissionsUpdated:
-        final callPermissionsUpdated = this.callPermissionsUpdated!;
-
+        final event = callPermissionsUpdated!;
         return CoordinatorCallPermissionsUpdatedEvent(
-          callCid: StreamCallCid(cid: callPermissionsUpdated.callCid),
-          createdAt: callPermissionsUpdated.createdAt,
-          ownCapabilities: callPermissionsUpdated.ownCapabilities.map(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          ownCapabilities: event.ownCapabilities.map(
             (it) => CallPermission.fromAlias(it.value),
           ),
-          user: callPermissionsUpdated.user.toCallUser(),
+          user: event.user.toCallUser(),
         );
       case EventType.callRecordingStarted:
         final event = callRecordingStarted!;
@@ -162,6 +154,26 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
         );
+      case EventType.callLiveStarted:
+        final event = callLiveStarted;
+        // TODO: Handle this case.
+        break;
+      case EventType.callMemberAdded:
+        final event = callMemberAdded;
+        // TODO: Handle this case.
+        break;
+      case EventType.callMemberRemoved:
+        final event = callMemberRemoved;
+        // TODO: Handle this case.
+        break;
+      case EventType.callMemberUpdated:
+        final event = callMemberUpdated;
+        // TODO: Handle this case.
+        break;
+      case EventType.callMemberUpdatedPermission:
+        final event = callMemberUpdatedPermission;
+        // TODO: Handle this case.
+        break;
       case EventType.callUserBlocked:
         final event = callUserBlocked!;
 
@@ -202,6 +214,22 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         );
       case EventType.unknown:
         return const CoordinatorUnknownEvent();
+      case EventType.callNotification:
+        // TODO: Handle call notification
+        break;
+      case EventType.callRingEvent:
+        final event = callCreated!;
+        final call = event.call;
+        // TODO: Convert this to ring event at some point
+        return CoordinatorCallCreatedEvent(
+          data: CallCreatedData(
+            callCid: StreamCallCid(cid: call.cid),
+            ringing: false,
+            metadata: call.toCallMetadata(event.members),
+          ),
+          createdAt: event.createdAt,
+        );
+        break;
     }
   }
 }
@@ -250,15 +278,38 @@ extension SortListExt on Iterable<SortInput> {
 extension CallSettingsInputExt on CallSettingsInput {
   open.CallSettingsRequest toOpenDto() {
     return open.CallSettingsRequest(
+      ring: ring?.toOpenDto(),
+      audio: audio?.toOpenDto(),
       video: video?.toOpenDto(),
-      screensharing: screensharing?.toOpenDto(),
+      screensharing: screenShare?.toOpenDto(),
       recording: recording?.toOpenDto(),
+      transcription: transcription?.toOpenDto(),
+      backstage: backstage?.toOpenDto(),
       geofencing: geofencing?.toOpenDto(),
     );
   }
 }
 
-extension on VideoSettingsInput {
+extension on RingSettings {
+  open.RingSettingsRequest toOpenDto() {
+    return open.RingSettingsRequest(
+      autoCancelTimeoutMs: autoCancelTimeout.inMilliseconds,
+      incomingCallTimeoutMs: autoRejectTimeout.inMilliseconds,
+    );
+  }
+}
+
+extension on AudioSettings {
+  open.AudioSettingsRequest toOpenDto() {
+    return open.AudioSettingsRequest(
+      accessRequestEnabled: accessRequestEnabled,
+      opusDtxEnabled: opusDtxEnabled,
+      redundantCodingEnabled: redundantCodingEnabled,
+    );
+  }
+}
+
+extension on VideoSettings {
   open.VideoSettingsRequest toOpenDto() {
     return open.VideoSettingsRequest(
       enabled: enabled,
@@ -267,7 +318,7 @@ extension on VideoSettingsInput {
   }
 }
 
-extension on ScreensharingSettingsInput {
+extension on ScreenShareSettings {
   open.ScreensharingSettingsRequest toOpenDto() {
     return open.ScreensharingSettingsRequest(
       enabled: enabled,
@@ -276,25 +327,82 @@ extension on ScreensharingSettingsInput {
   }
 }
 
-extension on RecordSettingsInput {
+extension on RecordingSettings {
   open.RecordSettingsRequest toOpenDto() {
-    // TODO
     return open.RecordSettingsRequest(
       audioOnly: audioOnly,
-      mode: open.RecordSettingsRequestModeEnum.values.firstWhereOrNull(
-        (it) => it.value == mode,
-      ),
-      quality: open.RecordSettingsRequestQualityEnum.values.firstWhereOrNull(
-        (it) => it.value == quality,
-      ),
+      mode: mode.toOpenDto(),
+      quality: quality.toOpenDto(),
     );
   }
 }
 
-extension on GeofenceSettingsInput {
+extension on TranscriptionSettings {
+  open.TranscriptionSettingsRequest toOpenDto() {
+    return open.TranscriptionSettingsRequest(
+      closedCaptionMode: closedCaptionMode,
+      mode: mode.toOpenDto(),
+    );
+  }
+}
+
+extension on BackstageSettings {
+  open.BackstageSettingsRequest toOpenDto() {
+    return open.BackstageSettingsRequest(
+      enabled: enabled,
+    );
+  }
+}
+
+extension on GeofencingSettings {
   open.GeofenceSettingsRequest toOpenDto() {
     return open.GeofenceSettingsRequest(
       names: names,
     );
+  }
+}
+
+extension on RecordSettingsMode {
+  open.RecordSettingsRequestModeEnum toOpenDto() {
+    switch (this) {
+      case RecordSettingsMode.available:
+        return open.RecordSettingsRequestModeEnum.available;
+      case RecordSettingsMode.disabled:
+        return open.RecordSettingsRequestModeEnum.disabled;
+      case RecordSettingsMode.autoOn:
+        return open.RecordSettingsRequestModeEnum.autoOn;
+    }
+  }
+}
+
+extension on RecordSettingsQuality {
+  open.RecordSettingsRequestQualityEnum toOpenDto() {
+    switch (this) {
+      case RecordSettingsQuality.audioOnly:
+        return open.RecordSettingsRequestQualityEnum.audioOnly;
+      case RecordSettingsQuality.n360p:
+        return open.RecordSettingsRequestQualityEnum.n360p;
+      case RecordSettingsQuality.n480p:
+        return open.RecordSettingsRequestQualityEnum.n480p;
+      case RecordSettingsQuality.n720p:
+        return open.RecordSettingsRequestQualityEnum.n720p;
+      case RecordSettingsQuality.n1080p:
+        return open.RecordSettingsRequestQualityEnum.n1080p;
+      case RecordSettingsQuality.n1440p:
+        return open.RecordSettingsRequestQualityEnum.n1440p;
+    }
+  }
+}
+
+extension on TranscriptionSettingsMode {
+  open.TranscriptionSettingsRequestModeEnum toOpenDto() {
+    switch (this) {
+      case TranscriptionSettingsMode.available:
+        return open.TranscriptionSettingsRequestModeEnum.available;
+      case TranscriptionSettingsMode.disabled:
+        return open.TranscriptionSettingsRequestModeEnum.disabled;
+      case TranscriptionSettingsMode.autoOn:
+        return open.TranscriptionSettingsRequestModeEnum.autoOn;
+    }
   }
 }

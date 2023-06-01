@@ -16,6 +16,68 @@ class VideoCallsApi {
 
   final ApiClient apiClient;
 
+  /// Accept Call
+  ///
+  ///   Sends events: - call.accepted  Required permissions: - JoinCall 
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  Future<Response> acceptCallWithHttpInfo(String type, String id,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/call/{type}/{id}/accept'
+      .replaceAll('{type}', type)
+      .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Accept Call
+  ///
+  ///   Sends events: - call.accepted  Required permissions: - JoinCall 
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  Future<AcceptCallResponse?> acceptCall(String type, String id,) async {
+    final response = await acceptCallWithHttpInfo(type, id,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'AcceptCallResponse',) as AcceptCallResponse;
+    
+    }
+    return null;
+  }
+
   /// End call
   ///
   ///   Sends events: - call.ended  Required permissions: - EndCall 
@@ -91,7 +153,13 @@ class VideoCallsApi {
   /// * [String] id (required):
   ///
   /// * [String] connectionId:
-  Future<Response> getCallWithHttpInfo(String type, String id, { String? connectionId, }) async {
+  ///
+  /// * [int] membersLimit:
+  ///
+  /// * [bool] ring:
+  ///
+  /// * [bool] notify:
+  Future<Response> getCallWithHttpInfo(String type, String id, { String? connectionId, int? membersLimit, bool? ring, bool? notify, }) async {
     // ignore: prefer_const_declarations
     final path = r'/call/{type}/{id}'
       .replaceAll('{type}', type)
@@ -106,6 +174,15 @@ class VideoCallsApi {
 
     if (connectionId != null) {
       queryParams.addAll(_queryParams('', 'connection_id', connectionId));
+    }
+    if (membersLimit != null) {
+      queryParams.addAll(_queryParams('', 'members_limit', membersLimit));
+    }
+    if (ring != null) {
+      queryParams.addAll(_queryParams('', 'ring', ring));
+    }
+    if (notify != null) {
+      queryParams.addAll(_queryParams('', 'notify', notify));
     }
 
     const contentTypes = <String>[];
@@ -133,8 +210,14 @@ class VideoCallsApi {
   /// * [String] id (required):
   ///
   /// * [String] connectionId:
-  Future<GetCallResponse?> getCall(String type, String id, { String? connectionId, }) async {
-    final response = await getCallWithHttpInfo(type, id,  connectionId: connectionId, );
+  ///
+  /// * [int] membersLimit:
+  ///
+  /// * [bool] ring:
+  ///
+  /// * [bool] notify:
+  Future<GetCallResponse?> getCall(String type, String id, { String? connectionId, int? membersLimit, bool? ring, bool? notify, }) async {
+    final response = await getCallWithHttpInfo(type, id,  connectionId: connectionId, membersLimit: membersLimit, ring: ring, notify: notify, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -143,72 +226,6 @@ class VideoCallsApi {
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'GetCallResponse',) as GetCallResponse;
-    
-    }
-    return null;
-  }
-
-  /// Get Call Edge Server
-  ///
-  /// Retrieve the edge server information and credentials for a call.  Required permissions: - JoinCall 
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [GetCallEdgeServerRequest] getCallEdgeServerRequest (required):
-  Future<Response> getCallEdgeServerWithHttpInfo(String type, String id, GetCallEdgeServerRequest getCallEdgeServerRequest,) async {
-    // ignore: prefer_const_declarations
-    final path = r'/call/{type}/{id}/get_edge_server'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
-
-    // ignore: prefer_final_locals
-    Object? postBody = getCallEdgeServerRequest;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>['application/json'];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'POST',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Get Call Edge Server
-  ///
-  /// Retrieve the edge server information and credentials for a call.  Required permissions: - JoinCall 
-  ///
-  /// Parameters:
-  ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  ///
-  /// * [GetCallEdgeServerRequest] getCallEdgeServerRequest (required):
-  Future<GetCallEdgeServerResponse?> getCallEdgeServer(String type, String id, GetCallEdgeServerRequest getCallEdgeServerRequest,) async {
-    final response = await getCallEdgeServerWithHttpInfo(type, id, getCallEdgeServerRequest,);
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'GetCallEdgeServerResponse',) as GetCallEdgeServerResponse;
     
     }
     return null;
@@ -264,7 +281,7 @@ class VideoCallsApi {
 
   /// Get or create a call
   ///
-  /// Gets or creates a new call  Sends events: - call.created  Required permissions: - CreateCall - ReadCall - UpdateCallSettings 
+  /// Gets or creates a new call  Sends events: - call.created - call.notification - call.ring  Required permissions: - CreateCall - ReadCall - UpdateCallSettings 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -310,7 +327,7 @@ class VideoCallsApi {
 
   /// Get or create a call
   ///
-  /// Gets or creates a new call  Sends events: - call.created  Required permissions: - CreateCall - ReadCall - UpdateCallSettings 
+  /// Gets or creates a new call  Sends events: - call.created - call.notification - call.ring  Required permissions: - CreateCall - ReadCall - UpdateCallSettings 
   ///
   /// Parameters:
   ///
@@ -338,7 +355,7 @@ class VideoCallsApi {
 
   /// Set call as live
   ///
-  ///   Sends events: - call.updated  Required permissions: - UpdateCall 
+  ///   Sends events: - call.live_started  Required permissions: - UpdateCall 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -376,7 +393,7 @@ class VideoCallsApi {
 
   /// Set call as live
   ///
-  ///   Sends events: - call.updated  Required permissions: - UpdateCall 
+  ///   Sends events: - call.live_started  Required permissions: - UpdateCall 
   ///
   /// Parameters:
   ///
@@ -587,6 +604,68 @@ class VideoCallsApi {
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
       return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'QueryMembersResponse',) as QueryMembersResponse;
+    
+    }
+    return null;
+  }
+
+  /// Reject Call
+  ///
+  ///   Sends events: - call.rejected  Required permissions: - JoinCall 
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  Future<Response> rejectCallWithHttpInfo(String type, String id,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/call/{type}/{id}/reject'
+      .replaceAll('{type}', type)
+      .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Reject Call
+  ///
+  ///   Sends events: - call.rejected  Required permissions: - JoinCall 
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  Future<RejectCallResponse?> rejectCall(String type, String id,) async {
+    final response = await rejectCallWithHttpInfo(type, id,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'RejectCallResponse',) as RejectCallResponse;
     
     }
     return null;
@@ -854,7 +933,7 @@ class VideoCallsApi {
 
   /// Update Call Member
   ///
-  ///   Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
+  ///   Sends events: - call.member_added - call.member_removed - call.member_updated  Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -894,7 +973,7 @@ class VideoCallsApi {
 
   /// Update Call Member
   ///
-  ///   Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
+  ///   Sends events: - call.member_added - call.member_removed - call.member_updated  Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
   ///
   /// Parameters:
   ///

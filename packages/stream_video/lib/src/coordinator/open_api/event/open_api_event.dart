@@ -18,6 +18,10 @@ class OpenApiEvent with EquatableMixin {
     this.callRejected,
     this.callUpdated,
     this.callEnded,
+    this.callSessionStarted,
+    this.callSessionEnded,
+    this.callSessionParticipantJoined,
+    this.callSessionParticipantLeft,
     this.callPermissionRequest,
     this.callPermissionsUpdated,
     this.callUserBlocked,
@@ -26,6 +30,11 @@ class OpenApiEvent with EquatableMixin {
     this.callRecordingStopped,
     this.callBroadcastingStarted,
     this.callBroadcastingStopped,
+    this.callLiveStarted,
+    this.callMemberAdded,
+    this.callMemberRemoved,
+    this.callMemberUpdated,
+    this.callMemberUpdatedPermission,
     this.callReaction,
     this.custom,
     this.unknown,
@@ -65,6 +74,18 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callEnded:
         final event = open.CallEndedEvent.fromJson(jsonObj);
         return result.copyWith(callEnded: event);
+      case EventType.callSessionStarted:
+        final event = open.CallSessionStartedEvent.fromJson(jsonObj);
+        return result.copyWith(callSessionStarted: event);
+      case EventType.callSessionEnded:
+        final event = open.CallSessionEndedEvent.fromJson(jsonObj);
+        return result.copyWith(callSessionEnded: event);
+      case EventType.callSessionParticipantJoined:
+        final event = open.CallSessionParticipantJoinedEvent.fromJson(jsonObj);
+        return result.copyWith(callSessionParticipantJoined: event);
+      case EventType.callSessionParticipantLeft:
+        final event = open.CallSessionParticipantLeftEvent.fromJson(jsonObj);
+        return result.copyWith(callSessionParticipantLeft: event);
       case EventType.callPermissionRequest:
         final event = open.PermissionRequestEvent.fromJson(jsonObj);
         return result.copyWith(callPermissionRequest: event);
@@ -89,6 +110,21 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callBroadcastingStopped:
         final event = open.CallBroadcastingStoppedEvent.fromJson(jsonObj);
         return result.copyWith(callBroadcastingStopped: event);
+      case EventType.callLiveStarted:
+        final event = open.CallLiveStartedEvent.fromJson(jsonObj);
+        return result.copyWith(callLiveStarted: event);
+      case EventType.callMemberAdded:
+        final event = open.CallMemberAddedEvent.fromJson(jsonObj);
+        return result.copyWith(callMemberAdded: event);
+      case EventType.callMemberRemoved:
+        final event = open.CallMemberRemovedEvent.fromJson(jsonObj);
+        return result.copyWith(callMemberRemoved: event);
+      case EventType.callMemberUpdated:
+        final event = open.CallMemberUpdatedEvent.fromJson(jsonObj);
+        return result.copyWith(callMemberUpdated: event);
+      case EventType.callMemberUpdatedPermission:
+        final event = open.CallMemberUpdatedPermissionEvent.fromJson(jsonObj);
+        return result.copyWith(callMemberUpdatedPermission: event);
       case EventType.callReaction:
         final event = open.CallReactionEvent.fromJson(jsonObj);
         return result.copyWith(callReaction: event);
@@ -96,13 +132,8 @@ class OpenApiEvent with EquatableMixin {
         final event = open.CustomVideoEvent.fromJson(jsonObj);
         return result.copyWith(custom: event);
       case EventType.unknown:
-        try {
-          final event = open.VideoEvent.fromJson(jsonObj);
-          return result.copyWith(unknown: event);
-        } catch (e, stk) {
-          streamLog.e(_tag, () => '[fromJson] failed: $e; $stk');
-          return result;
-        }
+        streamLog.e(_tag, () => '[fromJson] unexpected event: $jsonObj');
+        return result.copyWith(unknown: jsonObj);
     }
   }
 
@@ -114,6 +145,10 @@ class OpenApiEvent with EquatableMixin {
   final open.CallRejectedEvent? callRejected;
   final open.CallUpdatedEvent? callUpdated;
   final open.CallEndedEvent? callEnded;
+  final open.CallSessionStartedEvent? callSessionStarted;
+  final open.CallSessionEndedEvent? callSessionEnded;
+  final open.CallSessionParticipantJoinedEvent? callSessionParticipantJoined;
+  final open.CallSessionParticipantLeftEvent? callSessionParticipantLeft;
   final open.PermissionRequestEvent? callPermissionRequest;
   final open.UpdatedCallPermissionsEvent? callPermissionsUpdated;
   final open.BlockedUserEvent? callUserBlocked;
@@ -122,9 +157,14 @@ class OpenApiEvent with EquatableMixin {
   final open.CallRecordingStoppedEvent? callRecordingStopped;
   final open.CallBroadcastingStartedEvent? callBroadcastingStarted;
   final open.CallBroadcastingStoppedEvent? callBroadcastingStopped;
+  final open.CallLiveStartedEvent? callLiveStarted;
+  final open.CallMemberAddedEvent? callMemberAdded;
+  final open.CallMemberRemovedEvent? callMemberRemoved;
+  final open.CallMemberUpdatedEvent? callMemberUpdated;
+  final open.CallMemberUpdatedPermissionEvent? callMemberUpdatedPermission;
   final open.CallReactionEvent? callReaction;
   final open.CustomVideoEvent? custom;
-  final open.VideoEvent? unknown;
+  final Object? unknown;
 
   OpenApiEvent copyWith({
     EventType? type,
@@ -135,6 +175,10 @@ class OpenApiEvent with EquatableMixin {
     open.CallRejectedEvent? callRejected,
     open.CallUpdatedEvent? callUpdated,
     open.CallEndedEvent? callEnded,
+    open.CallSessionStartedEvent? callSessionStarted,
+    open.CallSessionEndedEvent? callSessionEnded,
+    open.CallSessionParticipantJoinedEvent? callSessionParticipantJoined,
+    open.CallSessionParticipantLeftEvent? callSessionParticipantLeft,
     open.PermissionRequestEvent? callPermissionRequest,
     open.UpdatedCallPermissionsEvent? callPermissionsUpdated,
     open.BlockedUserEvent? callUserBlocked,
@@ -143,9 +187,14 @@ class OpenApiEvent with EquatableMixin {
     open.CallRecordingStoppedEvent? callRecordingStopped,
     open.CallBroadcastingStartedEvent? callBroadcastingStarted,
     open.CallBroadcastingStoppedEvent? callBroadcastingStopped,
+    open.CallLiveStartedEvent? callLiveStarted,
+    open.CallMemberAddedEvent? callMemberAdded,
+    open.CallMemberRemovedEvent? callMemberRemoved,
+    open.CallMemberUpdatedEvent? callMemberUpdated,
+    open.CallMemberUpdatedPermissionEvent? callMemberUpdatedPermission,
     open.CallReactionEvent? callReaction,
     open.CustomVideoEvent? custom,
-    open.VideoEvent? unknown,
+    Object? unknown,
   }) {
     return OpenApiEvent(
       type: type ?? this.type,
@@ -156,6 +205,12 @@ class OpenApiEvent with EquatableMixin {
       callRejected: callRejected ?? this.callRejected,
       callUpdated: callUpdated ?? this.callUpdated,
       callEnded: callEnded ?? this.callEnded,
+      callSessionStarted: callSessionStarted ?? this.callSessionStarted,
+      callSessionEnded: callSessionEnded ?? this.callSessionEnded,
+      callSessionParticipantJoined:
+          callSessionParticipantJoined ?? this.callSessionParticipantJoined,
+      callSessionParticipantLeft:
+          callSessionParticipantLeft ?? this.callSessionParticipantLeft,
       callPermissionRequest:
           callPermissionRequest ?? this.callPermissionRequest,
       callPermissionsUpdated:
@@ -168,6 +223,12 @@ class OpenApiEvent with EquatableMixin {
           callBroadcastingStarted ?? this.callBroadcastingStarted,
       callBroadcastingStopped:
           callBroadcastingStopped ?? this.callBroadcastingStopped,
+      callLiveStarted: callLiveStarted ?? this.callLiveStarted,
+      callMemberAdded: callMemberAdded ?? this.callMemberAdded,
+      callMemberRemoved: callMemberRemoved ?? this.callMemberRemoved,
+      callMemberUpdated: callMemberUpdated ?? this.callMemberUpdated,
+      callMemberUpdatedPermission:
+          callMemberUpdatedPermission ?? this.callMemberUpdatedPermission,
       callReaction: callReaction ?? this.callReaction,
       custom: custom ?? this.custom,
       unknown: unknown ?? this.unknown,
@@ -187,6 +248,10 @@ class OpenApiEvent with EquatableMixin {
         callRejected,
         callUpdated,
         callEnded,
+        callSessionStarted,
+        callSessionEnded,
+        callSessionParticipantJoined,
+        callSessionParticipantLeft,
         callPermissionRequest,
         callPermissionsUpdated,
         callUserBlocked,
@@ -195,6 +260,11 @@ class OpenApiEvent with EquatableMixin {
         callRecordingStopped,
         callBroadcastingStarted,
         callBroadcastingStopped,
+        callLiveStarted,
+        callMemberAdded,
+        callMemberRemoved,
+        callMemberUpdated,
+        callMemberUpdatedPermission,
         callReaction,
         custom,
         unknown,

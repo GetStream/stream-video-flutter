@@ -13,7 +13,7 @@ part of openapi.api;
 class WSCallEvent {
   /// Returns a new [WSCallEvent] instance.
   WSCallEvent({
-    this.callId,
+    this.callCid,
   });
 
   ///
@@ -22,26 +22,26 @@ class WSCallEvent {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  String? callId;
+  String? callCid;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is WSCallEvent &&
-     other.callId == callId;
+     other.callCid == callCid;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (callId == null ? 0 : callId!.hashCode);
+    (callCid == null ? 0 : callCid!.hashCode);
 
   @override
-  String toString() => 'WSCallEvent[callId=$callId]';
+  String toString() => 'WSCallEvent[callCid=$callCid]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.callId != null) {
-      json[r'call_id'] = this.callId;
+    if (this.callCid != null) {
+      json[r'call_cid'] = this.callCid;
     } else {
-      json[r'call_id'] = null;
+      json[r'call_cid'] = null;
     }
     return json;
   }
@@ -65,13 +65,13 @@ class WSCallEvent {
       }());
 
       return WSCallEvent(
-        callId: mapValueOfType<String>(json, r'call_id'),
+        callCid: mapValueOfType<String>(json, r'call_cid'),
       );
     }
     return null;
   }
 
-  static List<WSCallEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<WSCallEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <WSCallEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -102,12 +102,10 @@ class WSCallEvent {
   static Map<String, List<WSCallEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<WSCallEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = WSCallEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = WSCallEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

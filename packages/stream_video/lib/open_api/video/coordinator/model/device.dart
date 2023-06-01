@@ -19,7 +19,7 @@ class Device {
     required this.id,
     required this.pushProvider,
     this.pushProviderName,
-    required this.userId,
+    this.voip,
   });
 
   /// Date/time of creation
@@ -55,7 +55,14 @@ class Device {
   ///
   String? pushProviderName;
 
-  String userId;
+  /// When true the token is for Apple VoIP push notifications
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? voip;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is Device &&
@@ -65,7 +72,7 @@ class Device {
      other.id == id &&
      other.pushProvider == pushProvider &&
      other.pushProviderName == pushProviderName &&
-     other.userId == userId;
+     other.voip == voip;
 
   @override
   int get hashCode =>
@@ -76,10 +83,10 @@ class Device {
     (id.hashCode) +
     (pushProvider.hashCode) +
     (pushProviderName == null ? 0 : pushProviderName!.hashCode) +
-    (userId.hashCode);
+    (voip == null ? 0 : voip!.hashCode);
 
   @override
-  String toString() => 'Device[createdAt=$createdAt, disabled=$disabled, disabledReason=$disabledReason, id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, userId=$userId]';
+  String toString() => 'Device[createdAt=$createdAt, disabled=$disabled, disabledReason=$disabledReason, id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, voip=$voip]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -101,7 +108,11 @@ class Device {
     } else {
       json[r'push_provider_name'] = null;
     }
-      json[r'user_id'] = this.userId;
+    if (this.voip != null) {
+      json[r'voip'] = this.voip;
+    } else {
+      json[r'voip'] = null;
+    }
     return json;
   }
 
@@ -130,13 +141,13 @@ class Device {
         id: mapValueOfType<String>(json, r'id')!,
         pushProvider: mapValueOfType<String>(json, r'push_provider')!,
         pushProviderName: mapValueOfType<String>(json, r'push_provider_name'),
-        userId: mapValueOfType<String>(json, r'user_id')!,
+        voip: mapValueOfType<bool>(json, r'voip'),
       );
     }
     return null;
   }
 
-  static List<Device>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<Device> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <Device>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -167,12 +178,10 @@ class Device {
   static Map<String, List<Device>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<Device>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = Device.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = Device.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -183,7 +192,6 @@ class Device {
     'created_at',
     'id',
     'push_provider',
-    'user_id',
   };
 }
 

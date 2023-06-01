@@ -1,13 +1,13 @@
 import 'package:meta/meta.dart';
 
-import '../policy/rule/sdp_munging_rule.dart';
 import '../sdp.dart';
 
 @internal
 abstract class SdpEditor {
-  void upsert(SdpMungingRule rule);
 
-  void removeWhereType<T extends SdpMungingRule>();
+  set opusDtxEnabled(bool value);
+
+  set opusRedEnabled(bool value);
 
   String? edit(Sdp? sdp);
 }

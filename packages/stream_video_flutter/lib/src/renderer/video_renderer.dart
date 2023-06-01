@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../stream_video_flutter.dart';
-import '../widgets/size_change_listener.dart';
 
 /// A builder for the widget that is displayed when there's no video stream.
 Widget _defaultPlaceholderBuilder(BuildContext context) => Container();
@@ -16,6 +16,8 @@ class StreamVideoRenderer extends StatelessWidget {
     required this.participant,
     required this.videoTrackType,
     this.placeholderBuilder = _defaultPlaceholderBuilder,
+    this.videoFit = VideoFit.cover,
+    this.onSizeChanged,
   });
 
   /// Represents a call.
@@ -30,58 +32,118 @@ class StreamVideoRenderer extends StatelessWidget {
   /// A builder for the placeholder.
   final WidgetBuilder placeholderBuilder;
 
+  /// The scale type to use for the video renderer.
+  final VideoFit videoFit;
+
+  /// Called when the size of the widget changes.
+  final ValueSetter<Size>? onSizeChanged;
+
   @override
   Widget build(BuildContext context) {
     final trackState = participant.publishedTracks[videoTrackType];
 
-    // The video track hasn't been published yet.
-    if (trackState == null) {
-      return placeholderBuilder.call(context);
-    }
-    // The video track is local and shouldn't send size notifications..
-    if (trackState is! RemoteTrackState) {
-      return _buildVideoTrackRenderer(context, trackState);
-    }
-
     final Widget child;
-    if (trackState.received) {
+    if (trackState == null) {
+      // The video track hasn't been published or subscribed yet.
+      child = placeholderBuilder.call(context);
+    } else if (trackState is! RemoteTrackState) {
+      // The video track is local and is already published.
+      child = _buildVideoTrackRenderer(context, trackState);
+    } else if (trackState.subscribed && trackState.received) {
+      // The video track is remote and has been received.
       child = _buildVideoTrackRenderer(context, trackState);
     } else {
+      // The video track is remote and hasn't been received yet.
       child = placeholderBuilder.call(context);
     }
-    return SizeChangeListener(
-      onSizeChanged: (size) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          call.apply(
-            UpdateSubscription(
-              userId: participant.userId,
-              sessionId: participant.sessionId,
-              trackIdPrefix: participant.trackIdPrefix,
-              trackType: videoTrackType,
-              videoDimension: RtcVideoDimension(
-                width: size.width.toInt(),
-                height: size.height.toInt(),
-              ),
-            ),
-          );
-        });
-      },
+
+    return VisibilityDetector(
+      key: Key(participant.sessionId),
+      onVisibilityChanged: _onVisibilityChanged,
       child: child,
     );
   }
 
   Widget _buildVideoTrackRenderer(BuildContext context, TrackState trackState) {
+    // If the track is muted, display the placeholder.
     if (trackState.muted) return placeholderBuilder.call(context);
 
     final videoTrack = call.getTrack(
       participant.trackIdPrefix,
       videoTrackType,
-    )!;
+    );
+
+    // If the track is not available, display the placeholder.
+    if (videoTrack == null) return placeholderBuilder.call(context);
+
     return VideoTrackRenderer(
+      videoFit: videoFit,
       videoTrack: videoTrack,
       mirror: participant.isLocal,
       placeholderBuilder: placeholderBuilder,
     );
+  }
+
+  void _onVisibilityChanged(VisibilityInfo info) {
+    final fraction = info.visibleFraction;
+
+    final prevVisibility = participant.viewportVisibility;
+    final visibility = ViewportVisibility.fromVisibleFraction(fraction);
+
+    // Update the viewport visibility of the participant.
+    if (prevVisibility != visibility) {
+      call.updateViewportVisibility(
+        sessionId: participant.sessionId,
+        visibility: visibility,
+      );
+    }
+
+    var size = info.size;
+    if (visibility != ViewportVisibility.visible) {
+      // If the visibility is not visible, set the size to zero.
+      size = Size.zero;
+    }
+
+    return _onSizeChanged(size);
+  }
+
+  void _onSizeChanged(Size size) {
+    // Notify the listener.
+    if (onSizeChanged != null) {
+      onSizeChanged!.call(size);
+    }
+
+    // We only care about remote tracks.
+    final trackState = participant.publishedTracks[videoTrackType];
+    if (trackState is! RemoteTrackState) return;
+
+    final prevDim = trackState.videoDimension;
+    final newDim = RtcVideoDimension(
+      width: size.width.toInt(),
+      height: size.height.toInt(),
+    );
+
+    // If the dimension hasn't changed, don't update the subscription.
+    if (prevDim == newDim) return;
+
+    if (newDim.isEmpty) {
+      // Remove the video subscription of the track.
+      call.removeSubscription(
+        userId: participant.userId,
+        sessionId: participant.sessionId,
+        trackIdPrefix: participant.trackIdPrefix,
+        trackType: videoTrackType,
+      );
+    } else {
+      // Update the video subscription of the track.
+      call.updateSubscription(
+        userId: participant.userId,
+        sessionId: participant.sessionId,
+        trackIdPrefix: participant.trackIdPrefix,
+        trackType: videoTrackType,
+        videoDimension: newDim,
+      );
+    }
   }
 }
 
@@ -102,7 +164,7 @@ class VideoTrackRenderer extends StatefulWidget {
     super.key,
     required this.videoTrack,
     this.mirror = false,
-    this.videoFit = VideoFit.contain,
+    this.videoFit = VideoFit.cover,
     this.placeholderBuilder = _defaultPlaceholderBuilder,
   });
 
@@ -135,9 +197,7 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
     (() async {
       await _videoRenderer.initialize();
       _videoRenderer.srcObject = widget.videoTrack.mediaStream;
-      setState(() {
-        _isInitialized = true;
-      });
+      if (mounted) setState(() => _isInitialized = true);
     })();
   }
 
@@ -146,14 +206,14 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
     super.didUpdateWidget(oldWidget);
     if (widget.videoTrack != oldWidget.videoTrack) {
       _videoRenderer.srcObject = widget.videoTrack.mediaStream;
-      setState(() {});
+      if (mounted) setState(() {});
     }
   }
 
   @override
   Future<void> dispose() async {
     super.dispose();
-    _videoRenderer.srcObject = null;
+    if (_isInitialized) _videoRenderer.srcObject = null;
     await _videoRenderer.dispose();
   }
 

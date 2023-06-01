@@ -27,6 +27,8 @@ abstract class StateEmitter<T> {
     T Function()? orElse,
     required Duration timeLimit,
   });
+
+  Stream<T> asStream();
 }
 
 abstract class MutableStateEmitter<T> extends StateEmitter<T> {
@@ -40,10 +42,12 @@ abstract class MutableStateEmitter<T> extends StateEmitter<T> {
 /// TODO
 class MutableStateEmitterImpl<T> extends MutableStateEmitter<T> {
   /// Creates a new instance with given [initialValue].
-  MutableStateEmitterImpl([T? initialValue])
-      : _state = initialValue == null
-            ? BehaviorSubject()
-            : BehaviorSubject.seeded(initialValue);
+  MutableStateEmitterImpl(
+    T? initialValue, {
+    bool sync = false,
+  }) : _state = initialValue == null
+            ? BehaviorSubject(sync: sync)
+            : BehaviorSubject.seeded(initialValue, sync: sync);
 
   final BehaviorSubject<T> _state;
 
@@ -106,4 +110,7 @@ class MutableStateEmitterImpl<T> extends MutableStateEmitter<T> {
       cancelOnError: cancelOnError,
     );
   }
+
+  @override
+  Stream<T> asStream() => _state;
 }

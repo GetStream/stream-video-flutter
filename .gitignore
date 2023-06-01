@@ -127,3 +127,4 @@ env.g.dart
 **/fastlane/Preview.html
 **/fastlane/screenshots
 **/fastlane/test_output
+/video-buddy-session.json

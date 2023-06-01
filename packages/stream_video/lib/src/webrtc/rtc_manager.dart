@@ -615,7 +615,7 @@ extension RtcManagerTrackHelper on RtcManager {
         publishedTracks[updatedTrack.trackId] = updatedTrack;
       }
 
-      return Result.success(None());
+      return const Result.success(none);
     }
 
     try {
@@ -626,7 +626,7 @@ extension RtcManagerTrackHelper on RtcManager {
         publishedTracks[updatedTrack.trackId] = updatedTrack;
       }
 
-      return Result.success(None());
+      return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[setAudioOutputDevice] rejected: $e');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -691,22 +691,29 @@ extension RtcManagerTrackHelper on RtcManager {
     required bool muted,
   }) async {
     if (muted) {
-      // ScreenShare cannot be muted, Un-publish instead
-      if (track.trackType == SfuTrackType.screenShare) {
-        await unpublishTrack(trackId: track.trackId);
+      await muteTrack(trackId: track.trackId);
 
-        // Also un-publish the audio track if it was published
+      // If the track is a screen share track, mute the audio track as well.
+      if (track.trackType == SfuTrackType.screenShare) {
         final screenShareAudioTrack = getPublisherTrackByType(
           SfuTrackType.screenShareAudio,
         );
         if (screenShareAudioTrack != null) {
-          await unpublishTrack(trackId: screenShareAudioTrack.trackId);
+          await muteTrack(trackId: screenShareAudioTrack.trackId);
         }
-      } else {
-        await muteTrack(trackId: track.trackId);
       }
     } else {
       await unmuteTrack(trackId: track.trackId);
+
+      // If the track is a screen share track, unmute the audio track as well.
+      if (track.trackType == SfuTrackType.screenShare) {
+        final screenShareAudioTrack = getPublisherTrackByType(
+          SfuTrackType.screenShareAudio,
+        );
+        if (screenShareAudioTrack != null) {
+          await unmuteTrack(trackId: screenShareAudioTrack.trackId);
+        }
+      }
     }
 
     return track;

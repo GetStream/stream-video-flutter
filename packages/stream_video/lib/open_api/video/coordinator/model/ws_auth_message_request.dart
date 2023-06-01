@@ -13,18 +13,9 @@ part of openapi.api;
 class WSAuthMessageRequest {
   /// Returns a new [WSAuthMessageRequest] instance.
   WSAuthMessageRequest({
-    this.device,
     required this.token,
     required this.userDetails,
   });
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  DeviceFieldsRequest? device;
 
   String token;
 
@@ -32,27 +23,20 @@ class WSAuthMessageRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is WSAuthMessageRequest &&
-     other.device == device &&
      other.token == token &&
      other.userDetails == userDetails;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (device == null ? 0 : device!.hashCode) +
     (token.hashCode) +
     (userDetails.hashCode);
 
   @override
-  String toString() => 'WSAuthMessageRequest[device=$device, token=$token, userDetails=$userDetails]';
+  String toString() => 'WSAuthMessageRequest[token=$token, userDetails=$userDetails]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.device != null) {
-      json[r'device'] = this.device;
-    } else {
-      json[r'device'] = null;
-    }
       json[r'token'] = this.token;
       json[r'user_details'] = this.userDetails;
     return json;
@@ -77,7 +61,6 @@ class WSAuthMessageRequest {
       }());
 
       return WSAuthMessageRequest(
-        device: DeviceFieldsRequest.fromJson(json[r'device']),
         token: mapValueOfType<String>(json, r'token')!,
         userDetails: ConnectUserDetailsRequest.fromJson(json[r'user_details'])!,
       );
@@ -85,7 +68,7 @@ class WSAuthMessageRequest {
     return null;
   }
 
-  static List<WSAuthMessageRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<WSAuthMessageRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <WSAuthMessageRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -116,12 +99,10 @@ class WSAuthMessageRequest {
   static Map<String, List<WSAuthMessageRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<WSAuthMessageRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = WSAuthMessageRequest.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = WSAuthMessageRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

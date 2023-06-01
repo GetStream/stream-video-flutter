@@ -2,18 +2,32 @@ import 'dart:async';
 
 import '../stream_video.dart';
 import 'coordinator/models/coordinator_events.dart';
+import 'coordinator/models/coordinator_inputs.dart' as input;
+import 'coordinator/open_api/coordinator_client_open_api.dart';
+import 'coordinator/retry/coordinator_client_retry.dart';
+import 'errors/video_error_composer.dart';
 import 'internal/_instance_holder.dart';
+import 'latency/latency_service.dart';
+import 'latency/latency_settings.dart';
+import 'lifecycle/lifecycle_state.dart';
+import 'lifecycle/lifecycle_utils.dart'
+    if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
 import 'logger/impl/external_logger.dart';
-import 'models/call_device.dart';
-import 'models/call_permission.dart';
-import 'models/call_reaction.dart';
 import 'models/queried_calls.dart';
-import 'models/queried_members.dart';
 import 'retry/retry_policy.dart';
-import 'shared_emitter.dart';
-import 'stream_video_impl.dart';
+import 'state_emitter.dart';
+import 'token/token_manager.dart';
 import 'utils/none.dart';
+import 'utils/standard.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
+
+const _tag = 'SV:Client';
+
+const _idEvents = 1;
+const _idAppState = 2;
+
+const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com/video';
+const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
 
 /// Handler function used for logging.
 typedef LogHandlerFunction = void Function(
@@ -24,243 +38,74 @@ typedef LogHandlerFunction = void Function(
   StackTrace? stk,
 ]);
 
-const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com/video';
-const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
-
 /// The client responsible for handling config and maintaining calls
-abstract class StreamVideo {
-  factory StreamVideo(
+class StreamVideo {
+  /// The singleton instance of the Stream Video client.
+  factory StreamVideo() => instance;
+
+  /// Creates a new Stream Video client unassociated with the
+  /// Stream Video singleton instance
+  factory StreamVideo.create(
     String apiKey, {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
-    int latencyMeasurementRounds = 3,
+    LatencySettings latencySettings = const LatencySettings(),
     RetryPolicy retryPolicy = const RetryPolicy(),
     SdpPolicy sdpPolicy = _defaultSdpPolicy,
   }) {
-    return StreamVideoImpl(
+    return StreamVideo._(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
-      latencyMeasurementRounds: latencyMeasurementRounds,
+      latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
     );
   }
 
+  StreamVideo._(
+    this.apiKey, {
+    required this.coordinatorRpcUrl,
+    required this.coordinatorWsUrl,
+    required this.latencySettings,
+    required this.retryPolicy,
+    required this.sdpPolicy,
+  }) {
+    _client = buildCoordinatorClient(
+      apiKey: apiKey,
+      tokenManager: _tokenManager,
+      latencySettings: latencySettings,
+      retryPolicy: retryPolicy,
+      rpcUrl: coordinatorRpcUrl,
+      wsUrl: coordinatorWsUrl,
+    );
+  }
+
   static final InstanceHolder _instanceHolder = InstanceHolder();
-
-  set pushNotificationManager(PushNotificationManager pushNotificationManager);
-
-  /// Returns the current [RetryPolicy].
-  RetryPolicy get retryPolicy;
-
-  /// Returns the current [SdpPolicy].
-  SdpPolicy get sdpPolicy;
-
-  /// Returns the current user if exists.
-  UserInfo? get currentUser;
-
-  /// You can subscribe to WebSocket events provided by the API.
-  /// Please note that subscribing to WebSocket events is an advanced use-case,
-  /// for most use-cases it should be enough to watch for changes
-  /// in the reactive [Call.state].
-  SharedEmitter<CoordinatorEvent> get events;
-
-  /// Invoked when a call was created by another user.
-  void Function(CallCreated)? onCallCreated;
-
-  /// Connects the [user] to the Stream Video service.
-  Future<Result<String>> connectUser(
-    UserInfo user, {
-    required TokenProvider tokenProvider,
-  });
-
-  /// Disconnects the user from the Stream Video service.
-  Future<Result<None>> disconnectUser();
-
-  /// Receives a call or creates it with given information. You can then use
-  /// the [CallReceivedOrCreated] in order to create a [Call] object.
-  Future<Result<CallReceivedOrCreated>> getOrCreateCall({
-    required StreamCallCid cid,
-    List<String> participantIds = const [],
-    bool ringing = false,
-  });
-
-  /// Allows you to create a new call with the given parameters
-  /// and joins the call immediately.
-  ///
-  /// If a call with the same [cid] already exists,
-  /// it will join the existing call.
-  Future<Result<CallJoined>> joinCall({
-    required StreamCallCid cid,
-    bool create = false,
-    void Function(CallReceivedOrCreated)? onReceivedOrCreated,
-  });
-
-  /// Signals other users that I have accepted the incoming call.
-  /// Causes the [CoordinatorCallAcceptedEvent] event to be emitted
-  /// to all the call members.
-  Future<Result<None>> acceptCall({
-    required StreamCallCid cid,
-  });
-
-  /// Signals other users that I have rejected the incoming call.
-  /// Causes the [CoordinatorCallRejectedEvent] event to be emitted
-  /// to all the call members.
-  Future<Result<None>> rejectCall({
-    required StreamCallCid cid,
-  });
-
-  /// Sends a custom event to the API to notify if we've changed something
-  /// in the state of the call.
-  Future<Result<None>> sendCustomEvent({
-    required StreamCallCid cid,
-    required String eventType,
-    required Map<String, Object> extraData,
-  });
-
-  /// Queries the API for members of a call.
-  Future<Result<QueriedMembers>> queryMembers({
-    required StreamCallCid callCid,
-    required Set<String> userIds,
-  });
-
-  /// Queries the API for calls.
-  Future<Result<QueriedCalls>> queryCalls({
-    required Map<String, Object> filterConditions,
-    String? next,
-    int? limit,
-  });
-
-  // TODO not supported
-  Future<Result<None>> inviteUsers({
-    required String callCid,
-    required List<UserInfo> users,
-  });
-
-  /// Sends a `call.permission_request` event to all users connected
-  /// to the call. The call settings object contains information about
-  /// which permissions can be requested during a call (for example a user
-  /// might be allowed to request permission to publish audio, but not video).
-  Future<Result<None>> requestPermissions({
-    required StreamCallCid callCid,
-    required List<CallPermission> permissions,
-  });
-
-  /// Allows you to grant or revoke a specific permission to a user in a call.
-  /// The permissions are specific to the call experience and
-  /// do not survive the call itself.
-  ///
-  /// When revoking a permission, this endpoint will also mute the relevant
-  /// track from the user. This is similar to muting a user with the
-  /// difference that the user will not be able to unmute afterwards.
-  ///
-  /// Supported permissions that can be granted or revoked:
-  /// `send-audio`, `send-video` and `screenshare`.
-  ///
-  /// `call.permissions_updated` event is sent to all members of the call.
-  Future<Result<None>> updateUserPermissions({
-    required StreamCallCid callCid,
-    required String userId,
-    List<CallPermission> grantPermissions = const [],
-    List<CallPermission> revokePermissions = const [],
-  });
-
-  /// Starts recording for the call described by the given [callCid].
-  Future<Result<None>> startRecording({
-    required StreamCallCid callCid,
-  });
-
-  /// Stops recording for the call described by the given [callCid].
-  Future<Result<None>> stopRecording({
-    required StreamCallCid callCid,
-  });
-
-  /// Starts broadcasting for the call described by the given [callCid].
-  Future<Result<None>> startBroadcasting({
-    required StreamCallCid callCid,
-  });
-
-  /// Stops broadcasting for the call described by the given [callCid].
-  Future<Result<None>> stopBroadcasting({
-    required StreamCallCid callCid,
-  });
-
-  Future<Result<None>> blockUser({
-    required StreamCallCid callCid,
-    required String userId,
-  });
-
-  Future<Result<None>> unblockUser({
-    required StreamCallCid callCid,
-    required String userId,
-  });
-
-  Future<Result<CallMetadata>> goLive({
-    required StreamCallCid callCid,
-  });
-
-  Future<Result<CallMetadata>> stopLive({
-    required StreamCallCid callCid,
-  });
-
-  /// Signals other users that I have cancelled my call to them before
-  /// they accepted it.
-  /// Causes the [CoordinatorCallEndedEvent] event to be emitted
-  /// to all the call members.
-  ///
-  /// Cancelling a call is only possible before the local participant
-  /// joined the call.
-  Future<Result<None>> endCall({
-    required StreamCallCid callCid,
-  });
-
-  Future<Result<None>> muteUsers({
-    required StreamCallCid callCid,
-    required List<String> userIds,
-  });
-
-  Future<Result<CallReaction>> sendReaction({
-    required StreamCallCid callCid,
-    required String reactionType,
-    String? emojiCode,
-    Map<String, Object> custom = const {},
-  });
-
-  Future<Result<CallDevice>> createDevice({
-    required String token,
-    required String pushProviderId,
-  });
-
-  Future<bool> handlePushNotification(Map<String, dynamic> payload);
-
-  Future<CallCreated?> consumeIncomingCall();
 
   static StreamVideo init(
     String apiKey, {
     String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     String coordinatorWsUrl = _defaultCoordinatorWsUrl,
-    int latencyMeasurementRounds = 3,
+    LatencySettings latencySettings = const LatencySettings(),
     RetryPolicy retryPolicy = const RetryPolicy(),
+    SdpPolicy sdpPolicy = _defaultSdpPolicy,
     Priority logPriority = Priority.none,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
-    SdpPolicy sdpPolicy = _defaultSdpPolicy,
   }) {
     _setupLogger(logPriority, logHandlerFunction);
     return _instanceHolder.init(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
-      latencyMeasurementRounds: latencyMeasurementRounds,
+      latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
     );
   }
 
   /// The singleton instance of the Stream Video client.
-  static StreamVideo get instance {
-    return _instanceHolder.instance;
-  }
+  static StreamVideo get instance => _instanceHolder.instance;
 
   /// Resets the singleton instance of the Stream Video client.
   ///
@@ -278,6 +123,251 @@ abstract class StreamVideo {
   static bool isInitialized() {
     return _instanceHolder.isInitialized();
   }
+
+  final _logger = taggedLogger(tag: _tag);
+
+  final String apiKey;
+  final String coordinatorRpcUrl;
+  final String coordinatorWsUrl;
+  final LatencySettings latencySettings;
+
+  /// Returns the current [RetryPolicy].
+  final RetryPolicy retryPolicy;
+
+  /// Returns the current [SdpPolicy].
+  final SdpPolicy sdpPolicy;
+
+  final _tokenManager = TokenManager();
+  final _subscriptions = Subscriptions();
+  late final CoordinatorClient _client;
+  PushNotificationManager? _pushNotificationManager;
+
+  var _state = _StreamVideoState();
+
+  Future<void> initPushNotificationManager(
+    PushNotificationManagerFactory factory,
+  ) async {
+    _pushNotificationManager = await factory(_client);
+  }
+
+  /// Returns the current user if exists.
+  UserInfo? get currentUser => _state.currentUser.valueOrNull;
+
+  /// Returns the active call if exists.
+  Call? get activeCall => _state.activeCall.valueOrNull;
+
+  /// You can subscribe to WebSocket events provided by the API.
+  /// Please note that subscribing to WebSocket events is an advanced use-case,
+  /// for most use-cases it should be enough to watch for changes
+  /// in the reactive [Call.state].
+  Stream<CoordinatorEvent> get events => _client.events.asStream();
+
+  /// Invoked when a call was created by another user with ringing set as True.
+  void Function(Call)? onIncomingCall;
+
+  /// Connects the [user] to the Stream Video service using a [TokenProvider].
+  /// This method is great if your service requires tokens to be refreshed.
+  ///
+  /// For applications outside of test and development, this method may be more
+  /// suitable as token refreshes are handled for you.
+  Future<Result<String>> connectUserWithProvider(
+    UserInfo user, {
+    required TokenProvider tokenProvider,
+  }) async {
+    _logger.i(() => '[connectUser] user.id : ${user.id}');
+    if (currentUser != null) {
+      _logger.w(() => '[connectUser] rejected (already set): $currentUser');
+      return _tokenManager.getToken();
+    }
+    final tokenResult = await _tokenManager.setTokenProvider(
+      user.id,
+      tokenProvider: tokenProvider,
+    );
+    if (tokenResult.isFailure) {
+      return tokenResult;
+    }
+    _state.currentUser.value = user;
+
+    try {
+      final result = await _client.connectUser(user);
+      _logger.v(() => '[connectUser] completed: $result');
+      if (result is Failure) {
+        return result;
+      }
+      _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
+      _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
+      await _pushNotificationManager?.onUserLoggedIn();
+      return tokenResult;
+    } catch (e, stk) {
+      _logger.e(() => '[connectUser] failed(${user.id}): $e');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  void _onEvent(CoordinatorEvent event) {
+    final currentUserId = _state.getCurrentUserId();
+    _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
+    if (event is CoordinatorCallCreatedEvent &&
+        event.metadata.details.createdBy.id != currentUserId &&
+        event.data.ringing) {
+      _logger.v(() => '[onCoordinatorEvent] onCallCreated: ${event.data}');
+      onIncomingCall?.call(_makeCallFromCreated(data: event.data));
+    }
+  }
+
+  Future<void> _onAppState(LifecycleState state) async {
+    _logger.d(() => '[onAppState] state: $state');
+    try {
+      final loggedIn = currentUser != null;
+      final activeCallCid = _state.activeCall.valueOrNull?.callCid;
+      if (loggedIn && state.isPaused && activeCallCid == null) {
+        _logger.i(() => '[onAppState] close connection');
+        _subscriptions.cancel(_idEvents);
+        await _client.closeConnection();
+      } else if (loggedIn && state.isResumed) {
+        _logger.i(() => '[onAppState] open connection');
+        await _client.openConnection();
+        _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
+      }
+    } catch (e) {
+      _logger.e(() => '[onAppState] failed: $e');
+    }
+  }
+
+  /// Disconnects the user from the Stream Video service.
+  Future<Result<None>> disconnectUser() async {
+    _logger.i(() => '[disconnectUser] currentUser.id: ${currentUser?.id}');
+    if (currentUser == null) {
+      _logger.w(() => '[disconnectUser] rejected (no user): $currentUser');
+      return const Result.success(none);
+    }
+    try {
+      await _client.disconnectUser();
+      _subscriptions.cancelAll();
+      _tokenManager.reset();
+
+      // Resetting the state.
+      await _state.close();
+      _state = _StreamVideoState();
+      return const Result.success(none);
+    } catch (e, stk) {
+      _logger.e(() => '[disconnectUser] failed: $e');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  StreamSubscription<Call?> listenActiveCall(
+    void Function(Call? value)? onActiveCall,
+  ) {
+    return _state.activeCall.listen(onActiveCall);
+  }
+
+  Call makeCall({
+    required String type,
+    required String id,
+    CallPreferences? preferences,
+  }) {
+    return Call(
+      callCid: StreamCallCid.from(type: type, id: id),
+      coordinatorClient: _client,
+      getCurrentUserId: _state.getCurrentUserId,
+      setActiveCall: _state.setActiveCall,
+      retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
+      preferences: preferences,
+    );
+  }
+
+  Call _makeCallFromCreated({
+    required CallCreatedData data,
+    CallPreferences? preferences,
+  }) {
+    return Call.fromCreated(
+      data: data,
+      coordinatorClient: _client,
+      getCurrentUserId: _state.getCurrentUserId,
+      setActiveCall: _state.setActiveCall,
+      retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
+      preferences: preferences,
+    );
+  }
+
+  /// Queries the API for calls.
+  Future<Result<QueriedCalls>> queryCalls({
+    required Map<String, Object> filterConditions,
+    String? next,
+    String? prev,
+    int? limit,
+    List<SortInput>? sorts,
+  }) {
+    return _client.queryCalls(
+      input.QueryCallsInput(
+        filterConditions: filterConditions,
+        next: next,
+        limit: limit,
+        prev: prev,
+        sorts: sorts ?? [],
+      ),
+    );
+  }
+
+  Future<bool> handlePushNotification(Map<String, dynamic> payload) {
+    return _pushNotificationManager?.handlePushNotification(payload) ??
+        Future.value(false);
+  }
+
+  Future<Call?> consumeIncomingCall() {
+    return _pushNotificationManager?.consumeIncomingCall().then((data) {
+          return data?.let((it) => _makeCallFromCreated(data: it));
+        }) ??
+        Future.value();
+  }
+}
+
+class _StreamVideoState {
+  final MutableStateEmitter<UserInfo?> currentUser = MutableStateEmitterImpl(
+    null,
+  );
+  final MutableStateEmitter<Call?> activeCall = MutableStateEmitterImpl(null);
+
+  Future<void> close() async {
+    await currentUser.close();
+    await activeCall.close();
+  }
+
+  String? getCurrentUserId() => currentUser.valueOrNull?.id;
+
+  Future<void> setActiveCall(Call? call) async {
+    final ongoingCall = activeCall.valueOrNull;
+    if (ongoingCall != null && call != null) {
+      await ongoingCall.disconnect();
+    }
+    activeCall.value = call;
+  }
+}
+
+CoordinatorClient buildCoordinatorClient(
+    {required String rpcUrl,
+    required String wsUrl,
+    required String apiKey,
+    required TokenManager tokenManager,
+    required RetryPolicy retryPolicy,
+    required LatencySettings latencySettings}) {
+  streamLog.i(_tag, () => '[buildCoordinatorClient] rpcUrl: $rpcUrl');
+  streamLog.i(_tag, () => '[buildCoordinatorClient] wsUrl: $wsUrl');
+  streamLog.i(_tag, () => '[buildCoordinatorClient] apiKey: $apiKey');
+  return CoordinatorClientRetry(
+    retryPolicy: retryPolicy,
+    delegate: CoordinatorClientOpenApi(
+      apiKey: apiKey,
+      tokenManager: tokenManager,
+      latencyService: LatencyService(settings: latencySettings),
+      retryPolicy: retryPolicy,
+      rpcUrl: rpcUrl,
+      wsUrl: wsUrl,
+    ),
+  );
 }
 
 void _setupLogger(Priority logPriority, LogHandlerFunction logHandlerFunction) {
@@ -304,45 +394,14 @@ void _defaultLogHandler(
 const _defaultSdpPolicy = SdpPolicy();
 
 extension StreamVideoX on StreamVideo {
-  /// Connects the [user] to the Stream Video service.
-  Future<Result<String>> connectUserWithToken(
+  /// Connects the [user] to the Stream Video service using a static token.
+  Future<Result<String>> connectUser(
     UserInfo user,
     String token,
   ) {
-    return connectUser(user, tokenProvider: TokenProvider.static(token));
-  }
-
-  /// Connects the [user] to the Stream Video service.
-  Future<Result<String>> connectUserWithProvider(
-    UserInfo user,
-    TokenProvider provider,
-  ) {
-    return connectUser(user, tokenProvider: provider);
-  }
-
-  /// Grants the [permissions] to the [userId] in the [callCid].
-  Future<Result<None>> grantUserPermissions({
-    required StreamCallCid callCid,
-    required String userId,
-    required List<CallPermission> permissions,
-  }) {
-    return updateUserPermissions(
-      callCid: callCid,
-      userId: userId,
-      grantPermissions: permissions,
-    );
-  }
-
-  /// Revokes the [permissions] from the [userId] in the [callCid].
-  Future<Result<None>> revokeUserPermissions({
-    required StreamCallCid callCid,
-    required String userId,
-    required List<CallPermission> permissions,
-  }) {
-    return updateUserPermissions(
-      callCid: callCid,
-      userId: userId,
-      revokePermissions: permissions,
+    return connectUserWithProvider(
+      user,
+      tokenProvider: TokenProvider.static(token),
     );
   }
 }

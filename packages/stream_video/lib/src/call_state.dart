@@ -6,11 +6,11 @@ import 'models/call_cid.dart';
 import 'models/call_metadata.dart';
 import 'models/call_participant_state.dart';
 import 'models/call_permission.dart';
-import 'models/call_setting.dart';
+import 'models/call_settings.dart';
 import 'models/call_status.dart';
 import 'webrtc/rtc_media_device/rtc_media_device.dart';
 
-/// TODO - Class that holds any information about the call, including participants
+/// Represents the call's state.
 @immutable
 class CallState extends Equatable {
   factory CallState({
@@ -21,10 +21,13 @@ class CallState extends Equatable {
       currentUserId: currentUserId,
       callCid: callCid,
       createdByUserId: '',
+      isRingingFlow: false,
       sessionId: '',
       status: CallStatus.idle(),
       isRecording: false,
-      settings: const CallSettings.disabled(),
+      isBroadcasting: false,
+      isTranscribing: false,
+      settings: const CallSettings(),
       videoInputDevice: null,
       audioInputDevice: null,
       audioOutputDevice: null,
@@ -42,11 +45,14 @@ class CallState extends Equatable {
     return CallState._(
       currentUserId: currentUserId,
       callCid: callCid,
-      createdByUserId: metadata.info.createdByUserId,
+      createdByUserId: metadata.details.createdBy.id,
+      isRingingFlow: ringing,
       sessionId: '',
       status: metadata.toCallStatus(currentUserId, ringing: ringing),
-      isRecording: false,
-      settings: metadata.details.settings,
+      isRecording: metadata.details.recording,
+      isBroadcasting: metadata.details.broadcasting,
+      isTranscribing: metadata.details.transcribing,
+      settings: metadata.settings,
       videoInputDevice: null,
       audioInputDevice: null,
       audioOutputDevice: null,
@@ -64,9 +70,12 @@ class CallState extends Equatable {
     required this.currentUserId,
     required this.callCid,
     required this.createdByUserId,
+    required this.isRingingFlow,
     required this.sessionId,
     required this.status,
     required this.isRecording,
+    required this.isBroadcasting,
+    required this.isTranscribing,
     required this.settings,
     required this.ownCapabilities,
     required this.callParticipants,
@@ -78,15 +87,22 @@ class CallState extends Equatable {
   final String currentUserId;
   final StreamCallCid callCid;
   final String createdByUserId;
+  final bool isRingingFlow;
   final String sessionId;
   final CallStatus status;
-  final bool isRecording;
   final CallSettings settings;
+  final bool isRecording;
+  final bool isBroadcasting;
+  final bool isTranscribing;
   final RtcMediaDevice? videoInputDevice;
   final RtcMediaDevice? audioInputDevice;
   final RtcMediaDevice? audioOutputDevice;
   final List<CallPermission> ownCapabilities;
   final List<CallParticipantState> callParticipants;
+
+  String get callId => callCid.id;
+
+  String get callType => callCid.id;
 
   CallParticipantState? get localParticipant {
     return callParticipants.firstWhereOrNull((element) => element.isLocal);
@@ -102,9 +118,12 @@ class CallState extends Equatable {
     String? currentUserId,
     StreamCallCid? callCid,
     String? createdByUserId,
+    bool? isRingingFlow,
     String? sessionId,
     CallStatus? status,
     bool? isRecording,
+    bool? isBroadcasting,
+    bool? isTranscribing,
     CallSettings? settings,
     RtcMediaDevice? videoInputDevice,
     RtcMediaDevice? audioInputDevice,
@@ -116,9 +135,12 @@ class CallState extends Equatable {
       currentUserId: currentUserId ?? this.currentUserId,
       callCid: callCid ?? this.callCid,
       createdByUserId: createdByUserId ?? this.createdByUserId,
+      isRingingFlow: isRingingFlow ?? this.isRingingFlow,
       sessionId: sessionId ?? this.sessionId,
       status: status ?? this.status,
       isRecording: isRecording ?? this.isRecording,
+      isBroadcasting: isBroadcasting ?? this.isBroadcasting,
+      isTranscribing: isTranscribing ?? this.isTranscribing,
       settings: settings ?? this.settings,
       videoInputDevice: videoInputDevice ?? this.videoInputDevice,
       audioInputDevice: audioInputDevice ?? this.audioInputDevice,
@@ -162,7 +184,7 @@ extension on CallMetadata {
     String currentUserId, {
     required bool ringing,
   }) {
-    final createdByMe = currentUserId == info.createdByUserId;
+    final createdByMe = currentUserId == details.createdBy.id;
     if (createdByMe && ringing) {
       return CallStatus.outgoing();
     } else if (!createdByMe && ringing) {
@@ -174,8 +196,8 @@ extension on CallMetadata {
 
   List<CallParticipantState> toCallParticipants(String currentUserId) {
     final result = <CallParticipantState>[];
-    for (final userId in details.members.keys) {
-      final member = details.members[userId];
+    for (final userId in members.keys) {
+      final member = members[userId];
       final user = users[userId];
       final isLocal = currentUserId == userId;
       result.add(

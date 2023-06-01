@@ -1,8 +1,8 @@
 import 'package:meta/meta.dart';
 
+import '../latency/latency_settings.dart';
 import '../retry/retry_policy.dart';
 import '../stream_video.dart';
-import '../stream_video_impl.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
 
 @internal
@@ -13,7 +13,7 @@ class InstanceHolder {
     String apiKey, {
     required String coordinatorRpcUrl,
     required String coordinatorWsUrl,
-    required int latencyMeasurementRounds,
+    required LatencySettings latencySettings,
     required RetryPolicy retryPolicy,
     required SdpPolicy sdpPolicy,
   }) {
@@ -24,11 +24,11 @@ class InstanceHolder {
         If you want to use multiple instances of the SDK, use StreamVideo.new() instead.
         ''');
     }
-    _instance = StreamVideoImpl(
+    _instance = StreamVideo.create(
       apiKey,
       coordinatorRpcUrl: coordinatorRpcUrl,
       coordinatorWsUrl: coordinatorWsUrl,
-      latencyMeasurementRounds: latencyMeasurementRounds,
+      latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
     );

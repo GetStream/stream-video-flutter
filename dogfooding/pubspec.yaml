@@ -7,22 +7,26 @@ environment:
   sdk: '>=2.18.0 <3.0.0'
 
 dependencies:
+  crypto: 3.0.2
   cupertino_icons: ^1.0.2
+  device_info_plus: ^8.1.0
   envied: ^0.3.0
-  firebase_auth: ^4.2.5
-  firebase_core: ^2.4.1
-  firebase_messaging: ^14.2.1
+  firebase_auth: ^4.6.1
+  firebase_core: ^2.13.0
+  firebase_messaging: ^14.6.1
   flutter:
     sdk: flutter
-  flutter_svg: ^1.1.6
-  google_fonts: ^3.0.1
-  google_sign_in: ^5.4.4
+  flutter_svg: 2.0.4
+  google_fonts: ^4.0.4
+  google_sign_in: ^6.1.1
   http: ^0.13.5
-  shared_preferences: ^2.0.17
   path_provider: ^2.0.14
   share_plus: ^6.3.1
-  device_info_plus: ^8.1.0
-  stream_chat_flutter: ^5.3.0
+  shared_preferences: ^2.0.17
+  stream_chat_flutter:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter
+      path: packages/stream_chat_flutter
   stream_video:
     path: ../packages/stream_video
   stream_video_flutter:

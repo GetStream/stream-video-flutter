@@ -6,9 +6,10 @@ import '../../../logger/stream_logger.dart';
 import '../../../webrtc/peer_type.dart';
 import '../models/sfu_audio_level.dart';
 import '../models/sfu_audio_sender.dart';
+import '../models/sfu_call_grants.dart';
 import '../models/sfu_call_state.dart';
+import '../models/sfu_connection_info.dart';
 import '../models/sfu_error.dart';
-import '../models/sfu_models.dart';
 import '../models/sfu_participant.dart';
 import '../models/sfu_track_type.dart';
 import '../models/sfu_video_sender.dart';
@@ -156,14 +157,16 @@ class SfuTrackPublishedEvent extends SfuEvent {
     required this.userId,
     required this.sessionId,
     required this.trackType,
+    required this.participant,
   });
 
   final String userId;
   final String sessionId;
   final SfuTrackType trackType;
+  final SfuParticipant participant;
 
   @override
-  List<Object> get props => [userId, sessionId, trackType];
+  List<Object> get props => [userId, sessionId, trackType, participant];
 }
 
 @internal
@@ -172,17 +175,39 @@ class SfuTrackUnpublishedEvent extends SfuEvent {
     required this.userId,
     required this.sessionId,
     required this.trackType,
+    required this.participant,
   });
 
   final String userId;
   final String sessionId;
   final SfuTrackType trackType;
+  final SfuParticipant participant;
 
   @override
-  List<Object> get props => [userId, sessionId, trackType];
+  List<Object> get props => [userId, sessionId, trackType, participant];
 }
 
-class SfuHealthCheckResponseEvent extends SfuEvent {}
+class SfuHealthCheckResponseEvent extends SfuEvent {
+  const SfuHealthCheckResponseEvent(this.participantCount);
+
+  final SfuParticipantCount participantCount;
+
+  @override
+  List<Object> get props => [participantCount];
+}
+
+class SfuCallGrantsUpdated extends SfuEvent {
+  const SfuCallGrantsUpdated({
+    required this.currentGrants,
+    required this.message,
+  });
+
+  final SfuCallGrants currentGrants;
+  final String message;
+
+  @override
+  List<Object> get props => [currentGrants, message];
+}
 
 class SfuErrorEvent extends SfuEvent {
   const SfuErrorEvent({required this.error});

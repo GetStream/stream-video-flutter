@@ -63,11 +63,19 @@ class TranscriptionApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<void> startTranscription(String type, String id,) async {
+  Future<StartTranscriptionResponse?> startTranscription(String type, String id,) async {
     final response = await startTranscriptionWithHttpInfo(type, id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StartTranscriptionResponse',) as StartTranscriptionResponse;
+    
+    }
+    return null;
   }
 
   /// Stop transcription
@@ -81,7 +89,7 @@ class TranscriptionApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> stoptranscriptionWithHttpInfo(String type, String id,) async {
+  Future<Response> stopTranscriptionWithHttpInfo(String type, String id,) async {
     // ignore: prefer_const_declarations
     final path = r'/call/{type}/{id}/stop_transcription'
       .replaceAll('{type}', type)
@@ -117,10 +125,18 @@ class TranscriptionApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<void> stoptranscription(String type, String id,) async {
-    final response = await stoptranscriptionWithHttpInfo(type, id,);
+  Future<StopTranscriptionResponse?> stopTranscription(String type, String id,) async {
+    final response = await stopTranscriptionWithHttpInfo(type, id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StopTranscriptionResponse',) as StopTranscriptionResponse;
+    
+    }
+    return null;
   }
 }
