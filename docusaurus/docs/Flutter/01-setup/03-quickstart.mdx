@@ -1,0 +1,34 @@
+---
+slug: /quickstart
+title: Quickstart
+---
+
+In this guide, we will cover the basics of making your first call using Stream Video. If you haven’t already, we recommend starting with the **************************introduction************************** and **************************installation************************** steps first as this guide will build on the material covered in those sections. 
+
+### Client setup
+
+Before we can create a new video client, we must first import the Stream Video package into our application. 
+
+```dart
+import 'package:stream_video_flutter/stream_video_flutter.dart'; 
+```
+
+Next, in our application’s `main` function, we can initialize the application by calling the `init` function and giving it our API key:
+
+```dart
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Add to your application
+  StreamVideo.init(
+    Env.streamVideoApiKey,
+  );
+
+  runApp(const MyApp());
+}
+```
+
+<aside>
+💡 Note: Because we initialize before the `runApp` method is called, it is important to call `WidgetsFlutterBinding` first.
+
+</aside>
