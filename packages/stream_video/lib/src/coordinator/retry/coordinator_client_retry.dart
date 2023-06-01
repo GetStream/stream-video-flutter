@@ -75,17 +75,6 @@ class CoordinatorClientRetry extends CoordinatorClient {
   SharedEmitter<CoordinatorEvent> get events => _delegate.events;
 
   @override
-  Future<Result<SfuServerSelected>> findBestCallEdgeServer({
-    required StreamCallCid callCid,
-    required List<SfuEdge> edges,
-  }) {
-    return _delegate.findBestCallEdgeServer(
-      callCid: callCid,
-      edges: edges,
-    );
-  }
-
-  @override
   Future<Result<CallReceivedOrCreatedData>> getOrCreateCall(
     GetOrCreateCallInput input,
   ) {
@@ -123,6 +112,26 @@ class CoordinatorClientRetry extends CoordinatorClient {
       () => _delegate.joinCall(input),
       (error, nextAttemptDelay) async {
         _logRetry('joinCall', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> acceptCall({required StreamCallCid cid}) {
+    return _retryManager.execute(
+          () => _delegate.acceptCall(cid: cid),
+          (error, nextAttemptDelay) async {
+        _logRetry('acceptCall', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> rejectCall({required StreamCallCid cid}) {
+    return _retryManager.execute(
+          () => _delegate.rejectCall(cid: cid),
+          (error, nextAttemptDelay) async {
+        _logRetry('rejectCall', error, nextAttemptDelay);
       },
     );
   }
@@ -188,22 +197,6 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<SfuServerSelected>> selectCallEdgeServer({
-    required StreamCallCid callCid,
-    required Map<String, SfuLatency> latencyByEdge,
-  }) {
-    return _retryManager.execute(
-      () => _delegate.selectCallEdgeServer(
-        callCid: callCid,
-        latencyByEdge: latencyByEdge,
-      ),
-      (error, nextAttemptDelay) async {
-        _logRetry('selectCallEdgeServer', error, nextAttemptDelay);
-      },
-    );
-  }
-
-  @override
   Future<Result<None>> sendCustomEvent(CustomEventInput input) {
     return _retryManager.execute(
       () => _delegate.sendCustomEvent(input),
@@ -219,16 +212,6 @@ class CoordinatorClientRetry extends CoordinatorClient {
       () => _delegate.sendReaction(input),
       (error, nextAttemptDelay) async {
         _logRetry('sendReaction', error, nextAttemptDelay);
-      },
-    );
-  }
-
-  @override
-  Future<Result<None>> sendUserEvent(EventInput input) {
-    return _retryManager.execute(
-      () => _delegate.sendUserEvent(input),
-      (error, nextAttemptDelay) async {
-        _logRetry('sendUserEvent', error, nextAttemptDelay);
       },
     );
   }

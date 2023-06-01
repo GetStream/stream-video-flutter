@@ -29,7 +29,7 @@ class CallMemberUpdatedEvent {
   /// The list of members that were updated
   List<MemberResponse> members;
 
-  /// The type of event: \"call.member_added\" in this case
+  /// The type of event: \"call.member_updated\" in this case
   String type;
 
   @override
@@ -84,14 +84,14 @@ class CallMemberUpdatedEvent {
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
-        members: MemberResponse.listFromJson(json[r'members'])!,
+        members: MemberResponse.listFromJson(json[r'members']),
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
     return null;
   }
 
-  static List<CallMemberUpdatedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallMemberUpdatedEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallMemberUpdatedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -122,12 +122,10 @@ class CallMemberUpdatedEvent {
   static Map<String, List<CallMemberUpdatedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallMemberUpdatedEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CallMemberUpdatedEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CallMemberUpdatedEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

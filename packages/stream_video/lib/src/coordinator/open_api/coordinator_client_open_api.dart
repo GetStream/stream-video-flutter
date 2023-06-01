@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
+import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../latency/latency_service.dart';
 import '../../location/location_service.dart';
@@ -203,7 +204,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           data: CallCreatedData(
             callCid: input.callCid,
             ringing: input.ringing ?? false,
-            metadata: result.call.toCallMetadata(result.members),
+            metadata: result.call.toCallMetadata(result.members, result.ownCapabilities),
           ),
         ),
       );
@@ -238,7 +239,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return Result.success(
         CoordinatorJoined(
           wasCreated: result.created,
-          metadata: result.call.toCallMetadata(result.members),
+          metadata: result.call.toCallMetadata(result.members, result.ownCapabilities),
           credentials: result.credentials.toCallCredentials(),
           members: result.members.toCallMembers(),
           users: result.members.toCallUsers(),
@@ -246,91 +247,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
-    }
-  }
-
-  @override
-  Future<Result<SfuServerSelected>> findBestCallEdgeServer({
-    required StreamCallCid callCid,
-    required List<SfuEdge> edges,
-  }) async {
-    _logger.d(
-      () => '[findBestCallEdgeServer] callCid: $callCid, '
-          'edges.length: ${edges.length}',
-    );
-    final latencyByEdge = await latencyService.measureEdgeLatencies(edges);
-    _logger.v(() => '[findBestCallEdgeServer] latencyByEdge: $latencyByEdge');
-    final response = await selectCallEdgeServer(
-      callCid: callCid,
-      latencyByEdge: latencyByEdge,
-    );
-    response.when(
-      success: (data) {
-        final server = data.credentials.sfuServer;
-        _logger.v(() => '[findBestCallEdgeServer] selectedEdge: $server');
-      },
-      failure: (error) {
-        _logger.e(() => '[findBestCallEdgeServer] failed: $error');
-      },
-    );
-    return response;
-  }
-
-  /// Finds the correct server to connect to for given user and request.
-  @override
-  Future<Result<SfuServerSelected>> selectCallEdgeServer({
-    required StreamCallCid callCid,
-    required Map<String, SfuLatency> latencyByEdge,
-  }) async {
-    try {
-      _logger.d(() => '[selectCallEdgeServer] callCid: $callCid, '
-          'latencyByEdge.length: ${latencyByEdge.length}');
-      final result = await videoApi.getCallEdgeServer(
-        callCid.type,
-        callCid.id,
-        open.GetCallEdgeServerRequest(
-          latencyMeasurements: latencyByEdge.map(
-            (name, latency) => MapEntry(name, latency.measurementsSeconds),
-          ),
-        ),
-      );
-      _logger.v(() => '[selectCallEdgeServer] completed: $result');
-      if (result == null) {
-        return Result.error('selectCallEdgeServer result is null');
-      }
-      return Result.success(
-        SfuServerSelected(
-          metadata: result.call.toCallMetadata(result.members),
-          credentials: result.credentials.toCallCredentials(),
-        ),
-      );
-    } catch (e, stk) {
-      _logger.e(() => '[selectCallEdgeServer] failed: $e; $stk');
-      return Result.failure(VideoErrors.compose(e, stk));
-    }
-  }
-
-  /// Sends a user-based event to the API to notify if we've changed something
-  /// in the state of the call.
-  @override
-  Future<Result<None>> sendUserEvent(
-    inputs.EventInput input,
-  ) async {
-    try {
-      _logger.d(() => '[sendUserEvent] input: $input');
-      final result = await eventsApi.sendEvent(
-        input.callCid.type,
-        input.callCid.id,
-        open.SendEventRequest(type: input.eventType.alias),
-      );
-      _logger.v(() => '[sendUserEvent] completed: $result');
-      if (result == null) {
-        return Result.error('sendUserEvent result is null');
-      }
-      return const Result.success(none);
-    } catch (e, stk) {
-      _logger.e(() => '[sendUserEvent] failed: $e; $stk');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -346,7 +262,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         input.callCid.type,
         input.callCid.id,
         open.SendEventRequest(
-          type: input.eventType,
           custom: input.custom,
         ),
       );
@@ -433,7 +348,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     String sessionId,
   ) async {
     try {
-      final result = await recordingApi.listRecordings(
+      final result = await recordingApi.listRecordingsTypeIdSession1(
         callCid.type,
         callCid.id,
         sessionId,
@@ -661,6 +576,36 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return Result.success(result.call.toCallMetadata());
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  /// Signals other users that I have accepted the incoming call.
+  /// Causes the [CoordinatorCallAcceptedEvent] event to be emitted
+  /// to all the call members.
+  @override
+  Future<Result<None>> acceptCall({
+    required StreamCallCid cid,
+  }) async {
+    try {
+      await videoApi.acceptCall(cid.type, cid.id);
+      return const Result.success(none);
+    } catch(e) {
+      return Result.failure(VideoErrors.compose(e));
+    }
+  }
+
+  /// Signals other users that I have rejected the incoming call.
+  /// Causes the [CoordinatorCallRejectedEvent] event to be emitted
+  /// to all the call members.
+  @override
+  Future<Result<None>> rejectCall({
+    required StreamCallCid cid,
+  }) async {
+    try {
+      await videoApi.rejectCall(cid.type, cid.id);
+      return const Result.success(none);
+    } catch(e) {
+      return Result.failure(VideoErrors.compose(e));
     }
   }
 }

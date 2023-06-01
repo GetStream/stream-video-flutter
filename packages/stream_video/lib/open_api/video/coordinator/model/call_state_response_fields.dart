@@ -17,6 +17,7 @@ class CallStateResponseFields {
     required this.call,
     this.members = const [],
     this.membership,
+    this.ownCapabilities = const [],
   });
 
   List<UserResponse> blockedUsers;
@@ -34,12 +35,15 @@ class CallStateResponseFields {
   ///
   MemberResponse? membership;
 
+  List<OwnCapability> ownCapabilities;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallStateResponseFields &&
      other.blockedUsers == blockedUsers &&
      other.call == call &&
      other.members == members &&
-     other.membership == membership;
+     other.membership == membership &&
+     other.ownCapabilities == ownCapabilities;
 
   @override
   int get hashCode =>
@@ -47,10 +51,11 @@ class CallStateResponseFields {
     (blockedUsers.hashCode) +
     (call.hashCode) +
     (members.hashCode) +
-    (membership == null ? 0 : membership!.hashCode);
+    (membership == null ? 0 : membership!.hashCode) +
+    (ownCapabilities.hashCode);
 
   @override
-  String toString() => 'CallStateResponseFields[blockedUsers=$blockedUsers, call=$call, members=$members, membership=$membership]';
+  String toString() => 'CallStateResponseFields[blockedUsers=$blockedUsers, call=$call, members=$members, membership=$membership, ownCapabilities=$ownCapabilities]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -62,6 +67,7 @@ class CallStateResponseFields {
     } else {
       json[r'membership'] = null;
     }
+      json[r'own_capabilities'] = this.ownCapabilities;
     return json;
   }
 
@@ -84,16 +90,17 @@ class CallStateResponseFields {
       }());
 
       return CallStateResponseFields(
-        blockedUsers: UserResponse.listFromJson(json[r'blocked_users'])!,
+        blockedUsers: UserResponse.listFromJson(json[r'blocked_users']),
         call: CallResponse.fromJson(json[r'call'])!,
-        members: MemberResponse.listFromJson(json[r'members'])!,
+        members: MemberResponse.listFromJson(json[r'members']),
         membership: MemberResponse.fromJson(json[r'membership']),
+        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
       );
     }
     return null;
   }
 
-  static List<CallStateResponseFields>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallStateResponseFields> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallStateResponseFields>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -124,12 +131,10 @@ class CallStateResponseFields {
   static Map<String, List<CallStateResponseFields>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallStateResponseFields>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CallStateResponseFields.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CallStateResponseFields.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -140,6 +145,7 @@ class CallStateResponseFields {
     'blocked_users',
     'call',
     'members',
+    'own_capabilities',
   };
 }
 

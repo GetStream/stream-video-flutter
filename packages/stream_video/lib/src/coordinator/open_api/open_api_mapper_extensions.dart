@@ -35,7 +35,8 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallCreatedEvent(
           data: CallCreatedData(
             callCid: StreamCallCid(cid: call.cid),
-            ringing: event.ringing,
+            // TODO: Remove ringing property from call created event
+            ringing: false,
             metadata: call.toCallMetadata(event.members),
           ),
           createdAt: event.createdAt,
@@ -213,6 +214,22 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         );
       case EventType.unknown:
         return const CoordinatorUnknownEvent();
+      case EventType.callNotification:
+        // TODO: Handle call notification
+        break;
+      case EventType.callRingEvent:
+        final event = callCreated!;
+        final call = event.call;
+        // TODO: Convert this to ring event at some point
+        return CoordinatorCallCreatedEvent(
+          data: CallCreatedData(
+            callCid: StreamCallCid(cid: call.cid),
+            ringing: false,
+            metadata: call.toCallMetadata(event.members),
+          ),
+          createdAt: event.createdAt,
+        );
+        break;
     }
   }
 }
@@ -277,7 +294,7 @@ extension on RingSettings {
   open.RingSettingsRequest toOpenDto() {
     return open.RingSettingsRequest(
       autoCancelTimeoutMs: autoCancelTimeout.inMilliseconds,
-      autoRejectTimeoutMs: autoRejectTimeout.inMilliseconds,
+      incomingCallTimeoutMs: autoRejectTimeout.inMilliseconds,
     );
   }
 }
@@ -389,4 +406,3 @@ extension on TranscriptionSettingsMode {
     }
   }
 }
-
