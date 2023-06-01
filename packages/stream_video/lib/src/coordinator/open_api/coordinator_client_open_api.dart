@@ -348,7 +348,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     String sessionId,
   ) async {
     try {
-      final result = await recordingApi.listRecordings(
+      final result = await recordingApi.listRecordingsTypeIdSession1(
         callCid.type,
         callCid.id,
         sessionId,
