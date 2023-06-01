@@ -78,16 +78,10 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
           _logger
               .v(() => '[participantUpdateSubscription] pFound: $participant');
 
-          var muted = trackState.muted;
-          if (trackState.received) {
-            // if the track is already received, we should unmute it.
-            muted = false;
-          }
           return participant.copyWith(
             publishedTracks: {
               ...participant.publishedTracks,
               action.trackType: trackState.copyWith(
-                muted: muted,
                 subscribed: true,
                 videoDimension: action.videoDimension,
               ),
@@ -113,7 +107,6 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
               publishedTracks: {
                 ...participant.publishedTracks,
                 action.trackType: trackState.copyWith(
-                  muted: true,
                   subscribed: false,
                   // TODO: Should be null, but copyWith doesn't allow it.
                   videoDimension: const RtcVideoDimension.zero(),
