@@ -8,6 +8,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import '../../repos/app_repository.dart';
 import '../routes/routes.dart';
 import '../utils/consts.dart';
+import '../utils/loading_dialog.dart';
 import '../utils/providers.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -23,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Call? call;
   Channel? chatChannel;
 
-   AppRepository? appRepo;
+  AppRepository? appRepo;
   final _callIdController = TextEditingController();
 
   @override
@@ -44,20 +45,23 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _joinOrCreateCall() async {
     final callId = _callIdController.text;
     if (callId.isEmpty) return debugPrint('Call ID is empty');
-
+    unawaited(showLoadingIndicator(context));
     try {
       call = streamVideoClient.makeCall(type: kCallType, id: callId);
       await call?.getOrCreateCall();
-      chatChannel =
-          await appRepo?.createChatChannel(channelId: call!.callCid.id);
+      chatChannel = await appRepo?.createChatChannel(
+        channelId: call!.callCid.id,
+      );
 
       if (mounted) {
+        unawaited(hideLoadingIndicator(context));
         await Navigator.of(context).pushNamed(
           Routes.lobby,
           arguments: [call, _handleCallNavigation],
         );
       }
     } catch (e, stk) {
+      unawaited(hideLoadingIndicator(context));
       debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());
     } finally {}

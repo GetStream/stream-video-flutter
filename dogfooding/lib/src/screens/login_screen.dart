@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -5,6 +7,7 @@ import 'package:stream_video/stream_video.dart';
 
 import '../routes/routes.dart';
 import '../utils/assets.dart';
+import '../utils/loading_dialog.dart';
 import '../utils/providers.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -27,8 +30,12 @@ class _LoginScreenState extends State<LoginScreen> {
       name: googleUser.displayName ?? '',
       image: googleUser.photoUrl,
     );
-    if (!mounted) return;
-    await context.authRepo.loginWithUserInfo(user);
+
+    if (mounted) {
+      unawaited(showLoadingIndicator(context));
+      await context.authRepo.loginWithUserInfo(user);
+    }
+    if (mounted) unawaited(hideLoadingIndicator(context));
     if (mounted) await Navigator.of(context).pushReplacementNamed(Routes.home);
     return;
   }
@@ -43,7 +50,9 @@ class _LoginScreenState extends State<LoginScreen> {
       name: email,
     );
 
+    unawaited(showLoadingIndicator(context));
     await context.authRepo.loginWithUserInfo(user);
+    if (mounted) unawaited(hideLoadingIndicator(context));
     if (mounted) await Navigator.of(context).pushReplacementNamed(Routes.home);
     return;
   }

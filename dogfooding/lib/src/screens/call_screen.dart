@@ -25,6 +25,7 @@ class _CallScreenState extends State<CallScreen> {
   void showChatDialog(BuildContext context) {
     showBottomSheet<dynamic>(
       context: context,
+      backgroundColor: const Color(0xFF101418),
       builder: (_) {
         return const FractionallySizedBox(
           heightFactor: 0.8,
