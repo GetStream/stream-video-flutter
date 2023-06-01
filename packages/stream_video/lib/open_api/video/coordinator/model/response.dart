@@ -20,21 +20,20 @@ class DurationResponse {
   String duration;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is DurationResponse && other.duration == duration;
+  bool operator ==(Object other) => identical(this, other) || other is DurationResponse &&
+     other.duration == duration;
 
   @override
   int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (duration.hashCode);
+    // ignore: unnecessary_parenthesis
+    (duration.hashCode);
 
   @override
   String toString() => 'DurationResponse[duration=$duration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'duration'] = this.duration;
+      json[r'duration'] = this.duration;
     return json;
   }
 
@@ -50,10 +49,8 @@ class DurationResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "Response[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "Response[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "DurationResponse[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "DurationResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -65,10 +62,7 @@ class DurationResponse {
     return null;
   }
 
-  static List<DurationResponse> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static List<DurationResponse> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <DurationResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -119,3 +113,4 @@ class DurationResponse {
     'duration',
   };
 }
+

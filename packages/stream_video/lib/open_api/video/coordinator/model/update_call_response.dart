@@ -13,32 +13,66 @@ part of openapi.api;
 class UpdateCallResponse {
   /// Returns a new [UpdateCallResponse] instance.
   UpdateCallResponse({
+    this.blockedUsers = const [],
     required this.call,
     required this.duration,
+    this.members = const [],
+    this.membership,
+    this.ownCapabilities = const [],
   });
+
+  List<UserResponse> blockedUsers;
 
   CallResponse call;
 
   String duration;
 
+  List<MemberResponse> members;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  MemberResponse? membership;
+
+  List<OwnCapability> ownCapabilities;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is UpdateCallResponse &&
+     other.blockedUsers == blockedUsers &&
      other.call == call &&
-     other.duration == duration;
+     other.duration == duration &&
+     other.members == members &&
+     other.membership == membership &&
+     other.ownCapabilities == ownCapabilities;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (blockedUsers.hashCode) +
     (call.hashCode) +
-    (duration.hashCode);
+    (duration.hashCode) +
+    (members.hashCode) +
+    (membership == null ? 0 : membership!.hashCode) +
+    (ownCapabilities.hashCode);
 
   @override
-  String toString() => 'UpdateCallResponse[call=$call, duration=$duration]';
+  String toString() => 'UpdateCallResponse[blockedUsers=$blockedUsers, call=$call, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'blocked_users'] = this.blockedUsers;
       json[r'call'] = this.call;
       json[r'duration'] = this.duration;
+      json[r'members'] = this.members;
+    if (this.membership != null) {
+      json[r'membership'] = this.membership;
+    } else {
+      json[r'membership'] = null;
+    }
+      json[r'own_capabilities'] = this.ownCapabilities;
     return json;
   }
 
@@ -61,8 +95,12 @@ class UpdateCallResponse {
       }());
 
       return UpdateCallResponse(
+        blockedUsers: UserResponse.listFromJson(json[r'blocked_users']),
         call: CallResponse.fromJson(json[r'call'])!,
         duration: mapValueOfType<String>(json, r'duration')!,
+        members: MemberResponse.listFromJson(json[r'members']),
+        membership: MemberResponse.fromJson(json[r'membership']),
+        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
       );
     }
     return null;
@@ -110,8 +148,11 @@ class UpdateCallResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'blocked_users',
     'call',
     'duration',
+    'members',
+    'own_capabilities',
   };
 }
 
