@@ -150,7 +150,7 @@ class CreateDeviceRequest {
     return null;
   }
 
-  static List<CreateDeviceRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CreateDeviceRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CreateDeviceRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -181,12 +181,10 @@ class CreateDeviceRequest {
   static Map<String, List<CreateDeviceRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CreateDeviceRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CreateDeviceRequest.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CreateDeviceRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -225,7 +223,7 @@ class CreateDeviceRequestPushProviderEnum {
 
   static CreateDeviceRequestPushProviderEnum? fromJson(dynamic value) => CreateDeviceRequestPushProviderEnumTypeTransformer().decode(value);
 
-  static List<CreateDeviceRequestPushProviderEnum>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CreateDeviceRequestPushProviderEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CreateDeviceRequestPushProviderEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {

@@ -88,7 +88,7 @@ class APNSRequest {
     return null;
   }
 
-  static List<APNSRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<APNSRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <APNSRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -119,12 +119,10 @@ class APNSRequest {
   static Map<String, List<APNSRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<APNSRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = APNSRequest.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = APNSRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

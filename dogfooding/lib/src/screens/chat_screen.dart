@@ -12,18 +12,21 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MediaQuery(
-      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
-      child: SafeArea(
-        child: Column(
-          children: const <Widget>[
-            Expanded(
-              child: StreamMessageListView(),
-            ),
-            StreamMessageInput(
-              elevation: 0,
-            ),
-          ],
+    return StreamChatTheme(
+      data: StreamChatThemeData.dark(),
+      child: MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: SafeArea(
+          child: Column(
+            children: const <Widget>[
+              Expanded(
+                child: StreamMessageListView(),
+              ),
+              StreamMessageInput(
+                elevation: 0,
+              ),
+            ],
+          ),
         ),
       ),
     );

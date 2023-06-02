@@ -18,6 +18,7 @@ class GetCallResponse {
     required this.duration,
     this.members = const [],
     this.membership,
+    this.ownCapabilities = const [],
   });
 
   List<UserResponse> blockedUsers;
@@ -36,13 +37,16 @@ class GetCallResponse {
   ///
   MemberResponse? membership;
 
+  List<OwnCapability> ownCapabilities;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is GetCallResponse &&
      other.blockedUsers == blockedUsers &&
      other.call == call &&
      other.duration == duration &&
      other.members == members &&
-     other.membership == membership;
+     other.membership == membership &&
+     other.ownCapabilities == ownCapabilities;
 
   @override
   int get hashCode =>
@@ -51,10 +55,11 @@ class GetCallResponse {
     (call.hashCode) +
     (duration.hashCode) +
     (members.hashCode) +
-    (membership == null ? 0 : membership!.hashCode);
+    (membership == null ? 0 : membership!.hashCode) +
+    (ownCapabilities.hashCode);
 
   @override
-  String toString() => 'GetCallResponse[blockedUsers=$blockedUsers, call=$call, duration=$duration, members=$members, membership=$membership]';
+  String toString() => 'GetCallResponse[blockedUsers=$blockedUsers, call=$call, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -67,6 +72,7 @@ class GetCallResponse {
     } else {
       json[r'membership'] = null;
     }
+      json[r'own_capabilities'] = this.ownCapabilities;
     return json;
   }
 
@@ -89,17 +95,18 @@ class GetCallResponse {
       }());
 
       return GetCallResponse(
-        blockedUsers: UserResponse.listFromJson(json[r'blocked_users'])!,
+        blockedUsers: UserResponse.listFromJson(json[r'blocked_users']),
         call: CallResponse.fromJson(json[r'call'])!,
         duration: mapValueOfType<String>(json, r'duration')!,
-        members: MemberResponse.listFromJson(json[r'members'])!,
+        members: MemberResponse.listFromJson(json[r'members']),
         membership: MemberResponse.fromJson(json[r'membership']),
+        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
       );
     }
     return null;
   }
 
-  static List<GetCallResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<GetCallResponse> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <GetCallResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -130,12 +137,10 @@ class GetCallResponse {
   static Map<String, List<GetCallResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<GetCallResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = GetCallResponse.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = GetCallResponse.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -147,6 +152,7 @@ class GetCallResponse {
     'call',
     'duration',
     'members',
+    'own_capabilities',
   };
 }
 

@@ -61,7 +61,7 @@ class RTMPIngress {
     return null;
   }
 
-  static List<RTMPIngress>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RTMPIngress> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <RTMPIngress>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -92,12 +92,10 @@ class RTMPIngress {
   static Map<String, List<RTMPIngress>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<RTMPIngress>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = RTMPIngress.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = RTMPIngress.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

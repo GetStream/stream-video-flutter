@@ -25,7 +25,6 @@ class CallResponse {
     required this.hlsPlaylistUrl,
     required this.id,
     required this.ingress,
-    this.ownCapabilities = const [],
     required this.recording,
     this.session,
     required this.settings,
@@ -70,9 +69,6 @@ class CallResponse {
   String id;
 
   CallIngressResponse ingress;
-
-  /// The capabilities of the current user
-  List<OwnCapability> ownCapabilities;
 
   bool recording;
 
@@ -125,7 +121,6 @@ class CallResponse {
      other.hlsPlaylistUrl == hlsPlaylistUrl &&
      other.id == id &&
      other.ingress == ingress &&
-     other.ownCapabilities == ownCapabilities &&
      other.recording == recording &&
      other.session == session &&
      other.settings == settings &&
@@ -150,7 +145,6 @@ class CallResponse {
     (hlsPlaylistUrl.hashCode) +
     (id.hashCode) +
     (ingress.hashCode) +
-    (ownCapabilities.hashCode) +
     (recording.hashCode) +
     (session == null ? 0 : session!.hashCode) +
     (settings.hashCode) +
@@ -161,7 +155,7 @@ class CallResponse {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcasting=$broadcasting, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, endedAt=$endedAt, hlsPlaylistUrl=$hlsPlaylistUrl, id=$id, ingress=$ingress, ownCapabilities=$ownCapabilities, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
+  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcasting=$broadcasting, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, endedAt=$endedAt, hlsPlaylistUrl=$hlsPlaylistUrl, id=$id, ingress=$ingress, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -181,7 +175,6 @@ class CallResponse {
       json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
       json[r'id'] = this.id;
       json[r'ingress'] = this.ingress;
-      json[r'own_capabilities'] = this.ownCapabilities;
       json[r'recording'] = this.recording;
     if (this.session != null) {
       json[r'session'] = this.session;
@@ -238,7 +231,6 @@ class CallResponse {
         hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
         id: mapValueOfType<String>(json, r'id')!,
         ingress: CallIngressResponse.fromJson(json[r'ingress'])!,
-        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
         recording: mapValueOfType<bool>(json, r'recording')!,
         session: CallSessionResponse.fromJson(json[r'session']),
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,
@@ -252,7 +244,7 @@ class CallResponse {
     return null;
   }
 
-  static List<CallResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallResponse> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -283,12 +275,10 @@ class CallResponse {
   static Map<String, List<CallResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CallResponse.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CallResponse.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -307,7 +297,6 @@ class CallResponse {
     'hls_playlist_url',
     'id',
     'ingress',
-    'own_capabilities',
     'recording',
     'settings',
     'transcribing',

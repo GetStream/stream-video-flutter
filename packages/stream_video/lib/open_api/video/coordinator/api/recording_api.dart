@@ -16,7 +16,69 @@ class RecordingApi {
 
   final ApiClient apiClient;
 
-  /// List recordings
+  /// List recordings (type, id)
+  ///
+  /// Lists recordings  Required permissions: - ListRecordings 
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  Future<Response> listRecordingsTypeId0WithHttpInfo(String type, String id,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/call/{type}/{id}/recordings'
+      .replaceAll('{type}', type)
+      .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// List recordings (type, id)
+  ///
+  /// Lists recordings  Required permissions: - ListRecordings 
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  Future<ListRecordingsResponse?> listRecordingsTypeId0(String type, String id,) async {
+    final response = await listRecordingsTypeId0WithHttpInfo(type, id,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'ListRecordingsResponse',) as ListRecordingsResponse;
+    
+    }
+    return null;
+  }
+
+  /// List recordings (type, id, session)
   ///
   /// Lists recordings  Required permissions: - ListRecordings 
   ///
@@ -29,7 +91,7 @@ class RecordingApi {
   /// * [String] id (required):
   ///
   /// * [String] session (required):
-  Future<Response> listRecordingsWithHttpInfo(String type, String id, String session,) async {
+  Future<Response> listRecordingsTypeIdSession1WithHttpInfo(String type, String id, String session,) async {
     // ignore: prefer_const_declarations
     final path = r'/call/{type}/{id}/{session}/recordings'
       .replaceAll('{type}', type)
@@ -57,7 +119,7 @@ class RecordingApi {
     );
   }
 
-  /// List recordings
+  /// List recordings (type, id, session)
   ///
   /// Lists recordings  Required permissions: - ListRecordings 
   ///
@@ -68,8 +130,8 @@ class RecordingApi {
   /// * [String] id (required):
   ///
   /// * [String] session (required):
-  Future<ListRecordingsResponse?> listRecordings(String type, String id, String session,) async {
-    final response = await listRecordingsWithHttpInfo(type, id, session,);
+  Future<ListRecordingsResponse?> listRecordingsTypeIdSession1(String type, String id, String session,) async {
+    final response = await listRecordingsTypeIdSession1WithHttpInfo(type, id, session,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

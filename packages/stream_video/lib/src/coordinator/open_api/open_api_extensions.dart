@@ -87,16 +87,19 @@ extension UserListExt on List<open.UserResponse> {
 }
 
 extension EnvelopeExt on open.CallResponse {
-  CallMetadata toCallMetadata([List<open.MemberResponse>? members]) {
+  CallMetadata toCallMetadata([
+    List<open.MemberResponse>? members,
+    List<open.OwnCapability>? ownCapabilities,
+  ]) {
     return CallMetadata(
       cid: StreamCallCid(cid: cid),
       details: CallDetails(
         hlsPlaylistUrl: hlsPlaylistUrl,
         createdBy: createdBy.toCallUser(),
         team: team ?? '',
-        ownCapabilities: ownCapabilities.map(
-          (it) => CallPermission.fromAlias(it.value),
-        ),
+        ownCapabilities:
+            ownCapabilities?.map((it) => CallPermission.fromAlias(it.value)) ??
+                [],
         blockedUserIds: List.unmodifiable(blockedUserIds),
         broadcasting: broadcasting,
         recording: recording,
@@ -125,7 +128,7 @@ extension EnvelopeExt on open.CallResponse {
 extension CallSettingsExt on open.CallSettingsResponse {
   // TODO open api provides wider settings options
   CallSettings toCallSettings() {
-    streamLog.i("CallSettingsExt", () => '[toCallSettings] settings: $this');
+    streamLog.i('CallSettingsExt', () => '[toCallSettings] settings: $this');
     return CallSettings(
       ring: RingSettings(
         autoCancelTimeout: Duration(milliseconds: ring.autoCancelTimeoutMs),

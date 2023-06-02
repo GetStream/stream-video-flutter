@@ -62,7 +62,7 @@ class DurationResponse {
     return null;
   }
 
-  static List<DurationResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<DurationResponse> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <DurationResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -90,15 +90,19 @@ class DurationResponse {
   }
 
   // maps a json object with a list of DurationResponse-objects as value to a dart map
-  static Map<String, List<DurationResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<DurationResponse>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<DurationResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = DurationResponse.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = DurationResponse.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
