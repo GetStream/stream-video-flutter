@@ -15,8 +15,9 @@ class JoinCallRequest {
   JoinCallRequest({
     this.create,
     this.data,
-    this.datacenterHintedId,
+    required this.location,
     this.membersLimit,
+    this.notify,
     this.ring,
   });
 
@@ -37,13 +38,7 @@ class JoinCallRequest {
   ///
   CallRequest? data;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? datacenterHintedId;
+  String location;
 
   /// Maximum value: 100
   ///
@@ -53,6 +48,14 @@ class JoinCallRequest {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   int? membersLimit;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? notify;
 
   /// if true and the call is created, the notification will include ring=true
   ///
@@ -67,8 +70,9 @@ class JoinCallRequest {
   bool operator ==(Object other) => identical(this, other) || other is JoinCallRequest &&
      other.create == create &&
      other.data == data &&
-     other.datacenterHintedId == datacenterHintedId &&
+     other.location == location &&
      other.membersLimit == membersLimit &&
+     other.notify == notify &&
      other.ring == ring;
 
   @override
@@ -76,12 +80,13 @@ class JoinCallRequest {
     // ignore: unnecessary_parenthesis
     (create == null ? 0 : create!.hashCode) +
     (data == null ? 0 : data!.hashCode) +
-    (datacenterHintedId == null ? 0 : datacenterHintedId!.hashCode) +
+    (location.hashCode) +
     (membersLimit == null ? 0 : membersLimit!.hashCode) +
+    (notify == null ? 0 : notify!.hashCode) +
     (ring == null ? 0 : ring!.hashCode);
 
   @override
-  String toString() => 'JoinCallRequest[create=$create, data=$data, datacenterHintedId=$datacenterHintedId, membersLimit=$membersLimit, ring=$ring]';
+  String toString() => 'JoinCallRequest[create=$create, data=$data, location=$location, membersLimit=$membersLimit, notify=$notify, ring=$ring]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -95,15 +100,16 @@ class JoinCallRequest {
     } else {
       json[r'data'] = null;
     }
-    if (this.datacenterHintedId != null) {
-      json[r'datacenter_hinted_id'] = this.datacenterHintedId;
-    } else {
-      json[r'datacenter_hinted_id'] = null;
-    }
+      json[r'location'] = this.location;
     if (this.membersLimit != null) {
       json[r'members_limit'] = this.membersLimit;
     } else {
       json[r'members_limit'] = null;
+    }
+    if (this.notify != null) {
+      json[r'notify'] = this.notify;
+    } else {
+      json[r'notify'] = null;
     }
     if (this.ring != null) {
       json[r'ring'] = this.ring;
@@ -134,15 +140,16 @@ class JoinCallRequest {
       return JoinCallRequest(
         create: mapValueOfType<bool>(json, r'create'),
         data: CallRequest.fromJson(json[r'data']),
-        datacenterHintedId: mapValueOfType<String>(json, r'datacenter_hinted_id'),
+        location: mapValueOfType<String>(json, r'location')!,
         membersLimit: mapValueOfType<int>(json, r'members_limit'),
+        notify: mapValueOfType<bool>(json, r'notify'),
         ring: mapValueOfType<bool>(json, r'ring'),
       );
     }
     return null;
   }
 
-  static List<JoinCallRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<JoinCallRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <JoinCallRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -173,12 +180,10 @@ class JoinCallRequest {
   static Map<String, List<JoinCallRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<JoinCallRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = JoinCallRequest.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = JoinCallRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -186,6 +191,7 @@ class JoinCallRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'location',
   };
 }
 

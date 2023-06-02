@@ -1,9 +1,10 @@
-import '../lifecycle/lifecycle_state.dart';
+import '../../open_api/video/coordinator/api.dart';
 import '../models/call_cid.dart';
 import '../models/call_device.dart';
 import '../models/call_metadata.dart';
 import '../models/call_reaction.dart';
 import '../models/call_received_created_data.dart';
+import '../models/guest_created_data.dart';
 import '../models/queried_calls.dart';
 import '../models/queried_members.dart';
 import '../models/user_info.dart';
@@ -15,7 +16,6 @@ import 'models/coordinator_inputs.dart' as inputs;
 import 'models/coordinator_models.dart' as models;
 
 abstract class CoordinatorClient {
-
   SharedEmitter<CoordinatorEvent> get events;
 
   Future<Result<None>> connectUser(UserInfo user);
@@ -38,19 +38,9 @@ abstract class CoordinatorClient {
 
   Future<Result<models.CoordinatorJoined>> joinCall(inputs.JoinCallInput input);
 
-  Future<Result<models.SfuServerSelected>> findBestCallEdgeServer({
-    required StreamCallCid callCid,
-    required List<models.SfuEdge> edges,
-  });
+  Future<Result<None>> acceptCall({required StreamCallCid cid});
 
-  Future<Result<models.SfuServerSelected>> selectCallEdgeServer({
-    required StreamCallCid callCid,
-    required Map<String, models.SfuLatency> latencyByEdge,
-  });
-
-  Future<Result<None>> sendUserEvent(
-    inputs.EventInput input,
-  );
+  Future<Result<None>> rejectCall({required StreamCallCid cid});
 
   /// Sends a custom event to the API to notify if we've changed something
   /// in the state of the call.
@@ -84,6 +74,12 @@ abstract class CoordinatorClient {
 
   /// Starts recording for the call described by the given [callCid].
   Future<Result<None>> startRecording(StreamCallCid callCid);
+
+  /// Returns a list of recording for the associated [callCid] and [sessionId].
+  Future<Result<List<CallRecording>>> listRecordings(
+    StreamCallCid callCid,
+    String sessionId,
+  );
 
   /// Stops recording for the call described by the given [callCid].
   Future<Result<None>> stopRecording(StreamCallCid callCid);
@@ -121,34 +117,6 @@ abstract class CoordinatorClient {
   Future<Result<None>> muteUsers(inputs.MuteUsersInput input);
 
   Future<Result<CallMetadata>> updateCall(inputs.UpdateCallInput input);
-}
 
-extension CoordinatorClientX on CoordinatorClient {
-  /// Signals other users that I have accepted the incoming call.
-  /// Causes the [CoordinatorCallAcceptedEvent] event to be emitted
-  /// to all the call members.
-  Future<Result<None>> acceptCall({
-    required StreamCallCid cid,
-  }) async {
-    return sendUserEvent(
-      inputs.EventInput(
-        callCid: cid,
-        eventType: inputs.EventTypeInput.accepted,
-      ),
-    );
-  }
-
-  /// Signals other users that I have rejected the incoming call.
-  /// Causes the [CoordinatorCallRejectedEvent] event to be emitted
-  /// to all the call members.
-  Future<Result<None>> rejectCall({
-    required StreamCallCid cid,
-  }) async {
-    return sendUserEvent(
-      inputs.EventInput(
-        callCid: cid,
-        eventType: inputs.EventTypeInput.rejected,
-      ),
-    );
-  }
+  Future<Result<GuestCreatedData>> createGuest(inputs.UserInput input);
 }

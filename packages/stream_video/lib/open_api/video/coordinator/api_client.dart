@@ -183,6 +183,12 @@ class ApiClient {
           return value is DateTime ? value : DateTime.tryParse(value);
         case 'APIError':
           return APIError.fromJson(value);
+        case 'APNS':
+          return APNS.fromJson(value);
+        case 'APNSRequest':
+          return APNSRequest.fromJson(value);
+        case 'AcceptCallResponse':
+          return AcceptCallResponse.fromJson(value);
         case 'AudioSettings':
           return AudioSettings.fromJson(value);
         case 'AudioSettingsRequest':
@@ -211,6 +217,8 @@ class ApiClient {
           return CallEndedEvent.fromJson(value);
         case 'CallIngressResponse':
           return CallIngressResponse.fromJson(value);
+        case 'CallLiveStartedEvent':
+          return CallLiveStartedEvent.fromJson(value);
         case 'CallMemberAddedEvent':
           return CallMemberAddedEvent.fromJson(value);
         case 'CallMemberRemovedEvent':
@@ -219,6 +227,10 @@ class ApiClient {
           return CallMemberUpdatedEvent.fromJson(value);
         case 'CallMemberUpdatedPermissionEvent':
           return CallMemberUpdatedPermissionEvent.fromJson(value);
+        case 'CallNotificationEvent':
+          return CallNotificationEvent.fromJson(value);
+        case 'CallParticipantResponse':
+          return CallParticipantResponse.fromJson(value);
         case 'CallReactionEvent':
           return CallReactionEvent.fromJson(value);
         case 'CallRecording':
@@ -233,6 +245,18 @@ class ApiClient {
           return CallRequest.fromJson(value);
         case 'CallResponse':
           return CallResponse.fromJson(value);
+        case 'CallRingEvent':
+          return CallRingEvent.fromJson(value);
+        case 'CallSessionEndedEvent':
+          return CallSessionEndedEvent.fromJson(value);
+        case 'CallSessionParticipantJoinedEvent':
+          return CallSessionParticipantJoinedEvent.fromJson(value);
+        case 'CallSessionParticipantLeftEvent':
+          return CallSessionParticipantLeftEvent.fromJson(value);
+        case 'CallSessionResponse':
+          return CallSessionResponse.fromJson(value);
+        case 'CallSessionStartedEvent':
+          return CallSessionStartedEvent.fromJson(value);
         case 'CallSettingsRequest':
           return CallSettingsRequest.fromJson(value);
         case 'CallSettingsResponse':
@@ -247,8 +271,6 @@ class ApiClient {
           return ConnectUserDetailsRequest.fromJson(value);
         case 'ConnectedEvent':
           return ConnectedEvent.fromJson(value);
-        case 'Coordinates':
-          return Coordinates.fromJson(value);
         case 'CreateCallTypeRequest':
           return CreateCallTypeRequest.fromJson(value);
         case 'CreateCallTypeResponse':
@@ -263,24 +285,20 @@ class ApiClient {
           return Credentials.fromJson(value);
         case 'CustomVideoEvent':
           return CustomVideoEvent.fromJson(value);
-        case 'DatacenterResponse':
-          return DatacenterResponse.fromJson(value);
         case 'Device':
           return Device.fromJson(value);
-        case 'DeviceFieldsRequest':
-          return DeviceFieldsRequest.fromJson(value);
         case 'EdgeResponse':
           return EdgeResponse.fromJson(value);
         case 'EndCallResponse':
           return EndCallResponse.fromJson(value);
+        case 'EventNotificationSettings':
+          return EventNotificationSettings.fromJson(value);
+        case 'EventNotificationSettingsRequest':
+          return EventNotificationSettingsRequest.fromJson(value);
         case 'GeofenceSettings':
           return GeofenceSettings.fromJson(value);
         case 'GeofenceSettingsRequest':
           return GeofenceSettingsRequest.fromJson(value);
-        case 'GetCallEdgeServerRequest':
-          return GetCallEdgeServerRequest.fromJson(value);
-        case 'GetCallEdgeServerResponse':
-          return GetCallEdgeServerResponse.fromJson(value);
         case 'GetCallResponse':
           return GetCallResponse.fromJson(value);
         case 'GetCallTypeResponse':
@@ -317,6 +335,10 @@ class ApiClient {
           return MuteUsersRequest.fromJson(value);
         case 'MuteUsersResponse':
           return MuteUsersResponse.fromJson(value);
+        case 'NotificationSettings':
+          return NotificationSettings.fromJson(value);
+        case 'NotificationSettingsRequest':
+          return NotificationSettingsRequest.fromJson(value);
         case 'OwnCapability':
           return OwnCapabilityTypeTransformer().decode(value);
         case 'OwnUserResponse':
@@ -339,6 +361,8 @@ class ApiClient {
           return RecordSettings.fromJson(value);
         case 'RecordSettingsRequest':
           return RecordSettingsRequest.fromJson(value);
+        case 'RejectCallResponse':
+          return RejectCallResponse.fromJson(value);
         case 'RequestPermissionRequest':
           return RequestPermissionRequest.fromJson(value);
         case 'RequestPermissionResponse':
@@ -365,8 +389,24 @@ class ApiClient {
           return SendReactionResponse.fromJson(value);
         case 'SortParamRequest':
           return SortParamRequest.fromJson(value);
+        case 'StartBroadcastingResponse':
+          return StartBroadcastingResponse.fromJson(value);
+        case 'StartRecordingResponse':
+          return StartRecordingResponse.fromJson(value);
+        case 'StartTranscriptionResponse':
+          return StartTranscriptionResponse.fromJson(value);
+        case 'StopBroadcastingResponse':
+          return StopBroadcastingResponse.fromJson(value);
         case 'StopLiveResponse':
           return StopLiveResponse.fromJson(value);
+        case 'StopRecordingResponse':
+          return StopRecordingResponse.fromJson(value);
+        case 'StopTranscriptionResponse':
+          return StopTranscriptionResponse.fromJson(value);
+        case 'TargetResolution':
+          return TargetResolution.fromJson(value);
+        case 'TargetResolutionRequest':
+          return TargetResolutionRequest.fromJson(value);
         case 'TranscriptionSettings':
           return TranscriptionSettings.fromJson(value);
         case 'TranscriptionSettingsRequest':

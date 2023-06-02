@@ -17,6 +17,7 @@ class CreateCallTypeResponse {
     required this.duration,
     this.grants = const {},
     required this.name,
+    required this.notificationSettings,
     required this.settings,
     required this.updatedAt,
   });
@@ -29,6 +30,8 @@ class CreateCallTypeResponse {
 
   String name;
 
+  NotificationSettings notificationSettings;
+
   CallSettingsResponse settings;
 
   DateTime updatedAt;
@@ -39,6 +42,7 @@ class CreateCallTypeResponse {
      other.duration == duration &&
      other.grants == grants &&
      other.name == name &&
+     other.notificationSettings == notificationSettings &&
      other.settings == settings &&
      other.updatedAt == updatedAt;
 
@@ -49,11 +53,12 @@ class CreateCallTypeResponse {
     (duration.hashCode) +
     (grants.hashCode) +
     (name.hashCode) +
+    (notificationSettings.hashCode) +
     (settings.hashCode) +
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'CreateCallTypeResponse[createdAt=$createdAt, duration=$duration, grants=$grants, name=$name, settings=$settings, updatedAt=$updatedAt]';
+  String toString() => 'CreateCallTypeResponse[createdAt=$createdAt, duration=$duration, grants=$grants, name=$name, notificationSettings=$notificationSettings, settings=$settings, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -61,6 +66,7 @@ class CreateCallTypeResponse {
       json[r'duration'] = this.duration;
       json[r'grants'] = this.grants;
       json[r'name'] = this.name;
+      json[r'notification_settings'] = this.notificationSettings;
       json[r'settings'] = this.settings;
       json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
     return json;
@@ -91,6 +97,7 @@ class CreateCallTypeResponse {
           ? const {}
             : mapCastOfType<String, List<String>>(json, r'grants') ?? const {},
         name: mapValueOfType<String>(json, r'name')!,
+        notificationSettings: NotificationSettings.fromJson(json[r'notification_settings'])!,
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,
         updatedAt: mapDateTime(json, r'updated_at', '')!,
       );
@@ -98,7 +105,7 @@ class CreateCallTypeResponse {
     return null;
   }
 
-  static List<CreateCallTypeResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CreateCallTypeResponse> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CreateCallTypeResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -129,12 +136,10 @@ class CreateCallTypeResponse {
   static Map<String, List<CreateCallTypeResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CreateCallTypeResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CreateCallTypeResponse.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CreateCallTypeResponse.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -146,6 +151,7 @@ class CreateCallTypeResponse {
     'duration',
     'grants',
     'name',
+    'notification_settings',
     'settings',
     'updated_at',
   };

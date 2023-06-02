@@ -18,11 +18,11 @@ class VideoEvent {
     required this.createdAt,
     this.type = 'call.permissions_updated',
     required this.user,
-    required this.hlsPlaylistUrl,
     required this.call,
+    required this.hlsPlaylistUrl,
     this.members = const [],
-    required this.ringing,
     this.capabilitiesByRole = const {},
+    required this.sessionId,
     required this.reaction,
     required this.connectionId,
     required this.me,
@@ -48,18 +48,18 @@ class VideoEvent {
 
   UserResponse user;
 
-  String hlsPlaylistUrl;
-
   CallResponse call;
 
-  /// The list of members that were updated
-  List<MemberResponse> members;
+  String hlsPlaylistUrl;
 
-  /// true when the call was created with ring enabled
-  bool ringing;
+  /// Call members
+  List<MemberResponse> members;
 
   /// The capabilities by role for this call
   Map<String, List<String>> capabilitiesByRole;
+
+  /// Call session ID
+  String sessionId;
 
   ReactionResponse reaction;
 
@@ -84,11 +84,11 @@ class VideoEvent {
      other.createdAt == createdAt &&
      other.type == type &&
      other.user == user &&
-     other.hlsPlaylistUrl == hlsPlaylistUrl &&
      other.call == call &&
+     other.hlsPlaylistUrl == hlsPlaylistUrl &&
      other.members == members &&
-     other.ringing == ringing &&
      other.capabilitiesByRole == capabilitiesByRole &&
+     other.sessionId == sessionId &&
      other.reaction == reaction &&
      other.connectionId == connectionId &&
      other.me == me &&
@@ -104,11 +104,11 @@ class VideoEvent {
     (createdAt.hashCode) +
     (type.hashCode) +
     (user.hashCode) +
-    (hlsPlaylistUrl.hashCode) +
     (call.hashCode) +
+    (hlsPlaylistUrl.hashCode) +
     (members.hashCode) +
-    (ringing.hashCode) +
     (capabilitiesByRole.hashCode) +
+    (sessionId.hashCode) +
     (reaction.hashCode) +
     (connectionId.hashCode) +
     (me.hashCode) +
@@ -117,7 +117,7 @@ class VideoEvent {
     (ownCapabilities.hashCode);
 
   @override
-  String toString() => 'VideoEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, hlsPlaylistUrl=$hlsPlaylistUrl, call=$call, members=$members, ringing=$ringing, capabilitiesByRole=$capabilitiesByRole, reaction=$reaction, connectionId=$connectionId, me=$me, custom=$custom, permissions=$permissions, ownCapabilities=$ownCapabilities]';
+  String toString() => 'VideoEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, call=$call, hlsPlaylistUrl=$hlsPlaylistUrl, members=$members, capabilitiesByRole=$capabilitiesByRole, sessionId=$sessionId, reaction=$reaction, connectionId=$connectionId, me=$me, custom=$custom, permissions=$permissions, ownCapabilities=$ownCapabilities]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -130,11 +130,11 @@ class VideoEvent {
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'type'] = this.type;
       json[r'user'] = this.user;
-      json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
       json[r'call'] = this.call;
+      json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
       json[r'members'] = this.members;
-      json[r'ringing'] = this.ringing;
       json[r'capabilities_by_role'] = this.capabilitiesByRole;
+      json[r'session_id'] = this.sessionId;
       json[r'reaction'] = this.reaction;
       json[r'connection_id'] = this.connectionId;
       json[r'me'] = this.me;
@@ -168,13 +168,13 @@ class VideoEvent {
         createdAt: mapDateTime(json, r'created_at', '')!,
         type: mapValueOfType<String>(json, r'type')!,
         user: UserResponse.fromJson(json[r'user'])!,
-        hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
         call: CallResponse.fromJson(json[r'call'])!,
-        members: MemberResponse.listFromJson(json[r'members'])!,
-        ringing: mapValueOfType<bool>(json, r'ringing')!,
+        hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
+        members: MemberResponse.listFromJson(json[r'members']),
         capabilitiesByRole: json[r'capabilities_by_role'] == null
           ? const {}
             : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
+        sessionId: mapValueOfType<String>(json, r'session_id')!,
         reaction: ReactionResponse.fromJson(json[r'reaction'])!,
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
         me: OwnUserResponse.fromJson(json[r'me'])!,
@@ -182,13 +182,13 @@ class VideoEvent {
         permissions: json[r'permissions'] is List
             ? (json[r'permissions'] as List).cast<String>()
             : const [],
-        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
+        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
       );
     }
     return null;
   }
 
-  static List<VideoEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<VideoEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <VideoEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -219,12 +219,10 @@ class VideoEvent {
   static Map<String, List<VideoEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<VideoEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = VideoEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = VideoEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -236,11 +234,11 @@ class VideoEvent {
     'created_at',
     'type',
     'user',
-    'hls_playlist_url',
     'call',
+    'hls_playlist_url',
     'members',
-    'ringing',
     'capabilities_by_role',
+    'session_id',
     'reaction',
     'connection_id',
     'me',

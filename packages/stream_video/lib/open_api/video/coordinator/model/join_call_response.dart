@@ -16,10 +16,11 @@ class JoinCallResponse {
     this.blockedUsers = const [],
     required this.call,
     required this.created,
+    required this.credentials,
     required this.duration,
-    this.edges = const [],
     this.members = const [],
     this.membership,
+    this.ownCapabilities = const [],
   });
 
   List<UserResponse> blockedUsers;
@@ -28,9 +29,9 @@ class JoinCallResponse {
 
   bool created;
 
-  String duration;
+  Credentials credentials;
 
-  List<DatacenterResponse> edges;
+  String duration;
 
   List<MemberResponse> members;
 
@@ -42,15 +43,18 @@ class JoinCallResponse {
   ///
   MemberResponse? membership;
 
+  List<OwnCapability> ownCapabilities;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is JoinCallResponse &&
      other.blockedUsers == blockedUsers &&
      other.call == call &&
      other.created == created &&
+     other.credentials == credentials &&
      other.duration == duration &&
-     other.edges == edges &&
      other.members == members &&
-     other.membership == membership;
+     other.membership == membership &&
+     other.ownCapabilities == ownCapabilities;
 
   @override
   int get hashCode =>
@@ -58,27 +62,29 @@ class JoinCallResponse {
     (blockedUsers.hashCode) +
     (call.hashCode) +
     (created.hashCode) +
+    (credentials.hashCode) +
     (duration.hashCode) +
-    (edges.hashCode) +
     (members.hashCode) +
-    (membership == null ? 0 : membership!.hashCode);
+    (membership == null ? 0 : membership!.hashCode) +
+    (ownCapabilities.hashCode);
 
   @override
-  String toString() => 'JoinCallResponse[blockedUsers=$blockedUsers, call=$call, created=$created, duration=$duration, edges=$edges, members=$members, membership=$membership]';
+  String toString() => 'JoinCallResponse[blockedUsers=$blockedUsers, call=$call, created=$created, credentials=$credentials, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'blocked_users'] = this.blockedUsers;
       json[r'call'] = this.call;
       json[r'created'] = this.created;
+      json[r'credentials'] = this.credentials;
       json[r'duration'] = this.duration;
-      json[r'edges'] = this.edges;
       json[r'members'] = this.members;
     if (this.membership != null) {
       json[r'membership'] = this.membership;
     } else {
       json[r'membership'] = null;
     }
+      json[r'own_capabilities'] = this.ownCapabilities;
     return json;
   }
 
@@ -101,19 +107,20 @@ class JoinCallResponse {
       }());
 
       return JoinCallResponse(
-        blockedUsers: UserResponse.listFromJson(json[r'blocked_users'])!,
+        blockedUsers: UserResponse.listFromJson(json[r'blocked_users']),
         call: CallResponse.fromJson(json[r'call'])!,
         created: mapValueOfType<bool>(json, r'created')!,
+        credentials: Credentials.fromJson(json[r'credentials'])!,
         duration: mapValueOfType<String>(json, r'duration')!,
-        edges: DatacenterResponse.listFromJson(json[r'edges'])!,
-        members: MemberResponse.listFromJson(json[r'members'])!,
+        members: MemberResponse.listFromJson(json[r'members']),
         membership: MemberResponse.fromJson(json[r'membership']),
+        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
       );
     }
     return null;
   }
 
-  static List<JoinCallResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<JoinCallResponse> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <JoinCallResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -144,12 +151,10 @@ class JoinCallResponse {
   static Map<String, List<JoinCallResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<JoinCallResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = JoinCallResponse.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = JoinCallResponse.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -160,9 +165,10 @@ class JoinCallResponse {
     'blocked_users',
     'call',
     'created',
+    'credentials',
     'duration',
-    'edges',
     'members',
+    'own_capabilities',
   };
 }
 

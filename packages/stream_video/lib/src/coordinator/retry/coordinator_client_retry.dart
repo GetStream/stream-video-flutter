@@ -1,3 +1,4 @@
+import '../../../open_api/video/coordinator/api.dart';
 import '../../errors/video_error.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
@@ -5,6 +6,7 @@ import '../../models/call_device.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_reaction.dart';
 import '../../models/call_received_created_data.dart';
+import '../../models/guest_created_data.dart';
 import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 import '../../models/user_info.dart';
@@ -74,17 +76,6 @@ class CoordinatorClientRetry extends CoordinatorClient {
   SharedEmitter<CoordinatorEvent> get events => _delegate.events;
 
   @override
-  Future<Result<SfuServerSelected>> findBestCallEdgeServer({
-    required StreamCallCid callCid,
-    required List<SfuEdge> edges,
-  }) {
-    return _delegate.findBestCallEdgeServer(
-      callCid: callCid,
-      edges: edges,
-    );
-  }
-
-  @override
   Future<Result<CallReceivedOrCreatedData>> getOrCreateCall(
     GetOrCreateCallInput input,
   ) {
@@ -122,6 +113,26 @@ class CoordinatorClientRetry extends CoordinatorClient {
       () => _delegate.joinCall(input),
       (error, nextAttemptDelay) async {
         _logRetry('joinCall', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> acceptCall({required StreamCallCid cid}) {
+    return _retryManager.execute(
+      () => _delegate.acceptCall(cid: cid),
+      (error, nextAttemptDelay) async {
+        _logRetry('acceptCall', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> rejectCall({required StreamCallCid cid}) {
+    return _retryManager.execute(
+      () => _delegate.rejectCall(cid: cid),
+      (error, nextAttemptDelay) async {
+        _logRetry('rejectCall', error, nextAttemptDelay);
       },
     );
   }
@@ -187,22 +198,6 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<SfuServerSelected>> selectCallEdgeServer({
-    required StreamCallCid callCid,
-    required Map<String, SfuLatency> latencyByEdge,
-  }) {
-    return _retryManager.execute(
-      () => _delegate.selectCallEdgeServer(
-        callCid: callCid,
-        latencyByEdge: latencyByEdge,
-      ),
-      (error, nextAttemptDelay) async {
-        _logRetry('selectCallEdgeServer', error, nextAttemptDelay);
-      },
-    );
-  }
-
-  @override
   Future<Result<None>> sendCustomEvent(CustomEventInput input) {
     return _retryManager.execute(
       () => _delegate.sendCustomEvent(input),
@@ -223,16 +218,6 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<None>> sendUserEvent(EventInput input) {
-    return _retryManager.execute(
-      () => _delegate.sendUserEvent(input),
-      (error, nextAttemptDelay) async {
-        _logRetry('sendUserEvent', error, nextAttemptDelay);
-      },
-    );
-  }
-
-  @override
   Future<Result<None>> startBroadcasting(StreamCallCid callCid) {
     return _retryManager.execute(
       () => _delegate.startBroadcasting(callCid),
@@ -248,6 +233,19 @@ class CoordinatorClientRetry extends CoordinatorClient {
       () => _delegate.startRecording(callCid),
       (error, nextAttemptDelay) async {
         _logRetry('startRecording', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<List<CallRecording>>> listRecordings(
+    StreamCallCid callCid,
+    String sessionId,
+  ) {
+    return _retryManager.execute(
+      () => _delegate.listRecordings(callCid, sessionId),
+      (error, nextAttemptDelay) async {
+        _logRetry('listRecordings', error, nextAttemptDelay);
       },
     );
   }
@@ -320,6 +318,16 @@ class CoordinatorClientRetry extends CoordinatorClient {
     _logger.w(
       () => '[$req] failed: $error, '
           'retrying in ${nextAttemptDelay.inMilliseconds} ms',
+    );
+  }
+
+  @override
+  Future<Result<GuestCreatedData>> createGuest(UserInput input) {
+    return _retryManager.execute(
+      () => _delegate.createGuest(input),
+      (error, nextAttemptDelay) async {
+        _logRetry('createGuest', error, nextAttemptDelay);
+      },
     );
   }
 }

@@ -18,6 +18,7 @@ class CreateDeviceRequest {
     this.pushProviderName,
     this.user,
     this.userId,
+    this.voipToken,
   });
 
   ///
@@ -54,13 +55,22 @@ class CreateDeviceRequest {
   ///
   String? userId;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? voipToken;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is CreateDeviceRequest &&
      other.id == id &&
      other.pushProvider == pushProvider &&
      other.pushProviderName == pushProviderName &&
      other.user == user &&
-     other.userId == userId;
+     other.userId == userId &&
+     other.voipToken == voipToken;
 
   @override
   int get hashCode =>
@@ -69,10 +79,11 @@ class CreateDeviceRequest {
     (pushProvider == null ? 0 : pushProvider!.hashCode) +
     (pushProviderName == null ? 0 : pushProviderName!.hashCode) +
     (user == null ? 0 : user!.hashCode) +
-    (userId == null ? 0 : userId!.hashCode);
+    (userId == null ? 0 : userId!.hashCode) +
+    (voipToken == null ? 0 : voipToken!.hashCode);
 
   @override
-  String toString() => 'CreateDeviceRequest[id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, user=$user, userId=$userId]';
+  String toString() => 'CreateDeviceRequest[id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, user=$user, userId=$userId, voipToken=$voipToken]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -101,6 +112,11 @@ class CreateDeviceRequest {
     } else {
       json[r'user_id'] = null;
     }
+    if (this.voipToken != null) {
+      json[r'voip_token'] = this.voipToken;
+    } else {
+      json[r'voip_token'] = null;
+    }
     return json;
   }
 
@@ -128,12 +144,13 @@ class CreateDeviceRequest {
         pushProviderName: mapValueOfType<String>(json, r'push_provider_name'),
         user: UserRequest.fromJson(json[r'user']),
         userId: mapValueOfType<String>(json, r'user_id'),
+        voipToken: mapValueOfType<bool>(json, r'voip_token'),
       );
     }
     return null;
   }
 
-  static List<CreateDeviceRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CreateDeviceRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CreateDeviceRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -164,12 +181,10 @@ class CreateDeviceRequest {
   static Map<String, List<CreateDeviceRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CreateDeviceRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CreateDeviceRequest.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CreateDeviceRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -208,7 +223,7 @@ class CreateDeviceRequestPushProviderEnum {
 
   static CreateDeviceRequestPushProviderEnum? fromJson(dynamic value) => CreateDeviceRequestPushProviderEnumTypeTransformer().decode(value);
 
-  static List<CreateDeviceRequestPushProviderEnum>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CreateDeviceRequestPushProviderEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CreateDeviceRequestPushProviderEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {

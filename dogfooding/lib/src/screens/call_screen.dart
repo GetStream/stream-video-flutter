@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../utils/users_provider.dart';
+import '../utils/providers.dart';
 import 'chat_screen.dart';
 
 class CallScreen extends StatefulWidget {
@@ -25,6 +25,7 @@ class _CallScreenState extends State<CallScreen> {
   void showChatDialog(BuildContext context) {
     showBottomSheet<dynamic>(
       context: context,
+      backgroundColor: const Color(0xFF101418),
       builder: (_) {
         return const FractionallySizedBox(
           heightFactor: 0.8,
@@ -44,8 +45,11 @@ class _CallScreenState extends State<CallScreen> {
           body: StreamCallContainer(
             call: widget.call,
             callConnectOptions: widget.callConnectOptions,
-            callContentBuilder:
-                (BuildContext context, Call call, CallState callState) {
+            callContentBuilder: (
+              BuildContext context,
+              Call call,
+              CallState callState,
+            ) {
               return StreamCallContent(
                 call: call,
                 callState: callState,

@@ -85,6 +85,7 @@ class CoordinatorCallCreatedEvent extends CoordinatorCallEvent {
 
   @override
   StreamCallCid get callCid => data.callCid;
+
   CallMetadata get metadata => data.metadata;
 
   @override
@@ -387,6 +388,80 @@ class CoordinatorCallCustomEvent extends CoordinatorCallEvent {
         custom,
         users,
       ];
+}
+
+class CoordinatorCallSessionStartedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallSessionStartedEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.sessionId,
+    required this.metadata,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final String sessionId;
+  final CallMetadata metadata;
+
+  @override
+  List<Object?> get props => [...super.props, createdAt, sessionId, metadata];
+}
+
+class CoordinatorCallSessionEndedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallSessionEndedEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.sessionId,
+    required this.metadata,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final String sessionId;
+  final CallMetadata metadata;
+
+  @override
+  List<Object?> get props => [...super.props, createdAt, sessionId, metadata];
+}
+
+class CoordinatorCallSessionParticipantJoinedEvent
+    extends CoordinatorCallEvent {
+  const CoordinatorCallSessionParticipantJoinedEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.sessionId,
+    required this.user,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final String sessionId;
+  final CallUser user;
+
+  @override
+  List<Object?> get props => [...super.props, createdAt, sessionId, user];
+}
+
+class CoordinatorCallSessionParticipantLeftEvent
+    extends CoordinatorCallEvent {
+  const CoordinatorCallSessionParticipantLeftEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.sessionId,
+    required this.user,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final String sessionId;
+  final CallUser user;
+
+  @override
+  List<Object?> get props => [...super.props, createdAt, sessionId, user];
 }
 
 // Unknown event.

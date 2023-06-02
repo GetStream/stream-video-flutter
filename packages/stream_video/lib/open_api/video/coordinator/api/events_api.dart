@@ -16,9 +16,9 @@ class EventsApi {
 
   final ApiClient apiClient;
 
-  /// Send event
+  /// Send custom event
   ///
-  /// Sends event to the call  Sends events: - call.accepted - call.rejected - custom  Required permissions: - SendEvent 
+  /// Sends custom event to the call  Sends events: - custom  Required permissions: - SendEvent 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -56,9 +56,9 @@ class EventsApi {
     );
   }
 
-  /// Send event
+  /// Send custom event
   ///
-  /// Sends event to the call  Sends events: - call.accepted - call.rejected - custom  Required permissions: - SendEvent 
+  /// Sends custom event to the call  Sends events: - custom  Required permissions: - SendEvent 
   ///
   /// Parameters:
   ///

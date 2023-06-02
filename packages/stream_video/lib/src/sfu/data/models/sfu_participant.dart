@@ -16,6 +16,7 @@ class SfuParticipant with EquatableMixin {
     required this.isSpeaking,
     required this.isDominantSpeaker,
     required this.audioLevel,
+    required this.roles,
   });
 
   final String userId;
@@ -29,6 +30,7 @@ class SfuParticipant with EquatableMixin {
   final bool isSpeaking;
   final bool isDominantSpeaker;
   final double audioLevel;
+  final List<String> roles;
 
   SfuParticipant copyWith({
     String? userId,
@@ -42,6 +44,7 @@ class SfuParticipant with EquatableMixin {
     bool? isSpeaking,
     bool? isDominantSpeaker,
     double? audioLevel,
+    List<String>? roles,
   }) =>
       SfuParticipant(
         userId: userId ?? this.userId,
@@ -55,6 +58,7 @@ class SfuParticipant with EquatableMixin {
         isSpeaking: isSpeaking ?? this.isSpeaking,
         isDominantSpeaker: isDominantSpeaker ?? this.isDominantSpeaker,
         audioLevel: audioLevel ?? this.audioLevel,
+        roles: roles ?? this.roles,
       );
 
   @override
@@ -64,7 +68,8 @@ class SfuParticipant with EquatableMixin {
         'userName: $userName, userImage: $userImage, '
         'publishedTracks: $publishedTracks, joinedAt: $joinedAt, '
         'connectionQuality: $connectionQuality, isSpeaking: $isSpeaking, '
-        'isDominantSpeaker: $isDominantSpeaker, audioLevel: $audioLevel}';
+        'isDominantSpeaker: $isDominantSpeaker, audioLevel: $audioLevel, '
+        'roles: $roles}';
   }
 
   @override
@@ -81,4 +86,20 @@ class SfuParticipant with EquatableMixin {
         isDominantSpeaker,
         audioLevel.hashCode,
       ];
+}
+
+class SfuParticipantCount with EquatableMixin {
+  SfuParticipantCount({
+    required this.total,
+    required this.anonymous,
+  });
+
+  final int total;
+  final int anonymous;
+
+  @override
+  bool? get stringify => true;
+
+  @override
+  List<Object?> get props => [total, anonymous];
 }

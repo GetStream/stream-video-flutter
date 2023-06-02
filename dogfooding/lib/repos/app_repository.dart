@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -6,47 +8,46 @@ import 'package:stream_video_push_notification/stream_video_push_notification.da
 
 import '../env/env.dart';
 import '../log_config.dart';
+import '../src/utils/consts.dart';
 
 class AppRepository {
-  factory AppRepository() => instance;
+  AppRepository();
 
-  AppRepository._internal();
+  late final StreamVideo _streamVideoClient;
+  late final StreamChatClient _streamChatClient;
 
-  static final AppRepository instance = AppRepository._internal();
+  StreamVideo get videoClient => _streamVideoClient;
 
-  StreamVideo? streamVideoClient;
-  StreamChatClient? streamChatClient;
+  StreamChatClient get chatClient => _streamChatClient;
 
-  Future<void> beginSession() async {
-    await initStreamVideo();
-    _initChat();
-    return;
-  }
-
-  Future<StreamVideo> initStreamVideo() async {
+  static Future<StreamVideo> initStreamVideo() async {
     if (!StreamVideo.isInitialized()) {
-      await _setupLogger();
-      streamVideoClient = StreamVideo.init(
+      final streamVideoClient = StreamVideo.init(
         Env.apiKey,
         coordinatorRpcUrl: Env.coordinatorRpcUrl,
         coordinatorWsUrl: Env.coordinatorWsUrl,
         logPriority: Priority.info,
       );
-      await streamVideoClient?.initPushNotificationManager(
-          StreamVideoPushNotificationManager.factory(),
+      await streamVideoClient.initPushNotificationManager(
+        StreamVideoPushNotificationManager.factory(),
       );
-      return streamVideoClient!;
+      return streamVideoClient;
     } else {
-      return streamVideoClient!;
+      return StreamVideo.instance;
     }
   }
 
+  Future<void> beginSession() async {
+    _streamVideoClient = await initStreamVideo();
+    unawaited(_setupLogger());
+    _streamChatClient = _initChat();
+  }
+
   StreamChatClient _initChat() {
-    streamChatClient = StreamChatClient(
+    return StreamChatClient(
       Env.apiKey,
       logLevel: Level.INFO,
     );
-    return streamChatClient!;
   }
 
   Future<void> _setupLogger() async {
@@ -72,35 +73,23 @@ class AppRepository {
       );
       children.add(fileLogger);
     }
-    StreamLog().validator = (priority, _) => true;
     StreamLog().logger = CompositeStreamLogger(children);
   }
 
   Future<Channel> createChatChannel({
     required String channelId,
-    required String channelName,
-    required List<String> channelMembers,
   }) async {
-    assert(streamChatClient != null);
-
-    /// TODO: check if can use "livestream" channel type here.
-    final channel = streamChatClient?.channel(
-      'messaging',
+    final channel = _streamChatClient.channel(
+      kMessageChannelType,
       id: channelId,
-      extraData: {
-        'name': channelName,
-        'members': channelMembers,
-      },
     );
 
-    await channel?.watch();
-    return channel!;
+    await channel.watch();
+    return channel;
   }
 
   Future<void> endSession() async {
-    await streamVideoClient?.disconnectUser();
-    await streamChatClient?.disconnectUser();
+    await _streamVideoClient.disconnectUser();
+    await _streamChatClient.disconnectUser();
   }
-
-
 }

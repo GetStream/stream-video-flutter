@@ -14,10 +14,19 @@ class UpdateCallTypeRequest {
   /// Returns a new [UpdateCallTypeRequest] instance.
   UpdateCallTypeRequest({
     this.grants = const {},
+    this.notificationSettings,
     this.settings,
   });
 
   Map<String, List<String>> grants;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  NotificationSettingsRequest? notificationSettings;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -30,20 +39,27 @@ class UpdateCallTypeRequest {
   @override
   bool operator ==(Object other) => identical(this, other) || other is UpdateCallTypeRequest &&
      other.grants == grants &&
+     other.notificationSettings == notificationSettings &&
      other.settings == settings;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (grants.hashCode) +
+    (notificationSettings == null ? 0 : notificationSettings!.hashCode) +
     (settings == null ? 0 : settings!.hashCode);
 
   @override
-  String toString() => 'UpdateCallTypeRequest[grants=$grants, settings=$settings]';
+  String toString() => 'UpdateCallTypeRequest[grants=$grants, notificationSettings=$notificationSettings, settings=$settings]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'grants'] = this.grants;
+    if (this.notificationSettings != null) {
+      json[r'notification_settings'] = this.notificationSettings;
+    } else {
+      json[r'notification_settings'] = null;
+    }
     if (this.settings != null) {
       json[r'settings'] = this.settings;
     } else {
@@ -74,13 +90,14 @@ class UpdateCallTypeRequest {
         grants: json[r'grants'] == null
           ? const {}
             : mapCastOfType<String, List<String>>(json, r'grants') ?? const {},
+        notificationSettings: NotificationSettingsRequest.fromJson(json[r'notification_settings']),
         settings: CallSettingsRequest.fromJson(json[r'settings']),
       );
     }
     return null;
   }
 
-  static List<UpdateCallTypeRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UpdateCallTypeRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <UpdateCallTypeRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -111,12 +128,10 @@ class UpdateCallTypeRequest {
   static Map<String, List<UpdateCallTypeRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<UpdateCallTypeRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = UpdateCallTypeRequest.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = UpdateCallTypeRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

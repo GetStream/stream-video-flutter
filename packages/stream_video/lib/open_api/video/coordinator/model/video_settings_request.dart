@@ -14,7 +14,10 @@ class VideoSettingsRequest {
   /// Returns a new [VideoSettingsRequest] instance.
   VideoSettingsRequest({
     this.accessRequestEnabled,
+    this.cameraDefaultOn,
+    this.cameraFacing,
     this.enabled,
+    this.targetResolution,
   });
 
   ///
@@ -31,21 +34,45 @@ class VideoSettingsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
+  bool? cameraDefaultOn;
+
+  VideoSettingsRequestCameraFacingEnum? cameraFacing;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
   bool? enabled;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  TargetResolutionRequest? targetResolution;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is VideoSettingsRequest &&
      other.accessRequestEnabled == accessRequestEnabled &&
-     other.enabled == enabled;
+     other.cameraDefaultOn == cameraDefaultOn &&
+     other.cameraFacing == cameraFacing &&
+     other.enabled == enabled &&
+     other.targetResolution == targetResolution;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (accessRequestEnabled == null ? 0 : accessRequestEnabled!.hashCode) +
-    (enabled == null ? 0 : enabled!.hashCode);
+    (cameraDefaultOn == null ? 0 : cameraDefaultOn!.hashCode) +
+    (cameraFacing == null ? 0 : cameraFacing!.hashCode) +
+    (enabled == null ? 0 : enabled!.hashCode) +
+    (targetResolution == null ? 0 : targetResolution!.hashCode);
 
   @override
-  String toString() => 'VideoSettingsRequest[accessRequestEnabled=$accessRequestEnabled, enabled=$enabled]';
+  String toString() => 'VideoSettingsRequest[accessRequestEnabled=$accessRequestEnabled, cameraDefaultOn=$cameraDefaultOn, cameraFacing=$cameraFacing, enabled=$enabled, targetResolution=$targetResolution]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -54,10 +81,25 @@ class VideoSettingsRequest {
     } else {
       json[r'access_request_enabled'] = null;
     }
+    if (this.cameraDefaultOn != null) {
+      json[r'camera_default_on'] = this.cameraDefaultOn;
+    } else {
+      json[r'camera_default_on'] = null;
+    }
+    if (this.cameraFacing != null) {
+      json[r'camera_facing'] = this.cameraFacing;
+    } else {
+      json[r'camera_facing'] = null;
+    }
     if (this.enabled != null) {
       json[r'enabled'] = this.enabled;
     } else {
       json[r'enabled'] = null;
+    }
+    if (this.targetResolution != null) {
+      json[r'target_resolution'] = this.targetResolution;
+    } else {
+      json[r'target_resolution'] = null;
     }
     return json;
   }
@@ -82,13 +124,16 @@ class VideoSettingsRequest {
 
       return VideoSettingsRequest(
         accessRequestEnabled: mapValueOfType<bool>(json, r'access_request_enabled'),
+        cameraDefaultOn: mapValueOfType<bool>(json, r'camera_default_on'),
+        cameraFacing: VideoSettingsRequestCameraFacingEnum.fromJson(json[r'camera_facing']),
         enabled: mapValueOfType<bool>(json, r'enabled'),
+        targetResolution: TargetResolutionRequest.fromJson(json[r'target_resolution']),
       );
     }
     return null;
   }
 
-  static List<VideoSettingsRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<VideoSettingsRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <VideoSettingsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -119,12 +164,10 @@ class VideoSettingsRequest {
   static Map<String, List<VideoSettingsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<VideoSettingsRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = VideoSettingsRequest.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = VideoSettingsRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -134,4 +177,81 @@ class VideoSettingsRequest {
   static const requiredKeys = <String>{
   };
 }
+
+
+class VideoSettingsRequestCameraFacingEnum {
+  /// Instantiate a new enum with the provided [value].
+  const VideoSettingsRequestCameraFacingEnum._(this.value);
+
+  /// The underlying value of this enum member.
+  final String value;
+
+  @override
+  String toString() => value;
+
+  String toJson() => value;
+
+  static const front = VideoSettingsRequestCameraFacingEnum._(r'front');
+  static const back = VideoSettingsRequestCameraFacingEnum._(r'back');
+  static const external_ = VideoSettingsRequestCameraFacingEnum._(r'external');
+
+  /// List of all possible values in this [enum][VideoSettingsRequestCameraFacingEnum].
+  static const values = <VideoSettingsRequestCameraFacingEnum>[
+    front,
+    back,
+    external_,
+  ];
+
+  static VideoSettingsRequestCameraFacingEnum? fromJson(dynamic value) => VideoSettingsRequestCameraFacingEnumTypeTransformer().decode(value);
+
+  static List<VideoSettingsRequestCameraFacingEnum> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <VideoSettingsRequestCameraFacingEnum>[];
+    if (json is List && json.isNotEmpty) {
+      for (final row in json) {
+        final value = VideoSettingsRequestCameraFacingEnum.fromJson(row);
+        if (value != null) {
+          result.add(value);
+        }
+      }
+    }
+    return result.toList(growable: growable);
+  }
+}
+
+/// Transformation class that can [encode] an instance of [VideoSettingsRequestCameraFacingEnum] to String,
+/// and [decode] dynamic data back to [VideoSettingsRequestCameraFacingEnum].
+class VideoSettingsRequestCameraFacingEnumTypeTransformer {
+  factory VideoSettingsRequestCameraFacingEnumTypeTransformer() => _instance ??= const VideoSettingsRequestCameraFacingEnumTypeTransformer._();
+
+  const VideoSettingsRequestCameraFacingEnumTypeTransformer._();
+
+  String encode(VideoSettingsRequestCameraFacingEnum data) => data.value;
+
+  /// Decodes a [dynamic value][data] to a VideoSettingsRequestCameraFacingEnum.
+  ///
+  /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
+  /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
+  /// cannot be decoded successfully, then an [UnimplementedError] is thrown.
+  ///
+  /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
+  /// and users are still using an old app with the old code.
+  VideoSettingsRequestCameraFacingEnum? decode(dynamic data, {bool allowNull = true}) {
+    if (data != null) {
+      switch (data) {
+        case r'front': return VideoSettingsRequestCameraFacingEnum.front;
+        case r'back': return VideoSettingsRequestCameraFacingEnum.back;
+        case r'external': return VideoSettingsRequestCameraFacingEnum.external_;
+        default:
+          if (!allowNull) {
+            throw ArgumentError('Unknown enum value to decode: $data');
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Singleton [VideoSettingsRequestCameraFacingEnumTypeTransformer] instance.
+  static VideoSettingsRequestCameraFacingEnumTypeTransformer? _instance;
+}
+
 

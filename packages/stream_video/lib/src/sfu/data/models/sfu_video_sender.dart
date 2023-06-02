@@ -1,32 +1,27 @@
-import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
+import 'package:equatable/equatable.dart';
+import 'sfu_codec.dart';
 
-class SfuVideoSender {
+import 'sfu_video_layer_setting.dart';
+
+class SfuVideoSender with EquatableMixin {
   SfuVideoSender({
     required this.mediaRequest,
     required this.codec,
+    required this.layers,
   });
 
   final SfuVideoMediaRequest mediaRequest;
   final SfuCodec codec;
+  final List<SfuVideoLayerSetting> layers;
 
   @override
-  String toString() {
-    return 'SfuVideoSender{mediaRequest: $mediaRequest, codec: $codec}';
-  }
+  bool? get stringify => true;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SfuVideoSender &&
-          runtimeType == other.runtimeType &&
-          mediaRequest == other.mediaRequest &&
-          codec == other.codec;
-
-  @override
-  int get hashCode => mediaRequest.hashCode ^ codec.hashCode;
+  List<Object?> get props => [mediaRequest, codec, layers];
 }
 
-class SfuVideoMediaRequest {
+class SfuVideoMediaRequest with EquatableMixin {
   SfuVideoMediaRequest({
     required this.idealHeight,
     required this.idealWidth,
@@ -38,21 +33,8 @@ class SfuVideoMediaRequest {
   final int idealFrameRate;
 
   @override
-  String toString() {
-    return 'SfuVideoMediaRequest{idealHeight: $idealHeight, '
-        'idealWidth: $idealWidth, idealFrameRate: $idealFrameRate}';
-  }
+  bool? get stringify => true;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SfuVideoMediaRequest &&
-          runtimeType == other.runtimeType &&
-          idealHeight == other.idealHeight &&
-          idealWidth == other.idealWidth &&
-          idealFrameRate == other.idealFrameRate;
-
-  @override
-  int get hashCode =>
-      idealHeight.hashCode ^ idealWidth.hashCode ^ idealFrameRate.hashCode;
+  List<Object?> get props => [idealHeight, idealWidth, idealFrameRate];
 }

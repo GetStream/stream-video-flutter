@@ -1,15 +1,14 @@
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_video/stream_video.dart';
 
-import '../../repos/auth_repo.dart';
 import '../routes/routes.dart';
 import '../utils/assets.dart';
-
-import 'package:crypto/crypto.dart';
+import '../utils/loading_dialog.dart';
+import '../utils/providers.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,10 +19,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
-  final auth = AuthRepository.instance;
 
   Future<void> _loginWithGoogle() async {
-    final googleUser = await auth.signInWithGoogle();
+    final googleUser = await context.authRepo.signInWithGoogle();
     if (googleUser == null) return debugPrint('Google login cancelled');
 
     final user = UserInfo(
@@ -33,7 +31,11 @@ class _LoginScreenState extends State<LoginScreen> {
       image: googleUser.photoUrl,
     );
 
-    await auth.loginWithUserInfo(user);
+    if (mounted) {
+      unawaited(showLoadingIndicator(context));
+      await context.authRepo.loginWithUserInfo(user);
+    }
+    if (mounted) unawaited(hideLoadingIndicator(context));
     if (mounted) await Navigator.of(context).pushReplacementNamed(Routes.home);
     return;
   }
@@ -48,7 +50,19 @@ class _LoginScreenState extends State<LoginScreen> {
       name: email,
     );
 
-    await auth.loginWithUserInfo(user);
+    unawaited(showLoadingIndicator(context));
+    await context.authRepo.loginWithUserInfo(user);
+    if (mounted) unawaited(hideLoadingIndicator(context));
+    if (mounted) await Navigator.of(context).pushReplacementNamed(Routes.home);
+    return;
+  }
+
+  Future<void> _loginAsGuest() async {
+    if (mounted) {
+      unawaited(showLoadingIndicator(context));
+      await context.authRepo.loginAsGuest();
+    }
+    if (mounted) unawaited(hideLoadingIndicator(context));
     if (mounted) await Navigator.of(context).pushReplacementNamed(Routes.home);
     return;
   }
@@ -140,6 +154,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: GoogleLoginButton(
                     onPressed: _loginWithGoogle,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextButton(
+                    child: Text(
+                      'Continue As Guest',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                    onPressed: _loginAsGuest,
                   ),
                 ),
               ],

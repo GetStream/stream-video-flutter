@@ -12,6 +12,7 @@ dependencies:
   async: ^2.10.0
   equatable: ^2.0.3
   http: ^0.13.4
+  jose: ^0.3.3
   protobuf: ^2.1.0
   tart: ^0.3.0
   uuid: ^3.0.6

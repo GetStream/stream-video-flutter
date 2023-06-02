@@ -15,6 +15,7 @@ class GetOrCreateCallRequest {
   GetOrCreateCallRequest({
     this.data,
     this.membersLimit,
+    this.notify,
     this.ring,
   });
 
@@ -35,7 +36,16 @@ class GetOrCreateCallRequest {
   ///
   int? membersLimit;
 
-  /// if provided it overrides the default ring setting for this call
+  /// if provided it sends a notification event to the members for this call
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? notify;
+
+  /// if provided it sends a ring event to the members for this call
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -48,6 +58,7 @@ class GetOrCreateCallRequest {
   bool operator ==(Object other) => identical(this, other) || other is GetOrCreateCallRequest &&
      other.data == data &&
      other.membersLimit == membersLimit &&
+     other.notify == notify &&
      other.ring == ring;
 
   @override
@@ -55,10 +66,11 @@ class GetOrCreateCallRequest {
     // ignore: unnecessary_parenthesis
     (data == null ? 0 : data!.hashCode) +
     (membersLimit == null ? 0 : membersLimit!.hashCode) +
+    (notify == null ? 0 : notify!.hashCode) +
     (ring == null ? 0 : ring!.hashCode);
 
   @override
-  String toString() => 'GetOrCreateCallRequest[data=$data, membersLimit=$membersLimit, ring=$ring]';
+  String toString() => 'GetOrCreateCallRequest[data=$data, membersLimit=$membersLimit, notify=$notify, ring=$ring]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -71,6 +83,11 @@ class GetOrCreateCallRequest {
       json[r'members_limit'] = this.membersLimit;
     } else {
       json[r'members_limit'] = null;
+    }
+    if (this.notify != null) {
+      json[r'notify'] = this.notify;
+    } else {
+      json[r'notify'] = null;
     }
     if (this.ring != null) {
       json[r'ring'] = this.ring;
@@ -101,13 +118,14 @@ class GetOrCreateCallRequest {
       return GetOrCreateCallRequest(
         data: CallRequest.fromJson(json[r'data']),
         membersLimit: mapValueOfType<int>(json, r'members_limit'),
+        notify: mapValueOfType<bool>(json, r'notify'),
         ring: mapValueOfType<bool>(json, r'ring'),
       );
     }
     return null;
   }
 
-  static List<GetOrCreateCallRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<GetOrCreateCallRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <GetOrCreateCallRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -138,12 +156,10 @@ class GetOrCreateCallRequest {
   static Map<String, List<GetOrCreateCallRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<GetOrCreateCallRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = GetOrCreateCallRequest.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = GetOrCreateCallRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

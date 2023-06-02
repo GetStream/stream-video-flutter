@@ -19,15 +19,28 @@ class CoordinatorJoined extends CoordinatorModel {
   const CoordinatorJoined({
     required this.wasCreated,
     required this.metadata,
-    required this.edges,
+    required this.credentials,
+    required this.members,
+    required this.users,
+    required this.duration,
   });
 
   final bool wasCreated;
   final CallMetadata metadata;
-  final List<SfuEdge> edges;
+  final CallCredentials credentials;
+  final Map<String, CallMember> members;
+  final Map<String, CallUser> users;
+  final String duration;
 
   @override
-  List<Object?> get props => [wasCreated, metadata, edges];
+  List<Object?> get props => [
+        wasCreated,
+        metadata,
+        credentials,
+        members,
+        users,
+        duration,
+      ];
 }
 
 class SfuServerSelected extends CoordinatorModel {

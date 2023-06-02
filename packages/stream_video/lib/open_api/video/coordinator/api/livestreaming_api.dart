@@ -18,7 +18,7 @@ class LivestreamingApi {
 
   /// Start broadcasting
   ///
-  /// Starts broadcasting 
+  /// Starts broadcasting  Required permissions: - StartBroadcasting 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -56,23 +56,31 @@ class LivestreamingApi {
 
   /// Start broadcasting
   ///
-  /// Starts broadcasting 
+  /// Starts broadcasting  Required permissions: - StartBroadcasting 
   ///
   /// Parameters:
   ///
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<void> startBroadcasting(String type, String id,) async {
+  Future<StartBroadcastingResponse?> startBroadcasting(String type, String id,) async {
     final response = await startBroadcastingWithHttpInfo(type, id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StartBroadcastingResponse',) as StartBroadcastingResponse;
+    
+    }
+    return null;
   }
 
   /// Stop broadcasting
   ///
-  /// Stops broadcasting 
+  /// Stops broadcasting  Required permissions: - StopBroadcasting 
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -110,18 +118,26 @@ class LivestreamingApi {
 
   /// Stop broadcasting
   ///
-  /// Stops broadcasting 
+  /// Stops broadcasting  Required permissions: - StopBroadcasting 
   ///
   /// Parameters:
   ///
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<void> stopBroadcasting(String type, String id,) async {
+  Future<StopBroadcastingResponse?> stopBroadcasting(String type, String id,) async {
     final response = await stopBroadcastingWithHttpInfo(type, id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StopBroadcastingResponse',) as StopBroadcastingResponse;
+    
+    }
+    return null;
   }
 
   /// Set call as not live
@@ -233,10 +249,18 @@ class LivestreamingApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<void> stopRecording(String type, String id,) async {
+  Future<StopRecordingResponse?> stopRecording(String type, String id,) async {
     final response = await stopRecordingWithHttpInfo(type, id,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StopRecordingResponse',) as StopRecordingResponse;
+    
+    }
+    return null;
   }
 }

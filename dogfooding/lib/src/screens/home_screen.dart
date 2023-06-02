@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
     hide StreamUserAvatar;
@@ -9,6 +7,9 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../repos/app_repository.dart';
 import '../routes/routes.dart';
+import '../utils/consts.dart';
+import '../utils/loading_dialog.dart';
+import '../utils/providers.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,32 +24,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Call? call;
   Channel? chatChannel;
 
+  AppRepository? appRepo;
   final _callIdController = TextEditingController();
 
-  Future<Channel> _initChatChannel({required String channelId}) async {
-    final chatClient = StreamChat.of(context).client;
-
-    final currentUserId = chatClient.state.currentUser?.id;
-
-    //FIXME(team): Chat does not allow emails as UIDs where as video does. Passing UIDs to chat directly causes a crash as they can be emails (which) are valid in video.
-    final callMemberIDs = call?.state.value.callParticipants
-        .map((CallParticipantState participant) => participant.userId)
-        .where((id) => id != currentUserId)
-        .map((e) => md5.convert(utf8.encode(e)).toString())
-        .toList(growable: false);
-
-    /// TODO: check if can use "livestream" channel type here.
-    final channel = chatClient.channel(
-      'messaging',
-      id: channelId,
-      extraData: {
-        'name': '${call?.state.value.callCid} Chat',
-        'members': callMemberIDs,
-      },
-    );
-
-    await channel.watch();
-    return channel;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    appRepo = context.appRepo;
   }
 
   void _handleCallNavigation(CallConnectOptions options) {
@@ -62,46 +44,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _joinOrCreateCall() async {
     final callId = _callIdController.text;
-    final chatClient = AppRepository.instance.streamChatClient;
     if (callId.isEmpty) return debugPrint('Call ID is empty');
-
+    unawaited(showLoadingIndicator(context));
     try {
-      call = streamVideoClient.makeCall(type: 'default', id: callId);
+      call = streamVideoClient.makeCall(type: kCallType, id: callId);
       await call?.getOrCreateCall();
-      chatChannel =  await _initChatChannel(channelId: call!.callCid.id);
-
-      final callMemberIDs = call?.state.value.callParticipants
-          .map((CallParticipantState participant) => participant.userId)
-          .where((id) => id != chatClient?.state.currentUser?.id)
-          .toList(
-            growable: false,
-          );
-
-      final channelName = call?.state.value.callCid;
-
-      chatChannel = await AppRepository.instance.createChatChannel(
+      chatChannel = await appRepo?.createChatChannel(
         channelId: call!.callCid.id,
-        channelMembers: callMemberIDs!,
-        channelName: '$channelName Chat',
       );
 
       if (mounted) {
+        unawaited(hideLoadingIndicator(context));
         await Navigator.of(context).pushNamed(
           Routes.lobby,
           arguments: [call, _handleCallNavigation],
         );
       }
     } catch (e, stk) {
+      unawaited(hideLoadingIndicator(context));
       debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());
     } finally {}
   }
 
   Future<void> _logout() async {
-    await AppRepository.instance.endSession();
-    if (mounted) {
-      unawaited(Navigator.of(context).pushReplacementNamed(Routes.login));
-    }
+    await appRepo?.endSession();
+    if (!mounted) return;
+    unawaited(Navigator.of(context).pushReplacementNamed(Routes.login));
   }
 
   @override

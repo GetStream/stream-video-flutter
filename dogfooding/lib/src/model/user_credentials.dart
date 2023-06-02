@@ -7,5 +7,5 @@ class UserCredentials {
   });
 
   final UserInfo user;
-  final String token;
+  final UserToken token;
 }

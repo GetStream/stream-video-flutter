@@ -14,37 +14,49 @@ class AudioSettings {
   /// Returns a new [AudioSettings] instance.
   AudioSettings({
     required this.accessRequestEnabled,
+    required this.micDefaultOn,
     required this.opusDtxEnabled,
     required this.redundantCodingEnabled,
+    required this.speakerDefaultOn,
   });
 
   bool accessRequestEnabled;
+
+  bool micDefaultOn;
 
   bool opusDtxEnabled;
 
   bool redundantCodingEnabled;
 
+  bool speakerDefaultOn;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is AudioSettings &&
      other.accessRequestEnabled == accessRequestEnabled &&
+     other.micDefaultOn == micDefaultOn &&
      other.opusDtxEnabled == opusDtxEnabled &&
-     other.redundantCodingEnabled == redundantCodingEnabled;
+     other.redundantCodingEnabled == redundantCodingEnabled &&
+     other.speakerDefaultOn == speakerDefaultOn;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (accessRequestEnabled.hashCode) +
+    (micDefaultOn.hashCode) +
     (opusDtxEnabled.hashCode) +
-    (redundantCodingEnabled.hashCode);
+    (redundantCodingEnabled.hashCode) +
+    (speakerDefaultOn.hashCode);
 
   @override
-  String toString() => 'AudioSettings[accessRequestEnabled=$accessRequestEnabled, opusDtxEnabled=$opusDtxEnabled, redundantCodingEnabled=$redundantCodingEnabled]';
+  String toString() => 'AudioSettings[accessRequestEnabled=$accessRequestEnabled, micDefaultOn=$micDefaultOn, opusDtxEnabled=$opusDtxEnabled, redundantCodingEnabled=$redundantCodingEnabled, speakerDefaultOn=$speakerDefaultOn]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'access_request_enabled'] = this.accessRequestEnabled;
+      json[r'mic_default_on'] = this.micDefaultOn;
       json[r'opus_dtx_enabled'] = this.opusDtxEnabled;
       json[r'redundant_coding_enabled'] = this.redundantCodingEnabled;
+      json[r'speaker_default_on'] = this.speakerDefaultOn;
     return json;
   }
 
@@ -68,14 +80,16 @@ class AudioSettings {
 
       return AudioSettings(
         accessRequestEnabled: mapValueOfType<bool>(json, r'access_request_enabled')!,
+        micDefaultOn: mapValueOfType<bool>(json, r'mic_default_on')!,
         opusDtxEnabled: mapValueOfType<bool>(json, r'opus_dtx_enabled')!,
         redundantCodingEnabled: mapValueOfType<bool>(json, r'redundant_coding_enabled')!,
+        speakerDefaultOn: mapValueOfType<bool>(json, r'speaker_default_on')!,
       );
     }
     return null;
   }
 
-  static List<AudioSettings>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<AudioSettings> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <AudioSettings>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -106,12 +120,10 @@ class AudioSettings {
   static Map<String, List<AudioSettings>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<AudioSettings>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = AudioSettings.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = AudioSettings.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -120,8 +132,10 @@ class AudioSettings {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'access_request_enabled',
+    'mic_default_on',
     'opus_dtx_enabled',
     'redundant_coding_enabled',
+    'speaker_default_on',
   };
 }
 

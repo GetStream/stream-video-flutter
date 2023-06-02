@@ -1,27 +1,24 @@
-class SfuError {
+import 'package:equatable/equatable.dart';
+
+class SfuError with EquatableMixin {
   SfuError({
     required this.message,
     required this.code,
+    required this.shouldRetry,
   });
 
   final String message;
   final SfuErrorCode code;
+  final bool shouldRetry;
 
   @override
   String toString() {
-    return 'SfuError{code: $code, message: $message}';
+    return 'SfuError{code: $code, message: $message, '
+        'shouldRetry: $shouldRetry}';
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SfuError &&
-          runtimeType == other.runtimeType &&
-          message == other.message &&
-          code == other.code;
-
-  @override
-  int get hashCode => message.hashCode ^ code.hashCode;
+  List<Object> get props => [message, code, shouldRetry];
 }
 
 enum SfuErrorCode {
@@ -32,5 +29,12 @@ enum SfuErrorCode {
   publishTrackVideoLayerNotFound,
   participantNotFound,
   callNotFound,
-  internalServerError,
+  requestValidationFailed,
+  unauthenticated,
+  permissionDenied,
+  tooManyRequests,
+  internalServerError;
+
+  @override
+  String toString() => name;
 }

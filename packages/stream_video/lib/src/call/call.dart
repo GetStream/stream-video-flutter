@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../../open_api/video/coordinator/api.dart';
 import '../../stream_video.dart';
 import '../action/internal/lifecycle_action.dart';
 import '../coordinator/models/coordinator_events.dart';
@@ -829,19 +830,11 @@ class Call {
     );
     _stateManager.lifecycleCallCreated(CallCreated(receivedOrCreated.data));
     _logger.v(() => '[joinCall] joinedMetadata: ${joinResult.data.metadata}');
-    final edgeResult = await _coordinatorClient.findBestCallEdgeServer(
-      callCid: callCid,
-      edges: joinResult.data.edges,
-    );
-    if (edgeResult is! Success<SfuServerSelected>) {
-      _logger.e(() => '[joinCall] edge finding failed: $edgeResult');
-      return edgeResult as Failure;
-    }
     final joined = CallJoinedData(
       callCid: callCid,
       wasCreated: joinResult.data.wasCreated,
-      metadata: edgeResult.data.metadata,
-      credentials: edgeResult.data.credentials,
+      metadata: joinResult.data.metadata,
+      credentials: joinResult.data.credentials,
     );
     _stateManager.lifecycleCallJoined(CallJoined(joined));
     _logger.v(() => '[joinCall] completed: $joined');
@@ -876,6 +869,15 @@ class Call {
 
   Future<Result<None>> startRecording() {
     return _permissionsManager.startRecording();
+  }
+
+  Future<Result<List<CallRecording>>> listRecordings() async {
+    final sessionId = _session?.sessionId;
+    if (sessionId == null) {
+      return Result.error('Session not found');
+    }
+
+    return _permissionsManager.listRecordings(sessionId);
   }
 
   Future<Result<None>> stopRecording() {
