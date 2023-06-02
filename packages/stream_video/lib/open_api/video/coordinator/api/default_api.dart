@@ -58,7 +58,7 @@ class DefaultApi {
   /// Parameters:
   ///
   /// * [CreateGuestRequest] createGuestRequest (required):
-  Future<CreateGuestResponse> createGuest(
+  Future<CreateGuestResponse?> createGuest(
     CreateGuestRequest createGuestRequest,
   ) async {
     final response = await createGuestWithHttpInfo(

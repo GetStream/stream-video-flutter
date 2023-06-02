@@ -178,14 +178,15 @@ class StreamVideo {
     _logger.i(() => '[connectUser] user.id : ${user.id}');
     if (currentUser != null) {
       _logger.w(() => '[connectUser] rejected (already set): $currentUser');
-      return _tokenManager.getToken();
+      final res = await _tokenManager.getToken();
+      return res.map((data) => data.rawValue);
     }
     final tokenResult = await _tokenManager.setTokenProvider(
       user.id,
       tokenProvider: tokenProvider,
     );
     if (tokenResult.isFailure) {
-      return tokenResult;
+      return tokenResult.map((data) => data.rawValue);
     }
     _state.currentUser.value = user;
 
@@ -198,7 +199,7 @@ class StreamVideo {
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
       _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
       await _pushNotificationManager?.onUserLoggedIn();
-      return tokenResult;
+      return tokenResult.map((data) => data.rawValue);
     } catch (e, stk) {
       _logger.e(() => '[connectUser] failed(${user.id}): $e');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -320,8 +321,10 @@ class StreamVideo {
     String? image,
     List<String>? teams,
     Map<String, Object>? custom,
-  }) {
-    return _client.createGuest(
+  }) async {
+    await _tokenManager.setTokenProvider(id,
+        tokenProvider: AnonymousTokenProvider());
+    final result = await _client.createGuest(
       UserInput(
         id: id,
         name: name,
@@ -331,6 +334,8 @@ class StreamVideo {
         custom: custom ?? {},
       ),
     );
+    _tokenManager.reset();
+    return result;
   }
 
   Future<bool> handlePushNotification(Map<String, dynamic> payload) {
@@ -368,13 +373,14 @@ class _StreamVideoState {
   }
 }
 
-CoordinatorClient buildCoordinatorClient(
-    {required String rpcUrl,
-    required String wsUrl,
-    required String apiKey,
-    required TokenManager tokenManager,
-    required RetryPolicy retryPolicy,
-    required LatencySettings latencySettings}) {
+CoordinatorClient buildCoordinatorClient({
+  required String rpcUrl,
+  required String wsUrl,
+  required String apiKey,
+  required TokenManager tokenManager,
+  required RetryPolicy retryPolicy,
+  required LatencySettings latencySettings,
+}) {
   streamLog.i(_tag, () => '[buildCoordinatorClient] rpcUrl: $rpcUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] wsUrl: $wsUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] apiKey: $apiKey');
@@ -422,7 +428,7 @@ extension StreamVideoX on StreamVideo {
   ) {
     return connectUserWithProvider(
       user,
-      tokenProvider: TokenProvider.static(token),
+      tokenProvider: TokenProvider.static(UserToken.fromRawValue(token)),
     );
   }
 }

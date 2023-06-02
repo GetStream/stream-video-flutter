@@ -206,7 +206,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           data: CallCreatedData(
             callCid: input.callCid,
             ringing: input.ringing ?? false,
-            metadata: result.call.toCallMetadata(result.members, result.ownCapabilities),
+            metadata: result.call
+                .toCallMetadata(result.members, result.ownCapabilities),
           ),
         ),
       );
@@ -241,7 +242,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return Result.success(
         CoordinatorJoined(
           wasCreated: result.created,
-          metadata: result.call.toCallMetadata(result.members, result.ownCapabilities),
+          metadata: result.call
+              .toCallMetadata(result.members, result.ownCapabilities),
           credentials: result.credentials.toCallCredentials(),
           members: result.members.toCallMembers(),
           users: result.members.toCallUsers(),
@@ -626,7 +628,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           ),
         ),
       );
-      return Result.success(res.toGuestCreatedData());
+
+      if (res != null) {
+        return Result.success(res.toGuestCreatedData());
+      } else {
+        return const Result.failure(
+            VideoError(message: 'Guest could not be created.'));
+      }
     } catch (e) {
       return Result.failure(VideoErrors.compose(e));
     }
@@ -649,7 +657,8 @@ class _Authentication extends open.Authentication {
       throw (tokenResult as Failure).error;
     }
     queryParams.add(open.QueryParam('api_key', apiKey));
-    headerParams['Authorization'] = tokenResult.data;
-    headerParams['stream-auth-type'] = 'jwt';
+    headerParams['Authorization'] = tokenResult.getDataOrNull()!.rawValue;
+    headerParams['stream-auth-type'] =
+        tokenResult.getDataOrNull()!.authType.name;
   }
 }

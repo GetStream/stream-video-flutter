@@ -27,7 +27,7 @@ class UserRepository {
     await prefs.setString(keyUserName, user.name);
     await prefs.setString(keyUserRole, user.role);
     await prefs.setString(keyUserImage, user.image ?? '');
-    await prefs.setString(keyToken, token);
+    await prefs.setString(keyToken, token.rawValue);
   }
 
   Future<UserCredentials?> getUserCredentials() async {
@@ -46,7 +46,7 @@ class UserRepository {
           role: role,
           image: image,
         ),
-        token: token,
+        token: UserToken.fromRawValue(token),
       );
     } else {
       return null;
