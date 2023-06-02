@@ -57,6 +57,16 @@ class _LoginScreenState extends State<LoginScreen> {
     return;
   }
 
+  Future<void> _loginAsGuest() async {
+    if (mounted) {
+      unawaited(showLoadingIndicator(context));
+      await context.authRepo.loginAsGuest();
+    }
+    if (mounted) unawaited(hideLoadingIndicator(context));
+    if (mounted) await Navigator.of(context).pushReplacementNamed(Routes.home);
+    return;
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -144,6 +154,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: GoogleLoginButton(
                     onPressed: _loginWithGoogle,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextButton(
+                    child: Text(
+                      'Continue As Guest',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                    onPressed: _loginAsGuest,
                   ),
                 ),
               ],

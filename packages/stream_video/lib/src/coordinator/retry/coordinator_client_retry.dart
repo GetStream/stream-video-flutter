@@ -6,6 +6,7 @@ import '../../models/call_device.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_reaction.dart';
 import '../../models/call_received_created_data.dart';
+import '../../models/guest_created_data.dart';
 import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 import '../../models/user_info.dart';
@@ -119,8 +120,8 @@ class CoordinatorClientRetry extends CoordinatorClient {
   @override
   Future<Result<None>> acceptCall({required StreamCallCid cid}) {
     return _retryManager.execute(
-          () => _delegate.acceptCall(cid: cid),
-          (error, nextAttemptDelay) async {
+      () => _delegate.acceptCall(cid: cid),
+      (error, nextAttemptDelay) async {
         _logRetry('acceptCall', error, nextAttemptDelay);
       },
     );
@@ -129,8 +130,8 @@ class CoordinatorClientRetry extends CoordinatorClient {
   @override
   Future<Result<None>> rejectCall({required StreamCallCid cid}) {
     return _retryManager.execute(
-          () => _delegate.rejectCall(cid: cid),
-          (error, nextAttemptDelay) async {
+      () => _delegate.rejectCall(cid: cid),
+      (error, nextAttemptDelay) async {
         _logRetry('rejectCall', error, nextAttemptDelay);
       },
     );
@@ -317,6 +318,16 @@ class CoordinatorClientRetry extends CoordinatorClient {
     _logger.w(
       () => '[$req] failed: $error, '
           'retrying in ${nextAttemptDelay.inMilliseconds} ms',
+    );
+  }
+
+  @override
+  Future<Result<GuestCreatedData>> createGuest(UserInput input) {
+    return _retryManager.execute(
+      () => _delegate.createGuest(input),
+      (error, nextAttemptDelay) async {
+        _logRetry('createGuest', error, nextAttemptDelay);
+      },
     );
   }
 }
