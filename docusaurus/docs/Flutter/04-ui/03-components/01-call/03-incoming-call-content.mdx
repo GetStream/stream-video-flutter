@@ -1,0 +1,50 @@
+# StreamIncomingCallContent
+
+The `StreamIncomingCallContent` widget displays the incoming call which includes information about the call
+and options to accept and decline it. The widget can be used on its own or as a part of `StreamCallContainer`.
+
+## Usage
+
+To use `StreamIncomingCallContent`, pass in the call and call state using the respective parameters.
+
+```dart
+    StreamIncomingCallContent(
+      call: call,
+      callState: callState,
+    ),
+```
+
+## Customisation
+
+### Modify event behaviour
+
+You can modify behaviours such as accepting and declining a call, as well as what happens when the
+microphone or camera buttons are tapped.
+
+```dart
+    StreamIncomingCallContent(
+      call: call,
+      callState: callState,
+      onAcceptCallTap: () {},
+      onDeclineCallTap: () {},
+      onCameraTap: () {},
+      onMicrophoneTap: () {},
+    ),
+```
+
+### Changing avatar and text styles
+
+The avatar and name styles when calling a user or a group of users can be customised via the single participant
+or multiple participant style parameters available.
+
+```dart
+    StreamIncomingCallContent(
+      call: call,
+      callState: callState,
+      singleParticipantAvatarTheme: StreamUserAvatarThemeData(),
+      singleParticipantTextStyle: TextStyle(),
+      multipleParticipantAvatarTheme: StreamUserAvatarThemeData(),
+      multipleParticipantTextStyle: TextStyle(),
+    ),
+```
+
