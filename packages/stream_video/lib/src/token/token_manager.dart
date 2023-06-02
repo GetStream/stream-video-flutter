@@ -1,3 +1,4 @@
+import '../../stream_video.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../utils/result.dart';
 import 'token.dart';
@@ -15,7 +16,7 @@ class TokenManager {
 
   TokenProvider _provider = _StubTokenProvider();
 
-  String? _token;
+  UserToken? _token;
 
   /// User id to which this TokenManager is configured to
   String get userId => _userId;
@@ -75,6 +76,29 @@ class _StubTokenProvider implements TokenProvider {
   @override
   Future<Result<UserToken>> getToken(String userId) async {
     return Result.error('StubTokenProvider is unable to provide a real token');
+  }
+
+  @override
+  set onTokenUpdated(OnTokenUpdated onTokenUpdated) {
+    /* no-op */
+  }
+}
+
+class AnonymousTokenProvider implements TokenProvider {
+  factory AnonymousTokenProvider() {
+    return _instance;
+  }
+
+  const AnonymousTokenProvider._();
+
+  static const AnonymousTokenProvider _instance = AnonymousTokenProvider._();
+
+  @override
+  bool get isStatic => false;
+
+  @override
+  Future<Result<UserToken>> getToken(String userId) async {
+    return Result.success(UserToken.anonymous(userId: userId));
   }
 
   @override

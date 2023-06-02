@@ -114,7 +114,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
 
       await StreamVideo.instance.connectUser(
         user,
-        token,
+        token.rawValue,
       );
 
       final call = StreamVideo.instance.makeCall(type: kCallType, id: callId);

@@ -4,6 +4,7 @@ import '../models/call_device.dart';
 import '../models/call_metadata.dart';
 import '../models/call_reaction.dart';
 import '../models/call_received_created_data.dart';
+import '../models/guest_created_data.dart';
 import '../models/queried_calls.dart';
 import '../models/queried_members.dart';
 import '../models/user_info.dart';
@@ -40,7 +41,6 @@ abstract class CoordinatorClient {
   Future<Result<None>> acceptCall({required StreamCallCid cid});
 
   Future<Result<None>> rejectCall({required StreamCallCid cid});
-
 
   /// Sends a custom event to the API to notify if we've changed something
   /// in the state of the call.
@@ -117,4 +117,6 @@ abstract class CoordinatorClient {
   Future<Result<None>> muteUsers(inputs.MuteUsersInput input);
 
   Future<Result<CallMetadata>> updateCall(inputs.UpdateCallInput input);
+
+  Future<Result<GuestCreatedData>> createGuest(inputs.UserInput input);
 }

@@ -13,6 +13,7 @@ import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
 import 'logger/impl/external_logger.dart';
+import 'models/guest_created_data.dart';
 import 'models/queried_calls.dart';
 import 'retry/retry_policy.dart';
 import 'state_emitter.dart';
@@ -177,14 +178,15 @@ class StreamVideo {
     _logger.i(() => '[connectUser] user.id : ${user.id}');
     if (currentUser != null) {
       _logger.w(() => '[connectUser] rejected (already set): $currentUser');
-      return _tokenManager.getToken();
+      final res = await _tokenManager.getToken();
+      return res.map((data) => data.rawValue);
     }
     final tokenResult = await _tokenManager.setTokenProvider(
       user.id,
       tokenProvider: tokenProvider,
     );
     if (tokenResult.isFailure) {
-      return tokenResult;
+      return tokenResult.map((data) => data.rawValue);
     }
     _state.currentUser.value = user;
 
@@ -197,7 +199,7 @@ class StreamVideo {
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
       _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
       await _pushNotificationManager?.onUserLoggedIn();
-      return tokenResult;
+      return tokenResult.map((data) => data.rawValue);
     } catch (e, stk) {
       _logger.e(() => '[connectUser] failed(${user.id}): $e');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -312,6 +314,30 @@ class StreamVideo {
     );
   }
 
+  Future<Result<GuestCreatedData>> createGuest({
+    required String id,
+    String? name,
+    String? role,
+    String? image,
+    List<String>? teams,
+    Map<String, Object>? custom,
+  }) async {
+    await _tokenManager.setTokenProvider(id,
+        tokenProvider: AnonymousTokenProvider());
+    final result = await _client.createGuest(
+      UserInput(
+        id: id,
+        name: name,
+        role: role,
+        image: image,
+        teams: teams,
+        custom: custom ?? {},
+      ),
+    );
+    _tokenManager.reset();
+    return result;
+  }
+
   Future<bool> handlePushNotification(Map<String, dynamic> payload) {
     return _pushNotificationManager?.handlePushNotification(payload) ??
         Future.value(false);
@@ -347,13 +373,14 @@ class _StreamVideoState {
   }
 }
 
-CoordinatorClient buildCoordinatorClient(
-    {required String rpcUrl,
-    required String wsUrl,
-    required String apiKey,
-    required TokenManager tokenManager,
-    required RetryPolicy retryPolicy,
-    required LatencySettings latencySettings}) {
+CoordinatorClient buildCoordinatorClient({
+  required String rpcUrl,
+  required String wsUrl,
+  required String apiKey,
+  required TokenManager tokenManager,
+  required RetryPolicy retryPolicy,
+  required LatencySettings latencySettings,
+}) {
   streamLog.i(_tag, () => '[buildCoordinatorClient] rpcUrl: $rpcUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] wsUrl: $wsUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] apiKey: $apiKey');
@@ -401,7 +428,7 @@ extension StreamVideoX on StreamVideo {
   ) {
     return connectUserWithProvider(
       user,
-      tokenProvider: TokenProvider.static(token),
+      tokenProvider: TokenProvider.static(UserToken.fromRawValue(token)),
     );
   }
 }
