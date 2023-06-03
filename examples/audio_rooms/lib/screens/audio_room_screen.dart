@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:animations/animations.dart';
 import 'package:audio_rooms/widgets/stream_audio_appbar.dart';
 import 'package:audio_rooms/widgets/stream_button.dart';
 import 'package:flutter/material.dart';
@@ -10,10 +9,13 @@ import 'dart:ui' as ui;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class AudioRoomScreen extends StatefulWidget {
-  static Route<dynamic> routeTo(Call audioRoom) {
+  static Route<dynamic> routeTo(Call audioRoom, String name) {
     return MaterialPageRoute(
       builder: (BuildContext context) {
-        return AudioRoomScreen(audioRoom: audioRoom);
+        return AudioRoomScreen(
+          audioRoom: audioRoom,
+          name: name,
+        );
       },
     );
   }
@@ -21,9 +23,11 @@ class AudioRoomScreen extends StatefulWidget {
   const AudioRoomScreen({
     Key? key,
     required this.audioRoom,
+    required this.name,
   }) : super(key: key);
 
   final Call audioRoom;
+  final String name;
 
   @override
   State<AudioRoomScreen> createState() => _AudioRoomScreenState();
@@ -46,7 +50,8 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> {
                 topRight: Radius.circular(24.0),
               ),
               child: _RoomScrollBody(
-                call: widget.audioRoom,
+                name: widget.name,
+                room: widget.audioRoom,
               ),
             ),
           ),
@@ -69,6 +74,7 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> {
                     "Leave quietly",
                   ),
                   onTap: () {
+                    widget.audioRoom.disconnect();
                     Navigator.of(context).pop();
                   },
                 ),
@@ -105,14 +111,15 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> {
   }
 }
 
-// TODO(Nash): Refactor to slivers and a custom scroll view
 class _RoomScrollBody extends StatefulWidget {
   const _RoomScrollBody({
     Key? key,
-    required this.call,
+    required this.name,
+    required this.room,
   }) : super(key: key);
 
-  final Call call;
+  final String name;
+  final Call room;
 
   @override
   State<_RoomScrollBody> createState() => _RoomScrollBodyState();
@@ -127,16 +134,18 @@ class _RoomScrollBodyState extends State<_RoomScrollBody> {
   @override
   void initState() {
     super.initState();
-    callStateSubscription = widget.call.state.valueStream.listen(
+    callStateSubscription = widget.room.state.asStream().listen(
       (callState) {
-        setState(() {
-          hosts = callState.callParticipants
-              .where((element) => element.isAudioEnabled)
-              .toList(growable: false);
-          listeners = callState.callParticipants
-              .where((element) => !element.isAudioEnabled)
-              .toList(growable: false);
-        });
+        setState(
+          () {
+            hosts = callState.callParticipants
+                .where((element) => element.role == 'admin')
+                .toList(growable: false);
+            listeners = callState.callParticipants
+                .where((element) => element.role == 'user')
+                .toList(growable: false);
+          },
+        );
       },
     );
   }
@@ -148,7 +157,7 @@ class _RoomScrollBodyState extends State<_RoomScrollBody> {
   }
 
   Widget _buildIndicatorText() {
-    return  Text.rich(
+    return Text.rich(
       TextSpan(
         style: const TextStyle(
           fontWeight: FontWeight.w500,
@@ -167,7 +176,7 @@ class _RoomScrollBodyState extends State<_RoomScrollBody> {
           ),
           const TextSpan(text: ' / '),
           const TextSpan(text: ' 26 '),
-          const  WidgetSpan(
+          const WidgetSpan(
             alignment: ui.PlaceholderAlignment.middle,
             child: Icon(
               Icons.message,
@@ -189,7 +198,7 @@ class _RoomScrollBodyState extends State<_RoomScrollBody> {
         slivers: [
           SliverToBoxAdapter(
             child: Text(
-              widget.call.state.value.callCid.value,
+              widget.name,
               style: theme.textTheme.displayLarge,
             ),
           ),
@@ -224,7 +233,7 @@ class _RoomScrollBodyState extends State<_RoomScrollBody> {
                   child: CircleAvatar(
                     radius: 52,
                     child: StreamCallParticipant(
-                      call: widget.call,
+                      call: widget.room,
                       participant: hosts[index],
                     ),
                   ),
@@ -260,8 +269,16 @@ class _RoomScrollBodyState extends State<_RoomScrollBody> {
                   child: CircleAvatar(
                     radius: 36,
                     child: StreamCallParticipant(
-                      call: widget.call,
+                      call: widget.room,
+                      backgroundColor: Colors.transparent,
                       participant: listeners[index],
+                      showParticipantLabel: false,
+                      userAvatarTheme: const StreamUserAvatarThemeData(
+                        constraints: BoxConstraints.expand(
+                          height: 80,
+                          width: 80,
+                        ),
+                      ),
                     ),
                   ),
                 );

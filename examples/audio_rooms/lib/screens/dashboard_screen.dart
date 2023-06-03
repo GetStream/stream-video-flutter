@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:animations/animations.dart';
 import 'package:audio_rooms/screens/audio_room_screen.dart';
 import 'package:audio_rooms/widgets/stream_audio_appbar.dart';
@@ -22,14 +24,36 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _createRoom() async {
-    final result = await StreamVideo.instance.getOrCreateCall(
-      cid: StreamCallCid.from(type: "audio_room", id: "testing"),
+    final audioRoom = StreamVideo.instance.makeCall(
+      type: "audio_room",
+      id: 'sometihgw33',
     );
-    print("Call Result ${result.isSuccess}");
-    print("Call Result ${result.isFailure}");
 
-    final call = Call.fromCid(callCid: result.getDataOrNull()!.data.callCid);
-    Navigator.of(context).push(AudioRoomScreen.routeTo(call));
+    await audioRoom.update(custom: {'name': 'Your first Audio Room'});
+    await audioRoom.connect();
+
+    if (mounted) {
+      Navigator.of(context).push(AudioRoomScreen.routeTo(
+        audioRoom,
+        'Your first Audio Room',
+      ));
+    }
+  }
+
+  Future<List<QueriedCall>> _queryCalls() async {
+    final audioRoomResult = await StreamVideo.instance.queryCalls(
+      filterConditions: {'type': 'audio_room'},
+    );
+    if (audioRoomResult.isSuccess) {
+      final rooms = audioRoomResult.getDataOrNull()?.calls;
+      rooms?.removeWhere((element) => element.members.isEmpty);
+      return rooms ?? [];
+    } else {
+      log(
+        '[_queryCalls]: Failed with error ${audioRoomResult.getErrorOrNull()?.message}',
+      );
+      throw Exception('Unable to find ongoing audio calls');
+    }
   }
 
   @override
@@ -61,28 +85,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                   ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      childCount: 12,
-                      (context, index) => OpenContainer(
-                        openBuilder: (context, action) => AudioRoomScreen(
-                          audioRoom: Call.fromCid(
-                            callCid: StreamCallCid.from(type: "type", id: "id"),
+                  FutureBuilder<List<QueriedCall>>(
+                    future: _queryCalls(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final data = snapshot.data ?? [];
+                        return SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            childCount: data.length,
+                            (context, index) {
+                              final room = data[index];
+                              final roomTitle =
+                                  room.call.details.custom['name'] as String? ??
+                                      room.call.cid.id;
+                              return OpenContainer(
+                                openBuilder: (context, action) =>
+                                    AudioRoomScreen(
+                                  audioRoom: room.callObject,
+                                  name: roomTitle,
+                                ),
+                                closedBuilder: (context, action) => _RoomCard(
+                                  roomTitle: roomTitle,
+                                  onRoomTap: (_) {
+                                    room.callObject.connect();
+                                    action();
+                                  },
+                                  users: room.members
+                                      .map((e) => e.userId)
+                                      .toList(growable: false),
+                                ),
+                                closedColor: const Color(0xFFDDDDDD),
+                              );
+                            },
                           ),
-                        ),
-                        closedBuilder: (context, action) => _RoomCard(
-                          roomTitle: 'Audio Room O1',
-                          onRoomTap: (_) => action.call(),
-                          users: const [
-                            "Deven",
-                            "Nash",
-                            "Thierry",
-                            "Tommaso",
-                          ],
-                        ),
-                        closedColor: const Color(0xFFDDDDDD),
-                      ),
-                    ),
+                        );
+                      } else if (snapshot.hasError) {
+                        return const SliverToBoxAdapter(
+                          child: Text('No Audio rooms online at this time'),
+                        );
+                      } else {
+                        return const SliverToBoxAdapter(
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+                    },
                   )
                 ],
               ),
@@ -133,18 +181,22 @@ class _RoomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return InkWell(
-      onTap: () => onRoomTap(roomTitle),
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: InkWell(
+        onTap: () => onRoomTap(roomTitle),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(roomTitle, style: theme.textTheme.displayMedium),
+              Text(
+                roomTitle,
+                style: theme.textTheme.displayMedium
+                    ?.copyWith(color: Colors.black),
+              ),
               const SizedBox(height: 12.0),
               Row(
                 children: [
@@ -164,14 +216,14 @@ class _RoomCard extends StatelessWidget {
                           ),
                         const SizedBox(height: 12.0),
                         Text(
-                          "124 participants",
+                          "${users.length} participants",
                           style: theme.textTheme.displaySmall?.copyWith(
                             color: Colors.blueGrey,
                           ),
                         )
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ],
@@ -183,32 +235,25 @@ class _RoomCard extends StatelessWidget {
 }
 
 class _AudioRoomAvatar extends StatelessWidget {
-  const _AudioRoomAvatar({Key? key}) : super(key: key);
+  const _AudioRoomAvatar({
+    Key? key,
+    this.imageURl,
+  }) : super(key: key);
+  final String? imageURl;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Transform.translate(
-          offset: const Offset(0.0, -15.5),
-          child: const CircleAvatar(
-            backgroundColor: Color(0xFFD9D9D9),
-          ),
-        ),
-        Transform.translate(
-          offset: const Offset(-15.0, 5),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.white, width: 222.0),
-              shape: BoxShape.circle,
-            ),
-            child: const CircleAvatar(
-              backgroundColor: Colors.amber,
-            ),
-          ),
-        )
-      ],
+    return CircleAvatar(
+      backgroundColor: imageURl == null ? Colors.blue : null,
+      backgroundImage: imageURl != null ? NetworkImage(imageURl!) : null,
+      child: imageURl == null ? const Text('🎙️') : null,
     );
   }
+}
+
+extension on QueriedCall {
+  Call get callObject => StreamVideo.instance.makeCall(
+        type: call.cid.type,
+        id: call.cid.id,
+      );
 }

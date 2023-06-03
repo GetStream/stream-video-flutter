@@ -28,6 +28,7 @@ export 'src/models/disconnect_reason.dart';
 export 'src/models/guest_created_data.dart';
 export 'src/models/user_info.dart';
 export 'src/models/viewport_visibility.dart';
+export 'src/models/queried_calls.dart';
 export 'src/platform_detector/platform_detector.dart';
 export 'src/push_notification/push_notification_manager.dart';
 export 'src/sfu/data/models/sfu_connection_quality.dart';

@@ -16,7 +16,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
-    await StreamVideo.instance.connectUser(
+    await StreamVideo.instance.connectUserWithProvider(
       const UserInfo(
         id: "nash@getstream.io",
         role: "admin",
