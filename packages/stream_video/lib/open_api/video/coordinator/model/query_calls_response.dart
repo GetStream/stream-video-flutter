@@ -93,7 +93,7 @@ class QueryCallsResponse {
       }());
 
       return QueryCallsResponse(
-        calls: CallStateResponseFields.listFromJson(json[r'calls'])!,
+        calls: CallStateResponseFields.listFromJson(json[r'calls']),
         duration: mapValueOfType<String>(json, r'duration')!,
         next: mapValueOfType<String>(json, r'next'),
         prev: mapValueOfType<String>(json, r'prev'),
@@ -102,7 +102,7 @@ class QueryCallsResponse {
     return null;
   }
 
-  static List<QueryCallsResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<QueryCallsResponse> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <QueryCallsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -133,12 +133,10 @@ class QueryCallsResponse {
   static Map<String, List<QueryCallsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<QueryCallsResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = QueryCallsResponse.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = QueryCallsResponse.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

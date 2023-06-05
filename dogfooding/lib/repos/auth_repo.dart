@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -25,10 +26,61 @@ class AuthRepository {
   final _logger = taggedLogger(tag: 'SV:LoginViewState');
   // late final _googleSignIn = GoogleSignIn(hostedDomain: 'getstream.io');
 
-  String? _userToken;
+  UserToken? _userToken;
 
   Future<GoogleSignInAccount?> signInWithGoogle() {
     return googleSignIn.signIn();
+  }
+
+  Future<void> loginAsGuest() async {
+    final guestId = randomString(6);
+    const imageUrl =
+        'https://vignette.wikia.nocookie.net/starwars/images/2/20/LukeTLJ.jpg';
+
+    final guest = await streamVideo.createGuest(
+      id: guestId,
+      name: guestId,
+      image: imageUrl,
+    );
+    final data = guest.getDataOrNull();
+    if (data == null) {
+      throw Exception();
+    }
+
+    final finalUser = UserInfo(
+      id: data.user.id,
+      image: data.user.image,
+      name: data.user.name ?? '',
+      teams: data.user.teams ?? [],
+      role: data.user.role,
+    );
+
+    final userCredentials = UserCredentials(
+      user: finalUser,
+      token: UserToken.fromRawValue(data.accessToken),
+    );
+
+    await streamVideo.connectUser(finalUser, data.accessToken);
+    _userToken = UserToken.fromRawValue(data.accessToken);
+    await UserRepository.instance.saveUserCredentials(userCredentials);
+
+    final chatUID = md5.convert(utf8.encode(finalUser.id)).toString();
+
+    final chatUser = User(
+      id: chatUID,
+      extraData: {
+        'name': finalUser.name,
+        'image': finalUser.image,
+      },
+    );
+
+    if (_userToken != null) {
+      await streamChat.connectUserWithProvider(chatUser, _tokenLoader);
+    } else {
+      await streamChat.connectUserWithProvider(chatUser, _tokenLoader);
+    }
+
+    return;
   }
 
   Future<void> loginWithUserInfo(UserInfo user) async {
@@ -78,5 +130,14 @@ class AuthRepository {
     );
     _logger.d(() => '[_tokenLoader] loading...: $token');
     return token;
+  }
+
+  String randomString(int length) {
+    final rand = Random();
+    const letters =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    return List.generate(length, (l) {
+      return letters[rand.nextInt(letters.length)];
+    }).fold('', (previousValue, element) => previousValue + element);
   }
 }

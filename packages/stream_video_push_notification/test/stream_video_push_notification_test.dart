@@ -68,12 +68,10 @@ Future<void> main() async {
   when(() => client.getOrCreateCall(
         GetOrCreateCallInput(callCid: streamCallCid),
       )).thenAnswer((_) => Future.value(Result.success(callReceivedOrCreated)));
-  when(() => client.sendUserEvent(
-        EventInput(callCid: streamCallCid, eventType: EventTypeInput.accepted),
-      )).thenAnswer((invocation) => Future.value(const Result.success(none)));
-  when(() => client.sendUserEvent(
-        EventInput(callCid: streamCallCid, eventType: EventTypeInput.rejected),
-      )).thenAnswer((invocation) => Future.value(const Result.success(none)));
+  when(() => client.acceptCall(cid: streamCallCid))
+      .thenAnswer((invocation) => Future.value(const Result.success(none)));
+  when(() => client.rejectCall(cid: streamCallCid))
+      .thenAnswer((invocation) => Future.value(const Result.success(none)));
   registerFallbackValue(streamCallCid);
   when(() => callNotificationWrapper.showCallNotification(
         streamCallCid: any(named: 'streamCallCid'),
@@ -152,10 +150,7 @@ Future<void> main() async {
     verify(() => client.getOrCreateCall(
           GetOrCreateCallInput(callCid: streamCallCid),
         )).called(1);
-    verify(() => client.sendUserEvent(
-          EventInput(
-              callCid: streamCallCid, eventType: EventTypeInput.accepted),
-        )).called(1);
+    verify(() => client.acceptCall(cid: streamCallCid)).called(1);
   });
 
   test('When a call is rejected it needs to be rejected on StreamVideo',
@@ -184,10 +179,7 @@ Future<void> main() async {
 
     await sut.handlePushNotification(data);
 
-    verify(() => client.sendUserEvent(
-          EventInput(
-              callCid: streamCallCid, eventType: EventTypeInput.rejected),
-        )).called(1);
+    verify(() => client.rejectCall(cid: streamCallCid)).called(1);
     verify(() => client.getOrCreateCall(
           GetOrCreateCallInput(callCid: streamCallCid),
         )).called(1);
@@ -212,10 +204,7 @@ Future<void> main() async {
     final result = await sut.consumeIncomingCall();
 
     expect(result, null);
-    verifyNever(() => client.sendUserEvent(
-          EventInput(
-              callCid: streamCallCid, eventType: EventTypeInput.accepted),
-        ));
+    verifyNever(() => client.acceptCall(cid: streamCallCid));
   });
 
   test("A RemoteMessage without stream.video as sender shouldn't be handled",

@@ -1,0 +1,55 @@
+---
+slug: /
+title: Introduction
+description: Introduction about Stream's video SDK
+---
+
+[Stream’s Video Flutter SDK](https://github.com/GetStream/stream-video-flutter) enables you to easily build native Video and Audio calling applications in Flutter using Dart.
+
+<aside>
+💡 Want to dive directly into the code? Check out our step-by-step tutorial to build your own video calling application using Stream video.
+</aside>
+
+The SDK is divided into four parts to help you quickly and effectively build video and voice applications with Stream:
+
+1. stream_video_flutter
+2. stream_video
+3. stream_video_push_notification
+4. stream_video_background
+
+
+### Stream Video Flutter
+
+Stream Video Flutter includes all of our modular, pre-made widgets, which developers can use to quickly build with Stream. In addition to the UI components, this package also includes all of our Flutter-specific handling and logic, such as background handling, push notification support, and more.
+
+These screens and widgets include:
+
+- Call Controls
+- Call Screen
+- Lobby Screen
+- Participant Rendering and Layout
+- etc.
+
+
+### Stream Video
+
+Stream Video is our base package, which acts as a low-level wrapper around the Stream Video API. It allows you to authenticate users, listen to events, and perform low-level operations such as creating a call, joining, inviting, sorting, and permission handling.
+
+The entry point for interacting directly with the Stream API is the `StreamVideo` class. This class is a singleton that can be accessed throughout your application via the static `instance` method.
+
+For example:
+
+```dart
+StreamVideo.instance.makeCall(type: "default", id: "YOUR-CALL-ID");
+```
+
+We will look at these concepts in more detail in the following sections.
+
+While developers are free to use `stream_video` in their applications directly, we recommend using our `stream_video_flutter` package instead since it contains many Flutter-specific configuration and behavior handling not included in the base package.
+
+
+### Push Notifications
+
+Push notifications are implemented and handled by `stream_video_push_notification`. This package configures the integration between Flutter and the underlying platform (iOS and Android), allowing for seamless integration and handling of push and call notifications to the device. Our push service is backed by Firebase Cloud Messaging.
+
+Please refer to our push notifications section for a more detailed guide.

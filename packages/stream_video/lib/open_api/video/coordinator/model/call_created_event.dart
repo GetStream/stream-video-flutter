@@ -17,7 +17,6 @@ class CallCreatedEvent {
     required this.callCid,
     required this.createdAt,
     this.members = const [],
-    required this.ringing,
     this.type = 'call.created',
   });
 
@@ -30,9 +29,6 @@ class CallCreatedEvent {
   /// the members added to this call
   List<MemberResponse> members;
 
-  /// true when the call was created with ring enabled
-  bool ringing;
-
   /// The type of event: \"call.created\" in this case
   String type;
 
@@ -42,7 +38,6 @@ class CallCreatedEvent {
      other.callCid == callCid &&
      other.createdAt == createdAt &&
      other.members == members &&
-     other.ringing == ringing &&
      other.type == type;
 
   @override
@@ -52,11 +47,10 @@ class CallCreatedEvent {
     (callCid.hashCode) +
     (createdAt.hashCode) +
     (members.hashCode) +
-    (ringing.hashCode) +
     (type.hashCode);
 
   @override
-  String toString() => 'CallCreatedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, ringing=$ringing, type=$type]';
+  String toString() => 'CallCreatedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -64,7 +58,6 @@ class CallCreatedEvent {
       json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'members'] = this.members;
-      json[r'ringing'] = this.ringing;
       json[r'type'] = this.type;
     return json;
   }
@@ -91,15 +84,14 @@ class CallCreatedEvent {
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
-        members: MemberResponse.listFromJson(json[r'members'])!,
-        ringing: mapValueOfType<bool>(json, r'ringing')!,
+        members: MemberResponse.listFromJson(json[r'members']),
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
     return null;
   }
 
-  static List<CallCreatedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallCreatedEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallCreatedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -130,12 +122,10 @@ class CallCreatedEvent {
   static Map<String, List<CallCreatedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallCreatedEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CallCreatedEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CallCreatedEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -147,7 +137,6 @@ class CallCreatedEvent {
     'call_cid',
     'created_at',
     'members',
-    'ringing',
     'type',
   };
 }

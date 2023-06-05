@@ -8,6 +8,7 @@ enum EventType {
   callCreated('call.created'),
   callAccepted('call.accepted'),
   callRejected('call.rejected'),
+  callRingEvent('call.ring'),
   callUpdated('call.updated'),
   callEnded('call.ended'),
   callSessionStarted('call.session_started'),
@@ -27,6 +28,7 @@ enum EventType {
   callMemberRemoved('call.member_removed'),
   callMemberUpdated('call.member_updated'),
   callMemberUpdatedPermission('call.member_updated_permission'),
+  callNotification('call.notification'),
   callReaction('call.reaction_new'),
   custom('custom'),
   unknown('unknown');

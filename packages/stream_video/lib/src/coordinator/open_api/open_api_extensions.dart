@@ -6,6 +6,7 @@ import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
 import '../../models/call_reaction.dart';
 import '../../models/call_settings.dart';
+import '../../models/guest_created_data.dart';
 import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 
@@ -59,6 +60,26 @@ extension UserExt on open.UserResponse {
   }
 }
 
+extension GuessExt on open.CreateGuestResponse {
+  GuestCreatedData toGuestCreatedData() {
+    return GuestCreatedData(
+      accessToken: accessToken,
+      duration: duration,
+      user: UserResponseData(
+        createdAt: user.createdAt,
+        id: user.id,
+        role: user.role,
+        updatedAt: user.updatedAt,
+        custom: user.custom,
+        deletedAt: user.deletedAt,
+        image: user.image,
+        name: user.name,
+        teams: user.teams,
+      ),
+    );
+  }
+}
+
 extension UserListExt on List<open.UserResponse> {
   List<CallUser> toCallUsers() {
     return map((it) => it.toCallUser()).toList();
@@ -66,16 +87,19 @@ extension UserListExt on List<open.UserResponse> {
 }
 
 extension EnvelopeExt on open.CallResponse {
-  CallMetadata toCallMetadata([List<open.MemberResponse>? members]) {
+  CallMetadata toCallMetadata([
+    List<open.MemberResponse>? members,
+    List<open.OwnCapability>? ownCapabilities,
+  ]) {
     return CallMetadata(
       cid: StreamCallCid(cid: cid),
       details: CallDetails(
         hlsPlaylistUrl: hlsPlaylistUrl,
         createdBy: createdBy.toCallUser(),
         team: team ?? '',
-        ownCapabilities: ownCapabilities.map(
-              (it) => CallPermission.fromAlias(it.value),
-        ),
+        ownCapabilities:
+            ownCapabilities?.map((it) => CallPermission.fromAlias(it.value)) ??
+                [],
         blockedUserIds: List.unmodifiable(blockedUserIds),
         broadcasting: broadcasting,
         recording: recording,
@@ -104,11 +128,11 @@ extension EnvelopeExt on open.CallResponse {
 extension CallSettingsExt on open.CallSettingsResponse {
   // TODO open api provides wider settings options
   CallSettings toCallSettings() {
-    streamLog.i("CallSettingsExt", () => '[toCallSettings] settings: $this');
+    streamLog.i('CallSettingsExt', () => '[toCallSettings] settings: $this');
     return CallSettings(
       ring: RingSettings(
         autoCancelTimeout: Duration(milliseconds: ring.autoCancelTimeoutMs),
-        autoRejectTimeout: Duration(milliseconds: ring.autoRejectTimeoutMs),
+        autoRejectTimeout: Duration(milliseconds: ring.incomingCallTimeoutMs),
       ),
       audio: AudioSettings(
         accessRequestEnabled: audio.accessRequestEnabled,

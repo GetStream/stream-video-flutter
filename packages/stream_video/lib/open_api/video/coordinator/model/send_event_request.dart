@@ -14,31 +14,25 @@ class SendEventRequest {
   /// Returns a new [SendEventRequest] instance.
   SendEventRequest({
     this.custom = const {},
-    required this.type,
   });
 
   Map<String, Object> custom;
 
-  String type;
-
   @override
   bool operator ==(Object other) => identical(this, other) || other is SendEventRequest &&
-     other.custom == custom &&
-     other.type == type;
+     other.custom == custom;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (custom.hashCode) +
-    (type.hashCode);
+    (custom.hashCode);
 
   @override
-  String toString() => 'SendEventRequest[custom=$custom, type=$type]';
+  String toString() => 'SendEventRequest[custom=$custom]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'custom'] = this.custom;
-      json[r'type'] = this.type;
     return json;
   }
 
@@ -62,13 +56,12 @@ class SendEventRequest {
 
       return SendEventRequest(
         custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
-        type: mapValueOfType<String>(json, r'type')!,
       );
     }
     return null;
   }
 
-  static List<SendEventRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<SendEventRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <SendEventRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -99,12 +92,10 @@ class SendEventRequest {
   static Map<String, List<SendEventRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<SendEventRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = SendEventRequest.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = SendEventRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -112,7 +103,6 @@ class SendEventRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'type',
   };
 }
 

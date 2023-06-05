@@ -111,7 +111,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     final image = userInfo.image;
 
     final authMessage = {
-      'token': tokenResult.data,
+      'token': tokenResult.getDataOrNull()?.rawValue,
       'user_details': {
         'id': userInfo.id,
         // TODO BE requires "name" & "image" to be inside "custom" field
