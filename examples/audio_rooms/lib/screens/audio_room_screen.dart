@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:audio_rooms/widgets/stream_audio_appbar.dart';
-import 'package:audio_rooms/widgets/stream_button.dart';
+import 'package:audio_rooms/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 import 'dart:ui' as ui;
@@ -60,7 +59,10 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> {
             left: 0.0,
             right: 0.0,
             top: height * 0.75,
-            child: const Scrim(applied: true, child: SizedBox.expand()),
+            child: const Scrim(
+              applied: true,
+              child: SizedBox.expand(),
+            ),
           ),
           Positioned.fill(
             bottom: 24.0,
@@ -213,7 +215,7 @@ class _RoomScrollBodyState extends State<_RoomScrollBody> {
           ),
           SliverToBoxAdapter(
             child: StreamBuilder<CallState>(
-                stream: widget.call.state.valueStream,
+                stream: widget.room.state.valueStream,
                 builder: (context, snapshot) {
                   final numberOfSpeakers = snapshot.data?.callParticipants
                       .where((element) => element.isAudioEnabled)
@@ -249,7 +251,7 @@ class _RoomScrollBodyState extends State<_RoomScrollBody> {
             padding: const EdgeInsets.only(top: 36, bottom: 12),
             sliver: SliverToBoxAdapter(
               child: StreamBuilder<CallState>(
-                  stream: widget.call.state.valueStream,
+                  stream: widget.room.state.valueStream,
                   builder: (context, snapshot) {
                     final numberOfSpeakers = snapshot.data?.callParticipants
                         .where((element) => !element.isAudioEnabled)
@@ -290,39 +292,6 @@ class _RoomScrollBodyState extends State<_RoomScrollBody> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class Scrim extends StatelessWidget {
-  final bool applied;
-  final Widget child;
-
-  final double opacity;
-  final Duration speed;
-  final Color color;
-
-  const Scrim({
-    Key? key,
-    required this.applied,
-    required this.child,
-    this.opacity = 0.75,
-    this.color = Colors.white,
-    this.speed = const Duration(milliseconds: 200),
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return AbsorbPointer(
-      absorbing: applied,
-      child: AnimatedContainer(
-        duration: speed,
-        curve: const Interval(0.0, 0.4, curve: Curves.easeInOut),
-        foregroundDecoration: BoxDecoration(
-          color: color.withOpacity(applied ? opacity : 0.0),
-        ),
-        child: child,
       ),
     );
   }

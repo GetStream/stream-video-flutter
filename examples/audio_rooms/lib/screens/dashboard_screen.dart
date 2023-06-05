@@ -2,8 +2,7 @@ import 'dart:developer';
 
 import 'package:animations/animations.dart';
 import 'package:audio_rooms/screens/audio_room_screen.dart';
-import 'package:audio_rooms/widgets/stream_audio_appbar.dart';
-import 'package:audio_rooms/widgets/stream_button.dart';
+import 'package:audio_rooms/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
