@@ -94,14 +94,14 @@ extension EnvelopeExt on open.CallResponse {
     return CallMetadata(
       cid: StreamCallCid(cid: cid),
       details: CallDetails(
-        hlsPlaylistUrl: hlsPlaylistUrl,
+        hlsPlaylistUrl: egress.hls!.playlistUrl,
         createdBy: createdBy.toCallUser(),
         team: team ?? '',
         ownCapabilities:
             ownCapabilities?.map((it) => CallPermission.fromAlias(it.value)) ??
                 [],
         blockedUserIds: List.unmodifiable(blockedUserIds),
-        broadcasting: broadcasting,
+        broadcasting: egress.broadcasting,
         recording: recording,
         backstage: backstage,
         transcribing: transcribing,
