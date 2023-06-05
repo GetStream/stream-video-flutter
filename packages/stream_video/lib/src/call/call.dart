@@ -867,8 +867,14 @@ class Call {
     return _permissionsManager.unblockUser(userId);
   }
 
-  Future<Result<None>> startRecording() {
-    return _permissionsManager.startRecording();
+  Future<Result<None>> startRecording() async {
+    final result = await _permissionsManager.startRecording();
+
+    if (result.isSuccess) {
+      _stateManager.setCallRecording(isRecording: true);
+    }
+
+    return result;
   }
 
   Future<Result<List<CallRecording>>> listRecordings() async {
@@ -880,16 +886,34 @@ class Call {
     return _permissionsManager.listRecordings(sessionId);
   }
 
-  Future<Result<None>> stopRecording() {
-    return _permissionsManager.stopRecording();
+  Future<Result<None>> stopRecording() async {
+    final result = await _permissionsManager.stopRecording();
+
+    if (result.isSuccess) {
+      _stateManager.setCallRecording(isRecording: false);
+    }
+
+    return result;
   }
 
-  Future<Result<None>> startBroadcasting() {
-    return _permissionsManager.startBroadcasting();
+  Future<Result<None>> startBroadcasting() async {
+    final result = await _permissionsManager.startBroadcasting();
+
+    if (result.isSuccess) {
+      _stateManager.setCallBroadcasting(isBroadcasting: true);
+    }
+
+    return result;
   }
 
-  Future<Result<None>> stopBroadcasting() {
-    return _permissionsManager.stopBroadcasting();
+  Future<Result<None>> stopBroadcasting() async {
+    final result = await _permissionsManager.stopBroadcasting();
+
+    if (result.isSuccess) {
+      _stateManager.setCallBroadcasting(isBroadcasting: false);
+    }
+
+    return result;
   }
 
   /// Allows for the muting of a or group of users as indicated by [userIds].
@@ -1040,6 +1064,26 @@ class Call {
 
     if (result.isSuccess) {
       _stateManager.setParticipantPinned(action);
+    }
+
+    return result;
+  }
+
+  Future<Result<CallMetadata>> goLive() async {
+    final result = await _coordinatorClient.goLive(callCid);
+
+    if (result.isSuccess) {
+      _stateManager.setCallLive(isLive: true);
+    }
+
+    return result;
+  }
+
+  Future<Result<CallMetadata>> stopLive() async {
+    final result = await _coordinatorClient.stopLive(callCid);
+
+    if (result.isSuccess) {
+      _stateManager.setCallLive(isLive: false);
     }
 
     return result;
