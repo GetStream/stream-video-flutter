@@ -31,9 +31,9 @@ class ToggleRecordingOption extends StatelessWidget {
       enabled ? Icon(enabledRecordingIcon) : Icon(disabledRecordingIcon),
       onPressed: () {
         if(!enabled) {
-          call.goLive();
+          call.startRecording();
         } else {
-          call.stopLive();
+          call.stopRecording();
         }
       },
     );
