@@ -11,6 +11,7 @@ export 'src/call_controls/controls/leave_call_option.dart';
 export 'src/call_controls/controls/toggle_camera_option.dart';
 export 'src/call_controls/controls/toggle_microphone_option.dart';
 export 'src/call_controls/controls/toggle_speakerphone_option.dart';
+export 'src/call_controls/controls/toggle_recording_option.dart';
 export 'src/call_participants/call_participant.dart';
 export 'src/call_participants/call_participants.dart';
 export 'src/call_participants/local_video.dart';
