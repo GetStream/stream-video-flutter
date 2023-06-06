@@ -81,6 +81,8 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> {
                   },
                 ),
                 const Spacer(),
+                if(widget.audioRoom.state.value.localParticipant != null)
+                ToggleMicrophoneOption(call: widget.audioRoom, localParticipant: widget.audioRoom.state.value.localParticipant!),
                 StreamButton(
                   backgroundColor: const Color(0xff1E262E),
                   borderRadius: 7.0,
