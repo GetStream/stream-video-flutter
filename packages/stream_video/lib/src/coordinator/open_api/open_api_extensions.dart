@@ -94,7 +94,7 @@ extension EnvelopeExt on open.CallResponse {
     return CallMetadata(
       cid: StreamCallCid(cid: cid),
       details: CallDetails(
-        hlsPlaylistUrl: egress.hls!.playlistUrl,
+        hlsPlaylistUrl: egress.hls?.playlistUrl ?? '',
         createdBy: createdBy.toCallUser(),
         team: team ?? '',
         ownCapabilities:
