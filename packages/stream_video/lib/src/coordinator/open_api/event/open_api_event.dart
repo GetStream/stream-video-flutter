@@ -14,6 +14,8 @@ class OpenApiEvent with EquatableMixin {
     this.connected,
     this.healthCheck,
     this.callCreated,
+    this.callRing,
+    this.callNotification,
     this.callAccepted,
     this.callRejected,
     this.callUpdated,
@@ -131,6 +133,12 @@ class OpenApiEvent with EquatableMixin {
       case EventType.custom:
         final event = open.CustomVideoEvent.fromJson(jsonObj);
         return result.copyWith(custom: event);
+      case EventType.callRingEvent:
+        final event = open.CallRingEvent.fromJson(jsonObj);
+        return result.copyWith(callRing: event);
+      case EventType.callNotification:
+        final event = open.CallNotificationEvent.fromJson(jsonObj);
+        return result.copyWith(callNotification: event);
       case EventType.unknown:
         streamLog.e(_tag, () => '[fromJson] unexpected event: $jsonObj');
         return result.copyWith(unknown: jsonObj);
@@ -141,6 +149,8 @@ class OpenApiEvent with EquatableMixin {
   final open.ConnectedEvent? connected;
   final open.HealthCheckEvent? healthCheck;
   final open.CallCreatedEvent? callCreated;
+  final open.CallRingEvent? callRing;
+  final open.CallNotificationEvent? callNotification;
   final open.CallAcceptedEvent? callAccepted;
   final open.CallRejectedEvent? callRejected;
   final open.CallUpdatedEvent? callUpdated;
@@ -171,6 +181,8 @@ class OpenApiEvent with EquatableMixin {
     open.ConnectedEvent? connected,
     open.HealthCheckEvent? healthCheck,
     open.CallCreatedEvent? callCreated,
+    open.CallRingEvent? callRing,
+    open.CallNotificationEvent? callNotification,
     open.CallAcceptedEvent? callAccepted,
     open.CallRejectedEvent? callRejected,
     open.CallUpdatedEvent? callUpdated,
@@ -201,6 +213,8 @@ class OpenApiEvent with EquatableMixin {
       connected: connected ?? this.connected,
       healthCheck: healthCheck ?? this.healthCheck,
       callCreated: callCreated ?? this.callCreated,
+      callRing: callRing ?? this.callRing,
+      callNotification: callNotification ?? this.callNotification,
       callAccepted: callAccepted ?? this.callAccepted,
       callRejected: callRejected ?? this.callRejected,
       callUpdated: callUpdated ?? this.callUpdated,
@@ -244,6 +258,8 @@ class OpenApiEvent with EquatableMixin {
         connected,
         healthCheck,
         callCreated,
+        callRing,
+        callNotification,
         callAccepted,
         callRejected,
         callUpdated,

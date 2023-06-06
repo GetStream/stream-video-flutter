@@ -289,6 +289,12 @@ class ApiClient {
           return Device.fromJson(value);
         case 'EdgeResponse':
           return EdgeResponse.fromJson(value);
+        case 'EgressHLSResponse':
+          return EgressHLSResponse.fromJson(value);
+        case 'EgressRTMPResponse':
+          return EgressRTMPResponse.fromJson(value);
+        case 'EgressResponse':
+          return EgressResponse.fromJson(value);
         case 'EndCallResponse':
           return EndCallResponse.fromJson(value);
         case 'EventNotificationSettings':
