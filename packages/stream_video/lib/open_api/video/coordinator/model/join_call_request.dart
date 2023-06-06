@@ -17,6 +17,7 @@ class JoinCallRequest {
     this.data,
     required this.location,
     this.membersLimit,
+    this.migratingFrom,
     this.notify,
     this.ring,
   });
@@ -49,6 +50,15 @@ class JoinCallRequest {
   ///
   int? membersLimit;
 
+  /// If the participant is migrating from another SFU, then this is the ID of the previous SFU
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? migratingFrom;
+
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -72,6 +82,7 @@ class JoinCallRequest {
      other.data == data &&
      other.location == location &&
      other.membersLimit == membersLimit &&
+     other.migratingFrom == migratingFrom &&
      other.notify == notify &&
      other.ring == ring;
 
@@ -82,11 +93,12 @@ class JoinCallRequest {
     (data == null ? 0 : data!.hashCode) +
     (location.hashCode) +
     (membersLimit == null ? 0 : membersLimit!.hashCode) +
+    (migratingFrom == null ? 0 : migratingFrom!.hashCode) +
     (notify == null ? 0 : notify!.hashCode) +
     (ring == null ? 0 : ring!.hashCode);
 
   @override
-  String toString() => 'JoinCallRequest[create=$create, data=$data, location=$location, membersLimit=$membersLimit, notify=$notify, ring=$ring]';
+  String toString() => 'JoinCallRequest[create=$create, data=$data, location=$location, membersLimit=$membersLimit, migratingFrom=$migratingFrom, notify=$notify, ring=$ring]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -105,6 +117,11 @@ class JoinCallRequest {
       json[r'members_limit'] = this.membersLimit;
     } else {
       json[r'members_limit'] = null;
+    }
+    if (this.migratingFrom != null) {
+      json[r'migrating_from'] = this.migratingFrom;
+    } else {
+      json[r'migrating_from'] = null;
     }
     if (this.notify != null) {
       json[r'notify'] = this.notify;
@@ -142,6 +159,7 @@ class JoinCallRequest {
         data: CallRequest.fromJson(json[r'data']),
         location: mapValueOfType<String>(json, r'location')!,
         membersLimit: mapValueOfType<int>(json, r'members_limit'),
+        migratingFrom: mapValueOfType<String>(json, r'migrating_from'),
         notify: mapValueOfType<bool>(json, r'notify'),
         ring: mapValueOfType<bool>(json, r'ring'),
       );

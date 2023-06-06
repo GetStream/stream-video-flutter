@@ -15,14 +15,13 @@ class CallResponse {
   CallResponse({
     required this.backstage,
     this.blockedUserIds = const [],
-    required this.broadcasting,
     required this.cid,
     required this.createdAt,
     required this.createdBy,
     required this.currentSessionId,
     this.custom = const {},
+    required this.egress,
     this.endedAt,
-    required this.hlsPlaylistUrl,
     required this.id,
     required this.ingress,
     required this.recording,
@@ -39,8 +38,6 @@ class CallResponse {
 
   List<String> blockedUserIds;
 
-  bool broadcasting;
-
   /// The unique identifier for a call (<type>:<id>)
   String cid;
 
@@ -54,6 +51,8 @@ class CallResponse {
   /// Custom data for this object
   Map<String, Object> custom;
 
+  EgressResponse egress;
+
   /// Date/time when the call ended
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -62,8 +61,6 @@ class CallResponse {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   DateTime? endedAt;
-
-  String hlsPlaylistUrl;
 
   /// Call ID
   String id;
@@ -111,14 +108,13 @@ class CallResponse {
   bool operator ==(Object other) => identical(this, other) || other is CallResponse &&
      other.backstage == backstage &&
      other.blockedUserIds == blockedUserIds &&
-     other.broadcasting == broadcasting &&
      other.cid == cid &&
      other.createdAt == createdAt &&
      other.createdBy == createdBy &&
      other.currentSessionId == currentSessionId &&
      other.custom == custom &&
+     other.egress == egress &&
      other.endedAt == endedAt &&
-     other.hlsPlaylistUrl == hlsPlaylistUrl &&
      other.id == id &&
      other.ingress == ingress &&
      other.recording == recording &&
@@ -135,14 +131,13 @@ class CallResponse {
     // ignore: unnecessary_parenthesis
     (backstage.hashCode) +
     (blockedUserIds.hashCode) +
-    (broadcasting.hashCode) +
     (cid.hashCode) +
     (createdAt.hashCode) +
     (createdBy.hashCode) +
     (currentSessionId.hashCode) +
     (custom.hashCode) +
+    (egress.hashCode) +
     (endedAt == null ? 0 : endedAt!.hashCode) +
-    (hlsPlaylistUrl.hashCode) +
     (id.hashCode) +
     (ingress.hashCode) +
     (recording.hashCode) +
@@ -155,24 +150,23 @@ class CallResponse {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, broadcasting=$broadcasting, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, endedAt=$endedAt, hlsPlaylistUrl=$hlsPlaylistUrl, id=$id, ingress=$ingress, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
+  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'backstage'] = this.backstage;
       json[r'blocked_user_ids'] = this.blockedUserIds;
-      json[r'broadcasting'] = this.broadcasting;
       json[r'cid'] = this.cid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'created_by'] = this.createdBy;
       json[r'current_session_id'] = this.currentSessionId;
       json[r'custom'] = this.custom;
+      json[r'egress'] = this.egress;
     if (this.endedAt != null) {
       json[r'ended_at'] = this.endedAt!.toUtc().toIso8601String();
     } else {
       json[r'ended_at'] = null;
     }
-      json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
       json[r'id'] = this.id;
       json[r'ingress'] = this.ingress;
       json[r'recording'] = this.recording;
@@ -221,14 +215,13 @@ class CallResponse {
         blockedUserIds: json[r'blocked_user_ids'] is List
             ? (json[r'blocked_user_ids'] as List).cast<String>()
             : const [],
-        broadcasting: mapValueOfType<bool>(json, r'broadcasting')!,
         cid: mapValueOfType<String>(json, r'cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
         createdBy: UserResponse.fromJson(json[r'created_by'])!,
         currentSessionId: mapValueOfType<String>(json, r'current_session_id')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
+        egress: EgressResponse.fromJson(json[r'egress'])!,
         endedAt: mapDateTime(json, r'ended_at', ''),
-        hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
         id: mapValueOfType<String>(json, r'id')!,
         ingress: CallIngressResponse.fromJson(json[r'ingress'])!,
         recording: mapValueOfType<bool>(json, r'recording')!,
@@ -288,13 +281,12 @@ class CallResponse {
   static const requiredKeys = <String>{
     'backstage',
     'blocked_user_ids',
-    'broadcasting',
     'cid',
     'created_at',
     'created_by',
     'current_session_id',
     'custom',
-    'hls_playlist_url',
+    'egress',
     'id',
     'ingress',
     'recording',

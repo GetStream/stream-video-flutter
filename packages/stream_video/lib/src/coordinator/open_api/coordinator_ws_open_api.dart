@@ -7,6 +7,7 @@ import '../../logger/impl/tagged_logger.dart';
 import '../../models/user_info.dart';
 import '../../retry/retry_policy.dart';
 import '../../shared_emitter.dart';
+import '../../token/token.dart';
 import '../../token/token_manager.dart';
 import '../../types/other.dart';
 import '../../utils/none.dart';
@@ -104,7 +105,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     _logger.i(() => '[authenticateUser] url: $url');
 
     final tokenResult = await tokenManager.getToken(refresh: _refreshToken);
-    if (tokenResult is! Success<String>) {
+    if (tokenResult.isFailure) {
       unawaited(_reconnect());
       return;
     }
