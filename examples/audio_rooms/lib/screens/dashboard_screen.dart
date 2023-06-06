@@ -1,6 +1,6 @@
-import 'dart:developer';
-
 import 'package:animations/animations.dart';
+import 'package:audio_rooms/repositories/audio_repository.dart';
+import 'package:audio_rooms/repositories/repository.dart';
 import 'package:audio_rooms/screens/audio_room_screen.dart';
 import 'package:audio_rooms/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,10 @@ class DashboardScreen extends StatefulWidget {
   static Route<dynamic> routeTo() {
     return MaterialPageRoute(
       builder: (BuildContext context) {
-        return const DashboardScreen();
+        return AudioProvider(
+          audioRepo: AudioRepository(StreamVideo.instance),
+          child: const DashboardScreen(),
+        );
       },
     );
   }
@@ -22,37 +25,36 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  Future<void> _createRoom() async {
-    final audioRoom = StreamVideo.instance.makeCall(
-      type: "audio_room",
-      id: 'sometihgw33',
+  Future<void> _createRoom(String title, String desc) async {
+    final room = await context.audio.createAudioRoom(
+      title: title,
+      description: desc,
     );
-
-    await audioRoom.update(custom: {'name': 'Your first Audio Room'});
-    await audioRoom.connect();
-
     if (mounted) {
-      Navigator.of(context).push(AudioRoomScreen.routeTo(
-        audioRoom,
-        'Your first Audio Room',
-      ));
+      Navigator.of(context).push(
+        AudioRoomScreen.routeTo(
+          room.callObject,
+          room.details.custom['name'] as String,
+        ),
+      );
     }
   }
 
-  Future<List<QueriedCall>> _queryCalls() async {
-    final audioRoomResult = await StreamVideo.instance.queryCalls(
-      filterConditions: {'type': 'audio_room'},
+  void _showDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: CreateRoomDialog(
+            onCreatePressed: (roomInfo) => _createRoom(
+              roomInfo.title,
+              roomInfo.desc,
+            ),
+          ),
+        );
+      },
     );
-    if (audioRoomResult.isSuccess) {
-      final rooms = audioRoomResult.getDataOrNull()?.calls;
-      rooms?.removeWhere((element) => element.members.isEmpty);
-      return rooms ?? [];
-    } else {
-      log(
-        '[_queryCalls]: Failed with error ${audioRoomResult.getErrorOrNull()?.message}',
-      );
-      throw Exception('Unable to find ongoing audio calls');
-    }
   }
 
   @override
@@ -85,7 +87,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
                   FutureBuilder<List<QueriedCall>>(
-                    future: _queryCalls(),
+                    future: context.audio.queryCalls(),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         final data = snapshot.data ?? [];
@@ -106,7 +108,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 closedBuilder: (context, action) => _RoomCard(
                                   roomTitle: roomTitle,
                                   onRoomTap: (_) {
-                                    room.callObject.connect();
+                                    room.callObject.getOrCreateCall();
                                     action();
                                   },
                                   users: room.members
@@ -150,7 +152,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               right: 24.0,
               top: height * 0.75,
               child: StreamButton(
-                onTap: _createRoom,
+                onTap: _showDialog,
                 child: const Text(
                   "New Room",
                 ),
@@ -254,5 +256,12 @@ extension on QueriedCall {
   Call get callObject => StreamVideo.instance.makeCall(
         type: call.cid.type,
         id: call.cid.id,
+      );
+}
+
+extension on CallMetadata {
+  Call get callObject => StreamVideo.instance.makeCall(
+        type: cid.type,
+        id: cid.id,
       );
 }
