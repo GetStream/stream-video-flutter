@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../../../open_api/video/coordinator/api.dart'
+    show CreateDeviceRequestPushProviderEnum;
 import '../../models/call_cid.dart';
 import '../../models/call_permission.dart';
 import '../../models/call_settings.dart';
@@ -18,26 +20,35 @@ abstract class CoordinatorInput with EquatableMixin {
 
 class CreateDeviceInput extends CoordinatorInput {
   const CreateDeviceInput({
-    required this.pushToken,
-    required this.pushProviderId,
+    required this.id,
+    required this.pushProvider,
+    this.voipToken,
+    this.pushProviderName,
+    this.userId,
   });
 
-  final String pushToken;
-  final String pushProviderId;
+  final String id;
+  final bool? voipToken;
+  final CreateDeviceRequestPushProviderEnum pushProvider;
+  final String? pushProviderName;
+  final String? userId;
 
   @override
-  List<Object?> get props => [pushProviderId, pushToken];
+  List<Object?> get props =>
+      [id, pushProvider, voipToken, pushProviderName, userId];
 }
 
 class DeleteDeviceInput extends CoordinatorInput {
   const DeleteDeviceInput({
-    required this.pushToken,
+    required this.id,
+    this.userId,
   });
 
-  final String pushToken;
+  final String id;
+  final String? userId;
 
   @override
-  List<Object?> get props => [pushToken];
+  List<Object?> get props => [id, userId];
 }
 
 class CreateCallInput extends CoordinatorInput {

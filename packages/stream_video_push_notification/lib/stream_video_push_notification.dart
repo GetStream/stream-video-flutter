@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stream_video/open_api/video/coordinator/api.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'src/call_notification_wrapper.dart';
@@ -69,8 +70,10 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     if (token != null) {
       await _client.createDevice(
         CreateDeviceInput(
-          pushToken: token,
-          pushProviderId: 'apn',
+          id: token,
+          voipToken: true,
+          pushProvider: CreateDeviceRequestPushProviderEnum.apn,
+          pushProviderName: 'voip'
         ),
       );
     }
@@ -79,8 +82,9 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   Future<void> _registerFirebaseToken(String token) async {
     await _client.createDevice(
       CreateDeviceInput(
-        pushToken: token,
-        pushProviderId: 'firebase',
+        id: token,
+        pushProvider: CreateDeviceRequestPushProviderEnum.firebase,
+        pushProviderName: 'firebase'
       ),
     );
   }

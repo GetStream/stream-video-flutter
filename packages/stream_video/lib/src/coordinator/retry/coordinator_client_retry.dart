@@ -43,7 +43,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<CallDevice>> createDevice(CreateDeviceInput input) {
+  Future<Result<None>> createDevice(CreateDeviceInput input) {
     return _retryManager.execute(
       () => _delegate.createDevice(input),
       (error, nextAttemptDelay) async {
