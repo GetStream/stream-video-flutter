@@ -295,7 +295,7 @@ class CallSession extends Disposable {
     final enabledRids = event.videoSenders.firstOrNull?.layers
         .where((e) => e.active)
         .map((e) => e.name)
-        .toList() ?? [];
+        .toSet() ?? {};
 
     _logger.v(() => '[onPublishQualityChanged] Enabled RIDs: $enabledRids');
 
