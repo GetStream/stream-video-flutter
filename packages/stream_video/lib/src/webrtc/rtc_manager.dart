@@ -191,7 +191,7 @@ class RtcManager extends Disposable {
     }
   }
 
-  Future<void> onPublishQualityChanged(List<String> rids) async {
+  Future<void> onPublishQualityChanged(Set<String> rids) async {
     final transceivers = await _publisher.pc.getTransceivers();
     for (final transceiver in transceivers) {
       if (transceiver.sender.track?.kind == 'video') {
