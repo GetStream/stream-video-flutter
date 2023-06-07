@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
 class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({Key? key}) : super(key: key);
+
   static Route<dynamic> routeTo() {
     return MaterialPageRoute(
       builder: (BuildContext context) {
@@ -17,8 +19,6 @@ class DashboardScreen extends StatefulWidget {
       },
     );
   }
-
-  const DashboardScreen({Key? key}) : super(key: key);
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -55,6 +55,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
         );
       },
     );
+  }
+
+  Future<void> _onRoomTapped(QueriedCall room) async {
+    room.callObject.connectOptions = CallConnectOptions(
+      camera: TrackOption.disabled(),
+      microphone: TrackOption.disabled(),
+    );
+
+    if (mounted) {
+      Navigator.of(context).push(
+        AudioRoomScreen.routeTo(
+          room.callObject,
+          room.call.details.custom['name'] as String,
+        ),
+      );
+    }
   }
 
   @override
@@ -99,24 +115,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               final roomTitle =
                                   room.call.details.custom['name'] as String? ??
                                       room.call.cid.id;
-                              return OpenContainer(
-                                openBuilder: (context, action) =>
-                                    AudioRoomScreen(
-                                  audioRoom: room.callObject,
-                                  name: roomTitle,
-                                ),
-                                closedBuilder: (context, action) => _RoomCard(
+                              return _RoomCard(
                                   roomTitle: roomTitle,
-                                  onRoomTap: (_) {
-                                    room.callObject.getOrCreateCall();
-                                    action();
-                                  },
-                                  users: room.members
-                                      .map((e) => e.userId)
-                                      .toList(growable: false),
-                                ),
-                                closedColor: const Color(0xFFDDDDDD),
-                              );
+                                  users: room
+                                      .callObject.state.value.callParticipants
+                                      .map((e) => e.name)
+                                      .toList(),
+                                  onRoomTap: (_) => _onRoomTapped(room));
+                              // return OpenContainer(
+                              //   openBuilder: (context, action) =>
+                              //       AudioRoomScreen(
+                              //     audioRoom: room.callObject,
+                              //     name: roomTitle,
+                              //   ),
+                              //   closedBuilder: (context, action) => _RoomCard(
+                              //     roomTitle: roomTitle,
+                              //     onRoomTap: (_) => _onRoomTapped(room, action),
+                              //     users: room.members
+                              //         .map((e) => e.userId)
+                              //         .toList(growable: false),
+                              //   ),
+                              //   closedColor: const Color(0xFFDDDDDD),
+                              // );
                             },
                           ),
                         );

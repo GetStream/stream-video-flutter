@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:audio_rooms/assets.dart';
 import 'package:audio_rooms/repositories/repository.dart';
@@ -16,16 +17,30 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
-    await StreamVideo.instance.connectUserWithProvider(
-      const UserInfo(
-        id: "nash@getstream.io",
-        role: "admin",
-        name: "Nash",
-      ),
-      tokenProvider: TokenProvider.dynamic(
-        (uid) => context.auth.fetchAuthTokenForUser(userId: uid),
-      ),
-    );
+    if (Platform.isAndroid) {
+      await StreamVideo.instance.connectUserWithProvider(
+        const UserInfo(
+          id: "test@getstream.io",
+          role: "user",
+          name: "Test",
+        ),
+        tokenProvider: TokenProvider.dynamic(
+          (uid) => context.auth.fetchAuthTokenForUser(userId: uid),
+        ),
+      );
+    } else {
+      await StreamVideo.instance.connectUserWithProvider(
+        const UserInfo(
+          id: "nash@getstream.io",
+          role: "admin",
+          name: "Nash",
+        ),
+        tokenProvider: TokenProvider.dynamic(
+          (uid) => context.auth.fetchAuthTokenForUser(userId: uid),
+        ),
+      );
+    }
+
     unawaited(
       Navigator.of(context).push(
         DashboardScreen.routeTo(),
