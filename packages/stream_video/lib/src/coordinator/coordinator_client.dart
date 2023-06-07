@@ -26,7 +26,7 @@ abstract class CoordinatorClient {
 
   Future<Result<None>> disconnectUser();
 
-  Future<Result<CallDevice>> createDevice(
+  Future<Result<None>> createDevice(
     inputs.CreateDeviceInput input,
   );
 
