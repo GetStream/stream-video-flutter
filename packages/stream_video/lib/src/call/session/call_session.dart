@@ -191,6 +191,8 @@ class CallSession extends Disposable {
       await _onTrackPublished(event);
     } else if (event is SfuTrackUnpublishedEvent) {
       await _onTrackUnpublished(event);
+    } else if (event is SfuChangePublishQualityEvent) {
+      await _onPublishQualityChanged(event);
     }
 
     if (event is SfuJoinResponseEvent) {
@@ -287,6 +289,19 @@ class CallSession extends Disposable {
     await track.stop();
   }
 
+  Future<void> _onPublishQualityChanged(SfuChangePublishQualityEvent event) async {
+    _logger.d(() => '[onPublishQualityChanged] event: $event');
+
+    final enabledRids = event.videoSenders.firstOrNull?.layers
+        .where((e) => e.active)
+        .map((e) => e.name)
+        .toList() ?? [];
+
+    _logger.v(() => '[onPublishQualityChanged] Enabled RIDs: $enabledRids');
+
+    return await rtcManager?.onPublishQualityChanged(enabledRids);
+  }
+
   Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {
     final offerSdp = event.sdp;
     _logger.i(() => '[onSubscriberOffer] event: $event');
@@ -342,7 +357,7 @@ class CallSession extends Disposable {
       await _applyCurrentAudioOutputDevice();
     }
 
-    if(track.isVideoTrack) {
+    if (track.isVideoTrack) {
       await _applyCurrentVideoInputDevice();
     }
 
