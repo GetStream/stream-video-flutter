@@ -194,21 +194,23 @@ class RtcManager extends Disposable {
   Future<void> onPublishQualityChanged(List<String> rids) async {
     final transceivers = await _publisher.pc.getTransceivers();
     for (final transceiver in transceivers) {
-      var changed = false;
-      final params = transceiver.sender.parameters;
-      params.encodings?.forEach((enc) {
-        // flip 'active' flag only when necessary
-        final shouldEnable = rids.contains(enc.rid);
-        if (shouldEnable != enc.active) {
-          enc.active = shouldEnable;
-          changed = true;
+      if (transceiver.sender.track?.kind == 'video') {
+        var changed = false;
+        final params = transceiver.sender.parameters;
+        params.encodings?.forEach((enc) {
+          // flip 'active' flag only when necessary
+          final shouldEnable = rids.contains(enc.rid);
+          if (shouldEnable != enc.active) {
+            enc.active = shouldEnable;
+            changed = true;
+          }
+        });
+        if (changed) {
+          if (params.encodings?.length == 0) {
+            _logger.v(() => 'No suitable video encoding quality found');
+          }
+          await transceiver.sender.setParameters(params);
         }
-      });
-      if (changed) {
-        if (params.encodings?.length == 0) {
-          _logger.v(() => 'No suitable video encoding quality found');
-        }
-        await transceiver.sender.setParameters(params);
       }
     }
   }
