@@ -6,7 +6,10 @@ class StreamAudioRoomsAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   const StreamAudioRoomsAppBar({
     Key? key,
+    this.onSettingsPressed,
   }) : super(key: key);
+
+  final VoidCallback? onSettingsPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +28,13 @@ class StreamAudioRoomsAppBar extends StatelessWidget
               backgroundImage: AssetImage(kStreamAudioIconAsset),
             ),
             const Spacer(),
-            const Icon(
-              Icons.settings,
-              size: 34,
-              color: Color(0xFF4C525C),
+            InkWell(
+              onTap: onSettingsPressed,
+              child: const Icon(
+                Icons.settings,
+                size: 34,
+                color: Color(0xFF4C525C),
+              ),
             ),
             const SizedBox(width: 24),
             StreamButton(
