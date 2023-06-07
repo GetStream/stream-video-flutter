@@ -64,6 +64,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   late final livestreamingApi = open.LivestreamingApi(_apiClient);
   late final moderationApi = open.ModerationApi(_apiClient);
   late final callTypesApi = open.CallTypesApi(_apiClient);
+  late final devicesApi = open.DevicesApi(_apiClient);
   late final defaultApi = open.DefaultApi(_apiClient);
   late final locationService = LocationService();
 
@@ -166,16 +167,49 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
   /// Create a new Device used to receive Push Notifications.
   @override
-  Future<Result<CallDevice>> createDevice(
+  Future<Result<None>> createDevice(
     inputs.CreateDeviceInput input,
   ) async {
-    return Result.error('not implemented');
+    try {
+      _logger.d(() => '[createDevice] input: $input');
+      final result = await devicesApi.createDevice(
+        open.CreateDeviceRequest(
+          id: input.id,
+          pushProvider: input.pushProvider,
+          pushProviderName: input.pushProviderName,
+          userId: input.userId,
+          voipToken: input.voipToken,
+        ),
+      );
+      _logger.v(() => '[createDevice] completed: $result');
+      if (result == null) {
+        return Result.error('createDevice result is null');
+      }
+      return const Result.success(none);
+    } catch (e, stk) {
+      _logger.e(() => '[createDevice] failed: $e; $stk');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
   }
 
   /// Deletes a Device used to receive Push Notifications.
   @override
   Future<Result<None>> deleteDevice(inputs.DeleteDeviceInput input) async {
-    return Result.error('not implemented');
+    try {
+      _logger.d(() => '[deleteDevice] input: $input');
+      final result = await devicesApi.deleteDevice(
+        id: input.id,
+        userId: input.userId,
+      );
+      _logger.v(() => '[deleteDevice] completed: $result');
+      if (result == null) {
+        return Result.error('deleteDevice result is null');
+      }
+      return const Result.success(none);
+    } catch (e, stk) {
+      _logger.e(() => '[deleteDevice] failed: $e; $stk');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
   }
 
   /// Gets the call if already exists or attempts to create a new call.
