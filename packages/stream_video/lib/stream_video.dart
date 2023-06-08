@@ -1,11 +1,11 @@
 library stream_video;
 
+export 'open_api/video/coordinator/api.dart';
 export 'src/action/participant_action.dart';
 export 'src/call/call.dart';
 export 'src/call/call_connect_options.dart';
 export 'src/call_state.dart';
 export 'src/coordinator/coordinator_client.dart';
-export 'src/coordinator/models/coordinator_inputs.dart';
 export 'src/events.dart';
 export 'src/logger/impl/console_logger.dart';
 export 'src/logger/impl/file_logger.dart';

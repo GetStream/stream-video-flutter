@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../../open_api/video/coordinator/api.dart';
 import '../../stream_video.dart';
 import '../action/internal/lifecycle_action.dart';
 import '../coordinator/models/coordinator_events.dart';
@@ -385,14 +384,26 @@ class Call {
 
   Future<Result<CallMetadata>> update({
     Map<String, Object>? custom,
-    CallSettingsInput? settingsOverride,
+    StreamRingSettings? ring,
+    StreamAudioSettings? audio,
+    StreamVideoSettings? video,
+    StreamScreenShareSettings? screenShare,
+    StreamRecordingSettings? recording,
+    StreamTranscriptionSettings? transcription,
+    StreamBackstageSettings? backstage,
+    StreamGeofencingSettings? geofencing,
   }) {
     return _coordinatorClient.updateCall(
-      UpdateCallInput(
-        callCid: callCid,
-        custom: custom ?? {},
-        settingsOverride: settingsOverride,
-      ),
+      callCid: callCid,
+      custom: custom ?? {},
+      ring: ring,
+      audio: audio,
+      video: video,
+      screenShare: screenShare,
+      recording: recording,
+      transcription: transcription,
+      backstage: backstage,
+      geofencing: geofencing,
     );
   }
 
@@ -752,12 +763,10 @@ class Call {
 
   Future<Result<None>> inviteUsers(List<UserInfo> users) {
     return _coordinatorClient.inviteUsers(
-      UpsertCallMembersInput(
-        callCid: callCid,
-        members: users.map((user) {
-          return MemberInput(userId: user.id, role: user.role);
-        }).toList(),
-      ),
+      callCid: callCid,
+      members: users.map((user) {
+        return MemberRequest(userId: user.id, role: user.role);
+      }).toList(),
     );
   }
 
@@ -779,16 +788,14 @@ class Call {
     }
 
     final response = await _coordinatorClient.getOrCreateCall(
-      GetOrCreateCallInput(
-        callCid: callCid,
-        ringing: ringing,
-        members: participantIds.map((id) {
-          return MemberInput(
-            userId: id,
-            role: 'admin',
-          );
-        }),
-      ),
+      callCid: callCid,
+      ringing: ringing,
+      members: participantIds.map((id) {
+        return MemberRequest(
+          userId: id,
+          role: 'admin',
+        );
+      }).toList(),
     );
 
     return response.fold(
@@ -813,9 +820,8 @@ class Call {
     bool create = false,
   }) async {
     _logger.d(() => '[joinCall] cid: $callCid');
-    final joinResult = await _coordinatorClient.joinCall(
-      JoinCallInput(callCid: callCid, create: create),
-    );
+    final joinResult =
+        await _coordinatorClient.joinCall(callCid: callCid, create: create);
     if (joinResult is! Success<CoordinatorJoined>) {
       _logger.e(() => '[joinCall] join failed: $joinResult');
       return joinResult as Failure;

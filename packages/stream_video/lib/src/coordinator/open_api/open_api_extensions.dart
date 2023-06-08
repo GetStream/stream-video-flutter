@@ -130,40 +130,40 @@ extension CallSettingsExt on open.CallSettingsResponse {
   CallSettings toCallSettings() {
     streamLog.i('CallSettingsExt', () => '[toCallSettings] settings: $this');
     return CallSettings(
-      ring: RingSettings(
+      ring: StreamRingSettings(
         autoCancelTimeout: Duration(milliseconds: ring.autoCancelTimeoutMs),
         autoRejectTimeout: Duration(milliseconds: ring.incomingCallTimeoutMs),
       ),
-      audio: AudioSettings(
+      audio: StreamAudioSettings(
         accessRequestEnabled: audio.accessRequestEnabled,
         opusDtxEnabled: audio.opusDtxEnabled,
         redundantCodingEnabled: audio.redundantCodingEnabled,
       ),
-      video: VideoSettings(
+      video: StreamVideoSettings(
         accessRequestEnabled: video.accessRequestEnabled,
         enabled: video.enabled,
       ),
-      screenShare: ScreenShareSettings(
+      screenShare: StreamScreenShareSettings(
         accessRequestEnabled: screensharing.accessRequestEnabled,
         enabled: screensharing.enabled,
       ),
-      recording: RecordingSettings(
+      recording: StreamRecordingSettings(
         audioOnly: recording.audioOnly,
         mode: recording.mode.toDomain(),
         quality: recording.quality.toDomain(),
       ),
-      broadcasting: BroadcastingSettings(
+      broadcasting: StreamBroadcastingSettings(
         enabled: broadcasting.enabled,
         hls: broadcasting.hls.toDomain(),
       ),
-      transcription: TranscriptionSettings(
+      transcription: StreamTranscriptionSettings(
         closedCaptionMode: transcription.closedCaptionMode,
         mode: transcription.mode.toDomain(),
       ),
-      backstage: BackstageSettings(
+      backstage: StreamBackstageSettings(
         enabled: backstage.enabled,
       ),
-      geofencing: GeofencingSettings(
+      geofencing: StreamGeofencingSettings(
         names: geofencing.names,
       ),
     );
@@ -183,8 +183,8 @@ extension on open.TranscriptionSettingsModeEnum {
 }
 
 extension on open.HLSSettings {
-  HlsSettings toDomain() {
-    return HlsSettings(
+  StreamHlsSettings toDomain() {
+    return StreamHlsSettings(
       autoOn: autoOn,
       enabled: enabled,
       qualityTracks: List.unmodifiable(qualityTracks),

@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import '../open_api/video/coordinator/api.dart';
 import '../stream_video.dart';
 import 'coordinator/models/coordinator_events.dart';
-import 'coordinator/models/coordinator_inputs.dart' as input;
 import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'coordinator/retry/coordinator_client_retry.dart';
 import 'errors/video_error_composer.dart';
@@ -301,16 +301,14 @@ class StreamVideo {
     String? next,
     String? prev,
     int? limit,
-    List<SortInput>? sorts,
+    List<SortParamRequest>? sorts,
   }) {
     return _client.queryCalls(
-      input.QueryCallsInput(
-        filterConditions: filterConditions,
-        next: next,
-        limit: limit,
-        prev: prev,
-        sorts: sorts ?? [],
-      ),
+      filterConditions: filterConditions,
+      next: next,
+      limit: limit,
+      prev: prev,
+      sorts: sorts ?? [],
     );
   }
 
@@ -325,14 +323,12 @@ class StreamVideo {
     await _tokenManager.setTokenProvider(id,
         tokenProvider: AnonymousTokenProvider());
     final result = await _client.createGuest(
-      UserInput(
-        id: id,
-        name: name,
-        role: role,
-        image: image,
-        teams: teams,
-        custom: custom ?? {},
-      ),
+      id: id,
+      name: name,
+      role: role,
+      image: image,
+      teams: teams,
+      custom: custom ?? {},
     );
     _tokenManager.reset();
     return result;
