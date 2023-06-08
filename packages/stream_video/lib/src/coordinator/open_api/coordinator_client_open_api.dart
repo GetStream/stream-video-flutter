@@ -660,14 +660,14 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<CallMetadata>> updateCall({
     required StreamCallCid callCid,
     Map<String, Object> custom = const {},
-    RingSettings? ring,
-    AudioSettings? audio,
-    VideoSettings? video,
-    ScreenShareSettings? screenShare,
-    RecordingSettings? recording,
-    TranscriptionSettings? transcription,
-    BackstageSettings? backstage,
-    GeofencingSettings? geofencing,
+    StreamRingSettings? ring,
+    StreamAudioSettings? audio,
+    StreamVideoSettings? video,
+    StreamScreenShareSettings? screenShare,
+    StreamRecordingSettings? recording,
+    StreamTranscriptionSettings? transcription,
+    StreamBackstageSettings? backstage,
+    StreamGeofencingSettings? geofencing,
   }) async {
     try {
       final result = await videoApi.updateCall(

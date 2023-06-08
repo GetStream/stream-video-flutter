@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../../open_api/video/coordinator/api.dart' as open;
+import '../../open_api/video/coordinator/api.dart';
 import '../../stream_video.dart';
 import '../action/internal/lifecycle_action.dart';
 import '../coordinator/models/coordinator_events.dart';
@@ -385,14 +385,14 @@ class Call {
 
   Future<Result<CallMetadata>> update({
     Map<String, Object>? custom,
-    RingSettings? ring,
-    AudioSettings? audio,
-    VideoSettings? video,
-    ScreenShareSettings? screenShare,
-    RecordingSettings? recording,
-    TranscriptionSettings? transcription,
-    BackstageSettings? backstage,
-    GeofencingSettings? geofencing,
+    StreamRingSettings? ring,
+    StreamAudioSettings? audio,
+    StreamVideoSettings? video,
+    StreamScreenShareSettings? screenShare,
+    StreamRecordingSettings? recording,
+    StreamTranscriptionSettings? transcription,
+    StreamBackstageSettings? backstage,
+    StreamGeofencingSettings? geofencing,
   }) {
     return _coordinatorClient.updateCall(
       callCid: callCid,
@@ -766,7 +766,7 @@ class Call {
     return _coordinatorClient.inviteUsers(
       callCid: callCid,
       members: users.map((user) {
-        return open.MemberRequest(userId: user.id, role: user.role);
+        return MemberRequest(userId: user.id, role: user.role);
       }).toList(),
     );
   }
@@ -792,7 +792,7 @@ class Call {
       callCid: callCid,
       ringing: ringing,
       members: participantIds.map((id) {
-        return open.MemberRequest(
+        return MemberRequest(
           userId: id,
           role: 'admin',
         );
@@ -885,7 +885,7 @@ class Call {
     return result;
   }
 
-  Future<Result<List<open.CallRecording>>> listRecordings() async {
+  Future<Result<List<CallRecording>>> listRecordings() async {
     final sessionId = _session?.sessionId;
     if (sessionId == null) {
       return Result.error('Session not found');
