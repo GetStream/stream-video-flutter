@@ -1,3 +1,91 @@
-# Authentication
+---
+slug: /client-and-authentication
+title: Client and Authentication
+---
 
-// TODO Write the content
+### Client Overview
+
+`StreamVideo` is the main class used for creating class, performing authentication and listening to core events dispatched by Stream’s servers.
+
+Before users are able to join or create a call, the client must first be configured with an `apiKey` obtained from the Stream Dashboard for the given project.
+
+The initialization constructor for `StreamVideo` also exposes many customization options which can be overridden based on the project needs such as the logging level, SDP policy, retry policy, etc.
+
+```dart
+static StreamVideo init(
+    String apiKey, {
+    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
+    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
+    LatencySettings latencySettings = const LatencySettings(),
+    RetryPolicy retryPolicy = const RetryPolicy(),
+    SdpPolicy sdpPolicy = _defaultSdpPolicy,
+    Priority logPriority = Priority.none,
+    LogHandlerFunction logHandlerFunction = _defaultLogHandler,
+  })
+```
+
+### Working with Tokens
+
+All tokens must be generated via a backend SDK and cannot be created from a frontend client. This step is typically included whenever a new user is registered on your backend.
+
+There are a few ways in which users can connect using our SDK. We support both long lived tokens and dynamic tokens via two constructors accessible on the `StreamVideo` class:
+
+- `connectUser(UserInfo user, String token)`
+- `connectUserWithProvider(user, tokenProvider)`
+
+For situations where your backend does not require tokens to be refreshed, `connectUser` can be used by simply passing in a `UserInfo` object and the token as a `String`.
+
+******************************Dynamic tokens******************************
+
+Using `connectUserWithProvider`, a Token Provider can be used to dynamically load a token from a server. On expiration, the SDK automatically calls the Token Provider to obtain a new token.
+
+As long as your handler returns a `String` it will satisfy the contract of `TokenProvider`
+
+```dart
+Future<String> _tokenLoader(String userId) async {
+    final token = await backend.loadToken(
+      apiKey: Env.apiKey,
+      userId: userId,
+    );
+    return token;
+  }
+```
+
+```dart
+await streamVideo.connectUserWithProvider(
+      user,
+      tokenProvider: TokenProvider.dynamic(_tokenLoader, (token) async {
+				// Callback function with the token
+      }),
+    );
+```
+
+### Anonymous users
+
+For use-cases like live streaming or guest meeting, you may want to allow users to join a call without creating an account.
+
+For these use-cases, the SDK has a guest endpoint which can be used to create a temporary user
+
+```dart
+final guest = await streamVideo.createGuest(
+      id: guestId,
+      name: guestId,
+      image: imageUrl,
+    );
+    final data = guest.getDataOrNull();
+    if (data == null) {
+      throw Exception();
+    }
+
+    final userInfo = UserInfo(
+      id: data.user.id,
+      image: data.user.image,
+      name: data.user.name ?? '',
+      teams: data.user.teams ?? [],
+      role: data.user.role,
+    );
+
+    await streamVideo.connectUser(userInfo, data.accessToken);
+```
+
+`createGuest` returns user information and a token which can be used to construct information about the user and connect to the API.
