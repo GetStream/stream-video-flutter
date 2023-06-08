@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../../open_api/video/coordinator/api.dart';
 import '../../stream_video.dart';
 import '../action/internal/lifecycle_action.dart';
 import '../coordinator/models/coordinator_events.dart';
@@ -821,9 +820,8 @@ class Call {
     bool create = false,
   }) async {
     _logger.d(() => '[joinCall] cid: $callCid');
-    final joinResult = await _coordinatorClient.joinCall(
-        callCid: callCid, create: create
-    );
+    final joinResult =
+        await _coordinatorClient.joinCall(callCid: callCid, create: create);
     if (joinResult is! Success<CoordinatorJoined>) {
       _logger.e(() => '[joinCall] join failed: $joinResult');
       return joinResult as Failure;
