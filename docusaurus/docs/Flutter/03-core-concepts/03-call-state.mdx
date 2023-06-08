@@ -3,78 +3,73 @@ slug: /call-and-participant-state
 title: Call and Participant State
 ---
 
-The `Call` object manages the state of the call for you. You can use the `CallState` property to access information about the call, such as call ID, call status, call participants, call settings, and other relevant details.
+When a `Call` is created, users can subscribe to receive notifications about any changes that may occur during the call's lifecycle.
 
-To retrieve the `CallState` object, use the following code:
+To access the state of a call, use `call.state.value` to obtain the latest `CallState` snapshot, or use `valueStream` to listen for real-time changes to the `CallState`.
 
-```dart
-CallState callState = call.state.value;
-```
-
-Alternatively, you can subscribe to changes in the call state to update your UI or perform other actions based on the call's current state. Here's an example of how to subscribe to call state changes:
+This functionality is particularly useful for determining which parts of the UI or application to render based on the current state or lifecycle of the ongoing call. For example, you may want to display an indicator to users when a call is being recorded.
 
 ```dart
-class CallContainer extends StatefulWidget {
-  const CallContainer({
-    super.key,
-    required this.call,
-  });
-
-  final Call call;
-
-  @override
-  State<CallContainer> createState() => _CallContainerState();
-}
-
-class _CallContainerState extends State<CallContainer> {
-  StreamSubscription<CallState>? _callStateSubscription;
-
-  Call get call => widget.call;
-
-  late CallState _callState;
-
-  @override
-  void initState() {
-    super.initState();
-    _callStateSubscription = call.state.listen((CallState callState) {
-      setState(() {
-        _callState = callState;
-      });
-    });
-    _callState = call.state.value;
-  }
-
-  @override
-  void dispose() {
-    _callStateSubscription?.cancel();
-    _callStateSubscription = null;
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final status = _callState.status;
-
-    if (status is CallStatusIncoming && !status.acceptedByMe) {
-      /// Show the ringing UI to the user
+StreamBuilder<CallState>(
+  stream: call.state.valueStream, // Subscribe to state changes
+  builder: (context, snapshot) {
+    final state = snapshot.data;
+    if (state.isRecording) {
+      return CallRecordingUI();
+    } else {
+      return RegularCallUI();
     }
-  }
-}
+  },
+),
 ```
-
-In this snippet, we are subscribing to the call state changes using the `listen()` method. Whenever the state changes, we update the UI by calling `setState()`. If the state is `CallStatusIncoming` and you haven't accepted the call yet, you can show the ringing UI.
 
 ## Understanding Call Status
+The `CallStatus` property of the `CallState` object indicates the current state of the call. Depending on where you are in the call lifecycle, `CallStatus` can have one of the following possible values.
 
-The `CallStatus` property of the `CallState` object indicates the current state of the call. Depending on where you are in the call lifecycle, `CallStatus` can have the following possible values:
-
-* `CallStatusIdle`: Indicates that there is no active call at the moment.
-* `CallStatusCreated`: Indicates that the call exists or has been created on the server.
-* `CallStatusJoining`: Indicates that the user has sent a request to join the call.
-* `CallStatusJoined`: Indicates that the user has successfully joined the call.
-* `CallStatusConnected`: Indicates that the user is connected to the call and is ready to send and receive tracks.
-* `CallStatusIncoming`: Indicates that there's an incoming call, and you need to display an incoming call screen.
-* `CallStatusOutgoing`: Indicates that the user is making an outgoing call, and you need to display an outgoing call screen.
-* `CallStatusDrop`: Indicates that the call has ended, failed, or has been canceled.
+| Call Status  | Description |
+| --- | --- |
+| CallStatusIdle | Indicates that there is no active call at the moment.  |
+| CallStatusIncoming | Indicates that there’s an incoming call, and you need to display an incoming call screen.  |
+| CallStatusOutgoing |  Indicates that the user is making an outgoing call, and you need to display an outgoing call screen.  |
+| CallStatusConnecting |  |
+| CallStatusReconnecting | Indicates that the SDK is attempting to reconnect to the call. The number of attempts can be set via the attempt property.  |
+| CallStatusConnected | Indicates that the user is connected to the call and is ready to send and receive tracks.  |
+| CallStatusDisconnected | Indicates that the call has ended, failed, or has been canceled. The exact reason can be accessed via the DisconnectedReason property.   |
+| CallStatusJoining |  |
+| CallStatusJoined | Indicates that the user has successfully joined the call. |
 
 By checking the `CallStatus` value in the `CallState` object, you can determine the current state of the call and adjust your UI accordingly.
+
+### Participant State
+In the call state, you can find the parameter `callParticipants`. This parameter allows you to access and manipulate the participants present on the call. By using `callParticipants`, you can easily map over the participants and observe changes in their configuration.
+
+For instance, you can keep track of which participant is currently speaking, which participant is the dominant speaker, and which participant is pinned to the call. Additionally, `callParticipants` allows you to monitor other changes to the call's configuration as well.
+
+Overall, `callParticipants` is a powerful tool that provides you with a lot of control and insight into the call's current state and configuration. By leveraging this parameter effectively, you can create more advanced and robust call applications.
+
+- User Id
+- Role
+- Name
+- Image
+- Session Id
+- TrackId Prefix
+- PublishedTracks
+- Is Local
+- Connection Quality
+- Is Online
+- Audio Level
+- Is Speaking
+- Is Dominant Speaker
+- Is Pinned
+- Reaction
+- Viewport Visibility
+
+```dart
+for(final user in call.state.value.callParticipants){
+	if(user.isdominantSpeaker){
+		setState(()=> dominantSpeaker = user);
+	}
+}
+```
+
+Combining `CallState` and `CallParticipantState` makes building custom UIs and integrations a breeze. If there is a property or API that is not exposed for your specific use case, feel free to reach out to us. We are constantly iterating and exposing APIs based on your feedback.
