@@ -41,6 +41,9 @@ jobs:
           flutter pub global activate melos
       - name: "Bootstrap Workspace"
         run: melos bootstrap --verbose
+      - name: "Prepare environment"
+        run: |
+          echo "${{ env.ENV_PROPERTIES }}" > .env
       - name: "Build Example"
         run: |
          melos run build:example:android
@@ -64,7 +67,7 @@ jobs:
           flutter pub global activate melos
       - name: "Bootstrap Workspace"
         run: melos bootstrap --verbose
-      - name: "Build Example"
+      - name: "Run Analyzer"
         run: |
           melos run analyze:warnings
 

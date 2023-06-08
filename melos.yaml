@@ -48,7 +48,10 @@ scripts:
       Run `flutter format --set-exit-if-changed .` in all packages.  
 
   build:example:android:
-    run:  melos bs &&  cd ./packages/stream_video_flutter/example && flutter build apk --verbose
+    run: |
+      cd ./packages/stream_video_flutter/example
+      flutter pub run build_runner build --delete-conflicting-outputs
+      flutter build apk --verbose
     description: |
       Run `flutter build apk --verbose` in the example app.
 
