@@ -2,3 +2,53 @@
 slug: /joining-and-creating-calls
 title: Joining and Creating Calls
 ---
+
+With authentication out of the way, we can now focus on creating and joining calls. Before proceeding, we highly recommend that you read the previous section on authentication, as the two are closely related.
+
+### Creating Calls
+To create a call, we first call the `makeCall` function on the `StreamVideo` class and pass it the call type and ID. The most common call type is `default`, which enables full audio and video transmission. However, as we will learn later, there are multiple call types (and even custom types) from which you can choose based on your use case.
+
+```dart
+final call = StreamVideo.instance.makeCall(type: 'default', id: 'Your-call-ID');
+
+```
+
+Calling `makeCall` returns a `Call` object for us to work with. However, it does not connect and start transmitting data automatically. To actually create and join the call, we must then invoke `getOrCreateCall` on the returned object.
+
+```dart
+final call = StreamVideo.instance.makeCall(type: 'default', id: 'Your-call-ID');
+await call.getOrCreateCall(); // New
+
+```
+
+Although we are not passing any parameters to `getOrCreateCall` in the above example, it is important to note a few things:
+
+1. Participants: Upon creation, we can supply a list of user IDs we would like to immediately add to the call.
+2. Ringing: If ringing is set to `true`, Stream will send a notification to the users on the call, triggering the platform call screen on iOS and Android.
+
+By default, calling `getOrCreateCall` assigns `admin` permission to each user supplied during creation.
+
+### Joining Calls
+To join a call that already exists, you must first know two things:
+
+- The `callType` of the existing call
+- The `ID` of the existing call
+
+Similar to the flow of creating a call, we can use `makeCall` to construct a `Call` class for us to perform operations on.
+
+```dart
+final call = StreamVideo.instance.makeCall(type: 'default', id: 'My-existing-call-ID');
+
+```
+
+Next, with our class instantiated, we can connect to the call and SFU by invoking `connect`.
+
+```dart
+final call = StreamVideo.instance.makeCall(type: 'default', id: 'My-existing-call-ID');
+await call.connect();
+
+```
+
+Unlike the call creation flow and functions, the user must have sufficient permissions to join the call, or a `VideoError` will be returned. All users connected via the `connect` function have the permission type of `user` by default and are limited in the actions they can perform.
+
+That's it! In just a few lines, we have created our first calls, and they are ready for the world to join. To learn how to observe events and the state of a call, please read the next chapter.
