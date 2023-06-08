@@ -43,11 +43,6 @@ platform :ios do
     match(readonly: is_ci)
 
     current_build_number = app_store_build_number(live: false)
-
-    # Fix for build number 22 being skipped
-    if current_build_number == 21
-      current_build_number = current_build_number + 1
-    end
     
     increment_build_number(build_number: current_build_number + 1)
 
