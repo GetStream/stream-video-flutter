@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../open_api/video/coordinator/api.dart';
+
 class CallSettings with EquatableMixin {
   const CallSettings({
     this.ring = const RingSettings(),
@@ -85,6 +87,14 @@ class AudioSettings extends MediaSettings {
         opusDtxEnabled,
         redundantCodingEnabled,
       ];
+
+  AudioSettingsRequest toOpenDto() {
+    return AudioSettingsRequest(
+      accessRequestEnabled: accessRequestEnabled,
+      opusDtxEnabled: opusDtxEnabled,
+      redundantCodingEnabled: redundantCodingEnabled,
+    );
+  }
 }
 
 class VideoSettings extends MediaSettings {
@@ -100,6 +110,13 @@ class VideoSettings extends MediaSettings {
         accessRequestEnabled,
         enabled,
       ];
+
+  VideoSettingsRequest toOpenDto() {
+    return VideoSettingsRequest(
+      enabled: enabled,
+      accessRequestEnabled: accessRequestEnabled,
+    );
+  }
 }
 
 class ScreenShareSettings extends MediaSettings {
@@ -115,6 +132,13 @@ class ScreenShareSettings extends MediaSettings {
         accessRequestEnabled,
         enabled,
       ];
+
+  ScreensharingSettingsRequest toOpenDto() {
+    return ScreensharingSettingsRequest(
+      enabled: enabled,
+      accessRequestEnabled: accessRequestEnabled,
+    );
+  }
 }
 
 class BackstageSettings extends AbstractSettings {
@@ -126,6 +150,12 @@ class BackstageSettings extends AbstractSettings {
 
   @override
   List<Object?> get props => [enabled];
+
+  BackstageSettingsRequest toOpenDto() {
+    return BackstageSettingsRequest(
+      enabled: enabled,
+    );
+  }
 }
 
 class BroadcastingSettings extends AbstractSettings {
@@ -150,6 +180,12 @@ class GeofencingSettings extends AbstractSettings {
 
   @override
   List<Object?> get props => [names];
+
+  GeofenceSettingsRequest toOpenDto() {
+    return GeofenceSettingsRequest(
+      names: names,
+    );
+  }
 }
 
 class RecordingSettings extends AbstractSettings {
@@ -167,6 +203,14 @@ class RecordingSettings extends AbstractSettings {
 
   @override
   List<Object?> get props => [audioOnly, mode, quality];
+
+  RecordSettingsRequest toOpenDto() {
+    return RecordSettingsRequest(
+      audioOnly: audioOnly,
+      mode: mode.toOpenDto(),
+      quality: quality.toOpenDto(),
+    );
+  }
 }
 
 class RingSettings extends AbstractSettings {
@@ -181,6 +225,13 @@ class RingSettings extends AbstractSettings {
 
   @override
   List<Object?> get props => [autoCancelTimeout, autoRejectTimeout];
+
+  RingSettingsRequest toOpenDto() {
+    return RingSettingsRequest(
+      autoCancelTimeoutMs: autoCancelTimeout.inMilliseconds,
+      incomingCallTimeoutMs: autoRejectTimeout.inMilliseconds,
+    );
+  }
 }
 
 class TranscriptionSettings extends AbstractSettings {
@@ -195,6 +246,13 @@ class TranscriptionSettings extends AbstractSettings {
 
   @override
   List<Object?> get props => [closedCaptionMode, mode];
+
+  TranscriptionSettingsRequest toOpenDto() {
+    return TranscriptionSettingsRequest(
+      closedCaptionMode: closedCaptionMode,
+      mode: mode.toOpenDto(),
+    );
+  }
 }
 
 class HlsSettings extends AbstractSettings {
@@ -219,6 +277,17 @@ enum RecordSettingsMode {
 
   @override
   String toString() => name;
+
+  RecordSettingsRequestModeEnum toOpenDto() {
+    switch (this) {
+      case RecordSettingsMode.available:
+        return RecordSettingsRequestModeEnum.available;
+      case RecordSettingsMode.disabled:
+        return RecordSettingsRequestModeEnum.disabled;
+      case RecordSettingsMode.autoOn:
+        return RecordSettingsRequestModeEnum.autoOn;
+    }
+  }
 }
 
 enum RecordSettingsQuality {
@@ -231,6 +300,23 @@ enum RecordSettingsQuality {
 
   @override
   String toString() => name;
+
+  RecordSettingsRequestQualityEnum toOpenDto() {
+    switch (this) {
+      case RecordSettingsQuality.audioOnly:
+        return RecordSettingsRequestQualityEnum.audioOnly;
+      case RecordSettingsQuality.n360p:
+        return RecordSettingsRequestQualityEnum.n360p;
+      case RecordSettingsQuality.n480p:
+        return RecordSettingsRequestQualityEnum.n480p;
+      case RecordSettingsQuality.n720p:
+        return RecordSettingsRequestQualityEnum.n720p;
+      case RecordSettingsQuality.n1080p:
+        return RecordSettingsRequestQualityEnum.n1080p;
+      case RecordSettingsQuality.n1440p:
+        return RecordSettingsRequestQualityEnum.n1440p;
+    }
+  }
 }
 
 enum TranscriptionSettingsMode {
@@ -240,4 +326,15 @@ enum TranscriptionSettingsMode {
 
   @override
   String toString() => name;
+
+  TranscriptionSettingsRequestModeEnum toOpenDto() {
+    switch (this) {
+      case TranscriptionSettingsMode.available:
+        return TranscriptionSettingsRequestModeEnum.available;
+      case TranscriptionSettingsMode.disabled:
+        return TranscriptionSettingsRequestModeEnum.disabled;
+      case TranscriptionSettingsMode.autoOn:
+        return TranscriptionSettingsRequestModeEnum.autoOn;
+    }
+  }
 }

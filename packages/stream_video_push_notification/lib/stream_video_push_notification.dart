@@ -69,23 +69,19 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     _logger.d(() => '[registerIOSDevice] token: $token');
     if (token != null) {
       await _client.createDevice(
-        CreateDeviceInput(
           id: token,
           voipToken: true,
           pushProvider: CreateDeviceRequestPushProviderEnum.apn,
-          pushProviderName: 'voip'
-        ),
+          pushProviderName: 'voip',
       );
     }
   }
 
   Future<void> _registerFirebaseToken(String token) async {
     await _client.createDevice(
-      CreateDeviceInput(
         id: token,
         pushProvider: CreateDeviceRequestPushProviderEnum.firebase,
-        pushProviderName: 'firebase'
-      ),
+        pushProviderName: 'firebase',
     );
   }
 
@@ -141,8 +137,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   Future<CallCreatedData?> _from(StreamCallCid streamCallCid) async {
-    final input = GetOrCreateCallInput(callCid: streamCallCid);
-    return (await _client.getOrCreateCall(input)).getDataOrNull()?.data;
+    return (await _client.getOrCreateCall(callCid: streamCallCid)).getDataOrNull()?.data;
   }
 
   @override

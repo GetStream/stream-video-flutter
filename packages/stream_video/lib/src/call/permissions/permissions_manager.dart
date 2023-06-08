@@ -45,10 +45,8 @@ class PermissionsManager {
     }
     _logger.d(() => '[request] permissions: $permissions');
     final result = coordinatorClient.requestPermissions(
-      RequestPermissionsInput(
-        callCid: callCid,
-        permissions: permissions,
-      ),
+      callCid: callCid,
+      permissions: permissions,
     );
     _logger.v(() => '[request] result: $result');
     return result;
@@ -68,12 +66,10 @@ class PermissionsManager {
     }
     _logger.d(() => '[grant] userId: $userId, permissions: $permissions');
     final result = await coordinatorClient.updateUserPermissions(
-      UpdateUserPermissionsInput(
-        callCid: callCid,
-        userId: userId,
-        grantPermissions: permissions,
-        revokePermissions: const [],
-      ),
+      callCid: callCid,
+      userId: userId,
+      grantPermissions: permissions,
+      revokePermissions: const [],
     );
     _logger.v(() => '[grant] result: $result');
     return result;
@@ -93,12 +89,10 @@ class PermissionsManager {
     }
     _logger.d(() => '[revoke] userId: $userId, permissions: $permissions');
     final result = await coordinatorClient.updateUserPermissions(
-      UpdateUserPermissionsInput(
-        callCid: callCid,
-        userId: userId,
-        grantPermissions: const [],
-        revokePermissions: permissions,
-      ),
+      callCid: callCid,
+      userId: userId,
+      grantPermissions: const [],
+      revokePermissions: permissions,
     );
     _logger.v(() => '[revoke] result: $result');
     return result;
@@ -111,10 +105,8 @@ class PermissionsManager {
     }
     _logger.d(() => '[blockUser] userId: $userId');
     final result = await coordinatorClient.blockUser(
-      BlockUserInput(
-        callCid: callCid,
-        userId: userId,
-      ),
+      callCid: callCid,
+      userId: userId,
     );
     _logger.v(() => '[blockUser] result: $result');
     return result;
@@ -127,10 +119,8 @@ class PermissionsManager {
     }
     _logger.d(() => '[unblockUser] userId: $userId');
     final result = coordinatorClient.unblockUser(
-      UnblockUserInput(
-        callCid: callCid,
-        userId: userId,
-      ),
+      callCid: callCid,
+      userId: userId,
     );
     _logger.v(() => '[unblockUser] result: $result');
     return result;
@@ -200,23 +190,19 @@ class PermissionsManager {
     late final Result<None> result;
     if (track == TrackType.all) {
       result = await coordinatorClient.muteUsers(
-        MuteUsersInput(
-          callCid: callCid,
-          userIds: userIds,
-          audio: true,
-          video: true,
-          screenshare: true,
-        ),
+        callCid: callCid,
+        userIds: userIds,
+        audio: true,
+        video: true,
+        screenshare: true,
       );
     } else {
       result = await coordinatorClient.muteUsers(
-        MuteUsersInput(
-          callCid: callCid,
-          userIds: userIds,
-          audio: track == TrackType.audio,
-          video: track == TrackType.video,
-          screenshare: track == TrackType.screenshare,
-        ),
+        callCid: callCid,
+        userIds: userIds,
+        audio: track == TrackType.audio,
+        video: track == TrackType.video,
+        screenshare: track == TrackType.screenshare,
       );
     }
 
@@ -259,14 +245,12 @@ class PermissionsManager {
     _logger.d(() => '[muteAllUsers] muting all users');
 
     return coordinatorClient.muteUsers(
-      MuteUsersInput(
-        callCid: callCid,
-        muteAllUsers: true,
-        userIds: const [],
-        audio: true,
-        video: true,
-        screenshare: true,
-      ),
+      callCid: callCid,
+      muteAllUsers: true,
+      userIds: const [],
+      audio: true,
+      video: true,
+      screenshare: true,
     );
   }
 
@@ -280,12 +264,10 @@ class PermissionsManager {
       return Result.error('Cannot send reaction (no permission)');
     }
     final result = await coordinatorClient.sendReaction(
-      ReactionInput(
-        callCid: callCid,
-        reactionType: reactionType,
-        emojiCode: emojiCode,
-        custom: custom,
-      ),
+      callCid: callCid,
+      reactionType: reactionType,
+      emojiCode: emojiCode,
+      custom: custom,
     );
     _logger.v(() => '[sendReaction] result: $result');
     return result;
@@ -295,7 +277,7 @@ class PermissionsManager {
     required Map<String, Object> filterConditions,
     String? next,
     String? prev,
-    List<SortInput> sorts = const [],
+    List<SortParamRequest> sorts = const [],
     int? limit,
   }) async {
     if (!_hasPermission(CallPermission.readCall)) {
@@ -303,14 +285,12 @@ class PermissionsManager {
       return Result.error('Cannot query members (no permission)');
     }
     final result = coordinatorClient.queryMembers(
-      QueryUsersInput(
-        callCid: callCid,
-        filterConditions: filterConditions,
-        next: next,
-        prev: prev,
-        sorts: sorts,
-        limit: limit,
-      ),
+      callCid: callCid,
+      filterConditions: filterConditions,
+      next: next,
+      prev: prev,
+      sorts: sorts,
+      limit: limit,
     );
     _logger.v(() => '[queryMembers] result: $result');
     return result;
