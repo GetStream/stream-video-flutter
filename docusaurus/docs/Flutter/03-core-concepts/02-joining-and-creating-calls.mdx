@@ -28,6 +28,28 @@ Although we are not passing any parameters to `getOrCreateCall` in the above exa
 
 By default, calling `getOrCreateCall` assigns `admin` permission to each user supplied during creation.
 
+### Call CRUD Operations
+
+With calls, we make it easy to perform basic create, read, update and delete (CRUD) operations on calls providing the user has the sufficient permissions.
+
+For example, once a call is created a user can `call.update` the information on the call by adding custom metadata such as a name, description or any other arbitrary `Map<String, Object>` to the call before `getOrCreateCall` is invoked.
+
+```dart
+call.update(custom: {'name': 'My first Call'});
+await call.getOrCreateCall();
+```
+
+Using the update method, a variety of settings can also be applied before the call is created such as:
+
+- Ring
+- Audio
+- Video
+- ScreenShare
+- Recording
+- Transcription
+- Backstage
+- Geofencing
+
 ### Joining Calls
 To join a call that already exists, you must first know two things:
 
