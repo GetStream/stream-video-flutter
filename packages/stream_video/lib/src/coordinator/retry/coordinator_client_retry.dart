@@ -71,6 +71,20 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
+  Future<Result<List<open.Device>>> listDevices({
+    required String userId,
+  }) {
+    return _retryManager.execute(
+      () => _delegate.listDevices(
+        userId: userId,
+      ),
+      (error, nextAttemptDelay) async {
+        _logRetry('listDevices', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
   Future<Result<None>> deleteDevice({
     required String id,
     String? userId,

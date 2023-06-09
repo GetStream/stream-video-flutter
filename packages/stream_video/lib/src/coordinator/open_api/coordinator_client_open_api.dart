@@ -195,6 +195,27 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     }
   }
 
+  /// Create a new Device used to receive Push Notifications.
+  @override
+  Future<Result<List<open.Device>>> listDevices({
+    required String userId,
+  }) async {
+    try {
+      _logger.d(() => '[listDevices] userId: $userId');
+      final result = await devicesApi.listDevices(
+        userId: userId,
+      );
+      _logger.v(() => '[listDevices] completed: $result');
+      if (result == null) {
+        return Result.error('listDevices result is null');
+      }
+      return Result.success(result.devices);
+    } catch (e, stk) {
+      _logger.e(() => '[listDevices] failed: $e; $stk');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
   /// Deletes a Device used to receive Push Notifications.
   @override
   Future<Result<None>> deleteDevice({
@@ -485,7 +506,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     }
   }
 
-  /// Queries users based on the given [input].
+  /// Queries users based on the given input.
   @override
   Future<Result<QueriedMembers>> queryMembers({
     required StreamCallCid callCid,
@@ -516,7 +537,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     }
   }
 
-  /// Queries calls based on the given [input].
+  /// Queries calls based on the given input.
   @override
   Future<Result<QueriedCalls>> queryCalls({
     required Map<String, Object> filterConditions,
