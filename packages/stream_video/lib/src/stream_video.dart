@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import '../open_api/video/coordinator/api.dart';
 import '../stream_video.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
@@ -13,7 +12,6 @@ import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
 import 'logger/impl/external_logger.dart';
-import 'models/guest_created_data.dart';
 import 'models/queried_calls.dart';
 import 'retry/retry_policy.dart';
 import 'state_emitter.dart';
@@ -320,8 +318,10 @@ class StreamVideo {
     List<String>? teams,
     Map<String, Object>? custom,
   }) async {
-    await _tokenManager.setTokenProvider(id,
-        tokenProvider: AnonymousTokenProvider());
+    await _tokenManager.setTokenProvider(
+      id,
+      tokenProvider: AnonymousTokenProvider(),
+    );
     final result = await _client.createGuest(
       id: id,
       name: name,

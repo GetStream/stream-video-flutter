@@ -367,8 +367,21 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? ringing,
   }) async {
     try {
-      // TODO
-
+      _logger.d(
+            () =>
+        '[inviteUsers] cid: $callCid, members: $members, ringing: $ringing',
+      );
+      final result = await videoApi.updateCallMembers(
+        callCid.type,
+        callCid.id,
+        open.UpdateCallMembersRequest(
+          updateMembers: members.toList(),
+        ),
+      );
+      _logger.v(() => '[inviteUsers] completed: $result');
+      if (result == null) {
+        return Result.error('inviteUsers result is null');
+      }
       return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
