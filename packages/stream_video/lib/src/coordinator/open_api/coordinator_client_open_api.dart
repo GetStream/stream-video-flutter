@@ -195,7 +195,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     }
   }
 
-  /// Create a new Device used to receive Push Notifications.
+  /// List devices used to receive Push Notifications.
   @override
   Future<Result<List<open.Device>>> listDevices({
     required String userId,
