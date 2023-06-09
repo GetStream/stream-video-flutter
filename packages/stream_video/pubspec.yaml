@@ -18,7 +18,7 @@ dependencies:
   uuid: ^3.0.6
   rxdart: ^0.27.5
   web_socket_channel: ^2.2.0
-  connectivity_plus: ^3.0.3
+  connectivity_plus: ^4.0.0
   collection: ^1.16.0
   flutter_webrtc: ^0.9.25
   intl: ^0.17.0
