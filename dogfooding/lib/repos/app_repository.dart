@@ -27,6 +27,8 @@ class AppRepository {
         coordinatorRpcUrl: Env.coordinatorRpcUrl,
         coordinatorWsUrl: Env.coordinatorWsUrl,
         logPriority: Priority.info,
+        muteAudioWhenInBackground: true,
+        muteVideoWhenInBackground: true,
       );
       await streamVideoClient.initPushNotificationManager(
         StreamVideoPushNotificationManager.factory(),

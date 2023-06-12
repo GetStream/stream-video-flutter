@@ -137,9 +137,7 @@ class CallParticipantState
         reaction,
         viewportVisibility,
       ];
-}
 
-extension TrackHelperX on CallParticipantState {
   TrackState? get videoTrack {
     return publishedTracks[SfuTrackType.video];
   }
