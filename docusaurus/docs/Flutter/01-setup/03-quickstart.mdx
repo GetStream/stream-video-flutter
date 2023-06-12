@@ -50,6 +50,19 @@ In the code above, we are performing a few key steps:
 3. Creating an object for our call, giving it the call type and unique ID.
 4. Connecting to the call we defined.
 
+
+Although it is not shown in the example above, users can choose to customize many different aspects of the SDK during initialization. Here are a few of the parameters which can be overridden during initialization:
+| Parameter | Description  |
+| --- | --- |
+| apiKey | Stream Video API key obtained from the Dashboard of your project. |
+| latencySettings | Controls the number of rounds and timeout duration for measuring latency when first connecting to a call. |
+| retryPolicy | Allows for custom handling of retries such as override the default number of max retries, passing in a custom backoff function and more.  |
+| sdpPolicy | Controls whether SDP Munging is enabled and gives access to functions supporting SDP Munging. |
+| logPriority | Allows for customizing the level of logs displayed while developing or running your application. |
+| logHandlerFunction | Can be overridden to intercept logs and perform custom actions such as sending device logs to a capture service.  |
+| muteVideoWhenInBackground | Indicates whether the SDK should disable the video track when the app moves from the foreground to background. We highly recommend you set this to true if your app does not support picture-in-picture mode. |
+| muteAudioWhenInBackground | Indicates whether the SDK should disable the audio track when the app moves from the foreground to background. We highly recommend you set this to true if your app does not support picture-in-picture mode. |
+
 ### Call UI
 
 Stream ships with many pre-made components to make building your call UI as simple as possible. All of our UI components are designed to be flexible and customizable, meaning as a developer, you can control exactly how much (or how little) of Stream’s stock components you would like to have in your app.
