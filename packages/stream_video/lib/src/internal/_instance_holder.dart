@@ -11,8 +11,6 @@ class InstanceHolder {
 
   StreamVideo init(
     String apiKey, {
-    required String coordinatorRpcUrl,
-    required String coordinatorWsUrl,
     required LatencySettings latencySettings,
     required RetryPolicy retryPolicy,
     required SdpPolicy sdpPolicy,
@@ -28,8 +26,6 @@ class InstanceHolder {
     }
     _instance = StreamVideo.create(
       apiKey,
-      coordinatorRpcUrl: coordinatorRpcUrl,
-      coordinatorWsUrl: coordinatorWsUrl,
       latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
