@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import '../open_api/video/coordinator/api.dart';
 import '../stream_video.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
@@ -13,7 +12,6 @@ import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
 import 'logger/impl/external_logger.dart';
-import 'models/guest_created_data.dart';
 import 'models/queried_calls.dart';
 import 'retry/retry_policy.dart';
 import 'state_emitter.dart';
@@ -53,6 +51,8 @@ class StreamVideo {
     LatencySettings latencySettings = const LatencySettings(),
     RetryPolicy retryPolicy = const RetryPolicy(),
     SdpPolicy sdpPolicy = _defaultSdpPolicy,
+    bool muteVideoWhenInBackground = false,
+    bool muteAudioWhenInBackground = false,
   }) {
     return StreamVideo._(
       apiKey,
@@ -61,6 +61,8 @@ class StreamVideo {
       latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
+      muteVideoWhenInBackground: muteVideoWhenInBackground,
+      muteAudioWhenInBackground: muteAudioWhenInBackground,
     );
   }
 
@@ -71,6 +73,8 @@ class StreamVideo {
     required this.latencySettings,
     required this.retryPolicy,
     required this.sdpPolicy,
+    this.muteVideoWhenInBackground = false,
+    this.muteAudioWhenInBackground = false,
   }) {
     _client = buildCoordinatorClient(
       apiKey: apiKey,
@@ -93,6 +97,8 @@ class StreamVideo {
     SdpPolicy sdpPolicy = _defaultSdpPolicy,
     Priority logPriority = Priority.none,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
+    bool muteVideoWhenInBackground = false,
+    bool muteAudioWhenInBackground = false,
   }) {
     _setupLogger(logPriority, logHandlerFunction);
     return _instanceHolder.init(
@@ -102,6 +108,8 @@ class StreamVideo {
       latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
+      muteVideoWhenInBackground: muteVideoWhenInBackground,
+      muteAudioWhenInBackground: muteAudioWhenInBackground,
     );
   }
 
@@ -143,8 +151,8 @@ class StreamVideo {
   late final CoordinatorClient _client;
   PushNotificationManager? _pushNotificationManager;
 
-  bool muteCameraWhenInBackground = true;
-  bool muteAudioWhenInBackground = true;
+  late bool muteVideoWhenInBackground;
+  late bool muteAudioWhenInBackground;
   bool _mutedCameraByStateChange = false;
   bool _mutedAudioByStateChange = false;
 
@@ -238,7 +246,7 @@ class StreamVideo {
         final isAudioEnabled =
             callState?.localParticipant?.isAudioEnabled ?? false;
 
-        if (muteCameraWhenInBackground && isVideoEnabled) {
+        if (muteVideoWhenInBackground && isVideoEnabled) {
           await activeCall?.setCameraEnabled(enabled: false);
           _mutedCameraByStateChange = true;
           _logger.v(() => 'Muted camera track since app was paused.');
@@ -352,8 +360,10 @@ class StreamVideo {
     List<String>? teams,
     Map<String, Object>? custom,
   }) async {
-    await _tokenManager.setTokenProvider(id,
-        tokenProvider: AnonymousTokenProvider());
+    await _tokenManager.setTokenProvider(
+      id,
+      tokenProvider: AnonymousTokenProvider(),
+    );
     final result = await _client.createGuest(
       id: id,
       name: name,
