@@ -16,6 +16,8 @@ class InstanceHolder {
     required LatencySettings latencySettings,
     required RetryPolicy retryPolicy,
     required SdpPolicy sdpPolicy,
+    bool muteVideoWhenInBackground = false,
+    bool muteAudioWhenInBackground = false,
   }) {
     if (_instance != null) {
       throw Exception('''
@@ -31,6 +33,8 @@ class InstanceHolder {
       latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
+      muteVideoWhenInBackground: muteVideoWhenInBackground,
+      muteAudioWhenInBackground: muteAudioWhenInBackground,
     );
     return _instance!;
   }
