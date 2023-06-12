@@ -143,6 +143,11 @@ class StreamVideo {
   late final CoordinatorClient _client;
   PushNotificationManager? _pushNotificationManager;
 
+  bool muteCameraWhenInBackground = true;
+  bool muteAudioWhenInBackground = true;
+  bool _mutedCameraByStateChange = false;
+  bool _mutedAudioByStateChange = false;
+
   var _state = _StreamVideoState();
 
   Future<void> initPushNotificationManager(
@@ -226,10 +231,37 @@ class StreamVideo {
         _logger.i(() => '[onAppState] close connection');
         _subscriptions.cancel(_idEvents);
         await _client.closeConnection();
+      } else if (loggedIn && state.isPaused && activeCallCid != null) {
+        final callState = activeCall?.state.value;
+        final isVideoEnabled =
+            callState?.localParticipant?.isVideoEnabled ?? false;
+        final isAudioEnabled =
+            callState?.localParticipant?.isAudioEnabled ?? false;
+
+        if (muteCameraWhenInBackground && isVideoEnabled) {
+          await activeCall?.setCameraEnabled(enabled: false);
+          _mutedCameraByStateChange = true;
+          _logger.v(() => 'Muted camera track since app was paused.');
+        }
+        if (muteAudioWhenInBackground && isAudioEnabled) {
+          await activeCall?.setMicrophoneEnabled(enabled: false);
+          _mutedAudioByStateChange = true;
+          _logger.v(() => 'Muted audio track since app was paused.');
+        }
       } else if (loggedIn && state.isResumed) {
         _logger.i(() => '[onAppState] open connection');
         await _client.openConnection();
         _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
+        if (_mutedCameraByStateChange) {
+          await activeCall?.setCameraEnabled(enabled: true);
+          _mutedCameraByStateChange = false;
+          _logger.v(() => 'Unmuted camera track since app was unpaused.');
+        }
+        if (_mutedAudioByStateChange) {
+          await activeCall?.setMicrophoneEnabled(enabled: true);
+          _mutedAudioByStateChange = false;
+          _logger.v(() => 'Unmuted audio track since app was unpaused.');
+        }
       }
     } catch (e) {
       _logger.e(() => '[onAppState] failed: $e');
