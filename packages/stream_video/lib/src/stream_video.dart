@@ -46,8 +46,6 @@ class StreamVideo {
   /// Stream Video singleton instance
   factory StreamVideo.create(
     String apiKey, {
-    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
-    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     LatencySettings latencySettings = const LatencySettings(),
     RetryPolicy retryPolicy = const RetryPolicy(),
     SdpPolicy sdpPolicy = _defaultSdpPolicy,
@@ -56,8 +54,8 @@ class StreamVideo {
   }) {
     return StreamVideo._(
       apiKey,
-      coordinatorRpcUrl: coordinatorRpcUrl,
-      coordinatorWsUrl: coordinatorWsUrl,
+      coordinatorRpcUrl: _defaultCoordinatorRpcUrl,
+      coordinatorWsUrl: _defaultCoordinatorWsUrl,
       latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
@@ -103,8 +101,6 @@ class StreamVideo {
     _setupLogger(logPriority, logHandlerFunction);
     return _instanceHolder.init(
       apiKey,
-      coordinatorRpcUrl: coordinatorRpcUrl,
-      coordinatorWsUrl: coordinatorWsUrl,
       latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
