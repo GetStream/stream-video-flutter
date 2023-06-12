@@ -46,19 +46,21 @@ class StreamVideo {
   /// Stream Video singleton instance
   factory StreamVideo.create(
     String apiKey, {
-    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
-    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     LatencySettings latencySettings = const LatencySettings(),
     RetryPolicy retryPolicy = const RetryPolicy(),
     SdpPolicy sdpPolicy = _defaultSdpPolicy,
+    bool muteVideoWhenInBackground = false,
+    bool muteAudioWhenInBackground = false,
   }) {
     return StreamVideo._(
       apiKey,
-      coordinatorRpcUrl: coordinatorRpcUrl,
-      coordinatorWsUrl: coordinatorWsUrl,
+      coordinatorRpcUrl: _defaultCoordinatorRpcUrl,
+      coordinatorWsUrl: _defaultCoordinatorWsUrl,
       latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
+      muteVideoWhenInBackground: muteVideoWhenInBackground,
+      muteAudioWhenInBackground: muteAudioWhenInBackground,
     );
   }
 
@@ -69,6 +71,8 @@ class StreamVideo {
     required this.latencySettings,
     required this.retryPolicy,
     required this.sdpPolicy,
+    this.muteVideoWhenInBackground = false,
+    this.muteAudioWhenInBackground = false,
   }) {
     _client = buildCoordinatorClient(
       apiKey: apiKey,
@@ -91,15 +95,17 @@ class StreamVideo {
     SdpPolicy sdpPolicy = _defaultSdpPolicy,
     Priority logPriority = Priority.none,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
+    bool muteVideoWhenInBackground = false,
+    bool muteAudioWhenInBackground = false,
   }) {
     _setupLogger(logPriority, logHandlerFunction);
     return _instanceHolder.init(
       apiKey,
-      coordinatorRpcUrl: coordinatorRpcUrl,
-      coordinatorWsUrl: coordinatorWsUrl,
       latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
+      muteVideoWhenInBackground: muteVideoWhenInBackground,
+      muteAudioWhenInBackground: muteAudioWhenInBackground,
     );
   }
 
@@ -140,6 +146,11 @@ class StreamVideo {
   final _subscriptions = Subscriptions();
   late final CoordinatorClient _client;
   PushNotificationManager? _pushNotificationManager;
+
+  late bool muteVideoWhenInBackground;
+  late bool muteAudioWhenInBackground;
+  bool _mutedCameraByStateChange = false;
+  bool _mutedAudioByStateChange = false;
 
   var _state = _StreamVideoState();
 
@@ -224,10 +235,37 @@ class StreamVideo {
         _logger.i(() => '[onAppState] close connection');
         _subscriptions.cancel(_idEvents);
         await _client.closeConnection();
+      } else if (loggedIn && state.isPaused && activeCallCid != null) {
+        final callState = activeCall?.state.value;
+        final isVideoEnabled =
+            callState?.localParticipant?.isVideoEnabled ?? false;
+        final isAudioEnabled =
+            callState?.localParticipant?.isAudioEnabled ?? false;
+
+        if (muteVideoWhenInBackground && isVideoEnabled) {
+          await activeCall?.setCameraEnabled(enabled: false);
+          _mutedCameraByStateChange = true;
+          _logger.v(() => 'Muted camera track since app was paused.');
+        }
+        if (muteAudioWhenInBackground && isAudioEnabled) {
+          await activeCall?.setMicrophoneEnabled(enabled: false);
+          _mutedAudioByStateChange = true;
+          _logger.v(() => 'Muted audio track since app was paused.');
+        }
       } else if (loggedIn && state.isResumed) {
         _logger.i(() => '[onAppState] open connection');
         await _client.openConnection();
         _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
+        if (_mutedCameraByStateChange) {
+          await activeCall?.setCameraEnabled(enabled: true);
+          _mutedCameraByStateChange = false;
+          _logger.v(() => 'Unmuted camera track since app was unpaused.');
+        }
+        if (_mutedAudioByStateChange) {
+          await activeCall?.setMicrophoneEnabled(enabled: true);
+          _mutedAudioByStateChange = false;
+          _logger.v(() => 'Unmuted audio track since app was unpaused.');
+        }
       }
     } catch (e) {
       _logger.e(() => '[onAppState] failed: $e');

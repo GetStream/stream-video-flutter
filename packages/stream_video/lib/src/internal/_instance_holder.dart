@@ -11,11 +11,11 @@ class InstanceHolder {
 
   StreamVideo init(
     String apiKey, {
-    required String coordinatorRpcUrl,
-    required String coordinatorWsUrl,
     required LatencySettings latencySettings,
     required RetryPolicy retryPolicy,
     required SdpPolicy sdpPolicy,
+    bool muteVideoWhenInBackground = false,
+    bool muteAudioWhenInBackground = false,
   }) {
     if (_instance != null) {
       throw Exception('''
@@ -26,11 +26,11 @@ class InstanceHolder {
     }
     _instance = StreamVideo.create(
       apiKey,
-      coordinatorRpcUrl: coordinatorRpcUrl,
-      coordinatorWsUrl: coordinatorWsUrl,
       latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
+      muteVideoWhenInBackground: muteVideoWhenInBackground,
+      muteAudioWhenInBackground: muteAudioWhenInBackground,
     );
     return _instance!;
   }
