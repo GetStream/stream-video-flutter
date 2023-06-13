@@ -26,6 +26,7 @@ export 'src/models/call_status.dart';
 export 'src/models/call_track_state.dart';
 export 'src/models/disconnect_reason.dart';
 export 'src/models/guest_created_data.dart';
+export 'src/models/queried_calls.dart';
 export 'src/models/user_info.dart';
 export 'src/models/viewport_visibility.dart';
 export 'src/platform_detector/platform_detector.dart';
