@@ -3,3 +3,107 @@ slug: /permission-and-moderation
 title: Permission and Moderation
 ---
 
+Permissions for a video call can be complex, particularly for use cases like educational apps, live events, audio rooms, and livestreams. These use cases require detailed permissions to ensure proper functionality and user privacy.
+
+### Current Permissions
+
+To check if a user has a certain permission, such as transmitting audio, video, or screensharing, you can use the `hasPermission` method on the `Call` class:
+
+```
+final canScreenShare = call.hasPermission(CallPermission.screenshare);
+
+```
+
+### Requesting and Granting Permissions
+
+If a user does not have permission for an action, it can be requested by calling `requestPermissions` on the current `Call` object.
+
+This method accepts a list of `CallPermission` allowing for multiple permission requests to be batched into a single call:
+
+```
+call.requestPermissions([CallPermission.screenshare, CallPermission.sendVideo]);
+
+```
+
+As a call admin, you can grant permission to other users by calling `call.grantPermissions` along with the user’s `id` and the list of permissions you would like to grant:
+
+```
+call.grantPermissions(userId: 'nash', [CallPermission.screenshare, CallPermission.sendVideo])
+
+```
+
+During a call, it is advised to set up a handler to listen and react to permission requests as they arrive. This can be done by passing a callback function to the `onPermissionRequest` property present on the `Call` object:
+
+```
+@override
+  void initState() {
+    super.initState();
+    widget.call.onPermissionRequest = (CoordinatorCallPermissionRequestEvent request) {
+      // TODO Handle Permission requests
+
+    };
+  }
+
+```
+
+The `CoordinatorCallPermissionRequestEvent` includes the following attributes which can be used to either grant or reject permission requests:
+
+- Call Cid
+- Created At
+- Permissions
+- User
+
+### Moderation Capabilities
+
+As with all calls, there may be times where the permissions granted to a user may need to be revoked or the user banned, placed on mute, or some other action taken to limit user interaction.
+
+To facilitate these requests, the SDK provides several methods for limiting user interaction during the call lifecycle.
+
+**Revoke Permissions**
+
+Similar to its sister method `grantPermissions`, `revokePermissions` lives on the current `Call` object and allows users to easily remove permissions currently assigned to a user by passing in the user id and the list of permissions to be revoked.
+
+```
+call.revokePermissions(userId: 'nash', [CallPermission.screenshare, CallPermission.sendVideo]);
+
+```
+
+**Mute Users**
+
+To disable the audio tracks of all users on a call or a specific user in a call, the `muteOthers` and `muteUser` functions can be called, respectively.
+
+```
+call.muteAllUsers();
+
+```
+
+```
+call.muteUsers(userIds: ['thierry']);
+
+```
+
+:::tip
+
+In the above example, we are only muting a single user. However, `muteUsers` does allow us to mute multiple users since it accepts a list of userIDs.
+
+:::
+
+**Blocking Members**
+
+Blocking and unblocking users can be done by calling `blockUser` or `unblockUser` on the current `Call` object.
+
+```
+call.blockUser('deven');
+
+call.unblockUser('deven');
+
+```
+
+**Ending the Call**
+
+As a host, you are able to end the current call for everyone using the `call.end` method.
+
+```
+await call.end();
+
+```
