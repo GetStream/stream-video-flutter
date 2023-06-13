@@ -847,6 +847,11 @@ class Call {
     return Result.success(joined);
   }
 
+  /// Returns true if the current user has the [CallPermission] supplied.
+  bool hasPermission(CallPermission permission) {
+    return _permissionsManager.hasPermission(permission);
+  }
+
   Future<Result<None>> requestPermissions(List<CallPermission> permissions) {
     return _permissionsManager.request(permissions);
   }
