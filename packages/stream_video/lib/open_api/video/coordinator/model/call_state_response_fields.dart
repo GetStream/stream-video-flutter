@@ -90,17 +90,17 @@ class CallStateResponseFields {
       }());
 
       return CallStateResponseFields(
-        blockedUsers: UserResponse.listFromJson(json[r'blocked_users']),
+        blockedUsers: UserResponse.listFromJson(json[r'blocked_users'])!,
         call: CallResponse.fromJson(json[r'call'])!,
-        members: MemberResponse.listFromJson(json[r'members']),
+        members: MemberResponse.listFromJson(json[r'members'])!,
         membership: MemberResponse.fromJson(json[r'membership']),
-        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
+        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
       );
     }
     return null;
   }
 
-  static List<CallStateResponseFields> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallStateResponseFields>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallStateResponseFields>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -131,10 +131,12 @@ class CallStateResponseFields {
   static Map<String, List<CallStateResponseFields>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallStateResponseFields>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = CallStateResponseFields.listFromJson(entry.value, growable: growable,);
+        final value = CallStateResponseFields.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

@@ -62,7 +62,7 @@ class MuteUsersResponse {
     return null;
   }
 
-  static List<MuteUsersResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<MuteUsersResponse>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <MuteUsersResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -93,10 +93,12 @@ class MuteUsersResponse {
   static Map<String, List<MuteUsersResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<MuteUsersResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = MuteUsersResponse.listFromJson(entry.value, growable: growable,);
+        final value = MuteUsersResponse.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

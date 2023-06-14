@@ -63,13 +63,13 @@ class UpdateCallMembersResponse {
 
       return UpdateCallMembersResponse(
         duration: mapValueOfType<String>(json, r'duration')!,
-        members: MemberResponse.listFromJson(json[r'members']),
+        members: MemberResponse.listFromJson(json[r'members'])!,
       );
     }
     return null;
   }
 
-  static List<UpdateCallMembersResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UpdateCallMembersResponse>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <UpdateCallMembersResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -100,10 +100,12 @@ class UpdateCallMembersResponse {
   static Map<String, List<UpdateCallMembersResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<UpdateCallMembersResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = UpdateCallMembersResponse.listFromJson(entry.value, growable: growable,);
+        final value = UpdateCallMembersResponse.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

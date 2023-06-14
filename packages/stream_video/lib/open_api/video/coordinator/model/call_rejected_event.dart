@@ -90,7 +90,7 @@ class CallRejectedEvent {
     return null;
   }
 
-  static List<CallRejectedEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallRejectedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallRejectedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -121,10 +121,12 @@ class CallRejectedEvent {
   static Map<String, List<CallRejectedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallRejectedEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = CallRejectedEvent.listFromJson(entry.value, growable: growable,);
+        final value = CallRejectedEvent.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

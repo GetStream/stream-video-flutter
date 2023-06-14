@@ -111,19 +111,19 @@ class CallSessionResponse {
       }());
 
       return CallSessionResponse(
-        acceptedBy: Map<String, DateTime>.from(json[r'accepted_by'])!,
+        acceptedBy: mapCastOfType<String, DateTime>(json, r'accepted_by')!,
         endedAt: mapDateTime(json, r'ended_at', ''),
         id: mapValueOfType<String>(json, r'id')!,
-        participants: CallParticipantResponse.listFromJson(json[r'participants']),
+        participants: CallParticipantResponse.listFromJson(json[r'participants'])!,
         participantsCountByRole: mapCastOfType<String, int>(json, r'participants_count_by_role')!,
-        rejectedBy: Map<String, DateTime>.from(json[r'rejected_by'])!,
+        rejectedBy: mapCastOfType<String, DateTime>(json, r'rejected_by')!,
         startedAt: mapDateTime(json, r'started_at', ''),
       );
     }
     return null;
   }
 
-  static List<CallSessionResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallSessionResponse>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallSessionResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -154,10 +154,12 @@ class CallSessionResponse {
   static Map<String, List<CallSessionResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallSessionResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = CallSessionResponse.listFromJson(entry.value, growable: growable,);
+        final value = CallSessionResponse.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;
