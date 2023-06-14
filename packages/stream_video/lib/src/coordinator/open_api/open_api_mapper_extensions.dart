@@ -4,6 +4,7 @@ import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../models/call_cid.dart';
 import '../../models/call_created_data.dart';
 import '../../models/call_permission.dart';
+import '../../models/call_ringing_data.dart';
 import '../../models/call_settings.dart';
 import '../models/coordinator_events.dart';
 import 'event/event_type.dart';
@@ -34,8 +35,6 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallCreatedEvent(
           data: CallCreatedData(
             callCid: StreamCallCid(cid: call.cid),
-            // TODO: Remove ringing property from call created event
-            ringing: false,
             metadata: call.toCallMetadata(event.members),
           ),
           createdAt: event.createdAt,
@@ -219,9 +218,8 @@ extension WebsocketEventMapperExt on OpenApiEvent {
       case EventType.callRingEvent:
         final event = callCreated!;
         final call = event.call;
-        // TODO: Convert this to ring event at some point
-        return CoordinatorCallCreatedEvent(
-          data: CallCreatedData(
+        return CoordinatorCallRingingEvent(
+          data: CallRingingData(
             callCid: StreamCallCid(cid: call.cid),
             ringing: false,
             metadata: call.toCallMetadata(event.members),

@@ -5,20 +5,23 @@ import 'call_cid.dart';
 import 'call_metadata.dart';
 
 @immutable
-class CallCreatedData with EquatableMixin {
-  const CallCreatedData({
+class CallRingingData with EquatableMixin {
+  const CallRingingData({
     required this.callCid,
+    required this.ringing,
     required this.metadata,
   });
 
   final StreamCallCid callCid;
+  final bool ringing;
   final CallMetadata metadata;
 
   @override
-  List<Object?> get props => [callCid, metadata];
+  List<Object?> get props => [callCid, ringing, metadata];
 
   @override
   String toString() {
-    return 'CallCreated{callCid: $callCid, metadata: $metadata}';
+    return 'CallRingingData{callCid: $callCid, ringing: $ringing, '
+        'metadata: $metadata}';
   }
 }

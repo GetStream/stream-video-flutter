@@ -21,6 +21,7 @@ export 'src/models/call_participant_state.dart';
 export 'src/models/call_permission.dart';
 export 'src/models/call_preferences.dart';
 export 'src/models/call_received_created_data.dart';
+export 'src/models/call_ringing_data.dart';
 export 'src/models/call_settings.dart';
 export 'src/models/call_stats.dart';
 export 'src/models/call_status.dart';

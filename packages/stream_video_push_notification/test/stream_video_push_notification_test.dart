@@ -18,7 +18,6 @@ Future<void> main() async {
   final StreamCallCid streamCallCid = StreamCallCid(cid: 'call:123');
   final callCreatedData = CallCreatedData(
     callCid: streamCallCid,
-    ringing: true,
     metadata: CallMetadata(
       cid: streamCallCid,
       details: const CallDetails(
