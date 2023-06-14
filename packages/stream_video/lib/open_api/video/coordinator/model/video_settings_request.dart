@@ -133,7 +133,7 @@ class VideoSettingsRequest {
     return null;
   }
 
-  static List<VideoSettingsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<VideoSettingsRequest>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <VideoSettingsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -164,10 +164,12 @@ class VideoSettingsRequest {
   static Map<String, List<VideoSettingsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<VideoSettingsRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = VideoSettingsRequest.listFromJson(entry.value, growable: growable,);
+        final value = VideoSettingsRequest.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;
@@ -204,7 +206,7 @@ class VideoSettingsRequestCameraFacingEnum {
 
   static VideoSettingsRequestCameraFacingEnum? fromJson(dynamic value) => VideoSettingsRequestCameraFacingEnumTypeTransformer().decode(value);
 
-  static List<VideoSettingsRequestCameraFacingEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<VideoSettingsRequestCameraFacingEnum>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <VideoSettingsRequestCameraFacingEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {

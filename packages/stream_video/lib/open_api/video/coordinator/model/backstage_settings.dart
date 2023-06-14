@@ -61,7 +61,7 @@ class BackstageSettings {
     return null;
   }
 
-  static List<BackstageSettings> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<BackstageSettings>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <BackstageSettings>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -92,10 +92,12 @@ class BackstageSettings {
   static Map<String, List<BackstageSettings>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<BackstageSettings>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = BackstageSettings.listFromJson(entry.value, growable: growable,);
+        final value = BackstageSettings.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

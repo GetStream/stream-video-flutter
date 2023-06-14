@@ -95,18 +95,18 @@ class UpdateCallResponse {
       }());
 
       return UpdateCallResponse(
-        blockedUsers: UserResponse.listFromJson(json[r'blocked_users']),
+        blockedUsers: UserResponse.listFromJson(json[r'blocked_users'])!,
         call: CallResponse.fromJson(json[r'call'])!,
         duration: mapValueOfType<String>(json, r'duration')!,
-        members: MemberResponse.listFromJson(json[r'members']),
+        members: MemberResponse.listFromJson(json[r'members'])!,
         membership: MemberResponse.fromJson(json[r'membership']),
-        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
+        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
       );
     }
     return null;
   }
 
-  static List<UpdateCallResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UpdateCallResponse>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <UpdateCallResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -137,10 +137,12 @@ class UpdateCallResponse {
   static Map<String, List<UpdateCallResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<UpdateCallResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = UpdateCallResponse.listFromJson(entry.value, growable: growable,);
+        final value = UpdateCallResponse.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

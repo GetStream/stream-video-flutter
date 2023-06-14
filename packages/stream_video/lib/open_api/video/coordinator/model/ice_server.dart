@@ -77,7 +77,7 @@ class ICEServer {
     return null;
   }
 
-  static List<ICEServer> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ICEServer>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ICEServer>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -108,10 +108,12 @@ class ICEServer {
   static Map<String, List<ICEServer>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<ICEServer>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = ICEServer.listFromJson(entry.value, growable: growable,);
+        final value = ICEServer.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

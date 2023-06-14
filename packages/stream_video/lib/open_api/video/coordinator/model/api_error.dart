@@ -112,7 +112,7 @@ class APIError {
     return null;
   }
 
-  static List<APIError> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<APIError>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <APIError>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -143,10 +143,12 @@ class APIError {
   static Map<String, List<APIError>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<APIError>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = APIError.listFromJson(entry.value, growable: growable,);
+        final value = APIError.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;
@@ -247,7 +249,7 @@ class APIErrorCodeEnum {
 
   static APIErrorCodeEnum? fromJson(dynamic value) => APIErrorCodeEnumTypeTransformer().decode(value);
 
-  static List<APIErrorCodeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<APIErrorCodeEnum>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <APIErrorCodeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {

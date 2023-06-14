@@ -69,7 +69,7 @@ class SendReactionResponse {
     return null;
   }
 
-  static List<SendReactionResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<SendReactionResponse>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <SendReactionResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -100,10 +100,12 @@ class SendReactionResponse {
   static Map<String, List<SendReactionResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<SendReactionResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = SendReactionResponse.listFromJson(entry.value, growable: growable,);
+        final value = SendReactionResponse.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

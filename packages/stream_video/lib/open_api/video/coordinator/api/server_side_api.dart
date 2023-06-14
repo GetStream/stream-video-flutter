@@ -11,36 +11,32 @@
 part of openapi.api;
 
 
-class LivestreamingApi {
-  LivestreamingApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+class ServerSideApi {
+  ServerSideApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
-  /// Start broadcasting
+  /// Create Call Type
   ///
-  /// Starts broadcasting  Required permissions: - StartBroadcasting 
+  ///  
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> startBroadcastingWithHttpInfo(String type, String id,) async {
+  /// * [CreateCallTypeRequest] createCallTypeRequest (required):
+  Future<Response> createCallTypeWithHttpInfo(CreateCallTypeRequest createCallTypeRequest,) async {
     // ignore: prefer_const_declarations
-    final path = r'/call/{type}/{id}/start_broadcasting'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+    final path = r'/calltypes';
 
     // ignore: prefer_final_locals
-    Object? postBody;
+    Object? postBody = createCallTypeRequest;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-    const contentTypes = <String>[];
+    const contentTypes = <String>['application/json'];
 
 
     return apiClient.invokeAPI(
@@ -54,17 +50,15 @@ class LivestreamingApi {
     );
   }
 
-  /// Start broadcasting
+  /// Create Call Type
   ///
-  /// Starts broadcasting  Required permissions: - StartBroadcasting 
+  ///  
   ///
   /// Parameters:
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<StartBroadcastingResponse?> startBroadcasting(String type, String id,) async {
-    final response = await startBroadcastingWithHttpInfo(type, id,);
+  /// * [CreateCallTypeRequest] createCallTypeRequest (required):
+  Future<CreateCallTypeResponse?> createCallType(CreateCallTypeRequest createCallTypeRequest,) async {
+    final response = await createCallTypeWithHttpInfo(createCallTypeRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -72,28 +66,25 @@ class LivestreamingApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StartBroadcastingResponse',) as StartBroadcastingResponse;
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'CreateCallTypeResponse',) as CreateCallTypeResponse;
     
     }
     return null;
   }
 
-  /// Stop broadcasting
+  /// Delete Call Type
   ///
-  /// Stops broadcasting  Required permissions: - StopBroadcasting 
+  ///  
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> stopBroadcastingWithHttpInfo(String type, String id,) async {
+  /// * [String] name (required):
+  Future<Response> deleteCallTypeWithHttpInfo(String name,) async {
     // ignore: prefer_const_declarations
-    final path = r'/call/{type}/{id}/stop_broadcasting'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+    final path = r'/calltypes/{name}'
+      .replaceAll('{name}', name);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -107,7 +98,7 @@ class LivestreamingApi {
 
     return apiClient.invokeAPI(
       path,
-      'POST',
+      'DELETE',
       queryParams,
       postBody,
       headerParams,
@@ -116,17 +107,15 @@ class LivestreamingApi {
     );
   }
 
-  /// Stop broadcasting
+  /// Delete Call Type
   ///
-  /// Stops broadcasting  Required permissions: - StopBroadcasting 
+  ///  
   ///
   /// Parameters:
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<StopBroadcastingResponse?> stopBroadcasting(String type, String id,) async {
-    final response = await stopBroadcastingWithHttpInfo(type, id,);
+  /// * [String] name (required):
+  Future<Response?> deleteCallType(String name,) async {
+    final response = await deleteCallTypeWithHttpInfo(name,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -134,28 +123,25 @@ class LivestreamingApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StopBroadcastingResponse',) as StopBroadcastingResponse;
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Response',) as Response;
     
     }
     return null;
   }
 
-  /// Set call as not live
+  /// Get Call Type
   ///
-  ///   Sends events: - call.updated  Required permissions: - UpdateCall 
+  ///  
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<Response> stopLiveWithHttpInfo(String type, String id,) async {
+  /// * [String] name (required):
+  Future<Response> getCallTypeWithHttpInfo(String name,) async {
     // ignore: prefer_const_declarations
-    final path = r'/call/{type}/{id}/stop_live'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+    final path = r'/calltypes/{name}'
+      .replaceAll('{name}', name);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -169,7 +155,7 @@ class LivestreamingApi {
 
     return apiClient.invokeAPI(
       path,
-      'POST',
+      'GET',
       queryParams,
       postBody,
       headerParams,
@@ -178,17 +164,15 @@ class LivestreamingApi {
     );
   }
 
-  /// Set call as not live
+  /// Get Call Type
   ///
-  ///   Sends events: - call.updated  Required permissions: - UpdateCall 
+  ///  
   ///
   /// Parameters:
   ///
-  /// * [String] type (required):
-  ///
-  /// * [String] id (required):
-  Future<StopLiveResponse?> stopLive(String type, String id,) async {
-    final response = await stopLiveWithHttpInfo(type, id,);
+  /// * [String] name (required):
+  Future<GetCallTypeResponse?> getCallType(String name,) async {
+    final response = await getCallTypeWithHttpInfo(name,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -196,42 +180,41 @@ class LivestreamingApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StopLiveResponse',) as StopLiveResponse;
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'GetCallTypeResponse',) as GetCallTypeResponse;
     
     }
     return null;
   }
 
-  /// Stop recording
+  /// Update Call Type
   ///
-  /// Stops recording  Sends events: - call.recording_stopped  Required permissions: - StopRecording 
+  ///  
   ///
   /// Note: This method returns the HTTP [Response].
   ///
   /// Parameters:
   ///
-  /// * [String] type (required):
+  /// * [String] name (required):
   ///
-  /// * [String] id (required):
-  Future<Response> stopRecordingWithHttpInfo(String type, String id,) async {
+  /// * [UpdateCallTypeRequest] updateCallTypeRequest (required):
+  Future<Response> updateCallTypeWithHttpInfo(String name, UpdateCallTypeRequest updateCallTypeRequest,) async {
     // ignore: prefer_const_declarations
-    final path = r'/call/{type}/{id}/stop_recording'
-      .replaceAll('{type}', type)
-      .replaceAll('{id}', id);
+    final path = r'/calltypes/{name}'
+      .replaceAll('{name}', name);
 
     // ignore: prefer_final_locals
-    Object? postBody;
+    Object? postBody = updateCallTypeRequest;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-    const contentTypes = <String>[];
+    const contentTypes = <String>['application/json'];
 
 
     return apiClient.invokeAPI(
       path,
-      'POST',
+      'PUT',
       queryParams,
       postBody,
       headerParams,
@@ -240,17 +223,17 @@ class LivestreamingApi {
     );
   }
 
-  /// Stop recording
+  /// Update Call Type
   ///
-  /// Stops recording  Sends events: - call.recording_stopped  Required permissions: - StopRecording 
+  ///  
   ///
   /// Parameters:
   ///
-  /// * [String] type (required):
+  /// * [String] name (required):
   ///
-  /// * [String] id (required):
-  Future<StopRecordingResponse?> stopRecording(String type, String id,) async {
-    final response = await stopRecordingWithHttpInfo(type, id,);
+  /// * [UpdateCallTypeRequest] updateCallTypeRequest (required):
+  Future<UpdateCallTypeResponse?> updateCallType(String name, UpdateCallTypeRequest updateCallTypeRequest,) async {
+    final response = await updateCallTypeWithHttpInfo(name, updateCallTypeRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -258,7 +241,7 @@ class LivestreamingApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'StopRecordingResponse',) as StopRecordingResponse;
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UpdateCallTypeResponse',) as UpdateCallTypeResponse;
     
     }
     return null;
