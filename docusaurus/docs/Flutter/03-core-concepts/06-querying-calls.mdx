@@ -17,10 +17,10 @@ To filter calls, a map containing the fields and conditions must be supplied to 
 
 ```dart
 final result = await video.queryCalls(
-      filterConditions: {
-        "custom.flutterAudioRoomCall": true,
-      },
-    );
+  filterConditions: {
+    "custom.flutterAudioRoomCall": true,
+  },
+);
 ```
 
 In the above example, we filter all calls that contain the custom field `flutterAudioRoomCall`. Other filtering options include call type, members, and start times.
