@@ -5,6 +5,7 @@ import '../../models/call_cid.dart';
 import '../../models/call_created_data.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
+import '../../models/call_ringing_data.dart';
 
 /// Represents the events coming in from the socket.
 @immutable
@@ -81,6 +82,29 @@ class CoordinatorCallCreatedEvent extends CoordinatorCallEvent {
   final CallCreatedData data;
   final DateTime createdAt;
 
+  @override
+  StreamCallCid get callCid => data.callCid;
+
+  CallMetadata get metadata => data.metadata;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        metadata,
+      ];
+}
+
+/// Sent when someone creates a call and invites another person to participate.
+class CoordinatorCallRingingEvent extends CoordinatorCallEvent {
+  const CoordinatorCallRingingEvent({
+    required this.data,
+    required this.createdAt,
+  });
+
+  final CallRingingData data;
+  final DateTime createdAt;
+
   bool get ringing => data.ringing;
 
   @override
@@ -90,11 +114,11 @@ class CoordinatorCallCreatedEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        ringing,
-        createdAt,
-        metadata,
-      ];
+    ...super.props,
+    ringing,
+    createdAt,
+    metadata,
+  ];
 }
 
 /// Sent when a call gets updated.

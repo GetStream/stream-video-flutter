@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 import '../../errors/video_error.dart';
 import '../../models/call_created_data.dart';
 import '../../models/call_joined_data.dart';
+import '../../models/call_ringing_data.dart';
 import '../internal_action.dart';
 
 @internal
@@ -101,6 +102,12 @@ class CallCreated extends LifecycleStage {
   const CallCreated(this.data);
 
   final CallCreatedData data;
+}
+
+class CallRinging extends LifecycleStage {
+  const CallRinging(this.data);
+
+  final CallRingingData data;
 }
 
 class CallJoining extends LifecycleStage {

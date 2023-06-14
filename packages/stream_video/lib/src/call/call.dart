@@ -93,6 +93,30 @@ class Call {
     ).also((it) => it._stateManager.lifecycleCallCreated(CallCreated(data)));
   }
 
+  /// Do not use the factory directly,
+  /// use the [StreamVideo.makeCall] method to construct a `Call` instance.
+  @internal
+  factory Call.fromRinging({
+    required CallRingingData data,
+    required CoordinatorClient coordinatorClient,
+    required GetCurrentUserId getCurrentUserId,
+    required SetActiveCall setActiveCall,
+    RetryPolicy? retryPolicy,
+    SdpPolicy? sdpPolicy,
+    CallPreferences? preferences,
+  }) {
+    streamLog.i(_tag, () => '<factory> created: $data');
+    return Call._internal(
+      callCid: data.callCid,
+      coordinatorClient: coordinatorClient,
+      getCurrentUserId: getCurrentUserId,
+      setActiveCall: setActiveCall,
+      retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
+      preferences: preferences,
+    ).also((it) => it._stateManager.lifecycleCallRinging(CallRinging(data)));
+  }
+
   factory Call._internal({
     required StreamCallCid callCid,
     required CoordinatorClient coordinatorClient,
@@ -830,7 +854,6 @@ class Call {
       wasCreated: joinResult.data.wasCreated,
       data: CallCreatedData(
         callCid: callCid,
-        ringing: false,
         metadata: joinResult.data.metadata,
       ),
     );
