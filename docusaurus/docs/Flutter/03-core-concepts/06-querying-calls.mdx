@@ -66,12 +66,11 @@ Similar to filtering, the SDK offers robust support for sorting, enabling sortin
 To add a sort, it is simple as specifying a list of sorts to the `queryCalls` function:
 
 ```dart
-Future<List<QueriedCall>> queryCalls() async {
-    final result = await video.queryCalls(
-      sorts: [
-        SortParamRequest(field: 'starts_at', direction: -1),
-      ]
-    );
+final result = await video.queryCalls(
+  sorts: [
+    SortParamRequest(field: 'starts_at', direction: -1),
+  ],
+);
 ```
 
 The `queryCalls` function can take multiple sort parameters, which can be combined with filtering to give you powerful control over the data in your application.
