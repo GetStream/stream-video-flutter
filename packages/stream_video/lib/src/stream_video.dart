@@ -12,6 +12,7 @@ import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
 import 'logger/impl/external_logger.dart';
+import 'models/call_ringing_data.dart';
 import 'models/queried_calls.dart';
 import 'retry/retry_policy.dart';
 import 'state_emitter.dart';
@@ -218,11 +219,11 @@ class StreamVideo {
   void _onEvent(CoordinatorEvent event) {
     final currentUserId = _state.getCurrentUserId();
     _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
-    if (event is CoordinatorCallCreatedEvent &&
+    if (event is CoordinatorCallRingingEvent &&
         event.metadata.details.createdBy.id != currentUserId &&
         event.data.ringing) {
       _logger.v(() => '[onCoordinatorEvent] onCallCreated: ${event.data}');
-      onIncomingCall?.call(_makeCallFromCreated(data: event.data));
+      onIncomingCall?.call(_makeCallFromRinging(data: event.data));
     }
   }
 
@@ -321,6 +322,21 @@ class StreamVideo {
     CallPreferences? preferences,
   }) {
     return Call.fromCreated(
+      data: data,
+      coordinatorClient: _client,
+      getCurrentUserId: _state.getCurrentUserId,
+      setActiveCall: _state.setActiveCall,
+      retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
+      preferences: preferences,
+    );
+  }
+
+  Call _makeCallFromRinging({
+    required CallRingingData data,
+    CallPreferences? preferences,
+  }) {
+    return Call.fromRinging(
       data: data,
       coordinatorClient: _client,
       getCurrentUserId: _state.getCurrentUserId,

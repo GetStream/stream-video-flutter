@@ -271,7 +271,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           wasCreated: result.created,
           data: CallCreatedData(
             callCid: callCid,
-            ringing: ringing ?? false,
             metadata: result.call
                 .toCallMetadata(result.members, result.ownCapabilities),
           ),
