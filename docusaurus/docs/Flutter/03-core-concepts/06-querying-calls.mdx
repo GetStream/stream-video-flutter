@@ -29,10 +29,10 @@ For instance, to find all livestreams on our application, we can set the `type` 
 
 ```dart
 final result = await video.queryCalls(
-      filterConditions: {
-        "type": 'livestream',
-      },
-    );
+  filterConditions: {
+    "type": 'livestream',
+  },
+);
 ```
 
 Filter expressions support multiple matching criteria, and it is also possible to combine filters. For more information, please visit the [filter operators guide](https://getstream.io/chat/docs/ios-swift/query_syntax_operators/?language=swift&q=filter). The full list of options that you can filter by is listed in the table below.
