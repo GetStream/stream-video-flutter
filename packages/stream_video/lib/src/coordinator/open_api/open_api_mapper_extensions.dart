@@ -215,13 +215,13 @@ extension WebsocketEventMapperExt on OpenApiEvent {
       case EventType.callNotification:
         // TODO: Handle call notification
         break;
-      case EventType.callRingEvent:
-        final event = callCreated!;
+      case EventType.callRing:
+        final event = callRing!;
         final call = event.call;
         return CoordinatorCallRingingEvent(
           data: CallRingingData(
             callCid: StreamCallCid(cid: call.cid),
-            ringing: false,
+            ringing: true,
             metadata: call.toCallMetadata(event.members),
           ),
           createdAt: event.createdAt,
