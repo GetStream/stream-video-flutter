@@ -27,17 +27,8 @@ part 'auth/oauth.dart';
 part 'auth/http_basic_auth.dart';
 part 'auth/http_bearer_auth.dart';
 
-part 'api/call_types_api.dart';
 part 'api/default_api.dart';
-part 'api/devices_api.dart';
-part 'api/events_api.dart';
-part 'api/livestreaming_api.dart';
-part 'api/moderation_api.dart';
-part 'api/push_api.dart';
-part 'api/recording_api.dart';
-part 'api/transcription_api.dart';
-part 'api/users_api.dart';
-part 'api/video_calls_api.dart';
+part 'api/server_side_api.dart';
 
 part 'model/api_error.dart';
 part 'model/apns.dart';

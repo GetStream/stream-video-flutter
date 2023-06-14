@@ -89,7 +89,7 @@ class AudioSettings {
     return null;
   }
 
-  static List<AudioSettings> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<AudioSettings>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <AudioSettings>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -120,10 +120,12 @@ class AudioSettings {
   static Map<String, List<AudioSettings>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<AudioSettings>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = AudioSettings.listFromJson(entry.value, growable: growable,);
+        final value = AudioSettings.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

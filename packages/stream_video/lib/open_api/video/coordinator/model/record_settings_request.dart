@@ -93,7 +93,7 @@ class RecordSettingsRequest {
     return null;
   }
 
-  static List<RecordSettingsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RecordSettingsRequest>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <RecordSettingsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -124,10 +124,12 @@ class RecordSettingsRequest {
   static Map<String, List<RecordSettingsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<RecordSettingsRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = RecordSettingsRequest.listFromJson(entry.value, growable: growable,);
+        final value = RecordSettingsRequest.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;
@@ -164,7 +166,7 @@ class RecordSettingsRequestModeEnum {
 
   static RecordSettingsRequestModeEnum? fromJson(dynamic value) => RecordSettingsRequestModeEnumTypeTransformer().decode(value);
 
-  static List<RecordSettingsRequestModeEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RecordSettingsRequestModeEnum>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <RecordSettingsRequestModeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -247,7 +249,7 @@ class RecordSettingsRequestQualityEnum {
 
   static RecordSettingsRequestQualityEnum? fromJson(dynamic value) => RecordSettingsRequestQualityEnumTypeTransformer().decode(value);
 
-  static List<RecordSettingsRequestQualityEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RecordSettingsRequestQualityEnum>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <RecordSettingsRequestQualityEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {

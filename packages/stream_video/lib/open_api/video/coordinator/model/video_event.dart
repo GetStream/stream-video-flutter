@@ -170,7 +170,7 @@ class VideoEvent {
         user: UserResponse.fromJson(json[r'user'])!,
         call: CallResponse.fromJson(json[r'call'])!,
         hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
-        members: MemberResponse.listFromJson(json[r'members']),
+        members: MemberResponse.listFromJson(json[r'members'])!,
         capabilitiesByRole: json[r'capabilities_by_role'] == null
           ? const {}
             : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
@@ -182,13 +182,13 @@ class VideoEvent {
         permissions: json[r'permissions'] is List
             ? (json[r'permissions'] as List).cast<String>()
             : const [],
-        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
+        ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities'])!,
       );
     }
     return null;
   }
 
-  static List<VideoEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<VideoEvent>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <VideoEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -219,10 +219,12 @@ class VideoEvent {
   static Map<String, List<VideoEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<VideoEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = VideoEvent.listFromJson(entry.value, growable: growable,);
+        final value = VideoEvent.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

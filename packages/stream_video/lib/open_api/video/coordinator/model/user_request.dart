@@ -130,7 +130,7 @@ class UserRequest {
     return null;
   }
 
-  static List<UserRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UserRequest>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <UserRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -161,10 +161,12 @@ class UserRequest {
   static Map<String, List<UserRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<UserRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = UserRequest.listFromJson(entry.value, growable: growable,);
+        final value = UserRequest.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

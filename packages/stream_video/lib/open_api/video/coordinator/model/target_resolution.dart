@@ -80,7 +80,7 @@ class TargetResolution {
     return null;
   }
 
-  static List<TargetResolution> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<TargetResolution>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <TargetResolution>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -111,10 +111,12 @@ class TargetResolution {
   static Map<String, List<TargetResolution>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<TargetResolution>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = TargetResolution.listFromJson(entry.value, growable: growable,);
+        final value = TargetResolution.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

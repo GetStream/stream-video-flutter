@@ -61,7 +61,7 @@ class EgressHLSResponse {
     return null;
   }
 
-  static List<EgressHLSResponse> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<EgressHLSResponse>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <EgressHLSResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -92,10 +92,12 @@ class EgressHLSResponse {
   static Map<String, List<EgressHLSResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<EgressHLSResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = EgressHLSResponse.listFromJson(entry.value, growable: growable,);
+        final value = EgressHLSResponse.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;
