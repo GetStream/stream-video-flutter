@@ -36,13 +36,13 @@ During a call, it is advised to set up a handler to listen and react to permissi
 
 ```
 @override
-  void initState() {
-    super.initState();
-    widget.call.onPermissionRequest = (CoordinatorCallPermissionRequestEvent request) {
-      // TODO Handle Permission requests
+void initState() {
+  super.initState();
+  widget.call.onPermissionRequest = (CoordinatorCallPermissionRequestEvent request) {
+    // TODO Handle Permission requests
 
-    };
-  }
+  };
+}
 
 ```
 
