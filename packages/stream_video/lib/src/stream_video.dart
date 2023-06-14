@@ -222,7 +222,7 @@ class StreamVideo {
     if (event is CoordinatorCallRingingEvent &&
         event.metadata.details.createdBy.id != currentUserId &&
         event.data.ringing) {
-      _logger.v(() => '[onCoordinatorEvent] onCallCreated: ${event.data}');
+      _logger.v(() => '[onCoordinatorEvent] onCallRinging: ${event.data}');
       onIncomingCall?.call(_makeCallFromRinging(data: event.data));
     }
   }
