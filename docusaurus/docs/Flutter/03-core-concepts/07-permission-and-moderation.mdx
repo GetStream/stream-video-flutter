@@ -61,7 +61,7 @@ To facilitate these requests, the SDK provides several methods for limiting user
 
 **Revoke Permissions**
 
-Similar to its sister method `grantPermissions`, `revokePermissions` lives on the current `Call` object and allows users to easily remove permissions currently assigned to a user by passing in the user id and the list of permissions to be revoked.
+Similar to its sister method `grantPermissions`, the `revokePermissions` method exists on the current `Call` object. It enables users to easily remove permissions assigned to a specific user by providing their user ID and the list of permissions to be revoked..
 
 ```
 call.revokePermissions(userId: 'nash', [CallPermission.screenshare, CallPermission.sendVideo]);
