@@ -824,7 +824,10 @@ class Call {
 
     return response.fold(
       success: (it) {
-        _stateManager.lifecycleCallCreated(CallCreated(it.data.data));
+        _stateManager.lifecycleCallCreated(
+          CallCreated(it.data.data),
+          ringing: ringing,
+        );
         _logger.v(() => '[getOrCreateCall] completed: ${it.data}');
         return it;
       },

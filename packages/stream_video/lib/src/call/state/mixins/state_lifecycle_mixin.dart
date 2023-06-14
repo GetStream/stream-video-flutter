@@ -73,11 +73,12 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   }
 
   void lifecycleCallCreated(
-    CallCreated stage,
-  ) {
-    _logger.d(() => '[lifecycleCallCreated] state: $state');
+    CallCreated stage, {
+    bool ringing = false,
+  }) {
+    _logger.d(() => '[lifecycleCallCreated] ringing: $ringing, state: $state');
     state = state.copyWith(
-      status: stage.data.toCallStatus(state: state),
+      status: stage.data.toCallStatus(state: state, ringing: ringing),
       createdByUserId: stage.data.metadata.details.createdBy.id,
       settings: stage.data.metadata.settings,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
@@ -86,9 +87,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   }
 
   void lifecycleCallRinging(
-      CallRinging stage,
-      ) {
-    _logger.d(() => '[lifecycleCallCreated] state: $state');
+    CallRinging stage,
+  ) {
+    _logger.d(() => '[lifecycleCallRinging] state: $state');
     state = state.copyWith(
       status: stage.data.toCallStatus(state: state),
       createdByUserId: stage.data.metadata.details.createdBy.id,
@@ -222,12 +223,13 @@ extension on CallMetadata {
 extension on CallCreatedData {
   CallStatus toCallStatus({
     required CallState state,
+    required bool ringing,
   }) {
     final status = state.status;
     final createdByMe = state.currentUserId == metadata.details.createdBy.id;
-    if (!status.isOutgoing && createdByMe) {
+    if (ringing && !status.isOutgoing && createdByMe) {
       return CallStatus.outgoing();
-    } else if (!status.isIncoming && !createdByMe) {
+    } else if (ringing && !status.isIncoming && !createdByMe) {
       return CallStatus.incoming();
     } else {
       return status;
