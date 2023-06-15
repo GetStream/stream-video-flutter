@@ -8,6 +8,7 @@ import '../coordinator/models/coordinator_events.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../errors/video_error_composer.dart';
 import '../models/call_credentials.dart';
+import '../models/queried_members.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
@@ -1269,6 +1270,22 @@ class Call {
     }
 
     return result;
+  }
+
+  Future<Result<QueriedMembers>> queryMembers({
+    required Map<String, Object> filterConditions,
+    String? next,
+    String? prev,
+    List<SortParamRequest> sorts = const [],
+    int? limit,
+  }) {
+    return _permissionsManager.queryMembers(
+      filterConditions: filterConditions,
+      next: next,
+      prev: prev,
+      sorts: sorts,
+      limit: limit,
+    );
   }
 }
 
