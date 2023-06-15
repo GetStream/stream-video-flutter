@@ -1,15 +1,11 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:stream_video/src/models/call_reaction.dart';
 
 import '../../stream_video.dart';
 import '../action/internal/lifecycle_action.dart';
-import '../coordinator/models/coordinator_events.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../errors/video_error_composer.dart';
-import '../models/call_credentials.dart';
-import '../models/queried_members.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
