@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:stream_video/src/models/call_reaction.dart';
 
 import '../../stream_video.dart';
 import '../action/internal/lifecycle_action.dart';
@@ -1285,6 +1286,18 @@ class Call {
       prev: prev,
       sorts: sorts,
       limit: limit,
+    );
+  }
+
+  Future<Result<CallReaction>> sendReaction({
+    required String reactionType,
+    String? emojiCode,
+    Map<String, Object> custom = const {},
+  }) {
+    return _permissionsManager.sendReaction(
+      reactionType: reactionType,
+      emojiCode: emojiCode,
+      custom: custom,
     );
   }
 }
