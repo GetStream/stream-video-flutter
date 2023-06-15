@@ -373,7 +373,7 @@ class ApiClient {
           return RequestPermissionRequest.fromJson(value);
         case 'RequestPermissionResponse':
           return RequestPermissionResponse.fromJson(value);
-        case 'Response':
+        case 'DurationResponse':
           return DurationResponse.fromJson(value);
         case 'RingSettings':
           return RingSettings.fromJson(value);
