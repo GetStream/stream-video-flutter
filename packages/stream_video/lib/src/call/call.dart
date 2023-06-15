@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../../open_api/video/coordinator/api.dart';
 import '../../stream_video.dart';
 import '../action/internal/lifecycle_action.dart';
 import '../coordinator/models/coordinator_events.dart';
@@ -92,6 +91,30 @@ class Call {
       sdpPolicy: sdpPolicy,
       preferences: preferences,
     ).also((it) => it._stateManager.lifecycleCallCreated(CallCreated(data)));
+  }
+
+  /// Do not use the factory directly,
+  /// use the [StreamVideo.makeCall] method to construct a `Call` instance.
+  @internal
+  factory Call.fromRinging({
+    required CallRingingData data,
+    required CoordinatorClient coordinatorClient,
+    required GetCurrentUserId getCurrentUserId,
+    required SetActiveCall setActiveCall,
+    RetryPolicy? retryPolicy,
+    SdpPolicy? sdpPolicy,
+    CallPreferences? preferences,
+  }) {
+    streamLog.i(_tag, () => '<factory> created: $data');
+    return Call._internal(
+      callCid: data.callCid,
+      coordinatorClient: coordinatorClient,
+      getCurrentUserId: getCurrentUserId,
+      setActiveCall: setActiveCall,
+      retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
+      preferences: preferences,
+    ).also((it) => it._stateManager.lifecycleCallRinging(CallRinging(data)));
   }
 
   factory Call._internal({
@@ -385,14 +408,26 @@ class Call {
 
   Future<Result<CallMetadata>> update({
     Map<String, Object>? custom,
-    CallSettingsInput? settingsOverride,
+    StreamRingSettings? ring,
+    StreamAudioSettings? audio,
+    StreamVideoSettings? video,
+    StreamScreenShareSettings? screenShare,
+    StreamRecordingSettings? recording,
+    StreamTranscriptionSettings? transcription,
+    StreamBackstageSettings? backstage,
+    StreamGeofencingSettings? geofencing,
   }) {
     return _coordinatorClient.updateCall(
-      UpdateCallInput(
-        callCid: callCid,
-        custom: custom ?? {},
-        settingsOverride: settingsOverride,
-      ),
+      callCid: callCid,
+      custom: custom ?? {},
+      ring: ring,
+      audio: audio,
+      video: video,
+      screenShare: screenShare,
+      recording: recording,
+      transcription: transcription,
+      backstage: backstage,
+      geofencing: geofencing,
     );
   }
 
@@ -752,12 +787,10 @@ class Call {
 
   Future<Result<None>> inviteUsers(List<UserInfo> users) {
     return _coordinatorClient.inviteUsers(
-      UpsertCallMembersInput(
-        callCid: callCid,
-        members: users.map((user) {
-          return MemberInput(userId: user.id, role: user.role);
-        }).toList(),
-      ),
+      callCid: callCid,
+      members: users.map((user) {
+        return MemberRequest(userId: user.id, role: user.role);
+      }).toList(),
     );
   }
 
@@ -779,21 +812,22 @@ class Call {
     }
 
     final response = await _coordinatorClient.getOrCreateCall(
-      GetOrCreateCallInput(
-        callCid: callCid,
-        ringing: ringing,
-        members: participantIds.map((id) {
-          return MemberInput(
-            userId: id,
-            role: 'admin',
-          );
-        }),
-      ),
+      callCid: callCid,
+      ringing: ringing,
+      members: participantIds.map((id) {
+        return MemberRequest(
+          userId: id,
+          role: 'admin',
+        );
+      }).toList(),
     );
 
     return response.fold(
       success: (it) {
-        _stateManager.lifecycleCallCreated(CallCreated(it.data.data));
+        _stateManager.lifecycleCallCreated(
+          CallCreated(it.data.data),
+          ringing: ringing,
+        );
         _logger.v(() => '[getOrCreateCall] completed: ${it.data}');
         return it;
       },
@@ -813,9 +847,8 @@ class Call {
     bool create = false,
   }) async {
     _logger.d(() => '[joinCall] cid: $callCid');
-    final joinResult = await _coordinatorClient.joinCall(
-      JoinCallInput(callCid: callCid, create: create),
-    );
+    final joinResult =
+        await _coordinatorClient.joinCall(callCid: callCid, create: create);
     if (joinResult is! Success<CoordinatorJoined>) {
       _logger.e(() => '[joinCall] join failed: $joinResult');
       return joinResult as Failure;
@@ -824,7 +857,6 @@ class Call {
       wasCreated: joinResult.data.wasCreated,
       data: CallCreatedData(
         callCid: callCid,
-        ringing: false,
         metadata: joinResult.data.metadata,
       ),
     );
@@ -839,6 +871,11 @@ class Call {
     _stateManager.lifecycleCallJoined(CallJoined(joined));
     _logger.v(() => '[joinCall] completed: $joined');
     return Result.success(joined);
+  }
+
+  /// Returns true if the current user has the [CallPermission] supplied.
+  bool hasPermission(CallPermission permission) {
+    return _permissionsManager.hasPermission(permission);
   }
 
   Future<Result<None>> requestPermissions(List<CallPermission> permissions) {

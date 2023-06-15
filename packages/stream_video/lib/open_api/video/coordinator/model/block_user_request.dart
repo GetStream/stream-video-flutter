@@ -62,7 +62,7 @@ class BlockUserRequest {
     return null;
   }
 
-  static List<BlockUserRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<BlockUserRequest>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <BlockUserRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -93,10 +93,12 @@ class BlockUserRequest {
   static Map<String, List<BlockUserRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<BlockUserRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = BlockUserRequest.listFromJson(entry.value, growable: growable,);
+        final value = BlockUserRequest.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

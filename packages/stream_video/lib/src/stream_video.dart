@@ -2,7 +2,6 @@ import 'dart:async';
 
 import '../stream_video.dart';
 import 'coordinator/models/coordinator_events.dart';
-import 'coordinator/models/coordinator_inputs.dart' as input;
 import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'coordinator/retry/coordinator_client_retry.dart';
 import 'errors/video_error_composer.dart';
@@ -13,7 +12,7 @@ import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
 import 'logger/impl/external_logger.dart';
-import 'models/guest_created_data.dart';
+import 'models/call_ringing_data.dart';
 import 'models/queried_calls.dart';
 import 'retry/retry_policy.dart';
 import 'state_emitter.dart';
@@ -48,19 +47,21 @@ class StreamVideo {
   /// Stream Video singleton instance
   factory StreamVideo.create(
     String apiKey, {
-    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
-    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
     LatencySettings latencySettings = const LatencySettings(),
     RetryPolicy retryPolicy = const RetryPolicy(),
     SdpPolicy sdpPolicy = _defaultSdpPolicy,
+    bool muteVideoWhenInBackground = false,
+    bool muteAudioWhenInBackground = false,
   }) {
     return StreamVideo._(
       apiKey,
-      coordinatorRpcUrl: coordinatorRpcUrl,
-      coordinatorWsUrl: coordinatorWsUrl,
+      coordinatorRpcUrl: _defaultCoordinatorRpcUrl,
+      coordinatorWsUrl: _defaultCoordinatorWsUrl,
       latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
+      muteVideoWhenInBackground: muteVideoWhenInBackground,
+      muteAudioWhenInBackground: muteAudioWhenInBackground,
     );
   }
 
@@ -71,6 +72,8 @@ class StreamVideo {
     required this.latencySettings,
     required this.retryPolicy,
     required this.sdpPolicy,
+    this.muteVideoWhenInBackground = false,
+    this.muteAudioWhenInBackground = false,
   }) {
     _client = buildCoordinatorClient(
       apiKey: apiKey,
@@ -93,15 +96,17 @@ class StreamVideo {
     SdpPolicy sdpPolicy = _defaultSdpPolicy,
     Priority logPriority = Priority.none,
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
+    bool muteVideoWhenInBackground = false,
+    bool muteAudioWhenInBackground = false,
   }) {
     _setupLogger(logPriority, logHandlerFunction);
     return _instanceHolder.init(
       apiKey,
-      coordinatorRpcUrl: coordinatorRpcUrl,
-      coordinatorWsUrl: coordinatorWsUrl,
       latencySettings: latencySettings,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
+      muteVideoWhenInBackground: muteVideoWhenInBackground,
+      muteAudioWhenInBackground: muteAudioWhenInBackground,
     );
   }
 
@@ -142,6 +147,11 @@ class StreamVideo {
   final _subscriptions = Subscriptions();
   late final CoordinatorClient _client;
   PushNotificationManager? _pushNotificationManager;
+
+  late bool muteVideoWhenInBackground;
+  late bool muteAudioWhenInBackground;
+  bool _mutedCameraByStateChange = false;
+  bool _mutedAudioByStateChange = false;
 
   var _state = _StreamVideoState();
 
@@ -209,11 +219,11 @@ class StreamVideo {
   void _onEvent(CoordinatorEvent event) {
     final currentUserId = _state.getCurrentUserId();
     _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
-    if (event is CoordinatorCallCreatedEvent &&
+    if (event is CoordinatorCallRingingEvent &&
         event.metadata.details.createdBy.id != currentUserId &&
         event.data.ringing) {
-      _logger.v(() => '[onCoordinatorEvent] onCallCreated: ${event.data}');
-      onIncomingCall?.call(_makeCallFromCreated(data: event.data));
+      _logger.v(() => '[onCoordinatorEvent] onCallRinging: ${event.data}');
+      onIncomingCall?.call(_makeCallFromRinging(data: event.data));
     }
   }
 
@@ -226,10 +236,37 @@ class StreamVideo {
         _logger.i(() => '[onAppState] close connection');
         _subscriptions.cancel(_idEvents);
         await _client.closeConnection();
+      } else if (loggedIn && state.isPaused && activeCallCid != null) {
+        final callState = activeCall?.state.value;
+        final isVideoEnabled =
+            callState?.localParticipant?.isVideoEnabled ?? false;
+        final isAudioEnabled =
+            callState?.localParticipant?.isAudioEnabled ?? false;
+
+        if (muteVideoWhenInBackground && isVideoEnabled) {
+          await activeCall?.setCameraEnabled(enabled: false);
+          _mutedCameraByStateChange = true;
+          _logger.v(() => 'Muted camera track since app was paused.');
+        }
+        if (muteAudioWhenInBackground && isAudioEnabled) {
+          await activeCall?.setMicrophoneEnabled(enabled: false);
+          _mutedAudioByStateChange = true;
+          _logger.v(() => 'Muted audio track since app was paused.');
+        }
       } else if (loggedIn && state.isResumed) {
         _logger.i(() => '[onAppState] open connection');
         await _client.openConnection();
         _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
+        if (_mutedCameraByStateChange) {
+          await activeCall?.setCameraEnabled(enabled: true);
+          _mutedCameraByStateChange = false;
+          _logger.v(() => 'Unmuted camera track since app was unpaused.');
+        }
+        if (_mutedAudioByStateChange) {
+          await activeCall?.setMicrophoneEnabled(enabled: true);
+          _mutedAudioByStateChange = false;
+          _logger.v(() => 'Unmuted audio track since app was unpaused.');
+        }
       }
     } catch (e) {
       _logger.e(() => '[onAppState] failed: $e');
@@ -295,22 +332,35 @@ class StreamVideo {
     );
   }
 
+  Call _makeCallFromRinging({
+    required CallRingingData data,
+    CallPreferences? preferences,
+  }) {
+    return Call.fromRinging(
+      data: data,
+      coordinatorClient: _client,
+      getCurrentUserId: _state.getCurrentUserId,
+      setActiveCall: _state.setActiveCall,
+      retryPolicy: retryPolicy,
+      sdpPolicy: sdpPolicy,
+      preferences: preferences,
+    );
+  }
+
   /// Queries the API for calls.
   Future<Result<QueriedCalls>> queryCalls({
     required Map<String, Object> filterConditions,
     String? next,
     String? prev,
     int? limit,
-    List<SortInput>? sorts,
+    List<SortParamRequest>? sorts,
   }) {
     return _client.queryCalls(
-      input.QueryCallsInput(
-        filterConditions: filterConditions,
-        next: next,
-        limit: limit,
-        prev: prev,
-        sorts: sorts ?? [],
-      ),
+      filterConditions: filterConditions,
+      next: next,
+      limit: limit,
+      prev: prev,
+      sorts: sorts ?? [],
     );
   }
 
@@ -322,17 +372,17 @@ class StreamVideo {
     List<String>? teams,
     Map<String, Object>? custom,
   }) async {
-    await _tokenManager.setTokenProvider(id,
-        tokenProvider: AnonymousTokenProvider());
+    await _tokenManager.setTokenProvider(
+      id,
+      tokenProvider: AnonymousTokenProvider(),
+    );
     final result = await _client.createGuest(
-      UserInput(
-        id: id,
-        name: name,
-        role: role,
-        image: image,
-        teams: teams,
-        custom: custom ?? {},
-      ),
+      id: id,
+      name: name,
+      role: role,
+      image: image,
+      teams: teams,
+      custom: custom ?? {},
     );
     _tokenManager.reset();
     return result;

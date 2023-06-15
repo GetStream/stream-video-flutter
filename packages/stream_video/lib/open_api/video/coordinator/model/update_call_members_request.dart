@@ -66,13 +66,13 @@ class UpdateCallMembersRequest {
         removeMembers: json[r'remove_members'] is List
             ? (json[r'remove_members'] as List).cast<String>()
             : const [],
-        updateMembers: MemberRequest.listFromJson(json[r'update_members']),
+        updateMembers: MemberRequest.listFromJson(json[r'update_members']) ?? const [],
       );
     }
     return null;
   }
 
-  static List<UpdateCallMembersRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UpdateCallMembersRequest>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <UpdateCallMembersRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -103,10 +103,12 @@ class UpdateCallMembersRequest {
   static Map<String, List<UpdateCallMembersRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<UpdateCallMembersRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = UpdateCallMembersRequest.listFromJson(entry.value, growable: growable,);
+        final value = UpdateCallMembersRequest.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

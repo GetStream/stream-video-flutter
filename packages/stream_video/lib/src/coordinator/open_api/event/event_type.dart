@@ -8,7 +8,7 @@ enum EventType {
   callCreated('call.created'),
   callAccepted('call.accepted'),
   callRejected('call.rejected'),
-  callRingEvent('call.ring'),
+  callRing('call.ring'),
   callUpdated('call.updated'),
   callEnded('call.ended'),
   callSessionStarted('call.session_started'),

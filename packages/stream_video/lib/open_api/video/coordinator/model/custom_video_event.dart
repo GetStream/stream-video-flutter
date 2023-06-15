@@ -91,7 +91,7 @@ class CustomVideoEvent {
     return null;
   }
 
-  static List<CustomVideoEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CustomVideoEvent>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CustomVideoEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -122,10 +122,12 @@ class CustomVideoEvent {
   static Map<String, List<CustomVideoEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CustomVideoEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = CustomVideoEvent.listFromJson(entry.value, growable: growable,);
+        final value = CustomVideoEvent.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

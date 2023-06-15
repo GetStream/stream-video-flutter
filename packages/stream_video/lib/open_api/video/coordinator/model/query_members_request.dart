@@ -138,14 +138,14 @@ class QueryMembersRequest {
         limit: mapValueOfType<int>(json, r'limit'),
         next: mapValueOfType<String>(json, r'next'),
         prev: mapValueOfType<String>(json, r'prev'),
-        sort: SortParamRequest.listFromJson(json[r'sort']),
+        sort: SortParamRequest.listFromJson(json[r'sort']) ?? const [],
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
     return null;
   }
 
-  static List<QueryMembersRequest> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<QueryMembersRequest>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <QueryMembersRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -176,10 +176,12 @@ class QueryMembersRequest {
   static Map<String, List<QueryMembersRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<QueryMembersRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = QueryMembersRequest.listFromJson(entry.value, growable: growable,);
+        final value = QueryMembersRequest.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

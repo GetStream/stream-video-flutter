@@ -1,11 +1,12 @@
 library stream_video;
 
+export 'open_api/video/coordinator/api.dart';
 export 'src/action/participant_action.dart';
 export 'src/call/call.dart';
 export 'src/call/call_connect_options.dart';
 export 'src/call_state.dart';
 export 'src/coordinator/coordinator_client.dart';
-export 'src/coordinator/models/coordinator_inputs.dart';
+export 'src/coordinator/models/coordinator_events.dart';
 export 'src/events.dart';
 export 'src/logger/impl/console_logger.dart';
 export 'src/logger/impl/file_logger.dart';
@@ -20,12 +21,14 @@ export 'src/models/call_participant_state.dart';
 export 'src/models/call_permission.dart';
 export 'src/models/call_preferences.dart';
 export 'src/models/call_received_created_data.dart';
+export 'src/models/call_ringing_data.dart';
 export 'src/models/call_settings.dart';
 export 'src/models/call_stats.dart';
 export 'src/models/call_status.dart';
 export 'src/models/call_track_state.dart';
 export 'src/models/disconnect_reason.dart';
 export 'src/models/guest_created_data.dart';
+export 'src/models/queried_calls.dart';
 export 'src/models/user_info.dart';
 export 'src/models/viewport_visibility.dart';
 export 'src/models/queried_calls.dart';

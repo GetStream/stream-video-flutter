@@ -1,0 +1,76 @@
+---
+slug: /querying-calls
+title: Querying Calls
+---
+
+For many different use cases, such as video calls, livestreams, or audio rooms, you may want to search and filter calls based on different criteria, such as:
+
+- Upcoming calls
+- Calls that are currently live
+- Popular livestreams or audio rooms with a link to the recording.
+
+To facilitate these, the SDK provides methods which allows users to quickly perform sorting and filtering using the `queryCalls` method on `StreamVideo`.
+
+### Filtering
+
+To filter calls, a map containing the fields and conditions must be supplied to `queryCalls` via the `filterConditions` parameter.
+
+```dart
+final result = await video.queryCalls(
+  filterConditions: {
+    "custom.flutterAudioRoomCall": true,
+  },
+);
+```
+
+In the above example, we filter all calls that contain the custom field `flutterAudioRoomCall`. Other filtering options include call type, members, and start times.
+
+For instance, to find all livestreams on our application, we can set the `type` filter to `livestream`.
+
+```dart
+final result = await video.queryCalls(
+  filterConditions: {
+    "type": 'livestream',
+  },
+);
+```
+
+Filter expressions support multiple matching criteria, and it is also possible to combine filters. For more information, please visit the [filter operators guide](https://getstream.io/chat/docs/ios-swift/query_syntax_operators/?language=swift&q=filter). The full list of options that you can filter by is listed in the table below.
+
+| Option | Description |
+| --- | --- |
+| type | The call type. Typically default, livestream etc |
+| id | The id for this call |
+| cid | The cid for this call. IE default:123 |
+| created_by_user_id | The user id who created the call |
+| created_at | When the call was created |
+| updated_at | When the call was updated |
+| starts_at | When the call starts at |
+| ended_at | When the call ended |
+| backstage | If the call is in backstage mode or not |
+| members | Check if you are a member of this call |
+| custom | You can query custom data using the "custom.myfield" syntax |
+
+### Sorting
+
+Similar to filtering, the SDK offers robust support for sorting, enabling sorting on the following fields:
+
+- `starts_at`
+- `created_at`
+- `updated_at`
+- `ended_at`
+- `type`
+- `id`
+- `cid`
+
+To add a sort, it is simple as specifying a list of sorts to the `queryCalls` function:
+
+```dart
+final result = await video.queryCalls(
+  sorts: [
+    SortParamRequest(field: 'starts_at', direction: -1),
+  ],
+);
+```
+
+The `queryCalls` function can take multiple sort parameters, which can be combined with filtering to give you powerful control over the data in your application.

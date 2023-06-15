@@ -133,7 +133,7 @@ class OpenApiEvent with EquatableMixin {
       case EventType.custom:
         final event = open.CustomVideoEvent.fromJson(jsonObj);
         return result.copyWith(custom: event);
-      case EventType.callRingEvent:
+      case EventType.callRing:
         final event = open.CallRingEvent.fromJson(jsonObj);
         return result.copyWith(callRing: event);
       case EventType.callNotification:

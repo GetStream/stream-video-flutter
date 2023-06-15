@@ -68,7 +68,7 @@ class ScreensharingSettings {
     return null;
   }
 
-  static List<ScreensharingSettings> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ScreensharingSettings>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ScreensharingSettings>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -99,10 +99,12 @@ class ScreensharingSettings {
   static Map<String, List<ScreensharingSettings>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<ScreensharingSettings>>{};
     if (json is Map && json.isNotEmpty) {
-      // ignore: parameter_assignments
-      json = json.cast<String, dynamic>();
+      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        map[entry.key] = ScreensharingSettings.listFromJson(entry.value, growable: growable,);
+        final value = ScreensharingSettings.listFromJson(entry.value, growable: growable,);
+        if (value != null) {
+          map[entry.key] = value;
+        }
       }
     }
     return map;

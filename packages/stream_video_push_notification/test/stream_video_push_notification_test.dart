@@ -18,7 +18,6 @@ Future<void> main() async {
   final StreamCallCid streamCallCid = StreamCallCid(cid: 'call:123');
   final callCreatedData = CallCreatedData(
     callCid: streamCallCid,
-    ringing: true,
     metadata: CallMetadata(
       cid: streamCallCid,
       details: const CallDetails(
@@ -66,7 +65,7 @@ Future<void> main() async {
   when(() => client.events)
       .thenAnswer((invocation) => MutableSharedEmitterImpl());
   when(() => client.getOrCreateCall(
-        GetOrCreateCallInput(callCid: streamCallCid),
+        callCid: streamCallCid,
       )).thenAnswer((_) => Future.value(Result.success(callReceivedOrCreated)));
   when(() => client.acceptCall(cid: streamCallCid))
       .thenAnswer((invocation) => Future.value(const Result.success(none)));
@@ -104,8 +103,7 @@ Future<void> main() async {
     final result = await sut.handlePushNotification(data);
 
     expect(result, true);
-    verify(() => client.getOrCreateCall(
-          GetOrCreateCallInput(callCid: streamCallCid),
+    verify(() => client.getOrCreateCall(callCid: streamCallCid,
         )).called(1);
     verify(() => callNotificationWrapper.showCallNotification(
           streamCallCid:
@@ -147,8 +145,7 @@ Future<void> main() async {
 
     verify(() => sharedPreferences.setString('incomingCallCid', 'call:123'))
         .called(1);
-    verify(() => client.getOrCreateCall(
-          GetOrCreateCallInput(callCid: streamCallCid),
+    verify(() => client.getOrCreateCall(callCid: streamCallCid,
         )).called(1);
     verify(() => client.acceptCall(cid: streamCallCid)).called(1);
   });
@@ -180,8 +177,7 @@ Future<void> main() async {
     await sut.handlePushNotification(data);
 
     verify(() => client.rejectCall(cid: streamCallCid)).called(1);
-    verify(() => client.getOrCreateCall(
-          GetOrCreateCallInput(callCid: streamCallCid),
+    verify(() => client.getOrCreateCall(callCid: streamCallCid,
         )).called(1);
   });
 
@@ -192,8 +188,7 @@ Future<void> main() async {
 
     expect(result, callCreatedData);
     verify(
-      () => client.getOrCreateCall(
-        GetOrCreateCallInput(callCid: streamCallCid),
+      () => client.getOrCreateCall(callCid: streamCallCid,
       ),
     ).called(1);
   });
