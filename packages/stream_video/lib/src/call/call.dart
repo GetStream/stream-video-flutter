@@ -1300,6 +1300,18 @@ class Call {
       custom: custom,
     );
   }
+
+  Future<Result<None>> sendCustomEvent({
+    required StreamCallCid callCid,
+    required String eventType,
+    Map<String, Object> custom = const {},
+  }) {
+    return _coordinatorClient.sendCustomEvent(
+      callCid: callCid,
+      eventType: eventType,
+      custom: custom,
+    );
+  }
 }
 
 CallStateNotifier _makeStateManager(
