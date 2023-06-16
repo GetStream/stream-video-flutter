@@ -30,11 +30,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       title: title,
       description: desc,
     );
+    await room.connect();
+    final metadata = await room.goLive();
+
     if (mounted) {
       Navigator.of(context).push(
         AudioRoomScreen.routeTo(
-          room.callObject,
-          room.details.custom['name'] as String,
+          room,
+          metadata.getDataOrNull()!.details.custom['name'] as String,
         ),
       );
     }
@@ -62,12 +65,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       camera: TrackOption.disabled(),
       microphone: TrackOption.disabled(),
     );
-    await room.callObject.connect();
+    final call = room.callObject;
+    await call.connect();
 
     if (mounted) {
       Navigator.of(context).push(
         AudioRoomScreen.routeTo(
-          room.callObject,
+          call,
           room.call.details.custom['name'] as String,
         ),
       );

@@ -9,7 +9,7 @@ class AudioRepository {
   final StreamVideo _streamVideo;
   Call? room;
 
-  Future<CallMetadata> createAudioRoom({
+  Future<Call> createAudioRoom({
     required String title,
     required String description,
   }) async {
@@ -25,14 +25,7 @@ class AudioRepository {
         "flutterAudioRoomCall": true,
       },
     );
-    final result = await room!.goLive();
-    if (result.isSuccess) {
-      return result.getDataOrNull()!;
-    } else {
-      final error = result.getErrorOrNull();
-      log('[createAudioRoom] failed with error $error');
-      throw Exception('Unable to create room');
-    }
+    return room!;
   }
 
   Future<List<QueriedCall>> queryCalls() async {

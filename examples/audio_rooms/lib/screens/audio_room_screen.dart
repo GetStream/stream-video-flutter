@@ -74,7 +74,6 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> {
             backgroundColor: const Color(0xff1E262E),
             borderRadius: 7.0,
             onTap: () {
-              widget.audioRoom.end();
               widget.audioRoom.disconnect();
               Navigator.of(context).pop();
             },
