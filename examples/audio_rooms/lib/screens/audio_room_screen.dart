@@ -109,7 +109,7 @@ class _AudioRoomScreenState extends State<AudioRoomScreen> {
         onSettingsPressed: () =>
             Navigator.push(context, AudioSettingsScreen.routeTo()),
       ),
-      body: StreamBuilder2(
+      body: CallStateBuilder(
         call: widget.audioRoom,
         builder: (context, callState) {
           print('--------- CALL STATE CHANGE --------------- $callState');
@@ -175,7 +175,7 @@ class _RoomScrollBodyState extends State<_RoomScrollBody> {
   Future<void> _configureDevices() async {
     final deviceNotifier = RtcMediaDeviceNotifier.instance;
     final outputDevices = await deviceNotifier.audioOutputs();
-    final firstDevice = outputDevices.getDataOrNull()![1];
+    final firstDevice = outputDevices.getDataOrNull()!.first;
     await widget.room.setAudioOutputDevice(firstDevice);
     widget.room.stats.listen((value) {
       print(value.toString());

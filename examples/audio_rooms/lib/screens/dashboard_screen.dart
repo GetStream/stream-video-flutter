@@ -62,6 +62,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       camera: TrackOption.disabled(),
       microphone: TrackOption.disabled(),
     );
+    await room.callObject.connect();
 
     if (mounted) {
       Navigator.of(context).push(
