@@ -114,7 +114,7 @@ class ServerSideApi {
   /// Parameters:
   ///
   /// * [String] name (required):
-  Future<Response?> deleteCallType(String name,) async {
+  Future<DurationResponse?> deleteCallType(String name,) async {
     final response = await deleteCallTypeWithHttpInfo(name,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
@@ -123,8 +123,7 @@ class ServerSideApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Response',) as Response;
-    
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'DurationResponse',) as DurationResponse;
     }
     return null;
   }
