@@ -128,7 +128,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   bool _isValidIncomingCall(Map<String, dynamic> payload) {
-    return payload['type'] == 'call.incoming' &&
+    return payload['type'] == 'call.ring' &&
         ((payload['call_cid'] as String?)?.isNotEmpty ?? false);
   }
 

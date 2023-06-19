@@ -144,9 +144,14 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     }
     final incomingCall = await StreamVideo.instance.consumeIncomingCall();
     if (incomingCall != null) {
+      final appRepository = AppRepository();
+      await appRepository.beginSession();
+      final chatChannel = await appRepository.createChatChannel(
+        channelId: incomingCall.callCid.id,
+      );
       await Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
         Routes.call,
-        arguments: incomingCall,
+        arguments: [incomingCall, const CallConnectOptions(), chatChannel],
       );
     }
   }
