@@ -22,7 +22,6 @@ This method accepts a list of `CallPermission` allowing for multiple permission 
 
 ```dart
 call.requestPermissions([CallPermission.screenshare, CallPermission.sendVideo]);
-
 ```
 
 As a call admin, you can grant permission to other users by calling `call.grantPermissions` along with the user’s `id` and the list of permissions you would like to grant:
@@ -43,7 +42,6 @@ void initState() {
 
   };
 }
-
 ```
 
 The `CoordinatorCallPermissionRequestEvent` includes the following attributes which can be used to either grant or reject permission requests:
@@ -74,12 +72,11 @@ To disable the audio tracks of all users on a call or a specific user in a call,
 
 ```dart
 call.muteAllUsers();
-
 ```
 
 ```dart
-call.muteUsers(userIds: ['thierry']);
 
+call.muteUsers(userIds: ['thierry']);
 ```
 
 :::tip
@@ -93,10 +90,10 @@ In the above example, we are only muting a single user. However, `muteUsers` doe
 Blocking and unblocking users can be done by calling `blockUser` or `unblockUser` on the current `Call` object.
 
 ```dart
+
 call.blockUser('deven');
 
 call.unblockUser('deven');
-
 ```
 
 **Ending the Call**
@@ -105,5 +102,6 @@ As a host, you are able to end the current call for everyone using the `call.end
 
 ```dart
 await call.end();
-
 ```
+
+To silently leave a call, the `disconnect` method can be used in place of the `end` method. 
