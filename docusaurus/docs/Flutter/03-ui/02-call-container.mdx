@@ -1,0 +1,51 @@
+---
+slug: /call-container
+title: Call Container
+---
+
+Similar to Flutter’s out-of-the-box `Container` widget, `StreamCallContainer` acts as a convenient widget for everything related to video and calling.
+
+By default, `StreamCallContainer` subscribes to a given `call` and listens for state changes during the call's life cycle.
+
+When the user receives an incoming `ringing` call, the widget automatically updates its UI to display a ringing screen. During the call lifecycle, the widget will also update itself to show call screen and outgoing call screen depending on the actions taken by the user.
+
+![Incoming call scren](../assets/ui_component_assets/incoming_call_screen.png)
+
+### Customizing Call Container
+
+```dart
+const StreamCallContainer({
+    super.key,
+    required this.call,
+    this.callConnectOptions = const CallConnectOptions(),
+    this.onBackPressed,
+    this.onLeaveCallTap,
+    this.onAcceptCallTap,
+    this.onDeclineCallTap,
+    this.onCancelCallTap,
+    this.incomingCallBuilder,
+    this.outgoingCallBuilder,
+    this.callContentBuilder,
+  });
+```
+
+Developers can easily respond to user actions, such as accepting or declining a call, by using exposed callbacks and builders.
+
+To replace default screens, such as those displayed when an incoming call is detected, developers can use one of the many optional builders available.
+
+```dart
+@override
+  Widget build(BuildContext context) {
+   return Scaffold(
+    body: StreamCallContainer(
+      call: widget.call,
+      incomingCallBuilder: (context, call, callState) {
+        return CustomIncomingCallScreen(call: call, state: callState);
+      },
+    ),
+);
+```
+
+All `builders` exposed by `StreamCallContainer` provide users with an ongoing `Call` object and the associated `CallState`. You can use these to subscribe to changes and display different UI options depending on the events.
+
+If your use case does not require ringing, incoming, or outgoing capabilities like Google Meet, then our `CallScreen` widget may be a better option. Keep reading to learn how to use it in your application.
