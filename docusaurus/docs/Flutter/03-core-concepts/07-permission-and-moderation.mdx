@@ -20,21 +20,21 @@ If a user does not have permission for an action, it can be requested by calling
 
 This method accepts a list of `CallPermission` allowing for multiple permission requests to be batched into a single call:
 
-```
+```dart
 call.requestPermissions([CallPermission.screenshare, CallPermission.sendVideo]);
 
 ```
 
 As a call admin, you can grant permission to other users by calling `call.grantPermissions` along with the user’s `id` and the list of permissions you would like to grant:
 
-```
+```dart
 call.grantPermissions(userId: 'nash', [CallPermission.screenshare, CallPermission.sendVideo])
 
 ```
 
 During a call, it is advised to set up a handler to listen and react to permission requests as they arrive. This can be done by passing a callback function to the `onPermissionRequest` property present on the `Call` object:
 
-```
+```dart
 @override
 void initState() {
   super.initState();
@@ -63,7 +63,7 @@ To facilitate these requests, the SDK provides several methods for limiting user
 
 Similar to its sister method `grantPermissions`, the `revokePermissions` method exists on the current `Call` object. It enables users to easily remove permissions assigned to a specific user by providing their user ID and the list of permissions to be revoked..
 
-```
+```dart
 call.revokePermissions(userId: 'nash', [CallPermission.screenshare, CallPermission.sendVideo]);
 
 ```
@@ -72,12 +72,12 @@ call.revokePermissions(userId: 'nash', [CallPermission.screenshare, CallPermissi
 
 To disable the audio tracks of all users on a call or a specific user in a call, the `muteOthers` and `muteUser` functions can be called, respectively.
 
-```
+```dart
 call.muteAllUsers();
 
 ```
 
-```
+```dart
 call.muteUsers(userIds: ['thierry']);
 
 ```
@@ -92,7 +92,7 @@ In the above example, we are only muting a single user. However, `muteUsers` doe
 
 Blocking and unblocking users can be done by calling `blockUser` or `unblockUser` on the current `Call` object.
 
-```
+```dart
 call.blockUser('deven');
 
 call.unblockUser('deven');
@@ -103,7 +103,7 @@ call.unblockUser('deven');
 
 As a host, you are able to end the current call for everyone using the `call.end` method.
 
-```
+```dart
 await call.end();
 
 ```
