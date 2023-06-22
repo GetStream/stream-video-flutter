@@ -1,0 +1,83 @@
+---
+slug: /video-render
+title: Video Renderer
+---
+
+One of the primary low-level widgets we offer is `StreamVideoRenderer`. As the name suggests, this widget is specifically designed to render the video track of a call participant. It also exposes callbacks that can be utilized to handle sizing changes, placeholder content, and other related functionalities.
+
+However, since `StreamVideoRenderer` is relatively basic, we have also introduced `StreamCallParticipant` as an extended version. It adds several extra features on top of `StreamVideoRenderer`, such as connection quality indicators, microphone indicators, and more.
+
+Since the SDK is designed to be modular and customizable, developers can choose whether they want to use the raw renderer or the participant widget.
+
+:::tip
+
+When in doubt, we recommend starting with `StreamCallParticipant` unless there is an explicit reason not to.
+
+:::
+
+### Customizing `StreamCallParticipant`
+
+```dart
+const StreamCallParticipant({
+    super.key,
+    required this.call,
+    required this.participant,
+    this.backgroundColor,
+    this.borderRadius,
+    this.userAvatarTheme,
+    this.showSpeakerBorder,
+    this.speakerBorderThickness,
+    this.speakerBorderColor,
+    this.showParticipantLabel,
+    this.participantLabelTextStyle,
+    this.participantLabelAlignment,
+    this.audioLevelIndicatorColor,
+    this.enabledMicrophoneColor,
+    this.disabledMicrophoneColor,
+    this.showConnectionQualityIndicator,
+    this.connectionLevelActiveColor,
+    this.connectionLevelInactiveColor,
+    this.connectionLevelAlignment,
+    this.videoPlaceholderBuilder,
+    this.videoRendererBuilder,
+    this.onSizeChanged,
+  });
+```
+
+Call Participant allows you to customize everything from the background color and border radius to setting placeholder content and customizing the audio level indicators.
+
+To use the widget, you need to supply two arguments: the current `call` and `participant` to render. Both of these parameters can be fetched from either `activeCall` or `callState`.
+
+```dart
+StreamCallContent(
+    call: call,
+    callState: callState,
+    callParticipantsBuilder: (context, call, callState) {
+      return StreamCallParticipant(
+        call: call,
+        participant: callState.localParticipant!,
+      );
+    },
+  );
+```
+
+### Using `StreamVideoRenderer` directly:
+
+```dart
+StreamCallContent(
+    call: call,
+    callState: callState,
+    callParticipantsBuilder: (context, call, callState) {
+      return StreamVideoRenderer(
+        call: call,
+        participant: callState.localParticipant!,
+        videoTrackType: SfuTrackType.screenShare,
+        videoFit: VideoFit.contain,
+      );
+    },
+  );
+```
+
+Video Render is the lowest level for displaying a participant's video in Flutter. Unlike `StreamCallParticipant`, the options exposed by `StreamVideoRenderer` are minimal and focuses more on video fit and layout, determining which track types to display, and providing callbacks for handling changes to the video rendering.
+
+Both `StreamVideoRenderer` and `StreamCallParticipant` can be used as part of other components, such as `StreamCallContent`, or as standalone widgets in your application, as long as the `call` and `participant` parameters are supplied.
