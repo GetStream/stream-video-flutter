@@ -14,7 +14,7 @@ dependencies:
   firebase_messaging: ^14.5.0
   stream_video:
     path: ../stream_video
-  flutter_callkit_incoming: ^1.0.3+3
+  flutter_callkit_incoming: ^2.0.0+1
   uuid: ^3.0.7
 
 dev_dependencies:

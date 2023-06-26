@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_callkit_incoming/entities/android_params.dart';
 import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
+import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/entities/ios_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:stream_video/stream_video.dart';
@@ -29,20 +30,23 @@ class CallNotificationWrapper {
       type: isVideoCall ? 1 : 0,
       textAccept: 'Accept',
       textDecline: 'Decline',
-      textMissedCall: 'Missed call',
+      missedCallNotification: const NotificationParams(
+        showNotification: true,
+        isShowCallback: true,
+        subtitle: 'Missed call',
+        callbackText: 'Call back',
+      ),
       duration: 30000,
       android: AndroidParams(
         isCustomNotification: true,
         isShowLogo: false,
-        isShowCallback: false,
-        isShowMissedCallNotification: false,
         ringtonePath: 'system_ringtone_default',
         backgroundColor: '#0955fa',
         backgroundUrl: avatarUrl,
         actionColor: '#4CAF50',
         incomingCallNotificationChannelName: "Incoming Call",
       ),
-      ios: IOSParams(
+      ios: const IOSParams(
         iconName: 'CallKitLogo',
         handleType: 'generic',
         supportsVideo: true,
@@ -61,10 +65,10 @@ class CallNotificationWrapper {
     );
     await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
     _streamSubscription = FlutterCallkitIncoming.onEvent.listen((event) {
-      if (event?.event == Event.ACTION_CALL_ACCEPT) {
+      if (event?.event == Event.actionCallAccept) {
         onCallAccepted(streamCallCid);
         _streamSubscription?.cancel();
-      } else if (event?.event == Event.ACTION_CALL_DECLINE) {
+      } else if (event?.event == Event.actionCallDecline) {
         onCallRejected(streamCallCid);
         _streamSubscription?.cancel();
       }
