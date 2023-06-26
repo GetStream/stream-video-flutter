@@ -72,7 +72,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
           id: token,
           voipToken: true,
           pushProvider: CreateDeviceRequestPushProviderEnum.apn,
-          pushProviderName: 'voip',
+          pushProviderName: 'flutter-apn-video',
       );
     }
   }
