@@ -1,10 +1,5 @@
 import 'dart:async';
-
-import 'package:flutter_callkit_incoming/entities/android_params.dart';
-import 'package:flutter_callkit_incoming/entities/call_event.dart';
-import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
-import 'package:flutter_callkit_incoming/entities/ios_params.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:uuid/uuid.dart';
@@ -25,8 +20,9 @@ class CallNotificationWrapper {
     var uuid = const Uuid();
     final callKitParams = CallKitParams(
       id: uuid.v4(),
-      nameCaller: 'Demo Call',
+      nameCaller: streamCallCid.value,
       avatar: avatarUrl,
+      handle: callers,
       type: isVideoCall ? 1 : 0,
       textAccept: 'Accept',
       textDecline: 'Decline',

@@ -36,16 +36,15 @@ import Firebase
         completion: @escaping () -> Void
     ) {
         let aps = payload.dictionaryPayload["aps"] as? [String: Any]
-        let alert = aps?["alert"] as? [String: Any]
-        let callCid = alert?["call_cid"] as? String
+        let streamDict = payload.dictionaryPayload["stream"] as? [String: Any]
+        let createdCallerName = streamDict?["created_by_display_name"] as? String ?? ""
+        let callCid = streamDict?["call_cid"] as? String ?? ""
 
-        let id = payload.dictionaryPayload["id"] as? String ?? ""
-        let nameCaller = payload.dictionaryPayload["nameCaller"] as? String ?? ""
-        let handle = payload.dictionaryPayload["handle"] as? String ?? ""
+        let id = UUID().uuidString
         let isVideo = payload.dictionaryPayload["isVideo"] as? Bool ?? false
 
-        let data = flutter_callkit_incoming.Data(id: id, nameCaller: nameCaller, handle: handle, type: isVideo ? 1 : 0)
-        data.extra = ["user": "abc@123", "platform": "ios"]
+        let data = flutter_callkit_incoming.Data(id: id, nameCaller: callCid, handle: createdCallerName, type: isVideo ? 1 : 0)
         SwiftFlutterCallkitIncomingPlugin.sharedInstance?.showCallkitIncoming(data, fromPushKit: true)
+        completion()
     }
 }
