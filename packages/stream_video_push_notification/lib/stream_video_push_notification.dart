@@ -7,7 +7,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:stream_video/open_api/video/coordinator/api.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'src/call_notification_wrapper.dart';
@@ -157,7 +156,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       // TODO(Deven): Use the same approach from iOS for incoming Android calls
       // We need to wait for a second to be sure sharedPreferences has been updated
       await _sharedPreferences.reload();
-      final incomingCid = _sharedPreferences.getString('incomingCallCid');
+      incomingCid = _sharedPreferences.getString('incomingCallCid') ?? '';
       await _sharedPreferences.remove('incomingCallCid');
     }
 
