@@ -43,8 +43,17 @@ import Firebase
         let id = UUID().uuidString
         let isVideo = payload.dictionaryPayload["isVideo"] as? Bool ?? false
 
+        if((SwiftFlutterCallkitIncomingPlugin.sharedInstance?.activeCalls().count ?? 0) >= 1){
+            return;
+        }
+
         let data = flutter_callkit_incoming.Data(id: id, nameCaller: callCid, handle: createdCallerName, type: isVideo ? 1 : 0)
+        data.extra = ["incomingCallCid": callCid, "platform": "ios"]
+        
         SwiftFlutterCallkitIncomingPlugin.sharedInstance?.showCallkitIncoming(data, fromPushKit: true)
-        completion()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            completion()
+        }
     }
 }
