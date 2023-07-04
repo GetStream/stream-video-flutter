@@ -8,6 +8,8 @@ abstract class PushNotificationManager {
   Future<bool> handlePushNotification(Map<String, dynamic> payload);
 
   Future<CallCreatedData?> consumeIncomingCall();
+
+  Future<void> endAllCalls();
 }
 
 typedef PushNotificationManagerFactory = Future<PushNotificationManager>

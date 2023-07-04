@@ -166,6 +166,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     return Future.value();
   }
 
+  @override
+  Future<void> endAllCalls() async {
+    await FlutterCallkitIncoming.endAllCalls();
+  }
+
   static PushNotificationManagerFactory factory({
     SharedPreferences? sharedPreferences,
     CallNotificationWrapper? callNotification,

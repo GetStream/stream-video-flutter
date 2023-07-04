@@ -146,7 +146,7 @@ class StreamVideo {
   final _tokenManager = TokenManager();
   final _subscriptions = Subscriptions();
   late final CoordinatorClient _client;
-  PushNotificationManager? _pushNotificationManager;
+  PushNotificationManager? pushNotificationManager;
 
   late bool muteVideoWhenInBackground;
   late bool muteAudioWhenInBackground;
@@ -158,7 +158,7 @@ class StreamVideo {
   Future<void> initPushNotificationManager(
     PushNotificationManagerFactory factory,
   ) async {
-    _pushNotificationManager = await factory(_client);
+    pushNotificationManager = await factory(_client);
   }
 
   /// Returns the current user if exists.
@@ -208,7 +208,7 @@ class StreamVideo {
       }
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
       _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
-      await _pushNotificationManager?.onUserLoggedIn();
+      await pushNotificationManager?.onUserLoggedIn();
       return tokenResult.map((data) => data.rawValue);
     } catch (e, stk) {
       _logger.e(() => '[connectUser] failed(${user.id}): $e');
@@ -389,12 +389,12 @@ class StreamVideo {
   }
 
   Future<bool> handlePushNotification(Map<String, dynamic> payload) {
-    return _pushNotificationManager?.handlePushNotification(payload) ??
+    return pushNotificationManager?.handlePushNotification(payload) ??
         Future.value(false);
   }
 
   Future<Call?> consumeIncomingCall() {
-    return _pushNotificationManager?.consumeIncomingCall().then((data) {
+    return pushNotificationManager?.consumeIncomingCall().then((data) {
           return data?.let((it) => _makeCallFromCreated(data: it));
         }) ??
         Future.value();

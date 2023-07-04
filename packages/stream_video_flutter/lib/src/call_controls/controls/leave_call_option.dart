@@ -27,7 +27,14 @@ class LeaveCallOption extends StatelessWidget {
       icon: Icon(icon),
       iconColor: Colors.white,
       backgroundColor: Colors.red,
-      onPressed: onLeaveCallTap ?? call.disconnect,
+      onPressed: () {
+        if(onLeaveCallTap != null) {
+          onLeaveCallTap!();
+        } else {
+          call.disconnect();
+        }
+        StreamVideo.instance.pushNotificationManager?.endAllCalls();
+      },
     );
   }
 }
