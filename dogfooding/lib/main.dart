@@ -16,7 +16,6 @@ import 'repos/auth_repo.dart';
 import 'repos/user_repository.dart';
 import 'src/routes/app_routes.dart';
 import 'src/routes/routes.dart';
-import 'src/screens/call_screen.dart';
 import 'src/utils/consts.dart';
 import 'src/utils/providers.dart';
 
@@ -121,9 +120,13 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
       final call = StreamVideo.instance.makeCall(type: kCallType, id: callId);
       await call.getOrCreateCall();
 
+      final chatChannel = await widget.appRepository.createChatChannel(
+        channelId: call.callCid.id,
+      );
+
       await _navigatorKey.currentState?.pushNamed(
         Routes.call,
-        arguments: call,
+        arguments: [call, const CallConnectOptions(), chatChannel],
       );
     }
   }
@@ -149,7 +152,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
         channelId: incomingCall.callCid.id,
       );
 
-      await Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
+      await Navigator.of(_navigatorKey.currentContext!).pushNamed(
         Routes.call,
         arguments: [incomingCall, const CallConnectOptions(), chatChannel],
       );
