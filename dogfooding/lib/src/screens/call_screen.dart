@@ -67,7 +67,10 @@ class _CallScreenState extends State<CallScreen> {
                           showChatDialog(context);
                         },
                       ),
-                      ToggleSpeakerphoneOption(call: call),
+                      FlipCameraOption(
+                        call: call,
+                        localParticipant: localParticipant,
+                      ),
                       ToggleMicrophoneOption(
                         call: call,
                         localParticipant: localParticipant,
