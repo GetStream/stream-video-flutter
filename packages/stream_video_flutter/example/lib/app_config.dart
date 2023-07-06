@@ -58,13 +58,4 @@ final sampleUsers = <SampleUser>[
     ),
     Env.sampleUserVideoToken05,
   ),
-  SampleUser(
-    const UserInfo(
-      id: 'deven@getstream.io',
-      name: 'Deven',
-      role: Env.sampleUserRole05,
-      image: Env.sampleUserImage05,
-    ),
-    Env.sampleUserVideoToken05,
-  ),
 ];
