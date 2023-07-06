@@ -120,9 +120,13 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
       final call = StreamVideo.instance.makeCall(type: kCallType, id: callId);
       await call.getOrCreateCall();
 
+      final chatChannel = await widget.appRepository.createChatChannel(
+        channelId: call.callCid.id,
+      );
+
       await _navigatorKey.currentState?.pushNamed(
         Routes.call,
-        arguments: call,
+        arguments: [call, const CallConnectOptions(), chatChannel],
       );
     }
   }
@@ -144,9 +148,13 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     }
     final incomingCall = await StreamVideo.instance.consumeIncomingCall();
     if (incomingCall != null) {
-      await Navigator.of(_navigatorKey.currentContext!).pushReplacementNamed(
+      final chatChannel = await widget.appRepository.createChatChannel(
+        channelId: incomingCall.callCid.id,
+      );
+
+      await Navigator.of(_navigatorKey.currentContext!).pushNamed(
         Routes.call,
-        arguments: incomingCall,
+        arguments: [incomingCall, const CallConnectOptions(), chatChannel],
       );
     }
   }

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import '../stream_video.dart';
-import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'coordinator/retry/coordinator_client_retry.dart';
 import 'errors/video_error_composer.dart';
@@ -12,8 +11,6 @@ import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
 import 'logger/impl/external_logger.dart';
-import 'models/call_ringing_data.dart';
-import 'models/queried_calls.dart';
 import 'retry/retry_policy.dart';
 import 'state_emitter.dart';
 import 'token/token_manager.dart';
@@ -145,8 +142,9 @@ class StreamVideo {
 
   final _tokenManager = TokenManager();
   final _subscriptions = Subscriptions();
+  final _sharedPrefsHelper = SharedPrefsHelper();
   late final CoordinatorClient _client;
-  PushNotificationManager? _pushNotificationManager;
+  PushNotificationManager? pushNotificationManager;
 
   late bool muteVideoWhenInBackground;
   late bool muteAudioWhenInBackground;
@@ -158,7 +156,7 @@ class StreamVideo {
   Future<void> initPushNotificationManager(
     PushNotificationManagerFactory factory,
   ) async {
-    _pushNotificationManager = await factory(_client);
+    pushNotificationManager = await factory(_client);
   }
 
   /// Returns the current user if exists.
@@ -184,6 +182,7 @@ class StreamVideo {
   Future<Result<String>> connectUserWithProvider(
     UserInfo user, {
     required TokenProvider tokenProvider,
+    bool saveUser = true,
   }) async {
     _logger.i(() => '[connectUser] user.id : ${user.id}');
     if (currentUser != null) {
@@ -206,9 +205,12 @@ class StreamVideo {
       if (result is Failure) {
         return result;
       }
+      if (saveUser) {
+        await _sharedPrefsHelper.saveUserCredentials(user);
+      }
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
       _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
-      await _pushNotificationManager?.onUserLoggedIn();
+      await pushNotificationManager?.onUserLoggedIn();
       return tokenResult.map((data) => data.rawValue);
     } catch (e, stk) {
       _logger.e(() => '[connectUser] failed(${user.id}): $e');
@@ -282,6 +284,7 @@ class StreamVideo {
     }
     try {
       await _client.disconnectUser();
+      await _sharedPrefsHelper.deleteSavedUser();
       _subscriptions.cancelAll();
       _tokenManager.reset();
 
@@ -389,12 +392,12 @@ class StreamVideo {
   }
 
   Future<bool> handlePushNotification(Map<String, dynamic> payload) {
-    return _pushNotificationManager?.handlePushNotification(payload) ??
+    return pushNotificationManager?.handlePushNotification(payload) ??
         Future.value(false);
   }
 
   Future<Call?> consumeIncomingCall() {
-    return _pushNotificationManager?.consumeIncomingCall().then((data) {
+    return pushNotificationManager?.consumeIncomingCall().then((data) {
           return data?.let((it) => _makeCallFromCreated(data: it));
         }) ??
         Future.value();
