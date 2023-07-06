@@ -141,20 +141,20 @@ Next, we can call our function using the data supplied by the user when they com
 
 ```dart
 Future<void> _onDialogPressed((String, String) roomInfo) async {
-    final call = await createRoom(
-      roomInfo.$1,
-      roomInfo.$2,
-    );
-
-		// By default, audio rooms are created in a backstage mode.
-    final result = await call.goLive();
-
-    final room = result.getDataOrNull()!;
-    log('Joining Call: ${call.callCid}');
-    Navigator.of(context).push(
-      AudioRoomScreen.routeTo(call, room, user),
-    );
-  }
+  final call = await createRoom(
+    roomInfo.$1,
+    roomInfo.$2,
+  );
+  
+  // By default, audio rooms are created in a backstage mode.
+  final result = await call.goLive();
+  
+  final room = result.getDataOrNull()!;
+  log('Joining Call: ${call.callCid}');
+  Navigator.of(context).push(
+    AudioRoomScreen.routeTo(call, room, user),
+  );
+}
 ```
 
 The code above calls the `createRoom` function we just defined passing it the room title and description as parameters. Unlike default meeting rooms, audio rooms are started in a “backstage” mode by default.
