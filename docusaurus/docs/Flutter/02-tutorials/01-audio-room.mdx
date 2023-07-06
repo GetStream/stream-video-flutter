@@ -93,7 +93,7 @@ Widget build(BuildContext context) {
                   backgroundImage: NetworkImage(user.imageURL),
                 ),
                 onTap: () async {
-									// Connect to StreamVideo using the selected user at login.
+				// Connect to StreamVideo using the selected user at login.
                   await StreamVideo.instance.connectUser(
                     user.toUserInfo(),
                     user.token,
@@ -227,7 +227,7 @@ Widget _buildParticipants() {
           callState = snapshot.data!; // Extract new CallState
           listeners = _sortParticipants(callState.callParticipants);
 
-					// Display listeners as a Grid
+		// Display listeners as a Grid
           return SliverGrid(
             delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) {
