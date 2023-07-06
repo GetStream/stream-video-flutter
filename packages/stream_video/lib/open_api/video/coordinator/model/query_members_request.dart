@@ -124,7 +124,7 @@ class QueryMembersRequest {
 
       return QueryMembersRequest(
         filterConditions: mapCastOfType<String, Object>(json, r'filter_conditions') ?? const {},
-        id: mapValueOfType<String>(json, r'id'),
+        id: mapValueOfType<String>(json, r'id')!,
         limit: mapValueOfType<int>(json, r'limit'),
         next: mapValueOfType<String>(json, r'next'),
         prev: mapValueOfType<String>(json, r'prev'),
