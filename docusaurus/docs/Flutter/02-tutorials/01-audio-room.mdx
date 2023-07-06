@@ -289,7 +289,7 @@ Should the user not have permission, it can be request using `requestPermissions
 final result = await call.requestPermissions([CallPermission.sendAudio]);
 ```
 
-For hosts or moderators, a UI can be added to show permission request or in the case of our simple example, we can grant them automatically be adding the following code snippet to our `initState` method:
+For hosts or moderators, a UI can be added to show permission requests. In the case of our simple example, we can grant them automatically be adding the following code snippet to our `initState` method:
 
 ```dart
 call.onPermissionRequest = (permissionRequest) {
