@@ -284,6 +284,7 @@ class StreamVideo {
     }
     try {
       await _client.disconnectUser();
+      await _sharedPrefsHelper.deleteSavedUser();
       _subscriptions.cancelAll();
       _tokenManager.reset();
 

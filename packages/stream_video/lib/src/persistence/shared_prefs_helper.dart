@@ -38,4 +38,11 @@ class SharedPrefsHelper {
     final userImage = _preferences.getString(keyUserImage) ?? '';
     return UserInfo(id: userId, role: userRole, name: userName, image: userImage);
   }
+
+  Future<void> deleteSavedUser() async {
+    await _preferences.remove(keyUserId);
+    await _preferences.remove(keyUserName);
+    await _preferences.remove(keyUserRole);
+    await _preferences.remove(keyUserImage);
+  }
 }
