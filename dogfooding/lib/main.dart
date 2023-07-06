@@ -202,6 +202,9 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
         colorScheme: ColorScheme.fromSwatch().copyWith(
           primary: const Color(0xff005FFF),
         ),
+        inputDecorationTheme: const InputDecorationTheme(
+          labelStyle: TextStyle(color: Colors.white),
+        ),
       ),
       onGenerateRoute: AppRoutes.generateRoute,
       builder: (BuildContext context, Widget? child) {
