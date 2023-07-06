@@ -192,15 +192,15 @@ With filtering in place, if you hot restart the application, there should be one
 
 ```dart
 Future<void> joinRoom(QueriedCall room) async {
-    final cid = room.call.cid;
-    final call = video.makeCall(type: cid.type, id: cid.id);
+  final cid = room.call.cid;
+  final call = video.makeCall(type: cid.type, id: cid.id);
 
-    await call.connect();
-    log('Joining Call: $cid');
-    Navigator.of(context).push(
-      AudioRoomScreen.routeTo(call, room.call, user),
-    );
-  }
+  await call.connect();
+  log('Joining Call: $cid');
+  Navigator.of(context).push(
+    AudioRoomScreen.routeTo(call, room.call, user),
+  );
+}
 ```
 
 ### Room screen
