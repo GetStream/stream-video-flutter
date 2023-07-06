@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import '../stream_video.dart';
-import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'coordinator/retry/coordinator_client_retry.dart';
 import 'errors/video_error_composer.dart';
@@ -12,8 +11,6 @@ import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
 import 'logger/impl/external_logger.dart';
-import 'models/call_ringing_data.dart';
-import 'models/queried_calls.dart';
 import 'retry/retry_policy.dart';
 import 'state_emitter.dart';
 import 'token/token_manager.dart';
