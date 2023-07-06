@@ -272,14 +272,14 @@ An audio room example would not be complete without the ability to control wheth
 
 ```dart
 void _onMicrophonePressed() {
-    if (enabled.value) {
-      call.setMicrophoneEnabled(enabled: false);
-      enabled.value = false;
-    } else {
-      call.setMicrophoneEnabled(enabled: true);
-      enabled.value = true;
-    }
+  if (enabled.value) {
+    call.setMicrophoneEnabled(enabled: false);
+    enabled.value = false;
+  } else {
+    call.setMicrophoneEnabled(enabled: true);
+    enabled.value = true;
   }
+}
 ```
 
 ### Permissions and speaking requests
