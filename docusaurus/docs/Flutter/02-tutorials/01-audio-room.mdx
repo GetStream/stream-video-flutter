@@ -170,20 +170,20 @@ With our room created, we can query the list of active audio rooms in our applic
 
 ```dart
 Future<List<QueriedCall>> queryCalls() async {
-    final result = await video.queryCalls(
-      filterConditions: {
-        "custom.flutterAudioRoomCall": true, // Filtering based on a custom property!
-      },
-    );
+  final result = await video.queryCalls(
+    filterConditions: {
+      "custom.flutterAudioRoomCall": true, // Filtering based on a custom property!
+    },
+  );
 
-    if (result.isSuccess) {
-      return result.getDataOrNull()?.calls ?? [];
-    } else {
-      final error = result.getErrorOrNull();
-      log('[queryCalls] failed with error $error');
-      throw Exception('No rooms found');
-    }
+  if (result.isSuccess) {
+    return result.getDataOrNull()?.calls ?? [];
+  } else {
+    final error = result.getErrorOrNull();
+    log('[queryCalls] failed with error $error');
+    throw Exception('No rooms found');
   }
+}
 ```
 
 As we talked in about in a previous tutorial, there are many ways in which developers can query calls on the Stream platform. The method we are using in this example is querying calls based on a the custom property `flutterAudioRoomCall: true`. This narrows the number of call to those created from our sample application ensure they contain the right structure and permissions. Of course, you can feel free to experiment with this and by setting custom properties or filtering.
