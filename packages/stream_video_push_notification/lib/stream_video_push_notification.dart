@@ -163,6 +163,23 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   @override
+  Future<void> showCallIncoming({
+    required StreamCallCid cid,
+    required String callers,
+    required void Function(StreamCallCid streamCallCid) onCallAccepted,
+    required void Function(StreamCallCid streamCallCid) onCallRejected,
+    bool isVideoCall = true,
+  }) {
+    return _callNotification.showCallNotification(
+      streamCallCid: cid,
+      callers: callers,
+      isVideoCall: isVideoCall,
+      onCallAccepted: onCallAccepted,
+      onCallRejected: onCallRejected,
+    );
+  }
+
+  @override
   Future<CallCreatedData?> consumeIncomingCall() async {
     var incomingCid = '';
 

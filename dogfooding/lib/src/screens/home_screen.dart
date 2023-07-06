@@ -28,6 +28,12 @@ class _HomeScreenState extends State<HomeScreen> {
   final _callIdController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    streamVideoClient.onIncomingCall = _onNavigateToCall;
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     appRepo = context.appRepo;
@@ -76,6 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _callIdController.dispose();
+    streamVideoClient.onIncomingCall = null;
     super.dispose();
   }
 
@@ -173,6 +180,24 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             // circular progress to show when joining a call
           ],
+        ),
+      ),
+    );
+  }
+
+  void _onNavigateToCall(
+      Call call, {
+        CallConnectOptions options = const CallConnectOptions(),
+      }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StreamUsersConfiguration(
+          usersProvider: MockUsersProvider(),
+          child: StreamCallContainer(
+            call: call,
+            callConnectOptions: options,
+          ),
         ),
       ),
     );

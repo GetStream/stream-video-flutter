@@ -58,6 +58,9 @@ class CallNotificationWrapper {
         supportsUngrouping: false,
         ringtonePath: 'system_ringtone_default',
       ),
+      extra: {
+        'incomingCallCid': streamCallCid.value,
+      },
     );
     await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
     _streamSubscription = FlutterCallkitIncoming.onEvent.listen((event) {
