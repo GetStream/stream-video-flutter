@@ -265,7 +265,7 @@ Widget _buildParticipants() {
   }
 ```
 
-In the above method, we are listening for changes to the call such as if a participants begins speaking, join or leaves the call, etc and updating the `SliverGrid`. Even though we are using the default `StreamCallParticipant` to perform the heavy lifting of rendering our call participant and speaking indicators, developer are free to use their own custom UI here as the `CallParticipantState` object exposes many properties to the user.
+In the above method, we are listening for changes to the call such as if a participant begins speaking, joins or leaves the call, etc., and updating the `SliverGrid`. Even though we are using the default `StreamCallParticipant` to perform the heavy lifting of rendering our call participant and speaking indicators, developer are free to use their own custom UI here as the `CallParticipantState` object exposes many properties to the user.
 
 ### Controlling the microphone
 An audio room example would not be complete without the ability to control whether the user is speaking or not. For this, the `setMicrophoneEnabled` method can be invoked on the `Call` object. If the user has speaking permissions, their audio tracks will be published and they will be allowed to speak during the call.
