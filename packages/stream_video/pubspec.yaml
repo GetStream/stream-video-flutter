@@ -26,6 +26,7 @@ dependencies:
   sdp_transform: ^0.3.2
   synchronized: ^3.0.0+3
   state_notifier: ^0.7.2+1
+  shared_preferences: ^2.2.0
 
 dev_dependencies:
   flutter_test:

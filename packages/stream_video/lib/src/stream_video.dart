@@ -145,6 +145,7 @@ class StreamVideo {
 
   final _tokenManager = TokenManager();
   final _subscriptions = Subscriptions();
+  final _sharedPrefsHelper = SharedPrefsHelper();
   late final CoordinatorClient _client;
   PushNotificationManager? pushNotificationManager;
 
@@ -184,6 +185,7 @@ class StreamVideo {
   Future<Result<String>> connectUserWithProvider(
     UserInfo user, {
     required TokenProvider tokenProvider,
+    bool saveUser = true,
   }) async {
     _logger.i(() => '[connectUser] user.id : ${user.id}');
     if (currentUser != null) {
@@ -205,6 +207,9 @@ class StreamVideo {
       _logger.v(() => '[connectUser] completed: $result');
       if (result is Failure) {
         return result;
+      }
+      if (saveUser) {
+        await _sharedPrefsHelper.saveUserCredentials(user);
       }
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
       _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));

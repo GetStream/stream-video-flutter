@@ -14,6 +14,7 @@ export 'src/logger/impl/tagged_logger.dart';
 export 'src/logger/stream_log.dart';
 export 'src/logger/stream_logger.dart';
 export 'src/models/models.dart';
+export 'src/persistence/shared_prefs_helper.dart';
 export 'src/platform_detector/platform_detector.dart';
 export 'src/push_notification/push_notification_manager.dart';
 export 'src/sfu/data/models/sfu_connection_quality.dart';

@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  shared_preferences: ^2.0.17
+  shared_preferences: ^2.2.0
   firebase_messaging: ^14.5.0
   stream_video:
     path: ../stream_video

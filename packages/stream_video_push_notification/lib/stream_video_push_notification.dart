@@ -137,9 +137,29 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   Future<CallCreatedData?> _from(StreamCallCid streamCallCid) async {
-    return (await _client.getOrCreateCall(callCid: streamCallCid))
+    SharedPrefsHelper prefs = SharedPrefsHelper(init: false);
+    await prefs.initPrefs();
+    var user = prefs.getSavedUser();
+
+    await StreamVideo.instance.connectUserWithProvider(
+      user,
+      tokenProvider: TokenProvider.dynamic(
+        (userId) {
+          return TokenService()
+              .loadToken(apiKey: StreamVideo.instance.apiKey, userId: userId);
+        },
+      ),
+      saveUser: false,
+    );
+    var callData = (await _client.getOrCreateCall(callCid: streamCallCid))
         .getDataOrNull()
         ?.data;
+
+    // TODO(Deven): Explore why this does not work
+    // await StreamVideo.instance.disconnectUser();
+    // await StreamVideo.reset(disconnectUser: true);
+
+    return callData;
   }
 
   @override
