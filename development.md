@@ -1,7 +1,6 @@
 ### Remaining 0.1 items
 - [ ] Push notifications
-- [ ] State refactor
-- [ ] UI Component documentation 
+- [x] UI Component documentation 
 - [ ] Chat integration guide  
 
 ### 0.2 milestone

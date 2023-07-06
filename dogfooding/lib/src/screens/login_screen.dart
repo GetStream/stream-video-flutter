@@ -159,15 +159,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TextButton(
-                    child: Text(
+                    onPressed: _loginAsGuest,
+                    child: const Text(
                       'Continue As Guest',
                       style: TextStyle(
-                        fontSize: 16.0,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         decoration: TextDecoration.underline,
                       ),
                     ),
-                    onPressed: _loginAsGuest,
                   ),
                 ),
               ],

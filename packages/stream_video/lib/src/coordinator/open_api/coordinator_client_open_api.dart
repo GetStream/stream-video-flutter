@@ -109,7 +109,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     try {
       final ws = _ws;
       if (ws == null) {
-        _logger.w(() => '[openConnection] rejected (no WS)');
+        _logger.w(() => '[closeConnection] rejected (no WS)');
         return Result.error('WS is not initialized');
       }
       if (ws.isDisconnected) {

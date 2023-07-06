@@ -35,20 +35,31 @@ import Firebase
         for type: PKPushType,
         completion: @escaping () -> Void
     ) {
-        let aps = payload.dictionaryPayload["aps"] as? [String: Any]
-        let alert = aps?["alert"] as? [String: Any]
-        let callCid = alert?["call_cid"] as? String
+        let state = UIApplication.shared.applicationState
+        if state == .active {
+            completion()
+            return
+        }
 
-        let id = payload.dictionaryPayload["id"] as? String ?? ""
-        let nameCaller = payload.dictionaryPayload["nameCaller"] as? String ?? ""
-        let handle = payload.dictionaryPayload["handle"] as? String ?? ""
+        let aps = payload.dictionaryPayload["aps"] as? [String: Any]
+        let streamDict = payload.dictionaryPayload["stream"] as? [String: Any]
+        let createdCallerName = streamDict?["created_by_display_name"] as? String ?? ""
+        let callCid = streamDict?["call_cid"] as? String ?? ""
+
+        let id = UUID().uuidString
         let isVideo = payload.dictionaryPayload["isVideo"] as? Bool ?? false
 
-        let data = flutter_callkit_incoming.Data(id: id, nameCaller: nameCaller, handle: handle, type: isVideo ? 1 : 0)
-        //set more data
-        data.extra = ["user": "abc@123", "platform": "ios"]
-        //data.iconName = ...
-        //data.....
+        if((SwiftFlutterCallkitIncomingPlugin.sharedInstance?.activeCalls().count ?? 0) >= 1){
+            return;
+        }
+
+        let data = flutter_callkit_incoming.Data(id: id, nameCaller: callCid, handle: createdCallerName, type: isVideo ? 1 : 0)
+        data.extra = ["incomingCallCid": callCid, "platform": "ios"]
+        
         SwiftFlutterCallkitIncomingPlugin.sharedInstance?.showCallkitIncoming(data, fromPushKit: true)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            completion()
+        }
     }
 }

@@ -9,6 +9,7 @@ import 'package:stream_video_push_notification/stream_video_push_notification.da
 import '../env/env.dart';
 import '../log_config.dart';
 import '../src/utils/consts.dart';
+import 'user_repository.dart';
 
 class AppRepository {
   AppRepository();
@@ -93,5 +94,6 @@ class AppRepository {
   Future<void> endSession() async {
     await _streamVideoClient.disconnectUser();
     await _streamChatClient.disconnectUser();
+    await UserRepository.instance.clear();
   }
 }

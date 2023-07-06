@@ -5,8 +5,8 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:stream_video/open_api/video/coordinator/api.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'src/call_notification_wrapper.dart';
@@ -69,19 +69,19 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     _logger.d(() => '[registerIOSDevice] token: $token');
     if (token != null) {
       await _client.createDevice(
-          id: token,
-          voipToken: true,
-          pushProvider: CreateDeviceRequestPushProviderEnum.apn,
-          pushProviderName: 'voip',
+        id: token,
+        voipToken: true,
+        pushProvider: CreateDeviceRequestPushProviderEnum.apn,
+        pushProviderName: 'flutter-apn-video',
       );
     }
   }
 
   Future<void> _registerFirebaseToken(String token) async {
     await _client.createDevice(
-        id: token,
-        pushProvider: CreateDeviceRequestPushProviderEnum.firebase,
-        pushProviderName: 'firebase',
+      id: token,
+      pushProvider: CreateDeviceRequestPushProviderEnum.firebase,
+      pushProviderName: 'firebase',
     );
   }
 
@@ -128,7 +128,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   bool _isValidIncomingCall(Map<String, dynamic> payload) {
-    return payload['type'] == 'call.incoming' &&
+    return payload['type'] == 'call.ring' &&
         ((payload['call_cid'] as String?)?.isNotEmpty ?? false);
   }
 
@@ -137,19 +137,75 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   Future<CallCreatedData?> _from(StreamCallCid streamCallCid) async {
-    return (await _client.getOrCreateCall(callCid: streamCallCid)).getDataOrNull()?.data;
+    SharedPrefsHelper prefs = SharedPrefsHelper(init: false);
+    await prefs.initPrefs();
+    var user = prefs.getSavedUser();
+
+    await StreamVideo.instance.connectUserWithProvider(
+      user,
+      tokenProvider: TokenProvider.dynamic(
+        (userId) {
+          return TokenService()
+              .loadToken(apiKey: StreamVideo.instance.apiKey, userId: userId);
+        },
+      ),
+      saveUser: false,
+    );
+    var callData = (await _client.getOrCreateCall(callCid: streamCallCid))
+        .getDataOrNull()
+        ?.data;
+
+    // TODO(Deven): Explore why this does not work
+    // await StreamVideo.instance.disconnectUser();
+    // await StreamVideo.reset(disconnectUser: true);
+
+    return callData;
+  }
+
+  @override
+  Future<void> showCallIncoming({
+    required StreamCallCid cid,
+    required String callers,
+    required void Function(StreamCallCid streamCallCid) onCallAccepted,
+    required void Function(StreamCallCid streamCallCid) onCallRejected,
+    bool isVideoCall = true,
+  }) {
+    return _callNotification.showCallNotification(
+      streamCallCid: cid,
+      callers: callers,
+      isVideoCall: isVideoCall,
+      onCallAccepted: onCallAccepted,
+      onCallRejected: onCallRejected,
+    );
   }
 
   @override
   Future<CallCreatedData?> consumeIncomingCall() async {
-    // We need to wait for a second to be sure sharedPreferences has been updated
-    await _sharedPreferences.reload();
-    final incomingCallCid = _sharedPreferences.getString('incomingCallCid');
-    await _sharedPreferences.remove('incomingCallCid');
-    if (incomingCallCid != null) {
-      return _from(StreamCallCid(cid: incomingCallCid));
+    var incomingCid = '';
+
+    var calls = await FlutterCallkitIncoming.activeCalls();
+
+    if (Platform.isIOS) {
+      if (calls is List && calls.isNotEmpty) {
+        incomingCid = calls[0]['extra']['incomingCallCid'];
+      }
+    } else if (Platform.isAndroid) {
+      // TODO(Deven): Use the same approach from iOS for incoming Android calls
+      // We need to wait for a second to be sure sharedPreferences has been updated
+      await _sharedPreferences.reload();
+      incomingCid = _sharedPreferences.getString('incomingCallCid') ?? '';
+      await _sharedPreferences.remove('incomingCallCid');
+    }
+
+    if (incomingCid != '') {
+      return _from(StreamCallCid(cid: incomingCid));
     }
     return Future.value();
+  }
+
+  @override
+  Future<void> endAllCalls() async {
+    await FlutterCallkitIncoming.endAllCalls();
   }
 
   static PushNotificationManagerFactory factory({
