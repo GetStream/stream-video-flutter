@@ -206,7 +206,7 @@ Future<void> joinRoom(QueriedCall room) async {
 ### Room screen
 Opening `lib/screens/audio_room_screen.dart`, we can tour the implementation of displaying participants.
 
-Every call object has an associate `CallState` which can be observed as a `stream` for changes which can then in turn be used to update the UI of our application. The most common way to interact with the call state in our UI layer would be to observe the `state` using a `StreamBuilder` and handle the new data as it comes in.
+Every call object has an associated `CallState` which can be observed as a `stream` for changes. These changes can then be used to update the UI of our application. The most common way to interact with the call state in our UI layer would be to observe the `state` using a `StreamBuilder` and handle the new data as it comes in.
 
 To see this in use, let’s take a look at the `_buildParticipants` method:
 
