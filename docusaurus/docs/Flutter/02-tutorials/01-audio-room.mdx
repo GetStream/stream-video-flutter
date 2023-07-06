@@ -121,20 +121,20 @@ To begin let’s look at the `createRoom` method. We can call `makeCall` on the 
 
 ```dart
 final room = video.makeCall(
-      type: "audio_room",
-      id: const Uuid().v4(),
-    );
+  type: "audio_room",
+  id: const Uuid().v4(),
+);
 
-    await room.getOrCreateCall();
-    await room.update(
-      custom: {
-        'name': title,
-        'description': description,
-        "flutterAudioRoomCall": true,
-      },
-    );
+await room.getOrCreateCall();
+await room.update(
+  custom: {
+    'name': title,
+    'description': description,
+    'flutterAudioRoomCall': true,
+  },
+);
 
-    return room;
+return room;
 ```
 
 Next, we can call our function using the data supplied by the user when the complete the “create room” dialog:
