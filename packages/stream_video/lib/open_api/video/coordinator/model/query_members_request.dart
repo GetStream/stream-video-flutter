@@ -14,7 +14,7 @@ class QueryMembersRequest {
   /// Returns a new [QueryMembersRequest] instance.
   QueryMembersRequest({
     this.filterConditions = const {},
-    this.id,
+    required this.id,
     this.limit,
     this.next,
     this.prev,
@@ -24,13 +24,7 @@ class QueryMembersRequest {
 
   Map<String, Object> filterConditions;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? id;
+  String id;
 
   /// Minimum value: 0
   /// Maximum value: 25
@@ -76,7 +70,7 @@ class QueryMembersRequest {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (filterConditions.hashCode) +
-    (id == null ? 0 : id!.hashCode) +
+    (id.hashCode) +
     (limit == null ? 0 : limit!.hashCode) +
     (next == null ? 0 : next!.hashCode) +
     (prev == null ? 0 : prev!.hashCode) +
@@ -89,11 +83,7 @@ class QueryMembersRequest {
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'filter_conditions'] = this.filterConditions;
-    if (this.id != null) {
       json[r'id'] = this.id;
-    } else {
-      json[r'id'] = null;
-    }
     if (this.limit != null) {
       json[r'limit'] = this.limit;
     } else {
@@ -189,6 +179,7 @@ class QueryMembersRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'id',
     'type',
   };
 }

@@ -24,8 +24,10 @@ class VideoEvent {
     this.capabilitiesByRole = const {},
     required this.sessionId,
     required this.reaction,
+    required this.userSessionId,
     required this.connectionId,
     required this.me,
+    required this.error,
     this.custom = const {},
     this.permissions = const [],
     this.ownCapabilities = const [],
@@ -63,10 +65,15 @@ class VideoEvent {
 
   ReactionResponse reaction;
 
+  /// The user session ID of the user that left the call session
+  String userSessionId;
+
   /// The connection_id for this client
   String connectionId;
 
   OwnUserResponse me;
+
+  APIError? error;
 
   /// Custom data for this object
   Map<String, Object> custom;
@@ -90,8 +97,10 @@ class VideoEvent {
      other.capabilitiesByRole == capabilitiesByRole &&
      other.sessionId == sessionId &&
      other.reaction == reaction &&
+     other.userSessionId == userSessionId &&
      other.connectionId == connectionId &&
      other.me == me &&
+     other.error == error &&
      other.custom == custom &&
      other.permissions == permissions &&
      other.ownCapabilities == ownCapabilities;
@@ -110,14 +119,16 @@ class VideoEvent {
     (capabilitiesByRole.hashCode) +
     (sessionId.hashCode) +
     (reaction.hashCode) +
+    (userSessionId.hashCode) +
     (connectionId.hashCode) +
     (me.hashCode) +
+    (error == null ? 0 : error!.hashCode) +
     (custom.hashCode) +
     (permissions.hashCode) +
     (ownCapabilities.hashCode);
 
   @override
-  String toString() => 'VideoEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, call=$call, hlsPlaylistUrl=$hlsPlaylistUrl, members=$members, capabilitiesByRole=$capabilitiesByRole, sessionId=$sessionId, reaction=$reaction, connectionId=$connectionId, me=$me, custom=$custom, permissions=$permissions, ownCapabilities=$ownCapabilities]';
+  String toString() => 'VideoEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, call=$call, hlsPlaylistUrl=$hlsPlaylistUrl, members=$members, capabilitiesByRole=$capabilitiesByRole, sessionId=$sessionId, reaction=$reaction, userSessionId=$userSessionId, connectionId=$connectionId, me=$me, error=$error, custom=$custom, permissions=$permissions, ownCapabilities=$ownCapabilities]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -136,8 +147,14 @@ class VideoEvent {
       json[r'capabilities_by_role'] = this.capabilitiesByRole;
       json[r'session_id'] = this.sessionId;
       json[r'reaction'] = this.reaction;
+      json[r'user_session_id'] = this.userSessionId;
       json[r'connection_id'] = this.connectionId;
       json[r'me'] = this.me;
+    if (this.error != null) {
+      json[r'error'] = this.error;
+    } else {
+      json[r'error'] = null;
+    }
       json[r'custom'] = this.custom;
       json[r'permissions'] = this.permissions;
       json[r'own_capabilities'] = this.ownCapabilities;
@@ -176,8 +193,10 @@ class VideoEvent {
             : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
         sessionId: mapValueOfType<String>(json, r'session_id')!,
         reaction: ReactionResponse.fromJson(json[r'reaction'])!,
+        userSessionId: mapValueOfType<String>(json, r'user_session_id')!,
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
         me: OwnUserResponse.fromJson(json[r'me'])!,
+        error: APIError.fromJson(json[r'error']),
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         permissions: json[r'permissions'] is List
             ? (json[r'permissions'] as List).cast<String>()
@@ -242,8 +261,10 @@ class VideoEvent {
     'capabilities_by_role',
     'session_id',
     'reaction',
+    'user_session_id',
     'connection_id',
     'me',
+    'error',
     'custom',
     'permissions',
     'own_capabilities',

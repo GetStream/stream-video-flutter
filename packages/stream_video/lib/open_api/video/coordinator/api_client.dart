@@ -271,6 +271,8 @@ class ApiClient {
           return ConnectUserDetailsRequest.fromJson(value);
         case 'ConnectedEvent':
           return ConnectedEvent.fromJson(value);
+        case 'ConnectionErrorEvent':
+          return ConnectionErrorEvent.fromJson(value);
         case 'CreateCallTypeRequest':
           return CreateCallTypeRequest.fromJson(value);
         case 'CreateCallTypeResponse':
