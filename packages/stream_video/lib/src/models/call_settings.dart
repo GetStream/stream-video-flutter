@@ -76,10 +76,12 @@ class StreamAudioSettings extends MediaSettings {
     super.accessRequestEnabled = false,
     this.opusDtxEnabled = false,
     this.redundantCodingEnabled = false,
+    this.defaultDevice = AudioSettingsRequestDefaultDeviceEnum.speaker,
   });
 
   final bool opusDtxEnabled;
   final bool redundantCodingEnabled;
+  final AudioSettingsRequestDefaultDeviceEnum defaultDevice;
 
   @override
   List<Object?> get props => [
@@ -90,6 +92,7 @@ class StreamAudioSettings extends MediaSettings {
 
   AudioSettingsRequest toOpenDto() {
     return AudioSettingsRequest(
+      defaultDevice: defaultDevice,
       accessRequestEnabled: accessRequestEnabled,
       opusDtxEnabled: opusDtxEnabled,
       redundantCodingEnabled: redundantCodingEnabled,

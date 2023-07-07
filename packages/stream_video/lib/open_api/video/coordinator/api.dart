@@ -75,6 +75,7 @@ part 'model/call_type_response.dart';
 part 'model/call_updated_event.dart';
 part 'model/connect_user_details_request.dart';
 part 'model/connected_event.dart';
+part 'model/connection_error_event.dart';
 part 'model/create_call_type_request.dart';
 part 'model/create_call_type_response.dart';
 part 'model/create_device_request.dart';

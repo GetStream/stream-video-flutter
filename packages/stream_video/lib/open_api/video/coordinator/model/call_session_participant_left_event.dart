@@ -18,6 +18,7 @@ class CallSessionParticipantLeftEvent {
     required this.sessionId,
     this.type = 'call.session_participant_left',
     required this.user,
+    required this.userSessionId,
   });
 
   String callCid;
@@ -32,13 +33,17 @@ class CallSessionParticipantLeftEvent {
 
   UserResponse user;
 
+  /// The user session ID of the user that left the call session
+  String userSessionId;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallSessionParticipantLeftEvent &&
      other.callCid == callCid &&
      other.createdAt == createdAt &&
      other.sessionId == sessionId &&
      other.type == type &&
-     other.user == user;
+     other.user == user &&
+     other.userSessionId == userSessionId;
 
   @override
   int get hashCode =>
@@ -47,10 +52,11 @@ class CallSessionParticipantLeftEvent {
     (createdAt.hashCode) +
     (sessionId.hashCode) +
     (type.hashCode) +
-    (user.hashCode);
+    (user.hashCode) +
+    (userSessionId.hashCode);
 
   @override
-  String toString() => 'CallSessionParticipantLeftEvent[callCid=$callCid, createdAt=$createdAt, sessionId=$sessionId, type=$type, user=$user]';
+  String toString() => 'CallSessionParticipantLeftEvent[callCid=$callCid, createdAt=$createdAt, sessionId=$sessionId, type=$type, user=$user, userSessionId=$userSessionId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -59,6 +65,7 @@ class CallSessionParticipantLeftEvent {
       json[r'session_id'] = this.sessionId;
       json[r'type'] = this.type;
       json[r'user'] = this.user;
+      json[r'user_session_id'] = this.userSessionId;
     return json;
   }
 
@@ -86,6 +93,7 @@ class CallSessionParticipantLeftEvent {
         sessionId: mapValueOfType<String>(json, r'session_id')!,
         type: mapValueOfType<String>(json, r'type')!,
         user: UserResponse.fromJson(json[r'user'])!,
+        userSessionId: mapValueOfType<String>(json, r'user_session_id')!,
       );
     }
     return null;
@@ -140,6 +148,7 @@ class CallSessionParticipantLeftEvent {
     'session_id',
     'type',
     'user',
+    'user_session_id',
   };
 }
 

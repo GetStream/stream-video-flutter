@@ -14,31 +14,43 @@ class CallParticipantResponse {
   /// Returns a new [CallParticipantResponse] instance.
   CallParticipantResponse({
     required this.joinedAt,
+    required this.role,
     required this.user,
+    required this.userSessionId,
   });
 
   DateTime joinedAt;
 
+  String role;
+
   UserResponse user;
+
+  String userSessionId;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallParticipantResponse &&
      other.joinedAt == joinedAt &&
-     other.user == user;
+     other.role == role &&
+     other.user == user &&
+     other.userSessionId == userSessionId;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (joinedAt.hashCode) +
-    (user.hashCode);
+    (role.hashCode) +
+    (user.hashCode) +
+    (userSessionId.hashCode);
 
   @override
-  String toString() => 'CallParticipantResponse[joinedAt=$joinedAt, user=$user]';
+  String toString() => 'CallParticipantResponse[joinedAt=$joinedAt, role=$role, user=$user, userSessionId=$userSessionId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'joined_at'] = this.joinedAt.toUtc().toIso8601String();
+      json[r'role'] = this.role;
       json[r'user'] = this.user;
+      json[r'user_session_id'] = this.userSessionId;
     return json;
   }
 
@@ -62,7 +74,9 @@ class CallParticipantResponse {
 
       return CallParticipantResponse(
         joinedAt: mapDateTime(json, r'joined_at', '')!,
+        role: mapValueOfType<String>(json, r'role')!,
         user: UserResponse.fromJson(json[r'user'])!,
+        userSessionId: mapValueOfType<String>(json, r'user_session_id')!,
       );
     }
     return null;
@@ -113,7 +127,9 @@ class CallParticipantResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'joined_at',
+    'role',
     'user',
+    'user_session_id',
   };
 }
 
