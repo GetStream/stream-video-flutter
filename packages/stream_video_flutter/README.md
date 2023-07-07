@@ -1,7 +1,7 @@
 # Stream Video Flutter
 Official Flutter package for the [Stream Video SDK](https://getstream.io/video/sdk/flutter/)
 
-<img src=".readme-assets/Github-Graphic-Flutter.jpg" alt="Stream Video for Flutter Header image" style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 1rem" />
+<img src="../../.readme-assets/Github-Graphic-Flutter.jpg" alt="Stream Video for Flutter Header image" style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 1rem" />
 
 ## Quick Links
 
