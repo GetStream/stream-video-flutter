@@ -225,7 +225,7 @@ class _StreamCallParticipantsInfoMenuState
               ),
               onInviteButtonPress: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(
+                  MaterialPageRoute<void>(
                     builder: (context) => StreamInviteUserListView(
                       controller: _controller,
                       inviteDividerColor: inviteDividerColor,

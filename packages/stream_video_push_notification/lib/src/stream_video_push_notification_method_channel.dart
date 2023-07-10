@@ -10,7 +10,6 @@ class StreamVideoPushNotificationMethodChannel {
   final MethodChannel _methodChannel;
 
   /// Obtain the Device Push Token VoIp.
-  @override
   Future<String?> getDevicePushTokenVoIP() async {
     return await _methodChannel.invokeMethod<String>('getDevicePushTokenVoIP');
   }

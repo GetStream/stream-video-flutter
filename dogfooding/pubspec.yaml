@@ -4,7 +4,8 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.18.0 <3.0.0'
+  sdk: '>=2.18.0 <4.0.0'
+  flutter: '>=3.3.0'
 
 dependencies:
   crypto: 3.0.2
@@ -23,16 +24,10 @@ dependencies:
   path_provider: ^2.0.14
   share_plus: ^7.0.2
   shared_preferences: ^2.0.17
-  stream_chat_flutter:
-    git:
-      url: https://github.com/GetStream/stream-chat-flutter
-      path: packages/stream_chat_flutter
-  stream_video:
-    path: ../packages/stream_video
-  stream_video_flutter:
-    path: ../packages/stream_video_flutter
-  stream_video_push_notification:
-    path: ../packages/stream_video_push_notification
+  stream_chat_flutter: ^6.5.0
+  stream_video: ^0.0.1
+  stream_video_flutter: ^0.0.1
+  stream_video_push_notification: ^0.0.1
   uni_links: ^0.5.1
 
 dev_dependencies:
