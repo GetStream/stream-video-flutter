@@ -1,7 +1,7 @@
 # Stream Video Flutter
 Official LLC (Low-level client) package for the [Stream Video SDK](https://getstream.io/video/sdk/flutter/). This package contains mostly low-level interfaces and methods for interacting with Stream Video and device APIs. We recommend you use the `stream_video_flutter` package for UI components associated with Stream Video.
 
-<img src="../../.readme-assets/Github-Graphic-Flutter.jpg" alt="Stream Video for Flutter Header image" style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 1rem" />
+<img src="https://raw.githubusercontent.com/GetStream/stream-video-flutter/main/.readme-assets/Github-Graphic-Flutter.jpg" alt="Stream Video for Flutter Header image" style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 1rem" />
 
 ## Quick Links
 
