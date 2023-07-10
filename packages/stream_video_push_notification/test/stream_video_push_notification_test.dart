@@ -1,10 +1,10 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/src/utils/none.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_push_notification/src/stream_video_push_notification_event_channel.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
-import 'package:test/test.dart';
 
 import 'mocks.dart';
 
@@ -103,7 +103,8 @@ Future<void> main() async {
     final result = await sut.handlePushNotification(data);
 
     expect(result, true);
-    verify(() => client.getOrCreateCall(callCid: streamCallCid,
+    verify(() => client.getOrCreateCall(
+          callCid: streamCallCid,
         )).called(1);
     verify(() => callNotificationWrapper.showCallNotification(
           streamCallCid:
@@ -145,7 +146,8 @@ Future<void> main() async {
 
     verify(() => sharedPreferences.setString('incomingCallCid', 'call:123'))
         .called(1);
-    verify(() => client.getOrCreateCall(callCid: streamCallCid,
+    verify(() => client.getOrCreateCall(
+          callCid: streamCallCid,
         )).called(1);
     verify(() => client.acceptCall(cid: streamCallCid)).called(1);
   });
@@ -177,7 +179,8 @@ Future<void> main() async {
     await sut.handlePushNotification(data);
 
     verify(() => client.rejectCall(cid: streamCallCid)).called(1);
-    verify(() => client.getOrCreateCall(callCid: streamCallCid,
+    verify(() => client.getOrCreateCall(
+          callCid: streamCallCid,
         )).called(1);
   });
 
@@ -188,7 +191,8 @@ Future<void> main() async {
 
     expect(result, callCreatedData);
     verify(
-      () => client.getOrCreateCall(callCid: streamCallCid,
+      () => client.getOrCreateCall(
+        callCid: streamCallCid,
       ),
     ).called(1);
   });
