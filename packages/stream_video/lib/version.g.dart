@@ -1,3 +1,3 @@
 // This file is generated. Do not manually edit.
 /// Current package version.
-String streamVideoVersion = '1.0.0';
+const String streamVideoVersion = '0.0.1+1';
