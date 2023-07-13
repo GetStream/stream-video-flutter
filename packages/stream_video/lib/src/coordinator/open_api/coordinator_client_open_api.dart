@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:uuid/uuid.dart';
+
 import '../../../../open_api/video/coordinator/api.dart' as open;
+import '../../../composed_version.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../latency/latency_service.dart';
@@ -42,10 +45,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required this.latencyService,
     required this.retryPolicy,
   }) : _apiClient = open.ApiClient(
-          basePath: rpcUrl,
-          authentication:
-              _Authentication(apiKey: apiKey, tokenManager: tokenManager),
-        );
+    basePath: rpcUrl,
+    authentication:
+    _Authentication(apiKey: apiKey, tokenManager: tokenManager),
+  );
 
   final _logger = taggedLogger(tag: 'SV:CoordClient');
   final String apiKey;
@@ -241,8 +244,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(
-        () =>
-            '[getOrCreateCall] cid: $callCid, ringing: $ringing, members: $members',
+            () =>
+        '[getOrCreateCall] cid: $callCid, ringing: $ringing, members: $members',
       );
       final result = await defaultApi.getOrCreateCall(
         callCid.type,
@@ -286,8 +289,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(
-        () =>
-            '[joinCall] cid: $callCid, dataCenterId: $datacenterId, ringing: $ringing, create: $create',
+            () =>
+        '[joinCall] cid: $callCid, dataCenterId: $datacenterId, ringing: $ringing, create: $create',
       );
       final location = await locationService.getLocation();
       _logger.v(() => '[joinCall] location: $location');
@@ -330,8 +333,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(
-        () =>
-            '[sendCustomEvent] cid: $callCid, eventType: $eventType, custom: $custom',
+            () =>
+        '[sendCustomEvent] cid: $callCid, eventType: $eventType, custom: $custom',
       );
       final result = await defaultApi.sendEvent(
         callCid.type,
@@ -439,10 +442,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   @override
-  Future<Result<List<open.CallRecording>>> listRecordings(
-    StreamCallCid callCid,
-    String sessionId,
-  ) async {
+  Future<Result<List<open.CallRecording>>> listRecordings(StreamCallCid callCid,
+      String sessionId,) async {
     try {
       final result = await defaultApi.listRecordingsTypeIdSession1(
         callCid.type,
@@ -795,10 +796,8 @@ class _Authentication extends open.Authentication {
   final TokenManager tokenManager;
 
   @override
-  Future<void> applyToParams(
-    List<open.QueryParam> queryParams,
-    Map<String, String> headerParams,
-  ) async {
+  Future<void> applyToParams(List<open.QueryParam> queryParams,
+      Map<String, String> headerParams,) async {
     final tokenResult = await tokenManager.getToken();
     if (tokenResult is! Success<UserToken>) {
       throw (tokenResult as Failure).error;
@@ -806,6 +805,11 @@ class _Authentication extends open.Authentication {
     queryParams.add(open.QueryParam('api_key', apiKey));
     headerParams['Authorization'] = tokenResult.getDataOrNull()!.rawValue;
     headerParams['stream-auth-type'] =
-        tokenResult.getDataOrNull()!.authType.name;
+        tokenResult
+            .getDataOrNull()!
+            .authType
+            .name;
+    headerParams['X-Stream-Client'] = streamClientVersion;
+    headerParams['x-client-request-id'] = const Uuid().v4();
   }
 }
