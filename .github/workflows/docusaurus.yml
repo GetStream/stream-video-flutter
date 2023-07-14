@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'docusaurus/**'
-      - '.github/workflows/docusaurus-react-deploy.yml'
+      - '.github/workflows/docusaurus.yml'
 
 jobs:
   push_docusaurus:
