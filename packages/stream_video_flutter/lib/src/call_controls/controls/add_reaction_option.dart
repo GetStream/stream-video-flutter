@@ -39,7 +39,7 @@ class _AddReactionOptionState extends State<AddReactionOption> {
   }
 
   void _toggleOverlay() {
-    var theme = StreamVideoTheme.of(context);
+    final theme = StreamVideoTheme.of(context);
     final overlayState = Overlay.of(context);
 
     if (overlayEntry != null) {

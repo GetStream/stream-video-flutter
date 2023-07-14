@@ -307,6 +307,8 @@ class Call {
       return _stateManager.coordinatorCallBroadcastingStarted(event);
     } else if (event is CoordinatorCallBroadcastingStoppedEvent) {
       return _stateManager.coordinatorCallBroadcastingStopped(event);
+    } else if (event is CoordinatorCallReactionEvent) {
+      return _stateManager.coordinatorCallReaction(event);
     }
   }
 
