@@ -1,4 +1,4 @@
-name: Publish Docusaurus docs
+name: Docusaurus
 
 on:
   push:
@@ -8,17 +8,18 @@ on:
 
 jobs:
   push_docusaurus:
-    name: Publish docusaurus docs
+    name: Publish docs
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v3.1.0
 
-      - name: Node Setup
-        uses: actions/setup-node@v3
+      - name: Setup Node 18
+        uses: actions/setup-node@v3.1.0
         with:
-          node-version: '18'
+          node-version: 18
 
-      - name: Push Flutter documentation
+      - name: Push docs
         uses: GetStream/push-stream-chat-docusaurus-action@main
         with:
           target-branch: ${{ github.ref == 'refs/heads/main' && 'main' || 'staging' }}
