@@ -1,4 +1,5 @@
 viewport
+Viewport
 [Tt]ooltip
 SDKs
 100ms
@@ -9,6 +10,7 @@ timeframe
 APNs
 Telehealth
 Flutter
+Podfile
 protobuf
 protos
 proto
@@ -21,3 +23,6 @@ keystores
 Xcode
 melos
 env
+UIs
+const
+Geofencing
