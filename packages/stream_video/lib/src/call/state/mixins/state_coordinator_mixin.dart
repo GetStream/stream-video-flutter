@@ -258,6 +258,46 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       callParticipants: newParticipants,
     );
   }
+
+  void resetCallReaction(
+    String userId,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () => '[resetCallReaction] rejected (status is not Active)',
+      );
+      return;
+    }
+
+    final newParticipants = state.callParticipants.map((e) {
+      if (userId == e.userId) {
+        return CallParticipantState(
+          userId: e.userId,
+          role: e.role,
+          name: e.name,
+          sessionId: e.sessionId,
+          trackIdPrefix: e.trackIdPrefix,
+          image: e.image,
+          publishedTracks: e.publishedTracks,
+          isLocal: e.isLocal,
+          connectionQuality: e.connectionQuality,
+          isOnline: e.isOnline,
+          audioLevel: e.audioLevel,
+          isSpeaking: e.isSpeaking,
+          isDominantSpeaker: e.isDominantSpeaker,
+          isPinned: e.isPinned,
+          viewportVisibility: e.viewportVisibility,
+        );
+      } else {
+        return e;
+      }
+    }).toList();
+
+    state = state.copyWith(
+      callParticipants: newParticipants,
+    );
+  }
 }
 
 extension on List<CallParticipantState> {

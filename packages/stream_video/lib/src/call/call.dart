@@ -1299,6 +1299,23 @@ class Call {
     );
   }
 
+  void resetReaction({
+    required String userId,
+  }) {
+    return _stateManager.resetCallReaction(userId);
+  }
+
+  List<CallReaction> getCurrentReactions() {
+    return _stateManager.callState.callParticipants.fold([],
+        (previousValue, e) {
+      if (e.reaction != null) {
+        return [...previousValue, e.reaction!];
+      } else {
+        return previousValue;
+      }
+    });
+  }
+
   Future<Result<None>> sendCustomEvent({
     required StreamCallCid callCid,
     required String eventType,
