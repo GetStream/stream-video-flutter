@@ -33,14 +33,14 @@ class _AddReactionOptionState extends State<AddReactionOption> {
   @override
   Widget build(BuildContext context) {
     return VisibilityDetector(
-      key: Key('reactionControlKey'),
+      key: const Key('reactionControlKey'),
       child: CallControlOption(
         key: key,
         icon: Icon(widget.reactionIcon),
         onPressed: _toggleOverlay,
       ),
       onVisibilityChanged: (info) {
-        if(info.visibleFraction == 0.0) {
+        if (info.visibleFraction == 0.0) {
           overlayEntry?.remove();
           overlayEntry = null;
         }
