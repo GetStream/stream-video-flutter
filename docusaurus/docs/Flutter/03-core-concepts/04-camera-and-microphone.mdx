@@ -13,10 +13,13 @@ call.setCameraEnabled(enabled: true);
 ```
 
 <aside>
-    💡 As a reminder, before attempting to access the user’s connected devices, please ensure the appropriate permissions are set in both the iOS plist file and Android Manifest.
+  💡 As a reminder, before attempting to access the user’s connected devices,
+  please ensure the appropriate permissions are set in both the iOS `plist` file
+  and Android Manifest.
 </aside>
 
 ### Camera Operations
+
 Conveniently attached to the `Call` class are a series of methods which can be used to flip the device’s camera, set the camera position and disable the camera all together.
 
 ```dart
@@ -27,6 +30,7 @@ call.setCameraEnabled(enabled: false);
 ```
 
 ### Microphone Operations
+
 Similar the Camera API, the `Call` object also includes methods for performing audio actions like disabling the audio devices, configuring the audio input device and audio output device.
 
 ```dart
@@ -36,6 +40,7 @@ call.setMicrophoneEnabled(enabled: true);
 ```
 
 ### Listing Connected Devices
+
 There may be cases where it becomes necessary to query all of the connected devices or listen to hardware changes such as when the user connects a new microphone or camera to their machine.
 
 For this, the `RtcMediaDeviceNotifier` can be used. Encapsulated in this class are methods and listeners for interacting with all connected devices.
@@ -55,4 +60,4 @@ final outputDevices = RtcMediaDeviceNotifier.instance.audioInputs();
 final inputDevices = RtcMediaDeviceNotifier.instance.videoInputs();
 ```
 
-When it comes to audio devices, WebRTC classifies them as two types, `Earpiece` and `Speaker`.  These can be used to sort and further filter the devices connected to your app.
+When it comes to audio devices, WebRTC classifies them as two types, `Earpiece` and `Speaker`. These can be used to sort and further filter the devices connected to your app.

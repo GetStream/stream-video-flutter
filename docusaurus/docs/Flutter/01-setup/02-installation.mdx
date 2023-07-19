@@ -24,19 +24,21 @@ This will automatically install the latest version of the Stream SDK from pub to
 Making video calls requires the usage of the device's camera and microphone. Therefore, before you can make and answer calls, you need to request permission to use them within your application.
 
 The following permissions must be granted for both Android and iOS:
+
 - Internet Connectivity
 - Camera
 - Microphone (+ control audio settings to adjust audio level & switch between speaker & earpiece)
 - Bluetooth (wireless headset)
 
 #### iOS
-![XCode Permission configuration](../assets/installation/ios_permission.png)
+
+![Xcode Permission configuration](../assets/installation/ios_permission.png)
 
 For iOS, you need to add the following keys and values to your `Info.plist` file at a minimum:
 
-`Privacy - Camera Usage Description` - "Your_app_name requires camera access in order to capture and transmit video"
+`Privacy - Camera Usage Description` - "<Your_app_name> requires camera access to capture and transmit video"
 
-`Privacy - Microphone Usage Description` - "Your_app_name requires microphone access in order to capture and transmit audio"
+`Privacy - Microphone Usage Description` - "<Your_app_name> requires microphone access to capture and transmit audio"
 
 #### Android
 
@@ -61,8 +63,10 @@ With Android specifically, you will also need to add additional permission if yo
 ```
 
 ## Platform Version
-Stream's Flutter Video SDK is supported on Android and iOS devices running the following versions and higher:
-- Android: SDK version 21 and above 
-- iOS: iOS 11 and above 
 
-> Note: For iOS, when setting the minimum version, please also be sure to update the `deployment_target` in your project's podfile.
+Stream's Flutter Video SDK is supported on Android and iOS devices running the following versions and higher:
+
+- Android: SDK version 21 and above
+- iOS: iOS 11 and above
+
+> Note: For iOS, when setting the minimum version, please also be sure to update the `deployment_target` in your project's Podfile.

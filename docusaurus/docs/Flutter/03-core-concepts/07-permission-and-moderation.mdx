@@ -3,11 +3,11 @@ slug: /permission-and-moderation
 title: Permission and Moderation
 ---
 
-Permissions for a video call can be complex, particularly for use cases like educational apps, live events, audio rooms, and livestreams. These use cases require detailed permissions to ensure proper functionality and user privacy.
+Permissions for a video call can be complex, particularly for use cases like educational apps, live events, audio rooms, and live streams. These use cases require detailed permissions to ensure proper functionality and user privacy.
 
 ### Current Permissions
 
-To check if a user has a certain permission, such as transmitting audio, video, or screensharing, you can use the `hasPermission` method on the `Call` class:
+To check if a user has certain permissions, such as transmitting audio, video, or screen sharing, you can use the `hasPermission` method on the `Call` class:
 
 ```
 final canScreenShare = call.hasPermission(CallPermission.screenshare);
@@ -81,7 +81,7 @@ call.muteUsers(userIds: ['thierry']);
 
 :::tip
 
-In the above example, we are only muting a single user. However, `muteUsers` does allow us to mute multiple users since it accepts a list of userIDs.
+In the above example, we are only muting a single user. However, `muteUsers` does allow us to mute multiple users since it accepts a list of user IDs.
 
 :::
 
@@ -104,4 +104,4 @@ As a host, you are able to end the current call for everyone using the `call.end
 await call.end();
 ```
 
-To silently leave a call, the `disconnect` method can be used in place of the `end` method. 
+To silently leave a call, the `disconnect` method can be used in place of the `end` method.
