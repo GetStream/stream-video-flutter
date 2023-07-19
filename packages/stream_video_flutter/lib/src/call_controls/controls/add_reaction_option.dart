@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../stream_video_flutter.dart';
 
@@ -31,10 +32,19 @@ class _AddReactionOptionState extends State<AddReactionOption> {
 
   @override
   Widget build(BuildContext context) {
-    return CallControlOption(
-      key: key,
-      icon: Icon(widget.reactionIcon),
-      onPressed: _toggleOverlay,
+    return VisibilityDetector(
+      key: Key('reactionControlKey'),
+      child: CallControlOption(
+        key: key,
+        icon: Icon(widget.reactionIcon),
+        onPressed: _toggleOverlay,
+      ),
+      onVisibilityChanged: (info) {
+        if(info.visibleFraction == 0.0) {
+          overlayEntry?.remove();
+          overlayEntry = null;
+        }
+      },
     );
   }
 
