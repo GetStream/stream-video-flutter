@@ -10,6 +10,7 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import '../models/models.pb.dart' as $0;
+import '../signal_rpc/signal.pb.dart' as $1;
 
 import '../models/models.pbenum.dart' as $0;
 import 'events.pbenum.dart';
@@ -32,6 +33,8 @@ enum SfuEvent_EventPayload {
   trackUnpublished, 
   error, 
   callGrantsUpdated, 
+  goAway, 
+  iceRestart, 
   notSet
 }
 
@@ -52,10 +55,12 @@ class SfuEvent extends $pb.GeneratedMessage {
     17 : SfuEvent_EventPayload.trackUnpublished,
     18 : SfuEvent_EventPayload.error,
     19 : SfuEvent_EventPayload.callGrantsUpdated,
+    20 : SfuEvent_EventPayload.goAway,
+    21 : SfuEvent_EventPayload.iceRestart,
     0 : SfuEvent_EventPayload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SfuEvent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 19])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21])
     ..aOM<SubscriberOffer>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscriberOffer', subBuilder: SubscriberOffer.create)
     ..aOM<PublisherAnswer>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'publisherAnswer', subBuilder: PublisherAnswer.create)
     ..aOM<ConnectionQualityChanged>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionQualityChanged', subBuilder: ConnectionQualityChanged.create)
@@ -71,6 +76,8 @@ class SfuEvent extends $pb.GeneratedMessage {
     ..aOM<TrackUnpublished>(17, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackUnpublished', subBuilder: TrackUnpublished.create)
     ..aOM<Error>(18, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error', subBuilder: Error.create)
     ..aOM<CallGrantsUpdated>(19, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callGrantsUpdated', subBuilder: CallGrantsUpdated.create)
+    ..aOM<GoAway>(20, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'goAway', subBuilder: GoAway.create)
+    ..aOM<ICERestart>(21, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'iceRestart', subBuilder: ICERestart.create)
     ..hasRequiredFields = false
   ;
 
@@ -91,6 +98,8 @@ class SfuEvent extends $pb.GeneratedMessage {
     TrackUnpublished? trackUnpublished,
     Error? error,
     CallGrantsUpdated? callGrantsUpdated,
+    GoAway? goAway,
+    ICERestart? iceRestart,
   }) {
     final _result = create();
     if (subscriberOffer != null) {
@@ -137,6 +146,12 @@ class SfuEvent extends $pb.GeneratedMessage {
     }
     if (callGrantsUpdated != null) {
       _result.callGrantsUpdated = callGrantsUpdated;
+    }
+    if (goAway != null) {
+      _result.goAway = goAway;
+    }
+    if (iceRestart != null) {
+      _result.iceRestart = iceRestart;
     }
     return _result;
   }
@@ -328,6 +343,28 @@ class SfuEvent extends $pb.GeneratedMessage {
   void clearCallGrantsUpdated() => clearField(19);
   @$pb.TagNumber(19)
   CallGrantsUpdated ensureCallGrantsUpdated() => $_ensure(14);
+
+  @$pb.TagNumber(20)
+  GoAway get goAway => $_getN(15);
+  @$pb.TagNumber(20)
+  set goAway(GoAway v) { setField(20, v); }
+  @$pb.TagNumber(20)
+  $core.bool hasGoAway() => $_has(15);
+  @$pb.TagNumber(20)
+  void clearGoAway() => clearField(20);
+  @$pb.TagNumber(20)
+  GoAway ensureGoAway() => $_ensure(15);
+
+  @$pb.TagNumber(21)
+  ICERestart get iceRestart => $_getN(16);
+  @$pb.TagNumber(21)
+  set iceRestart(ICERestart v) { setField(21, v); }
+  @$pb.TagNumber(21)
+  $core.bool hasIceRestart() => $_has(16);
+  @$pb.TagNumber(21)
+  void clearIceRestart() => clearField(21);
+  @$pb.TagNumber(21)
+  ICERestart ensureIceRestart() => $_ensure(16);
 }
 
 class Error extends $pb.GeneratedMessage {
@@ -438,6 +475,53 @@ class ICETrickle extends $pb.GeneratedMessage {
   $core.bool hasIceCandidate() => $_has(1);
   @$pb.TagNumber(2)
   void clearIceCandidate() => clearField(2);
+}
+
+class ICERestart extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ICERestart', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..e<$0.PeerType>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'peerType', $pb.PbFieldType.OE, defaultOrMaker: $0.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED, valueOf: $0.PeerType.valueOf, enumValues: $0.PeerType.values)
+    ..hasRequiredFields = false
+  ;
+
+  ICERestart._() : super();
+  factory ICERestart({
+    $0.PeerType? peerType,
+  }) {
+    final _result = create();
+    if (peerType != null) {
+      _result.peerType = peerType;
+    }
+    return _result;
+  }
+  factory ICERestart.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ICERestart.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ICERestart clone() => ICERestart()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ICERestart copyWith(void Function(ICERestart) updates) => super.copyWith((message) => updates(message as ICERestart)) as ICERestart; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ICERestart create() => ICERestart._();
+  ICERestart createEmptyInstance() => create();
+  static $pb.PbList<ICERestart> createRepeated() => $pb.PbList<ICERestart>();
+  @$core.pragma('dart2js:noInline')
+  static ICERestart getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ICERestart>(create);
+  static ICERestart? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $0.PeerType get peerType => $_getN(0);
+  @$pb.TagNumber(1)
+  set peerType($0.PeerType v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasPeerType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPeerType() => clearField(1);
 }
 
 enum SfuRequest_RequestPayload {
@@ -800,6 +884,8 @@ class JoinRequest extends $pb.GeneratedMessage {
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscriberSdp')
     ..aOM<$0.ClientDetails>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'clientDetails', subBuilder: $0.ClientDetails.create)
+    ..aOM<Migration>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'migration', subBuilder: Migration.create)
+    ..aOB(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fastReconnect')
     ..hasRequiredFields = false
   ;
 
@@ -809,6 +895,8 @@ class JoinRequest extends $pb.GeneratedMessage {
     $core.String? sessionId,
     $core.String? subscriberSdp,
     $0.ClientDetails? clientDetails,
+    Migration? migration,
+    $core.bool? fastReconnect,
   }) {
     final _result = create();
     if (token != null) {
@@ -822,6 +910,12 @@ class JoinRequest extends $pb.GeneratedMessage {
     }
     if (clientDetails != null) {
       _result.clientDetails = clientDetails;
+    }
+    if (migration != null) {
+      _result.migration = migration;
+    }
+    if (fastReconnect != null) {
+      _result.fastReconnect = fastReconnect;
     }
     return _result;
   }
@@ -883,21 +977,109 @@ class JoinRequest extends $pb.GeneratedMessage {
   void clearClientDetails() => clearField(4);
   @$pb.TagNumber(4)
   $0.ClientDetails ensureClientDetails() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  Migration get migration => $_getN(4);
+  @$pb.TagNumber(5)
+  set migration(Migration v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasMigration() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearMigration() => clearField(5);
+  @$pb.TagNumber(5)
+  Migration ensureMigration() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  $core.bool get fastReconnect => $_getBF(5);
+  @$pb.TagNumber(6)
+  set fastReconnect($core.bool v) { $_setBool(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasFastReconnect() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearFastReconnect() => clearField(6);
+}
+
+class Migration extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Migration', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fromSfuId')
+    ..pc<$0.TrackInfo>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'announcedTracks', $pb.PbFieldType.PM, subBuilder: $0.TrackInfo.create)
+    ..pc<$1.TrackSubscriptionDetails>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscriptions', $pb.PbFieldType.PM, subBuilder: $1.TrackSubscriptionDetails.create)
+    ..hasRequiredFields = false
+  ;
+
+  Migration._() : super();
+  factory Migration({
+    $core.String? fromSfuId,
+    $core.Iterable<$0.TrackInfo>? announcedTracks,
+    $core.Iterable<$1.TrackSubscriptionDetails>? subscriptions,
+  }) {
+    final _result = create();
+    if (fromSfuId != null) {
+      _result.fromSfuId = fromSfuId;
+    }
+    if (announcedTracks != null) {
+      _result.announcedTracks.addAll(announcedTracks);
+    }
+    if (subscriptions != null) {
+      _result.subscriptions.addAll(subscriptions);
+    }
+    return _result;
+  }
+  factory Migration.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Migration.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Migration clone() => Migration()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Migration copyWith(void Function(Migration) updates) => super.copyWith((message) => updates(message as Migration)) as Migration; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Migration create() => Migration._();
+  Migration createEmptyInstance() => create();
+  static $pb.PbList<Migration> createRepeated() => $pb.PbList<Migration>();
+  @$core.pragma('dart2js:noInline')
+  static Migration getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Migration>(create);
+  static Migration? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get fromSfuId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set fromSfuId($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasFromSfuId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearFromSfuId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<$0.TrackInfo> get announcedTracks => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $core.List<$1.TrackSubscriptionDetails> get subscriptions => $_getList(2);
 }
 
 class JoinResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'JoinResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
     ..aOM<$0.CallState>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callState', subBuilder: $0.CallState.create)
+    ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reconnected')
     ..hasRequiredFields = false
   ;
 
   JoinResponse._() : super();
   factory JoinResponse({
     $0.CallState? callState,
+    $core.bool? reconnected,
   }) {
     final _result = create();
     if (callState != null) {
       _result.callState = callState;
+    }
+    if (reconnected != null) {
+      _result.reconnected = reconnected;
     }
     return _result;
   }
@@ -932,6 +1114,15 @@ class JoinResponse extends $pb.GeneratedMessage {
   void clearCallState() => clearField(1);
   @$pb.TagNumber(1)
   $0.CallState ensureCallState() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.bool get reconnected => $_getBF(1);
+  @$pb.TagNumber(2)
+  set reconnected($core.bool v) { $_setBool(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasReconnected() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearReconnected() => clearField(2);
 }
 
 class ParticipantJoined extends $pb.GeneratedMessage {
@@ -1964,5 +2155,52 @@ class CallGrantsUpdated extends $pb.GeneratedMessage {
   $core.bool hasMessage() => $_has(1);
   @$pb.TagNumber(2)
   void clearMessage() => clearField(2);
+}
+
+class GoAway extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GoAway', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..e<$0.GoAwayReason>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reason', $pb.PbFieldType.OE, defaultOrMaker: $0.GoAwayReason.GO_AWAY_REASON_UNSPECIFIED, valueOf: $0.GoAwayReason.valueOf, enumValues: $0.GoAwayReason.values)
+    ..hasRequiredFields = false
+  ;
+
+  GoAway._() : super();
+  factory GoAway({
+    $0.GoAwayReason? reason,
+  }) {
+    final _result = create();
+    if (reason != null) {
+      _result.reason = reason;
+    }
+    return _result;
+  }
+  factory GoAway.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory GoAway.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  GoAway clone() => GoAway()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  GoAway copyWith(void Function(GoAway) updates) => super.copyWith((message) => updates(message as GoAway)) as GoAway; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static GoAway create() => GoAway._();
+  GoAway createEmptyInstance() => create();
+  static $pb.PbList<GoAway> createRepeated() => $pb.PbList<GoAway>();
+  @$core.pragma('dart2js:noInline')
+  static GoAway getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GoAway>(create);
+  static GoAway? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $0.GoAwayReason get reason => $_getN(0);
+  @$pb.TagNumber(1)
+  set reason($0.GoAwayReason v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasReason() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearReason() => clearField(1);
 }
 

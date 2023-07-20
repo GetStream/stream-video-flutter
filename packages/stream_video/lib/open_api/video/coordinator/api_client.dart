@@ -205,6 +205,8 @@ class ApiClient {
           return BlockedUserEvent.fromJson(value);
         case 'BroadcastSettings':
           return BroadcastSettings.fromJson(value);
+        case 'BroadcastSettingsRequest':
+          return BroadcastSettingsRequest.fromJson(value);
         case 'CallAcceptedEvent':
           return CallAcceptedEvent.fromJson(value);
         case 'CallBroadcastingStartedEvent':
@@ -321,6 +323,8 @@ class ApiClient {
           return GoLiveResponse.fromJson(value);
         case 'HLSSettings':
           return HLSSettings.fromJson(value);
+        case 'HLSSettingsRequest':
+          return HLSSettingsRequest.fromJson(value);
         case 'HealthCheckEvent':
           return HealthCheckEvent.fromJson(value);
         case 'ICEServer':
