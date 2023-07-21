@@ -15,6 +15,7 @@ class CallSettingsRequest {
   CallSettingsRequest({
     this.audio,
     this.backstage,
+    this.broadcasting,
     this.geofencing,
     this.recording,
     this.ring,
@@ -38,6 +39,14 @@ class CallSettingsRequest {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   BackstageSettingsRequest? backstage;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  BroadcastSettingsRequest? broadcasting;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -91,6 +100,7 @@ class CallSettingsRequest {
   bool operator ==(Object other) => identical(this, other) || other is CallSettingsRequest &&
      other.audio == audio &&
      other.backstage == backstage &&
+     other.broadcasting == broadcasting &&
      other.geofencing == geofencing &&
      other.recording == recording &&
      other.ring == ring &&
@@ -103,6 +113,7 @@ class CallSettingsRequest {
     // ignore: unnecessary_parenthesis
     (audio == null ? 0 : audio!.hashCode) +
     (backstage == null ? 0 : backstage!.hashCode) +
+    (broadcasting == null ? 0 : broadcasting!.hashCode) +
     (geofencing == null ? 0 : geofencing!.hashCode) +
     (recording == null ? 0 : recording!.hashCode) +
     (ring == null ? 0 : ring!.hashCode) +
@@ -111,7 +122,7 @@ class CallSettingsRequest {
     (video == null ? 0 : video!.hashCode);
 
   @override
-  String toString() => 'CallSettingsRequest[audio=$audio, backstage=$backstage, geofencing=$geofencing, recording=$recording, ring=$ring, screensharing=$screensharing, transcription=$transcription, video=$video]';
+  String toString() => 'CallSettingsRequest[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, recording=$recording, ring=$ring, screensharing=$screensharing, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -124,6 +135,11 @@ class CallSettingsRequest {
       json[r'backstage'] = this.backstage;
     } else {
       json[r'backstage'] = null;
+    }
+    if (this.broadcasting != null) {
+      json[r'broadcasting'] = this.broadcasting;
+    } else {
+      json[r'broadcasting'] = null;
     }
     if (this.geofencing != null) {
       json[r'geofencing'] = this.geofencing;
@@ -179,6 +195,7 @@ class CallSettingsRequest {
       return CallSettingsRequest(
         audio: AudioSettingsRequest.fromJson(json[r'audio']),
         backstage: BackstageSettingsRequest.fromJson(json[r'backstage']),
+        broadcasting: BroadcastSettingsRequest.fromJson(json[r'broadcasting']),
         geofencing: GeofenceSettingsRequest.fromJson(json[r'geofencing']),
         recording: RecordSettingsRequest.fromJson(json[r'recording']),
         ring: RingSettingsRequest.fromJson(json[r'ring']),

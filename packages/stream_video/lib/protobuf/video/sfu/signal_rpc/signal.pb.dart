@@ -14,6 +14,116 @@ import '../models/models.pb.dart' as $0;
 
 import '../models/models.pbenum.dart' as $0;
 
+class ICERestartRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ICERestartRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.signal'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
+    ..e<$0.PeerType>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'peerType', $pb.PbFieldType.OE, defaultOrMaker: $0.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED, valueOf: $0.PeerType.valueOf, enumValues: $0.PeerType.values)
+    ..hasRequiredFields = false
+  ;
+
+  ICERestartRequest._() : super();
+  factory ICERestartRequest({
+    $core.String? sessionId,
+    $0.PeerType? peerType,
+  }) {
+    final _result = create();
+    if (sessionId != null) {
+      _result.sessionId = sessionId;
+    }
+    if (peerType != null) {
+      _result.peerType = peerType;
+    }
+    return _result;
+  }
+  factory ICERestartRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ICERestartRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ICERestartRequest clone() => ICERestartRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ICERestartRequest copyWith(void Function(ICERestartRequest) updates) => super.copyWith((message) => updates(message as ICERestartRequest)) as ICERestartRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ICERestartRequest create() => ICERestartRequest._();
+  ICERestartRequest createEmptyInstance() => create();
+  static $pb.PbList<ICERestartRequest> createRepeated() => $pb.PbList<ICERestartRequest>();
+  @$core.pragma('dart2js:noInline')
+  static ICERestartRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ICERestartRequest>(create);
+  static ICERestartRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get sessionId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set sessionId($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasSessionId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSessionId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $0.PeerType get peerType => $_getN(1);
+  @$pb.TagNumber(2)
+  set peerType($0.PeerType v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasPeerType() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPeerType() => clearField(2);
+}
+
+class ICERestartResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ICERestartResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.signal'), createEmptyInstance: create)
+    ..aOM<$0.Error>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error', subBuilder: $0.Error.create)
+    ..hasRequiredFields = false
+  ;
+
+  ICERestartResponse._() : super();
+  factory ICERestartResponse({
+    $0.Error? error,
+  }) {
+    final _result = create();
+    if (error != null) {
+      _result.error = error;
+    }
+    return _result;
+  }
+  factory ICERestartResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ICERestartResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ICERestartResponse clone() => ICERestartResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ICERestartResponse copyWith(void Function(ICERestartResponse) updates) => super.copyWith((message) => updates(message as ICERestartResponse)) as ICERestartResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ICERestartResponse create() => ICERestartResponse._();
+  ICERestartResponse createEmptyInstance() => create();
+  static $pb.PbList<ICERestartResponse> createRepeated() => $pb.PbList<ICERestartResponse>();
+  @$core.pragma('dart2js:noInline')
+  static ICERestartResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ICERestartResponse>(create);
+  static ICERestartResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $0.Error get error => $_getN(0);
+  @$pb.TagNumber(1)
+  set error($0.Error v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasError() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearError() => clearField(1);
+  @$pb.TagNumber(1)
+  $0.Error ensureError() => $_ensure(0);
+}
+
 class UpdateMuteStatesRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateMuteStatesRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.signal'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
@@ -824,6 +934,10 @@ class SignalServerApi {
   $async.Future<UpdateMuteStatesResponse> updateMuteStates($pb.ClientContext? ctx, UpdateMuteStatesRequest request) {
     var emptyResponse = UpdateMuteStatesResponse();
     return _client.invoke<UpdateMuteStatesResponse>(ctx, 'SignalServer', 'UpdateMuteStates', request, emptyResponse);
+  }
+  $async.Future<ICERestartResponse> iceRestart($pb.ClientContext? ctx, ICERestartRequest request) {
+    var emptyResponse = ICERestartResponse();
+    return _client.invoke<ICERestartResponse>(ctx, 'SignalServer', 'IceRestart', request, emptyResponse);
   }
 }
 

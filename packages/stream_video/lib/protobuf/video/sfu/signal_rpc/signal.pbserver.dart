@@ -22,6 +22,7 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
   $async.Future<$1.ICETrickleResponse> iceTrickle($pb.ServerContext ctx, $0.ICETrickle request);
   $async.Future<$1.UpdateSubscriptionsResponse> updateSubscriptions($pb.ServerContext ctx, $1.UpdateSubscriptionsRequest request);
   $async.Future<$1.UpdateMuteStatesResponse> updateMuteStates($pb.ServerContext ctx, $1.UpdateMuteStatesRequest request);
+  $async.Future<$1.ICERestartResponse> iceRestart($pb.ServerContext ctx, $1.ICERestartRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
@@ -30,6 +31,7 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
       case 'IceTrickle': return $0.ICETrickle();
       case 'UpdateSubscriptions': return $1.UpdateSubscriptionsRequest();
       case 'UpdateMuteStates': return $1.UpdateMuteStatesRequest();
+      case 'IceRestart': return $1.ICERestartRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
@@ -41,6 +43,7 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
       case 'IceTrickle': return this.iceTrickle(ctx, request as $0.ICETrickle);
       case 'UpdateSubscriptions': return this.updateSubscriptions(ctx, request as $1.UpdateSubscriptionsRequest);
       case 'UpdateMuteStates': return this.updateMuteStates(ctx, request as $1.UpdateMuteStatesRequest);
+      case 'IceRestart': return this.iceRestart(ctx, request as $1.ICERestartRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

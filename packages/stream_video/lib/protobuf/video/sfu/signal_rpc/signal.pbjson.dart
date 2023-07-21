@@ -10,6 +10,27 @@ import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
 import '../models/models.pbjson.dart' as $0;
 
+@$core.Deprecated('Use iCERestartRequestDescriptor instead')
+const ICERestartRequest$json = const {
+  '1': 'ICERestartRequest',
+  '2': const [
+    const {'1': 'session_id', '3': 1, '4': 1, '5': 9, '10': 'sessionId'},
+    const {'1': 'peer_type', '3': 2, '4': 1, '5': 14, '6': '.stream.video.sfu.models.PeerType', '10': 'peerType'},
+  ],
+};
+
+/// Descriptor for `ICERestartRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List iCERestartRequestDescriptor = $convert.base64Decode('ChFJQ0VSZXN0YXJ0UmVxdWVzdBIdCgpzZXNzaW9uX2lkGAEgASgJUglzZXNzaW9uSWQSPgoJcGVlcl90eXBlGAIgASgOMiEuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGVlclR5cGVSCHBlZXJUeXBl');
+@$core.Deprecated('Use iCERestartResponseDescriptor instead')
+const ICERestartResponse$json = const {
+  '1': 'ICERestartResponse',
+  '2': const [
+    const {'1': 'error', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Error', '10': 'error'},
+  ],
+};
+
+/// Descriptor for `ICERestartResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List iCERestartResponseDescriptor = $convert.base64Decode('ChJJQ0VSZXN0YXJ0UmVzcG9uc2USNAoFZXJyb3IYASABKAsyHi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5FcnJvclIFZXJyb3I=');
 @$core.Deprecated('Use updateMuteStatesRequestDescriptor instead')
 const UpdateMuteStatesRequest$json = const {
   '1': 'UpdateMuteStatesRequest',
@@ -161,6 +182,7 @@ const $core.Map<$core.String, $core.dynamic> SignalServerServiceBase$json = cons
     const {'1': 'IceTrickle', '2': '.stream.video.sfu.models.ICETrickle', '3': '.stream.video.sfu.signal.ICETrickleResponse'},
     const {'1': 'UpdateSubscriptions', '2': '.stream.video.sfu.signal.UpdateSubscriptionsRequest', '3': '.stream.video.sfu.signal.UpdateSubscriptionsResponse'},
     const {'1': 'UpdateMuteStates', '2': '.stream.video.sfu.signal.UpdateMuteStatesRequest', '3': '.stream.video.sfu.signal.UpdateMuteStatesResponse'},
+    const {'1': 'IceRestart', '2': '.stream.video.sfu.signal.ICERestartRequest', '3': '.stream.video.sfu.signal.ICERestartResponse'},
   ],
 };
 
@@ -182,7 +204,9 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> SignalServ
   '.stream.video.sfu.signal.UpdateMuteStatesRequest': UpdateMuteStatesRequest$json,
   '.stream.video.sfu.signal.TrackMuteState': TrackMuteState$json,
   '.stream.video.sfu.signal.UpdateMuteStatesResponse': UpdateMuteStatesResponse$json,
+  '.stream.video.sfu.signal.ICERestartRequest': ICERestartRequest$json,
+  '.stream.video.sfu.signal.ICERestartResponse': ICERestartResponse$json,
 };
 
 /// Descriptor for `SignalServer`. Decode as a `google.protobuf.ServiceDescriptorProto`.
-final $typed_data.Uint8List signalServerServiceDescriptor = $convert.base64Decode('CgxTaWduYWxTZXJ2ZXISawoMU2V0UHVibGlzaGVyEiwuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuU2V0UHVibGlzaGVyUmVxdWVzdBotLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlNldFB1Ymxpc2hlclJlc3BvbnNlEmUKClNlbmRBbnN3ZXISKi5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5TZW5kQW5zd2VyUmVxdWVzdBorLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlNlbmRBbnN3ZXJSZXNwb25zZRJeCgpJY2VUcmlja2xlEiMuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuSUNFVHJpY2tsZRorLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLklDRVRyaWNrbGVSZXNwb25zZRKAAQoTVXBkYXRlU3Vic2NyaXB0aW9ucxIzLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlVwZGF0ZVN1YnNjcmlwdGlvbnNSZXF1ZXN0GjQuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuVXBkYXRlU3Vic2NyaXB0aW9uc1Jlc3BvbnNlEncKEFVwZGF0ZU11dGVTdGF0ZXMSMC5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5VcGRhdGVNdXRlU3RhdGVzUmVxdWVzdBoxLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlVwZGF0ZU11dGVTdGF0ZXNSZXNwb25zZQ==');
+final $typed_data.Uint8List signalServerServiceDescriptor = $convert.base64Decode('CgxTaWduYWxTZXJ2ZXISawoMU2V0UHVibGlzaGVyEiwuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuU2V0UHVibGlzaGVyUmVxdWVzdBotLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlNldFB1Ymxpc2hlclJlc3BvbnNlEmUKClNlbmRBbnN3ZXISKi5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5TZW5kQW5zd2VyUmVxdWVzdBorLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlNlbmRBbnN3ZXJSZXNwb25zZRJeCgpJY2VUcmlja2xlEiMuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuSUNFVHJpY2tsZRorLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLklDRVRyaWNrbGVSZXNwb25zZRKAAQoTVXBkYXRlU3Vic2NyaXB0aW9ucxIzLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlVwZGF0ZVN1YnNjcmlwdGlvbnNSZXF1ZXN0GjQuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuVXBkYXRlU3Vic2NyaXB0aW9uc1Jlc3BvbnNlEncKEFVwZGF0ZU11dGVTdGF0ZXMSMC5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5VcGRhdGVNdXRlU3RhdGVzUmVxdWVzdBoxLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlVwZGF0ZU11dGVTdGF0ZXNSZXNwb25zZRJlCgpJY2VSZXN0YXJ0Eiouc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuSUNFUmVzdGFydFJlcXVlc3QaKy5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5JQ0VSZXN0YXJ0UmVzcG9uc2U=');
