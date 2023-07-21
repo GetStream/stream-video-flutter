@@ -131,7 +131,7 @@ class QueryCallsRequest {
         limit: mapValueOfType<int>(json, r'limit'),
         next: mapValueOfType<String>(json, r'next'),
         prev: mapValueOfType<String>(json, r'prev'),
-        sort: SortParamRequest.listFromJson(json[r'sort'])!,
+        sort: SortParamRequest.listFromJson(json[r'sort']) ?? const [],
         watch: mapValueOfType<bool>(json, r'watch'),
       );
     }
@@ -182,7 +182,6 @@ class QueryCallsRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'sort',
   };
 }
 

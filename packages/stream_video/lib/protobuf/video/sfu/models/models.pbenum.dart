@@ -89,13 +89,20 @@ class ErrorCode extends $pb.ProtobufEnum {
   static const ErrorCode ERROR_CODE_PUBLISH_TRACKS_MISMATCH = ErrorCode._(101, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PUBLISH_TRACKS_MISMATCH');
   static const ErrorCode ERROR_CODE_PUBLISH_TRACK_OUT_OF_ORDER = ErrorCode._(102, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PUBLISH_TRACK_OUT_OF_ORDER');
   static const ErrorCode ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND = ErrorCode._(103, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND');
+  static const ErrorCode ERROR_CODE_LIVE_ENDED = ErrorCode._(104, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_LIVE_ENDED');
   static const ErrorCode ERROR_CODE_PARTICIPANT_NOT_FOUND = ErrorCode._(200, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PARTICIPANT_NOT_FOUND');
+  static const ErrorCode ERROR_CODE_PARTICIPANT_MIGRATING_OUT = ErrorCode._(201, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PARTICIPANT_MIGRATING_OUT');
+  static const ErrorCode ERROR_CODE_PARTICIPANT_MIGRATION_FAILED = ErrorCode._(202, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PARTICIPANT_MIGRATION_FAILED');
+  static const ErrorCode ERROR_CODE_PARTICIPANT_MIGRATING = ErrorCode._(203, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PARTICIPANT_MIGRATING');
+  static const ErrorCode ERROR_CODE_PARTICIPANT_RECONNECT_FAILED = ErrorCode._(204, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PARTICIPANT_RECONNECT_FAILED');
+  static const ErrorCode ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE = ErrorCode._(205, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE');
   static const ErrorCode ERROR_CODE_CALL_NOT_FOUND = ErrorCode._(300, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_CALL_NOT_FOUND');
   static const ErrorCode ERROR_CODE_REQUEST_VALIDATION_FAILED = ErrorCode._(400, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_REQUEST_VALIDATION_FAILED');
   static const ErrorCode ERROR_CODE_UNAUTHENTICATED = ErrorCode._(401, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_UNAUTHENTICATED');
   static const ErrorCode ERROR_CODE_PERMISSION_DENIED = ErrorCode._(403, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_PERMISSION_DENIED');
   static const ErrorCode ERROR_CODE_TOO_MANY_REQUESTS = ErrorCode._(429, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_TOO_MANY_REQUESTS');
   static const ErrorCode ERROR_CODE_INTERNAL_SERVER_ERROR = ErrorCode._(500, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_INTERNAL_SERVER_ERROR');
+  static const ErrorCode ERROR_CODE_SFU_SHUTTING_DOWN = ErrorCode._(600, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_SFU_SHUTTING_DOWN');
 
   static const $core.List<ErrorCode> values = <ErrorCode> [
     ERROR_CODE_UNSPECIFIED,
@@ -103,13 +110,20 @@ class ErrorCode extends $pb.ProtobufEnum {
     ERROR_CODE_PUBLISH_TRACKS_MISMATCH,
     ERROR_CODE_PUBLISH_TRACK_OUT_OF_ORDER,
     ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND,
+    ERROR_CODE_LIVE_ENDED,
     ERROR_CODE_PARTICIPANT_NOT_FOUND,
+    ERROR_CODE_PARTICIPANT_MIGRATING_OUT,
+    ERROR_CODE_PARTICIPANT_MIGRATION_FAILED,
+    ERROR_CODE_PARTICIPANT_MIGRATING,
+    ERROR_CODE_PARTICIPANT_RECONNECT_FAILED,
+    ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE,
     ERROR_CODE_CALL_NOT_FOUND,
     ERROR_CODE_REQUEST_VALIDATION_FAILED,
     ERROR_CODE_UNAUTHENTICATED,
     ERROR_CODE_PERMISSION_DENIED,
     ERROR_CODE_TOO_MANY_REQUESTS,
     ERROR_CODE_INTERNAL_SERVER_ERROR,
+    ERROR_CODE_SFU_SHUTTING_DOWN,
   ];
 
   static final $core.Map<$core.int, ErrorCode> _byValue = $pb.ProtobufEnum.initByValue(values);
@@ -160,5 +174,22 @@ class TrackUnpublishReason extends $pb.ProtobufEnum {
   static TrackUnpublishReason? valueOf($core.int value) => _byValue[value];
 
   const TrackUnpublishReason._($core.int v, $core.String n) : super(v, n);
+}
+
+class GoAwayReason extends $pb.ProtobufEnum {
+  static const GoAwayReason GO_AWAY_REASON_UNSPECIFIED = GoAwayReason._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'GO_AWAY_REASON_UNSPECIFIED');
+  static const GoAwayReason GO_AWAY_REASON_SHUTTING_DOWN = GoAwayReason._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'GO_AWAY_REASON_SHUTTING_DOWN');
+  static const GoAwayReason GO_AWAY_REASON_REBALANCE = GoAwayReason._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'GO_AWAY_REASON_REBALANCE');
+
+  static const $core.List<GoAwayReason> values = <GoAwayReason> [
+    GO_AWAY_REASON_UNSPECIFIED,
+    GO_AWAY_REASON_SHUTTING_DOWN,
+    GO_AWAY_REASON_REBALANCE,
+  ];
+
+  static final $core.Map<$core.int, GoAwayReason> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static GoAwayReason? valueOf($core.int value) => _byValue[value];
+
+  const GoAwayReason._($core.int v, $core.String n) : super(v, n);
 }
 

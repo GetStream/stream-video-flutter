@@ -95,7 +95,9 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
           sessionId: event.sessionId,
-          user: event.user.toCallUser(),
+          user: event.participant.user.toCallUser(),
+          participantJoinedAt: event.participant.joinedAt,
+          participantSessionId: event.participant.userSessionId,
         );
       case EventType.callSessionParticipantLeft:
         final event = callSessionParticipantLeft!;
@@ -104,7 +106,9 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
           sessionId: event.sessionId,
-          user: event.user.toCallUser(),
+          user: event.participant.user.toCallUser(),
+          participantJoinedAt: event.participant.joinedAt,
+          participantSessionId: event.participant.userSessionId,
         );
       case EventType.callPermissionRequest:
         final event = callPermissionRequest!;

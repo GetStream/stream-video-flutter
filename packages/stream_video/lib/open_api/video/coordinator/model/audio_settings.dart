@@ -173,7 +173,7 @@ class AudioSettingsDefaultDeviceEnum {
 
   static AudioSettingsDefaultDeviceEnum? fromJson(dynamic value) => AudioSettingsDefaultDeviceEnumTypeTransformer().decode(value);
 
-  static List<AudioSettingsDefaultDeviceEnum> listFromJson(dynamic json, {bool growable = false,}) {
+  static List<AudioSettingsDefaultDeviceEnum>? listFromJson(dynamic json, {bool growable = false,}) {
     final result = <AudioSettingsDefaultDeviceEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
