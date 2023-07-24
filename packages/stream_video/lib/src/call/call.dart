@@ -307,6 +307,8 @@ class Call {
       return _stateManager.coordinatorCallBroadcastingStarted(event);
     } else if (event is CoordinatorCallBroadcastingStoppedEvent) {
       return _stateManager.coordinatorCallBroadcastingStopped(event);
+    } else if (event is CoordinatorCallReactionEvent) {
+      return _stateManager.coordinatorCallReaction(event);
     }
   }
 
@@ -1295,6 +1297,23 @@ class Call {
       emojiCode: emojiCode,
       custom: custom,
     );
+  }
+
+  void resetReaction({
+    required String userId,
+  }) {
+    return _stateManager.resetCallReaction(userId);
+  }
+
+  List<CallReaction> getCurrentReactions() {
+    return _stateManager.callState.callParticipants.fold([],
+        (previousValue, e) {
+      if (e.reaction != null) {
+        return [...previousValue, e.reaction!];
+      } else {
+        return previousValue;
+      }
+    });
   }
 
   Future<Result<None>> sendCustomEvent({

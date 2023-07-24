@@ -26,6 +26,26 @@ class StreamCallControlsThemeData with Diagnosticable {
     this.inactiveOptionBackgroundColor = const Color.fromRGBO(0, 0, 0, 0.4),
     this.optionShape = const CircleBorder(),
     this.optionPadding = const EdgeInsets.all(16),
+    this.callReactions = const [
+      CallReactionData(
+        type: 'reaction',
+        emojiCode: ':like:',
+        custom: {},
+        icon: '👍',
+      ),
+      CallReactionData(
+        type: 'raised-hand',
+        emojiCode: ':raise-hand:',
+        custom: {},
+        icon: '✋',
+      ),
+      CallReactionData(
+        type: 'reaction',
+        emojiCode: ':fireworks:',
+        custom: {},
+        icon: '🎉',
+      ),
+    ],
   });
 
   /// The border radius of the call controls bar.
@@ -67,6 +87,8 @@ class StreamCallControlsThemeData with Diagnosticable {
   /// The padding applied to the call control option.
   final EdgeInsetsGeometry optionPadding;
 
+  final List<CallReactionData> callReactions;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   StreamCallControlsThemeData copyWith({
@@ -83,6 +105,7 @@ class StreamCallControlsThemeData with Diagnosticable {
     Color? inactiveOptionBackgroundColor,
     OutlinedBorder? optionShape,
     EdgeInsetsGeometry? optionPadding,
+    List<CallReactionData>? callReactions,
   }) {
     return StreamCallControlsThemeData(
       borderRadius: borderRadius ?? this.borderRadius,
@@ -102,6 +125,7 @@ class StreamCallControlsThemeData with Diagnosticable {
           inactiveOptionBackgroundColor ?? this.inactiveOptionBackgroundColor,
       optionShape: optionShape ?? this.optionShape,
       optionPadding: optionPadding ?? this.optionPadding,
+      callReactions: callReactions ?? this.callReactions,
     );
   }
 
@@ -140,6 +164,7 @@ class StreamCallControlsThemeData with Diagnosticable {
       optionShape: OutlinedBorder.lerp(optionShape, other.optionShape, t)!,
       optionPadding:
           EdgeInsetsGeometry.lerp(optionPadding, other.optionPadding, t)!,
+      callReactions: other.callReactions,
     );
   }
 
@@ -158,6 +183,7 @@ class StreamCallControlsThemeData with Diagnosticable {
         inactiveOptionBackgroundColor,
         optionShape,
         optionPadding,
+        callReactions,
       );
 
   @override
@@ -181,7 +207,8 @@ class StreamCallControlsThemeData with Diagnosticable {
         other.optionBackgroundColor == optionBackgroundColor &&
         other.inactiveOptionBackgroundColor == inactiveOptionBackgroundColor &&
         other.optionShape == optionShape &&
-        other.optionPadding == optionPadding;
+        other.optionPadding == optionPadding &&
+        other.callReactions == callReactions;
   }
 
   @override
@@ -210,6 +237,12 @@ class StreamCallControlsThemeData with Diagnosticable {
           'optionPadding',
           optionPadding,
         ),
+      )
+      ..add(
+        DiagnosticsProperty<List<CallReactionData>>(
+          'callReactions',
+          callReactions,
+        ),
       );
   }
 
@@ -230,6 +263,7 @@ class StreamCallControlsThemeData with Diagnosticable {
       inactiveOptionBackgroundColor: other.inactiveOptionBackgroundColor,
       optionShape: other.optionShape,
       optionPadding: other.optionPadding,
+      callReactions: other.callReactions,
     );
   }
 }

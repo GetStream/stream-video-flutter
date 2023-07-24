@@ -21,3 +21,23 @@ class CallReaction with EquatableMixin {
   @override
   List<Object?> get props => [type, user, emojiCode, custom];
 }
+
+class CallReactionData with EquatableMixin {
+  const CallReactionData({
+    required this.type,
+    required this.icon,
+    this.emojiCode,
+    this.custom = const {},
+  });
+
+  final String type;
+  final String? emojiCode;
+  final String icon;
+  final Map<String, Object>? custom;
+
+  @override
+  bool? get stringify => true;
+
+  @override
+  List<Object?> get props => [type, icon, emojiCode, custom];
+}
