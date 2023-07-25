@@ -176,8 +176,6 @@ class StreamCallParticipant extends StatelessWidget {
               );
             };
 
-            print(participant.reaction);
-
             var videoRendererBuilder = this.videoRendererBuilder;
             videoRendererBuilder ??= (context, call, participant) {
               return Stack(
