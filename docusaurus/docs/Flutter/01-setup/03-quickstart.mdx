@@ -116,9 +116,9 @@ Looking at our current UI code, we can make use of Flutter’s composition and b
 
 `StreamCallContainer` ships with many different builders that can be implemented to override the default UI and behavior. Since we are interested in changing the content/UI of our call, we can override the `callContentBuilder` as a starting point.
 
-<aside>
-    💡 Please take a minute to explore and look at the other parameters you can customize. There are many options for changing colors, layouts, behaviour, etc.
-</aside>
+:::note
+    Please take a minute to explore and look at the other parameters you can customize. There are many options for changing colors, layouts, behaviour, etc.
+:::
 
 Next, we can use another Stream UI component, `StreamCallContent` to access the control area and add our custom button.
 
