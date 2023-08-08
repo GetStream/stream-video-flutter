@@ -3,11 +3,11 @@ slug: /video-calling-guide
 title: Video Calling Guide
 ---
 
-1. Introduction to what we are creating
+### Introduction
 
 In this tutorial, we will learn how to build a video calling app similar to Google Meet or Zoom using Stream Video.
 
-2. Creating a new project on the dashboard
+### Creating a new project on the dashboard
 
 To start with, log in to the Stream dashboard and create a new project for your new video calling app.
 
@@ -19,7 +19,7 @@ Once the project is created, navigate to the *Video&Audio* section. Note your AP
 
 ![Stream Video Key](../assets/tutorials/vc-key.png)
 
-3. Creating a new Flutter project and adding configuration
+### Creating a new Flutter project and adding configuration
 
 To begin developing your video calling app, you need to create a new Flutter project.
 If you do not have Flutter or an IDE configured to work with it, we highly recommend following the [Install](https://flutter.dev/docs/get-started/install)
@@ -60,7 +60,7 @@ You can also use the [stream_video]() package directly if you need direct access
 The [stream_video_flutter_background] package adds background capabilities for the app on Android while the
 [stream_video_push_notification] package helps in adding push notifications and an end-to-end call flow (CallKit).
 
-4. Initialising Stream Video
+### Initialising Stream Video
 
 To start adding the SDK to your app, initialise the Stream Video SDK and connect a user:
 
@@ -134,7 +134,7 @@ For the corresponding iOS permissions, open the `Info.plist` file and add:
 </array>
 ```
 
-5. Setting up a call
+### Setting up a call
 
 Now that the dependencies, permissions, and initialisations are set, we can get onto creating a call.
 
@@ -186,7 +186,7 @@ The UI as of the moment is a simple button on the screen:
 You have created a Stream Video call. Let's set up the call screen UI so that the user can see other users
 and interact.
 
-6. Setting up the call UI
+### Setting up the call UI
 
 To set up a call screen, set up a new file named 'call_screen.dart' and create a new widget to handle the call screen:
 
@@ -243,7 +243,7 @@ When connecting other users, you can use the same process. The `call.getOrCreate
 a call if it doesn't exist, and simply return the existing call if it already does.
 :::
 
-7. Customising the `StreamCallContainer`
+### Customising the `StreamCallContainer`
 
 To customise any aspect of the call screen made previously, you can use the `CallContentBuilder` parameter
 of the `StreamCallContainer`.
