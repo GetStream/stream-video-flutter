@@ -1,3 +1,7 @@
+## 0.0.3
+
+* Adds ability to update provider names for Firebase and APNS
+
 ## 0.0.2
 
 * Updates for backend

@@ -30,7 +30,10 @@ class AppRepository {
         muteVideoWhenInBackground: true,
       );
       await streamVideoClient.initPushNotificationManager(
-        StreamVideoPushNotificationManager.factory(),
+        StreamVideoPushNotificationManager.factory(
+          apnsProviderName: 'flutter-apn-video',
+          firebaseProviderName: 'firebase',
+        ),
       );
       return streamVideoClient;
     } else {

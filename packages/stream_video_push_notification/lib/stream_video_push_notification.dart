@@ -20,11 +20,15 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required CallNotificationWrapper callNotification,
     required StreamVideoPushNotificationMethodChannel methodChannel,
     required StreamVideoPushNotificationEventChannel eventChannel,
+    String? firebaseProviderName,
+    String? apnsProviderName,
   })  : _client = client,
         _callNotification = callNotification,
         _sharedPreferences = sharedPreferences,
         _methodChannel = methodChannel,
-        _eventChannel = eventChannel {
+        _eventChannel = eventChannel,
+        _firebaseProviderName = firebaseProviderName,
+        _apnsProviderName = apnsProviderName {
     _eventChannel.onEvent.listen((event) {
       if (event.type == NativeEventType.ACTION_INCOMING_CALL) {
         _showCall(event.content['call_cid']);
@@ -38,6 +42,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   final SharedPreferences _sharedPreferences;
   final StreamVideoPushNotificationMethodChannel _methodChannel;
   final StreamVideoPushNotificationEventChannel _eventChannel;
+  final String? _firebaseProviderName;
+  final String? _apnsProviderName;
 
   @override
   Future<void> onUserLoggedIn() async {
@@ -49,6 +55,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   Future<void> _registerAndroidDevice() async {
+    if(_firebaseProviderName == null) {
+      _logger.w(() => '[registerAndroidDevice] No Firebase provider name set');
+      return;
+    }
+
     if (_isFirebaseInitialized()) {
       FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
         _logger.d(() => '[registerAndroidDevice] refreshedToken: $token');
@@ -65,6 +76,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   Future<void> _registerIOSDevice() async {
+    if(_apnsProviderName == null) {
+      _logger.w(() => '[registerIOSDevice] No APNS provider name set');
+      return;
+    }
+
     final token = await _methodChannel.getDevicePushTokenVoIP();
     _logger.d(() => '[registerIOSDevice] token: $token');
     if (token != null) {
@@ -72,7 +88,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         id: token,
         voipToken: true,
         pushProvider: CreateDeviceRequestPushProviderEnum.apn,
-        pushProviderName: 'flutter-apn-video',
+        pushProviderName: _apnsProviderName,
       );
     }
   }
@@ -81,7 +97,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     await _client.createDevice(
       id: token,
       pushProvider: CreateDeviceRequestPushProviderEnum.firebase,
-      pushProviderName: 'firebase',
+      pushProviderName: _firebaseProviderName,
     );
   }
 
@@ -209,6 +225,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   static PushNotificationManagerFactory factory({
+    String? firebaseProviderName,
+    String? apnsProviderName,
     SharedPreferences? sharedPreferences,
     CallNotificationWrapper? callNotification,
     StreamVideoPushNotificationMethodChannel? methodChannel,
@@ -224,6 +242,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
             methodChannel ?? const StreamVideoPushNotificationMethodChannel(),
         eventChannel:
             eventChannel ?? const StreamVideoPushNotificationEventChannel(),
+        apnsProviderName: apnsProviderName,
+        firebaseProviderName: firebaseProviderName,
       );
     };
   }
