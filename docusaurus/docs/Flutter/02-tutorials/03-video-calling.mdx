@@ -160,7 +160,7 @@ return Scaffold(
 To instantiate a call, you can use the `StreamVideo.makeCall()` method. You then need to create this
 on the backend using the `call.getOrCreateCall()` method.
 
-Here is how that looks:
+Here is how that looks in code:
 
 ```dart
 ElevatedButton(
@@ -179,11 +179,134 @@ ElevatedButton(
 )
 ```
 
+The UI as of the moment is a simple button on the screen:
+
+![Home Screen UI](../assets/tutorials/vc-ui-1.png)
+
 You have created a Stream Video call. Let's set up the call screen UI so that the user can see other users
 and interact.
 
 6. Setting up the call UI
 
-7. Adding CallKit call flow to apps
+To set up a call screen, set up a new file named 'call_screen.dart' and create a new widget to handle the call screen:
 
-8. Recap
+```dart
+import 'package:flutter/material.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+class CallScreen extends StatefulWidget {
+  final Call call;
+
+  const CallScreen({
+    Key? key,
+    required this.call,
+  }) : super(key: key);
+
+  @override
+  State<CallScreen> createState() => _CallScreenState();
+}
+
+class _CallScreenState extends State<CallScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
+```
+
+In this widget, we take the call we created previously as a parameter.
+
+In the `build()` method, we use the `StreamCallContainer` widget - a widget made by the Stream team to
+make it easy to build video calls:
+
+```dart
+class _CallScreenState extends State<CallScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: StreamCallContainer(
+        call: widget.call,
+      ),
+    );
+  }
+}
+```
+
+And that's... pretty much it.
+
+Once you navigate to the `CallScreen` after the button press, this is what you will be greeted with:
+
+![Call Screen UI](../assets/tutorials/vc-ui-2.png)
+
+:::note
+When connecting other users, you can use the same process. The `call.getOrCreateCall()` method will create
+a call if it doesn't exist, and simply return the existing call if it already does.
+:::
+
+7. Customising the `StreamCallContainer`
+
+To customise any aspect of the call screen made previously, you can use the `CallContentBuilder` parameter
+of the `StreamCallContainer`.
+
+For example, if you want to add your own call controls to the call, you can do it using the `callControlsBuilder`:
+
+```dart
+StreamCallContainer(
+  call: widget.call,
+  callContentBuilder: (
+      BuildContext context,
+      Call call,
+      CallState callState,
+      ) {
+    return StreamCallContent(
+      call: call,
+      callState: callState,
+      callControlsBuilder: (
+          BuildContext context,
+          Call call,
+          CallState callState,
+          ) {
+        final localParticipant = callState.localParticipant!;
+        return StreamCallControls(
+          options: [
+            CallControlOption(
+              icon: const Icon(Icons.chat_outlined),
+              onPressed: () {
+                // Open your chat window
+              },
+            ),
+            FlipCameraOption(
+              call: call,
+              localParticipant: localParticipant,
+            ),
+            AddReactionOption(
+              call: call,
+              localParticipant: localParticipant,
+            ),
+            ToggleMicrophoneOption(
+              call: call,
+              localParticipant: localParticipant,
+            ),
+            ToggleCameraOption(
+              call: call,
+              localParticipant: localParticipant,
+            ),
+            LeaveCallOption(
+              call: call,
+              onLeaveCallTap: () {
+                call.disconnect();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  },
+),
+```
+
+When building Whatsapp/Telegram style calling, you need to add incoming and outgoing screens to the app.
+The `StreamCallContainer` also has these screens inbuilt and allows you to change these using the `incomingCallBuilder` and
+`outgoingCallBuilder`.
+
+
