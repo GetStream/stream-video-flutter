@@ -58,7 +58,7 @@ class StreamVideoRenderer extends StatelessWidget {
     }
 
     return VisibilityDetector(
-      key: Key(participant.sessionId),
+      key: Key('${participant.sessionId}$trackState'),
       onVisibilityChanged: _onVisibilityChanged,
       child: child,
     );
