@@ -1,0 +1,189 @@
+---
+slug: /video-calling-guide
+title: Video Calling Guide
+---
+
+1. Introduction to what we are creating
+
+In this tutorial, we will learn how to build a video calling app similar to Google Meet or Zoom using Stream Video.
+
+2. Creating a new project on the dashboard
+
+To start with, log in to the Stream dashboard and create a new project for your new video calling app.
+
+You will need to fill in the relevant fields, like this:
+
+![Create Project](../assets/tutorials/vc-create-project.png)
+
+Once the project is created, navigate to the *Video&Audio* section. Note your API key from the overview:
+
+![Stream Video Key](../assets/tutorials/vc-key.png)
+
+3. Creating a new Flutter project and adding configuration
+
+To begin developing your video calling app, you need to create a new Flutter project.
+If you do not have Flutter or an IDE configured to work with it, we highly recommend following the [Install](https://flutter.dev/docs/get-started/install)
+and [Set up an editor](https://flutter.dev/docs/get-started/editor) steps from the official documentation.
+
+Please make sure you are using the latest version of Flutter from the stable channel:
+
+```bash
+flutter channel stable
+flutter upgrade
+```
+
+Now, open your IDE and start a new Flutter application called flutter_video_calling_demo.
+If you are using Android Studio (recommended) make sure to create the project as a Flutter application
+and keep all default settings.
+
+![Create Flutter Project](../assets/tutorials/vc-create-flutter-project.png)
+
+The next step is to add Stream Video to your dependencies, to do that just open pubspec.yaml
+and add it inside the dependencies section.
+
+```yaml
+dependencies:
+  flutter:
+    sdk: flutter
+
+  stream_video: ^0.0.2
+  stream_video_flutter: ^0.0.2
+  stream_video_push_notification: ^0.0.2
+```
+
+Stream has several packages that you can use to integrate video into your application.
+
+In this tutorial, we will use the [stream_video_flutter]() package which contains pre-built UI elements for you to use.
+
+You can also use the [stream_video]() package directly if you need direct access to the low-level client.
+
+The [stream_video_flutter_background] package adds background capabilities for the app on Android while the
+[stream_video_push_notification] package helps in adding push notifications and an end-to-end call flow (CallKit).
+
+4. Initialising Stream Video
+
+To start adding the SDK to your app, initialise the Stream Video SDK and connect a user:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  StreamVideo.init(
+    'hd8szvscpxvd',
+  );
+
+  // This step is usually done later
+  await StreamVideo.instance.connectUser(
+    const UserInfo(id: 'vasil', role: 'admin', name: 'Willard Hessel'),
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmFzaWwifQ.N44i27-o800njeSlcvH2HGlBfTl8MH4vQl0ddkq5BVI',
+  );
+
+  runApp(const MyApp());
+}
+```
+
+:::note
+Connecting a user usually takes places after authentication and token creation originating from your backend.
+This example uses a demo token for the user.
+:::
+
+Your user is now connected.
+
+Before you go ahead, you need to add the required permissions for video calling to your app.
+
+In your `AndroidManifest.xml` file, add these permissions:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-feature android:name="android.hardware.camera"/>
+    <uses-feature android:name="android.hardware.camera.autofocus"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+
+    ...
+</manifest>
+```
+
+For the corresponding iOS permissions, open the `Info.plist` file and add:
+
+```plist
+<key>NSCameraUsageDescription</key>
+<string>$(PRODUCT_NAME) Camera Usage!</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>$(PRODUCT_NAME) Microphone Usage!</string>
+<key>UIApplicationSupportsIndirectInputEvents</key>
+<true/>
+<key>UIBackgroundModes</key>
+<array>
+    <string>audio</string>
+	<string>fetch</string>
+	<string>processing</string>
+	<string>remote-notification</string>
+	<string>voip</string>
+</array>
+```
+
+5. Setting up a call
+
+Now that the dependencies, permissions, and initialisations are set, we can get onto creating a call.
+
+Let's create a simple screen with a button that joins a call:
+
+```dart
+return Scaffold(
+  appBar: AppBar(
+    backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+    title: Text(widget.title),
+  ),
+  body: Center(
+   child: ElevatedButton(
+     child: Text('Create Call'),
+     onPressed: () async {
+
+     },
+   ),
+  ),
+);
+```
+
+To instantiate a call, you can use the `StreamVideo.makeCall()` method. You then need to create this
+on the backend using the `call.getOrCreateCall()` method.
+
+Here is how that looks:
+
+```dart
+ElevatedButton(
+  child: Text('Create Call'),
+  onPressed: () async {
+    try {
+      var call = StreamVideo.instance.makeCall(
+          type: 'default', id: 'demo-call-123');
+
+      await call.getOrCreateCall();
+    } catch (e) {
+      debugPrint('Error joining or creating call: $e');
+      debugPrint(e.toString());
+    }
+  },
+)
+```
+
+You have created a Stream Video call. Let's set up the call screen UI so that the user can see other users
+and interact.
+
+6. Setting up the call UI
+
+7. Adding CallKit call flow to apps
+
+8. Recap
