@@ -25,14 +25,15 @@ class AppRepository {
     if (!StreamVideo.isInitialized()) {
       final streamVideoClient = StreamVideo.init(
         Env.apiKey,
-        coordinatorRpcUrl: Env.coordinatorRpcUrl,
-        coordinatorWsUrl: Env.coordinatorWsUrl,
         logPriority: Priority.info,
         muteAudioWhenInBackground: true,
         muteVideoWhenInBackground: true,
       );
       await streamVideoClient.initPushNotificationManager(
-        StreamVideoPushNotificationManager.factory(),
+        StreamVideoPushNotificationManager.factory(
+          apnsProviderName: 'flutter-apn-video',
+          firebaseProviderName: 'firebase',
+        ),
       );
       return streamVideoClient;
     } else {
