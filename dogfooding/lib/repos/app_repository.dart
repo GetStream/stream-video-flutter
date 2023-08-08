@@ -25,8 +25,6 @@ class AppRepository {
     if (!StreamVideo.isInitialized()) {
       final streamVideoClient = StreamVideo.init(
         Env.apiKey,
-        coordinatorRpcUrl: Env.coordinatorRpcUrl,
-        coordinatorWsUrl: Env.coordinatorWsUrl,
         logPriority: Priority.info,
         muteAudioWhenInBackground: true,
         muteVideoWhenInBackground: true,
