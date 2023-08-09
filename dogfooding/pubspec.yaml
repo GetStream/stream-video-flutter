@@ -12,19 +12,19 @@ dependencies:
   cupertino_icons: ^1.0.2
   device_info_plus: ^8.1.0
   envied: ^0.3.0
-  firebase_auth: ^4.6.1
+  firebase_auth: ^4.7.2
   firebase_core: ^2.13.0
   firebase_messaging: ^14.6.1
   flutter:
     sdk: flutter
-  flutter_svg: 2.0.4
+  flutter_svg: 2.0.5
   google_fonts: ^4.0.4
   google_sign_in: ^6.1.1
   http: ^0.13.5
   path_provider: ^2.0.14
   share_plus: ^7.0.2
   shared_preferences: ^2.0.17
-  stream_chat_flutter: ^6.5.0
+  stream_chat_flutter: ^6.8.1
   stream_video: ^0.0.2
   stream_video_flutter: ^0.0.3
   stream_video_push_notification: ^0.0.3

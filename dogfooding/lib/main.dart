@@ -13,6 +13,7 @@ import 'package:uni_links/uni_links.dart';
 import 'firebase_options.dart';
 import 'repos/app_repository.dart';
 import 'repos/auth_repo.dart';
+import 'repos/token_service.dart';
 import 'repos/user_repository.dart';
 import 'src/routes/app_routes.dart';
 import 'src/routes/routes.dart';
@@ -21,13 +22,31 @@ import 'src/utils/providers.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  await AppRepository.initStreamVideo();
+  // As this runs in a separate isolate, we need to initialize and connect the
+  // user to StreamVideo again.
+  final appRepo = AppRepository();
+  await appRepo.beginSession();
+  final authRepo = AuthRepository(
+    tokenService: TokenService(),
+    streamVideo: appRepo.videoClient,
+    streamChat: appRepo.chatClient,
+    googleSignIn: GoogleSignIn(hostedDomain: 'getstream.io'),
+  );
+
+  final credentials = await UserRepository.instance.getUserCredentials();
+  if (credentials == null) {
+    // The user is not logged in, so we don't need to handle the message.
+    return;
+  }
+
+  await authRepo.loginWithUserInfo(credentials.user);
+
+  // Once the setup is done, we can handle the message.
   await _handleRemoteMessage(message);
 }
 
-Future<void> _handleRemoteMessage(RemoteMessage message) async {
-  await StreamVideo.instance.handlePushNotification(message.data);
+Future<bool> _handleRemoteMessage(RemoteMessage message) {
+  return StreamVideo.instance.handlePushNotification(message.data);
 }
 
 Future<void> main() async {
