@@ -16,6 +16,7 @@ dependencies:
   stream_video: ^0.0.2
   flutter_callkit_incoming: ^2.0.0+1
   uuid: ^3.0.7
+  rxdart: ^0.27.7
   collection: ^1.16.0
   firebase_core: ^2.11.0
 
