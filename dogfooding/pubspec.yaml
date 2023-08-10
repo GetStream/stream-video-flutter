@@ -20,7 +20,7 @@ dependencies:
   flutter_svg: ^2.0.5
   google_fonts: ^4.0.4
   google_sign_in: ^6.1.4
-  http: ^0.13.0
+  http: ^0.13.6
   path_provider: ^2.1.0
   share_plus: ^7.1.0
   shared_preferences: ^2.2.0

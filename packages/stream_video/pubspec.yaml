@@ -14,7 +14,7 @@ dependencies:
     sdk: flutter
   async: ^2.10.0
   equatable: ^2.0.5
-  http: ^0.13.0
+  http: ^0.13.6
   jose: ^0.3.3
   protobuf: ^3.0.0
   tart: ^0.4.0
