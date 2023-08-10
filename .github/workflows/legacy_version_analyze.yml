@@ -31,7 +31,7 @@ jobs:
   # This is to minimize accidentally making changes that break old versions
   # (which we don't commit to supporting, but don't want to actively break)
   # without updating the constraints.
-  analyze_legacy_versions:
+  analyze_legacy_version:
     timeout-minutes: 15
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
