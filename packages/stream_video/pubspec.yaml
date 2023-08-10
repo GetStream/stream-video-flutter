@@ -6,39 +6,39 @@ repository: https://github.com/GetStream/stream-video-flutter
 issue_tracker: https://github.com/GetStream/stream-video-flutter/issues
 
 environment:
-  sdk: ">=2.18.0 <4.0.0"
-  flutter: ">=3.3.0"
+  sdk: ">=2.19.0 <4.0.0"
+  flutter: ">=3.7.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  async: ^2.11.0
+  async: ^2.10.0
   equatable: ^2.0.5
-  http: ^0.13.4
+  http: ^0.13.6
   jose: ^0.3.3
   protobuf: ^3.0.0
-  tart: ^0.3.0
+  tart: ^0.4.0
   uuid: ^3.0.7
   rxdart: ^0.27.7
   web_socket_channel: ^2.4.0
-  connectivity_plus: ^4.0.1
-  collection: ^1.17.1
-  flutter_webrtc: ^0.9.35
+  connectivity_plus: ^4.0.2
+  collection: ^1.17.0
+  flutter_webrtc: ^0.9.34
   intl: ^0.18.1
-  meta: ^1.9.1
+  meta: ^1.8.0
   sdp_transform: ^0.3.2
   synchronized: ^3.1.0
   state_notifier: ^0.7.2+1
   shared_preferences: ^2.2.0
   fixnum: ^1.1.0
-  dart_webrtc: ^1.1.1
-  webrtc_interface: ^1.1.0
+  dart_webrtc: ^1.0.17
+  webrtc_interface: ^1.0.13
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   mockito: ^5.2.0
-  mocktail: ^0.3.0
+  mocktail: ^1.0.0
 
 topics:
   - video
