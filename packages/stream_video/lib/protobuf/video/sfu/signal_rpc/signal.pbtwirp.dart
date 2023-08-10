@@ -336,7 +336,7 @@ Future<List<int>> doProtobufRequest(twirp.Context ctx, Uri url,
     req.bodyBytes = msgReq.writeToBuffer();
 
     // call onRequestPrepared hook for user to modify request
-    ctx = hooks.onRequestPrepared(ctx, req);
+    ctx = await hooks.onRequestPrepared(ctx, req);
 
     // send data
     final res = await httpClient.send(req);
@@ -380,7 +380,7 @@ Future<String> doJSONRequest(twirp.Context ctx, Uri url,
     req.body = json.encode(msgReq.toProto3Json());
 
     // call onRequestPrepared hook for user to modify request
-    ctx = hooks.onRequestPrepared(ctx, req);
+    ctx = await hooks.onRequestPrepared(ctx, req);
 
     // send data
     final res = await httpClient.send(req);
