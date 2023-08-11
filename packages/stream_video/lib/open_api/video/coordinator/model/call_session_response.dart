@@ -16,6 +16,8 @@ class CallSessionResponse {
     this.acceptedBy = const {},
     this.endedAt,
     required this.id,
+    this.liveEndedAt,
+    this.liveStartedAt,
     this.participants = const [],
     this.participantsCountByRole = const {},
     this.rejectedBy = const {},
@@ -33,6 +35,22 @@ class CallSessionResponse {
   DateTime? endedAt;
 
   String id;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? liveEndedAt;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? liveStartedAt;
 
   List<CallParticipantResponse> participants;
 
@@ -53,6 +71,8 @@ class CallSessionResponse {
      other.acceptedBy == acceptedBy &&
      other.endedAt == endedAt &&
      other.id == id &&
+     other.liveEndedAt == liveEndedAt &&
+     other.liveStartedAt == liveStartedAt &&
      other.participants == participants &&
      other.participantsCountByRole == participantsCountByRole &&
      other.rejectedBy == rejectedBy &&
@@ -64,13 +84,15 @@ class CallSessionResponse {
     (acceptedBy.hashCode) +
     (endedAt == null ? 0 : endedAt!.hashCode) +
     (id.hashCode) +
+    (liveEndedAt == null ? 0 : liveEndedAt!.hashCode) +
+    (liveStartedAt == null ? 0 : liveStartedAt!.hashCode) +
     (participants.hashCode) +
     (participantsCountByRole.hashCode) +
     (rejectedBy.hashCode) +
     (startedAt == null ? 0 : startedAt!.hashCode);
 
   @override
-  String toString() => 'CallSessionResponse[acceptedBy=$acceptedBy, endedAt=$endedAt, id=$id, participants=$participants, participantsCountByRole=$participantsCountByRole, rejectedBy=$rejectedBy, startedAt=$startedAt]';
+  String toString() => 'CallSessionResponse[acceptedBy=$acceptedBy, endedAt=$endedAt, id=$id, liveEndedAt=$liveEndedAt, liveStartedAt=$liveStartedAt, participants=$participants, participantsCountByRole=$participantsCountByRole, rejectedBy=$rejectedBy, startedAt=$startedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -81,6 +103,16 @@ class CallSessionResponse {
       json[r'ended_at'] = null;
     }
       json[r'id'] = this.id;
+    if (this.liveEndedAt != null) {
+      json[r'live_ended_at'] = this.liveEndedAt!.toUtc().toIso8601String();
+    } else {
+      json[r'live_ended_at'] = null;
+    }
+    if (this.liveStartedAt != null) {
+      json[r'live_started_at'] = this.liveStartedAt!.toUtc().toIso8601String();
+    } else {
+      json[r'live_started_at'] = null;
+    }
       json[r'participants'] = this.participants;
       json[r'participants_count_by_role'] = this.participantsCountByRole;
       json[r'rejected_by'] = this.rejectedBy;
@@ -114,6 +146,8 @@ class CallSessionResponse {
         acceptedBy: mapCastOfType<String, DateTime>(json, r'accepted_by')!,
         endedAt: mapDateTime(json, r'ended_at', ''),
         id: mapValueOfType<String>(json, r'id')!,
+        liveEndedAt: mapDateTime(json, r'live_ended_at', ''),
+        liveStartedAt: mapDateTime(json, r'live_started_at', ''),
         participants: CallParticipantResponse.listFromJson(json[r'participants'])!,
         participantsCountByRole: mapCastOfType<String, int>(json, r'participants_count_by_role')!,
         rejectedBy: mapCastOfType<String, DateTime>(json, r'rejected_by')!,

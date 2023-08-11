@@ -164,7 +164,12 @@ abstract class CoordinatorClient {
   /// joined the call.
   Future<Result<None>> endCall(StreamCallCid callCid);
 
-  Future<Result<CallMetadata>> goLive(StreamCallCid callCid);
+  Future<Result<CallMetadata>> goLive({
+    required StreamCallCid callCid,
+    bool? startHls,
+    bool? startRecording,
+    bool? startTranscription,
+  });
 
   Future<Result<CallMetadata>> stopLive(StreamCallCid callCid);
 

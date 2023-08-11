@@ -609,20 +609,22 @@ class DefaultApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> goLiveWithHttpInfo(String type, String id,) async {
+  ///
+  /// * [GoLiveRequest] goLiveRequest (required):
+  Future<Response> goLiveWithHttpInfo(String type, String id, GoLiveRequest goLiveRequest,) async {
     // ignore: prefer_const_declarations
     final path = r'/call/{type}/{id}/go_live'
       .replaceAll('{type}', type)
       .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
-    Object? postBody;
+    Object? postBody = goLiveRequest;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-    const contentTypes = <String>[];
+    const contentTypes = <String>['application/json'];
 
 
     return apiClient.invokeAPI(
@@ -645,8 +647,10 @@ class DefaultApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<GoLiveResponse?> goLive(String type, String id,) async {
-    final response = await goLiveWithHttpInfo(type, id,);
+  ///
+  /// * [GoLiveRequest] goLiveRequest (required):
+  Future<GoLiveResponse?> goLive(String type, String id, GoLiveRequest goLiveRequest,) async {
+    final response = await goLiveWithHttpInfo(type, id, goLiveRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -2113,5 +2117,137 @@ class DefaultApi {
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
+  }
+
+  /// Pin
+  ///
+  /// Pins a track for all users in the call.  Required permissions: - PinCallTrack 
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [PinRequest] pinRequest (required):
+  Future<Response> videoPinWithHttpInfo(String type, String id, PinRequest pinRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/call/{type}/{id}/pin'
+      .replaceAll('{type}', type)
+      .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody = pinRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Pin
+  ///
+  /// Pins a track for all users in the call.  Required permissions: - PinCallTrack 
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [PinRequest] pinRequest (required):
+  Future<PinResponse?> videoPin(String type, String id, PinRequest pinRequest,) async {
+    final response = await videoPinWithHttpInfo(type, id, pinRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'PinResponse',) as PinResponse;
+    
+    }
+    return null;
+  }
+
+  /// Unpin
+  ///
+  /// Unpins a track for all users in the call.  Required permissions: - PinCallTrack 
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [UnpinRequest] unpinRequest (required):
+  Future<Response> videoUnpinWithHttpInfo(String type, String id, UnpinRequest unpinRequest,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/call/{type}/{id}/unpin'
+      .replaceAll('{type}', type)
+      .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody = unpinRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Unpin
+  ///
+  /// Unpins a track for all users in the call.  Required permissions: - PinCallTrack 
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [UnpinRequest] unpinRequest (required):
+  Future<UnpinResponse?> videoUnpin(String type, String id, UnpinRequest unpinRequest,) async {
+    final response = await videoUnpinWithHttpInfo(type, id, unpinRequest,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'UnpinResponse',) as UnpinResponse;
+    
+    }
+    return null;
   }
 }
