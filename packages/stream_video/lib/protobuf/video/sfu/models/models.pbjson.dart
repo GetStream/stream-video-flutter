@@ -98,11 +98,12 @@ const SdkType$json = const {
     const {'1': 'SDK_TYPE_IOS', '2': 4},
     const {'1': 'SDK_TYPE_FLUTTER', '2': 5},
     const {'1': 'SDK_TYPE_REACT_NATIVE', '2': 6},
+    const {'1': 'SDK_TYPE_UNITY', '2': 7},
   ],
 };
 
 /// Descriptor for `SdkType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List sdkTypeDescriptor = $convert.base64Decode('CgdTZGtUeXBlEhgKFFNES19UWVBFX1VOU1BFQ0lGSUVEEAASEgoOU0RLX1RZUEVfUkVBQ1QQARIUChBTREtfVFlQRV9BTkdVTEFSEAISFAoQU0RLX1RZUEVfQU5EUk9JRBADEhAKDFNES19UWVBFX0lPUxAEEhQKEFNES19UWVBFX0ZMVVRURVIQBRIZChVTREtfVFlQRV9SRUFDVF9OQVRJVkUQBg==');
+final $typed_data.Uint8List sdkTypeDescriptor = $convert.base64Decode('CgdTZGtUeXBlEhgKFFNES19UWVBFX1VOU1BFQ0lGSUVEEAASEgoOU0RLX1RZUEVfUkVBQ1QQARIUChBTREtfVFlQRV9BTkdVTEFSEAISFAoQU0RLX1RZUEVfQU5EUk9JRBADEhAKDFNES19UWVBFX0lPUxAEEhQKEFNES19UWVBFX0ZMVVRURVIQBRIZChVTREtfVFlQRV9SRUFDVF9OQVRJVkUQBhISCg5TREtfVFlQRV9VTklUWRAH');
 @$core.Deprecated('Use trackUnpublishReasonDescriptor instead')
 const TrackUnpublishReason$json = const {
   '1': 'TrackUnpublishReason',
@@ -135,11 +136,12 @@ const CallState$json = const {
     const {'1': 'participants', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Participant', '10': 'participants'},
     const {'1': 'started_at', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'startedAt'},
     const {'1': 'participant_count', '3': 3, '4': 1, '5': 11, '6': '.stream.video.sfu.models.ParticipantCount', '10': 'participantCount'},
+    const {'1': 'pins', '3': 4, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Pin', '10': 'pins'},
   ],
 };
 
 /// Descriptor for `CallState`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callStateDescriptor = $convert.base64Decode('CglDYWxsU3RhdGUSSAoMcGFydGljaXBhbnRzGAEgAygLMiQuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGFydGljaXBhbnRSDHBhcnRpY2lwYW50cxI5CgpzdGFydGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJc3RhcnRlZEF0ElYKEXBhcnRpY2lwYW50X2NvdW50GAMgASgLMikuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGFydGljaXBhbnRDb3VudFIQcGFydGljaXBhbnRDb3VudA==');
+final $typed_data.Uint8List callStateDescriptor = $convert.base64Decode('CglDYWxsU3RhdGUSSAoMcGFydGljaXBhbnRzGAEgAygLMiQuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGFydGljaXBhbnRSDHBhcnRpY2lwYW50cxI5CgpzdGFydGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJc3RhcnRlZEF0ElYKEXBhcnRpY2lwYW50X2NvdW50GAMgASgLMikuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGFydGljaXBhbnRDb3VudFIQcGFydGljaXBhbnRDb3VudBIwCgRwaW5zGAQgAygLMhwuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGluUgRwaW5z');
 @$core.Deprecated('Use participantCountDescriptor instead')
 const ParticipantCount$json = const {
   '1': 'ParticipantCount',
@@ -151,6 +153,17 @@ const ParticipantCount$json = const {
 
 /// Descriptor for `ParticipantCount`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List participantCountDescriptor = $convert.base64Decode('ChBQYXJ0aWNpcGFudENvdW50EhQKBXRvdGFsGAEgASgNUgV0b3RhbBIcCglhbm9ueW1vdXMYAiABKA1SCWFub255bW91cw==');
+@$core.Deprecated('Use pinDescriptor instead')
+const Pin$json = const {
+  '1': 'Pin',
+  '2': const [
+    const {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
+    const {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
+  ],
+};
+
+/// Descriptor for `Pin`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List pinDescriptor = $convert.base64Decode('CgNQaW4SFwoHdXNlcl9pZBgBIAEoCVIGdXNlcklkEh0KCnNlc3Npb25faWQYAiABKAlSCXNlc3Npb25JZA==');
 @$core.Deprecated('Use participantDescriptor instead')
 const Participant$json = const {
   '1': 'Participant',

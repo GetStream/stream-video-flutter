@@ -35,6 +35,7 @@ enum SfuEvent_EventPayload {
   callGrantsUpdated, 
   goAway, 
   iceRestart, 
+  pinsUpdated, 
   notSet
 }
 
@@ -57,10 +58,11 @@ class SfuEvent extends $pb.GeneratedMessage {
     19 : SfuEvent_EventPayload.callGrantsUpdated,
     20 : SfuEvent_EventPayload.goAway,
     21 : SfuEvent_EventPayload.iceRestart,
+    22 : SfuEvent_EventPayload.pinsUpdated,
     0 : SfuEvent_EventPayload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SfuEvent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22])
     ..aOM<SubscriberOffer>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscriberOffer', subBuilder: SubscriberOffer.create)
     ..aOM<PublisherAnswer>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'publisherAnswer', subBuilder: PublisherAnswer.create)
     ..aOM<ConnectionQualityChanged>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionQualityChanged', subBuilder: ConnectionQualityChanged.create)
@@ -78,6 +80,7 @@ class SfuEvent extends $pb.GeneratedMessage {
     ..aOM<CallGrantsUpdated>(19, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callGrantsUpdated', subBuilder: CallGrantsUpdated.create)
     ..aOM<GoAway>(20, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'goAway', subBuilder: GoAway.create)
     ..aOM<ICERestart>(21, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'iceRestart', subBuilder: ICERestart.create)
+    ..aOM<PinsChanged>(22, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pinsUpdated', subBuilder: PinsChanged.create)
     ..hasRequiredFields = false
   ;
 
@@ -100,6 +103,7 @@ class SfuEvent extends $pb.GeneratedMessage {
     CallGrantsUpdated? callGrantsUpdated,
     GoAway? goAway,
     ICERestart? iceRestart,
+    PinsChanged? pinsUpdated,
   }) {
     final _result = create();
     if (subscriberOffer != null) {
@@ -152,6 +156,9 @@ class SfuEvent extends $pb.GeneratedMessage {
     }
     if (iceRestart != null) {
       _result.iceRestart = iceRestart;
+    }
+    if (pinsUpdated != null) {
+      _result.pinsUpdated = pinsUpdated;
     }
     return _result;
   }
@@ -365,6 +372,58 @@ class SfuEvent extends $pb.GeneratedMessage {
   void clearIceRestart() => clearField(21);
   @$pb.TagNumber(21)
   ICERestart ensureIceRestart() => $_ensure(16);
+
+  @$pb.TagNumber(22)
+  PinsChanged get pinsUpdated => $_getN(17);
+  @$pb.TagNumber(22)
+  set pinsUpdated(PinsChanged v) { setField(22, v); }
+  @$pb.TagNumber(22)
+  $core.bool hasPinsUpdated() => $_has(17);
+  @$pb.TagNumber(22)
+  void clearPinsUpdated() => clearField(22);
+  @$pb.TagNumber(22)
+  PinsChanged ensurePinsUpdated() => $_ensure(17);
+}
+
+class PinsChanged extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PinsChanged', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..pc<$0.Pin>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pins', $pb.PbFieldType.PM, subBuilder: $0.Pin.create)
+    ..hasRequiredFields = false
+  ;
+
+  PinsChanged._() : super();
+  factory PinsChanged({
+    $core.Iterable<$0.Pin>? pins,
+  }) {
+    final _result = create();
+    if (pins != null) {
+      _result.pins.addAll(pins);
+    }
+    return _result;
+  }
+  factory PinsChanged.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory PinsChanged.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  PinsChanged clone() => PinsChanged()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  PinsChanged copyWith(void Function(PinsChanged) updates) => super.copyWith((message) => updates(message as PinsChanged)) as PinsChanged; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static PinsChanged create() => PinsChanged._();
+  PinsChanged createEmptyInstance() => create();
+  static $pb.PbList<PinsChanged> createRepeated() => $pb.PbList<PinsChanged>();
+  @$core.pragma('dart2js:noInline')
+  static PinsChanged getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PinsChanged>(create);
+  static PinsChanged? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$0.Pin> get pins => $_getList(0);
 }
 
 class Error extends $pb.GeneratedMessage {

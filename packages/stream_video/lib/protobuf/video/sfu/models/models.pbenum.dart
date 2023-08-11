@@ -140,6 +140,7 @@ class SdkType extends $pb.ProtobufEnum {
   static const SdkType SDK_TYPE_IOS = SdkType._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SDK_TYPE_IOS');
   static const SdkType SDK_TYPE_FLUTTER = SdkType._(5, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SDK_TYPE_FLUTTER');
   static const SdkType SDK_TYPE_REACT_NATIVE = SdkType._(6, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SDK_TYPE_REACT_NATIVE');
+  static const SdkType SDK_TYPE_UNITY = SdkType._(7, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SDK_TYPE_UNITY');
 
   static const $core.List<SdkType> values = <SdkType> [
     SDK_TYPE_UNSPECIFIED,
@@ -149,6 +150,7 @@ class SdkType extends $pb.ProtobufEnum {
     SDK_TYPE_IOS,
     SDK_TYPE_FLUTTER,
     SDK_TYPE_REACT_NATIVE,
+    SDK_TYPE_UNITY,
   ];
 
   static final $core.Map<$core.int, SdkType> _byValue = $pb.ProtobufEnum.initByValue(values);
