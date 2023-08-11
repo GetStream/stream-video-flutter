@@ -355,10 +355,10 @@ To enable HLS support, your call must first be placed into “broadcasting” mo
 Next, we can obtain the HLS URL by querying the `hlsPlaylistURL` from the result of our create call function:
 
 ```dart
-final result = await call.getOrCreateCall();
+final result = await call.startHLS();
 
 if (result.isSuccess) {
-  final url = result.getDataOrNull()!.data.metadata.details.hlsPlaylistUrl;
+  final url = state.value.egress.hlsPlaylistUrl;
 
 ...
 }

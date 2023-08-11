@@ -115,7 +115,7 @@ abstract class CoordinatorClient {
   Future<Result<None>> stopRecording(StreamCallCid callCid);
 
   /// Starts broadcasting for the call described by the given [callCid].
-  Future<Result<None>> startBroadcasting(StreamCallCid callCid);
+  Future<Result<String?>> startBroadcasting(StreamCallCid callCid);
 
   /// Stops broadcasting for the call described by the given [callCid].
   Future<Result<None>> stopBroadcasting(StreamCallCid callCid);

@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 import 'call_cid.dart';
+import 'call_egress.dart';
 import 'call_permission.dart';
 import 'call_settings.dart';
 
@@ -34,7 +35,6 @@ class CallMetadata with EquatableMixin {
 @immutable
 class CallDetails with EquatableMixin {
   const CallDetails({
-    required this.hlsPlaylistUrl,
     required this.createdBy,
     required this.team,
     required this.ownCapabilities,
@@ -43,6 +43,7 @@ class CallDetails with EquatableMixin {
     required this.recording,
     required this.backstage,
     required this.transcribing,
+    required this.egress,
     required this.custom,
     required this.rtmpIngress,
     this.startsAt,
@@ -51,7 +52,6 @@ class CallDetails with EquatableMixin {
     this.updatedAt,
   });
 
-  final String hlsPlaylistUrl;
   final CallUser createdBy;
   final String team;
   final Iterable<CallPermission> ownCapabilities;
@@ -60,6 +60,7 @@ class CallDetails with EquatableMixin {
   final bool recording;
   final bool backstage;
   final bool transcribing;
+  final CallEgress egress;
   final Map<String, Object> custom;
   final String rtmpIngress;
   final DateTime? startsAt;
@@ -69,7 +70,6 @@ class CallDetails with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        hlsPlaylistUrl,
         createdBy,
         ownCapabilities,
         blockedUserIds,
@@ -77,6 +77,7 @@ class CallDetails with EquatableMixin {
         recording,
         backstage,
         transcribing,
+        egress,
         custom,
         rtmpIngress,
         startsAt,
