@@ -350,15 +350,15 @@ With these two pieces of information, we can update the settings in OBS then sel
 ### Viewing a livestream (HLS)
 The final piece of livestreaming using Stream is support for HLS or HTTP Live Streaming. HLS unlike WebRTC based streaming tends to have a 10 to 20 second delay but offers video buffering under poor network condition.
 
-To enable HLS support, your call must first be placed into “broadcasting” mode using the `call.startBroadcasting()` method.
+To enable HLS support, your `call` must first be placed into “broadcasting” mode using the `call.startHLS()` method.
 
-Next, we can obtain the HLS URL by querying the `hlsPlaylistURL` from the result of our create call function:
+Next, we can obtain the HLS URL by querying the `hlsPlaylistURL` from `call.state`:
 
 ```dart
 final result = await call.startHLS();
 
 if (result.isSuccess) {
-  final url = state.value.egress.hlsPlaylistUrl;
+  final url = call.state.value.egress.hlsPlaylistUrl;
 
 ...
 }
