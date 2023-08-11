@@ -1106,8 +1106,17 @@ class Call {
     return result;
   }
 
-  Future<Result<CallMetadata>> goLive() async {
-    final result = await _coordinatorClient.goLive(callCid);
+  Future<Result<CallMetadata>> goLive({
+    bool? startHls,
+    bool? startRecording,
+    bool? startTranscription,
+  }) async {
+    final result = await _coordinatorClient.goLive(
+      callCid: callCid,
+      startHls: startHls,
+      startRecording: startRecording,
+      startTranscription: startTranscription,
+    );
 
     if (result.isSuccess) {
       _stateManager.setCallLive(isLive: true);
