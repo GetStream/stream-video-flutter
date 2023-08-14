@@ -1,0 +1,80 @@
+---
+slug: /video-theme
+title: Video Theme
+---
+
+
+Understanding How To Customize Widgets Using `StreamVideoTheme`
+
+Find the pub.dev documentation [here](https://pub.dev/documentation/stream_video_flutter/latest/stream_video_flutter/StreamVideoTheme-class.html)
+
+### Background
+
+Stream's UI SDK makes it easy for you to add custom styles and attributes to our widgets.
+
+Through the use of `StreamVideoTheme`, you can extensively customize various elements of our UI widgets by applying modifications using `StreamVideoTheme.copyWith`.
+
+`StreamVideoTheme` is a theme extension, meaning that it can be applied to your application's theme using [`ThemeData.extensions`](https://api.flutter.dev/flutter/material/ThemeExtension-class.html):
+```dart
+ThemeData(extensions: <ThemeExtension<dynamic>>[StreamVideoTheme.dark()])
+```
+
+:::note
+In case of `StreamVideoTheme` instance is not passed at the root layer either `StreamVideoTheme._kLightFallbackTheme` or `StreamVideoTheme._kDarkFallbackTheme` will be used as a fallback based on `ThemeData.brightness` value.
+:::
+
+### A closer look at StreamVideoTheme
+
+Looking at the constructor for `StreamVideoTheme`, we can see the full list of properties and widgets available for customization.
+
+Some high-level properties such as `textTheme` or `colorTheme` can be set application-wide directly from this class. 
+In contrast, larger components such as `StreamCallParticipant`, `StreamLobbyView`, etc. have been addressed with smaller theme objects.
+
+```dart
+factory StreamVideoTheme({
+  required Brightness brightness,
+  StreamTextTheme? textTheme,
+  StreamColorTheme? colorTheme,
+  StreamCallControlsThemeData? callControlsTheme,
+  StreamUserAvatarThemeData? userAvatarTheme,
+  StreamLobbyViewThemeData? lobbyViewTheme,
+  StreamCallParticipantThemeData? callParticipantTheme,
+  StreamLocalVideoThemeData? localVideoTheme,
+  StreamCallParticipantsInfoMenuThemeData? callParticipantsInfoMenuTheme,
+  StreamIncomingOutgoingCallThemeData? incomingCallTheme,
+  StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
+}); 
+```
+
+### Stream Video Theme in use
+
+Let's take a look at customizing widgets using `StreamVideoTheme`.
+In the example below, we're changing the default `accentPrimary` color to `lightBlue` and overriding the typography and colors of `StreamCallParticipant` labels for the `Dark` theme.
+
+```dart
+bool isLightTheme = false;
+
+final darkAppTheme = StreamVideoTheme.dark();
+final lightAppTheme = StreamVideoTheme.light();
+
+MaterialApp(
+  theme: ThemeData(
+    extensions: <ThemeExtension<dynamic>>[lightAppTheme],
+  ),
+  darkTheme: ThemeData(
+    extensions: <ThemeExtension<dynamic>>[
+      darkAppTheme.copyWith(
+        colorTheme: darkAppTheme.colorTheme.copyWith(
+          accentPrimary: Colors.lightBlue,
+        ),
+        callParticipantTheme: darkAppTheme.callParticipantTheme.copyWith(
+          participantLabelTextStyle: const TextStyle(
+            color: Colors.white,
+          ),
+        ),
+      ),
+    ],
+  ),
+  themeMode: isLightTheme ? ThemeMode.light : ThemeMode.dark,
+  ...
+);
