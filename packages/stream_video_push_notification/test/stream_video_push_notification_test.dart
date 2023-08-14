@@ -11,7 +11,6 @@ import 'mocks.dart';
 Future<void> main() async {
   final client = CoordinatorClientMock();
   final callNotificationWrapper = CallNotificationWrapperMock();
-  final sharedPreferences = SharedPreferencesMock();
   final eventChannelMock = EventChannelMock();
   final streamVideoEventChannel =
       StreamVideoPushNotificationEventChannel(eventChannel: eventChannelMock);
@@ -82,14 +81,8 @@ Future<void> main() async {
         onCallAccepted: any(named: 'onCallAccepted'),
         onCallRejected: any(named: 'onCallRejected'),
       )).thenAnswer((invocation) => Future.value());
-  when(() => sharedPreferences.setString(any(), any()))
-      .thenAnswer((_) => Future.value(true));
-  when(sharedPreferences.reload).thenAnswer((_) => Future.value());
-  when(() => sharedPreferences.remove('incomingCallCid'))
-      .thenAnswer((_) => Future.value(true));
 
   final factory = StreamVideoPushNotificationManager.factory(
-    sharedPreferences: sharedPreferences,
     callNotification: callNotificationWrapper,
     eventChannel: streamVideoEventChannel,
   );
@@ -146,8 +139,6 @@ Future<void> main() async {
 
     await sut.handlePushNotification(data);
 
-    verify(() => sharedPreferences.setString('incomingCallCid', 'call:123'))
-        .called(1);
     verify(() => client.getOrCreateCall(
           callCid: streamCallCid,
         )).called(1);
@@ -187,8 +178,6 @@ Future<void> main() async {
   });
 
   test('When a call was accepted, it should be able to be consumed', () async {
-    when(() => sharedPreferences.getString('incomingCallCid'))
-        .thenReturn('call:123');
     final result = await sut.consumeIncomingCall();
 
     expect(result, callCreatedData);
@@ -201,7 +190,6 @@ Future<void> main() async {
 
   test("When there aren't any accepted call, it shouldn't consume any call",
       () async {
-    when(() => sharedPreferences.getString('incomingCallCid')).thenReturn(null);
     final result = await sut.consumeIncomingCall();
 
     expect(result, null);

@@ -1,6 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
 
+// TODO: Verify if this is needed anymore?
+// We already have FlutterCallkitIncoming.onEvent; (Event.actionCallIncoming)
 class StreamVideoPushNotificationEventChannel {
   const StreamVideoPushNotificationEventChannel(
       {EventChannel eventChannel =

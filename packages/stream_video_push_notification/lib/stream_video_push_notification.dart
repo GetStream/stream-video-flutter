@@ -6,7 +6,6 @@ import 'package:collection/collection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'src/call_notification_wrapper.dart';
@@ -16,7 +15,6 @@ import 'src/stream_video_push_notification_method_channel.dart';
 class StreamVideoPushNotificationManager implements PushNotificationManager {
   StreamVideoPushNotificationManager._create({
     required CoordinatorClient client,
-    required SharedPreferences sharedPreferences,
     required CallNotificationWrapper callNotification,
     required StreamVideoPushNotificationMethodChannel methodChannel,
     required StreamVideoPushNotificationEventChannel eventChannel,
@@ -24,7 +22,6 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? apnsProviderName,
   })  : _client = client,
         _callNotification = callNotification,
-        _sharedPreferences = sharedPreferences,
         _methodChannel = methodChannel,
         _eventChannel = eventChannel,
         _firebaseProviderName = firebaseProviderName,
@@ -39,7 +36,6 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   final _logger = taggedLogger(tag: 'SV:PNManager');
   final CoordinatorClient _client;
   final CallNotificationWrapper _callNotification;
-  final SharedPreferences _sharedPreferences;
   final StreamVideoPushNotificationMethodChannel _methodChannel;
   final StreamVideoPushNotificationEventChannel _eventChannel;
   final String? _firebaseProviderName;
@@ -55,7 +51,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   Future<void> _registerAndroidDevice() async {
-    if(_firebaseProviderName == null) {
+    if (_firebaseProviderName == null) {
       _logger.w(() => '[registerAndroidDevice] No Firebase provider name set');
       return;
     }
@@ -76,7 +72,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   Future<void> _registerIOSDevice() async {
-    if(_apnsProviderName == null) {
+    if (_apnsProviderName == null) {
       _logger.w(() => '[registerIOSDevice] No APNS provider name set');
       return;
     }
@@ -105,10 +101,9 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     final streamCallCid = StreamCallCid(cid: cid);
     final call = await _from(streamCallCid);
     if (call != null) {
-      await _callNotification.showCallNotification(
-        streamCallCid: streamCallCid,
+      await showCallIncoming(
+        cid: streamCallCid,
         callers: call.metadata.users.values.map((e) => e.name).join(', '),
-        isVideoCall: true,
         avatarUrl: call.metadata.users.values.firstOrNull?.image,
         onCallAccepted: _acceptCall,
         onCallRejected: _rejectCall,
@@ -127,7 +122,6 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   Future<void> _acceptCall(StreamCallCid streamCallCid) async {
-    await _sharedPreferences.setString('incomingCallCid', streamCallCid.value);
     await _client.acceptCall(cid: streamCallCid);
   }
 
@@ -153,29 +147,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   Future<CallCreatedData?> _from(StreamCallCid streamCallCid) async {
-    SharedPrefsHelper prefs = SharedPrefsHelper(init: false);
-    await prefs.initPrefs();
-    var user = prefs.getSavedUser();
-
-    await StreamVideo.instance.connectUserWithProvider(
-      user,
-      tokenProvider: TokenProvider.dynamic(
-        (userId) {
-          return TokenService()
-              .loadToken(apiKey: StreamVideo.instance.apiKey, userId: userId);
-        },
-      ),
-      saveUser: false,
-    );
-    var callData = (await _client.getOrCreateCall(callCid: streamCallCid))
-        .getDataOrNull()
-        ?.data;
-
-    // TODO(Deven): Explore why this does not work
-    // await StreamVideo.instance.disconnectUser();
-    // await StreamVideo.reset(disconnectUser: true);
-
-    return callData;
+    final result = await _client.getOrCreateCall(callCid: streamCallCid);
+    return result.getDataOrNull()?.data;
   }
 
   @override
@@ -185,11 +158,13 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required void Function(StreamCallCid streamCallCid) onCallAccepted,
     required void Function(StreamCallCid streamCallCid) onCallRejected,
     bool isVideoCall = true,
+    String? avatarUrl,
   }) {
     return _callNotification.showCallNotification(
       streamCallCid: cid,
       callers: callers,
       isVideoCall: isVideoCall,
+      avatarUrl: avatarUrl,
       onCallAccepted: onCallAccepted,
       onCallRejected: onCallRejected,
     );
@@ -197,26 +172,18 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   @override
   Future<CallCreatedData?> consumeIncomingCall() async {
-    var incomingCid = '';
+    final calls = await FlutterCallkitIncoming.activeCalls();
 
-    var calls = await FlutterCallkitIncoming.activeCalls();
+    // return if calls and data is not available.
+    if (calls is! List) return null;
+    final call = calls.lastOrNull;
+    if(call is! Map) return null;
 
-    if (Platform.isIOS) {
-      if (calls is List && calls.isNotEmpty) {
-        incomingCid = calls[0]['extra']['incomingCallCid'];
-      }
-    } else if (Platform.isAndroid) {
-      // TODO(Deven): Use the same approach from iOS for incoming Android calls
-      // We need to wait for a second to be sure sharedPreferences has been updated
-      await _sharedPreferences.reload();
-      incomingCid = _sharedPreferences.getString('incomingCallCid') ?? '';
-      await _sharedPreferences.remove('incomingCallCid');
-    }
+    final incomingCid = call['extra']?['incomingCallCid'];
 
-    if (incomingCid != '') {
-      return _from(StreamCallCid(cid: incomingCid));
-    }
-    return Future.value();
+    if (incomingCid == null) return null;
+
+    return _from(StreamCallCid(cid: incomingCid));
   }
 
   @override
@@ -227,21 +194,18 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   static PushNotificationManagerFactory factory({
     String? firebaseProviderName,
     String? apnsProviderName,
-    SharedPreferences? sharedPreferences,
-    CallNotificationWrapper? callNotification,
-    StreamVideoPushNotificationMethodChannel? methodChannel,
-    StreamVideoPushNotificationEventChannel? eventChannel,
+    CallNotificationWrapper callNotification = const CallNotificationWrapper(),
+    StreamVideoPushNotificationMethodChannel methodChannel =
+        const StreamVideoPushNotificationMethodChannel(),
+    StreamVideoPushNotificationEventChannel eventChannel =
+        const StreamVideoPushNotificationEventChannel(),
   }) {
     return (client) async {
       return StreamVideoPushNotificationManager._create(
         client: client,
-        sharedPreferences:
-            sharedPreferences ?? await SharedPreferences.getInstance(),
-        callNotification: callNotification ?? const CallNotificationWrapper(),
-        methodChannel:
-            methodChannel ?? const StreamVideoPushNotificationMethodChannel(),
-        eventChannel:
-            eventChannel ?? const StreamVideoPushNotificationEventChannel(),
+        callNotification: callNotification,
+        methodChannel: methodChannel,
+        eventChannel: eventChannel,
         apnsProviderName: apnsProviderName,
         firebaseProviderName: firebaseProviderName,
       );

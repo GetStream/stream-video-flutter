@@ -12,7 +12,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  shared_preferences: ^2.2.0
   firebase_messaging: ^14.6.5
   stream_video: ^0.0.2
   flutter_callkit_incoming: ^2.0.0+1
