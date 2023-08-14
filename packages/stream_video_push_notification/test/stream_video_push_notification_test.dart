@@ -20,7 +20,6 @@ Future<void> main() async {
     metadata: CallMetadata(
       cid: streamCallCid,
       details: const CallDetails(
-        hlsPlaylistUrl: '',
         createdBy: CallUser(
           id: "jc",
           name: "JC M",
@@ -36,6 +35,9 @@ Future<void> main() async {
         transcribing: false,
         custom: {},
         rtmpIngress: '',
+        egress: CallEgress(
+          hlsPlaylistUrl: '',
+        ),
       ),
       settings: const CallSettings(),
       users: const {

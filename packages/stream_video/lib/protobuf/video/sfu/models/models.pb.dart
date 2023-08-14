@@ -21,6 +21,7 @@ class CallState extends $pb.GeneratedMessage {
     ..pc<Participant>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participants', $pb.PbFieldType.PM, subBuilder: Participant.create)
     ..aOM<$0.Timestamp>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startedAt', subBuilder: $0.Timestamp.create)
     ..aOM<ParticipantCount>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participantCount', subBuilder: ParticipantCount.create)
+    ..pc<Pin>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pins', $pb.PbFieldType.PM, subBuilder: Pin.create)
     ..hasRequiredFields = false
   ;
 
@@ -29,6 +30,7 @@ class CallState extends $pb.GeneratedMessage {
     $core.Iterable<Participant>? participants,
     $0.Timestamp? startedAt,
     ParticipantCount? participantCount,
+    $core.Iterable<Pin>? pins,
   }) {
     final _result = create();
     if (participants != null) {
@@ -39,6 +41,9 @@ class CallState extends $pb.GeneratedMessage {
     }
     if (participantCount != null) {
       _result.participantCount = participantCount;
+    }
+    if (pins != null) {
+      _result.pins.addAll(pins);
     }
     return _result;
   }
@@ -87,6 +92,9 @@ class CallState extends $pb.GeneratedMessage {
   void clearParticipantCount() => clearField(3);
   @$pb.TagNumber(3)
   ParticipantCount ensureParticipantCount() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $core.List<Pin> get pins => $_getList(3);
 }
 
 class ParticipantCount extends $pb.GeneratedMessage {
@@ -148,6 +156,67 @@ class ParticipantCount extends $pb.GeneratedMessage {
   $core.bool hasAnonymous() => $_has(1);
   @$pb.TagNumber(2)
   void clearAnonymous() => clearField(2);
+}
+
+class Pin extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Pin', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.models'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sessionId')
+    ..hasRequiredFields = false
+  ;
+
+  Pin._() : super();
+  factory Pin({
+    $core.String? userId,
+    $core.String? sessionId,
+  }) {
+    final _result = create();
+    if (userId != null) {
+      _result.userId = userId;
+    }
+    if (sessionId != null) {
+      _result.sessionId = sessionId;
+    }
+    return _result;
+  }
+  factory Pin.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Pin.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Pin clone() => Pin()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Pin copyWith(void Function(Pin) updates) => super.copyWith((message) => updates(message as Pin)) as Pin; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Pin create() => Pin._();
+  Pin createEmptyInstance() => create();
+  static $pb.PbList<Pin> createRepeated() => $pb.PbList<Pin>();
+  @$core.pragma('dart2js:noInline')
+  static Pin getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Pin>(create);
+  static Pin? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get userId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set userId($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasUserId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUserId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get sessionId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set sessionId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasSessionId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSessionId() => clearField(2);
 }
 
 class Participant extends $pb.GeneratedMessage {

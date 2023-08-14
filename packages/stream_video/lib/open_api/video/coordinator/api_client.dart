@@ -319,6 +319,8 @@ class ApiClient {
           return GetOrCreateCallRequest.fromJson(value);
         case 'GetOrCreateCallResponse':
           return GetOrCreateCallResponse.fromJson(value);
+        case 'GoLiveRequest':
+          return GoLiveRequest.fromJson(value);
         case 'GoLiveResponse':
           return GoLiveResponse.fromJson(value);
         case 'HLSSettings':
@@ -357,6 +359,10 @@ class ApiClient {
           return OwnUserResponse.fromJson(value);
         case 'PermissionRequestEvent':
           return PermissionRequestEvent.fromJson(value);
+        case 'PinRequest':
+          return PinRequest.fromJson(value);
+        case 'PinResponse':
+          return PinResponse.fromJson(value);
         case 'QueryCallsRequest':
           return QueryCallsRequest.fromJson(value);
         case 'QueryCallsResponse':
@@ -429,6 +435,10 @@ class ApiClient {
           return UnblockUserResponse.fromJson(value);
         case 'UnblockedUserEvent':
           return UnblockedUserEvent.fromJson(value);
+        case 'UnpinRequest':
+          return UnpinRequest.fromJson(value);
+        case 'UnpinResponse':
+          return UnpinResponse.fromJson(value);
         case 'UpdateCallMembersRequest':
           return UpdateCallMembersRequest.fromJson(value);
         case 'UpdateCallMembersResponse':

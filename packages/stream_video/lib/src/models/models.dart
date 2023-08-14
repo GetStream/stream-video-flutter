@@ -2,6 +2,7 @@ export 'call_cid.dart';
 export 'call_created_data.dart';
 export 'call_credentials.dart';
 export 'call_device.dart';
+export 'call_egress.dart';
 export 'call_joined_data.dart';
 export 'call_metadata.dart';
 export 'call_participant_state.dart';
