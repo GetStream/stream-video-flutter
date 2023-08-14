@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../protobuf/video/sfu/models/models.pb.dart';
 import 'models/call_cid.dart';
 import 'models/call_egress.dart';
 import 'models/call_metadata.dart';
