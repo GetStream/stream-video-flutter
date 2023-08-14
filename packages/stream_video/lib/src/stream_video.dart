@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import '../stream_video.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
@@ -218,7 +219,8 @@ class StreamVideo {
     _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
     if (event is CoordinatorCallRingingEvent &&
         event.metadata.details.createdBy.id != currentUserId &&
-        event.data.ringing) {
+        event.data.ringing &&
+        !Platform.isIOS) {
       _logger.v(() => '[onCoordinatorEvent] onCallRinging: ${event.data}');
       onIncomingCall?.call(_makeCallFromRinging(data: event.data));
     }

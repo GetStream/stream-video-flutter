@@ -5,12 +5,15 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'src/call_notification_wrapper.dart';
 import 'src/stream_video_push_notification_event_channel.dart';
 import 'src/stream_video_push_notification_method_channel.dart';
+
+typedef CallEventCallback = void Function(StreamCallCid cid);
 
 class StreamVideoPushNotificationManager implements PushNotificationManager {
   StreamVideoPushNotificationManager._create({
@@ -20,6 +23,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required StreamVideoPushNotificationEventChannel eventChannel,
     String? firebaseProviderName,
     String? apnsProviderName,
+    CallEventCallback? onCallAccepted,
+    CallEventCallback? onCallRejected,
   })  : _client = client,
         _callNotification = callNotification,
         _methodChannel = methodChannel,
@@ -29,6 +34,21 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     _eventChannel.onEvent.listen((event) {
       if (event.type == NativeEventType.ACTION_INCOMING_CALL) {
         _showCall(event.content['call_cid']);
+      }
+    });
+    FlutterCallkitIncoming.onEvent.listen((event) {
+      if(event == null) {
+        return;
+      }
+
+      if(event.event == Event.actionCallAccept) {
+        var cid = StreamCallCid(cid: event.body['extra']['incomingCallCid']);
+        _acceptCall(cid);
+        onCallAccepted?.call(cid);
+      } else if (event.event == Event.actionCallDecline) {
+        var cid = StreamCallCid(cid: event.body['extra']['incomingCallCid']);
+        _rejectCall(cid);
+        onCallRejected?.call(cid);
       }
     });
   }
@@ -199,6 +219,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         const StreamVideoPushNotificationMethodChannel(),
     StreamVideoPushNotificationEventChannel eventChannel =
         const StreamVideoPushNotificationEventChannel(),
+    CallEventCallback? onCallAccepted,
+    CallEventCallback? onCallRejected,
   }) {
     return (client) async {
       return StreamVideoPushNotificationManager._create(
@@ -208,6 +230,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         eventChannel: eventChannel,
         apnsProviderName: apnsProviderName,
         firebaseProviderName: firebaseProviderName,
+        onCallAccepted: onCallAccepted,
+        onCallRejected: onCallRejected,
       );
     };
   }

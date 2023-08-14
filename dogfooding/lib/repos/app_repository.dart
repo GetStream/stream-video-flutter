@@ -50,6 +50,9 @@ class AppRepository {
         StreamVideoPushNotificationManager.factory(
           apnsProviderName: 'flutter-apn-video',
           firebaseProviderName: 'firebase',
+          onCallAccepted: (cid) {
+            // Navigate to the call screen
+          }
         ),
       );
       return streamVideoClient;
