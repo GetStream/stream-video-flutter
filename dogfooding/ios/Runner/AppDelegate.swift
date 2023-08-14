@@ -36,10 +36,6 @@ import Firebase
         completion: @escaping () -> Void
     ) {
         let state = UIApplication.shared.applicationState
-        if state == .active {
-            completion()
-            return
-        }
 
         let aps = payload.dictionaryPayload["aps"] as? [String: Any]
         let streamDict = payload.dictionaryPayload["stream"] as? [String: Any]
