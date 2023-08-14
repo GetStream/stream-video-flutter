@@ -469,10 +469,12 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   @override
-  Future<Result<None>> startBroadcasting(StreamCallCid callCid) async {
+  Future<Result<String?>> startBroadcasting(StreamCallCid callCid) async {
     try {
-      await defaultApi.startBroadcasting(callCid.type, callCid.id);
-      return const Result.success(none);
+      final result = await defaultApi
+          .startBroadcasting(callCid.type, callCid.id)
+          .then((it) => it?.playlistUrl);
+      return Result.success(result);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }

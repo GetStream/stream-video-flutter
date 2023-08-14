@@ -933,17 +933,21 @@ class Call {
     return result;
   }
 
-  Future<Result<None>> startBroadcasting() async {
+  /// Starts the broadcasting of the call.
+  Future<Result<String?>> startHLS() async {
     final result = await _permissionsManager.startBroadcasting();
 
     if (result.isSuccess) {
-      _stateManager.setCallBroadcasting(isBroadcasting: true);
+      _stateManager.setCallBroadcasting(
+          isBroadcasting: true,
+          hlsPlaylistUrl: result.getDataOrNull()
+      );
     }
-
     return result;
   }
 
-  Future<Result<None>> stopBroadcasting() async {
+  /// Stops the broadcasting of the call.
+  Future<Result<None>> stopHLS() async {
     final result = await _permissionsManager.stopBroadcasting();
 
     if (result.isSuccess) {
@@ -1106,6 +1110,7 @@ class Call {
     return result;
   }
 
+  /// Starts the livestreaming of the call.
   Future<Result<CallMetadata>> goLive({
     bool? startHls,
     bool? startRecording,
@@ -1125,6 +1130,7 @@ class Call {
     return result;
   }
 
+  /// Stops the livestreaming of the call.
   Future<Result<CallMetadata>> stopLive() async {
     final result = await _coordinatorClient.stopLive(callCid);
 

@@ -81,6 +81,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       status: stage.data.toCallStatus(state: state, ringing: ringing),
       createdByUserId: stage.data.metadata.details.createdBy.id,
       settings: stage.data.metadata.settings,
+      egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
       callParticipants: stage.data.metadata.toCallParticipants(state),
     );
@@ -95,6 +96,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       createdByUserId: stage.data.metadata.details.createdBy.id,
       isRingingFlow: stage.data.ringing,
       settings: stage.data.metadata.settings,
+      egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
       callParticipants: stage.data.metadata.toCallParticipants(state),
     );
@@ -118,6 +120,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       status: status,
       createdByUserId: stage.data.metadata.details.createdBy.id,
       settings: stage.data.metadata.settings,
+      egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
       callParticipants: stage.data.metadata.toCallParticipants(state),
     );

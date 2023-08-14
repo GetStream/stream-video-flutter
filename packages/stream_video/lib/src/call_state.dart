@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 import 'models/call_cid.dart';
+import 'models/call_egress.dart';
 import 'models/call_metadata.dart';
 import 'models/call_participant_state.dart';
 import 'models/call_permission.dart';
@@ -29,6 +30,7 @@ class CallState extends Equatable {
       isTranscribing: false,
       isBackstage: false,
       settings: const CallSettings(),
+      egress: const CallEgress(),
       videoInputDevice: null,
       audioInputDevice: null,
       audioOutputDevice: null,
@@ -55,6 +57,7 @@ class CallState extends Equatable {
       isTranscribing: metadata.details.transcribing,
       isBackstage: metadata.details.backstage,
       settings: metadata.settings,
+      egress: metadata.details.egress,
       videoInputDevice: null,
       audioInputDevice: null,
       audioOutputDevice: null,
@@ -80,6 +83,7 @@ class CallState extends Equatable {
     required this.isTranscribing,
     required this.isBackstage,
     required this.settings,
+    required this.egress,
     required this.ownCapabilities,
     required this.callParticipants,
     required this.videoInputDevice,
@@ -94,6 +98,7 @@ class CallState extends Equatable {
   final String sessionId;
   final CallStatus status;
   final CallSettings settings;
+  final CallEgress egress;
   final bool isRecording;
   final bool isBroadcasting;
   final bool isTranscribing;
@@ -130,6 +135,7 @@ class CallState extends Equatable {
     bool? isTranscribing,
     bool? isBackstage,
     CallSettings? settings,
+    CallEgress? egress,
     RtcMediaDevice? videoInputDevice,
     RtcMediaDevice? audioInputDevice,
     RtcMediaDevice? audioOutputDevice,
@@ -148,6 +154,7 @@ class CallState extends Equatable {
       isTranscribing: isTranscribing ?? this.isTranscribing,
       isBackstage: isBackstage ?? this.isBackstage,
       settings: settings ?? this.settings,
+      egress: egress ?? this.egress,
       videoInputDevice: videoInputDevice ?? this.videoInputDevice,
       audioInputDevice: audioInputDevice ?? this.audioInputDevice,
       audioOutputDevice: audioOutputDevice ?? this.audioOutputDevice,
@@ -168,6 +175,7 @@ class CallState extends Equatable {
         isBroadcasting,
         isBackstage,
         settings,
+        egress,
         videoInputDevice,
         audioInputDevice,
         audioOutputDevice,
@@ -180,7 +188,8 @@ class CallState extends Equatable {
     return 'CallState(status: $status, currentUserId: $currentUserId,'
         ' callCid: $callCid, createdByUserId: $createdByUserId,'
         ' sessionId: $sessionId, isRecording: $isRecording,'
-        ' settings: $settings, videoInputDevice: $videoInputDevice,'
+        ' settings: $settings, egress: $egress, '
+        ' videoInputDevice: $videoInputDevice,'
         ' audioInputDevice: $audioInputDevice,'
         ' audioOutputDevice: $audioOutputDevice,'
         ' ownCapabilities: $ownCapabilities,'

@@ -354,7 +354,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<None>> startBroadcasting(StreamCallCid callCid) {
+  Future<Result<String?>> startBroadcasting(StreamCallCid callCid) {
     return _retryManager.execute(
       () => _delegate.startBroadcasting(callCid),
       (error, nextAttemptDelay) async {
