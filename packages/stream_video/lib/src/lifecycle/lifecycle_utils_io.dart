@@ -31,11 +31,9 @@ Stream<LifecycleState> get appState {
   return controller.stream;
 }
 
-
 typedef OnLifecycleStateChanged = void Function(LifecycleState state);
 
 class LifecycleStateCallback extends WidgetsBindingObserver {
-
   LifecycleStateCallback(this.onStateChanged);
 
   OnLifecycleStateChanged onStateChanged;
@@ -46,18 +44,15 @@ class LifecycleStateCallback extends WidgetsBindingObserver {
   }
 }
 
-
 extension on AppLifecycleState {
   LifecycleState toDomain() {
-    switch (this) {
-      case AppLifecycleState.resumed:
-        return LifecycleState.resumed;
-      case AppLifecycleState.inactive:
-        return LifecycleState.inactive;
-      case AppLifecycleState.paused:
-        return LifecycleState.paused;
-      case AppLifecycleState.detached:
-        return LifecycleState.detached;
-    }
+    return switch (this) {
+      AppLifecycleState.resumed => LifecycleState.resumed,
+      AppLifecycleState.inactive => LifecycleState.inactive,
+      AppLifecycleState.paused => LifecycleState.paused,
+      AppLifecycleState.detached => LifecycleState.detached,
+      // TODO: Switch with `hidden` once we stop supporting Flutter 3.10.
+      _ => LifecycleState.hidden,
+    };
   }
 }

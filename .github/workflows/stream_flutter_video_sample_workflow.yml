@@ -2,7 +2,7 @@ name: stream_flutter_video_sample_workflow
 
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  FLUTTER_VERSION: 3.10.0
+  flutter_channel: "stable"
 
 on:
   pull_request:
@@ -35,7 +35,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           cache: true
-          flutter-version: ${{ env.flutter_version }}
+          channel: ${{ env.flutter_channel }}
       - name: "Install Tools"
         run: |
           flutter pub global activate melos
@@ -61,7 +61,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           cache: true
-          flutter-version: ${{ env.flutter_version }}
+          channel: ${{ env.flutter_channel }}
       - name: "Install Tools"
         run: |
           flutter pub global activate melos
