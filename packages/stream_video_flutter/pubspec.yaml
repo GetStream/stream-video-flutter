@@ -6,15 +6,15 @@ repository: https://github.com/GetStream/stream-video-flutter
 issue_tracker: https://github.com/GetStream/stream-video-flutter/issues
 
 environment:
-  sdk: ">=2.19.0 <4.0.0"
-  flutter: ">=3.7.0"
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
 
 dependencies:
   cached_network_image: ^3.2.3
-  collection: ^1.17.0
+  collection: ^1.17.1
   flutter:
     sdk: flutter
-  flutter_webrtc: ^0.9.34
+  flutter_webrtc: ^0.9.40
   rate_limiter: ^1.0.0
   stream_video: ^0.0.2
   stream_video_flutter_background: ^0.0.1

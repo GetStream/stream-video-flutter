@@ -6,18 +6,18 @@ repository: https://github.com/GetStream/stream-video-flutter
 issue_tracker: https://github.com/GetStream/stream-video-flutter/issues
 
 environment:
-  sdk: '>=2.19.0 <4.0.0'
-  flutter: ">=3.7.0"
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  firebase_messaging: ^14.6.5
+  firebase_messaging: ^14.6.6
   stream_video: ^0.0.2
   flutter_callkit_incoming: ^2.0.0+1
   uuid: ^3.0.7
   rxdart: ^0.27.7
-  collection: ^1.17.0
+  collection: ^1.17.1
   firebase_core: ^2.15.0
 
 dev_dependencies:
