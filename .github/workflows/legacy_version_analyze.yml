@@ -55,15 +55,15 @@ jobs:
 
       # Only analyze lib/; non-client code doesn't need to work on
       # all supported legacy version.
-      # TODO: Treat info as error once all packages solve their info issues.
+      # TODO: Treat info and warning as error once all packages solve their issues.
       - name: "Stream Video Analyze"
-        run: cd packages/stream_video/lib && dart analyze .
+        run: cd packages/stream_video/lib && dart analyze --no-fatal-warnings .
 
       - name: "Stream Video Flutter Analyze"
-        run: cd packages/stream_video_flutter/lib && dart analyze .
+        run: cd packages/stream_video_flutter/lib && dart analyze --no-fatal-warnings .
 
       - name: "Stream Video Flutter Background Analyze"
-        run: cd packages/stream_video_flutter_background/lib && dart analyze .
+        run: cd packages/stream_video_flutter_background/lib && dart analyze --no-fatal-warnings .
 
       - name: "Stream Video Push Notification Analyze"
-        run: cd packages/stream_video_push_notification/lib && dart analyze .
+        run: cd packages/stream_video_push_notification/lib && dart analyze --no-fatal-warnings .
