@@ -78,7 +78,7 @@ class OwnCapability {
 
   static OwnCapability? fromJson(dynamic value) => OwnCapabilityTypeTransformer().decode(value);
 
-  static List<OwnCapability>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<OwnCapability> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <OwnCapability>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {

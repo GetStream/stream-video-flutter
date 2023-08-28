@@ -62,7 +62,7 @@ class StopBroadcastingResponse {
     return null;
   }
 
-  static List<StopBroadcastingResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<StopBroadcastingResponse> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <StopBroadcastingResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -93,12 +93,10 @@ class StopBroadcastingResponse {
   static Map<String, List<StopBroadcastingResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<StopBroadcastingResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = StopBroadcastingResponse.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = StopBroadcastingResponse.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

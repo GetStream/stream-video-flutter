@@ -61,7 +61,7 @@ class SendEventRequest {
     return null;
   }
 
-  static List<SendEventRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<SendEventRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <SendEventRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -92,12 +92,10 @@ class SendEventRequest {
   static Map<String, List<SendEventRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<SendEventRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = SendEventRequest.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = SendEventRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

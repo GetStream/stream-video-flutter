@@ -68,7 +68,7 @@ class UnpinRequest {
     return null;
   }
 
-  static List<UnpinRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<UnpinRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <UnpinRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -99,12 +99,10 @@ class UnpinRequest {
   static Map<String, List<UnpinRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<UnpinRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = UnpinRequest.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = UnpinRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
