@@ -103,6 +103,7 @@ class ErrorCode extends $pb.ProtobufEnum {
   static const ErrorCode ERROR_CODE_TOO_MANY_REQUESTS = ErrorCode._(429, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_TOO_MANY_REQUESTS');
   static const ErrorCode ERROR_CODE_INTERNAL_SERVER_ERROR = ErrorCode._(500, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_INTERNAL_SERVER_ERROR');
   static const ErrorCode ERROR_CODE_SFU_SHUTTING_DOWN = ErrorCode._(600, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_SFU_SHUTTING_DOWN');
+  static const ErrorCode ERROR_CODE_SFU_FULL = ErrorCode._(700, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ERROR_CODE_SFU_FULL');
 
   static const $core.List<ErrorCode> values = <ErrorCode> [
     ERROR_CODE_UNSPECIFIED,
@@ -124,6 +125,7 @@ class ErrorCode extends $pb.ProtobufEnum {
     ERROR_CODE_TOO_MANY_REQUESTS,
     ERROR_CODE_INTERNAL_SERVER_ERROR,
     ERROR_CODE_SFU_SHUTTING_DOWN,
+    ERROR_CODE_SFU_FULL,
   ];
 
   static final $core.Map<$core.int, ErrorCode> _byValue = $pb.ProtobufEnum.initByValue(values);
