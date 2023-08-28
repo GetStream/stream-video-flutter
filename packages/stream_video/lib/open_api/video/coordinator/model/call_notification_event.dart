@@ -97,7 +97,7 @@ class CallNotificationEvent {
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
-        members: MemberResponse.listFromJson(json[r'members'])!,
+        members: MemberResponse.listFromJson(json[r'members']),
         sessionId: mapValueOfType<String>(json, r'session_id')!,
         type: mapValueOfType<String>(json, r'type')!,
         user: UserResponse.fromJson(json[r'user'])!,
@@ -106,7 +106,7 @@ class CallNotificationEvent {
     return null;
   }
 
-  static List<CallNotificationEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallNotificationEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallNotificationEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -137,12 +137,10 @@ class CallNotificationEvent {
   static Map<String, List<CallNotificationEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallNotificationEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CallNotificationEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CallNotificationEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

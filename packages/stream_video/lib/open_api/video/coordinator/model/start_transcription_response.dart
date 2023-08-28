@@ -61,7 +61,7 @@ class StartTranscriptionResponse {
     return null;
   }
 
-  static List<StartTranscriptionResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<StartTranscriptionResponse> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <StartTranscriptionResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -92,12 +92,10 @@ class StartTranscriptionResponse {
   static Map<String, List<StartTranscriptionResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<StartTranscriptionResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = StartTranscriptionResponse.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = StartTranscriptionResponse.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

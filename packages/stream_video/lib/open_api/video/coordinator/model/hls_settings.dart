@@ -77,7 +77,7 @@ class HLSSettings {
     return null;
   }
 
-  static List<HLSSettings>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<HLSSettings> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <HLSSettings>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -108,12 +108,10 @@ class HLSSettings {
   static Map<String, List<HLSSettings>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<HLSSettings>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = HLSSettings.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = HLSSettings.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

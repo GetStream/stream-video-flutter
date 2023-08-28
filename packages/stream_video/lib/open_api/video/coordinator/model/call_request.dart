@@ -144,7 +144,7 @@ class CallRequest {
         createdBy: UserRequest.fromJson(json[r'created_by']),
         createdById: mapValueOfType<String>(json, r'created_by_id'),
         custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
-        members: MemberRequest.listFromJson(json[r'members']) ?? const [],
+        members: MemberRequest.listFromJson(json[r'members']),
         settingsOverride: CallSettingsRequest.fromJson(json[r'settings_override']),
         startsAt: mapDateTime(json, r'starts_at', ''),
         team: mapValueOfType<String>(json, r'team'),
@@ -153,7 +153,7 @@ class CallRequest {
     return null;
   }
 
-  static List<CallRequest>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallRequest> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -184,12 +184,10 @@ class CallRequest {
   static Map<String, List<CallRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallRequest>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CallRequest.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CallRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

@@ -87,7 +87,7 @@ class ConnectionErrorEvent {
     return null;
   }
 
-  static List<ConnectionErrorEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ConnectionErrorEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ConnectionErrorEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -118,12 +118,10 @@ class ConnectionErrorEvent {
   static Map<String, List<ConnectionErrorEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<ConnectionErrorEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = ConnectionErrorEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = ConnectionErrorEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

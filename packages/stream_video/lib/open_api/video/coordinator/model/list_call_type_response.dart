@@ -68,7 +68,7 @@ class ListCallTypeResponse {
     return null;
   }
 
-  static List<ListCallTypeResponse>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<ListCallTypeResponse> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <ListCallTypeResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -99,12 +99,10 @@ class ListCallTypeResponse {
   static Map<String, List<ListCallTypeResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<ListCallTypeResponse>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = ListCallTypeResponse.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = ListCallTypeResponse.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
