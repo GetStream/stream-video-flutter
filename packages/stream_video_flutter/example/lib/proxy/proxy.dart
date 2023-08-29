@@ -14,7 +14,6 @@ class ProxiedHttpOverrides extends HttpOverrides {
       ..findProxy = (uri) {
         return _proxy.isNotEmpty ? 'PROXY $_proxy;' : 'DIRECT';
       }
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => Platform.isAndroid;
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => Platform.isAndroid;
   }
 }
