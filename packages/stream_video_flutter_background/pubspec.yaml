@@ -1,6 +1,6 @@
 name: stream_video_flutter_background
 description: Adds background support for Stream Video SDK, a service for building video calls, audio rooms, and live-streaming applications.
-version: 0.0.2
+version: 0.0.1
 homepage: https://getstream.io/video/
 repository: https://github.com/GetStream/stream-video-flutter
 issue_tracker: https://github.com/GetStream/stream-video-flutter/issues

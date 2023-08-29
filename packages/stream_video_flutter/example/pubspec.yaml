@@ -40,8 +40,9 @@ dependencies:
   share_plus: ^7.1.0
   device_info_plus: ^9.0.3
   intl: ^0.18.1
-  stream_video_flutter: ^0.0.4
-  stream_video_flutter_background: 0.0.2
+  stream_video: ^0.0.2
+  stream_video_flutter: ^0.0.3
+  stream_video_flutter_background: 0.0.1
   envied: ^0.3.0+3
 
   # The following adds the Cupertino Icons font to your application.

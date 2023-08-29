@@ -1,4 +1,4 @@
-## 0.0.4
+## Upcoming
 
 * Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0
 
