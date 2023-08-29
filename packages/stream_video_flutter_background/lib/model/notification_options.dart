@@ -15,7 +15,7 @@ class NotificationOptions with EquatableMixin {
     return {
       'content': content?.toJson(),
       'avatar': avatar?.toJson(),
-      'use_custom_layout' : useCustomLayout,
+      'use_custom_layout': useCustomLayout,
     };
   }
 

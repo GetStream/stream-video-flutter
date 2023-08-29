@@ -28,7 +28,7 @@ class LeaveCallOption extends StatelessWidget {
       iconColor: Colors.white,
       backgroundColor: Colors.red,
       onPressed: () {
-        if(onLeaveCallTap != null) {
+        if (onLeaveCallTap != null) {
           onLeaveCallTap!();
         } else {
           call.disconnect();
