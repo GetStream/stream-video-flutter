@@ -177,7 +177,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     // return if calls and data is not available.
     if (calls is! List) return null;
     final call = calls.lastOrNull;
-    if(call is! Map) return null;
+    if (call is! Map) return null;
 
     final incomingCid = call['extra']?['incomingCallCid'];
 
