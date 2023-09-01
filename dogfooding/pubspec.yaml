@@ -1,11 +1,11 @@
 name: flutter_dogfooding
-description: Flutter Dogfooding App to showcase Video SDK.
-publish_to: 'none'
 version: 1.0.0+1
+publish_to: none
+description: Flutter Dogfooding App to showcase Video SDK.
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=3.10.0"
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
 
 dependencies:
   crypto: ^3.0.3
@@ -14,10 +14,13 @@ dependencies:
   envied: ^0.3.0+3
   firebase_auth: ^4.7.3
   firebase_core: ^2.15.1
+  firebase_crashlytics: ^3.3.5
   firebase_messaging: ^14.6.6
   flutter:
     sdk: flutter
   flutter_svg: ^2.0.7
+  get_it: ^7.6.0
+  go_router: ^10.1.0
   google_fonts: ^5.1.0
   google_sign_in: ^6.1.4
   http: ^1.1.0
@@ -25,7 +28,6 @@ dependencies:
   share_plus: ^7.1.0
   shared_preferences: ^2.2.0
   stream_chat_flutter: ^6.9.0
-  stream_video: ^0.0.2
   stream_video_flutter: ^0.0.4
   stream_video_push_notification: ^0.0.4
   uni_links: ^0.5.1
@@ -34,22 +36,28 @@ dev_dependencies:
   build_runner: ^2.4.6
   envied_generator: ^0.3.0+3
   flutter_launcher_icons: ^0.13.1
+  flutter_lints: ^2.0.2
   flutter_test:
     sdk: flutter
+  go_router_builder: ^2.3.1
+  import_sorter: ^4.6.0
+  pubspec_dependency_sorter: ^1.0.4
 
-# The following section is specific to Flutter packages.
+import_sorter:
+  emojis: true
+
 flutter:
-  uses-material-design: true
   assets:
     - assets/
+  uses-material-design: true
 
 flutter_icons:
-  image_path: "assets/app_icon.png"
-  android: true
-  ios: true
+  image_path: assets/app_icon.png
   web:
     generate: true
   windows:
     generate: true
   macos:
     generate: true
+  android: true
+  ios: true

@@ -1,29 +1,14 @@
-import 'dart:async';
-
+// 🐦 Flutter imports:
 import 'package:flutter/material.dart';
+
+// 📦 Package imports:
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../routes/routes.dart';
-import '../utils/after_layout.dart';
+// 🌎 Project imports:
 import '../utils/assets.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> with AfterLayoutMixin {
-  @override
-  FutureOr<void> afterFirstLayout(BuildContext context) {
-    // Show splash screen for 2 seconds.
-    Future<void>.delayed(const Duration(seconds: 2)).then(
-      (_) async {
-        await Navigator.of(context).pushReplacementNamed(Routes.login);
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +20,8 @@ class _SplashScreenState extends State<SplashScreen> with AfterLayoutMixin {
           children: [
             Hero(
               tag: 'stream_logo',
-              child: SvgPicture.asset(
-                streamLogoAsset,
-                semanticsLabel: 'Stream Logo',
+              child: Image.asset(
+                streamVideoIconAsset,
                 width: size.width * 0.5,
               ),
             ),
