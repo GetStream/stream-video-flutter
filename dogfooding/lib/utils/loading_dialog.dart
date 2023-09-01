@@ -1,4 +1,7 @@
+// 🐦 Flutter imports:
 import 'package:flutter/material.dart';
+
+// 📦 Package imports:
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 Future<void> showLoadingIndicator(BuildContext context) async {
@@ -21,6 +24,4 @@ Future<void> showLoadingIndicator(BuildContext context) async {
   );
 }
 
-Future<void> hideLoadingIndicator(BuildContext context) async {
-  Navigator.of(context).pop();
-}
+void hideLoadingIndicator(BuildContext context) => Navigator.of(context).pop();

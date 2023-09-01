@@ -1,14 +1,20 @@
+// 🎯 Dart imports:
 import 'dart:async';
 
+// 🐦 Flutter imports:
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:stream_video/stream_video.dart';
 
-import '../routes/routes.dart';
+// 📦 Package imports:
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+// 🌎 Project imports:
+import '../app/user_auth_controller.dart';
+import '../di/injector.dart';
 import '../utils/assets.dart';
 import '../utils/loading_dialog.dart';
-import '../utils/providers.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,53 +24,51 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  late final _userAuthController = locator.get<UserAuthController>();
   final _emailController = TextEditingController();
 
   Future<void> _loginWithGoogle() async {
-    final googleUser = await context.authRepo.signInWithGoogle();
+    final googleService = locator<GoogleSignIn>();
+    final googleUser = await googleService.signIn();
     if (googleUser == null) return debugPrint('Google login cancelled');
 
-    final user = UserInfo(
+    final userInfo = UserInfo(
       role: 'admin',
       id: googleUser.email,
       name: googleUser.displayName ?? '',
       image: googleUser.photoUrl,
     );
 
-    if (mounted) {
-      unawaited(showLoadingIndicator(context));
-      await context.authRepo.loginWithUserInfo(user);
-    }
-    if (mounted) unawaited(hideLoadingIndicator(context));
-    if (mounted) await Navigator.of(context).pushReplacementNamed(Routes.home);
-    return;
+    if (mounted) unawaited(showLoadingIndicator(context));
+
+    await _userAuthController.loginWithInfo(userInfo);
+
+    if (mounted) hideLoadingIndicator(context);
   }
 
   Future<void> _loginWithEmail() async {
     final email = _emailController.text;
     if (email.isEmpty) return debugPrint('Email is empty');
 
-    final user = UserInfo(
+    final userInfo = UserInfo(
       role: 'admin',
       id: email,
       name: email,
     );
 
-    unawaited(showLoadingIndicator(context));
-    await context.authRepo.loginWithUserInfo(user);
-    if (mounted) unawaited(hideLoadingIndicator(context));
-    if (mounted) await Navigator.of(context).pushReplacementNamed(Routes.home);
-    return;
+    if (mounted) unawaited(showLoadingIndicator(context));
+
+    await _userAuthController.loginWithInfo(userInfo);
+
+    if (mounted) hideLoadingIndicator(context);
   }
 
   Future<void> _loginAsGuest() async {
-    if (mounted) {
-      unawaited(showLoadingIndicator(context));
-      await context.authRepo.loginAsGuest();
-    }
-    if (mounted) unawaited(hideLoadingIndicator(context));
-    if (mounted) await Navigator.of(context).pushReplacementNamed(Routes.home);
-    return;
+    if (mounted) unawaited(showLoadingIndicator(context));
+
+    await _userAuthController.guestLogin();
+
+    if (mounted) hideLoadingIndicator(context);
   }
 
   @override
@@ -75,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -95,8 +99,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 36),
                 Text('Stream Meetings', style: theme.textTheme.bodyLarge),
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 18,
+                  ),
                   child: Text(
                     'Please sign in with your Google Stream account.',
                     textAlign: TextAlign.center,
