@@ -25,12 +25,13 @@ import 'user_auth_controller.dart';
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // As this runs in a separate isolate, we need to initialize and connect the
   // user to StreamVideo again.
-  final prefs = locator.get<AppPreferences>();
 
-  // The user is not logged in, so we don't need to handle the message.
+  // If the user is not logged in, we don't need to handle the message.
+  final prefs = locator.get<AppPreferences>();
   final credentials = prefs.userCredentials;
   if (credentials == null) return;
 
+  // Login using the stored credentials.
   final authController = locator.get<UserAuthController>();
   await authController.loginWithInfo(credentials.userInfo);
 
@@ -147,6 +148,7 @@ class _StreamDogFoodingAppContentState extends State<StreamDogFoodingAppContent>
     return MaterialApp.router(
       title: kAppName,
       routerConfig: _router,
+      theme: _buildTheme(Brightness.dark),
       builder: (context, child) {
         // Wrap the app in a StreamChat widget to provide it with the
         // StreamChatClient instance.
@@ -156,28 +158,31 @@ class _StreamDogFoodingAppContentState extends State<StreamDogFoodingAppContent>
           child: child!,
         );
       },
-      theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFF2C2C2E),
-        // textTheme: GoogleFonts.interTextTheme().copyWith(
-        //   bodyLarge: const TextStyle(
-        //     color: Colors.white,
-        //     fontWeight: FontWeight.bold,
-        //     fontSize: 28,
-        //   ),
-        //   bodyMedium: const TextStyle(
-        //     fontSize: 18,
-        //     color: Color(0xFF979797),
-        //   ),
-        // ),
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-          primary: const Color(0xff005FFF),
+    );
+  }
+
+  ThemeData _buildTheme(brightness) {
+    final baseTheme = ThemeData(brightness: brightness);
+    final baseTextTheme = GoogleFonts.interTextTheme(baseTheme.textTheme);
+    return baseTheme.copyWith(
+      scaffoldBackgroundColor: const Color(0xFF2C2C2E),
+      colorScheme: ColorScheme.fromSwatch().copyWith(
+        primary: const Color(0xff005FFF),
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+        labelStyle: TextStyle(color: Colors.white),
+      ),
+      extensions: <ThemeExtension<dynamic>>[StreamVideoTheme.dark()],
+      textTheme: baseTextTheme.copyWith(
+        bodyLarge: baseTextTheme.bodyLarge?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 28,
         ),
-        inputDecorationTheme: const InputDecorationTheme(
-          labelStyle: TextStyle(color: Colors.white),
+        bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+          fontSize: 18,
+          color: const Color(0xFF979797),
         ),
-        extensions: <ThemeExtension<dynamic>>[
-          StreamVideoTheme.dark(),
-        ],
       ),
     );
   }

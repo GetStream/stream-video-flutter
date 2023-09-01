@@ -102,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge,
               ),
-              const SizedBox(height: 36),
+              const SizedBox(height: 24),
               Text(
                 'Build reliable video calling, audio rooms, '
                 'and live streaming with our easy-to-use '
@@ -110,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 36),
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
