@@ -44,6 +44,11 @@ jobs:
           
       - name: Bootstrap Workspace
         run: melos bootstrap --verbose
+
+      - name: Prepare environment
+        run: |
+          echo "${{ env.ENV_PROPERTIES }}" > .env &&
+          melos run generate:all
         
         # TODO: Treat info and warning as error once all packages solve their issues.
       - name: Dart Analyze
@@ -79,7 +84,8 @@ jobs:
         
       - name: Prepare environment
         run: |
-          echo "${{ env.ENV_PROPERTIES }}" > .env
+          echo "${{ env.ENV_PROPERTIES }}" > .env &&
+          melos run generate:all
           
       - name: Build Example
         run: |

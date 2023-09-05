@@ -112,7 +112,6 @@ scripts:
   build:example:android:
     run: |
       cd ./packages/stream_video_flutter/example && 
-      flutter pub run build_runner build --delete-conflicting-outputs && 
       flutter build apk --release --verbose
     description: |
       Run `flutter build apk` in the example app.
