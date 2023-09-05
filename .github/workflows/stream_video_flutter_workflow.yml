@@ -1,8 +1,8 @@
 name: stream_video_flutter_workflow
 
 env:
-  ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  flutter_channel: "stable"
+  FLUTTER_CHANNEL: stable
+  ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
 
 on:
   pull_request:
@@ -36,7 +36,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           cache: true
-          channel: ${{ env.flutter_channel }}
+          channel: ${{ env.FLUTTER_CHANNEL }}
           
       - name: Install Tools
         run: |
@@ -73,7 +73,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           cache: true
-          channel: ${{ env.flutter_channel }}
+          channel: ${{ env.FLUTTER_CHANNEL }}
           
       - name: Install Tools
         run: |
