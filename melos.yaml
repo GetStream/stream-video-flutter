@@ -7,11 +7,6 @@ versioning:
 packages:
   - dogfooding
   - packages/**
-  - examples/**
-
-command:
-  bootstrap:
-    usePubspecOverrides: true
 
 scripts:
   postclean:
@@ -34,26 +29,26 @@ scripts:
       Run `dart analyze` in all packages.
        - Note: you can also rely on your IDEs Dart Analysis / Issues window.
 
-  analyze:warnings:
+  analyze:warning:
     run: |
       melos exec -c 5 --ignore="*example*" -- \
         dart analyze --fatal-warnings .
     description: |
       Run `dart analyze` in all packages.
        Flags all compiler `errors` in the project.
+  
+  analyze:error:
+    run: |
+      melos exec -c 5 --ignore="*example*" -- \
+        dart analyze --no-fatal-warnings .
+    description: |
+      Run `dart analyze` in all packages.
+       Flags all compiler `errors` in the project.
 
   format:
-    run: flutter format --set-exit-if-changed .
+    run: dart format --set-exit-if-changed .
     description: |
-      Run `flutter format --set-exit-if-changed .` in all packages.  
-
-  build:example:android:
-    run: |
-      cd ./packages/stream_video_flutter/example && 
-      flutter pub run build_runner build --delete-conflicting-outputs && 
-      flutter build apk
-    description: |
-      Run `flutter build apk --verbose` in the example app.
+      Run `dart format --set-exit-if-changed .` in all packages.
 
   metrics:
     run: |
@@ -66,7 +61,7 @@ scripts:
   lint:pub:
     run: |
       melos exec -c 5 --no-private --ignore="*example*" -- \
-            pub publish --dry-run
+            flutter pub publish --dry-run
     description: |
       Run `pub publish --dry-run` in all packages.
        - Note: you can also rely on your IDEs Dart Analysis / Issues window.
@@ -90,32 +85,40 @@ scripts:
   test:dart:
     run: melos exec -c 1 --fail-fast -- "flutter test --coverage"
     description: Run Dart tests for a specific package in this project.
-    select-package:
+    packageFilters:
       flutter: false
-      dir-exists: test
+      dirExists: test
 
   test:flutter:
     run: melos exec -c 4 --fail-fast -- "flutter test --coverage"
     description: Run Flutter tests for a specific package in this project.
-    select-package:
+    packageFilters:
       flutter: true
-      dir-exists: test
+      dirExists: test
 
   clean:flutter:
     run: melos exec -c 4 --fail-fast -- "flutter clean"
     description: Run Flutter clean for a specific package in this project.
-    select-package:
+    packageFilters:
       flutter: true
 
   coverage:ignore-file:
     run: |
       melos exec -c 5 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/remove-from-coverage.sh"
     description: Removes all the ignored files from the coverage report.
-    select-package:
-      dir-exists: coverage
+    packageFilters:
+      dirExists: coverage
+      
+  build:example:android:
+    run: |
+      cd ./packages/stream_video_flutter/example && 
+      flutter pub run build_runner build --delete-conflicting-outputs && 
+      flutter build apk --release --verbose
+    description: |
+      Run `flutter build apk` in the example app.
 
-  # docs:
-  #   run: |
-  #     npm install -g https://github.com/GetStream/stream-chat-docusaurus-cli &&
-  #     npx stream-chat-docusaurus -i -s
-  #   description: Runs the docusaurus documentation locally.
+  docs:
+    run: |
+      npm install -g https://github.com/GetStream/stream-chat-docusaurus-cli &&
+      npx stream-chat-docusaurus -i -s
+    description: Runs the docusaurus documentation locally.

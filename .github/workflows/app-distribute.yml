@@ -1,14 +1,8 @@
 name: App Distribute CI
 
 on:
-  pull_request:
-    types: [opened, synchronize, ready_for_review]
-    branches:
-      - develop
-      - main
   push:
     branches:
-      - develop
       - main
 
 env:
