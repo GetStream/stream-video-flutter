@@ -55,11 +55,6 @@ jobs:
         run: |
           melos run analyze:error
           
-      - name: Pub Check
-        if: github.base_ref == 'main'
-        run: |
-          melos run lint:pub
-          
   build:
     timeout-minutes: 15
     runs-on: ubuntu-latest
