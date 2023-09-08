@@ -1,19 +1,20 @@
 ---
-id: adding_push_notifications_and_callkit
+id: adding_ringing_and_callkit
 sidebar_position: 2
-title: Push Notifications and CallKit
+title: Adding Ringing and CallKit
 ---
 
-Adding Push Notifications And CallKit To Your Application
+Adding Ringing And CallKit To Your Application
 
 ### Introduction
 
-This guide details how to add push notifications and an end-to-end call flow to your app.
+This guide details how to add an end-to-end call flow (ringing) to your Flutter application.
 
-Push notifications are a core part of the experience for a video app. They can be simple reminders of calls or
-trigger a larger end-to-end flow in which an immersive calling experience is presented.
+Ringing is done through a custom interface for Android and CallKit for iOS. An end-to-end call flow
+allows you to add an immersive calling experience to your application.
 
-Stream Video sends push notification to members that have at least one registered device.
+Ringing requires push/VoIP notifications to be sent to your device. Stream Video sends push/VoIP notifications
+to members that have at least one registered device.
 
 To receive push notifications from Stream Video, you'll need to:
 
