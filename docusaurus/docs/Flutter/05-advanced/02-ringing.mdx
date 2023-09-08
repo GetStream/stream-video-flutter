@@ -135,53 +135,13 @@ class _StreamDemoState extends State<StreamDemoApp> with WidgetsBindingObserver 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
     _tryConsumingIncomingCallFromTerminatedState();
-    _observeDeepLinks();
+    //...
   }
 ```
 
-The last two methods called in `initState()` handle incoming calls and deep links respectively. Add these functions to the widget:
+The last method called in `initState()` handles incoming calls when starting the app from a terminated state. Add these functions to the widget:
 
 ```dart
-  Future<void> _observeDeepLinks() async {
-    // The app was terminated.
-    try {
-      final initialUri = await getInitialUri();
-      if (initialUri != null) {
-        await _handleDeepLink(initialUri);
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-
-    // The app was in the background.
-    if (!kIsWeb) {
-      _subscription = uriLinkStream.listen((Uri? uri) {
-        if (mounted && uri != null) {
-          _handleDeepLink(uri);
-        }
-      });
-    }
-  }
-
-  Future<void> _handleDeepLink(Uri uri) async {
-    final callId = uri.pathSegments.last;
-
-    if (userCredentials != null) {
-      final user = YOUR_USER;
-      final token = YOUR_USER_TOKEN;
-
-      await StreamVideo.instance.connectUser(
-        user,
-        token.rawValue,
-      );
-
-      final call = StreamVideo.instance.makeCall(type: kCallType, id: callId);
-      await call.getOrCreateCall();
-
-      // Navigate to your call page
-    }
-  }
-
   void _tryConsumingIncomingCallFromTerminatedState() {
     if (_navigatorKey.currentContext == null) {
       // App is not running yet. Postpone consuming after app is in the foreground
