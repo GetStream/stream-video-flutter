@@ -46,6 +46,8 @@ You now need to upload your Firebase credentials using the Stream dashboard.
 
 - Select **New Configuration** and select **Firebase**.
 
+![Firebase Configuration](../assets/advanced_assets/firebase_config.png)
+
 - Add a name for your push provider in the **Name** field and add your previously generated Firebase Credentials in the **Credentials JSON** field.
 
 - Click **Create** and your push provider should be ready.
@@ -59,7 +61,25 @@ Additional setup and instructions can be found [here](https://firebase.google.co
 
 Once that's done, FCM should be able to send push notifications to your devices.
 
-#### Step 4 - Add code to listen to push notifications
+#### Step 4 - Add native permissions
+
+Add these permissions to `AndroidManifest.xml` in order to support video calling:
+
+```xml
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-feature android:name="android.hardware.camera"/>
+    <uses-feature android:name="android.hardware.camera.autofocus"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+```
+
+#### Step 5 - Add code to listen to push notifications
 
 - Add the following code in your `main.dart` as global functions to listen to background notifications:
 
@@ -214,41 +234,94 @@ The last two methods called in `initState()` handle incoming calls and deep link
 
 - Select **New Configuration** and select **APN**.
 
+![APNS Configuration](../assets/advanced_assets/apns_config.png)
+
 - Add a name for your push provider in the **Name** field and add your previously generated P12 file with your additional Apple information.
 
 - Click **Create** and your push provider should be ready.
 
 #### Step 3 - Add dependencies
 
-#### Step 4 - Add native code to the iOS project
+There are no dependencies on the Flutter side that you need to add specifically for iOS.
+
+#### Step 4 - Add native permissions
+
+Add these permissions to `Info.plist` in order to support video calling:
+
+```plist
+    <key>NSCameraUsageDescription</key>
+	<string>$(PRODUCT_NAME) Camera Usage!</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>$(PRODUCT_NAME) Microphone Usage!</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>fetch</string>
+		<string>processing</string>
+		<string>remote-notification</string>
+		<string>voip</string>
+	</array>
+```
+
+#### Step 5 - Add native code to the iOS project
+
+In your iOS project, add these imports to your `AppDelegate.swift`:
+
+```swift
+import UIKit
+import Flutter
+import PushKit
+import stream_video_push_notification
+import flutter_callkit_incoming
+```
+
+In the same file, add these methods to your `AppDelegate` class:
+
+```swift
+    func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType) {
+        let deviceToken = credentials.token.map { String(format: "%02x", $0) }.joined()
+        SwiftStreamVideoPushNotificationPlugin.setDevicePushTokenVoIP(deviceToken: deviceToken)
+    }
+
+    func pushRegistry(
+        _ registry: PKPushRegistry,
+        didReceiveIncomingPushWith payload: PKPushPayload,
+        for type: PKPushType,
+        completion: @escaping () -> Void
+    ) {
+        let state = UIApplication.shared.applicationState
+        if state == .active {
+            completion()
+            return
+        }
+
+        let aps = payload.dictionaryPayload["aps"] as? [String: Any]
+        let streamDict = payload.dictionaryPayload["stream"] as? [String: Any]
+        let createdCallerName = streamDict?["created_by_display_name"] as? String ?? ""
+        let callCid = streamDict?["call_cid"] as? String ?? ""
+
+        let id = UUID().uuidString
+        let isVideo = payload.dictionaryPayload["isVideo"] as? Bool ?? false
+
+        if((SwiftFlutterCallkitIncomingPlugin.sharedInstance?.activeCalls().count ?? 0) >= 1){
+            return;
+        }
+
+        let data = flutter_callkit_incoming.Data(id: id, nameCaller: callCid, handle: createdCallerName, type: isVideo ? 1 : 0)
+        data.extra = ["incomingCallCid": callCid, "platform": "ios"]
+
+        SwiftFlutterCallkitIncomingPlugin.sharedInstance?.showCallkitIncoming(data, fromPushKit: true)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            completion()
+        }
+    }
+```
 
 ### Registering a Device With Stream Backend
 
 Once you configure a push provider and set it up on the Stream dashboard, a device that is supposed to receive push notifications needs to be registered on the Stream backend.
 
-:::note
-Device registration is carried out every time a user logs in and does not need to be implemented in your app.
-:::
-
-// TODO: Add device registration code
-
-### Testing if Push Notifications are Setup Correctly
-
-If you're not sure whether you've set up push notifications correctly, for example, you don't always receive them, or they don’t work reliably, then you can follow these steps to make sure your configuration is correct and working:
-
-1. Clone our repository for push testing: `git clone git@github.com:GetStream/chat-push-test.git`
-2. `cd flutter`
-3. In that folder run `flutter pub get`
-4. Input your API key and secret in `lib/main.dart`
-5. Change the bundle identifier/application ID and development team/user so you can run the app on your physical device.**Do not** run on an iOS simulator, as it will not work. Testing on an Android emulator is fine.
-6. Add your `google-services.json/GoogleService-Info.plist`
-7. Run the app
-8. Accept push notification permission (iOS only)
-9. Tap on `Device ID` and copy it
-10. After configuring [stream-cli](https://github.com/GetStream/stream-cli), run the following command using your user ID:
-
-```shell
-stream chat:push:test -u <USER-ID>
-```
-
-You should get a test push notification 🥳
+Device registration is carried out in the SDK every time a user logs in and does not need to be implemented in your app.
