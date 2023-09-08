@@ -19,10 +19,22 @@ mixin StateCallActionsMixin on StateNotifier<CallState> {
     );
   }
 
-  void setCallBroadcasting({required bool isBroadcasting}) {
-    _logger.e(() => '[setCallBroadcasting] isBroadcasting:$isBroadcasting');
+  void setCallBroadcasting({
+    required bool isBroadcasting,
+    String? hlsPlaylistUrl,
+  }) {
+    _logger.e(
+      () => '[setCallBroadcasting] isBroadcasting:$isBroadcasting'
+          ', hlsPlaylistUrl: $hlsPlaylistUrl',
+    );
+    final curEgress = state.egress;
+    final newEgress = curEgress.copyWith(
+      hlsPlaylistUrl: hlsPlaylistUrl,
+    );
+
     state = state.copyWith(
       isBroadcasting: isBroadcasting,
+      egress: newEgress,
     );
   }
 }

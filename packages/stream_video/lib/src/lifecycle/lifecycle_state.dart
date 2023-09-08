@@ -2,7 +2,8 @@ enum LifecycleState {
   paused,
   resumed,
   inactive,
-  detached;
+  detached,
+  hidden;
 
   @override
   String toString() => name;
@@ -16,4 +17,6 @@ extension LifecycleStateX on LifecycleState {
   bool get isDetached => this == LifecycleState.detached;
 
   bool get isInactive => this == LifecycleState.inactive;
+
+  bool get isHidden => this == LifecycleState.hidden;
 }

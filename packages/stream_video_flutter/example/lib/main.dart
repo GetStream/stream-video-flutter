@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,7 +6,6 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'env/env.dart';
 import 'log_config.dart';
-import 'proxy/proxy.dart';
 import 'screen/login_screen.dart';
 
 const _tag = 'MyApp';
@@ -20,8 +17,6 @@ Future<void> main() async {
 
   StreamVideo.init(
     Env.streamVideoApiKey,
-    coordinatorRpcUrl: Env.streamCoordinatorRpcUrl,
-    coordinatorWsUrl: Env.streamCoordinatorWSUrl,
   );
 
   await _setupLogger();

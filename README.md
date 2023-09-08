@@ -2,10 +2,13 @@
 
 <img src=".readme-assets/Github-Graphic-Flutter.jpg" alt="Stream Video for Flutter Header image" style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 1rem" />
 
+[![CI](https://github.com/GetStream/stream-video-flutter/actions/workflows/stream_video_flutter_workflow.yml/badge.svg?branch=main)](https://github.com/GetStream/stream-video-flutter/actions/workflows/stream_video_flutter_workflow.yml)
+[![Melos](https://img.shields.io/badge/maintained%20with-melos-f700ff.svg?style=flat-square)](https://github.com/invertase/melos)
+
 ## Quick Links
 
 - [Register](https://getstream.io/video/) to get an API key for Stream Video
-- [Sample apps](https://github.com/GetStream/stream-video-flutter/tree/main/examples)
+- [Sample apps](https://github.com/GetStream/flutter-video-samples)
 
 This repository contains code for our [Dart](https://dart.dev/) and [Flutter](https://flutter.dev/) video clients.
 

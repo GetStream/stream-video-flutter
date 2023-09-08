@@ -13,11 +13,14 @@ part of openapi.api;
 class CallEndedEvent {
   /// Returns a new [CallEndedEvent] instance.
   CallEndedEvent({
+    required this.call,
     required this.callCid,
     required this.createdAt,
     this.type = 'call.ended',
     this.user,
   });
+
+  CallResponse call;
 
   String callCid;
 
@@ -36,6 +39,7 @@ class CallEndedEvent {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallEndedEvent &&
+     other.call == call &&
      other.callCid == callCid &&
      other.createdAt == createdAt &&
      other.type == type &&
@@ -44,16 +48,18 @@ class CallEndedEvent {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (call.hashCode) +
     (callCid.hashCode) +
     (createdAt.hashCode) +
     (type.hashCode) +
     (user == null ? 0 : user!.hashCode);
 
   @override
-  String toString() => 'CallEndedEvent[callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
+  String toString() => 'CallEndedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'call'] = this.call;
       json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'type'] = this.type;
@@ -84,6 +90,7 @@ class CallEndedEvent {
       }());
 
       return CallEndedEvent(
+        call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
         type: mapValueOfType<String>(json, r'type')!,
@@ -93,7 +100,7 @@ class CallEndedEvent {
     return null;
   }
 
-  static List<CallEndedEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallEndedEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallEndedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -124,12 +131,10 @@ class CallEndedEvent {
   static Map<String, List<CallEndedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallEndedEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CallEndedEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CallEndedEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -137,6 +142,7 @@ class CallEndedEvent {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'call',
     'call_cid',
     'created_at',
     'type',

@@ -3,11 +3,10 @@ name: App Distribute CI
 on:
   push:
     branches:
-      - develop
       - main
 
 env:
-  FLUTTER_VERSION: 3.10.0
+  FLUTTER_CHANNEL: stable
   ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
   MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
   FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
@@ -32,9 +31,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
-          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
+          channel: ${{ env.FLUTTER_CHANNEL }}
 
       - name: Setup Melos
         run: flutter pub global activate melos
@@ -67,9 +65,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
-          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
+          channel: ${{ env.FLUTTER_CHANNEL }}
 
       - name: Setup Melos
         run: flutter pub global activate melos
@@ -102,9 +99,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
-          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
+          channel: ${{ env.FLUTTER_CHANNEL }}
 
       - name: Setup Melos
         run: flutter pub global activate melos

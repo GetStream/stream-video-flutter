@@ -68,18 +68,26 @@ const ErrorCode$json = const {
     const {'1': 'ERROR_CODE_PUBLISH_TRACKS_MISMATCH', '2': 101},
     const {'1': 'ERROR_CODE_PUBLISH_TRACK_OUT_OF_ORDER', '2': 102},
     const {'1': 'ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND', '2': 103},
+    const {'1': 'ERROR_CODE_LIVE_ENDED', '2': 104},
     const {'1': 'ERROR_CODE_PARTICIPANT_NOT_FOUND', '2': 200},
+    const {'1': 'ERROR_CODE_PARTICIPANT_MIGRATING_OUT', '2': 201},
+    const {'1': 'ERROR_CODE_PARTICIPANT_MIGRATION_FAILED', '2': 202},
+    const {'1': 'ERROR_CODE_PARTICIPANT_MIGRATING', '2': 203},
+    const {'1': 'ERROR_CODE_PARTICIPANT_RECONNECT_FAILED', '2': 204},
+    const {'1': 'ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE', '2': 205},
     const {'1': 'ERROR_CODE_CALL_NOT_FOUND', '2': 300},
     const {'1': 'ERROR_CODE_REQUEST_VALIDATION_FAILED', '2': 400},
     const {'1': 'ERROR_CODE_UNAUTHENTICATED', '2': 401},
     const {'1': 'ERROR_CODE_PERMISSION_DENIED', '2': 403},
     const {'1': 'ERROR_CODE_TOO_MANY_REQUESTS', '2': 429},
     const {'1': 'ERROR_CODE_INTERNAL_SERVER_ERROR', '2': 500},
+    const {'1': 'ERROR_CODE_SFU_SHUTTING_DOWN', '2': 600},
+    const {'1': 'ERROR_CODE_SFU_FULL', '2': 700},
   ],
 };
 
 /// Descriptor for `ErrorCode`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List errorCodeDescriptor = $convert.base64Decode('CglFcnJvckNvZGUSGgoWRVJST1JfQ09ERV9VTlNQRUNJRklFRBAAEiYKIkVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19OT1RfRk9VTkQQZBImCiJFUlJPUl9DT0RFX1BVQkxJU0hfVFJBQ0tTX01JU01BVENIEGUSKQolRVJST1JfQ09ERV9QVUJMSVNIX1RSQUNLX09VVF9PRl9PUkRFUhBmEjIKLkVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19WSURFT19MQVlFUl9OT1RfRk9VTkQQZxIlCiBFUlJPUl9DT0RFX1BBUlRJQ0lQQU5UX05PVF9GT1VORBDIARIeChlFUlJPUl9DT0RFX0NBTExfTk9UX0ZPVU5EEKwCEikKJEVSUk9SX0NPREVfUkVRVUVTVF9WQUxJREFUSU9OX0ZBSUxFRBCQAxIfChpFUlJPUl9DT0RFX1VOQVVUSEVOVElDQVRFRBCRAxIhChxFUlJPUl9DT0RFX1BFUk1JU1NJT05fREVOSUVEEJMDEiEKHEVSUk9SX0NPREVfVE9PX01BTllfUkVRVUVTVFMQrQMSJQogRVJST1JfQ09ERV9JTlRFUk5BTF9TRVJWRVJfRVJST1IQ9AM=');
+final $typed_data.Uint8List errorCodeDescriptor = $convert.base64Decode('CglFcnJvckNvZGUSGgoWRVJST1JfQ09ERV9VTlNQRUNJRklFRBAAEiYKIkVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19OT1RfRk9VTkQQZBImCiJFUlJPUl9DT0RFX1BVQkxJU0hfVFJBQ0tTX01JU01BVENIEGUSKQolRVJST1JfQ09ERV9QVUJMSVNIX1RSQUNLX09VVF9PRl9PUkRFUhBmEjIKLkVSUk9SX0NPREVfUFVCTElTSF9UUkFDS19WSURFT19MQVlFUl9OT1RfRk9VTkQQZxIZChVFUlJPUl9DT0RFX0xJVkVfRU5ERUQQaBIlCiBFUlJPUl9DT0RFX1BBUlRJQ0lQQU5UX05PVF9GT1VORBDIARIpCiRFUlJPUl9DT0RFX1BBUlRJQ0lQQU5UX01JR1JBVElOR19PVVQQyQESLAonRVJST1JfQ09ERV9QQVJUSUNJUEFOVF9NSUdSQVRJT05fRkFJTEVEEMoBEiUKIEVSUk9SX0NPREVfUEFSVElDSVBBTlRfTUlHUkFUSU5HEMsBEiwKJ0VSUk9SX0NPREVfUEFSVElDSVBBTlRfUkVDT05ORUNUX0ZBSUxFRBDMARIzCi5FUlJPUl9DT0RFX1BBUlRJQ0lQQU5UX01FRElBX1RSQU5TUE9SVF9GQUlMVVJFEM0BEh4KGUVSUk9SX0NPREVfQ0FMTF9OT1RfRk9VTkQQrAISKQokRVJST1JfQ09ERV9SRVFVRVNUX1ZBTElEQVRJT05fRkFJTEVEEJADEh8KGkVSUk9SX0NPREVfVU5BVVRIRU5USUNBVEVEEJEDEiEKHEVSUk9SX0NPREVfUEVSTUlTU0lPTl9ERU5JRUQQkwMSIQocRVJST1JfQ09ERV9UT09fTUFOWV9SRVFVRVNUUxCtAxIlCiBFUlJPUl9DT0RFX0lOVEVSTkFMX1NFUlZFUl9FUlJPUhD0AxIhChxFUlJPUl9DT0RFX1NGVV9TSFVUVElOR19ET1dOENgEEhgKE0VSUk9SX0NPREVfU0ZVX0ZVTEwQvAU=');
 @$core.Deprecated('Use sdkTypeDescriptor instead')
 const SdkType$json = const {
   '1': 'SdkType',
@@ -91,11 +99,12 @@ const SdkType$json = const {
     const {'1': 'SDK_TYPE_IOS', '2': 4},
     const {'1': 'SDK_TYPE_FLUTTER', '2': 5},
     const {'1': 'SDK_TYPE_REACT_NATIVE', '2': 6},
+    const {'1': 'SDK_TYPE_UNITY', '2': 7},
   ],
 };
 
 /// Descriptor for `SdkType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List sdkTypeDescriptor = $convert.base64Decode('CgdTZGtUeXBlEhgKFFNES19UWVBFX1VOU1BFQ0lGSUVEEAASEgoOU0RLX1RZUEVfUkVBQ1QQARIUChBTREtfVFlQRV9BTkdVTEFSEAISFAoQU0RLX1RZUEVfQU5EUk9JRBADEhAKDFNES19UWVBFX0lPUxAEEhQKEFNES19UWVBFX0ZMVVRURVIQBRIZChVTREtfVFlQRV9SRUFDVF9OQVRJVkUQBg==');
+final $typed_data.Uint8List sdkTypeDescriptor = $convert.base64Decode('CgdTZGtUeXBlEhgKFFNES19UWVBFX1VOU1BFQ0lGSUVEEAASEgoOU0RLX1RZUEVfUkVBQ1QQARIUChBTREtfVFlQRV9BTkdVTEFSEAISFAoQU0RLX1RZUEVfQU5EUk9JRBADEhAKDFNES19UWVBFX0lPUxAEEhQKEFNES19UWVBFX0ZMVVRURVIQBRIZChVTREtfVFlQRV9SRUFDVF9OQVRJVkUQBhISCg5TREtfVFlQRV9VTklUWRAH');
 @$core.Deprecated('Use trackUnpublishReasonDescriptor instead')
 const TrackUnpublishReason$json = const {
   '1': 'TrackUnpublishReason',
@@ -109,6 +118,18 @@ const TrackUnpublishReason$json = const {
 
 /// Descriptor for `TrackUnpublishReason`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List trackUnpublishReasonDescriptor = $convert.base64Decode('ChRUcmFja1VucHVibGlzaFJlYXNvbhImCiJUUkFDS19VTlBVQkxJU0hfUkVBU09OX1VOU1BFQ0lGSUVEEAASJQohVFJBQ0tfVU5QVUJMSVNIX1JFQVNPTl9VU0VSX01VVEVEEAESLQopVFJBQ0tfVU5QVUJMSVNIX1JFQVNPTl9QRVJNSVNTSU9OX1JFVk9LRUQQAhIlCiFUUkFDS19VTlBVQkxJU0hfUkVBU09OX01PREVSQVRJT04QAw==');
+@$core.Deprecated('Use goAwayReasonDescriptor instead')
+const GoAwayReason$json = const {
+  '1': 'GoAwayReason',
+  '2': const [
+    const {'1': 'GO_AWAY_REASON_UNSPECIFIED', '2': 0},
+    const {'1': 'GO_AWAY_REASON_SHUTTING_DOWN', '2': 1},
+    const {'1': 'GO_AWAY_REASON_REBALANCE', '2': 2},
+  ],
+};
+
+/// Descriptor for `GoAwayReason`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List goAwayReasonDescriptor = $convert.base64Decode('CgxHb0F3YXlSZWFzb24SHgoaR09fQVdBWV9SRUFTT05fVU5TUEVDSUZJRUQQABIgChxHT19BV0FZX1JFQVNPTl9TSFVUVElOR19ET1dOEAESHAoYR09fQVdBWV9SRUFTT05fUkVCQUxBTkNFEAI=');
 @$core.Deprecated('Use callStateDescriptor instead')
 const CallState$json = const {
   '1': 'CallState',
@@ -116,11 +137,12 @@ const CallState$json = const {
     const {'1': 'participants', '3': 1, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Participant', '10': 'participants'},
     const {'1': 'started_at', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'startedAt'},
     const {'1': 'participant_count', '3': 3, '4': 1, '5': 11, '6': '.stream.video.sfu.models.ParticipantCount', '10': 'participantCount'},
+    const {'1': 'pins', '3': 4, '4': 3, '5': 11, '6': '.stream.video.sfu.models.Pin', '10': 'pins'},
   ],
 };
 
 /// Descriptor for `CallState`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List callStateDescriptor = $convert.base64Decode('CglDYWxsU3RhdGUSSAoMcGFydGljaXBhbnRzGAEgAygLMiQuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGFydGljaXBhbnRSDHBhcnRpY2lwYW50cxI5CgpzdGFydGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJc3RhcnRlZEF0ElYKEXBhcnRpY2lwYW50X2NvdW50GAMgASgLMikuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGFydGljaXBhbnRDb3VudFIQcGFydGljaXBhbnRDb3VudA==');
+final $typed_data.Uint8List callStateDescriptor = $convert.base64Decode('CglDYWxsU3RhdGUSSAoMcGFydGljaXBhbnRzGAEgAygLMiQuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGFydGljaXBhbnRSDHBhcnRpY2lwYW50cxI5CgpzdGFydGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJc3RhcnRlZEF0ElYKEXBhcnRpY2lwYW50X2NvdW50GAMgASgLMikuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGFydGljaXBhbnRDb3VudFIQcGFydGljaXBhbnRDb3VudBIwCgRwaW5zGAQgAygLMhwuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGluUgRwaW5z');
 @$core.Deprecated('Use participantCountDescriptor instead')
 const ParticipantCount$json = const {
   '1': 'ParticipantCount',
@@ -132,6 +154,17 @@ const ParticipantCount$json = const {
 
 /// Descriptor for `ParticipantCount`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List participantCountDescriptor = $convert.base64Decode('ChBQYXJ0aWNpcGFudENvdW50EhQKBXRvdGFsGAEgASgNUgV0b3RhbBIcCglhbm9ueW1vdXMYAiABKA1SCWFub255bW91cw==');
+@$core.Deprecated('Use pinDescriptor instead')
+const Pin$json = const {
+  '1': 'Pin',
+  '2': const [
+    const {'1': 'user_id', '3': 1, '4': 1, '5': 9, '10': 'userId'},
+    const {'1': 'session_id', '3': 2, '4': 1, '5': 9, '10': 'sessionId'},
+  ],
+};
+
+/// Descriptor for `Pin`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List pinDescriptor = $convert.base64Decode('CgNQaW4SFwoHdXNlcl9pZBgBIAEoCVIGdXNlcklkEh0KCnNlc3Npb25faWQYAiABKAlSCXNlc3Npb25JZA==');
 @$core.Deprecated('Use participantDescriptor instead')
 const Participant$json = const {
   '1': 'Participant',

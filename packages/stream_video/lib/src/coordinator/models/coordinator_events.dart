@@ -114,11 +114,11 @@ class CoordinatorCallRingingEvent extends CoordinatorCallEvent {
 
   @override
   List<Object?> get props => [
-    ...super.props,
-    ringing,
-    createdAt,
-    metadata,
-  ];
+        ...super.props,
+        ringing,
+        createdAt,
+        metadata,
+      ];
 }
 
 /// Sent when a call gets updated.
@@ -457,6 +457,8 @@ class CoordinatorCallSessionParticipantJoinedEvent
     required this.createdAt,
     required this.sessionId,
     required this.user,
+    required this.participantJoinedAt,
+    required this.participantSessionId,
   });
 
   @override
@@ -464,18 +466,28 @@ class CoordinatorCallSessionParticipantJoinedEvent
   final DateTime createdAt;
   final String sessionId;
   final CallUser user;
+  final DateTime participantJoinedAt;
+  final String participantSessionId;
 
   @override
-  List<Object?> get props => [...super.props, createdAt, sessionId, user];
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        sessionId,
+        participantJoinedAt,
+        participantSessionId,
+        user
+      ];
 }
 
-class CoordinatorCallSessionParticipantLeftEvent
-    extends CoordinatorCallEvent {
+class CoordinatorCallSessionParticipantLeftEvent extends CoordinatorCallEvent {
   const CoordinatorCallSessionParticipantLeftEvent({
     required this.callCid,
     required this.createdAt,
     required this.sessionId,
     required this.user,
+    required this.participantJoinedAt,
+    required this.participantSessionId,
   });
 
   @override
@@ -483,9 +495,18 @@ class CoordinatorCallSessionParticipantLeftEvent
   final DateTime createdAt;
   final String sessionId;
   final CallUser user;
+  final DateTime participantJoinedAt;
+  final String participantSessionId;
 
   @override
-  List<Object?> get props => [...super.props, createdAt, sessionId, user];
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        sessionId,
+        participantJoinedAt,
+        participantSessionId,
+        user
+      ];
 }
 
 // Unknown event.

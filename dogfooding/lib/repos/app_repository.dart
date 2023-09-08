@@ -14,25 +14,43 @@ import 'user_repository.dart';
 class AppRepository {
   AppRepository();
 
-  late final StreamVideo _streamVideoClient;
-  late final StreamChatClient _streamChatClient;
+  StreamVideo? _streamVideoClient;
+  StreamChatClient? _streamChatClient;
 
-  StreamVideo get videoClient => _streamVideoClient;
+  StreamVideo get videoClient {
+    final client = _streamVideoClient;
+    if (client == null) {
+      throw Exception(
+        'Please initialise Stream Video by calling AppRepository.beginSession()',
+      );
+    }
 
-  StreamChatClient get chatClient => _streamChatClient;
+    return client;
+  }
+
+  StreamChatClient get chatClient {
+    final client = _streamChatClient;
+    if (client == null) {
+      throw Exception(
+        'Please initialise Stream Chat by calling AppRepository.beginSession()',
+      );
+    }
+    return client;
+  }
 
   static Future<StreamVideo> initStreamVideo() async {
     if (!StreamVideo.isInitialized()) {
       final streamVideoClient = StreamVideo.init(
         Env.apiKey,
-        coordinatorRpcUrl: Env.coordinatorRpcUrl,
-        coordinatorWsUrl: Env.coordinatorWsUrl,
         logPriority: Priority.info,
         muteAudioWhenInBackground: true,
         muteVideoWhenInBackground: true,
       );
       await streamVideoClient.initPushNotificationManager(
-        StreamVideoPushNotificationManager.factory(),
+        StreamVideoPushNotificationManager.factory(
+          apnsProviderName: 'flutter-apn-video',
+          firebaseProviderName: 'firebase',
+        ),
       );
       return streamVideoClient;
     } else {
@@ -43,10 +61,10 @@ class AppRepository {
   Future<void> beginSession() async {
     _streamVideoClient = await initStreamVideo();
     unawaited(_setupLogger());
-    _streamChatClient = _initChat();
+    _streamChatClient = initStreamChat();
   }
 
-  StreamChatClient _initChat() {
+  StreamChatClient initStreamChat() {
     return StreamChatClient(
       Env.apiKey,
       logLevel: Level.INFO,
@@ -82,7 +100,7 @@ class AppRepository {
   Future<Channel> createChatChannel({
     required String channelId,
   }) async {
-    final channel = _streamChatClient.channel(
+    final channel = chatClient.channel(
       kMessageChannelType,
       id: channelId,
     );
@@ -92,8 +110,10 @@ class AppRepository {
   }
 
   Future<void> endSession() async {
-    await _streamVideoClient.disconnectUser();
-    await _streamChatClient.disconnectUser();
+    await _streamVideoClient?.disconnectUser();
+    _streamVideoClient = null;
+    await _streamChatClient?.disconnectUser();
+    _streamChatClient = null;
     await UserRepository.instance.clear();
   }
 }

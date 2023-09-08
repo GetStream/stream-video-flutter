@@ -75,7 +75,7 @@ class RecordSettings {
     return null;
   }
 
-  static List<RecordSettings>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RecordSettings> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <RecordSettings>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -106,12 +106,10 @@ class RecordSettings {
   static Map<String, List<RecordSettings>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<RecordSettings>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = RecordSettings.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = RecordSettings.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -151,7 +149,7 @@ class RecordSettingsModeEnum {
 
   static RecordSettingsModeEnum? fromJson(dynamic value) => RecordSettingsModeEnumTypeTransformer().decode(value);
 
-  static List<RecordSettingsModeEnum>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RecordSettingsModeEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <RecordSettingsModeEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -234,7 +232,7 @@ class RecordSettingsQualityEnum {
 
   static RecordSettingsQualityEnum? fromJson(dynamic value) => RecordSettingsQualityEnumTypeTransformer().decode(value);
 
-  static List<RecordSettingsQualityEnum>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<RecordSettingsQualityEnum> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <RecordSettingsQualityEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {

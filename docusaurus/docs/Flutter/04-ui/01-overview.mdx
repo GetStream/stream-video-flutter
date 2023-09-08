@@ -1,0 +1,29 @@
+---
+slug: /ui-components-overview
+title: UI Components Overview
+---
+
+### Introduction
+
+The Stream Video Flutter SDK provides UI components to facilitate the quick integration of voice, video, and streaming use cases in your applications.
+
+As a developer building with Stream, you can either use our out-of-the-box solution, inclusive of theming, views, and state handling, or completely build your own UI while reusing our lower-level components where you see fit.
+
+### Component Overview
+
+| Name              | ClassName                 | Overview                                                                                                                                                                                                                                                                                                              |
+| ----------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Video Render      | StreamVideoRenderer       | Widget that renders a single video track for a call participant. StreamVideoRenderer exposes callbacks for handling size changes, video fit types, and more!                                                                                                                                                          |
+| Call Container    | StreamCallContainer       | Call Container automatically subscribes to call events and displays the appropriate UI based on the various call states. For example, Call Container will automatically display an incoming call screen when a ringing call is detected and update the UI to display the call contents if the user chooses to answer. |
+| Incoming Call     | StreamIncomingCallContent | Displays a ringing interface to the current user when an incoming call is detected.                                                                                                                                                                                                                                   |
+| Outgoing Call     | StreamOutgoingCallContent | Represents the UI of a call when the current user rings another user.                                                                                                                                                                                                                                                 |
+| Call Content      | StreamCallContent         | Represents the UI of an active call. This Widget displays the participants, controls, and call app bar by default.                                                                                                                                                                                                    |
+| Call Controls     | StreamCallControls        | These represent a set of options the user can interact with to control various aspects of the call such as toggling the microphone, camera, etc. For convenience, we provide a `withDefaultOptions` constructor.                                                                                                      |
+| Call Participants | StreamCallParticipants    | StreamCallParticipants renders the participants on a call and adjusts itself based on the number of participants, screen-sharing, grid type, etc.                                                                                                                                                                     |
+| Lobby View        | StreamLobbyView           | A widget that can be shown before a user joins a meeting or call. It allows the user to configure their microphone, camera, and output device state before joining a call.                                                                                                                                            |
+
+These are just a few of our offered components. Each component has many lower-level widgets which can be used independently to create custom UIs and experiences for your application.
+
+Please continue reading on or select a component directly to learn more about how it can be used and customized to fit the needs of your application.
+
+If there is a widget or component you would like to see added to the library, please feel free to contact us, we are always open to feedback and constantly looking to add more widgets.

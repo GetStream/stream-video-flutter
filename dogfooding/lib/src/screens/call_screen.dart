@@ -71,6 +71,10 @@ class _CallScreenState extends State<CallScreen> {
                         call: call,
                         localParticipant: localParticipant,
                       ),
+                      AddReactionOption(
+                        call: call,
+                        localParticipant: localParticipant,
+                      ),
                       ToggleMicrophoneOption(
                         call: call,
                         localParticipant: localParticipant,

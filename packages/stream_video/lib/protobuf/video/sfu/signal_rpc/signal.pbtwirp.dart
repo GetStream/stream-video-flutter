@@ -21,6 +21,8 @@ abstract class SignalServer {
   Future<UpdateSubscriptionsResponse> updateSubscriptions(twirp.Context ctx, UpdateSubscriptionsRequest req);
   
   Future<UpdateMuteStatesResponse> updateMuteStates(twirp.Context ctx, UpdateMuteStatesRequest req);
+  
+  Future<ICERestartResponse> iceRestart(twirp.Context ctx, ICERestartRequest req);
 }
 
 
@@ -142,6 +144,28 @@ class SignalServerJSONClient implements SignalServer {
       Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/UpdateMuteStates');
       final data = await doJSONRequest(ctx, url, hooks, req);
       final UpdateMuteStatesResponse res = UpdateMuteStatesResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ICERestartResponse> iceRestart(twirp.Context ctx, ICERestartRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'signal');
+    ctx = twirp.withServiceName(ctx, 'SignalServer');
+    ctx = twirp.withMethodName(ctx, 'IceRestart');
+    return interceptor((ctx, req) {
+      return callIceRestart(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<ICERestartResponse> callIceRestart(twirp.Context ctx, ICERestartRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/IceRestart');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final ICERestartResponse res = ICERestartResponse.create();
       res.mergeFromProto3Json(json.decode(data));
       return Future.value(res);
     } catch (e) {
@@ -275,6 +299,28 @@ class SignalServerProtobufClient implements SignalServer {
       rethrow;
     }
   }
+
+  @override
+  Future<ICERestartResponse> iceRestart(twirp.Context ctx, ICERestartRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'signal');
+    ctx = twirp.withServiceName(ctx, 'SignalServer');
+    ctx = twirp.withMethodName(ctx, 'IceRestart');
+    return interceptor((ctx, req) {
+      return callIceRestart(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<ICERestartResponse> callIceRestart(twirp.Context ctx, ICERestartRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/IceRestart');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final ICERestartResponse res = ICERestartResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
 
 Future<List<int>> doProtobufRequest(twirp.Context ctx, Uri url,
@@ -290,7 +336,7 @@ Future<List<int>> doProtobufRequest(twirp.Context ctx, Uri url,
     req.bodyBytes = msgReq.writeToBuffer();
 
     // call onRequestPrepared hook for user to modify request
-    ctx = hooks.onRequestPrepared(ctx, req);
+    ctx = await hooks.onRequestPrepared(ctx, req);
 
     // send data
     final res = await httpClient.send(req);
@@ -334,7 +380,7 @@ Future<String> doJSONRequest(twirp.Context ctx, Uri url,
     req.body = json.encode(msgReq.toProto3Json());
 
     // call onRequestPrepared hook for user to modify request
-    ctx = hooks.onRequestPrepared(ctx, req);
+    ctx = await hooks.onRequestPrepared(ctx, req);
 
     // send data
     final res = await httpClient.send(req);

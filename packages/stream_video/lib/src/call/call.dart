@@ -307,6 +307,8 @@ class Call {
       return _stateManager.coordinatorCallBroadcastingStarted(event);
     } else if (event is CoordinatorCallBroadcastingStoppedEvent) {
       return _stateManager.coordinatorCallBroadcastingStopped(event);
+    } else if (event is CoordinatorCallReactionEvent) {
+      return _stateManager.coordinatorCallReaction(event);
     }
   }
 
@@ -931,17 +933,21 @@ class Call {
     return result;
   }
 
-  Future<Result<None>> startBroadcasting() async {
+  /// Starts the broadcasting of the call.
+  Future<Result<String?>> startHLS() async {
     final result = await _permissionsManager.startBroadcasting();
 
     if (result.isSuccess) {
-      _stateManager.setCallBroadcasting(isBroadcasting: true);
+      _stateManager.setCallBroadcasting(
+          isBroadcasting: true,
+          hlsPlaylistUrl: result.getDataOrNull()
+      );
     }
-
     return result;
   }
 
-  Future<Result<None>> stopBroadcasting() async {
+  /// Stops the broadcasting of the call.
+  Future<Result<None>> stopHLS() async {
     final result = await _permissionsManager.stopBroadcasting();
 
     if (result.isSuccess) {
@@ -1104,8 +1110,18 @@ class Call {
     return result;
   }
 
-  Future<Result<CallMetadata>> goLive() async {
-    final result = await _coordinatorClient.goLive(callCid);
+  /// Starts the livestreaming of the call.
+  Future<Result<CallMetadata>> goLive({
+    bool? startHls,
+    bool? startRecording,
+    bool? startTranscription,
+  }) async {
+    final result = await _coordinatorClient.goLive(
+      callCid: callCid,
+      startHls: startHls,
+      startRecording: startRecording,
+      startTranscription: startTranscription,
+    );
 
     if (result.isSuccess) {
       _stateManager.setCallLive(isLive: true);
@@ -1114,6 +1130,7 @@ class Call {
     return result;
   }
 
+  /// Stops the livestreaming of the call.
   Future<Result<CallMetadata>> stopLive() async {
     final result = await _coordinatorClient.stopLive(callCid);
 
@@ -1295,6 +1312,23 @@ class Call {
       emojiCode: emojiCode,
       custom: custom,
     );
+  }
+
+  void resetReaction({
+    required String userId,
+  }) {
+    return _stateManager.resetCallReaction(userId);
+  }
+
+  List<CallReaction> getCurrentReactions() {
+    return _stateManager.callState.callParticipants.fold([],
+        (previousValue, e) {
+      if (e.reaction != null) {
+        return [...previousValue, e.reaction!];
+      } else {
+        return previousValue;
+      }
+    });
   }
 
   Future<Result<None>> sendCustomEvent({

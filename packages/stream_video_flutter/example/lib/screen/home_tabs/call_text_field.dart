@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class CallIdTextField extends StatelessWidget {
   const CallIdTextField({

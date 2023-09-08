@@ -7,10 +7,6 @@ part 'env.g.dart';
 abstract class Env {
   @EnviedField(varName: 'SAMPLE_STREAM_VIDEO_API_KEY')
   static const String streamVideoApiKey = _Env.streamVideoApiKey;
-  @EnviedField(varName: 'SAMPLE_COORDINATOR_RPC_URL')
-  static const String streamCoordinatorRpcUrl = _Env.streamCoordinatorRpcUrl;
-  @EnviedField(varName: 'SAMPLE_COORDINATOR_WS_URL')
-  static const String streamCoordinatorWSUrl = _Env.streamCoordinatorWSUrl;
 
   @EnviedField(varName: 'SAMPLE_USER_00_ID')
   static const String sampleUserId00 = _Env.sampleUserId00;

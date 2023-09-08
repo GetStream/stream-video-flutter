@@ -142,7 +142,6 @@ class StreamVideo {
 
   final _tokenManager = TokenManager();
   final _subscriptions = Subscriptions();
-  final _sharedPrefsHelper = SharedPrefsHelper();
   late final CoordinatorClient _client;
   PushNotificationManager? pushNotificationManager;
 
@@ -182,7 +181,6 @@ class StreamVideo {
   Future<Result<String>> connectUserWithProvider(
     UserInfo user, {
     required TokenProvider tokenProvider,
-    bool saveUser = true,
   }) async {
     _logger.i(() => '[connectUser] user.id : ${user.id}');
     if (currentUser != null) {
@@ -204,9 +202,6 @@ class StreamVideo {
       _logger.v(() => '[connectUser] completed: $result');
       if (result is Failure) {
         return result;
-      }
-      if (saveUser) {
-        await _sharedPrefsHelper.saveUserCredentials(user);
       }
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
       _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
@@ -284,7 +279,6 @@ class StreamVideo {
     }
     try {
       await _client.disconnectUser();
-      await _sharedPrefsHelper.deleteSavedUser();
       _subscriptions.cancelAll();
       _tokenManager.reset();
 
@@ -391,16 +385,17 @@ class StreamVideo {
     return result;
   }
 
-  Future<bool> handlePushNotification(Map<String, dynamic> payload) {
-    return pushNotificationManager?.handlePushNotification(payload) ??
-        Future.value(false);
+  Future<bool> handlePushNotification(Map<String, dynamic> payload) async {
+    final manager = pushNotificationManager;
+    if (manager == null) return false;
+
+    return manager.handlePushNotification(payload);
   }
 
-  Future<Call?> consumeIncomingCall() {
+  Future<Call?> consumeIncomingCall() async {
     return pushNotificationManager?.consumeIncomingCall().then((data) {
-          return data?.let((it) => _makeCallFromCreated(data: it));
-        }) ??
-        Future.value();
+      return data?.let((it) => _makeCallFromCreated(data: it));
+    });
   }
 }
 

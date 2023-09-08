@@ -15,15 +15,16 @@ class CallSessionParticipantLeftEvent {
   CallSessionParticipantLeftEvent({
     required this.callCid,
     required this.createdAt,
+    required this.participant,
     required this.sessionId,
     this.type = 'call.session_participant_left',
-    required this.user,
-    required this.userSessionId,
   });
 
   String callCid;
 
   DateTime createdAt;
+
+  CallParticipantResponse participant;
 
   /// Call session ID
   String sessionId;
@@ -31,41 +32,33 @@ class CallSessionParticipantLeftEvent {
   /// The type of event: \"call.session_participant_left\" in this case
   String type;
 
-  UserResponse user;
-
-  /// The user session ID of the user that left the call session
-  String userSessionId;
-
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallSessionParticipantLeftEvent &&
      other.callCid == callCid &&
      other.createdAt == createdAt &&
+     other.participant == participant &&
      other.sessionId == sessionId &&
-     other.type == type &&
-     other.user == user &&
-     other.userSessionId == userSessionId;
+     other.type == type;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (callCid.hashCode) +
     (createdAt.hashCode) +
+    (participant.hashCode) +
     (sessionId.hashCode) +
-    (type.hashCode) +
-    (user.hashCode) +
-    (userSessionId.hashCode);
+    (type.hashCode);
 
   @override
-  String toString() => 'CallSessionParticipantLeftEvent[callCid=$callCid, createdAt=$createdAt, sessionId=$sessionId, type=$type, user=$user, userSessionId=$userSessionId]';
+  String toString() => 'CallSessionParticipantLeftEvent[callCid=$callCid, createdAt=$createdAt, participant=$participant, sessionId=$sessionId, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+      json[r'participant'] = this.participant;
       json[r'session_id'] = this.sessionId;
       json[r'type'] = this.type;
-      json[r'user'] = this.user;
-      json[r'user_session_id'] = this.userSessionId;
     return json;
   }
 
@@ -90,16 +83,15 @@ class CallSessionParticipantLeftEvent {
       return CallSessionParticipantLeftEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', '')!,
+        participant: CallParticipantResponse.fromJson(json[r'participant'])!,
         sessionId: mapValueOfType<String>(json, r'session_id')!,
         type: mapValueOfType<String>(json, r'type')!,
-        user: UserResponse.fromJson(json[r'user'])!,
-        userSessionId: mapValueOfType<String>(json, r'user_session_id')!,
       );
     }
     return null;
   }
 
-  static List<CallSessionParticipantLeftEvent>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<CallSessionParticipantLeftEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallSessionParticipantLeftEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -130,12 +122,10 @@ class CallSessionParticipantLeftEvent {
   static Map<String, List<CallSessionParticipantLeftEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallSessionParticipantLeftEvent>>{};
     if (json is Map && json.isNotEmpty) {
-      json = json.cast<String, dynamic>(); // ignore: parameter_assignments
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        final value = CallSessionParticipantLeftEvent.listFromJson(entry.value, growable: growable,);
-        if (value != null) {
-          map[entry.key] = value;
-        }
+        map[entry.key] = CallSessionParticipantLeftEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -145,10 +135,9 @@ class CallSessionParticipantLeftEvent {
   static const requiredKeys = <String>{
     'call_cid',
     'created_at',
+    'participant',
     'session_id',
     'type',
-    'user',
-    'user_session_id',
   };
 }
 

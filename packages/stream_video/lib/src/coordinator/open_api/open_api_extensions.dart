@@ -2,6 +2,7 @@ import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../logger/stream_log.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_credentials.dart';
+import '../../models/call_egress.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
 import '../../models/call_reaction.dart';
@@ -94,7 +95,7 @@ extension EnvelopeExt on open.CallResponse {
     return CallMetadata(
       cid: StreamCallCid(cid: cid),
       details: CallDetails(
-        hlsPlaylistUrl: egress.hls?.playlistUrl ?? '',
+        egress: egress.toCallEgress(),
         createdBy: createdBy.toCallUser(),
         team: team ?? '',
         ownCapabilities:
@@ -121,6 +122,25 @@ extension EnvelopeExt on open.CallResponse {
         createdBy.id: createdBy.toCallMember(),
         ...?members?.toCallMembers(),
       },
+    );
+  }
+}
+
+extension EgressExt on open.EgressResponse {
+  CallEgress toCallEgress() {
+    return CallEgress(
+      hlsPlaylistUrl: hls?.playlistUrl,
+      rtmps: rtmps.map((it) => it.toCallRtmp()).toList(),
+    );
+  }
+}
+
+extension EgressRtmpExt on open.EgressRTMPResponse {
+  CallEgressRtmp toCallRtmp() {
+    return CallEgressRtmp(
+      name: name,
+      streamKey: streamKey,
+      url: url,
     );
   }
 }

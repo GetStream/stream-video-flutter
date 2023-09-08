@@ -8,6 +8,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../env/env.dart';
 import '../src/model/user_credentials.dart';
+import 'token_service.dart';
 import 'user_repository.dart';
 
 class AuthRepository {
@@ -24,7 +25,6 @@ class AuthRepository {
   final GoogleSignIn googleSignIn;
 
   final _logger = taggedLogger(tag: 'SV:LoginViewState');
-  // late final _googleSignIn = GoogleSignIn(hostedDomain: 'getstream.io');
 
   UserToken? _userToken;
 
@@ -51,7 +51,7 @@ class AuthRepository {
       id: data.user.id,
       image: data.user.image,
       name: data.user.name ?? '',
-      teams: data.user.teams ?? [],
+      teams: data.user.teams,
       role: data.user.role,
     );
 

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
@@ -162,6 +163,7 @@ class StreamCallParticipant extends StatelessWidget {
         ),
         child: Builder(
           builder: (context) {
+            final theme = StreamVideoTheme.of(context);
             var videoPlaceholderBuilder = this.videoPlaceholderBuilder;
             videoPlaceholderBuilder ??= (context, call, participant) {
               return Center(
@@ -176,18 +178,40 @@ class StreamCallParticipant extends StatelessWidget {
 
             var videoRendererBuilder = this.videoRendererBuilder;
             videoRendererBuilder ??= (context, call, participant) {
-              return StreamVideoRenderer(
-                call: call,
-                participant: participant,
-                videoTrackType: SfuTrackType.video,
-                onSizeChanged: onSizeChanged,
-                placeholderBuilder: (context) {
-                  return videoPlaceholderBuilder!(
-                    context,
-                    call,
-                    participant,
-                  );
-                },
+              return Stack(
+                children: [
+                  StreamVideoRenderer(
+                    call: call,
+                    participant: participant,
+                    videoTrackType: SfuTrackType.video,
+                    onSizeChanged: onSizeChanged,
+                    placeholderBuilder: (context) {
+                      return videoPlaceholderBuilder!(
+                        context,
+                        call,
+                        participant,
+                      );
+                    },
+                  ),
+                  if (participant.reaction != null)
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          theme.callControlsTheme.callReactions
+                                  .firstWhereOrNull((e) =>
+                                      e.emojiCode ==
+                                      participant.reaction?.emojiCode)
+                                  ?.icon ??
+                              '',
+                          style: TextStyle(
+                            fontSize: 24.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               );
             };
 

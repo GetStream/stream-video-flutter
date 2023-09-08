@@ -155,7 +155,7 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> startBroadcasting() async {
+  Future<Result<String?>> startBroadcasting() async {
     if (!hasPermission(CallPermission.startBroadcastCall)) {
       _logger.w(() => '[startBroadcasting] rejected (no permission)');
       return Result.error('Cannot start broadcasting (no permission)');

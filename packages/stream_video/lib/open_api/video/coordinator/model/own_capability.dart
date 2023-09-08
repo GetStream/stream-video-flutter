@@ -31,6 +31,7 @@ class OwnCapability {
   static const joinCall = OwnCapability._(r'join-call');
   static const joinEndedCall = OwnCapability._(r'join-ended-call');
   static const muteUsers = OwnCapability._(r'mute-users');
+  static const pinForEveryone = OwnCapability._(r'pin-for-everyone');
   static const readCall = OwnCapability._(r'read-call');
   static const removeCallMember = OwnCapability._(r'remove-call-member');
   static const screenshare = OwnCapability._(r'screenshare');
@@ -57,6 +58,7 @@ class OwnCapability {
     joinCall,
     joinEndedCall,
     muteUsers,
+    pinForEveryone,
     readCall,
     removeCallMember,
     screenshare,
@@ -76,7 +78,7 @@ class OwnCapability {
 
   static OwnCapability? fromJson(dynamic value) => OwnCapabilityTypeTransformer().decode(value);
 
-  static List<OwnCapability>? listFromJson(dynamic json, {bool growable = false,}) {
+  static List<OwnCapability> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <OwnCapability>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -118,6 +120,7 @@ class OwnCapabilityTypeTransformer {
         case r'join-call': return OwnCapability.joinCall;
         case r'join-ended-call': return OwnCapability.joinEndedCall;
         case r'mute-users': return OwnCapability.muteUsers;
+        case r'pin-for-everyone': return OwnCapability.pinForEveryone;
         case r'read-call': return OwnCapability.readCall;
         case r'remove-call-member': return OwnCapability.removeCallMember;
         case r'screenshare': return OwnCapability.screenshare;
