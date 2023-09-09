@@ -8,7 +8,6 @@ import '../../logger/impl/tagged_logger.dart';
 import '../../models/user_info.dart';
 import '../../retry/retry_policy.dart';
 import '../../shared_emitter.dart';
-import '../../token/token.dart';
 import '../../token/token_manager.dart';
 import '../../types/other.dart';
 import '../../utils/none.dart';
@@ -74,6 +73,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
 
   String? userId;
   String? clientId;
+  String? connectionId;
 
   @override
   Future<Result<None>> connect() {
@@ -177,6 +177,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     // resetting connection
     userId = null;
     clientId = null;
+    connectionId = null;
 
     // check if we manually closed the connection
     if (_manuallyClosed) {
@@ -243,6 +244,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     healthMonitor.onPongReceived();
     userId ??= event.me.id;
     clientId ??= event.connectionId;
+    connectionId ??= event.connectionId;
   }
 
   void _handleHealthCheckEvent(open.HealthCheckEvent event) {

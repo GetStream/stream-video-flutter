@@ -38,26 +38,30 @@ const _idEvents = 1;
 /// An accessor that allows us to communicate with the API around video calls.
 class CoordinatorClientOpenApi extends CoordinatorClient {
   CoordinatorClientOpenApi({
-    required String rpcUrl,
+    required this.rpcUrl,
     required this.wsUrl,
     required this.apiKey,
     required this.tokenManager,
     required this.latencyService,
     required this.retryPolicy,
-  }) : _apiClient = open.ApiClient(
-          basePath: rpcUrl,
-          authentication:
-              _Authentication(apiKey: apiKey, tokenManager: tokenManager),
-        );
+  });
 
   final _logger = taggedLogger(tag: 'SV:CoordClient');
-  final String apiKey;
+  final String rpcUrl;
   final String wsUrl;
+  final String apiKey;
   final TokenManager tokenManager;
   final LatencyService latencyService;
   final RetryPolicy retryPolicy;
 
-  final open.ApiClient _apiClient;
+  late final open.ApiClient _apiClient = open.ApiClient(
+    basePath: rpcUrl,
+    authentication: _Authentication(
+      apiKey: apiKey,
+      tokenManager: tokenManager,
+      getConnectionId: () => _ws?.connectionId,
+    ),
+  );
   late final defaultApi = open.DefaultApi(_apiClient);
   late final serverSideApi = open.ServerSideApi(_apiClient);
   late final locationService = LocationService();
@@ -302,7 +306,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           ring: ringing,
           location: location,
         ),
-        connectionId: _ws?.clientId,
       );
       if (result == null) {
         return Result.error('joinCall result is null');
@@ -806,11 +809,18 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 }
 
+typedef GetConnectionId = String? Function();
+
 class _Authentication extends open.Authentication {
-  _Authentication({required this.apiKey, required this.tokenManager});
+  _Authentication({
+    required this.apiKey,
+    required this.tokenManager,
+    required this.getConnectionId,
+  });
 
   final String apiKey;
   final TokenManager tokenManager;
+  final GetConnectionId getConnectionId;
 
   @override
   Future<void> applyToParams(
@@ -822,6 +832,10 @@ class _Authentication extends open.Authentication {
       throw (tokenResult as Failure).error;
     }
     queryParams.add(open.QueryParam('api_key', apiKey));
+    final connectionId = getConnectionId();
+    if (connectionId != null) {
+      queryParams.add(open.QueryParam('connection_id', connectionId));
+    }
     headerParams['Authorization'] = tokenResult.getDataOrNull()!.rawValue;
     headerParams['stream-auth-type'] =
         tokenResult.getDataOrNull()!.authType.name;
