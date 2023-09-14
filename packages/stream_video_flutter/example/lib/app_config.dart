@@ -1,9 +1,19 @@
-import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'env/env.dart';
 import 'sample_user.dart';
 
 final sampleUsers = <SampleUser>[
+  SampleUser(
+    const UserInfo(
+      id: 'sahil@getstream.io',
+      name: 'sahil@getstream.io',
+      role: 'user',
+      image:
+          'https://lh3.googleusercontent.com/a/AAcHTtfKtkwI9iEK-YKiLZ_qHlO2TbWBQ_pvOTtMNvuS=s1337',
+    ),
+    Env.sampleUserVideoToken00,
+  ),
   SampleUser(
     const UserInfo(
       id: Env.sampleUserId00,

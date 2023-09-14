@@ -1,7 +1,6 @@
 package io.getstream.video.flutter.stream_video_push_notification
 
 import androidx.annotation.NonNull
-
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall

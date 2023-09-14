@@ -33,7 +33,7 @@ class LeaveCallOption extends StatelessWidget {
         } else {
           call.disconnect();
         }
-        StreamVideo.instance.pushNotificationManager?.endAllCalls();
+        // StreamVideo.instance.pushNotificationManager?.endAllCalls();
       },
     );
   }

@@ -8,6 +8,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 import 'package:flutter_dogfooding/core/repos/user_chat_repository.dart';
+import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import '../app/user_auth_controller.dart';
 import '../core/repos/token_service.dart';
 import '../core/repos/user_auth_repository.dart';
@@ -104,9 +105,17 @@ StreamChatClient _initStreamChat() {
 StreamVideo _initStreamVideo() {
   final streamVideoClient = StreamVideo.init(
     Env.apiKey,
-    logPriority: Priority.info,
+    logPriority: Priority.none,
     muteAudioWhenInBackground: true,
     muteVideoWhenInBackground: true,
+    pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
+      iosPushProvider: const StreamVideoPushProvider.apn(
+        name: 'flutter-apn-video',
+      ),
+      androidPushProvider: const StreamVideoPushProvider.firebase(
+        name: 'firebase',
+      ),
+    ),
   );
 
   return streamVideoClient;

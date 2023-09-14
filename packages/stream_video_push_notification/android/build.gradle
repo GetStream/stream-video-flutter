@@ -1,4 +1,4 @@
-group 'io.getstream.video.flutter'
+group 'io.getstream.video.flutter.stream_video_push_notification'
 version '1.0-SNAPSHOT'
 
 buildscript {

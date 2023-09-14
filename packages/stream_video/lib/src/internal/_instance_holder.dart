@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../latency/latency_settings.dart';
+import '../push_notification/push_notification_manager.dart';
 import '../retry/retry_policy.dart';
 import '../stream_video.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
@@ -16,6 +17,7 @@ class InstanceHolder {
     required SdpPolicy sdpPolicy,
     bool muteVideoWhenInBackground = false,
     bool muteAudioWhenInBackground = false,
+    PNManagerProvider? pushNotificationManagerProvider,
   }) {
     if (_instance != null) {
       throw Exception('''
@@ -31,6 +33,7 @@ class InstanceHolder {
       sdpPolicy: sdpPolicy,
       muteVideoWhenInBackground: muteVideoWhenInBackground,
       muteAudioWhenInBackground: muteAudioWhenInBackground,
+      pushNotificationManagerProvider: pushNotificationManagerProvider,
     );
     return _instance!;
   }

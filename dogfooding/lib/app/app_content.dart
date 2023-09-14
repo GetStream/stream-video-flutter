@@ -2,6 +2,7 @@
 import 'dart:async';
 
 // 🐦 Flutter imports:
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +18,7 @@ import 'package:uni_links/uni_links.dart';
 import 'package:flutter_dogfooding/router/routes.dart';
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
+import '../firebase_options.dart';
 import '../router/router.dart';
 import '../utils/consts.dart';
 import 'user_auth_controller.dart';
@@ -26,21 +28,31 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // As this runs in a separate isolate, we need to initialize and connect the
   // user to StreamVideo again.
 
-  // If the user is not logged in, we don't need to handle the message.
-  final prefs = locator.get<AppPreferences>();
-  final credentials = prefs.userCredentials;
-  if (credentials == null) return;
+  // Initialise Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Login using the stored credentials.
-  final authController = locator.get<UserAuthController>();
-  await authController.loginWithInfo(credentials.userInfo);
+  await AppInjector.init();
 
   // Once the setup is done, we can handle the message.
   await _handleRemoteMessage(message);
+
+  return AppInjector.reset();
 }
 
-Future<bool> _handleRemoteMessage(RemoteMessage message) {
-  return locator.get<StreamVideo>().handlePushNotification(message.data);
+Future<bool> _handleRemoteMessage(RemoteMessage message) async {
+  final streamVideo = locator.get<StreamVideo>();
+  streamVideo.onCallKitEvent<ActionCallAccept>((event) {
+    // TODO: Handle accept button pressed.
+  });
+  streamVideo.onCallKitEvent<ActionCallDecline>((event) {
+    // TODO: Handle decline button pressed.
+  });
+
+  // streamVideo.pushNotificationManager?.on<ActionCallDecline>((data) {
+  //   print('ActionCallDecline: $data');
+  // });
+
+  return streamVideo.handleVoipPushNotification(message.data);
 }
 
 class StreamDogFoodingAppContent extends StatefulWidget {
@@ -62,17 +74,19 @@ class _StreamDogFoodingAppContentState extends State<StreamDogFoodingAppContent>
   void initState() {
     super.initState();
     // Init push notification manager to handle incoming calls.
-    _streamVideo.initPushNotificationManager(
-      StreamVideoPushNotificationManager.factory(
-        apnsProviderName: 'flutter-apn-video',
-        firebaseProviderName: 'firebase',
-      ),
-    );
+    // _streamVideo.initPushNotificationManager(null);
+
+    // final NotificationManager a = StreamVideoPushNotificationManager2(
+    //   client: client,
+    //   iosPushProvider: iosPushProvider,
+    //   androidPushProvider: androidPushProvider,
+    // );
+    //
+    // a.registerDevice();
 
     WidgetsBinding.instance.addObserver(this);
-    FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    _consumeIncomingCall();
+    // _consumeIncomingCall();
     _observeDeepLinks();
   }
 
@@ -85,7 +99,7 @@ class _StreamDogFoodingAppContentState extends State<StreamDogFoodingAppContent>
 
   // Check if there is an incoming call that needs to be consumed.
   Future<void> _consumeIncomingCall() async {
-    final call = await StreamVideo.instance.consumeIncomingCall();
+    final call = await _streamVideo.consumeIncomingCall();
     if (call == null) return;
 
     // Navigate to the lobby screen.

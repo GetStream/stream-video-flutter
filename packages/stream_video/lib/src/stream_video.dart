@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:uuid/uuid.dart';
+
+import '../../open_api/video/coordinator/api.dart' as open;
 import '../stream_video.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'coordinator/retry/coordinator_client_retry.dart';
@@ -15,7 +18,6 @@ import 'retry/retry_policy.dart';
 import 'state_emitter.dart';
 import 'token/token_manager.dart';
 import 'utils/none.dart';
-import 'utils/standard.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
 
 const _tag = 'SV:Client';
@@ -49,6 +51,7 @@ class StreamVideo {
     SdpPolicy sdpPolicy = _defaultSdpPolicy,
     bool muteVideoWhenInBackground = false,
     bool muteAudioWhenInBackground = false,
+    PNManagerProvider? pushNotificationManagerProvider,
   }) {
     return StreamVideo._(
       apiKey,
@@ -59,6 +62,7 @@ class StreamVideo {
       sdpPolicy: sdpPolicy,
       muteVideoWhenInBackground: muteVideoWhenInBackground,
       muteAudioWhenInBackground: muteAudioWhenInBackground,
+      pushNotificationManagerProvider: pushNotificationManagerProvider,
     );
   }
 
@@ -71,6 +75,7 @@ class StreamVideo {
     required this.sdpPolicy,
     this.muteVideoWhenInBackground = false,
     this.muteAudioWhenInBackground = false,
+    PNManagerProvider? pushNotificationManagerProvider,
   }) {
     _client = buildCoordinatorClient(
       apiKey: apiKey,
@@ -80,6 +85,11 @@ class StreamVideo {
       rpcUrl: coordinatorRpcUrl,
       wsUrl: coordinatorWsUrl,
     );
+
+    // Initialize the push notification manager if the provider is provided.
+    if (pushNotificationManagerProvider != null) {
+      _pushNotificationManager = pushNotificationManagerProvider(_client);
+    }
   }
 
   static final InstanceHolder _instanceHolder = InstanceHolder();
@@ -95,6 +105,7 @@ class StreamVideo {
     LogHandlerFunction logHandlerFunction = _defaultLogHandler,
     bool muteVideoWhenInBackground = false,
     bool muteAudioWhenInBackground = false,
+    PNManagerProvider? pushNotificationManagerProvider,
   }) {
     _setupLogger(logPriority, logHandlerFunction);
     return _instanceHolder.init(
@@ -104,6 +115,7 @@ class StreamVideo {
       sdpPolicy: sdpPolicy,
       muteVideoWhenInBackground: muteVideoWhenInBackground,
       muteAudioWhenInBackground: muteAudioWhenInBackground,
+      pushNotificationManagerProvider: pushNotificationManagerProvider,
     );
   }
 
@@ -143,20 +155,14 @@ class StreamVideo {
   final _tokenManager = TokenManager();
   final _subscriptions = Subscriptions();
   late final CoordinatorClient _client;
-  PushNotificationManager? pushNotificationManager;
+  late final PushNotificationManager? _pushNotificationManager;
 
-  late bool muteVideoWhenInBackground;
-  late bool muteAudioWhenInBackground;
+  final bool muteVideoWhenInBackground;
+  final bool muteAudioWhenInBackground;
   bool _mutedCameraByStateChange = false;
   bool _mutedAudioByStateChange = false;
 
   var _state = _StreamVideoState();
-
-  Future<void> initPushNotificationManager(
-    PushNotificationManagerFactory factory,
-  ) async {
-    pushNotificationManager = await factory(_client);
-  }
 
   /// Returns the current user if exists.
   UserInfo? get currentUser => _state.currentUser.valueOrNull;
@@ -205,7 +211,10 @@ class StreamVideo {
       }
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
       _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
-      await pushNotificationManager?.onUserLoggedIn();
+
+      // Register device for push notification.
+      _pushNotificationManager?.registerDevice();
+
       return tokenResult.map((data) => data.rawValue);
     } catch (e, stk) {
       _logger.e(() => '[connectUser] failed(${user.id}): $e');
@@ -281,6 +290,9 @@ class StreamVideo {
       await _client.disconnectUser();
       _subscriptions.cancelAll();
       _tokenManager.reset();
+
+      // Unregister device for push notification.
+      _pushNotificationManager?.unregisterDevice();
 
       // Resetting the state.
       await _state.close();
@@ -385,17 +397,110 @@ class StreamVideo {
     return result;
   }
 
-  Future<bool> handlePushNotification(Map<String, dynamic> payload) async {
-    final manager = pushNotificationManager;
-    if (manager == null) return false;
+  Future<Result<None>> createDevice({
+    required String id,
+    required open.CreateDeviceRequestPushProviderEnum pushProvider,
+    String? pushProviderName,
+    String? userId,
+    bool? voipToken,
+  }) {
+    return _client.createDevice(
+      id: id,
+      pushProvider: pushProvider,
+      pushProviderName: pushProviderName,
+      userId: userId,
+      voipToken: voipToken,
+    );
+  }
 
-    return manager.handlePushNotification(payload);
+  Future<Result<None>> deleteDevice({
+    required String id,
+    String? userId,
+  }) {
+    return _client.deleteDevice(
+      id: id,
+      userId: userId,
+    );
+  }
+
+  Future<Result<List<open.Device>>> listDevices({required String userId}) {
+    return _client.listDevices(userId: userId);
+  }
+
+  StreamSubscription<T>? onCallKitEvent<T extends CallKitEvent>(
+    void Function(T event)? onEvent,
+  ) {
+    final manager = _pushNotificationManager;
+    if (manager == null) {
+      _logger.e(() => '[on] rejected (no manager)');
+      return null;
+    }
+
+    return manager.on<T>(onEvent);
+  }
+
+  static const _uuid = Uuid();
+
+  /// Handle incoming VoIP push notifications.
+  ///
+  /// Returns `true` if the notification was handled, `false` otherwise.
+  Future<bool> handleVoipPushNotification(Map<String, dynamic> payload) async {
+    final manager = _pushNotificationManager;
+    if (manager == null) {
+      _logger.e(() => '[handleVoipPushNotification] rejected (no manager)');
+      return false;
+    }
+
+    // Only handle messages from stream.video
+    final sender = payload['sender'] as String?;
+    if (sender != 'stream.video') return false;
+
+    // Only handle ringing calls.
+    final type = payload['type'] as String?;
+    if (type != 'call.ring') return false;
+
+    // Return if the payload does not contain a call cid.
+    final cid = payload['call_cid'] as String?;
+    if (cid == null) return false;
+
+    final caller = payload['created_by_display_name'] as String?;
+    unawaited(
+      manager.showIncomingCall(
+        uuid: _uuid.v4(),
+        callCid: StreamCallCid(cid: cid),
+        nameCaller: caller,
+      ),
+    );
+
+    return true;
   }
 
   Future<Call?> consumeIncomingCall() async {
-    return pushNotificationManager?.consumeIncomingCall().then((data) {
-      return data?.let((it) => _makeCallFromCreated(data: it));
-    });
+    final manager = _pushNotificationManager;
+    if (manager == null) {
+      _logger.e(() => '[consumeIncomingCall] rejected (no manager)');
+      return null;
+    }
+
+    final calls = await manager.activeCalls();
+
+    return null;
+
+    // return if calls and data is not available.
+    // if (calls is! List) return null;
+    // final call = calls.lastOrNull;
+    // if (call is! Map) return null;
+    //
+    // final incomingCid = call['extra']?['incomingCallCid'];
+    //
+    // if (incomingCid == null) return null;
+    //
+    // return _from(StreamCallCid(cid: incomingCid));
+    // manager.activeCalls();
+    //
+    // return manager.consumeIncomingCall().then((data) {
+    //   return data?.let((it) => _makeCallFromCreated(data: it));
+    // });
   }
 }
 
