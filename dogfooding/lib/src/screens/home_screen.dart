@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
     unawaited(showLoadingIndicator(context));
     try {
       call = streamVideoClient.makeCall(type: kCallType, id: callId);
-      await call?.getOrCreateCall();
+      await call?.getOrCreate();
       chatChannel = await appRepo?.createChatChannel(
         channelId: call!.callCid.id,
       );
@@ -161,9 +161,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onNavigateToCall(
-      Call call, {
-        CallConnectOptions options = const CallConnectOptions(),
-      }) {
+    Call call, {
+    CallConnectOptions options = const CallConnectOptions(),
+  }) {
     Navigator.push(
       context,
       MaterialPageRoute(

@@ -6,6 +6,7 @@ import '../../stream_video.dart';
 import '../action/internal/lifecycle_action.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../errors/video_error_composer.dart';
+import '../models/call_received_data.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../shared_emitter.dart';
@@ -356,7 +357,8 @@ class Call {
     return result;
   }
 
-  Future<Result<None>> join() async {
+  @Deprecated('Lobby view no longer needs joining to coordinator')
+  Future<Result<None>> joinLobby() async {
     _logger.d(() => '[join] no args');
     _stateManager.lifecycleCallJoining(const CallJoining());
     final joinedResult = await _joinIfNeeded();
@@ -372,7 +374,7 @@ class Call {
     }
   }
 
-  Future<Result<None>> connect() async {
+  Future<Result<None>> join() async {
     _logger.i(() => '[connect] status: ${_status.value}');
     if (_status.value == _ConnectionStatus.connected) {
       _logger.w(() => '[connect] rejected (connected)');
@@ -401,7 +403,7 @@ class Call {
       _status.value = _ConnectionStatus.connected;
     } else {
       _logger.e(() => '[connect] failed: $result');
-      await disconnect();
+      await leave();
     }
     return result;
   }
@@ -622,6 +624,7 @@ class Call {
       _logger.d(() => '[awaitIfNeeded] incoming timeout: $timeout');
       futureResult = _awaitIncomingToBeAccepted(timeout);
     } else if (status is CallStatusJoining) {
+      // TODO we don't need this case, since we no longer join from LobbyView
       _logger.d(() => '[awaitIfNeeded] joining to become joined');
       futureResult = _awaitCallToBeJoined();
     }
@@ -632,7 +635,7 @@ class Call {
     return const Result.success(none);
   }
 
-  Future<Result<None>> disconnect() async {
+  Future<Result<None>> leave() async {
     final state = this.state.value;
     _logger.i(() => '[disconnect] ${_status.value}; state: $state');
     if (state.status.isDisconnected) {
@@ -794,21 +797,62 @@ class Call {
     );
   }
 
+  /// Receives a call information. You can then use
+  /// the [CallReceivedData] in order to create a [Call] object.
+  Future<Result<CallReceivedData>> get({
+    int? membersLimit,
+    bool ringing = false,
+    bool notify = false,
+  }) async {
+    _logger.d(
+      () => '[get] cid: $callCid, membersLimit: $membersLimit'
+          ', ringing: $ringing, notify: $notify',
+    );
+    final currentUserId = _getCurrentUserId();
+    if (currentUserId == null) {
+      _logger.e(() => '[get] failed (no userId)');
+      return Result.error('[get] failed; no user_id found');
+    }
+
+    final response = await _coordinatorClient.getCall(
+      callCid: callCid,
+      membersLimit: membersLimit,
+      ringing: ringing,
+      notify: notify,
+    );
+
+    return response.fold(
+      success: (it) {
+        _stateManager.lifecycleCallReceived(
+          CallReceived(it.data),
+          ringing: ringing,
+          notify: notify,
+        );
+        _logger.v(() => '[get] completed: ${it.data}');
+        return it;
+      },
+      failure: (it) {
+        _logger.e(() => '[get] failed: ${it.error}');
+        return it;
+      },
+    );
+  }
+
   /// Receives a call or creates it with given information. You can then use
   /// the [CallReceivedOrCreatedData] in order to create a [Call] object.
-  Future<Result<CallReceivedOrCreatedData>> getOrCreateCall({
+  Future<Result<CallReceivedOrCreatedData>> getOrCreate({
     List<String> participantIds = const [],
     bool ringing = false,
   }) async {
     _logger.d(
-      () => '[getOrCreateCall] cid: $callCid, ringing: $ringing, '
+      () => '[getOrCreate] cid: $callCid, ringing: $ringing, '
           'participantIds: $participantIds',
     );
 
     final currentUserId = _getCurrentUserId();
     if (currentUserId == null) {
-      _logger.e(() => '[getOrCreateCall] failed (no userId)');
-      return Result.error('[createCall] failed; no user_id found');
+      _logger.e(() => '[getOrCreate] failed (no userId)');
+      return Result.error('[getOrCreate] failed; no user_id found');
     }
 
     final response = await _coordinatorClient.getOrCreateCall(
@@ -828,11 +872,11 @@ class Call {
           CallCreated(it.data.data),
           ringing: ringing,
         );
-        _logger.v(() => '[getOrCreateCall] completed: ${it.data}');
+        _logger.v(() => '[getOrCreate] completed: ${it.data}');
         return it;
       },
       failure: (it) {
-        _logger.e(() => '[getOrCreateCall] failed: ${it.error}');
+        _logger.e(() => '[getOrCreate] failed: ${it.error}');
         return it;
       },
     );
@@ -939,9 +983,7 @@ class Call {
 
     if (result.isSuccess) {
       _stateManager.setCallBroadcasting(
-          isBroadcasting: true,
-          hlsPlaylistUrl: result.getDataOrNull()
-      );
+          isBroadcasting: true, hlsPlaylistUrl: result.getDataOrNull());
     }
     return result;
   }

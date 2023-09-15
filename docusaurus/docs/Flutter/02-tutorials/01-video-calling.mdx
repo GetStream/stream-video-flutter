@@ -156,7 +156,7 @@ return Scaffold(
 ```
 
 To instantiate a call, you can use the `StreamVideo.makeCall()` method. You then need to create this
-on the backend using the `call.getOrCreateCall()` method.
+on the backend using the `call.getOrCreate()` method.
 
 Here is how that looks in code:
 
@@ -168,7 +168,7 @@ ElevatedButton(
       var call = StreamVideo.instance.makeCall(
           type: 'default', id: 'demo-call-123');
 
-      await call.getOrCreateCall();
+      await call.getOrCreate();
     } catch (e) {
       debugPrint('Error joining or creating call: $e');
       debugPrint(e.toString());
@@ -237,7 +237,7 @@ Once you navigate to the `CallScreen` after the button press, this is what you w
 ![Call Screen UI](../assets/tutorials/vc-ui-2.png)
 
 :::note
-When connecting other users, you can use the same process. The `call.getOrCreateCall()` method will create
+When connecting other users, you can use the same process. The `call.getOrCreate()` method will create
 a call if it doesn't exist, and simply return the existing call if it already does.
 :::
 
@@ -292,7 +292,7 @@ StreamCallContainer(
             LeaveCallOption(
               call: call,
               onLeaveCallTap: () {
-                call.disconnect();
+                call.leave();
               },
             ),
           ],
