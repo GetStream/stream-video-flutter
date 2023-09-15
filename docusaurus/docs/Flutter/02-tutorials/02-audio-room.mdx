@@ -129,7 +129,7 @@ final room = video.makeCall(
   id: const Uuid().v4(),
 );
 
-await room.getOrCreateCall();
+await room.getOrCreate();
 await room.update(
   custom: {
     'name': title,
@@ -198,7 +198,7 @@ Future<void> joinRoom(QueriedCall room) async {
   final cid = room.call.cid;
   final call = video.makeCall(type: cid.type, id: cid.id);
 
-  await call.connect();
+  await call.join();
   log('Joining Call: $cid');
   Navigator.of(context).push(
     AudioRoomScreen.routeTo(call, room.call, user),

@@ -31,7 +31,7 @@ class LeaveCallOption extends StatelessWidget {
         if (onLeaveCallTap != null) {
           onLeaveCallTap!();
         } else {
-          call.disconnect();
+          call.leave();
         }
         StreamVideo.instance.pushNotificationManager?.endAllCalls();
       },

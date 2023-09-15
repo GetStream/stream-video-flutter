@@ -137,7 +137,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
       );
 
       final call = StreamVideo.instance.makeCall(type: kCallType, id: callId);
-      await call.getOrCreateCall();
+      await call.getOrCreate();
 
       final chatChannel = await widget.appRepository.createChatChannel(
         channelId: call.callCid.id,
@@ -202,7 +202,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
         // widget is detached
         break;
       case AppLifecycleState.hidden:
-        // widget is hidden
+      // widget is hidden
     }
   }
 

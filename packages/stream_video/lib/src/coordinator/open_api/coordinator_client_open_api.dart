@@ -15,6 +15,7 @@ import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
 import '../../models/call_reaction.dart';
 import '../../models/call_received_created_data.dart';
+import '../../models/call_received_data.dart';
 import '../../models/call_settings.dart';
 import '../../models/guest_created_data.dart';
 import '../../models/queried_calls.dart';
@@ -39,28 +40,33 @@ const _idEvents = 1;
 class CoordinatorClientOpenApi extends CoordinatorClient {
   CoordinatorClientOpenApi({
     required String rpcUrl,
-    required this.wsUrl,
-    required this.apiKey,
-    required this.tokenManager,
-    required this.latencyService,
-    required this.retryPolicy,
-  }) : _apiClient = open.ApiClient(
+    required String wsUrl,
+    required String apiKey,
+    required TokenManager tokenManager,
+    required LatencyService latencyService,
+    required RetryPolicy retryPolicy,
+  })  : _wsUrl = wsUrl,
+        _apiKey = apiKey,
+        _tokenManager = tokenManager,
+        _latencyService = latencyService,
+        _retryPolicy = retryPolicy,
+        _apiClient = open.ApiClient(
           basePath: rpcUrl,
           authentication:
               _Authentication(apiKey: apiKey, tokenManager: tokenManager),
         );
 
   final _logger = taggedLogger(tag: 'SV:CoordClient');
-  final String apiKey;
-  final String wsUrl;
-  final TokenManager tokenManager;
-  final LatencyService latencyService;
-  final RetryPolicy retryPolicy;
+  final String _apiKey;
+  final String _wsUrl;
+  final TokenManager _tokenManager;
+  final LatencyService _latencyService;
+  final RetryPolicy _retryPolicy;
 
   final open.ApiClient _apiClient;
-  late final defaultApi = open.DefaultApi(_apiClient);
-  late final serverSideApi = open.ServerSideApi(_apiClient);
-  late final locationService = LocationService();
+  late final _defaultApi = open.DefaultApi(_apiClient);
+  late final _serverSideApi = open.ServerSideApi(_apiClient);
+  late final _locationService = LocationService();
 
   @override
   SharedEmitter<CoordinatorEvent> get events => _events;
@@ -151,11 +157,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
   CoordinatorWebSocketOpenApi _createWebSocket(UserInfo user) {
     return CoordinatorWebSocketOpenApi(
-      wsUrl,
-      apiKey: apiKey,
+      _wsUrl,
+      apiKey: _apiKey,
       userInfo: user,
-      tokenManager: tokenManager,
-      retryPolicy: retryPolicy,
+      tokenManager: _tokenManager,
+      retryPolicy: _retryPolicy,
     );
   }
 
@@ -177,7 +183,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         voipToken: voipToken,
       );
       _logger.d(() => '[createDevice] input: $input');
-      final result = await defaultApi.createDevice(
+      final result = await _defaultApi.createDevice(
         input,
       );
       _logger.v(() => '[createDevice] completed: $result');
@@ -198,7 +204,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(() => '[listDevices] userId: $userId');
-      final result = await defaultApi.listDevices(
+      final result = await _defaultApi.listDevices(
         userId: userId,
       );
       _logger.v(() => '[listDevices] completed: $result');
@@ -220,7 +226,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(() => '[deleteDevice] id: $id, userId: $userId');
-      final result = await defaultApi.deleteDevice(
+      final result = await _defaultApi.deleteDevice(
         id: id,
         userId: userId,
       );
@@ -235,6 +241,44 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     }
   }
 
+  /// Gets the call if already exists.
+  @override
+  Future<Result<CallReceivedData>> getCall({
+    required StreamCallCid callCid,
+    int? membersLimit,
+    bool? ringing,
+    bool? notify,
+  }) async {
+    try {
+      _logger.d(
+        () => '[getCall] cid: $callCid, ringing: $ringing'
+            ', membersLimit: $membersLimit, ringing: $ringing, notify: $notify',
+      );
+      final result = await _defaultApi.getCall(
+        callCid.type,
+        callCid.id,
+        membersLimit: membersLimit,
+        ring: ringing,
+        notify: notify,
+      );
+      _logger.v(() => '[getCall] completed: $result');
+      if (result == null) {
+        return Result.error('getCall result is null');
+      }
+
+      return Result.success(
+        CallReceivedData(
+          callCid: callCid,
+          metadata: result.call
+              .toCallMetadata(result.members, result.ownCapabilities),
+        ),
+      );
+    } catch (e, stk) {
+      _logger.e(() => '[getCall] failed: $e; $stk');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
   /// Gets the call if already exists or attempts to create a new call.
   @override
   Future<Result<CallReceivedOrCreatedData>> getOrCreateCall({
@@ -244,10 +288,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(
-        () =>
-            '[getOrCreateCall] cid: $callCid, ringing: $ringing, members: $members',
+        () => '[getOrCreateCall] cid: $callCid'
+            ', ringing: $ringing, members: $members',
       );
-      final result = await defaultApi.getOrCreateCall(
+      final result = await _defaultApi.getOrCreateCall(
         callCid.type,
         callCid.id,
         open.GetOrCreateCallRequest(
@@ -273,7 +317,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
     } catch (e, stk) {
-      _logger.v(() => '[getOrCreateCall] failed: $e; $stk');
+      _logger.e(() => '[getOrCreateCall] failed: $e; $stk');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -289,12 +333,12 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(
-        () =>
-            '[joinCall] cid: $callCid, dataCenterId: $datacenterId, ringing: $ringing, create: $create',
+        () => '[joinCall] cid: $callCid, dataCenterId: $datacenterId'
+            ', ringing: $ringing, create: $create',
       );
-      final location = await locationService.getLocation();
+      final location = await _locationService.getLocation();
       _logger.v(() => '[joinCall] location: $location');
-      final result = await defaultApi.joinCall(
+      final result = await _defaultApi.joinCall(
         callCid.type,
         callCid.id,
         open.JoinCallRequest(
@@ -304,6 +348,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
         connectionId: _ws?.clientId,
       );
+      _logger.v(() => '[joinCall] completed: $result');
       if (result == null) {
         return Result.error('joinCall result is null');
       }
@@ -320,6 +365,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
     } catch (e, stk) {
+      _logger.e(() => '[joinCall] failed: $e; $stk');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
@@ -333,10 +379,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(
-        () =>
-            '[sendCustomEvent] cid: $callCid, eventType: $eventType, custom: $custom',
+        () => '[sendCustomEvent] cid: $callCid'
+            ', eventType: $eventType, custom: $custom',
       );
-      final result = await defaultApi.sendEvent(
+      final result = await _defaultApi.sendEvent(
         callCid.type,
         callCid.id,
         open.SendEventRequest(
@@ -366,7 +412,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         () =>
             '[inviteUsers] cid: $callCid, members: $members, ringing: $ringing',
       );
-      final result = await defaultApi.updateCallMembers(
+      final result = await _defaultApi.updateCallMembers(
         callCid.type,
         callCid.id,
         open.UpdateCallMembersRequest(
@@ -389,7 +435,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required List<CallPermission> permissions,
   }) async {
     try {
-      final result = await defaultApi.requestPermission(
+      final result = await _defaultApi.requestPermission(
         callCid.type,
         callCid.id,
         open.RequestPermissionRequest(
@@ -413,7 +459,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required List<CallPermission> revokePermissions,
   }) async {
     try {
-      final result = await defaultApi.updateUserPermissions(
+      final result = await _defaultApi.updateUserPermissions(
         callCid.type,
         callCid.id,
         open.UpdateUserPermissionsRequest(
@@ -434,7 +480,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> startRecording(StreamCallCid callCid) async {
     try {
-      await defaultApi.startRecording(callCid.type, callCid.id);
+      await _defaultApi.startRecording(callCid.type, callCid.id);
       return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -447,7 +493,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     String sessionId,
   ) async {
     try {
-      final result = await defaultApi.listRecordingsTypeIdSession1(
+      final result = await _defaultApi.listRecordingsTypeIdSession1(
         callCid.type,
         callCid.id,
         sessionId,
@@ -461,7 +507,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> stopRecording(StreamCallCid callCid) async {
     try {
-      await defaultApi.stopRecording(callCid.type, callCid.id);
+      await _defaultApi.stopRecording(callCid.type, callCid.id);
       return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -471,7 +517,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<String?>> startBroadcasting(StreamCallCid callCid) async {
     try {
-      final result = await defaultApi
+      final result = await _defaultApi
           .startBroadcasting(callCid.type, callCid.id)
           .then((it) => it?.playlistUrl);
       return Result.success(result);
@@ -483,7 +529,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> stopBroadcasting(StreamCallCid callCid) async {
     try {
-      await defaultApi.stopBroadcasting(callCid.type, callCid.id);
+      await _defaultApi.stopBroadcasting(callCid.type, callCid.id);
       return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -498,7 +544,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     Map<String, Object> custom = const {},
   }) async {
     try {
-      final result = await defaultApi.sendVideoReaction(
+      final result = await _defaultApi.sendVideoReaction(
         callCid.type,
         callCid.id,
         open.SendReactionRequest(
@@ -527,7 +573,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     int? limit,
   }) async {
     try {
-      final result = await defaultApi.queryMembers(
+      final result = await _defaultApi.queryMembers(
         open.QueryMembersRequest(
           type: callCid.type,
           id: callCid.id,
@@ -557,7 +603,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     int? limit,
   }) async {
     try {
-      final result = await defaultApi.queryCalls(
+      final result = await _defaultApi.queryCalls(
         open.QueryCallsRequest(
           filterConditions: filterConditions,
           next: next,
@@ -581,7 +627,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required String userId,
   }) async {
     try {
-      final result = await defaultApi.blockUser(
+      final result = await _defaultApi.blockUser(
         callCid.type,
         callCid.id,
         open.BlockUserRequest(userId: userId),
@@ -601,7 +647,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required String userId,
   }) async {
     try {
-      final result = await defaultApi.unblockUser(
+      final result = await _defaultApi.unblockUser(
         callCid.type,
         callCid.id,
         open.UnblockUserRequest(userId: userId),
@@ -618,7 +664,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> endCall(StreamCallCid callCid) async {
     try {
-      final result = await defaultApi.endCall(callCid.type, callCid.id);
+      final result = await _defaultApi.endCall(callCid.type, callCid.id);
       if (result == null) {
         return Result.error('endCall result is null');
       }
@@ -636,7 +682,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? startTranscription,
   }) async {
     try {
-      final result = await defaultApi.goLive(
+      final result = await _defaultApi.goLive(
         callCid.type,
         callCid.id,
         open.GoLiveRequest(
@@ -658,7 +704,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<CallMetadata>> stopLive(StreamCallCid callCid) async {
     try {
-      final result = await defaultApi.stopLive(callCid.type, callCid.id);
+      final result = await _defaultApi.stopLive(callCid.type, callCid.id);
       if (result == null) {
         return Result.error('stopLive result is null');
       }
@@ -679,7 +725,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? screenshare,
   }) async {
     try {
-      final result = await defaultApi.muteUsers(
+      final result = await _defaultApi.muteUsers(
         callCid.type,
         callCid.id,
         open.MuteUsersRequest(
@@ -714,7 +760,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     StreamGeofencingSettings? geofencing,
   }) async {
     try {
-      final result = await defaultApi.updateCall(
+      final result = await _defaultApi.updateCall(
         callCid.type,
         callCid.id,
         open.UpdateCallRequest(
@@ -748,7 +794,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required StreamCallCid cid,
   }) async {
     try {
-      await defaultApi.acceptCall(cid.type, cid.id);
+      await _defaultApi.acceptCall(cid.type, cid.id);
       return const Result.success(none);
     } catch (e) {
       return Result.failure(VideoErrors.compose(e));
@@ -763,7 +809,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required StreamCallCid cid,
   }) async {
     try {
-      await defaultApi.rejectCall(cid.type, cid.id);
+      await _defaultApi.rejectCall(cid.type, cid.id);
       return const Result.success(none);
     } catch (e) {
       return Result.failure(VideoErrors.compose(e));
@@ -780,7 +826,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     Map<String, Object> custom = const {},
   }) async {
     try {
-      final res = await defaultApi.createGuest(
+      final res = await _defaultApi.createGuest(
         open.CreateGuestRequest(
           user: open.UserRequest(
             id: id,

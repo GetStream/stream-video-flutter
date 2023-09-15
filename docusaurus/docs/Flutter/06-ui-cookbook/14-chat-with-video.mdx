@@ -395,7 +395,7 @@ Future<Call> _joinCall(BuildContext context, String cid) async {
   final id = parts[1];
 
   final call = await StreamVideo.instance.joinCall(type: type, id: id);
-  await call.connect();
+  await call.join();
   return call;
 }
 ```

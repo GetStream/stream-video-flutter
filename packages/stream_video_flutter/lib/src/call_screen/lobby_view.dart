@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
@@ -45,9 +46,16 @@ class StreamLobbyView extends StatefulWidget {
 }
 
 class _StreamLobbyViewState extends State<StreamLobbyView> {
+  late final _logger = taggedLogger(tag: 'SV:LobbyView');
+
   RtcLocalAudioTrack? _microphoneTrack;
   RtcLocalCameraTrack? _cameraTrack;
+  List<CallUser> _members = <CallUser>[];
+  bool _membersEnabled = false;
   bool _isJoiningCall = false;
+
+  StreamSubscription<Object>? _fetchSubscription;
+  StreamSubscription<Object>? _eventSubscription;
 
   Future<void> toggleCamera() async {
     if (_cameraTrack != null) {
@@ -59,7 +67,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
       final cameraTrack = await RtcLocalTrack.camera();
       return setState(() => _cameraTrack = cameraTrack);
     } catch (e) {
-      streamLog.w('SV:LobbyView', () => 'Error creating camera track: $e');
+      _logger.w(() => 'Error creating camera track: $e');
     }
   }
 
@@ -73,7 +81,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
       final microphoneTrack = await RtcLocalTrack.audio();
       return setState(() => _microphoneTrack = microphoneTrack);
     } catch (e) {
-      streamLog.w('SV:LobbyView', () => 'Error creating microphone track: $e');
+      _logger.w(() => 'Error creating microphone track: $e');
     }
   }
 
@@ -102,9 +110,8 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
   @override
   void initState() {
     super.initState();
-    // Obtains SFU credentials and picks the best server, but doesn't
-    // connect to the call yet.
-    widget.call.join();
+    _fetchCall();
+    _listenEvents();
   }
 
   @override
@@ -117,7 +124,53 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
 
     _cameraTrack = null;
     _microphoneTrack = null;
+    _fetchSubscription?.cancel();
+    _eventSubscription?.cancel();
     super.dispose();
+  }
+
+  void _fetchCall() {
+    // Obtains SFU credentials and picks the best server, but doesn't
+    // connect to the call yet.
+    final currentUserId = StreamVideo.instance.currentUser?.id;
+    _logger.d(() => '[fetchCall] currentUserId: $currentUserId');
+    _fetchSubscription?.cancel();
+    _fetchSubscription =
+        widget.call.get(notify: true).asStream().listen((result) {
+      result.fold(
+        success: (it) {
+          _logger.v(() => '[fetchCall] completed: ${it.data}');
+          final users = it.data.metadata.users;
+          setState(() {
+            _members = it.data.metadata.members.values
+                .map((it) => users[it.userId])
+                .whereNotNull()
+                .where((it) => it.id != currentUserId)
+                .toList();
+          });
+        },
+        failure: (it) {
+          _logger.e(() => '[fetchCall] failed: ${it.error}');
+        },
+      );
+    });
+  }
+
+  void _listenEvents() {
+    _eventSubscription?.cancel();
+    _eventSubscription = StreamVideo.instance.events.listen((event) {
+      if (event is CoordinatorCallSessionParticipantLeftEvent) {
+        _logger.d(() => '[listenEvents] #userLeft; user: ${event.user}');
+        setState(() {
+          _members.removeWhere((user) => user.id == event.user.id);
+        });
+      } else if (event is CoordinatorCallSessionParticipantJoinedEvent) {
+        _logger.d(() => '[listenEvents] #userJoined; user: ${event.user}');
+        setState(() {
+          _members.add(event.user);
+        });
+      }
+    });
   }
 
   @override
@@ -268,6 +321,18 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           children: [
+                            if (_membersEnabled && _members.isNotEmpty)
+                              // TODO implement members drawing
+                              SizedBox(
+                                height: 100,
+                                child: ListView.builder(
+                                  itemCount: _members.length,
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder: (context, idx) {
+                                    return Text(_members[idx].name);
+                                  },
+                                ),
+                              ),
                             Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,

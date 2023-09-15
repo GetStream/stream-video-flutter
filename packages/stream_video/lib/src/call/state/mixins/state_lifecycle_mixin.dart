@@ -6,6 +6,7 @@ import '../../../logger/impl/tagged_logger.dart';
 import '../../../models/call_created_data.dart';
 import '../../../models/call_metadata.dart';
 import '../../../models/call_participant_state.dart';
+import '../../../models/call_received_data.dart';
 import '../../../models/call_ringing_data.dart';
 import '../../../models/call_status.dart';
 import '../../../models/disconnect_reason.dart';
@@ -69,6 +70,25 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
         DisconnectReason.ended(),
       ),
       sessionId: '',
+    );
+  }
+
+  void lifecycleCallReceived(
+    CallReceived stage, {
+    bool ringing = false,
+    bool notify = false,
+  }) {
+    _logger.d(
+      () => '[lifecycleCallReceived] ringing: $ringing'
+          ', notify: $notify, state: $state',
+    );
+    state = state.copyWith(
+      status: stage.data.toCallStatus(state: state, ringing: ringing),
+      createdByUserId: stage.data.metadata.details.createdBy.id,
+      settings: stage.data.metadata.settings,
+      egress: stage.data.metadata.details.egress,
+      ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
+      callParticipants: stage.data.metadata.toCallParticipants(state),
     );
   }
 
@@ -224,6 +244,23 @@ extension on CallMetadata {
 }
 
 extension on CallCreatedData {
+  CallStatus toCallStatus({
+    required CallState state,
+    required bool ringing,
+  }) {
+    final status = state.status;
+    final createdByMe = state.currentUserId == metadata.details.createdBy.id;
+    if (ringing && !status.isOutgoing && createdByMe) {
+      return CallStatus.outgoing();
+    } else if (ringing && !status.isIncoming && !createdByMe) {
+      return CallStatus.incoming();
+    } else {
+      return status;
+    }
+  }
+}
+
+extension on CallReceivedData {
   CallStatus toCallStatus({
     required CallState state,
     required bool ringing,

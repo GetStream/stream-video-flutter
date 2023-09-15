@@ -136,7 +136,7 @@ class StreamBackgroundService {
         if (onButtonClick != null) {
           await onButtonClick.call(call, ButtonType.cancel);
         } else {
-          await call.disconnect();
+          await call.leave();
         }
       }
     };
