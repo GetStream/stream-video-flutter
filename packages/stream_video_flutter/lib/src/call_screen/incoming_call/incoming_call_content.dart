@@ -131,7 +131,7 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
       widget.onDeclineCallTap!();
     } else {
       await widget.call.reject();
-      await widget.call.disconnect();
+      await widget.call.leave();
     }
   }
 

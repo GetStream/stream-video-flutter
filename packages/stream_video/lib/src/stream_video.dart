@@ -415,7 +415,7 @@ class _StreamVideoState {
   Future<void> setActiveCall(Call? call) async {
     final ongoingCall = activeCall.valueOrNull;
     if (ongoingCall != null && call != null) {
-      await ongoingCall.disconnect();
+      await ongoingCall.leave();
     }
     activeCall.value = call;
   }

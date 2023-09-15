@@ -86,7 +86,7 @@ class _CallScreenState extends State<CallScreen> {
                       LeaveCallOption(
                         call: call,
                         onLeaveCallTap: () {
-                          call.disconnect();
+                          call.leave();
                         },
                       ),
                     ],
