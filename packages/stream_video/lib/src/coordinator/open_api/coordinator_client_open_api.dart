@@ -273,8 +273,12 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return Result.success(
         CallReceivedData(
           callCid: callCid,
-          metadata: result.call
-              .toCallMetadata(result.members, result.ownCapabilities),
+          metadata: result.call.toCallMetadata(
+            membership: result.membership,
+            members: result.members,
+            ownCapabilities: result.ownCapabilities,
+            blockedUsers: result.blockedUsers,
+          ),
         ),
       );
     } catch (e, stk) {
@@ -315,8 +319,12 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           wasCreated: result.created,
           data: CallCreatedData(
             callCid: callCid,
-            metadata: result.call
-                .toCallMetadata(result.members, result.ownCapabilities),
+            metadata: result.call.toCallMetadata(
+              membership: result.membership,
+              members: result.members,
+              ownCapabilities: result.ownCapabilities,
+              blockedUsers: result.blockedUsers,
+            ),
           ),
         ),
       );
@@ -359,8 +367,12 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return Result.success(
         CoordinatorJoined(
           wasCreated: result.created,
-          metadata: result.call
-              .toCallMetadata(result.members, result.ownCapabilities),
+          metadata: result.call.toCallMetadata(
+            membership: result.membership,
+            members: result.members,
+            ownCapabilities: result.ownCapabilities,
+            blockedUsers: result.blockedUsers,
+          ),
           credentials: result.credentials.toCallCredentials(),
           members: result.members.toCallMembers(),
           users: result.members.toCallUsers(),

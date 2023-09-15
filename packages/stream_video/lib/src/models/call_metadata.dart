@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 import 'call_cid.dart';
 import 'call_egress.dart';
 import 'call_permission.dart';
+import 'call_session_data.dart';
 import 'call_settings.dart';
 
 @immutable
@@ -12,6 +13,7 @@ class CallMetadata with EquatableMixin {
     required this.cid,
     required this.details,
     required this.settings,
+    required this.session,
     required this.users,
     required this.members,
   });
@@ -19,11 +21,12 @@ class CallMetadata with EquatableMixin {
   final StreamCallCid cid;
   final CallDetails details;
   final CallSettings settings;
+  final CallSessionData session;
   final Map<String, CallUser> users;
   final Map<String, CallMember> members;
 
   @override
-  List<Object?> get props => [cid, details, settings, users, members];
+  List<Object?> get props => [cid, details, settings, session, users, members];
 
   @override
   String toString() {
@@ -121,6 +124,7 @@ class CallMember with EquatableMixin {
   }
 }
 
+@immutable
 class CallUser with EquatableMixin {
   const CallUser({
     required this.id,
