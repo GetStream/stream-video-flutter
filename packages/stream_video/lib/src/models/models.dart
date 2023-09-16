@@ -11,6 +11,7 @@ export 'call_preferences.dart';
 export 'call_reaction.dart';
 export 'call_received_created_data.dart';
 export 'call_ringing_data.dart';
+export 'call_session_data.dart';
 export 'call_settings.dart';
 export 'call_stats.dart';
 export 'call_status.dart';
