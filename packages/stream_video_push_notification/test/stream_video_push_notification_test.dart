@@ -19,6 +19,7 @@ Future<void> main() async {
     callCid: streamCallCid,
     metadata: CallMetadata(
       cid: streamCallCid,
+      session: const CallSessionData(),
       details: const CallDetails(
         createdBy: CallUser(
           id: "jc",

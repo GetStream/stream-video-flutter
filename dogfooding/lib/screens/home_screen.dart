@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _call = _streamVideo.makeCall(type: kCallType, id: callId);
 
     try {
-      await _call!.getOrCreateCall();
+      await _call!.getOrCreate();
     } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());

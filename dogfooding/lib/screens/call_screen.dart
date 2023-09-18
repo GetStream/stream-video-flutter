@@ -40,7 +40,7 @@ class _CallScreenState extends State<CallScreen> {
 
   @override
   void dispose() {
-    widget.call.disconnect();
+    widget.call.leave();
     _userChatRepo.disconnectUser();
     super.dispose();
   }
@@ -144,9 +144,7 @@ class _CallScreenState extends State<CallScreen> {
                   ),
                   LeaveCallOption(
                     call: call,
-                    onLeaveCallTap: () {
-                      call.disconnect();
-                    },
+                    onLeaveCallTap: () => call.leave(),
                   ),
                 ],
               );

@@ -123,7 +123,7 @@ class _StreamDogFoodingAppContentState extends State<StreamDogFoodingAppContent>
     final call = _streamVideo.makeCall(type: kCallType, id: callId);
 
     try {
-      await call.getOrCreateCall();
+      await call.getOrCreate();
     } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());
