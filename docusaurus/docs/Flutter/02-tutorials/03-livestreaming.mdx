@@ -258,7 +258,7 @@ class LiveStreamScreen extends StatelessWidget {
                     color: Colors.black,
                     child: GestureDetector(
                       onTap: () {
-                        currentStream.disconnect();
+                        currentStream.leave();
                         Navigator.pop(context);
                       },
                       child: const Center(
@@ -295,7 +295,7 @@ To setup WebRTC based livestreaming, we can first make a call using `makeCall` a
 
 Next, we can set some default behaviour for our livestream such as configuring whether the camera and microphone should be enabled by default.
 
-Finally, we can create the call by invoking `getOrCreateCall` on the object we just created. By default, a `livestream` call is started in backstage mode, meaning the call hosts can join and see each other but the call will be invisible to others.
+Finally, we can create the call by invoking `getOrCreate` on the object we just created. By default, a `livestream` call is started in backstage mode, meaning the call hosts can join and see each other but the call will be invisible to others.
 
 When the hosts are ready, the can make the call “live” by calling `goLive`.
 
@@ -313,9 +313,9 @@ Future<void> _createLivestream() async {
       microphone: TrackOption.enabled(),
     );
 
-    final result = await call.getOrCreateCall(); // Call object is created
+    final result = await call.getOrCreate(); // Call object is created
     if (result.isSuccess) {
-      await call.connect(); // Our local app user is able to join and recieve events from the call
+      await call.join(); // Our local app user is able to join and recieve events from the call
       await call.goLive(); // Allow others to see and joing the call
 			print('Joining call ${call.id}');
       Navigator.of(context).push(LiveStreamScreen.route(call));

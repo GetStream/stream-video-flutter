@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
@@ -152,8 +153,10 @@ class _StreamCallContentState extends State<StreamCallContent> {
   }
 
   void _toggleStatsVisibility() {
-    setState(() {
-      _isStatsVisible = !_isStatsVisible;
-    });
+    if(kDebugMode){
+      setState(() {
+        _isStatsVisible = !_isStatsVisible;
+      });
+    }
   }
 }

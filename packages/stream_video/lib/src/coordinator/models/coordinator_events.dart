@@ -6,6 +6,7 @@ import '../../models/call_created_data.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
 import '../../models/call_ringing_data.dart';
+import '../../models/call_session_data.dart';
 
 /// Represents the events coming in from the socket.
 @immutable
@@ -99,10 +100,12 @@ class CoordinatorCallCreatedEvent extends CoordinatorCallEvent {
 class CoordinatorCallRingingEvent extends CoordinatorCallEvent {
   const CoordinatorCallRingingEvent({
     required this.data,
+    required this.sessionId,
     required this.createdAt,
   });
 
   final CallRingingData data;
+  final String sessionId;
   final DateTime createdAt;
 
   bool get ringing => data.ringing;
@@ -116,6 +119,7 @@ class CoordinatorCallRingingEvent extends CoordinatorCallEvent {
   List<Object?> get props => [
         ...super.props,
         ringing,
+        sessionId,
         createdAt,
         metadata,
       ];
@@ -457,8 +461,7 @@ class CoordinatorCallSessionParticipantJoinedEvent
     required this.createdAt,
     required this.sessionId,
     required this.user,
-    required this.participantJoinedAt,
-    required this.participantSessionId,
+    required this.participant,
   });
 
   @override
@@ -466,17 +469,15 @@ class CoordinatorCallSessionParticipantJoinedEvent
   final DateTime createdAt;
   final String sessionId;
   final CallUser user;
-  final DateTime participantJoinedAt;
-  final String participantSessionId;
+  final CallParticipant participant;
 
   @override
   List<Object?> get props => [
         ...super.props,
         createdAt,
         sessionId,
-        participantJoinedAt,
-        participantSessionId,
-        user
+        participant,
+        user,
       ];
 }
 
@@ -486,8 +487,7 @@ class CoordinatorCallSessionParticipantLeftEvent extends CoordinatorCallEvent {
     required this.createdAt,
     required this.sessionId,
     required this.user,
-    required this.participantJoinedAt,
-    required this.participantSessionId,
+    required this.participant,
   });
 
   @override
@@ -495,17 +495,15 @@ class CoordinatorCallSessionParticipantLeftEvent extends CoordinatorCallEvent {
   final DateTime createdAt;
   final String sessionId;
   final CallUser user;
-  final DateTime participantJoinedAt;
-  final String participantSessionId;
+  final CallParticipant participant;
 
   @override
   List<Object?> get props => [
         ...super.props,
         createdAt,
         sessionId,
-        participantJoinedAt,
-        participantSessionId,
-        user
+        participant,
+        user,
       ];
 }
 

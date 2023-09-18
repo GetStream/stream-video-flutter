@@ -233,7 +233,7 @@ class _JoinScreenState extends State<JoinScreen> {
         type: 'default',
       );
 
-      await call.connect();
+      await call.join();
       
       await _navigateToCall(call);
     } catch (e) {

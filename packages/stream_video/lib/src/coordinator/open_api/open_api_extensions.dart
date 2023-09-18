@@ -6,10 +6,12 @@ import '../../models/call_egress.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
 import '../../models/call_reaction.dart';
+import '../../models/call_session_data.dart';
 import '../../models/call_settings.dart';
 import '../../models/guest_created_data.dart';
 import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
+import '../../utils/standard.dart';
 
 extension MemberExt on open.MemberResponse {
   CallMember toCallMember() {
@@ -82,46 +84,59 @@ extension GuessExt on open.CreateGuestResponse {
 }
 
 extension UserListExt on List<open.UserResponse> {
-  List<CallUser> toCallUsers() {
-    return map((it) => it.toCallUser()).toList();
+  Map<String, CallUser> toCallUsers() {
+    return {for (final user in this) user.id: user.toCallUser()};
   }
 }
 
 extension EnvelopeExt on open.CallResponse {
-  CallMetadata toCallMetadata([
+  CallMetadata toCallMetadata({
+    open.MemberResponse? membership,
     List<open.MemberResponse>? members,
     List<open.OwnCapability>? ownCapabilities,
-  ]) {
+    List<open.UserResponse>? blockedUsers,
+  }) {
     return CallMetadata(
       cid: StreamCallCid(cid: cid),
-      details: CallDetails(
-        egress: egress.toCallEgress(),
-        createdBy: createdBy.toCallUser(),
-        team: team ?? '',
-        ownCapabilities:
-            ownCapabilities?.map((it) => CallPermission.fromAlias(it.value)) ??
-                [],
-        blockedUserIds: List.unmodifiable(blockedUserIds),
-        broadcasting: egress.broadcasting,
-        recording: recording,
-        backstage: backstage,
-        transcribing: transcribing,
-        custom: Map.unmodifiable(custom),
-        rtmpIngress: ingress.rtmp.address,
-        startsAt: startsAt,
-        createdAt: createdAt,
-        endedAt: endedAt,
-        updatedAt: updatedAt,
-      ),
+      details: toCallDetails(ownCapabilities),
       settings: settings.toCallSettings(),
+      session: session?.toCallSessionData() ?? const CallSessionData(),
       users: {
         createdBy.id: createdBy.toCallUser(),
         ...?members?.toCallUsers(),
+        ...?blockedUsers?.toCallUsers(),
+        ...?session?.participants.toCallUsers(),
       },
       members: {
         createdBy.id: createdBy.toCallMember(),
         ...?members?.toCallMembers(),
+        ...?membership?.let((it) => [it]).toCallMembers(),
       },
+    );
+  }
+
+  CallDetails toCallDetails(
+    List<open.OwnCapability>? ownCapabilities,
+  ) {
+    return CallDetails(
+      createdBy: createdBy.toCallUser(),
+      egress: egress.toCallEgress(),
+      team: team ?? '',
+      ownCapabilities: ownCapabilities?.map(
+            (it) => CallPermission.fromAlias(it.value),
+          ) ??
+          [],
+      blockedUserIds: List.unmodifiable(blockedUserIds),
+      broadcasting: egress.broadcasting,
+      recording: recording,
+      backstage: backstage,
+      transcribing: transcribing,
+      custom: Map.unmodifiable(custom),
+      rtmpIngress: ingress.rtmp.address,
+      startsAt: startsAt,
+      createdAt: createdAt,
+      endedAt: endedAt,
+      updatedAt: updatedAt,
     );
   }
 }
@@ -278,7 +293,12 @@ extension ReactionExt on open.ReactionResponse {
 extension CallStateResponseFieldsExt on open.CallStateResponseFields {
   QueriedCall toQueriedCall() {
     return QueriedCall(
-      call: call.toCallMetadata(members),
+      call: call.toCallMetadata(
+        membership: membership,
+        members: members,
+        ownCapabilities: ownCapabilities,
+        blockedUsers: blockedUsers,
+      ),
       blockedUsers: blockedUsers.map((it) => it.toCallUser()).toList(),
       members: members.map((it) => it.toCallMember()).toList(),
       membership: membership?.toCallMember(),
@@ -304,5 +324,52 @@ extension QueryMembersResponseExt on open.QueryMembersResponse {
       next: next,
       prev: prev,
     );
+  }
+}
+
+extension CallSessionResponseExt on open.CallSessionResponse {
+  CallSessionData toCallSessionData() {
+    return CallSessionData(
+      id: id,
+      participants: participants.toCallParticipants(),
+      participantsCountByRole: participantsCountByRole,
+      rejectedBy: rejectedBy,
+      acceptedBy: acceptedBy,
+      startedAt: startedAt,
+      endedAt: endedAt,
+      liveStartedAt: liveStartedAt,
+      liveEndedAt: liveEndedAt,
+    );
+  }
+}
+
+extension ParticipantExt on open.CallParticipantResponse {
+  CallUser toCallUser() {
+    return user.toCallUser();
+  }
+
+  CallParticipant toCallParticipant() {
+    return CallParticipant(
+      userSessionId: userSessionId,
+      userId: user.id,
+      role: role,
+      joinedAt: joinedAt,
+    );
+  }
+}
+
+extension ParticipantListExt on List<open.CallParticipantResponse> {
+  Map<String, CallParticipant> toCallParticipants() {
+    return {
+      for (final participant in this)
+        participant.userSessionId: participant.toCallParticipant()
+    };
+  }
+
+  Map<String, CallUser> toCallUsers() {
+    return {
+      for (final participant in this)
+        participant.user.id: participant.toCallUser()
+    };
   }
 }

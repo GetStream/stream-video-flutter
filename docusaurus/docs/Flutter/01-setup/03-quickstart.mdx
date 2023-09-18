@@ -33,7 +33,7 @@ Future<void> main() async {
   // Set up our call object
   final call = StreamVideo.instance.makeCall(type: 'default', id: '345');
   // Connect to the call we created
-  await call.connect();
+  await call.join();
 
   runApp(
     StreamVideoGettingStarted(
@@ -164,7 +164,7 @@ return StreamCallContent(
             call: call,
             localParticipant: localParticipant,
           ),
-          LeaveCallOption(call: call, onLeaveCallTap: call.disconnect),
+          LeaveCallOption(call: call, onLeaveCallTap: call.leave),
         ],
       );
     },

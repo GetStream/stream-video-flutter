@@ -4,6 +4,7 @@ import '../models/call_metadata.dart';
 import '../models/call_permission.dart';
 import '../models/call_reaction.dart';
 import '../models/call_received_created_data.dart';
+import '../models/call_received_data.dart';
 import '../models/call_settings.dart';
 import '../models/guest_created_data.dart';
 import '../models/queried_calls.dart';
@@ -41,6 +42,13 @@ abstract class CoordinatorClient {
   Future<Result<None>> deleteDevice({
     required String id,
     String? userId,
+  });
+
+  Future<Result<CallReceivedData>> getCall({
+    required StreamCallCid callCid,
+    int? membersLimit,
+    bool? ringing,
+    bool? notify,
   });
 
   Future<Result<CallReceivedOrCreatedData>> getOrCreateCall({

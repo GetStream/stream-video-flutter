@@ -14,30 +14,30 @@ final call = StreamVideo.instance.makeCall(type: 'default', id: 'Your-call-ID');
 
 ```
 
-Calling `makeCall` returns a `Call` object for us to work with. However, it does neither connect nor start transmitting data automatically. To create and join the call, we must then invoke `getOrCreateCall` on the returned object.
+Calling `makeCall` returns a `Call` object for us to work with. However, it does neither connect nor start transmitting data automatically. To create and join the call, we must then invoke `getOrCreate` on the returned object.
 
 ```dart
 final call = StreamVideo.instance.makeCall(type: 'default', id: 'Your-call-ID');
-await call.getOrCreateCall(); // New
+await call.getOrCreate(); // New
 
 ```
 
-Although we are not passing any parameters to `getOrCreateCall` in the above example, it is important to note a few things:
+Although we are not passing any parameters to `getOrCreate` in the above example, it is important to note a few things:
 
 1. Participants: Upon creation, we can supply a list of user IDs we would like to immediately add to the call.
 2. Ringing: If ringing is set to `true`, Stream will send a notification to the users on the call, triggering the platform call screen on iOS and Android.
 
-By default, calling `getOrCreateCall` assigns `admin` permission to each user who is supplied during creation.
+By default, calling `getOrCreate` assigns `admin` permission to each user who is supplied during creation.
 
 ### Call CRUD Operations
 
 With calls, we make it easy to perform basic create, read, update, and delete (CRUD) operations on calls providing the user has sufficient permissions.
 
-For example, once a call is created a user can `call.update` the information on the call by adding custom metadata such as a name, description, or any other arbitrary `Map<String, Object>` to the call before `getOrCreateCall` is invoked.
+For example, once a call is created a user can `call.update` the information on the call by adding custom metadata such as a name, description, or any other arbitrary `Map<String, Object>` to the call before `getOrCreate` is invoked.
 
 ```dart
 call.update(custom: {'name': 'My first Call'});
-await call.getOrCreateCall();
+await call.getOrCreate();
 ```
 
 Using the update method, a variety of settings can also be applied before the call is created such as:
@@ -69,7 +69,7 @@ Next, with our class instantiated, we can connect to the call and SFU by invokin
 
 ```dart
 final call = StreamVideo.instance.makeCall(type: 'default', id: 'My-existing-call-ID');
-await call.connect();
+await call.join();
 
 ```
 

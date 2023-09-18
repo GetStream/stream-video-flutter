@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import '../call_participants/participant_label.dart';
+import 'lobby_participants_view.dart';
 
 /// A widget that can be shown before joining a call. Measures latencies
 /// and selects the best SFU. This speeds up the process of joining when
@@ -18,6 +20,7 @@ class StreamLobbyView extends StatefulWidget {
     this.backgroundColor,
     this.cardBackgroundColor,
     this.userAvatarTheme,
+    this.participantAvatarTheme,
   });
 
   /// Represents a call.
@@ -40,14 +43,24 @@ class StreamLobbyView extends StatefulWidget {
   /// Theme for the avatar.
   final StreamUserAvatarThemeData? userAvatarTheme;
 
+  /// Theme for the participant avatar.
+  final StreamUserAvatarThemeData? participantAvatarTheme;
+
   @override
   State<StreamLobbyView> createState() => _StreamLobbyViewState();
 }
 
 class _StreamLobbyViewState extends State<StreamLobbyView> {
+  late final _logger = taggedLogger(tag: 'SV:LobbyView');
+
   RtcLocalAudioTrack? _microphoneTrack;
   RtcLocalCameraTrack? _cameraTrack;
+  List<CallParticipant> _participants = <CallParticipant>[];
+  Map<String, CallUser> _users = <String, CallUser>{};
   bool _isJoiningCall = false;
+
+  StreamSubscription<Object>? _fetchSubscription;
+  StreamSubscription<Object>? _eventSubscription;
 
   Future<void> toggleCamera() async {
     if (_cameraTrack != null) {
@@ -59,7 +72,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
       final cameraTrack = await RtcLocalTrack.camera();
       return setState(() => _cameraTrack = cameraTrack);
     } catch (e) {
-      streamLog.w('SV:LobbyView', () => 'Error creating camera track: $e');
+      _logger.w(() => 'Error creating camera track: $e');
     }
   }
 
@@ -73,7 +86,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
       final microphoneTrack = await RtcLocalTrack.audio();
       return setState(() => _microphoneTrack = microphoneTrack);
     } catch (e) {
-      streamLog.w('SV:LobbyView', () => 'Error creating microphone track: $e');
+      _logger.w(() => 'Error creating microphone track: $e');
     }
   }
 
@@ -102,9 +115,8 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
   @override
   void initState() {
     super.initState();
-    // Obtains SFU credentials and picks the best server, but doesn't
-    // connect to the call yet.
-    widget.call.join();
+    _fetchCall();
+    _listenEvents();
   }
 
   @override
@@ -117,7 +129,59 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
 
     _cameraTrack = null;
     _microphoneTrack = null;
+    _fetchSubscription?.cancel();
+    _eventSubscription?.cancel();
     super.dispose();
+  }
+
+  void _fetchCall() {
+    // Obtains SFU credentials and picks the best server, but doesn't
+    // connect to the call yet.
+    final currentUserId = StreamVideo.instance.currentUser?.id;
+    _logger.d(() => '[fetchCall] currentUserId: $currentUserId');
+    _fetchSubscription?.cancel();
+    _fetchSubscription = widget.call.getOrCreate().asStream().listen((result) {
+      result.fold(
+        success: (it) {
+          _logger.v(() => '[fetchCall] completed: ${it.data}');
+          final metadata = it.data.data.metadata;
+          _users = metadata.users;
+          _participants = metadata.session.participants.values
+              .sortedBy((it) => it.joinedAt ?? DateTime.now())
+              .where((it) => it.userId != currentUserId)
+              .toList();
+          setState(() {});
+        },
+        failure: (it) {
+          _logger.e(() => '[fetchCall] failed: ${it.error}');
+        },
+      );
+    });
+  }
+
+  void _listenEvents() {
+    _eventSubscription?.cancel();
+    _eventSubscription = StreamVideo.instance.events.listen((event) {
+      if (event is CoordinatorCallSessionParticipantLeftEvent) {
+        _logger.d(() => '[listenEvents] #userLeft; user: ${event.user}');
+        _participants.removeWhere(
+          (it) => it.userSessionId == event.participant.userSessionId,
+        );
+        final hasSameUser = _participants.firstWhereOrNull(
+              (it) => it.userId == event.participant.userId,
+            ) !=
+            null;
+        if (!hasSameUser) {
+          _users.remove(event.user.id);
+        }
+        setState(() {});
+      } else if (event is CoordinatorCallSessionParticipantJoinedEvent) {
+        _logger.d(() => '[listenEvents] #userJoined; user: ${event.user}');
+        _users[event.user.id] = event.user;
+        _participants.add(event.participant);
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -131,12 +195,19 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
     final cardBackgroundColor =
         widget.cardBackgroundColor ?? theme.cardBackgroundColor;
     final userAvatarTheme = widget.userAvatarTheme ?? theme.userAvatarTheme;
+    final participantAvatarTheme =
+        widget.participantAvatarTheme ?? theme.participantAvatarTheme;
 
     final currentUser = StreamVideo.instance.currentUser;
 
     final cameraEnabled = _cameraTrack != null;
     final microphoneEnabled = _microphoneTrack != null;
 
+    final participants = _participants
+        .map((it) => _users[it.userId])
+        .whereNotNull()
+        .map((e) => e.toUserInfo())
+        .toList();
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -273,11 +344,16 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                                 horizontal: 16,
                               ),
                               child: Text(
-                                'You are about to join a call. 0 more people are in the call.',
+                                'You are about to join a call. ${participants.length} more people are in the call.',
                                 style: textTheme.title3,
                               ),
                             ),
                             const SizedBox(height: 16),
+                            if (participants.isNotEmpty)
+                              StreamLobbyParticipantsView(
+                                participants: participants,
+                                participantAvatarTheme: participantAvatarTheme,
+                              ),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: colorTheme.accentPrimary,
@@ -306,6 +382,18 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
           ),
         ),
       ),
+    );
+  }
+}
+
+extension on CallUser {
+  UserInfo toUserInfo() {
+    return UserInfo(
+      id: id,
+      name: name,
+      image: image,
+      role: role,
+      teams: teams,
     );
   }
 }

@@ -37,7 +37,7 @@ You can see that as a first step, we need to create a `StreamCallCid` object bas
 2. Connect the current user to the call obtained before:
 
 ```dart
-  call.connect();
+  call.join();
 ```
 
 That's it. From that point, we can start listening to call state updates. The easiest way to do that is by listening to the stream that can be accessed from the `Call` object:

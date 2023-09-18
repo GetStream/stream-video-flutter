@@ -1,11 +1,7 @@
-import 'package:collection/collection.dart';
-
-import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../models/call_cid.dart';
 import '../../models/call_created_data.dart';
 import '../../models/call_permission.dart';
 import '../../models/call_ringing_data.dart';
-import '../../models/call_settings.dart';
 import '../models/coordinator_events.dart';
 import 'event/event_type.dart';
 import 'event/open_api_event.dart';
@@ -35,8 +31,20 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallCreatedEvent(
           data: CallCreatedData(
             callCid: StreamCallCid(cid: call.cid),
-            metadata: call.toCallMetadata(event.members),
+            metadata: call.toCallMetadata(members: event.members),
           ),
+          createdAt: event.createdAt,
+        );
+      case EventType.callRing:
+        final event = callRing!;
+        final call = event.call;
+        return CoordinatorCallRingingEvent(
+          data: CallRingingData(
+            callCid: StreamCallCid(cid: call.cid),
+            ringing: true,
+            metadata: call.toCallMetadata(members: event.members),
+          ),
+          sessionId: event.sessionId,
           createdAt: event.createdAt,
         );
       case EventType.callAccepted:
@@ -96,8 +104,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           createdAt: event.createdAt,
           sessionId: event.sessionId,
           user: event.participant.user.toCallUser(),
-          participantJoinedAt: event.participant.joinedAt,
-          participantSessionId: event.participant.userSessionId,
+          participant: event.participant.toCallParticipant(),
         );
       case EventType.callSessionParticipantLeft:
         final event = callSessionParticipantLeft!;
@@ -107,8 +114,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           createdAt: event.createdAt,
           sessionId: event.sessionId,
           user: event.participant.user.toCallUser(),
-          participantJoinedAt: event.participant.joinedAt,
-          participantSessionId: event.participant.userSessionId,
+          participant: event.participant.toCallParticipant(),
         );
       case EventType.callPermissionRequest:
         final event = callPermissionRequest!;
@@ -204,32 +210,20 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           custom: event.reaction.custom,
         );
       case EventType.custom:
-        final custom = this.custom!;
+        final event = custom!;
 
         return CoordinatorCallCustomEvent(
-          callCid: StreamCallCid(cid: custom.callCid),
-          senderUserId: custom.user.id,
-          createdAt: custom.createdAt,
-          eventType: custom.type,
-          custom: custom.custom,
-          users: {custom.user.id: custom.user.toCallUser()},
+          callCid: StreamCallCid(cid: event.callCid),
+          senderUserId: event.user.id,
+          createdAt: event.createdAt,
+          eventType: event.type,
+          custom: event.custom,
+          users: {event.user.id: event.user.toCallUser()},
         );
       case EventType.unknown:
         return const CoordinatorUnknownEvent();
       case EventType.callNotification:
         // TODO: Handle call notification
-        break;
-      case EventType.callRing:
-        final event = callRing!;
-        final call = event.call;
-        return CoordinatorCallRingingEvent(
-          data: CallRingingData(
-            callCid: StreamCallCid(cid: call.cid),
-            ringing: true,
-            metadata: call.toCallMetadata(event.members),
-          ),
-          createdAt: event.createdAt,
-        );
         break;
     }
   }

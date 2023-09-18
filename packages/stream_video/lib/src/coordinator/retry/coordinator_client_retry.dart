@@ -6,6 +6,7 @@ import '../../models/call_metadata.dart';
 import '../../models/call_permission.dart';
 import '../../models/call_reaction.dart';
 import '../../models/call_received_created_data.dart';
+import '../../models/call_received_data.dart';
 import '../../models/call_settings.dart';
 import '../../models/guest_created_data.dart';
 import '../../models/queried_calls.dart';
@@ -112,6 +113,26 @@ class CoordinatorClientRetry extends CoordinatorClient {
 
   @override
   SharedEmitter<CoordinatorEvent> get events => _delegate.events;
+
+  @override
+  Future<Result<CallReceivedData>> getCall({
+    required StreamCallCid callCid,
+    int? membersLimit,
+    bool? ringing,
+    bool? notify,
+  }) {
+    return _retryManager.execute(
+      () => _delegate.getCall(
+        callCid: callCid,
+        membersLimit: membersLimit,
+        ringing: ringing,
+        notify: notify,
+      ),
+      (error, nextAttemptDelay) async {
+        _logRetry('getCall', error, nextAttemptDelay);
+      },
+    );
+  }
 
   @override
   Future<Result<CallReceivedOrCreatedData>> getOrCreateCall({

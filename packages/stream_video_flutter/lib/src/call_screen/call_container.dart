@@ -146,7 +146,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     try {
       _logger.d(() => '[connect] no args');
       call.connectOptions = widget.callConnectOptions;
-      final result = await call.connect();
+      final result = await call.join();
       _logger.v(() => '[connect] completed: $result');
     } catch (e) {
       _logger.v(() => '[connect] failed: $e');
