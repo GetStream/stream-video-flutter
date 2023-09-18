@@ -1,0 +1,184 @@
+---
+slug: /call-participants
+title: Call Participants
+---
+
+Often in a video call, an app needs the ability to arrange and resize the video feeds of different
+participants on the screen to suit design needs. Customizing participant layouts is a simple but
+effective way to improve the quality and experience of video calls. It can help to improve focus and engagement,
+highlight key speakers or presenters, and accommodate the different needs of participants.
+
+By default, the Flutter SDK for Stream Video displays a grid of participants in a call.
+
+To create your own layout for the user participants instead, use the `callParticipantsBuilder` parameter
+of the `StreamCallContent` widget.
+
+The default widget used is the `StreamCallParticipants` widget:
+
+```dart
+StreamCallContent(
+  call: call,
+  callState: callState,
+  callParticipantsBuilder: (
+    BuildContext context,
+    Call call,
+    CallState callState,
+  ) {
+    return StreamCallParticipants(
+      call: call,
+      participants: callState.callParticipants,
+    );
+  },
+);
+```
+
+:::note
+As a reminder, the `StreamCallContent` widget above can be supplied to the `callContentBuilder` parameter
+of the `StreamCallContainer` widget which manages most of the UI components related to a call.
+:::
+
+If you need a fully custom widget, you can supply your own widget in place of `StreamCallParticipants`.
+
+However, the `StreamCallParticipants` widget also allows you to customise quite a few things.
+
+## Change only participant grid elements
+
+To change all participant video elements, you can use the `callParticipantsBuilder` parameter. This will
+be applied to all user video elements:
+
+```dart
+StreamCallContent(
+  call: call,
+  callState: callState,
+  callParticipantsBuilder: (
+    BuildContext context,
+    Call call,
+    CallState callState,
+  ) {
+    return StreamCallParticipants(
+      call: call,
+      participants: callState.callParticipants,
+      callParticipantBuilder: (
+        BuildContext context,
+        Call call,
+        CallParticipantState callState,
+      ) {
+        // Build call participant video
+      },
+    );
+  },
+);
+```
+
+## Change local participant video
+
+To only change the local participant video, use the `localVideoParticipantBuilder` parameter which only
+changes the local participant video stream:
+
+```dart
+StreamCallContent(
+  call: call,
+  callState: callState,
+  callParticipantsBuilder: (
+    BuildContext context,
+    Call call,
+    CallState callState,
+  ) {
+    return StreamCallParticipants(
+      call: call,
+      participants: callState.callParticipants,
+      localVideoParticipantBuilder: (
+        BuildContext context,
+        Call call,
+        CallParticipantState callState,
+      ) {
+        // Build local participant video
+      },
+    );
+  },
+);
+```
+
+## Change screensharing view
+
+If a user is screensharing, you can also customise the screensharing stream using the `screenShareContentBuilder`
+parameter:
+
+```dart
+StreamCallContent(
+  call: call,
+  callState: callState,
+  callParticipantsBuilder: (
+    BuildContext context,
+    Call call,
+    CallState callState,
+  ) {
+    return StreamCallParticipants(
+      call: call,
+      participants: callState.callParticipants,
+      screenShareContentBuilder: (
+        BuildContext context,
+        Call call,
+        CallParticipantState callState,
+      ) {
+        // Build screensharing content view
+      },
+    );
+  },
+);
+```
+
+## Change grid layout
+
+There are two grid layouts that `stream_video_flutter` supports at the moment: grid and spotlight.
+
+You can change these via the `layoutMode` parameter:
+
+```dart
+StreamCallContent(
+  call: call,
+  callState: callState,
+  callParticipantsBuilder: (
+    BuildContext context,
+    Call call,
+    CallState callState,
+  ) {
+    return StreamCallParticipants(
+      call: call,
+      participants: callState.callParticipants,
+      layoutMode: ParticipantLayoutMode.spotlight,
+    );
+  },
+);
+```
+
+## Sort and filter participants
+
+Sorting changes the order of participants on the grid while filtering selects participants to display
+according to the filters given.
+
+```dart
+StreamCallContent(
+  call: call,
+  callState: callState,
+  callParticipantsBuilder: (
+    BuildContext context,
+    Call call,
+    CallState callState,
+  ) {
+    return StreamCallParticipants(
+      call: call,
+      participants: callState.callParticipants,
+      filter: (participant) {
+        // returning true displays the participant while returning false does not
+        return YOUR_CONDITION_HERE;
+      },
+      sort: (a, b) {
+        // Returning an integer > 0 sorts a higher than b
+        // Add sorting code here
+      },
+    );
+  },
+);
+```
+
