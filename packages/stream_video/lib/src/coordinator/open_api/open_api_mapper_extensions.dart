@@ -121,7 +121,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallPermissionRequestEvent(
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
-          permissions: event.permissions,
+          permissions: event.permissions.map(CallPermission.fromAlias).toList(),
           user: event.user.toCallUser(),
         );
       case EventType.callPermissionsUpdated:

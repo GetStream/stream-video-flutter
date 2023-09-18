@@ -26,6 +26,7 @@ enum CallPermission {
   updateCallMember('update-call-member'),
   startTranscriptionCall('start-transcription-call'),
   stopTranscriptionCall('stop-transcription-call'),
+  pinForEveryone('pin-for-everyone'),
   unknown('unknown');
 
   const CallPermission(this.alias);
