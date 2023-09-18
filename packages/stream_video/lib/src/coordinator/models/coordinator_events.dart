@@ -229,7 +229,7 @@ class CoordinatorCallPermissionRequestEvent extends CoordinatorCallEvent {
   @override
   final StreamCallCid callCid;
   final DateTime createdAt;
-  final List<String> permissions;
+  final List<CallPermission> permissions;
   final CallUser user;
 
   @override
