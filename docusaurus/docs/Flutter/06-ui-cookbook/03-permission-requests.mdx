@@ -1,0 +1,51 @@
+# Permission Requests
+During a call, participants can have different capabilities and permissions. This is very common for use cases such as e-learning or large conference calls where the call organizer may want to enable additional controls to prevent users from speaking during large calls or control when users are allowed to broadcast their video.
+
+In this sample, we will take a closer look at the ways in which users can listen, request, and act on permission requests. For more information on the full moderation and permissions of [Stream Video](https://getstream.io/video/), please see our full guide [here](https://getstream.io/video/docs/flutter/permission-and-moderation/).
+
+## Listening for new permission requests
+When a user requests a new capability during a call, the `onPermissionRequest` function is triggered on the `Call` object. This function receives an object containing the requested permissions list and an object representing the `CallUser` who made the request.
+
+```dart
+@override
+  void initState() {
+    super.initState();
+    /// The [onPermissionRequest] handler can be used to be notified of new requests from users in the call.
+    /// [CoordinatorCallPermissionRequestEvent] contains the user requesting permissions along with a list
+    /// containing the different capabilities they would like granted.
+    widget.call.onPermissionRequest =
+        (CoordinatorCallPermissionRequestEvent permissionRequestEvent) {
+      final uid = permissionRequestEvent.user.id;
+
+      /// For more complex applications, a user may request one or more permission at the same time. In those cases,
+      /// the full range of permissions can be retrieved from the `permissions` list.
+      final permission = permissionRequestEvent.permissions;
+    };
+  }
+```
+
+The `CoordinatorCallPermissionRequestEvent` also includes:
+
+- `callCid` - ID of the current call
+- `createdAt` - Timestamp of when the user made the permission request
+- `permissions` - List of call permissions requested by the user
+- `user` - Object representing the user making the current request
+
+## Responding to permission requests
+Should the call admins wish to grant the request permissions, they can easily do so by calling `grantPermissions` on the `Call` object. The user ID, along with the list of permissions requested, must be supplied to the function.
+
+Below is a simple example of allowing a user to speak during a call:
+
+```dart
+/// Once a permission request is received, it can be granted using [grantPermissions] or revoked using [revokePermissions]
+  Future<void> grantSpeakingPermission(String userID) async {
+    await widget.call.grantPermissions(
+      userId: userID,
+      permissions: [CallPermission.sendAudio],
+    );
+  }
+```
+
+This workflow can easily be adapted to fit your application’s UI. For example, a very common use case for handling permission requests is to show a modal of all permission requests and a button to either allow or cancel the request.
+
+For a full example, please see our code on [GitHub](https://github.com/GetStream/flutter-video-samples).
