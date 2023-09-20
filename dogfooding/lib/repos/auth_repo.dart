@@ -57,11 +57,11 @@ class AuthRepository {
 
     final userCredentials = UserCredentials(
       user: finalUser,
-      token: UserToken.fromRawValue(data.accessToken),
+      token: UserToken.jwt(data.accessToken),
     );
 
     await streamVideo.connectUser(finalUser, data.accessToken);
-    _userToken = UserToken.fromRawValue(data.accessToken);
+    _userToken = UserToken.jwt(data.accessToken);
     await UserRepository.instance.saveUserCredentials(userCredentials);
 
     final chatUID = md5.convert(utf8.encode(finalUser.id)).toString();
@@ -86,15 +86,18 @@ class AuthRepository {
   Future<void> loginWithUserInfo(UserInfo user) async {
     final tokenResult = await streamVideo.connectUserWithProvider(
       user,
-      tokenProvider: TokenProvider.dynamic(_tokenLoader, (token) async {
-        _logger.d(() => '[onTokenUpdated] token: $token');
-        final userCredentials = UserCredentials(
-          user: user,
-          token: token,
-        );
-        _userToken = token;
-        await UserRepository.instance.saveUserCredentials(userCredentials);
-      }),
+      tokenProvider: TokenProvider.dynamic(
+        _tokenLoader,
+        onTokenUpdated: (token) async {
+          _logger.d(() => '[onTokenUpdated] token: $token');
+          final userCredentials = UserCredentials(
+            user: user,
+            token: token,
+          );
+          _userToken = token;
+          await UserRepository.instance.saveUserCredentials(userCredentials);
+        },
+      ),
     );
 
     final chatUID = md5.convert(utf8.encode(user.id)).toString();

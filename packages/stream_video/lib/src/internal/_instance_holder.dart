@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../latency/latency_settings.dart';
+import '../logger/stream_log.dart';
 import '../retry/retry_policy.dart';
 import '../stream_video.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
@@ -8,6 +9,17 @@ import '../webrtc/sdp/policy/sdp_policy.dart';
 @internal
 class InstanceHolder {
   StreamVideo? _instance;
+
+  void install(StreamVideo instance) {
+    if (_instance != null) {
+      streamLog.w(
+        'InstanceHolder',
+        () => 'StreamVideo has already been initialised, '
+            'overriding with new instance.',
+      );
+    }
+    _instance = instance;
+  }
 
   StreamVideo init(
     String apiKey, {

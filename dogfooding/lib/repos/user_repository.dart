@@ -46,7 +46,7 @@ class UserRepository {
           role: role,
           image: image,
         ),
-        token: UserToken.fromRawValue(token),
+        token: UserToken.jwt(token),
       );
     } else {
       return null;

@@ -1,11 +1,11 @@
+import 'package:meta/meta.dart';
+
 import '../../stream_video.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../utils/result.dart';
-import 'token.dart';
 
 const _emptyUserId = 'stream:none';
 
 /// Handles common token operations
+@internal
 class TokenManager {
   /// Initialize a new token manager
   TokenManager();

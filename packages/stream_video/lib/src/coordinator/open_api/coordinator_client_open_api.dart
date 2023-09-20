@@ -64,7 +64,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     basePath: _rpcUrl,
     authentication: _Authentication(
       apiKey: _apiKey,
-      tokenManager: _tokenManager,
+      getToken: () async {
+        final tokenResult = await _tokenManager.getToken();
+        if (tokenResult is! Success<UserToken>) {
+          throw (tokenResult as Failure).error;
+        }
+        return tokenResult.data;
+      },
       getConnectionId: () => _ws?.connectionId,
     ),
   );
@@ -829,6 +835,53 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   @override
+  Future<Result<GuestCreatedData>> loadGuest({
+    required String id,
+    String? name,
+    String? role,
+    String? image,
+    List<String>? teams,
+    Map<String, Object> custom = const {},
+  }) async {
+    try {
+      final defaultApi = open.DefaultApi(
+        open.ApiClient(
+          basePath: _rpcUrl,
+          authentication: _Authentication(
+            apiKey: _apiKey,
+            getToken: () async {
+              return UserToken.anonymous();
+            },
+            getConnectionId: () => _ws?.connectionId,
+          ),
+        ),
+      );
+      final res = await defaultApi.createGuest(
+        open.CreateGuestRequest(
+          user: open.UserRequest(
+            id: id,
+            custom: custom,
+            image: image,
+            name: name,
+            role: role,
+            teams: teams ?? [],
+          ),
+        ),
+      );
+
+      if (res != null) {
+        return Result.success(res.toGuestCreatedData());
+      } else {
+        return const Result.failure(
+          VideoError(message: 'Guest could not be created.'),
+        );
+      }
+    } catch (e) {
+      return Result.failure(VideoErrors.compose(e));
+    }
+  }
+
+  @override
   Future<Result<GuestCreatedData>> createGuest({
     required String id,
     String? name,
@@ -865,16 +918,17 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 }
 
 typedef GetConnectionId = String? Function();
+typedef GetToken = Future<UserToken> Function();
 
 class _Authentication extends open.Authentication {
   _Authentication({
     required this.apiKey,
-    required this.tokenManager,
+    required this.getToken,
     required this.getConnectionId,
   });
 
   final String apiKey;
-  final TokenManager tokenManager;
+  final GetToken getToken;
   final GetConnectionId getConnectionId;
 
   @override
@@ -882,18 +936,16 @@ class _Authentication extends open.Authentication {
     List<open.QueryParam> queryParams,
     Map<String, String> headerParams,
   ) async {
-    final tokenResult = await tokenManager.getToken();
-    if (tokenResult is! Success<UserToken>) {
-      throw (tokenResult as Failure).error;
-    }
     queryParams.add(open.QueryParam('api_key', apiKey));
     final connectionId = getConnectionId();
     if (connectionId != null) {
       queryParams.add(open.QueryParam('connection_id', connectionId));
     }
-    headerParams['Authorization'] = tokenResult.getDataOrNull()!.rawValue;
-    headerParams['stream-auth-type'] =
-        tokenResult.getDataOrNull()!.authType.name;
+    final userToken = await getToken();
+    headerParams['stream-auth-type'] = userToken.authType.name;
+    if (userToken.rawValue.isNotEmpty) {
+      headerParams['Authorization'] = userToken.rawValue;
+    }
     headerParams['X-Stream-Client'] = streamClientVersion;
     headerParams['x-client-request-id'] = const Uuid().v4();
   }
