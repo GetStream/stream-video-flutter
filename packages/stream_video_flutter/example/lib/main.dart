@@ -21,6 +21,23 @@ Future<void> main() async {
 
   await _setupLogger();
 
+  // await StreamVideo.instance.connectUser(
+  //   user.userInfo,
+  //   user.token,
+  // );
+
+  runApp(const MyApp(connectUser: _connectUser));
+}
+
+Future<Result<None>> _connectUser(UserInfo user, String token) async {
+  streamLog.i(_tag, () => '[connectUser] user: $user, token: $token');
+  final client = StreamVideo.build(
+    Env.streamVideoApiKey,
+    user: User.fromInfo(UserType.authenticated, user),
+    userToken: token,
+  );
+  await client.connect();
+
   StreamBackgroundService.init(
     StreamVideo.instance,
     onNotificationClick: (call) async {
@@ -33,7 +50,7 @@ Future<void> main() async {
     },
   );
 
-  runApp(const MyApp());
+  return const Result.success(none);
 }
 
 Future<void> _setupLogger() async {
@@ -64,7 +81,12 @@ Future<void> _setupLogger() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({
+    super.key,
+    required this.connectUser,
+  });
+
+  final ConnectUser connectUser;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +107,7 @@ class MyApp extends StatelessWidget {
         extensions: <ThemeExtension<dynamic>>[darkAppTheme],
       ),
       themeMode: ThemeMode.dark,
-      home: const LoginScreen(),
+      home: LoginScreen(connectUser: connectUser),
       debugShowCheckedModeBanner: false,
     );
   }

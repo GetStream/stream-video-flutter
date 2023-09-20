@@ -20,5 +20,6 @@ export 'disconnect_reason.dart';
 export 'guest_created_data.dart';
 export 'queried_calls.dart';
 export 'queried_members.dart';
+export 'user.dart';
 export 'user_info.dart';
 export 'viewport_visibility.dart';

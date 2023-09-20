@@ -65,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _logout() async {
-    await _streamVideo.disconnectUser();
+    await _streamVideo.disconnect();
     Navigator.of(context).pop();
   }
 

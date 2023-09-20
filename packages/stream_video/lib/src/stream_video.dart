@@ -11,11 +11,9 @@ import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
 import 'logger/impl/external_logger.dart';
-import 'models/user.dart';
 import 'retry/retry_policy.dart';
 import 'state_emitter.dart';
 import 'token/token_manager.dart';
-import 'utils/none.dart';
 import 'utils/standard.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
 
@@ -97,7 +95,7 @@ class StreamVideo {
         ),
       );
     }
-    _instanceHolder.install(instance)
+    _instanceHolder.install(instance);
     return instance;
   }
 
