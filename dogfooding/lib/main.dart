@@ -164,6 +164,9 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
     if (_navigatorKey.currentContext == null) {
       return;
     }
+    if (!StreamVideo.isInitialized()) {
+      return;
+    }
     final incomingCall = await StreamVideo.instance.consumeIncomingCall();
     if (incomingCall != null) {
       final chatChannel = await widget.appRepository.createChatChannel(

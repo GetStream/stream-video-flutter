@@ -76,7 +76,7 @@ class AuthRepository {
     );
 
     if (_userToken != null) {
-      await streamChat.connectUser(chatUser, _userToken!.rawValue);
+      await streamChat.connectUserWithProvider(chatUser, _tokenLoader);
     } else {
       await streamChat.connectUserWithProvider(chatUser, _tokenLoader);
     }
