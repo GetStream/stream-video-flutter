@@ -131,7 +131,7 @@ class StreamVideo {
   /// This is useful if you want to re-initialise the SDK with a different
   /// API key.
   static Future<void> reset({bool disconnect = false}) async {
-    if (disconnect) {
+    if (disconnect && _instanceHolder.isInitialized()) {
       await _instanceHolder.instance.disconnect();
     }
     return _instanceHolder.reset();

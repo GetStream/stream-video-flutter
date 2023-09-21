@@ -140,13 +140,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       timeLimit: const Duration(seconds: 15),
     )
         .then((it) {
-      if (it.isConnected) {
-        _logger.v(() => '[waitUntilConnected] completed: $it');
-        return const Result.success(none);
-      } else {
-        _logger.e(() => '[waitUntilConnected] failed: $it');
-        return Result<None>.error('waitUntilConnected failed');
-      }
+      _logger.v(() => '[waitUntilConnected] completed: $it');
+      return const Result.success(none);
     }).onError((error, stackTrace) {
       _logger.e(() => '[waitUntilConnected] failed: $error; $stackTrace');
       return Result<None>.failure(VideoErrors.compose(error, stackTrace));
