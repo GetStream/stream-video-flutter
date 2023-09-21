@@ -1,10 +1,7 @@
 import 'package:meta/meta.dart';
 
-import '../latency/latency_settings.dart';
 import '../logger/stream_log.dart';
-import '../retry/retry_policy.dart';
 import '../stream_video.dart';
-import '../webrtc/sdp/policy/sdp_policy.dart';
 
 @internal
 class InstanceHolder {
@@ -19,32 +16,6 @@ class InstanceHolder {
       );
     }
     _instance = instance;
-  }
-
-  StreamVideo init(
-    String apiKey, {
-    required LatencySettings latencySettings,
-    required RetryPolicy retryPolicy,
-    required SdpPolicy sdpPolicy,
-    bool muteVideoWhenInBackground = false,
-    bool muteAudioWhenInBackground = false,
-  }) {
-    if (_instance != null) {
-      throw Exception('''
-        StreamVideo has already been initialised, use StreamVideo.instance to access the singleton instance.
-        If you want to re-initialise the SDK, call StreamVideo.reset() first.
-        If you want to use multiple instances of the SDK, use StreamVideo.new() instead.
-        ''');
-    }
-    _instance = StreamVideo.create(
-      apiKey,
-      latencySettings: latencySettings,
-      retryPolicy: retryPolicy,
-      sdpPolicy: sdpPolicy,
-      muteVideoWhenInBackground: muteVideoWhenInBackground,
-      muteAudioWhenInBackground: muteAudioWhenInBackground,
-    );
-    return _instance!;
   }
 
   /// The singleton instance of the Stream Video client.

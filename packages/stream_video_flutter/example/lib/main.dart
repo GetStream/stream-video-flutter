@@ -31,7 +31,7 @@ Future<void> main() async {
 
 Future<Result<None>> _connectUser(UserInfo user, String token) async {
   streamLog.i(_tag, () => '[connectUser] user: $user, token: $token');
-  final client = StreamVideo.build(
+  final client = StreamVideo(
     Env.streamVideoApiKey,
     user: User(info: user),
     userToken: token,

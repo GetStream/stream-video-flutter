@@ -14,21 +14,7 @@ import 'user_repository.dart';
 class AppRepository {
   AppRepository();
 
-  // TODO delete
-  // StreamVideo? _streamVideoClient;
   StreamChatClient? _streamChatClient;
-
-  // TODO delete
-  // StreamVideo get videoClient {
-  //   final client = _streamVideoClient;
-  //   if (client == null) {
-  //     throw Exception(
-  //       'Please initialise Stream Video by calling AppRepository.beginSession()',
-  //     );
-  //   }
-  //
-  //   return client;
-  // }
 
   StreamChatClient get chatClient {
     final client = _streamChatClient;
@@ -47,7 +33,7 @@ class AppRepository {
     video.OnTokenUpdated? onTokenUpdated,
   }) async {
     if (!video.StreamVideo.isInitialized()) {
-      final instance = video.StreamVideo.build(
+      final instance = video.StreamVideo(
         Env.apiKey,
         config: const video.StreamVideoConfig(
           logPriority: video.Priority.verbose,
@@ -73,29 +59,7 @@ class AppRepository {
     }
   }
 
-  static Future<video.StreamVideo> _initStreamVideo() async {
-    if (!video.StreamVideo.isInitialized()) {
-      final streamVideoClient = video.StreamVideo.init(
-        Env.apiKey,
-        logPriority: video.Priority.verbose,
-        muteAudioWhenInBackground: true,
-        muteVideoWhenInBackground: true,
-      );
-      await streamVideoClient.initPushNotificationManager(
-        StreamVideoPushNotificationManager.factory(
-          apnsProviderName: 'flutter-apn-video',
-          firebaseProviderName: 'firebase',
-        ),
-      );
-      return streamVideoClient;
-    } else {
-      return video.StreamVideo.instance;
-    }
-  }
-
   Future<void> beginSession() async {
-    // TODO delete
-    // _streamVideoClient = await _initStreamVideo();
     unawaited(_setupLogger());
     _streamChatClient = initStreamChat();
   }
@@ -146,10 +110,7 @@ class AppRepository {
   }
 
   Future<void> endSession() async {
-    await video.StreamVideo.reset(disconnectUser: true);
-    // TODO delete
-    // await _streamVideoClient?.disconnectUser();
-    // _streamVideoClient = null;
+    await video.StreamVideo.reset(disconnect: true);
     await _streamChatClient?.disconnectUser();
     _streamChatClient = null;
     await UserRepository.instance.clear();

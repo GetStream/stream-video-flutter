@@ -129,12 +129,6 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
       final user = userCredentials.user;
       final token = userCredentials.token;
 
-      // TODO delete
-      // await StreamVideo.instance.connectUser(
-      //   user,
-      //   token.rawValue,
-      // );
-
       await AppRepository.ensureVideoInitialized(
         user: User(info: user),
         userToken: token.rawValue,

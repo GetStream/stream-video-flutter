@@ -36,12 +36,9 @@ typedef LogHandlerFunction = void Function(
 
 /// The client responsible for handling config and maintaining calls
 class StreamVideo {
-  /// The singleton instance of the Stream Video client.
-  factory StreamVideo() => instance;
-
   /// Creates a new Stream Video client unassociated with the
   /// Stream Video singleton instance
-  factory StreamVideo.build(
+  factory StreamVideo(
     String apiKey, {
     StreamVideoConfig config = const StreamVideoConfig(),
     required User user,
@@ -101,33 +98,13 @@ class StreamVideo {
 
     _setupLogger(config.logPriority, config.logHandlerFunction);
 
-    _instanceHolder.install(instance);
+    if (config.installAsSingleton) {
+      _instanceHolder.install(instance);
+    }
     if (config.autoConnect) {
       unawaited(instance.connect());
     }
     return instance;
-  }
-
-  /// Creates a new Stream Video client unassociated with the
-  /// Stream Video singleton instance
-  factory StreamVideo.create(
-    String apiKey, {
-    LatencySettings latencySettings = const LatencySettings(),
-    RetryPolicy retryPolicy = const RetryPolicy(),
-    SdpPolicy sdpPolicy = _defaultSdpPolicy,
-    bool muteVideoWhenInBackground = false,
-    bool muteAudioWhenInBackground = false,
-  }) {
-    return StreamVideo._(
-      apiKey,
-      coordinatorRpcUrl: _defaultCoordinatorRpcUrl,
-      coordinatorWsUrl: _defaultCoordinatorWsUrl,
-      latencySettings: latencySettings,
-      retryPolicy: retryPolicy,
-      sdpPolicy: sdpPolicy,
-      muteVideoWhenInBackground: muteVideoWhenInBackground,
-      muteAudioWhenInBackground: muteAudioWhenInBackground,
-    );
   }
 
   StreamVideo._(
@@ -152,29 +129,6 @@ class StreamVideo {
 
   static final InstanceHolder _instanceHolder = InstanceHolder();
 
-  static StreamVideo init(
-    String apiKey, {
-    String coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
-    String coordinatorWsUrl = _defaultCoordinatorWsUrl,
-    LatencySettings latencySettings = const LatencySettings(),
-    RetryPolicy retryPolicy = const RetryPolicy(),
-    SdpPolicy sdpPolicy = _defaultSdpPolicy,
-    Priority logPriority = Priority.none,
-    LogHandlerFunction logHandlerFunction = _defaultLogHandler,
-    bool muteVideoWhenInBackground = false,
-    bool muteAudioWhenInBackground = false,
-  }) {
-    _setupLogger(logPriority, logHandlerFunction);
-    return _instanceHolder.init(
-      apiKey,
-      latencySettings: latencySettings,
-      retryPolicy: retryPolicy,
-      sdpPolicy: sdpPolicy,
-      muteVideoWhenInBackground: muteVideoWhenInBackground,
-      muteAudioWhenInBackground: muteAudioWhenInBackground,
-    );
-  }
-
   /// The singleton instance of the Stream Video client.
   static StreamVideo get instance => _instanceHolder.instance;
 
@@ -182,9 +136,9 @@ class StreamVideo {
   ///
   /// This is useful if you want to re-initialise the SDK with a different
   /// API key.
-  static Future<void> reset({bool disconnectUser = false}) async {
-    if (disconnectUser) {
-      await _instanceHolder.instance.disconnectUser();
+  static Future<void> reset({bool disconnect = false}) async {
+    if (disconnect) {
+      await _instanceHolder.instance.disconnect();
     }
     return _instanceHolder.reset();
   }
@@ -241,6 +195,7 @@ class StreamVideo {
   /// Invoked when a call was created by another user with ringing set as True.
   void Function(Call)? onIncomingCall;
 
+  /// Connects the user to the Stream Video service.
   Future<Result<None>> connect() async {
     final user = _state.currentUser.valueOrNull;
     if (user == null) {
@@ -306,53 +261,6 @@ class StreamVideo {
     };
   }
 
-  /// Connects the [user] to the Stream Video service using a [TokenProvider].
-  /// This method is great if your service requires tokens to be refreshed.
-  ///
-  /// For applications outside of test and development, this method may be more
-  /// suitable as token refreshes are handled for you.
-  Future<Result<String>> connectUserWithProvider(
-    UserInfo user, {
-    required TokenProvider tokenProvider,
-  }) async {
-    _logger.i(() => '[connectUser] user.id : ${user.id}');
-    if (currentUser != null) {
-      _logger.w(() => '[connectUser] rejected (already set): $currentUser');
-      final res = await _tokenManager.getToken();
-      return res.map((data) => data.rawValue);
-    }
-    final tokenResult = await _tokenManager.setTokenProvider(
-      user.id,
-      tokenProvider: tokenProvider,
-    );
-    if (tokenResult.isFailure) {
-      return tokenResult.map((data) => data.rawValue);
-    }
-    // TODO temp fix
-    _state.currentUser.value = User(info: user);
-
-    try {
-      final result = await _client.connectUser(user);
-      _logger.v(() => '[connectUser] result: $result');
-      if (result is Failure) {
-        return result;
-      }
-      _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
-      _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
-      try {
-        await pushNotificationManager?.onUserLoggedIn();
-      } catch (e, stk) {
-        _logger.w(() =>
-            '[connectUser] pushNotificationManager.onUserLoggedIn failed: $e');
-      }
-      _logger.v(() => '[connectUser] completed');
-      return tokenResult.map((data) => data.rawValue);
-    } catch (e, stk) {
-      _logger.e(() => '[connectUser] failed(${user.id}): $e');
-      return Result.failure(VideoErrors.compose(e, stk));
-    }
-  }
-
   void _onEvent(CoordinatorEvent event) {
     final currentUserId = _state.getCurrentUserId();
     _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
@@ -407,28 +315,6 @@ class StreamVideo {
       }
     } catch (e) {
       _logger.e(() => '[onAppState] failed: $e');
-    }
-  }
-
-  /// Disconnects the user from the Stream Video service.
-  Future<Result<None>> disconnectUser() async {
-    _logger.i(() => '[disconnectUser] currentUser.id: ${currentUser?.id}');
-    if (currentUser == null) {
-      _logger.w(() => '[disconnectUser] rejected (no user): $currentUser');
-      return const Result.success(none);
-    }
-    try {
-      await _client.disconnectUser();
-      _subscriptions.cancelAll();
-      _tokenManager.reset();
-
-      // Resetting the state.
-      await _state.close();
-      _state = _StreamVideoState();
-      return const Result.success(none);
-    } catch (e, stk) {
-      _logger.e(() => '[disconnectUser] failed: $e');
-      return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
@@ -616,19 +502,6 @@ void _defaultLogHandler(
 
 const _defaultSdpPolicy = SdpPolicy();
 
-extension StreamVideoX on StreamVideo {
-  /// Connects the [user] to the Stream Video service using a static token.
-  Future<Result<String>> connectUser(
-    UserInfo user,
-    String token,
-  ) {
-    return connectUserWithProvider(
-      user,
-      tokenProvider: TokenProvider.static(UserToken.jwt(token)),
-    );
-  }
-}
-
 class StreamVideoConfig {
   const StreamVideoConfig({
     this.coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
@@ -641,6 +514,7 @@ class StreamVideoConfig {
     this.muteVideoWhenInBackground = false,
     this.muteAudioWhenInBackground = false,
     this.autoConnect = true,
+    this.installAsSingleton = true,
   });
 
   final String coordinatorRpcUrl;
@@ -659,4 +533,5 @@ class StreamVideoConfig {
   final bool muteVideoWhenInBackground;
   final bool muteAudioWhenInBackground;
   final bool autoConnect;
+  final bool installAsSingleton;
 }

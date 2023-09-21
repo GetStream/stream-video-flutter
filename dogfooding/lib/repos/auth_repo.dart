@@ -24,12 +24,6 @@ class AuthRepository {
   final chat.StreamChatClient streamChat;
   final GoogleSignIn googleSignIn;
 
-  final _videoConfig = const StreamVideoConfig(
-    logPriority: Priority.verbose,
-    muteAudioWhenInBackground: true,
-    muteVideoWhenInBackground: true,
-    autoConnect: false,
-  );
   late StreamVideo streamVideo;
 
   final _logger = taggedLogger(tag: 'SV:LoginViewState');
@@ -71,34 +65,6 @@ class AuthRepository {
     final finalUser = streamVideo.currentUser!;
     _logger.v(() => '[loginAsGuest] finalUser: $finalUser');
 
-    // final guest = await streamVideo.createGuest(
-    //   id: guestId,
-    //   name: guestId,
-    //   image: imageUrl,
-    // );
-    // final data = guest.getDataOrNull();
-    // if (data == null) {
-    //   throw Exception();
-    // }
-    // _logger.v(() => '[loginAsGuest] data: $data');
-    //
-    // final finalUser = UserInfo(
-    //   id: data.user.id,
-    //   image: data.user.image,
-    //   name: data.user.name ?? '',
-    //   teams: data.user.teams,
-    //   role: data.user.role,
-    // );
-    //
-    // final userCredentials = UserCredentials(
-    //   user: finalUser,
-    //   token: UserToken.jwt(data.accessToken),
-    // );
-    //
-    // await streamVideo.connectUser(finalUser, data.accessToken);
-    // _userToken = UserToken.jwt(data.accessToken);
-    // await UserRepository.instance.saveUserCredentials(userCredentials);
-
     final chatUID = md5.convert(utf8.encode(finalUser.id)).toString();
 
     final chatUser = chat.User(
@@ -110,7 +76,7 @@ class AuthRepository {
     );
 
     if (_userToken != null) {
-      await streamChat.connectUserWithProvider(chatUser, _tokenLoader);
+      await streamChat.connectUser(chatUser, _userToken!.rawValue);
     } else {
       await streamChat.connectUserWithProvider(chatUser, _tokenLoader);
     }
@@ -140,24 +106,7 @@ class AuthRepository {
         await UserRepository.instance.saveUserCredentials(userCredentials);
       },
     );
-
     final result = await streamVideo.connect();
-
-    // final tokenResult = await streamVideo.connectUserWithProvider(
-    //   user,
-    //   tokenProvider: TokenProvider.dynamic(
-    //     _tokenLoader,
-    //     onTokenUpdated: (token) async {
-    //       _logger.d(() => '[onTokenUpdated] token: $token');
-    //       final userCredentials = UserCredentials(
-    //         user: user,
-    //         token: token,
-    //       );
-    //       _userToken = token;
-    //       await UserRepository.instance.saveUserCredentials(userCredentials);
-    //     },
-    //   ),
-    // );
 
     final chatUID = md5.convert(utf8.encode(user.id)).toString();
 
@@ -174,13 +123,6 @@ class AuthRepository {
     } else {
       await streamChat.connectUserWithProvider(chatUser, _tokenLoader);
     }
-
-    // _logger.d(() => '[onLoginSuccess] tokenResult: $tokenResult');
-    //
-    // if (tokenResult is! Success<String>) {
-    //   // TODO show error
-    //   return;
-    // }
 
     _logger.v(() => '[loginWithUserInfo] result: $result');
 
