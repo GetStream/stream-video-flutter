@@ -1,6 +1,9 @@
+import 'package:async/async.dart' as async;
 import 'package:meta/meta.dart';
 
 import '../../stream_video.dart';
+import '../utils/cancelable_operation.dart';
+import '../utils/future.dart';
 
 const _emptyUserId = 'stream:none';
 
@@ -32,11 +35,13 @@ class TokenManager {
     return getToken();
   }
 
+  async.CancelableOperation<Result<UserToken>>? _provideToken;
+
   /// Returns the token refreshing the existing one if [refresh] is true
   Future<Result<UserToken>> getToken({bool refresh = false}) async {
     _logger.d(() => '[getToken] refresh: $refresh, _token: $_token');
     if (refresh || _token == null) {
-      final result = await _provider.getToken(_userId);
+      final result = await provideToken();
       _logger.v(() => '[getToken] completed: $result');
       if (result is! Success<UserToken>) {
         return result;
@@ -44,6 +49,16 @@ class TokenManager {
       _token = result.data;
     }
     return Result.success(_token!);
+  }
+
+  Future<Result<UserToken>> provideToken() async {
+    if (_provideToken == null) {
+      _logger.d(() => '[provideToken] _userId: $_userId');
+      _provideToken = _provider.getToken(_userId).asCancelable();
+    }
+    return _provideToken!.valueOrDefault(
+      Result.error('provideToken was cancelled'),
+    );
   }
 
   /// Returns the token refreshing the existing one.
@@ -55,6 +70,7 @@ class TokenManager {
   /// Resets the token manager
   void reset() {
     _logger.d(() => '[reset] no args');
+    _provideToken?.cancel();
     _userId = _emptyUserId;
     _provider = _StubTokenProvider();
     _token = null;

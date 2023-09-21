@@ -25,10 +25,10 @@ abstract class TokenProvider {
     OnTokenUpdated? onTokenUpdated,
   ]) {
     if (token != null && loader == null) {
-      return TokenProvider.static(token);
+      return TokenProvider.static(token, onTokenUpdated: onTokenUpdated);
     }
     if (loader != null) {
-      return _DynamicProvider(
+      return TokenProvider.dynamic(
         loader,
         initialToken: token,
         onTokenUpdated: onTokenUpdated,
@@ -37,8 +37,11 @@ abstract class TokenProvider {
     throw ArgumentError('Either `userToken` or `tokenProvider` must be set');
   }
 
-  factory TokenProvider.static(UserToken token) {
-    return _StaticProvider(token);
+  factory TokenProvider.static(
+    UserToken token, {
+    OnTokenUpdated? onTokenUpdated,
+  }) {
+    return _StaticProvider(token, onTokenUpdated: onTokenUpdated);
   }
 
   factory TokenProvider.dynamic(
@@ -61,7 +64,10 @@ abstract class TokenProvider {
 }
 
 class _StaticProvider implements TokenProvider {
-  _StaticProvider(this.token);
+  _StaticProvider(this.token, {OnTokenUpdated? onTokenUpdated}) {
+    _logger.d(() => '<init> token: $token');
+    onTokenUpdated?.call(token);
+  }
 
   final _logger = taggedLogger(tag: 'SV:StaticProvider');
 

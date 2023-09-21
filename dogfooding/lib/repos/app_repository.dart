@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart' as video;
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 
 import '../env/env.dart';
@@ -14,19 +14,21 @@ import 'user_repository.dart';
 class AppRepository {
   AppRepository();
 
-  StreamVideo? _streamVideoClient;
+  // TODO delete
+  // StreamVideo? _streamVideoClient;
   StreamChatClient? _streamChatClient;
 
-  StreamVideo get videoClient {
-    final client = _streamVideoClient;
-    if (client == null) {
-      throw Exception(
-        'Please initialise Stream Video by calling AppRepository.beginSession()',
-      );
-    }
-
-    return client;
-  }
+  // TODO delete
+  // StreamVideo get videoClient {
+  //   final client = _streamVideoClient;
+  //   if (client == null) {
+  //     throw Exception(
+  //       'Please initialise Stream Video by calling AppRepository.beginSession()',
+  //     );
+  //   }
+  //
+  //   return client;
+  // }
 
   StreamChatClient get chatClient {
     final client = _streamChatClient;
@@ -38,11 +40,44 @@ class AppRepository {
     return client;
   }
 
-  static Future<StreamVideo> initStreamVideo() async {
-    if (!StreamVideo.isInitialized()) {
-      final streamVideoClient = StreamVideo.init(
+  static Future<video.StreamVideo> ensureVideoInitialized({
+    required video.User user,
+    String? userToken,
+    video.TokenLoader? tokenLoader,
+    video.OnTokenUpdated? onTokenUpdated,
+  }) async {
+    if (!video.StreamVideo.isInitialized()) {
+      final instance = video.StreamVideo.build(
         Env.apiKey,
-        logPriority: Priority.info,
+        config: const video.StreamVideoConfig(
+          logPriority: video.Priority.verbose,
+          muteAudioWhenInBackground: true,
+          muteVideoWhenInBackground: true,
+          autoConnect: false,
+        ),
+        user: user,
+        tokenLoader: tokenLoader,
+        onTokenUpdated: onTokenUpdated,
+      );
+
+      await video.StreamVideo.instance.initPushNotificationManager(
+        StreamVideoPushNotificationManager.factory(
+          apnsProviderName: 'flutter-apn-video',
+          firebaseProviderName: 'firebase',
+        ),
+      );
+
+      return instance;
+    } else {
+      return video.StreamVideo.instance;
+    }
+  }
+
+  static Future<video.StreamVideo> _initStreamVideo() async {
+    if (!video.StreamVideo.isInitialized()) {
+      final streamVideoClient = video.StreamVideo.init(
+        Env.apiKey,
+        logPriority: video.Priority.verbose,
         muteAudioWhenInBackground: true,
         muteVideoWhenInBackground: true,
       );
@@ -54,12 +89,13 @@ class AppRepository {
       );
       return streamVideoClient;
     } else {
-      return StreamVideo.instance;
+      return video.StreamVideo.instance;
     }
   }
 
   Future<void> beginSession() async {
-    _streamVideoClient = await initStreamVideo();
+    // TODO delete
+    // _streamVideoClient = await _initStreamVideo();
     unawaited(_setupLogger());
     _streamChatClient = initStreamChat();
   }
@@ -72,15 +108,15 @@ class AppRepository {
   }
 
   Future<void> _setupLogger() async {
-    const consoleLogger = ConsoleStreamLogger();
-    final children = <StreamLogger>[consoleLogger];
-    FileStreamLogger? fileLogger;
+    const consoleLogger = video.ConsoleStreamLogger();
+    final children = <video.StreamLogger>[consoleLogger];
+    video.FileStreamLogger? fileLogger;
     if (!kIsWeb) {
-      fileLogger = FileStreamLogger(
+      fileLogger = video.FileStreamLogger(
         AppFileLogConfig('1.0.0'),
         sender: (logFile) async {
           consoleLogger.log(
-            Priority.debug,
+            video.Priority.debug,
             'DogFoodingApp',
             () => '[send] logFile: $logFile(${logFile.existsSync()})',
           );
@@ -94,7 +130,7 @@ class AppRepository {
       );
       children.add(fileLogger);
     }
-    StreamLog().logger = CompositeStreamLogger(children);
+    video.StreamLog().logger = video.CompositeStreamLogger(children);
   }
 
   Future<Channel> createChatChannel({
@@ -110,8 +146,10 @@ class AppRepository {
   }
 
   Future<void> endSession() async {
-    await _streamVideoClient?.disconnectUser();
-    _streamVideoClient = null;
+    await video.StreamVideo.reset(disconnectUser: true);
+    // TODO delete
+    // await _streamVideoClient?.disconnectUser();
+    // _streamVideoClient = null;
     await _streamChatClient?.disconnectUser();
     _streamChatClient = null;
     await UserRepository.instance.clear();

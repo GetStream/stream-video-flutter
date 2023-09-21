@@ -23,12 +23,14 @@ import '../../models/queried_members.dart';
 import '../../models/user_info.dart';
 import '../../retry/retry_policy.dart';
 import '../../shared_emitter.dart';
+import '../../state_emitter.dart';
 import '../../token/token.dart';
 import '../../token/token_manager.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
 import '../../utils/standard.dart';
 import '../coordinator_client.dart';
+import '../models/coordinator_connection_state.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_models.dart';
 import 'coordinator_ws_open_api.dart';
@@ -82,24 +84,73 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   SharedEmitter<CoordinatorEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
 
+  final _connectionState = MutableStateEmitterImpl<CoordinatorConnectionState>(
+    const CoordinatorDisconnected(),
+  );
+
   UserInfo? _user;
   CoordinatorWebSocketOpenApi? _ws;
   StreamSubscription<CoordinatorEvent>? _wsSubscription;
 
   @override
   Future<Result<None>> connectUser(UserInfo user) async {
-    _logger.d(() => '[connectUser] user: $user');
-    if (_user != null) {
-      _logger.w(() => '[connectUser] rejected (another user in use): $_user');
-      return Result.error(
-        'Another user is in use, please call "disconnectUser" first',
-      );
+    _logger.d(() => '[connectUser] user.id: ${user.id}');
+    final state = _connectionState.value;
+    if (state.isConnected) {
+      _logger.w(() => '[connectUser] rejected (already connected): $_user');
+      return const Result.success(none);
     }
+    if (state.isConnecting) {
+      _logger.w(() => '[connectUser] wait (already connecting): $_user');
+      return _waitUntilConnected();
+    }
+    _connectionState.value = CoordinatorConnectionState.connecting(
+      userId: user.id,
+    );
     _user = user;
     _ws = _createWebSocket(user).also((ws) {
-      _wsSubscription = ws.events.listen(_events.emit);
+      _wsSubscription = ws.events.listen((event) {
+        if (event is CoordinatorConnectedEvent) {
+          _logger.i(() => '[connectUser] WS connected');
+          _connectionState.value = CoordinatorConnectionState.connected(
+            userId: event.userId,
+          );
+        } else if (event is CoordinatorDisconnectedEvent) {
+          _logger.i(() => '[connectUser] WS disconnected');
+          _connectionState.value = CoordinatorConnectionState.disconnected(
+            userId: event.userId,
+            clientId: event.clientId,
+            closeCode: event.closeCode,
+            closeReason: event.closeReason,
+          );
+        }
+        _events.emit(event);
+      });
     });
     return openConnection();
+  }
+
+  Future<Result<None>> _waitUntilConnected() async {
+    _logger.w(() => '[waitUntilConnected] user.id: ${_user?.id}');
+    return _connectionState
+        .firstWhere(
+      (it) => it.isConnected,
+      // TODO
+      // replace timeout with config value,
+      timeLimit: const Duration(seconds: 15),
+    )
+        .then((it) {
+      if (it.isConnected) {
+        _logger.v(() => '[waitUntilConnected] completed: $it');
+        return const Result.success(none);
+      } else {
+        _logger.e(() => '[waitUntilConnected] failed: $it');
+        return Result<None>.error('waitUntilConnected failed');
+      }
+    }).onError((error, stackTrace) {
+      _logger.e(() => '[waitUntilConnected] failed: $error; $stackTrace');
+      return Result<None>.failure(VideoErrors.compose(error, stackTrace));
+    });
   }
 
   @override
@@ -844,6 +895,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     Map<String, Object> custom = const {},
   }) async {
     try {
+      _logger.d(() => '[loadGuest] id: $id');
       final defaultApi = open.DefaultApi(
         open.ApiClient(
           basePath: _rpcUrl,
@@ -856,7 +908,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           ),
         ),
       );
-      final res = await defaultApi.createGuest(
+      final result = await defaultApi.createGuest(
         open.CreateGuestRequest(
           user: open.UserRequest(
             id: id,
@@ -868,9 +920,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           ),
         ),
       );
-
-      if (res != null) {
-        return Result.success(res.toGuestCreatedData());
+      _logger.v(() => '[loadGuest] completed: $result');
+      if (result != null) {
+        return Result.success(result.toGuestCreatedData());
       } else {
         return const Result.failure(
           VideoError(message: 'Guest could not be created.'),

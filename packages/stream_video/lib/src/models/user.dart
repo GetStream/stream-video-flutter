@@ -1,6 +1,11 @@
 import 'models.dart';
 
 class User {
+  User({
+    required this.info,
+    this.type = UserType.authenticated,
+  });
+
   factory User.regular({
     required String userId,
     String? name,
@@ -9,7 +14,7 @@ class User {
     List<String> teams = const [],
     Map<String, Object?> extraData = const {},
   }) {
-    return User._(
+    return User(
       type: UserType.anonymous,
       info: UserInfo(
         id: userId,
@@ -23,7 +28,7 @@ class User {
   }
 
   factory User.anonymous() {
-    return User._(
+    return User(
       type: UserType.anonymous,
       info: const UserInfo(
         id: '!anon',
@@ -31,27 +36,20 @@ class User {
     );
   }
 
-  factory User.guest(String userId) {
-    return User._(
+  factory User.guest(
+    String userId, {
+    String? name,
+    String? image,
+  }) {
+    return User(
       type: UserType.guest,
       info: UserInfo(
         id: userId,
-        name: userId,
+        name: name ?? userId,
+        image: image,
       ),
     );
   }
-
-  factory User.fromInfo(UserType type, UserInfo info) {
-    return User._(
-      info: info,
-      type: type,
-    );
-  }
-
-  User._({
-    required this.info,
-    this.type = UserType.authenticated,
-  });
 
   final UserType type;
   final UserInfo info;

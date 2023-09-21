@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart' as chat;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -28,7 +28,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await appRepo.beginSession();
   final authRepo = AuthRepository(
     tokenService: TokenService(),
-    streamVideo: appRepo.videoClient,
     streamChat: appRepo.chatClient,
     googleSignIn: GoogleSignIn(hostedDomain: 'getstream.io'),
   );
@@ -57,7 +56,6 @@ Future<void> main() async {
   await appRepo.beginSession();
   final authRepo = AuthRepository(
     tokenService: TokenService(),
-    streamVideo: appRepo.videoClient,
     streamChat: appRepo.chatClient,
     googleSignIn: GoogleSignIn(hostedDomain: 'getstream.io'),
   );
@@ -131,10 +129,17 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
       final user = userCredentials.user;
       final token = userCredentials.token;
 
-      await StreamVideo.instance.connectUser(
-        user,
-        token.rawValue,
+      // TODO delete
+      // await StreamVideo.instance.connectUser(
+      //   user,
+      //   token.rawValue,
+      // );
+
+      await AppRepository.ensureVideoInitialized(
+        user: User(info: user),
+        userToken: token.rawValue,
       );
+      await StreamVideo.instance.connect();
 
       final call = StreamVideo.instance.makeCall(type: kCallType, id: callId);
       await call.getOrCreate();
@@ -201,7 +206,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
       case AppLifecycleState.detached:
         // widget is detached
         break;
-      case AppLifecycleState.hidden:
+      //case AppLifecycleState.hidden:
       // widget is hidden
     }
   }
@@ -241,7 +246,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
           appRepo: widget.appRepository,
           child: AuthenticationProvider(
             auth: widget.authRepository,
-            child: StreamChat(
+            child: chat.StreamChat(
               client: widget.appRepository.chatClient,
               child: child,
             ),
