@@ -40,7 +40,7 @@ class StreamVideo {
   /// Stream Video singleton instance
   factory StreamVideo(
     String apiKey, {
-    StreamVideoConfig config = const StreamVideoConfig(),
+    StreamVideoOptions options = const StreamVideoOptions(),
     required User user,
     String? userToken,
     TokenLoader? tokenLoader,
@@ -48,13 +48,13 @@ class StreamVideo {
   }) {
     final instance = StreamVideo._(
       apiKey,
-      coordinatorRpcUrl: config.coordinatorRpcUrl,
-      coordinatorWsUrl: config.coordinatorWsUrl,
-      latencySettings: config.latencySettings,
-      retryPolicy: config.retryPolicy,
-      sdpPolicy: config.sdpPolicy,
-      muteVideoWhenInBackground: config.muteVideoWhenInBackground,
-      muteAudioWhenInBackground: config.muteAudioWhenInBackground,
+      coordinatorRpcUrl: options.coordinatorRpcUrl,
+      coordinatorWsUrl: options.coordinatorWsUrl,
+      latencySettings: options.latencySettings,
+      retryPolicy: options.retryPolicy,
+      sdpPolicy: options.sdpPolicy,
+      muteVideoWhenInBackground: options.muteVideoWhenInBackground,
+      muteAudioWhenInBackground: options.muteAudioWhenInBackground,
     );
 
     instance._state.currentUser.value = user;
@@ -96,12 +96,12 @@ class StreamVideo {
       );
     }
 
-    _setupLogger(config.logPriority, config.logHandlerFunction);
+    _setupLogger(options.logPriority, options.logHandlerFunction);
 
-    if (config.installAsSingleton) {
+    if (options.installAsSingleton) {
       _instanceHolder.install(instance);
     }
-    if (config.autoConnect) {
+    if (options.autoConnect) {
       unawaited(instance.connect());
     }
     return instance;
@@ -502,8 +502,8 @@ void _defaultLogHandler(
 
 const _defaultSdpPolicy = SdpPolicy();
 
-class StreamVideoConfig {
-  const StreamVideoConfig({
+class StreamVideoOptions {
+  const StreamVideoOptions({
     this.coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     this.coordinatorWsUrl = _defaultCoordinatorWsUrl,
     this.latencySettings = const LatencySettings(),

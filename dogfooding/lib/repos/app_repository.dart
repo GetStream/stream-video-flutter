@@ -35,7 +35,7 @@ class AppRepository {
     if (!video.StreamVideo.isInitialized()) {
       final instance = video.StreamVideo(
         Env.apiKey,
-        config: const video.StreamVideoConfig(
+        options: const video.StreamVideoOptions(
           logPriority: video.Priority.verbose,
           muteAudioWhenInBackground: true,
           muteVideoWhenInBackground: true,
