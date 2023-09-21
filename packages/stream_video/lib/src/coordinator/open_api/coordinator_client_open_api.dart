@@ -901,9 +901,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           basePath: _rpcUrl,
           authentication: _Authentication(
             apiKey: _apiKey,
-            getToken: () async {
-              return UserToken.anonymous();
-            },
+            getToken: () => UserToken.anonymous(userId: id),
             getConnectionId: () => _ws?.connectionId,
           ),
         ),
@@ -970,7 +968,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 }
 
 typedef GetConnectionId = String? Function();
-typedef GetToken = Future<UserToken> Function();
+typedef GetToken = FutureOr<UserToken> Function();
 
 class _Authentication extends open.Authentication {
   _Authentication({

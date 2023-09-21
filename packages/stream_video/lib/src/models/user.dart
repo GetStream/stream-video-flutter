@@ -1,7 +1,7 @@
 import 'models.dart';
 
 class User {
-  User({
+  const User({
     required this.info,
     this.type = UserType.authenticated,
   });
@@ -15,7 +15,6 @@ class User {
     Map<String, Object?> extraData = const {},
   }) {
     return User(
-      type: UserType.anonymous,
       info: UserInfo(
         id: userId,
         name: name ?? '',
@@ -27,17 +26,17 @@ class User {
     );
   }
 
-  factory User.anonymous() {
+  factory User.anonymous({
+    String userId = '!anon',
+  }) {
     return User(
       type: UserType.anonymous,
-      info: const UserInfo(
-        id: '!anon',
-      ),
+      info: UserInfo(id: userId),
     );
   }
 
-  factory User.guest(
-    String userId, {
+  factory User.guest({
+    required String userId,
     String? name,
     String? image,
   }) {

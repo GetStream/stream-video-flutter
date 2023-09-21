@@ -58,18 +58,17 @@ class StreamVideo {
     );
 
     instance._state.currentUser.value = user;
-    if (user.type == UserType.anonymous) {
-      instance._tokenManager.setTokenProvider(
-        user.id,
-        tokenProvider: TokenProvider.static(
+    final tokenProvider = switch (user.type) {
+      UserType.authenticated => TokenProvider.from(
+          userToken?.let(UserToken.jwt),
+          tokenLoader,
+          instance._wrapOnTokenUpdated(onTokenUpdated),
+        ),
+      UserType.anonymous => TokenProvider.static(
           UserToken.anonymous(),
           onTokenUpdated: instance._wrapOnTokenUpdated(onTokenUpdated),
         ),
-      );
-    } else if (user.type == UserType.guest) {
-      instance._tokenManager.setTokenProvider(
-        user.id,
-        tokenProvider: TokenProvider.dynamic(
+      UserType.guest => TokenProvider.dynamic(
           (userId) async {
             final result = await instance._client.loadGuest(id: userId);
             if (result is! Success<GuestCreatedData>) {
@@ -84,17 +83,12 @@ class StreamVideo {
           },
           onTokenUpdated: instance._wrapOnTokenUpdated(onTokenUpdated),
         ),
-      );
-    } else {
-      instance._tokenManager.setTokenProvider(
-        user.id,
-        tokenProvider: TokenProvider.from(
-          userToken?.let(UserToken.jwt),
-          tokenLoader,
-          instance._wrapOnTokenUpdated(onTokenUpdated),
-        ),
-      );
-    }
+    };
+
+    instance._tokenManager.setTokenProvider(
+      user.id,
+      tokenProvider: tokenProvider,
+    );
 
     _setupLogger(options.logPriority, options.logHandlerFunction);
 
@@ -500,15 +494,13 @@ void _defaultLogHandler(
   /* no-op */
 }
 
-const _defaultSdpPolicy = SdpPolicy();
-
 class StreamVideoOptions {
   const StreamVideoOptions({
     this.coordinatorRpcUrl = _defaultCoordinatorRpcUrl,
     this.coordinatorWsUrl = _defaultCoordinatorWsUrl,
     this.latencySettings = const LatencySettings(),
     this.retryPolicy = const RetryPolicy(),
-    this.sdpPolicy = _defaultSdpPolicy,
+    this.sdpPolicy = const SdpPolicy(),
     this.logPriority = Priority.none,
     this.logHandlerFunction = _defaultLogHandler,
     this.muteVideoWhenInBackground = false,

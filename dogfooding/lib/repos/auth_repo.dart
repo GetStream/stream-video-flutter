@@ -47,7 +47,7 @@ class AuthRepository {
         'https://vignette.wikia.nocookie.net/starwars/images/2/20/LukeTLJ.jpg';
     _logger.d(() => '[loginAsGuest] guestId: $guestId');
 
-    final guest = User.guest(guestId, image: imageUrl);
+    final guest = User.guest(userId: guestId, image: imageUrl);
     streamVideo = await AppRepository.ensureVideoInitialized(
       user: guest,
       onTokenUpdated: (token) async {

@@ -153,8 +153,8 @@ class UserToken extends Equatable {
 
   /// The token that can be used when user is unknown.
   /// Is used by `anonymous` token provider.
-  factory UserToken.anonymous({String? userId}) => UserToken._(
-        userId: userId ?? '!anon',
+  factory UserToken.anonymous({String userId = '!anon'}) => UserToken._(
+        userId: userId,
         authType: AuthType.anonymous,
       );
 
