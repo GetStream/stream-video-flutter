@@ -72,7 +72,6 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
   final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
 
   String? userId;
-  String? clientId;
   String? connectionId;
 
   @override
@@ -168,7 +167,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     _events.emit(
       CoordinatorDisconnectedEvent(
         userId: userId,
-        clientId: clientId,
+        connectionId: connectionId,
         closeCode: closeCode,
         closeReason: closeReason,
       ),
@@ -176,7 +175,6 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
 
     // resetting connection
     userId = null;
-    clientId = null;
     connectionId = null;
 
     // check if we manually closed the connection
@@ -243,7 +241,6 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     connectionState = ConnectionState.connected;
     healthMonitor.onPongReceived();
     userId ??= event.me.id;
-    clientId ??= event.connectionId;
     connectionId ??= event.connectionId;
   }
 
@@ -258,7 +255,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       {
         'type': 'health.check',
         // 'user_id': _userId,
-        'client_id': clientId,
+        'client_id': connectionId,
         // 'call_type': _callInfo?.callType,
         // 'call_id': _callInfo?.callId,
       }

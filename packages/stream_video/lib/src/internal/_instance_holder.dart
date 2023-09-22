@@ -23,7 +23,7 @@ class InstanceHolder {
     final instance = _instance;
     if (instance == null) {
       throw Exception(
-        'Please initialise Stream Video by calling StreamVideo.init()',
+        'Please initialise Stream Video by calling StreamVideo()',
       );
     }
     return instance;

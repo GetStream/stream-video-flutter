@@ -37,6 +37,7 @@ import 'coordinator_ws_open_api.dart';
 import 'open_api_extensions.dart';
 
 const _idEvents = 1;
+const _waitForConnectionTimeout = 5000;
 
 /// An accessor that allows us to communicate with the API around video calls.
 class CoordinatorClientOpenApi extends CoordinatorClient {
@@ -114,12 +115,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           _logger.i(() => '[connectUser] WS connected');
           _connectionState.value = CoordinatorConnectionState.connected(
             userId: event.userId,
+            connectionId: event.connectionId,
           );
         } else if (event is CoordinatorDisconnectedEvent) {
           _logger.i(() => '[connectUser] WS disconnected');
           _connectionState.value = CoordinatorConnectionState.disconnected(
             userId: event.userId,
-            clientId: event.clientId,
+            connectionId: event.connectionId,
             closeCode: event.closeCode,
             closeReason: event.closeReason,
           );
@@ -137,7 +139,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       (it) => it.isConnected,
       // TODO
       // replace timeout with config value,
-      timeLimit: const Duration(seconds: 15),
+      timeLimit: const Duration(milliseconds: _waitForConnectionTimeout),
     )
         .then((it) {
       _logger.v(() => '[waitUntilConnected] completed: $it');
@@ -231,6 +233,12 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? voipToken,
   }) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[createDevice] no connection established');
+        return connectionResult;
+      }
+
       final input = open.CreateDeviceRequest(
         id: id,
         pushProvider: pushProvider,
@@ -260,6 +268,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(() => '[listDevices] userId: $userId');
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[listDevices] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.listDevices(
         userId: userId,
       );
@@ -282,6 +295,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(() => '[deleteDevice] id: $id, userId: $userId');
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[deleteDevice] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.deleteDevice(
         id: id,
         userId: userId,
@@ -310,6 +328,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         () => '[getCall] cid: $callCid, ringing: $ringing'
             ', membersLimit: $membersLimit, ringing: $ringing, notify: $notify',
       );
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[getCall] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.getCall(
         callCid.type,
         callCid.id,
@@ -350,6 +373,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         () => '[getOrCreateCall] cid: $callCid'
             ', ringing: $ringing, members: $members',
       );
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[getOrCreateCall] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.getOrCreateCall(
         callCid.type,
         callCid.id,
@@ -398,6 +426,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         () => '[joinCall] cid: $callCid, dataCenterId: $datacenterId'
             ', ringing: $ringing, create: $create',
       );
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[joinCall] no connection established');
+        return connectionResult;
+      }
       final location = await _locationService.getLocation();
       _logger.v(() => '[joinCall] location: $location');
       final result = await _defaultApi.joinCall(
@@ -446,6 +479,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         () => '[sendCustomEvent] cid: $callCid'
             ', eventType: $eventType, custom: $custom',
       );
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[sendCustomEvent] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.sendEvent(
         callCid.type,
         callCid.id,
@@ -476,6 +514,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         () =>
             '[inviteUsers] cid: $callCid, members: $members, ringing: $ringing',
       );
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[inviteUsers] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.updateCallMembers(
         callCid.type,
         callCid.id,
@@ -499,6 +542,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required List<CallPermission> permissions,
   }) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[requestPermissions] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.requestPermission(
         callCid.type,
         callCid.id,
@@ -523,6 +571,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required List<CallPermission> revokePermissions,
   }) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[updateUserPermissions] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.updateUserPermissions(
         callCid.type,
         callCid.id,
@@ -544,6 +597,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> startRecording(StreamCallCid callCid) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[startRecording] no connection established');
+        return connectionResult;
+      }
       await _defaultApi.startRecording(callCid.type, callCid.id);
       return const Result.success(none);
     } catch (e, stk) {
@@ -557,6 +615,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     String sessionId,
   ) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[listRecordings] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.listRecordingsTypeIdSession1(
         callCid.type,
         callCid.id,
@@ -571,6 +634,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> stopRecording(StreamCallCid callCid) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[stopRecording] no connection established');
+        return connectionResult;
+      }
       await _defaultApi.stopRecording(callCid.type, callCid.id);
       return const Result.success(none);
     } catch (e, stk) {
@@ -581,6 +649,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<String?>> startBroadcasting(StreamCallCid callCid) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[startBroadcasting] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi
           .startBroadcasting(callCid.type, callCid.id)
           .then((it) => it?.playlistUrl);
@@ -593,6 +666,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> stopBroadcasting(StreamCallCid callCid) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[stopBroadcasting] no connection established');
+        return connectionResult;
+      }
       await _defaultApi.stopBroadcasting(callCid.type, callCid.id);
       return const Result.success(none);
     } catch (e, stk) {
@@ -608,6 +686,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     Map<String, Object> custom = const {},
   }) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[sendReaction] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.sendVideoReaction(
         callCid.type,
         callCid.id,
@@ -637,6 +720,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     int? limit,
   }) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[queryMembers] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.queryMembers(
         open.QueryMembersRequest(
           type: callCid.type,
@@ -667,6 +755,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     int? limit,
   }) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[queryCalls] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.queryCalls(
         open.QueryCallsRequest(
           filterConditions: filterConditions,
@@ -691,6 +784,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required String userId,
   }) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[blockUser] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.blockUser(
         callCid.type,
         callCid.id,
@@ -711,6 +809,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required String userId,
   }) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[unblockUser] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.unblockUser(
         callCid.type,
         callCid.id,
@@ -728,6 +831,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> endCall(StreamCallCid callCid) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[endCall] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.endCall(callCid.type, callCid.id);
       if (result == null) {
         return Result.error('endCall result is null');
@@ -746,6 +854,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? startTranscription,
   }) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[goLive] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.goLive(
         callCid.type,
         callCid.id,
@@ -768,6 +881,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<CallMetadata>> stopLive(StreamCallCid callCid) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[stopLive] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.stopLive(callCid.type, callCid.id);
       if (result == null) {
         return Result.error('stopLive result is null');
@@ -789,6 +907,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? screenshare,
   }) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[muteUsers] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.muteUsers(
         callCid.type,
         callCid.id,
@@ -824,6 +947,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     StreamGeofencingSettings? geofencing,
   }) async {
     try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[updateCall] no connection established');
+        return connectionResult;
+      }
       final result = await _defaultApi.updateCall(
         callCid.type,
         callCid.id,
@@ -916,41 +1044,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       _logger.v(() => '[loadGuest] completed: $result');
       if (result != null) {
         return Result.success(result.toGuestCreatedData());
-      } else {
-        return const Result.failure(
-          VideoError(message: 'Guest could not be created.'),
-        );
-      }
-    } catch (e) {
-      return Result.failure(VideoErrors.compose(e));
-    }
-  }
-
-  @override
-  Future<Result<GuestCreatedData>> createGuest({
-    required String id,
-    String? name,
-    String? role,
-    String? image,
-    List<String>? teams,
-    Map<String, Object> custom = const {},
-  }) async {
-    try {
-      final res = await _defaultApi.createGuest(
-        open.CreateGuestRequest(
-          user: open.UserRequest(
-            id: id,
-            custom: custom,
-            image: image,
-            name: name,
-            role: role,
-            teams: teams ?? [],
-          ),
-        ),
-      );
-
-      if (res != null) {
-        return Result.success(res.toGuestCreatedData());
       } else {
         return const Result.failure(
           VideoError(message: 'Guest could not be created.'),

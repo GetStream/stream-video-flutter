@@ -99,26 +99,3 @@ class _StubTokenProvider implements TokenProvider {
     /* no-op */
   }
 }
-
-class AnonymousTokenProvider implements TokenProvider {
-  factory AnonymousTokenProvider() {
-    return _instance;
-  }
-
-  const AnonymousTokenProvider._();
-
-  static const AnonymousTokenProvider _instance = AnonymousTokenProvider._();
-
-  @override
-  bool get isStatic => false;
-
-  @override
-  Future<Result<UserToken>> getToken(String userId) async {
-    return Result.success(UserToken.anonymous(userId: userId));
-  }
-
-  @override
-  set onTokenUpdated(OnTokenUpdated onTokenUpdated) {
-    /* no-op */
-  }
-}

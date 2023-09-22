@@ -191,12 +191,19 @@ class StreamVideo {
 
   /// Connects the user to the Stream Video service.
   Future<Result<None>> connect() async {
+    _logger.i(() => '[connect] no args');
+    // final guest user will be updated when token gets fetched
+    final tokenResult = await _waitForToken();
+    if (tokenResult is Failure) {
+      _logger.e(() => '[connect] token fetching failed: $tokenResult');
+      return tokenResult;
+    }
     final user = _state.currentUser.valueOrNull;
     if (user == null) {
       _logger.w(() => '[connect] rejected (currentUser is null)');
       return Result.error('User is not set');
     }
-    _logger.i(() => '[connect] currentUser.id : ${user.id}');
+    _logger.v(() => '[connect] currentUser.id : ${user.id}');
 
     try {
       final result = await _client.connectUser(user.info);
@@ -211,12 +218,6 @@ class StreamVideo {
       } catch (e, stk) {
         _logger.w(() => '[connect] #pnManager; failed: $e, $stk');
       }
-      try {
-        _logger.v(() => '[connect] checking token');
-        await _tokenManager.getToken();
-      } catch (e, stk) {
-        _logger.w(() => '[connect] #tokenManager; failed: $e, $stk');
-      }
       return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[connect] failed(${user.id}): $e');
@@ -224,18 +225,28 @@ class StreamVideo {
     }
   }
 
+  Future<Result<UserToken>> _waitForToken() async {
+    final user = _state.currentUser.valueOrNull;
+    if (user == null) {
+      _logger.w(() => '[waitForToken] rejected (user is null)');
+      return Result.error('User is not set');
+    }
+    _logger.d(() => '[waitForToken] currentUser.id : ${user.id}');
+    return _tokenManager.getToken();
+  }
+
   /// Disconnects the user from the Stream Video service.
   Future<Result<None>> disconnect() async {
+    _logger.i(() => '[disconnect] no args');
     final user = _state.currentUser.valueOrNull;
     if (user == null) {
       _logger.w(() => '[disconnect] rejected (currentUser is null)');
       return const Result.success(none);
     }
-    _logger.i(() => '[disconnect] currentUser.id: ${user.id}');
+    _logger.v(() => '[disconnect] currentUser.id: ${user.id}');
     try {
       await _client.disconnectUser();
       _subscriptions.cancelAll();
-      //_tokenManager.reset();
 
       // Resetting the state.
       await _state.clear();
@@ -326,7 +337,7 @@ class StreamVideo {
     return Call(
       callCid: StreamCallCid.from(type: type, id: id),
       coordinatorClient: _client,
-      getCurrentUserId: _state.getCurrentUserId,
+      currentUser: _state.currentUser,
       setActiveCall: _state.setActiveCall,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
@@ -341,7 +352,7 @@ class StreamVideo {
     return Call.fromCreated(
       data: data,
       coordinatorClient: _client,
-      getCurrentUserId: _state.getCurrentUserId,
+      currentUser: _state.currentUser,
       setActiveCall: _state.setActiveCall,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
@@ -356,7 +367,7 @@ class StreamVideo {
     return Call.fromRinging(
       data: data,
       coordinatorClient: _client,
-      getCurrentUserId: _state.getCurrentUserId,
+      currentUser: _state.currentUser,
       setActiveCall: _state.setActiveCall,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
@@ -379,30 +390,6 @@ class StreamVideo {
       prev: prev,
       sorts: sorts ?? [],
     );
-  }
-
-  Future<Result<GuestCreatedData>> createGuest({
-    required String id,
-    String? name,
-    String? role,
-    String? image,
-    List<String>? teams,
-    Map<String, Object>? custom,
-  }) async {
-    await _tokenManager.setTokenProvider(
-      id,
-      tokenProvider: AnonymousTokenProvider(),
-    );
-    final result = await _client.createGuest(
-      id: id,
-      name: name,
-      role: role,
-      image: image,
-      teams: teams,
-      custom: custom ?? {},
-    );
-    _tokenManager.reset();
-    return result;
   }
 
   Future<bool> handlePushNotification(Map<String, dynamic> payload) async {

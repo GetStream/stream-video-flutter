@@ -203,15 +203,6 @@ abstract class CoordinatorClient {
     StreamGeofencingSettings? geofencing,
   });
 
-  Future<Result<GuestCreatedData>> createGuest({
-    required String id,
-    String? name,
-    String? role,
-    String? image,
-    List<String>? teams,
-    Map<String, Object> custom = const {},
-  });
-
   Future<Result<GuestCreatedData>> loadGuest({
     required String id,
     String? name,

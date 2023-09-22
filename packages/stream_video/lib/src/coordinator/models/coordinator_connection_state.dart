@@ -3,23 +3,26 @@ import 'package:equatable/equatable.dart';
 sealed class CoordinatorConnectionState with EquatableMixin {
   const CoordinatorConnectionState();
 
-  factory CoordinatorConnectionState.connected({String? userId}) {
-    return CoordinatorConnected(userId: userId);
+  factory CoordinatorConnectionState.connected({
+    required String userId,
+    required String connectionId,
+  }) {
+    return CoordinatorConnected(userId: userId, connectionId: connectionId);
   }
 
-  factory CoordinatorConnectionState.connecting({String? userId}) {
+  factory CoordinatorConnectionState.connecting({required String userId}) {
     return CoordinatorConnecting(userId: userId);
   }
 
   factory CoordinatorConnectionState.disconnected({
     String? userId,
-    String? clientId,
+    String? connectionId,
     int? closeCode,
     String? closeReason,
   }) {
     return CoordinatorDisconnected(
       userId: userId,
-      clientId: clientId,
+      connectionId: connectionId,
       closeCode: closeCode,
       closeReason: closeReason,
     );
@@ -33,9 +36,13 @@ sealed class CoordinatorConnectionState with EquatableMixin {
 }
 
 class CoordinatorConnected extends CoordinatorConnectionState {
-  const CoordinatorConnected({this.userId});
+  const CoordinatorConnected({
+    required this.userId,
+    required this.connectionId,
+  });
 
-  final String? userId;
+  final String userId;
+  final String connectionId;
 
   @override
   List<Object?> get props => [userId];
@@ -45,9 +52,9 @@ class CoordinatorConnected extends CoordinatorConnectionState {
 }
 
 class CoordinatorConnecting extends CoordinatorConnectionState {
-  const CoordinatorConnecting({this.userId});
+  const CoordinatorConnecting({required this.userId});
 
-  final String? userId;
+  final String userId;
 
   @override
   List<Object?> get props => [userId];
@@ -59,18 +66,18 @@ class CoordinatorConnecting extends CoordinatorConnectionState {
 class CoordinatorDisconnected extends CoordinatorConnectionState {
   const CoordinatorDisconnected({
     this.userId,
-    this.clientId,
+    this.connectionId,
     this.closeCode,
     this.closeReason,
   });
 
-  final String? clientId;
   final String? userId;
+  final String? connectionId;
   final int? closeCode;
   final String? closeReason;
 
   @override
-  List<Object?> get props => [userId];
+  List<Object?> get props => [userId, connectionId, closeCode, closeReason];
 
   @override
   String toString() => 'Disconnected{userId: $userId}';
