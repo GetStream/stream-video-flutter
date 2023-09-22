@@ -37,13 +37,11 @@ class QueriedCalls with EquatableMixin {
 class QueriedCall with EquatableMixin {
   QueriedCall({
     required this.call,
-    required this.blockedUsers,
     required this.members,
     this.membership,
   });
 
   final CallMetadata call;
-  final List<CallUser> blockedUsers;
   final List<CallMember> members;
   final CallMember? membership;
 
@@ -51,5 +49,5 @@ class QueriedCall with EquatableMixin {
   bool? get stringify => true;
 
   @override
-  List<Object?> get props => [call, blockedUsers, members, membership];
+  List<Object?> get props => [call, members, membership];
 }

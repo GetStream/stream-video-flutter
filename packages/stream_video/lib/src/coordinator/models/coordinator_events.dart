@@ -511,3 +511,7 @@ class CoordinatorCallSessionParticipantLeftEvent extends CoordinatorCallEvent {
 class CoordinatorUnknownEvent extends CoordinatorEvent {
   const CoordinatorUnknownEvent();
 }
+
+class CoordinatorUnsupportedEvent extends CoordinatorEvent {
+  const CoordinatorUnsupportedEvent();
+}

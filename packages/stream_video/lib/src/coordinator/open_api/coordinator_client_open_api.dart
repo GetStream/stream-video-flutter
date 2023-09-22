@@ -277,7 +277,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             membership: result.membership,
             members: result.members,
             ownCapabilities: result.ownCapabilities,
-            blockedUsers: result.blockedUsers,
           ),
         ),
       );
@@ -323,7 +322,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
               membership: result.membership,
               members: result.members,
               ownCapabilities: result.ownCapabilities,
-              blockedUsers: result.blockedUsers,
             ),
           ),
         ),
@@ -371,7 +369,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             membership: result.membership,
             members: result.members,
             ownCapabilities: result.ownCapabilities,
-            blockedUsers: result.blockedUsers,
           ),
           credentials: result.credentials.toCallCredentials(),
           members: result.members.toCallMembers(),
