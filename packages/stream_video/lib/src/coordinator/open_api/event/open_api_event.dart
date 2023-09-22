@@ -38,6 +38,9 @@ class OpenApiEvent with EquatableMixin {
     this.callMemberUpdated,
     this.callMemberUpdatedPermission,
     this.callReaction,
+    this.callUserMuted,
+    this.callRecordingReady,
+    this.callRecordingFailed,
     this.custom,
     this.unknown,
   });
@@ -139,6 +142,15 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callNotification:
         final event = open.CallNotificationEvent.fromJson(jsonObj);
         return result.copyWith(callNotification: event);
+      case EventType.callUserMuted:
+        final event = open.CallUserMuted.fromJson(jsonObj);
+        return result.copyWith(callUserMuted: event);
+      case EventType.callRecordingReady:
+        final event = open.CallRecordingReadyEvent.fromJson(jsonObj);
+        return result.copyWith(callRecordingReady: event);
+      case EventType.callRecordingFailed:
+        final event = open.CallRecordingFailedEvent.fromJson(jsonObj);
+        return result.copyWith(callRecordingFailed: event);
       case EventType.unknown:
         streamLog.e(_tag, () => '[fromJson] unexpected event: $jsonObj');
         return result.copyWith(unknown: jsonObj);
@@ -173,6 +185,9 @@ class OpenApiEvent with EquatableMixin {
   final open.CallMemberUpdatedEvent? callMemberUpdated;
   final open.CallMemberUpdatedPermissionEvent? callMemberUpdatedPermission;
   final open.CallReactionEvent? callReaction;
+  final open.CallUserMuted? callUserMuted;
+  final open.CallRecordingReadyEvent? callRecordingReady;
+  final open.CallRecordingFailedEvent? callRecordingFailed;
   final open.CustomVideoEvent? custom;
   final Object? unknown;
 
@@ -205,6 +220,9 @@ class OpenApiEvent with EquatableMixin {
     open.CallMemberUpdatedEvent? callMemberUpdated,
     open.CallMemberUpdatedPermissionEvent? callMemberUpdatedPermission,
     open.CallReactionEvent? callReaction,
+    open.CallUserMuted? callUserMuted,
+    open.CallRecordingReadyEvent? callRecordingReady,
+    open.CallRecordingFailedEvent? callRecordingFailed,
     open.CustomVideoEvent? custom,
     Object? unknown,
   }) {
@@ -244,6 +262,9 @@ class OpenApiEvent with EquatableMixin {
       callMemberUpdatedPermission:
           callMemberUpdatedPermission ?? this.callMemberUpdatedPermission,
       callReaction: callReaction ?? this.callReaction,
+      callUserMuted: callUserMuted ?? this.callUserMuted,
+      callRecordingReady: callRecordingReady ?? this.callRecordingReady,
+      callRecordingFailed: callRecordingFailed ?? this.callRecordingFailed,
       custom: custom ?? this.custom,
       unknown: unknown ?? this.unknown,
     );

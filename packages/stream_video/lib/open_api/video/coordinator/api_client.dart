@@ -237,6 +237,10 @@ class ApiClient {
           return CallReactionEvent.fromJson(value);
         case 'CallRecording':
           return CallRecording.fromJson(value);
+        case 'CallRecordingFailedEvent':
+          return CallRecordingFailedEvent.fromJson(value);
+        case 'CallRecordingReadyEvent':
+          return CallRecordingReadyEvent.fromJson(value);
         case 'CallRecordingStartedEvent':
           return CallRecordingStartedEvent.fromJson(value);
         case 'CallRecordingStoppedEvent':
@@ -269,6 +273,8 @@ class ApiClient {
           return CallTypeResponse.fromJson(value);
         case 'CallUpdatedEvent':
           return CallUpdatedEvent.fromJson(value);
+        case 'CallUserMuted':
+          return CallUserMuted.fromJson(value);
         case 'ConnectUserDetailsRequest':
           return ConnectUserDetailsRequest.fromJson(value);
         case 'ConnectedEvent':

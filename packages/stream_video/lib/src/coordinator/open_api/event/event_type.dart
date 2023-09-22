@@ -30,6 +30,9 @@ enum EventType {
   callMemberUpdatedPermission('call.member_updated_permission'),
   callNotification('call.notification'),
   callReaction('call.reaction_new'),
+  callUserMuted('call.user_muted'),
+  callRecordingReady('call.recording_ready'),
+  callRecordingFailed('call.recording_failed'),
   custom('custom'),
   unknown('unknown');
 
