@@ -121,7 +121,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallPermissionRequestEvent(
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
-          permissions: event.permissions,
+          permissions: event.permissions.map(CallPermission.fromAlias).toList(),
           user: event.user.toCallUser(),
         );
       case EventType.callPermissionsUpdated:
@@ -209,6 +209,18 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           emojiCode: event.reaction.emojiCode,
           custom: event.reaction.custom,
         );
+      case EventType.callNotification:
+        // TODO: Handle event
+        break;
+      case EventType.callUserMuted:
+        // TODO: Handle event
+        break;
+      case EventType.callRecordingReady:
+        // TODO: Handle event
+        break;
+      case EventType.callRecordingFailed:
+        // TODO: Handle event
+        break;
       case EventType.custom:
         final event = custom!;
 
@@ -222,9 +234,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         );
       case EventType.unknown:
         return const CoordinatorUnknownEvent();
-      case EventType.callNotification:
-        // TODO: Handle call notification
-        break;
     }
+    return const CoordinatorUnsupportedEvent();
   }
 }

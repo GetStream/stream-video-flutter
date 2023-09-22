@@ -13,15 +13,12 @@ part of openapi.api;
 class GetCallResponse {
   /// Returns a new [GetCallResponse] instance.
   GetCallResponse({
-    this.blockedUsers = const [],
     required this.call,
     required this.duration,
     this.members = const [],
     this.membership,
     this.ownCapabilities = const [],
   });
-
-  List<UserResponse> blockedUsers;
 
   CallResponse call;
 
@@ -41,7 +38,6 @@ class GetCallResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is GetCallResponse &&
-     other.blockedUsers == blockedUsers &&
      other.call == call &&
      other.duration == duration &&
      other.members == members &&
@@ -51,7 +47,6 @@ class GetCallResponse {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (blockedUsers.hashCode) +
     (call.hashCode) +
     (duration.hashCode) +
     (members.hashCode) +
@@ -59,11 +54,10 @@ class GetCallResponse {
     (ownCapabilities.hashCode);
 
   @override
-  String toString() => 'GetCallResponse[blockedUsers=$blockedUsers, call=$call, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities]';
+  String toString() => 'GetCallResponse[call=$call, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'blocked_users'] = this.blockedUsers;
       json[r'call'] = this.call;
       json[r'duration'] = this.duration;
       json[r'members'] = this.members;
@@ -95,7 +89,6 @@ class GetCallResponse {
       }());
 
       return GetCallResponse(
-        blockedUsers: UserResponse.listFromJson(json[r'blocked_users']),
         call: CallResponse.fromJson(json[r'call'])!,
         duration: mapValueOfType<String>(json, r'duration')!,
         members: MemberResponse.listFromJson(json[r'members']),
@@ -148,7 +141,6 @@ class GetCallResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'blocked_users',
     'call',
     'duration',
     'members',

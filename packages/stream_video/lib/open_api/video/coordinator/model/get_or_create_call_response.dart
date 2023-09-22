@@ -13,7 +13,6 @@ part of openapi.api;
 class GetOrCreateCallResponse {
   /// Returns a new [GetOrCreateCallResponse] instance.
   GetOrCreateCallResponse({
-    this.blockedUsers = const [],
     required this.call,
     required this.created,
     required this.duration,
@@ -21,8 +20,6 @@ class GetOrCreateCallResponse {
     this.membership,
     this.ownCapabilities = const [],
   });
-
-  List<UserResponse> blockedUsers;
 
   CallResponse call;
 
@@ -44,7 +41,6 @@ class GetOrCreateCallResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is GetOrCreateCallResponse &&
-     other.blockedUsers == blockedUsers &&
      other.call == call &&
      other.created == created &&
      other.duration == duration &&
@@ -55,7 +51,6 @@ class GetOrCreateCallResponse {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (blockedUsers.hashCode) +
     (call.hashCode) +
     (created.hashCode) +
     (duration.hashCode) +
@@ -64,11 +59,10 @@ class GetOrCreateCallResponse {
     (ownCapabilities.hashCode);
 
   @override
-  String toString() => 'GetOrCreateCallResponse[blockedUsers=$blockedUsers, call=$call, created=$created, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities]';
+  String toString() => 'GetOrCreateCallResponse[call=$call, created=$created, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'blocked_users'] = this.blockedUsers;
       json[r'call'] = this.call;
       json[r'created'] = this.created;
       json[r'duration'] = this.duration;
@@ -101,7 +95,6 @@ class GetOrCreateCallResponse {
       }());
 
       return GetOrCreateCallResponse(
-        blockedUsers: UserResponse.listFromJson(json[r'blocked_users']),
         call: CallResponse.fromJson(json[r'call'])!,
         created: mapValueOfType<bool>(json, r'created')!,
         duration: mapValueOfType<String>(json, r'duration')!,
@@ -155,7 +148,6 @@ class GetOrCreateCallResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'blocked_users',
     'call',
     'created',
     'duration',

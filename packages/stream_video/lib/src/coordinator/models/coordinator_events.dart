@@ -229,7 +229,7 @@ class CoordinatorCallPermissionRequestEvent extends CoordinatorCallEvent {
   @override
   final StreamCallCid callCid;
   final DateTime createdAt;
-  final List<String> permissions;
+  final List<CallPermission> permissions;
   final CallUser user;
 
   @override
@@ -510,4 +510,8 @@ class CoordinatorCallSessionParticipantLeftEvent extends CoordinatorCallEvent {
 // Unknown event.
 class CoordinatorUnknownEvent extends CoordinatorEvent {
   const CoordinatorUnknownEvent();
+}
+
+class CoordinatorUnsupportedEvent extends CoordinatorEvent {
+  const CoordinatorUnsupportedEvent();
 }

@@ -94,7 +94,6 @@ extension EnvelopeExt on open.CallResponse {
     open.MemberResponse? membership,
     List<open.MemberResponse>? members,
     List<open.OwnCapability>? ownCapabilities,
-    List<open.UserResponse>? blockedUsers,
   }) {
     return CallMetadata(
       cid: StreamCallCid(cid: cid),
@@ -104,7 +103,6 @@ extension EnvelopeExt on open.CallResponse {
       users: {
         createdBy.id: createdBy.toCallUser(),
         ...?members?.toCallUsers(),
-        ...?blockedUsers?.toCallUsers(),
         ...?session?.participants.toCallUsers(),
       },
       members: {
@@ -297,9 +295,7 @@ extension CallStateResponseFieldsExt on open.CallStateResponseFields {
         membership: membership,
         members: members,
         ownCapabilities: ownCapabilities,
-        blockedUsers: blockedUsers,
       ),
-      blockedUsers: blockedUsers.map((it) => it.toCallUser()).toList(),
       members: members.map((it) => it.toCallMember()).toList(),
       membership: membership?.toCallMember(),
     );
