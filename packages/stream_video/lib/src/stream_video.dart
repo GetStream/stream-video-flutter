@@ -290,6 +290,7 @@ class StreamVideo {
     final user = _state.user.value;
     _logger.v(() => '[connect] currentUser.id : ${user.id}');
     try {
+      await _disconnectOperation?.cancel();
       final result = await _client.connectUser(user.info);
       _logger.v(() => '[connect] completed: $result');
       if (result is Failure) {
@@ -324,7 +325,6 @@ class StreamVideo {
     }
     try {
       await _connectOperation?.cancel();
-      _connectOperation = null;
       await _client.disconnectUser();
       _subscriptions.cancelAll();
 
