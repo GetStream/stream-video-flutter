@@ -45,7 +45,7 @@ class CoordinatorConnected extends CoordinatorConnectionState {
   final String connectionId;
 
   @override
-  List<Object?> get props => [userId];
+  List<Object?> get props => [userId, connectionId];
 
   @override
   String toString() => 'Connected{userId: $userId}';

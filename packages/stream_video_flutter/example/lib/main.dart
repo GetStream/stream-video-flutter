@@ -15,16 +15,7 @@ Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  StreamVideo.init(
-    Env.streamVideoApiKey,
-  );
-
   await _setupLogger();
-
-  // await StreamVideo.instance.connectUser(
-  //   user.userInfo,
-  //   user.token,
-  // );
 
   runApp(const MyApp(connectUser: _connectUser));
 }
@@ -90,7 +81,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeCall = StreamVideo.instance.activeCall;
+    Call? activeCall;
+    if (StreamVideo.isInitialized()) {
+      activeCall = StreamVideo.instance.activeCall;
+    }
     streamLog.i(_tag, () => '[build] activeCall: $activeCall');
 
     final darkAppTheme = StreamVideoTheme.dark();

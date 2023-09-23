@@ -129,7 +129,14 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         _events.emit(event);
       });
     });
-    return openConnection();
+    final openResult = await openConnection();
+    if (openResult is Failure) {
+      _logger.e(() => '[connectUser] open failed: $openResult');
+      return openResult;
+    }
+    return _waitUntilConnected().whenComplete(() {
+      _logger.v(() => '[connectUser] completed');
+    });
   }
 
   Future<Result<None>> _waitUntilConnected() async {

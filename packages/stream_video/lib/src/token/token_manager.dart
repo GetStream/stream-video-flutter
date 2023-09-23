@@ -35,13 +35,13 @@ class TokenManager {
     return getToken();
   }
 
-  async.CancelableOperation<Result<UserToken>>? _provideToken;
+  async.CancelableOperation<Result<UserToken>>? _tokenOperation;
 
   /// Returns the token refreshing the existing one if [refresh] is true
   Future<Result<UserToken>> getToken({bool refresh = false}) async {
     _logger.d(() => '[getToken] refresh: $refresh, _token: $_token');
     if (refresh || _token == null) {
-      final result = await provideToken();
+      final result = await _provideToken();
       _logger.v(() => '[getToken] completed: $result');
       if (result is! Success<UserToken>) {
         return result;
@@ -51,14 +51,21 @@ class TokenManager {
     return Result.success(_token!);
   }
 
-  Future<Result<UserToken>> provideToken() async {
-    if (_provideToken == null) {
+  UserToken? getCachedToken() => _token;
+
+  Future<Result<UserToken>> _provideToken() async {
+    if (_tokenOperation == null) {
       _logger.d(() => '[provideToken] _userId: $_userId');
-      _provideToken = _provider.getToken(_userId).asCancelable();
+      _tokenOperation = _provider.getToken(_userId).asCancelable();
     }
-    return _provideToken!.valueOrDefault(
+    return _tokenOperation!
+        .valueOrDefault(
       Result.error('provideToken was cancelled'),
-    );
+    )
+        .whenComplete(() {
+      _logger.v(() => '[provideToken] drop cached future');
+      _tokenOperation = null;
+    });
   }
 
   /// Returns the token refreshing the existing one.
@@ -70,7 +77,8 @@ class TokenManager {
   /// Resets the token manager
   void reset() {
     _logger.d(() => '[reset] no args');
-    _provideToken?.cancel();
+    _tokenOperation?.cancel();
+    _tokenOperation = null;
     _userId = _emptyUserId;
     _provider = _StubTokenProvider();
     _token = null;

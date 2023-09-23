@@ -28,10 +28,15 @@ class _HomeScreenState extends State<HomeScreen> {
   AppRepository? appRepo;
   final _callIdController = TextEditingController();
 
+  StreamSubscription<Call>? _onIncomingCallSubscription;
+
   @override
   void initState() {
     super.initState();
-    streamVideoClient.onIncomingCall = _onNavigateToCall;
+    _onIncomingCallSubscription?.cancel();
+    _onIncomingCallSubscription = streamVideoClient.state.incomingCall.listen(
+      _onNavigateToCall,
+    );
   }
 
   @override
@@ -85,7 +90,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _callIdController.dispose();
-    streamVideoClient.onIncomingCall = null;
+    _onIncomingCallSubscription?.cancel();
+    _onIncomingCallSubscription = null;
     super.dispose();
   }
 

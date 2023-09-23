@@ -1,8 +1,16 @@
 import 'dart:async';
 
-import '../stream_video.dart';
+import 'package:async/async.dart' as async;
+import 'package:stream_video/src/logger/stream_logger.dart';
+
+import '../open_api/video/coordinator/api.dart' as open;
+import 'call/call.dart';
+import 'coordinator/coordinator_client.dart';
+import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'coordinator/retry/coordinator_client_retry.dart';
+import 'core/client_state.dart';
+import 'core/connection_state.dart';
 import 'errors/video_error_composer.dart';
 import 'internal/_instance_holder.dart';
 import 'latency/latency_service.dart';
@@ -10,17 +18,35 @@ import 'latency/latency_settings.dart';
 import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart' as lifecycle;
+import 'logger/impl/console_logger.dart';
 import 'logger/impl/external_logger.dart';
+import 'logger/impl/tagged_logger.dart';
+import 'logger/stream_log.dart';
+import 'models/call_cid.dart';
+import 'models/call_created_data.dart';
+import 'models/call_preferences.dart';
+import 'models/call_ringing_data.dart';
+import 'models/guest_created_data.dart';
+import 'models/queried_calls.dart';
+import 'models/user.dart';
+import 'models/user_info.dart';
+import 'push_notification/push_notification_manager.dart';
 import 'retry/retry_policy.dart';
-import 'state_emitter.dart';
+import 'token/token.dart';
 import 'token/token_manager.dart';
+import 'utils/cancelable_operation.dart';
+import 'utils/future.dart';
+import 'utils/none.dart';
+import 'utils/result.dart';
 import 'utils/standard.dart';
+import 'utils/subscriptions.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
 
 const _tag = 'SV:Client';
 
 const _idEvents = 1;
 const _idAppState = 2;
+const _idConnect = 3;
 
 const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com/video';
 const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
@@ -36,9 +62,37 @@ typedef LogHandlerFunction = void Function(
 
 /// The client responsible for handling config and maintaining calls
 class StreamVideo {
+  /// Creates a new Stream Video client associated with the
+  /// Stream Video singleton instance
+  ///
+  /// If [failIfSingletonExists] is set to false, the new instance will override and disconnect the existing singleton instance.
+  factory StreamVideo(
+    String apiKey, {
+    StreamVideoOptions options = const StreamVideoOptions(),
+    required User user,
+    String? userToken,
+    TokenLoader? tokenLoader,
+    OnTokenUpdated? onTokenUpdated,
+    bool failIfSingletonExists = true,
+  }) {
+    final instance = StreamVideo._(
+      apiKey,
+      options: options,
+      user: user,
+      userToken: userToken,
+      tokenLoader: tokenLoader,
+      onTokenUpdated: onTokenUpdated,
+    );
+    _instanceHolder.install(
+      instance,
+      failIfSingletonExists: failIfSingletonExists,
+    );
+    return instance;
+  }
+
   /// Creates a new Stream Video client unassociated with the
   /// Stream Video singleton instance
-  factory StreamVideo(
+  factory StreamVideo.create(
     String apiKey, {
     StreamVideoOptions options = const StreamVideoOptions(),
     required User user,
@@ -48,77 +102,71 @@ class StreamVideo {
   }) {
     final instance = StreamVideo._(
       apiKey,
-      coordinatorRpcUrl: options.coordinatorRpcUrl,
-      coordinatorWsUrl: options.coordinatorWsUrl,
-      latencySettings: options.latencySettings,
-      retryPolicy: options.retryPolicy,
-      sdpPolicy: options.sdpPolicy,
-      muteVideoWhenInBackground: options.muteVideoWhenInBackground,
-      muteAudioWhenInBackground: options.muteAudioWhenInBackground,
+      options: options,
+      user: user,
+      userToken: userToken,
+      tokenLoader: tokenLoader,
+      onTokenUpdated: onTokenUpdated,
+    );
+    return instance;
+  }
+
+  StreamVideo._(
+    String apiKey, {
+    required StreamVideoOptions options,
+    required User user,
+    String? userToken,
+    TokenLoader? tokenLoader,
+    OnTokenUpdated? onTokenUpdated,
+  })  : _options = options,
+        _state = MutableClientState(user) {
+    _client = buildCoordinatorClient(
+      apiKey: apiKey,
+      tokenManager: _tokenManager,
+      latencySettings: _options.latencySettings,
+      retryPolicy: _options.retryPolicy,
+      rpcUrl: _options.coordinatorRpcUrl,
+      wsUrl: _options.coordinatorWsUrl,
     );
 
-    instance._state.currentUser.value = user;
+    _state.user.value = user;
     final tokenProvider = switch (user.type) {
       UserType.authenticated => TokenProvider.from(
           userToken?.let(UserToken.jwt),
           tokenLoader,
-          instance._wrapOnTokenUpdated(onTokenUpdated),
+          onTokenUpdated,
         ),
       UserType.anonymous => TokenProvider.static(
           UserToken.anonymous(),
-          onTokenUpdated: instance._wrapOnTokenUpdated(onTokenUpdated),
+          onTokenUpdated: onTokenUpdated,
         ),
       UserType.guest => TokenProvider.dynamic(
           (userId) async {
-            final result = await instance._client.loadGuest(id: userId);
+            final result = await _client.loadGuest(id: userId);
             if (result is! Success<GuestCreatedData>) {
               throw (result as Failure).error;
             }
             final updatedUser = result.data.user;
-            instance._state.currentUser.value = User(
+            _state.user.value = User(
               type: user.type,
               info: updatedUser.toUserInfo(),
             );
             return result.data.accessToken;
           },
-          onTokenUpdated: instance._wrapOnTokenUpdated(onTokenUpdated),
+          onTokenUpdated: onTokenUpdated,
         ),
     };
 
-    instance._tokenManager.setTokenProvider(
+    _tokenManager.setTokenProvider(
       user.id,
       tokenProvider: tokenProvider,
     );
 
     _setupLogger(options.logPriority, options.logHandlerFunction);
 
-    if (options.installAsSingleton) {
-      _instanceHolder.install(instance);
-    }
     if (options.autoConnect) {
-      unawaited(instance.connect());
+      unawaited(connect());
     }
-    return instance;
-  }
-
-  StreamVideo._(
-    this.apiKey, {
-    required this.coordinatorRpcUrl,
-    required this.coordinatorWsUrl,
-    required this.latencySettings,
-    required this.retryPolicy,
-    required this.sdpPolicy,
-    this.muteVideoWhenInBackground = false,
-    this.muteAudioWhenInBackground = false,
-  }) {
-    _client = buildCoordinatorClient(
-      apiKey: apiKey,
-      tokenManager: _tokenManager,
-      latencySettings: latencySettings,
-      retryPolicy: retryPolicy,
-      rpcUrl: coordinatorRpcUrl,
-      wsUrl: coordinatorWsUrl,
-    );
   }
 
   static final InstanceHolder _instanceHolder = InstanceHolder();
@@ -145,28 +193,16 @@ class StreamVideo {
 
   final _logger = taggedLogger(tag: _tag);
 
-  final String apiKey;
-  final String coordinatorRpcUrl;
-  final String coordinatorWsUrl;
-  final LatencySettings latencySettings;
-
-  /// Returns the current [RetryPolicy].
-  final RetryPolicy retryPolicy;
-
-  /// Returns the current [SdpPolicy].
-  final SdpPolicy sdpPolicy;
+  final StreamVideoOptions _options;
+  final MutableClientState _state;
 
   final _tokenManager = TokenManager();
   final _subscriptions = Subscriptions();
   late final CoordinatorClient _client;
   PushNotificationManager? pushNotificationManager;
 
-  late bool muteVideoWhenInBackground;
-  late bool muteAudioWhenInBackground;
   bool _mutedCameraByStateChange = false;
   bool _mutedAudioByStateChange = false;
-
-  var _state = _StreamVideoState();
 
   Future<void> initPushNotificationManager(
     PushNotificationManagerFactory factory,
@@ -175,7 +211,10 @@ class StreamVideo {
   }
 
   /// Returns the current user if exists.
-  UserInfo? get currentUser => _state.currentUser.valueOrNull?.info;
+  UserInfo get currentUser => _state.currentUser.info;
+
+  /// Returns the [StreamVideo] state.
+  ClientState get state => _state;
 
   /// Returns the active call if exists.
   Call? get activeCall => _state.activeCall.valueOrNull;
@@ -186,31 +225,83 @@ class StreamVideo {
   /// in the reactive [Call.state].
   Stream<CoordinatorEvent> get events => _client.events.asStream();
 
-  /// Invoked when a call was created by another user with ringing set as True.
-  void Function(Call)? onIncomingCall;
+  async.CancelableOperation<Result<UserToken>>? _connectOperation;
+  async.CancelableOperation<Result<None>>? _disconnectOperation;
+
+  set _connectionState(ConnectionState newState) {
+    final curState = _connectionState;
+    if (curState != newState) {
+      _logger.i(() => '[setConnectionState] #client; $newState <= $curState');
+      _state.connection.value = newState;
+    }
+  }
+
+  ConnectionState get _connectionState => _state.connection.value;
 
   /// Connects the user to the Stream Video service.
-  Future<Result<None>> connect() async {
-    _logger.i(() => '[connect] no args');
-    // final guest user will be updated when token gets fetched
-    final tokenResult = await _waitForToken();
-    if (tokenResult is Failure) {
+  Future<Result<UserToken>> connect() async {
+    _connectOperation ??= _connect().asCancelable();
+    return _connectOperation!
+        .valueOrDefault(
+      Result.error('connect was cancelled'),
+    )
+        .whenComplete(() {
+      _logger.i(() => '[connect] clear shared operation');
+      _connectOperation = null;
+    });
+  }
+
+  /// Disconnects the user from the Stream Video service.
+  Future<Result<None>> disconnect() async {
+    _disconnectOperation ??= _disconnect().asCancelable();
+    return _disconnectOperation!
+        .valueOrDefault(
+      Result.error('disconnect was cancelled'),
+    )
+        .whenComplete(() {
+      _logger.i(() => '[disconnect] clear shared operation');
+      _disconnectOperation = null;
+    });
+  }
+
+  Future<Result<UserToken>> _connect() async {
+    _logger.i(() => '[connect] currentUser.id: ${_state.currentUser.id}');
+    if (_connectionState.isConnected) {
+      _logger.w(() => '[connect] rejected (already connected)');
+      final token = _tokenManager.getCachedToken();
+      if (token == null) {
+        return Result.error('[connect] userToken is null in Connected state');
+      }
+      return Result.success(token);
+    }
+    _connectionState = ConnectionState.connecting(
+      _state.currentUser.id,
+    );
+    // guest user will be updated when token gets fetched
+    final tokenResult = await _tokenManager.getToken();
+    if (tokenResult is! Success<UserToken>) {
       _logger.e(() => '[connect] token fetching failed: $tokenResult');
+      _connectionState = ConnectionState.failed(
+        _state.currentUser.id,
+        error: (tokenResult as Failure).error,
+      );
       return tokenResult;
     }
-    final user = _state.currentUser.valueOrNull;
-    if (user == null) {
-      _logger.w(() => '[connect] rejected (currentUser is null)');
-      return Result.error('User is not set');
-    }
+    final user = _state.user.value;
     _logger.v(() => '[connect] currentUser.id : ${user.id}');
-
     try {
       final result = await _client.connectUser(user.info);
       _logger.v(() => '[connect] completed: $result');
       if (result is Failure) {
+        _connectionState = ConnectionState.failed(
+          _state.currentUser.id,
+          error: result.error,
+        );
         return result;
       }
+      _connectionState = ConnectionState.connected(
+        _state.currentUser.id,
+      );
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
       _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
       try {
@@ -218,38 +309,30 @@ class StreamVideo {
       } catch (e, stk) {
         _logger.w(() => '[connect] #pnManager; failed: $e, $stk');
       }
-      return const Result.success(none);
+      return Result.success(tokenResult.data);
     } catch (e, stk) {
       _logger.e(() => '[connect] failed(${user.id}): $e');
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
 
-  Future<Result<UserToken>> _waitForToken() async {
-    final user = _state.currentUser.valueOrNull;
-    if (user == null) {
-      _logger.w(() => '[waitForToken] rejected (user is null)');
-      return Result.error('User is not set');
-    }
-    _logger.d(() => '[waitForToken] currentUser.id : ${user.id}');
-    return _tokenManager.getToken();
-  }
-
-  /// Disconnects the user from the Stream Video service.
-  Future<Result<None>> disconnect() async {
-    _logger.i(() => '[disconnect] no args');
-    final user = _state.currentUser.valueOrNull;
-    if (user == null) {
-      _logger.w(() => '[disconnect] rejected (currentUser is null)');
+  Future<Result<None>> _disconnect() async {
+    _logger.i(() => '[disconnect] currentUser.id: ${_state.currentUser.id}');
+    if (_connectionState.isDisconnected) {
+      _logger.w(() => '[disconnect] rejected (already disconnected)');
       return const Result.success(none);
     }
-    _logger.v(() => '[disconnect] currentUser.id: ${user.id}');
     try {
+      await _connectOperation?.cancel();
+      _connectOperation = null;
       await _client.disconnectUser();
       _subscriptions.cancelAll();
 
       // Resetting the state.
       await _state.clear();
+      _connectionState = ConnectionState.disconnected(
+        _state.currentUser.id,
+      );
       _logger.v(() => '[disconnect] completed');
       return const Result.success(none);
     } catch (e, stk) {
@@ -258,22 +341,25 @@ class StreamVideo {
     }
   }
 
-  OnTokenUpdated _wrapOnTokenUpdated(OnTokenUpdated? onTokenUpdated) {
-    return (UserToken token) async {
-      _logger.v(() => '[onTokenUpdated] token: $token');
-      _state.currentToken.value = token;
-      return onTokenUpdated?.call(token);
-    };
-  }
-
   void _onEvent(CoordinatorEvent event) {
-    final currentUserId = _state.getCurrentUserId();
+    final currentUserId = _state.currentUser.id;
     _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
     if (event is CoordinatorCallRingingEvent &&
         event.metadata.details.createdBy.id != currentUserId &&
         event.data.ringing) {
       _logger.v(() => '[onCoordinatorEvent] onCallRinging: ${event.data}');
-      onIncomingCall?.call(_makeCallFromRinging(data: event.data));
+      final call = _makeCallFromRinging(data: event.data);
+      _state.incomingCall.emit(call);
+    } else if (event is CoordinatorConnectedEvent) {
+      _logger.i(() => '[onCoordinatorEvent] connected ${event.userId}');
+      _connectionState = ConnectionState.connected(
+        _state.currentUser.id,
+      );
+    } else if (event is CoordinatorDisconnectedEvent) {
+      _logger.i(() => '[onCoordinatorEvent] disconnected ${event.userId}');
+      _connectionState = ConnectionState.disconnected(
+        _state.currentUser.id,
+      );
     }
   }
 
@@ -293,12 +379,12 @@ class StreamVideo {
         final isAudioEnabled =
             callState?.localParticipant?.isAudioEnabled ?? false;
 
-        if (muteVideoWhenInBackground && isVideoEnabled) {
+        if (_options.muteVideoWhenInBackground && isVideoEnabled) {
           await activeCall?.setCameraEnabled(enabled: false);
           _mutedCameraByStateChange = true;
           _logger.v(() => 'Muted camera track since app was paused.');
         }
-        if (muteAudioWhenInBackground && isAudioEnabled) {
+        if (_options.muteAudioWhenInBackground && isAudioEnabled) {
           await activeCall?.setMicrophoneEnabled(enabled: false);
           _mutedAudioByStateChange = true;
           _logger.v(() => 'Muted audio track since app was paused.');
@@ -337,10 +423,10 @@ class StreamVideo {
     return Call(
       callCid: StreamCallCid.from(type: type, id: id),
       coordinatorClient: _client,
-      currentUser: _state.currentUser,
+      currentUser: _state.user,
       setActiveCall: _state.setActiveCall,
-      retryPolicy: retryPolicy,
-      sdpPolicy: sdpPolicy,
+      retryPolicy: _options.retryPolicy,
+      sdpPolicy: _options.sdpPolicy,
       preferences: preferences,
     );
   }
@@ -352,10 +438,10 @@ class StreamVideo {
     return Call.fromCreated(
       data: data,
       coordinatorClient: _client,
-      currentUser: _state.currentUser,
+      currentUser: _state.user,
       setActiveCall: _state.setActiveCall,
-      retryPolicy: retryPolicy,
-      sdpPolicy: sdpPolicy,
+      retryPolicy: _options.retryPolicy,
+      sdpPolicy: _options.sdpPolicy,
       preferences: preferences,
     );
   }
@@ -367,10 +453,10 @@ class StreamVideo {
     return Call.fromRinging(
       data: data,
       coordinatorClient: _client,
-      currentUser: _state.currentUser,
+      currentUser: _state.user,
       setActiveCall: _state.setActiveCall,
-      retryPolicy: retryPolicy,
-      sdpPolicy: sdpPolicy,
+      retryPolicy: _options.retryPolicy,
+      sdpPolicy: _options.sdpPolicy,
       preferences: preferences,
     );
   }
@@ -381,7 +467,7 @@ class StreamVideo {
     String? next,
     String? prev,
     int? limit,
-    List<SortParamRequest>? sorts,
+    List<open.SortParamRequest>? sorts,
   }) {
     return _client.queryCalls(
       filterConditions: filterConditions,
@@ -403,36 +489,6 @@ class StreamVideo {
     return pushNotificationManager?.consumeIncomingCall().then((data) {
       return data?.let((it) => _makeCallFromCreated(data: it));
     });
-  }
-}
-
-class _StreamVideoState {
-  final MutableStateEmitter<User?> currentUser = MutableStateEmitterImpl(
-    null,
-  );
-  final MutableStateEmitter<UserToken?> currentToken = MutableStateEmitterImpl(
-    null,
-  );
-  final MutableStateEmitter<Call?> activeCall = MutableStateEmitterImpl(null);
-
-  Future<void> close() async {
-    await currentToken.close();
-    await currentUser.close();
-    await activeCall.close();
-  }
-
-  Future<void> clear() async {
-    activeCall.value = null;
-  }
-
-  String? getCurrentUserId() => currentUser.valueOrNull?.id;
-
-  Future<void> setActiveCall(Call? call) async {
-    final ongoingCall = activeCall.valueOrNull;
-    if (ongoingCall != null && call != null) {
-      await ongoingCall.leave();
-    }
-    activeCall.value = call;
   }
 }
 
@@ -493,7 +549,6 @@ class StreamVideoOptions {
     this.muteVideoWhenInBackground = false,
     this.muteAudioWhenInBackground = false,
     this.autoConnect = true,
-    this.installAsSingleton = true,
   });
 
   final String coordinatorRpcUrl;
@@ -512,5 +567,4 @@ class StreamVideoOptions {
   final bool muteVideoWhenInBackground;
   final bool muteAudioWhenInBackground;
   final bool autoConnect;
-  final bool installAsSingleton;
 }

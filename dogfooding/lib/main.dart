@@ -203,7 +203,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp>
       case AppLifecycleState.detached:
         // widget is detached
         break;
-      //case AppLifecycleState.hidden:
+      case AppLifecycleState.hidden:
       // widget is hidden
     }
   }

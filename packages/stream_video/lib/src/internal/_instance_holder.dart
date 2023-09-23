@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import '../logger/stream_log.dart';
@@ -7,13 +9,25 @@ import '../stream_video.dart';
 class InstanceHolder {
   StreamVideo? _instance;
 
-  void install(StreamVideo instance) {
+  void install(
+    StreamVideo instance, {
+    bool failIfSingletonExists = true,
+  }) {
     if (_instance != null) {
+      if (failIfSingletonExists) {
+        throw Exception('''
+        StreamVideo has already been initialised, use StreamVideo.instance to access the singleton instance.
+        If you want to re-initialise the SDK, call StreamVideo.reset() first.
+        If you want to use multiple instances of the SDK, use StreamVideo.create() instead.
+        ''');
+      }
       streamLog.w(
         'InstanceHolder',
         () => 'StreamVideo has already been initialised, '
-            'overriding with new instance.',
+            'disconnecting the existing instance '
+            'and overriding it with the new instance.',
       );
+      unawaited(_instance!.disconnect());
     }
     _instance = instance;
   }
