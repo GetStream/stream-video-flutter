@@ -22,6 +22,7 @@ export 'src/sorting/call_participant_sorting_presets.dart';
 export 'src/stream_video.dart';
 export 'src/token/token.dart';
 export 'src/types/other.dart';
+export 'src/utils/none.dart';
 export 'src/utils/result.dart';
 export 'src/utils/string.dart';
 export 'src/utils/subscriptions.dart';

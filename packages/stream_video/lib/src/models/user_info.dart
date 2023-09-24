@@ -3,30 +3,19 @@ import 'package:equatable/equatable.dart';
 class UserInfo extends Equatable {
   const UserInfo({
     required this.id,
-    required this.role,
-    required this.name,
-    this.teams,
+    this.role = 'user',
+    this.name = '',
+    this.teams = const [],
     this.image,
-    this.extraData,
+    this.extraData = const {},
   });
 
   final String id;
   final String name;
   final String role;
   final String? image;
-  final Iterable<String>? teams;
-  final Map<String, Object?>? extraData;
-
-  factory UserInfo.fromJson(Map<String, Object?> json) {
-    return UserInfo(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      role: json['role'] as String,
-      image: json['image'] as String?,
-      teams: json['teams'] as Iterable<String>?,
-      extraData: json['extra_data'] as Map<String, Object?>?,
-    );
-  }
+  final List<String> teams;
+  final Map<String, Object?> extraData;
 
   Map<String, Object?> toJson() {
     return {

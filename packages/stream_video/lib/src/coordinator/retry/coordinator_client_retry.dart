@@ -517,7 +517,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<GuestCreatedData>> createGuest({
+  Future<Result<GuestCreatedData>> loadGuest({
     required String id,
     String? name,
     String? role,
@@ -526,7 +526,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     Map<String, Object> custom = const {},
   }) {
     return _retryManager.execute(
-      () => _delegate.createGuest(
+      () => _delegate.loadGuest(
         id: id,
         name: name,
         role: role,
@@ -535,7 +535,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
         custom: custom,
       ),
       (error, nextAttemptDelay) async {
-        _logRetry('createGuest', error, nextAttemptDelay);
+        _logRetry('loadGuest', error, nextAttemptDelay);
       },
     );
   }

@@ -5,8 +5,18 @@ import '../app_config.dart';
 import '../sample_user.dart';
 import 'home_screen.dart';
 
+typedef ConnectUser = Future<Result<None>> Function(
+  UserInfo user,
+  String token,
+);
+
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({
+    super.key,
+    required this.connectUser,
+  });
+
+  final ConnectUser connectUser;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -61,10 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       loggingIn = true;
     });
-    await StreamVideo.instance.connectUser(
-      user.userInfo,
-      user.token,
-    );
+    await widget.connectUser(user.userInfo, user.token);
     setState(() {
       loggingIn = false;
     });

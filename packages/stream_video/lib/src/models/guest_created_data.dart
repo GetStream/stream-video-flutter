@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import 'user_info.dart';
+
 @immutable
 class GuestCreatedData with EquatableMixin {
   /// Returns a new [GuestCreatedData] instance.
@@ -126,4 +128,17 @@ class UserResponseData with EquatableMixin {
   @override
   List<Object?> get props =>
       [createdAt, custom, deletedAt, id, image, name, role, teams, updatedAt];
+}
+
+extension UserResponseDataX on UserResponseData {
+  UserInfo toUserInfo() {
+    return UserInfo(
+      id: id,
+      name: name ?? '',
+      image: image,
+      role: role,
+      teams: teams,
+      extraData: custom,
+    );
+  }
 }

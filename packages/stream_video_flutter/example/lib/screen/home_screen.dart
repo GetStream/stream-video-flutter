@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -14,18 +16,24 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final StreamVideo _streamVideo = StreamVideo.instance;
-  late final currentUser = _streamVideo.currentUser!;
+  late final currentUser = _streamVideo.currentUser;
+
+  StreamSubscription<Call>? _onIncomingCallSubscription;
 
   @override
   void initState() {
     super.initState();
-    _streamVideo.onIncomingCall = _onNavigateToCall;
+    _onIncomingCallSubscription?.cancel();
+    _onIncomingCallSubscription = _streamVideo.state.incomingCall.listen(
+      _onNavigateToCall,
+    );
   }
 
   @override
   void dispose() {
     super.dispose();
-    _streamVideo.onIncomingCall = null;
+    _onIncomingCallSubscription?.cancel();
+    _onIncomingCallSubscription = null;
   }
 
   @override
@@ -65,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _logout() async {
-    await _streamVideo.disconnectUser();
+    await _streamVideo.disconnect();
     Navigator.of(context).pop();
   }
 

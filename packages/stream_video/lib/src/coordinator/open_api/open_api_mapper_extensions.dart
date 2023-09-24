@@ -16,7 +16,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
       case EventType.connectionOk:
         final event = connected!;
         return CoordinatorConnectedEvent(
-          clientId: event.connectionId,
+          connectionId: event.connectionId,
           userId: event.me.id,
         );
       case EventType.healthCheck:
