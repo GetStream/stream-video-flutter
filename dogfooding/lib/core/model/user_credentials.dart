@@ -12,8 +12,8 @@ class UserCredentials {
 
   factory UserCredentials.fromJson(Map<String, Object?> json) {
     return UserCredentials(
-      token: UserToken.fromRawValue(json['token']! as String),
-      userInfo: UserInfo.fromJson(json['user']! as Map<String, Object?>),
+      token: UserToken.jwt(json['token']! as String),
+      userInfo: _parseUserInfoFromJson(json['user']! as Map<String, Object?>),
     );
   }
 
@@ -23,4 +23,15 @@ class UserCredentials {
       'user': userInfo.toJson(),
     };
   }
+}
+
+UserInfo _parseUserInfoFromJson(Map<String, Object?> json) {
+  return UserInfo(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    role: json['role'] as String,
+    image: json['image'] as String?,
+    teams: (json['teams'] as List<dynamic>).cast(),
+    extraData: json['extra_data'] as Map<String, Object?>,
+  );
 }

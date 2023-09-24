@@ -2,7 +2,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide User;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 // 🌎 Project imports:
@@ -29,23 +29,13 @@ class AppInjector {
     final prefs = await SharedPreferences.getInstance();
     locator.registerSingleton<AppPreferences>(AppPreferences(prefs: prefs));
 
-    // Stream services
-    locator.registerLazySingleton<StreamVideo>(_initStreamVideo);
+    // Stream chat
     locator.registerLazySingleton<StreamChatClient>(_initStreamChat);
 
     // Attach streamVideo logger
 
     // Repositories
-    locator.registerSingleton(
-      const TokenService(apiKey: Env.apiKey),
-    );
-    locator.registerLazySingleton<UserAuthRepository>(
-      () => UserAuthRepository(
-        videoClient: locator(),
-        tokenService: locator(),
-      ),
-    );
-
+    locator.registerSingleton(const TokenService(apiKey: Env.apiKey));
     locator.registerLazySingleton<UserChatRepository>(
       () => UserChatRepository(
         chatClient: locator(),
@@ -53,13 +43,32 @@ class AppInjector {
       ),
     );
 
-    // App wide Controllers
+    locator.registerFactoryParam<UserAuthRepository, User, void>(
+      (user, _) {
+        // We need to register the video client here because we need it to
+        // initialise the user auth repo.
+        locator.registerSingleton(_initStreamVideo(
+          user,
+          tokenLoader: switch (user.type) {
+            UserType.authenticated => (String userId) {
+                final tokenService = locator<TokenService>();
+                return tokenService.loadToken(userId: userId);
+              },
+            _ => null,
+          },
+        ));
+
+        return UserAuthRepository(
+          videoClient: locator(),
+          tokenService: locator(),
+        );
+      },
+    );
+
+    // App wide Controller
     locator.registerLazySingleton<UserAuthController>(
       dispose: (controller) => controller.dispose(),
-      () => UserAuthController(
-        prefs: locator(),
-        authRepo: locator(),
-      ),
+      () => UserAuthController(prefs: locator()),
     );
   }
 
@@ -101,12 +110,19 @@ StreamChatClient _initStreamChat() {
   return streamChatClient;
 }
 
-StreamVideo _initStreamVideo() {
-  final streamVideoClient = StreamVideo.init(
+StreamVideo _initStreamVideo(
+  User user, {
+  TokenLoader? tokenLoader,
+}) {
+  final streamVideoClient = StreamVideo(
     Env.apiKey,
-    logPriority: Priority.info,
-    muteAudioWhenInBackground: true,
-    muteVideoWhenInBackground: true,
+    user: user,
+    tokenLoader: tokenLoader,
+    options: const StreamVideoOptions(
+      logPriority: Priority.info,
+      muteAudioWhenInBackground: true,
+      muteVideoWhenInBackground: true,
+    ),
   );
 
   return streamVideoClient;

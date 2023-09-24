@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 // 📦 Package imports:
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide User;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:uni_links/uni_links.dart';
@@ -33,7 +33,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
   // Login using the stored credentials.
   final authController = locator.get<UserAuthController>();
-  await authController.loginWithInfo(credentials.userInfo);
+  await authController.login(User(info: credentials.userInfo));
 
   // Once the setup is done, we can handle the message.
   await _handleRemoteMessage(message);
@@ -53,7 +53,6 @@ class StreamDogFoodingAppContent extends StatefulWidget {
 
 class _StreamDogFoodingAppContentState extends State<StreamDogFoodingAppContent>
     with WidgetsBindingObserver {
-  late final _streamVideo = locator.get<StreamVideo>();
   late final _userAuthController = locator.get<UserAuthController>();
 
   late final _router = initRouter(_userAuthController);
@@ -61,8 +60,18 @@ class _StreamDogFoodingAppContentState extends State<StreamDogFoodingAppContent>
   @override
   void initState() {
     super.initState();
+    initPushNotificationManagerIfAvailable();
+  }
+
+  void initPushNotificationManagerIfAvailable() {
+    // Return if the video client is not yet registered.
+    // i.e. the user is not logged in.
+    if (!locator.isRegistered<StreamVideo>()) return;
+
+    final streamVideo = locator.get<StreamVideo>();
+
     // Init push notification manager to handle incoming calls.
-    _streamVideo.initPushNotificationManager(
+    streamVideo.initPushNotificationManager(
       StreamVideoPushNotificationManager.factory(
         apnsProviderName: 'flutter-apn-video',
         firebaseProviderName: 'firebase',
@@ -120,7 +129,8 @@ class _StreamDogFoodingAppContentState extends State<StreamDogFoodingAppContent>
     final currentUser = _userAuthController.currentUser;
     if (currentUser == null) return;
 
-    final call = _streamVideo.makeCall(type: kCallType, id: callId);
+    final streamVideo = locator.get<StreamVideo>();
+    final call = streamVideo.makeCall(type: kCallType, id: callId);
 
     try {
       await call.getOrCreate();
@@ -138,7 +148,7 @@ class _StreamDogFoodingAppContentState extends State<StreamDogFoodingAppContent>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _deepLinkSubscription?.cancel();
-    _userAuthController.dispose();
+    locator.get<UserAuthController>().dispose();
     _router.dispose();
     super.dispose();
   }

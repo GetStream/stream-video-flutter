@@ -9,6 +9,8 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/di/injector.dart';
 import 'package:flutter_dogfooding/screens/splash_screen.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart'
+    hide ConnectionState;
 import '../core/repos/app_preferences.dart';
 import '../firebase_options.dart';
 import 'app_content.dart';
@@ -78,7 +80,7 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
     if (credentials == null) return;
 
     final authController = locator.get<UserAuthController>();
-    await authController.loginWithInfo(credentials.userInfo);
+    await authController.login(User(info: credentials.userInfo));
   }
 
   @override
@@ -90,9 +92,11 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
         // This means that the app is now ready to use.
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasError) {
+            print(snapshot.error);
+            print(snapshot.stackTrace);
             return const Directionality(
               textDirection: TextDirection.ltr,
-              child: Text('Error loading app'),
+              child: Center(child: Text('Error loading app')),
             );
           }
 

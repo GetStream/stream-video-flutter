@@ -210,8 +210,11 @@ class StreamVideo {
     pushNotificationManager = await factory(_client);
   }
 
-  /// Returns the current user if exists.
+  /// Returns the current user.
   UserInfo get currentUser => _state.currentUser.info;
+
+  /// Returns the current user type.
+  UserType get currentUserType => _state.currentUser.type;
 
   /// Returns the [StreamVideo] state.
   ClientState get state => _state;
