@@ -18,7 +18,7 @@ final class StreamVideoPushProvider {
     TokenStreamProvider tokenStreamProvider = _firebaseTokenStreamProvider,
   })  : isVoIP = false,
         _tokenStreamProvider = tokenStreamProvider,
-        type = CreateDeviceRequestPushProviderEnum.firebase;
+        type = PushProvider.firebase;
 
   static Stream<String> _firebaseTokenStreamProvider() async* {
     final initialToken = await StreamTokenProvider.getFirebaseToken();
@@ -33,7 +33,7 @@ final class StreamVideoPushProvider {
     TokenStreamProvider tokenStreamProvider = _voIPTokenStreamProvider,
   })  : isVoIP = true,
         _tokenStreamProvider = tokenStreamProvider,
-        type = CreateDeviceRequestPushProviderEnum.apn;
+        type = PushProvider.apn;
 
   static Stream<String> _voIPTokenStreamProvider() async* {
     final initialToken = await StreamTokenProvider.getVoIPToken();
@@ -49,7 +49,7 @@ final class StreamVideoPushProvider {
   final bool isVoIP;
 
   /// The push provider type.
-  final CreateDeviceRequestPushProviderEnum type;
+  final PushProvider type;
 
   /// Emits the current push token for the device and emits a new token
   /// whenever the token is refreshed.
