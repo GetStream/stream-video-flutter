@@ -50,19 +50,7 @@ class AppInjector {
       (user, _) {
         // We need to register the video client here because we need it to
         // initialise the user auth repo.
-        locator.registerSingleton(_initStreamVideo(
-          user,
-          tokenLoader: switch (user.type) {
-            UserType.authenticated => (String userId) {
-                final tokenService = locator<TokenService>();
-                return tokenService.loadToken(userId: userId);
-              },
-            _ => null,
-          },
-        ));
-
-        // Attach streamVideo logger
-        _setupLogger();
+        registerStreamVideo(user);
 
         return UserAuthRepository(
           videoClient: locator(),
@@ -75,6 +63,22 @@ class AppInjector {
     locator.registerLazySingleton<UserAuthController>(
       dispose: (controller) => controller.dispose(),
       () => UserAuthController(prefs: locator()),
+    );
+  }
+
+  static StreamVideo registerStreamVideo(User user) {
+    _setupLogger();
+    return locator.registerSingleton(
+      _initStreamVideo(
+        user,
+        tokenLoader: switch (user.type) {
+          UserType.authenticated => (String userId) {
+              final tokenService = locator<TokenService>();
+              return tokenService.loadToken(userId: userId);
+            },
+          _ => null,
+        },
+      ),
     );
   }
 

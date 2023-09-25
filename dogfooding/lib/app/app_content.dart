@@ -15,6 +15,7 @@ import 'package:uni_links/uni_links.dart';
 
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/router/routes.dart';
+import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
 import '../firebase_options.dart';
 import '../router/router.dart';
@@ -28,8 +29,23 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // Initialise the app.
   await AppInjector.init();
-  // Handle the message.
-  await _handleRemoteMessage(message);
+
+  try {
+    // Return if the user is not logged in.
+    final prefs = locator.get<AppPreferences>();
+    final credentials = prefs.userCredentials;
+    if (credentials == null) return;
+
+    // Initialise the video client.
+    AppInjector.registerStreamVideo(User(info: credentials.userInfo));
+
+    // Handle the message.
+    await _handleRemoteMessage(message);
+  } catch (e, stk) {
+    debugPrint('Error handling remote message: $e');
+    debugPrint(stk.toString());
+  }
+
   // Reset the injector once the message is handled.
   return AppInjector.reset();
 }
