@@ -27,6 +27,8 @@ import 'models/call_created_data.dart';
 import 'models/call_preferences.dart';
 import 'models/call_ringing_data.dart';
 import 'models/guest_created_data.dart';
+import 'models/push_device.dart';
+import 'models/push_provider.dart';
 import 'models/queried_calls.dart';
 import 'models/user.dart';
 import 'models/user_info.dart';
@@ -366,13 +368,12 @@ class StreamVideo {
   Future<void> _onAppState(LifecycleState state) async {
     _logger.d(() => '[onAppState] state: $state');
     try {
-      final loggedIn = currentUser != null;
       final activeCallCid = _state.activeCall.valueOrNull?.callCid;
-      if (loggedIn && state.isPaused && activeCallCid == null) {
+      if (state.isPaused && activeCallCid == null) {
         _logger.i(() => '[onAppState] close connection');
         _subscriptions.cancel(_idEvents);
         await _client.closeConnection();
-      } else if (loggedIn && state.isPaused && activeCallCid != null) {
+      } else if (state.isPaused && activeCallCid != null) {
         final callState = activeCall?.state.value;
         final isVideoEnabled =
             callState?.localParticipant?.isVideoEnabled ?? false;
@@ -389,7 +390,7 @@ class StreamVideo {
           _mutedAudioByStateChange = true;
           _logger.v(() => 'Muted audio track since app was paused.');
         }
-      } else if (loggedIn && state.isResumed) {
+      } else if (state.isResumed) {
         _logger.i(() => '[onAppState] open connection');
         await _client.openConnection();
         _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
@@ -476,6 +477,34 @@ class StreamVideo {
       prev: prev,
       sorts: sorts ?? [],
     );
+  }
+
+  /// Adds a device that will be used to receive push notifications.
+  Future<Result<None>> addDevice({
+    required String pushToken,
+    required PushProvider pushProvider,
+    String? pushProviderName,
+    bool? voipToken,
+  }) {
+    return _client.createDevice(
+      id: pushToken,
+      pushProvider: pushProvider,
+      pushProviderName: pushProviderName,
+      userId: currentUser.id,
+      voipToken: voipToken,
+    );
+  }
+
+  /// Gets a list of devices used to receive push notifications.
+  Future<Result<List<PushDevice>>> getDevices() {
+    return _client.listDevices(userId: currentUser.id);
+  }
+
+  /// Removes a device used to receive push notifications.
+  Future<Result<None>> removeDevice({
+    required String pushToken,
+  }) {
+    return _client.deleteDevice(id: pushToken, userId: currentUser.id);
   }
 
   Future<bool> handlePushNotification(Map<String, dynamic> payload) async {
