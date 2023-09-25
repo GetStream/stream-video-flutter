@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:async/async.dart' as async;
-import 'package:stream_video/src/logger/stream_logger.dart';
+import 'package:uuid/uuid.dart';
 
 import '../open_api/video/coordinator/api.dart' as open;
 import 'call/call.dart';
@@ -11,6 +11,7 @@ import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'coordinator/retry/coordinator_client_retry.dart';
 import 'core/client_state.dart';
 import 'core/connection_state.dart';
+import 'errors/video_error.dart';
 import 'errors/video_error_composer.dart';
 import 'internal/_instance_holder.dart';
 import 'latency/latency_service.dart';
@@ -22,8 +23,8 @@ import 'logger/impl/console_logger.dart';
 import 'logger/impl/external_logger.dart';
 import 'logger/impl/tagged_logger.dart';
 import 'logger/stream_log.dart';
+import 'logger/stream_logger.dart';
 import 'models/call_cid.dart';
-import 'models/call_created_data.dart';
 import 'models/call_preferences.dart';
 import 'models/call_ringing_data.dart';
 import 'models/guest_created_data.dart';
@@ -74,6 +75,7 @@ class StreamVideo {
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
     bool failIfSingletonExists = true,
+    PNManagerProvider? pushNotificationManagerProvider,
   }) {
     final instance = StreamVideo._(
       apiKey,
@@ -82,11 +84,14 @@ class StreamVideo {
       userToken: userToken,
       tokenLoader: tokenLoader,
       onTokenUpdated: onTokenUpdated,
+      pushNotificationManagerProvider: pushNotificationManagerProvider,
     );
+
     _instanceHolder.install(
       instance,
       failIfSingletonExists: failIfSingletonExists,
     );
+
     return instance;
   }
 
@@ -94,30 +99,33 @@ class StreamVideo {
   /// Stream Video singleton instance
   factory StreamVideo.create(
     String apiKey, {
-    StreamVideoOptions options = const StreamVideoOptions(),
     required User user,
+    StreamVideoOptions options = const StreamVideoOptions(),
     String? userToken,
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
+    PNManagerProvider? pushNotificationManagerProvider,
   }) {
     final instance = StreamVideo._(
       apiKey,
-      options: options,
       user: user,
+      options: options,
       userToken: userToken,
       tokenLoader: tokenLoader,
       onTokenUpdated: onTokenUpdated,
+      pushNotificationManagerProvider: pushNotificationManagerProvider,
     );
     return instance;
   }
 
   StreamVideo._(
     String apiKey, {
-    required StreamVideoOptions options,
     required User user,
+    required StreamVideoOptions options,
     String? userToken,
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
+    PNManagerProvider? pushNotificationManagerProvider,
   })  : _options = options,
         _state = MutableClientState(user) {
     _client = buildCoordinatorClient(
@@ -128,6 +136,9 @@ class StreamVideo {
       rpcUrl: _options.coordinatorRpcUrl,
       wsUrl: _options.coordinatorWsUrl,
     );
+
+    // Initialize the push notification manager if the provider is provided.
+    pushNotificationManager = pushNotificationManagerProvider?.call(_client);
 
     _state.user.value = user;
     final tokenProvider = switch (user.type) {
@@ -199,16 +210,10 @@ class StreamVideo {
   final _tokenManager = TokenManager();
   final _subscriptions = Subscriptions();
   late final CoordinatorClient _client;
-  PushNotificationManager? pushNotificationManager;
+  late final PushNotificationManager? pushNotificationManager;
 
   bool _mutedCameraByStateChange = false;
   bool _mutedAudioByStateChange = false;
-
-  Future<void> initPushNotificationManager(
-    PushNotificationManagerFactory factory,
-  ) async {
-    pushNotificationManager = await factory(_client);
-  }
 
   /// Returns the current user.
   UserInfo get currentUser => _state.currentUser.info;
@@ -245,9 +250,7 @@ class StreamVideo {
   Future<Result<UserToken>> connect() async {
     _connectOperation ??= _connect().asCancelable();
     return _connectOperation!
-        .valueOrDefault(
-      Result.error('connect was cancelled'),
-    )
+        .valueOrDefault(Result.error('connect was cancelled'))
         .whenComplete(() {
       _logger.i(() => '[connect] clear shared operation');
       _connectOperation = null;
@@ -258,9 +261,7 @@ class StreamVideo {
   Future<Result<None>> disconnect() async {
     _disconnectOperation ??= _disconnect().asCancelable();
     return _disconnectOperation!
-        .valueOrDefault(
-      Result.error('disconnect was cancelled'),
-    )
+        .valueOrDefault(Result.error('disconnect was cancelled'))
         .whenComplete(() {
       _logger.i(() => '[disconnect] clear shared operation');
       _disconnectOperation = null;
@@ -308,11 +309,13 @@ class StreamVideo {
       );
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
       _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
+
       try {
-        await pushNotificationManager?.onUserLoggedIn();
+        pushNotificationManager?.registerDevice();
       } catch (e, stk) {
         _logger.w(() => '[connect] #pnManager; failed: $e, $stk');
       }
+
       return Result.success(tokenResult.data);
     } catch (e, stk) {
       _logger.e(() => '[connect] failed(${user.id}): $e');
@@ -331,11 +334,12 @@ class StreamVideo {
       await _client.disconnectUser();
       _subscriptions.cancelAll();
 
+      // Unregister device from push notification manager.
+      pushNotificationManager?.unregisterDevice();
+
       // Resetting the state.
       await _state.clear();
-      _connectionState = ConnectionState.disconnected(
-        _state.currentUser.id,
-      );
+      _connectionState = ConnectionState.disconnected(_state.currentUser.id);
       _logger.v(() => '[disconnect] completed');
       return const Result.success(none);
     } catch (e, stk) {
@@ -434,21 +438,6 @@ class StreamVideo {
     );
   }
 
-  Call _makeCallFromCreated({
-    required CallCreatedData data,
-    CallPreferences? preferences,
-  }) {
-    return Call.fromCreated(
-      data: data,
-      coordinatorClient: _client,
-      currentUser: _state.user,
-      setActiveCall: _state.setActiveCall,
-      retryPolicy: _options.retryPolicy,
-      sdpPolicy: _options.sdpPolicy,
-      preferences: preferences,
-    );
-  }
-
   Call _makeCallFromRinging({
     required CallRingingData data,
     CallPreferences? preferences,
@@ -481,17 +470,77 @@ class StreamVideo {
     );
   }
 
-  Future<bool> handlePushNotification(Map<String, dynamic> payload) async {
+  StreamSubscription<T>? onCallKitEvent<T extends CallKitEvent>(
+    void Function(T event)? onEvent,
+  ) {
     final manager = pushNotificationManager;
-    if (manager == null) return false;
+    if (manager == null) {
+      _logger.e(() => '[on] rejected (no manager)');
+      return null;
+    }
 
-    return manager.handlePushNotification(payload);
+    return manager.on<T>(onEvent);
   }
 
-  Future<Call?> consumeIncomingCall() async {
-    return pushNotificationManager?.consumeIncomingCall().then((data) {
-      return data?.let((it) => _makeCallFromCreated(data: it));
-    });
+  /// Handle incoming VoIP push notifications.
+  ///
+  /// Returns `true` if the notification was handled, `false` otherwise.
+  Future<bool> handleVoipPushNotification(Map<String, dynamic> payload) async {
+    final manager = pushNotificationManager;
+    if (manager == null) {
+      _logger.e(() => '[handleVoipPushNotification] rejected (no manager)');
+      return false;
+    }
+
+    // Only handle messages from stream.video
+    final sender = payload['sender'] as String?;
+    if (sender != 'stream.video') return false;
+
+    // Only handle ringing calls.
+    final type = payload['type'] as String?;
+    if (type != 'call.ring') return false;
+
+    // Return if the payload does not contain a call cid.
+    final callCid = payload['call_cid'] as String?;
+    if (callCid == null) return false;
+
+    final uuid = const Uuid().v4();
+    final createdById = payload['created_by_id'] as String?;
+    final createdByName = payload['created_by_display_name'] as String?;
+
+    unawaited(
+      manager.showIncomingCall(
+        uuid: uuid,
+        handle: createdById,
+        nameCaller: createdByName,
+        callCid: callCid,
+      ),
+    );
+
+    return true;
+  }
+
+  /// Consumes incoming voIP call and returns the [Call] object.
+  Future<Result<Call>> consumeIncomingCall({
+    required String uuid,
+    required String cid,
+  }) async {
+    final manager = pushNotificationManager;
+    if (manager == null) {
+      return const Result.failure(
+        VideoError(message: 'Push notification manager not initialized.'),
+      );
+    }
+
+    final callCid = StreamCallCid(cid: cid);
+    final call = makeCall(type: callCid.type, id: callCid.id);
+    final result = await call.getOrCreate();
+
+    if (result is Failure) {
+      return result;
+    }
+
+    return Result.success(call);
   }
 }
 

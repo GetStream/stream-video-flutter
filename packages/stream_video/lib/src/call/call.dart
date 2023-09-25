@@ -1051,7 +1051,7 @@ class Call {
   /// can be override by passing a [track] to the function.
   ///
   /// Note: The user calling this function must have permission to perform the
-  //  action else it will result in an error.
+  ///  action else it will result in an error.
   Future<Result<None>> muteOthers({TrackType track = TrackType.audio}) {
     return _permissionsManager.muteOthers(track: track);
   }
@@ -1447,9 +1447,9 @@ extension on CallStateNotifier {
     if (currentUserId.isEmpty) {
       return Result.error('no userId');
     }
-    if (stateUserId.isEmpty || stateUserId != currentUserId) {
+    // if (stateUserId.isEmpty || stateUserId != currentUserId) {
       lifecycleUpdateUserId(SetUserId(currentUserId));
-    }
+    // }
     return const Result.success(none);
   }
 }

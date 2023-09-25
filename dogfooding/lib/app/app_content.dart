@@ -2,6 +2,7 @@
 import 'dart:async';
 
 // 🐦 Flutter imports:
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -10,37 +11,32 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide User;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:uni_links/uni_links.dart';
 
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/router/routes.dart';
-import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
+import '../firebase_options.dart';
 import '../router/router.dart';
 import '../utils/consts.dart';
 import 'user_auth_controller.dart';
 
+// As this runs in a separate isolate, we need to setup the app again.
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // As this runs in a separate isolate, we need to initialize and connect the
-  // user to StreamVideo again.
-
-  // If the user is not logged in, we don't need to handle the message.
-  final prefs = locator.get<AppPreferences>();
-  final credentials = prefs.userCredentials;
-  if (credentials == null) return;
-
-  // Login using the stored credentials.
-  final authController = locator.get<UserAuthController>();
-  await authController.login(User(info: credentials.userInfo));
-
-  // Once the setup is done, we can handle the message.
+  // Initialise Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Initialise the app.
+  await AppInjector.init();
+  // Handle the message.
   await _handleRemoteMessage(message);
+  // Reset the injector once the message is handled.
+  return AppInjector.reset();
 }
 
-Future<bool> _handleRemoteMessage(RemoteMessage message) {
-  return locator.get<StreamVideo>().handlePushNotification(message.data);
+Future<bool> _handleRemoteMessage(RemoteMessage message) async {
+  final streamVideo = locator.get<StreamVideo>();
+  return streamVideo.handleVoipPushNotification(message.data);
 }
 
 class StreamDogFoodingAppContent extends StatefulWidget {
@@ -51,8 +47,8 @@ class StreamDogFoodingAppContent extends StatefulWidget {
       _StreamDogFoodingAppContentState();
 }
 
-class _StreamDogFoodingAppContentState extends State<StreamDogFoodingAppContent>
-    with WidgetsBindingObserver {
+class _StreamDogFoodingAppContentState
+    extends State<StreamDogFoodingAppContent> {
   late final _userAuthController = locator.get<UserAuthController>();
 
   late final _router = initRouter(_userAuthController);
@@ -68,37 +64,30 @@ class _StreamDogFoodingAppContentState extends State<StreamDogFoodingAppContent>
     // i.e. the user is not logged in.
     if (!locator.isRegistered<StreamVideo>()) return;
 
-    final streamVideo = locator.get<StreamVideo>();
-
-    // Init push notification manager to handle incoming calls.
-    streamVideo.initPushNotificationManager(
-      StreamVideoPushNotificationManager.factory(
-        apnsProviderName: 'flutter-apn-video',
-        firebaseProviderName: 'firebase',
-      ),
-    );
-
-    WidgetsBinding.instance.addObserver(this);
-    FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    _consumeIncomingCall();
+    // Observes deep links.
     _observeDeepLinks();
+    // Observe FCM messages.
+    _observeFcmMessages();
+    // Observe call kit events.
+    _observeCallKitEvents();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _consumeIncomingCall();
-    }
+  final _callKitEventSubscriptions = Subscriptions();
+
+  void _observeCallKitEvents() {
+    final streamVideo = locator.get<StreamVideo>();
+    _callKitEventSubscriptions.addAll([
+      streamVideo.onCallKitEvent<ActionCallAccept>(_onCallAccept),
+      streamVideo.onCallKitEvent<ActionCallDecline>(_onCallDecline),
+      streamVideo.onCallKitEvent<ActionCallEnded>(_onCallEnded),
+    ]);
   }
 
-  // Check if there is an incoming call that needs to be consumed.
-  Future<void> _consumeIncomingCall() async {
-    final call = await StreamVideo.instance.consumeIncomingCall();
-    if (call == null) return;
+  StreamSubscription<RemoteMessage>? _fcmSubscription;
 
-    // Navigate to the lobby screen.
-    _router.push(LobbyRoute($extra: call).location, extra: call);
+  _observeFcmMessages() {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    _fcmSubscription = FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
   }
 
   StreamSubscription<Uri?>? _deepLinkSubscription;
@@ -144,11 +133,57 @@ class _StreamDogFoodingAppContentState extends State<StreamDogFoodingAppContent>
     _router.push(LobbyRoute($extra: call).location, extra: call);
   }
 
+  void _onCallAccept(ActionCallAccept event) async {
+    final streamVideo = locator.get<StreamVideo>();
+
+    final uuid = event.data.uuid;
+    final cid = event.data.callCid;
+    if (uuid == null || cid == null) return;
+
+    final call = await streamVideo.consumeIncomingCall(uuid: uuid, cid: cid);
+    final callToJoin = call.getDataOrNull();
+    if (callToJoin == null) return;
+
+    // Navigate to the call screen.
+    final extra = (
+      call: callToJoin,
+      connectOptions: const CallConnectOptions(),
+    );
+    _router.push(CallRoute($extra: extra).location, extra: extra);
+  }
+
+  void _onCallDecline(ActionCallDecline event) async {
+    final streamVideo = locator.get<StreamVideo>();
+
+    final uuid = event.data.uuid;
+    final cid = event.data.callCid;
+    if (uuid == null || cid == null) return;
+
+    // TODO: Notify the server that the call was declined.
+  }
+
+  void _onCallEnded(ActionCallEnded event) async {
+    final streamVideo = locator.get<StreamVideo>();
+
+    final uuid = event.data.uuid;
+    final cid = event.data.callCid;
+    if (uuid == null || cid == null) return;
+
+    final call = streamVideo.activeCall;
+    if (call == null || call.callCid.value != cid) return;
+
+    final result = await call.end();
+    if (result is Failure) {
+      debugPrint('Error ending call: ${result.error}');
+    }
+  }
+
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    _fcmSubscription?.cancel();
     _deepLinkSubscription?.cancel();
-    locator.get<UserAuthController>().dispose();
+    _callKitEventSubscriptions.cancelAll();
+    _userAuthController.dispose();
     _router.dispose();
     super.dispose();
   }
@@ -195,5 +230,16 @@ class _StreamDogFoodingAppContentState extends State<StreamDogFoodingAppContent>
         ),
       ),
     );
+  }
+}
+
+extension on Subscriptions {
+  void addAll<T>(Iterable<StreamSubscription<T>?> subscriptions) {
+    for (var i = 0; i < subscriptions.length; i++) {
+      final subscription = subscriptions.elementAt(i);
+      if (subscription == null) continue;
+
+      add(i + 100, subscription);
+    }
   }
 }

@@ -30,6 +30,7 @@ class CallScreen extends StatefulWidget {
 
 class _CallScreenState extends State<CallScreen> {
   Channel? _channel;
+  late final _streamVideo = locator.get<StreamVideo>();
   late final _userChatRepo = locator.get<UserChatRepository>();
 
   @override
@@ -144,7 +145,16 @@ class _CallScreenState extends State<CallScreen> {
                   ),
                   LeaveCallOption(
                     call: call,
-                    onLeaveCallTap: () => call.leave(),
+                    onLeaveCallTap: () async {
+                      final result = await call.leave();
+                      if (result is Failure) {
+                        debugPrint('Error leaving call: ${result.error}');
+                        return;
+                      }
+
+                      // End all calls.
+                      _streamVideo.pushNotificationManager?.endAllCalls();
+                    },
                   ),
                 ],
               );
