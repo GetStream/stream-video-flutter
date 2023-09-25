@@ -142,7 +142,7 @@ class CallUser with EquatableMixin {
   final String name;
   final String role;
   final String image;
-  final Map<String, Object> custom;
+  final Map<String, Object?> custom;
   final List<String> teams;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -163,8 +163,16 @@ class CallUser with EquatableMixin {
 
   @override
   String toString() {
-    return 'CallUser{id: $id, name: $name, role: $role, image: $image, '
-        'teams: $teams, createdAt: $createdAt, updatedAt: $updatedAt, '
-        'deletedAt: $deletedAt, custom: $custom}';
+    return 'CallUser{'
+        'id: $id'
+        ', name: $name'
+        ', role: $role'
+        ', image: $image'
+        ', teams: $teams'
+        ', createdAt: $createdAt'
+        ', updatedAt: $updatedAt'
+        ', deletedAt: $deletedAt'
+        ', custom: $custom'
+        '}';
   }
 }

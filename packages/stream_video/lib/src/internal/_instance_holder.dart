@@ -1,38 +1,35 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
-import '../latency/latency_settings.dart';
-import '../retry/retry_policy.dart';
+import '../logger/stream_log.dart';
 import '../stream_video.dart';
-import '../webrtc/sdp/policy/sdp_policy.dart';
 
 @internal
 class InstanceHolder {
   StreamVideo? _instance;
 
-  StreamVideo init(
-    String apiKey, {
-    required LatencySettings latencySettings,
-    required RetryPolicy retryPolicy,
-    required SdpPolicy sdpPolicy,
-    bool muteVideoWhenInBackground = false,
-    bool muteAudioWhenInBackground = false,
+  void install(
+    StreamVideo instance, {
+    bool failIfSingletonExists = true,
   }) {
     if (_instance != null) {
-      throw Exception('''
+      if (failIfSingletonExists) {
+        throw Exception('''
         StreamVideo has already been initialised, use StreamVideo.instance to access the singleton instance.
         If you want to re-initialise the SDK, call StreamVideo.reset() first.
-        If you want to use multiple instances of the SDK, use StreamVideo.new() instead.
+        If you want to use multiple instances of the SDK, use StreamVideo.create() instead.
         ''');
+      }
+      streamLog.w(
+        'InstanceHolder',
+        () => 'StreamVideo has already been initialised, '
+            'disconnecting the existing instance '
+            'and overriding it with the new instance.',
+      );
+      unawaited(_instance!.disconnect());
     }
-    _instance = StreamVideo.create(
-      apiKey,
-      latencySettings: latencySettings,
-      retryPolicy: retryPolicy,
-      sdpPolicy: sdpPolicy,
-      muteVideoWhenInBackground: muteVideoWhenInBackground,
-      muteAudioWhenInBackground: muteAudioWhenInBackground,
-    );
-    return _instance!;
+    _instance = instance;
   }
 
   /// The singleton instance of the Stream Video client.
@@ -40,7 +37,7 @@ class InstanceHolder {
     final instance = _instance;
     if (instance == null) {
       throw Exception(
-        'Please initialise Stream Video by calling StreamVideo.init()',
+        'Please initialise Stream Video by calling StreamVideo()',
       );
     }
     return instance;

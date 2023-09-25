@@ -17,7 +17,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleUpdateUserId(
     SetUserId action,
   ) {
-    _logger.d(() => '[lifecycleUpdateUserId] state: $state');
+    _logger.d(
+      () => '[lifecycleUpdateUserId] userId: ${action.userId}, state: $state',
+    );
     state = state.copyWith(
       currentUserId: action.userId,
       status: CallStatus.idle(),

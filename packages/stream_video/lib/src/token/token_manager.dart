@@ -1,11 +1,14 @@
+import 'package:async/async.dart' as async;
+import 'package:meta/meta.dart';
+
 import '../../stream_video.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../utils/result.dart';
-import 'token.dart';
+import '../utils/cancelable_operation.dart';
+import '../utils/future.dart';
 
 const _emptyUserId = 'stream:none';
 
 /// Handles common token operations
+@internal
 class TokenManager {
   /// Initialize a new token manager
   TokenManager();
@@ -32,11 +35,13 @@ class TokenManager {
     return getToken();
   }
 
+  async.CancelableOperation<Result<UserToken>>? _tokenOperation;
+
   /// Returns the token refreshing the existing one if [refresh] is true
   Future<Result<UserToken>> getToken({bool refresh = false}) async {
     _logger.d(() => '[getToken] refresh: $refresh, _token: $_token');
     if (refresh || _token == null) {
-      final result = await _provider.getToken(_userId);
+      final result = await _provideToken();
       _logger.v(() => '[getToken] completed: $result');
       if (result is! Success<UserToken>) {
         return result;
@@ -44,6 +49,23 @@ class TokenManager {
       _token = result.data;
     }
     return Result.success(_token!);
+  }
+
+  UserToken? getCachedToken() => _token;
+
+  Future<Result<UserToken>> _provideToken() async {
+    if (_tokenOperation == null) {
+      _logger.d(() => '[provideToken] _userId: $_userId');
+      _tokenOperation = _provider.getToken(_userId).asCancelable();
+    }
+    return _tokenOperation!
+        .valueOrDefault(
+      Result.error('provideToken was cancelled'),
+    )
+        .whenComplete(() {
+      _logger.v(() => '[provideToken] drop cached future');
+      _tokenOperation = null;
+    });
   }
 
   /// Returns the token refreshing the existing one.
@@ -55,6 +77,8 @@ class TokenManager {
   /// Resets the token manager
   void reset() {
     _logger.d(() => '[reset] no args');
+    _tokenOperation?.cancel();
+    _tokenOperation = null;
     _userId = _emptyUserId;
     _provider = _StubTokenProvider();
     _token = null;
@@ -76,29 +100,6 @@ class _StubTokenProvider implements TokenProvider {
   @override
   Future<Result<UserToken>> getToken(String userId) async {
     return Result.error('StubTokenProvider is unable to provide a real token');
-  }
-
-  @override
-  set onTokenUpdated(OnTokenUpdated onTokenUpdated) {
-    /* no-op */
-  }
-}
-
-class AnonymousTokenProvider implements TokenProvider {
-  factory AnonymousTokenProvider() {
-    return _instance;
-  }
-
-  const AnonymousTokenProvider._();
-
-  static const AnonymousTokenProvider _instance = AnonymousTokenProvider._();
-
-  @override
-  bool get isStatic => false;
-
-  @override
-  Future<Result<UserToken>> getToken(String userId) async {
-    return Result.success(UserToken.anonymous(userId: userId));
   }
 
   @override

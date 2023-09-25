@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../stream_video.dart';
 import '../action/internal/lifecycle_action.dart';
@@ -14,7 +15,6 @@ import '../state_emitter.dart';
 import '../utils/cancelable_operation.dart';
 import '../utils/cancelables.dart';
 import '../utils/future.dart';
-import '../utils/none.dart';
 import '../utils/standard.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
@@ -32,11 +32,12 @@ typedef GetCurrentUserId = String? Function();
 typedef SetActiveCall = Future<void> Function(Call?);
 
 const _idState = 1;
-const _idCoordEvents = 2;
-const _idSessionEvents = 3;
-const _idSessionStats = 4;
-const _idConnect = 5;
-const _idAwait = 6;
+const _idUserId = 2;
+const _idCoordEvents = 3;
+const _idSessionEvents = 4;
+const _idSessionStats = 5;
+const _idConnect = 6;
+const _idAwait = 7;
 
 const _tag = 'SV:Call';
 
@@ -50,7 +51,7 @@ class Call {
   factory Call({
     required StreamCallCid callCid,
     required CoordinatorClient coordinatorClient,
-    required GetCurrentUserId getCurrentUserId,
+    required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
@@ -60,7 +61,7 @@ class Call {
     return Call._internal(
       callCid: callCid,
       coordinatorClient: coordinatorClient,
-      getCurrentUserId: getCurrentUserId,
+      currentUser: currentUser,
       setActiveCall: setActiveCall,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
@@ -74,7 +75,7 @@ class Call {
   factory Call.fromCreated({
     required CallCreatedData data,
     required CoordinatorClient coordinatorClient,
-    required GetCurrentUserId getCurrentUserId,
+    required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
@@ -84,7 +85,7 @@ class Call {
     return Call._internal(
       callCid: data.callCid,
       coordinatorClient: coordinatorClient,
-      getCurrentUserId: getCurrentUserId,
+      currentUser: currentUser,
       setActiveCall: setActiveCall,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
@@ -98,7 +99,7 @@ class Call {
   factory Call.fromRinging({
     required CallRingingData data,
     required CoordinatorClient coordinatorClient,
-    required GetCurrentUserId getCurrentUserId,
+    required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
@@ -108,7 +109,7 @@ class Call {
     return Call._internal(
       callCid: data.callCid,
       coordinatorClient: coordinatorClient,
-      getCurrentUserId: getCurrentUserId,
+      currentUser: currentUser,
       setActiveCall: setActiveCall,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
@@ -119,7 +120,7 @@ class Call {
   factory Call._internal({
     required StreamCallCid callCid,
     required CoordinatorClient coordinatorClient,
-    required GetCurrentUserId getCurrentUserId,
+    required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
@@ -132,7 +133,7 @@ class Call {
     final stateManager = _makeStateManager(
       callCid,
       coordinatorClient,
-      getCurrentUserId,
+      currentUser,
       finalCallPreferences,
     );
     final permissionManager = _makePermissionAwareManager(
@@ -142,7 +143,7 @@ class Call {
     );
     return Call._(
       coordinatorClient: coordinatorClient,
-      getCurrentUserId: getCurrentUserId,
+      currentUser: currentUser,
       setActiveCall: setActiveCall,
       preferences: finalCallPreferences,
       stateManager: stateManager,
@@ -154,7 +155,7 @@ class Call {
   }
 
   Call._({
-    required GetCurrentUserId getCurrentUserId,
+    required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
     required CoordinatorClient coordinatorClient,
     required CallPreferences preferences,
@@ -169,7 +170,12 @@ class Call {
         ),
         _stateManager = stateManager,
         _permissionsManager = permissionManager,
-        _getCurrentUserId = getCurrentUserId,
+        _getCurrentUserId = (() => currentUser.valueOrNull?.id),
+        _currentUserIdUpdates = currentUser
+            .asStream()
+            .map((it) => it?.id)
+            .whereNotNull()
+            .distinct(),
         _setActiveCall = setActiveCall,
         _coordinatorClient = coordinatorClient,
         _preferences = preferences,
@@ -179,6 +185,7 @@ class Call {
     if (stateManager.callState.isRingingFlow) {
       _observeState();
       _observeEvents();
+      _observeUserId();
     }
   }
 
@@ -187,6 +194,7 @@ class Call {
   late final _cancelables = Cancelables();
 
   final GetCurrentUserId _getCurrentUserId;
+  final Stream<String> _currentUserIdUpdates;
   final SetActiveCall _setActiveCall;
   final CoordinatorClient _coordinatorClient;
   final RetryPolicy _retryPolicy;
@@ -263,6 +271,22 @@ class Call {
       _idCoordEvents,
       _coordinatorClient.events.on<CoordinatorCallEvent>((event) async {
         await _onCoordinatorEvent(event);
+      }),
+    );
+  }
+
+  void _observeUserId() {
+    _subscriptions.add(
+      _idUserId,
+      _currentUserIdUpdates.listen((userId) {
+        if (userId.isEmpty) return;
+        final stateUserId = _stateManager.callState.currentUserId;
+        if (userId == stateUserId) {
+          _logger.v(() => '[observeUserId] rejected (same userId): $userId');
+          return;
+        }
+        _logger.d(() => '[observeUserId] userId: $userId');
+        _stateManager.lifecycleUpdateUserId(SetUserId(userId));
       }),
     );
   }
@@ -450,6 +474,7 @@ class Call {
     }
     _observeState();
     _observeEvents();
+    _observeUserId();
     final result = await _awaitIfNeeded();
     if (result.isFailure) {
       _logger.e(() => '[connect] waiting failed: $result');
@@ -1026,7 +1051,7 @@ class Call {
   /// can be override by passing a [track] to the function.
   ///
   /// Note: The user calling this function must have permission to perform the
-  //  action else it will result in an error.
+  ///  action else it will result in an error.
   Future<Result<None>> muteOthers({TrackType track = TrackType.audio}) {
     return _permissionsManager.muteOthers(track: track);
   }
@@ -1389,10 +1414,10 @@ class Call {
 CallStateNotifier _makeStateManager(
   StreamCallCid callCid,
   CoordinatorClient coordinatorClient,
-  GetCurrentUserId getCurrentUserId,
+  StateEmitter<User?> currentUser,
   CallPreferences callPreferences,
 ) {
-  final currentUserId = getCurrentUserId() ?? '';
+  final currentUserId = currentUser.valueOrNull?.id ?? '';
 
   return CallStateNotifier(
     CallState(
@@ -1422,7 +1447,7 @@ extension on CallStateNotifier {
     if (currentUserId.isEmpty) {
       return Result.error('no userId');
     }
-    if (stateUserId.isEmpty) {
+    if (stateUserId.isEmpty || stateUserId != currentUserId) {
       lifecycleUpdateUserId(SetUserId(currentUserId));
     }
     return const Result.success(none);

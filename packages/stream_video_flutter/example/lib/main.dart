@@ -15,11 +15,19 @@ Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  StreamVideo.init(
-    Env.streamVideoApiKey,
-  );
-
   await _setupLogger();
+
+  runApp(const MyApp(connectUser: _connectUser));
+}
+
+Future<Result<None>> _connectUser(UserInfo user, String token) async {
+  streamLog.i(_tag, () => '[connectUser] user: $user, token: $token');
+  final client = StreamVideo(
+    Env.streamVideoApiKey,
+    user: User(info: user),
+    userToken: token,
+  );
+  await client.connect();
 
   StreamBackgroundService.init(
     StreamVideo.instance,
@@ -33,7 +41,7 @@ Future<void> main() async {
     },
   );
 
-  runApp(const MyApp());
+  return const Result.success(none);
 }
 
 Future<void> _setupLogger() async {
@@ -64,11 +72,19 @@ Future<void> _setupLogger() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({
+    super.key,
+    required this.connectUser,
+  });
+
+  final ConnectUser connectUser;
 
   @override
   Widget build(BuildContext context) {
-    final activeCall = StreamVideo.instance.activeCall;
+    Call? activeCall;
+    if (StreamVideo.isInitialized()) {
+      activeCall = StreamVideo.instance.activeCall;
+    }
     streamLog.i(_tag, () => '[build] activeCall: $activeCall');
 
     final darkAppTheme = StreamVideoTheme.dark();
@@ -85,7 +101,7 @@ class MyApp extends StatelessWidget {
         extensions: <ThemeExtension<dynamic>>[darkAppTheme],
       ),
       themeMode: ThemeMode.dark,
-      home: const LoginScreen(),
+      home: LoginScreen(connectUser: connectUser),
       debugShowCheckedModeBanner: false,
     );
   }
