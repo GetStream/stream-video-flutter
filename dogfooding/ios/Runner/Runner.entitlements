@@ -6,7 +6,7 @@
 	<string>development</string>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>applinks:stream-calls-dogfood.vercel.app</string>
+		<string>applinks:getstream.io</string>
 	</array>
 </dict>
 </plist>

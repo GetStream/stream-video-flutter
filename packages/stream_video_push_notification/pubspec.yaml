@@ -17,6 +17,7 @@ dependencies:
   flutter_callkit_incoming: ^2.0.0+1
   uuid: ^3.0.7
   rxdart: ^0.27.7
+  meta: ^1.9.1
   collection: ^1.17.1
   firebase_core: ^2.15.0
 
@@ -39,9 +40,6 @@ flutter:
   # adding or updating assets for this project.
   plugin:
     platforms:
-      android:
-        package: io.getstream.video.flutter.stream_video_push_notification
-        pluginClass: StreamVideoPushNotificationPlugin
       ios:
         pluginClass: StreamVideoPushNotificationPlugin
 

@@ -5,9 +5,9 @@ class UserInfo extends Equatable {
     required this.id,
     this.role = 'user',
     this.name = '',
-    this.teams = const [],
     this.image,
-    this.extraData = const {},
+    this.teams = const <String>[],
+    this.extraData = const <String, Object?>{},
   });
 
   final String id;

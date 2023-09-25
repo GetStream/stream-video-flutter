@@ -1,4 +1,4 @@
-import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'env/env.dart';
 import 'sample_user.dart';
