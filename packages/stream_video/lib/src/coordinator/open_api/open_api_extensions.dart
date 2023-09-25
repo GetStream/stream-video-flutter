@@ -1,4 +1,7 @@
+import 'package:collection/collection.dart';
+
 import '../../../../open_api/video/coordinator/api.dart' as open;
+import '../../errors/video_error.dart';
 import '../../logger/stream_log.dart';
 import '../../models/call_cid.dart';
 import '../../models/call_credentials.dart';
@@ -9,6 +12,8 @@ import '../../models/call_reaction.dart';
 import '../../models/call_session_data.dart';
 import '../../models/call_settings.dart';
 import '../../models/guest_created_data.dart';
+import '../../models/push_device.dart';
+import '../../models/push_provider.dart';
 import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 import '../../utils/standard.dart';
@@ -367,5 +372,49 @@ extension ParticipantListExt on List<open.CallParticipantResponse> {
       for (final participant in this)
         participant.user.id: participant.toCallUser()
     };
+  }
+}
+
+extension CreateDeviceRequestPushProviderEnumX
+    on open.CreateDeviceRequestPushProviderEnum {
+  PushProvider toPushProvider() {
+    if (this == open.CreateDeviceRequestPushProviderEnum.firebase) {
+      return PushProvider.firebase;
+    } else if (this == open.CreateDeviceRequestPushProviderEnum.xiaomi) {
+      return PushProvider.xiaomi;
+    } else if (this == open.CreateDeviceRequestPushProviderEnum.huawei) {
+      return PushProvider.huawei;
+    } else if (this == open.CreateDeviceRequestPushProviderEnum.apn) {
+      return PushProvider.apn;
+    }
+    throw VideoError(message: 'Unknown push provider: $this');
+  }
+}
+
+extension DeviceExt on open.Device {
+  PushDevice? toPushDevice() {
+    final parsedProvider = PushProvider.fromAlias(pushProvider);
+    if (parsedProvider == null) {
+      streamLog.e(
+        'DeviceExt',
+        () => '[toPushDevice] unknown push provider: $pushProvider',
+      );
+      return null;
+    }
+    return PushDevice(
+      pushToken: id,
+      pushProvider: parsedProvider,
+      pushProviderName: pushProviderName,
+      voip: voip,
+      createdAt: createdAt,
+      disabled: disabled,
+      disabledReason: disabledReason,
+    );
+  }
+}
+
+extension DeviceListExt on List<open.Device> {
+  List<PushDevice> toPushDevices() {
+    return map((it) => it.toPushDevice()).whereNotNull().toList();
   }
 }

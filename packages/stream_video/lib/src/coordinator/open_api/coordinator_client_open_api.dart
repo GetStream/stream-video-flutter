@@ -18,6 +18,8 @@ import '../../models/call_received_created_data.dart';
 import '../../models/call_received_data.dart';
 import '../../models/call_settings.dart';
 import '../../models/guest_created_data.dart';
+import '../../models/push_device.dart';
+import '../../models/push_provider.dart';
 import '../../models/queried_calls.dart';
 import '../../models/queried_members.dart';
 import '../../models/user_info.dart';
@@ -234,7 +236,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> createDevice({
     required String id,
-    required open.CreateDeviceRequestPushProviderEnum pushProvider,
+    required PushProvider pushProvider,
     String? pushProviderName,
     String? userId,
     bool? voipToken,
@@ -248,7 +250,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       final input = open.CreateDeviceRequest(
         id: id,
-        pushProvider: pushProvider,
+        pushProvider: pushProvider.toOpenDTO(),
         pushProviderName: pushProviderName,
         userId: userId,
         voipToken: voipToken,
@@ -270,7 +272,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
   /// List devices used to receive Push Notifications.
   @override
-  Future<Result<List<open.Device>>> listDevices({
+  Future<Result<List<PushDevice>>> listDevices({
     required String userId,
   }) async {
     try {
@@ -287,7 +289,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       if (result == null) {
         return Result.error('listDevices result is null');
       }
-      return Result.success(result.devices);
+      return Result.success(result.devices.toPushDevices());
     } catch (e, stk) {
       _logger.e(() => '[listDevices] failed: $e; $stk');
       return Result.failure(VideoErrors.compose(e, stk));
@@ -1093,5 +1095,20 @@ class _Authentication extends open.Authentication {
     }
     headerParams['X-Stream-Client'] = streamClientVersion;
     headerParams['x-client-request-id'] = const Uuid().v4();
+  }
+}
+
+extension on PushProvider {
+  open.CreateDeviceRequestPushProviderEnum toOpenDTO() {
+    switch (this) {
+      case PushProvider.firebase:
+        return open.CreateDeviceRequestPushProviderEnum.firebase;
+      case PushProvider.xiaomi:
+        return open.CreateDeviceRequestPushProviderEnum.xiaomi;
+      case PushProvider.huawei:
+        return open.CreateDeviceRequestPushProviderEnum.huawei;
+      case PushProvider.apn:
+        return open.CreateDeviceRequestPushProviderEnum.apn;
+    }
   }
 }
