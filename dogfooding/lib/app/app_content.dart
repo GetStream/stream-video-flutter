@@ -175,7 +175,14 @@ class _StreamDogFoodingAppContentState
     final cid = event.data.callCid;
     if (uuid == null || cid == null) return;
 
-    // TODO: Notify the server that the call was declined.
+    final call = await streamVideo.consumeIncomingCall(uuid: uuid, cid: cid);
+    final callToReject = call.getDataOrNull();
+    if (callToReject == null) return;
+
+    final result = await callToReject.reject();
+    if (result is Failure) {
+      debugPrint('Error rejecting call: ${result.error}');
+    }
   }
 
   void _onCallEnded(ActionCallEnded event) async {
@@ -188,9 +195,9 @@ class _StreamDogFoodingAppContentState
     final call = streamVideo.activeCall;
     if (call == null || call.callCid.value != cid) return;
 
-    final result = await call.end();
+    final result = await call.leave();
     if (result is Failure) {
-      debugPrint('Error ending call: ${result.error}');
+      debugPrint('Error leaving call: ${result.error}');
     }
   }
 

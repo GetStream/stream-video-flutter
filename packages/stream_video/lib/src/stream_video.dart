@@ -26,6 +26,7 @@ import 'logger/stream_log.dart';
 import 'logger/stream_logger.dart';
 import 'models/call_cid.dart';
 import 'models/call_preferences.dart';
+import 'models/call_received_data.dart';
 import 'models/call_ringing_data.dart';
 import 'models/guest_created_data.dart';
 import 'models/queried_calls.dart';
@@ -530,12 +531,18 @@ class StreamVideo {
     }
 
     final callCid = StreamCallCid(cid: cid);
-    final call = makeCall(type: callCid.type, id: callCid.id);
-    final result = await call.getOrCreate();
-
-    if (result is Failure) {
-      return result;
+    final callResult = await _client.getCall(callCid: callCid);
+    if (callResult is! Success<CallReceivedData>) {
+      return callResult as Failure;
     }
+
+    final call = _makeCallFromRinging(
+      data: CallRingingData(
+        callCid: callCid,
+        ringing: true,
+        metadata: callResult.data.metadata,
+      ),
+    );
 
     return Result.success(call);
   }

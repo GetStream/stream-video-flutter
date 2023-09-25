@@ -6,26 +6,6 @@ import 'sample_user.dart';
 final sampleUsers = <SampleUser>[
   SampleUser(
     const UserInfo(
-      id: 'sahil@getstream.io',
-      name: 'Sahil Kumar',
-      role: 'admin',
-      image:
-          'https://lh3.googleusercontent.com/a/AAcHTtfKtkwI9iEK-YKiLZ_qHlO2TbWBQ_pvOTtMNvuS=s1337',
-    ),
-    Env.sampleUserVideoToken00,
-  ),
-  SampleUser(
-    const UserInfo(
-      id: 'deven@getstream.io',
-      name: 'Deven Joshi',
-      role: 'admin',
-      image:
-      'https://lh3.googleusercontent.com/a/AAcHTtfKtkwI9iEK-YKiLZ_qHlO2TbWBQ_pvOTtMNvuS=s1337',
-    ),
-    Env.sampleUserVideoToken00,
-  ),
-  SampleUser(
-    const UserInfo(
       id: Env.sampleUserId00,
       name: Env.sampleUserName00,
       role: Env.sampleUserRole00,
