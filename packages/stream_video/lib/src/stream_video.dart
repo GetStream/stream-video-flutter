@@ -310,11 +310,8 @@ class StreamVideo {
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
       _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
 
-      try {
-        pushNotificationManager?.registerDevice();
-      } catch (e, stk) {
-        _logger.w(() => '[connect] #pnManager; failed: $e, $stk');
-      }
+      // Register device with push notification manager.
+      pushNotificationManager?.registerDevice();
 
       return Result.success(tokenResult.data);
     } catch (e, stk) {
