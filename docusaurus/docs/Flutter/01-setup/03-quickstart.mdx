@@ -21,17 +21,18 @@ Future<void> main() async {
   // Ensure Flutter is able to communicate with Plugins
   WidgetsFlutterBinding.ensureInitialized();
 
-	// Initialize Stream video and set the API key for our app.
-  StreamVideo.init('YOUR-API-KEY', logPriority: Priority.info);
-
-  // Connect a user by calling to our application
-  await StreamVideo.instance.connectUser(
-    const UserInfo(id: 'testing', role: 'admin', name: 'Test User'),
-    'YOUR-TOKEN',
+	// Initialize Stream video and set the API key along with the user for our app.
+  final client = StreamVideo(
+    'YOUR-API-KEY',
+    user: User.regular(userId: 'testing', name: 'Test User'),
+    userToken: 'YOUR-USER-TOKEN',
+    options: const StreamVideoOptions(
+      logPriority: Priority.info,
+    ),
   );
 
   // Set up our call object
-  final call = StreamVideo.instance.makeCall(type: 'default', id: '345');
+  final call = client.makeCall(type: 'default', id: '345');
   // Connect to the call we created
   await call.join();
 
