@@ -160,6 +160,14 @@ class _StreamDogFoodingAppContentState
     final callToJoin = call.getDataOrNull();
     if (callToJoin == null) return;
 
+    var acceptResult = await callToJoin.accept();
+
+    // Return if cannot accept call
+    if(acceptResult.isFailure) {
+      debugPrint('Error accepting call: $call');
+      return;
+    }
+
     // Navigate to the call screen.
     final extra = (
       call: callToJoin,
