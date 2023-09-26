@@ -60,7 +60,7 @@ The [stream_video_flutter_background] package adds background capabilities for t
 
 ### Initialising Stream Video
 
-To start adding the SDK to your app, initialise the Stream Video SDK and connect a user:
+To start adding the SDK to your app, initialise the Stream Video SDK with a user:
 
 ```dart
 import 'package:flutter/material.dart';
@@ -69,15 +69,14 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  StreamVideo.init(
+  final client = StreamVideo(
     'hd8szvscpxvd',
+    user: User.regular(userId: 'vasil', role: 'admin', name: 'Willard Hessel'),
+    userToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmFzaWwifQ.N44i27-o800njeSlcvH2HGlBfTl8MH4vQl0ddkq5BVI',
   );
 
-  // This step is usually done later
-  await StreamVideo.instance.connectUser(
-    const UserInfo(id: 'vasil', role: 'admin', name: 'Willard Hessel'),
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmFzaWwifQ.N44i27-o800njeSlcvH2HGlBfTl8MH4vQl0ddkq5BVI',
-  );
+  // Right after creation client connects to the backend and authenticates the user
+  // To access the client you can simply use `StreamVideo.instance`.
 
   runApp(const MyApp());
 }
