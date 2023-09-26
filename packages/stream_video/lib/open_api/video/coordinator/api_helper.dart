@@ -102,3 +102,17 @@ DateTime? mapDateTime(dynamic map, String key, [String? pattern]) {
   }
   return null;
 }
+
+extension on Map<String, String> {
+  Map<String, DateTime> convertValueToDateTime() {
+    final Map<String, DateTime> output = {};
+    for (var key in keys) {
+      final value = this[key];
+      if (value == null) continue;
+      final dateTime = DateTime.tryParse(value);
+      if (dateTime == null) continue;
+      output[key] = dateTime;
+    }
+    return output;
+  }
+}
