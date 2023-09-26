@@ -48,7 +48,8 @@ mixin StateSfuMixin on StateNotifier<CallState> {
     final participants = event.callState.participants.map((aParticipant) {
       final isLocal = aParticipant.userId == state.currentUserId;
       final existing = state.callParticipants.firstWhereOrNull(
-        (it) => it.userId == aParticipant.userId,
+        (it) => it.userId == aParticipant.userId
+            && it.sessionId == aParticipant.sessionId,
       );
       final existingName = existing?.name ?? '';
       final existingRole = existing?.role ?? '';
@@ -212,10 +213,20 @@ mixin StateSfuMixin on StateNotifier<CallState> {
       isLocal: isLocal,
       isOnline: !isLocal,
     );
+    var isExisting = false;
+    final participants = state.callParticipants.map((it) {
+      if (it.userId == participant.userId &&
+          it.sessionId == participant.sessionId) {
+        isExisting = true;
+        return participant;
+      } else {
+        return it;
+      }
+    });
     state = state.copyWith(
       callParticipants: [
-        ...state.callParticipants,
-        participant,
+        ...participants,
+        if (!isExisting) participant,
       ],
     );
   }
