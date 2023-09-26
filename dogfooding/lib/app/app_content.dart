@@ -162,6 +162,7 @@ class _StreamDogFoodingAppContentState
 
     var acceptResult = await callToJoin.accept();
 
+    // Return if cannot accept call
     if(acceptResult.isFailure) {
       debugPrint('Error accepting call: $call');
       return;
