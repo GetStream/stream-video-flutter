@@ -1,6 +1,6 @@
 name: stream_video_push_notification
 description: Adds push notification support for Stream Video, a service for building video calls, audio rooms, and live-streaming applications.
-version: 0.0.4
+version: 0.1.0
 homepage: https://getstream.io/video/
 repository: https://github.com/GetStream/stream-video-flutter
 issue_tracker: https://github.com/GetStream/stream-video-flutter/issues
@@ -40,6 +40,8 @@ flutter:
   # adding or updating assets for this project.
   plugin:
     platforms:
+      android:
+        default_package: stream_chat_flutter
       ios:
         pluginClass: StreamVideoPushNotificationPlugin
 
