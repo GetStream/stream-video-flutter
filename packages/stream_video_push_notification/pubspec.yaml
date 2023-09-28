@@ -13,7 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   firebase_messaging: ^14.6.6
-  stream_video: ^0.0.3
+  stream_video: ^0.1.0
   flutter_callkit_incoming: ^2.0.0+1
   uuid: ^3.0.7
   rxdart: ^0.27.7
