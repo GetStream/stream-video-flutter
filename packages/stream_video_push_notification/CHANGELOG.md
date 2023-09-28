@@ -1,3 +1,10 @@
+## 0.1.0
+
+* Added helper class for iOS native push initialization
+* Fixes for iOS CallKit implementation
+* Fixes for Android ringing implementation
+* Added event listeners for call state changes
+
 ## 0.0.4
 
 * Updated minimum supported `SDK` version to Flutter 3.10/Dart 3.0

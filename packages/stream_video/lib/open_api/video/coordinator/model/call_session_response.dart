@@ -141,16 +141,17 @@ class CallSessionResponse {
         });
         return true;
       }());
-
       return CallSessionResponse(
-        acceptedBy: mapCastOfType<String, DateTime>(json, r'accepted_by')!,
+        acceptedBy: mapCastOfType<String, String>(json, r'accepted_by')!
+            .convertValueToDateTime(),
         endedAt: mapDateTime(json, r'ended_at', ''),
         id: mapValueOfType<String>(json, r'id')!,
         liveEndedAt: mapDateTime(json, r'live_ended_at', ''),
         liveStartedAt: mapDateTime(json, r'live_started_at', ''),
         participants: CallParticipantResponse.listFromJson(json[r'participants']),
         participantsCountByRole: mapCastOfType<String, int>(json, r'participants_count_by_role')!,
-        rejectedBy: mapCastOfType<String, DateTime>(json, r'rejected_by')!,
+        rejectedBy: mapCastOfType<String, String>(json, r'rejected_by')!
+            .convertValueToDateTime(),
         startedAt: mapDateTime(json, r'started_at', ''),
       );
     }

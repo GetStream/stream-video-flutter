@@ -1,16 +1,16 @@
 // 📦 Package imports:
 import 'package:flutter/foundation.dart';
+// 🌎 Project imports:
+import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
+import 'package:flutter_dogfooding/core/repos/user_chat_repository.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide User;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-
-// 🌎 Project imports:
-import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
-import 'package:flutter_dogfooding/core/repos/user_chat_repository.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
+
 import '../app/user_auth_controller.dart';
 import '../core/repos/token_service.dart';
 import '../core/repos/user_auth_repository.dart';
@@ -69,6 +69,7 @@ class AppInjector {
   static StreamVideo registerStreamVideo(User user) {
     _setupLogger();
     return locator.registerSingleton(
+      dispose: (_) => StreamVideo.reset(),
       _initStreamVideo(
         user,
         tokenLoader: switch (user.type) {

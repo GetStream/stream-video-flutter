@@ -12,50 +12,66 @@ Before users are able to join or create a call, the client must first be configu
 The initialization constructor for `StreamVideo` also exposes many customization options which can be overridden based on the project needs such as the logging level, SDP policy, retry policy, etc.
 
 ```dart
-static StreamVideo init(
-    String apiKey, {
-    LatencySettings latencySettings = const LatencySettings(),
-    RetryPolicy retryPolicy = const RetryPolicy(),
-    SdpPolicy sdpPolicy = _defaultSdpPolicy,
-    Priority logPriority = Priority.none,
-    LogHandlerFunction logHandlerFunction = _defaultLogHandler,
-  })
+factory StreamVideo(
+  String apiKey, {
+  StreamVideoOptions options = StreamVideoOptions(
+    coordinatorRpcUrl: _defaultCoordinatorRpcUrl,
+    coordinatorWsUrl: _defaultCoordinatorWsUrl,
+    latencySettings: const LatencySettings(),
+    sdpPolicy: const SdpPolicy(),
+    retryPolicy: const RetryPolicy(),
+    logPriority: Priority.none,
+    logHandlerFunction: _defaultLogHandler,
+    muteVideoWhenInBackground: false,
+    muteAudioWhenInBackground: false,
+    autoConnect: true,
+  ),
+  required User user,
+  String? userToken,
+  TokenLoader? tokenLoader,
+  OnTokenUpdated? onTokenUpdated,
+  bool failIfSingletonExists = true,
+  PNManagerProvider? pushNotificationManagerProvider,
+});
 ```
 
 ### Working with Tokens
 
 All tokens must be generated via a backend SDK and cannot be created from a frontend client. This step is typically included whenever a new user is registered on your backend.
 
-There are a few ways in which users can connect using our SDK. We support both long lived tokens and dynamic tokens via two constructors accessible on the `StreamVideo` class:
+There are a few ways in which users can connect using our SDK. We support both long lived tokens and dynamic tokens via two parameters accessible on the `StreamVideo` class:
 
-- `connectUser(UserInfo user, String token)`
-- `connectUserWithProvider(user, tokenProvider)`
+- `StreamVideo(apiKey, user: User, userToken: String)`
+- `StreamVideo(apiKey, user: User, tokenLoader: TokenLoader)`
 
-For situations where your backend does not require tokens to be refreshed, `connectUser` can be used by simply passing in a `UserInfo` object and the token as a `String`.
+For situations where your backend does not require tokens to be refreshed, the first variant can be used by simply passing in a `User` object and the `userToken` as a `String`.
 
 *Dynamic tokens*
 
-Using `connectUserWithProvider`, a Token Provider can be used to dynamically load a token from a server. On expiration, the SDK automatically calls the Token Provider to obtain a new token.
+Using the second variant, a Token Loader can be used to dynamically load a token from a server. On expiration, the SDK automatically calls the Token Loader to obtain a new token.
 
-As long as your handler returns a `String` it will satisfy the contract of `TokenProvider`
+As long as your handler returns a `String` it will satisfy the contract of `TokenLoader`
 
 ```dart
 Future<String> _tokenLoader(String userId) async {
-    final token = await backend.loadToken(
-      apiKey: Env.apiKey,
-      userId: userId,
-    );
-    return token;
-  }
+  final token = await backend.loadToken(
+    apiKey: Env.apiKey,
+    userId: userId,
+  );
+  return token;
+}
 ```
 
 ```dart
-await streamVideo.connectUserWithProvider(
-      user,
-      tokenProvider: TokenProvider.dynamic(_tokenLoader, (token) async {
-				// Callback function with the token
-      }),
-    );
+StreamVideo(
+  apiKey, 
+  user: user, 
+  tokenLoader: _tokenLoader,
+  onTokenUpdated: (token) async {
+    // Callback function with the token.
+    // Called when the token is updated.
+  },
+);
 ```
 
 ### Anonymous users
@@ -65,25 +81,19 @@ For use-cases like live streaming or guest meeting, you may want to allow users 
 For these use-cases, the SDK has a guest endpoint which can be used to create a temporary user
 
 ```dart
-final guest = await streamVideo.createGuest(
-      id: guestId,
-      name: guestId,
-      image: imageUrl,
-    );
-    final data = guest.getDataOrNull();
-    if (data == null) {
-      throw Exception();
-    }
+final guest = User.guest(userId: guestId, name: guestName, image: guestImage);
+final client = StreamVideo(
+  apiKey,
+  user: guest,
+);
 
-    final userInfo = UserInfo(
-      id: data.user.id,
-      image: data.user.image,
-      name: data.user.name ?? '',
-      teams: data.user.teams ?? [],
-      role: data.user.role,
-    );
-
-    await streamVideo.connectUser(userInfo, data.accessToken);
+final result = await client.connect();
+// if result wasn't successful, then result will return null
+final userToken = result.getDataOrNull();
+final userInfo = client.currentUser;
 ```
+:::note
+`userInfo.id` will be slightly different from what you passed in. This is because the SDK will generate a unique ID for the user.
+Please user the generated ID across your app.
+:::
 
-`createGuest` returns user information and a token which can be used to construct information about the user and connect to the API.
