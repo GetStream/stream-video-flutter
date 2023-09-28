@@ -66,116 +66,211 @@ Once that's done, FCM should be able to send push notifications to your devices.
 Add these permissions to `AndroidManifest.xml` in order to support video calling:
 
 ```xml
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-feature android:name="android.hardware.camera"/>
-    <uses-feature android:name="android.hardware.camera.autofocus"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
-    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+<uses-permission android:name="android.permission.INTERNET"/>
+<uses-feature android:name="android.hardware.camera"/>
+<uses-feature android:name="android.hardware.camera.autofocus"/>
+<uses-permission android:name="android.permission.CAMERA"/>
+<uses-permission android:name="android.permission.RECORD_AUDIO"/>
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+<uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
+<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
+<uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
 ```
 
 #### Step 5 - Add code to listen to push notifications
 
+We recommend storing user credentials locally when the user logs in so you can log the user in when
+a push notification is received.
+
 - Add the following code in your `main.dart` as global functions to listen to background notifications:
 
 ```dart
+// As this runs in a separate isolate, we need to setup the app again.
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  await AppRepository.initStreamVideo(); // TODO(Deven): Replace this line with a good way to initialise the client and push notification manager
-  await _handleRemoteMessage(message);
+
+  // Initialise Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  try {
+    // Get stored user credentials
+    var credentials = yourUserCredentialsGetMethod();
+    if (credentials == null) return;
+
+    // Initialise StreamVideo
+    StreamVideo(
+      // ...
+      // Make sure you initialise push notification manager
+      pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
+        iosPushProvider: const StreamVideoPushProvider.apn(
+          name: 'your-ios-provider-name',
+        ),
+        androidPushProvider: const StreamVideoPushProvider.firebase(
+          name: 'your-fcm-provider',
+        ),
+        pushParams: const StreamVideoPushParams(
+          appName: kAppName,
+          ios: IOSParams(iconName: 'IconMask'),
+        ),
+      ),
+    );
+
+    // Pass it along to the handler
+    await _handleRemoteMessage(message);
+  } catch (e, stk) {
+    debugPrint('Error handling remote message: $e');
+    debugPrint(stk.toString());
+  }
+
+  StreamVideo.reset();
 }
 
 Future<void> _handleRemoteMessage(RemoteMessage message) async {
-  await StreamVideo.instance.handlePushNotification(message.data);
+  await StreamVideo.instance.handleVoipPushNotification(message.data);
 }
 ```
 
-- The following changes are for the root widget of your app. First, add the `WidgetsBindingObserver` mixin to your widget state.
-Then add the `didChangeAppLifecycleState()` method to consume any incoming calls when the app is resumed.
+In a high-level widget in your app, add this code to listen to CallKit events:
 
 ```dart
-class _StreamDemoState extends State<StreamDemoApp> with WidgetsBindingObserver {
+final _callKitEventSubscriptions = Subscriptions();
 
-      // ...
+void _observeCallKitEvents() {
+  final streamVideo = StreamVideo.instance;
+  _callKitEventSubscriptions.addAll([
+    streamVideo.onCallKitEvent<ActionCallAccept>(_onCallAccept),
+    streamVideo.onCallKitEvent<ActionCallDecline>(_onCallDecline),
+    streamVideo.onCallKitEvent<ActionCallEnded>(_onCallEnded),
+    // You can add additional events if you need to handle them
+    // As an example, handling mute events from CallKit
+  ]);
+}
 
-      @override
-      void didChangeAppLifecycleState(AppLifecycleState state) {
-        super.didChangeAppLifecycleState(state);
-        switch (state) {
-          case AppLifecycleState.resumed:
-            _consumeIncomingCall();
-            break;
-          case AppLifecycleState.inactive:
-            // widget is inactive
-            break;
-          case AppLifecycleState.paused:
-            // widget is paused
-            break;
-          case AppLifecycleState.detached:
-            // widget is detached
-            break;
-        }
-      }
+void _onCallAccept(ActionCallAccept event) async {
+  final streamVideo = StreamVideo.instance;
+
+  final uuid = event.data.uuid;
+  final cid = event.data.callCid;
+  if (uuid == null || cid == null) return;
+
+  final call = await streamVideo.consumeIncomingCall(uuid: uuid, cid: cid);
+  final callToJoin = call.getDataOrNull();
+  if (callToJoin == null) return;
+
+  var acceptResult = await callToJoin.accept();
+
+  // Return if cannot accept call
+  if(acceptResult.isFailure) {
+    debugPrint('Error accepting call: $call');
+    return;
+  }
+
+  // Data for next screen
+  final extra = (
+    call: callToJoin,
+    connectOptions: const CallConnectOptions(),
+  );
+
+  // Navigate to next screen if needed
+}
+
+void _onCallDecline(ActionCallDecline event) async {
+  final streamVideo = StreamVideo.instance;
+
+  final uuid = event.data.uuid;
+  final cid = event.data.callCid;
+  if (uuid == null || cid == null) return;
+
+  final call = await streamVideo.consumeIncomingCall(uuid: uuid, cid: cid);
+  final callToReject = call.getDataOrNull();
+  if (callToReject == null) return;
+
+  final result = await callToReject.reject();
+  if (result is Failure) {
+    debugPrint('Error rejecting call: ${result.error}');
+  }
+}
+
+void _onCallEnded(ActionCallEnded event) async {
+  final streamVideo = StreamVideo.instance;
+
+  final uuid = event.data.uuid;
+  final cid = event.data.callCid;
+  if (uuid == null || cid == null) return;
+
+  final call = streamVideo.activeCall;
+  if (call == null || call.callCid.value != cid) return;
+
+  final result = await call.leave();
+  if (result is Failure) {
+    debugPrint('Error leaving call: ${result.error}');
+  }
+}
+
+@override
+void dispose() {
+  // ...
+  _callKitEventSubscriptions.cancelAll();
 }
 ```
 
-- In the `initState()` method of the widget, add the following code:
+Please add an additional extension at the end of the class / in a different file that we added to make
+subscriptions simpler:
 
 ```dart
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
-    _tryConsumingIncomingCallFromTerminatedState();
-    //...
+extension on Subscriptions {
+  void addAll<T>(Iterable<StreamSubscription<T>?> subscriptions) {
+    for (var i = 0; i < subscriptions.length; i++) {
+      final subscription = subscriptions.elementAt(i);
+      if (subscription == null) continue;
+
+      add(i + 100, subscription);
+    }
   }
+}
 ```
 
-The last method called in `initState()` handles incoming calls when starting the app from a terminated state. Add these functions to the widget:
+The code upto this point handles calls for the background and foreground state of the app.
+To handle calls from a terminated state, we need to add some additional code.
+
+In a high-level widget, add this method and call it from the `initState()` method:
 
 ```dart
-  void _tryConsumingIncomingCallFromTerminatedState() {
-    if (_navigatorKey.currentContext == null) {
-      // App is not running yet. Postpone consuming after app is in the foreground
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        _consumeIncomingCall();
-      });
-    } else {
-      // no-op. If the app is already running we'll handle this in didChangeAppLifecycleState
-    }
-  }
+@override
+void initState() {
+  //...
+  _tryConsumingIncomingCallFromTerminatedState();
+}
 
-  Future<void> _consumeIncomingCall() async {
-    if (_navigatorKey.currentContext == null) {
-      return;
-    }
-    final incomingCall = await StreamVideo.instance.consumeIncomingCall();
-    if (incomingCall != null) {
-      // Navigate to your call page
-    }
+void _tryConsumingIncomingCallFromTerminatedState() {
+  if (_navigatorKey.currentContext == null) {
+    // App is not running yet. Postpone consuming after app is in the foreground
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _consumeIncomingCall();
+    });
+  } else {
+    // no-op. If the app is already running we'll handle this in didChangeAppLifecycleState
   }
+}
+
+Future<void> _consumeIncomingCall() async {
+  final calls = await StreamVideo.instance.pushNotificationManager?.activeCalls();
+  if (calls == null || calls.isEmpty) return;
+
+  final call = await StreamVideo.instance.consumeIncomingCall(
+    uuid: calls.first.uuid,
+    cid: calls.first.callCid,
+  );
+}
 ```
 
-- Finally, add a `NavigatorKey` and add it to your `MaterialApp`/`CupertinoApp`/`WidgetsApp`:
+If you need to manage the CallKit call, you can use the `StreamVideo.pushNotificationManager`. As an example, let's
+say you want to end all calls on the CallKit side, you can end them this way:
 
 ```dart
-  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: _navigatorKey,
-      ...
-    );
-  }
+StreamVideo.instance.pushNotificationManager?.endAllCalls();
 ```
 
 ### Integrating APNs for iOS
@@ -209,75 +304,46 @@ There are no dependencies on the Flutter side that you need to add specifically 
 Add these permissions to `Info.plist` in order to support video calling:
 
 ```plist
-    <key>NSCameraUsageDescription</key>
-	<string>$(PRODUCT_NAME) Camera Usage!</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>$(PRODUCT_NAME) Microphone Usage!</string>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>audio</string>
-		<string>fetch</string>
-		<string>processing</string>
-		<string>remote-notification</string>
-		<string>voip</string>
-	</array>
+<key>NSCameraUsageDescription</key>
+<string>$(PRODUCT_NAME) Camera Usage!</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>$(PRODUCT_NAME) Microphone Usage!</string>
+<key>UIApplicationSupportsIndirectInputEvents</key>
+<true/>
+<key>UIBackgroundModes</key>
+<array>
+	<string>audio</string>
+	<string>fetch</string>
+	<string>processing</string>
+	<string>remote-notification</string>
+	<string>voip</string>
+</array>
 ```
 
 #### Step 5 - Add native code to the iOS project
 
-In your iOS project, add these imports to your `AppDelegate.swift`:
+In your iOS project, add the following imports to your `AppDelegate.swift`:
 
 ```swift
 import UIKit
 import Flutter
-import PushKit
 import stream_video_push_notification
-import flutter_callkit_incoming
 ```
 
-In the same file, add these methods to your `AppDelegate` class:
+In the same file, add an extra line to your `AppDelegate` class which registers the app for push notifications:
 
 ```swift
-    func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType) {
-        let deviceToken = credentials.token.map { String(format: "%02x", $0) }.joined()
-        SwiftStreamVideoPushNotificationPlugin.setDevicePushTokenVoIP(deviceToken: deviceToken)
-    }
+override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+) -> Bool {
+    GeneratedPluginRegistrant.register(with: self)
 
-    func pushRegistry(
-        _ registry: PKPushRegistry,
-        didReceiveIncomingPushWith payload: PKPushPayload,
-        for type: PKPushType,
-        completion: @escaping () -> Void
-    ) {
-        let state = UIApplication.shared.applicationState
-        if state == .active {
-            completion()
-            return
-        }
+    // Register for push notifications.
+    StreamVideoPKDelegateManager.shared.registerForPushNotifications()
 
-        let aps = payload.dictionaryPayload["aps"] as? [String: Any]
-        let streamDict = payload.dictionaryPayload["stream"] as? [String: Any]
-        let createdCallerName = streamDict?["created_by_display_name"] as? String ?? ""
-        let callCid = streamDict?["call_cid"] as? String ?? ""
-
-        let id = UUID().uuidString
-        let isVideo = payload.dictionaryPayload["isVideo"] as? Bool ?? false
-
-        if((SwiftFlutterCallkitIncomingPlugin.sharedInstance?.activeCalls().count ?? 0) >= 1){
-            return;
-        }
-
-        let data = flutter_callkit_incoming.Data(id: id, nameCaller: callCid, handle: createdCallerName, type: isVideo ? 1 : 0)
-        data.extra = ["incomingCallCid": callCid, "platform": "ios"]
-
-        SwiftFlutterCallkitIncomingPlugin.sharedInstance?.showCallkitIncoming(data, fromPushKit: true)
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            completion()
-        }
-    }
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+}
 ```
 
 ### Registering a Device With Stream Backend
