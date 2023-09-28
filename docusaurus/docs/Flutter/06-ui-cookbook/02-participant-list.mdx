@@ -73,7 +73,7 @@ class _ParticipantListScreenState extends State<ParticipantListScreen> {
 
   @override
   void initState() {
-    widget.call.connect();
+    widget.call.join();
 
     _callState = widget.call.state.value;
     _subscription = widget.call.state.listen((callState) {
@@ -142,7 +142,7 @@ class _ParticipantListScreenState extends State<ParticipantListScreen> {
 
   @override
   void initState() {
-    widget.call.connect();
+    widget.call.join();
 
     _callState = widget.call.state.value;
     _subscription = widget.call.state.listen((callState) {
