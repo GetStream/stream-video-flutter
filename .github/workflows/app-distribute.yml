@@ -1,7 +1,6 @@
 name: App Distribute CI
 
 on:
-  pull_request:
   push:
     branches:
       - main
