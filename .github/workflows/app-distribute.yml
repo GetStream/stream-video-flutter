@@ -78,7 +78,7 @@ jobs:
       - name: Prepare environment
         run: |
           echo "${{ env.ENV_PROPERTIES }}" > .env
-          echo "${{ env.CREDENTIAL_FILE_CONTENT }}" > dogfooding/android/fastlane/firebase-service-account.json
+          echo "${{ env.CREDENTIAL_FILE_CONTENT }}" | base64 --decode | jq > dogfooding/android/fastlane/firebase-service-account.json
 
       - name: Setup Ruby and Gems
         uses: ruby/setup-ruby@v1
