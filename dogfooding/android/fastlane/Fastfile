@@ -28,6 +28,7 @@ platform :android do
       release_notes: "Lots of amazing new features to test out!",
       android_artifact_type: "APK",
       android_artifact_path: "#{root_path}/build/app/outputs/flutter-apk/app-release.apk",
+      service_credentials_file: "#{root_path}/fastlane/firebase-service-account.json",
     )
   end
 end
