@@ -9,7 +9,7 @@ env:
   FLUTTER_CHANNEL: stable
   ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
   MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-  FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+  CREDENTIAL_FILE_CONTENT: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
   MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
   APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
   APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
@@ -75,7 +75,9 @@ jobs:
         run: melos bootstrap
 
       - name: Prepare environment
-        run: echo "${{ env.ENV_PROPERTIES }}" > .env
+        run: |
+          echo "${{ env.ENV_PROPERTIES }}" > .env
+          echo "${{ env.CREDENTIAL_FILE_CONTENT }}" | base64 --decode | jq > dogfooding/android/fastlane/firebase-service-account.json
 
       - name: Setup Ruby and Gems
         uses: ruby/setup-ruby@v1
