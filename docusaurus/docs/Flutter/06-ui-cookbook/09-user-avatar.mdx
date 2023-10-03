@@ -1,0 +1,85 @@
+# User Avatar
+
+User avatars on video calling screens are important for identifying users, creating a sense of presence, and expressing personality.
+As such, it is important to be able to customise user avatars according to your app specifications.
+
+![User Avatar](../assets/cookbook/user-avatar.png)
+
+## Customising the user avatar
+
+The user avatar can be modified via the `userAvatarTheme` parameter of the `StreamCallParticipant` widget:
+
+```dart
+StreamCallContainer(
+  // ...
+  callContentBuilder: (
+    BuildContext context,
+    Call call,
+    CallState callState,
+  ) {
+    return StreamCallContent(
+      call: call,
+      callState: callState,
+      callParticipantsBuilder: (
+        BuildContext context,
+        Call call,
+        CallState callState,
+      ) {
+        return StreamCallParticipants(
+          call: call,
+          participants: callState.callParticipants,
+          callParticipantBuilder: (
+            BuildContext context,
+            Call call,
+            CallParticipantState participantState,
+          ) {
+            return StreamCallParticipant(
+              call: call,
+              participant: participantState,
+              userAvatarTheme: StreamUserAvatarThemeData(),
+            );
+          },
+        );
+      },
+    );
+  },
+),
+```
+
+### Customising size of the avatar
+
+You can change the size of the user avatar on the screen by providing it `BoxConstraints` using the constraints parameter.
+The default value of the constraints is `BoxConstraints.tightFor(height: 40, width: 40)`.
+
+```dart
+StreamUserAvatarThemeData(
+  constraints: const BoxConstraints.tightFor(
+    height: 50,
+    width: 50,
+  ),
+),
+```
+
+### Customising border radius of the avatar
+
+You can change the border radius of the user avatar using the `borderRadius` parameter.
+The default value for border radius is `20` units.
+
+```dart
+StreamUserAvatarThemeData(
+  borderRadius: const BorderRadius.all(Radius.circular(25)),
+),
+```
+
+### Changing the style of initials displayed
+
+If the user does not have an image to be displayed, initials of the user are displayed instead.
+To change the style of these initials, you can use the `initialsTextStyle` parameter:
+
+```dart
+StreamUserAvatarThemeData(
+  initialsTextStyle: TextStyle(
+    fontWeight: FontWeight.bold,
+  ),
+),
+```
