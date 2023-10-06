@@ -251,6 +251,10 @@ class StreamVideo {
 
   /// Connects the user to the Stream Video service.
   Future<Result<UserToken>> connect() async {
+    if (currentUserType == UserType.anonymous) {
+      _logger.w(() => '[connect] rejected (anonymous user)');
+      return Result.error('Cannot connect anonymous user to the WS');
+    }
     _connectOperation ??= _connect().asCancelable();
     return _connectOperation!
         .valueOrDefault(Result.error('connect was cancelled'))
