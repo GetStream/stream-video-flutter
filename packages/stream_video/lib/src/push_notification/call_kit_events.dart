@@ -4,8 +4,11 @@ part of 'push_notification_manager.dart';
 ///
 /// Instances of this class are used to signify different call events that can be
 /// received from [PushNotificationManager].
-sealed class CallKitEvent {
+sealed class CallKitEvent with EquatableMixin {
   const CallKitEvent();
+
+  @override
+  bool? get stringify => true;
 }
 
 /// Event for updating the VoIP push token on the device (iOS specific).
@@ -16,6 +19,9 @@ class ActionDidUpdateDevicePushTokenVoip extends CallKitEvent {
 
   /// The updated device push token for VoIP.
   final String token;
+
+  @override
+  List<Object?> get props => [token];
 }
 
 /// Represents an incoming call event.
@@ -27,6 +33,9 @@ class ActionCallIncoming extends CallKitEvent {
 
   /// The call data associated with the incoming call.
   final CallData data;
+
+  @override
+  List<Object?> get props => [data];
 }
 
 /// Represents a call start event.
@@ -38,6 +47,9 @@ class ActionCallStart extends CallKitEvent {
 
   /// The call data associated with the outgoing call.
   final CallData data;
+
+  @override
+  List<Object?> get props => [data];
 }
 
 /// Represents a call accept event.
@@ -51,6 +63,9 @@ class ActionCallAccept extends CallKitEvent {
 
   /// The call data associated with the call that was accepted.
   final CallData data;
+
+  @override
+  List<Object?> get props => [data];
 }
 
 /// Represents a call decline event.
@@ -64,6 +79,9 @@ class ActionCallDecline extends CallKitEvent {
 
   /// The call data associated with the call that was declined.
   final CallData data;
+
+  @override
+  List<Object?> get props => [data];
 }
 
 /// Represents a call end event.
@@ -76,6 +94,9 @@ class ActionCallEnded extends CallKitEvent {
 
   /// The call data associated with the call that ended.
   final CallData data;
+
+  @override
+  List<Object?> get props => [data];
 }
 
 /// Represents a call timeout event.
@@ -88,6 +109,9 @@ class ActionCallTimeout extends CallKitEvent {
 
   /// The call data associated with the call that timed out.
   final CallData data;
+
+  @override
+  List<Object?> get props => [data];
 }
 
 /// Represents a call callback event.
@@ -102,6 +126,9 @@ class ActionCallCallback extends CallKitEvent {
 
   /// The call data associated with the call that was called back.
   final CallData data;
+
+  @override
+  List<Object?> get props => [data];
 }
 
 /// Represents a call toggle hold event.
@@ -120,6 +147,9 @@ class ActionCallToggleHold extends CallKitEvent {
 
   /// Indicates whether the call is on hold.
   final bool isOnHold;
+
+  @override
+  List<Object?> get props => [uuid, isOnHold];
 }
 
 /// Represents a call toggle mute event.
@@ -138,6 +168,9 @@ class ActionCallToggleMute extends CallKitEvent {
 
   /// Indicates whether the call is muted.
   final bool isMuted;
+
+  @override
+  List<Object?> get props => [uuid, isMuted];
 }
 
 /// Represents a call toggle DMTF event.
@@ -156,6 +189,9 @@ class ActionCallToggleDmtf extends CallKitEvent {
 
   /// The digits to send.
   final String digits;
+
+  @override
+  List<Object?> get props => [uuid, digits];
 }
 
 /// Represents a call toggle group event.
@@ -174,6 +210,9 @@ class ActionCallToggleGroup extends CallKitEvent {
 
   /// The unique identifier for the call to group with.
   final String callUUIDToGroupWith;
+
+  @override
+  List<Object?> get props => [uuid, callUUIDToGroupWith];
 }
 
 /// Represents a call toggle audio session event.
@@ -186,6 +225,9 @@ class ActionCallToggleAudioSession extends CallKitEvent {
 
   /// Indicates whether the audio session is active.
   final bool isActivate;
+
+  @override
+  List<Object?> get props => [isActivate];
 }
 
 /// Represents a custom call event.
@@ -195,6 +237,9 @@ class ActionCallCustom extends CallKitEvent {
 
   /// The custom data associated with the call.
   final Map<String, Object?>? body;
+
+  @override
+  List<Object?> get props => [body];
 }
 
 /// Represents call data with various properties related to the call.
@@ -202,7 +247,7 @@ class ActionCallCustom extends CallKitEvent {
 /// This class encapsulates information about an ongoing or past call, including
 /// unique identifiers, caller's avatar, handle, name, video availability, and
 /// additional extra data associated with the call.
-class CallData {
+class CallData with EquatableMixin {
   /// Creates a [CallData] instance with the provided details.
   const CallData({
     this.uuid,
@@ -234,4 +279,18 @@ class CallData {
 
   /// Extra data associated with the call.
   final Map<String, Object?>? extraData;
+
+  @override
+  bool? get stringify => true;
+
+  @override
+  List<Object?> get props => [
+        uuid,
+        callCid,
+        avatar,
+        handle,
+        nameCaller,
+        hasVideo,
+        extraData,
+      ];
 }

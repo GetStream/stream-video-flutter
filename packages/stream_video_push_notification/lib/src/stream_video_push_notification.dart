@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'stream_video_push_params.dart';
@@ -82,7 +83,10 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   @override
   Stream<CallKitEvent> get onCallEvent {
-    return StreamCallKit().onEvent.map((event) => event.toCallKitEvent());
+    return StreamCallKit()
+        .onEvent
+        .map((event) => event.toCallKitEvent())
+        .doOnData((event) => _logger.v(() => '[onCallKitEvent] event: $event'));
   }
 
   @override
