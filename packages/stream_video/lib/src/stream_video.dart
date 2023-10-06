@@ -431,6 +431,7 @@ class StreamVideo {
       coordinatorClient: _client,
       currentUser: _state.user,
       setActiveCall: _state.setActiveCall,
+      getActiveCallCid: _state.getActiveCallCid,
       retryPolicy: _options.retryPolicy,
       sdpPolicy: _options.sdpPolicy,
       preferences: preferences,
@@ -446,6 +447,7 @@ class StreamVideo {
       coordinatorClient: _client,
       currentUser: _state.user,
       setActiveCall: _state.setActiveCall,
+      getActiveCallCid: _state.getActiveCallCid,
       retryPolicy: _options.retryPolicy,
       sdpPolicy: _options.sdpPolicy,
       preferences: preferences,
@@ -476,6 +478,9 @@ class StreamVideo {
     String? pushProviderName,
     bool? voipToken,
   }) {
+    _logger.d(() => '[addDevice] pushProvider: $pushProvider'
+        ', pushToken: $pushToken, pushProviderName: $pushProviderName'
+        ', voipToken: $voipToken');
     return _client.createDevice(
       id: pushToken,
       pushProvider: pushProvider,
@@ -494,6 +499,7 @@ class StreamVideo {
   Future<Result<None>> removeDevice({
     required String pushToken,
   }) {
+    _logger.d(() => '[removeDevice] pushToken: $pushToken');
     return _client.deleteDevice(id: pushToken, userId: currentUser.id);
   }
 
@@ -502,7 +508,7 @@ class StreamVideo {
   ) {
     final manager = pushNotificationManager;
     if (manager == null) {
-      _logger.e(() => '[on] rejected (no manager)');
+      _logger.e(() => '[onCallKitEvent] rejected (no manager)');
       return null;
     }
 
@@ -513,6 +519,7 @@ class StreamVideo {
   ///
   /// Returns `true` if the notification was handled, `false` otherwise.
   Future<bool> handleVoipPushNotification(Map<String, dynamic> payload) async {
+    _logger.d(() => '[handleVoipPushNotification] payload: $payload');
     final manager = pushNotificationManager;
     if (manager == null) {
       _logger.e(() => '[handleVoipPushNotification] rejected (no manager)');
@@ -552,6 +559,7 @@ class StreamVideo {
     required String uuid,
     required String cid,
   }) async {
+    _logger.d(() => '[consumeIncomingCall] uuid: $uuid, cid: $cid');
     final manager = pushNotificationManager;
     if (manager == null) {
       return const Result.failure(
