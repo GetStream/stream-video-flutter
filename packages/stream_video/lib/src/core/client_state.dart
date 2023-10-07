@@ -1,4 +1,5 @@
 import '../call/call.dart';
+import '../models/call_cid.dart';
 import '../models/user.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
@@ -52,6 +53,8 @@ class MutableClientState implements ClientState {
     activeCall.value = null;
     connection.value = ConnectionState.disconnected(user.value.id);
   }
+
+  StreamCallCid? getActiveCallCid() => activeCall.valueOrNull!.callCid;
 
   Future<void> setActiveCall(Call? call) async {
     final ongoingCall = activeCall.valueOrNull;

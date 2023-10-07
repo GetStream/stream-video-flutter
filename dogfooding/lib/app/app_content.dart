@@ -1,20 +1,15 @@
-// 🎯 Dart imports:
 import 'dart:async';
 
-// 🐦 Flutter imports:
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-// 📦 Package imports:
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_dogfooding/router/routes.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide User;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:uni_links/uni_links.dart';
 
-// 🌎 Project imports:
-import 'package:flutter_dogfooding/router/routes.dart';
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
 import '../firebase_options.dart';
@@ -67,6 +62,7 @@ class _StreamDogFoodingAppContentState
     extends State<StreamDogFoodingAppContent> {
   late final _userAuthController = locator.get<UserAuthController>();
 
+  late final _logger = taggedLogger(tag: 'StreamDogFoodingAppContent');
   late final _router = initRouter(_userAuthController);
 
   @override
@@ -150,6 +146,7 @@ class _StreamDogFoodingAppContentState
   }
 
   void _onCallAccept(ActionCallAccept event) async {
+    _logger.d(() => '[onCallAccept] event: $event');
     final streamVideo = locator.get<StreamVideo>();
 
     final uuid = event.data.uuid;
@@ -163,7 +160,7 @@ class _StreamDogFoodingAppContentState
     var acceptResult = await callToJoin.accept();
 
     // Return if cannot accept call
-    if(acceptResult.isFailure) {
+    if (acceptResult.isFailure) {
       debugPrint('Error accepting call: $call');
       return;
     }
@@ -177,6 +174,7 @@ class _StreamDogFoodingAppContentState
   }
 
   void _onCallDecline(ActionCallDecline event) async {
+    _logger.d(() => '[onCallDecline] event: $event');
     final streamVideo = locator.get<StreamVideo>();
 
     final uuid = event.data.uuid;

@@ -30,6 +30,7 @@ typedef OnCallPermissionRequest = void Function(
 typedef GetCurrentUserId = String? Function();
 
 typedef SetActiveCall = Future<void> Function(Call?);
+typedef GetActiveCallCid = StreamCallCid? Function();
 
 const _idState = 1;
 const _idUserId = 2;
@@ -53,6 +54,7 @@ class Call {
     required CoordinatorClient coordinatorClient,
     required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
+    required GetActiveCallCid getActiveCallCid,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -63,6 +65,7 @@ class Call {
       coordinatorClient: coordinatorClient,
       currentUser: currentUser,
       setActiveCall: setActiveCall,
+      getActiveCallCid: getActiveCallCid,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
       preferences: preferences,
@@ -77,6 +80,7 @@ class Call {
     required CoordinatorClient coordinatorClient,
     required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
+    required GetActiveCallCid getActiveCallCid,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -87,6 +91,7 @@ class Call {
       coordinatorClient: coordinatorClient,
       currentUser: currentUser,
       setActiveCall: setActiveCall,
+      getActiveCallCid: getActiveCallCid,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
       preferences: preferences,
@@ -101,6 +106,7 @@ class Call {
     required CoordinatorClient coordinatorClient,
     required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
+    required GetActiveCallCid getActiveCallCid,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -111,6 +117,7 @@ class Call {
       coordinatorClient: coordinatorClient,
       currentUser: currentUser,
       setActiveCall: setActiveCall,
+      getActiveCallCid: getActiveCallCid,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
       preferences: preferences,
@@ -122,6 +129,7 @@ class Call {
     required CoordinatorClient coordinatorClient,
     required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
+    required GetActiveCallCid getActiveCallCid,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -145,6 +153,7 @@ class Call {
       coordinatorClient: coordinatorClient,
       currentUser: currentUser,
       setActiveCall: setActiveCall,
+      getActiveCallCid: getActiveCallCid,
       preferences: finalCallPreferences,
       stateManager: stateManager,
       credentials: credentials,
@@ -157,6 +166,7 @@ class Call {
   Call._({
     required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
+    required GetActiveCallCid getActiveCallCid,
     required CoordinatorClient coordinatorClient,
     required CallPreferences preferences,
     required CallStateNotifier stateManager,
@@ -177,6 +187,7 @@ class Call {
             .whereNotNull()
             .distinct(),
         _setActiveCall = setActiveCall,
+        _getActiveCallCid = getActiveCallCid,
         _coordinatorClient = coordinatorClient,
         _preferences = preferences,
         _retryPolicy = retryPolicy,
@@ -196,6 +207,7 @@ class Call {
   final GetCurrentUserId _getCurrentUserId;
   final Stream<String> _currentUserIdUpdates;
   final SetActiveCall _setActiveCall;
+  final GetActiveCallCid _getActiveCallCid;
   final CoordinatorClient _coordinatorClient;
   final RetryPolicy _retryPolicy;
   final CallPreferences _preferences;
@@ -383,15 +395,15 @@ class Call {
 
   @Deprecated('Lobby view no longer needs joining to coordinator')
   Future<Result<None>> joinLobby() async {
-    _logger.d(() => '[join] no args');
+    _logger.d(() => '[joinLobby] no args');
     _stateManager.lifecycleCallJoining(const CallJoining());
     final joinedResult = await _joinIfNeeded();
     if (joinedResult is Success<CallCredentials>) {
-      _logger.v(() => '[join] completed');
+      _logger.v(() => '[joinLobby] completed');
       return const Result.success(none);
     } else {
       final failedResult = joinedResult as Failure;
-      _logger.e(() => '[join] failed: $failedResult');
+      _logger.e(() => '[joinLobby] failed: $failedResult');
       final error = failedResult.error;
       _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
       return failedResult;
@@ -399,13 +411,19 @@ class Call {
   }
 
   Future<Result<None>> join() async {
-    _logger.i(() => '[connect] status: ${_status.value}');
+    _logger.i(() => '[join] status: ${_status.value}');
     if (_status.value == _ConnectionStatus.connected) {
-      _logger.w(() => '[connect] rejected (connected)');
+      _logger.w(() => '[join] rejected (connected)');
       return const Result.success(none);
     }
+    if (_getActiveCallCid() == callCid) {
+      _logger.w(
+        () => '[join] rejected (a call with the same cid is in progress)',
+      );
+      return Result.error('a call with the same cid is in progress');
+    }
     if (_status.value == _ConnectionStatus.connecting) {
-      _logger.v(() => '[connect] await "connecting" change');
+      _logger.v(() => '[join] await "connecting" change');
       final status = await _status.firstWhere(
         (it) => it != _ConnectionStatus.connecting,
         timeLimit: _preferences.connectTimeout,
@@ -423,10 +441,10 @@ class Call {
         .storeIn(_idConnect, _cancelables)
         .valueOrDefault(Result.error('connect cancelled'));
     if (result.isSuccess) {
-      _logger.v(() => '[connect] finished: $result');
+      _logger.v(() => '[join] finished: $result');
       _status.value = _ConnectionStatus.connected;
     } else {
-      _logger.e(() => '[connect] failed: $result');
+      _logger.e(() => '[join] failed: $result');
       await leave();
     }
     return result;
@@ -458,18 +476,18 @@ class Call {
   }
 
   Future<Result<None>> _connect() async {
-    _logger.d(() => '[connect] options: $_connectOptions');
+    _logger.d(() => '[join] options: $_connectOptions');
     final validation = await _stateManager.validateUserId(_getCurrentUserId);
     if (validation.isFailure) {
-      _logger.w(() => '[connect] rejected (validation): $validation');
+      _logger.w(() => '[join] rejected (validation): $validation');
       return validation;
     }
-    _logger.v(() => '[connect] validated');
+    _logger.v(() => '[join] validated');
 
     final state = this.state.value;
     final status = state.status;
     if (!status.isConnectable) {
-      _logger.w(() => '[connect] rejected (not Connectable): $status');
+      _logger.w(() => '[join] rejected (not Connectable): $status');
       return Result.error('invalid status: $status');
     }
     _observeState();
@@ -477,7 +495,7 @@ class Call {
     _observeUserId();
     final result = await _awaitIfNeeded();
     if (result.isFailure) {
-      _logger.e(() => '[connect] waiting failed: $result');
+      _logger.e(() => '[join] waiting failed: $result');
 
       _stateManager.lifecycleCallTimeout(const CallTimeout());
 
@@ -486,28 +504,28 @@ class Call {
 
     _stateManager
         .lifecycleCallConnectingAction(CallConnecting(_reconnectAttempt));
-    _logger.v(() => '[connect] joining to coordinator');
+    _logger.v(() => '[join] joining to coordinator');
     final joinedResult = await _joinIfNeeded();
     if (joinedResult is! Success<CallCredentials>) {
-      _logger.e(() => '[connect] joining failed: $joinedResult');
+      _logger.e(() => '[join] coordinator joining failed: $joinedResult');
       final error = (joinedResult as Failure).error;
       _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
       return result;
     }
 
-    _logger.v(() => '[connect] starting sfu session');
+    _logger.v(() => '[join] starting sfu session');
     final sessionResult = await _startSession(joinedResult.data);
     if (sessionResult is! Success<None>) {
-      _logger.w(() => '[connect] sfu session start failed: $sessionResult');
+      _logger.w(() => '[join] sfu session start failed: $sessionResult');
       final error = (sessionResult as Failure).error;
       _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
       return sessionResult;
     }
-    _logger.v(() => '[connect] started session');
+    _logger.v(() => '[join] started session');
     _stateManager.lifecycleCallConnected(const CallConnected());
     await _applyConnectOptions();
 
-    _logger.v(() => '[connect] completed');
+    _logger.v(() => '[join] completed');
     return const Result.success(none);
   }
 
@@ -662,19 +680,19 @@ class Call {
 
   Future<Result<None>> leave() async {
     final state = this.state.value;
-    _logger.i(() => '[disconnect] ${_status.value}; state: $state');
+    _logger.i(() => '[leave] ${_status.value}; state: $state');
     if (state.status.isDisconnected) {
-      _logger.w(() => '[disconnect] rejected (state.status is disconnected)');
+      _logger.w(() => '[leave] rejected (state.status is disconnected)');
       return const Result.success(none);
     }
     if (_status.value == _ConnectionStatus.disconnected) {
-      _logger.w(() => '[disconnect] rejected (status is disconnected)');
+      _logger.w(() => '[leave] rejected (status is disconnected)');
       return const Result.success(none);
     }
     _status.value = _ConnectionStatus.disconnected;
-    await _clear('disconnect');
+    await _clear('leave');
     _stateManager.lifecycleCallDisconnected(const CallDisconnected());
-    _logger.v(() => '[disconnect] finished');
+    _logger.v(() => '[leave] finished');
     return const Result.success(none);
   }
 
