@@ -54,7 +54,7 @@ class MutableClientState implements ClientState {
     connection.value = ConnectionState.disconnected(user.value.id);
   }
 
-  StreamCallCid? getActiveCallCid() => activeCall.valueOrNull!.callCid;
+  StreamCallCid? getActiveCallCid() => activeCall.valueOrNull?.callCid;
 
   Future<void> setActiveCall(Call? call) async {
     final ongoingCall = activeCall.valueOrNull;
