@@ -55,8 +55,8 @@ In this tutorial, we will use the [stream_video_flutter](https://pub.dev/package
 
 You can also use the [stream_video](https://pub.dev/packages/stream_video) package directly if you need direct access to the low-level client.
 
-The [stream_video_flutter_background] package adds background capabilities for the app on Android while the
-[stream_video_push_notification] package helps in adding push notifications and an end-to-end call flow (CallKit).
+The [stream_video_flutter_background](https://pub.dev/packages/stream_video_flutter_background) package adds background capabilities for the app on Android while the
+[stream_video_push_notification](https://pub.dev/packages/stream_video_push_notification) package helps in adding push notifications and an end-to-end call flow (CallKit).
 
 ### Initialising Stream Video
 
@@ -154,8 +154,8 @@ return Scaffold(
 );
 ```
 
-To instantiate a call, you can use the `StreamVideo.makeCall()` method. You then need to create this
-on the backend using the `call.getOrCreate()` method.
+To instantiate a call, you can use the `StreamVideo.makeCall()` method. You then need to call `call.getOrCreate()` method.
+This method creates the call in the backend.
 
 Here is how that looks in code:
 
