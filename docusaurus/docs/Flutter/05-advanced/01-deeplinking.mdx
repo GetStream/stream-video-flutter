@@ -14,11 +14,8 @@ To handle deep links in Android you need to declare an intent filter in `android
 <activity
     android:name=".MainActivity"
     android:exported="true">
-    <intent-filter
-        android:autoVerify="true" 
-        android:label="Call Link">
+    <intent-filter android:autoVerify="true" android:label="call_link">
         <action android:name="android.intent.action.VIEW" />
-    
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
         <data
@@ -101,9 +98,11 @@ In its simplest form, your AASA file should have the following format:
 }
 ```
 
-You can also specify exact paths if you want to have stricter control over which ones can invoke your app. You can also specify several apps on the same domain.
+You can also specify exact paths if you want to have stricter control over which ones can invoke your app.
+You can also specify several apps on the same domain.
 
-Before proceeding, please make sure that the uploaded file is a valid one, and it's deployed at the right place. For this, you can use Apple's [validation tool](https://search.developer.apple.com/appsearch-validation-tool).
+Before proceeding, please make sure that the uploaded file is a valid one, and it's deployed at the right place.
+For this, you can use Apple's [validation tool](https://search.developer.apple.com/appsearch-validation-tool).
 
 ## Handling deep links
 
@@ -118,52 +117,61 @@ dependencies:
 Next, use the snippet below to listen for incoming deep links and navigate to `JoinScreen` that we'll cover in the next step:
 
 ```dart
+import 'package:uni_links/uni_links.dart';
+
+StreamSubscription<Uri?>? _deepLinkSubscription;
+
 Future<void> _observeDeepLinks() async {
-  // 1
-  try {
-    final initialUri = await getInitialUri();
-    if (initialUri != null) {
-      await _handleDeepLink(initialUri);
-    }
-  } catch (e) {
-    debugPrint(e.toString());
+  // The app was in the background.
+  if (!kIsWeb) {
+    _deepLinkSubscription = uriLinkStream.listen((uri) {
+      if (mounted && uri != null) _handleDeepLink(uri);
+    });
   }
 
-  // 2
-  if (!kIsWeb) {
-    _subscription = uriLinkStream.listen((Uri? uri) {
-      if (mounted && uri != null) {
-        _handleDeepLink(uri);
-      }
-    });
+  // The app was terminated.
+  try {
+    final initialUri = await getInitialUri();
+    if (initialUri != null) _handleDeepLink(initialUri);
+  } catch (e) {
+    debugPrint(e.toString());
   }
 }
 
 Future<void> _handleDeepLink(Uri uri) async {
-  // 3
-  final callId = uri.pathSegments.last;
+  // Parse the call id from the deep link.
+  final callId = uri.queryParameters['id'];
+  if (callId == null) return;
 
-  // 4
-  Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (context) {
-        return JoinScreen(
-          callId: callId,
-        );
-      },
-    ),
-  );
+  // return if the video user is not yet logged in.
+  // Replace the getCurrentUser() method with your method to retrieve the current user
+  final currentUser = getCurrentUser();
+  if (currentUser == null) return;
+
+  final streamVideo = StreamVideo.instance;
+  final call = streamVideo.makeCall(type: kCallType, id: callId);
+
+  try {
+    await call.getOrCreate();
+  } catch (e, stk) {
+    debugPrint('Error joining or creating call: $e');
+    debugPrint(stk.toString());
+    return;
+  }
+
+  // Your method to navigate to the lobby/call screen.
+  navigateToCallScreen();
 }
 ```
 
 In this snippet, you:
 
-1. Handle the case when the app was terminated and is now started by a deep link.
-2. Handle the case when the app was in the background and is now brought to the foreground by a deep link.
+1. Handle the case when the app was in the background and is now brought to the foreground by a deep link.
+2. Handle the case when the app was terminated and is now started by a deep link.
 3. Extract the call ID from the deep link URL.
-4. Navigate to a screen that will handle call initialization.
+4. Navigate to a screen that will handle the call.
 
-Finally, add `JoinScreen` with the call initialization:
+While you can initialize the call on your call screen, you can also add an intermediary `JoinScreen` with the call initialization:
 
 ```dart
 class JoinScreen extends StatefulWidget {
@@ -184,9 +192,10 @@ class _JoinScreenState extends State<JoinScreen> {
   @override
   void initState() {
     super.initState();
-    _initCall(widget.callId);
+    _joinCall(widget.callId);
   }
 
+  // Step 1
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,45 +205,25 @@ class _JoinScreenState extends State<JoinScreen> {
       body: Center(
         child: _isInProgress
             ? const CircularProgressIndicator(
-                strokeWidth: 2,
-              )
+          strokeWidth: 2,
+        )
             : const SizedBox(),
       ),
     );
   }
 
-  Future<void> _initCall(String callId) async {
-    await _logIn();
-    await _joinCall(widget.callId);
-  }
-
-  // 1
-  Future<void> _logIn() async {
-    final userCredentials = await UserRepository.instance.getUserCredentials();
-
-    if (userCredentials != null) {
-      final user = userCredentials.user;
-      final token = userCredentials.token;
-      
-      await StreamVideo.instance.connectUser(
-        user,
-        token: Token(token),
-      );
-    }
-  }
-
-  // 2
+  // Step 2
   Future<void> _joinCall(String callId) async {
     setState(() => _isInProgress = true);
 
     try {
-      final call = await StreamVideo.instance.joinCall(
+      final call = StreamVideo.instance.makeCall(
         id: callId,
         type: 'default',
       );
 
       await call.join();
-      
+
       await _navigateToCall(call);
     } catch (e) {
       debugPrint(e.toString());
@@ -243,28 +232,18 @@ class _JoinScreenState extends State<JoinScreen> {
     }
   }
 
-  // 3
+  // Step 3
   Future<void> _navigateToCall(Call call) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) {
-          return StreamCallScreen(
-            call: call,
-            onBackPressed: navigateHome,
-            onHangUp: navigateHome,
-          );
-        },
-      ),
-    );
+    // Navigate to your call screen
   }
 }
 ```
 
 Here's what you're doing here, step-by-step:
 
-1. Connecting the user from your persistence storage to the Video API.
+1. Showing a connecting screen for the call while it initializes.
 2. Joining the call with the call ID from the deep link.
-3. Navigating to `StreamCallScreen` from our SDK.
+3. Navigating to your call screen.
 
 ## Testing deep links
 
