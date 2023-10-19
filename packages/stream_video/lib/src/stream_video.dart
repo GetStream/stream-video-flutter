@@ -51,6 +51,7 @@ const _tag = 'SV:Client';
 const _idEvents = 1;
 const _idAppState = 2;
 const _idConnect = 3;
+const _idActiveCall = 4;
 
 const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com/video';
 const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
@@ -322,6 +323,13 @@ class StreamVideo {
       // Register device with push notification manager.
       pushNotificationManager?.registerDevice();
 
+      if (pushNotificationManager != null) {
+        _subscriptions.add(
+          _idActiveCall,
+          _state.activeCall.listen(_onActiveCall),
+        );
+      }
+
       return Result.success(tokenResult.data);
     } catch (e, stk) {
       _logger.e(() => '[connect] failed(${user.id}): $e');
@@ -418,6 +426,12 @@ class StreamVideo {
       }
     } catch (e) {
       _logger.e(() => '[onAppState] failed: $e');
+    }
+  }
+
+  Future<void> _onActiveCall(Call? activeCall) async {
+    if (activeCall == null) {
+      await pushNotificationManager?.endAllCalls();
     }
   }
 
