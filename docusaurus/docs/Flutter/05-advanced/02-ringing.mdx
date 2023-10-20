@@ -24,7 +24,7 @@ To receive push notifications from Stream Video, you'll need to:
 
 #### Step 1 - Get the Firebase Credentials
 
-These credentials are the [private key file](https://firebase.google.com/docs/admin/setup#:~:text=To%20generate%20a%20private%20key%20file%20for%20your%20service%20account%3A) for your service account, in Firebase console.
+These credentials are the [private key file](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments) for your service account, in Firebase console.
 
 To generate a private key file for your service account in the Firebase console:
 
@@ -40,7 +40,7 @@ This JSON file contains the credentials that need to be uploaded to Stream’s s
 
 You now need to upload your Firebase credentials using the Stream dashboard.
 
-- Go to the dashboard of your video project at the [Stream website](https://getstream.io).
+- Go to the dashboard of your video project at the [Stream website](https://dashboard.getstream.io).
 
 - Open the **Push Notifications** tab under **Video & Audio**.
 
@@ -48,16 +48,20 @@ You now need to upload your Firebase credentials using the Stream dashboard.
 
 ![Firebase Configuration](../assets/advanced_assets/firebase_config.png)
 
-- Add a name for your push provider in the **Name** field and add your previously generated Firebase Credentials in the **Credentials JSON** field.
+- Add a name for your push provider in the **Name** field. You will use this name later in the code to identify which provider to use for android notifications.
+
+- Add your previously generated Firebase Credentials in the **Credentials JSON** field.
+
+- Enable this provider using toggle button
 
 - Click **Create** and your push provider should be ready.
 
 #### Step 3 - Add dependencies to your app
 
-To integrate push notifications in your Flutter app, you need to use the package [`firebase_messaging`](https://pub.dev/packages/firebase_messaging).
+To integrate push notifications in your Flutter app, you need to use the **firebase_messaging** package.
 
-Follow the [Flutter Firebase documentation](https://firebase.flutter.dev/docs/messaging/overview/) to set up the plugin for Android and iOS.
-Additional setup and instructions can be found [here](https://firebase.google.com/docs/cloud-messaging/flutter/client). Be sure to read this documentation to understand Firebase messaging functionality.
+Follow the [Flutter Firebase documentation](https://firebase.flutter.dev/docs/messaging/overview/#installation) to set up the plugin for Android and iOS.
+Make sure you complete additional setup described [here](https://firebase.flutter.dev/docs/messaging/apple-integration/) and [here](https://firebase.google.com/docs/cloud-messaging/flutter/client).
 
 Once that's done, FCM should be able to send push notifications to your devices.
 
@@ -66,9 +70,9 @@ Once that's done, FCM should be able to send push notifications to your devices.
 Add these permissions to `AndroidManifest.xml` in order to support video calling:
 
 ```xml
-<uses-permission android:name="android.permission.INTERNET"/>
 <uses-feature android:name="android.hardware.camera"/>
 <uses-feature android:name="android.hardware.camera.autofocus"/>
+<uses-permission android:name="android.permission.INTERNET"/>
 <uses-permission android:name="android.permission.CAMERA"/>
 <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -77,6 +81,7 @@ Add these permissions to `AndroidManifest.xml` in order to support video calling
 <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
 <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
 <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 ```
 
 #### Step 5 - Add code to listen to push notifications
@@ -85,6 +90,9 @@ We recommend storing user credentials locally when the user logs in so you can l
 a push notification is received.
 
 - Add the following code in your `main.dart` as global functions to listen to background notifications:
+- Replace `yourUserCredentialsGetMethod()` with your implementation to get logged in user credentials
+- For `androidPushProvider` use the provider name created in [Step 2](#Step-2---Upload-the-Firebase-Credentials-to-Stream)
+- For `iosPushProvider` use the provider name we will create later in [APN integration](#Integrating-APNs-for-iOS​)
 
 ```dart
 // As this runs in a separate isolate, we need to setup the app again.
@@ -132,10 +140,133 @@ Future<void> _handleRemoteMessage(RemoteMessage message) async {
 }
 ```
 
+The code upto this point handles calls for the background and foreground state of the app.
+To handle calls from a terminated state, we need to add some additional code.
+
+In a high-level widget, add this method and call it from the `initState()` method:
+- add navigator key to MaterialApp widget: `navigatorKey: _navigatorKey`
+
+```dart
+final _navigatorKey = GlobalKey<NavigatorState>();
+
+@override
+void initState() {
+  //...
+  _tryConsumingIncomingCallFromTerminatedState();
+}
+
+void _tryConsumingIncomingCallFromTerminatedState() {
+  if (_navigatorKey.currentContext == null) {
+    // App is not running yet. Postpone consuming after app is in the foreground
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _consumeIncomingCall();
+    });
+  } else {
+    // no-op. If the app is already running we'll handle it via events
+  }
+}
+
+Future<void> _consumeIncomingCall() async {
+  final calls = await StreamVideo.instance.pushNotificationManager?.activeCalls();
+  if (calls == null || calls.isEmpty) return;
+
+  final call = await StreamVideo.instance.consumeIncomingCall(
+    uuid: calls.first.uuid,
+    cid: calls.first.callCid,
+  );
+}
+```
+
+#### Step 6 - Request notification permission from user
+
+For Android 13+ you need to request post notification permission. You can do it using [permission_handler](https://pub.dev/packages/permission_handler) package.
+
+Remember to follow [official best practices](https://developer.android.com/develop/ui/views/notifications/notification-permission#best-practices) (especially showing prompt before the request).
+
+### Integrating APNs for iOS
+
+#### Step 1 - Get the iOS certificate for push notifications
+
+- Generate push notification service key [here](https://developer.apple.com/account/resources/certificates/add). Make sure you select **Apple Push Notifications service SSL (Sandbox & Production)**.
+
+- You will need to create **Certificate Signing Request** - [follow this steps](https://developer.apple.com/help/account/create-certificates/create-a-certificate-signing-request)
+
+- Convert the *aps.cer* file you created in the last step to a .p12 certificate file using keychain access. Make sure that you configure no password for the p12 file.
+  - Add app.cer to login keychain
+  - Find it in Certificate tab, right click and export as .p12 file
+  - Remember not to set any password while exporting
+
+#### Step 2 - Upload the certificate and create a push provider
+
+- Go to the dashboard of your video project at the [Stream website](https://dashboard.getstream.io).
+
+- Open the **Push Notifications** tab under **Video & Audio**.
+
+- Select **New Configuration** and select **APN**.
+
+![APNs Configuration](../assets/advanced_assets/apns_config.png)
+
+- Add a name for your push provider in the **Name** field. This is the name used while setting up ios push notifications in the code we did [earlier](#Step-5---Add-code-to-listen-to-push-notifications)
+
+- Add your previously generated P12 file with your additional Apple information.
+
+- Enable this provider using toggle button
+
+- Click **Create** and your push provider should be ready.
+
+#### Step 3 - Add dependencies
+
+There are no dependencies on the Flutter side that you need to add specifically for iOS.
+
+#### Step 4 - Add native permissions
+
+Add these permissions to `Info.plist` in order to support video calling:
+
+```plist
+<key>NSCameraUsageDescription</key>
+<string>$(PRODUCT_NAME) Camera Usage!</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>$(PRODUCT_NAME) Microphone Usage!</string>
+<key>UIApplicationSupportsIndirectInputEvents</key>
+<true/>
+<key>UIBackgroundModes</key>
+<array>
+	<string>audio</string>
+	<string>fetch</string>
+	<string>processing</string>
+	<string>remote-notification</string>
+	<string>voip</string>
+</array>
+```
+
+#### Step 5 - Add code to handle CallKit events
+
+In a high-level widget in your app, add this code to listen to FCM messages:
+
+```
+@override
+void initState() {
+  ...
+  _observeFcmMessages()
+}
+
+_observeFcmMessages() {
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  _fcmSubscription = FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
+}
+```
+
 In a high-level widget in your app, add this code to listen to CallKit events:
+- remember to implement navigation in a marked line
 
 ```dart
 final _callKitEventSubscriptions = Subscriptions();
+
+@override
+void initState() {
+  ...
+  _observeCallKitEvents()
+}
 
 void _observeCallKitEvents() {
   final streamVideo = StreamVideo.instance;
@@ -232,40 +363,6 @@ extension on Subscriptions {
 }
 ```
 
-The code upto this point handles calls for the background and foreground state of the app.
-To handle calls from a terminated state, we need to add some additional code.
-
-In a high-level widget, add this method and call it from the `initState()` method:
-
-```dart
-@override
-void initState() {
-  //...
-  _tryConsumingIncomingCallFromTerminatedState();
-}
-
-void _tryConsumingIncomingCallFromTerminatedState() {
-  if (_navigatorKey.currentContext == null) {
-    // App is not running yet. Postpone consuming after app is in the foreground
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _consumeIncomingCall();
-    });
-  } else {
-    // no-op. If the app is already running we'll handle it via events
-  }
-}
-
-Future<void> _consumeIncomingCall() async {
-  final calls = await StreamVideo.instance.pushNotificationManager?.activeCalls();
-  if (calls == null || calls.isEmpty) return;
-
-  final call = await StreamVideo.instance.consumeIncomingCall(
-    uuid: calls.first.uuid,
-    cid: calls.first.callCid,
-  );
-}
-```
-
 If you need to manage the CallKit call, you can use the `StreamVideo.pushNotificationManager`. As an example, let's
 say you want to end all calls on the CallKit side, you can end them this way:
 
@@ -273,54 +370,7 @@ say you want to end all calls on the CallKit side, you can end them this way:
 StreamVideo.instance.pushNotificationManager?.endAllCalls();
 ```
 
-### Integrating APNs for iOS
-
-#### Step 1 - Get the iOS certificate for push notifications
-
-- Generate push notification service key [here](https://developer.apple.com/account/resources/certificates/add). Make sure you select **Apple Push Notifications service SSL (Sandbox & Production).
-
-- Convert the aps.cer file you created in the last step to a .p12 certificate file using keychain access. Make sure that you configure no password for the p12 file.
-
-#### Step 2 - Upload the certificate and create a push provider
-
-- Go to the dashboard of your video project at the [Stream website](https://getstream.io).
-
-- Open the **Push Notifications** tab under **Video & Audio**.
-
-- Select **New Configuration** and select **APN**.
-
-![APNs Configuration](../assets/advanced_assets/apns_config.png)
-
-- Add a name for your push provider in the **Name** field and add your previously generated P12 file with your additional Apple information.
-
-- Click **Create** and your push provider should be ready.
-
-#### Step 3 - Add dependencies
-
-There are no dependencies on the Flutter side that you need to add specifically for iOS.
-
-#### Step 4 - Add native permissions
-
-Add these permissions to `Info.plist` in order to support video calling:
-
-```plist
-<key>NSCameraUsageDescription</key>
-<string>$(PRODUCT_NAME) Camera Usage!</string>
-<key>NSMicrophoneUsageDescription</key>
-<string>$(PRODUCT_NAME) Microphone Usage!</string>
-<key>UIApplicationSupportsIndirectInputEvents</key>
-<true/>
-<key>UIBackgroundModes</key>
-<array>
-	<string>audio</string>
-	<string>fetch</string>
-	<string>processing</string>
-	<string>remote-notification</string>
-	<string>voip</string>
-</array>
-```
-
-#### Step 5 - Add native code to the iOS project
+#### Step 6 - Add native code to the iOS project
 
 In your iOS project, add the following imports to your `AppDelegate.swift`:
 
