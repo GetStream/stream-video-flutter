@@ -58,7 +58,7 @@ class UserResponseData with EquatableMixin {
   /// Date/time of creation
   final DateTime createdAt;
 
-  final Map<String, Object> custom;
+  final Map<String, Object?> custom;
 
   /// Date/time of deletion
   ///

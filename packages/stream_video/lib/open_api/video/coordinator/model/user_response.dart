@@ -27,7 +27,7 @@ class UserResponse {
   /// Date/time of creation
   DateTime createdAt;
 
-  Map<String, Object> custom;
+  Map<String, Object?> custom;
 
   /// Date/time of deletion
   ///
@@ -137,7 +137,7 @@ class UserResponse {
 
       return UserResponse(
         createdAt: mapDateTime(json, r'created_at', '')!,
-        custom: mapCastOfType<String, Object>(json, r'custom')!,
+        custom: mapCastOfType<String, Object?>(json, r'custom')!,
         deletedAt: mapDateTime(json, r'deleted_at', ''),
         id: mapValueOfType<String>(json, r'id')!,
         image: mapValueOfType<String>(json, r'image'),

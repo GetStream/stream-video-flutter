@@ -103,7 +103,7 @@ class CallMember with EquatableMixin {
 
   final String userId;
   final String role;
-  final Map<String, Object>? custom;
+  final Map<String, Object?> custom;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final DateTime? deletedAt;
