@@ -1,3 +1,11 @@
+## 0.1.1
+
+* Fixed call join bug
+* Fixed CallKit call not ending bug
+* Anonymous users can no longer connect to WS
+* Users can no longer join a call twice
+* Fixed landscape call control visibility
+
 ## 0.1.0
 
 * Aligned SDK initialization with other SDKs

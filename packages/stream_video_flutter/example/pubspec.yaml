@@ -40,7 +40,7 @@ dependencies:
   share_plus: ^7.1.0
   device_info_plus: ^9.0.3
   intl: ^0.18.1
-  stream_video_flutter: ^0.1.0
+  stream_video_flutter: ^0.1.1
   stream_video_flutter_background: 0.1.0
   envied: ^0.3.0+3
 
