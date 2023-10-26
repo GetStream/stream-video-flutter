@@ -84,8 +84,9 @@ class CallUpdatedEvent {
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         capabilitiesByRole: json[r'capabilities_by_role'] == null
-          ? const {}
-            : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
+            ? const {}
+            : capabilitiesFromJson(json['capabilities_by_role']) ??
+                const {},
         createdAt: mapDateTime(json, r'created_at', '')!,
         type: mapValueOfType<String>(json, r'type')!,
       );
@@ -93,7 +94,25 @@ class CallUpdatedEvent {
     return null;
   }
 
-  static List<CallUpdatedEvent> listFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<String>> capabilitiesFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
+    final map = <String, List<String>>{};
+    if (json is Map && json.isNotEmpty) {
+      // ignore: parameter_assignments
+      json = json.cast<String, dynamic>();
+      for (final entry in json.entries) {
+        map[entry.key] = entry.value.cast<String>();
+      }
+    }
+    return growable ? map : Map.unmodifiable(map);
+  }
+
+  static List<CallUpdatedEvent> listFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final result = <CallUpdatedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -121,13 +140,19 @@ class CallUpdatedEvent {
   }
 
   // maps a json object with a list of CallUpdatedEvent-objects as value to a dart map
-  static Map<String, List<CallUpdatedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+  static Map<String, List<CallUpdatedEvent>> mapListFromJson(
+    dynamic json, {
+    bool growable = false,
+  }) {
     final map = <String, List<CallUpdatedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallUpdatedEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallUpdatedEvent.listFromJson(
+          entry.value,
+          growable: growable,
+        );
       }
     }
     return map;
@@ -142,4 +167,3 @@ class CallUpdatedEvent {
     'type',
   };
 }
-
