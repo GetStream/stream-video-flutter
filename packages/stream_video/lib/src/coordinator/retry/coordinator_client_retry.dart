@@ -175,19 +175,52 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<None>> inviteUsers({
+  Future<Result<None>> addMembers({
     required StreamCallCid callCid,
     required Iterable<open.MemberRequest> members,
     bool? ringing,
   }) {
     return _retryManager.execute(
-      () => _delegate.inviteUsers(
+      () => _delegate.addMembers(
         callCid: callCid,
         members: members,
-        ringing: ringing,
       ),
       (error, nextAttemptDelay) async {
         _logRetry('inviteUsers', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> removeMembers({
+    required StreamCallCid callCid,
+    required Iterable<String> removeIds,
+  }) async {
+    return _retryManager.execute(
+      () => _delegate.removeMembers(
+        callCid: callCid,
+        removeIds: removeIds,
+      ),
+      (error, nextAttemptDelay) async {
+        _logRetry('removeMembers', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> updateCallMembers({
+    required StreamCallCid callCid,
+    Iterable<open.MemberRequest> updateMembers = const [],
+    Iterable<String> removeIds = const [],
+  }) {
+    return _retryManager.execute(
+      () => _delegate.updateCallMembers(
+        callCid: callCid,
+        updateMembers: updateMembers,
+        removeIds: removeIds,
+      ),
+      (error, nextAttemptDelay) async {
+        _logRetry('removeMembers', error, nextAttemptDelay);
       },
     );
   }
