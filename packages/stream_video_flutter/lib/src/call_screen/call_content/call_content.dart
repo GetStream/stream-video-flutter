@@ -112,20 +112,17 @@ class _StreamCallContentState extends State<StreamCallContent> {
     }
 
     final localParticipant = callState.localParticipant;
-    final isDesktopOrPortrait = !isMobileLandscape(context);
 
     return Scaffold(
       backgroundColor: const Color(0XFF272A30),
-      appBar: isDesktopOrPortrait
-          ? widget.callAppBarBuilder?.call(context, call, callState) ??
-              CallAppBar(
-                call: call,
-                onBackPressed: widget.onBackPressed,
-                onLayoutModeChanged: (mode) {
-                  setState(() => _currentLayoutMode = mode);
-                },
-              )
-          : null,
+      appBar: widget.callAppBarBuilder?.call(context, call, callState) ??
+          CallAppBar(
+            call: call,
+            onBackPressed: widget.onBackPressed,
+            onLayoutModeChanged: (mode) {
+              setState(() => _currentLayoutMode = mode);
+            },
+          ),
       body: Stack(
         children: [
           GestureDetector(
@@ -141,7 +138,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
           ),
         ],
       ),
-      bottomNavigationBar: isDesktopOrPortrait && localParticipant != null
+      bottomNavigationBar: localParticipant != null
           ? widget.callControlsBuilder?.call(context, call, callState) ??
               StreamCallControls.withDefaultOptions(
                 call: call,
@@ -153,7 +150,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
   }
 
   void _toggleStatsVisibility() {
-    if(kDebugMode){
+    if (kDebugMode) {
       setState(() {
         _isStatsVisible = !_isStatsVisible;
       });

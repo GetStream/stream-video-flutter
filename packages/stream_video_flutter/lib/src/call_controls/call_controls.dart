@@ -63,20 +63,13 @@ class StreamCallControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isMobileLandscape(context)) {
-      return LandscapeCallControls(
-        options: options,
-        spacing: spacing,
-      );
-    } else {
-      return PortraitCallControls(
-        options: options,
-        elevation: elevation,
-        spacing: spacing,
-        padding: padding,
-        borderRadius: borderRadius,
-      );
-    }
+    return PortraitCallControls(
+      options: options,
+      elevation: elevation,
+      spacing: spacing,
+      padding: padding,
+      borderRadius: borderRadius,
+    );
   }
 }
 
