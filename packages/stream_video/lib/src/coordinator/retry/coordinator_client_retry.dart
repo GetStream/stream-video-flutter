@@ -186,7 +186,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
         members: members,
       ),
       (error, nextAttemptDelay) async {
-        _logRetry('inviteUsers', error, nextAttemptDelay);
+        _logRetry('addMembers', error, nextAttemptDelay);
       },
     );
   }
@@ -220,7 +220,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
         removeIds: removeIds,
       ),
       (error, nextAttemptDelay) async {
-        _logRetry('removeMembers', error, nextAttemptDelay);
+        _logRetry('updateCallMembers', error, nextAttemptDelay);
       },
     );
   }
