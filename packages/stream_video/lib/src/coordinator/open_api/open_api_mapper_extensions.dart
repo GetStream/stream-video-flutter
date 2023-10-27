@@ -66,7 +66,7 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         final event = callUpdated!;
         return CoordinatorCallUpdatedEvent(
           callCid: StreamCallCid(cid: event.call.cid),
-          capabilitiesByRole: Map.unmodifiable(event.capabilitiesByRole),
+          capabilitiesByRole: event.capabilitiesByRole,
           metadata: event.call.toCallMetadata(),
           createdAt: event.createdAt,
         );
