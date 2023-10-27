@@ -178,7 +178,6 @@ class CoordinatorClientRetry extends CoordinatorClient {
   Future<Result<None>> addMembers({
     required StreamCallCid callCid,
     required Iterable<open.MemberRequest> members,
-    bool? ringing,
   }) {
     return _retryManager.execute(
       () => _delegate.addMembers(

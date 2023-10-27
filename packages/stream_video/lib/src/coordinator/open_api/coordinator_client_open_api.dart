@@ -518,7 +518,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required Iterable<open.MemberRequest> members,
   }) async {
     _logger.d(
-      () => '[inviteUsers] cid: $callCid, members: $members',
+      () => '[addMembers] cid: $callCid, members: $members',
     );
 
     return updateCallMembers(callCid: callCid, updateMembers: members);
@@ -530,7 +530,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required Iterable<String> removeIds,
   }) async {
     _logger.d(
-      () => '[removeMembers] cid: $callCid, members: $removeIds',
+      () => '[removeMembers] cid: $callCid, removeIds: $removeIds',
     );
 
     return updateCallMembers(callCid: callCid, removeIds: removeIds);
@@ -549,7 +549,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       );
       final connectionResult = await _waitUntilConnected();
       if (connectionResult is Failure) {
-        _logger.e(() => '[inviteUsers] no connection established');
+        _logger.e(() => '[updateCallMembers] no connection established');
         return connectionResult;
       }
       final result = await _defaultApi.updateCallMembers(
