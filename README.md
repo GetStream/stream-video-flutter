@@ -64,9 +64,9 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.3.0 milestone
 - [ ] Publish apps to Android/iOS
 - [ ] Participant sort bug
-- [ ] Android/iOS ringing flow
+- [x] Android/iOS ringing flow
 - [ ] Create new call types
-- [ ] Deeplinking
+- [x] Deeplinking
 - [ ] RTMP streaming
 - [ ] Video filters / audio filters
 - [ ] Tap to focus (flutter_webrtc)
