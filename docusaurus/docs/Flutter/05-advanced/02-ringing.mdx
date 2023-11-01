@@ -229,6 +229,10 @@ Add these permissions to `Info.plist` in order to support video calling:
 <string>$(PRODUCT_NAME) Microphone Usage!</string>
 <key>UIApplicationSupportsIndirectInputEvents</key>
 <true/>
+<key>BGTaskSchedulerPermittedIdentifiers</key>
+<array>
+  <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+</array>
 <key>UIBackgroundModes</key>
 <array>
 	<string>audio</string>
