@@ -831,12 +831,32 @@ class Call {
     });
   }
 
-  Future<Result<None>> inviteUsers(List<UserInfo> users) {
-    return _coordinatorClient.inviteUsers(
+  Future<Result<None>> addMembers(List<UserInfo> users) {
+    return _coordinatorClient.addMembers(
       callCid: callCid,
       members: users.map((user) {
         return MemberRequest(userId: user.id, role: user.role);
       }).toList(),
+    );
+  }
+
+  Future<Result<None>> removeMembers(List<String> userIds) {
+    return _coordinatorClient.removeMembers(
+      callCid: callCid,
+      removeIds: userIds,
+    );
+  }
+
+  Future<Result<None>> updateCallMembers({
+    List<UserInfo> updateMembers = const [],
+    List<String> removeIds = const [],
+  }) {
+    return _coordinatorClient.updateCallMembers(
+      callCid: callCid,
+      updateMembers: updateMembers.map((user) {
+        return MemberRequest(userId: user.id, role: user.role);
+      }).toList(),
+      removeIds: removeIds,
     );
   }
 
@@ -884,12 +904,12 @@ class Call {
   /// Receives a call or creates it with given information. You can then use
   /// the [CallReceivedOrCreatedData] in order to create a [Call] object.
   Future<Result<CallReceivedOrCreatedData>> getOrCreate({
-    List<String> participantIds = const [],
+    List<String> memberIds = const [],
     bool ringing = false,
   }) async {
     _logger.d(
       () => '[getOrCreate] cid: $callCid, ringing: $ringing, '
-          'participantIds: $participantIds',
+          'memberIds: $memberIds',
     );
 
     final currentUserId = _getCurrentUserId();
@@ -901,7 +921,7 @@ class Call {
     final response = await _coordinatorClient.getOrCreateCall(
       callCid: callCid,
       ringing: ringing,
-      members: participantIds.map((id) {
+      members: memberIds.map((id) {
         return MemberRequest(
           userId: id,
           role: 'admin',
