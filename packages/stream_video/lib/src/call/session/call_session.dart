@@ -289,13 +289,15 @@ class CallSession extends Disposable {
     await track.stop();
   }
 
-  Future<void> _onPublishQualityChanged(SfuChangePublishQualityEvent event) async {
+  Future<void> _onPublishQualityChanged(
+      SfuChangePublishQualityEvent event) async {
     _logger.d(() => '[onPublishQualityChanged] event: $event');
 
     final enabledRids = event.videoSenders.firstOrNull?.layers
-        .where((e) => e.active)
-        .map((e) => e.name)
-        .toSet() ?? {};
+            .where((e) => e.active)
+            .map((e) => e.name)
+            .toSet() ??
+        {};
 
     _logger.v(() => '[onPublishQualityChanged] Enabled RIDs: $enabledRids');
 
@@ -572,23 +574,35 @@ class CallSession extends Disposable {
     return rtcManager.setAudioOutputDevice(device: device);
   }
 
-  Future<Result<None>> setCameraEnabled(bool enabled) async {
+  Future<Result<None>> setCameraEnabled(
+    bool enabled, {
+    CameraConstraints? constraints,
+  }) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set camera, Call not connected');
     }
 
-    final result = await rtcManager.setCameraEnabled(enabled: enabled);
+    final result = await rtcManager.setCameraEnabled(
+      enabled: enabled,
+      constraints: constraints,
+    );
     return result.map((_) => none);
   }
 
-  Future<Result<None>> setMicrophoneEnabled(bool enabled) async {
+  Future<Result<None>> setMicrophoneEnabled(
+    bool enabled, {
+    AudioConstraints? constraints,
+  }) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set microphone, Call not connected');
     }
 
-    final result = await rtcManager.setMicrophoneEnabled(enabled: enabled);
+    final result = await rtcManager.setMicrophoneEnabled(
+      enabled: enabled,
+      constraints: constraints,
+    );
     return result.map((_) => none);
   }
 
@@ -602,13 +616,19 @@ class CallSession extends Disposable {
     return result.map((_) => none);
   }
 
-  Future<Result<None>> setScreenShareEnabled(bool enabled) async {
+  Future<Result<None>> setScreenShareEnabled(
+    bool enabled, {
+    ScreenShareConstraints? constraints,
+  }) async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return Result.error('Unable to set ScreenShare, Call not connected');
     }
 
-    final result = await rtcManager.setScreenShareEnabled(enabled: enabled);
+    final result = await rtcManager.setScreenShareEnabled(
+      enabled: enabled,
+      constraints: constraints,
+    );
     return result.map((_) => none);
   }
 

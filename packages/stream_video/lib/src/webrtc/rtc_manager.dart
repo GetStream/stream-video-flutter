@@ -664,30 +664,43 @@ extension RtcManagerTrackHelper on RtcManager {
     return setTrackFacingMode(facingMode: facingMode);
   }
 
-  Future<Result<RtcLocalTrack>> setCameraEnabled({bool enabled = true}) {
+  Future<Result<RtcLocalTrack>> setCameraEnabled({
+    bool enabled = true,
+    CameraConstraints? constraints,
+  }) {
     return _setTrackEnabled(
       trackType: SfuTrackType.video,
       enabled: enabled,
+      constraints: constraints,
     );
   }
 
-  Future<Result<RtcLocalTrack>> setMicrophoneEnabled({bool enabled = true}) {
+  Future<Result<RtcLocalTrack>> setMicrophoneEnabled({
+    bool enabled = true,
+    AudioConstraints? constraints,
+  }) {
     return _setTrackEnabled(
       trackType: SfuTrackType.audio,
       enabled: enabled,
+      constraints: constraints,
     );
   }
 
-  Future<Result<RtcLocalTrack>> setScreenShareEnabled({bool enabled = true}) {
+  Future<Result<RtcLocalTrack>> setScreenShareEnabled({
+    bool enabled = true,
+    ScreenShareConstraints? constraints,
+  }) {
     return _setTrackEnabled(
       trackType: SfuTrackType.screenShare,
       enabled: enabled,
+      constraints: constraints,
     );
   }
 
   Future<Result<RtcLocalTrack>> _setTrackEnabled({
     required SfuTrackType trackType,
     required bool enabled,
+    MediaConstraints? constraints,
   }) async {
     final track = getPublisherTrackByType(trackType);
 
@@ -703,7 +716,10 @@ extension RtcManagerTrackHelper on RtcManager {
 
     // Track not found, create a new one and publish it if enabled is true.
     if (enabled) {
-      return _createAndPublishTrack(trackType: trackType);
+      return _createAndPublishTrack(
+        trackType: trackType,
+        constraints: constraints,
+      );
     }
 
     // Track not found and enabled is false, return error.
@@ -745,21 +761,52 @@ extension RtcManagerTrackHelper on RtcManager {
 
   Future<Result<RtcLocalTrack>> _createAndPublishTrack({
     required SfuTrackType trackType,
+    MediaConstraints? constraints,
   }) async {
     if (trackType == SfuTrackType.video) {
-      final cameraTrackResult = await createCameraTrack();
+      if (constraints != null && constraints is! CameraConstraints) {
+        final errorMessage =
+            'Invalid media constraints type ${constraints.runtimeType}, ${CameraConstraints} expected';
+        _logger.e(() => errorMessage);
+        return Result.error(errorMessage);
+      }
+
+      final cameraTrackResult = await createCameraTrack(
+        constraints:
+            (constraints ?? const CameraConstraints()) as CameraConstraints,
+      );
       return cameraTrackResult.fold(
         success: (it) => publishVideoTrack(track: it.data),
         failure: (it) => it,
       );
     } else if (trackType == SfuTrackType.audio) {
-      final audioTrackResult = await createAudioTrack();
+      if (constraints != null && constraints is! AudioConstraints) {
+        final errorMessage =
+            'Invalid media constraints type ${constraints.runtimeType}, ${AudioConstraints} expected';
+        _logger.e(() => errorMessage);
+        return Result.error(errorMessage);
+      }
+
+      final audioTrackResult = await createAudioTrack(
+        constraints:
+            (constraints ?? const AudioConstraints()) as AudioConstraints,
+      );
       return audioTrackResult.fold(
         success: (it) => publishAudioTrack(track: it.data),
         failure: (it) => it,
       );
     } else if (trackType == SfuTrackType.screenShare) {
-      final screenShareTrackResult = await createScreenShareTrack();
+      if (constraints != null && constraints is! ScreenShareConstraints) {
+        final errorMessage =
+            'Invalid media constraints type ${constraints.runtimeType}, ${ScreenShareConstraints} expected';
+        _logger.e(() => errorMessage);
+        return Result.error(errorMessage);
+      }
+
+      final screenShareTrackResult = await createScreenShareTrack(
+        constraints: (constraints ?? const ScreenShareConstraints())
+            as ScreenShareConstraints,
+      );
       return screenShareTrackResult.fold(
         success: (it) => publishVideoTrack(track: it.data),
         failure: (it) => it,
