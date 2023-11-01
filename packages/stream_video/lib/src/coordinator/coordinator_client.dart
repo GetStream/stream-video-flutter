@@ -78,10 +78,20 @@ abstract class CoordinatorClient {
     Map<String, Object> custom = const {},
   });
 
-  Future<Result<None>> inviteUsers({
+  Future<Result<None>> addMembers({
     required StreamCallCid callCid,
     required Iterable<open.MemberRequest> members,
-    bool? ringing,
+  });
+
+  Future<Result<None>> removeMembers({
+    required StreamCallCid callCid,
+    required Iterable<String> removeIds,
+  });
+
+  Future<Result<None>> updateCallMembers({
+    required StreamCallCid callCid,
+    Iterable<open.MemberRequest> updateMembers = const [],
+    Iterable<String> removeIds = const [],
   });
 
   /// Sends a `call.permission_request` event to all users connected

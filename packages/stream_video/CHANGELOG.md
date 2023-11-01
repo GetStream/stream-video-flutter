@@ -1,3 +1,15 @@
+## Upcoming
+
+✅ Added
+
+* `removeMembers` and `updateCallMembers` to `Call`
+
+🔄 Changed
+
+Breaking changes 🚧
+* renamed `inviteUsers` to `addMembers` in `Call`
+* renamed parameter name in `getOrCreateCall` from `participantIds` to `memberIds`
+
 ## 0.1.1
 
 * Fixed call join bug

@@ -513,31 +513,56 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
   /// Sends invite to people for an existing call.
   @override
-  Future<Result<None>> inviteUsers({
+  Future<Result<None>> addMembers({
     required StreamCallCid callCid,
     required Iterable<open.MemberRequest> members,
-    bool? ringing,
+  }) async {
+    _logger.d(
+      () => '[addMembers] cid: $callCid, members: $members',
+    );
+
+    return updateCallMembers(callCid: callCid, updateMembers: members);
+  }
+
+  @override
+  Future<Result<None>> removeMembers({
+    required StreamCallCid callCid,
+    required Iterable<String> removeIds,
+  }) async {
+    _logger.d(
+      () => '[removeMembers] cid: $callCid, removeIds: $removeIds',
+    );
+
+    return updateCallMembers(callCid: callCid, removeIds: removeIds);
+  }
+
+  @override
+  Future<Result<None>> updateCallMembers({
+    required StreamCallCid callCid,
+    Iterable<open.MemberRequest> updateMembers = const [],
+    Iterable<String> removeIds = const [],
   }) async {
     try {
       _logger.d(
         () =>
-            '[inviteUsers] cid: $callCid, members: $members, ringing: $ringing',
+            '[updateCallMembers] cid: $callCid, updateMembers: $updateMembers, removeIds: $removeIds',
       );
       final connectionResult = await _waitUntilConnected();
       if (connectionResult is Failure) {
-        _logger.e(() => '[inviteUsers] no connection established');
+        _logger.e(() => '[updateCallMembers] no connection established');
         return connectionResult;
       }
       final result = await _defaultApi.updateCallMembers(
         callCid.type,
         callCid.id,
         open.UpdateCallMembersRequest(
-          updateMembers: members.toList(),
+          updateMembers: updateMembers.toList(),
+          removeMembers: removeIds.toList(),
         ),
       );
-      _logger.v(() => '[inviteUsers] completed: $result');
+      _logger.v(() => '[updateCallMembers] completed: $result');
       if (result == null) {
-        return Result.error('inviteUsers result is null');
+        return Result.error('updateCallMembers result is null');
       }
       return const Result.success(none);
     } catch (e, stk) {

@@ -53,7 +53,7 @@ class StreamInviteUserListController extends ValueNotifier<CallInviteState> {
     final users = value.users;
     final selectedUsers = value.selectedUsers;
 
-    await call.inviteUsers(selectedUsers.values.toList());
+    await call.addMembers(selectedUsers.values.toList());
     users.removeWhere((user) => selectedUsers.containsKey(user.id));
     selectedUsers.clear();
     notifyListeners();
