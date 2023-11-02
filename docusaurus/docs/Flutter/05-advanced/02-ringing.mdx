@@ -48,11 +48,11 @@ You now need to upload your Firebase credentials using the Stream dashboard.
 
 ![Firebase Configuration](../assets/advanced_assets/firebase_config.png)
 
-- Add a name for your push provider in the **Name** field. You will use this name later in the code to identify which provider to use for android notifications.
+- Add a name for your push provider in the **Name** field. You will use this name later in the code to identify which provider to use for Android notifications.
 
 - Add your previously generated Firebase Credentials in the **Credentials JSON** field.
 
-- Enable this provider using toggle button
+- Enable this provider using toggle button.
 
 - Click **Create** and your push provider should be ready.
 
@@ -206,7 +206,7 @@ Remember to follow [official best practices](https://developer.android.com/devel
 
 ![APNs Configuration](../assets/advanced_assets/apns_config.png)
 
-- Add a name for your push provider in the **Name** field. This is the name used while setting up ios push notifications in the code we did [earlier](#Step-5---Add-code-to-listen-to-push-notifications)
+- Add a name for your push provider in the **Name** field. This is the name used while setting up iOS push notifications in the code we did [earlier](#Step-5---Add-code-to-listen-to-push-notifications)
 
 - Add your previously generated P12 file with your additional Apple information.
 
@@ -261,7 +261,6 @@ _observeFcmMessages() {
 ```
 
 In a high-level widget in your app, add this code to listen to CallKit events:
-- remember to implement navigation in a marked line
 
 ```dart
 final _callKitEventSubscriptions = Subscriptions();
@@ -350,6 +349,10 @@ void dispose() {
   _callKitEventSubscriptions.cancelAll();
 }
 ```
+
+:::note
+Remember to implement navigation in a marked line.
+:::
 
 Please add an additional extension at the end of the class / in a different file that we added to make
 subscriptions simpler:
