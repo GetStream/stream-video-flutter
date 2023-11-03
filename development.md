@@ -1,4 +1,4 @@
-### 0.1.0 milestone 
+### 0.1.0 milestone
 - [x] Participant sorting/filtering
 - [x] Screensharing
 - [x] Opus RED / DTX
@@ -23,26 +23,43 @@
 - [x] Android foreground service
 
 ### 0.3.0 milestone
-- [ ] Publish apps to Android/iOS
-- [ ] Participant sort bug
-- [ ] Android/iOS ringing flow
-- [ ] Create new call types
-- [ ] Deeplinking
-- [ ] RTMP streaming
-- [ ] Video filters / audio filters
-- [ ] Tap to focus (flutter_webrtc)
+- [ ] Publish apps to Android/iOS [Deven]
+- - [ ] Check the stores' descriptions
+- - [ ] Publish Dogfooding app
+- [ ] Participant sort bug [Efthymis]
+- [x] Android/iOS ringing flow
+- [ ] Create new call types [Efthymis]
+- [ ] Live streaming component(s) [Deven]
+- [x] Deeplinking
+- [ ] Tap to focus (flutter_webrtc) [Kanat]
+- [ ] Push notifications [Maciej]
+- - [ ] Customization of the notification
+- - [ ] Customizing call.kt ringing calls
+- - [ ] Bug app crashes when notification button is tapped
+- [ ] Native packages refactor [Maciej]
+- - [ ] Create the native projects in stream_video_flutter
+- - [ ] Merge stream_video_flutter_background
+- - [ ] Merge screen sharing branch
+- [ ] Screen sharing *(depends on "Native packages refactor")* [Maciej]
+- - [ ] iOS
+- - [ ] Android
+- [ ] Regular reconnection [Maciej,Kanat]
+- [ ] Support ICE restart reconnection [Maciej,Kanat]
+- [ ] Update WebRTC version to m114 (livekit version) [Kanat]
+- [ ] Fix analysis issues [Maciej]
 
 ### 0.4.0 milestone
-- [ ] Fast reconnect
-- [ ] Bluetooth fixes
-- [ ] Switch the earpiece/microphone button
-- [ ] Local audio levels
+- [ ] Implement Chat overlay for Dogfooding app
+- [ ] Support SFU migration
+- [ ] Video filters / audio filters
+- [ ] Bluetooth fixes (check support of BT media devices in flutter)
+- [ ] Switch the earpiece/microphone button *(depends on "Bluetooth fixes")*
+- [ ] Local audio levels (maybe from webrtc)
 - [ ] Test coverage
 - [ ] Align custom event support to other SDKs
-- [ ] Update WebRTC version
-- [ ] Dynascale 2.0
 
 ### 0.5.0 milestone
+- [ ] Dynascale 2.0
 - [ ] Picture-in-picture
 - [ ] SFU switching
 - [ ] Update RTC reconnection logic
