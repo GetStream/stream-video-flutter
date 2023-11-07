@@ -84,13 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => StreamUsersConfiguration(
-          usersProvider: MockUsersProvider(),
-          child: StreamCallContainer(
-            call: call,
-            callConnectOptions: options,
-          ),
-        ),
+        builder: (context) => LivestreamPlayer(call: call),
       ),
     );
   }
