@@ -32,8 +32,8 @@
 - [x] Deeplinking
 - [ ] Tap to focus (flutter_webrtc) [Kanat]
 - [ ] Push notifications [Maciej]
-- - [ ] Customization of the notification
-- - [ ] Customizing call.kt ringing calls
+- - [x] Customization of the incoming/outgoing call screens
+- - [x] Customizing CallKit ringing calls
 - - [ ] Bug app crashes when notification button is tapped
 - [ ] Native packages refactor [Maciej]
 - - [ ] Create the native projects in stream_video_flutter

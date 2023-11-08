@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
@@ -23,6 +25,8 @@ class StreamOutgoingCallContent extends StatefulWidget {
     this.singleParticipantTextStyle,
     this.multipleParticipantTextStyle,
     this.callingLabelTextStyle,
+    this.participantsAvatarBuilder,
+    this.participantsDisplayNameBuilder,
   });
 
   /// Represents a call.
@@ -54,6 +58,12 @@ class StreamOutgoingCallContent extends StatefulWidget {
 
   /// Text style for the calling label.
   final TextStyle? callingLabelTextStyle;
+
+  /// Builder used to create a custom widget for participants avatars.
+  final ParticipantsAvatarBuilder? participantsAvatarBuilder;
+
+  /// Builder used to create a custom widget for participants display names.
+  final ParticipantsDisplayNameBuilder? participantsDisplayNameBuilder;
 
   @override
   State<StreamOutgoingCallContent> createState() =>
@@ -90,19 +100,33 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Spacer(),
-            ParticipantAvatars(
-              participants: participants,
-              singleParticipantAvatarTheme: singleParticipantAvatarTheme,
-              multipleParticipantAvatarTheme: multipleParticipantAvatarTheme,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
-              child: CallingParticipants(
-                participants: participants,
-                singleParticipantTextStyle: singleParticipantTextStyle,
-                multipleParticipantTextStyle: multipleParticipantTextStyle,
-              ),
-            ),
+            widget.participantsAvatarBuilder?.call(
+                  context,
+                  widget.call,
+                  widget.callState,
+                  participants,
+                ) ??
+                ParticipantAvatars(
+                  participants: participants,
+                  singleParticipantAvatarTheme: singleParticipantAvatarTheme,
+                  multipleParticipantAvatarTheme:
+                      multipleParticipantAvatarTheme,
+                ),
+            widget.participantsDisplayNameBuilder?.call(
+                  context,
+                  widget.call,
+                  widget.callState,
+                  participants,
+                ) ??
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
+                  child: CallingParticipants(
+                    participants: participants,
+                    singleParticipantTextStyle: singleParticipantTextStyle,
+                    multipleParticipantTextStyle: multipleParticipantTextStyle,
+                  ),
+                ),
             Text(
               'Calling…',
               style: callingLabelTextStyle,

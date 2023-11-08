@@ -93,6 +93,7 @@ a push notification is received.
 - Replace `yourUserCredentialsGetMethod()` with your implementation to get logged in user credentials
 - For `androidPushProvider` use the provider name created in [Step 2](#Step-2---Upload-the-Firebase-Credentials-to-Stream)
 - For `iosPushProvider` use the provider name we will create later in [APN integration](#Integrating-APNs-for-iOS​)
+- Add app icon Asset in Xcode for displaying in CallKit screen dedicated button (named `IconMask` in the code below). [See details here](https://developer.apple.com/documentation/callkit/cxproviderconfiguration/2274376-icontemplateimagedata)
 
 ```dart
 // As this runs in a separate isolate, we need to setup the app again.

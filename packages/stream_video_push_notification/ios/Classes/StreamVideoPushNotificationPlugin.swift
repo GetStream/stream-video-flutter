@@ -5,54 +5,41 @@ import flutter_callkit_incoming
 public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
     
     public static func register(with registrar: FlutterPluginRegistrar) {
-        // no-op
+        let channel = FlutterMethodChannel(name: "stream_video_push_notifications", binaryMessenger: registrar.messenger())
+        let instance = StreamVideoPushNotificationPlugin()
+
+        registrar.addMethodCallDelegate(instance, channel: channel)
     }
+
+    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        switch call.method {
+            case "initData":
+                if let arguments = call.arguments as? [String: Any] {
+                    StreamVideoPKDelegateManager.shared.initData(data: arguments)
+                    result(nil)
+                } else {
+                    result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid argument", details: nil))
+                }
+            default:
+                result(FlutterMethodNotImplemented)
+        }
+    }       
     
     @objc public static func setDevicePushTokenVoIP(deviceToken: String) {
         SwiftFlutterCallkitIncomingPlugin.sharedInstance?.setDevicePushTokenVoIP(deviceToken)
     }
     
     @objc public static func startOutgoingCall(
-        uuid: String,
-        callCid: String,
-        avatar: String? = nil,
-        handle: String? = nil,
-        nameCaller: String? = nil,
-        hasVideo: Bool = true,
+        data: flutter_callkit_incoming.Data,
         fromPushKit: Bool
     ) {
-        let defaultCallText = "Unknown Caller"
-        
-        let data = flutter_callkit_incoming.Data(
-            id: uuid,
-            nameCaller: nameCaller ?? defaultCallText,
-            handle: handle ?? defaultCallText,
-            type: hasVideo ? 1 : 0
-        )
-        data.extra = ["callCid": callCid]
-        
         SwiftFlutterCallkitIncomingPlugin.sharedInstance?.startCall(data, fromPushKit: fromPushKit)
     }
     
     @objc public static func showIncomingCall(
-        uuid: String,
-        callCid: String,
-        avatar: String? = nil,
-        handle: String? = nil,
-        nameCaller: String? = nil,
-        hasVideo: Bool = true,
+        data: flutter_callkit_incoming.Data,
         fromPushKit: Bool
     ) {
-        let defaultCallText = "Unknown Caller"
-        
-        let data = flutter_callkit_incoming.Data(
-            id: uuid,
-            nameCaller: nameCaller ?? defaultCallText,
-            handle: handle ?? defaultCallText,
-            type: hasVideo ? 1 : 0
-        )
-        data.extra = ["callCid": callCid]
-        
         SwiftFlutterCallkitIncomingPlugin.sharedInstance?.showCallkitIncoming(data, fromPushKit: fromPushKit)
     }
     

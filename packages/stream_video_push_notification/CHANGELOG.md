@@ -1,3 +1,28 @@
+## Upcoming
+
+ ✅ Added
+
+ * `incomingCallerNameOverride` and `incomingCallerHandlerOverride` to `StreamVideoPushParams` to allow customization of CallKit call screen
+ * `participantsAvatarBuilder` and `participantsDisplayNameBuilder` to `StreamOutgoingCallContent` and `StreamIncomingCallContent` to allow customiztion of Incoming and Outgoing call screens
+
+Example usage:
+ ```dart
+ StreamCallContainer(
+    ...
+    outgoingCallBuilder: (context, call, callState) =>
+            StreamOutgoingCallContent(
+                call: call,
+                callState: callState,
+                participantsDisplayNameBuilder:
+                    (context, call, callState, participants) => your widget here,
+            ),
+ )
+ ```
+
+ 🐞 Fixed
+
+ * App icon in CallKit screen is now visible in dedicated button when correctly configured.
+
 ## 0.1.1
 
 * Aligned version with other Stream Video packages
