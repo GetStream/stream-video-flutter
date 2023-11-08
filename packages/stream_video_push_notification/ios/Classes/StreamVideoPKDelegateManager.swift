@@ -47,24 +47,22 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
         let createdByName = streamDict?["created_by_display_name"] as? String
         let createdById = streamDict?["created_by_id"] as? String
 
-        let data: flutter_callkit_incoming.Data
+        let data: StreamVideoPushParams
         if let jsonData = defaultData {
-            data = try! flutter_callkit_incoming.Data(args: jsonData)
+            data = StreamVideoPushParams(args: jsonData)
         } else {
-            data = try! flutter_callkit_incoming.Data(args: [String: Any]())
+            data = StreamVideoPushParams(args: [String: Any]())
         }
 
-        let displayNameOverride = data.extra["display_name_override"] as? String
-
-        data.uuid = UUID().uuidString
-        data.nameCaller = displayNameOverride ?? createdByName ?? defaultCallText
-        data.handle = createdById ?? defaultCallText
-        data.type = 1 //video
-        data.extra = ["callCid": callCid]
+        data.callKitData.uuid = UUID().uuidString
+        data.callKitData.nameCaller = data.incomingCallerNameOverride ?? createdByName ?? defaultCallText
+        data.callKitData.handle = data.incomingCallerHandlerOverride ?? createdById ?? defaultCallText
+        data.callKitData.type = 1 //video
+        data.callKitData.extra = ["callCid": callCid]
 
         // Show call incoming notification.
         StreamVideoPushNotificationPlugin.showIncomingCall(
-            data: data,
+            data: data.callKitData,
             fromPushKit: true
         )
         

@@ -106,8 +106,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     final params = pushParams.copyWith(
       id: uuid,
       avatar: avatar,
-      handle: handle,
-      nameCaller: nameCaller,
+      handle: pushParams.incomingCallerHandlerOverride ?? handle,
+      nameCaller: pushParams.incomingCallerNameOverride ?? nameCaller,
       type: hasVideo ? 1 : 0,
       extra: {'callCid': callCid},
     );
@@ -127,8 +127,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     final params = pushParams.copyWith(
       id: uuid,
       avatar: avatar,
-      handle: handle,
-      nameCaller: nameCaller,
+      handle: pushParams.incomingCallerHandlerOverride ?? handle,
+      nameCaller: pushParams.incomingCallerNameOverride ?? nameCaller,
       type: hasVideo ? 1 : 0,
       extra: {'callCid': callCid},
     );

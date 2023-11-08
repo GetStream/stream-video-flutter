@@ -23,6 +23,8 @@ class StreamIncomingCallContent extends StatefulWidget {
     this.singleParticipantTextStyle,
     this.multipleParticipantTextStyle,
     this.callingLabelTextStyle,
+    this.participantsAvatarBuilder,
+    this.participantsDisplayNameBuilder,
   });
 
   /// Represents a call.
@@ -57,6 +59,12 @@ class StreamIncomingCallContent extends StatefulWidget {
 
   /// Text style for the calling label.
   final TextStyle? callingLabelTextStyle;
+
+  /// Builder used to create a custom widget for participants avatars.
+  final ParticipantsAvatarBuilder? participantsAvatarBuilder;
+
+  /// Builder used to create a custom widget for participants display names.
+  final ParticipantsDisplayNameBuilder? participantsDisplayNameBuilder;
 
   @override
   State<StreamIncomingCallContent> createState() =>
@@ -93,19 +101,33 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Spacer(),
-            ParticipantAvatars(
-              participants: users,
-              singleParticipantAvatarTheme: singleParticipantAvatarTheme,
-              multipleParticipantAvatarTheme: multipleParticipantAvatarTheme,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
-              child: CallingParticipants(
-                participants: users,
-                singleParticipantTextStyle: singleParticipantTextStyle,
-                multipleParticipantTextStyle: multipleParticipantTextStyle,
-              ),
-            ),
+            widget.participantsAvatarBuilder?.call(
+                  context,
+                  widget.call,
+                  widget.callState,
+                  users,
+                ) ??
+                ParticipantAvatars(
+                  participants: users,
+                  singleParticipantAvatarTheme: singleParticipantAvatarTheme,
+                  multipleParticipantAvatarTheme:
+                      multipleParticipantAvatarTheme,
+                ),
+            widget.participantsDisplayNameBuilder?.call(
+                  context,
+                  widget.call,
+                  widget.callState,
+                  users,
+                ) ??
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 64, vertical: 32),
+                  child: CallingParticipants(
+                    participants: users,
+                    singleParticipantTextStyle: singleParticipantTextStyle,
+                    multipleParticipantTextStyle: multipleParticipantTextStyle,
+                  ),
+                ),
             Text(
               // TODO hardcoded text
               'Incoming Call...',
