@@ -1,4 +1,4 @@
-class OpenApiErrorCode {
+mixin OpenApiErrorCode {
   static const tokenExpired = 40;
   static const tokenNotValid = 41;
   static const tokenDateIncorrect = 42;
@@ -9,6 +9,6 @@ class OpenApiErrorCode {
     tokenExpired,
     tokenNotValid,
     tokenDateIncorrect,
-    tokenSignatureIncorrect
+    tokenSignatureIncorrect,
   ];
 }

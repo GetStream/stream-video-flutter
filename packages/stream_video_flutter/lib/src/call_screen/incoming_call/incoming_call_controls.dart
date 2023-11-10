@@ -80,7 +80,7 @@ class IncomingCallControls extends StatelessWidget {
                 onPressed: onCameraTap,
               ),
             ],
-          )
+          ),
         ],
       ),
     );

@@ -9,6 +9,7 @@ class VideoError with EquatableMixin implements Error {
   final String message;
 
   /// Cause of the error, either a BE exception or an SDK based one.
+  @override
   final StackTrace? stackTrace;
 
   @override

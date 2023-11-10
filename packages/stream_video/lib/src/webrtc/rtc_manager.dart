@@ -206,7 +206,7 @@ class RtcManager extends Disposable {
           }
         });
         if (changed) {
-          if (params.encodings?.length == 0) {
+          if (params.encodings?.isEmpty ?? true) {
             _logger.v(() => 'No suitable video encoding quality found');
           }
           await transceiver.sender.setParameters(params);

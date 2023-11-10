@@ -78,7 +78,7 @@ class ParticipantAvatars extends StatelessWidget {
             child: StreamUserAvatar(
               user: participants[1],
             ),
-          )
+          ),
         ],
       );
     } else if (length >= 3) {
@@ -127,9 +127,9 @@ class ParticipantAvatars extends StatelessWidget {
                   child: StreamUserAvatar(
                     user: participants[2],
                   ),
-                )
+                ),
             ],
-          )
+          ),
         ],
       );
     } else {

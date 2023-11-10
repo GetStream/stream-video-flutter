@@ -23,8 +23,6 @@ class StreamCallParticipantThemeData with Diagnosticable {
         fontWeight: FontWeight.bold,
         color: Colors.white,
       ),
-      selectionColor: const Color(0xFF005FFF),
-      selectionThickness: 4,
     ),
     this.showSpeakerBorder = true,
     this.speakerBorderThickness = 4,
@@ -116,10 +114,10 @@ class StreamCallParticipantThemeData with Diagnosticable {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       borderRadius: borderRadius ?? this.borderRadius,
       userAvatarTheme: userAvatarTheme ?? this.userAvatarTheme,
-      showSpeakerBorder: showDominantSpeakerBorder ?? this.showSpeakerBorder,
+      showSpeakerBorder: showDominantSpeakerBorder ?? showSpeakerBorder,
       speakerBorderThickness:
-          dominantSpeakerBorderThickness ?? this.speakerBorderThickness,
-      speakerBorderColor: dominantSpeakerBorderColor ?? this.speakerBorderColor,
+          dominantSpeakerBorderThickness ?? speakerBorderThickness,
+      speakerBorderColor: dominantSpeakerBorderColor ?? speakerBorderColor,
       showParticipantLabel: showParticipantLabel ?? this.showParticipantLabel,
       participantLabelTextStyle:
           participantLabelTextStyle ?? this.participantLabelTextStyle,

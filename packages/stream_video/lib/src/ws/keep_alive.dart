@@ -31,7 +31,7 @@ mixin KeepAlive on StreamWebSocket {
   /// Sends a ping signal every [_pingDuration] and waits for a pong message
   /// within [_pongTimeoutDuration].
   ///
-  /// If a pong message is not [ack] within [_pongTimeoutDuration], the
+  /// If a pong message is not [ackPong] within [_pongTimeoutDuration], the
   /// connection is closed.
   void startPingPong() {
     isKeepAliveStarted = true;

@@ -44,9 +44,7 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
   void participantUpdateViewportVisibilities(
     UpdateViewportVisibilities action,
   ) {
-    for (final action in action.actions) {
-      participantUpdateViewportVisibility(action);
-    }
+    action.actions.forEach(participantUpdateViewportVisibility);
   }
 
   void participantUpdateSubscriptions(
@@ -54,7 +52,8 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
   ) {
     final sessionId = state.sessionId;
     _logger.d(
-        () => '[participantUpdateSubscriptions] #$sessionId; action: $action');
+      () => '[participantUpdateSubscriptions] #$sessionId; action: $action',
+    );
     for (final action in action.actions) {
       if (action is UpdateSubscription) {
         participantUpdateSubscription(action);
@@ -67,8 +66,10 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
   void participantUpdateSubscription(
     UpdateSubscription action,
   ) {
-    _logger.d(() =>
-        '[participantUpdateSubscription] #${state.sessionId}; action: $action');
+    _logger.d(
+      () =>
+          '[participantUpdateSubscription] #${state.sessionId}; action: $action',
+    );
     state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         final trackState = participant.publishedTracks[action.trackType];

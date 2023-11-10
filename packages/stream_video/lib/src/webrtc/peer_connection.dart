@@ -92,8 +92,10 @@ class StreamPeerConnection extends Disposable {
     Map<String, dynamic> mediaConstraints = const {},
   ]) async {
     try {
-      _logger.i(() =>
-          '[createLocalOffer] >>> #$type; mediaConstraints: $mediaConstraints');
+      _logger.i(
+        () =>
+            '[createLocalOffer] >>> #$type; mediaConstraints: $mediaConstraints',
+      );
       final localOffer = await pc.createOffer(mediaConstraints);
       final modifiedSdp = sdpEditor.edit(localOffer.sdp?.let(Sdp.localOffer));
       final modifiedOffer = localOffer.copyWith(sdp: modifiedSdp);
@@ -209,7 +211,7 @@ class StreamPeerConnection extends Disposable {
     }
   }
 
-  /// Adds a local [rtc.MediaStreamTrack] with video to a given [connection].
+  /// Adds a local [rtc.MediaStreamTrack] with video to a given connection.
   ///
   /// The video is then sent in three different resolutions using simulcast.
   Future<Result<rtc.RTCRtpTransceiver>> addVideoTransceiver({
@@ -351,6 +353,7 @@ class StreamPeerConnection extends Disposable {
 }
 
 extension on rtc.StatsReport {
+  // ignore: unused_element
   String stringify() {
     return 'ts: $timestamp, id: $id, type: $type, values: $values';
   }

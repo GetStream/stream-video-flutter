@@ -68,18 +68,23 @@ class _LoginScreenState extends State<LoginScreen> {
     if (loggingIn) {
       return;
     }
+
     setState(() {
       loggingIn = true;
     });
+
     await widget.connectUser(user.userInfo, user.token);
+
     setState(() {
       loggingIn = false;
     });
 
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const HomeScreen(),
-      ),
-    );
+    if (mounted) {
+      await Navigator.of(context).push(
+        MaterialPageRoute<dynamic>(
+          builder: (context) => const HomeScreen(),
+        ),
+      );
+    }
   }
 }

@@ -30,6 +30,7 @@ class StreamUsersConfiguration extends InheritedWidget {
 
 /// Used to expose a mechanism that allows the SDK to fetch users.
 /// These users can then be invited to calls, explored in isolation and more.
+// ignore: one_member_abstracts
 abstract class StreamUsersProvider {
   /// Provides a single instance of a user list that can be presented on the UI.
   Future<List<UserInfo>> providerUsers();

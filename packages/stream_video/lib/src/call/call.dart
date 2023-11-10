@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -265,11 +267,6 @@ class Call {
     _connectOptions = connectOptions;
   }
 
-  // This is only used in [_onStateChanged] to determine the difference between
-  // the previous and current state. It should not be used for any other
-  // purpose. It is not guaranteed to be the latest, Use [state] instead.
-  CallState? _prevState;
-
   void _observeState() {
     _subscriptions.add(
       _idState,
@@ -313,8 +310,6 @@ class Call {
         state.settings.audio.opusDtxEnabled;
     _sessionFactory.sdpEditor.opusRedEnabled =
         state.settings.audio.redundantCodingEnabled;
-
-    _prevState = state;
   }
 
   Future<void> _onCoordinatorEvent(CoordinatorCallEvent event) async {
@@ -530,7 +525,6 @@ class Call {
   }
 
   Future<Result<CallCredentials>> _joinIfNeeded() async {
-    final state = this.state.value;
     final creds = _credentials;
     if (creds != null) {
       _logger.w(() => '[joinIfNeeded] rejected (already joined): $creds');
@@ -605,8 +599,10 @@ class Call {
       _stateManager
           .lifecycleCallConnectingAction(CallConnecting(_reconnectAttempt));
       if (_status.value == _ConnectionStatus.disconnected) {
-        _logger.w(() =>
-            '[reconnect] attempt($_reconnectAttempt) rejected (disconnected)');
+        _logger.w(
+          () =>
+              '[reconnect] attempt($_reconnectAttempt) rejected (disconnected)',
+        );
         _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< rejected');
         return;
       }
@@ -947,9 +943,6 @@ class Call {
 
   /// Allows you to create a new call with the given parameters
   /// and joins the call immediately.
-  ///
-  /// If a call with the same [cid] already exists,
-  /// it will join the existing call.
   Future<Result<CallJoinedData>> _joinCall({
     bool create = false,
   }) async {
@@ -1046,7 +1039,9 @@ class Call {
 
     if (result.isSuccess) {
       _stateManager.setCallBroadcasting(
-          isBroadcasting: true, hlsPlaylistUrl: result.getDataOrNull());
+        isBroadcasting: true,
+        hlsPlaylistUrl: result.getDataOrNull(),
+      );
     }
     return result;
   }

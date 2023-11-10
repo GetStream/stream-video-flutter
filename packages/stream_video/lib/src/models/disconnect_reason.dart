@@ -10,7 +10,8 @@ abstract class DisconnectReason extends Equatable {
   const factory DisconnectReason.timeout() = DisconnectReasonTimeout;
 
   const factory DisconnectReason.failure(
-      VideoError error) = DisconnectReasonFailure;
+    VideoError error,
+  ) = DisconnectReasonFailure;
 
   const factory DisconnectReason.rejected({
     required String byUserId,
@@ -95,7 +96,7 @@ class DisconnectReasonEnded extends DisconnectReason {
   const DisconnectReasonEnded._internal();
 
   static const DisconnectReasonEnded _instance =
-  DisconnectReasonEnded._internal();
+      DisconnectReasonEnded._internal();
 
   @override
   String toString() {
@@ -111,7 +112,7 @@ class DisconnectReasonLastParticipantLeft extends DisconnectReason {
   const DisconnectReasonLastParticipantLeft._internal();
 
   static const DisconnectReasonLastParticipantLeft _instance =
-  DisconnectReasonLastParticipantLeft._internal();
+      DisconnectReasonLastParticipantLeft._internal();
 
   @override
   String toString() {
@@ -127,7 +128,7 @@ class DisconnectReasonManuallyClosed extends DisconnectReason {
   const DisconnectReasonManuallyClosed._internal();
 
   static const DisconnectReasonManuallyClosed _instance =
-  DisconnectReasonManuallyClosed._internal();
+      DisconnectReasonManuallyClosed._internal();
 
   @override
   String toString() {
