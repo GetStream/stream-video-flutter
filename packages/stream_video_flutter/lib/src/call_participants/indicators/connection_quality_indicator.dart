@@ -97,7 +97,7 @@ class _ConnectionQualityIndicatorPainter extends CustomPainter {
         return 2;
       case SfuConnectionQuality.excellent:
         return 3;
-      default:
+      case SfuConnectionQuality.unspecified:
         return 0;
     }
   }

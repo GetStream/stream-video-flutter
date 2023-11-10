@@ -93,5 +93,8 @@ linter:
     # 'parameter_assignments' already enforces this to an extent.
     prefer_final_parameters: false
 
+    # There are situations where we use default in enums on purpose
     no_default_cases: false
+
+    # Would be a breaking change in some cases, no need to add those just for lintl cleanup
     avoid_positional_boolean_parameters: false

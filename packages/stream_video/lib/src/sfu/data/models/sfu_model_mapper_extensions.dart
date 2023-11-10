@@ -12,9 +12,9 @@ extension SfuPeerTypeMapper on sfu_models.PeerType {
         return StreamPeerType.subscriber;
       case sfu_models.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED:
         return StreamPeerType.publisher;
-      default:
-        throw StateError('unexpected quality: $this');
     }
+
+    throw StateError('unexpected quality: $this');
   }
 }
 

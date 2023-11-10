@@ -45,7 +45,7 @@
 - [ ] Regular reconnection [Maciej,Kanat]
 - [ ] Support ICE restart reconnection [Maciej,Kanat]
 - [ ] Update WebRTC version to m114 (livekit version) [Kanat]
-- [ ] Fix analysis issues [Maciej]
+- [x] Fix analysis issues [Maciej]
 
 ### 0.4.0 milestone
 - [ ] Implement Chat overlay for Dogfooding app
