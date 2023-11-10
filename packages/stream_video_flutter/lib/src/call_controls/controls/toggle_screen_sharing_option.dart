@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_background/flutter_background.dart';
 
 import '../../../stream_video_flutter.dart';
 
@@ -12,6 +15,7 @@ class ToggleScreenShareOption extends StatelessWidget {
     this.enabledScreenShareIcon = Icons.screen_share,
     this.disabledScreenShareIcon = Icons.stop_screen_share,
     this.screenShareConstraints,
+    this.androidBackgroundServiceConfig,
   });
 
   /// Represents a call.
@@ -26,8 +30,11 @@ class ToggleScreenShareOption extends StatelessWidget {
   /// The icon that is shown when the screen sharing is disabled.
   final IconData disabledScreenShareIcon;
 
-  // Constraints for screen sharing
+  /// Constraints for screen sharing
   final ScreenShareConstraints? screenShareConstraints;
+
+  /// Android configuration for the [FlutterBackground] plugin.
+  final FlutterBackgroundAndroidConfig? androidBackgroundServiceConfig;
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +44,28 @@ class ToggleScreenShareOption extends StatelessWidget {
       icon: enabled
           ? Icon(enabledScreenShareIcon)
           : Icon(disabledScreenShareIcon),
-      onPressed: () {
-        call.setScreenShareEnabled(
-          enabled: !enabled,
+      onPressed: () async {
+        final toggledEnabled = !enabled;
+
+        if (Platform.isAndroid) {
+          if (toggledEnabled) {
+            final androidConfig = androidBackgroundServiceConfig ??
+                const FlutterBackgroundAndroidConfig(
+                  notificationTitle: 'You are screen sharing',
+                  notificationText: '',
+                  notificationImportance: AndroidNotificationImportance.High,
+                  shouldRequestBatteryOptimizationsOff: false,
+                );
+
+            await FlutterBackground.initialize(androidConfig: androidConfig);
+            await FlutterBackground.enableBackgroundExecution();
+          } else {
+            await FlutterBackground.disableBackgroundExecution();
+          }
+        }
+
+        await call.setScreenShareEnabled(
+          enabled: toggledEnabled,
           constraints: screenShareConstraints,
         );
       },

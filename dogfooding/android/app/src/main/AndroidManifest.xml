@@ -17,6 +17,11 @@
         android:label="Dogfooding"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <service android:name="de.julianassmann.flutter_background.IsolateHolderService"
+            android:foregroundServiceType="mediaProjection"
+            android:enabled="true"
+            android:exported="false"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

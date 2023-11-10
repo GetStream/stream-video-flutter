@@ -1176,8 +1176,10 @@ class Call {
     required bool enabled,
     ScreenShareConstraints? constraints,
   }) async {
-    final result = await _session?.setScreenShareEnabled(enabled,
-            constraints: constraints) ??
+    final result = await _session?.setScreenShareEnabled(
+          enabled,
+          constraints: constraints,
+        ) ??
         Result.error('Session is null');
 
     if (result.isSuccess) {

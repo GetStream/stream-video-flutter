@@ -103,4 +103,32 @@ With that, the setup for the broadcast upload extension is done.
 
 ### Android
 
----- screen sharing for Android will be available soon ----
+The Stream Video SDK has support for screen sharing from an Android device. The SDK is using the [Android Media Projection API](https://developer.android.com/guide/topics/large-screens/media-projection) for the capture. To initiate screen sharing, user consent is mandatory.
+
+When using the `ToggleScreenShareOption` within the` stream_video_flutter` package, permission handling is seamlessly integrated. However, if you opt to initiate screen sharing via the `setScreenShareEnabled()` method on the `Call` object, you will be responsible for securing the necessary permissions and initiating a foreground service. The foreground service is essential for displaying a notification to the user while screen sharing is active.
+
+Below is an example snippet that demonstrates how to use the [`flutter_background`](https://pub.dev/packages/flutter_background) package to manage these requirements:
+
+```dart
+Future<bool> startForegroundService() async {
+  const androidConfig = FlutterBackgroundAndroidConfig(
+    notificationTitle: 'You are screen sharing',
+    notificationText: '',
+    notificationImportance: AndroidNotificationImportance.High,
+    shouldRequestBatteryOptimizationsOff: false,
+  );
+
+  //initialization will ask for a needed permissions
+  await FlutterBackground.initialize(androidConfig: androidConfig);
+  return FlutterBackground.enableBackgroundExecution();
+}
+```
+
+In case of using `flutter_background` you will also need to add a media projection service declation in `AndroidManifest.xml`.
+
+```xml
+<service android:name="de.julianassmann.flutter_background.IsolateHolderService"
+    android:foregroundServiceType="mediaProjection"
+    android:enabled="true"
+    android:exported="false"/>
+```
