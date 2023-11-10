@@ -1,32 +1,43 @@
 ---
 id: screen_sharing
 sidebar_position: 3
-title: Screen sharing
+title: Screen Sharing
 ---
 
-Adding option to share the screen during a call
-
 ### Introduction
+During the duration of a call, participants may want to share either a portion of thier screen, application or their entire screen to other users on the call. Stream Video makes it easy to support screensharing to other users natively on both Android and iOS devices. 
 
-Stream Video supports screen sharing during the call. This guide details how to configure it in your app.
+In this guide, we will look at the steps required to confgure screensharing on both platforms. If you are interested in screensharing for just one platform, you can skip to the [Android](#android) or [iOS](#ios) section using this link.
 
 ### iOS
+Starting with iOS, there are two main options for screensharing from an iOS device. These are:
 
-There are two options for screensharing from an iOS device:
+- **in-app screensharing** - In this mode, the app's screen is only shared while the app is active or in the foreground. If the app is not in the foreground, screensharing is paused. 
+- **broadcasting** - Using broadcasting mode allows the app to share the contents of the screen even when the application goes into the background.
 
-- **in-app screensharing** - the screen is shared only while the app is active (in the foreground).
-- **broadcasting** - the device shares the screen even when the app goes into the background.
-Both of these options use Apple's framework ReplayKit (via [flutter_webrtc](https://pub.dev/packages/flutter_webrtc)) for broadcasting the user's screen.
-
-:::info
-  In order for a user to be able to share their screen, they must have the screenshare capability configured for the call they are in.
-:::
+Both of these options use Apple's framework [ReplayKit](https://developer.apple.com/documentation/replaykit) (via [flutter_webrtc](https://pub.dev/packages/flutter_webrtc)) for broadcasting the user's screen.
 
 ![Screen sharing dashboard](../assets/advanced_assets/screen_sharing_dashboard.png)
 
-#### In-app sharing
+:::info
+  Before a user can share their screen, the call must have the screensharing capability configured via the [Dashboard](https://dashboard.getstream.io/). 
+:::
 
-In-app screensharing broadcasts only the app's screens. When you are in a call, and you have the required capability, you can toggle screensharing by calling the `setScreenShareEnabled()` method. 
+#### In-app sharing
+In-app screensharing only shares the application's screens. While on a call, screensharing can be enabled by calling `call.setScreenShareEnabled(enabled: true)` method.
+
+```dart 
+  void startSharing() {
+    // Checks to ensure the user can share their screen. 
+    final canShare = call.hasPermission(CallPermission.screenshare);
+
+    if (canShare) {
+      // Set screensharing to enabled 
+      call.setScreenShareEnabled(enabled: true);
+    }
+  }
+```
+
 
 :::tip
 If you use our UI components you can also add `ToggleScreenShareOption` as one of `StreamCallControls` option.
@@ -35,7 +46,6 @@ If you use our UI components you can also add `ToggleScreenShareOption` as one o
 When the method is invoked, ReplayKit will ask for the user's consent that their screen will be shared. Only after the permission is granted, the screensharing starts.
 
 #### Broadcasting
-
 In most cases, you would need to share your screen while you are in the background, to be able to open other apps. For this, you need to create a Broadcast Upload Extension.
 
 ##### Add dependencies
