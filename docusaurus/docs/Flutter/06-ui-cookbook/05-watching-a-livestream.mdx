@@ -1,9 +1,9 @@
 # Watching a Livestream
 
-This sample walks you through building advanced UIs for watching a livestream on Flutter.
+This sample walks you through building advanced UIs for watching a Livestream on Flutter.
 
 :::note
-In this cookbook tutorial, we will assume that you already know how to join a livestream call. If you haven't familiarized yourself with the **[Livestream Tutorial](https://getstream.io/video/docs/flutter/livestreaming/)** yet, we highly recommend doing so before proceeding with this cookbook.
+In this cookbook tutorial, we will assume that you already know how to join a Livestream call. If you haven't familiarized yourself with the **[Livestream Tutorial](https://getstream.io/video/docs/flutter/livestreaming/)** yet, we highly recommend doing so before proceeding with this cookbook.
 ::::
 
 To view an HLS stream and benefit from the full experience of selecting different streaming qualities and performing different player actions like muting and unmuting the stream, we recommend using [lecle_yoyo_player](https://pub.dev/packages/lecle_yoyo_player).
@@ -11,14 +11,14 @@ To view an HLS stream and benefit from the full experience of selecting differen
 When building for livestreaming, there are a few considerations you need to keep in mind for the UI:
 
 - UI for when the video isn't loaded yet
-- A message to show when the livestream hasn't started yet
-- What to show when the livestream stopped
+- A message to show when the Livestream hasn't started yet
+- What to show when the Livestream stopped
 - How to indicate when there are connection problems
 - Number of participants
 - Duration of the call
 
 ## Setting up the UI
-To setup our UI for rendering a livestream, we can use Flutter’s built-in `StreamBuilder` widget for listening to changes in our call state and rendering different UIs based on the stage of our live stream:
+To setup our UI for rendering a Livestream, we can use Flutter’s built-in `StreamBuilder` widget for listening to changes in our call state and rendering different UIs based on the stage of our live stream:
 
 ```dart
 @override
@@ -55,7 +55,7 @@ To setup our UI for rendering a livestream, we can use Flutter’s built-in `Str
 By looking at different properties on our `CallState`, we can render different UIs and messages based on whether the call is live, backstage, or loading. A `Stack` also allows us to add different secondary live stream elements such as a view count above the main UI.
 
 ## Rendering the Livestream
-Before running the code below to see the livestream in action, we recommend going to our [Dashboard](https://dashboard.getstream.io/) and creating a livestream first since it can be done visually without having to create another instance of the application on the simulator.
+Before running the code below to see the Livestream in action, we recommend going to our [Dashboard](https://dashboard.getstream.io/) and creating a Livestream first since it can be done visually without having to create another instance of the application on the simulator.
 
 Once a stream is started on the dashboard, the `Livestream ID` can be passed to the `id` parameter for the `Call` object in code.
 
