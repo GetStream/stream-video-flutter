@@ -67,9 +67,21 @@ dependencies:
 If you want to start screen sharing in broadcast mode on iOS you will need to toggle on using `ScreenShareConstraints`. Just set the flag to true inside `ToggleScreenShareOption` or when you use `call.setScreenShareEnabled()` directly.
 
 ```dart
-const ScreenShareConstraints(
+const constraints = ScreenShareConstraints(
     useiOSBroadcastExtension: true,
+);
+
+...
+
+ToggleScreenShareOption(
+  ...
+  screenShareConstraints: constraints,
 ),
+
+//or
+
+call.setScreenShareEnabled(enabled: true, constraints: constraints);
+
 ```
 
 ##### Add Broadcast Upload Extension
