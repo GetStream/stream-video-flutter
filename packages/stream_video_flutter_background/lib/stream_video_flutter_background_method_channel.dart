@@ -16,15 +16,6 @@ class MethodChannelStreamVideoFlutterBackground
   late final methodChannel =
       const MethodChannel('stream_video_flutter_background');
 
-  @override
-  Function(String callCid)? onContentClick;
-
-  @override
-  Function(String buttonType, String callCid)? onButtonClick;
-
-  @override
-  Function(String callCid)? onUiLayerDestroyed;
-
   Future<void> methodHandler(MethodCall call) async {
     switch (call.method) {
       case "onNotificationContentClick":

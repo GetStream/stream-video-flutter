@@ -48,8 +48,9 @@ mixin StateSfuMixin on StateNotifier<CallState> {
     final participants = event.callState.participants.map((aParticipant) {
       final isLocal = aParticipant.userId == state.currentUserId;
       final existing = state.callParticipants.firstWhereOrNull(
-        (it) => it.userId == aParticipant.userId
-            && it.sessionId == aParticipant.sessionId,
+        (it) =>
+            it.userId == aParticipant.userId &&
+            it.sessionId == aParticipant.sessionId,
       );
       final existingName = existing?.name ?? '';
       final existingRole = existing?.role ?? '';
@@ -63,7 +64,7 @@ mixin StateSfuMixin on StateNotifier<CallState> {
         trackIdPrefix: aParticipant.trackLookupPrefix,
         publishedTracks: {
           for (final track in aParticipant.publishedTracks)
-            track: TrackState.base(isLocal: isLocal)
+            track: TrackState.base(isLocal: isLocal),
         },
         isLocal: isLocal,
         isOnline: !isLocal,

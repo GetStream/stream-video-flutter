@@ -113,6 +113,7 @@ class StreamVideoPushParams extends CallKitParams {
   factory StreamVideoPushParams.fromJson(Map<String, dynamic> json) =>
       _$StreamVideoPushParamsFromJson(json);
 
+  @override
   Map<String, dynamic> toJson() => _$StreamVideoPushParamsToJson(this);
 }
 

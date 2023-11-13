@@ -29,7 +29,7 @@ mixin StateRtcMixin on StateNotifier<CallState> {
                 muted: false,
                 subscribed: true,
                 received: true,
-              )
+              ),
             },
           );
         } else {

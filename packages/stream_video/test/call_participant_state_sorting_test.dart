@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/models/call_participant_state.dart';
 import 'package:stream_video/src/models/call_track_state.dart';
@@ -53,7 +55,7 @@ void main() {
       sessionId: '3',
       role: 'admin',
       trackIdPrefix: '123',
-      publishedTracks: const {},
+      publishedTracks: {},
       connectionQuality: SfuConnectionQuality.excellent,
       isSpeaking: true,
       isDominantSpeaker: false,
@@ -103,7 +105,7 @@ void main() {
       trackIdPrefix: '123',
       publishedTracks: {
         SfuTrackType.audio: TrackState.remote(),
-        SfuTrackType.video: TrackState.remote()
+        SfuTrackType.video: TrackState.remote(),
       },
       connectionQuality: SfuConnectionQuality.excellent,
       isSpeaking: false,

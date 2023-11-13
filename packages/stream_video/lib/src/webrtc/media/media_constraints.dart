@@ -34,9 +34,10 @@ extension MediaDevices on rtc_interface.MediaDevices {
   Future<rtc.MediaStream> getMedia(MediaConstraints constraints) {
     final constraintsMap = constraints.toMap();
     streamLog.i(
-        'SV:MediaDevices',
-        () =>
-            '[getMedia] #${constraints.runtimeType}; constraintsMap: $constraintsMap');
+      'SV:MediaDevices',
+      () =>
+          '[getMedia] #${constraints.runtimeType}; constraintsMap: $constraintsMap',
+    );
     if (constraints is ScreenShareConstraints) {
       return rtc.navigator.mediaDevices.getDisplayMedia(
         constraintsMap,

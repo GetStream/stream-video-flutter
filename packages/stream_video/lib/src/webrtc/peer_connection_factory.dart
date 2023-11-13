@@ -1,10 +1,10 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import 'package:stream_video/src/types/other.dart';
-import 'package:stream_video/src/webrtc/peer_connection.dart';
-import 'package:stream_video/src/webrtc/peer_type.dart';
 
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
+import '../types/other.dart';
+import 'peer_connection.dart';
+import 'peer_type.dart';
 import 'sdp/editor/sdp_editor.dart';
 
 class StreamPeerConnectionFactory {
@@ -47,8 +47,10 @@ class StreamPeerConnectionFactory {
     required RTCConfiguration configuration,
     Map<String, dynamic> mediaConstraints = const {},
   }) async {
-    _logger.i(() => '[createPeerConnection] #$type; configuration: '
-        '${configuration.toMap()}, mediaConstraints: $mediaConstraints');
+    _logger.i(
+      () => '[createPeerConnection] #$type; configuration: '
+          '${configuration.toMap()}, mediaConstraints: $mediaConstraints',
+    );
     final pc = await rtc.createPeerConnection(
       configuration.toMap(),
       mediaConstraints,

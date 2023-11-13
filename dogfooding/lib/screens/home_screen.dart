@@ -166,7 +166,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class _JoinForm extends StatelessWidget {
   const _JoinForm({
-    super.key,
     required this.callIdController,
     required this.onJoinPressed,
   });

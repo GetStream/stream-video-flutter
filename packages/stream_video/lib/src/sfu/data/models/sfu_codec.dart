@@ -1,5 +1,8 @@
+import 'package:meta/meta.dart';
+
+@immutable
 class SfuCodec {
-  SfuCodec({
+  const SfuCodec({
     required this.payloadType,
     required this.name,
     required this.fmtpLine,

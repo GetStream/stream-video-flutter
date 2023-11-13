@@ -38,7 +38,6 @@ import '../models/coordinator_models.dart';
 import 'coordinator_ws_open_api.dart';
 import 'open_api_extensions.dart';
 
-const _idEvents = 1;
 const _waitForConnectionTimeout = 5000;
 
 /// An accessor that allows us to communicate with the API around video calls.
@@ -62,6 +61,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   final String _apiKey;
   final String _wsUrl;
   final TokenManager _tokenManager;
+  // ignore: unused_field
   final LatencyService _latencyService;
   final RetryPolicy _retryPolicy;
 
@@ -80,6 +80,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     ),
   );
   late final _defaultApi = open.DefaultApi(_apiClient);
+  // ignore: unused_field
   late final _serverSideApi = open.ServerSideApi(_apiClient);
   late final _locationService = LocationService();
 

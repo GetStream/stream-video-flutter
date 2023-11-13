@@ -74,7 +74,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _logout() async {
     await _streamVideo.disconnect();
-    Navigator.of(context).pop();
+
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   void _onNavigateToCall(
@@ -83,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<dynamic>(
         builder: (context) => StreamUsersConfiguration(
           usersProvider: MockUsersProvider(),
           child: StreamCallContainer(

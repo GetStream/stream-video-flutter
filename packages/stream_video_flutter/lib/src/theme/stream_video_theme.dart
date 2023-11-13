@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:flutter/material.dart' hide TextTheme;
 
 import '../utils/device_segmentation.dart';
@@ -92,13 +94,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       textTheme: textTheme,
       colorTheme: colorTheme,
       callControlsTheme: StreamCallControlsThemeData(
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(32),
           topRight: Radius.circular(32),
         ),
         backgroundColor: colorTheme.barsBg,
         elevation: 8,
-        padding: EdgeInsets.all(14),
+        padding: const EdgeInsets.all(14),
         spacing: 10,
         optionIconColor: Colors.black,
         inactiveOptionIconColor: Colors.white,
@@ -106,8 +108,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         inactiveOptionElevation: 2,
         optionBackgroundColor: Colors.white,
         inactiveOptionBackgroundColor: colorTheme.overlay.withOpacity(0.4),
-        optionShape: CircleBorder(),
-        optionPadding: EdgeInsets.all(16),
+        optionShape: const CircleBorder(),
+        optionPadding: const EdgeInsets.all(16),
       ),
       userAvatarTheme: StreamUserAvatarThemeData(
         borderRadius: BorderRadius.circular(20),
@@ -184,11 +186,11 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       ),
       callParticipantsInfoMenuTheme: StreamCallParticipantsInfoMenuThemeData(
         participantDividerColor: colorTheme.overlayDark,
-        participantDividerIndent: 0.0,
-        participantDividerHeight: 0.0,
+        participantDividerIndent: 0,
+        participantDividerHeight: 0,
         participantNameTextStyle: TextStyle(
           color: colorTheme.textHighEmphasis,
-          fontSize: 18.0,
+          fontSize: 18,
         ),
         participantIconActiveColor: colorTheme.textHighEmphasis,
         participantIconInactiveColor: colorTheme.accentError,
@@ -198,17 +200,17 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             fontWeight: FontWeight.bold,
             color: colorTheme.barsBg,
           ),
-          constraints: BoxConstraints(
+          constraints: const BoxConstraints(
             minHeight: 56,
             minWidth: 56,
           ),
-          borderRadius: BorderRadius.all(
+          borderRadius: const BorderRadius.all(
             Radius.circular(32),
           ),
         ),
         inviteDividerColor: colorTheme.overlayDark,
-        inviteDividerIndent: 16.0,
-        inviteDividerHeight: 0.0,
+        inviteDividerIndent: 16,
+        inviteDividerHeight: 0,
         inviteUsernameTextStyle: TextStyle(
           color: colorTheme.textHighEmphasis,
           fontSize: 18,

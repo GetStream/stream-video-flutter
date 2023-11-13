@@ -363,14 +363,14 @@ extension ParticipantListExt on List<open.CallParticipantResponse> {
   Map<String, CallParticipant> toCallParticipants() {
     return {
       for (final participant in this)
-        participant.userSessionId: participant.toCallParticipant()
+        participant.userSessionId: participant.toCallParticipant(),
     };
   }
 
   Map<String, CallUser> toCallUsers() {
     return {
       for (final participant in this)
-        participant.user.id: participant.toCallUser()
+        participant.user.id: participant.toCallUser(),
     };
   }
 }

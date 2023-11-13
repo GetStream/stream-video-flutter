@@ -102,7 +102,7 @@ class _StreamInviteUserListViewState extends State<StreamInviteUserListView> {
         actions: [
           InviteButton(
             controller: widget.controller,
-          )
+          ),
         ],
       ),
       body: Column(

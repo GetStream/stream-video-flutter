@@ -93,7 +93,7 @@ class _CallDiagnosticsContentState extends State<CallDiagnosticsContent> {
                 onPressed: () => widget.onClosePressed?.call(),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -107,12 +107,14 @@ class _CallDiagnosticsContentState extends State<CallDiagnosticsContent> {
       await fileLogger?.clear();
       _logger.v(() => '[onClearPressed] completed');
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: Colors.redAccent,
-          content: Text('LOGS CLEARED'),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.redAccent,
+            content: Text('LOGS CLEARED'),
+          ),
+        );
+      }
     } catch (e, stk) {
       _logger.e(() => '[onClearPressed] failed: $e; $stk');
     }
@@ -134,7 +136,6 @@ class _CallDiagnosticsContentState extends State<CallDiagnosticsContent> {
 /// Represents the publisher/subscriber stats.
 class _CallStatsContent extends StatelessWidget {
   const _CallStatsContent({
-    super.key,
     required this.publisherStats,
     required this.subscriberStats,
   });
@@ -183,7 +184,6 @@ class _CallStatsContent extends StatelessWidget {
 /// Represents the publisher/subscriber stats.
 class _PubSubContent extends StatelessWidget {
   const _PubSubContent({
-    super.key,
     required this.title,
     required this.remote,
     required this.local,

@@ -19,7 +19,6 @@ import '../../sfu/sfu_client_impl.dart';
 import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
 import '../../utils/debounce_buffer.dart';
-import '../../utils/none.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
 import '../../webrtc/model/stats/rtc_printable_stats.dart';
@@ -289,13 +288,16 @@ class CallSession extends Disposable {
     await track.stop();
   }
 
-  Future<void> _onPublishQualityChanged(SfuChangePublishQualityEvent event) async {
+  Future<void> _onPublishQualityChanged(
+    SfuChangePublishQualityEvent event,
+  ) async {
     _logger.d(() => '[onPublishQualityChanged] event: $event');
 
     final enabledRids = event.videoSenders.firstOrNull?.layers
-        .where((e) => e.active)
-        .map((e) => e.name)
-        .toSet() ?? {};
+            .where((e) => e.active)
+            .map((e) => e.name)
+            .toSet() ??
+        {};
 
     _logger.v(() => '[onPublishQualityChanged] Enabled RIDs: $enabledRids');
 
@@ -332,7 +334,7 @@ class CallSession extends Disposable {
           sfu.TrackMuteState(
             trackType: track.trackType.toDTO(),
             muted: muted,
-          )
+          ),
         ],
       ),
     );

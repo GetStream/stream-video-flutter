@@ -197,16 +197,18 @@ class StreamCallParticipant extends StatelessWidget {
                     Align(
                       alignment: Alignment.topRight,
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8),
                         child: Text(
                           theme.callControlsTheme.callReactions
-                                  .firstWhereOrNull((e) =>
-                                      e.emojiCode ==
-                                      participant.reaction?.emojiCode)
+                                  .firstWhereOrNull(
+                                    (e) =>
+                                        e.emojiCode ==
+                                        participant.reaction?.emojiCode,
+                                  )
                                   ?.icon ??
                               '',
-                          style: TextStyle(
-                            fontSize: 24.0,
+                          style: const TextStyle(
+                            fontSize: 24,
                           ),
                         ),
                       ),
