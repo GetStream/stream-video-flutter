@@ -100,7 +100,7 @@ class StreamLocalVideo extends StatelessWidget {
               color: shadowColor,
               blurRadius: 4,
               spreadRadius: 2,
-            )
+            ),
           ],
         ),
         child: callParticipantBuilder(

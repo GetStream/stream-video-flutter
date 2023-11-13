@@ -28,13 +28,12 @@
 - - [ ] Publish Dogfooding app
 - [ ] Participant sort bug [Efthymis]
 - [x] Android/iOS ringing flow
-- [ ] Create new call types [Efthymis]
 - [ ] Live streaming component(s) [Deven]
 - [x] Deeplinking
 - [ ] Tap to focus (flutter_webrtc) [Kanat]
 - [ ] Push notifications [Maciej]
-- - [ ] Customization of the notification
-- - [ ] Customizing call.kt ringing calls
+- - [x] Customization of the incoming/outgoing call screens
+- - [x] Customizing CallKit ringing calls
 - - [ ] Bug app crashes when notification button is tapped
 - [ ] Native packages refactor [Maciej]
 - - [ ] Create the native projects in stream_video_flutter
@@ -46,7 +45,7 @@
 - [ ] Regular reconnection [Maciej,Kanat]
 - [ ] Support ICE restart reconnection [Maciej,Kanat]
 - [ ] Update WebRTC version to m114 (livekit version) [Kanat]
-- [ ] Fix analysis issues [Maciej]
+- [x] Fix analysis issues [Maciej]
 
 ### 0.4.0 milestone
 - [ ] Implement Chat overlay for Dogfooding app
@@ -55,16 +54,23 @@
 - [ ] Bluetooth fixes (check support of BT media devices in flutter)
 - [ ] Switch the earpiece/microphone button *(depends on "Bluetooth fixes")*
 - [ ] Local audio levels (maybe from webrtc)
-- [ ] Test coverage
+- [ ] Test coverage 
+- - [ ] stream_video (75%)
+- - [ ] stream_video_flutter (75%)
+- - [ ] stream_video_push_notification
+- - [ ] Coverage check for PRs
 - [ ] Align custom event support to other SDKs
+- [ ] Send raw stats to backend
+- [ ] Documentation parity
+- - [ ] UI components
+- - [ ] Cookbook
+- - [ ] Advanced guides
 
 ### 0.5.0 milestone
 - [ ] Dynascale 2.0
 - [ ] Picture-in-picture
 - [ ] SFU switching
-- [ ] Update RTC reconnection logic
 - [ ] Buttons to simulate ICE restarts / SFU switching
 - [ ] Proximity button support
-- [ ] Call stats
+- [ ] Call stats component
 - [ ] Transcription
-- [ ] Send raw stats to backend

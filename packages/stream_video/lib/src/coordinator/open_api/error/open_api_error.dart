@@ -9,7 +9,7 @@ class OpenApiError {
     return OpenApiError.fromJson(json.decode(rawJson));
   }
 
-  static OpenApiError? fromJson(dynamic jsonObj) {
+  static OpenApiError? fromJson(Map<String, dynamic> jsonObj) {
     final errorObj = jsonObj['error'];
     if (errorObj == null) {
       return null;

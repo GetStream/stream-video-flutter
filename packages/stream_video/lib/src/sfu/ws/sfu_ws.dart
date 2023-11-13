@@ -58,11 +58,11 @@ class SfuWebSocket extends StreamWebSocket
 
   /// TODO
   SfuWebSocket._(
-    String url, {
-    Iterable<String>? protocols,
+    super.url, {
+    super.protocols,
     required this.sessionSeq,
     required this.sessionId,
-  }) : super(url, protocols: protocols, tag: '$_tag-$sessionSeq') {
+  }) : super(tag: '$_tag-$sessionSeq') {
     _logger.i(() => '<init> sessionId: $sessionId');
 
     onConnectionStateUpdated = (it) {};
@@ -154,12 +154,13 @@ class SfuWebSocket extends StreamWebSocket
 
     _events.emit(
       SfuSocketDisconnected(
-          sessionId: sessionId,
-          url: url,
-          reason: DisconnectionReason(
-            closeCode: closeCode,
-            closeReason: closeReason,
-          )),
+        sessionId: sessionId,
+        url: url,
+        reason: DisconnectionReason(
+          closeCode: closeCode,
+          closeReason: closeReason,
+        ),
+      ),
     );
   }
 

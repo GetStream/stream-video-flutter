@@ -36,16 +36,20 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
   ) {
     final status = state.status;
     if (status is! CallStatusOutgoing) {
-      _logger.w(() =>
-          '[coordinatorUpdateCallAccepted] rejected (status is not Outgoing)');
+      _logger.w(
+        () =>
+            '[coordinatorUpdateCallAccepted] rejected (status is not Outgoing)',
+      );
       return;
     }
     final participant = state.callParticipants.firstWhereOrNull((participant) {
       return participant.userId == event.acceptedByUserId;
     });
     if (participant == null) {
-      _logger.w(() =>
-          '[coordinatorUpdateCallAccepted] rejected (accepted by non-Member)');
+      _logger.w(
+        () =>
+            '[coordinatorUpdateCallAccepted] rejected (accepted by non-Member)',
+      );
       return;
     }
     state = state.copyWith(

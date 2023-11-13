@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable
+
 import '../../models/call_cid.dart';
 import '../../models/call_created_data.dart';
 import '../../models/call_permission.dart';
@@ -6,8 +8,6 @@ import '../models/coordinator_events.dart';
 import 'event/event_type.dart';
 import 'event/open_api_event.dart';
 import 'open_api_extensions.dart';
-
-const _tag = 'SV:OpenWsEventMapper';
 
 extension WebsocketEventMapperExt on OpenApiEvent {
   /// Returns [CoordinatorEvent].
@@ -20,10 +20,8 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           userId: event.me.id,
         );
       case EventType.healthCheck:
-        final healthCheck = this.healthCheck!;
-
         return CoordinatorHealthCheckEvent(
-          clientId: healthCheck.connectionId,
+          clientId: healthCheck!.connectionId,
         );
       case EventType.callCreated:
         final event = callCreated!;

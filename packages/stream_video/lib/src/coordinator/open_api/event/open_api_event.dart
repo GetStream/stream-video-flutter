@@ -49,7 +49,7 @@ class OpenApiEvent with EquatableMixin {
     return OpenApiEvent.fromJson(json.decode(rawJson));
   }
 
-  static OpenApiEvent? fromJson(dynamic jsonObj) {
+  static OpenApiEvent? fromJson(Map<String, dynamic> jsonObj) {
     final rawType = jsonObj['type'];
     if (rawType == null) {
       return null;

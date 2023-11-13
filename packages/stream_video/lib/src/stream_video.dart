@@ -50,7 +50,6 @@ const _tag = 'SV:Client';
 
 const _idEvents = 1;
 const _idAppState = 2;
-const _idConnect = 3;
 const _idActiveCall = 4;
 
 const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com/video';
@@ -498,9 +497,11 @@ class StreamVideo {
     String? pushProviderName,
     bool? voipToken,
   }) {
-    _logger.d(() => '[addDevice] pushProvider: $pushProvider'
-        ', pushToken: $pushToken, pushProviderName: $pushProviderName'
-        ', voipToken: $voipToken');
+    _logger.d(
+      () => '[addDevice] pushProvider: $pushProvider'
+          ', pushToken: $pushToken, pushProviderName: $pushProviderName'
+          ', voipToken: $voipToken',
+    );
     return _client.createDevice(
       id: pushToken,
       pushProvider: pushProvider,

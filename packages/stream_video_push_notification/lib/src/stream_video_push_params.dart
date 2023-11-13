@@ -1,8 +1,14 @@
 import 'package:flutter_callkit_incoming/entities/entities.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
+part 'stream_video_push_params.g.dart';
 
+@JsonSerializable(explicitToJson: true)
 class StreamVideoPushParams extends CallKitParams {
+  final String? incomingCallerNameOverride;
+  final String? incomingCallerHandlerOverride;
+
   const StreamVideoPushParams({
     super.appName,
     super.avatar,
@@ -14,6 +20,8 @@ class StreamVideoPushParams extends CallKitParams {
     super.headers,
     super.android,
     super.ios,
+    this.incomingCallerNameOverride,
+    this.incomingCallerHandlerOverride,
   });
 
   const StreamVideoPushParams._internal({
@@ -31,6 +39,8 @@ class StreamVideoPushParams extends CallKitParams {
     super.headers,
     super.android,
     super.ios,
+    this.incomingCallerNameOverride,
+    this.incomingCallerHandlerOverride,
   });
 
   @internal
@@ -49,6 +59,8 @@ class StreamVideoPushParams extends CallKitParams {
     Map<String, Object?>? headers,
     AndroidParams? android,
     IOSParams? ios,
+    String? incomingCallerNameOverride,
+    String? incomingCallerHandlerOverride,
   }) {
     return StreamVideoPushParams._internal(
       id: id ?? this.id,
@@ -66,6 +78,10 @@ class StreamVideoPushParams extends CallKitParams {
       headers: headers ?? this.headers,
       android: android ?? this.android,
       ios: ios ?? this.ios,
+      incomingCallerNameOverride:
+          incomingCallerNameOverride ?? this.incomingCallerNameOverride,
+      incomingCallerHandlerOverride:
+          incomingCallerHandlerOverride ?? this.incomingCallerHandlerOverride,
     );
   }
 
@@ -89,8 +105,16 @@ class StreamVideoPushParams extends CallKitParams {
       headers: other.headers,
       android: android?.merge(other.android),
       ios: ios?.merge(other.ios),
+      incomingCallerNameOverride: other.incomingCallerNameOverride,
+      incomingCallerHandlerOverride: other.incomingCallerHandlerOverride,
     );
   }
+
+  factory StreamVideoPushParams.fromJson(Map<String, dynamic> json) =>
+      _$StreamVideoPushParamsFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$StreamVideoPushParamsToJson(this);
 }
 
 extension on IOSParams {

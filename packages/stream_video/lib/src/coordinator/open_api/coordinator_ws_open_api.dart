@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:web_socket_channel/web_socket_channel.dart';
+
 import '../../../composed_version.dart';
 import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../core/video_error.dart';
@@ -12,7 +14,6 @@ import '../../token/token_manager.dart';
 import '../../types/other.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
-import '../../ws/base_ws.dart';
 import '../../ws/health/health_monitor.dart';
 import '../coordinator_ws.dart';
 import '../models/coordinator_events.dart';
@@ -121,7 +122,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
         'custom': <String, dynamic>{
           'name': userInfo.name,
           if (image != null) ...{'image': image},
-          ...?userInfo.extraData,
+          ...userInfo.extraData,
         },
       },
     };
@@ -145,6 +146,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     healthMonitor.onSocketError(error);
     connectionState = ConnectionState.failed;
 
+    // ignore: unused_local_variable
     StreamVideoWebSocketError wsError;
     if (error is WebSocketChannelException) {
       wsError = StreamVideoWebSocketError.fromWebSocketChannelError(error);
@@ -193,7 +195,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     OpenApiError? dtoError;
     OpenApiEvent? dtoEvent;
     try {
-      final jsonDecoded = json.decode(message);
+      final jsonDecoded = json.decode(message) as Map<String, dynamic>;
       dtoError = OpenApiError.fromJson(jsonDecoded);
       dtoEvent = OpenApiEvent.fromJson(jsonDecoded);
     } catch (e, stk) {

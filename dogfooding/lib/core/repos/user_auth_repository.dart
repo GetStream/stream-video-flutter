@@ -36,6 +36,7 @@ class UserAuthRepository {
 
 extension on UserResponseData {
   /// Converts [UserResponseData] to [UserInfo]
+  // ignore: unused_element
   UserInfo toUserInfo() {
     return UserInfo(
       id: id,

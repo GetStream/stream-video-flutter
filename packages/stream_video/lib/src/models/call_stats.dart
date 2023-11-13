@@ -1,9 +1,12 @@
+import 'package:meta/meta.dart';
+
 import '../webrtc/model/stats/rtc_printable_stats.dart';
 import '../webrtc/model/stats/rtc_raw_stats.dart';
 import '../webrtc/peer_type.dart';
 
+@immutable
 class CallStats {
-  CallStats({
+  const CallStats({
     required this.peerType,
     required this.printable,
     required this.raw,

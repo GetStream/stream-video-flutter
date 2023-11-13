@@ -85,7 +85,8 @@ class FileStreamLogger extends StreamLogger {
           _finalizer.attach(this, it, detach: this);
         });
       }
-    } catch (e, stk) {}
+      // ignore: empty_catches
+    } catch (e) {}
   }
 
   Future<void> _swapFiles() async {
@@ -238,6 +239,7 @@ class FileStreamLogger extends StreamLogger {
     console?.log(Priority.debug, _tag, message);
   }
 
+  // ignore: unused_element
   void _logI(MessageBuilder message) {
     console?.log(Priority.info, _tag, message);
   }

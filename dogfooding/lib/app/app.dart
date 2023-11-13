@@ -92,8 +92,9 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
         // This means that the app is now ready to use.
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasError) {
-            print(snapshot.error);
-            print(snapshot.stackTrace);
+            debugPrint(snapshot.error.toString());
+            debugPrint(snapshot.stackTrace.toString());
+
             return const Directionality(
               textDirection: TextDirection.ltr,
               child: Center(child: Text('Error loading app')),

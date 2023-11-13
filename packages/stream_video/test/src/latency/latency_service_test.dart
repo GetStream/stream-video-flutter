@@ -18,7 +18,6 @@ class UriFake extends Fake implements Uri {}
 
 Future<void> main() async {
   const settings = LatencySettings(
-    measurementRounds: 3,
     measurementTimeout: Duration(milliseconds: 400),
   );
 
@@ -71,7 +70,6 @@ Future<void> main() async {
     'When finished due to request failure, all latencies should be filled with fallback values',
     () async {
       /* Given */
-      const fetchDuration = Duration(milliseconds: 100);
       const edgeCount = 4;
       final measurementCount = edgeCount * settings.measurementRounds;
       final edges = _generateEdges(count: edgeCount);
@@ -127,7 +125,7 @@ Future<void> main() async {
         }
       }
 
-      await Future.delayed(fetchDuration);
+      await Future<void>.delayed(fetchDuration);
     },
   );
 }
