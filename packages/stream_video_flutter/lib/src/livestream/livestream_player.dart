@@ -1,14 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import '../call_screen/call_diagnostics_content/call_diagnostics_content.dart';
 import 'livestream_info.dart';
-
-// Maybe tomorrow:
-
-// Check if call container updates as much as livestreams
-// Check how participants grid keeps the track subscribed
 
 class LivestreamPlayer extends StatefulWidget {
   const LivestreamPlayer({
@@ -68,21 +65,12 @@ class _LivestreamPlayerState extends State<LivestreamPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    final livestreamingParticipant =
-        _callState.callParticipants.where((e) => e.isVideoEnabled).first;
-
     return Scaffold(
       body: Stack(
         children: [
-          StreamVideoRenderer(
-            key: ValueKey(livestreamingParticipant.sessionId),
-            call: widget.call,
-            participant: livestreamingParticipant,
-            videoTrackType: SfuTrackType.video,
-            onSizeChanged: (size) {},
-            placeholderBuilder: (context) {
-              return Text('Placeholder');
-            },
+          LivestreamContent(
+            call: call,
+            callState: _callState,
           ),
           Align(
             alignment: Alignment.bottomCenter,
@@ -120,5 +108,103 @@ class _LivestreamPlayerState extends State<LivestreamPlayer> {
       popped = false;
     }
     _logger.v(() => '[leave] popped: $popped');
+  }
+}
+
+class LivestreamContent extends StatefulWidget {
+  const LivestreamContent({
+    Key? key,
+    required this.call,
+    required this.callState,
+  }) : super(key: key);
+
+  /// Represents a call.
+  final Call call;
+
+  /// Holds information about the call.
+  final CallState callState;
+
+  @override
+  State<LivestreamContent> createState() => _LivestreamContentState();
+}
+
+class _LivestreamContentState extends State<LivestreamContent> {
+  /// Represents a call.
+  Call get call => widget.call;
+
+  /// Holds information about the call.
+  CallState get callState => widget.callState;
+
+  /// Controls the visibility of [CallDiagnosticsContent].
+  bool _isStatsVisible = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget bodyWidget;
+    if (callState.status.isConnected) {
+      final participant =
+          callState.callParticipants.where((e) => e.isVideoEnabled).first;
+
+      bodyWidget = StreamCallParticipant(
+        // We use the sessionId as the key to avoid rebuilding the widget
+        // when the participant changes.
+        key: ValueKey(participant.sessionId),
+        call: call,
+        participant: participant,
+        showConnectionQualityIndicator: false,
+        showParticipantLabel: false,
+        showSpeakerBorder: false,
+      );
+    } else {
+      final isReconnecting = callState.status.isReconnecting;
+      bodyWidget = Center(
+        child: Text(isReconnecting ? 'Reconnecting' : 'Connecting'),
+      );
+    }
+
+    final localParticipant = callState.localParticipant;
+
+    return Scaffold(
+      backgroundColor: const Color(0XFF272A30),
+      // appBar: widget.callAppBarBuilder?.call(context, call, callState) ??
+      //     CallAppBar(
+      //       call: call,
+      //       onBackPressed: widget.onBackPressed,
+      //       onLayoutModeChanged: (mode) {
+      //         setState(() => _currentLayoutMode = mode);
+      //       },
+      //     ),
+      body: Stack(
+        children: [
+          GestureDetector(
+            onDoubleTap: _toggleStatsVisibility,
+            child: bodyWidget,
+          ),
+          Visibility(
+            visible: _isStatsVisible,
+            child: CallDiagnosticsContent(
+              call: call,
+              onClosePressed: _toggleStatsVisibility,
+            ),
+          ),
+        ],
+      ),
+      // bottomNavigationBar: localParticipant != null
+      //     ? widget.callControlsBuilder?.call(context, call, callState) ??
+      //         StreamCallControls.withDefaultOptions(
+      //           call: call,
+      //           localParticipant: localParticipant,
+      //           onLeaveCallTap: widget.onLeaveCallTap,
+      //         )
+      //     : null,
+    );
+  }
+
+  void _toggleStatsVisibility() {
+    if (kDebugMode) {
+      setState(() {
+        _isStatsVisible = !_isStatsVisible;
+      });
+    }
   }
 }
