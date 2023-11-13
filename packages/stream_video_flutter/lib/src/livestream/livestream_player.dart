@@ -75,6 +75,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer> {
           Align(
             alignment: Alignment.bottomCenter,
             child: LivestreamInfo(
+              call: call,
               callState: widget.call.state.value,
             ),
           ),
@@ -154,6 +155,7 @@ class _LivestreamContentState extends State<LivestreamContent> {
         showConnectionQualityIndicator: false,
         showParticipantLabel: false,
         showSpeakerBorder: false,
+        videoFit: VideoFit.contain,
       );
     } else {
       final isReconnecting = callState.status.isReconnecting;
@@ -162,18 +164,13 @@ class _LivestreamContentState extends State<LivestreamContent> {
       );
     }
 
-    final localParticipant = callState.localParticipant;
-
     return Scaffold(
       backgroundColor: const Color(0XFF272A30),
-      // appBar: widget.callAppBarBuilder?.call(context, call, callState) ??
-      //     CallAppBar(
-      //       call: call,
-      //       onBackPressed: widget.onBackPressed,
-      //       onLayoutModeChanged: (mode) {
-      //         setState(() => _currentLayoutMode = mode);
-      //       },
-      //     ),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      extendBodyBehindAppBar: true,
       body: Stack(
         children: [
           GestureDetector(
@@ -189,14 +186,6 @@ class _LivestreamContentState extends State<LivestreamContent> {
           ),
         ],
       ),
-      // bottomNavigationBar: localParticipant != null
-      //     ? widget.callControlsBuilder?.call(context, call, callState) ??
-      //         StreamCallControls.withDefaultOptions(
-      //           call: call,
-      //           localParticipant: localParticipant,
-      //           onLeaveCallTap: widget.onLeaveCallTap,
-      //         )
-      //     : null,
     );
   }
 
