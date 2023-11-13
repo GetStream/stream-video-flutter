@@ -23,7 +23,9 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     return (CoordinatorClient client) {
       final params = _defaultPushParams.merge(pushParams);
 
-      StreamVideoPushNotificationPlatform.instance.initData(params.toJson());
+      if (Platform.isIOS) {
+        StreamVideoPushNotificationPlatform.instance.initData(params.toJson());
+      }
 
       return StreamVideoPushNotificationManager._(
         client: client,
