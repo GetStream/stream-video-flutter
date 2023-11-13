@@ -30,6 +30,14 @@ flutter:
     - images/
   uses-material-design: true
 
+  plugin:
+    platforms:
+      android:
+        package: io.getstream.video.flutter.stream_video_flutter
+        pluginClass: StreamVideoFlutterPlugin
+      ios:
+        pluginClass: StreamVideoFlutterPlugin
+
 topics:
   - video
   - audio
