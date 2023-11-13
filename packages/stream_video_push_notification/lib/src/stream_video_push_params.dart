@@ -10,8 +10,12 @@ class StreamVideoPushParams extends CallKitParams {
   final String? incomingCallerHandlerOverride;
 
   const StreamVideoPushParams({
+    super.id,
+    super.nameCaller,
     super.appName,
     super.avatar,
+    super.handle,
+    super.type,
     super.duration,
     super.textAccept,
     super.textDecline,
