@@ -8,8 +8,8 @@ import flutter_callkit_incoming
 
     public init(args: [String: Any?]) {
         self.callKitData = flutter_callkit_incoming.Data.init(args: args)
-        self.incomingCallerNameOverride = args["incomingCallerNameOverride"] as? String ?? ""
-        self.incomingCallerHandlerOverride = args["incomingCallerHandlerOverride"] as? String ?? ""
+        self.incomingCallerNameOverride = args["incomingCallerNameOverride"] as? String
+        self.incomingCallerHandlerOverride = args["incomingCallerHandlerOverride"] as? String
     }
 
     public func toJSON() -> [String: Any]  {
