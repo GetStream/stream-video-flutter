@@ -1,3 +1,31 @@
+## 0.2.0
+
+✅ Added
+
+* `removeMembers` and `updateCallMembers` to `Call`
+* `incomingCallerNameOverride` and `incomingCallerHandlerOverride` to `StreamVideoPushParams` to allow customization of CallKit call screen
+* `participantsAvatarBuilder` and `participantsDisplayNameBuilder` to `StreamOutgoingCallContent` and `StreamIncomingCallContent` to allow customiztion of Incoming and Outgoing call screens
+
+Example usage:
+ ```dart
+ StreamCallContainer(
+    ...
+    outgoingCallBuilder: (context, call, callState) =>
+            StreamOutgoingCallContent(
+                call: call,
+                callState: callState,
+                participantsDisplayNameBuilder:
+                    (context, call, callState, participants) => your widget here,
+            ),
+ )
+ ```
+
+🔄 Changed
+
+Breaking changes 🚧
+* renamed `inviteUsers` to `addMembers` in `Call`
+* renamed parameter name in `getOrCreateCall` from `participantIds` to `memberIds`
+
 ## 0.1.1
 
 * Fixed call join bug
