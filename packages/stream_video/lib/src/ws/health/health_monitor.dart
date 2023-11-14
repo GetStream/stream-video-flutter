@@ -159,6 +159,7 @@ class HealthMonitorImpl implements HealthMonitor {
     _networkChangeSubscription = null;
   }
 
+  // ignore: unused_element
   Future<bool> _isNetworkConnected() async {
     final result = await Connectivity().checkConnectivity();
     return result != ConnectivityResult.none;

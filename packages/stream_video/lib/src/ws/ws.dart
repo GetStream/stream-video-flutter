@@ -32,7 +32,7 @@ abstract class StreamWebSocket {
   final TaggedLogger _logger;
 
   WebSocketChannel? _ws;
-  StreamSubscription? _wsSubscription;
+  StreamSubscription<dynamic>? _wsSubscription;
 
   /// Returns true if the ws connection is in progress.
   bool get connectRequestInProgress => _connectRequestInProgress;
@@ -40,7 +40,7 @@ abstract class StreamWebSocket {
 
   /// Creates a new websocket connection.
   ///
-  /// Connects to [uri] using and returns a channel that can be used to
+  /// Connects to [url] using and returns a channel that can be used to
   /// communicate over the resulting socket.
   Future<Result<None>> connect() async {
     _logger.i(

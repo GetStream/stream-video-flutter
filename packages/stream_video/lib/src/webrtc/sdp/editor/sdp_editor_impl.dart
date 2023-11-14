@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'package:meta/meta.dart';
 
 import '../../../logger/impl/tagged_logger.dart';

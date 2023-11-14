@@ -137,7 +137,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
   void _fetchCall() {
     // Obtains SFU credentials and picks the best server, but doesn't
     // connect to the call yet.
-    final currentUserId = StreamVideo.instance.currentUser?.id;
+    final currentUserId = StreamVideo.instance.currentUser.id;
     _logger.d(() => '[fetchCall] currentUserId: $currentUserId');
     _fetchSubscription?.cancel();
     _fetchSubscription = widget.call.getOrCreate().asStream().listen((result) {
@@ -260,7 +260,6 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                       child: Builder(
                         builder: (context) {
                           Widget placeHolderBuilder(BuildContext context) {
-                            if (currentUser == null) return Container();
                             return Center(
                               child: StreamUserAvatarTheme(
                                 data: userAvatarTheme,
@@ -276,7 +275,6 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                               if (cameraEnabled)
                                 VideoTrackRenderer(
                                   mirror: true,
-                                  videoFit: VideoFit.cover,
                                   videoTrack: _cameraTrack!,
                                   placeholderBuilder: placeHolderBuilder,
                                 )
@@ -293,8 +291,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                                       child: StreamParticipantLabel(
                                         isAudioEnabled: microphoneEnabled,
                                         isSpeaking: false,
-                                        participantName:
-                                            currentUser?.name ?? '',
+                                        participantName: currentUser.name,
                                       ),
                                     ),
                                   ],
@@ -369,7 +366,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                                   color: Colors.white,
                                 ),
                               ),
-                            )
+                            ),
                           ],
                         ),
                       ),

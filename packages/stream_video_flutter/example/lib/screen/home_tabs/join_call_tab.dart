@@ -19,7 +19,7 @@ class JoinCallTab extends StatefulWidget {
 class _JoinCallTabState extends State<JoinCallTab> {
   final _callIdController = TextEditingController();
 
-  bool _callInProgress = false;
+  final bool _callInProgress = false;
   bool _useLobby = false;
 
   @override
@@ -48,7 +48,7 @@ class _JoinCallTabState extends State<JoinCallTab> {
                     _useLobby = value;
                   });
                 },
-              )
+              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -81,7 +81,7 @@ class _JoinCallTabState extends State<JoinCallTab> {
     }
     await Navigator.push(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<dynamic>(
         builder: (context) => StreamLobbyView(
           call: call,
           onJoinCallPressed: (options) {

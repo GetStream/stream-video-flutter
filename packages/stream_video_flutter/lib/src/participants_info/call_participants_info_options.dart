@@ -44,7 +44,7 @@ class CallParticipantsInfoOptions extends StatelessWidget {
             titles: muteToggleTitles,
             call: call,
             localParticipant: localParticipant,
-          )
+          ),
         ],
       ),
     );

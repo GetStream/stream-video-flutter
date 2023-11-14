@@ -35,7 +35,7 @@ class CallConnectOptions with EquatableMixin {
     return 'CallConnectOptions{'
         'camera: $camera,'
         ' microphone: $microphone,'
-        ' screenShare: $screenShare,'
+        ' screenShare: $screenShare, '
         '}';
   }
 }

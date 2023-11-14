@@ -1,3 +1,5 @@
+// ignore_for_file: one_member_abstracts
+
 import 'models/coordinator_events.dart';
 
 abstract class CoordinatorEventListener {

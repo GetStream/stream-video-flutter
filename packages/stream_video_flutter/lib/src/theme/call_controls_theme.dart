@@ -30,19 +30,16 @@ class StreamCallControlsThemeData with Diagnosticable {
       CallReactionData(
         type: 'reaction',
         emojiCode: ':like:',
-        custom: {},
         icon: '👍',
       ),
       CallReactionData(
         type: 'raised-hand',
         emojiCode: ':raise-hand:',
-        custom: {},
         icon: '✋',
       ),
       CallReactionData(
         type: 'reaction',
         emojiCode: ':fireworks:',
-        custom: {},
         icon: '🎉',
       ),
     ],

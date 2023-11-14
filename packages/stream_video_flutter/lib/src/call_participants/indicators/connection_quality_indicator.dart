@@ -25,7 +25,7 @@ class StreamConnectionQualityIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context).callParticipantTheme;
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.85),
         borderRadius: BorderRadius.circular(6),
@@ -77,8 +77,8 @@ class _ConnectionQualityIndicatorPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     for (var i = 0; i < 3; i++) {
-      final double offsetLeft = 7 + i * 5;
-      final double offsetTop = 14 - i * 3;
+      final offsetLeft = 7 + i * 5.0;
+      final offsetTop = 14 - i * 3.0;
       final connectionLevel = _getConnectionLevel();
 
       canvas.drawLine(
@@ -97,7 +97,7 @@ class _ConnectionQualityIndicatorPainter extends CustomPainter {
         return 2;
       case SfuConnectionQuality.excellent:
         return 3;
-      default:
+      case SfuConnectionQuality.unspecified:
         return 0;
     }
   }

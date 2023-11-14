@@ -6,6 +6,7 @@ import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_push_notification/stream_video_push_notification_platform_interface.dart';
 
 import 'stream_video_push_params.dart';
 
@@ -20,11 +21,17 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     StreamVideoPushParams? pushParams,
   }) {
     return (CoordinatorClient client) {
+      final params = _defaultPushParams.merge(pushParams);
+
+      if (CurrentPlatform.isIos) {
+        StreamVideoPushNotificationPlatform.instance.initData(params.toJson());
+      }
+
       return StreamVideoPushNotificationManager._(
         client: client,
         iosPushProvider: iosPushProvider,
         androidPushProvider: androidPushProvider,
-        pushParams: _defaultPushParams.merge(pushParams),
+        pushParams: params,
       );
     };
   }
@@ -101,8 +108,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     final params = pushParams.copyWith(
       id: uuid,
       avatar: avatar,
-      handle: handle,
-      nameCaller: nameCaller,
+      handle: pushParams.incomingCallerHandlerOverride ?? handle,
+      nameCaller: pushParams.incomingCallerNameOverride ?? nameCaller,
       type: hasVideo ? 1 : 0,
       extra: {'callCid': callCid},
     );
@@ -122,8 +129,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     final params = pushParams.copyWith(
       id: uuid,
       avatar: avatar,
-      handle: handle,
-      nameCaller: nameCaller,
+      handle: pushParams.incomingCallerHandlerOverride ?? handle,
+      nameCaller: pushParams.incomingCallerNameOverride ?? nameCaller,
       type: hasVideo ? 1 : 0,
       extra: {'callCid': callCid},
     );

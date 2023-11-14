@@ -138,7 +138,7 @@ extension SfuEventMapper on sfu_events.SfuEvent {
           message: payload.message,
         );
       default:
-        return SfuUnknownEvent();
+        return const SfuUnknownEvent();
     }
   }
 }

@@ -1,10 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../../../open_api/video/coordinator/api.dart';
 import '../../../stream_video.dart';
-import '../../models/call_reaction.dart';
-import '../../models/queried_members.dart';
-import '../../utils/none.dart';
 import '../state/call_state_notifier.dart';
 
 typedef GetStateOrNull = CallState? Function();

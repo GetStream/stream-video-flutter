@@ -41,7 +41,7 @@ class _MyAppState extends State<MyApp> {
                 })
               });
     } catch (e, stk) {
-      print('[initPlatformState] failed: $e; $stk');
+      debugPrint('[initPlatformState] failed: $e; $stk');
     }
   }
 

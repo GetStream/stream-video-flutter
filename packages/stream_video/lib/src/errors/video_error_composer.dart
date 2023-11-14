@@ -31,7 +31,7 @@ mixin VideoErrors {
       );
     } else {
       return VideoError(
-        message: 'Unexpected error: ${exception?.toString()}',
+        message: 'Unexpected error: $exception',
       );
     }
   }

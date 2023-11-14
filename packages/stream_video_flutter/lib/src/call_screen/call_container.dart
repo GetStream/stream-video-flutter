@@ -25,6 +25,22 @@ typedef CallContentBuilder = Widget Function(
   CallState callState,
 );
 
+/// Builder used to create a custom widget for participants avatars.
+typedef ParticipantsAvatarBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallState callState,
+  List<UserInfo> participants,
+);
+
+/// Builder used to create a custom widget for participants display names.
+typedef ParticipantsDisplayNameBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallState callState,
+  List<UserInfo> participants,
+);
+
 /// Represents different call content based on the call state.
 class StreamCallContainer extends StatefulWidget {
   /// Creates a new instance of [StreamCallContainer].

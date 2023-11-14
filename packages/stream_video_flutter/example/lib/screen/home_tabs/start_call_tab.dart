@@ -51,7 +51,7 @@ class _StartCallTabState extends State<StartCallTab>
           const SizedBox(height: 8),
           Flexible(
             child: ParticipantsList(
-              currentUserId: StreamVideo.instance.currentUser!.id,
+              currentUserId: StreamVideo.instance.currentUser.id,
               onSelectionChanged: (selectedUsers) {
                 setState(() {
                   _selectedUsers.clear();
@@ -79,7 +79,7 @@ class _StartCallTabState extends State<StartCallTab>
                           _ringingCall = !_ringingCall;
                         });
                       },
-                    )
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -88,7 +88,7 @@ class _StartCallTabState extends State<StartCallTab>
                   child: const Text('Start call'),
                 ),
               ],
-            )
+            ),
         ],
       ),
     );
@@ -119,7 +119,7 @@ class _StartCallTabState extends State<StartCallTab>
         } else {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<dynamic>(
               builder: (context) => StreamLobbyView(
                 call: call,
                 onJoinCallPressed: (options) {
@@ -167,7 +167,7 @@ class _ParticipantsListState extends State<ParticipantsList> {
     final remainingUsers = [
       ...users.where(
         (user) => user.userInfo.id != widget.currentUserId,
-      )
+      ),
     ];
 
     return ListView.separated(
@@ -181,7 +181,7 @@ class _ParticipantsListState extends State<ParticipantsList> {
 
         final isSelected = _selectedUsers.contains(user);
 
-        void onChanged(bool? selected) {
+        void onChanged({bool? selected}) {
           if (selected == null) return;
           setState(() {
             if (selected) {
@@ -194,14 +194,14 @@ class _ParticipantsListState extends State<ParticipantsList> {
         }
 
         return InkWell(
-          onTap: () => onChanged(!isSelected),
+          onTap: () => onChanged(selected: !isSelected),
           child: ListTile(
             contentPadding: EdgeInsets.zero,
             leading: StreamUserAvatar(user: user),
             title: Text(name),
             trailing: Checkbox(
               value: isSelected,
-              onChanged: onChanged,
+              onChanged: (value) => onChanged(selected: value),
             ),
           ),
         );

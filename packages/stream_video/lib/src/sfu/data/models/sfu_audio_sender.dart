@@ -29,8 +29,9 @@ class SfuAudioSender {
   int get hashCode => mediaRequest.hashCode ^ codec.hashCode;
 }
 
+@immutable
 class SfuAudioMediaRequest {
-  SfuAudioMediaRequest({
+  const SfuAudioMediaRequest({
     required this.channelCount,
   });
 
