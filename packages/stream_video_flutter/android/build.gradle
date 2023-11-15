@@ -1,4 +1,4 @@
-group 'io.getstream.video.flutter.background.stream_video_flutter'
+group 'io.getstream.video.flutter.stream_video_flutter'
 version '1.0-SNAPSHOT'
 
 buildscript {
