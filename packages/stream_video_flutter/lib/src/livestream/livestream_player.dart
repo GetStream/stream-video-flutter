@@ -43,9 +43,12 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   /// Controls the visibility of [CallDiagnosticsContent].
   bool _isStatsVisible = false;
   bool _livestreamEnabled = true;
+  bool _fullscreen = false;
 
   late Animation<double> _controllerAnimation;
   late AnimationController _animationController;
+  late Timer _durationTimer;
+  final ValueNotifier<double> _duration = ValueNotifier<double>(0);
 
   @override
   void initState() {
@@ -66,12 +69,17 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     );
 
     _animationController.forward();
+    _durationTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      // var currentTime = DateTime.now();
+    });
   }
 
   @override
   void dispose() {
     _callStateSubscription?.cancel();
     _callStateSubscription = null;
+    _durationTimer.cancel();
+    _duration.dispose();
     super.dispose();
   }
 
@@ -112,6 +120,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
               callState: _callState,
               backButtonBuilder: widget.backButtonBuilder,
               displayDiagnostics: _isStatsVisible,
+              videoFit: _fullscreen ? VideoFit.cover : VideoFit.contain,
             ),
             Visibility(
               visible: _controllerAnimation.value != 0,
@@ -151,6 +160,12 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
                   child: LivestreamInfo(
                     call: call,
                     callState: widget.call.state.value,
+                    fullscreen: _fullscreen,
+                    onStateChanged: () {
+                      setState(() {
+                        _fullscreen = !_fullscreen;
+                      });
+                    },
                   ),
                 ),
               ),

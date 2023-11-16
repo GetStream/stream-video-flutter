@@ -5,11 +5,6 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 
-// These are eyeballed device IDs for the speaker and earpiece.
-// based on Android and iOS enumerated devices.
-const deviceIdSpeaker = 'speaker';
-const deviceIdEarpiece = 'earpiece';
-
 /// A widget that represents a call control option to toggle if the
 /// speakerphone is on or off.
 ///

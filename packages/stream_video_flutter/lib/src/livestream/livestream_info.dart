@@ -8,10 +8,14 @@ class LivestreamInfo extends StatelessWidget {
     Key? key,
     required this.call,
     required this.callState,
+    required this.fullscreen,
+    required this.onStateChanged,
   }) : super(key: key);
 
   final Call call;
   final CallState callState;
+  final bool fullscreen;
+  final VoidCallback onStateChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -79,10 +83,20 @@ class LivestreamInfo extends StatelessWidget {
                 call: call,
               ),
               IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.fullscreen,
-                  color: Colors.white,
+                onPressed: onStateChanged,
+                icon: AnimatedCrossFade(
+                  firstChild: Icon(
+                    Icons.fullscreen_exit,
+                    color: Colors.white,
+                  ),
+                  secondChild: Icon(
+                    Icons.fullscreen,
+                    color: Colors.white,
+                  ),
+                  crossFadeState: fullscreen
+                      ? CrossFadeState.showFirst
+                      : CrossFadeState.showSecond,
+                  duration: Duration(milliseconds: 300),
                 ),
               ),
             ],

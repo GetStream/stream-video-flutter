@@ -11,6 +11,7 @@ class LivestreamContent extends StatefulWidget {
     required this.callState,
     this.backButtonBuilder,
     this.displayDiagnostics = false,
+    this.videoFit = VideoFit.contain,
   }) : super(key: key);
 
   /// Represents a call.
@@ -23,6 +24,8 @@ class LivestreamContent extends StatefulWidget {
 
   final bool displayDiagnostics;
 
+  final VideoFit videoFit;
+
   @override
   State<LivestreamContent> createState() => _LivestreamContentState();
 }
@@ -33,6 +36,8 @@ class _LivestreamContentState extends State<LivestreamContent> {
 
   /// Holds information about the call.
   CallState get callState => widget.callState;
+
+  VideoFit get videoFit => widget.videoFit;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +60,7 @@ class _LivestreamContentState extends State<LivestreamContent> {
           showConnectionQualityIndicator: false,
           showParticipantLabel: false,
           showSpeakerBorder: false,
-          videoFit: VideoFit.contain,
+          videoFit: videoFit,
         );
       }
     } else {
