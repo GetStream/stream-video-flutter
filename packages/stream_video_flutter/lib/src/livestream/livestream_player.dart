@@ -137,6 +137,21 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
                   child: LivestreamToggle(
                     enabled: _livestreamEnabled,
                     onStateChanged: () {
+                      final livestreamingParticipant = _callState
+                          .callParticipants
+                          .where((e) => e.isVideoEnabled)
+                          .first;
+
+                      livestreamingParticipant.publishedTracks
+                          .forEach((key, value) {
+                        final tracks = call
+                            .getTracks(livestreamingParticipant.trackIdPrefix);
+
+                        for (final e in tracks) {
+                          _livestreamEnabled ? e.disable() : e.enable();
+                        }
+                      });
+
                       setState(() {
                         _livestreamEnabled = !_livestreamEnabled;
                       });
