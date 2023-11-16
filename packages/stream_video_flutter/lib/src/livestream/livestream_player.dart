@@ -1,11 +1,9 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../call_screen/call_diagnostics_content/call_diagnostics_content.dart';
-import 'livestream_info.dart';
+import 'livestream_content.dart';
 
 class LivestreamPlayer extends StatefulWidget {
   const LivestreamPlayer({
@@ -13,17 +11,22 @@ class LivestreamPlayer extends StatefulWidget {
     required this.call,
     this.muted = false,
     this.showParticipantCount = true,
+    this.backButtonBuilder,
+    this.allowDiagnostics = false,
   });
 
   final Call call;
   final bool muted;
   final bool showParticipantCount;
+  final WidgetBuilder? backButtonBuilder;
+  final bool allowDiagnostics;
 
   @override
   State<LivestreamPlayer> createState() => _LivestreamPlayerState();
 }
 
-class _LivestreamPlayerState extends State<LivestreamPlayer> {
+class _LivestreamPlayerState extends State<LivestreamPlayer>
+    with SingleTickerProviderStateMixin {
   final _logger = taggedLogger(tag: 'SV:LivestreamPlayer');
   StreamSubscription<CallState>? _callStateSubscription;
 
@@ -36,12 +39,31 @@ class _LivestreamPlayerState extends State<LivestreamPlayer> {
   bool loading = false;
   bool error = false;
 
+  /// Controls the visibility of [CallDiagnosticsContent].
+  bool _isStatsVisible = false;
+
+  late Animation<double> _controllerAnimation;
+  late AnimationController _animationController;
+
   @override
   void initState() {
     super.initState();
     _callStateSubscription = call.state.listen(_setState);
     _callState = call.state.value;
     _connect();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _controllerAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _animationController.forward();
   }
 
   @override
@@ -50,8 +72,6 @@ class _LivestreamPlayerState extends State<LivestreamPlayer> {
     _callStateSubscription = null;
     super.dispose();
   }
-
-  int updated = 0;
 
   void _setState(CallState callState) {
     _logger.v(() => '[setState] callState.status: ${callState.status}');
@@ -65,21 +85,53 @@ class _LivestreamPlayerState extends State<LivestreamPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          LivestreamContent(
-            call: call,
-            callState: _callState,
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: LivestreamInfo(
+    return GestureDetector(
+      onTap: () {
+        if(!_animationController.isAnimating) {
+          if(_controllerAnimation.value == 1.0) {
+            _animationController.reverse();
+          } else {
+            _animationController.forward();
+          }
+        }
+      },
+      onDoubleTap: () {
+        if (widget.allowDiagnostics) {
+          setState(() {
+            _isStatsVisible = !_isStatsVisible;
+          });
+        }
+      },
+      child: Scaffold(
+        body: Stack(
+          children: [
+            LivestreamContent(
               call: call,
-              callState: widget.call.state.value,
+              callState: _callState,
+              backButtonBuilder: widget.backButtonBuilder,
+              displayDiagnostics: _isStatsVisible,
             ),
-          ),
-        ],
+            Visibility(
+              visible: _controllerAnimation.value != 0,
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: AnimatedBuilder(
+                  animation: _controllerAnimation,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _controllerAnimation.value,
+                      child: child,
+                    );
+                  },
+                  child: LivestreamInfo(
+                    call: call,
+                    callState: widget.call.state.value,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -109,91 +161,5 @@ class _LivestreamPlayerState extends State<LivestreamPlayer> {
       popped = false;
     }
     _logger.v(() => '[leave] popped: $popped');
-  }
-}
-
-class LivestreamContent extends StatefulWidget {
-  const LivestreamContent({
-    Key? key,
-    required this.call,
-    required this.callState,
-  }) : super(key: key);
-
-  /// Represents a call.
-  final Call call;
-
-  /// Holds information about the call.
-  final CallState callState;
-
-  @override
-  State<LivestreamContent> createState() => _LivestreamContentState();
-}
-
-class _LivestreamContentState extends State<LivestreamContent> {
-  /// Represents a call.
-  Call get call => widget.call;
-
-  /// Holds information about the call.
-  CallState get callState => widget.callState;
-
-  /// Controls the visibility of [CallDiagnosticsContent].
-  bool _isStatsVisible = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final Widget bodyWidget;
-    if (callState.status.isConnected) {
-      final participant =
-          callState.callParticipants.where((e) => e.isVideoEnabled).first;
-
-      bodyWidget = StreamCallParticipant(
-        // We use the sessionId as the key to avoid rebuilding the widget
-        // when the participant changes.
-        key: ValueKey(participant.sessionId),
-        call: call,
-        participant: participant,
-        showConnectionQualityIndicator: false,
-        showParticipantLabel: false,
-        showSpeakerBorder: false,
-        videoFit: VideoFit.contain,
-      );
-    } else {
-      final isReconnecting = callState.status.isReconnecting;
-      bodyWidget = Center(
-        child: Text(isReconnecting ? 'Reconnecting' : 'Connecting'),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: const Color(0XFF272A30),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          GestureDetector(
-            onDoubleTap: _toggleStatsVisibility,
-            child: bodyWidget,
-          ),
-          Visibility(
-            visible: _isStatsVisible,
-            child: CallDiagnosticsContent(
-              call: call,
-              onClosePressed: _toggleStatsVisibility,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _toggleStatsVisibility() {
-    if (kDebugMode) {
-      setState(() {
-        _isStatsVisible = !_isStatsVisible;
-      });
-    }
   }
 }

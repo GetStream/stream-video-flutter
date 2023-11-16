@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
-import '../call_controls/controls/toggle_speakerphone_option.dart';
 import 'livestream_speakerphone_option.dart';
 
 class LivestreamInfo extends StatelessWidget {

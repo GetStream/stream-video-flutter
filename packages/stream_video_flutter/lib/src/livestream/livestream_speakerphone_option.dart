@@ -110,7 +110,7 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
           await _setSpeakerphoneEnabled(enabled: !enabled);
         } catch (_) {}
       },
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
     );
   }
 }
