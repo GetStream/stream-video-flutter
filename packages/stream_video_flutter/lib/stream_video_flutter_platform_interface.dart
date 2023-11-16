@@ -1,4 +1,5 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:stream_video_flutter_background/model/notification_payload.dart';
 
 import 'stream_video_flutter_method_channel.dart';
 
@@ -25,5 +26,27 @@ abstract class StreamVideoFlutterPlatform extends PlatformInterface {
 
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
+  }
+
+  Function(String callCid)? onContentClick;
+
+  Function(String buttonType, String callCid)? onButtonClick;
+
+  Function(String callCid)? onUiLayerDestroyed;
+
+  Future<bool> startService(NotificationPayload payload) {
+    throw UnimplementedError('startService() has not been implemented.');
+  }
+
+  Future<bool> updateService(NotificationPayload payload) {
+    throw UnimplementedError('updateService() has not been implemented.');
+  }
+
+  Future<bool> stopService() {
+    throw UnimplementedError('stopService() has not been implemented.');
+  }
+
+  Future<bool> get isServiceRunning {
+    throw UnimplementedError('isRunningService has not been implemented.');
   }
 }

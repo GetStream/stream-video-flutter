@@ -19,6 +19,7 @@ dependencies:
   stream_video: ^0.2.0
   stream_video_flutter_background: ^0.2.0
   visibility_detector: ^0.4.0+2
+  plugin_platform_interface: ^2.1.5
 
 dev_dependencies:
   flutter_test:
