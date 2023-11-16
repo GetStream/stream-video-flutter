@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
@@ -6,13 +5,13 @@ import '../call_screen/call_diagnostics_content/call_diagnostics_content.dart';
 
 class LivestreamContent extends StatefulWidget {
   const LivestreamContent({
-    Key? key,
+    super.key,
     required this.call,
     required this.callState,
     this.backButtonBuilder,
     this.displayDiagnostics = false,
     this.videoFit = VideoFit.contain,
-  }) : super(key: key);
+  });
 
   /// Represents a call.
   final Call call;

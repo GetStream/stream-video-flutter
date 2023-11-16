@@ -5,10 +5,10 @@ import 'livestream_speakerphone_option.dart';
 
 class LivestreamToggle extends StatelessWidget {
   const LivestreamToggle({
-    Key? key,
+    super.key,
     required this.enabled,
     required this.onStateChanged,
-  }) : super(key: key);
+  });
 
   final bool enabled;
   final VoidCallback onStateChanged;
@@ -18,19 +18,19 @@ class LivestreamToggle extends StatelessWidget {
     return Center(
       child: IconButton(
         onPressed: onStateChanged,
-        iconSize: 64.0,
+        iconSize: 64,
         icon: AnimatedCrossFade(
-          firstChild: Icon(
+          firstChild: const Icon(
             Icons.pause_rounded,
             color: Colors.white,
           ),
-          secondChild: Icon(
+          secondChild: const Icon(
             Icons.play_arrow_rounded,
             color: Colors.white,
           ),
           crossFadeState:
               enabled ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
         ),
       ),
     );

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide TextTheme;
 
 import '../utils/device_segmentation.dart';
 import '../widgets/floating_view/floating_view_alignment.dart';
+import 'stream_livestream_theme.dart';
 import 'themes.dart';
 
 /// {@template streamVideoThemeData}
@@ -23,6 +24,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallParticipantsInfoMenuThemeData? callParticipantsInfoMenuTheme,
     StreamIncomingOutgoingCallThemeData? incomingCallTheme,
     StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
+    StreamLivestreamThemeData? livestreamTheme,
   }) {
     final isDark = brightness == Brightness.dark;
     textTheme ??=
@@ -46,6 +48,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callParticipantsInfoMenuTheme: callParticipantsInfoMenuTheme,
       incomingCallTheme: incomingCallTheme,
       outgoingCallTheme: outgoingCallTheme,
+      livestreamTheme: livestreamTheme,
     );
 
     return defaultTheme.merge(customizedTheme);
@@ -71,6 +74,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.callParticipantsInfoMenuTheme,
     required this.incomingCallTheme,
     required this.outgoingCallTheme,
+    required this.livestreamTheme,
   });
 
   /// Creates a theme from a Material [Theme]
@@ -319,6 +323,48 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           fontWeight: FontWeight.bold,
         ),
       ),
+      livestreamTheme: const StreamLivestreamThemeData(
+        playIcon: const Icon(
+          Icons.play_arrow_rounded,
+          color: Colors.white,
+        ),
+        pauseIcon: const Icon(
+          Icons.pause_rounded,
+          color: Colors.white,
+        ),
+        playPauseIconSize: 64.0,
+        liveButtonColor: Colors.blue,
+        backstageButtonColor: Colors.red,
+        callStateButtonTextStyle: const TextStyle(
+          color: Colors.white,
+        ),
+        participantCountTextStyle: const TextStyle(
+          color: Colors.white,
+        ),
+        durationTextStyle: const TextStyle(
+          color: Colors.white,
+        ),
+        participantIcon: const Icon(
+          Icons.remove_red_eye_outlined,
+          color: Colors.white,
+        ),
+        speakerEnabledIcon: const Icon(
+          Icons.volume_up_rounded,
+          color: Colors.white,
+        ),
+        speakerDisabledIcon: const Icon(
+          Icons.volume_off_rounded,
+          color: Colors.white,
+        ),
+        expandIcon: const Icon(
+          Icons.fullscreen,
+          color: Colors.white,
+        ),
+        contractIcon: const Icon(
+          Icons.fullscreen_exit,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 
@@ -364,6 +410,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the outgoing call widget.
   final StreamIncomingOutgoingCallThemeData outgoingCallTheme;
 
+  /// Theme for the outgoing call widget.
+  final StreamLivestreamThemeData livestreamTheme;
+
   /// Creates a copy of [StreamVideoTheme] with specified attributes
   /// overridden.
   @override
@@ -378,6 +427,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallParticipantsInfoMenuThemeData? callParticipantsInfoMenuTheme,
     StreamIncomingOutgoingCallThemeData? incomingCallTheme,
     StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
+    StreamLivestreamThemeData? livestreamTheme,
   }) =>
       StreamVideoTheme.raw(
         textTheme: this.textTheme.merge(textTheme),
@@ -393,6 +443,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         localVideoTheme: this.localVideoTheme.merge(localVideoTheme),
         incomingCallTheme: this.incomingCallTheme.merge(incomingCallTheme),
         outgoingCallTheme: this.outgoingCallTheme.merge(outgoingCallTheme),
+        livestreamTheme: this.livestreamTheme.merge(livestreamTheme),
       );
 
   /// Merge themes
@@ -410,6 +461,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           .merge(other.callParticipantsInfoMenuTheme),
       incomingCallTheme: incomingCallTheme.merge(other.incomingCallTheme),
       outgoingCallTheme: outgoingCallTheme.merge(other.outgoingCallTheme),
+      livestreamTheme: livestreamTheme.merge(other.livestreamTheme),
     );
   }
 
@@ -436,6 +488,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       ),
       incomingCallTheme: incomingCallTheme.lerp(other.incomingCallTheme, t),
       outgoingCallTheme: outgoingCallTheme.lerp(other.outgoingCallTheme, t),
+      livestreamTheme: livestreamTheme.lerp(other.livestreamTheme, t),
     );
   }
 }

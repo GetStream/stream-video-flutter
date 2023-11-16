@@ -5,12 +5,12 @@ import 'livestream_speakerphone_option.dart';
 
 class LivestreamInfo extends StatelessWidget {
   const LivestreamInfo({
-    Key? key,
+    super.key,
     required this.call,
     required this.callState,
     required this.fullscreen,
     required this.onStateChanged,
-  }) : super(key: key);
+  });
 
   final Call call;
   final CallState callState;
@@ -27,11 +27,11 @@ class LivestreamInfo extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 4,
                   vertical: 8,
                 ),
-                margin: EdgeInsets.symmetric(
+                margin: const EdgeInsets.symmetric(
                   horizontal: 12,
                 ),
                 decoration: BoxDecoration(
@@ -40,31 +40,31 @@ class LivestreamInfo extends StatelessWidget {
                 ),
                 child: Text(
                   callState.isBackstage ? 'Backstage' : 'Live',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                   ),
                 ),
               ),
-              Icon(
+              const Icon(
                 Icons.remove_red_eye_outlined,
                 color: Colors.white,
               ),
-              SizedBox(
+              const SizedBox(
                 width: 8,
               ),
               Text(
                 callState.otherParticipants.length.toString(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                 ),
               ),
             ],
           ),
-          Row(
+          const Row(
             children: [
               CircleAvatar(
                 backgroundColor: Colors.red,
-                radius: 4.0,
+                radius: 4,
               ),
               SizedBox(
                 width: 8,
@@ -85,18 +85,18 @@ class LivestreamInfo extends StatelessWidget {
               IconButton(
                 onPressed: onStateChanged,
                 icon: AnimatedCrossFade(
-                  firstChild: Icon(
+                  firstChild: const Icon(
                     Icons.fullscreen_exit,
                     color: Colors.white,
                   ),
-                  secondChild: Icon(
+                  secondChild: const Icon(
                     Icons.fullscreen,
                     color: Colors.white,
                   ),
                   crossFadeState: fullscreen
                       ? CrossFadeState.showFirst
                       : CrossFadeState.showSecond,
-                  duration: Duration(milliseconds: 300),
+                  duration: const Duration(milliseconds: 300),
                 ),
               ),
             ],

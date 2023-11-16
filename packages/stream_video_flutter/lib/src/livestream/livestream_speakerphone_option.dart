@@ -42,7 +42,7 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
     if (audioOutputs.isEmpty) return;
 
     var device = audioOutputs.firstWhereOrNull(
-          (it) => it.id.equalsIgnoreCase(
+      (it) => it.id.equalsIgnoreCase(
         enabled ? deviceIdSpeaker : deviceIdEarpiece,
       ),
     );
@@ -71,11 +71,11 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
     super.initState();
     _deviceChangeSubscription =
         _deviceNotifier.onDeviceChange.listen((devices) {
-          final audioOutputs = devices.where(
-                (it) => it.kind == RtcMediaDeviceKind.audioOutput,
-          );
-          _audioOutputs = audioOutputs.toList();
-        });
+      final audioOutputs = devices.where(
+        (it) => it.kind == RtcMediaDeviceKind.audioOutput,
+      );
+      _audioOutputs = audioOutputs.toList();
+    });
   }
 
   @override
@@ -95,10 +95,15 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
     }
 
     return IconButton(
-      color: Colors.white,
       icon: enabled
-          ? Icon(widget.enabledSpeakerphoneIcon)
-          : Icon(widget.disabledSpeakerphoneIcon),
+          ? Icon(
+              widget.enabledSpeakerphoneIcon,
+              color: Colors.white,
+            )
+          : Icon(
+              widget.disabledSpeakerphoneIcon,
+              color: Colors.white,
+            ),
       onPressed: () async {
         try {
           // Enable/disable the speaker.

@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'livestream_content.dart';
-import 'livestream_toggle.dart';
 
 class LivestreamPlayer extends StatefulWidget {
   const LivestreamPlayer({
