@@ -35,7 +35,7 @@ class LivestreamInfo extends StatelessWidget {
                   color: Colors.blue,
                 ),
                 child: Text(
-                  'Live',
+                  callState.isBackstage ? 'Backstage' : 'Live',
                   style: TextStyle(
                     color: Colors.white,
                   ),
@@ -56,8 +56,36 @@ class LivestreamInfo extends StatelessWidget {
               ),
             ],
           ),
-          LivestreamSpeakerphoneOption(
-            call: call,
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.red,
+                radius: 4.0,
+              ),
+              SizedBox(
+                width: 8,
+              ),
+              Text(
+                '01:41',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              LivestreamSpeakerphoneOption(
+                call: call,
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.fullscreen,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
         ],
       ),

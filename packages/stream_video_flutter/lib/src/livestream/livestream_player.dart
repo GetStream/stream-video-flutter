@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import 'livestream_content.dart';
+import 'livestream_toggle.dart';
 
 class LivestreamPlayer extends StatefulWidget {
   const LivestreamPlayer({
@@ -41,6 +42,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
 
   /// Controls the visibility of [CallDiagnosticsContent].
   bool _isStatsVisible = false;
+  bool _livestreamEnabled = true;
 
   late Animation<double> _controllerAnimation;
   late AnimationController _animationController;
@@ -87,8 +89,8 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if(!_animationController.isAnimating) {
-          if(_controllerAnimation.value == 1.0) {
+        if (!_animationController.isAnimating) {
+          if (_controllerAnimation.value == 1.0) {
             _animationController.reverse();
           } else {
             _animationController.forward();
@@ -110,6 +112,29 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
               callState: _callState,
               backButtonBuilder: widget.backButtonBuilder,
               displayDiagnostics: _isStatsVisible,
+            ),
+            Visibility(
+              visible: _controllerAnimation.value != 0,
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: AnimatedBuilder(
+                  animation: _controllerAnimation,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _controllerAnimation.value,
+                      child: child,
+                    );
+                  },
+                  child: LivestreamToggle(
+                    enabled: _livestreamEnabled,
+                    onStateChanged: () {
+                      setState(() {
+                        _livestreamEnabled = !_livestreamEnabled;
+                      });
+                    },
+                  ),
+                ),
+              ),
             ),
             Visibility(
               visible: _controllerAnimation.value != 0,
