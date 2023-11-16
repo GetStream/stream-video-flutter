@@ -1,5 +1,4 @@
 // 📦 Package imports:
-import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/di/injector.dart';
 import 'package:go_router/go_router.dart';
 
