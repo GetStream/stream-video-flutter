@@ -67,7 +67,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     );
 
     _animationController.forward();
-    _durationTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _durationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       // var currentTime = DateTime.now();
     });
   }

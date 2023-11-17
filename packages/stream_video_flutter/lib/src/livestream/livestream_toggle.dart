@@ -30,14 +30,16 @@ class LivestreamToggle extends StatelessWidget {
         icon: AnimatedCrossFade(
           firstChild: IconTheme(
             data: pauseIconTheme,
-            child: const Icon(
+            child: Icon(
               Icons.pause_rounded,
+              size: theme.playPauseIconSize,
             ),
           ),
           secondChild: IconTheme(
             data: playIconTheme,
-            child: const Icon(
+            child: Icon(
               Icons.play_arrow_rounded,
+              size: theme.playPauseIconSize,
             ),
           ),
           crossFadeState:
