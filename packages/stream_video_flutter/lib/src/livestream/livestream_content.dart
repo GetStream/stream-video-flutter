@@ -42,27 +42,36 @@ class _LivestreamContentState extends State<LivestreamContent> {
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
 
-    final Widget bodyWidget;
+    late Widget bodyWidget;
     if (callState.status.isConnected) {
       if (callState.isBackstage) {
         bodyWidget = const Center(
           child: Text('Livestream is backstage'),
         );
       } else {
-        final participant =
-            callState.callParticipants.where((e) => e.isVideoEnabled).first;
+        final streamingParticipants =
+            callState.callParticipants.where((e) => e.isVideoEnabled).toList();
 
-        bodyWidget = StreamCallParticipant(
-          // We use the sessionId as the key to avoid rebuilding the widget
-          // when the participant changes.
-          key: ValueKey(participant.sessionId),
-          call: call,
-          participant: participant,
-          showConnectionQualityIndicator: false,
-          showParticipantLabel: false,
-          showSpeakerBorder: false,
-          videoFit: videoFit,
+        bodyWidget = const Center(
+          child: Text('No livestreaming participants'),
         );
+
+        if (streamingParticipants.isEmpty) {
+        } else {
+          final participant = streamingParticipants.first;
+
+          bodyWidget = StreamCallParticipant(
+            // We use the sessionId as the key to avoid rebuilding the widget
+            // when the participant changes.
+            key: ValueKey(participant.sessionId),
+            call: call,
+            participant: participant,
+            showConnectionQualityIndicator: false,
+            showParticipantLabel: false,
+            showSpeakerBorder: false,
+            videoFit: videoFit,
+          );
+        }
       }
     } else {
       final isReconnecting = callState.status.isReconnecting;
