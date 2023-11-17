@@ -46,7 +46,8 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   late Animation<double> _controllerAnimation;
   late AnimationController _animationController;
   late Timer _durationTimer;
-  final ValueNotifier<double> _duration = ValueNotifier<double>(0);
+  final ValueNotifier<Duration> _duration =
+      ValueNotifier<Duration>(Duration.zero);
 
   @override
   void initState() {
@@ -67,8 +68,16 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     );
 
     _animationController.forward();
+
+    final now = DateTime.now();
+    final currentTime = now.millisecondsSinceEpoch;
+    final startedAt = _callState.liveStartedAt?.millisecondsSinceEpoch ??
+        _callState.createdAt?.millisecondsSinceEpoch ??
+        now.millisecondsSinceEpoch;
+    _duration.value = Duration(milliseconds: currentTime - startedAt);
+
     _durationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      // var currentTime = DateTime.now();
+      _duration.value = _duration.value + const Duration(seconds: 1);
     });
   }
 
@@ -174,14 +183,20 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
                       child: child,
                     );
                   },
-                  child: LivestreamInfo(
-                    call: call,
-                    callState: widget.call.state.value,
-                    fullscreen: _fullscreen,
-                    onStateChanged: () {
-                      setState(() {
-                        _fullscreen = !_fullscreen;
-                      });
+                  child: ValueListenableBuilder<Duration>(
+                    valueListenable: _duration,
+                    builder: (context, duration, _) {
+                      return LivestreamInfo(
+                        call: call,
+                        callState: widget.call.state.value,
+                        fullscreen: _fullscreen,
+                        onStateChanged: () {
+                          setState(() {
+                            _fullscreen = !_fullscreen;
+                          });
+                        },
+                        duration: duration,
+                      );
                     },
                   ),
                 ),

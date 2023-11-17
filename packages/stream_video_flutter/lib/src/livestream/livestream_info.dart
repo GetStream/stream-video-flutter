@@ -11,12 +11,14 @@ class LivestreamInfo extends StatelessWidget {
     required this.callState,
     required this.fullscreen,
     required this.onStateChanged,
+    required this.duration,
   });
 
   final Call call;
   final CallState callState;
   final bool fullscreen;
   final VoidCallback onStateChanged;
+  final Duration duration;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +49,12 @@ class LivestreamInfo extends StatelessWidget {
     final durationTextTheme = const TextStyle(
       color: Colors.white,
     ).merge(theme.durationTextStyle);
+
+    final minutes = duration.inMinutes;
+    final seconds = duration.inSeconds % 60;
+
+    final formattedDuration =
+        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
     return ColoredBox(
       color: Colors.black.withOpacity(0.4),
@@ -97,7 +105,7 @@ class LivestreamInfo extends StatelessWidget {
                 width: 8,
               ),
               Text(
-                '01:41',
+                formattedDuration,
                 style: durationTextTheme,
               ),
             ],
