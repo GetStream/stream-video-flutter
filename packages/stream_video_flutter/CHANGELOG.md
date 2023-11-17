@@ -1,3 +1,9 @@
+## Upcoming 
+
+✅ Added
+
+* Added `LivestreamPlayer` - a in-built widget that allows you to easily view livestreams.
+
 ## 0.2.0
 
 ✅ Added

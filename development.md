@@ -28,7 +28,7 @@
 - - [ ] Publish Dogfooding app
 - [ ] Participant sort bug [Efthymis]
 - [x] Android/iOS ringing flow
-- [ ] Live streaming component(s) [Deven]
+- [x] Live streaming component(s) [Deven]
 - [x] Deeplinking
 - [ ] Tap to focus (flutter_webrtc) [Kanat]
 - [ ] Push notifications [Maciej]
