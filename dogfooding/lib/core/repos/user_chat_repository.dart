@@ -19,7 +19,9 @@ class UserChatRepository {
   Future<OwnUser> connectUser(User user) {
     return chatClient.connectUserWithProvider(
       user,
-      (userId) => tokenService.loadToken(userId: userId),
+      (userId) => tokenService
+          .loadToken(userId: userId)
+          .then((response) => response.token),
     );
   }
 

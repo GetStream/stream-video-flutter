@@ -166,7 +166,7 @@ class _ParticipantsListState extends State<ParticipantsList> {
 
     final remainingUsers = [
       ...users.where(
-        (user) => user.userInfo.id != widget.currentUserId,
+        (user) => user.id != widget.currentUserId,
       ),
     ];
 
@@ -175,7 +175,7 @@ class _ParticipantsListState extends State<ParticipantsList> {
       itemCount: remainingUsers.length,
       separatorBuilder: (context, index) => const Divider(),
       itemBuilder: (context, index) {
-        final user = remainingUsers[index].userInfo;
+        final user = remainingUsers[index];
 
         final name = user.name;
 

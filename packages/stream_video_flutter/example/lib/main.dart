@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import 'env/env.dart';
+import 'core/token_service.dart';
 import 'log_config.dart';
 import 'screen/login_screen.dart';
 
@@ -20,12 +20,15 @@ Future<void> main() async {
   runApp(const MyApp(connectUser: _connectUser));
 }
 
-Future<Result<None>> _connectUser(UserInfo user, String token) async {
-  streamLog.i(_tag, () => '[connectUser] user: $user, token: $token');
+Future<Result<None>> _connectUser(UserInfo user) async {
+  streamLog.i(_tag, () => '[connectUser] user: $user');
+
+  final tokenResponse = await const TokenService().loadToken(userId: user.id);
+
   final client = StreamVideo(
-    Env.streamVideoApiKey,
+    tokenResponse.apiKey,
     user: User(info: user),
-    userToken: token,
+    userToken: tokenResponse.token,
   );
   await client.connect();
 
