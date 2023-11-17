@@ -3,6 +3,8 @@ library stream_video_flutter;
 export 'package:stream_video/stream_video.dart';
 
 export 'src/call_background/background_service.dart';
+export 'src/call_background/model/notification_options.dart';
+export 'src/call_background/model/notification_payload.dart';
 export 'src/call_controls/call_control_option.dart';
 export 'src/call_controls/call_controls.dart';
 export 'src/call_controls/controls/add_reaction_option.dart';
