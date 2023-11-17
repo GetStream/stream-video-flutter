@@ -323,18 +323,16 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           fontWeight: FontWeight.bold,
         ),
       ),
-      livestreamTheme: const StreamLivestreamThemeData(
-        playIcon: const Icon(
-          Icons.play_arrow_rounded,
+      livestreamTheme: StreamLivestreamThemeData(
+        playIconTheme: const IconThemeData(
           color: Colors.white,
         ),
-        pauseIcon: const Icon(
-          Icons.pause_rounded,
+        pauseIconTheme: const IconThemeData(
           color: Colors.white,
         ),
-        playPauseIconSize: 64.0,
-        liveButtonColor: Colors.blue,
-        backstageButtonColor: Colors.red,
+        playPauseIconSize: 64,
+        liveButtonColor: colorTheme.accentPrimary,
+        backstageButtonColor: colorTheme.accentError,
         callStateButtonTextStyle: const TextStyle(
           color: Colors.white,
         ),
@@ -344,24 +342,19 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         durationTextStyle: const TextStyle(
           color: Colors.white,
         ),
-        participantIcon: const Icon(
-          Icons.remove_red_eye_outlined,
+        participantIconTheme: const IconThemeData(
           color: Colors.white,
         ),
-        speakerEnabledIcon: const Icon(
-          Icons.volume_up_rounded,
+        speakerEnabledIconTheme: const IconThemeData(
           color: Colors.white,
         ),
-        speakerDisabledIcon: const Icon(
-          Icons.volume_off_rounded,
+        speakerDisabledIconTheme: const IconThemeData(
           color: Colors.white,
         ),
-        expandIcon: const Icon(
-          Icons.fullscreen,
+        expandIconTheme: const IconThemeData(
           color: Colors.white,
         ),
-        contractIcon: const Icon(
-          Icons.fullscreen_exit,
+        contractIconTheme: const IconThemeData(
           color: Colors.white,
         ),
       ),

@@ -10,12 +10,10 @@ import '../../stream_video_flutter.dart';
 class StreamLivestreamThemeData with Diagnosticable {
   /// Creates a new instance of [StreamLivestreamThemeData].
   const StreamLivestreamThemeData({
-    this.playIcon = const Icon(
-      Icons.play_arrow_rounded,
+    this.playIconTheme = const IconThemeData(
       color: Colors.white,
     ),
-    this.pauseIcon = const Icon(
-      Icons.pause_rounded,
+    this.pauseIconTheme = const IconThemeData(
       color: Colors.white,
     ),
     this.playPauseIconSize = 64.0,
@@ -30,31 +28,26 @@ class StreamLivestreamThemeData with Diagnosticable {
     this.durationTextStyle = const TextStyle(
       color: Colors.white,
     ),
-    this.participantIcon = const Icon(
-      Icons.remove_red_eye_outlined,
+    this.participantIconTheme = const IconThemeData(
       color: Colors.white,
     ),
-    this.speakerEnabledIcon = const Icon(
-      Icons.volume_up_rounded,
+    this.speakerEnabledIconTheme = const IconThemeData(
       color: Colors.white,
     ),
-    this.speakerDisabledIcon = const Icon(
-      Icons.volume_off_rounded,
+    this.speakerDisabledIconTheme = const IconThemeData(
       color: Colors.white,
     ),
-    this.expandIcon = const Icon(
-      Icons.fullscreen,
+    this.expandIconTheme = const IconThemeData(
       color: Colors.white,
     ),
-    this.contractIcon = const Icon(
-      Icons.fullscreen_exit,
+    this.contractIconTheme = const IconThemeData(
       color: Colors.white,
     ),
   });
 
-  final Icon playIcon;
+  final IconThemeData playIconTheme;
 
-  final Icon pauseIcon;
+  final IconThemeData pauseIconTheme;
 
   final double playPauseIconSize;
 
@@ -68,36 +61,36 @@ class StreamLivestreamThemeData with Diagnosticable {
 
   final TextStyle durationTextStyle;
 
-  final Icon participantIcon;
+  final IconThemeData participantIconTheme;
 
-  final Icon speakerEnabledIcon;
+  final IconThemeData speakerEnabledIconTheme;
 
-  final Icon speakerDisabledIcon;
+  final IconThemeData speakerDisabledIconTheme;
 
-  final Icon expandIcon;
+  final IconThemeData expandIconTheme;
 
-  final Icon contractIcon;
+  final IconThemeData contractIconTheme;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   StreamLivestreamThemeData copyWith({
-    Icon? playIcon,
-    Icon? pauseIcon,
+    IconThemeData? playIconTheme,
+    IconThemeData? pauseIconTheme,
     double? playPauseIconSize,
     Color? liveButtonColor,
     Color? backstageButtonColor,
     TextStyle? callStateButtonTextStyle,
     TextStyle? participantCountTextStyle,
     TextStyle? durationTextStyle,
-    Icon? participantIcon,
-    Icon? speakerEnabledIcon,
-    Icon? speakerDisabledIcon,
-    Icon? expandIcon,
-    Icon? contractIcon,
+    IconThemeData? participantIconTheme,
+    IconThemeData? speakerEnabledIconTheme,
+    IconThemeData? speakerDisabledIconTheme,
+    IconThemeData? expandIconTheme,
+    IconThemeData? contractIconTheme,
   }) {
     return StreamLivestreamThemeData(
-      playIcon: playIcon ?? this.playIcon,
-      pauseIcon: pauseIcon ?? this.pauseIcon,
+      playIconTheme: playIconTheme ?? this.playIconTheme,
+      pauseIconTheme: pauseIconTheme ?? this.pauseIconTheme,
       playPauseIconSize: playPauseIconSize ?? this.playPauseIconSize,
       liveButtonColor: liveButtonColor ?? this.liveButtonColor,
       backstageButtonColor: backstageButtonColor ?? this.backstageButtonColor,
@@ -106,11 +99,13 @@ class StreamLivestreamThemeData with Diagnosticable {
       participantCountTextStyle:
           participantCountTextStyle ?? this.participantCountTextStyle,
       durationTextStyle: durationTextStyle ?? this.durationTextStyle,
-      participantIcon: participantIcon ?? this.participantIcon,
-      speakerEnabledIcon: speakerEnabledIcon ?? this.speakerEnabledIcon,
-      speakerDisabledIcon: speakerDisabledIcon ?? this.speakerDisabledIcon,
-      expandIcon: expandIcon ?? this.expandIcon,
-      contractIcon: contractIcon ?? this.contractIcon,
+      participantIconTheme: participantIconTheme ?? this.participantIconTheme,
+      speakerEnabledIconTheme:
+          speakerEnabledIconTheme ?? this.speakerEnabledIconTheme,
+      speakerDisabledIconTheme:
+          speakerDisabledIconTheme ?? this.speakerDisabledIconTheme,
+      expandIconTheme: expandIconTheme ?? this.expandIconTheme,
+      contractIconTheme: contractIconTheme ?? this.contractIconTheme,
     );
   }
 
@@ -122,8 +117,9 @@ class StreamLivestreamThemeData with Diagnosticable {
     double t,
   ) {
     return StreamLivestreamThemeData(
-      playIcon: t < 0.5 ? playIcon : other.playIcon,
-      pauseIcon: t < 0.5 ? pauseIcon : other.pauseIcon,
+      playIconTheme: IconThemeData.lerp(playIconTheme, other.playIconTheme, t),
+      pauseIconTheme:
+          IconThemeData.lerp(pauseIconTheme, other.pauseIconTheme, t),
       playPauseIconSize:
           lerpDouble(playPauseIconSize, other.playPauseIconSize, t)!,
       liveButtonColor: Color.lerp(liveButtonColor, other.liveButtonColor, t)!,
@@ -139,33 +135,54 @@ class StreamLivestreamThemeData with Diagnosticable {
         other.participantCountTextStyle,
         t,
       )!,
-      durationTextStyle:
-          TextStyle.lerp(durationTextStyle, other.durationTextStyle, t)!,
-      participantIcon: t < 0.5 ? participantIcon : other.participantIcon,
-      speakerEnabledIcon:
-          t < 0.5 ? speakerEnabledIcon : other.speakerEnabledIcon,
-      speakerDisabledIcon:
-          t < 0.5 ? speakerDisabledIcon : other.speakerDisabledIcon,
-      expandIcon: t < 0.5 ? expandIcon : other.expandIcon,
-      contractIcon: t < 0.5 ? contractIcon : other.contractIcon,
+      durationTextStyle: TextStyle.lerp(
+        durationTextStyle,
+        other.durationTextStyle,
+        t,
+      )!,
+      participantIconTheme: IconThemeData.lerp(
+        participantIconTheme,
+        other.participantIconTheme,
+        t,
+      ),
+      speakerEnabledIconTheme: IconThemeData.lerp(
+        speakerEnabledIconTheme,
+        other.speakerEnabledIconTheme,
+        t,
+      ),
+      speakerDisabledIconTheme: IconThemeData.lerp(
+        speakerDisabledIconTheme,
+        other.speakerDisabledIconTheme,
+        t,
+      ),
+      expandIconTheme: IconThemeData.lerp(
+        expandIconTheme,
+        other.expandIconTheme,
+        t,
+      ),
+      contractIconTheme: IconThemeData.lerp(
+        contractIconTheme,
+        other.contractIconTheme,
+        t,
+      ),
     );
   }
 
   @override
   int get hashCode => Object.hash(
-        playIcon,
-        pauseIcon,
+        playIconTheme,
+        pauseIconTheme,
         playPauseIconSize,
         liveButtonColor,
         backstageButtonColor,
         callStateButtonTextStyle,
         participantCountTextStyle,
         durationTextStyle,
-        participantIcon,
-        speakerEnabledIcon,
-        speakerDisabledIcon,
-        expandIcon,
-        contractIcon,
+        participantIconTheme,
+        speakerEnabledIconTheme,
+        speakerDisabledIconTheme,
+        expandIconTheme,
+        contractIconTheme,
       );
 
   @override
@@ -177,27 +194,27 @@ class StreamLivestreamThemeData with Diagnosticable {
       return false;
     }
     return other is StreamLivestreamThemeData &&
-        other.playIcon == playIcon &&
-        other.pauseIcon == pauseIcon &&
+        other.playIconTheme == playIconTheme &&
+        other.pauseIconTheme == pauseIconTheme &&
         other.playPauseIconSize == playPauseIconSize &&
         other.liveButtonColor == liveButtonColor &&
         other.backstageButtonColor == backstageButtonColor &&
         other.callStateButtonTextStyle == callStateButtonTextStyle &&
         other.participantCountTextStyle == participantCountTextStyle &&
         other.durationTextStyle == durationTextStyle &&
-        other.participantIcon == participantIcon &&
-        other.speakerEnabledIcon == speakerEnabledIcon &&
-        other.speakerDisabledIcon == speakerDisabledIcon &&
-        other.expandIcon == expandIcon &&
-        other.contractIcon == contractIcon;
+        other.participantIconTheme == participantIconTheme &&
+        other.speakerEnabledIconTheme == speakerEnabledIconTheme &&
+        other.speakerDisabledIconTheme == speakerDisabledIconTheme &&
+        other.expandIconTheme == expandIconTheme &&
+        other.contractIconTheme == contractIconTheme;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(IconDataProperty('playIcon', playIcon.icon))
-      ..add(IconDataProperty('pauseIcon', pauseIcon.icon))
+      ..add(DiagnosticsProperty('playIconTheme', playIconTheme))
+      ..add(DiagnosticsProperty('pauseIconTheme', pauseIconTheme))
       ..add(DoubleProperty('playPauseIconSize', playPauseIconSize))
       ..add(ColorProperty('liveButtonColor', liveButtonColor))
       ..add(ColorProperty('backstageButtonColor', backstageButtonColor))
@@ -216,30 +233,37 @@ class StreamLivestreamThemeData with Diagnosticable {
       ..add(
         DiagnosticsProperty<TextStyle>('durationTextStyle', durationTextStyle),
       )
-      ..add(IconDataProperty('participantIcon', participantIcon.icon))
-      ..add(IconDataProperty('speakerEnabledIcon', speakerEnabledIcon.icon))
-      ..add(IconDataProperty('speakerDisabledIcon', speakerDisabledIcon.icon))
-      ..add(IconDataProperty('expandIcon', expandIcon.icon))
-      ..add(IconDataProperty('contractIcon', contractIcon.icon));
+      ..add(DiagnosticsProperty('participantIconTheme', participantIconTheme))
+      ..add(
+        DiagnosticsProperty('speakerEnabledIconTheme', speakerEnabledIconTheme),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'speakerDisabledIconTheme',
+          speakerDisabledIconTheme,
+        ),
+      )
+      ..add(DiagnosticsProperty('expandIconTheme', expandIconTheme))
+      ..add(DiagnosticsProperty('contractIconTheme', contractIconTheme));
   }
 
   /// Merges one [StreamCallControlsThemeData] with the another.
   StreamLivestreamThemeData merge(StreamLivestreamThemeData? other) {
     if (other == null) return this;
     return copyWith(
-      playIcon: other.playIcon,
-      pauseIcon: other.pauseIcon,
+      playIconTheme: other.playIconTheme,
+      pauseIconTheme: other.pauseIconTheme,
       playPauseIconSize: other.playPauseIconSize,
       liveButtonColor: other.liveButtonColor,
       backstageButtonColor: other.backstageButtonColor,
       callStateButtonTextStyle: other.callStateButtonTextStyle,
       participantCountTextStyle: other.participantCountTextStyle,
       durationTextStyle: other.durationTextStyle,
-      participantIcon: other.participantIcon,
-      speakerEnabledIcon: other.speakerEnabledIcon,
-      speakerDisabledIcon: other.speakerDisabledIcon,
-      expandIcon: other.expandIcon,
-      contractIcon: other.contractIcon,
+      participantIconTheme: other.participantIconTheme,
+      speakerEnabledIconTheme: other.speakerEnabledIconTheme,
+      speakerDisabledIconTheme: other.speakerDisabledIconTheme,
+      expandIconTheme: other.expandIconTheme,
+      contractIconTheme: other.contractIconTheme,
     );
   }
 }
