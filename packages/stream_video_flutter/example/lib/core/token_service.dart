@@ -5,13 +5,13 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class TokenResponse {
-  final String token;
-  final String apiKey;
-
   const TokenResponse(this.token, this.apiKey);
 
   factory TokenResponse.fromJson(Map<String, dynamic> json) =>
       TokenResponse(json['token'], json['apiKey']);
+
+  final String token;
+  final String apiKey;
 }
 
 class TokenService {
@@ -22,7 +22,7 @@ class TokenService {
     Duration? expiresIn,
   }) async {
     final queryParameters = <String, dynamic>{
-      'environment': 'pronto',
+      'environment': 'demo',
       'user_id': userId,
     };
     if (expiresIn != null) {

@@ -1,5 +1,8 @@
 // 🐦 Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_dogfooding/core/repos/token_service.dart';
+import 'package:flutter_dogfooding/core/repos/user_chat_repository.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide User;
 
 // 📦 Package imports:
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -26,9 +29,13 @@ import '../di/injector.dart';
 class UserAuthController extends ChangeNotifier {
   UserAuthController({
     required AppPreferences prefs,
-  }) : _prefs = prefs;
+    required TokenService tokenService,
+  })  : _prefs = prefs,
+        _tokenService = tokenService;
 
   final AppPreferences _prefs;
+  final TokenService _tokenService;
+
   UserAuthRepository? _authRepo;
 
   /// Returns the current user if they are logged in, or null if they are not.
@@ -37,7 +44,10 @@ class UserAuthController extends ChangeNotifier {
 
   /// Logs in the given [user] and returns the user credentials.
   Future<UserCredentials> login(User user) async {
-    _authRepo ??= locator.get<UserAuthRepository>(param1: user);
+    final tokenResponse = await _tokenService.loadToken(userId: user.id);
+
+    _authRepo ??=
+        locator.get<UserAuthRepository>(param1: user, param2: tokenResponse);
     final credentials = await _authRepo!.login();
     _currentUser = credentials.userInfo;
 
@@ -62,6 +72,9 @@ class UserAuthController extends ChangeNotifier {
       locator.unregister<StreamVideo>(
         disposingFunction: (_) => StreamVideo.reset(),
       );
+
+      locator.unregister<StreamChatClient>();
+      locator.unregister<UserChatRepository>();
     }
 
     await _prefs.clearUserCredentials();

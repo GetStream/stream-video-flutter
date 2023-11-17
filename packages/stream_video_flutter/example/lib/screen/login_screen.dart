@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app_config.dart';
-import '../sample_user.dart';
 import 'home_screen.dart';
 
 typedef ConnectUser = Future<Result<None>> Function(
   UserInfo user,
-  String token,
 );
 
 class LoginScreen extends StatefulWidget {
@@ -41,9 +39,9 @@ class _LoginScreenState extends State<LoginScreen> {
               itemBuilder: (context, position) {
                 final user = users[position];
                 return ListTile(
-                  leading: StreamUserAvatar(user: user.userInfo),
-                  title: Text(user.userInfo.name),
-                  subtitle: Text('Role: ${user.userInfo.role}'),
+                  leading: StreamUserAvatar(user: user),
+                  title: Text(user.name),
+                  subtitle: Text('Role: ${user.role}'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
                     await _onUserTap(user);
@@ -64,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<void> _onUserTap(SampleUser user) async {
+  Future<void> _onUserTap(UserInfo user) async {
     if (loggingIn) {
       return;
     }
@@ -73,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
       loggingIn = true;
     });
 
-    await widget.connectUser(user.userInfo, user.token);
+    await widget.connectUser(user);
 
     setState(() {
       loggingIn = false;

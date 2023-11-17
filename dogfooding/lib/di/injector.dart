@@ -14,7 +14,6 @@ import 'package:stream_video_push_notification/stream_video_push_notification.da
 import '../app/user_auth_controller.dart';
 import '../core/repos/token_service.dart';
 import '../core/repos/user_auth_repository.dart';
-import '../env/env.dart';
 import '../log_config.dart';
 import '../utils/consts.dart';
 
@@ -32,25 +31,19 @@ class AppInjector {
 
     // App Preferences
     final prefs = await SharedPreferences.getInstance();
+
     locator.registerSingleton<AppPreferences>(AppPreferences(prefs: prefs));
 
-    // Stream chat
-    locator.registerLazySingleton<StreamChatClient>(_initStreamChat);
-
     // Repositories
-    locator.registerSingleton(const TokenService(apiKey: Env.apiKey));
-    locator.registerLazySingleton<UserChatRepository>(
-      () => UserChatRepository(
-        chatClient: locator(),
-        tokenService: locator(),
-      ),
-    );
+    locator.registerSingleton(const TokenService());
 
-    locator.registerFactoryParam<UserAuthRepository, User, void>(
-      (user, _) {
+    locator.registerFactoryParam<UserAuthRepository, User, TokenResponse>(
+      (user, tokenResponse) {
+        registerStreamChat(tokenResponse.apiKey);
+
         // We need to register the video client here because we need it to
         // initialise the user auth repo.
-        registerStreamVideo(user);
+        registerStreamVideo(tokenResponse, user);
 
         return UserAuthRepository(
           videoClient: locator(),
@@ -62,20 +55,40 @@ class AppInjector {
     // App wide Controller
     locator.registerLazySingleton<UserAuthController>(
       dispose: (controller) => controller.dispose(),
-      () => UserAuthController(prefs: locator()),
+      () => UserAuthController(prefs: locator(), tokenService: locator()),
     );
   }
 
-  static StreamVideo registerStreamVideo(User user) {
+  static void registerStreamChat(String apiKey) {
+    locator.registerSingleton<StreamChatClient>(
+      _initStreamChat(apiKey),
+      dispose: (client) => client.dispose(),
+    );
+
+    locator.registerLazySingleton<UserChatRepository>(
+      () => UserChatRepository(
+        chatClient: locator(),
+        tokenService: locator(),
+      ),
+    );
+  }
+
+  static StreamVideo registerStreamVideo(
+      TokenResponse tokenResponse, User user) {
     _setupLogger();
+
     return locator.registerSingleton(
       dispose: (_) => StreamVideo.reset(),
       _initStreamVideo(
+        tokenResponse.apiKey,
         user,
+        initialToken: tokenResponse.token,
         tokenLoader: switch (user.type) {
           UserType.authenticated => (String userId) {
               final tokenService = locator<TokenService>();
-              return tokenService.loadToken(userId: userId);
+              return tokenService
+                  .loadToken(userId: userId)
+                  .then((response) => response.token);
             },
           _ => null,
         },
@@ -112,9 +125,9 @@ StreamLog _setupLogger() {
   return StreamLog()..logger = CompositeStreamLogger(children);
 }
 
-StreamChatClient _initStreamChat() {
+StreamChatClient _initStreamChat(String apiKey) {
   final streamChatClient = StreamChatClient(
-    Env.apiKey,
+    apiKey,
     logLevel: Level.INFO,
   );
 
@@ -122,11 +135,13 @@ StreamChatClient _initStreamChat() {
 }
 
 StreamVideo _initStreamVideo(
+  String apiKey,
   User user, {
+  String? initialToken,
   TokenLoader? tokenLoader,
 }) {
   final streamVideoClient = StreamVideo(
-    Env.apiKey,
+    apiKey,
     user: user,
     tokenLoader: tokenLoader,
     options: const StreamVideoOptions(
