@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../theme/themes.dart';
 import 'livestream_speakerphone_option.dart';
 
 class LivestreamInfo extends StatelessWidget {
@@ -19,6 +20,34 @@ class LivestreamInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = StreamLivestreamTheme.of(context);
+    final colorTheme = StreamVideoTheme.of(context).colorTheme;
+
+    final participantIconTheme = IconThemeData(
+      color: colorTheme.livestreamCallControlsColor,
+    ).merge(theme.participantIconTheme);
+    final speakerphoneEnabledIconTheme = IconThemeData(
+      color: colorTheme.livestreamCallControlsColor,
+    ).merge(theme.speakerEnabledIconTheme);
+    final speakerphoneDisabledIconTheme = IconThemeData(
+      color: colorTheme.livestreamCallControlsColor,
+    ).merge(theme.speakerDisabledIconTheme);
+    final expandIconTheme = IconThemeData(
+      color: colorTheme.livestreamCallControlsColor,
+    ).merge(theme.expandIconTheme);
+    final contractIconTheme = IconThemeData(
+      color: colorTheme.livestreamCallControlsColor,
+    ).merge(theme.contractIconTheme);
+    final callStatusButtonTextTheme = const TextStyle(
+      color: Colors.white,
+    ).merge(theme.callStateButtonTextStyle);
+    final participantTextTheme = const TextStyle(
+      color: Colors.white,
+    ).merge(theme.participantCountTextStyle);
+    final durationTextTheme = const TextStyle(
+      color: Colors.white,
+    ).merge(theme.durationTextStyle);
+
     return ColoredBox(
       color: Colors.black.withOpacity(0.4),
       child: Row(
@@ -40,40 +69,36 @@ class LivestreamInfo extends StatelessWidget {
                 ),
                 child: Text(
                   callState.isBackstage ? 'Backstage' : 'Live',
-                  style: const TextStyle(
-                    color: Colors.white,
-                  ),
+                  style: callStatusButtonTextTheme,
                 ),
               ),
-              const Icon(
-                Icons.remove_red_eye_outlined,
-                color: Colors.white,
+              IconTheme(
+                data: participantIconTheme,
+                child: const Icon(
+                  Icons.remove_red_eye_outlined,
+                ),
               ),
               const SizedBox(
                 width: 8,
               ),
               Text(
                 callState.otherParticipants.length.toString(),
-                style: const TextStyle(
-                  color: Colors.white,
-                ),
+                style: participantTextTheme,
               ),
             ],
           ),
-          const Row(
+          Row(
             children: [
-              CircleAvatar(
+              const CircleAvatar(
                 backgroundColor: Colors.red,
                 radius: 4,
               ),
-              SizedBox(
+              const SizedBox(
                 width: 8,
               ),
               Text(
                 '01:41',
-                style: TextStyle(
-                  color: Colors.white,
-                ),
+                style: durationTextTheme,
               ),
             ],
           ),
@@ -81,17 +106,23 @@ class LivestreamInfo extends StatelessWidget {
             children: [
               LivestreamSpeakerphoneOption(
                 call: call,
+                enabledSpeakerphoneIconTheme: speakerphoneEnabledIconTheme,
+                disabledSpeakerphoneIconTheme: speakerphoneDisabledIconTheme,
               ),
               IconButton(
                 onPressed: onStateChanged,
                 icon: AnimatedCrossFade(
-                  firstChild: const Icon(
-                    Icons.fullscreen_exit,
-                    color: Colors.white,
+                  firstChild: IconTheme(
+                    data: contractIconTheme,
+                    child: const Icon(
+                      Icons.fullscreen_exit,
+                    ),
                   ),
-                  secondChild: const Icon(
-                    Icons.fullscreen,
-                    color: Colors.white,
+                  secondChild: IconTheme(
+                    data: expandIconTheme,
+                    child: const Icon(
+                      Icons.fullscreen,
+                    ),
                   ),
                   crossFadeState: fullscreen
                       ? CrossFadeState.showFirst

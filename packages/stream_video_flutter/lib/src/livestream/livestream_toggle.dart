@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
 
-import 'livestream_speakerphone_option.dart';
+import '../theme/themes.dart';
 
 class LivestreamToggle extends StatelessWidget {
   const LivestreamToggle({
@@ -15,18 +14,31 @@ class LivestreamToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = StreamLivestreamTheme.of(context);
+    final colorTheme = StreamVideoTheme.of(context).colorTheme;
+    final pauseIconTheme = IconThemeData(
+      color: colorTheme.livestreamCallControlsColor,
+    ).merge(theme.pauseIconTheme);
+    final playIconTheme = IconThemeData(
+      color: colorTheme.livestreamCallControlsColor,
+    ).merge(theme.playIconTheme);
+
     return Center(
       child: IconButton(
         onPressed: onStateChanged,
-        iconSize: 64,
+        iconSize: theme.playPauseIconSize,
         icon: AnimatedCrossFade(
-          firstChild: const Icon(
-            Icons.pause_rounded,
-            color: Colors.white,
+          firstChild: IconTheme(
+            data: pauseIconTheme,
+            child: const Icon(
+              Icons.pause_rounded,
+            ),
           ),
-          secondChild: const Icon(
-            Icons.play_arrow_rounded,
-            color: Colors.white,
+          secondChild: IconTheme(
+            data: playIconTheme,
+            child: const Icon(
+              Icons.play_arrow_rounded,
+            ),
           ),
           crossFadeState:
               enabled ? CrossFadeState.showFirst : CrossFadeState.showSecond,

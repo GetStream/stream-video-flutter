@@ -14,18 +14,22 @@ class LivestreamSpeakerphoneOption extends StatefulWidget {
   const LivestreamSpeakerphoneOption({
     super.key,
     required this.call,
-    this.enabledSpeakerphoneIcon = Icons.volume_up_rounded,
-    this.disabledSpeakerphoneIcon = Icons.volume_off_rounded,
+    this.enabledSpeakerphoneIconTheme = const IconThemeData(
+      color: Colors.white,
+    ),
+    this.disabledSpeakerphoneIconTheme = const IconThemeData(
+      color: Colors.white,
+    ),
   });
 
   /// Represents a call.
   final Call call;
 
   /// The icon that is shown when the speakerphone is enabled.
-  final IconData enabledSpeakerphoneIcon;
+  final IconThemeData enabledSpeakerphoneIconTheme;
 
   /// The icon that is shown when the speakerphone is disabled.
-  final IconData disabledSpeakerphoneIcon;
+  final IconThemeData disabledSpeakerphoneIconTheme;
 
   @override
   State<LivestreamSpeakerphoneOption> createState() => _ToggleSpeakerState();
@@ -96,13 +100,17 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
 
     return IconButton(
       icon: enabled
-          ? Icon(
-              widget.enabledSpeakerphoneIcon,
-              color: Colors.white,
+          ? IconTheme(
+              data: widget.enabledSpeakerphoneIconTheme,
+              child: const Icon(
+                Icons.volume_up_rounded,
+              ),
             )
-          : Icon(
-              widget.disabledSpeakerphoneIcon,
-              color: Colors.white,
+          : IconTheme(
+              data: widget.disabledSpeakerphoneIconTheme,
+              child: const Icon(
+                Icons.volume_off_rounded,
+              ),
             ),
       onPressed: () async {
         try {

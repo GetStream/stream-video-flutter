@@ -40,6 +40,8 @@ class _LivestreamContentState extends State<LivestreamContent> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = StreamVideoTheme.of(context);
+
     final Widget bodyWidget;
     if (callState.status.isConnected) {
       if (callState.isBackstage) {
@@ -70,7 +72,7 @@ class _LivestreamContentState extends State<LivestreamContent> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0XFF272A30),
+      backgroundColor: theme.colorTheme.livestreamBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
