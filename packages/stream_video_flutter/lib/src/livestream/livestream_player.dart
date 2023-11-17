@@ -15,7 +15,7 @@ class LivestreamPlayer extends StatefulWidget {
   ///
   /// * [call] is the livestream call intended to be viewed.
   ///
-  /// * [muted] defines if the call is muted by default
+  /// * [muted] defines if the call is muted by default.
   ///
   /// * [showParticipantCount] defines if the call should show participant count
   ///
