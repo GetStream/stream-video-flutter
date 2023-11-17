@@ -25,10 +25,10 @@ class LivestreamSpeakerphoneOption extends StatefulWidget {
   /// Represents a call.
   final Call call;
 
-  /// The icon that is shown when the speakerphone is enabled.
+  /// The theme that is applied when the speakerphone is enabled.
   final IconThemeData enabledSpeakerphoneIconTheme;
 
-  /// The icon that is shown when the speakerphone is disabled.
+  /// The theme that is applied when the speakerphone is disabled.
   final IconThemeData disabledSpeakerphoneIconTheme;
 
   @override

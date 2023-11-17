@@ -3,7 +3,29 @@ import 'package:flutter/material.dart';
 import '../../stream_video_flutter.dart';
 import '../call_screen/call_diagnostics_content/call_diagnostics_content.dart';
 
+/// The video renderer widget associated with [LivestreamPlayer].
+///
+/// This widget also contains a diagnostic widget that can be used by
+/// double-tapping the whole widget.
+///
+/// Additionally, there is an action button meant for a back/close action
+/// implemented in this widget.
 class LivestreamContent extends StatefulWidget {
+
+  /// Creates a [LivestreamContent] widget.
+  ///
+  /// * [call] is the livestream call intended to be viewed.
+  ///
+  /// * [callState] is the livestream call state.
+  ///
+  /// * [backButtonBuilder] allows you to build a back/close button for closing
+  /// the livestream.
+  ///
+  /// * [displayDiagnostics] displays call diagnostics when the widget is
+  /// double-tapped.
+  ///
+  /// * [videoFit] denotes if the video fits the width (contain) or expands to
+  /// the whole size (cover).
   const LivestreamContent({
     super.key,
     required this.call,
@@ -19,10 +41,17 @@ class LivestreamContent extends StatefulWidget {
   /// Holds information about the call.
   final CallState callState;
 
+  /// [WidgetBuilder] used to build an action button on the top left side of
+  /// the screen.
   final WidgetBuilder? backButtonBuilder;
 
+  /// Boolean to allow a user to double-tap a call to see diagnostic data.
+  ///
+  /// Defaults to false.
   final bool displayDiagnostics;
 
+  /// Denotes if the video fits the width (contain) or expands to
+  /// the whole size (cover).
   final VideoFit videoFit;
 
   @override
@@ -36,6 +65,8 @@ class _LivestreamContentState extends State<LivestreamContent> {
   /// Holds information about the call.
   CallState get callState => widget.callState;
 
+  /// Denotes if the video fits the width (contain) or expands to
+  /// the whole size (cover).
   VideoFit get videoFit => widget.videoFit;
 
   @override

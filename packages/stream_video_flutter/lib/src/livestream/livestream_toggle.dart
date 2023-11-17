@@ -2,14 +2,28 @@ import 'package:flutter/material.dart';
 
 import '../theme/themes.dart';
 
+/// A toggle for pausing and resuming the livestream.
+///
+/// Meant to stop all video and audio tracks locally - this is done through
+/// the [onStateChanged] parameter in the implementation and not in the widget.
 class LivestreamToggle extends StatelessWidget {
+
+  /// Creates a [LivestreamToggle].
+  ///
+  /// [enabled] decides the icon to be displayed.
+  ///
+  /// [onStateChanged] notifies the implementing widget that the
+  /// state of the widget has changed.
   const LivestreamToggle({
     super.key,
     required this.enabled,
     required this.onStateChanged,
   });
 
+  /// Whether the play/pause state is enabled.
   final bool enabled;
+
+  /// Notifies the implementing widget of a requested state change.
   final VoidCallback onStateChanged;
 
   @override

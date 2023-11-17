@@ -4,7 +4,22 @@ import 'package:stream_video/stream_video.dart';
 import '../theme/themes.dart';
 import 'livestream_speakerphone_option.dart';
 
+/// A control bar style widget meant for displaying livestream controls and
+/// actions.
 class LivestreamInfo extends StatelessWidget {
+  /// Creates a [LivestreamInfo] widget.
+  ///
+  /// * [call] is the livestream call intended to be viewed.
+  ///
+  /// * [callState] is the livestream call state.
+  ///
+  /// * [fullscreen] denotes if the video renderer is in cover or contain mode.
+  ///
+  /// * [onStateChanged] notifies the implementing widget of a state change.
+  ///
+  /// * [duration] denotes the current call duration.
+  ///
+  /// * [showParticipantCount] defines if the call should show participant count.
   const LivestreamInfo({
     super.key,
     required this.call,
@@ -12,13 +27,28 @@ class LivestreamInfo extends StatelessWidget {
     required this.fullscreen,
     required this.onStateChanged,
     required this.duration,
+    required this.showParticipantCount,
   });
 
+  /// The livestream call to display/modify.
   final Call call;
+
+  /// The livestream call state.
   final CallState callState;
+
+  /// Denotes if the video renderer is in cover or contain mode.
   final bool fullscreen;
+
+  /// Notifies the implementing widget of a requested state change.
   final VoidCallback onStateChanged;
+
+  /// The current duration of the call.
   final Duration duration;
+
+  /// Boolean to display participant count.
+  ///
+  /// Defaults to true.
+  final bool showParticipantCount;
 
   @override
   Widget build(BuildContext context) {
@@ -80,19 +110,24 @@ class LivestreamInfo extends StatelessWidget {
                   style: callStatusButtonTextTheme,
                 ),
               ),
-              IconTheme(
-                data: participantIconTheme,
-                child: const Icon(
-                  Icons.remove_red_eye_outlined,
+              if (showParticipantCount)
+                Row(
+                  children: [
+                    IconTheme(
+                      data: participantIconTheme,
+                      child: const Icon(
+                        Icons.remove_red_eye_outlined,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    Text(
+                      callState.otherParticipants.length.toString(),
+                      style: participantTextTheme,
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(
-                width: 8,
-              ),
-              Text(
-                callState.otherParticipants.length.toString(),
-                style: participantTextTheme,
-              ),
             ],
           ),
           Row(

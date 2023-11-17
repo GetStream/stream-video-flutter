@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
-/// Defines default property values for [StreamCallControls] widgets.
+/// Defines default property values for [StreamLivestreamThemeData] widgets.
 @immutable
 class StreamLivestreamThemeData with Diagnosticable {
   /// Creates a new instance of [StreamLivestreamThemeData].
@@ -45,30 +45,43 @@ class StreamLivestreamThemeData with Diagnosticable {
     ),
   });
 
+  /// The icon theme for the play icon for playing the livestream
   final IconThemeData playIconTheme;
 
+  /// The icon theme for the pause icon for pausing the livestream
   final IconThemeData pauseIconTheme;
 
+  /// The size of the play/pause icon
   final double playPauseIconSize;
 
+  /// The color of the "live" button on the control bar
   final Color liveButtonColor;
 
+  /// The color of the "backstage" button on the control bar
   final Color backstageButtonColor;
 
+  /// The [TextStyle] for the live/backstage button
   final TextStyle callStateButtonTextStyle;
 
+  /// The [TextStyle] for the participant count
   final TextStyle participantCountTextStyle;
 
+  /// The [TextStyle] for the duration count
   final TextStyle durationTextStyle;
 
+  /// The icon theme for the participant icon
   final IconThemeData participantIconTheme;
 
+  /// The icon theme for the speaker enabled icon on the control bar
   final IconThemeData speakerEnabledIconTheme;
 
+  /// The icon theme for the speaker disabled icon on the control bar
   final IconThemeData speakerDisabledIconTheme;
 
+  /// The icon theme for the expand icon on the control bar
   final IconThemeData expandIconTheme;
 
+  /// The icon theme for the contract icon on the control bar
   final IconThemeData contractIconTheme;
 
   /// Creates a copy of this object with the given fields replaced with the
@@ -109,7 +122,7 @@ class StreamLivestreamThemeData with Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two [StreamCallControlsThemeData] themes.
+  /// Linearly interpolate between two [StreamLivestreamThemeData] themes.
   ///
   /// All the properties must be non-null.
   StreamLivestreamThemeData lerp(
@@ -247,7 +260,7 @@ class StreamLivestreamThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('contractIconTheme', contractIconTheme));
   }
 
-  /// Merges one [StreamCallControlsThemeData] with the another.
+  /// Merges one [StreamLivestreamThemeData] with the another.
   StreamLivestreamThemeData merge(StreamLivestreamThemeData? other) {
     if (other == null) return this;
     return copyWith(
@@ -268,10 +281,10 @@ class StreamLivestreamThemeData with Diagnosticable {
   }
 }
 
-/// Applies a call controls theme to descendant [StreamCallControls]
+/// Applies a call controls theme to descendant [StreamLivestreamThemeData]
 /// widgets.
 class StreamLivestreamTheme extends InheritedWidget {
-  /// Creates a new instance of [StreamCallControlsTheme].
+  /// Creates a new instance of [StreamLivestreamTheme].
   const StreamLivestreamTheme({
     super.key,
     required this.data,
@@ -282,8 +295,8 @@ class StreamLivestreamTheme extends InheritedWidget {
   final StreamLivestreamThemeData data;
 
   /// Returns the configuration [data] from the closest
-  /// [StreamCallControlsTheme] ancestor. If there is no ancestor,
-  /// it returns [StreamVideoTheme.callControlsTheme].
+  /// [StreamLivestreamTheme] ancestor. If there is no ancestor,
+  /// it returns [StreamVideoTheme.livestreamTheme].
   static StreamLivestreamThemeData of(BuildContext context) {
     final livestreamTheme =
         context.dependOnInheritedWidgetOfExactType<StreamLivestreamTheme>();

@@ -4,7 +4,24 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
+/// Creates a widget that allows a user to view a livestream.
+///
+/// By default, the widget has call controls and other elements including:
+/// play/pause the stream, live/backstage indicator, participant count,
+/// call duration, mute/unmute call, expand/contract livestream.
 class LivestreamPlayer extends StatefulWidget {
+
+  /// Creates a livestream player
+  ///
+  /// * [call] is the livestream call intended to be viewed.
+  ///
+  /// * [muted] defines if the call is muted by default
+  ///
+  /// * [showParticipantCount] defines if the call should show participant count
+  ///
+  /// * [backButtonBuilder] allows you to build a back/close button for closing the livestream.
+  ///
+  /// * [allowDiagnostics] displays call diagnostics when the widget is double-tapped.
   const LivestreamPlayer({
     super.key,
     required this.call,
@@ -14,10 +31,24 @@ class LivestreamPlayer extends StatefulWidget {
     this.allowDiagnostics = false,
   });
 
+  /// The livestream call to display.
   final Call call;
+
+  /// Stores if the call should be muted by default
   final bool muted;
+
+  /// Boolean to display participant count.
+  ///
+  /// Defaults to true.
   final bool showParticipantCount;
+
+  /// [WidgetBuilder] used to build an action button on the top left side of
+  /// the screen.
   final WidgetBuilder? backButtonBuilder;
+
+  /// Boolean to allow a user to double-tap a call to see diagnostic data.
+  ///
+  /// Defaults to false.
   final bool allowDiagnostics;
 
   @override
@@ -35,17 +66,25 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   /// Holds information about the call.
   late CallState _callState;
 
-  bool loading = false;
-  bool error = false;
-
-  /// Controls the visibility of [CallDiagnosticsContent].
+  /// Controls the visibility of diagnostic data.
   bool _isStatsVisible = false;
+
+  /// Stores the paused state of the stream.
   bool _livestreamEnabled = true;
+
+  /// Stores if the livestream is in cover or contain mode.
   bool _fullscreen = false;
 
+  /// Curved animation that stores the controller opacity.
   late Animation<double> _controllerAnimation;
+
+  /// Animation controller for opacity animation.
   late AnimationController _animationController;
+
+  /// Timer for updating duration.
   late Timer _durationTimer;
+
+  /// Current duration of call.
   final ValueNotifier<Duration> _duration =
       ValueNotifier<Duration>(Duration.zero);
 
@@ -196,6 +235,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
                           });
                         },
                         duration: duration,
+                        showParticipantCount: widget.showParticipantCount,
                       );
                     },
                   ),
@@ -208,6 +248,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     );
   }
 
+  /// Joins a call.
   Future<void> _connect() async {
     try {
       _logger.d(() => '[connect] no args');
