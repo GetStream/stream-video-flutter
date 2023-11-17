@@ -1,13 +1,31 @@
 // 📦 Package imports:
+import 'package:flutter_dogfooding/di/injector.dart';
 import 'package:go_router/go_router.dart';
 
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/router/routes.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../app/user_auth_controller.dart';
 
 GoRouter initRouter(UserAuthController authNotifier) {
   return GoRouter(
-    routes: $appRoutes,
+    routes: [
+      ShellRoute(
+        routes: [
+          $homeRoute,
+          $lobbyRoute,
+          $callRoute,
+        ],
+        builder: (context, state, child) {
+          return StreamChat(
+            client: locator.get(),
+            streamChatThemeData: StreamChatThemeData.dark(),
+            child: child,
+          );
+        },
+      ),
+      $loginRoute,
+    ],
     refreshListenable: authNotifier,
     redirect: (context, state) {
       // get the current user

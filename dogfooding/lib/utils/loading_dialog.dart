@@ -1,5 +1,6 @@
 // 🐦 Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 // 📦 Package imports:
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -24,4 +25,4 @@ Future<void> showLoadingIndicator(BuildContext context) async {
   );
 }
 
-void hideLoadingIndicator(BuildContext context) => Navigator.of(context).pop();
+void hideLoadingIndicator(BuildContext context) => context.pop();

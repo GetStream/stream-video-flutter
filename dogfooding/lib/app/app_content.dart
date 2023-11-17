@@ -4,9 +4,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/core/repos/token_service.dart';
 import 'package:flutter_dogfooding/router/routes.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide User;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -31,8 +31,15 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     final credentials = prefs.userCredentials;
     if (credentials == null) return;
 
+    final tokenResponse = await locator
+        .get<TokenService>()
+        .loadToken(userId: credentials.userInfo.id);
+
     // Initialise the video client.
-    AppInjector.registerStreamVideo(User(info: credentials.userInfo));
+    AppInjector.registerStreamVideo(
+      tokenResponse,
+      User(info: credentials.userInfo),
+    );
 
     // Handle the message.
     await _handleRemoteMessage(message);
@@ -224,13 +231,7 @@ class _StreamDogFoodingAppContentState
       routerConfig: _router,
       theme: _buildTheme(Brightness.dark),
       builder: (context, child) {
-        // Wrap the app in a StreamChat widget to provide it with the
-        // StreamChatClient instance.
-        return StreamChat(
-          client: locator.get(),
-          streamChatThemeData: StreamChatThemeData.dark(),
-          child: child!,
-        );
+        return child!;
       },
     );
   }
