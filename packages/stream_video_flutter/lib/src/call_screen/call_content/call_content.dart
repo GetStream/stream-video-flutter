@@ -48,6 +48,7 @@ class StreamCallContent extends StatefulWidget {
     this.overlayAppBarBuilder,
     this.callParticipantsBuilder,
     this.callControlsBuilder,
+    this.backgroundColor,
   });
 
   /// Represents a call.
@@ -73,6 +74,9 @@ class StreamCallContent extends StatefulWidget {
 
   /// Builder used to create a custom call controls panel.
   final CallControlsBuilder? callControlsBuilder;
+
+  /// Scaffold background color
+  final Color? backgroundColor;
 
   @override
   State<StreamCallContent> createState() => _StreamCallContentState();
@@ -114,7 +118,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
     final localParticipant = callState.localParticipant;
 
     return Scaffold(
-      backgroundColor: const Color(0XFF272A30),
+      backgroundColor: widget.backgroundColor ?? const Color(0XFF272A30),
       appBar: widget.callAppBarBuilder?.call(context, call, callState) ??
           CallAppBar(
             call: call,
