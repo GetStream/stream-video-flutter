@@ -22,6 +22,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import io.getstream.video.flutter.stream_video_flutter.R
+import io.getstream.video.flutter.stream_video_flutter.service.ServiceType
 
 internal class NotificationActionBuilderImpl(
     private val context: Context
@@ -29,64 +30,70 @@ internal class NotificationActionBuilderImpl(
 
     override fun createAcceptAction(
         notificationId: Int,
-        callCid: StreamCallCid
+        callCid: StreamCallCid,
+        type: ServiceType
     ): NotificationCompat.Action {
         return NotificationCompat.Action.Builder(
             android.R.drawable.ic_menu_call,
             context.getString(R.string.stream_call_notification_action_accept),
-            createAcceptPendingIntent(notificationId, callCid),
+            createAcceptPendingIntent(notificationId, callCid, type),
         ).build()
     }
 
     override fun createRejectAction(
         notificationId: Int,
-        callCid: StreamCallCid
+        callCid: StreamCallCid,
+        type: ServiceType
     ): NotificationCompat.Action {
         return NotificationCompat.Action.Builder(
             android.R.drawable.ic_delete,
             context.getString(R.string.stream_call_notification_action_reject),
-            createRejectPendingIntent(notificationId, callCid),
+            createRejectPendingIntent(notificationId, callCid, type),
         ).build()
     }
 
     override fun createCancelAction(
         notificationId: Int,
-        callCid: StreamCallCid
+        callCid: StreamCallCid,
+        type: ServiceType
     ): NotificationCompat.Action {
         return NotificationCompat.Action.Builder(
             android.R.drawable.ic_delete,
             context.getString(R.string.stream_call_notification_action_cancel),
-            createCancelPendingIntent(notificationId, callCid),
+            createCancelPendingIntent(notificationId, callCid, type),
         ).build()
     }
 
     private fun createAcceptPendingIntent(
         notificationId: Int,
-        callCid: StreamCallCid
+        callCid: StreamCallCid,
+        type: ServiceType
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,
-        Intent().setNotificationAction(context.packageName, NotificationAction.Accept(callCid)),
+        Intent().setNotificationAction(context.packageName, NotificationAction.Accept(callCid, type)),
         IMMUTABLE_PENDING_INTENT_FLAGS,
     )
 
     private fun createRejectPendingIntent(
         notificationId: Int,
-        callCid: StreamCallCid
+        callCid: StreamCallCid,
+        type: ServiceType
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,
-        Intent().setNotificationAction(context.packageName, NotificationAction.Reject(callCid)),
+        Intent().setNotificationAction(context.packageName, NotificationAction.Reject(callCid, type)),
         IMMUTABLE_PENDING_INTENT_FLAGS,
     )
 
     private fun createCancelPendingIntent(
         notificationId: Int,
-        callCid: StreamCallCid
+        callCid: StreamCallCid,
+        type: ServiceType
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,
-        Intent().setNotificationAction(context.packageName, NotificationAction.Cancel(callCid)),
+        Intent().setNotificationAction(context.packageName, NotificationAction.Cancel(callCid, type)),
         IMMUTABLE_PENDING_INTENT_FLAGS,
     )
 

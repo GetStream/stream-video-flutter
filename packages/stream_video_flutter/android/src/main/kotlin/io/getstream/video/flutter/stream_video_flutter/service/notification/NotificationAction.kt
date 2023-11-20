@@ -16,11 +16,14 @@
 
 package io.getstream.video.flutter.stream_video_flutter.service.notification
 
+import io.getstream.video.flutter.stream_video_flutter.service.ServiceType
+
 sealed class NotificationAction {
     internal abstract val type: String
     internal abstract val callCid: StreamCallCid
+    internal abstract val serviceType: ServiceType
 
-    internal data class Accept(override val callCid: StreamCallCid) : NotificationAction() {
+    internal data class Accept(override val callCid: StreamCallCid, override val serviceType: ServiceType) : NotificationAction() {
         override val type: String = TYPE
         companion object {
             const val TYPE = "accept"
@@ -28,7 +31,7 @@ sealed class NotificationAction {
         }
     }
 
-    internal data class Reject(override val callCid: StreamCallCid) : NotificationAction() {
+    internal data class Reject(override val callCid: StreamCallCid, override val serviceType: ServiceType) : NotificationAction() {
         override val type: String = TYPE
         companion object {
             const val TYPE = "reject"
@@ -36,7 +39,7 @@ sealed class NotificationAction {
         }
     }
 
-    internal data class Cancel(override val callCid: StreamCallCid) : NotificationAction() {
+    internal data class Cancel(override val callCid: StreamCallCid, override val serviceType: ServiceType) : NotificationAction() {
         override val type: String = TYPE
         companion object {
             const val TYPE = "cancel"

@@ -52,7 +52,7 @@ class StreamVideoFlutterPlugin: FlutterPlugin, ActivityAware, PluginRegistry.New
     scope.launch {
       binding.applicationContext.registerNotificationActionReceiverAsFlow().collect {
         logger.i { "[onNotificationAction] action: $it" }
-        channel?.invokeMethod("onBackgroundNotificationButtonClick", arrayListOf(it.type, it.callCid))
+        channel?.invokeMethod("onBackgroundNotificationButtonClick", arrayListOf(it.type, it.callCid, it.serviceType.toString()))
       }
     }
   }

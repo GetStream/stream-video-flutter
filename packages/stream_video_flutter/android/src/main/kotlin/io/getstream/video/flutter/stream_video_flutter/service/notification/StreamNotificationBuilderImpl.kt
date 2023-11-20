@@ -32,6 +32,7 @@ import com.squareup.picasso.Picasso
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.flutter.stream_video_flutter.R
+import io.getstream.video.flutter.stream_video_flutter.service.ServiceType
 import io.getstream.video.flutter.stream_video_flutter.service.notification.image.CircleTransform
 import io.getstream.video.flutter.stream_video_flutter.service.notification.image.CustomTarget
 import io.getstream.video.flutter.stream_video_flutter.service.notification.image.DefaultTarget
@@ -46,6 +47,7 @@ private const val TAG = "StreamNtfBuilder"
 internal class StreamNotificationBuilderImpl(
     private val context: Context,
     private val scope: CoroutineScope,
+    private val type: ServiceType,
     private val getNotificationId: () -> Int,
     private val onUpdate: (IdentifiedNotification) -> Unit,
 ) : StreamNotificationBuilder {
@@ -114,21 +116,25 @@ internal class StreamNotificationBuilderImpl(
     ) {
         val contentTitle = payload.options?.content?.title ?: context.applicationName
         val contentText = payload.options?.content?.text
-        val groupKey = payload.callCid
 
-        setGroup(groupKey)
+        if(type == ServiceType.call) {
+            setSmallIcon(R.drawable.stream_video_ic_call)
+        } else {
+            setSmallIcon(R.drawable.stream_video_ic_screenshare)
+        }
+
+        setOngoing(true)
         setContentIntent(contentIntent)
         setCategory(NotificationCompat.CATEGORY_CALL)
         setDefaults(NotificationCompat.DEFAULT_ALL)
         setAutoCancel(false)
-        setSmallIcon(R.drawable.stream_baseline_call_stream_24dp)
         setContentTitle(contentTitle)
         if (!contentText.isNullOrEmpty()) {
             setContentText(contentText)
         }
         priority = NotificationCompat.PRIORITY_MAX
 
-        addAction(actionBuilder.createCancelAction(getNotificationId(), payload.callCid))
+        addAction(actionBuilder.createCancelAction(getNotificationId(), payload.callCid, type))
 
         val avatarUrl = payload.options?.avatar?.url
         if (!avatarUrl.isNullOrEmpty()) {
@@ -146,12 +152,16 @@ internal class StreamNotificationBuilderImpl(
         payload: NotificationPayload,
         contentIntent: PendingIntent?,
     ) {
-        setGroup(payload.callCid)
+        if(type == ServiceType.call) {
+            setSmallIcon(R.drawable.stream_video_ic_call)
+        } else {
+            setSmallIcon(R.drawable.stream_video_ic_screenshare)
+        }
+
         setContentIntent(contentIntent)
         setCategory(NotificationCompat.CATEGORY_CALL)
         setDefaults(NotificationCompat.DEFAULT_ALL)
         setAutoCancel(false)
-        setSmallIcon(R.drawable.stream_baseline_call_stream_24dp)
 
         priority = NotificationCompat.PRIORITY_MAX
 
@@ -213,7 +223,7 @@ internal class StreamNotificationBuilderImpl(
         setContentTitle(contentTitle)
         setContentText(contentText)
 
-        val cancelAction = actionBuilder.createCancelAction(getNotificationId(), payload.callCid)
+        val cancelAction = actionBuilder.createCancelAction(getNotificationId(), payload.callCid, type)
         cancelAction.actionIntent
 
         setCancelButton(cancelAction.title)

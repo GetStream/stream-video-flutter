@@ -17,21 +17,25 @@
 package io.getstream.video.flutter.stream_video_flutter.service.notification
 
 import androidx.core.app.NotificationCompat
+import io.getstream.video.flutter.stream_video_flutter.service.ServiceType
 
 internal interface NotificationActionBuilder {
 
     fun createAcceptAction(
         notificationId: Int,
-        callCid: StreamCallCid
+        callCid: StreamCallCid,
+        type: ServiceType,
     ): NotificationCompat.Action
 
     fun createRejectAction(
         notificationId: Int,
-        callCid: StreamCallCid
+        callCid: StreamCallCid,
+        type: ServiceType,
     ): NotificationCompat.Action
 
     fun createCancelAction(
         notificationId: Int,
-        callCid: StreamCallCid
+        callCid: StreamCallCid,
+        type: ServiceType,
     ): NotificationCompat.Action
 }

@@ -39,7 +39,7 @@ open class StreamCallService : Service() {
     private val getNotificationId = { R.id.stream_call_notification }
 
     protected open fun createNotificationBuilder(context: Context): StreamNotificationBuilder =
-        StreamNotificationBuilderImpl(context, scope, getNotificationId) {
+        StreamNotificationBuilderImpl(context, scope, ServiceType.call, getNotificationId) {
             logger.i { "[onNotificationUpdated] notification: $it" }
             notificationManager.notify(it.id, it.notification)
         }
