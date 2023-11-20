@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+* Added a `includeUserDetails` field to determine if user details should be passed to backend when connecting user.
+
 ## 0.2.0
 
 ✅ Added
