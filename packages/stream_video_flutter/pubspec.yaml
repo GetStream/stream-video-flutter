@@ -17,7 +17,6 @@ dependencies:
   flutter_webrtc: ^0.9.40
   rate_limiter: ^1.0.0
   stream_video: ^0.2.0
-  stream_video_flutter_background: ^0.2.0
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:
