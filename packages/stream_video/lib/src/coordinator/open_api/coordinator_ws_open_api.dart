@@ -44,6 +44,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
     required this.userInfo,
     required this.tokenManager,
     required this.retryPolicy,
+    this.includeUserDetails = false,
   }) : super(
           _buildUrl(url, apiKey),
           protocols: protocols,
@@ -65,6 +66,9 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
 
   /// The retry policy is used for reconnection flow.
   final RetryPolicy retryPolicy;
+
+  /// Decides whether to pass user details to backend when connecting the user.
+  final bool includeUserDetails;
 
   bool _refreshToken = false;
 
@@ -110,20 +114,18 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
       unawaited(_reconnect());
       return;
     }
-    final image = userInfo.image;
 
     final authMessage = {
       'token': tokenResult.getDataOrNull()?.rawValue,
       'user_details': {
         'id': userInfo.id,
-        // TODO BE requires "name" & "image" to be inside "custom" field
-        // 'name': userInfo.name,
-        // 'image': userInfo.image,
-        'custom': <String, dynamic>{
+        if (includeUserDetails) ...{
           'name': userInfo.name,
-          if (image != null) ...{'image': image},
-          ...userInfo.extraData,
-        },
+          'image': userInfo.image,
+          'custom': <String, dynamic>{
+            ...userInfo.extraData,
+          },
+        }
       },
     };
     return send(
