@@ -35,8 +35,7 @@ dependencies:
   stream_chat_flutter: 5.2.0
 
   # Stream Video SDK
-  stream_video_flutter:
-    path: ../../../stream_video_flutter // TODO: Replace with published dependency
+  stream_video_flutter: ^0.2.0
 ```
 
 You'll be integrating two SDKs - Video and Chat. In the snippet above we declared dependencies for both of them.
@@ -394,8 +393,9 @@ Future<Call> _joinCall(BuildContext context, String cid) async {
   final type = parts[0];
   final id = parts[1];
 
-  final call = await StreamVideo.instance.joinCall(type: type, id: id);
+  final call = StreamVideo.instance.makeCall(type: type, id: id);
   await call.join();
+
   return call;
 }
 ```
@@ -478,7 +478,7 @@ To finish up, you can add the logging out counterpart, by replacing `_disconnect
 Future<void> _disconnectVideoUser() async {
   final videoClient = StreamVideo.instance;
 
-  await videoClient.disconnectUser();
+  await videoClient.disconnect();
 }
 ```
 
