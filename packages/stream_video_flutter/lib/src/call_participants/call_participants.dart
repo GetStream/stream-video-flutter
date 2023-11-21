@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'layout/participant_layout_mode.dart';
 import 'regular_call_participants_content.dart';
 import 'screen_share_call_participants_content.dart';
 

@@ -17,16 +17,20 @@
 package io.getstream.video.flutter.stream_video_flutter.service.notification
 
 import android.content.Intent
+import io.getstream.video.flutter.stream_video_flutter.service.ServiceType
 
 private const val KEY_CID = "cid"
+private const val KEY_TYPE = "type"
 
 internal fun Intent.extractNotificationAction(): NotificationAction {
     val callGuid = extractCallGuid()
+    val serviceType = extractServiceType()
     val action = action.orEmpty()
+
     return when {
-        action.endsWith(NotificationAction.Accept.SUFFIX) -> NotificationAction.Accept(callGuid)
-        action.endsWith(NotificationAction.Reject.SUFFIX) -> NotificationAction.Reject(callGuid)
-        action.endsWith(NotificationAction.Cancel.SUFFIX) -> NotificationAction.Cancel(callGuid)
+        action.endsWith(NotificationAction.Accept.SUFFIX) -> NotificationAction.Accept(callGuid, serviceType)
+        action.endsWith(NotificationAction.Reject.SUFFIX) -> NotificationAction.Reject(callGuid, serviceType)
+        action.endsWith(NotificationAction.Cancel.SUFFIX) -> NotificationAction.Cancel(callGuid, serviceType)
         else -> error("unexpected action: $action")
     }
 }
@@ -45,3 +49,4 @@ internal fun Intent.setNotificationAction(
 }
 
 private fun Intent.extractCallGuid(): StreamCallCid = getStringExtra(KEY_CID) ?: error("no cid found")
+private fun Intent.extractServiceType(): ServiceType = ServiceType.valueOf(getStringExtra(KEY_TYPE) ?: "call")

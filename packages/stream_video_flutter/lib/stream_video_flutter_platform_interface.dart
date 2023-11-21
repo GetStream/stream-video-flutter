@@ -1,6 +1,7 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import '../src/call_background/model/notification_payload.dart';
+import '../src/call_background/model/service_type.dart';
 import 'stream_video_flutter_method_channel.dart';
 
 abstract class StreamVideoFlutterPlatform extends PlatformInterface {
@@ -27,24 +28,34 @@ abstract class StreamVideoFlutterPlatform extends PlatformInterface {
 
   void Function(String callCid)? onBackgroundNotificationContentClick;
 
-  void Function(String buttonType, String callCid)?
+  void Function(String buttonType, String callCid, ServiceType serviceType)?
       onBackgroundNotificationButtonClick;
 
   void Function(String callCid)? onBackgroundNotificationUiLayerDestroyed;
 
-  Future<bool> startBackgroundService(NotificationPayload payload) {
+  Future<bool> startBackgroundService({
+    required NotificationPayload payload,
+    required ServiceType type,
+  }) {
     throw UnimplementedError('startService() has not been implemented.');
   }
 
-  Future<bool> updateBackgroundService(NotificationPayload payload) {
+  Future<bool> updateBackgroundService({
+    required NotificationPayload payload,
+    required ServiceType type,
+  }) {
     throw UnimplementedError('updateService() has not been implemented.');
   }
 
-  Future<bool> stopBackgroundService() {
+  Future<bool> stopBackgroundService(
+    ServiceType type,
+  ) {
     throw UnimplementedError('stopService() has not been implemented.');
   }
 
-  Future<bool> get isBackgroundServiceRunning {
+  Future<bool> isBackgroundServiceRunning(
+    ServiceType type,
+  ) {
     throw UnimplementedError('isRunningService has not been implemented.');
   }
 }

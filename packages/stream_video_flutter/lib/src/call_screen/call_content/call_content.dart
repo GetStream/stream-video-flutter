@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../../call_participants/layout/participant_layout_mode.dart';
 import '../call_diagnostics_content/call_diagnostics_content.dart';
 
 /// Builder used to create a custom call app bar.

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart' hide ConnectionState;
 
 import '../../../stream_video_flutter.dart';
-import '../../call_participants/layout/participant_layout_mode.dart';
 import '../../utils/extensions.dart';
 
 /// Builder used to create a custom participants info widget.

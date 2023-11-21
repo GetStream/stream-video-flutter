@@ -1134,9 +1134,13 @@ class Call {
     return result;
   }
 
-  Future<Result<None>> setCameraEnabled({required bool enabled}) async {
-    final result = await _session?.setCameraEnabled(enabled) ??
-        Result.error('Session is null');
+  Future<Result<None>> setCameraEnabled({
+    required bool enabled,
+    CameraConstraints? constraints,
+  }) async {
+    final result =
+        await _session?.setCameraEnabled(enabled, constraints: constraints) ??
+            Result.error('Session is null');
 
     if (result.isSuccess) {
       _stateManager
@@ -1146,8 +1150,14 @@ class Call {
     return result;
   }
 
-  Future<Result<None>> setMicrophoneEnabled({required bool enabled}) async {
-    final result = await _session?.setMicrophoneEnabled(enabled) ??
+  Future<Result<None>> setMicrophoneEnabled({
+    required bool enabled,
+    AudioConstraints? constraints,
+  }) async {
+    final result = await _session?.setMicrophoneEnabled(
+          enabled,
+          constraints: constraints,
+        ) ??
         Result.error('Session is null');
 
     if (result.isSuccess) {
@@ -1159,8 +1169,14 @@ class Call {
     return result;
   }
 
-  Future<Result<None>> setScreenShareEnabled({required bool enabled}) async {
-    final result = await _session?.setScreenShareEnabled(enabled) ??
+  Future<Result<None>> setScreenShareEnabled({
+    required bool enabled,
+    ScreenShareConstraints? constraints,
+  }) async {
+    final result = await _session?.setScreenShareEnabled(
+          enabled,
+          constraints: constraints,
+        ) ??
         Result.error('Session is null');
 
     if (result.isSuccess) {

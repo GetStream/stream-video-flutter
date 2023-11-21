@@ -1,10 +1,14 @@
 package io.getstream.video.flutter.stream_video_flutter.service
 
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Binder
 import android.os.IBinder
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.flutter.stream_video_flutter.R
 import io.getstream.video.flutter.stream_video_flutter.service.notification.NotificationPayload
@@ -15,9 +19,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 
-open class StreamCallService : Service() {
-
-    private val logger by taggedLogger("StreamCallService")
+/**
+ * Screen-sharing in Android requires a ForegroundService (with type foregroundServiceType set to "mediaProjection").
+ * The Stream SDK will start this [StreamScreenShareService] once screen-sharing is enabled and then
+ * will stop it when screen-sharing it's either stopped by the user or we get a callback that the
+ * screen-sharing was stopped by the system.
+ *
+ * This Service isn't doing any long-running operations. It's just an empty Service to meet the platform
+ * requirement (https://developer.android.com/reference/android/media/projection/MediaProjectionManager).
+ */
+internal class StreamScreenShareService : Service() {
+    private val logger by taggedLogger("StreamScreenShareService")
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
@@ -31,18 +43,18 @@ open class StreamCallService : Service() {
         get() {
             val payload = notificationPayload
             if (payload.callCid.isEmpty()) {
-                error("[StreamCallService.callCid] NotificationPayload.callCid must not be empty")
+                error("[StreamScreenShareService.callCid] NotificationPayload.callCid must not be empty")
             }
             return payload
         }
 
-    private val getNotificationId = { R.id.stream_call_notification }
+    private val getNotificationId = { R.id.stream_screen_share_notification }
 
     protected open fun createNotificationBuilder(context: Context): StreamNotificationBuilder =
-        StreamNotificationBuilderImpl(context, scope, ServiceType.call, getNotificationId) {
-            logger.i { "[onNotificationUpdated] notification: $it" }
-            notificationManager.notify(it.id, it.notification)
-        }
+            StreamNotificationBuilderImpl(context, scope, ServiceType.screenSharing, getNotificationId) {
+                logger.i { "[onNotificationUpdated] notification: $it" }
+                notificationManager.notify(it.id, it.notification)
+            }
 
     override fun onCreate() {
         super.onCreate()
@@ -91,5 +103,3 @@ open class StreamCallService : Service() {
         internal const val ACTION_UPDATE = "UPDATE"
     }
 }
-
-
