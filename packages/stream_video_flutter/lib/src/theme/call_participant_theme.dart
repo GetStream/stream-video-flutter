@@ -10,6 +10,7 @@ import '../../stream_video_flutter.dart';
 class StreamCallParticipantThemeData with Diagnosticable {
   /// Creates a new instance of [StreamCallParticipantThemeData].
   const StreamCallParticipantThemeData({
+    this.videoFit = VideoFit.cover,
     this.backgroundColor = const Color(0xffB4B7BB),
     this.borderRadius = BorderRadius.zero,
     this.userAvatarTheme = const StreamUserAvatarThemeData(
@@ -41,6 +42,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
     this.connectionLevelInactiveColor = Colors.white,
     this.connectionLevelAlignment = Alignment.bottomRight,
   });
+
+  /// The fit of the [VideoRenderer] widget
+  final VideoFit videoFit;
 
   /// The background color of the call participant.
   final Color backgroundColor;
@@ -93,6 +97,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   StreamCallParticipantThemeData copyWith({
+    VideoFit? videoFit,
     Color? backgroundColor,
     BorderRadius? borderRadius,
     StreamUserAvatarThemeData? userAvatarTheme,
@@ -111,6 +116,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
     AlignmentGeometry? connectionLevelAlignment,
   }) {
     return StreamCallParticipantThemeData(
+      videoFit: videoFit ?? this.videoFit,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       borderRadius: borderRadius ?? this.borderRadius,
       userAvatarTheme: userAvatarTheme ?? this.userAvatarTheme,
@@ -148,6 +154,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
     double t,
   ) {
     return StreamCallParticipantThemeData(
+      videoFit: t < 0.5 ? videoFit : other.videoFit,
       backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t)!,
       borderRadius: BorderRadius.lerp(borderRadius, other.borderRadius, t)!,
       userAvatarTheme: userAvatarTheme.lerp(other.userAvatarTheme, t),
@@ -209,6 +216,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hash(
+        videoFit,
         backgroundColor,
         borderRadius,
         userAvatarTheme,
@@ -236,6 +244,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
       return false;
     }
     return other is StreamCallParticipantThemeData &&
+        other.videoFit == videoFit &&
         other.backgroundColor == backgroundColor &&
         other.borderRadius == borderRadius &&
         other.userAvatarTheme == userAvatarTheme &&
@@ -259,6 +268,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
+      ..add(DiagnosticsProperty('videoFit', videoFit))
       ..add(DiagnosticsProperty('backgroundColor', backgroundColor))
       ..add(DiagnosticsProperty('borderRadius', borderRadius))
       ..add(DiagnosticsProperty('userAvatarTheme', userAvatarTheme))
@@ -338,6 +348,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
   StreamCallParticipantThemeData merge(StreamCallParticipantThemeData? other) {
     if (other == null) return this;
     return copyWith(
+      videoFit: other.videoFit,
       backgroundColor: other.backgroundColor,
       borderRadius: other.borderRadius,
       userAvatarTheme: other.userAvatarTheme,

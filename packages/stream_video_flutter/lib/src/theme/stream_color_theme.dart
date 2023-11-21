@@ -56,6 +56,8 @@ class StreamColorTheme {
       opacity: 1,
       blur: 8,
     ),
+    this.livestreamBackground = const Color(0x66000000),
+    this.livestreamCallControlsColor = const Color(0xffffffff),
   });
 
   /// Initialise with dark theme
@@ -110,6 +112,8 @@ class StreamColorTheme {
       ],
       stops: [0, 1],
     ),
+    this.livestreamBackground = const Color(0x66000000),
+    this.livestreamCallControlsColor = const Color(0xffffffff),
   });
 
   /// Raw theme initialization
@@ -133,6 +137,8 @@ class StreamColorTheme {
     required this.overlay,
     required this.overlayDark,
     required this.bgGradient,
+    required this.livestreamBackground,
+    required this.livestreamCallControlsColor,
   });
 
   ///
@@ -192,6 +198,10 @@ class StreamColorTheme {
   ///
   final Gradient bgGradient;
 
+  final Color livestreamBackground;
+
+  final Color livestreamCallControlsColor;
+
   /// Copy with theme
   StreamColorTheme copyWith({
     Color? textHighEmphasis,
@@ -213,6 +223,8 @@ class StreamColorTheme {
     Color? overlay,
     Color? overlayDark,
     Gradient? bgGradient,
+    Color? livestreamBackground,
+    Color? livestreamCallControlsColor,
   }) {
     return StreamColorTheme.raw(
       textHighEmphasis: textHighEmphasis ?? this.textHighEmphasis,
@@ -234,6 +246,9 @@ class StreamColorTheme {
       overlay: overlay ?? this.overlay,
       overlayDark: overlayDark ?? this.overlayDark,
       bgGradient: bgGradient ?? this.bgGradient,
+      livestreamBackground: livestreamBackground ?? this.livestreamBackground,
+      livestreamCallControlsColor:
+          livestreamCallControlsColor ?? this.livestreamCallControlsColor,
     );
   }
 
@@ -260,6 +275,8 @@ class StreamColorTheme {
       borderBottom: other.borderBottom,
       shadowIconButton: other.shadowIconButton,
       modalShadow: other.modalShadow,
+      livestreamBackground: other.livestreamBackground,
+      livestreamCallControlsColor: other.livestreamCallControlsColor,
     );
   }
 
@@ -285,6 +302,13 @@ class StreamColorTheme {
       borderBottom: borderBottom.lerp(other.borderBottom, t),
       shadowIconButton: shadowIconButton.lerp(other.shadowIconButton, t),
       modalShadow: modalShadow.lerp(other.modalShadow, t),
+      livestreamBackground:
+          Color.lerp(livestreamBackground, other.livestreamBackground, t),
+      livestreamCallControlsColor: Color.lerp(
+        livestreamCallControlsColor,
+        other.livestreamCallControlsColor,
+        t,
+      ),
     );
   }
 }
