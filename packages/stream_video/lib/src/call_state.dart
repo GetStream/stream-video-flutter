@@ -36,6 +36,11 @@ class CallState extends Equatable {
       audioOutputDevice: null,
       ownCapabilities: List.unmodifiable(const []),
       callParticipants: List.unmodifiable(const []),
+      createdAt: null,
+      startsAt: null,
+      endedAt: null,
+      liveStartedAt: null,
+      liveEndedAt: null,
     );
   }
 
@@ -67,6 +72,11 @@ class CallState extends Equatable {
           currentUserId,
         ),
       ),
+      createdAt: null,
+      startsAt: null,
+      endedAt: null,
+      liveStartedAt: null,
+      liveEndedAt: null,
     );
   }
 
@@ -89,6 +99,11 @@ class CallState extends Equatable {
     required this.videoInputDevice,
     required this.audioInputDevice,
     required this.audioOutputDevice,
+    required this.createdAt,
+    required this.startsAt,
+    required this.endedAt,
+    required this.liveStartedAt,
+    required this.liveEndedAt,
   });
 
   final String currentUserId;
@@ -108,6 +123,11 @@ class CallState extends Equatable {
   final RtcMediaDevice? audioOutputDevice;
   final List<CallPermission> ownCapabilities;
   final List<CallParticipantState> callParticipants;
+  final DateTime? createdAt;
+  final DateTime? startsAt;
+  final DateTime? endedAt;
+  final DateTime? liveStartedAt;
+  final DateTime? liveEndedAt;
 
   String get callId => callCid.id;
 
@@ -141,6 +161,11 @@ class CallState extends Equatable {
     RtcMediaDevice? audioOutputDevice,
     List<CallPermission>? ownCapabilities,
     List<CallParticipantState>? callParticipants,
+    DateTime? createdAt,
+    DateTime? startsAt,
+    DateTime? endedAt,
+    DateTime? liveStartedAt,
+    DateTime? liveEndedAt,
   }) {
     return CallState._(
       currentUserId: currentUserId ?? this.currentUserId,
@@ -160,6 +185,11 @@ class CallState extends Equatable {
       audioOutputDevice: audioOutputDevice ?? this.audioOutputDevice,
       ownCapabilities: ownCapabilities ?? this.ownCapabilities,
       callParticipants: callParticipants ?? this.callParticipants,
+      createdAt: createdAt ?? this.createdAt,
+      startsAt: startsAt ?? this.startsAt,
+      endedAt: endedAt ?? this.endedAt,
+      liveStartedAt: liveStartedAt ?? this.liveStartedAt,
+      liveEndedAt: liveEndedAt ?? this.liveEndedAt,
     );
   }
 
@@ -181,6 +211,11 @@ class CallState extends Equatable {
         audioOutputDevice,
         ownCapabilities,
         callParticipants,
+        createdAt,
+        startsAt,
+        endedAt,
+        liveStartedAt,
+        liveEndedAt,
       ];
 
   @override

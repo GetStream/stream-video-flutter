@@ -5,6 +5,7 @@ export 'incoming_outgoing_call_theme.dart';
 export 'lobby_view_theme.dart';
 export 'local_video_theme.dart';
 export 'stream_color_theme.dart';
+export 'stream_livestream_theme.dart';
 export 'stream_text_theme.dart';
 export 'stream_video_theme.dart';
 export 'user_avatar_theme.dart';

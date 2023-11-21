@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/extensions.dart';
@@ -27,6 +28,7 @@ class StreamCallParticipant extends StatelessWidget {
     super.key,
     required this.call,
     required this.participant,
+    this.videoFit,
     this.backgroundColor,
     this.borderRadius,
     this.userAvatarTheme,
@@ -53,6 +55,9 @@ class StreamCallParticipant extends StatelessWidget {
 
   /// The participant to display.
   final CallParticipantState participant;
+
+  /// The fit of the [VideoRenderer] widget
+  final VideoFit? videoFit;
 
   /// The background color of the call participant.
   final Color? backgroundColor;
@@ -115,6 +120,7 @@ class StreamCallParticipant extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = StreamCallParticipantTheme.of(context);
 
+    final videoFit = this.videoFit ?? theme.videoFit;
     final backgroundColor = this.backgroundColor ?? theme.backgroundColor;
     final borderRadius = this.borderRadius ?? theme.borderRadius;
     final userAvatarTheme = this.userAvatarTheme ?? theme.userAvatarTheme;
@@ -192,6 +198,7 @@ class StreamCallParticipant extends StatelessWidget {
                         participant,
                       );
                     },
+                    videoFit: videoFit,
                   ),
                   if (participant.reaction != null)
                     Align(
