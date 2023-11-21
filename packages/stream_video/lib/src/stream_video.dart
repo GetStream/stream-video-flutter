@@ -179,7 +179,11 @@ class StreamVideo {
     _setupLogger(options.logPriority, options.logHandlerFunction);
 
     if (options.autoConnect) {
-      unawaited(connect());
+      unawaited(
+        connect(
+          includeUserDetails: options.includeUserDetailsForAutoConnect,
+        ),
+      );
     }
   }
 
@@ -250,14 +254,18 @@ class StreamVideo {
   ConnectionState get _connectionState => _state.connection.value;
 
   /// Connects the user to the Stream Video service.
-  Future<Result<UserToken>> connect() async {
+  Future<Result<UserToken>> connect({
+    bool includeUserDetails = true,
+  }) async {
     if (currentUserType == UserType.anonymous) {
       _logger.w(() => '[connect] rejected (anonymous user)');
       return Result.error(
         'Cannot connect anonymous user to the WS due to Missing Permissions',
       );
     }
-    _connectOperation ??= _connect().asCancelable();
+    _connectOperation ??= _connect(
+      includeUserDetails: includeUserDetails,
+    ).asCancelable();
     return _connectOperation!
         .valueOrDefault(Result.error('connect was cancelled'))
         .whenComplete(() {
@@ -277,7 +285,9 @@ class StreamVideo {
     });
   }
 
-  Future<Result<UserToken>> _connect() async {
+  Future<Result<UserToken>> _connect({
+    bool includeUserDetails = false,
+  }) async {
     _logger.i(() => '[connect] currentUser.id: ${_state.currentUser.id}');
     if (_connectionState.isConnected) {
       _logger.w(() => '[connect] rejected (already connected)');
@@ -304,7 +314,10 @@ class StreamVideo {
     _logger.v(() => '[connect] currentUser.id : ${user.id}');
     try {
       await _disconnectOperation?.cancel();
-      final result = await _client.connectUser(user.info);
+      final result = await _client.connectUser(
+        user.info,
+        includeUserDetails: includeUserDetails,
+      );
       _logger.v(() => '[connect] completed: $result');
       if (result is Failure) {
         _connectionState = ConnectionState.failed(
@@ -663,6 +676,7 @@ class StreamVideoOptions {
     this.muteVideoWhenInBackground = false,
     this.muteAudioWhenInBackground = false,
     this.autoConnect = true,
+    this.includeUserDetailsForAutoConnect = true,
   });
 
   final String coordinatorRpcUrl;
@@ -681,4 +695,5 @@ class StreamVideoOptions {
   final bool muteVideoWhenInBackground;
   final bool muteAudioWhenInBackground;
   final bool autoConnect;
+  final bool includeUserDetailsForAutoConnect;
 }
