@@ -25,6 +25,7 @@ factory StreamVideo(
     muteVideoWhenInBackground: false,
     muteAudioWhenInBackground: false,
     autoConnect: true,
+    includeUserDetailsForAutoConnect: true,
   ),
   required User user,
   String? userToken,
@@ -33,6 +34,25 @@ factory StreamVideo(
   bool failIfSingletonExists = true,
   PNManagerProvider? pushNotificationManagerProvider,
 });
+```
+
+The SDK tries to connect automatically by default. You can set `autoConnect` to false in `StreamVideoOptions`
+to change this behaviour.
+
+To connect later, you can use the `connect()` method:
+
+```dart
+    StreamVideo.instance.connect();
+```
+
+The connection passes the user info by default to the backend.
+To change this, you can set the `includeUserDetailsForAutoConnect` parameter in `StreamVideoOptions` when auto-connecting
+or use the `includeUserDetails` parameter when using the `connect()` method:
+
+```dart
+    StreamVideo.instance.connect(
+        includeUserDetails: false,
+    );
 ```
 
 ### Working with Tokens
