@@ -74,7 +74,6 @@ extension SocketConnection: StreamDelegate {
     func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
         switch eventCode {
         case .openCompleted:
-            os_log(.debug, log: broadcastLogger, "client stream open completed")
             if aStream == outputStream {
                 didOpen?()
             }
@@ -83,7 +82,6 @@ extension SocketConnection: StreamDelegate {
                 var buffer: UInt8 = 0
                 let numberOfBytesRead = inputStream?.read(&buffer, maxLength: 1)
                 if numberOfBytesRead == 0 && aStream.streamStatus == .atEnd {
-                    os_log(.debug, log: broadcastLogger, "server socket closed")
                     close()
                     notifyDidClose(error: nil)
                 }
