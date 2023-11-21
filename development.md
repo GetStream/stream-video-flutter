@@ -39,9 +39,9 @@
 - - [X] Create the native projects in stream_video_flutter
 - - [x] Merge stream_video_flutter_background
 - - [x] Merge screen sharing branch
-- [ ] Screen sharing *(depends on "Native packages refactor")* [Maciej]
-- - [ ] iOS
-- - [ ] Android
+- [x] Screen sharing *(depends on "Native packages refactor")* [Maciej]
+- - [x] iOS
+- - [x] Android
 - [ ] Regular reconnection [Maciej,Kanat]
 - [ ] Support ICE restart reconnection [Maciej,Kanat]
 - [ ] Update WebRTC version to m114 (livekit version) [Kanat]
