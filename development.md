@@ -35,7 +35,7 @@
 - - [x] Customization of the incoming/outgoing call screens
 - - [x] Customizing CallKit ringing calls
 - - [ ] Bug app crashes when notification button is tapped
-- [ ] Native packages refactor [Maciej]
+- [x] Native packages refactor [Maciej]
 - - [X] Create the native projects in stream_video_flutter
 - - [ ] Merge stream_video_flutter_background
 - - [ ] Merge screen sharing branch
