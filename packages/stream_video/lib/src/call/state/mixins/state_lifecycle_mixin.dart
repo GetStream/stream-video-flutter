@@ -91,6 +91,11 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
       callParticipants: stage.data.metadata.toCallParticipants(state),
+      createdAt: stage.data.metadata.details.createdAt,
+      startsAt: stage.data.metadata.details.startsAt,
+      endedAt: stage.data.metadata.details.endedAt,
+      liveStartedAt: stage.data.metadata.session.liveStartedAt,
+      liveEndedAt: stage.data.metadata.session.liveEndedAt,
     );
   }
 
@@ -106,6 +111,11 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
       callParticipants: stage.data.metadata.toCallParticipants(state),
+      createdAt: stage.data.metadata.details.createdAt,
+      startsAt: stage.data.metadata.details.startsAt,
+      endedAt: stage.data.metadata.details.endedAt,
+      liveStartedAt: stage.data.metadata.session.liveStartedAt,
+      liveEndedAt: stage.data.metadata.session.liveEndedAt,
     );
   }
 
@@ -121,6 +131,11 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
       callParticipants: stage.data.metadata.toCallParticipants(state),
+      createdAt: stage.data.metadata.details.createdAt,
+      startsAt: stage.data.metadata.details.startsAt,
+      endedAt: stage.data.metadata.details.endedAt,
+      liveStartedAt: stage.data.metadata.session.liveStartedAt,
+      liveEndedAt: stage.data.metadata.session.liveEndedAt,
     );
   }
 
@@ -145,6 +160,11 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
       callParticipants: stage.data.metadata.toCallParticipants(state),
+      createdAt: stage.data.metadata.details.createdAt,
+      startsAt: stage.data.metadata.details.startsAt,
+      endedAt: stage.data.metadata.details.endedAt,
+      liveStartedAt: stage.data.metadata.session.liveStartedAt,
+      liveEndedAt: stage.data.metadata.session.liveEndedAt,
     );
   }
 

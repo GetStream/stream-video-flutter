@@ -289,8 +289,14 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<None>> connectUser(UserInfo user) {
-    return _delegate.connectUser(user);
+  Future<Result<None>> connectUser(
+    UserInfo user, {
+    bool includeUserDetails = false,
+  }) {
+    return _delegate.connectUser(
+      user,
+      includeUserDetails: includeUserDetails,
+    );
   }
 
   @override

@@ -97,7 +97,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   StreamSubscription<CoordinatorEvent>? _wsSubscription;
 
   @override
-  Future<Result<None>> connectUser(UserInfo user) async {
+  Future<Result<None>> connectUser(
+    UserInfo user, {
+    bool includeUserDetails = false,
+  }) async {
     _logger.d(() => '[connectUser] user.id: ${user.id}');
     final state = _connectionState.value;
     if (state.isConnected) {
@@ -112,7 +115,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       userId: user.id,
     );
     _user = user;
-    _ws = _createWebSocket(user).also((ws) {
+    _ws = _createWebSocket(
+      user,
+      includeUserDetails: includeUserDetails,
+    ).also((ws) {
       _wsSubscription = ws.events.listen((event) {
         if (event is CoordinatorConnectedEvent) {
           _logger.i(() => '[connectUser] WS connected');
@@ -223,13 +229,17 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     );
   }
 
-  CoordinatorWebSocketOpenApi _createWebSocket(UserInfo user) {
+  CoordinatorWebSocketOpenApi _createWebSocket(
+    UserInfo user, {
+    bool includeUserDetails = false,
+  }) {
     return CoordinatorWebSocketOpenApi(
       _wsUrl,
       apiKey: _apiKey,
       userInfo: user,
       tokenManager: _tokenManager,
       retryPolicy: _retryPolicy,
+      includeUserDetails: includeUserDetails,
     );
   }
 
