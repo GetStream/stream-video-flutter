@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/stream_decline" />
+    <corners android:radius="@dimen/stream_notification_size_button_x2" />
+</shape>

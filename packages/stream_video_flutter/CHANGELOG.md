@@ -1,8 +1,13 @@
-## Upcoming 
+## Upcoming
 
 ✅ Added
 
 * Added `LivestreamPlayer` - a in-built widget that allows you to easily view livestreams.
+* Added screen sharing functionality and related toggle option for both Android and iOS. Check [our documentation](https://getstream.io/video/docs/flutter/) for more details
+
+🔄 Changed
+
+* The functionality from `stream_video_flutter_background` is now merged into `stream_video_flutter`. You no longer have to use the background plugin.
 
 ## 0.2.0
 

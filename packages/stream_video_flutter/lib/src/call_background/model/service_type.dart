@@ -1,0 +1,4 @@
+enum ServiceType {
+  call,
+  screenSharing,
+}

@@ -1,5 +1,5 @@
 # Uncomment this line to define a global platform for your project
-# platform :ios, '11.0'
+platform :ios, '14'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -32,6 +32,11 @@ target 'Runner' do
   use_modular_headers!
   
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+end
+
+target 'ScreenSharing' do
+  use_frameworks!
+  pod 'stream_video_flutter', :path => File.join('.symlinks', 'plugins', 'stream_video_flutter', 'ios')
 end
 
 post_install do |installer|

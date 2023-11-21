@@ -135,6 +135,12 @@ class _CallScreenState extends State<CallScreen> {
                     call: call,
                     localParticipant: localParticipant,
                   ),
+                  ToggleScreenShareOption(
+                    call: call,
+                    localParticipant: localParticipant,
+                    screenShareConstraints: const ScreenShareConstraints(
+                        useiOSBroadcastExtension: true),
+                  ),
                   ToggleMicrophoneOption(
                     call: call,
                     localParticipant: localParticipant,
