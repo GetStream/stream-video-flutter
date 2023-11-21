@@ -37,8 +37,8 @@
 - - [ ] Bug app crashes when notification button is tapped
 - [x] Native packages refactor [Maciej]
 - - [X] Create the native projects in stream_video_flutter
-- - [ ] Merge stream_video_flutter_background
-- - [ ] Merge screen sharing branch
+- - [x] Merge stream_video_flutter_background
+- - [x] Merge screen sharing branch
 - [ ] Screen sharing *(depends on "Native packages refactor")* [Maciej]
 - - [ ] iOS
 - - [ ] Android
