@@ -9,6 +9,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/router/routes.dart';
+import 'package:stream_video_flutter/stream_video_flutter_background.dart';
 import '../app/user_auth_controller.dart';
 import '../di/injector.dart';
 import '../utils/assets.dart';
@@ -28,6 +29,31 @@ class _HomeScreenState extends State<HomeScreen> {
   late final _callIdController = TextEditingController();
 
   Call? _call;
+
+  @override
+  void initState() {
+    StreamBackgroundService.init(
+      StreamVideo.instance,
+      onNotificationClick: (call) async {
+        final extra = (
+          call: call,
+          connectOptions: const CallConnectOptions(),
+        );
+
+        CallRoute($extra: extra).push(context);
+      },
+      onButtonClick: (call, type, serviceType) async {
+        switch (serviceType) {
+          case ServiceType.call:
+            call.end();
+          case ServiceType.screenSharing:
+            StreamVideoFlutterBackground.stopService(ServiceType.screenSharing);
+            call.setScreenShareEnabled(enabled: false);
+        }
+      },
+    );
+    super.initState();
+  }
 
   Future<void> _getOrCreateCall() async {
     var callId = _callIdController.text;

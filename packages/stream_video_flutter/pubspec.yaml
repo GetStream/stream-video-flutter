@@ -1,5 +1,6 @@
 name: stream_video_flutter
-description: The Official UI package for Stream Video, a service for building video calls, audio rooms, and live-streaming applications.
+description: The Official UI package for Stream Video, a service for building
+  video calls, audio rooms, and live-streaming applications.
 version: 0.2.0
 homepage: https://getstream.io/video/
 repository: https://github.com/GetStream/stream-video-flutter
@@ -12,12 +13,12 @@ environment:
 dependencies:
   cached_network_image: ^3.2.3
   collection: ^1.17.1
+  equatable: ^2.0.5
   flutter:
     sdk: flutter
   flutter_webrtc: ^0.9.40
   rate_limiter: ^1.0.0
   stream_video: ^0.2.0
-  stream_video_flutter_background: ^0.2.0
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:
@@ -29,6 +30,14 @@ flutter:
   assets:
     - images/
   uses-material-design: true
+
+  plugin:
+    platforms:
+      android:
+        package: io.getstream.video.flutter.stream_video_flutter
+        pluginClass: StreamVideoFlutterPlugin
+      ios:
+        pluginClass: StreamVideoFlutterPlugin
 
 topics:
   - video

@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_flutter_background/model/notification_options.dart';
-import 'package:stream_video_flutter_background/model/notification_payload.dart';
-import 'package:stream_video_flutter_background/stream_video_flutter_background.dart';
+
+import '../../stream_video_flutter_background.dart';
+import 'model/notification_options.dart';
+import 'model/notification_payload.dart';
+import 'model/service_type.dart';
 
 const _tag = 'SV:Background';
 const _btnCancel = 'cancel';
@@ -14,7 +16,7 @@ enum ButtonType {
 
 typedef NotificationOptionsBuilder = NotificationOptions Function(Call);
 
-typedef OnButtonClick = Future<void> Function(Call, ButtonType);
+typedef OnButtonClick = Future<void> Function(Call, ButtonType, ServiceType);
 typedef OnNotificationClick = Future<void> Function(Call);
 typedef OnUiLayerDestroyed = Future<void> Function(Call);
 
@@ -31,16 +33,22 @@ class StreamBackgroundService {
 
   static void init(
     StreamVideo streamVideo, {
-    NotificationOptionsBuilder optionsBuilder = _defaultOptions,
+    NotificationOptionsBuilder callNotificationOptionsBuilder =
+        _callDefaultOptions,
+    NotificationOptionsBuilder screenShareNotificationOptionsBuilder =
+        _screenShareDefaultOptions,
     OnNotificationClick? onNotificationClick,
     OnButtonClick? onButtonClick,
     OnUiLayerDestroyed? onPlatformUiLayerDestroyed,
   }) {
+    _instance._screenShareNotificationOptionsBuilder =
+        screenShareNotificationOptionsBuilder;
+
     _activeCalSubscription?.cancel();
     _activeCalSubscription = streamVideo.listenActiveCall((call) async {
       await _instance.onActiveCall(
         call: call,
-        optionsBuilder: optionsBuilder,
+        optionsBuilder: callNotificationOptionsBuilder,
         onNotificationClick: onNotificationClick,
         onButtonClick: onButtonClick,
         onUiLayerDestroyed: onPlatformUiLayerDestroyed,
@@ -49,11 +57,31 @@ class StreamBackgroundService {
   }
 
   final _logger = taggedLogger(tag: _tag);
+
   StreamSubscription<CallState>? _subscription;
+  NotificationOptionsBuilder? _screenShareNotificationOptionsBuilder;
+
+  Future<void> startScreenSharingNotificationService(Call call) async {
+    await StreamVideoFlutterBackground.startService(
+      NotificationPayload(
+        callCid: call.callCid.value,
+        options: (_screenShareNotificationOptionsBuilder ??
+                _screenShareDefaultOptions)
+            .call(call),
+      ),
+      ServiceType.screenSharing,
+    );
+  }
+
+  Future<void> stopScreenSharingNotificationService() async {
+    await StreamVideoFlutterBackground.stopService(
+      ServiceType.screenSharing,
+    );
+  }
 
   Future<void> onActiveCall({
     Call? call,
-    NotificationOptionsBuilder optionsBuilder = _defaultOptions,
+    NotificationOptionsBuilder optionsBuilder = _callDefaultOptions,
     OnNotificationClick? onNotificationClick,
     OnButtonClick? onButtonClick,
     OnUiLayerDestroyed? onUiLayerDestroyed,
@@ -89,8 +117,9 @@ class StreamBackgroundService {
           callCid: call.callCid.value,
           options: optionsBuilder.call(call),
         ),
+        ServiceType.call,
       );
-      _logger.d(() => '[onConnected] service start result: $result');
+      _logger.d(() => '[onConnected] call service start result: $result');
       if (result) {
         StreamVideoFlutterBackground.setOnNotificationContentClick(
           _buildOnContentClick(call, onNotificationClick),
@@ -114,10 +143,20 @@ class StreamBackgroundService {
       StreamVideoFlutterBackground.setOnNotificationButtonClick(null);
       StreamVideoFlutterBackground.setOnPlatformUiLayerDestroyed(null);
       await _subscription?.cancel();
-      final result = await StreamVideoFlutterBackground.stopService();
-      _logger.d(() => '[onDisconnected] service stop result: $result');
+
+      final callResult =
+          await StreamVideoFlutterBackground.stopService(ServiceType.call);
+
+      final sharingResult = await StreamVideoFlutterBackground.stopService(
+        ServiceType.screenSharing,
+      );
+      _logger.d(
+        () =>
+            '[onDisconnected] call service stop result: $callResult, screen sharing service stop result: $sharingResult',
+      );
     } catch (e, stk) {
-      _logger.e(() => '[onDisconnected] service stop failed: $e, stk: $stk');
+      _logger
+          .e(() => '[onDisconnected] call service stop failed: $e, stk: $stk');
     }
   }
 
@@ -125,8 +164,11 @@ class StreamBackgroundService {
     Call call,
     OnButtonClick? onButtonClick,
   ) {
-    return (btn, callCid) async {
-      _logger.d(() => '[onButtonClick] btn: $btn, callCid: $callCid');
+    return (btn, callCid, serviceType) async {
+      _logger.d(
+        () =>
+            '[onButtonClick] btn: $btn, callCid: $callCid, serviceType: $serviceType',
+      );
       final expected = call.callCid.value;
       if (call.callCid.value != callCid) {
         _logger.w(() => '[onButtonClick] rejected (expectedCid: $expected)');
@@ -134,7 +176,7 @@ class StreamBackgroundService {
       }
       if (btn == _btnCancel) {
         if (onButtonClick != null) {
-          await onButtonClick.call(call, ButtonType.cancel);
+          await onButtonClick.call(call, ButtonType.cancel, serviceType);
         } else {
           await call.leave();
         }
@@ -184,23 +226,33 @@ class StreamBackgroundService {
             callCid: call.callCid.value,
             options: optionsBuilder.call(call),
           ),
+          ServiceType.call,
         );
-        _logger.v(() => '[listenState] service update result: $result');
+        _logger.v(() => '[listenState] call service update result: $result');
       } catch (e, stk) {
-        _logger.e(() => '[listenState] service update failed: $e; $stk');
+        _logger.e(() => '[listenState] call service update failed: $e; $stk');
       }
     });
   }
 }
 
-NotificationOptions _defaultOptions(Call call) {
+NotificationOptions _callDefaultOptions(Call call) {
   final users = call.state.valueOrNull?.callParticipants
           .map((it) => it.userId)
           .join(', ') ??
       '';
   return NotificationOptions(
     content: NotificationContent(
+      title: 'Call in progress',
       text: '${call.callCid.id}: $users',
+    ),
+  );
+}
+
+NotificationOptions _screenShareDefaultOptions(Call call) {
+  return const NotificationOptions(
+    content: NotificationContent(
+      title: 'You are screen sharing',
     ),
   );
 }
