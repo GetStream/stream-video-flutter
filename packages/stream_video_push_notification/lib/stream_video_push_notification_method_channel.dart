@@ -10,8 +10,36 @@ class MethodChannelStreamVideoPushNotification
   @visibleForTesting
   final methodChannel = const MethodChannel('stream_video_push_notifications');
 
+  CallerCustomizationFunction? callerCustomizationCallback;
+
+  MethodChannelStreamVideoPushNotification() {
+    methodChannel.setMethodCallHandler((call) async {
+      if (call.method == "customizeCaller") {
+        final name = call.arguments["created_by_display_name"];
+        final handle = call.arguments["created_by_id"];
+        final callId = call.arguments["call_cid"];
+
+        final result = callerCustomizationCallback?.call(
+          callCid: callId,
+          callerName: name,
+          callerHandle: handle,
+        );
+
+        if (result != null) {
+          return result.toJson();
+        }
+
+        return null;
+      }
+    });
+  }
+
   @override
-  Future<void> initData(Map<String, dynamic> data) async {
-    await methodChannel.invokeMethod<String>('initData', data);
+  Future<void> init(
+    Map<String, dynamic> pushParams,
+    CallerCustomizationFunction? callerCustomizationCallback,
+  ) async {
+    this.callerCustomizationCallback = callerCustomizationCallback;
+    await methodChannel.invokeMethod<String>('initData', pushParams);
   }
 }

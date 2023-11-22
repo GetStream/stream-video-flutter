@@ -9,6 +9,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         let instance = StreamVideoPushNotificationPlugin()
 
         registrar.addMethodCallDelegate(instance, channel: channel)
+        StreamVideoPKDelegateManager.shared.initChannel(channel: channel)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

@@ -30,9 +30,6 @@ StreamVideoPushParams _$StreamVideoPushParamsFromJson(
       ios: json['ios'] == null
           ? null
           : IOSParams.fromJson(json['ios'] as Map<String, dynamic>),
-      incomingCallerNameOverride: json['incomingCallerNameOverride'] as String?,
-      incomingCallerHandlerOverride:
-          json['incomingCallerHandlerOverride'] as String?,
     );
 
 Map<String, dynamic> _$StreamVideoPushParamsToJson(
@@ -52,6 +49,4 @@ Map<String, dynamic> _$StreamVideoPushParamsToJson(
       'headers': instance.headers,
       'android': instance.android?.toJson(),
       'ios': instance.ios?.toJson(),
-      'incomingCallerNameOverride': instance.incomingCallerNameOverride,
-      'incomingCallerHandlerOverride': instance.incomingCallerHandlerOverride,
     };
