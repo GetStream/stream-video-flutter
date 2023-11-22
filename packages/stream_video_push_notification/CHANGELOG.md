@@ -1,3 +1,23 @@
+## Upcoming
+
+✅ Added
+
+* `callerCustomizationCallback` to `StreamVideoPushNotificationManager` that allow dynamic customization of CallKit call screen
+
+Example usage:
+```dart
+pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
+    ...
+    callerCustomizationCallback: ({required callCid, callerHandle, callerName}) =>
+          CallerCustomizationResponse(name: "Customized $callerName"),
+    ),
+```
+
+🔄 Changed
+
+Breaking changes 🚧
+* Removed the `incomingCallerNameOverride` and `incomingCallerHandlerOverride` from `StreamVideoPushParams` in favor of the new `callerCustomizationCallback` in `StreamVideoPushNotificationManager`
+
 ## 0.2.0
 
  ✅ Added
