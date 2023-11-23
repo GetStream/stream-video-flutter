@@ -28,7 +28,8 @@ class LivestreamToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamLivestreamTheme.of(context);
+    final streamVideoTheme = StreamVideoTheme.of(context);
+    final theme = streamVideoTheme.livestreamTheme;
     final colorTheme = StreamVideoTheme.of(context).colorTheme;
     final pauseIconTheme = IconThemeData(
       color: colorTheme.livestreamCallControlsColor,

@@ -91,6 +91,8 @@ class _StreamCallContentState extends State<StreamCallContent> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = StreamVideoTheme.of(context);
+
     final Widget bodyWidget;
     if (callState.status.isConnected) {
       bodyWidget = widget.callParticipantsBuilder?.call(
@@ -113,7 +115,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
     final localParticipant = callState.localParticipant;
 
     return Scaffold(
-      backgroundColor: const Color(0XFF272A30),
+      backgroundColor: theme.callContentTheme.callContentBackgroundColor,
       appBar: widget.callAppBarBuilder?.call(context, call, callState) ??
           CallAppBar(
             call: call,

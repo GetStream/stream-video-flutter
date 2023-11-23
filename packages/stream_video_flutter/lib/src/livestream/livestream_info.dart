@@ -52,7 +52,8 @@ class LivestreamInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamLivestreamTheme.of(context);
+    final streamVideoTheme = StreamVideoTheme.of(context);
+    final theme = streamVideoTheme.livestreamTheme;
     final colorTheme = StreamVideoTheme.of(context).colorTheme;
 
     final participantIconTheme = IconThemeData(
@@ -70,15 +71,6 @@ class LivestreamInfo extends StatelessWidget {
     final contractIconTheme = IconThemeData(
       color: colorTheme.livestreamCallControlsColor,
     ).merge(theme.contractIconTheme);
-    final callStatusButtonTextTheme = const TextStyle(
-      color: Colors.white,
-    ).merge(theme.callStateButtonTextStyle);
-    final participantTextTheme = const TextStyle(
-      color: Colors.white,
-    ).merge(theme.participantCountTextStyle);
-    final durationTextTheme = const TextStyle(
-      color: Colors.white,
-    ).merge(theme.durationTextStyle);
 
     final minutes = duration.inMinutes;
     final seconds = duration.inSeconds % 60;
@@ -107,7 +99,7 @@ class LivestreamInfo extends StatelessWidget {
                 ),
                 child: Text(
                   callState.isBackstage ? 'Backstage' : 'Live',
-                  style: callStatusButtonTextTheme,
+                  style: theme.callStateButtonTextStyle,
                 ),
               ),
               if (showParticipantCount)
@@ -124,7 +116,7 @@ class LivestreamInfo extends StatelessWidget {
                     ),
                     Text(
                       callState.otherParticipants.length.toString(),
-                      style: participantTextTheme,
+                      style: theme.participantCountTextStyle,
                     ),
                   ],
                 ),
@@ -141,7 +133,7 @@ class LivestreamInfo extends StatelessWidget {
               ),
               Text(
                 formattedDuration,
-                style: durationTextTheme,
+                style: theme.durationTextStyle,
               ),
             ],
           ),

@@ -1,3 +1,4 @@
+export 'call_content_theme.dart';
 export 'call_controls_theme.dart';
 export 'call_participant_theme.dart';
 export 'call_participants_info_menu_theme.dart';
