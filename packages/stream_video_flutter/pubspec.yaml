@@ -17,6 +17,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_webrtc: ^0.9.40
+  plugin_platform_interface: ^2.1.7
   rate_limiter: ^1.0.0
   stream_video: ^0.2.0
   visibility_detector: ^0.4.0+2

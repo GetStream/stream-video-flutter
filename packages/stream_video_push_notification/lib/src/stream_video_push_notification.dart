@@ -18,13 +18,15 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   static create({
     required StreamVideoPushProvider iosPushProvider,
     required StreamVideoPushProvider androidPushProvider,
+    CallerCustomizationFunction? callerCustomizationCallback,
     StreamVideoPushParams? pushParams,
   }) {
     return (CoordinatorClient client) {
       final params = _defaultPushParams.merge(pushParams);
 
       if (CurrentPlatform.isIos) {
-        StreamVideoPushNotificationPlatform.instance.initData(params.toJson());
+        StreamVideoPushNotificationPlatform.instance
+            .init(params.toJson(), callerCustomizationCallback);
       }
 
       return StreamVideoPushNotificationManager._(
@@ -32,6 +34,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         iosPushProvider: iosPushProvider,
         androidPushProvider: androidPushProvider,
         pushParams: params,
+        callerCustomizationCallback: callerCustomizationCallback,
       );
     };
   }
@@ -41,12 +44,14 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required this.iosPushProvider,
     required this.androidPushProvider,
     required this.pushParams,
+    this.callerCustomizationCallback,
   }) : _client = client;
 
   final CoordinatorClient _client;
   final StreamVideoPushProvider iosPushProvider;
   final StreamVideoPushProvider androidPushProvider;
   final StreamVideoPushParams pushParams;
+  final CallerCustomizationFunction? callerCustomizationCallback;
 
   final _logger = taggedLogger(tag: 'SV:PNManager');
 
@@ -105,11 +110,17 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? nameCaller,
     bool hasVideo = true,
   }) {
+    final customData = callerCustomizationCallback?.call(
+      callCid: callCid,
+      callerName: nameCaller,
+      callerHandle: handle,
+    );
+
     final params = pushParams.copyWith(
       id: uuid,
-      avatar: avatar,
-      handle: pushParams.incomingCallerHandlerOverride ?? handle,
-      nameCaller: pushParams.incomingCallerNameOverride ?? nameCaller,
+      avatar: customData?.avatar ?? avatar,
+      handle: customData?.handle ?? handle,
+      nameCaller: customData?.name ?? nameCaller,
       type: hasVideo ? 1 : 0,
       extra: {'callCid': callCid},
     );
@@ -126,11 +137,17 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? nameCaller,
     bool hasVideo = true,
   }) {
+    final customData = callerCustomizationCallback?.call(
+      callCid: callCid,
+      callerName: nameCaller,
+      callerHandle: handle,
+    );
+
     final params = pushParams.copyWith(
       id: uuid,
-      avatar: avatar,
-      handle: pushParams.incomingCallerHandlerOverride ?? handle,
-      nameCaller: pushParams.incomingCallerNameOverride ?? nameCaller,
+      avatar: customData?.avatar ?? avatar,
+      handle: customData?.handle ?? handle,
+      nameCaller: customData?.name ?? nameCaller,
       type: hasVideo ? 1 : 0,
       extra: {'callCid': callCid},
     );

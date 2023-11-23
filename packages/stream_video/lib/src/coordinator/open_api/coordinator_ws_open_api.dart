@@ -125,7 +125,7 @@ class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
           'custom': <String, dynamic>{
             ...userInfo.extraData,
           },
-        }
+        },
       },
     };
     return send(

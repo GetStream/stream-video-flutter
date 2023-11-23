@@ -4,7 +4,6 @@ import 'package:flutter/material.dart' hide TextTheme;
 
 import '../utils/device_segmentation.dart';
 import '../widgets/floating_view/floating_view_alignment.dart';
-import 'stream_livestream_theme.dart';
 import 'themes.dart';
 
 /// {@template streamVideoThemeData}

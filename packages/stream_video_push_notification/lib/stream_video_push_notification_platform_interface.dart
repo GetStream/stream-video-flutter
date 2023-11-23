@@ -1,6 +1,28 @@
 import 'stream_video_push_notification_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+class CallerCustomizationResponse {
+  final String? avatar;
+  final String? name;
+  final String? handle;
+
+  CallerCustomizationResponse({this.name, this.handle, this.avatar});
+
+  Map<String, dynamic> toJson() {
+    return {
+      "name": name,
+      "handle": handle,
+      "avatar": avatar,
+    };
+  }
+}
+
+typedef CallerCustomizationFunction = CallerCustomizationResponse Function({
+  required String callCid,
+  String? callerHandle,
+  String? callerName,
+});
+
 abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   StreamVideoPushNotificationPlatform() : super(token: _token);
 
@@ -22,7 +44,10 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<void> initData(Map<String, dynamic> data) {
+  Future<void> init(
+    Map<String, dynamic> pushParams,
+    CallerCustomizationFunction? callerCustomizationCallback,
+  ) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }
