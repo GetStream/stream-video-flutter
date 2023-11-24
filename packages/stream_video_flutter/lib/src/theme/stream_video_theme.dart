@@ -72,6 +72,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.localVideoTheme,
     required this.callParticipantsInfoMenuTheme,
     required this.incomingCallTheme,
+    required this.callContentTheme,
     required this.outgoingCallTheme,
     required this.livestreamTheme,
   });
@@ -278,6 +279,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           fontWeight: FontWeight.bold,
         ),
       ),
+      callContentTheme: const StreamCallContentThemeData(
+        callContentBackgroundColor: Color(0XFF272A30),
+      ),
       outgoingCallTheme: StreamIncomingOutgoingCallThemeData(
         singleParticipantAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(
@@ -399,6 +403,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the outgoing call widget.
   final StreamIncomingOutgoingCallThemeData incomingCallTheme;
 
+  /// Theme for the call content widget.
+  final StreamCallContentThemeData callContentTheme;
+
   /// Theme for the outgoing call widget.
   final StreamIncomingOutgoingCallThemeData outgoingCallTheme;
 
@@ -418,6 +425,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamLocalVideoThemeData? localVideoTheme,
     StreamCallParticipantsInfoMenuThemeData? callParticipantsInfoMenuTheme,
     StreamIncomingOutgoingCallThemeData? incomingCallTheme,
+    StreamCallContentThemeData? callContentTheme,
     StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) =>
@@ -434,6 +442,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             .merge(callParticipantsInfoMenuTheme),
         localVideoTheme: this.localVideoTheme.merge(localVideoTheme),
         incomingCallTheme: this.incomingCallTheme.merge(incomingCallTheme),
+        callContentTheme: this.callContentTheme.merge(callContentTheme),
         outgoingCallTheme: this.outgoingCallTheme.merge(outgoingCallTheme),
         livestreamTheme: this.livestreamTheme.merge(livestreamTheme),
       );
@@ -452,6 +461,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callParticipantsInfoMenuTheme: callParticipantsInfoMenuTheme
           .merge(other.callParticipantsInfoMenuTheme),
       incomingCallTheme: incomingCallTheme.merge(other.incomingCallTheme),
+      callContentTheme: callContentTheme.merge(other.callContentTheme),
       outgoingCallTheme: outgoingCallTheme.merge(other.outgoingCallTheme),
       livestreamTheme: livestreamTheme.merge(other.livestreamTheme),
     );
@@ -479,6 +489,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         t,
       ),
       incomingCallTheme: incomingCallTheme.lerp(other.incomingCallTheme, t),
+      callContentTheme: callContentTheme.lerp(other.callContentTheme, t),
       outgoingCallTheme: outgoingCallTheme.lerp(other.outgoingCallTheme, t),
       livestreamTheme: livestreamTheme.lerp(other.livestreamTheme, t),
     );

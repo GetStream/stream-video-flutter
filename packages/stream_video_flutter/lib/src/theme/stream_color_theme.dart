@@ -198,8 +198,10 @@ class StreamColorTheme {
   ///
   final Gradient bgGradient;
 
+  ///
   final Color livestreamBackground;
 
+  ///
   final Color livestreamCallControlsColor;
 
   /// Copy with theme
