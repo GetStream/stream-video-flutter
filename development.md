@@ -28,20 +28,20 @@
 - - [ ] Publish Dogfooding app
 - [ ] Participant sort bug [Efthymis]
 - [x] Android/iOS ringing flow
-- [ ] Live streaming component(s) [Deven]
+- [x] Live streaming component(s) [Deven]
 - [x] Deeplinking
 - [ ] Tap to focus (flutter_webrtc) [Kanat]
 - [ ] Push notifications [Maciej]
 - - [x] Customization of the incoming/outgoing call screens
 - - [x] Customizing CallKit ringing calls
 - - [ ] Bug app crashes when notification button is tapped
-- [ ] Native packages refactor [Maciej]
-- - [ ] Create the native projects in stream_video_flutter
-- - [ ] Merge stream_video_flutter_background
-- - [ ] Merge screen sharing branch
-- [ ] Screen sharing *(depends on "Native packages refactor")* [Maciej]
-- - [ ] iOS
-- - [ ] Android
+- [x] Native packages refactor [Maciej]
+- - [X] Create the native projects in stream_video_flutter
+- - [x] Merge stream_video_flutter_background
+- - [x] Merge screen sharing branch
+- [x] Screen sharing *(depends on "Native packages refactor")* [Maciej]
+- - [x] iOS
+- - [x] Android
 - [ ] Regular reconnection [Maciej,Kanat]
 - [ ] Support ICE restart reconnection [Maciej,Kanat]
 - [ ] Update WebRTC version to m114 (livekit version) [Kanat]
