@@ -248,6 +248,8 @@ class Call {
 
   CallConnectOptions _connectOptions = const CallConnectOptions();
 
+  String? currentSFU;
+
   @override
   String toString() {
     return 'Call{cid: $callCid}';
@@ -552,6 +554,7 @@ class Call {
     final session = await _sessionFactory.makeCallSession(
       credentials: credentials,
       stateManager: _stateManager,
+      onSessionMigrationEvent: _onSessionMigrationEvent,
     );
     _logger.v(() => '[startSession] session created: $session');
     _session = session;
@@ -695,6 +698,17 @@ class Call {
     _stateManager.lifecycleCallDisconnected(const CallDisconnected());
     _logger.v(() => '[leave] finished');
     return const Result.success(none);
+  }
+
+  Future<void> _onSessionMigrationEvent() async {
+    final joinedResult = await _joinCall(migratingFrom: currentSFU);
+
+    if(joinedResult.isFailure) {
+      final failedResult = joinedResult as Failure;
+      _logger.e(() => '[onSessionMigrationEvent] failed: $failedResult');
+      final error = failedResult.error;
+      _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
+    }
   }
 
   Future<void> _clear(String src) async {
@@ -956,14 +970,19 @@ class Call {
   /// and joins the call immediately.
   Future<Result<CallJoinedData>> _joinCall({
     bool create = false,
+    String? migratingFrom,
   }) async {
     _logger.d(() => '[joinCall] cid: $callCid');
-    final joinResult =
-        await _coordinatorClient.joinCall(callCid: callCid, create: create);
+    final joinResult = await _coordinatorClient.joinCall(
+      callCid: callCid,
+      create: create,
+      migratingFrom: migratingFrom,
+    );
     if (joinResult is! Success<CoordinatorJoined>) {
       _logger.e(() => '[joinCall] join failed: $joinResult');
       return joinResult as Failure;
     }
+    currentSFU = joinResult.data.credentials.sfuServer.name;
     final receivedOrCreated = CallReceivedOrCreatedData(
       wasCreated: joinResult.data.wasCreated,
       data: CallCreatedData(

@@ -26,6 +26,7 @@ class CallSessionFactory {
   Future<CallSession> makeCallSession({
     required CallCredentials credentials,
     required CallStateNotifier stateManager,
+    required SessionMigrationCallback onSessionMigrationEvent,
   }) async {
     final sessionId = const Uuid().v4();
     _logger.d(() => '[makeCallSession] sessionId: $sessionId');
@@ -45,6 +46,7 @@ class CallSessionFactory {
       config: sessionConfig,
       stateManager: stateManager,
       sdpEditor: sdpEditor,
+      onSessionMigrationEvent: onSessionMigrationEvent,
     );
   }
 

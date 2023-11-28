@@ -231,4 +231,15 @@ mixin StateSfuMixin on StateNotifier<CallState> {
       ],
     );
   }
+
+  void sfuGoAway(
+      SfuGoAwayEvent event,
+      ) {
+    _logger.d(
+          () => '[sfuGoAway] ${state.sessionId}; event: $event',
+    );
+    state = state.copyWith(
+      status: const CallStatusMigrating(),
+    );
+  }
 }
