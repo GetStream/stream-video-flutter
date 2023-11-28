@@ -446,6 +446,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     String? datacenterId,
     bool? ringing,
     bool? create,
+    String? migratingFrom,
   }) async {
     try {
       _logger.d(
@@ -466,6 +467,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           create: create,
           ring: ringing,
           location: location,
+          migratingFrom: migratingFrom,
         ),
       );
       _logger.v(() => '[joinCall] completed: $result');
