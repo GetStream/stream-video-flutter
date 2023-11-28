@@ -74,7 +74,7 @@ class CallSession extends Disposable {
   final SfuClient sfuClient;
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
-  final Function? onSessionMigrationEvent;
+  final SessionMigrationCallback onSessionMigrationEvent;
   RtcManager? rtcManager;
   StreamSubscription<SfuEvent>? eventsSubscription;
 
@@ -458,6 +458,7 @@ class CallSession extends Disposable {
     }
 
     stateManager.sfuGoAway(event);
+    onSessionMigrationEvent();
   }
 
   Future<void> _onRemoteTrackReceived(
