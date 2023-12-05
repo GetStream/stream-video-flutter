@@ -902,6 +902,9 @@ class Call {
   Future<Result<CallReceivedOrCreatedData>> getOrCreate({
     List<String> memberIds = const [],
     bool ringing = false,
+    String? team,
+    bool? notify,
+    Map<String, Object> custom = const {},
   }) async {
     _logger.d(
       () => '[getOrCreate] cid: $callCid, ringing: $ringing, '
@@ -923,6 +926,9 @@ class Call {
           role: 'admin',
         );
       }).toList(),
+      team: team,
+      notify: notify,
+      custom: custom,
     );
 
     return response.fold(
