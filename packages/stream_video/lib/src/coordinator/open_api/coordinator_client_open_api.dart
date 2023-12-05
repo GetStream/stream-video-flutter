@@ -387,6 +387,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required StreamCallCid callCid,
     bool? ringing,
     List<open.MemberRequest>? members,
+    String? team,
+    bool? notify,
+    Map<String, Object> custom = const {},
   }) async {
     try {
       _logger.d(
@@ -404,8 +407,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         open.GetOrCreateCallRequest(
           data: open.CallRequest(
             members: members ?? [],
+            team: team,
+            custom: custom,
           ),
           ring: ringing,
+          notify: notify,
         ),
       );
       _logger.v(() => '[getOrCreateCall] completed: $result');

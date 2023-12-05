@@ -141,12 +141,18 @@ class CoordinatorClientRetry extends CoordinatorClient {
     required StreamCallCid callCid,
     bool? ringing,
     List<open.MemberRequest>? members,
+    String? team,
+    bool? notify,
+    Map<String, Object> custom = const {},
   }) {
     return _retryManager.execute(
       () => _delegate.getOrCreateCall(
         callCid: callCid,
         ringing: ringing,
         members: members,
+        team: team,
+        notify: notify,
+        custom: custom,
       ),
       (error, nextAttemptDelay) async {
         _logRetry('getOrCreateCall', error, nextAttemptDelay);
