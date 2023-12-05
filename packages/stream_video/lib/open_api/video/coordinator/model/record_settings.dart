@@ -278,7 +278,7 @@ class RecordSettingsQualityEnumTypeTransformer {
           }
       }
     }
-    return null;
+    return RecordSettingsQualityEnum.n720p;
   }
 
   /// Singleton [RecordSettingsQualityEnumTypeTransformer] instance.
