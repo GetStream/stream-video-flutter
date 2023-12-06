@@ -15,6 +15,7 @@ part 'stream_video_push_provider.dart';
 const _idToken = 1;
 const _idCallIncoming = 2;
 const _idCallEnded = 3;
+const _idCallAcceptDecline = 4;
 
 /// Implementation of [PushNotificationManager] for Stream Video.
 class StreamVideoPushNotificationManager implements PushNotificationManager {
@@ -53,15 +54,25 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     _subscriptions.add(
       _idCallIncoming,
       onCallEvent.whereType<ActionCallIncoming>().listen(
-        (event) {
+        (_) {
           _subscriptions.add(
             _idCallEnded,
             client.events.on<CoordinatorCallEndedEvent>(
-              (event) {
+              (_) {
                 endAllCalls();
               },
             ),
           );
+        },
+      ),
+    );
+
+    _subscriptions.add(
+      _idCallAcceptDecline,
+      onCallEvent.whereType<ActionCallAccept>().map((_) => null).mergeWith(
+          [onCallEvent.whereType<ActionCallDecline>().map((_) => null)]).listen(
+        (_) {
+          _subscriptions.cancel(_idCallEnded);
         },
       ),
     );
