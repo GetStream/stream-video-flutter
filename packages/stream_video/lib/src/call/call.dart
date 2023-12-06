@@ -234,6 +234,10 @@ class Call {
   SharedEmitter<SfuEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<SfuEvent>();
 
+  SharedEmitter<CoordinatorCallEvent> get coordinatorEvents =>
+      _coordinatorEvents;
+  final _coordinatorEvents = MutableSharedEmitterImpl<CoordinatorCallEvent>();
+
   OnCallPermissionRequest? onPermissionRequest;
 
   final _status = MutableStateEmitterImpl<_ConnectionStatus>(
@@ -279,6 +283,7 @@ class Call {
     _subscriptions.add(
       _idCoordEvents,
       _coordinatorClient.events.on<CoordinatorCallEvent>((event) async {
+        _coordinatorEvents.emit(event);
         await _onCoordinatorEvent(event);
       }),
     );
