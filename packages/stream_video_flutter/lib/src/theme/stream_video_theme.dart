@@ -38,9 +38,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     );
 
     final customizedTheme = defaultTheme.copyWith(
-      callContentTheme: callContentTheme,
       textTheme: textTheme,
       colorTheme: colorTheme,
+      callContentTheme: callContentTheme,
       callControlsTheme: callControlsTheme,
       userAvatarTheme: userAvatarTheme,
       lobbyViewTheme: lobbyViewTheme,
