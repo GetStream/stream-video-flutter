@@ -8,6 +8,11 @@ class Subscriptions {
     _subscriptions[id] = subscription;
   }
 
+
+  bool contains(int id) {
+    return _subscriptions.containsKey(id);
+  }
+
   void cancel(int id) {
     _subscriptions[id]?.cancel();
     _subscriptions.remove(id);

@@ -56,6 +56,18 @@ class SfuClientImpl extends SfuClient {
   }
 
   @override
+  Future<Result<sfu.ICERestartResponse>> restartIce(
+    sfu.ICERestartRequest request,
+  ) async {
+    try {
+      final response = await _client.iceRestart(_withAuthHeaders(), request);
+      return Result.success(response);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
   Future<Result<sfu.SetPublisherResponse>> setPublisher(
     sfu.SetPublisherRequest request,
   ) async {

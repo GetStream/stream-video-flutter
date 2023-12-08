@@ -85,6 +85,7 @@ extension SfuEventMapper on sfu_events.SfuEvent {
       case sfu_events.SfuEvent_EventPayload.joinResponse:
         return SfuJoinResponseEvent(
           callState: joinResponse.callState.toDomain(),
+          isReconnected: joinResponse.reconnected,
         );
       case sfu_events.SfuEvent_EventPayload.participantJoined:
         return SfuParticipantJoinedEvent(

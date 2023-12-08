@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
@@ -10,6 +11,7 @@ import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
 import '../../action/internal/rtc_action.dart';
 import '../../disposable.dart';
+import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
@@ -33,6 +35,9 @@ import 'call_session_config.dart';
 const _tag = 'SV:CallSession';
 
 const _debounceDuration = Duration(milliseconds: 200);
+const _pcReconnectTimeout = Duration(seconds: 4);
+
+typedef OnFullReconnectNeeded = void Function();
 
 class CallSession extends Disposable {
   CallSession({
@@ -41,6 +46,7 @@ class CallSession extends Disposable {
     required this.sessionId,
     required this.config,
     required this.stateManager,
+    required this.onFullReconnectNeeded,
     required SdpEditor sdpEditor,
   })  : sfuClient = SfuClientImpl(
           baseUrl: config.sfuUrl,
@@ -71,8 +77,11 @@ class CallSession extends Disposable {
   final SfuClient sfuClient;
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
+  final OnFullReconnectNeeded onFullReconnectNeeded;
+
   RtcManager? rtcManager;
   StreamSubscription<SfuEvent>? eventsSubscription;
+  Timer? _peerConnectionCheckTimer;
 
   SharedEmitter<CallStats> get stats => _stats;
   late final _stats = MutableSharedEmitterImpl<CallStats>();
@@ -130,6 +139,8 @@ class CallSession extends Disposable {
       )
         ..onPublisherIceCandidate = _onLocalIceCandidate
         ..onSubscriberIceCandidate = _onLocalIceCandidate
+        ..onSubscriberDisconnectedOrFailed = _onSubsciberDisconnectedOrFailed
+        ..onPublisherDisconnectedOrFailed = _onPublisherDisconnectedOrFailed
         ..onLocalTrackMuted = _onLocalTrackMuted
         ..onLocalTrackPublished = _onLocalTrackPublished
         ..onRenegotiationNeeded = _onRenegotiationNeeded
@@ -144,6 +155,57 @@ class CallSession extends Disposable {
     }
   }
 
+  Future<Result<None>> fastReconnect() async {
+    try {
+      _logger.d(() => '[fastReconnect] no args');
+
+      final genericSdp = await RtcManager.getGenericSdp();
+      _logger.v(() => '[fastReconnect] genericSdp.len: ${genericSdp.length}');
+
+      await eventsSubscription?.cancel();
+      eventsSubscription = sfuWS.events.listen(_onSfuEvent);
+      await sfuWS.connect();
+
+      sfuWS.send(
+        sfu_events.SfuRequest(
+          joinRequest: sfu_events.JoinRequest(
+            token: config.sfuToken,
+            sessionId: sessionId,
+            subscriberSdp: genericSdp,
+            fastReconnect: true,
+          ),
+        ),
+      );
+
+      _logger.v(() => '[fastReconnect] wait for SfuJoinResponseEvent');
+      final event = await sfuWS.events.waitFor<SfuJoinResponseEvent>(
+        timeLimit: const Duration(seconds: 30),
+      );
+
+      if (event.isReconnected) {
+        _logger.v(() =>
+            '[fastReconnect] fast-reconnect possible - requesting ICE restarts');
+        final iceResult = await sfuClient.restartIce(
+          sfu.ICERestartRequest(
+            sessionId: sessionId,
+            peerType: sfu_models.PeerType.PEER_TYPE_SUBSCRIBER,
+          ),
+        );
+
+        _logger.v(() => '[fastReconnect] completed');
+        return iceResult.map((data) => none);
+      } else {
+        _logger.v(() => '[fastReconnect] fast-reconnect not possible');
+        return const Result.failure(
+          VideoError(message: 'Fast reconnect not possible'),
+        );
+      }
+    } catch (e, stk) {
+      _logger.e(() => '[fastReconnect] failed: $e');
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
   @override
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
@@ -154,6 +216,7 @@ class CallSession extends Disposable {
     await sfuWS.disconnect();
     await rtcManager?.dispose();
     rtcManager = null;
+    _peerConnectionCheckTimer?.cancel();
     return await super.dispose();
   }
 
@@ -397,6 +460,56 @@ class CallSession extends Disposable {
       ),
     );
     _logger.v(() => '[onLocalIceCandidate] result: $result');
+  }
+
+  Future<void> _onSubsciberDisconnectedOrFailed(
+    StreamPeerConnection pc,
+    rtc.RTCIceConnectionState state,
+  ) async {
+    _logger.d(
+      () => '[_onSubsciberDisconnectedOrFaild] type: ${pc.type}, state: $state',
+    );
+
+    _peerConnectionCheckTimer?.cancel();
+    _peerConnectionCheckTimer = Timer(_pcReconnectTimeout, () {
+      if (pc.pc.connectionState !=
+          RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
+        _peerConnectionCheckTimer = null;
+        onFullReconnectNeeded();
+      }
+    });
+
+    final iceResult = await sfuClient.restartIce(
+      sfu.ICERestartRequest(
+        sessionId: sessionId,
+        peerType: sfu_models.PeerType.PEER_TYPE_SUBSCRIBER,
+      ),
+    );
+
+    _logger.v(() => '[_onSubsciberDisconnectedOrFailed] result: $iceResult');
+  }
+
+  Future<void> _onPublisherDisconnectedOrFailed(
+    StreamPeerConnection pc,
+    rtc.RTCIceConnectionState state,
+  ) async {
+    _logger.d(
+      () =>
+          '[_onPublisherDisconnectedOrFailed] type: ${pc.type}, state: $state',
+    );
+
+    _peerConnectionCheckTimer?.cancel();
+    _peerConnectionCheckTimer = Timer(_pcReconnectTimeout, () {
+      if (pc.pc.connectionState !=
+          RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
+        _peerConnectionCheckTimer = null;
+        onFullReconnectNeeded();
+      }
+    });
+
+    await pc.pc.restartIce();
+
+    _logger.v(() => '[_onPublisherDisconnectedOrFailed] ice restarted');
   }
 
   Future<void> _onRenegotiationNeeded(StreamPeerConnection pc) async {
