@@ -14,8 +14,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   factory StreamVideoTheme({
     required Brightness brightness,
     StreamTextTheme? textTheme,
-    StreamCallContentThemeData? callContentTheme,
     StreamColorTheme? colorTheme,
+    StreamCallContentThemeData? callContentTheme,
     StreamCallControlsThemeData? callControlsTheme,
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewThemeData? lobbyViewTheme,
