@@ -136,6 +136,9 @@ class CallSession extends Disposable {
         ..onRemoteTrackReceived = _onRemoteTrackReceived
         ..onStatsReceived = _onStatsReceived;
 
+      if (CurrentPlatform.isIos) {
+        await rtcManager?.setAppleAudioConfiguration();
+      }
       _logger.v(() => '[start] completed');
       return const Result.success(none);
     } catch (e, stk) {
