@@ -12,6 +12,11 @@ import 'stream_video_push_params.dart';
 
 part 'stream_video_push_provider.dart';
 
+const _idToken = 1;
+const _idCallIncoming = 2;
+const _idCallEnded = 3;
+const _idCallAcceptDecline = 4;
+
 /// Implementation of [PushNotificationManager] for Stream Video.
 class StreamVideoPushNotificationManager implements PushNotificationManager {
   /// Factory for creating a new instance of [StreamVideoPushNotificationManager].
@@ -45,7 +50,33 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required this.androidPushProvider,
     required this.pushParams,
     this.callerCustomizationCallback,
-  }) : _client = client;
+  }) : _client = client {
+    _subscriptions.add(
+      _idCallIncoming,
+      onCallEvent.whereType<ActionCallIncoming>().listen(
+        (_) {
+          _subscriptions.add(
+            _idCallEnded,
+            client.events.on<CoordinatorCallEndedEvent>(
+              (_) {
+                endAllCalls();
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    _subscriptions.add(
+      _idCallAcceptDecline,
+      onCallEvent.whereType<ActionCallAccept>().map((_) => null).mergeWith(
+          [onCallEvent.whereType<ActionCallDecline>().map((_) => null)]).listen(
+        (_) {
+          _subscriptions.cancel(_idCallEnded);
+        },
+      ),
+    );
+  }
 
   final CoordinatorClient _client;
   final StreamVideoPushProvider iosPushProvider;
@@ -55,7 +86,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   final _logger = taggedLogger(tag: 'SV:PNManager');
 
-  StreamSubscription<String>? _tokenSubscription;
+  final Subscriptions _subscriptions = Subscriptions();
 
   @override
   void registerDevice() {
@@ -79,7 +110,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       );
     }
 
-    _tokenSubscription ??= pushProvider.onTokenRefresh.listen(registerDevice);
+    _subscriptions.addIfAbsent(
+        _idToken, () => pushProvider.onTokenRefresh.listen(registerDevice));
   }
 
   @override
@@ -88,9 +120,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     if (token == null) return;
 
     _client.deleteDevice(id: token);
-
-    _tokenSubscription?.cancel();
-    _tokenSubscription = null;
+    _subscriptions.cancel(_idToken);
   }
 
   @override
@@ -228,8 +258,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   @override
   Future<void> dispose() async {
-    _tokenSubscription?.cancel();
-    _tokenSubscription = null;
+    _subscriptions.cancelAll();
   }
 }
 
