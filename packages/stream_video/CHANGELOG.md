@@ -1,8 +1,34 @@
-## Upcoming
+## 0.3.0
+
+🚧 Breaking changes
+
+* Removed the `incomingCallerNameOverride` and `incomingCallerHandlerOverride` from `StreamVideoPushParams` in favor of the new `callerCustomizationCallback` in `StreamVideoPushNotificationManager`.
 
 ✅ Added
 
+* `callerCustomizationCallback` to `StreamVideoPushNotificationManager` that allow dynamic customization of CallKit call screen
+
+Example usage:
+
+```dart
+pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
+    ...
+    callerCustomizationCallback: ({required callCid, callerHandle, callerName}) =>
+          CallerCustomizationResponse(name: "Customized $callerName"),
+    ),
+```
+
 * Added a `includeUserDetails` field to determine if user details should be passed to backend when connecting user.
+* Exposed call coordinator events through the `coordinatorEvents` stream in the `Call` class.
+* Added `team`, `notify`, and `custom` properties to `getOrCreate()` for `Call`.
+
+🐞 Fixed
+
+* Added Apple audio configuration to make audio work in silent mode.
+* Fixes `queryCalls` response mapping.
+
+🔄 Changed
+
 
 ## 0.2.0
 
