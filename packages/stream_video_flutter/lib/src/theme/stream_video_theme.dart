@@ -15,6 +15,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required Brightness brightness,
     StreamTextTheme? textTheme,
     StreamColorTheme? colorTheme,
+    StreamCallContentThemeData? callContentTheme,
     StreamCallControlsThemeData? callControlsTheme,
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewThemeData? lobbyViewTheme,
@@ -39,6 +40,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     final customizedTheme = defaultTheme.copyWith(
       textTheme: textTheme,
       colorTheme: colorTheme,
+      callContentTheme: callContentTheme,
       callControlsTheme: callControlsTheme,
       userAvatarTheme: userAvatarTheme,
       lobbyViewTheme: lobbyViewTheme,

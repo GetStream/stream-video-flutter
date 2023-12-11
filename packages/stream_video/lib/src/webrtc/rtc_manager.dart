@@ -824,6 +824,26 @@ extension RtcManagerTrackHelper on RtcManager {
     _logger.e(() => 'Unsupported trackType $trackType');
     return Result.error('Unsupported trackType $trackType');
   }
+
+  Future<Result<None>> setAppleAudioConfiguration() async {
+    try {
+      await rtc.Helper.setAppleAudioConfiguration(
+        rtc.AppleAudioConfiguration(
+          appleAudioMode: rtc.AppleAudioMode.videoChat,
+          appleAudioCategory: rtc.AppleAudioCategory.playAndRecord,
+          appleAudioCategoryOptions: {
+            rtc.AppleAudioCategoryOption.mixWithOthers,
+            rtc.AppleAudioCategoryOption.allowBluetooth,
+            rtc.AppleAudioCategoryOption.allowBluetoothA2DP,
+            rtc.AppleAudioCategoryOption.allowAirPlay,
+          },
+        ),
+      );
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
 }
 
 extension on RtcLocalTrack<VideoConstraints> {

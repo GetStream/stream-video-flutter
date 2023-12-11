@@ -8,11 +8,16 @@ class Subscriptions {
     _subscriptions[id] = subscription;
   }
 
-
   bool contains(int id) {
     return _subscriptions.containsKey(id);
   }
+  
+  void addIfAbsent(int id, StreamSubscription<dynamic> Function() ifAbsent) {
+    if (_subscriptions.containsKey(id)) return;
 
+    _subscriptions[id] = ifAbsent();
+  }
+ 
   void cancel(int id) {
     _subscriptions[id]?.cancel();
     _subscriptions.remove(id);
