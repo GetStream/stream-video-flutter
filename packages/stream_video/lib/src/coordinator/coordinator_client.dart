@@ -70,6 +70,7 @@ abstract class CoordinatorClient {
     String? datacenterId,
     bool? ringing,
     bool? create,
+    String? migratingFrom,
   });
 
   Future<Result<None>> acceptCall({required StreamCallCid cid});

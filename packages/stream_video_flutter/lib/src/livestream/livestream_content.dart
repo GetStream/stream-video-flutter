@@ -11,7 +11,6 @@ import '../call_screen/call_diagnostics_content/call_diagnostics_content.dart';
 /// Additionally, there is an action button meant for a back/close action
 /// implemented in this widget.
 class LivestreamContent extends StatefulWidget {
-
   /// Creates a [LivestreamContent] widget.
   ///
   /// * [call] is the livestream call intended to be viewed.
@@ -105,9 +104,18 @@ class _LivestreamContentState extends State<LivestreamContent> {
         }
       }
     } else {
+      final isMigrating = callState.status.isMigrating;
       final isReconnecting = callState.status.isReconnecting;
+      final statusText = isMigrating
+          ? 'Migrating'
+          : isReconnecting
+              ? 'Reconnecting'
+              : 'Connecting';
       bodyWidget = Center(
-        child: Text(isReconnecting ? 'Reconnecting' : 'Connecting'),
+        child: Text(
+          statusText,
+          style: theme.textTheme.title3,
+        ),
       );
     }
 

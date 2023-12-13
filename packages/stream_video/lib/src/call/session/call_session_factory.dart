@@ -24,24 +24,28 @@ class CallSessionFactory {
   final SdpEditor sdpEditor;
 
   Future<CallSession> makeCallSession({
+    String? sessionId,
     required CallCredentials credentials,
     required CallStateNotifier stateManager,
   }) async {
-    final sessionId = const Uuid().v4();
-    _logger.d(() => '[makeCallSession] sessionId: $sessionId');
+    final finalSessionId = sessionId ?? const Uuid().v4();
+    _logger.d(() => '[makeCallSession] sessionId: $finalSessionId($sessionId)');
     final rtcConfig = _makeRtcConfig(credentials.iceServers) ??
         defaultRtcConfiguration(credentials.sfuServer.url);
     final sessionConfig = CallSessionConfig(
+      sfuName: credentials.sfuServer.name,
       sfuUrl: credentials.sfuServer.url,
       sfuWsEndpoint: credentials.sfuServer.wsEndpoint,
       sfuToken: credentials.sfuToken,
       rtcConfig: rtcConfig,
     );
-    _logger.v(() => '[makeCallSession] sfuUrl: ${sessionConfig.sfuUrl}');
+    final sfuName = sessionConfig.sfuName;
+    final sfuUrl = sessionConfig.sfuUrl;
+    _logger.v(() => '[makeCallSession] sfuName: $sfuName, sfuUrl: $sfuUrl');
     return CallSession(
       sessionSeq: _sessionSeq++,
       callCid: callCid,
-      sessionId: sessionId,
+      sessionId: finalSessionId,
       config: sessionConfig,
       stateManager: stateManager,
       sdpEditor: sdpEditor,
