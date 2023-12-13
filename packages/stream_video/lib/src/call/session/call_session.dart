@@ -34,8 +34,6 @@ const _tag = 'SV:CallSession';
 
 const _debounceDuration = Duration(milliseconds: 200);
 
-typedef SessionMigrationCallback = void Function();
-
 class CallSession extends Disposable {
   CallSession({
     required this.callCid,
@@ -43,7 +41,6 @@ class CallSession extends Disposable {
     required this.sessionId,
     required this.config,
     required this.stateManager,
-    required this.onSessionMigrationEvent,
     required SdpEditor sdpEditor,
   })  : sfuClient = SfuClientImpl(
           baseUrl: config.sfuUrl,
@@ -74,7 +71,6 @@ class CallSession extends Disposable {
   final SfuClient sfuClient;
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
-  final SessionMigrationCallback onSessionMigrationEvent;
   RtcManager? rtcManager;
   StreamSubscription<SfuEvent>? eventsSubscription;
 
@@ -199,8 +195,6 @@ class CallSession extends Disposable {
       await _onTrackUnpublished(event);
     } else if (event is SfuChangePublishQualityEvent) {
       await _onPublishQualityChanged(event);
-    } else if (event is SfuGoAwayEvent) {
-      await _onGoAwayReceived(event);
     }
 
     if (event is SfuJoinResponseEvent) {
@@ -447,18 +441,6 @@ class CallSession extends Disposable {
     if (ansResult is! Success<void>) {
       _logger.w(() => '[negotiate] #setRemoteAnswer; failed: $ansResult');
     }
-  }
-
-  Future<void> _onGoAwayReceived(SfuGoAwayEvent event) async {
-    _logger.d(() => '[onGoAwayReceived] reason: ${event.goAwayReason}');
-
-    if(stateManager.callState.status is CallStatusMigrating) {
-      _logger.d(() => '[onGoAwayReceived] Call already migrating');
-      return;
-    }
-
-    stateManager.sfuGoAway(event);
-    onSessionMigrationEvent();
   }
 
   Future<void> _onRemoteTrackReceived(

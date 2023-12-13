@@ -248,8 +248,6 @@ class Call {
 
   CallConnectOptions _connectOptions = const CallConnectOptions();
 
-  String? currentSFU;
-
   @override
   String toString() {
     return 'Call{cid: $callCid}';
@@ -548,13 +546,18 @@ class Call {
     return joinedResult as Failure;
   }
 
-  Future<Result<None>> _startSession(CallCredentials credentials) async {
-    _logger.d(() => '[startSession] credentials: $credentials');
+  Future<Result<None>> _startSession(
+    CallCredentials credentials, [
+    String? sessionId,
+  ]) async {
+    _logger.d(
+      () => '[startSession] credentials: $credentials, sessionId: $sessionId',
+    );
     _credentials = null;
     final session = await _sessionFactory.makeCallSession(
+      sessionId: sessionId,
       credentials: credentials,
       stateManager: _stateManager,
-      onSessionMigrationEvent: _onSessionMigrationEvent,
     );
     _logger.v(() => '[startSession] session created: $session');
     _session = session;
@@ -577,11 +580,24 @@ class Call {
     return result;
   }
 
+  Future<Result<None>> _stopSession() async {
+    _subscriptions.cancel(_idSessionEvents);
+    _subscriptions.cancel(_idSessionStats);
+
+    await _session?.dispose();
+    _session = null;
+    _credentials = null;
+
+    return const Result.success(none);
+  }
+
   Future<void> _onSfuEvent(SfuEvent sfuEvent) async {
     if (sfuEvent is SfuSocketDisconnected) {
       await _reconnect(sfuEvent.reason);
     } else if (sfuEvent is SfuSocketFailed) {
       await _reconnect(sfuEvent.error);
+    } else if (sfuEvent is SfuGoAwayEvent) {
+      await _switchSfu(sfuEvent.goAwayReason);
     }
   }
 
@@ -700,15 +716,44 @@ class Call {
     return const Result.success(none);
   }
 
-  Future<void> _onSessionMigrationEvent() async {
-    final joinedResult = await _joinCall(migratingFrom: currentSFU);
+  Future<void> _switchSfu(SfuGoAwayReason reason) async {
+    _logger.d(() => '[switchSfu] reason: $reason');
+    final migratingFrom = _session?.config.sfuName;
+    final sessionId = _session?.sessionId;
 
-    if(joinedResult.isFailure) {
+    if (_stateManager.callState.status is CallStatusMigrating) {
+      _logger.d(() => '[switchSfu] rejected (call already migrating)');
+      return;
+    }
+    await _stopSession();
+    _stateManager.lifecycleCallMigrating();
+    _logger.d(() => '[switchSfu] migratingFrom: $migratingFrom($sessionId)');
+    final joinedResult = await _joinCall(migratingFrom: migratingFrom);
+
+    if (joinedResult is! Success<CallJoinedData>) {
       final failedResult = joinedResult as Failure;
-      _logger.e(() => '[onSessionMigrationEvent] failed: $failedResult');
+      _logger.e(() => '[switchSfu] failed: $failedResult');
       final error = failedResult.error;
       _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
+      return;
     }
+
+    _logger.v(() => '[switchSfu] starting sfu session');
+    final sessionResult = await _startSession(
+      joinedResult.data.credentials,
+      sessionId,
+    );
+    if (sessionResult is! Success<None>) {
+      _logger.w(() => '[switchSfu] sfu session start failed: $sessionResult');
+      final error = (sessionResult as Failure).error;
+      _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
+      return;
+    }
+    _logger.v(() => '[switchSfu] started session');
+    _stateManager.lifecycleCallConnected(const CallConnected());
+    await _applyConnectOptions();
+
+    _logger.v(() => '[switchSfu] completed');
   }
 
   Future<void> _clear(String src) async {
@@ -972,7 +1017,7 @@ class Call {
     bool create = false,
     String? migratingFrom,
   }) async {
-    _logger.d(() => '[joinCall] cid: $callCid');
+    _logger.d(() => '[joinCall] cid: $callCid, migratingFrom: $migratingFrom');
     final joinResult = await _coordinatorClient.joinCall(
       callCid: callCid,
       create: create,
@@ -982,7 +1027,6 @@ class Call {
       _logger.e(() => '[joinCall] join failed: $joinResult');
       return joinResult as Failure;
     }
-    currentSFU = joinResult.data.credentials.sfuServer.name;
     final receivedOrCreated = CallReceivedOrCreatedData(
       wasCreated: joinResult.data.wasCreated,
       data: CallCreatedData(
@@ -1173,8 +1217,12 @@ class Call {
             Result.error('Session is null');
 
     if (result.isSuccess) {
-      _stateManager
-          .participantSetCameraEnabled(SetCameraEnabled(enabled: enabled));
+      _stateManager.participantSetCameraEnabled(
+        SetCameraEnabled(enabled: enabled),
+      );
+      _connectOptions = _connectOptions.copyWith(
+        camera: enabled ? TrackOption.enabled() : TrackOption.disabled(),
+      );
     }
 
     return result;
@@ -1194,6 +1242,9 @@ class Call {
       _stateManager.participantSetMicrophoneEnabled(
         SetMicrophoneEnabled(enabled: enabled),
       );
+      _connectOptions = _connectOptions.copyWith(
+        microphone: enabled ? TrackOption.enabled() : TrackOption.disabled(),
+      );
     }
 
     return result;
@@ -1212,6 +1263,9 @@ class Call {
     if (result.isSuccess) {
       _stateManager.participantSetScreenShareEnabled(
         SetScreenShareEnabled(enabled: enabled),
+      );
+      _connectOptions = _connectOptions.copyWith(
+        screenShare: enabled ? TrackOption.enabled() : TrackOption.disabled(),
       );
     }
 
