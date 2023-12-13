@@ -106,9 +106,18 @@ class _StreamCallContentState extends State<StreamCallContent> {
             layoutMode: _currentLayoutMode,
           );
     } else {
+      final isMigrating = callState.status.isMigrating;
       final isReconnecting = callState.status.isReconnecting;
+      final statusText = isMigrating
+          ? 'Migrating'
+          : isReconnecting
+              ? 'Reconnecting'
+              : 'Connecting';
       bodyWidget = Center(
-        child: Text(isReconnecting ? 'Reconnecting' : 'Connecting'),
+        child: Text(
+          statusText,
+          style: theme.textTheme.title3,
+        ),
       );
     }
 

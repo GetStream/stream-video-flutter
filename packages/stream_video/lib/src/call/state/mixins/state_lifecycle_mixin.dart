@@ -239,6 +239,14 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       status: CallStatus.connected(),
     );
   }
+
+  void lifecycleCallMigrating() {
+    _logger.d(() => '[lifecycleCallMigrating] state: $state');
+    state = state.copyWith(
+      status: const CallStatusMigrating(),
+      callParticipants: const [],
+    );
+  }
 }
 
 extension on CallMetadata {

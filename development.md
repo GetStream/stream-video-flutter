@@ -42,14 +42,14 @@
 - [x] Screen sharing *(depends on "Native packages refactor")* [Maciej]
 - - [x] iOS
 - - [x] Android
-- [ ] Regular reconnection [Maciej,Kanat]
+- [x] Regular reconnection [Maciej,Kanat]
 - [ ] Support ICE restart reconnection [Maciej,Kanat]
-- [ ] Update WebRTC version to m114 (livekit version) [Kanat]
+- [x] Update WebRTC version to m114 (livekit version) [Kanat]
 - [x] Fix analysis issues [Maciej]
 
 ### 0.4.0 milestone
 - [ ] Implement Chat overlay for Dogfooding app
-- [ ] Support SFU migration
+- [x] Support SFU migration
 - [ ] Video filters / audio filters
 - [ ] Bluetooth fixes (check support of BT media devices in flutter)
 - [ ] Switch the earpiece/microphone button *(depends on "Bluetooth fixes")*

@@ -64,6 +64,8 @@ abstract class CallStatus extends Equatable {
 
   bool get isReconnecting => this is CallStatusReconnecting;
 
+  bool get isMigrating => this is CallStatusMigrating;
+
   bool get isConnected => this is CallStatusConnected;
 
   bool get isDisconnected => this is CallStatusDisconnected;
@@ -141,6 +143,15 @@ class CallStatusReconnecting extends CallStatusConnecting {
   @override
   String toString() {
     return 'Reconnecting{attempt: $attempt}';
+  }
+}
+
+class CallStatusMigrating extends CallStatusConnecting {
+  const CallStatusMigrating() : super._internal();
+
+  @override
+  String toString() {
+    return 'Migrating';
   }
 }
 
