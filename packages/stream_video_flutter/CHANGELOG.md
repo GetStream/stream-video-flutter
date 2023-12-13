@@ -1,3 +1,7 @@
+## Upcoming
+
+* Added support for SFU migration to improve video resilience.
+
 ## 0.3.0
 
 🚧 Breaking changes 
