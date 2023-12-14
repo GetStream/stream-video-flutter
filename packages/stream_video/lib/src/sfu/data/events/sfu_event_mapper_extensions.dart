@@ -8,6 +8,7 @@ import '../models/sfu_codec.dart';
 import '../models/sfu_connection_info.dart';
 import '../models/sfu_connection_quality.dart';
 import '../models/sfu_error.dart';
+import '../models/sfu_goaway_reason.dart';
 import '../models/sfu_model_mapper_extensions.dart';
 import '../models/sfu_participant.dart';
 import '../models/sfu_track_type.dart';
@@ -137,6 +138,11 @@ extension SfuEventMapper on sfu_events.SfuEvent {
           ),
           message: payload.message,
         );
+      case sfu_events.SfuEvent_EventPayload.goAway:
+        final payload = goAway;
+        return SfuGoAwayEvent(
+          goAwayReason: payload.reason.toDomain(),
+        );
       default:
         return const SfuUnknownEvent();
     }
@@ -202,6 +208,22 @@ extension SfuConnectionQualityExtension on sfu_models.ConnectionQuality {
         return SfuConnectionQuality.unspecified;
       default:
         throw StateError('unexpected quality: $this');
+    }
+  }
+}
+
+/// TODO
+extension SfuGoAwayReasonExtension on sfu_models.GoAwayReason {
+  SfuGoAwayReason toDomain() {
+    switch (this) {
+      case sfu_models.GoAwayReason.GO_AWAY_REASON_REBALANCE:
+        return SfuGoAwayReason.rebalance;
+      case sfu_models.GoAwayReason.GO_AWAY_REASON_SHUTTING_DOWN:
+        return SfuGoAwayReason.shuttingDown;
+      case sfu_models.GoAwayReason.GO_AWAY_REASON_UNSPECIFIED:
+        return SfuGoAwayReason.unspecified;
+      default:
+        throw StateError('unexpected go away reason: $this');
     }
   }
 }
