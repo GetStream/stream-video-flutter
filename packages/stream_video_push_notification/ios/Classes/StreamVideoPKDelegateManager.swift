@@ -76,12 +76,37 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
             let callType = String(splitCid[0])
             let callId = String(splitCid[1])
         } 
-        
-        let data: StreamVideoPushParams
-        if let jsonData = self.defaultData {
-            data = StreamVideoPushParams(args: jsonData)
-        } else {
-            data = StreamVideoPushParams(args: [String: Any]())
+
+        methodChannel?.invokeMethod("customizeCaller", arguments: streamDict) { (response) in
+            if let customData = response as? [String: Any] {
+                createdByName = customData["name"] as? String ?? createdByName
+                createdById = customData["handle"] as? String ?? createdById
+            }
+
+            let data: StreamVideoPushParams
+            if let jsonData = self.defaultData {
+                data = StreamVideoPushParams(args: jsonData)
+            } else {
+                data = StreamVideoPushParams(args: [String: Any]())
+            }
+
+            data.callKitData.uuid = callId
+            data.callKitData.nameCaller = createdByName ?? defaultCallText
+            data.callKitData.handle = createdById ?? defaultCallText
+            data.callKitData.type = 1 //video
+            data.callKitData.extra = ["callCid": callCid]
+
+            // Show call incoming notification.
+            StreamVideoPushNotificationPlugin.showIncomingCall(
+                data: data.callKitData,
+                fromPushKit: true
+            )
+            
+            // Complete after a delay to ensure that the incoming call notification
+            // is displayed before completing the push notification handling.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                completion()
+            }
         }
         
         data.callKitData.uuid = callId
