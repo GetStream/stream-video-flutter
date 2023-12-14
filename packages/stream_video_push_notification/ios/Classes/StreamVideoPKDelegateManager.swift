@@ -52,6 +52,15 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
         var createdByName = streamDict?["created_by_display_name"] as? String
         var createdById = streamDict?["created_by_id"] as? String
 
+        let splitCid = callCid.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: true)
+        var callId = UUID().uuidString;
+        var callType = "";
+
+        if splitCid.count == 2 {
+            let callType = String(splitCid[0])
+            let callId = String(splitCid[1])
+        } 
+
         methodChannel?.invokeMethod("customizeCaller", arguments: streamDict) { (response) in
             if let customData = response as? [String: Any] {
                 createdByName = customData["name"] as? String ?? createdByName
@@ -65,7 +74,7 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
                 data = StreamVideoPushParams(args: [String: Any]())
             }
 
-            data.callKitData.uuid = UUID().uuidString
+            data.callKitData.uuid = callId
             data.callKitData.nameCaller = createdByName ?? defaultCallText
             data.callKitData.handle = createdById ?? defaultCallText
             data.callKitData.type = 1 //video
