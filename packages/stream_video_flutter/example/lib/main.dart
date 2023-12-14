@@ -23,7 +23,10 @@ Future<void> main() async {
 Future<Result<None>> _connectUser(UserInfo user) async {
   streamLog.i(_tag, () => '[connectUser] user: $user');
 
-  final tokenResponse = await const TokenService().loadToken(userId: user.id);
+  final tokenResponse = await const TokenService().loadToken(
+    environment: Environment.demo,
+    userId: user.id,
+  );
 
   final client = StreamVideo(
     tokenResponse.apiKey,
