@@ -201,7 +201,10 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     _logger.d(() => '[lifecycleCallConnectingAction] state: $state');
     final CallStatus status;
     if (stage.attempt > 0) {
-      status = CallStatus.reconnecting(stage.attempt);
+      status = CallStatus.reconnecting(
+        stage.attempt,
+        isFastReconnectAttempt: stage.isFastReconnectAttempt,
+      );
     } else {
       status = CallStatus.connecting();
     }

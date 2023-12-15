@@ -613,6 +613,8 @@ class Call {
     if (_status.value == _ConnectionStatus.reconnecting) return;
     _status.value = _ConnectionStatus.reconnecting;
 
+    _stateManager.lifecycleCallConnectingAction(CallConnecting.fastReconnect());
+
     var tryFastReconnect = true;
     _logger.w(() => '[reconnect] starting timer');
     final timer = Timer(_fastReconnectTimeout, () {
@@ -634,9 +636,9 @@ class Call {
       },
     );
 
+    //no internet connection after _reconnectTimeout, leave the call
     if (connectionStatus != InternetConnectionStatus.connected) {
       timer.cancel();
-
       await leave();
       return;
     }
@@ -648,13 +650,16 @@ class Call {
       final result = await _session!.fastReconnect();
       if (!result.isSuccess) {
         _logger.w(
-          () => '[reconnect]fast reconnect failed, doing full reconnect',
+          () =>
+              '[reconnect] fast reconnect failed, doing full reconnect: ${result.fold(success: (success) => '', failure: (failure) => failure.error.message)}',
         );
         await _fullReconnect(reason);
       } else {
         _logger.w(
           () => '[reconnect] fast reconnect successful',
         );
+
+        _stateManager.lifecycleCallConnected(const CallConnected());
         _status.value = _ConnectionStatus.connected;
       }
     } else {

@@ -263,6 +263,8 @@ extension SfuErrorCodeExtension on sfu_models.ErrorCode {
         return SfuErrorCode.publishTrackVideoLayerNotFound;
       case sfu_models.ErrorCode.ERROR_CODE_PARTICIPANT_NOT_FOUND:
         return SfuErrorCode.participantNotFound;
+      case sfu_models.ErrorCode.ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE:
+        return SfuErrorCode.participantMediaTransportFailure;
       case sfu_models.ErrorCode.ERROR_CODE_CALL_NOT_FOUND:
         return SfuErrorCode.callNotFound;
       case sfu_models.ErrorCode.ERROR_CODE_INTERNAL_SERVER_ERROR:
