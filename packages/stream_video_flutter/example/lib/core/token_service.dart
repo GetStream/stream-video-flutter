@@ -19,10 +19,11 @@ class TokenService {
 
   Future<TokenResponse> loadToken({
     required String userId,
+    required Environment environment,
     Duration? expiresIn,
   }) async {
     final queryParameters = <String, dynamic>{
-      'environment': 'demo',
+      'environment': environment.alias,
       'user_id': userId,
     };
     if (expiresIn != null) {
@@ -40,4 +41,13 @@ class TokenService {
     final body = json.decode(response.body) as Map<String, dynamic>;
     return TokenResponse.fromJson(body);
   }
+}
+
+enum Environment {
+  pronto('pronto'),
+  demo('demo');
+
+  const Environment(this.alias);
+
+  final String alias;
 }
