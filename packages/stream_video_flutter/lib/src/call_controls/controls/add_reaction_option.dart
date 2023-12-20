@@ -62,7 +62,7 @@ class _AddReactionOptionState extends State<AddReactionOption> {
       overlayEntry = OverlayEntry(
         builder: (context) {
           return Positioned(
-            left: offset.dx,
+            left: offset.dx - 16,
             bottom: renderBox.size.height + 16,
             child: Material(
               color: Colors.transparent,
