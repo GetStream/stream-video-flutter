@@ -3,8 +3,11 @@ package io.getstream.video.flutter.stream_video_flutter.service.utils
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Context.RECEIVER_NOT_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
+import androidx.annotation.RequiresApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
@@ -25,6 +28,7 @@ internal val Context.applicationName: String get() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun Context.registerReceiverAsFlow(vararg actions: String): Flow<Intent> {
     return callbackFlow {
@@ -39,7 +43,8 @@ internal fun Context.registerReceiverAsFlow(vararg actions: String): Flow<Intent
                 actions.forEach {
                     addAction(it)
                 }
-            }
+            },
+            RECEIVER_NOT_EXPORTED
         )
 
         awaitClose {
