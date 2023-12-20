@@ -7,7 +7,6 @@ import '../theme/themes.dart';
 /// Meant to stop all video and audio tracks locally - this is done through
 /// the [onStateChanged] parameter in the implementation and not in the widget.
 class LivestreamToggle extends StatelessWidget {
-
   /// Creates a [LivestreamToggle].
   ///
   /// [enabled] decides the icon to be displayed.

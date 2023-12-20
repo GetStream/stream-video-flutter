@@ -1,6 +1,8 @@
-## Upcoming
+## 0.3.1
 
+* Important: Fixes crash for CallKit on iOS.
 * Added support for SFU migration to improve video resilience.
+* Fixes for streaming flags in `CallState` (backstage, broadcasting, recording).
 
 ## 0.3.0
 

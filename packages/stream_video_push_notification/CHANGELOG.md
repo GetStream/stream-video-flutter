@@ -1,3 +1,7 @@
+## 0.3.1
+
+* Important: Fixes crash for CallKit on iOS.
+
 ## 0.3.0
 
 ✅ Added
