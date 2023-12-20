@@ -27,8 +27,12 @@ abstract class CallStatus extends Equatable {
     return CallStatusConnecting();
   }
 
-  factory CallStatus.reconnecting(int attempt) {
-    return CallStatusReconnecting(attempt: attempt);
+  factory CallStatus.reconnecting(
+    int attempt, {
+    bool isFastReconnectAttempt = false,
+  }) {
+    return CallStatusReconnecting(
+        attempt: attempt, isFastReconnectAttempt: isFastReconnectAttempt);
   }
 
   factory CallStatus.connected() {
@@ -63,6 +67,9 @@ abstract class CallStatus extends Equatable {
   bool get isConnecting => this is CallStatusConnecting;
 
   bool get isReconnecting => this is CallStatusReconnecting;
+  bool get isFastReconnecting =>
+      this is CallStatusReconnecting &&
+      (this as CallStatusReconnecting).isFastReconnectAttempt;
 
   bool get isMigrating => this is CallStatusMigrating;
 
@@ -133,16 +140,19 @@ class CallStatusConnecting extends CallStatusActive {
 }
 
 class CallStatusReconnecting extends CallStatusConnecting {
-  const CallStatusReconnecting({required this.attempt}) : super._internal();
+  const CallStatusReconnecting(
+      {required this.attempt, this.isFastReconnectAttempt = false})
+      : super._internal();
 
   final int attempt;
+  final bool isFastReconnectAttempt;
 
   @override
-  List<Object?> get props => [attempt];
+  List<Object?> get props => [attempt, isFastReconnectAttempt];
 
   @override
   String toString() {
-    return 'Reconnecting{attempt: $attempt}';
+    return 'Reconnecting{attempt: $attempt} ${isFastReconnectAttempt ? "" : "(fast)"}';
   }
 }
 

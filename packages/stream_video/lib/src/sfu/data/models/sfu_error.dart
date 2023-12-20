@@ -28,6 +28,7 @@ enum SfuErrorCode {
   publishTrackOutOfOrder,
   publishTrackVideoLayerNotFound,
   participantNotFound,
+  participantMediaTransportFailure,
   callNotFound,
   requestValidationFailed,
   unauthenticated,

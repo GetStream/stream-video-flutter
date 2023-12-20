@@ -86,6 +86,7 @@ extension SfuEventMapper on sfu_events.SfuEvent {
       case sfu_events.SfuEvent_EventPayload.joinResponse:
         return SfuJoinResponseEvent(
           callState: joinResponse.callState.toDomain(),
+          isReconnected: joinResponse.reconnected,
         );
       case sfu_events.SfuEvent_EventPayload.participantJoined:
         return SfuParticipantJoinedEvent(
@@ -262,6 +263,8 @@ extension SfuErrorCodeExtension on sfu_models.ErrorCode {
         return SfuErrorCode.publishTrackVideoLayerNotFound;
       case sfu_models.ErrorCode.ERROR_CODE_PARTICIPANT_NOT_FOUND:
         return SfuErrorCode.participantNotFound;
+      case sfu_models.ErrorCode.ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE:
+        return SfuErrorCode.participantMediaTransportFailure;
       case sfu_models.ErrorCode.ERROR_CODE_CALL_NOT_FOUND:
         return SfuErrorCode.callNotFound;
       case sfu_models.ErrorCode.ERROR_CODE_INTERNAL_SERVER_ERROR:

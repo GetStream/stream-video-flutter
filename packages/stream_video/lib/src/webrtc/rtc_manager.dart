@@ -74,6 +74,14 @@ class RtcManager extends Disposable {
     _subscriber.onIceCandidate = cb;
   }
 
+  set onSubscriberDisconnectedOrFailed(OnDisconnectedOrFailed? cb) {
+    _subscriber.onDisconnectedOrFailed = cb;
+  }
+
+  set onPublisherDisconnectedOrFailed(OnDisconnectedOrFailed? cb) {
+    _publisher.onDisconnectedOrFailed = cb;
+  }
+
   set onRenegotiationNeeded(OnRenegotiationNeeded? cb) {
     _publisher.onRenegotiationNeeded = cb;
   }

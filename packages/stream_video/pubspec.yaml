@@ -21,6 +21,7 @@ dependencies:
     sdk: flutter
   flutter_webrtc: ^0.9.47
   http: ^1.1.0
+  internet_connection_checker: ^1.0.0+1
   intl: ^0.18.1
   jose: ^0.3.4
   meta: ^1.9.1
