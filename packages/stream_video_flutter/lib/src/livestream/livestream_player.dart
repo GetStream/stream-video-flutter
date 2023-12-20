@@ -10,7 +10,6 @@ import '../../stream_video_flutter.dart';
 /// play/pause the stream, live/backstage indicator, participant count,
 /// call duration, mute/unmute call, expand/contract livestream.
 class LivestreamPlayer extends StatefulWidget {
-
   /// Creates a livestream player
   ///
   /// * [call] is the livestream call intended to be viewed.
