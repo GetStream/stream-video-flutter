@@ -96,6 +96,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       endedAt: stage.data.metadata.details.endedAt,
       liveStartedAt: stage.data.metadata.session.liveStartedAt,
       liveEndedAt: stage.data.metadata.session.liveEndedAt,
+      isBackstage: stage.data.metadata.details.backstage,
+      isBroadcasting: stage.data.metadata.details.broadcasting,
+      isRecording: stage.data.metadata.details.recording,
     );
   }
 
@@ -116,6 +119,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       endedAt: stage.data.metadata.details.endedAt,
       liveStartedAt: stage.data.metadata.session.liveStartedAt,
       liveEndedAt: stage.data.metadata.session.liveEndedAt,
+      isBackstage: stage.data.metadata.details.backstage,
+      isBroadcasting: stage.data.metadata.details.broadcasting,
+      isRecording: stage.data.metadata.details.recording,
     );
   }
 
@@ -136,6 +142,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       endedAt: stage.data.metadata.details.endedAt,
       liveStartedAt: stage.data.metadata.session.liveStartedAt,
       liveEndedAt: stage.data.metadata.session.liveEndedAt,
+      isBackstage: stage.data.metadata.details.backstage,
+      isBroadcasting: stage.data.metadata.details.broadcasting,
+      isRecording: stage.data.metadata.details.recording,
     );
   }
 
@@ -165,6 +174,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       endedAt: stage.data.metadata.details.endedAt,
       liveStartedAt: stage.data.metadata.session.liveStartedAt,
       liveEndedAt: stage.data.metadata.session.liveEndedAt,
+      isBackstage: stage.data.metadata.details.backstage,
+      isBroadcasting: stage.data.metadata.details.broadcasting,
+      isRecording: stage.data.metadata.details.recording,
     );
   }
 

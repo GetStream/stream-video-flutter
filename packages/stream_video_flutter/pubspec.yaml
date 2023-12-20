@@ -11,7 +11,7 @@ environment:
   flutter: ">=3.10.0"
 
 dependencies:
-  cached_network_image: ^3.2.3
+  cached_network_image: ^3.3.0
   collection: ^1.17.1
   equatable: ^2.0.5
   flutter:
