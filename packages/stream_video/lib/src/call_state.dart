@@ -258,6 +258,7 @@ extension on CallMetadata {
           userId: userId,
           role: member?.role ?? user?.role ?? '',
           name: user?.name ?? '',
+          custom: user?.custom ?? {},
           image: user?.image ?? '',
           sessionId: '',
           trackIdPrefix: '',

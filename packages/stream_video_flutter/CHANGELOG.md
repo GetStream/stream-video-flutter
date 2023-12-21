@@ -1,3 +1,7 @@
+## Upcoming
+
+* Added `custom` field to `CallParticipantState` with custom user data.
+
 ## 0.3.1
 
 * Important: Fixes crash for CallKit on iOS.
