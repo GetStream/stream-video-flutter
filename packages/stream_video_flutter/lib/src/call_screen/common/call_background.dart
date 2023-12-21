@@ -62,6 +62,7 @@ class _ParticipantImageBackground extends StatelessWidget {
             fit: BoxFit.cover,
             filterQuality: FilterQuality.high,
             imageUrl: imageUrl!,
+            errorWidget: (_, __, ___) => _DefaultCallBackground(),
           ),
           ClipRect(
             child: BackdropFilter(
