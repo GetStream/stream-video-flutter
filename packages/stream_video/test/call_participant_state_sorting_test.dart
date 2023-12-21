@@ -14,6 +14,7 @@ void main() {
       name: 'A',
       userId: '1',
       sessionId: '1',
+      custom: const {},
       role: 'admin',
       trackIdPrefix: '123',
       publishedTracks: {
@@ -33,6 +34,7 @@ void main() {
       name: 'B',
       userId: '2',
       sessionId: '2',
+      custom: const {},
       role: 'admin',
       trackIdPrefix: '123',
       publishedTracks: {
@@ -53,6 +55,7 @@ void main() {
       name: 'C',
       userId: '3',
       sessionId: '3',
+      custom: {},
       role: 'admin',
       trackIdPrefix: '123',
       publishedTracks: {},
@@ -69,6 +72,7 @@ void main() {
       name: 'D',
       userId: '4',
       sessionId: '4',
+      custom: const {},
       role: 'admin',
       trackIdPrefix: '123',
       publishedTracks: {SfuTrackType.audio: TrackState.remote()},
@@ -85,6 +89,7 @@ void main() {
       name: 'E',
       userId: '5',
       sessionId: '5',
+      custom: const {},
       role: 'admin',
       trackIdPrefix: '123',
       publishedTracks: {SfuTrackType.screenShare: TrackState.remote()},
@@ -101,6 +106,7 @@ void main() {
       name: 'F',
       userId: '6',
       sessionId: '6',
+      custom: const {},
       role: 'admin',
       trackIdPrefix: '123',
       publishedTracks: {
