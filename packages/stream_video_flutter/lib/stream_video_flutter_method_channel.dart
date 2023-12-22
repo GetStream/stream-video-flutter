@@ -22,7 +22,7 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
         onBackgroundNotificationContentClick?.call(callCid);
         break;
       case 'onBackgroundNotificationButtonClick':
-        final arguments = call.arguments as List<String>;
+        final arguments = (call.arguments as List).cast<String>();
 
         final buttonType = arguments[0];
         final callCid = arguments[1];
