@@ -178,6 +178,7 @@ extension SfuParticipantExtension on sfu_models.Participant {
       userName: name,
       userImage: image,
       sessionId: sessionId,
+      custom: custom.fields,
       publishedTracks: publishedTracks
           .map(
             (track) => track.toDomain(),
