@@ -158,7 +158,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
                   strokeWidth: 2,
                 ),
               ),
-            )
+            ),
         ],
       ),
       bottomNavigationBar: localParticipant != null
