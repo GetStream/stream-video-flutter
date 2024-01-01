@@ -38,6 +38,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
+            <intent-filter>
+                <action android:name="${applicationId}.intent.action.STREAM_CALL"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+
             <intent-filter android:autoVerify="true" android:label="call_link">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
