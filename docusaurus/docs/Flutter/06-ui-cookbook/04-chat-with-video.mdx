@@ -35,7 +35,7 @@ dependencies:
   stream_chat_flutter: 5.2.0
 
   # Stream Video SDK
-  stream_video_flutter: ^0.2.0
+  stream_video_flutter: ^0.3.1
 ```
 
 You'll be integrating two SDKs - Video and Chat. In the snippet above we declared dependencies for both of them.
@@ -434,20 +434,9 @@ To successfully connect to a Call, you need to use its `callCid` to get the deta
 
 Firstly, you need to initialize the Video client, aptly called `StreamVideo`.
 
-### Initializing StreamVideo
-
-Open `main.dart`. To initialize the client, you need to add the following lines:
-
-```dart title="/lib/main.dart"
-StreamVideo.init(
-  "us83cfwuhy8n",
-  logLevel: Level.INFO,
-);
-```
+### Initializing StreamVideo and logging in a User
 
 You're now ready to log in the user and connect to a call when tapping on the custom attachment or header action.
-
-### Logging in a User
 
 For the login aspect of `StreamVideo`, there's not much to think about. The `StreamVideo` client is tied to a user instance. You cannot access any potential Calls or join an audio/video call, unless you're logged in. It's a server requirement and it makes things easy to think about.
 
@@ -455,20 +444,20 @@ Open the `login_screen.dart` file and replace the `_connectVideoUser` code with 
 
 ```dart title="/lib/screen/login_screen.dart"
 Future<void> _connectVideoUser(SampleUser user) async {
-  final videoClient = StreamVideo.instance;
-
-  await videoClient.connectUser(
-    user.toVideoUser(),
-    token: Token(user.videoToken),
-  );
+    var client = StreamVideo(
+      "us83cfwuhy8n",
+      user: user.toVideoUser(),
+      userToken: user.videoToken,
+    );
+    await client.connect();
 }
 ```
 
 It's very simple in what it does:
 
-1. You obtain a singleton instance of `StreamVideo`.
-2. You call the `connectUser()` function, with a sample user mapped to a user from the Video SDK.
-4. You pass in a `Token` to make API calls.
+1. You initialise `StreamVideo` using your API key and pass along the user you want to connect.
+2. You call the `connect()` function to connect the video client.
+3. The `StreamVideo` client created here is now accessible using `StreamVideo.instance` anywhere in your app.
 
 With all of this, your attachments will be able to hit the Video API endpoints to join a call.
 
@@ -491,14 +480,15 @@ void _startCall(BuildContext context) async {
   final currentUser = StreamChat.of(context).currentUser;
   final channel = StreamChannel.of(context).channel;
 
-  final createCallResult = await StreamVideo.instance.createCall(
+  final call = StreamVideo.instance.makeCall(
     id: 'call${Random().nextInt(10000)}',
     type: "default",
-    ringing: false,
-    participantIds: [],
   );
 
-  final call = createCallResult.call;
+  await call.getOrCreate(
+    memberIds: [],
+    ringing: false,
+  );
 
   channel.sendMessage(
     Message(
@@ -519,7 +509,7 @@ void _startCall(BuildContext context) async {
 
 This snippet is larger than the previous integration steps, but it packs a few things to keep in mind when creating a Call:
 
-1. You're able to `createCall()` by passing in a Call ID, its `type`, if you want to ring anyone in the Call and its `participantIds`. For simplicity, you'll create **meeting calls**, which don't require any initial Participants or ringing.
+1. You are able to `makeCall()` by passing in a Call ID and its `type`. You can then use `call.getOrCreate()` if you want to create a ringing call and add `memberIds`. For simplicity, you' will create **meeting calls**, which don't require any initial members or ringing.
 2. If the API call is successful, you can proceed to build the Call attachment. If the API call fails, you can show custom UI to the user, but in this case we'll just ignore that case.
 3. To build the `Attachment`, you use its constructor, which lets you define the type of the `Attachment`, its author and any `extraData` you might need to render the UI. In this case, you pass in the `call.callCid` used to show the UI in the list.
 4. Finally, when the attachment is ready, you can build a new `Message` and pass in your `customAttachment`. By calling `channel.sendMessage()`, you create a new message in the channel, with the details required to join the Call.
