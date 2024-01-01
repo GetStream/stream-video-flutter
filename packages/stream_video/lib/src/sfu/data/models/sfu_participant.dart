@@ -9,6 +9,7 @@ class SfuParticipant with EquatableMixin {
     required this.userName,
     required this.userImage,
     required this.sessionId,
+    required this.custom,
     required this.publishedTracks,
     required this.joinedAt,
     required this.trackLookupPrefix,
@@ -23,6 +24,7 @@ class SfuParticipant with EquatableMixin {
   final String userName;
   final String userImage;
   final String sessionId;
+  final Map<String, Object?> custom;
   final List<SfuTrackType> publishedTracks;
   final DateTime joinedAt;
   final String trackLookupPrefix;
@@ -37,6 +39,7 @@ class SfuParticipant with EquatableMixin {
     String? userName,
     String? userImage,
     String? sessionId,
+    Map<String, Object?>? custom,
     List<SfuTrackType>? publishedTracks,
     DateTime? joinedAt,
     String? trackLookupPrefix,
@@ -51,6 +54,7 @@ class SfuParticipant with EquatableMixin {
         userName: userId ?? this.userName,
         userImage: userId ?? this.userImage,
         sessionId: sessionId ?? this.sessionId,
+        custom: custom ?? this.custom,
         publishedTracks: publishedTracks ?? this.publishedTracks,
         joinedAt: joinedAt ?? this.joinedAt,
         trackLookupPrefix: trackLookupPrefix ?? this.trackLookupPrefix,
@@ -78,6 +82,7 @@ class SfuParticipant with EquatableMixin {
         userName,
         userImage,
         sessionId,
+        custom,
         publishedTracks,
         joinedAt,
         trackLookupPrefix,

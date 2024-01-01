@@ -141,12 +141,18 @@ class CoordinatorClientRetry extends CoordinatorClient {
     required StreamCallCid callCid,
     bool? ringing,
     List<open.MemberRequest>? members,
+    String? team,
+    bool? notify,
+    Map<String, Object> custom = const {},
   }) {
     return _retryManager.execute(
       () => _delegate.getOrCreateCall(
         callCid: callCid,
         ringing: ringing,
         members: members,
+        team: team,
+        notify: notify,
+        custom: custom,
       ),
       (error, nextAttemptDelay) async {
         _logRetry('getOrCreateCall', error, nextAttemptDelay);
@@ -230,6 +236,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     String? datacenterId,
     bool? ringing,
     bool? create,
+    String? migratingFrom,
   }) {
     return _retryManager.execute(
       () => _delegate.joinCall(
@@ -237,6 +244,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
         datacenterId: datacenterId,
         ringing: ringing,
         create: create,
+        migratingFrom: migratingFrom,
       ),
       (error, nextAttemptDelay) async {
         _logRetry('joinCall', error, nextAttemptDelay);

@@ -74,6 +74,14 @@ class RtcManager extends Disposable {
     _subscriber.onIceCandidate = cb;
   }
 
+  set onSubscriberDisconnectedOrFailed(OnDisconnectedOrFailed? cb) {
+    _subscriber.onDisconnectedOrFailed = cb;
+  }
+
+  set onPublisherDisconnectedOrFailed(OnDisconnectedOrFailed? cb) {
+    _publisher.onDisconnectedOrFailed = cb;
+  }
+
   set onRenegotiationNeeded(OnRenegotiationNeeded? cb) {
     _publisher.onRenegotiationNeeded = cb;
   }
@@ -815,6 +823,26 @@ extension RtcManagerTrackHelper on RtcManager {
 
     _logger.e(() => 'Unsupported trackType $trackType');
     return Result.error('Unsupported trackType $trackType');
+  }
+
+  Future<Result<None>> setAppleAudioConfiguration() async {
+    try {
+      await rtc.Helper.setAppleAudioConfiguration(
+        rtc.AppleAudioConfiguration(
+          appleAudioMode: rtc.AppleAudioMode.videoChat,
+          appleAudioCategory: rtc.AppleAudioCategory.playAndRecord,
+          appleAudioCategoryOptions: {
+            rtc.AppleAudioCategoryOption.mixWithOthers,
+            rtc.AppleAudioCategoryOption.allowBluetooth,
+            rtc.AppleAudioCategoryOption.allowBluetoothA2DP,
+            rtc.AppleAudioCategoryOption.allowAirPlay,
+          },
+        ),
+      );
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
   }
 }
 

@@ -10,6 +10,7 @@ import '../models/sfu_call_grants.dart';
 import '../models/sfu_call_state.dart';
 import '../models/sfu_connection_info.dart';
 import '../models/sfu_error.dart';
+import '../models/sfu_goaway_reason.dart';
 import '../models/sfu_participant.dart';
 import '../models/sfu_track_type.dart';
 import '../models/sfu_video_sender.dart';
@@ -31,12 +32,16 @@ class SfuUnknownEvent extends SfuEvent {
 
 @internal
 class SfuJoinResponseEvent extends SfuEvent {
-  const SfuJoinResponseEvent({required this.callState});
+  const SfuJoinResponseEvent({
+    required this.callState,
+    this.isReconnected = false,
+  });
 
   final SfuCallState callState;
+  final bool isReconnected;
 
   @override
-  List<Object> get props => [callState];
+  List<Object> get props => [callState, isReconnected];
 }
 
 @internal
@@ -233,6 +238,17 @@ class SfuSocketConnected extends SfuSocketEvent {
 
   @override
   List<Object?> get props => [sessionId, url];
+}
+
+class SfuGoAwayEvent extends SfuSocketEvent {
+  const SfuGoAwayEvent({
+    required this.goAwayReason,
+  });
+
+  final SfuGoAwayReason goAwayReason;
+
+  @override
+  List<Object?> get props => [goAwayReason];
 }
 
 class SfuSocketDisconnected extends SfuSocketEvent {

@@ -140,12 +140,16 @@ class CallSessionStart extends LifecycleStage {
 }
 
 class CallConnecting extends LifecycleStage {
-  const CallConnecting(this.attempt);
+  const CallConnecting(this.attempt, {this.isFastReconnectAttempt = false});
+
+  factory CallConnecting.fastReconnect() =>
+      const CallConnecting(1, isFastReconnectAttempt: true);
 
   final int attempt;
+  final bool isFastReconnectAttempt;
 
   @override
-  List<Object?> get props => [attempt];
+  List<Object?> get props => [attempt, isFastReconnectAttempt];
 }
 
 class CallConnected extends LifecycleStage {

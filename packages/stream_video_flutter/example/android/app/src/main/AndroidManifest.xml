@@ -43,7 +43,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="com.example.example.intent.action.STREAM_CALL"/>
+                <action android:name="${applicationId}.intent.action.STREAM_CALL"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>

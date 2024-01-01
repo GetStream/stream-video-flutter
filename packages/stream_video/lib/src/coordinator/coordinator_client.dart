@@ -60,6 +60,9 @@ abstract class CoordinatorClient {
     required StreamCallCid callCid,
     bool? ringing,
     List<open.MemberRequest>? members,
+    String? team,
+    bool? notify,
+    Map<String, Object> custom = const {},
   });
 
   Future<Result<models.CoordinatorJoined>> joinCall({
@@ -67,6 +70,7 @@ abstract class CoordinatorClient {
     String? datacenterId,
     bool? ringing,
     bool? create,
+    String? migratingFrom,
   });
 
   Future<Result<None>> acceptCall({required StreamCallCid cid});
