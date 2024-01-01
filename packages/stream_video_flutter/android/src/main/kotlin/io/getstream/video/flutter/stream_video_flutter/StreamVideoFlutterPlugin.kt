@@ -3,7 +3,9 @@ package io.getstream.video.flutter.stream_video_flutter
 import androidx.annotation.NonNull
 
 import android.content.Intent
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -42,6 +44,7 @@ class StreamVideoFlutterPlugin: FlutterPlugin, ActivityAware, PluginRegistry.New
 
   private var activityBinding: ActivityPluginBinding? = null
 
+  @RequiresApi(Build.VERSION_CODES.O)
   override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     logger.i { "[onAttachedToEngine] no args" }
     channel = MethodChannel(binding.binaryMessenger, CHANNEL_NAME).apply {
