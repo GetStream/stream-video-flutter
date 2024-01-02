@@ -186,8 +186,10 @@ class CallSession extends Disposable {
       );
 
       if (event.isReconnected) {
-        _logger.v(() =>
-            '[fastReconnect] fast-reconnect possible - requesting ICE restarts');
+        _logger.v(
+          () =>
+              '[fastReconnect] fast-reconnect possible - requesting ICE restarts',
+        );
         final iceResult = await sfuClient.restartIce(
           sfu.ICERestartRequest(
             sessionId: sessionId,

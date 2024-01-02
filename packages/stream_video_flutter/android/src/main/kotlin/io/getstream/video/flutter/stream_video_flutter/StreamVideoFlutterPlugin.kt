@@ -44,7 +44,6 @@ class StreamVideoFlutterPlugin: FlutterPlugin, ActivityAware, PluginRegistry.New
 
   private var activityBinding: ActivityPluginBinding? = null
 
-  @RequiresApi(Build.VERSION_CODES.O)
   override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     logger.i { "[onAttachedToEngine] no args" }
     channel = MethodChannel(binding.binaryMessenger, CHANNEL_NAME).apply {

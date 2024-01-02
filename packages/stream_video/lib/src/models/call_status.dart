@@ -32,7 +32,9 @@ abstract class CallStatus extends Equatable {
     bool isFastReconnectAttempt = false,
   }) {
     return CallStatusReconnecting(
-        attempt: attempt, isFastReconnectAttempt: isFastReconnectAttempt);
+      attempt: attempt,
+      isFastReconnectAttempt: isFastReconnectAttempt,
+    );
   }
 
   factory CallStatus.connected() {
@@ -140,9 +142,10 @@ class CallStatusConnecting extends CallStatusActive {
 }
 
 class CallStatusReconnecting extends CallStatusConnecting {
-  const CallStatusReconnecting(
-      {required this.attempt, this.isFastReconnectAttempt = false})
-      : super._internal();
+  const CallStatusReconnecting({
+    required this.attempt,
+    this.isFastReconnectAttempt = false,
+  }) : super._internal();
 
   final int attempt;
   final bool isFastReconnectAttempt;
