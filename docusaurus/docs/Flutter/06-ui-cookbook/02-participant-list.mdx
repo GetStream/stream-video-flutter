@@ -26,13 +26,12 @@ Before building the actual view, let's take a look on how we can obtain and conn
 1. Get the call object using the `StreamVideo` class:
 
 ```dart
-  final callCid = StreamCallCid.from(type: type, id: id);
-  final data = await StreamVideo.instance.getOrCreateCall(cid: callCid);
-  final call = Call.fromCreated(data: data.getDataOrNull()!.data);
+  final call = StreamVideo.instance.makeCall(type: type, id: id);
+  await call.getOrCreate();
 ```
 //TODO Cover call options configuration once https://github.com/GetStream/stream-video-flutter/pull/278 is merged
 
-You can see that as a first step, we need to create a `StreamCallCid` object based on `type` and `id`, later use a `StreamVideo` instance to get or create a call and lastly - use a factory method to create a `Call` object itself.
+You can see that as a first step, we need to create a call using the `makeCall()` method based on `type` and `id`, after which we can create/get the call using the `call.getOrCreate()` method.
 
 2. Connect the current user to the call obtained before:
 
