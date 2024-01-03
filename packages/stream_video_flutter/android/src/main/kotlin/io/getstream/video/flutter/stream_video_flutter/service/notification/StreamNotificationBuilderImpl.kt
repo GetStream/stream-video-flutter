@@ -95,12 +95,23 @@ internal class StreamNotificationBuilderImpl(
         } else {
             PendingIntent.FLAG_UPDATE_CURRENT
         }
-        val contentIntent = PendingIntent.getActivity(
-            context,
-            0,
-            intent,
-            flags,
-        )
+
+        val contentIntent =  if(type == ServiceType.call) {
+            PendingIntent.getActivity(
+                    context,
+                    0,
+                    intent,
+                    flags,
+            )
+        } else {
+            PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_IMMUTABLE,
+            )
+        }
+
         return NotificationCompat.Builder(context, getNotificationChannelId()).apply {
             if (payload.options?.useCustomLayout == true) {
                 enrichCustom(payload, contentIntent)

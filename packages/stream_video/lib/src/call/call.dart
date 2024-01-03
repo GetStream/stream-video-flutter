@@ -2,6 +2,8 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -43,6 +45,9 @@ const _idConnect = 6;
 const _idAwait = 7;
 
 const _tag = 'SV:Call';
+
+const _reconnectTimeout = Duration(seconds: 30);
+const _fastReconnectTimeout = Duration(seconds: kDebugMode ? 10 : 3);
 
 int _callSeq = 1;
 
@@ -546,12 +551,19 @@ class Call {
     return joinedResult as Failure;
   }
 
-  Future<Result<None>> _startSession(CallCredentials credentials) async {
-    _logger.d(() => '[startSession] credentials: $credentials');
+  Future<Result<None>> _startSession(
+    CallCredentials credentials, [
+    String? sessionId,
+  ]) async {
+    _logger.d(
+      () => '[startSession] credentials: $credentials, sessionId: $sessionId',
+    );
     _credentials = null;
     final session = await _sessionFactory.makeCallSession(
+      sessionId: sessionId,
       credentials: credentials,
       stateManager: _stateManager,
+      onFullReconnectNeeded: () => _fullReconnect(null),
     );
     _logger.v(() => '[startSession] session created: $session');
     _session = session;
@@ -574,25 +586,98 @@ class Call {
     return result;
   }
 
+  Future<Result<None>> _stopSession() async {
+    _subscriptions.cancel(_idSessionEvents);
+    _subscriptions.cancel(_idSessionStats);
+
+    await _session?.dispose();
+    _session = null;
+    _credentials = null;
+
+    return const Result.success(none);
+  }
+
   Future<void> _onSfuEvent(SfuEvent sfuEvent) async {
     if (sfuEvent is SfuSocketDisconnected) {
       await _reconnect(sfuEvent.reason);
     } else if (sfuEvent is SfuSocketFailed) {
       await _reconnect(sfuEvent.error);
+    } else if (sfuEvent is SfuGoAwayEvent) {
+      await _switchSfu(sfuEvent.goAwayReason);
     }
   }
 
   Future<void> _reconnect(dynamic reason) async {
+    //one reconnect attempt at a time
+    if (_status.value == _ConnectionStatus.reconnecting) return;
+    _status.value = _ConnectionStatus.reconnecting;
+
+    _stateManager.lifecycleCallConnectingAction(CallConnecting.fastReconnect());
+
+    var tryFastReconnect = true;
+    _logger.w(() => '[reconnect] starting timer');
+    final timer = Timer(_fastReconnectTimeout, () {
+      _logger.w(() => '[reconnect] too late for fast reconnect');
+      tryFastReconnect = false;
+    });
+
+    final connectionStatus = await InternetConnectionChecker.createInstance(
+      checkInterval: const Duration(seconds: 1),
+    )
+        .onStatusChange
+        .firstWhere((status) => status == InternetConnectionStatus.connected)
+        .timeout(
+      _reconnectTimeout,
+      onTimeout: () {
+        _logger.w(() => '[reconnect] timeout');
+
+        return InternetConnectionStatus.disconnected;
+      },
+    );
+
+    //no internet connection after _reconnectTimeout, leave the call
+    if (connectionStatus != InternetConnectionStatus.connected) {
+      timer.cancel();
+      await leave();
+      return;
+    }
+
+    if (_session != null && tryFastReconnect) {
+      _logger.w(() => '[reconnect] trying fast reconnect');
+      timer.cancel();
+
+      final result = await _session!.fastReconnect();
+      if (!result.isSuccess) {
+        _logger.w(
+          () =>
+              '[reconnect] fast reconnect failed, doing full reconnect: ${result.fold(success: (success) => '', failure: (failure) => failure.error.message)}',
+        );
+        await _fullReconnect(reason);
+      } else {
+        _logger.w(
+          () => '[reconnect] fast reconnect successful',
+        );
+
+        _stateManager.lifecycleCallConnected(const CallConnected());
+        _status.value = _ConnectionStatus.connected;
+      }
+    } else {
+      _logger.w(() => '[reconnect] doing full reconnect');
+      await _fullReconnect(reason);
+    }
+  }
+
+  Future<void> _fullReconnect(dynamic reason) async {
     if (_status.value == _ConnectionStatus.disconnected) {
-      _logger.w(() => '[reconnect] rejected (disconnected)');
+      _logger.w(() => '[fullReconnect] rejected (disconnected)');
       return;
     }
     if (_status.value == _ConnectionStatus.connecting) {
-      _logger.w(() => '[reconnect] rejected (connecting)');
+      _logger.w(() => '[fullReconnect] rejected (connecting)');
       return;
     }
     _status.value = _ConnectionStatus.connecting;
-    _logger.w(() => '[reconnect] >>>>>>>>>>>>>>>> reason: $reason');
+    _logger.w(() => '[fullReconnect] >>>>>>>>>>>>>>>> reason: $reason');
     _subscriptions.cancel(_idSessionEvents);
     await _session?.dispose();
     _session = null;
@@ -606,52 +691,52 @@ class Call {
       if (_status.value == _ConnectionStatus.disconnected) {
         _logger.w(
           () =>
-              '[reconnect] attempt($_reconnectAttempt) rejected (disconnected)',
+              '[fullReconnect] attempt($_reconnectAttempt) rejected (disconnected)',
         );
-        _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< rejected');
+        _logger.v(() => '[fullReconnect] <<<<<<<<<<<<<<< rejected');
         return;
       }
       final elapsed = DateTime.now().toUtc().millisecondsSinceEpoch - startTime;
       final retryPolicy = _retryPolicy;
       if (elapsed > retryPolicy.config.callRejoinTimeout.inMilliseconds) {
-        _logger.w(() => '[reconnect] timeout exceed');
+        _logger.w(() => '[fullReconnect] timeout exceed');
         result = Result.error('was unable to reconnect in 15 seconds');
         break;
       }
       final delay = retryPolicy.backoff(_reconnectAttempt);
       _logger.v(
-        () => '[reconnect] attempt: $_reconnectAttempt, '
+        () => '[fullReconnect] attempt: $_reconnectAttempt, '
             'elapsed: $elapsed, delay: $delay',
       );
       await Future<void>.delayed(delay);
-      _logger.v(() => '[reconnect] joining to coordinator');
+      _logger.v(() => '[fullReconnect] joining to coordinator');
       final joinedResult = await _joinIfNeeded();
       if (joinedResult is! Success<CallCredentials>) {
-        _logger.e(() => '[reconnect] joining failed: $joinedResult');
+        _logger.e(() => '[fullReconnect] joining failed: $joinedResult');
         continue;
       }
-      _logger.v(() => '[reconnect] starting session');
+      _logger.v(() => '[fullReconnect] starting session');
       result = await _startSession(joinedResult.data);
       if (result is! Success<None>) {
-        _logger.w(() => '[reconnect] session start failed: $result');
+        _logger.w(() => '[fullReconnect] session start failed: $result');
         continue;
       }
-      _logger.v(() => '[reconnect] session started');
+      _logger.v(() => '[fullReconnect] session started');
       break;
     }
     _reconnectAttempt = 0;
     if (result.isFailure) {
-      _logger.e(() => '[reconnect] <<<<<<<<<<<<<<< failed: $result');
+      _logger.e(() => '[fullReconnect] <<<<<<<<<<<<<<< failed: $result');
       _status.value = _ConnectionStatus.disconnected;
       final error = (result as Failure).error;
       _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
       return;
     }
-    _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< completed');
+    _logger.v(() => '[fullReconnect] <<<<<<<<<<<<<<< completed');
     _stateManager.lifecycleCallConnected(const CallConnected());
     _status.value = _ConnectionStatus.connected;
     await _applyConnectOptions();
-    _logger.v(() => '[reconnect] <<<<<<<<<<<<<<< side effects applied');
+    _logger.v(() => '[fullReconnect] <<<<<<<<<<<<<<< side effects applied');
   }
 
   Future<Result<None>> _awaitIfNeeded() async {
@@ -695,6 +780,46 @@ class Call {
     _stateManager.lifecycleCallDisconnected(const CallDisconnected());
     _logger.v(() => '[leave] finished');
     return const Result.success(none);
+  }
+
+  Future<void> _switchSfu(SfuGoAwayReason reason) async {
+    _logger.d(() => '[switchSfu] reason: $reason');
+    final migratingFrom = _session?.config.sfuName;
+    final sessionId = _session?.sessionId;
+
+    if (_stateManager.callState.status is CallStatusMigrating) {
+      _logger.d(() => '[switchSfu] rejected (call already migrating)');
+      return;
+    }
+    await _stopSession();
+    _stateManager.lifecycleCallMigrating();
+    _logger.d(() => '[switchSfu] migratingFrom: $migratingFrom($sessionId)');
+    final joinedResult = await _joinCall(migratingFrom: migratingFrom);
+
+    if (joinedResult is! Success<CallJoinedData>) {
+      final failedResult = joinedResult as Failure;
+      _logger.e(() => '[switchSfu] failed: $failedResult');
+      final error = failedResult.error;
+      _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
+      return;
+    }
+
+    _logger.v(() => '[switchSfu] starting sfu session');
+    final sessionResult = await _startSession(
+      joinedResult.data.credentials,
+      sessionId,
+    );
+    if (sessionResult is! Success<None>) {
+      _logger.w(() => '[switchSfu] sfu session start failed: $sessionResult');
+      final error = (sessionResult as Failure).error;
+      _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
+      return;
+    }
+    _logger.v(() => '[switchSfu] started session');
+    _stateManager.lifecycleCallConnected(const CallConnected());
+    await _applyConnectOptions();
+
+    _logger.v(() => '[switchSfu] completed');
   }
 
   Future<void> _clear(String src) async {
@@ -956,10 +1081,14 @@ class Call {
   /// and joins the call immediately.
   Future<Result<CallJoinedData>> _joinCall({
     bool create = false,
+    String? migratingFrom,
   }) async {
-    _logger.d(() => '[joinCall] cid: $callCid');
-    final joinResult =
-        await _coordinatorClient.joinCall(callCid: callCid, create: create);
+    _logger.d(() => '[joinCall] cid: $callCid, migratingFrom: $migratingFrom');
+    final joinResult = await _coordinatorClient.joinCall(
+      callCid: callCid,
+      create: create,
+      migratingFrom: migratingFrom,
+    );
     if (joinResult is! Success<CoordinatorJoined>) {
       _logger.e(() => '[joinCall] join failed: $joinResult');
       return joinResult as Failure;
@@ -1154,8 +1283,12 @@ class Call {
             Result.error('Session is null');
 
     if (result.isSuccess) {
-      _stateManager
-          .participantSetCameraEnabled(SetCameraEnabled(enabled: enabled));
+      _stateManager.participantSetCameraEnabled(
+        SetCameraEnabled(enabled: enabled),
+      );
+      _connectOptions = _connectOptions.copyWith(
+        camera: enabled ? TrackOption.enabled() : TrackOption.disabled(),
+      );
     }
 
     return result;
@@ -1175,6 +1308,9 @@ class Call {
       _stateManager.participantSetMicrophoneEnabled(
         SetMicrophoneEnabled(enabled: enabled),
       );
+      _connectOptions = _connectOptions.copyWith(
+        microphone: enabled ? TrackOption.enabled() : TrackOption.disabled(),
+      );
     }
 
     return result;
@@ -1193,6 +1329,9 @@ class Call {
     if (result.isSuccess) {
       _stateManager.participantSetScreenShareEnabled(
         SetScreenShareEnabled(enabled: enabled),
+      );
+      _connectOptions = _connectOptions.copyWith(
+        screenShare: enabled ? TrackOption.enabled() : TrackOption.disabled(),
       );
     }
 
@@ -1518,6 +1657,7 @@ extension on CallStateNotifier {
 enum _ConnectionStatus {
   disconnected,
   connecting,
+  reconnecting,
   connected;
 
   @override

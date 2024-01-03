@@ -3,7 +3,9 @@ package io.getstream.video.flutter.stream_video_flutter
 import androidx.annotation.NonNull
 
 import android.content.Intent
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding

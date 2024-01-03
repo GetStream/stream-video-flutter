@@ -73,6 +73,8 @@ extension CallStatusExtension on CallStatus {
       return 'Joined';
     } else if (isReconnecting) {
       return 'Reconnecting';
+    } else if (isMigrating) {
+      return 'Migrating';
     } else if (isConnecting) {
       return 'Connecting';
     } else if (isConnected) {

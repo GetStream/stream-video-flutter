@@ -1,13 +1,45 @@
 ## Upcoming
 
+* Added `custom` field to `CallParticipantState` with custom user data.
+
+## 0.3.1
+
+* Important: Fixes crash for CallKit on iOS.
+* Added support for SFU migration to improve video resilience.
+* Fixes for streaming flags in `CallState` (backstage, broadcasting, recording).
+
+## 0.3.0
+
+🚧 Breaking changes 
+
+* The functionality from `stream_video_flutter_background` is now merged into `stream_video_flutter`. You no longer have to use the background plugin.
+* Removed the `incomingCallerNameOverride` and `incomingCallerHandlerOverride` from `StreamVideoPushParams` in favor of the new `callerCustomizationCallback` in `StreamVideoPushNotificationManager`.
+
 ✅ Added
 
 * Added `LivestreamPlayer` - a in-built widget that allows you to easily view livestreams.
 * Added screen sharing functionality and related toggle option for both Android and iOS. Check [our documentation](https://getstream.io/video/docs/flutter/) for more details
+* Exposed call coordinator events through the `coordinatorEvents` stream in the `Call` class.
+* Added `StreamCallContentTheme` to video theme.
+* `callerCustomizationCallback` to `StreamVideoPushNotificationManager` that allow dynamic customization of CallKit call screen.
 
-🔄 Changed
+Example usage:
 
-* The functionality from `stream_video_flutter_background` is now merged into `stream_video_flutter`. You no longer have to use the background plugin.
+```dart
+pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
+    ...
+    callerCustomizationCallback: ({required callCid, callerHandle, callerName}) =>
+          CallerCustomizationResponse(name: "Customized $callerName"),
+    ),
+```
+
+* Added a `includeUserDetails` field to determine if user details should be passed to backend when connecting user.
+* Added `team`, `notify`, and `custom` properties to `getOrCreate()` for `Call`.
+
+🐞 Fixed
+
+* Added Apple audio configuration to make audio work in silent mode.
+* Fixed ringing call cancellation issues.
 
 ## 0.2.0
 
