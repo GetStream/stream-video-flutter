@@ -283,6 +283,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       ),
       callContentTheme: const StreamCallContentThemeData(
         callContentBackgroundColor: Color(0XFF272A30),
+        appBarCenterTitle: false,
       ),
       outgoingCallTheme: StreamIncomingOutgoingCallThemeData(
         singleParticipantAvatarTheme: StreamUserAvatarThemeData(

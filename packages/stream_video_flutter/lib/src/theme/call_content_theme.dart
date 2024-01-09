@@ -8,20 +8,25 @@ import '../../stream_video_flutter.dart';
 class StreamCallContentThemeData with Diagnosticable {
   /// Creates a new instance of [StreamCallContentThemeData].
   const StreamCallContentThemeData({
+    this.appBarCenterTitle = false,
     this.callContentBackgroundColor = const Color(0XFF272A30),
   });
 
   /// Theme for the avatar in a call with one participant.
   final Color callContentBackgroundColor;
 
+  final bool appBarCenterTitle;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   StreamCallContentThemeData copyWith({
     Color? callContentBackgroundColor,
+    bool? appBarCenterTitle,
   }) {
     return StreamCallContentThemeData(
       callContentBackgroundColor:
           callContentBackgroundColor ?? this.callContentBackgroundColor,
+      appBarCenterTitle: appBarCenterTitle ?? this.appBarCenterTitle,
     );
   }
 
@@ -39,6 +44,7 @@ class StreamCallContentThemeData with Diagnosticable {
         other.callContentBackgroundColor,
         t,
       )!,
+      appBarCenterTitle: other.appBarCenterTitle,
     );
   }
 
@@ -46,6 +52,7 @@ class StreamCallContentThemeData with Diagnosticable {
   int get hashCode => Object.hashAll(
         [
           callContentBackgroundColor,
+          appBarCenterTitle,
         ],
       );
 
@@ -59,6 +66,7 @@ class StreamCallContentThemeData with Diagnosticable {
     }
     return other is StreamCallContentThemeData &&
         runtimeType == other.runtimeType &&
+        appBarCenterTitle == other.appBarCenterTitle &&
         callContentBackgroundColor == other.callContentBackgroundColor;
   }
 
@@ -71,6 +79,12 @@ class StreamCallContentThemeData with Diagnosticable {
         callContentBackgroundColor,
       ),
     );
+    properties.add(
+      DiagnosticsProperty(
+        'appBarCenterTitle',
+        appBarCenterTitle,
+      ),
+    );
   }
 
   /// Merges one [StreamCallContentThemeData] with the another.
@@ -80,6 +94,7 @@ class StreamCallContentThemeData with Diagnosticable {
     if (other == null) return this;
     return copyWith(
       callContentBackgroundColor: other.callContentBackgroundColor,
+      appBarCenterTitle: other.appBarCenterTitle,
     );
   }
 }

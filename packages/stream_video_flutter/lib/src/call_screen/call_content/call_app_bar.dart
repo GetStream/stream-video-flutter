@@ -87,7 +87,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: elevation,
       leading: leadingWidget,
       backgroundColor: backgroundColor ?? theme.colorTheme.barsBg,
-      centerTitle: false,
+      centerTitle: theme.callContentTheme.appBarCenterTitle,
       actions: actions ??
           <Widget>[
             ParticipantLayoutModeButton(
