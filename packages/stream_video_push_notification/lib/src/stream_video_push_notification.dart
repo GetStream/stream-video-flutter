@@ -26,14 +26,20 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required StreamVideoPushProvider iosPushProvider,
     required StreamVideoPushProvider androidPushProvider,
     CallerCustomizationFunction? callerCustomizationCallback,
+    Function? callback,
     StreamVideoPushParams? pushParams,
   }) {
     return (CoordinatorClient client) {
       final params = _defaultPushParams.merge(pushParams);
 
+      print("INITIALIZING PUSH PLATFORM");
       if (CurrentPlatform.isIos) {
-        StreamVideoPushNotificationPlatform.instance
-            .init(params.toJson(), callerCustomizationCallback);
+        print("INITIALIZING PUSH PLATFORM iOS");
+        StreamVideoPushNotificationPlatform.instance.init(
+          params.toJson(),
+          callerCustomizationCallback,
+          callback,
+        );
       }
 
       return StreamVideoPushNotificationManager._(
@@ -53,6 +59,20 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required this.pushParams,
     this.callerCustomizationCallback,
   }) : _client = client {
+    print("INITIALIZING PUSH MANAGER");
+
+    Future.delayed(Duration(milliseconds: 1000))
+        .then((value) => print('PUSH NOTIFICATION start 1s'));
+
+    Future.delayed(Duration(milliseconds: 2000))
+        .then((value) => print('PUSH NOTIFICATION start 2s'));
+
+    Future.delayed(Duration(milliseconds: 3000))
+        .then((value) => print('PUSH NOTIFICATION start 3s'));
+
+    Future.delayed(Duration(milliseconds: 4000))
+        .then((value) => print('PUSH NOTIFICATION start 4s'));
+
     _subscriptions.add(
       _idCallIncoming,
       onCallEvent.whereType<ActionCallIncoming>().listen(
