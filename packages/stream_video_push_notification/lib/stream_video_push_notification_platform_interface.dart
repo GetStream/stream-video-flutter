@@ -47,6 +47,7 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   Future<void> init(
     Map<String, dynamic> pushParams,
     CallerCustomizationFunction? callerCustomizationCallback,
+    Function? callback,
   ) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
