@@ -21,6 +21,8 @@ const _idCallKitAcceptDecline = 5;
 /// Implementation of [PushNotificationManager] for Stream Video.
 class StreamVideoPushNotificationManager implements PushNotificationManager {
   /// Factory for creating a new instance of [StreamVideoPushNotificationManager].
+  ///   /// Parameters:
+  /// * [callerCustomizationCallback] callback providing customized caller data used for call screen and CallKit call. (for iOS this will only work for foreground calls)
   static create({
     required StreamVideoPushProvider iosPushProvider,
     required StreamVideoPushProvider androidPushProvider,

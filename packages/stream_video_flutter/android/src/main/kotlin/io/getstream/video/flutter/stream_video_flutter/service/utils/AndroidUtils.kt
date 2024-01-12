@@ -3,8 +3,13 @@ package io.getstream.video.flutter.stream_video_flutter.service.utils
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Context.RECEIVER_NOT_EXPORTED
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
+import androidx.annotation.RequiresApi
+import io.getstream.video.flutter.stream_video_flutter.service.notification.IdentifiedNotification
+import io.getstream.video.flutter.stream_video_flutter.service.notification.NotificationAction
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
@@ -33,14 +38,25 @@ internal fun Context.registerReceiverAsFlow(vararg actions: String): Flow<Intent
                 trySendBlocking(intent)
             }
         }
-        registerReceiver(
-            receiver,
-            IntentFilter().apply {
-                actions.forEach {
-                    addAction(it)
-                }
+
+        val intentFilter =  IntentFilter().apply {
+            actions.forEach {
+                addAction(it)
             }
-        )
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(
+                    receiver,
+                    intentFilter,
+                    RECEIVER_NOT_EXPORTED
+            )
+        }else {
+            registerReceiver(
+                    receiver,
+                    intentFilter
+            )
+        }
 
         awaitClose {
             unregisterReceiver(receiver)

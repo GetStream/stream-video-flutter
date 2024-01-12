@@ -27,6 +27,7 @@ class CallSessionFactory {
     String? sessionId,
     required CallCredentials credentials,
     required CallStateNotifier stateManager,
+    required OnFullReconnectNeeded onFullReconnectNeeded,
   }) async {
     final finalSessionId = sessionId ?? const Uuid().v4();
     _logger.d(() => '[makeCallSession] sessionId: $finalSessionId($sessionId)');
@@ -49,6 +50,7 @@ class CallSessionFactory {
       config: sessionConfig,
       stateManager: stateManager,
       sdpEditor: sdpEditor,
+      onFullReconnectNeeded: onFullReconnectNeeded,
     );
   }
 

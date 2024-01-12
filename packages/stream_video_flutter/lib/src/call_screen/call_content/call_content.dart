@@ -94,7 +94,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
     final theme = StreamVideoTheme.of(context);
 
     final Widget bodyWidget;
-    if (callState.status.isConnected) {
+    if (callState.status.isConnected || callState.status.isFastReconnecting) {
       bodyWidget = widget.callParticipantsBuilder?.call(
             context,
             call,
@@ -146,6 +146,19 @@ class _StreamCallContentState extends State<StreamCallContent> {
               onClosePressed: _toggleStatsVisibility,
             ),
           ),
+          if (callState.status.isFastReconnecting)
+            const Positioned(
+              top: 25,
+              left: 25,
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              ),
+            ),
         ],
       ),
       bottomNavigationBar: localParticipant != null

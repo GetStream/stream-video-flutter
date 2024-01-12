@@ -96,6 +96,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       endedAt: stage.data.metadata.details.endedAt,
       liveStartedAt: stage.data.metadata.session.liveStartedAt,
       liveEndedAt: stage.data.metadata.session.liveEndedAt,
+      isBackstage: stage.data.metadata.details.backstage,
+      isBroadcasting: stage.data.metadata.details.broadcasting,
+      isRecording: stage.data.metadata.details.recording,
     );
   }
 
@@ -116,6 +119,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       endedAt: stage.data.metadata.details.endedAt,
       liveStartedAt: stage.data.metadata.session.liveStartedAt,
       liveEndedAt: stage.data.metadata.session.liveEndedAt,
+      isBackstage: stage.data.metadata.details.backstage,
+      isBroadcasting: stage.data.metadata.details.broadcasting,
+      isRecording: stage.data.metadata.details.recording,
     );
   }
 
@@ -136,6 +142,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       endedAt: stage.data.metadata.details.endedAt,
       liveStartedAt: stage.data.metadata.session.liveStartedAt,
       liveEndedAt: stage.data.metadata.session.liveEndedAt,
+      isBackstage: stage.data.metadata.details.backstage,
+      isBroadcasting: stage.data.metadata.details.broadcasting,
+      isRecording: stage.data.metadata.details.recording,
     );
   }
 
@@ -165,6 +174,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       endedAt: stage.data.metadata.details.endedAt,
       liveStartedAt: stage.data.metadata.session.liveStartedAt,
       liveEndedAt: stage.data.metadata.session.liveEndedAt,
+      isBackstage: stage.data.metadata.details.backstage,
+      isBroadcasting: stage.data.metadata.details.broadcasting,
+      isRecording: stage.data.metadata.details.recording,
     );
   }
 
@@ -201,7 +213,10 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     _logger.d(() => '[lifecycleCallConnectingAction] state: $state');
     final CallStatus status;
     if (stage.attempt > 0) {
-      status = CallStatus.reconnecting(stage.attempt);
+      status = CallStatus.reconnecting(
+        stage.attempt,
+        isFastReconnectAttempt: stage.isFastReconnectAttempt,
+      );
     } else {
       status = CallStatus.connecting();
     }
@@ -261,6 +276,7 @@ extension on CallMetadata {
           userId: userId,
           role: member?.role ?? user?.role ?? '',
           name: user?.name ?? '',
+          custom: user?.custom ?? {},
           image: user?.image ?? '',
           sessionId: '',
           trackIdPrefix: '',

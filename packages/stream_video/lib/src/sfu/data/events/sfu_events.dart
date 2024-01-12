@@ -32,12 +32,16 @@ class SfuUnknownEvent extends SfuEvent {
 
 @internal
 class SfuJoinResponseEvent extends SfuEvent {
-  const SfuJoinResponseEvent({required this.callState});
+  const SfuJoinResponseEvent({
+    required this.callState,
+    this.isReconnected = false,
+  });
 
   final SfuCallState callState;
+  final bool isReconnected;
 
   @override
-  List<Object> get props => [callState];
+  List<Object> get props => [callState, isReconnected];
 }
 
 @internal
