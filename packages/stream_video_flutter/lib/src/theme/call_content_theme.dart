@@ -102,8 +102,8 @@ class StreamCallContentTheme extends InheritedWidget {
   static StreamCallContentThemeData incomingCallThemeOf(
     BuildContext context,
   ) {
-    final incomingOutgoingCallTheme = context
-        .dependOnInheritedWidgetOfExactType<StreamCallContentTheme>();
+    final incomingOutgoingCallTheme =
+        context.dependOnInheritedWidgetOfExactType<StreamCallContentTheme>();
     return incomingOutgoingCallTheme?.data ??
         StreamVideoTheme.of(context).callContentTheme;
   }

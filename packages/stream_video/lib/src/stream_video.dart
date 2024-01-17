@@ -572,13 +572,18 @@ class StreamVideo {
     final callCid = payload['call_cid'] as String?;
     if (callCid == null) return false;
 
-    final uuid = const Uuid().v4();
+    var callId = const Uuid().v4();
+    final splitCid = callCid.split(':');
+    if (splitCid.length == 2) {
+      callId = splitCid.last;
+    }
+
     final createdById = payload['created_by_id'] as String?;
     final createdByName = payload['created_by_display_name'] as String?;
 
     unawaited(
       manager.showIncomingCall(
-        uuid: uuid,
+        uuid: callId,
         handle: createdById,
         nameCaller: createdByName,
         callCid: callCid,
