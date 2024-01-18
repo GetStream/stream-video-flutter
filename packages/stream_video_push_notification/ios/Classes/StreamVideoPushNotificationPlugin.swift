@@ -17,10 +17,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         switch call.method {
             case "initData":
                 if let arguments = call.arguments as? [String: Any] {
-                    guard let handle = arguments["callbackHandler"] as? Int64 else {
-                        fatalError("Missing callback handle")
-                    }
-                    
+                    let handle = arguments["callbackHandler"] as? Int64
                     persistentState.set(handle, forKey: "callback_handle")
                     
                     StreamVideoPKDelegateManager.shared.initData(data: arguments)

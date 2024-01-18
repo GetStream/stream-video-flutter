@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
-  Future<void> _getOrCreateCall() async {
+  Future<void> _getOrCreateCall({List<String> memberIds = const []}) async {
     var callId = _callIdController.text;
     if (callId.isEmpty) callId = generateAlphanumericString(12);
 
@@ -63,7 +63,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _call = _streamVideo.makeCall(type: kCallType, id: callId);
 
     try {
-      await _call!.getOrCreate();
+      await _call!.getOrCreate(
+        memberIds: memberIds,
+        ringing: memberIds.isNotEmpty,
+      );
     } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());
@@ -73,6 +76,56 @@ class _HomeScreenState extends State<HomeScreen> {
       hideLoadingIndicator(context);
       LobbyRoute($extra: _call!).push(context);
     }
+  }
+
+  Future<void> _directCall(BuildContext context) async {
+    TextEditingController controller = TextEditingController();
+
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Enter ID of user you want to call'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: controller,
+                  decoration: InputDecoration(hintText: "User id"),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      shape: MaterialStatePropertyAll(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      backgroundColor: const MaterialStatePropertyAll<Color>(
+                        Color(0xFF005FFF),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _getOrCreateCall(memberIds: [controller.text]);
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      child: Text(
+                        'Call',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          );
+        });
   }
 
   @override
@@ -171,14 +224,39 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    backgroundColor: const MaterialStatePropertyAll<Color>(
-                      Color(0xFF005FFF),
-                    ),
                   ),
                   onPressed: _getOrCreateCall,
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 14),
                     child: Text('Start New Call'),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Want to directly call someone?",
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStatePropertyAll(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  onPressed: () => _directCall(context),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    child: Text('Direct Call'),
                   ),
                 ),
               ),
@@ -213,14 +291,18 @@ class _JoinForm extends StatelessWidget {
                 controller: callIdController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8),
                   isDense: true,
                   border: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
                   hintText: 'Enter call id',
+
                   // suffix button to generate a random call id
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.refresh),
+                    color: Colors.white,
+                    padding: EdgeInsets.zero,
                     onPressed: () {
                       // generate a 10 character nanoId for call id
                       final callId = generateAlphanumericString(10);
@@ -256,6 +338,7 @@ class _JoinForm extends StatelessWidget {
                     padding: EdgeInsets.symmetric(vertical: 14),
                     child: Text(
                       'Join call',
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 );

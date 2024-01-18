@@ -41,11 +41,12 @@ class MethodChannelStreamVideoPushNotification
   Future<void> init(
     Map<String, dynamic> pushParams,
     CallerCustomizationFunction? callerCustomizationCallback,
-    Function? callback,
+    BackgroundVoipCallHandler? backgroundVoipCallHandler,
   ) async {
     this.callerCustomizationCallback = callerCustomizationCallback;
-    if (callback != null) {
-      final backgroundCallback = PluginUtilities.getCallbackHandle(callback);
+    if (backgroundVoipCallHandler != null) {
+      final backgroundCallback =
+          PluginUtilities.getCallbackHandle(backgroundVoipCallHandler);
       pushParams['callbackHandler'] = backgroundCallback?.toRawHandle();
     }
     await methodChannel.invokeMethod<String>('initData', pushParams);
