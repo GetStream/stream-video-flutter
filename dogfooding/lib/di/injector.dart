@@ -1,5 +1,6 @@
 // 📦 Package imports:
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 import 'package:flutter_dogfooding/core/repos/user_chat_repository.dart';
@@ -18,6 +19,12 @@ import '../log_config.dart';
 import '../utils/consts.dart';
 
 GetIt locator = GetIt.instance;
+
+@pragma('vm:entry-point')
+Future<void> _backgroundVoipCallHandler() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  AppInjector.init();
+}
 
 /// This class is responsible for registering dependencies
 /// and injecting them into the app.
@@ -151,15 +158,16 @@ StreamVideo _initStreamVideo(
     ),
     pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
       iosPushProvider: const StreamVideoPushProvider.apn(
-        name: 'flutter-apn-video',
+        name: 'rn-apn-video',
       ),
       androidPushProvider: const StreamVideoPushProvider.firebase(
-        name: 'firebase',
+        name: 'rn-fcm-video',
       ),
       pushParams: const StreamVideoPushParams(
         appName: kAppName,
         ios: IOSParams(iconName: 'IconMask'),
       ),
+      backgroundVoipCallHandler: _backgroundVoipCallHandler,
     ),
   );
 
