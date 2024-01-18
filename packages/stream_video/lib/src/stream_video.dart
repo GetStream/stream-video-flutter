@@ -400,11 +400,13 @@ class StreamVideo {
     _logger.d(() => '[onAppState] state: $state');
     try {
       final activeCallCid = _state.activeCall.valueOrNull?.callCid;
-      if (state.isPaused && activeCallCid == null) {
-        _logger.i(() => '[onAppState] close connection');
-        _subscriptions.cancel(_idEvents);
-        await _client.closeConnection();
-      } else if (state.isPaused && activeCallCid != null) {
+
+      // if (state.isPaused && activeCallCid == null) {
+      //   _logger.i(() => '[onAppState] close connection');
+      //   _subscriptions.cancel(_idEvents);
+      //   await _client.closeConnection();
+      // } else
+      if (state.isPaused && activeCallCid != null) {
         final callState = activeCall?.state.value;
         final isVideoEnabled =
             callState?.localParticipant?.isVideoEnabled ?? false;
