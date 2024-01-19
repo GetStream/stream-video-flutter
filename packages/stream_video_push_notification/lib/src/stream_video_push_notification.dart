@@ -13,9 +13,10 @@ import 'stream_video_push_params.dart';
 part 'stream_video_push_provider.dart';
 
 const _idToken = 1;
-const _idCallIncoming = 2;
+const _idCallKitIncoming = 2;
 const _idCallEnded = 3;
-const _idCallAcceptDecline = 4;
+const _idCallAccepted = 4;
+const _idCallKitAcceptDecline = 5;
 
 /// Implementation of [PushNotificationManager] for Stream Video.
 class StreamVideoPushNotificationManager implements PushNotificationManager {
@@ -54,14 +55,26 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     this.callerCustomizationCallback,
   }) : _client = client {
     _subscriptions.add(
-      _idCallIncoming,
+      _idCallKitIncoming,
       onCallEvent.whereType<ActionCallIncoming>().listen(
         (_) {
           _subscriptions.add(
             _idCallEnded,
             client.events.on<CoordinatorCallEndedEvent>(
-              (_) {
-                endAllCalls();
+              (event) {
+                FlutterCallkitIncoming.endCall(event.callCid.id);
+              },
+            ),
+          );
+
+          _subscriptions.add(
+            _idCallAccepted,
+            client.events.on<CoordinatorCallAcceptedEvent>(
+              (event) async {
+                await FlutterCallkitIncoming.silenceEvents();
+                await FlutterCallkitIncoming.endCall(event.callCid.id);
+                await Future<void>.delayed(const Duration(milliseconds: 300));
+                await FlutterCallkitIncoming.unsilenceEvents();
               },
             ),
           );
@@ -70,10 +83,13 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     );
 
     _subscriptions.add(
-      _idCallAcceptDecline,
-      onCallEvent.whereType<ActionCallAccept>().map((_) => null).mergeWith(
-          [onCallEvent.whereType<ActionCallDecline>().map((_) => null)]).listen(
+      _idCallKitAcceptDecline,
+      onCallEvent.whereType<ActionCallAccept>().map((_) => null).mergeWith([
+        onCallEvent.whereType<ActionCallDecline>().map((_) => null),
+        onCallEvent.whereType<ActionCallTimeout>().map((_) => null),
+      ]).listen(
         (_) {
+          _subscriptions.cancel(_idCallAccepted);
           _subscriptions.cancel(_idCallEnded);
         },
       ),
