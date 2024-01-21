@@ -264,8 +264,7 @@ class Call {
 
   set connectOptions(CallConnectOptions connectOptions) {
     final status = _status.value;
-    if (status == _ConnectionStatus.connecting ||
-        status == _ConnectionStatus.connected) {
+    if (status == _ConnectionStatus.connected) {
       _logger.w(
         () => '[setConnectOptions] rejected (connectOptions must be'
             ' set before invoking `connect`)',
