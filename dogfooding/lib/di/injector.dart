@@ -158,10 +158,10 @@ StreamVideo _initStreamVideo(
     ),
     pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
       iosPushProvider: const StreamVideoPushProvider.apn(
-        name: 'rn-apn-video',
+        name: 'flutter-apn',
       ),
       androidPushProvider: const StreamVideoPushProvider.firebase(
-        name: 'rn-fcm-video',
+        name: 'flutter-firebase',
       ),
       pushParams: const StreamVideoPushParams(
         appName: kAppName,
