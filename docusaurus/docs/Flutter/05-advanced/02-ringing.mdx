@@ -380,7 +380,7 @@ StreamVideo.instance.pushNotificationManager?.endAllCalls();
 
 #### Step 6 - Add callback to handle call in terminated state
 
-When the iOS app is terminated the Flutter engine is not running and we need to start it up to handle the Stream call events. This is done internally by the SDK, the only thing needed (similarly to Android) is to register a callback handle that will run when Flutter engine starts and connect to StreamVideo.
+When an iOS app is terminated, the Flutter engine is not running. The engine needs to be started up to handle Stream call events whenever a call is received by the app. The Stream SDK performs the job of running a Flutter engine instance whenever a call is received. However, on the app side, a callback handle needs to be registered that will connect to `StreamVideo`. 
 
 ```dart
 @pragma('vm:entry-point')
