@@ -85,15 +85,15 @@ class _HomeScreenState extends State<HomeScreen> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text('Enter ID of user you want to call'),
+            title: const Text('Enter ID of user you want to call'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: controller,
-                  decoration: InputDecoration(hintText: "User id"),
+                  decoration: const InputDecoration(hintText: "User id"),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 8,
                 ),
                 Align(
@@ -291,7 +291,7 @@ class _JoinForm extends StatelessWidget {
                 controller: callIdController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                   isDense: true,
                   border: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
