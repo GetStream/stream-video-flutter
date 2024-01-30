@@ -19,6 +19,7 @@ import 'models/coordinator_events.dart';
 import 'models/coordinator_models.dart' as models;
 
 abstract class CoordinatorClient {
+  bool get isConnected;
   SharedEmitter<CoordinatorEvent> get events;
 
   Future<Result<None>> connectUser(
