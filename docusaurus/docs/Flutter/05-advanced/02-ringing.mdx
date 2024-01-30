@@ -378,7 +378,49 @@ say you want to end all calls on the CallKit side, you can end them this way:
 StreamVideo.instance.pushNotificationManager?.endAllCalls();
 ```
 
-#### Step 6 - Add native code to the iOS project
+#### Step 6 - Add callback to handle call in terminated state
+
+When the iOS app is terminated the Flutter engine is not running and we need to start it up to handle the Stream call events. This is done internally by the SDK, the only thing needed (similarly to Android) is to register a callback handle that will run when Flutter engine starts and connect to StreamVideo.
+
+```dart
+@pragma('vm:entry-point')
+Future<void> _backgroundVoipCallHandler() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Get stored user credentials
+  var credentials = yourUserCredentialsGetMethod();
+  if (credentials == null) return;
+
+  // Initialise StreamVideo
+  StreamVideo(
+    // ...
+    // Make sure you initialise push notification manager
+    pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
+      iosPushProvider: const StreamVideoPushProvider.apn(
+        name: 'your-ios-provider-name',
+      ),
+      androidPushProvider: const StreamVideoPushProvider.firebase(
+        name: 'your-fcm-provider',
+      ),
+      pushParams: const StreamVideoPushParams(
+        appName: kAppName,
+        ios: IOSParams(iconName: 'IconMask'),
+      ),
+    ),
+  );
+}
+```
+
+The `_backgroundVoipCallHandler` method should then be set when StreamVideo is initialised:
+
+```dart
+  StreamVideo(
+    ...,
+    backgroundVoipCallHandler: _backgroundVoipCallHandler,
+  );
+```
+
+#### Step 7 - Add native code to the iOS project
 
 In your iOS project, add the following imports to your `AppDelegate.swift`:
 
