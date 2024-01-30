@@ -44,8 +44,6 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
             return completion()
         }
         
-        print("voip received")
-        
         let defaults = UserDefaults.standard
         let callbackHandle = defaults.object(forKey: "callback_handle") as? Int64
         
@@ -53,8 +51,6 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
         
         let state = UIApplication.shared.applicationState
         if state == .background || state == .inactive {
-            print("in background")
-
             if state == .inactive, callbackHandle != nil {
                 DispatchQueue.main.async {
                     let engine = FlutterEngine(name: "StreamVideoIsolate", project: nil, allowHeadlessExecution: true)
@@ -62,7 +58,6 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
                     let entrypoint = callbackInfo?.callbackName
                     let uri = callbackInfo?.callbackLibraryPath
                     
-                    print("starting Engine")
                     let isRunning = engine.run(withEntrypoint: entrypoint, libraryURI: uri)
                 }
              }
@@ -70,8 +65,6 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
             
             handleIncomingCall(streamDict: streamDict, state: state, completion: completion)
         } else if state == .active {
-            print("in foreground")
-            
             mainChannel?.invokeMethod("customizeCaller", arguments: streamDict) { (response) in
                 if let customData = response as? [String: Any] {
                     streamDict?["created_by_display_name"] = customData["name"] as? String
@@ -84,8 +77,6 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
     }
     
     func handleIncomingCall(streamDict: [String: Any]?, state: UIApplication.State, completion: @escaping () -> Void) {
-        print("handling call")
-        
         let defaultCallText = "Unknown Caller"
         
         let callCid = streamDict?["call_cid"] as? String ?? ""

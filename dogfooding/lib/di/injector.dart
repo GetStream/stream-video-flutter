@@ -61,7 +61,7 @@ Future<void> _backgroundVoipCallHandler() async {
 /// and injecting them into the app.
 class AppInjector {
   // Register dependencies
-  static Future<void> init({bool streamVideoOnly = false}) async {
+  static Future<void> init() async {
     // Google sign in
     locator.registerSingleton<GoogleSignIn>(
       GoogleSignIn(hostedDomain: 'getstream.io'),
