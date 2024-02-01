@@ -714,6 +714,21 @@ extension RtcManagerTrackHelper on RtcManager {
 
     // Track found, mute/unmute it.
     if (track != null) {
+      if (enabled &&
+          track.trackType == SfuTrackType.screenShare &&
+          constraints is ScreenShareConstraints &&
+          (track.mediaConstraints as ScreenShareConstraints)
+                  .useiOSBroadcastExtension !=
+              constraints.useiOSBroadcastExtension) {
+        // If existing screen share track has different broadcast extension constraints, unpublish it and create a new one.
+        await unpublishTrack(trackId: track.trackId);
+
+        return _createAndPublishTrack(
+          trackType: trackType,
+          constraints: constraints,
+        );
+      }
+
       final toggledTrack = await _toggleTrackMuteState(
         track: track,
         muted: !enabled,
