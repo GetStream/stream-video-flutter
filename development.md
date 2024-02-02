@@ -31,10 +31,10 @@
 - [x] Live streaming component(s) [Deven]
 - [x] Deeplinking
 - [ ] Tap to focus (flutter_webrtc) [Kanat]
-- [ ] Push notifications [Maciej]
+- [x] Push notifications [Maciej]
 - - [x] Customization of the incoming/outgoing call screens
 - - [x] Customizing CallKit ringing calls
-- - [ ] Bug app crashes when notification button is tapped
+- - [x] Bug app crashes when notification button is tapped
 - [x] Native packages refactor [Maciej]
 - - [X] Create the native projects in stream_video_flutter
 - - [x] Merge stream_video_flutter_background
@@ -43,7 +43,7 @@
 - - [x] iOS
 - - [x] Android
 - [x] Regular reconnection [Maciej,Kanat]
-- [ ] Support ICE restart reconnection [Maciej,Kanat]
+- [x] Support ICE restart reconnection [Maciej,Kanat]
 - [x] Update WebRTC version to m114 (livekit version) [Kanat]
 - [x] Fix analysis issues [Maciej]
 
