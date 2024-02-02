@@ -715,11 +715,8 @@ extension RtcManagerTrackHelper on RtcManager {
     // Track found, mute/unmute it.
     if (track != null) {
       if (enabled &&
-          track.trackType == SfuTrackType.screenShare &&
-          constraints is ScreenShareConstraints &&
-          (track.mediaConstraints as ScreenShareConstraints)
-                  .useiOSBroadcastExtension !=
-              constraints.useiOSBroadcastExtension) {
+          track is RtcLocalScreenShareTrack &&
+          !track.compareScreenShareMode(constraints)) {
         // If existing screen share track has different broadcast extension constraints, unpublish it and create a new one.
         await unpublishTrack(trackId: track.trackId);
 
