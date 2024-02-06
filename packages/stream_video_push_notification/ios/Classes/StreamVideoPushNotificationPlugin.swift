@@ -3,19 +3,23 @@ import UIKit
 import flutter_callkit_incoming
 
 public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
+    let persistentState: UserDefaults = UserDefaults.standard
     
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(name: "stream_video_push_notifications", binaryMessenger: registrar.messenger())
+        let mainChannel = FlutterMethodChannel(name: "stream_video_push_notifications", binaryMessenger: registrar.messenger())
         let instance = StreamVideoPushNotificationPlugin()
-
-        registrar.addMethodCallDelegate(instance, channel: channel)
-        StreamVideoPKDelegateManager.shared.initChannel(channel: channel)
+        
+        registrar.addMethodCallDelegate(instance, channel: mainChannel)
+        StreamVideoPKDelegateManager.shared.initChannel(mainChannel: mainChannel)
     }
-
+    
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
             case "initData":
                 if let arguments = call.arguments as? [String: Any] {
+                    let handle = arguments["callbackHandler"] as? Int64
+                    persistentState.set(handle, forKey: "callback_handle")
+                    
                     StreamVideoPKDelegateManager.shared.initData(data: arguments)
                     result(nil)
                 } else {

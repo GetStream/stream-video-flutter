@@ -27,14 +27,18 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required StreamVideoPushProvider iosPushProvider,
     required StreamVideoPushProvider androidPushProvider,
     CallerCustomizationFunction? callerCustomizationCallback,
+    BackgroundVoipCallHandler? backgroundVoipCallHandler,
     StreamVideoPushParams? pushParams,
   }) {
     return (CoordinatorClient client) {
       final params = _defaultPushParams.merge(pushParams);
 
       if (CurrentPlatform.isIos) {
-        StreamVideoPushNotificationPlatform.instance
-            .init(params.toJson(), callerCustomizationCallback);
+        StreamVideoPushNotificationPlatform.instance.init(
+          params.toJson(),
+          callerCustomizationCallback,
+          backgroundVoipCallHandler,
+        );
       }
 
       return StreamVideoPushNotificationManager._(
@@ -54,10 +58,29 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required this.pushParams,
     this.callerCustomizationCallback,
   }) : _client = client {
+    //if there are active calls (for iOS) when connecting, subscribe to end call event
+    FlutterCallkitIncoming.activeCalls().then((value) {
+      if (value is List && value.isNotEmpty) {
+        _subscriptions.add(
+          _idCallEnded,
+          client.events.on<CoordinatorCallEndedEvent>(
+            (event) {
+              FlutterCallkitIncoming.endCall(event.callCid.id);
+            },
+          ),
+        );
+      }
+    });
+
     _subscriptions.add(
       _idCallKitIncoming,
       onCallEvent.whereType<ActionCallIncoming>().listen(
         (_) {
+          if (!client.isConnected) {
+            _wasWsConnected = client.isConnected;
+            client.openConnection();
+          }
+
           _subscriptions.add(
             _idCallEnded,
             client.events.on<CoordinatorCallEndedEvent>(
@@ -89,6 +112,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         onCallEvent.whereType<ActionCallTimeout>().map((_) => null),
       ]).listen(
         (_) {
+          if (_wasWsConnected == false) {
+            _wasWsConnected = null;
+            client.closeConnection();
+          }
+
           _subscriptions.cancel(_idCallAccepted);
           _subscriptions.cancel(_idCallEnded);
         },
@@ -103,6 +131,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   final CallerCustomizationFunction? callerCustomizationCallback;
 
   final _logger = taggedLogger(tag: 'SV:PNManager');
+  bool? _wasWsConnected;
 
   final Subscriptions _subscriptions = Subscriptions();
 

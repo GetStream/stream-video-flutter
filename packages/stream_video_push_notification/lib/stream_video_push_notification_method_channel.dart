@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'stream_video_push_notification_platform_interface.dart';
 
@@ -38,8 +41,14 @@ class MethodChannelStreamVideoPushNotification
   Future<void> init(
     Map<String, dynamic> pushParams,
     CallerCustomizationFunction? callerCustomizationCallback,
+    BackgroundVoipCallHandler? backgroundVoipCallHandler,
   ) async {
     this.callerCustomizationCallback = callerCustomizationCallback;
+    if (backgroundVoipCallHandler != null) {
+      final backgroundCallback =
+          PluginUtilities.getCallbackHandle(backgroundVoipCallHandler);
+      pushParams['callbackHandler'] = backgroundCallback?.toRawHandle();
+    }
     await methodChannel.invokeMethod<String>('initData', pushParams);
   }
 }

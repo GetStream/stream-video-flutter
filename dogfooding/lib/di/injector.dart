@@ -1,5 +1,6 @@
 // 📦 Package imports:
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 import 'package:flutter_dogfooding/core/repos/user_chat_repository.dart';
@@ -18,6 +19,43 @@ import '../log_config.dart';
 import '../utils/consts.dart';
 
 GetIt locator = GetIt.instance;
+
+@pragma('vm:entry-point')
+Future<void> _backgroundVoipCallHandler() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final appPrefs = AppPreferences(prefs: prefs);
+
+  final apiKey = appPrefs.apiKey;
+  final userCredentials = appPrefs.userCredentials;
+
+  if (apiKey == null || userCredentials == null) {
+    return;
+  }
+
+  StreamVideo(
+    apiKey,
+    user: User(info: userCredentials.userInfo),
+    userToken: userCredentials.token.rawValue,
+    options: const StreamVideoOptions(
+      logPriority: Priority.info,
+      muteAudioWhenInBackground: true,
+      muteVideoWhenInBackground: true,
+    ),
+    pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
+      iosPushProvider: const StreamVideoPushProvider.apn(
+        name: 'flutter-apn',
+      ),
+      androidPushProvider: const StreamVideoPushProvider.firebase(
+        name: 'flutter-firebase',
+      ),
+      pushParams: const StreamVideoPushParams(
+        appName: kAppName,
+        ios: IOSParams(iconName: 'IconMask'),
+      ),
+    ),
+  );
+}
 
 /// This class is responsible for registering dependencies
 /// and injecting them into the app.
@@ -160,6 +198,7 @@ StreamVideo _initStreamVideo(
         appName: kAppName,
         ios: IOSParams(iconName: 'IconMask'),
       ),
+      backgroundVoipCallHandler: _backgroundVoipCallHandler,
     ),
   );
 
