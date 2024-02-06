@@ -12,7 +12,7 @@
 
 This repository contains code for our [Dart](https://dart.dev/) and [Flutter](https://flutter.dev/) video clients.
 
-We use [melos](https://melos.invertase.dev) to manage this repository.
+We use [Melos](https://melos.invertase.dev) to manage this repository.
 
 ## Understanding the structure of the repository
 
