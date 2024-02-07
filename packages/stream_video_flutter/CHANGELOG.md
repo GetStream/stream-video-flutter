@@ -1,5 +1,19 @@
 ## Upcoming
 
+🐞 Fixed
+
+* Various fixes to call ringing and push notifications
+ - fixes call ringing cancelation when app is terminated on iOS
+ - fixes late push notification handling on Android, where already ended call was ringing if the device was offline and the push was delivered with a delay
+ - fixes call ringing cancelation when caller timed out while calling
+* Fixed background image for incoming/outgoing call screens when `participant.image` is invalid
+* Fixed action tap callback on Android call notification
+* Fixes possible crashes for Android SDKs versions <26
+* Fixed screen sharing on iOS when screen sharing mode was switched between `in-app` and `broadcast`
+* Changed the version range of `intl` package to >=0.18.1 <=0.19.0 because it was causing isses with other packages
+
+✅ Added
+
 * Added `custom` field to `CallParticipantState` with custom user data.
 
 ## 0.3.1
