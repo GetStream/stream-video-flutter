@@ -3,7 +3,7 @@
 🐞 Fixed
 
 * Various fixes to call ringing and push notifications
- - fixes call ringing cancelation when app is terminated on iOS
+ - fixes call ringing cancelation when app is terminated on iOS (requires additional setup - check Step 6 of the [APNS integration](https://getstream.io/video/docs/flutter/advanced/adding_ringing_and_callkit/#integrating-apns-for-ios)) in our documentations
  - fixes late push notification handling on Android, where already ended call was ringing if the device was offline and the push was delivered with a delay
  - fixes call ringing cancelation when caller timed out while calling
 * Fixed background image for incoming/outgoing call screens when `participant.image` is invalid
