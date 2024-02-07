@@ -94,10 +94,20 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         _idCallAccepted,
         client.events.on<CoordinatorCallAcceptedEvent>(
           (event) async {
-            await FlutterCallkitIncoming.silenceEvents();
-            await FlutterCallkitIncoming.endCall(event.callCid.id);
-            await Future<void>.delayed(const Duration(milliseconds: 300));
-            await FlutterCallkitIncoming.unsilenceEvents();
+            final callRingingState = await streamVideo.getCallRingingState(
+                type: event.callCid.type, id: event.callCid.id);
+
+            switch (callRingingState) {
+              case CallRingingState.accepted:
+              case CallRingingState.rejected:
+              case CallRingingState.ended:
+                await FlutterCallkitIncoming.silenceEvents();
+                await FlutterCallkitIncoming.endCall(event.callCid.id);
+                await Future<void>.delayed(const Duration(milliseconds: 300));
+                await FlutterCallkitIncoming.unsilenceEvents();
+              case CallRingingState.ringing:
+                break;
+            }
           },
         ),
       );
