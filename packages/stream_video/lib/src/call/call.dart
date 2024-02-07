@@ -371,7 +371,8 @@ class Call {
   Future<Result<None>> reject() async {
     final state = this.state.value;
     final status = state.status;
-    if (status is! CallStatusIncoming || status.acceptedByMe) {
+    if ((status is! CallStatusIncoming || status.acceptedByMe) &&
+        status is! CallStatusOutgoing) {
       _logger.w(() => '[rejectCall] rejected (invalid status): $status');
       return Result.error('invalid status: $status');
     }
@@ -502,6 +503,7 @@ class Call {
     if (result.isFailure) {
       _logger.e(() => '[join] waiting failed: $result');
 
+      await reject();
       _stateManager.lifecycleCallTimeout(const CallTimeout());
 
       return result;
@@ -1050,7 +1052,7 @@ class Call {
     final response = await _coordinatorClient.getOrCreateCall(
       callCid: callCid,
       ringing: ringing,
-      members: memberIds.map((id) {
+      members: {...memberIds, currentUserId}.map((id) {
         return MemberRequest(
           userId: id,
           role: 'admin',
