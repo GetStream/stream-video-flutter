@@ -639,30 +639,28 @@ class StreamVideo {
           return CallRingingState.ended;
         }
 
-        if (_state.currentUser.name != null) {
-          if (callData.metadata.session.acceptedBy
-              .containsKey(_state.currentUser.name)) {
-            _logger.e(() => '[getCallRingingState] call already accepted');
-            return CallRingingState.accepted;
-          }
+        if (callData.metadata.session.acceptedBy
+            .containsKey(_state.currentUser.id)) {
+          _logger.e(() => '[getCallRingingState] call already accepted');
+          return CallRingingState.accepted;
+        }
 
-          if (callData.metadata.session.rejectedBy
-              .containsKey(_state.currentUser.name)) {
-            _logger.e(() => '[getCallRingingState] call already rejected');
-            return CallRingingState.rejected;
-          }
+        if (callData.metadata.session.rejectedBy
+            .containsKey(_state.currentUser.id)) {
+          _logger.e(() => '[getCallRingingState] call already rejected');
+          return CallRingingState.rejected;
+        }
 
-          final otherMembers = callData.metadata.members.keys.toList()
-            ..remove(_state.currentUser.name);
-          if (callData.metadata.session.rejectedBy.keys
-              .toSet()
-              .containsAll(otherMembers)) {
-            _logger.e(
-              () =>
-                  '[getCallRingingState] call already rejected by all other members',
-            );
-            return CallRingingState.rejected;
-          }
+        final otherMembers = callData.metadata.members.keys.toList()
+          ..remove(_state.currentUser.id);
+        if (callData.metadata.session.rejectedBy.keys
+            .toSet()
+            .containsAll(otherMembers)) {
+          _logger.e(
+            () =>
+                '[getCallRingingState] call already rejected by all other members',
+          );
+          return CallRingingState.rejected;
         }
 
         return CallRingingState.ringing;
