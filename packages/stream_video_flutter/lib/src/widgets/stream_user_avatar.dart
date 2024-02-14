@@ -52,6 +52,7 @@ class StreamUserAvatar extends StatelessWidget {
     this.constraints,
     this.borderRadius,
     this.initialsTextStyle,
+    this.initialsBackground,
     this.selectionColor,
     this.selectionThickness,
   });
@@ -89,6 +90,9 @@ class StreamUserAvatar extends StatelessWidget {
   /// [TextStyle] for the initials text.
   final TextStyle? initialsTextStyle;
 
+  /// Background color for the initials.
+  final Color? initialsBackground;
+
   /// Color of the selection.
   final Color? selectionColor;
 
@@ -104,6 +108,8 @@ class StreamUserAvatar extends StatelessWidget {
     final constraints = this.constraints ?? theme.constraints;
     final borderRadius = this.borderRadius ?? theme.borderRadius;
     final initialsTextStyle = this.initialsTextStyle ?? theme.initialsTextStyle;
+    final initialsBackground =
+        this.initialsBackground ?? theme.initialsBackground;
     final selectionColor = this.selectionColor ?? theme.selectionColor;
     final selectionThickness =
         this.selectionThickness ?? theme.selectionThickness;
@@ -140,6 +146,7 @@ class StreamUserAvatar extends StatelessWidget {
                     user: user,
                     borderRadius: borderRadius,
                     initialsTextStyle: initialsTextStyle,
+                    initialsBackground: initialsBackground,
                   ),
       ),
     );
@@ -200,6 +207,7 @@ class _InitialsUserAvatar extends StatelessWidget {
     required this.user,
     required this.borderRadius,
     required this.initialsTextStyle,
+    this.initialsBackground,
   });
 
   /// User whose avatar is to be displayed.
@@ -211,6 +219,9 @@ class _InitialsUserAvatar extends StatelessWidget {
   /// [TextStyle] for the initials text.
   final TextStyle? initialsTextStyle;
 
+  /// Background color for the initials.
+  final Color? initialsBackground;
+
   @override
   Widget build(BuildContext context) {
     final initials =
@@ -221,7 +232,7 @@ class _InitialsUserAvatar extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: avatarColor,
+        color: initialsBackground ?? avatarColor,
         borderRadius: borderRadius,
       ),
       child: Center(

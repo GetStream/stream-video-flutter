@@ -25,6 +25,7 @@ export 'src/call_screen/call_container.dart';
 export 'src/call_screen/call_content/call_app_bar.dart';
 export 'src/call_screen/call_content/call_content.dart';
 export 'src/call_screen/incoming_call/incoming_call_content.dart';
+export 'src/call_screen/lobby_video.dart';
 export 'src/call_screen/lobby_view.dart';
 export 'src/call_screen/outgoing_call/outgoing_call_content.dart';
 export 'src/livestream/livestream_content.dart';

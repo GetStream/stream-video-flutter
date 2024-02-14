@@ -3,6 +3,7 @@ import 'dart:async';
 
 // 🐦 Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/widgets/stream_button.dart';
 
 // 📦 Package imports:
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -85,40 +86,32 @@ class _HomeScreenState extends State<HomeScreen> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Enter ID of user you want to call'),
+            title: Text(
+              'Enter the ID of the user you want to call',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: controller,
-                  decoration: const InputDecoration(hintText: "User id"),
+                  decoration: const InputDecoration(hintText: "User ID"),
                 ),
                 const SizedBox(
-                  height: 8,
+                  height: 16,
                 ),
                 Align(
                   alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                      shape: MaterialStatePropertyAll(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      backgroundColor: const MaterialStatePropertyAll<Color>(
-                        Color(0xFF005FFF),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _getOrCreateCall(memberIds: [controller.text]);
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      child: Text(
-                        'Call',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                  child: SizedBox(
+                    width: 150,
+                    child: StreamButton.active(
+                      label: 'Call',
+                      icon: const Icon(Icons.video_camera_front,
+                          color: Colors.white),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _getOrCreateCall(memberIds: [controller.text]);
+                      },
                     ),
                   ),
                 )
@@ -152,13 +145,17 @@ class _HomeScreenState extends State<HomeScreen> {
           child: StreamUserAvatar(user: currentUser),
         ),
         titleSpacing: 4,
+        centerTitle: false,
         title: Text(
           name,
           style: theme.textTheme.bodyMedium,
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(
+              Icons.logout,
+              color: Colors.white,
+            ),
             onPressed: _userAuthController.logout,
           ),
         ],
@@ -172,93 +169,41 @@ class _HomeScreenState extends State<HomeScreen> {
                 tag: 'stream_logo',
                 child: Image.asset(
                   streamVideoIconAsset,
-                  width: size.width * 0.3,
+                  width: size.width * 0.6,
                 ),
               ),
               const SizedBox(height: 24),
+              Text('Stream', style: theme.textTheme.headlineMedium),
+              Text('[Video Calling]',
+                  style: theme.textTheme.headlineMedium
+                      ?.apply(color: const Color(0xFF00E2A1))),
+              const SizedBox(height: 48),
               Text(
-                'Stream Video Calling',
+                'Start a new call, join a meeting by\n'
+                'entering the call ID or by scanning\n'
+                'a QR code.',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Build reliable video calling, audio rooms, '
-                'and live streaming with our easy-to-use '
-                'SDKs and global edge network',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium,
+                style: theme.textTheme.bodyMedium?.apply(
+                  color: const Color(0xFF979CA0),
+                ),
               ),
               const SizedBox(height: 36),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Call ID Number',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: 12,
-                  ),
-                ),
-              ),
               const SizedBox(height: 8),
               _JoinForm(
                 callIdController: _callIdController,
                 onJoinPressed: _getOrCreateCall,
               ),
               const SizedBox(height: 24),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Don't have a call ID?",
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: 12,
-                  ),
-                ),
+              StreamButton.primary(
+                label: 'Start New Call',
+                icon: const Icon(Icons.video_call, color: Colors.white),
+                onPressed: _getOrCreateCall,
               ),
               const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    shape: MaterialStatePropertyAll(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  onPressed: _getOrCreateCall,
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    child: Text('Start New Call'),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Want to directly call someone?",
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    shape: MaterialStatePropertyAll(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  onPressed: () => _directCall(context),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    child: Text('Direct Call'),
-                  ),
-                ),
+              StreamButton.tertiary(
+                label: 'Direct Call',
+                icon: const Icon(Icons.person, color: Colors.white),
+                onPressed: () => _directCall(context),
               ),
             ],
           ),
@@ -291,13 +236,16 @@ class _JoinForm extends StatelessWidget {
                 controller: callIdController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                  isDense: true,
-                  border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF979CA0), width: 1),
+                    borderRadius: BorderRadius.all(Radius.circular(36)),
                   ),
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(36)),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  isDense: true,
                   hintText: 'Enter call id',
-
                   // suffix button to generate a random call id
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.refresh),
@@ -322,26 +270,10 @@ class _JoinForm extends StatelessWidget {
               valueListenable: callIdController,
               builder: (context, value, __) {
                 final hasText = value.text.isNotEmpty;
-                return ElevatedButton(
-                  style: ButtonStyle(
-                    shape: MaterialStatePropertyAll(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    backgroundColor: const MaterialStatePropertyAll<Color>(
-                      Color(0xFF005FFF),
-                    ),
-                  ),
-                  onPressed: hasText ? onJoinPressed : null,
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    child: Text(
-                      'Join call',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                );
+                return StreamButton.active(
+                    label: 'Join call',
+                    icon: const Icon(Icons.login, color: Colors.white),
+                    onPressed: hasText ? onJoinPressed : () {});
               },
             ),
           ],
