@@ -210,7 +210,7 @@ class _CallScreenState extends State<CallScreen> {
               ),
               if (call.state.valueOrNull?.otherParticipants.isEmpty ?? false)
                 Positioned(
-                  bottom: 50,
+                  bottom: 60,
                   left: 0,
                   right: 0,
                   child: ShareCallCard(callId: call.id),
