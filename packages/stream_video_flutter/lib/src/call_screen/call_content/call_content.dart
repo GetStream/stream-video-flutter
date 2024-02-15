@@ -47,6 +47,7 @@ class StreamCallContent extends StatefulWidget {
     this.overlayAppBarBuilder,
     this.callParticipantsBuilder,
     this.callControlsBuilder,
+    this.layoutMode = ParticipantLayoutMode.grid,
   });
 
   /// Represents a call.
@@ -73,6 +74,8 @@ class StreamCallContent extends StatefulWidget {
   /// Builder used to create a custom call controls panel.
   final CallControlsBuilder? callControlsBuilder;
 
+  final ParticipantLayoutMode layoutMode;
+
   @override
   State<StreamCallContent> createState() => _StreamCallContentState();
 }
@@ -86,8 +89,6 @@ class _StreamCallContentState extends State<StreamCallContent> {
 
   /// Controls the visibility of [CallDiagnosticsContent].
   bool _isStatsVisible = false;
-
-  ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +104,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
           StreamCallParticipants(
             call: call,
             participants: callState.callParticipants,
-            layoutMode: _currentLayoutMode,
+            layoutMode: widget.layoutMode,
           );
     } else {
       final isMigrating = callState.status.isMigrating;
@@ -129,9 +130,6 @@ class _StreamCallContentState extends State<StreamCallContent> {
           CallAppBar(
             call: call,
             onBackPressed: widget.onBackPressed,
-            onLayoutModeChanged: (mode) {
-              setState(() => _currentLayoutMode = mode);
-            },
           ),
       body: Stack(
         children: [

@@ -28,17 +28,23 @@ class StreamConnectionQualityIndicator extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.85),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(10),
+        ),
       ),
-      child: SizedBox(
-        width: 24,
-        height: 24,
-        child: CustomPaint(
-          size: const Size.square(24),
-          painter: _ConnectionQualityIndicatorPainter(
-            connectionQuality: connectionQuality,
-            activeColor: activeColor ?? theme.connectionLevelActiveColor,
-            inactiveColor: inactiveColor ?? theme.connectionLevelInactiveColor,
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CustomPaint(
+            size: const Size.square(24),
+            painter: _ConnectionQualityIndicatorPainter(
+              connectionQuality: connectionQuality,
+              activeColor: activeColor ?? theme.connectionLevelActiveColor,
+              inactiveColor:
+                  inactiveColor ?? theme.connectionLevelInactiveColor,
+            ),
           ),
         ),
       ),

@@ -13,6 +13,7 @@ export 'src/call_controls/controls/default_control_options.dart';
 export 'src/call_controls/controls/flip_camera_option.dart';
 export 'src/call_controls/controls/leave_call_option.dart';
 export 'src/call_controls/controls/toggle_camera_option.dart';
+export 'src/call_controls/controls/toggle_layout_option.dart';
 export 'src/call_controls/controls/toggle_microphone_option.dart';
 export 'src/call_controls/controls/toggle_recording_option.dart';
 export 'src/call_controls/controls/toggle_screen_sharing_option.dart';

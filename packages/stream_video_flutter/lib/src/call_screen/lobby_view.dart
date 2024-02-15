@@ -2,10 +2,8 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/src/call_screen/lobby_video.dart';
 
 import '../../stream_video_flutter.dart';
-import '../call_participants/participant_label.dart';
 import 'lobby_participants_view.dart';
 
 /// A widget that can be shown before joining a call. Measures latencies

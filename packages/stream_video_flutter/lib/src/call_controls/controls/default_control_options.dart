@@ -13,6 +13,5 @@ List<Widget> defaultCallControlOptions({
     ToggleCameraOption(call: call, localParticipant: localParticipant),
     ToggleMicrophoneOption(call: call, localParticipant: localParticipant),
     FlipCameraOption(call: call, localParticipant: localParticipant),
-    LeaveCallOption(call: call, onLeaveCallTap: onLeaveCallTap),
   ];
 }

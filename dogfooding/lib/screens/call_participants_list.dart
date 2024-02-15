@@ -1,0 +1,129 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/widgets/share_call_card.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+class CallParticipantsList extends StatefulWidget {
+  const CallParticipantsList({
+    super.key,
+    required this.call,
+  });
+
+  final Call call;
+
+  @override
+  State<CallParticipantsList> createState() => _CallParticipantsListState();
+}
+
+class _CallParticipantsListState extends State<CallParticipantsList> {
+  StreamSubscription<CallState>? _callStateSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _callStateSubscription = widget.call.state.listen(_setState);
+    _setState(widget.call.state.value);
+  }
+
+  @override
+  void dispose() {
+    _callStateSubscription?.cancel();
+    _callStateSubscription = null;
+    super.dispose();
+  }
+
+  Future<void> _setState(CallState state) async {
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final callState = widget.call.state.value;
+    final participants = callState.callParticipants;
+
+    final streamVideoTheme = StreamVideoTheme.of(context);
+    final textTheme = streamVideoTheme.textTheme;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Participants (${callState.callParticipants.length})',
+          style: textTheme.title3.apply(color: Colors.white),
+        ),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.close,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ShareCallCard(
+              callId: widget.call.id,
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.only(bottom: 16),
+              itemBuilder: (context, index) {
+                final participant = participants[index];
+
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      StreamUserAvatarTheme(
+                        data: streamVideoTheme.userAvatarTheme,
+                        child: StreamUserAvatar(
+                          user: UserInfo(
+                            id: participant.userId,
+                            role: participant.role,
+                            name: participant.name
+                                .ifEmpty(() => participant.userId),
+                            image: participant.image,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            participant.name,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                      participant.isAudioEnabled
+                          ? const Icon(Icons.mic_rounded)
+                          : const Icon(Icons.mic_off_rounded),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      participant.isVideoEnabled
+                          ? const Icon(Icons.videocam_rounded)
+                          : const Icon(Icons.videocam_off_rounded),
+                    ],
+                  ),
+                );
+              },
+              // separatorBuilder: (context, index) => const Divider(),
+              itemCount: participants.length,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

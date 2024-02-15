@@ -1,3 +1,15 @@
+## Upcomming
+
+🚧 UI changes to SDK components
+
+* `CallParticipantsLabel` - removed internal padding, it sticks to the corner of the video frame by default now
+* Extracted `StreamLobbyVideo` widget from `StreamLobbyView` that can be easly reused in custom layout
+* `CallAppBar`
+    - `LeaveCallOption` moved from default call controls to `CallAppBar`
+    - Participants button removed from `CallAppBar` together with `onParticipantsInfoTap` and `participantsInfoBuilder` properties
+    - Layout Mode button removed from `CallAppBar` together with `onLayoutModeChanged` property. You can use new `ToggleLayoutOption` instead in custom layout anywhere
+* `ToggleLayoutOption` added
+
 ## 0.3.2
 
 🐞 Fixed
