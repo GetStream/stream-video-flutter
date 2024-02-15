@@ -38,10 +38,9 @@ class FlipCameraOption extends StatelessWidget {
       icon: position == CameraPosition.front
           ? Icon(frontCameraIcon)
           : Icon(backCameraIcon),
-      disabledBackgroundColor: theme.optionBackgroundColor,
       onPressed: trackState?.muted == false //
           ? call.flipCamera
-          : null,
+          : () {},
     );
   }
 }

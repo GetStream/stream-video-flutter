@@ -127,6 +127,7 @@ class _CallScreenState extends State<CallScreen> {
                 callAppBarBuilder: (context, call, callState) {
                   return CallAppBar(
                     call: call,
+                    leadingWidth: 120,
                     leading: Row(
                       children: [
                         ToggleLayoutOption(

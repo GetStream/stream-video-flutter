@@ -20,6 +20,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor,
     this.onBackPressed,
     this.leading,
+    this.leadingWidth,
     this.title,
     this.actions,
   });
@@ -41,6 +42,9 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// The leading widget to display.
   final Widget? leading;
+
+  /// The width of the leading widget.
+  final double? leadingWidth;
 
   /// The title widget to display.
   final Widget? title;
@@ -75,7 +79,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       elevation: elevation,
       leading: leadingWidget,
-      leadingWidth: 120,
+      leadingWidth: leadingWidth,
       backgroundColor: backgroundColor ?? theme.colorTheme.barsBg,
       centerTitle: true,
       actions: actions ??
