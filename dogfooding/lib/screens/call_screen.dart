@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 // 📦 Package imports:
 import 'package:crypto/crypto.dart';
+import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide User;
 
@@ -78,7 +79,7 @@ class _CallScreenState extends State<CallScreen> {
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF101418),
+      backgroundColor: AppColorPalette.backgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(16),

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/core/repos/token_service.dart';
 import 'package:flutter_dogfooding/router/routes.dart';
+import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:uni_links/uni_links.dart';
@@ -243,9 +244,9 @@ class _StreamDogFoodingAppContentState
     const colorTheme = StreamColorTheme.dark();
 
     return baseTheme.copyWith(
-      scaffoldBackgroundColor: const Color(0xFF101213),
+      scaffoldBackgroundColor: AppColorPalette.backgroundColor,
       colorScheme: ColorScheme.fromSwatch().copyWith(
-        primary: const Color(0xff005FFF),
+        primary: AppColorPalette.primary,
       ),
       inputDecorationTheme: const InputDecorationTheme(
         labelStyle: TextStyle(color: Colors.white),
@@ -265,7 +266,7 @@ class _StreamDogFoodingAppContentState
             inactiveOptionIconColor: Colors.white,
             optionElevation: 2,
             inactiveOptionElevation: 2,
-            optionBackgroundColor: const Color(0xFF19232D),
+            optionBackgroundColor: AppColorPalette.buttonSecondary,
             inactiveOptionBackgroundColor: colorTheme.overlay.withOpacity(0.4),
             optionShape: const CircleBorder(),
             optionPadding: const EdgeInsets.all(10),
@@ -279,14 +280,14 @@ class _StreamDogFoodingAppContentState
             initialsTextStyle: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF005FFF),
+              color: AppColorPalette.primary,
             ),
-            initialsBackground: const Color(0xFF183158),
+            initialsBackground: AppColorPalette.avatarBackground,
             selectionThickness: 4,
           ),
           lobbyViewTheme: StreamLobbyViewThemeData(
-            backgroundColor: const Color(0xFF101213),
-            cardBackgroundColor: const Color(0xFF19232D),
+            backgroundColor: AppColorPalette.backgroundColor,
+            cardBackgroundColor: AppColorPalette.buttonSecondary,
             userAvatarTheme: StreamUserAvatarThemeData(
               constraints: const BoxConstraints.tightFor(
                 height: 100,
@@ -294,8 +295,8 @@ class _StreamDogFoodingAppContentState
               ),
               borderRadius: const BorderRadius.all(Radius.circular(50)),
               initialsTextStyle:
-                  textTheme.title1.copyWith(color: const Color(0xFF005FFF)),
-              initialsBackground: const Color(0xFF183158),
+                  textTheme.title1.copyWith(color: AppColorPalette.primary),
+              initialsBackground: AppColorPalette.avatarBackground,
               selectionThickness: 4,
             ),
           ),
