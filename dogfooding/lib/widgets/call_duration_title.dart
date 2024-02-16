@@ -19,6 +19,7 @@ class CallDurationTitle extends StatefulWidget {
 }
 
 class _CallDurationTitleState extends State<CallDurationTitle> {
+  late DateTime _startedAt;
   Duration _duration = Duration.zero;
   Timer? _timer;
 
@@ -27,11 +28,10 @@ class _CallDurationTitleState extends State<CallDurationTitle> {
     super.initState();
 
     widget.call.get().then((value) {
-      final startedAt = value.foldOrNull(
+      _startedAt = value.foldOrNull(
               success: (callData) =>
-                  callData.data.metadata.session.startedAt) ??
+                  callData.data.metadata.session.startedAt ?? DateTime.now()) ??
           DateTime.now();
-      _duration = DateTime.now().difference(startedAt);
 
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (!mounted) {
@@ -40,7 +40,7 @@ class _CallDurationTitleState extends State<CallDurationTitle> {
         }
 
         setState(() {
-          _duration += const Duration(seconds: 1);
+          _duration = DateTime.now().difference(_startedAt);
         });
       });
     });
