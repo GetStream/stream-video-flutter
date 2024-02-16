@@ -11,6 +11,7 @@ List<RouteBase> get $appRoutes => [
       $loginRoute,
       $lobbyRoute,
       $callRoute,
+      $participantsRoute,
     ];
 
 RouteBase get $homeRoute => GoRouteData.$route(
@@ -99,6 +100,33 @@ extension $CallRouteExtension on CallRoute {
 
   String get location => GoRouteData.$location(
         '/call',
+      );
+
+  void go(BuildContext context) => context.go(location, extra: $extra);
+
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: $extra);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: $extra);
+
+  void replace(BuildContext context) =>
+      context.replace(location, extra: $extra);
+}
+
+RouteBase get $participantsRoute => GoRouteData.$route(
+      path: '/call/participants',
+      name: 'participants',
+      factory: $ParticipantsRouteExtension._fromState,
+    );
+
+extension $ParticipantsRouteExtension on ParticipantsRoute {
+  static ParticipantsRoute _fromState(GoRouterState state) => ParticipantsRoute(
+        $extra: state.extra as Call,
+      );
+
+  String get location => GoRouteData.$location(
+        '/call/participants',
       );
 
   void go(BuildContext context) => context.go(location, extra: $extra);

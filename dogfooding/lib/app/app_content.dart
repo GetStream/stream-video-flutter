@@ -251,6 +251,10 @@ class _StreamDogFoodingAppContentState
       inputDecorationTheme: const InputDecorationTheme(
         labelStyle: TextStyle(color: Colors.white),
       ),
+      bottomSheetTheme: baseTheme.bottomSheetTheme.copyWith(
+        backgroundColor: Colors.black,
+        dragHandleColor: Colors.white,
+      ),
       extensions: <ThemeExtension<dynamic>>[
         StreamVideoTheme.dark().copyWith(
           callControlsTheme: StreamCallControlsThemeData(
@@ -261,7 +265,7 @@ class _StreamDogFoodingAppContentState
             backgroundColor: colorTheme.barsBg,
             elevation: 8,
             padding: const EdgeInsets.all(14),
-            spacing: 10,
+            spacing: 4,
             optionIconColor: Colors.white,
             inactiveOptionIconColor: Colors.white,
             optionElevation: 2,
@@ -269,7 +273,7 @@ class _StreamDogFoodingAppContentState
             optionBackgroundColor: AppColorPalette.buttonSecondary,
             inactiveOptionBackgroundColor: colorTheme.overlay.withOpacity(0.4),
             optionShape: const CircleBorder(),
-            optionPadding: const EdgeInsets.all(10),
+            optionPadding: const EdgeInsets.all(14),
           ),
           userAvatarTheme: StreamUserAvatarThemeData(
             borderRadius: BorderRadius.circular(20),
@@ -302,19 +306,19 @@ class _StreamDogFoodingAppContentState
           ),
           callParticipantTheme: StreamCallParticipantThemeData(
             showSpeakerBorder: true,
-            borderRadius: isDesktopDevice
-                ? const BorderRadius.all(Radius.circular(12))
-                : BorderRadius.zero,
+            borderRadius: const BorderRadius.all(Radius.circular(16)),
             speakerBorderColor: colorTheme.accentPrimary,
             speakerBorderThickness: 4,
-            backgroundColor: colorTheme.disabled,
+            backgroundColor: AppColorPalette.buttonSecondary,
             userAvatarTheme: StreamUserAvatarThemeData(
               constraints: const BoxConstraints.tightFor(
                 height: 100,
                 width: 100,
               ),
               borderRadius: const BorderRadius.all(Radius.circular(50)),
-              initialsTextStyle: textTheme.title1.copyWith(color: Colors.white),
+              initialsTextStyle:
+                  textTheme.title1.copyWith(color: const Color(0xFF005FFF)),
+              initialsBackground: AppColorPalette.avatarBackground,
               selectionColor: colorTheme.accentPrimary,
               selectionThickness: 4,
             ),
@@ -323,8 +327,11 @@ class _StreamDogFoodingAppContentState
                 textTheme.footnote.copyWith(color: Colors.white),
             disabledMicrophoneColor: Colors.white,
             enabledMicrophoneColor: Colors.white,
-            connectionLevelActiveColor: colorTheme.accentPrimary,
+            connectionLevelActiveColor: const Color(0xFF00FF00),
             connectionLevelInactiveColor: Colors.white,
+            participantsGridPadding: const EdgeInsets.all(4),
+            participantsGridMainAxisSpacing: 4,
+            participantsGridCrossAxisSpacing: 4,
           ),
         )
       ],

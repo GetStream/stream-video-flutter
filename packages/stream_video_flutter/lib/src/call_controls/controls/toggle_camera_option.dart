@@ -12,6 +12,10 @@ class ToggleCameraOption extends StatelessWidget {
     required this.localParticipant,
     this.enabledCameraIcon = Icons.videocam_rounded,
     this.disabledCameraIcon = Icons.videocam_off_rounded,
+    this.enabledCameraIconColor,
+    this.disabledCameraIconColor,
+    this.enabledCameraBackgroundColor,
+    this.disabledCameraBackgroundColor,
   });
 
   /// Represents a call.
@@ -26,12 +30,28 @@ class ToggleCameraOption extends StatelessWidget {
   /// The icon that is shown when the camera is disabled.
   final IconData disabledCameraIcon;
 
+  /// Color of the icon when camera is enabled
+  final Color? enabledCameraIconColor;
+
+  /// Color of the icon when camera is disabled
+  final Color? disabledCameraIconColor;
+
+  /// Color of the background when camera is enabled
+  final Color? enabledCameraBackgroundColor;
+
+  /// Color of the background when camera is disabled
+  final Color? disabledCameraBackgroundColor;
+
   @override
   Widget build(BuildContext context) {
     final enabled = localParticipant.isVideoEnabled;
 
     return CallControlOption(
       icon: enabled ? Icon(enabledCameraIcon) : Icon(disabledCameraIcon),
+      iconColor: enabled ? enabledCameraIconColor : disabledCameraIconColor,
+      backgroundColor: enabled
+          ? enabledCameraBackgroundColor
+          : disabledCameraBackgroundColor,
       onPressed: () {
         call.setCameraEnabled(enabled: !enabled);
       },

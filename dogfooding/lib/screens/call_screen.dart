@@ -6,7 +6,11 @@ import 'package:flutter/material.dart';
 
 // 📦 Package imports:
 import 'package:crypto/crypto.dart';
+import 'package:flutter_dogfooding/router/routes.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
+import 'package:flutter_dogfooding/widgets/badged_call_option.dart';
+import 'package:flutter_dogfooding/widgets/call_duration_title.dart';
+import 'package:flutter_dogfooding/widgets/share_call_card.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide User;
 
@@ -30,9 +34,10 @@ class CallScreen extends StatefulWidget {
 }
 
 class _CallScreenState extends State<CallScreen> {
-  Channel? _channel;
-  late final _streamVideo = locator.get<StreamVideo>();
   late final _userChatRepo = locator.get<UserChatRepository>();
+
+  Channel? _channel;
+  ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
 
   @override
   void initState() {
@@ -79,7 +84,6 @@ class _CallScreenState extends State<CallScreen> {
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      backgroundColor: AppColorPalette.backgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(16),
@@ -99,6 +103,10 @@ class _CallScreenState extends State<CallScreen> {
     );
   }
 
+  void showParticipants(BuildContext context) {
+    ParticipantsRoute($extra: widget.call).push(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,56 +122,104 @@ class _CallScreenState extends State<CallScreen> {
           return StreamCallContent(
             call: call,
             callState: callState,
+            layoutMode: _currentLayoutMode,
+            callParticipantsBuilder: (context, call, callState) {
+              return Stack(
+                children: [
+                  StreamCallParticipants(
+                    call: call,
+                    participants: callState.callParticipants,
+                    layoutMode: _currentLayoutMode,
+                  ),
+                  if (call.state.valueOrNull?.otherParticipants.isEmpty ??
+                      false)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: ShareCallCard(callId: call.id),
+                    )
+                ],
+              );
+            },
+            callAppBarBuilder: (context, call, callState) {
+              return CallAppBar(
+                call: call,
+                leadingWidth: 120,
+                leading: Row(
+                  children: [
+                    ToggleLayoutOption(
+                      onLayoutModeChanged: (layout) {
+                        setState(() {
+                          _currentLayoutMode = layout;
+                        });
+                      },
+                    ),
+                    if (call.state.valueOrNull?.localParticipant != null)
+                      FlipCameraOption(
+                        call: call,
+                        localParticipant: call.state.value.localParticipant!,
+                      ),
+                  ],
+                ),
+                title: CallDurationTitle(call: call),
+              );
+            },
             callControlsBuilder: (
               BuildContext context,
               Call call,
               CallState callState,
             ) {
               final localParticipant = callState.localParticipant!;
-              return StreamCallControls(
-                options: [
-                  CallControlOption(
-                    icon: const Icon(Icons.chat_outlined),
-                    onPressed: _channel != null //
-                        ? () => showChat(context)
-                        : null,
-                  ),
-                  FlipCameraOption(
-                    call: call,
-                    localParticipant: localParticipant,
-                  ),
-                  AddReactionOption(
-                    call: call,
-                    localParticipant: localParticipant,
-                  ),
-                  ToggleScreenShareOption(
-                    call: call,
-                    localParticipant: localParticipant,
-                    screenShareConstraints: const ScreenShareConstraints(
-                        useiOSBroadcastExtension: true),
-                  ),
-                  ToggleMicrophoneOption(
-                    call: call,
-                    localParticipant: localParticipant,
-                  ),
-                  ToggleCameraOption(
-                    call: call,
-                    localParticipant: localParticipant,
-                  ),
-                  LeaveCallOption(
-                    call: call,
-                    onLeaveCallTap: () async {
-                      final result = await call.leave();
-                      if (result is Failure) {
-                        debugPrint('Error leaving call: ${result.error}');
-                        return;
-                      }
-
-                      // End all calls.
-                      _streamVideo.pushNotificationManager?.endAllCalls();
-                    },
-                  ),
-                ],
+              return Container(
+                padding: const EdgeInsets.only(
+                  top: 16,
+                  left: 8,
+                ),
+                color: Colors.black,
+                child: SafeArea(
+                  child: Row(children: [
+                    ToggleScreenShareOption(
+                      call: call,
+                      localParticipant: localParticipant,
+                      screenShareConstraints: const ScreenShareConstraints(
+                        useiOSBroadcastExtension: true,
+                      ),
+                      enabledScreenShareBackgroundColor:
+                          AppColorPalette.primary,
+                      disabledScreenShareIcon: Icons.screen_share,
+                    ),
+                    ToggleMicrophoneOption(
+                      call: call,
+                      localParticipant: localParticipant,
+                      disabledMicrophoneBackgroundColor: AppColorPalette.appRed,
+                    ),
+                    ToggleCameraOption(
+                      call: call,
+                      localParticipant: localParticipant,
+                      disabledCameraBackgroundColor: AppColorPalette.appRed,
+                    ),
+                    const Spacer(),
+                    BadgedCallOption(
+                      callControlOption: CallControlOption(
+                        icon: const Icon(Icons.people),
+                        onPressed: _channel != null //
+                            ? () => showParticipants(context)
+                            : null,
+                      ),
+                      badgeCount: callState.callParticipants.length,
+                    ),
+                    BadgedCallOption(
+                      callControlOption: CallControlOption(
+                        icon: const Icon(Icons.question_answer),
+                        onPressed: _channel != null //
+                            ? () => showChat(context)
+                            : null,
+                      ),
+                      badgeCount: _channel?.state?.unreadCount ?? 0,
+                    )
+                  ]),
+                ),
               );
             },
           );

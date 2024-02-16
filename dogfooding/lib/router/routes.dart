@@ -1,5 +1,6 @@
 // 🐦 Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/screens/call_participants_list.dart';
 
 // 📦 Package imports:
 import 'package:go_router/go_router.dart';
@@ -70,6 +71,22 @@ class CallRoute extends GoRouteData {
     return CallScreen(
       call: $extra.call,
       connectOptions: $extra.connectOptions,
+    );
+  }
+}
+
+@immutable
+@TypedGoRoute<ParticipantsRoute>(
+    path: '/call/participants', name: 'participants')
+class ParticipantsRoute extends GoRouteData {
+  const ParticipantsRoute({required this.$extra});
+
+  final Call $extra;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return CallParticipantsList(
+      call: $extra,
     );
   }
 }

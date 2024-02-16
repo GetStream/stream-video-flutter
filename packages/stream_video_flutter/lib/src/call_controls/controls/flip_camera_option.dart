@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
-
-import '../call_control_option.dart';
+import '../../../stream_video_flutter.dart';
 
 /// A widget that represents a call control option to flip the active camera.
 class FlipCameraOption extends StatelessWidget {
@@ -40,7 +38,7 @@ class FlipCameraOption extends StatelessWidget {
           : Icon(backCameraIcon),
       onPressed: trackState?.muted == false //
           ? call.flipCamera
-          : null,
+          : () {},
     );
   }
 }

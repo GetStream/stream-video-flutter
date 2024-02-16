@@ -41,6 +41,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
     this.connectionLevelActiveColor = const Color(0xff005FFF),
     this.connectionLevelInactiveColor = Colors.white,
     this.connectionLevelAlignment = Alignment.bottomRight,
+    this.participantsGridPadding = const EdgeInsets.all(8),
+    this.participantsGridMainAxisSpacing = 8,
+    this.participantsGridCrossAxisSpacing = 8,
   });
 
   /// The fit of the [VideoRenderer] widget
@@ -94,6 +97,15 @@ class StreamCallParticipantThemeData with Diagnosticable {
   /// Alignment for the connection level.
   final AlignmentGeometry connectionLevelAlignment;
 
+  /// The padding between the participants in the grid layout.
+  final EdgeInsets participantsGridPadding;
+
+  /// Main axis spacing between the participants in the grid layout.
+  final double participantsGridMainAxisSpacing;
+
+  /// Cross axis spacing between the participants in the grid layout.
+  final double participantsGridCrossAxisSpacing;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   StreamCallParticipantThemeData copyWith({
@@ -114,6 +126,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
     Color? connectionLevelActiveColor,
     Color? connectionLevelInactiveColor,
     AlignmentGeometry? connectionLevelAlignment,
+    EdgeInsets? participantsGridPadding,
+    double? participantsGridMainAxisSpacing,
+    double? participantsGridCrossAxisSpacing,
   }) {
     return StreamCallParticipantThemeData(
       videoFit: videoFit ?? this.videoFit,
@@ -143,6 +158,12 @@ class StreamCallParticipantThemeData with Diagnosticable {
           connectionLevelInactiveColor ?? this.connectionLevelInactiveColor,
       connectionLevelAlignment:
           connectionLevelAlignment ?? this.connectionLevelAlignment,
+      participantsGridPadding:
+          participantsGridPadding ?? this.participantsGridPadding,
+      participantsGridMainAxisSpacing: participantsGridMainAxisSpacing ??
+          this.participantsGridMainAxisSpacing,
+      participantsGridCrossAxisSpacing: participantsGridCrossAxisSpacing ??
+          this.participantsGridCrossAxisSpacing,
     );
   }
 
@@ -211,6 +232,21 @@ class StreamCallParticipantThemeData with Diagnosticable {
         other.connectionLevelAlignment,
         t,
       )!,
+      participantsGridPadding: EdgeInsets.lerp(
+        participantsGridPadding,
+        other.participantsGridPadding,
+        t,
+      )!,
+      participantsGridMainAxisSpacing: lerpDouble(
+        participantsGridMainAxisSpacing,
+        other.participantsGridMainAxisSpacing,
+        t,
+      )!,
+      participantsGridCrossAxisSpacing: lerpDouble(
+        participantsGridCrossAxisSpacing,
+        other.participantsGridCrossAxisSpacing,
+        t,
+      )!,
     );
   }
 
@@ -233,6 +269,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
         connectionLevelActiveColor,
         connectionLevelInactiveColor,
         connectionLevelAlignment,
+        participantsGridPadding,
+        participantsGridMainAxisSpacing,
+        participantsGridCrossAxisSpacing,
       );
 
   @override
@@ -261,7 +300,12 @@ class StreamCallParticipantThemeData with Diagnosticable {
             showConnectionQualityIndicator &&
         other.connectionLevelActiveColor == connectionLevelActiveColor &&
         other.connectionLevelInactiveColor == connectionLevelInactiveColor &&
-        other.connectionLevelAlignment == connectionLevelAlignment;
+        other.connectionLevelAlignment == connectionLevelAlignment &&
+        other.participantsGridPadding == participantsGridPadding &&
+        other.participantsGridMainAxisSpacing ==
+            participantsGridMainAxisSpacing &&
+        other.participantsGridCrossAxisSpacing ==
+            participantsGridCrossAxisSpacing;
   }
 
   @override
@@ -341,6 +385,24 @@ class StreamCallParticipantThemeData with Diagnosticable {
           'connectionLevelAlignment',
           connectionLevelAlignment,
         ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'participantsGridPadding',
+          participantsGridPadding,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'participantsGridMainAxisSpacing',
+          participantsGridMainAxisSpacing,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'participantsGridCrossAxisSpacing',
+          participantsGridCrossAxisSpacing,
+        ),
       );
   }
 
@@ -365,6 +427,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
       connectionLevelActiveColor: other.connectionLevelActiveColor,
       connectionLevelInactiveColor: other.connectionLevelInactiveColor,
       connectionLevelAlignment: other.connectionLevelAlignment,
+      participantsGridPadding: other.participantsGridPadding,
+      participantsGridMainAxisSpacing: other.participantsGridMainAxisSpacing,
+      participantsGridCrossAxisSpacing: other.participantsGridCrossAxisSpacing,
     );
   }
 }

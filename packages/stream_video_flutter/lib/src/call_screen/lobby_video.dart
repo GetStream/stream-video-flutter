@@ -149,17 +149,18 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
               icon: microphoneEnabled
                   ? const Icon(Icons.mic_rounded)
                   : const Icon(Icons.mic_off_rounded),
-              iconColor: microphoneEnabled ? null : Colors.white,
+              iconColor: microphoneEnabled ? null : theme.optionOffIconColor,
               backgroundColor:
-                  microphoneEnabled ? null : const Color(0xFFDC433B),
+                  microphoneEnabled ? null : theme.optionOffBackgroundColor,
               onPressed: toggleMicrophone,
             ),
             CallControlOption(
               icon: cameraEnabled
                   ? const Icon(Icons.videocam_rounded)
                   : const Icon(Icons.videocam_off_rounded),
-              iconColor: cameraEnabled ? null : Colors.white,
-              backgroundColor: cameraEnabled ? null : const Color(0xFFDC433B),
+              iconColor: cameraEnabled ? null : theme.optionOffIconColor,
+              backgroundColor:
+                  cameraEnabled ? null : theme.optionOffBackgroundColor,
               onPressed: toggleCamera,
             ),
           ],
