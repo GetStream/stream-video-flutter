@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:flutter_dogfooding/utils/assets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -18,6 +19,7 @@ class CallDurationTitle extends StatefulWidget {
 }
 
 class _CallDurationTitleState extends State<CallDurationTitle> {
+  late DateTime _startedAt;
   Duration _duration = Duration.zero;
   Timer? _timer;
 
@@ -26,11 +28,10 @@ class _CallDurationTitleState extends State<CallDurationTitle> {
     super.initState();
 
     widget.call.get().then((value) {
-      final startedAt = value.foldOrNull(
+      _startedAt = value.foldOrNull(
               success: (callData) =>
-                  callData.data.metadata.session.startedAt) ??
+                  callData.data.metadata.session.startedAt ?? DateTime.now()) ??
           DateTime.now();
-      _duration = DateTime.now().difference(startedAt);
 
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (!mounted) {
@@ -39,7 +40,7 @@ class _CallDurationTitleState extends State<CallDurationTitle> {
         }
 
         setState(() {
-          _duration += const Duration(seconds: 1);
+          _duration = DateTime.now().difference(_startedAt);
         });
       });
     });
@@ -72,7 +73,7 @@ class _CallDurationTitleState extends State<CallDurationTitle> {
           Text(
             '${_duration.inMinutes.toString().padLeft(2, '0')}:${_duration.inSeconds.remainder(60).toString().padLeft(2, '0')}',
             style: videoTheme.textTheme.title3.apply(
-              color: const Color(0xFF979CA0),
+              color: AppColorPalette.secondaryText,
             ),
           ),
         ],

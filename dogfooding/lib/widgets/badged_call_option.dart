@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class BadgedCallOption extends StatelessWidget {
@@ -42,7 +43,7 @@ class Badge extends StatelessWidget {
       width: 18,
       padding: const EdgeInsets.all(6),
       decoration: const BoxDecoration(
-        color: Color(0xFF00E2A1),
+        color: AppColorPalette.appGreen,
         shape: BoxShape.circle,
       ),
       child: Center(
