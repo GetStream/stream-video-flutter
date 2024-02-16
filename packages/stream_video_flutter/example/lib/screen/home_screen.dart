@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../users_provider.dart';
 import 'home_tabs/join_call_tab.dart';
 import 'home_tabs/start_call_tab.dart';
 
@@ -87,12 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute<dynamic>(
-        builder: (context) => StreamUsersConfiguration(
-          usersProvider: MockUsersProvider(),
-          child: StreamCallContainer(
-            call: call,
-            callConnectOptions: options,
-          ),
+        builder: (context) => StreamCallContainer(
+          call: call,
+          callConnectOptions: options,
         ),
       ),
     );

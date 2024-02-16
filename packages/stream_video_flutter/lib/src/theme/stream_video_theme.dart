@@ -21,7 +21,6 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamLobbyViewThemeData? lobbyViewTheme,
     StreamCallParticipantThemeData? callParticipantTheme,
     StreamLocalVideoThemeData? localVideoTheme,
-    StreamCallParticipantsInfoMenuThemeData? callParticipantsInfoMenuTheme,
     StreamIncomingOutgoingCallThemeData? incomingCallTheme,
     StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
     StreamLivestreamThemeData? livestreamTheme,
@@ -46,7 +45,6 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       lobbyViewTheme: lobbyViewTheme,
       callParticipantTheme: callParticipantTheme,
       localVideoTheme: localVideoTheme,
-      callParticipantsInfoMenuTheme: callParticipantsInfoMenuTheme,
       incomingCallTheme: incomingCallTheme,
       outgoingCallTheme: outgoingCallTheme,
       livestreamTheme: livestreamTheme,
@@ -72,7 +70,6 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.lobbyViewTheme,
     required this.callParticipantTheme,
     required this.localVideoTheme,
-    required this.callParticipantsInfoMenuTheme,
     required this.incomingCallTheme,
     required this.callContentTheme,
     required this.outgoingCallTheme,
@@ -187,53 +184,6 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Colors.white,
-          ),
-        ),
-      ),
-      callParticipantsInfoMenuTheme: StreamCallParticipantsInfoMenuThemeData(
-        participantDividerColor: colorTheme.overlayDark,
-        participantDividerIndent: 0,
-        participantDividerHeight: 0,
-        participantNameTextStyle: TextStyle(
-          color: colorTheme.textHighEmphasis,
-          fontSize: 18,
-        ),
-        participantIconActiveColor: colorTheme.textHighEmphasis,
-        participantIconInactiveColor: colorTheme.accentError,
-        participantUserAvatarTheme: StreamUserAvatarThemeData(
-          initialsTextStyle: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: colorTheme.barsBg,
-          ),
-          constraints: const BoxConstraints(
-            minHeight: 56,
-            minWidth: 56,
-          ),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(32),
-          ),
-        ),
-        inviteDividerColor: colorTheme.overlayDark,
-        inviteDividerIndent: 16,
-        inviteDividerHeight: 0,
-        inviteUsernameTextStyle: TextStyle(
-          color: colorTheme.textHighEmphasis,
-          fontSize: 18,
-        ),
-        inviteSelectedIconColor: colorTheme.accentPrimary,
-        inviteUserAvatarTheme: const StreamUserAvatarThemeData(
-          initialsTextStyle: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-          constraints: BoxConstraints(
-            minHeight: 56,
-            minWidth: 56,
-          ),
-          borderRadius: BorderRadius.all(
-            Radius.circular(32),
           ),
         ),
       ),
@@ -399,9 +349,6 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the local video widget.
   final StreamLocalVideoThemeData localVideoTheme;
 
-  /// Theme for the participants info widget.
-  final StreamCallParticipantsInfoMenuThemeData callParticipantsInfoMenuTheme;
-
   /// Theme for the outgoing call widget.
   final StreamIncomingOutgoingCallThemeData incomingCallTheme;
 
@@ -425,7 +372,6 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamLobbyViewThemeData? lobbyViewTheme,
     StreamCallParticipantThemeData? callParticipantTheme,
     StreamLocalVideoThemeData? localVideoTheme,
-    StreamCallParticipantsInfoMenuThemeData? callParticipantsInfoMenuTheme,
     StreamIncomingOutgoingCallThemeData? incomingCallTheme,
     StreamCallContentThemeData? callContentTheme,
     StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
@@ -439,9 +385,6 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         lobbyViewTheme: this.lobbyViewTheme.merge(lobbyViewTheme),
         callParticipantTheme:
             this.callParticipantTheme.merge(callParticipantTheme),
-        callParticipantsInfoMenuTheme: this
-            .callParticipantsInfoMenuTheme
-            .merge(callParticipantsInfoMenuTheme),
         localVideoTheme: this.localVideoTheme.merge(localVideoTheme),
         incomingCallTheme: this.incomingCallTheme.merge(incomingCallTheme),
         callContentTheme: this.callContentTheme.merge(callContentTheme),
@@ -460,8 +403,6 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       lobbyViewTheme: lobbyViewTheme.merge(other.lobbyViewTheme),
       callParticipantTheme:
           callParticipantTheme.merge(other.callParticipantTheme),
-      callParticipantsInfoMenuTheme: callParticipantsInfoMenuTheme
-          .merge(other.callParticipantsInfoMenuTheme),
       incomingCallTheme: incomingCallTheme.merge(other.incomingCallTheme),
       callContentTheme: callContentTheme.merge(other.callContentTheme),
       outgoingCallTheme: outgoingCallTheme.merge(other.outgoingCallTheme),
@@ -486,10 +427,6 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           callParticipantTheme.lerp(other.callParticipantTheme, t),
       localVideoTheme: localVideoTheme.lerp(other.localVideoTheme, t),
       callControlsTheme: callControlsTheme.lerp(other.callControlsTheme, t),
-      callParticipantsInfoMenuTheme: callParticipantsInfoMenuTheme.lerp(
-        other.callParticipantsInfoMenuTheme,
-        t,
-      ),
       incomingCallTheme: incomingCallTheme.lerp(other.incomingCallTheme, t),
       callContentTheme: callContentTheme.lerp(other.callContentTheme, t),
       outgoingCallTheme: outgoingCallTheme.lerp(other.outgoingCallTheme, t),
