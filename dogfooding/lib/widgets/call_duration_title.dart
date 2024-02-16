@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:flutter_dogfooding/utils/assets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -72,7 +73,7 @@ class _CallDurationTitleState extends State<CallDurationTitle> {
           Text(
             '${_duration.inMinutes.toString().padLeft(2, '0')}:${_duration.inSeconds.remainder(60).toString().padLeft(2, '0')}',
             style: videoTheme.textTheme.title3.apply(
-              color: const Color(0xFF979CA0),
+              color: AppColorPalette.secondaryText,
             ),
           ),
         ],

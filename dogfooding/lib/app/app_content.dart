@@ -309,7 +309,7 @@ class _StreamDogFoodingAppContentState
             borderRadius: const BorderRadius.all(Radius.circular(16)),
             speakerBorderColor: colorTheme.accentPrimary,
             speakerBorderThickness: 4,
-            backgroundColor: const Color(0xFF19232D),
+            backgroundColor: AppColorPalette.buttonSecondary,
             userAvatarTheme: StreamUserAvatarThemeData(
               constraints: const BoxConstraints.tightFor(
                 height: 100,
@@ -318,7 +318,7 @@ class _StreamDogFoodingAppContentState
               borderRadius: const BorderRadius.all(Radius.circular(50)),
               initialsTextStyle:
                   textTheme.title1.copyWith(color: const Color(0xFF005FFF)),
-              initialsBackground: const Color(0xFF183158),
+              initialsBackground: AppColorPalette.avatarBackground,
               selectionColor: colorTheme.accentPrimary,
               selectionThickness: 4,
             ),

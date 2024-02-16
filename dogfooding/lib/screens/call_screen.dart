@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 // 📦 Package imports:
 import 'package:crypto/crypto.dart';
 import 'package:flutter_dogfooding/router/routes.dart';
+import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:flutter_dogfooding/widgets/badged_call_option.dart';
 import 'package:flutter_dogfooding/widgets/call_duration_title.dart';
 import 'package:flutter_dogfooding/widgets/share_call_card.dart';
@@ -185,19 +186,18 @@ class _CallScreenState extends State<CallScreen> {
                         useiOSBroadcastExtension: true,
                       ),
                       enabledScreenShareBackgroundColor:
-                          const Color(0xFF005FFF),
+                          AppColorPalette.primary,
                       disabledScreenShareIcon: Icons.screen_share,
                     ),
                     ToggleMicrophoneOption(
                       call: call,
                       localParticipant: localParticipant,
-                      disabledMicrophoneBackgroundColor:
-                          const Color(0xFFDC433B),
+                      disabledMicrophoneBackgroundColor: AppColorPalette.appRed,
                     ),
                     ToggleCameraOption(
                       call: call,
                       localParticipant: localParticipant,
-                      disabledCameraBackgroundColor: const Color(0xFFDC433B),
+                      disabledCameraBackgroundColor: AppColorPalette.appRed,
                     ),
                     const Spacer(),
                     BadgedCallOption(

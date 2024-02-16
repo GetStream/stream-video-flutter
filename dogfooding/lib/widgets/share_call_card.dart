@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:flutter_dogfooding/widgets/stream_button.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -18,7 +19,7 @@ class ShareCallCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF19232D),
+        color: AppColorPalette.buttonSecondary,
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(16),
@@ -47,7 +48,7 @@ class ShareCallCard extends StatelessWidget {
             Text(
               callId,
               style: theme.textTheme.title3.copyWith(
-                color: const Color(0xFF00E2A1),
+                color: AppColorPalette.appGreen,
               ),
             ),
             const Spacer(),
@@ -60,7 +61,8 @@ class ShareCallCard extends StatelessWidget {
                     SnackBar(
                       content: Row(
                         children: [
-                          const Icon(Icons.check, color: Color(0xFF00E2A1)),
+                          const Icon(Icons.check,
+                              color: AppColorPalette.appGreen),
                           const SizedBox(width: 8),
                           Text('Call ID copied to clipboard',
                               style: theme.textTheme.body.copyWith(
