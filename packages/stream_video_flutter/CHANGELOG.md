@@ -9,6 +9,12 @@
     - Participants button removed from `CallAppBar` together with `onParticipantsInfoTap` and `participantsInfoBuilder` properties
     - Layout Mode button removed from `CallAppBar` together with `onLayoutModeChanged` property. You can use new `ToggleLayoutOption` instead in custom layout anywhere
 * `ToggleLayoutOption` added
+* Components related to participants menu item from `CallAppBar` are removeed: `CallParticipantsInfoItem`, `StreamCallParticipantsInfoMenu` and `CallParticipantsInfoOptions`
+* `StreamCallParticipantsInfoMenuTheme` is removed
+
+Removed
+
+- 
 
 ## 0.3.2
 
