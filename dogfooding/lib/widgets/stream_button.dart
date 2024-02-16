@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/theme/app_palette.dart';
 
 class StreamButton extends StatelessWidget {
   const StreamButton({
@@ -19,7 +20,7 @@ class StreamButton extends StatelessWidget {
       label: label,
       icon: icon,
       onPressed: onPressed,
-      backgroundColor: const Color(0xff005FFF),
+      backgroundColor: AppColorPalette.primary,
     );
   }
 
@@ -32,7 +33,7 @@ class StreamButton extends StatelessWidget {
       label: label,
       icon: icon,
       onPressed: onPressed,
-      backgroundColor: const Color(0xFF19232D),
+      backgroundColor: AppColorPalette.buttonSecondary,
     );
   }
 
@@ -45,7 +46,7 @@ class StreamButton extends StatelessWidget {
       label: label,
       icon: icon,
       onPressed: onPressed,
-      backgroundColor: const Color(0xFF101213),
+      backgroundColor: AppColorPalette.backgroundColor,
       borderColor: const Color(0xFF323B44),
     );
   }

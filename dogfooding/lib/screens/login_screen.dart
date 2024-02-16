@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/app/user_auth_controller.dart';
+import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:flutter_dogfooding/widgets/stream_button.dart';
 
 // 📦 Package imports:
@@ -106,9 +107,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 36),
                 Text('Stream', style: theme.textTheme.headlineMedium),
-                Text('[Video Calling]',
-                    style: theme.textTheme.headlineMedium
-                        ?.apply(color: const Color(0xFF00E2A1))),
+                Text(
+                  '[Video Calling]',
+                  style: theme.textTheme.headlineMedium?.apply(
+                    color: AppColorPalette.appGreen,
+                  ),
+                ),
                 const SizedBox(height: 48),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),

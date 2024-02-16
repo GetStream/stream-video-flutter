@@ -3,6 +3,7 @@ import 'dart:async';
 
 // 🐦 Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:flutter_dogfooding/widgets/stream_button.dart';
 
 // 📦 Package imports:
@@ -174,9 +175,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 24),
               Text('Stream', style: theme.textTheme.headlineMedium),
-              Text('[Video Calling]',
-                  style: theme.textTheme.headlineMedium
-                      ?.apply(color: const Color(0xFF00E2A1))),
+              Text(
+                '[Video Calling]',
+                style: theme.textTheme.headlineMedium?.apply(
+                  color: AppColorPalette.appGreen,
+                ),
+              ),
               const SizedBox(height: 48),
               Text(
                 'Start a new call, join a meeting by\n'
@@ -184,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 'a QR code.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.apply(
-                  color: const Color(0xFF979CA0),
+                  color: AppColorPalette.secondaryText,
                 ),
               ),
               const SizedBox(height: 36),
@@ -237,7 +241,10 @@ class _JoinForm extends StatelessWidget {
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF979CA0), width: 1),
+                    borderSide: BorderSide(
+                      color: AppColorPalette.secondaryText,
+                      width: 1,
+                    ),
                     borderRadius: BorderRadius.all(Radius.circular(36)),
                   ),
                   border: const OutlineInputBorder(
