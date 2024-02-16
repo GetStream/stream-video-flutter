@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/core/repos/token_service.dart';
 import 'package:flutter_dogfooding/router/routes.dart';
+import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:uni_links/uni_links.dart';
@@ -239,24 +240,101 @@ class _StreamDogFoodingAppContentState
   ThemeData _buildTheme(brightness) {
     final baseTheme = ThemeData(brightness: brightness);
     final baseTextTheme = GoogleFonts.interTextTheme(baseTheme.textTheme);
+    final textTheme = StreamVideoTheme.dark().textTheme;
+    const colorTheme = StreamColorTheme.dark();
+
     return baseTheme.copyWith(
-      scaffoldBackgroundColor: const Color(0xFF2C2C2E),
+      scaffoldBackgroundColor: AppColorPalette.backgroundColor,
       colorScheme: ColorScheme.fromSwatch().copyWith(
-        primary: const Color(0xff005FFF),
+        primary: AppColorPalette.primary,
       ),
       inputDecorationTheme: const InputDecorationTheme(
         labelStyle: TextStyle(color: Colors.white),
       ),
-      extensions: <ThemeExtension<dynamic>>[StreamVideoTheme.dark()],
+      extensions: <ThemeExtension<dynamic>>[
+        StreamVideoTheme.dark().copyWith(
+          callControlsTheme: StreamCallControlsThemeData(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(32),
+              topRight: Radius.circular(32),
+            ),
+            backgroundColor: colorTheme.barsBg,
+            elevation: 8,
+            padding: const EdgeInsets.all(14),
+            spacing: 10,
+            optionIconColor: Colors.white,
+            inactiveOptionIconColor: Colors.white,
+            optionElevation: 2,
+            inactiveOptionElevation: 2,
+            optionBackgroundColor: AppColorPalette.buttonSecondary,
+            inactiveOptionBackgroundColor: colorTheme.overlay.withOpacity(0.4),
+            optionShape: const CircleBorder(),
+            optionPadding: const EdgeInsets.all(10),
+          ),
+          userAvatarTheme: StreamUserAvatarThemeData(
+            borderRadius: BorderRadius.circular(20),
+            constraints: const BoxConstraints.tightFor(
+              height: 40,
+              width: 40,
+            ),
+            initialsTextStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColorPalette.primary,
+            ),
+            initialsBackground: AppColorPalette.avatarBackground,
+            selectionThickness: 4,
+          ),
+          lobbyViewTheme: StreamLobbyViewThemeData(
+            backgroundColor: AppColorPalette.backgroundColor,
+            cardBackgroundColor: AppColorPalette.buttonSecondary,
+            userAvatarTheme: StreamUserAvatarThemeData(
+              constraints: const BoxConstraints.tightFor(
+                height: 100,
+                width: 100,
+              ),
+              borderRadius: const BorderRadius.all(Radius.circular(50)),
+              initialsTextStyle:
+                  textTheme.title1.copyWith(color: AppColorPalette.primary),
+              initialsBackground: AppColorPalette.avatarBackground,
+              selectionThickness: 4,
+            ),
+          ),
+          callParticipantTheme: StreamCallParticipantThemeData(
+            showSpeakerBorder: true,
+            borderRadius: isDesktopDevice
+                ? const BorderRadius.all(Radius.circular(12))
+                : BorderRadius.zero,
+            speakerBorderColor: colorTheme.accentPrimary,
+            speakerBorderThickness: 4,
+            backgroundColor: colorTheme.disabled,
+            userAvatarTheme: StreamUserAvatarThemeData(
+              constraints: const BoxConstraints.tightFor(
+                height: 100,
+                width: 100,
+              ),
+              borderRadius: const BorderRadius.all(Radius.circular(50)),
+              initialsTextStyle: textTheme.title1.copyWith(color: Colors.white),
+              selectionColor: colorTheme.accentPrimary,
+              selectionThickness: 4,
+            ),
+            audioLevelIndicatorColor: colorTheme.accentPrimary,
+            participantLabelTextStyle:
+                textTheme.footnote.copyWith(color: Colors.white),
+            disabledMicrophoneColor: Colors.white,
+            enabledMicrophoneColor: Colors.white,
+            connectionLevelActiveColor: colorTheme.accentPrimary,
+            connectionLevelInactiveColor: Colors.white,
+          ),
+        )
+      ],
       textTheme: baseTextTheme.copyWith(
         bodyLarge: baseTextTheme.bodyLarge?.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.bold,
-          fontSize: 28,
         ),
         bodyMedium: baseTextTheme.bodyMedium?.copyWith(
-          fontSize: 18,
-          color: const Color(0xFF979797),
+          color: Colors.white,
         ),
       ),
     );
