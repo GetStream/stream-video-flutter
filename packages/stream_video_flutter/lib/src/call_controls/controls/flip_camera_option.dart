@@ -26,8 +26,6 @@ class FlipCameraOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamCallControlsTheme.of(context);
-
     CameraPosition? position;
     final trackState = localParticipant.videoTrack;
     if (trackState is LocalTrackState) {

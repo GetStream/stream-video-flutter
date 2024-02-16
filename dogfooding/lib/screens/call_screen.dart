@@ -118,104 +118,110 @@ class _CallScreenState extends State<CallScreen> {
           Call call,
           CallState callState,
         ) {
-          return Stack(
-            children: [
-              StreamCallContent(
-                call: call,
-                callState: callState,
-                layoutMode: _currentLayoutMode,
-                callAppBarBuilder: (context, call, callState) {
-                  return CallAppBar(
+          return StreamCallContent(
+            call: call,
+            callState: callState,
+            layoutMode: _currentLayoutMode,
+            callParticipantsBuilder: (context, call, callState) {
+              return Stack(
+                children: [
+                  StreamCallParticipants(
                     call: call,
-                    leadingWidth: 120,
-                    leading: Row(
-                      children: [
-                        ToggleLayoutOption(
-                          onLayoutModeChanged: (layout) {
-                            setState(() {
-                              _currentLayoutMode = layout;
-                            });
-                          },
-                        ),
-                        if (call.state.valueOrNull?.localParticipant != null)
-                          FlipCameraOption(
-                            call: call,
-                            localParticipant:
-                                call.state.value.localParticipant!,
-                          ),
-                      ],
+                    participants: callState.callParticipants,
+                    layoutMode: _currentLayoutMode,
+                  ),
+                  if (call.state.valueOrNull?.otherParticipants.isEmpty ??
+                      false)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: ShareCallCard(callId: call.id),
+                    )
+                ],
+              );
+            },
+            callAppBarBuilder: (context, call, callState) {
+              return CallAppBar(
+                call: call,
+                leadingWidth: 120,
+                leading: Row(
+                  children: [
+                    ToggleLayoutOption(
+                      onLayoutModeChanged: (layout) {
+                        setState(() {
+                          _currentLayoutMode = layout;
+                        });
+                      },
                     ),
-                    title: CallDurationTitle(call: call),
-                  );
-                },
-                callControlsBuilder: (
-                  BuildContext context,
-                  Call call,
-                  CallState callState,
-                ) {
-                  final localParticipant = callState.localParticipant!;
-                  return Container(
-                    padding: const EdgeInsets.only(
-                      top: 16,
-                      left: 8,
+                    if (call.state.valueOrNull?.localParticipant != null)
+                      FlipCameraOption(
+                        call: call,
+                        localParticipant: call.state.value.localParticipant!,
+                      ),
+                  ],
+                ),
+                title: CallDurationTitle(call: call),
+              );
+            },
+            callControlsBuilder: (
+              BuildContext context,
+              Call call,
+              CallState callState,
+            ) {
+              final localParticipant = callState.localParticipant!;
+              return Container(
+                padding: const EdgeInsets.only(
+                  top: 16,
+                  left: 8,
+                ),
+                color: Colors.black,
+                child: SafeArea(
+                  child: Row(children: [
+                    ToggleScreenShareOption(
+                      call: call,
+                      localParticipant: localParticipant,
+                      screenShareConstraints: const ScreenShareConstraints(
+                        useiOSBroadcastExtension: true,
+                      ),
+                      enabledScreenShareBackgroundColor:
+                          const Color(0xFF005FFF),
+                      disabledScreenShareIcon: Icons.screen_share,
                     ),
-                    color: Colors.black,
-                    child: SafeArea(
-                      child: Row(children: [
-                        ToggleScreenShareOption(
-                          call: call,
-                          localParticipant: localParticipant,
-                          screenShareConstraints: const ScreenShareConstraints(
-                            useiOSBroadcastExtension: true,
-                          ),
-                          enabledScreenShareBackgroundColor:
-                              const Color(0xFF005FFF),
-                          disabledScreenShareIcon: Icons.screen_share,
-                        ),
-                        ToggleMicrophoneOption(
-                          call: call,
-                          localParticipant: localParticipant,
-                          disabledMicrophoneBackgroundColor:
-                              const Color(0xFFDC433B),
-                        ),
-                        ToggleCameraOption(
-                          call: call,
-                          localParticipant: localParticipant,
-                          disabledCameraBackgroundColor:
-                              const Color(0xFFDC433B),
-                        ),
-                        const Spacer(),
-                        BadgedCallOption(
-                          callControlOption: CallControlOption(
-                            icon: const Icon(Icons.people),
-                            onPressed: _channel != null //
-                                ? () => showParticipants(context)
-                                : null,
-                          ),
-                          badgeCount: callState.callParticipants.length,
-                        ),
-                        BadgedCallOption(
-                          callControlOption: CallControlOption(
-                            icon: const Icon(Icons.question_answer),
-                            onPressed: _channel != null //
-                                ? () => showChat(context)
-                                : null,
-                          ),
-                          badgeCount: _channel?.state?.unreadCount ?? 0,
-                        )
-                      ]),
+                    ToggleMicrophoneOption(
+                      call: call,
+                      localParticipant: localParticipant,
+                      disabledMicrophoneBackgroundColor:
+                          const Color(0xFFDC433B),
                     ),
-                  );
-                },
-              ),
-              if (call.state.valueOrNull?.otherParticipants.isEmpty ?? false)
-                Positioned(
-                  bottom: 60,
-                  left: 0,
-                  right: 0,
-                  child: ShareCallCard(callId: call.id),
-                )
-            ],
+                    ToggleCameraOption(
+                      call: call,
+                      localParticipant: localParticipant,
+                      disabledCameraBackgroundColor: const Color(0xFFDC433B),
+                    ),
+                    const Spacer(),
+                    BadgedCallOption(
+                      callControlOption: CallControlOption(
+                        icon: const Icon(Icons.people),
+                        onPressed: _channel != null //
+                            ? () => showParticipants(context)
+                            : null,
+                      ),
+                      badgeCount: callState.callParticipants.length,
+                    ),
+                    BadgedCallOption(
+                      callControlOption: CallControlOption(
+                        icon: const Icon(Icons.question_answer),
+                        onPressed: _channel != null //
+                            ? () => showChat(context)
+                            : null,
+                      ),
+                      badgeCount: _channel?.state?.unreadCount ?? 0,
+                    )
+                  ]),
+                ),
+              );
+            },
           );
         },
       ),

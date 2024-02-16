@@ -233,7 +233,10 @@ class StreamCallParticipantThemeData with Diagnosticable {
         t,
       )!,
       participantsGridPadding: EdgeInsets.lerp(
-          participantsGridPadding, other.participantsGridPadding, t)!,
+        participantsGridPadding,
+        other.participantsGridPadding,
+        t,
+      )!,
       participantsGridMainAxisSpacing: lerpDouble(
         participantsGridMainAxisSpacing,
         other.participantsGridMainAxisSpacing,
