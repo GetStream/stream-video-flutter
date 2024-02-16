@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
-
-import '../../stream_video_flutter.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// A widget that displays the list of participants in the lobby.
 class StreamLobbyParticipantsView extends StatelessWidget {

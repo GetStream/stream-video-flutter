@@ -1,4 +1,4 @@
-import 'sdp_munging_rule.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/rule/sdp_munging_rule.dart';
 
 class SdpRuleToggle {
   SdpRuleToggle({

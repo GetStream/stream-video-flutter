@@ -1,26 +1,25 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:stream_video/composed_version.dart';
+import 'package:stream_video/open_api/video/coordinator/api.dart' as open;
+import 'package:stream_video/src/coordinator/coordinator_ws.dart';
+import 'package:stream_video/src/coordinator/models/coordinator_events.dart';
+import 'package:stream_video/src/coordinator/open_api/error/open_api_error.dart';
+import 'package:stream_video/src/coordinator/open_api/error/open_api_error_code.dart';
+import 'package:stream_video/src/coordinator/open_api/event/open_api_event.dart';
+import 'package:stream_video/src/coordinator/open_api/open_api_mapper_extensions.dart';
+import 'package:stream_video/src/core/video_error.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/models/user_info.dart';
+import 'package:stream_video/src/retry/retry_policy.dart';
+import 'package:stream_video/src/shared_emitter.dart';
+import 'package:stream_video/src/token/token_manager.dart';
+import 'package:stream_video/src/types/other.dart';
+import 'package:stream_video/src/utils/none.dart';
+import 'package:stream_video/src/utils/result.dart';
+import 'package:stream_video/src/ws/health/health_monitor.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-
-import '../../../composed_version.dart';
-import '../../../open_api/video/coordinator/api.dart' as open;
-import '../../core/video_error.dart';
-import '../../logger/impl/tagged_logger.dart';
-import '../../models/user_info.dart';
-import '../../retry/retry_policy.dart';
-import '../../shared_emitter.dart';
-import '../../token/token_manager.dart';
-import '../../types/other.dart';
-import '../../utils/none.dart';
-import '../../utils/result.dart';
-import '../../ws/health/health_monitor.dart';
-import '../coordinator_ws.dart';
-import '../models/coordinator_events.dart';
-import 'error/open_api_error.dart';
-import 'error/open_api_error_code.dart';
-import 'event/open_api_event.dart';
-import 'open_api_mapper_extensions.dart';
 
 // TODO: The class needs further refactor. Some parts can be abstracted.
 

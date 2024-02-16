@@ -1,7 +1,7 @@
-import '../../platform_detector/platform_detector.dart';
-import '../model/rtc_video_parameters.dart';
-import 'constraints/facing_mode.dart';
-import 'video_constraints.dart';
+import 'package:stream_video/src/platform_detector/platform_detector.dart';
+import 'package:stream_video/src/webrtc/media/constraints/facing_mode.dart';
+import 'package:stream_video/src/webrtc/media/video_constraints.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_parameters.dart';
 
 /// Options used when creating a video track that captures the camera.
 class CameraConstraints extends VideoConstraints {

@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-import '../../../stream_video_flutter.dart';
-import '../call_diagnostics_content/call_diagnostics_content.dart';
+import 'package:stream_video_flutter/src/call_screen/call_diagnostics_content/call_diagnostics_content.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Builder used to create a custom call app bar.
 typedef CallAppBarBuilder = PreferredSizeWidget Function(

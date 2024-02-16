@@ -1,10 +1,9 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
-
-import '../../../../open_api/video/coordinator/api.dart' as open;
-import '../../../logger/stream_log.dart';
-import 'event_type.dart';
+import 'package:stream_video/open_api/video/coordinator/api.dart' as open;
+import 'package:stream_video/src/coordinator/open_api/event/event_type.dart';
+import 'package:stream_video/src/logger/stream_log.dart';
 
 const _tag = 'SV:OpenApiEvent';
 

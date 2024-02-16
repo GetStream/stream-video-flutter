@@ -1,15 +1,14 @@
 import 'dart:async';
 
-import 'package:web_socket_channel/web_socket_channel.dart';
-
-import '../errors/video_error_composer.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../utils/none.dart';
-import '../utils/result.dart';
-import 'connect/connect.dart'
+import 'package:stream_video/src/errors/video_error_composer.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/utils/none.dart';
+import 'package:stream_video/src/utils/result.dart';
+import 'package:stream_video/src/ws/connect/connect.dart'
     if (dart.library.html) 'package:stream_video/src/ws/connect/connect_html.dart'
     if (dart.library.io) 'package:stream_video/src/ws/connect/connect_io.dart'
     as platform;
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 export 'package:web_socket_channel/web_socket_channel.dart';
 

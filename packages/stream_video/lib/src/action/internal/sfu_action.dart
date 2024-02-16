@@ -1,7 +1,6 @@
 import 'package:meta/meta.dart';
-
-import '../../sfu/data/events/sfu_events.dart';
-import '../internal_action.dart';
+import 'package:stream_video/src/action/internal_action.dart';
+import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 
 @internal
 abstract class SfuAction extends StreamInternalAction {

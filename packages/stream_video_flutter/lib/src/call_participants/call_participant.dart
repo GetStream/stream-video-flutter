@@ -1,11 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-
-import '../../stream_video_flutter.dart';
-import '../utils/extensions.dart';
-import 'indicators/connection_quality_indicator.dart';
-import 'participant_label.dart';
+import 'package:stream_video_flutter/src/call_participants/indicators/connection_quality_indicator.dart';
+import 'package:stream_video_flutter/src/call_participants/participant_label.dart';
+import 'package:stream_video_flutter/src/utils/extensions.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Builder function used to build a video placeholder.
 typedef VideoPlaceholderBuilder = Widget Function(

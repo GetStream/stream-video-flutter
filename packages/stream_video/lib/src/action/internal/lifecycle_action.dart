@@ -1,12 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-
-import '../../errors/video_error.dart';
-import '../../models/call_created_data.dart';
-import '../../models/call_joined_data.dart';
-import '../../models/call_received_data.dart';
-import '../../models/call_ringing_data.dart';
-import '../internal_action.dart';
+import 'package:stream_video/src/action/internal_action.dart';
+import 'package:stream_video/src/errors/video_error.dart';
+import 'package:stream_video/src/models/call_created_data.dart';
+import 'package:stream_video/src/models/call_joined_data.dart';
+import 'package:stream_video/src/models/call_received_data.dart';
+import 'package:stream_video/src/models/call_ringing_data.dart';
 
 @internal
 abstract class LifecycleAction extends StreamInternalAction {

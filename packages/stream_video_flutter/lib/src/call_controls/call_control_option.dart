@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../stream_video_flutter.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Widget that represents a call control option.
 class CallControlOption extends StatelessWidget {

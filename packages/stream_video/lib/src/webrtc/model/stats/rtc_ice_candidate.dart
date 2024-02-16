@@ -17,7 +17,7 @@
 //   relayProtocol: tcp,
 // }
 
-import 'rtc_writable.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_writable.dart';
 
 class RtcIceCandidate implements RtcWritable {
   const RtcIceCandidate({

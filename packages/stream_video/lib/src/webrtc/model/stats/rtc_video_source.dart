@@ -10,7 +10,7 @@
 //   frames: 2271
 // }
 
-import 'rtc_media_source.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_media_source.dart';
 
 class RtcVideoSource extends RtcMediaSource {
   const RtcVideoSource({

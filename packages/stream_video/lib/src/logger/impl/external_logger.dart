@@ -1,4 +1,4 @@
-import '../stream_logger.dart';
+import 'package:stream_video/src/logger/stream_logger.dart';
 
 typedef ExternalFunction = void Function(
   Priority priority,

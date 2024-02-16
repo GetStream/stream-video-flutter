@@ -2,18 +2,18 @@ import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
-import '../disposable.dart';
-import '../errors/video_error_composer.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../models/call_cid.dart';
-import '../utils/none.dart';
-import '../utils/result.dart';
-import '../utils/standard.dart';
-import 'model/stats/rtc_printable_stats.dart';
-import 'model/stats/rtc_stats_mapper.dart';
-import 'peer_type.dart';
-import 'sdp/editor/sdp_editor.dart';
-import 'sdp/sdp.dart';
+import 'package:stream_video/src/disposable.dart';
+import 'package:stream_video/src/errors/video_error_composer.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/models/call_cid.dart';
+import 'package:stream_video/src/utils/none.dart';
+import 'package:stream_video/src/utils/result.dart';
+import 'package:stream_video/src/utils/standard.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_printable_stats.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_stats_mapper.dart';
+import 'package:stream_video/src/webrtc/peer_type.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/sdp_editor.dart';
+import 'package:stream_video/src/webrtc/sdp/sdp.dart';
 
 /// {@template onStreamAdded}
 /// Handler when a new [rtc.MediaStream] gets added.

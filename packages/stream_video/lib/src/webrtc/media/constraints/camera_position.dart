@@ -1,4 +1,4 @@
-import 'facing_mode.dart';
+import 'package:stream_video/src/webrtc/media/constraints/facing_mode.dart';
 
 /// Enum type to represent the camera position of a video track.
 enum CameraPosition {

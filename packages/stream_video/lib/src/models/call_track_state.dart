@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../webrtc/media/constraints/camera_position.dart';
-import '../webrtc/model/rtc_video_dimension.dart';
-import '../webrtc/rtc_media_device/rtc_media_device.dart';
+import 'package:stream_video/src/webrtc/media/constraints/camera_position.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_dimension.dart';
+import 'package:stream_video/src/webrtc/rtc_media_device/rtc_media_device.dart';
 
 @immutable
 abstract class TrackState with EquatableMixin {

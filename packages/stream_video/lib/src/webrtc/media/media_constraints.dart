@@ -1,8 +1,7 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_video/src/logger/stream_log.dart';
+import 'package:stream_video/src/webrtc/media/screen_share_constraints.dart';
 import 'package:webrtc_interface/webrtc_interface.dart' as rtc_interface;
-
-import '../../logger/stream_log.dart';
-import 'screen_share_constraints.dart';
 
 export 'audio_constraints.dart';
 export 'camera_constraints.dart';

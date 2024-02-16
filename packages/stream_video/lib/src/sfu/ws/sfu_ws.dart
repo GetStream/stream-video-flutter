@@ -1,18 +1,18 @@
 import 'dart:async';
 
-import '../../../composed_version.dart';
-import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
-import '../../errors/video_error_composer.dart';
-import '../../logger/impl/tagged_logger.dart';
-import '../../logger/stream_log.dart';
-import '../../shared_emitter.dart';
-import '../../types/other.dart';
-import '../../utils/none.dart';
-import '../../utils/result.dart';
-import '../../ws/health/health_monitor.dart';
-import '../../ws/ws.dart';
-import '../data/events/sfu_event_mapper_extensions.dart';
-import '../data/events/sfu_events.dart';
+import 'package:stream_video/composed_version.dart';
+import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart' as sfu_events;
+import 'package:stream_video/src/errors/video_error_composer.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/logger/stream_log.dart';
+import 'package:stream_video/src/sfu/data/events/sfu_event_mapper_extensions.dart';
+import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
+import 'package:stream_video/src/shared_emitter.dart';
+import 'package:stream_video/src/types/other.dart';
+import 'package:stream_video/src/utils/none.dart';
+import 'package:stream_video/src/utils/result.dart';
+import 'package:stream_video/src/ws/health/health_monitor.dart';
+import 'package:stream_video/src/ws/ws.dart';
 
 const _tag = 'SV:Sfu-WS';
 

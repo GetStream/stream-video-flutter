@@ -1,22 +1,22 @@
 import 'package:collection/collection.dart';
 
-import '../../../../open_api/video/coordinator/api.dart' as open;
-import '../../errors/video_error.dart';
-import '../../logger/stream_log.dart';
-import '../../models/call_cid.dart';
-import '../../models/call_credentials.dart';
-import '../../models/call_egress.dart';
-import '../../models/call_metadata.dart';
-import '../../models/call_permission.dart';
-import '../../models/call_reaction.dart';
-import '../../models/call_session_data.dart';
-import '../../models/call_settings.dart';
-import '../../models/guest_created_data.dart';
-import '../../models/push_device.dart';
-import '../../models/push_provider.dart';
-import '../../models/queried_calls.dart';
-import '../../models/queried_members.dart';
-import '../../utils/standard.dart';
+import 'package:stream_video/open_api/video/coordinator/api.dart' as open;
+import 'package:stream_video/src/errors/video_error.dart';
+import 'package:stream_video/src/logger/stream_log.dart';
+import 'package:stream_video/src/models/call_cid.dart';
+import 'package:stream_video/src/models/call_credentials.dart';
+import 'package:stream_video/src/models/call_egress.dart';
+import 'package:stream_video/src/models/call_metadata.dart';
+import 'package:stream_video/src/models/call_permission.dart';
+import 'package:stream_video/src/models/call_reaction.dart';
+import 'package:stream_video/src/models/call_session_data.dart';
+import 'package:stream_video/src/models/call_settings.dart';
+import 'package:stream_video/src/models/guest_created_data.dart';
+import 'package:stream_video/src/models/push_device.dart';
+import 'package:stream_video/src/models/push_provider.dart';
+import 'package:stream_video/src/models/queried_calls.dart';
+import 'package:stream_video/src/models/queried_members.dart';
+import 'package:stream_video/src/utils/standard.dart';
 
 extension MemberExt on open.MemberResponse {
   CallMember toCallMember() {

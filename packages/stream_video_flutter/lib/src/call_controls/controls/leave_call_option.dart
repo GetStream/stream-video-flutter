@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../../stream_video_flutter.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// A widget that represents a call control option to leave a call.
 class LeaveCallOption extends StatelessWidget {

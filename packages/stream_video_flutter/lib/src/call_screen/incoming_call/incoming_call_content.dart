@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-
-import '../../../stream_video_flutter.dart';
-import '../../utils/extensions.dart';
-import '../common/call_background.dart';
-import '../common/calling_participants.dart';
-import '../common/participant_avatars.dart';
-import 'incoming_call_controls.dart';
+import 'package:stream_video_flutter/src/call_screen/common/call_background.dart';
+import 'package:stream_video_flutter/src/call_screen/common/calling_participants.dart';
+import 'package:stream_video_flutter/src/call_screen/common/participant_avatars.dart';
+import 'package:stream_video_flutter/src/call_screen/incoming_call/incoming_call_controls.dart';
+import 'package:stream_video_flutter/src/utils/extensions.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Represents the Incoming Call state and UI, when the user is called by
 /// other people.

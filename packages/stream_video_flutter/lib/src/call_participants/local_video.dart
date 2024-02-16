@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../stream_video_flutter.dart';
-import '../widgets/floating_view/floating_view_alignment.dart';
+import 'package:stream_video_flutter/src/widgets/floating_view/floating_view_alignment.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Represents a floating item used to feature a participant video.
 class StreamLocalVideo extends StatelessWidget {

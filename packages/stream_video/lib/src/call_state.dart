@@ -1,15 +1,14 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-
-import 'models/call_cid.dart';
-import 'models/call_egress.dart';
-import 'models/call_metadata.dart';
-import 'models/call_participant_state.dart';
-import 'models/call_permission.dart';
-import 'models/call_settings.dart';
-import 'models/call_status.dart';
-import 'webrtc/rtc_media_device/rtc_media_device.dart';
+import 'package:stream_video/src/models/call_cid.dart';
+import 'package:stream_video/src/models/call_egress.dart';
+import 'package:stream_video/src/models/call_metadata.dart';
+import 'package:stream_video/src/models/call_participant_state.dart';
+import 'package:stream_video/src/models/call_permission.dart';
+import 'package:stream_video/src/models/call_settings.dart';
+import 'package:stream_video/src/models/call_status.dart';
+import 'package:stream_video/src/webrtc/rtc_media_device/rtc_media_device.dart';
 
 /// Represents the call's state.
 @immutable

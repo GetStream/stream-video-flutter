@@ -1,9 +1,8 @@
 import 'package:async/async.dart' as async;
 import 'package:meta/meta.dart';
-
-import '../../stream_video.dart';
-import '../utils/cancelable_operation.dart';
-import '../utils/future.dart';
+import 'package:stream_video/src/utils/cancelable_operation.dart';
+import 'package:stream_video/src/utils/future.dart';
+import 'package:stream_video/stream_video.dart';
 
 const _emptyUserId = 'stream:none';
 

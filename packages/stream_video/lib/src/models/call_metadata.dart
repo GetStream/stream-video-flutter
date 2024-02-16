@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import 'call_cid.dart';
-import 'call_egress.dart';
-import 'call_permission.dart';
-import 'call_session_data.dart';
-import 'call_settings.dart';
+import 'package:stream_video/src/models/call_cid.dart';
+import 'package:stream_video/src/models/call_egress.dart';
+import 'package:stream_video/src/models/call_permission.dart';
+import 'package:stream_video/src/models/call_session_data.dart';
+import 'package:stream_video/src/models/call_settings.dart';
 
 @immutable
 class CallMetadata with EquatableMixin {

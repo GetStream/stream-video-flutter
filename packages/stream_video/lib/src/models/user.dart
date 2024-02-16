@@ -1,4 +1,4 @@
-import 'models.dart';
+import 'package:stream_video/src/models/models.dart';
 
 class User {
   const User({

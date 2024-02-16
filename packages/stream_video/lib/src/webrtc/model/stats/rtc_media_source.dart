@@ -1,4 +1,4 @@
-import 'rtc_writable.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_writable.dart';
 
 abstract class RtcMediaSource implements RtcWritable {
   const RtcMediaSource({

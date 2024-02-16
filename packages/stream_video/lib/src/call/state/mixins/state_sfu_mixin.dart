@@ -1,15 +1,15 @@
 import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
-import '../../../call_state.dart';
-import '../../../logger/impl/tagged_logger.dart';
-import '../../../models/call_participant_state.dart';
-import '../../../models/call_preferences.dart';
-import '../../../models/call_status.dart';
-import '../../../models/call_track_state.dart';
-import '../../../models/disconnect_reason.dart';
-import '../../../sfu/data/events/sfu_events.dart';
-import '../../../utils/string.dart';
+import 'package:stream_video/src/call_state.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/models/call_participant_state.dart';
+import 'package:stream_video/src/models/call_preferences.dart';
+import 'package:stream_video/src/models/call_status.dart';
+import 'package:stream_video/src/models/call_track_state.dart';
+import 'package:stream_video/src/models/disconnect_reason.dart';
+import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
+import 'package:stream_video/src/utils/string.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 

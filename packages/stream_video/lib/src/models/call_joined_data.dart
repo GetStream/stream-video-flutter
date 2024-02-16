@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import 'call_cid.dart';
-import 'call_credentials.dart';
-import 'call_metadata.dart';
+import 'package:stream_video/src/models/call_cid.dart';
+import 'package:stream_video/src/models/call_credentials.dart';
+import 'package:stream_video/src/models/call_metadata.dart';
 
 @immutable
 class CallJoinedData with EquatableMixin {

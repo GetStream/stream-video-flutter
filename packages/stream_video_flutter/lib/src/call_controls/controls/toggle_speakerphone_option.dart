@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-
-import '../../../stream_video_flutter.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 // These are eyeballed device IDs for the speaker and earpiece.
 // based on Android and iOS enumerated devices.

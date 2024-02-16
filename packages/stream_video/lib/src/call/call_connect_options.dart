@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
-
-import '../webrtc/media/media_constraints.dart';
-import '../webrtc/rtc_track/rtc_local_track.dart';
+import 'package:stream_video/src/webrtc/media/media_constraints.dart';
+import 'package:stream_video/src/webrtc/rtc_track/rtc_local_track.dart';
 
 class CallConnectOptions with EquatableMixin {
   const CallConnectOptions({

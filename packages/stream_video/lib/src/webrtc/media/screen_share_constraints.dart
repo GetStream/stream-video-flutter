@@ -1,6 +1,6 @@
-import '../../platform_detector/platform_detector.dart';
-import '../model/rtc_video_parameters.dart';
-import 'video_constraints.dart';
+import 'package:stream_video/src/platform_detector/platform_detector.dart';
+import 'package:stream_video/src/webrtc/media/video_constraints.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_parameters.dart';
 
 /// Options used when creating a video track that captures the screen.
 class ScreenShareConstraints extends VideoConstraints {

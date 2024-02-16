@@ -1,9 +1,9 @@
-import '../../../../logger/impl/tagged_logger.dart';
-import '../../attributes/fmtp.dart';
-import '../../attributes/rtpmap.dart';
-import '../../codec/sdp_codec.dart';
-import '../../sdp.dart';
-import 'sdp_edit_action.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/webrtc/sdp/attributes/fmtp.dart';
+import 'package:stream_video/src/webrtc/sdp/attributes/rtpmap.dart';
+import 'package:stream_video/src/webrtc/sdp/codec/sdp_codec.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/action/sdp_edit_action.dart';
+import 'package:stream_video/src/webrtc/sdp/sdp.dart';
 
 final _logger = taggedLogger(tag: 'SV:SetOpusDtxEnabled');
 

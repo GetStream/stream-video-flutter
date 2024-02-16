@@ -1,10 +1,10 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
-import '../../logger/stream_log.dart';
-import '../../sfu/data/models/sfu_track_type.dart';
-import '../model/rtc_video_dimension.dart';
-import '../rtc_audio_api/rtc_audio_api.dart' as rtc_audio_api;
-import 'rtc_track.dart';
+import 'package:stream_video/src/logger/stream_log.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_dimension.dart';
+import 'package:stream_video/src/webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio_api;
+import 'package:stream_video/src/webrtc/rtc_track/rtc_track.dart';
 
 const _tag = 'SV:RtcRemoteTrack';
 

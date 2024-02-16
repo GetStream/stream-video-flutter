@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:async/async.dart' as async;
 
-import 'stream.dart';
+import 'package:stream_video/src/utils/stream.dart';
 
 extension FutureX<T> on Future<T> {
   async.CancelableOperation<T> asCancelable() {

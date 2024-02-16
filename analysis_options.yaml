@@ -78,7 +78,12 @@ linter:
     avoid_annotating_with_dynamic: false
 
     # conflicts with `prefer_relative_imports`
-    always_use_package_imports: false
+    # When mixing relative and absolute imports it's possible to create confusion
+    # where the same member gets imported in two different ways. One way to avoid 
+    # that is to ensure you consistently use absolute imports for files within 
+    # the lib/ directory.
+    always_use_package_imports: true
+    prefer_relative_imports: false
 
     # False positive, null checks don't need a message
     prefer_asserts_with_message: false

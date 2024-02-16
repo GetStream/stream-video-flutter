@@ -1,8 +1,8 @@
-import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
-import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
-import '../../../webrtc/peer_type.dart';
-import 'sfu_subscription_details.dart';
-import 'sfu_track_type.dart';
+import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
+import 'package:stream_video/src/sfu/data/models/sfu_subscription_details.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/webrtc/peer_type.dart';
 
 /// TODO
 extension SfuPeerTypeMapper on sfu_models.PeerType {

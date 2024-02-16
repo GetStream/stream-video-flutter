@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import '../../../../open_api/video/coordinator/api.dart';
+import 'package:stream_video/open_api/video/coordinator/api.dart';
 
 class OpenApiError {
   const OpenApiError(this.apiError);

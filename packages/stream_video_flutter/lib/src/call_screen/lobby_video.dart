@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-
-import '../../stream_video_flutter.dart';
-import '../call_participants/participant_label.dart';
+import 'package:stream_video_flutter/src/call_participants/participant_label.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// A widget that can be shown before joining a call. Measures latencies
 /// and selects the best SFU. This speeds up the process of joining when

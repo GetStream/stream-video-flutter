@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-import '../../stream_video_flutter.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Defines default property values for [StreamIncomingCallContent] and
 /// [StreamOutgoingCallContent] widgets.

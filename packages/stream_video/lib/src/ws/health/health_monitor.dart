@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-import '../../logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
 
 abstract class HealthMonitor {
   bool get isStarted;

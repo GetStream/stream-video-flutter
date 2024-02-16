@@ -15,7 +15,7 @@
 //   packetsLost: 0,
 // }
 
-import 'rtc_remote_inbound_rtp.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_remote_inbound_rtp.dart';
 
 class RtcRemoteInboundRtpVideoStream extends RtcRemoteInboundRtp {
   const RtcRemoteInboundRtpVideoStream({

@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import 'rtc_video_dimension.dart';
-import 'rtc_video_encoding.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_dimension.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_encoding.dart';
 
 @immutable
 class RtcVideoParameters

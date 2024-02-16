@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import 'sfu_participant.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
 
 @immutable
 class SfuCallState with EquatableMixin {

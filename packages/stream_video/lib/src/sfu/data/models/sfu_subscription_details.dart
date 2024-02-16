@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../../stream_video.dart';
+import 'package:stream_video/stream_video.dart';
 
 class SfuSubscriptionDetails with EquatableMixin {
   const SfuSubscriptionDetails({

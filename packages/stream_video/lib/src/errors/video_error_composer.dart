@@ -1,7 +1,6 @@
+import 'package:stream_video/src/errors/video_error.dart';
 import 'package:tart/tart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-
-import 'video_error.dart';
 
 /// TODO
 mixin VideoErrors {

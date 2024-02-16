@@ -1,9 +1,9 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:rxdart/rxdart.dart';
 
-import '../../errors/video_error_composer.dart';
-import '../../utils/result.dart';
-import 'rtc_media_device.dart';
+import 'package:stream_video/src/errors/video_error_composer.dart';
+import 'package:stream_video/src/utils/result.dart';
+import 'package:stream_video/src/webrtc/rtc_media_device/rtc_media_device.dart';
 
 class RtcMediaDeviceNotifier {
   RtcMediaDeviceNotifier._internal() {

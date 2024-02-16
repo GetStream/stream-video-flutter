@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 
-import '../logger/stream_log.dart';
+import 'package:stream_video/src/logger/stream_log.dart';
 
 const _tag = 'SV:LocationService';
 

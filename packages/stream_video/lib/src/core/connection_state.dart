@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../errors/video_error.dart';
+import 'package:stream_video/src/errors/video_error.dart';
 
 sealed class ConnectionState with EquatableMixin {
   const ConnectionState();

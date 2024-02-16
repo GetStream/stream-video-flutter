@@ -1,12 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-
-import '../sfu/data/models/sfu_connection_quality.dart';
-import '../sfu/data/models/sfu_track_type.dart';
-import '../sorting/call_participant_sorting_presets.dart';
-import 'call_reaction.dart';
-import 'call_track_state.dart';
-import 'viewport_visibility.dart';
+import 'package:stream_video/src/models/call_reaction.dart';
+import 'package:stream_video/src/models/call_track_state.dart';
+import 'package:stream_video/src/models/viewport_visibility.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_connection_quality.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/sorting/call_participant_sorting_presets.dart';
 
 @immutable
 class CallParticipantState

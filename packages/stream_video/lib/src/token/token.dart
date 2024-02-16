@@ -1,9 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:jose/jose.dart';
-
-import '../../stream_video.dart';
-import '../errors/video_error_composer.dart';
-import '../utils/standard.dart';
+import 'package:stream_video/src/errors/video_error_composer.dart';
+import 'package:stream_video/src/utils/standard.dart';
+import 'package:stream_video/stream_video.dart';
 
 /// A function which can be used to request a Stream Video API token from your
 /// own backend server

@@ -1,5 +1,5 @@
-import '../models/call_participant_state.dart';
-import 'call_participant_state_sorting.dart';
+import 'package:stream_video/src/models/call_participant_state.dart';
+import 'package:stream_video/src/sorting/call_participant_state_sorting.dart';
 
 mixin CallParticipantSortingPresets {
   /// The default sorting preset.

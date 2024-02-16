@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import '../../stream_video_flutter.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Extensions on [String].
 extension StringExtension on String {

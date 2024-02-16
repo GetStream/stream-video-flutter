@@ -1,16 +1,15 @@
 import 'package:meta/meta.dart';
-
-import '../../attributes/fmtp.dart';
-import '../../attributes/rtpmap.dart';
-import '../../specification/media_description.dart';
-import '../rule/rule_prioritize_codec.dart';
-import '../rule/rule_set_opus_dtx_enabled.dart';
-import '../rule/rule_set_opus_red_enabled.dart';
-import '../rule/sdp_munging_rule.dart';
-import 'action_prioritize_codec.dart';
-import 'action_set_opus_dtx_enabled.dart';
-import 'action_set_opus_red_enabled.dart';
-import 'sdp_edit_action.dart';
+import 'package:stream_video/src/webrtc/sdp/attributes/fmtp.dart';
+import 'package:stream_video/src/webrtc/sdp/attributes/rtpmap.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/action/action_prioritize_codec.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/action/action_set_opus_dtx_enabled.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/action/action_set_opus_red_enabled.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/action/sdp_edit_action.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/rule/rule_prioritize_codec.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/rule/rule_set_opus_dtx_enabled.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/rule/rule_set_opus_red_enabled.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/rule/sdp_munging_rule.dart';
+import 'package:stream_video/src/webrtc/sdp/specification/media_description.dart';
 
 @internal
 class SdpEditActionFactory {

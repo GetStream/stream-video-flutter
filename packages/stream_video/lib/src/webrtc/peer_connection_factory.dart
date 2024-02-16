@@ -1,11 +1,11 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
-import '../logger/impl/tagged_logger.dart';
-import '../models/call_cid.dart';
-import '../types/other.dart';
-import 'peer_connection.dart';
-import 'peer_type.dart';
-import 'sdp/editor/sdp_editor.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/models/call_cid.dart';
+import 'package:stream_video/src/types/other.dart';
+import 'package:stream_video/src/webrtc/peer_connection.dart';
+import 'package:stream_video/src/webrtc/peer_type.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/sdp_editor.dart';
 
 class StreamPeerConnectionFactory {
   StreamPeerConnectionFactory({

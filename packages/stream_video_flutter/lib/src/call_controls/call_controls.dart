@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../stream_video_flutter.dart';
-import '../utils/extensions.dart';
+import 'package:stream_video_flutter/src/utils/extensions.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Represents the set of controls the user can use to change their audio
 /// and video device state, or browse other types of settings, leave the call,

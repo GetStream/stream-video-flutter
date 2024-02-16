@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
-import 'disconnect_reason.dart';
+import 'package:stream_video/src/models/disconnect_reason.dart';
 
 @immutable
 abstract class CallStatus extends Equatable {

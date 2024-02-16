@@ -1,5 +1,5 @@
-import '../events.dart';
-import '../logger/stream_log.dart';
+import 'package:stream_video/src/events.dart';
+import 'package:stream_video/src/logger/stream_log.dart';
 
 /// Connection state type used throughout the SDK.
 enum ConnectionState {

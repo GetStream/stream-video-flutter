@@ -26,8 +26,8 @@
 //  silentConcealedSamples: 57560
 // }
 
-import 'rtc_media_stream_track.dart';
-import 'rtc_writable.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_media_stream_track.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_writable.dart';
 
 class RtcMediaStreamTrackRemoteAudio
     implements RtcMediaStreamTrack, RtcWritable {

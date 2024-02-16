@@ -37,9 +37,9 @@
 //  totalDecodeTime: 0.435,
 // }
 
-import '../../../utils/format.dart';
-import 'rtc_inbound_rtp.dart';
-import 'rtc_writable.dart';
+import 'package:stream_video/src/utils/format.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_inbound_rtp.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_writable.dart';
 
 class RtcInboundRtpVideoStream implements RtcInboundRtp, RtcWritable {
   const RtcInboundRtpVideoStream({

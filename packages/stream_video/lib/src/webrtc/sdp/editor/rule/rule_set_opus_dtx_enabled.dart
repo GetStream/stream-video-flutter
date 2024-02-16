@@ -1,5 +1,5 @@
-import '../../sdp.dart';
-import 'sdp_munging_rule.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/rule/sdp_munging_rule.dart';
+import 'package:stream_video/src/webrtc/sdp/sdp.dart';
 
 class SetOpusDtxEnabledRule extends SdpMungingRule {
   const SetOpusDtxEnabledRule({

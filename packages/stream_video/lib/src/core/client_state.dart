@@ -1,9 +1,9 @@
-import '../call/call.dart';
-import '../models/call_cid.dart';
-import '../models/user.dart';
-import '../shared_emitter.dart';
-import '../state_emitter.dart';
-import 'connection_state.dart';
+import 'package:stream_video/src/call/call.dart';
+import 'package:stream_video/src/core/connection_state.dart';
+import 'package:stream_video/src/models/call_cid.dart';
+import 'package:stream_video/src/models/user.dart';
+import 'package:stream_video/src/shared_emitter.dart';
+import 'package:stream_video/src/state_emitter.dart';
 
 abstract class ClientState {
   /// Returns the current user.

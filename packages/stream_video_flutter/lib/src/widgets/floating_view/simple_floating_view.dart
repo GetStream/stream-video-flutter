@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../utils/extensions.dart';
-import 'floating_view_alignment.dart';
+import 'package:stream_video_flutter/src/utils/extensions.dart';
+import 'package:stream_video_flutter/src/widgets/floating_view/floating_view_alignment.dart';
 
 /// A simple draggable floating view that can be moved to any position.
 class SimpleFloatingView extends StatefulWidget {

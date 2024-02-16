@@ -1,11 +1,10 @@
 import 'package:equatable/equatable.dart';
-
-import '../../../../platform_detector/platform_detector.dart';
-import '../../codec/sdp_codec.dart';
-import '../../editor/rule/rule_set_opus_red_enabled.dart';
-import '../../sdp.dart';
-import 'rule_prioritize_codec.dart';
-import 'rule_set_opus_dtx_enabled.dart';
+import 'package:stream_video/src/platform_detector/platform_detector.dart';
+import 'package:stream_video/src/webrtc/sdp/codec/sdp_codec.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/rule/rule_prioritize_codec.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/rule/rule_set_opus_dtx_enabled.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/rule/rule_set_opus_red_enabled.dart';
+import 'package:stream_video/src/webrtc/sdp/sdp.dart';
 
 abstract class SdpMungingRule with EquatableMixin {
   const SdpMungingRule({

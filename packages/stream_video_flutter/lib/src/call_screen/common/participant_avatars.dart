@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../../stream_video_flutter.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Renders avatars of the participants on the outgoing call and incoming
 /// call screens.

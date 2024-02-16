@@ -1,14 +1,13 @@
+import 'package:stream_video/src/call/session/call_session.dart';
+import 'package:stream_video/src/call/session/call_session_config.dart';
+import 'package:stream_video/src/call/state/call_state_notifier.dart';
+import 'package:stream_video/src/core/utils.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/models/call_cid.dart';
+import 'package:stream_video/src/models/call_credentials.dart';
+import 'package:stream_video/src/types/other.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/sdp_editor.dart';
 import 'package:uuid/uuid.dart';
-
-import '../../core/utils.dart';
-import '../../logger/impl/tagged_logger.dart';
-import '../../models/call_cid.dart';
-import '../../models/call_credentials.dart';
-import '../../types/other.dart';
-import '../../webrtc/sdp/editor/sdp_editor.dart';
-import '../state/call_state_notifier.dart';
-import 'call_session.dart';
-import 'call_session_config.dart';
 
 int _sessionSeq = 1;
 

@@ -1,4 +1,4 @@
-import '../../../logger/stream_log.dart';
+import 'package:stream_video/src/logger/stream_log.dart';
 
 const _tag = 'SV:EventType';
 

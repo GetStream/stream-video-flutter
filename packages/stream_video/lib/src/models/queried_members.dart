@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import 'call_metadata.dart';
+import 'package:stream_video/src/models/call_metadata.dart';
 
 class QueriedMembers with EquatableMixin {
   factory QueriedMembers({

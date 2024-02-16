@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-
-import '../../stream_video_flutter.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Builder used to create a custom incoming call widget.
 typedef IncomingCallBuilder = Widget Function(

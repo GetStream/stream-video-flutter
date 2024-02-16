@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../stream_video_flutter.dart';
-import '../call_screen/call_diagnostics_content/call_diagnostics_content.dart';
+import 'package:stream_video_flutter/src/call_screen/call_diagnostics_content/call_diagnostics_content.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// The video renderer widget associated with [LivestreamPlayer].
 ///

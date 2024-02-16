@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../stream_logger.dart';
+import 'package:stream_video/src/logger/stream_logger.dart';
 
 class ConsoleStreamLogger extends StreamLogger {
   const ConsoleStreamLogger();

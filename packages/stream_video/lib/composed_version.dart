@@ -1,5 +1,5 @@
-import 'src/platform_detector/platform_detector.dart';
-import 'version.g.dart';
+import 'package:stream_video/src/platform_detector/platform_detector.dart';
+import 'package:stream_video/version.g.dart';
 
 /// Default user agent for all requests
 final String defaultUserAgent = 'stream-video-dart-client-${CurrentPlatform

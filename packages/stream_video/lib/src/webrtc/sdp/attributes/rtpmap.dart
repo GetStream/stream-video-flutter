@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-import '../codec/sdp_codec.dart';
-import '../sdp.dart';
+import 'package:stream_video/src/webrtc/sdp/codec/sdp_codec.dart';
+import 'package:stream_video/src/webrtc/sdp/sdp.dart';
 
 /// Represents 'rtpmap' attribute
 /// Reference: https://www.rfc-editor.org/rfc/rfc4566#section-6.

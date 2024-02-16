@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
-
-import '../theme/themes.dart';
-import 'livestream_speakerphone_option.dart';
+import 'package:stream_video_flutter/src/livestream/livestream_speakerphone_option.dart';
+import 'package:stream_video_flutter/src/theme/themes.dart';
 
 /// A control bar style widget meant for displaying livestream controls and
 /// actions.

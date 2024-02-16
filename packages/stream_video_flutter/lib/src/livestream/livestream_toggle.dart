@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../theme/themes.dart';
+import 'package:stream_video_flutter/src/theme/themes.dart';
 
 /// A toggle for pausing and resuming the livestream.
 ///

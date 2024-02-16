@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
-
-import 'notification_options.dart';
+import 'package:stream_video_flutter/src/call_background/model/notification_options.dart';
 
 class NotificationPayload with EquatableMixin {
   const NotificationPayload({

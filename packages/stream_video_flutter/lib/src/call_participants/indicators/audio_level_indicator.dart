@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-
-import '../../theme/stream_video_theme.dart';
+import 'package:stream_video_flutter/src/theme/stream_video_theme.dart';
 
 /// Widget used to indicate the audio levels of a given participant.
 class StreamAudioLevelIndicator extends StatefulWidget {

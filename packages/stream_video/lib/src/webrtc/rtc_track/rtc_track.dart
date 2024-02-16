@@ -1,9 +1,9 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:meta/meta.dart';
 
-import '../../logger/stream_log.dart';
-import '../../sfu/data/models/sfu_track_type.dart';
-import '../model/rtc_video_dimension.dart';
+import 'package:stream_video/src/logger/stream_log.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_dimension.dart';
 
 export 'rtc_local_track.dart';
 export 'rtc_remote_track.dart';

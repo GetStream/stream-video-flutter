@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../../models/call_credentials.dart';
-import '../../models/call_metadata.dart';
+import 'package:stream_video/src/models/call_credentials.dart';
+import 'package:stream_video/src/models/call_metadata.dart';
 
 @immutable
 abstract class CoordinatorModel with EquatableMixin {

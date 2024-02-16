@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-
-import '../logger/impl/tagged_logger.dart';
-import '../utils/standard.dart';
-import 'lifecycle_state.dart';
+import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/utils/standard.dart';
 
 final _logger = taggedLogger(tag: 'SV:LifecycleUtilsM');
 

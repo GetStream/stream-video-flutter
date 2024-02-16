@@ -10,8 +10,8 @@
 //  ended: false,
 // }
 
-import 'rtc_media_stream_track.dart';
-import 'rtc_writable.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_media_stream_track.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_writable.dart';
 
 class RtcMediaStreamTrackLocalAudio
     implements RtcMediaStreamTrack, RtcWritable {

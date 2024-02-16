@@ -1,8 +1,8 @@
 import 'package:meta/meta.dart';
 
-import '../webrtc/model/stats/rtc_printable_stats.dart';
-import '../webrtc/model/stats/rtc_raw_stats.dart';
-import '../webrtc/peer_type.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_printable_stats.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_raw_stats.dart';
+import 'package:stream_video/src/webrtc/peer_type.dart';
 
 @immutable
 class CallStats {

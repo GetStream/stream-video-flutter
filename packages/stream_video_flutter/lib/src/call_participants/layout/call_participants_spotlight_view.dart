@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
-
-import '../call_participants.dart';
+import 'package:stream_video_flutter/src/call_participants/call_participants.dart';
 
 const _kSpacing = 16.0;
 

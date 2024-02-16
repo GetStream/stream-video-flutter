@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import 'sfu_connection_quality.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_connection_quality.dart';
 
 @immutable
 class SfuConnectionQualityInfo {

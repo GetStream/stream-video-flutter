@@ -1,7 +1,6 @@
 import 'package:meta/meta.dart';
-
-import '../../../stream_video.dart';
-import '../internal_action.dart';
+import 'package:stream_video/src/action/internal_action.dart';
+import 'package:stream_video/stream_video.dart';
 
 @internal
 abstract class RtcAction extends StreamInternalAction {

@@ -4,8 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_video/stream_video.dart';
-
-import '../../theme/stream_video_theme.dart';
+import 'package:stream_video_flutter/src/theme/stream_video_theme.dart';
 
 /// Renders a call background that shows either a static image or user images
 /// based on the call state.

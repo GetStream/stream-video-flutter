@@ -1,14 +1,14 @@
 import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
-import '../../../action/internal/coordinator_action.dart';
-import '../../../call_state.dart';
-import '../../../coordinator/models/coordinator_events.dart';
-import '../../../logger/impl/tagged_logger.dart';
-import '../../../models/call_participant_state.dart';
-import '../../../models/call_reaction.dart';
-import '../../../models/call_status.dart';
-import '../../../models/disconnect_reason.dart';
+import 'package:stream_video/src/action/internal/coordinator_action.dart';
+import 'package:stream_video/src/call_state.dart';
+import 'package:stream_video/src/coordinator/models/coordinator_events.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/models/call_participant_state.dart';
+import 'package:stream_video/src/models/call_reaction.dart';
+import 'package:stream_video/src/models/call_status.dart';
+import 'package:stream_video/src/models/disconnect_reason.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 

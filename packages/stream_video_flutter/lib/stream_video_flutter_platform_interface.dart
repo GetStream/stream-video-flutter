@@ -1,8 +1,7 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-
-import '../src/call_background/model/notification_payload.dart';
-import '../src/call_background/model/service_type.dart';
-import 'stream_video_flutter_method_channel.dart';
+import 'package:stream_video_flutter/src/call_background/model/notification_payload.dart';
+import 'package:stream_video_flutter/src/call_background/model/service_type.dart';
+import 'package:stream_video_flutter/stream_video_flutter_method_channel.dart';
 
 abstract class StreamVideoFlutterPlatform extends PlatformInterface {
   /// Constructs a StreamVideoFlutterPlatform.

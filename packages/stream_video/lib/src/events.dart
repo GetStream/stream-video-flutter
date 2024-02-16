@@ -1,4 +1,4 @@
-import 'types/other.dart';
+import 'package:stream_video/src/types/other.dart';
 
 /// Model class for connection state updates.
 class ConnectionStateUpdatedEvent {

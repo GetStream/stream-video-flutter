@@ -1,8 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-
-import '../../../stream_video_flutter.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// A widget that represents a call control option to start/stop screen sharing
 class ToggleScreenShareOption extends StatelessWidget {

@@ -1,13 +1,13 @@
 // ignore_for_file: unused_local_variable
 
-import '../../models/call_cid.dart';
-import '../../models/call_created_data.dart';
-import '../../models/call_permission.dart';
-import '../../models/call_ringing_data.dart';
-import '../models/coordinator_events.dart';
-import 'event/event_type.dart';
-import 'event/open_api_event.dart';
-import 'open_api_extensions.dart';
+import 'package:stream_video/src/coordinator/models/coordinator_events.dart';
+import 'package:stream_video/src/coordinator/open_api/event/event_type.dart';
+import 'package:stream_video/src/coordinator/open_api/event/open_api_event.dart';
+import 'package:stream_video/src/coordinator/open_api/open_api_extensions.dart';
+import 'package:stream_video/src/models/call_cid.dart';
+import 'package:stream_video/src/models/call_created_data.dart';
+import 'package:stream_video/src/models/call_permission.dart';
+import 'package:stream_video/src/models/call_ringing_data.dart';
 
 extension WebsocketEventMapperExt on OpenApiEvent {
   /// Returns [CoordinatorEvent].

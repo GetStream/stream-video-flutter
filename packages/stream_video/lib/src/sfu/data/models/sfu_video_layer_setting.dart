@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import 'sfu_codec.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
 
 class SfuVideoLayerSetting with EquatableMixin {
   SfuVideoLayerSetting({

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'floating_view_alignment.dart';
+import 'package:stream_video_flutter/src/widgets/floating_view/floating_view_alignment.dart';
 
 /// The time duration for floating view to settle in one of the corners.
 const _snapAnimationDuration = Duration(milliseconds: 300);

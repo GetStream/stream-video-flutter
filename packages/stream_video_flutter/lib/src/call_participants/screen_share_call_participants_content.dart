@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../stream_video_flutter.dart';
-import 'layout/call_participants_spotlight_view.dart';
+import 'package:stream_video_flutter/src/call_participants/layout/call_participants_spotlight_view.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// A widget that represents the main area of the call when somebody is
 /// sharing their screen.

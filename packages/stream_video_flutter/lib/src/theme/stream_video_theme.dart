@@ -1,10 +1,9 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:flutter/material.dart' hide TextTheme;
-
-import '../utils/device_segmentation.dart';
-import '../widgets/floating_view/floating_view_alignment.dart';
-import 'themes.dart';
+import 'package:stream_video_flutter/src/theme/themes.dart';
+import 'package:stream_video_flutter/src/utils/device_segmentation.dart';
+import 'package:stream_video_flutter/src/widgets/floating_view/floating_view_alignment.dart';
 
 /// {@template streamVideoThemeData}
 /// Theme data for Stream Video

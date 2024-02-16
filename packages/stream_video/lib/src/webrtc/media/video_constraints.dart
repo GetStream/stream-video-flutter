@@ -1,5 +1,5 @@
-import '../model/rtc_video_parameters.dart';
-import 'media_constraints.dart';
+import 'package:stream_video/src/webrtc/media/media_constraints.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_parameters.dart';
 
 /// Base class for options when creating a video track.
 abstract class VideoConstraints extends MediaConstraints {

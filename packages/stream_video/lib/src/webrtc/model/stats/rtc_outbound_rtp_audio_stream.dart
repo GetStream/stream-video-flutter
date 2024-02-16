@@ -19,9 +19,9 @@
 //  retransmittedBytesSent: 0
 // }
 
-import '../../../utils/format.dart';
-import 'rtc_outbound_rtp.dart';
-import 'rtc_writable.dart';
+import 'package:stream_video/src/utils/format.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_outbound_rtp.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_writable.dart';
 
 class RtcOutboundRtpAudioStream implements RtcOutboundRtp, RtcWritable {
   const RtcOutboundRtpAudioStream({

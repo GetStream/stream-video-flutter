@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart' hide ConnectionState;
-
-import '../../../stream_video_flutter.dart';
-import '../../utils/extensions.dart';
+import 'package:stream_video_flutter/src/utils/extensions.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Widget that represents the default app bar that's shown in calls.
 class CallAppBar extends StatelessWidget implements PreferredSizeWidget {

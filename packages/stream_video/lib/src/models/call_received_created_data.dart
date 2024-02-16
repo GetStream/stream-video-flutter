@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import 'call_created_data.dart';
+import 'package:stream_video/src/models/call_created_data.dart';
 
 @immutable
 class CallReceivedOrCreatedData with EquatableMixin {

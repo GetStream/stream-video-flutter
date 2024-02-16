@@ -1,8 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
-import '../../stream_video_flutter.dart';
-import '../utils/extensions.dart';
+import 'package:stream_video_flutter/src/utils/extensions.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Builder function used to build an image widget for the user avatar.
 typedef ImageWidgetBuilder = Widget Function(

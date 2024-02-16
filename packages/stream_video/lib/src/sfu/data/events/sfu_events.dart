@@ -1,19 +1,18 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-
-import '../../../errors/video_error.dart';
-import '../../../logger/stream_logger.dart';
-import '../../../webrtc/peer_type.dart';
-import '../models/sfu_audio_level.dart';
-import '../models/sfu_audio_sender.dart';
-import '../models/sfu_call_grants.dart';
-import '../models/sfu_call_state.dart';
-import '../models/sfu_connection_info.dart';
-import '../models/sfu_error.dart';
-import '../models/sfu_goaway_reason.dart';
-import '../models/sfu_participant.dart';
-import '../models/sfu_track_type.dart';
-import '../models/sfu_video_sender.dart';
+import 'package:stream_video/src/errors/video_error.dart';
+import 'package:stream_video/src/logger/stream_logger.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_audio_level.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_audio_sender.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_call_grants.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_call_state.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_connection_info.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_error.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_goaway_reason.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_video_sender.dart';
+import 'package:stream_video/src/webrtc/peer_type.dart';
 
 abstract class SfuEvent extends Equatable {
   const SfuEvent();

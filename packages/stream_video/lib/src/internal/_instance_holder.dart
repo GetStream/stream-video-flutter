@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../logger/stream_log.dart';
-import '../stream_video.dart';
+import 'package:stream_video/src/logger/stream_log.dart';
+import 'package:stream_video/src/stream_video.dart';
 
 @internal
 class InstanceHolder {

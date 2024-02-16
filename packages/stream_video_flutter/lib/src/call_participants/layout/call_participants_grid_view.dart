@@ -3,10 +3,9 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
-
-import '../../theme/stream_video_theme.dart';
-import '../../widgets/tile_view.dart';
-import '../call_participants.dart';
+import 'package:stream_video_flutter/src/call_participants/call_participants.dart';
+import 'package:stream_video_flutter/src/theme/stream_video_theme.dart';
+import 'package:stream_video_flutter/src/widgets/tile_view.dart';
 
 const _kDefaultSpacing = 16.0;
 

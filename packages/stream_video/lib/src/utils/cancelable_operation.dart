@@ -1,6 +1,6 @@
 import 'package:async/async.dart' as async;
 
-import 'cancelables.dart';
+import 'package:stream_video/src/utils/cancelables.dart';
 
 extension CancelableOperationX<T> on async.CancelableOperation<T> {
   Future<T> valueOrDefault(T cancellationValue) {

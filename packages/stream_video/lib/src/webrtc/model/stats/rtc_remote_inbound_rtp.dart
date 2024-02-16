@@ -15,8 +15,8 @@
 //   packetsLost: 0,
 // }
 
-import 'rtc_inbound_rtp.dart';
-import 'rtc_writable.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_inbound_rtp.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_writable.dart';
 
 class RtcRemoteInboundRtp implements RtcInboundRtp, RtcWritable {
   const RtcRemoteInboundRtp({

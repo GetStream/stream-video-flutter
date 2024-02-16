@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import '../logger/impl/tagged_logger.dart';
-import 'lifecycle_state.dart';
+import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
 
 final _logger = taggedLogger(tag: 'SV:LifecycleUtils');
 

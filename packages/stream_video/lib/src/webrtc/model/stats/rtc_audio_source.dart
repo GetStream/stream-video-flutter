@@ -11,7 +11,7 @@
 //   echoReturnLossEnhancement: 0.17551203072071075
 // }
 
-import 'rtc_media_source.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_media_source.dart';
 
 class RtcAudioSource extends RtcMediaSource {
   const RtcAudioSource({

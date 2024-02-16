@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../open_api/video/coordinator/api.dart';
+import 'package:stream_video/open_api/video/coordinator/api.dart';
 
 class CallSettings with EquatableMixin {
   const CallSettings({

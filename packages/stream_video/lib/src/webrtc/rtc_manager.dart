@@ -1,28 +1,28 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
-import '../disposable.dart';
-import '../errors/video_error_composer.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../logger/stream_log.dart';
-import '../models/call_cid.dart';
-import '../platform_detector/platform_detector.dart';
-import '../sfu/data/models/sfu_model_parser.dart';
-import '../sfu/data/models/sfu_track_type.dart';
-import '../utils/none.dart';
-import '../utils/result.dart';
-import 'codecs_helper.dart' as codecs;
-import 'media/media_constraints.dart';
-import 'model/rtc_audio_bitrate_preset.dart';
-import 'model/rtc_tracks_info.dart';
-import 'model/rtc_video_dimension.dart';
-import 'model/rtc_video_encoding.dart';
-import 'model/rtc_video_parameters.dart';
-import 'peer_connection.dart';
-import 'peer_type.dart';
-import 'rtc_media_device/rtc_media_device.dart';
-import 'rtc_parser.dart';
-import 'rtc_track/rtc_track.dart';
+import 'package:stream_video/src/disposable.dart';
+import 'package:stream_video/src/errors/video_error_composer.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/logger/stream_log.dart';
+import 'package:stream_video/src/models/call_cid.dart';
+import 'package:stream_video/src/platform_detector/platform_detector.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_model_parser.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/utils/none.dart';
+import 'package:stream_video/src/utils/result.dart';
+import 'package:stream_video/src/webrtc/codecs_helper.dart' as codecs;
+import 'package:stream_video/src/webrtc/media/media_constraints.dart';
+import 'package:stream_video/src/webrtc/model/rtc_audio_bitrate_preset.dart';
+import 'package:stream_video/src/webrtc/model/rtc_tracks_info.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_dimension.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_encoding.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_parameters.dart';
+import 'package:stream_video/src/webrtc/peer_connection.dart';
+import 'package:stream_video/src/webrtc/peer_type.dart';
+import 'package:stream_video/src/webrtc/rtc_media_device/rtc_media_device.dart';
+import 'package:stream_video/src/webrtc/rtc_parser.dart';
+import 'package:stream_video/src/webrtc/rtc_track/rtc_track.dart';
 
 /// {@template OnLocalTrackMuted}
 /// Callback for when a local track is muted.

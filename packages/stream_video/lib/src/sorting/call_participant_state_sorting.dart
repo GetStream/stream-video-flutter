@@ -1,5 +1,5 @@
-import '../models/call_participant_state.dart';
-import '../models/viewport_visibility.dart';
+import 'package:stream_video/src/models/call_participant_state.dart';
+import 'package:stream_video/src/models/viewport_visibility.dart';
 
 /// A comparator which sorts participants by the fact that they are the
 /// dominant speaker or not.

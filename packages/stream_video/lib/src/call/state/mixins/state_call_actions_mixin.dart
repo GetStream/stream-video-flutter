@@ -1,6 +1,6 @@
 import 'package:state_notifier/state_notifier.dart';
-import '../../../call_state.dart';
-import '../../../logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/call_state.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 

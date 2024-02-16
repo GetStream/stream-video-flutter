@@ -1,9 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-
-import '../../coordinator/models/coordinator_events.dart';
-import '../../models/call_metadata.dart';
-import '../internal_action.dart';
+import 'package:stream_video/src/action/internal_action.dart';
+import 'package:stream_video/src/coordinator/models/coordinator_events.dart';
+import 'package:stream_video/src/models/call_metadata.dart';
 
 @internal
 abstract class CoordinatorAction extends StreamInternalAction

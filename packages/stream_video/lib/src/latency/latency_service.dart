@@ -1,10 +1,9 @@
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
-
-import '../coordinator/models/coordinator_models.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../utils/none.dart';
-import 'latency_settings.dart';
+import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
+import 'package:stream_video/src/latency/latency_settings.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/utils/none.dart';
 
 final _logger = taggedLogger(tag: 'SV:LatencyService');
 

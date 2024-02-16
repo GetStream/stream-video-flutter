@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../sdp.dart';
+import 'package:stream_video/src/webrtc/sdp/sdp.dart';
 
 class SdpPolicy with EquatableMixin {
   const SdpPolicy({

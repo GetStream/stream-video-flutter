@@ -1,7 +1,6 @@
 import 'package:meta/meta.dart';
-
-import '../../../stream_video.dart';
-import '../state/call_state_notifier.dart';
+import 'package:stream_video/src/call/state/call_state_notifier.dart';
+import 'package:stream_video/stream_video.dart';
 
 typedef GetStateOrNull = CallState? Function();
 

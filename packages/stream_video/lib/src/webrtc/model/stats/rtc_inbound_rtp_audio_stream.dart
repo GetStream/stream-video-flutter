@@ -30,9 +30,9 @@
 //  fecPacketsDiscarded: 0
 // }
 
-import '../../../utils/format.dart';
-import 'rtc_inbound_rtp.dart';
-import 'rtc_writable.dart';
+import 'package:stream_video/src/utils/format.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_inbound_rtp.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_writable.dart';
 
 class RtcInboundRtpAudioStream implements RtcInboundRtp, RtcWritable {
   const RtcInboundRtpAudioStream({

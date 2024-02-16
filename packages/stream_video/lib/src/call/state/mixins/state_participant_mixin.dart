@@ -1,12 +1,12 @@
 import 'package:state_notifier/state_notifier.dart';
 
-import '../../../action/participant_action.dart';
-import '../../../call_state.dart';
-import '../../../logger/impl/tagged_logger.dart';
-import '../../../models/call_track_state.dart';
-import '../../../sfu/data/models/sfu_track_type.dart';
-import '../../../webrtc/media/constraints/camera_position.dart';
-import '../../../webrtc/model/rtc_video_dimension.dart';
+import 'package:stream_video/src/action/participant_action.dart';
+import 'package:stream_video/src/call_state.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/models/call_track_state.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/webrtc/media/constraints/camera_position.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_dimension.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 

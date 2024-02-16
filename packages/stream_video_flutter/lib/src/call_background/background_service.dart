@@ -1,11 +1,10 @@
 import 'dart:async';
 
 import 'package:stream_video/stream_video.dart';
-
-import '../../stream_video_flutter_background.dart';
-import 'model/notification_options.dart';
-import 'model/notification_payload.dart';
-import 'model/service_type.dart';
+import 'package:stream_video_flutter/src/call_background/model/notification_options.dart';
+import 'package:stream_video_flutter/src/call_background/model/notification_payload.dart';
+import 'package:stream_video_flutter/src/call_background/model/service_type.dart';
+import 'package:stream_video_flutter/stream_video_flutter_background.dart';
 
 const _tag = 'SV:Background';
 const _btnCancel = 'cancel';

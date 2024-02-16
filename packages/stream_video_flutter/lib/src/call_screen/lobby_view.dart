@@ -2,10 +2,8 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/src/call_screen/lobby_video.dart';
-
-import '../../stream_video_flutter.dart';
-import 'lobby_participants_view.dart';
+import 'package:stream_video_flutter/src/call_screen/lobby_participants_view.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// A widget that can be shown before joining a call. Measures latencies
 /// and selects the best SFU. This speeds up the process of joining when

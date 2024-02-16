@@ -1,6 +1,5 @@
+import 'package:example/env/env.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-
-import 'env/env.dart';
 
 final sampleUsers = <UserInfo>[
   const UserInfo(

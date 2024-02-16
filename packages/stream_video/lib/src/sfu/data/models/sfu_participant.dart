@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-import 'sfu_connection_quality.dart';
-import 'sfu_track_type.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_connection_quality.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
 
 class SfuParticipant with EquatableMixin {
   SfuParticipant({

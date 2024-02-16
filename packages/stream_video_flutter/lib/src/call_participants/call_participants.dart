@@ -1,9 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-
-import '../../stream_video_flutter.dart';
-import 'regular_call_participants_content.dart';
-import 'screen_share_call_participants_content.dart';
+import 'package:stream_video_flutter/src/call_participants/regular_call_participants_content.dart';
+import 'package:stream_video_flutter/src/call_participants/screen_share_call_participants_content.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Builder function used to build a participant item.
 typedef CallParticipantBuilder = Widget Function(

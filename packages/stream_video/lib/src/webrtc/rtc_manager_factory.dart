@@ -1,9 +1,9 @@
-import '../logger/impl/tagged_logger.dart';
-import '../models/call_cid.dart';
-import '../types/other.dart';
-import 'peer_connection_factory.dart';
-import 'rtc_manager.dart';
-import 'sdp/editor/sdp_editor.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/models/call_cid.dart';
+import 'package:stream_video/src/types/other.dart';
+import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
+import 'package:stream_video/src/webrtc/rtc_manager.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/sdp_editor.dart';
 
 class RtcManagerFactory {
   RtcManagerFactory({

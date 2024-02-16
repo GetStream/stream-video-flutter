@@ -1,18 +1,17 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:meta/meta.dart';
-
-import '../../../logger/impl/tagged_logger.dart';
-import '../../../platform_detector/platform_detector.dart';
-import '../codec/sdp_codec.dart';
-import '../policy/sdp_policy.dart';
-import '../sdp.dart';
-import 'action/sdp_edit_action_factory.dart';
-import 'rule/rule_set_opus_dtx_enabled.dart';
-import 'rule/rule_set_opus_red_enabled.dart';
-import 'rule/rule_toggle.dart';
-import 'rule/sdp_munging_rule.dart';
-import 'sdp_editor.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/platform_detector/platform_detector.dart';
+import 'package:stream_video/src/webrtc/sdp/codec/sdp_codec.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/action/sdp_edit_action_factory.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/rule/rule_set_opus_dtx_enabled.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/rule/rule_set_opus_red_enabled.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/rule/rule_toggle.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/rule/sdp_munging_rule.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/sdp_editor.dart';
+import 'package:stream_video/src/webrtc/sdp/policy/sdp_policy.dart';
+import 'package:stream_video/src/webrtc/sdp/sdp.dart';
 
 @internal
 class SdpEditorImpl implements SdpEditor {

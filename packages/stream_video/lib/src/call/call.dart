@@ -6,26 +6,25 @@ import 'package:flutter/foundation.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-
-import '../../stream_video.dart';
-import '../action/internal/lifecycle_action.dart';
-import '../coordinator/models/coordinator_models.dart';
-import '../errors/video_error_composer.dart';
-import '../models/call_received_data.dart';
-import '../retry/retry_policy.dart';
-import '../sfu/data/events/sfu_events.dart';
-import '../shared_emitter.dart';
-import '../state_emitter.dart';
-import '../utils/cancelable_operation.dart';
-import '../utils/cancelables.dart';
-import '../utils/future.dart';
-import '../utils/standard.dart';
-import '../webrtc/sdp/editor/sdp_editor_impl.dart';
-import '../webrtc/sdp/policy/sdp_policy.dart';
-import 'permissions/permissions_manager.dart';
-import 'session/call_session.dart';
-import 'session/call_session_factory.dart';
-import 'state/call_state_notifier.dart';
+import 'package:stream_video/src/action/internal/lifecycle_action.dart';
+import 'package:stream_video/src/call/permissions/permissions_manager.dart';
+import 'package:stream_video/src/call/session/call_session.dart';
+import 'package:stream_video/src/call/session/call_session_factory.dart';
+import 'package:stream_video/src/call/state/call_state_notifier.dart';
+import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
+import 'package:stream_video/src/errors/video_error_composer.dart';
+import 'package:stream_video/src/models/call_received_data.dart';
+import 'package:stream_video/src/retry/retry_policy.dart';
+import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
+import 'package:stream_video/src/shared_emitter.dart';
+import 'package:stream_video/src/state_emitter.dart';
+import 'package:stream_video/src/utils/cancelable_operation.dart';
+import 'package:stream_video/src/utils/cancelables.dart';
+import 'package:stream_video/src/utils/future.dart';
+import 'package:stream_video/src/utils/standard.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/sdp_editor_impl.dart';
+import 'package:stream_video/src/webrtc/sdp/policy/sdp_policy.dart';
+import 'package:stream_video/stream_video.dart';
 
 typedef OnCallPermissionRequest = void Function(
   CoordinatorCallPermissionRequestEvent,

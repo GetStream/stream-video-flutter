@@ -1,6 +1,6 @@
-import '../../codec/sdp_codec.dart';
-import '../../sdp.dart';
-import 'sdp_munging_rule.dart';
+import 'package:stream_video/src/webrtc/sdp/codec/sdp_codec.dart';
+import 'package:stream_video/src/webrtc/sdp/editor/rule/sdp_munging_rule.dart';
+import 'package:stream_video/src/webrtc/sdp/sdp.dart';
 
 class PrioritizeCodecRule extends SdpMungingRule {
   const PrioritizeCodecRule({

@@ -2,9 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
-import '../logger/stream_log.dart';
-import 'model/rtc_video_dimension.dart';
-import 'model/rtc_video_parameters.dart';
+import 'package:stream_video/src/logger/stream_log.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_dimension.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_parameters.dart';
 
 // 16:9 default
 const _defaultSimulcast_16x9 = {

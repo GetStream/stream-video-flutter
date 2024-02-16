@@ -1,12 +1,11 @@
+import 'package:example/core/token_service.dart';
+import 'package:example/log_config.dart';
+import 'package:example/screen/login_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-
-import 'core/token_service.dart';
-import 'log_config.dart';
-import 'screen/login_screen.dart';
 
 const _tag = 'MyApp';
 

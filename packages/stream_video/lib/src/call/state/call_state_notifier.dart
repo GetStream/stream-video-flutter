@@ -1,15 +1,14 @@
 import 'package:state_notifier/state_notifier.dart';
-
-import '../../call_state.dart';
-import '../../logger/impl/tagged_logger.dart';
-import '../../models/call_preferences.dart';
-import '../../state_emitter.dart';
-import 'mixins/state_call_actions_mixin.dart';
-import 'mixins/state_coordinator_mixin.dart';
-import 'mixins/state_lifecycle_mixin.dart';
-import 'mixins/state_participant_mixin.dart';
-import 'mixins/state_rtc_mixin.dart';
-import 'mixins/state_sfu_mixin.dart';
+import 'package:stream_video/src/call/state/mixins/state_call_actions_mixin.dart';
+import 'package:stream_video/src/call/state/mixins/state_coordinator_mixin.dart';
+import 'package:stream_video/src/call/state/mixins/state_lifecycle_mixin.dart';
+import 'package:stream_video/src/call/state/mixins/state_participant_mixin.dart';
+import 'package:stream_video/src/call/state/mixins/state_rtc_mixin.dart';
+import 'package:stream_video/src/call/state/mixins/state_sfu_mixin.dart';
+import 'package:stream_video/src/call_state.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/models/call_preferences.dart';
+import 'package:stream_video/src/state_emitter.dart';
 
 class CallStateNotifier extends StateNotifier<CallState>
     with

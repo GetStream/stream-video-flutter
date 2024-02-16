@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
-import 'floating_view_alignment.dart';
-import 'simple_floating_view.dart';
-import 'snapping_floating_view.dart';
+import 'package:stream_video_flutter/src/widgets/floating_view/floating_view_alignment.dart';
+import 'package:stream_video_flutter/src/widgets/floating_view/simple_floating_view.dart';
+import 'package:stream_video_flutter/src/widgets/floating_view/snapping_floating_view.dart';
 
 /// A widget that uses either [SimpleFloatingView] or [SnappingFloatingView]
 /// depending on the [enableSnappingBehavior].

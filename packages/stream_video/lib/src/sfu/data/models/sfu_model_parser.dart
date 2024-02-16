@@ -1,5 +1,5 @@
-import '../../../../protobuf/video/sfu/models/models.pbenum.dart' as sfu_models;
-import 'sfu_track_type.dart';
+import 'package:stream_video/protobuf/video/sfu/models/models.pbenum.dart' as sfu_models;
+import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
 
 mixin SfuTrackTypeParser {
   static SfuTrackType parseSfuName(String name) {

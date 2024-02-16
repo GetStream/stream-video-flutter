@@ -1,8 +1,7 @@
+import 'package:example/app_config.dart';
+import 'package:example/screen/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-
-import '../app_config.dart';
-import 'home_screen.dart';
 
 typedef ConnectUser = Future<Result<None>> Function(
   UserInfo user,

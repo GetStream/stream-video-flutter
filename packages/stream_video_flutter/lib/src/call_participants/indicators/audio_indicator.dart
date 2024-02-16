@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../../stream_video_flutter.dart';
-import 'audio_level_indicator.dart';
+import 'package:stream_video_flutter/src/call_participants/indicators/audio_level_indicator.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Widget used to indicate the audio state of a given participant.
 /// Either shows a mute icon or audio levels.

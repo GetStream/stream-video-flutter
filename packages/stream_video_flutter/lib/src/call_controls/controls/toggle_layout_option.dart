@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../../stream_video_flutter.dart';
-import '../../theme/stream_icons.dart';
+import 'package:stream_video_flutter/src/theme/stream_icons.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// A widget that allows to change the layout of the call.
 class ToggleLayoutOption extends StatefulWidget {

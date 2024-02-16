@@ -1,11 +1,10 @@
 import 'package:equatable/equatable.dart';
-
-import '../models/viewport_visibility.dart';
-import '../sfu/data/models/sfu_track_type.dart';
-import '../webrtc/media/constraints/camera_position.dart';
-import '../webrtc/model/rtc_video_dimension.dart';
-import '../webrtc/rtc_media_device/rtc_media_device.dart';
-import 'external_action.dart';
+import 'package:stream_video/src/action/external_action.dart';
+import 'package:stream_video/src/models/viewport_visibility.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/webrtc/media/constraints/camera_position.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_dimension.dart';
+import 'package:stream_video/src/webrtc/rtc_media_device/rtc_media_device.dart';
 
 abstract class ParticipantAction extends StreamExternalAction
     with EquatableMixin {

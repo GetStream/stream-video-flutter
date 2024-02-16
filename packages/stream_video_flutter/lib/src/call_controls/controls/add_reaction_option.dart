@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-
-import '../../../stream_video_flutter.dart';
 
 /// A widget that allows a user to add a reaction
 class AddReactionOption extends StatefulWidget {

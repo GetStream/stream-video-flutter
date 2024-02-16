@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import 'models.dart';
+import 'package:stream_video/src/models/models.dart';
 
 @immutable
 class PushDevice with EquatableMixin {

@@ -1,5 +1,5 @@
-import '../../sfu/data/models/sfu_track_type.dart';
-import 'rtc_video_parameters.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_parameters.dart';
 
 class RtcTrackInfo {
   const RtcTrackInfo({

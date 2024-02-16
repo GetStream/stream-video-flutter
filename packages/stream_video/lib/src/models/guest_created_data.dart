@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import 'user_info.dart';
+import 'package:stream_video/src/models/user_info.dart';
 
 @immutable
 class GuestCreatedData with EquatableMixin {

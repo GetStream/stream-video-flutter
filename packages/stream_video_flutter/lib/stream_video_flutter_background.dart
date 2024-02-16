@@ -1,10 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-
-import '../src/call_background/model/notification_payload.dart';
-import 'src/call_background/model/service_type.dart';
-import 'stream_video_flutter_platform_interface.dart';
+import 'package:stream_video_flutter/src/call_background/model/notification_payload.dart';
+import 'package:stream_video_flutter/src/call_background/model/service_type.dart';
+import 'package:stream_video_flutter/stream_video_flutter_platform_interface.dart';
 
 typedef OnNotificationContentClick = void Function(String callCid);
 

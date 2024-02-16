@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../sdp.dart';
+import 'package:stream_video/src/webrtc/sdp/sdp.dart';
 
 /// Represents 'fmtp' attribute
 /// Reference: https://www.rfc-editor.org/rfc/rfc4566#section-6.

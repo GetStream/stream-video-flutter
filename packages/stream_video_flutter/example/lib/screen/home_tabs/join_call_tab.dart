@@ -1,8 +1,7 @@
+import 'package:example/screen/home_tabs/call_text_field.dart';
+import 'package:example/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-
-import '../../utils.dart';
-import 'call_text_field.dart';
 
 class JoinCallTab extends StatefulWidget {
   const JoinCallTab({

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'sfu_codec.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
 
-import 'sfu_video_layer_setting.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_video_layer_setting.dart';
 
 class SfuVideoSender with EquatableMixin {
   SfuVideoSender({

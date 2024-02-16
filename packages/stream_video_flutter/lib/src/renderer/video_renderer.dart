@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-
-import '../../stream_video_flutter.dart';
 
 /// A builder for the widget that is displayed when there's no video stream.
 Widget _defaultPlaceholderBuilder(BuildContext context) => Container();

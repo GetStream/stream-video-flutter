@@ -1,15 +1,14 @@
+import 'package:stream_video/composed_version.dart';
+import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart' as sfu_models;
+import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
+import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart'
+    as signal_twirp;
+import 'package:stream_video/src/errors/video_error_composer.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/sfu/sfu_client.dart';
+import 'package:stream_video/src/utils/result.dart';
 import 'package:tart/tart.dart';
 import 'package:uuid/uuid.dart';
-
-import '../../composed_version.dart';
-import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
-import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
-import '../../protobuf/video/sfu/signal_rpc/signal.pbtwirp.dart'
-    as signal_twirp;
-import '../errors/video_error_composer.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../utils/result.dart';
-import 'sfu_client.dart';
 
 class SfuClientImpl extends SfuClient {
   SfuClientImpl({

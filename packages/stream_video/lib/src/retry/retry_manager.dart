@@ -1,6 +1,6 @@
-import '../errors/video_error.dart';
-import '../utils/result.dart';
-import 'retry_policy.dart';
+import 'package:stream_video/src/errors/video_error.dart';
+import 'package:stream_video/src/retry/retry_policy.dart';
+import 'package:stream_video/src/utils/result.dart';
 
 typedef Delegate<T> = Future<Result<T>> Function();
 typedef OnFailure<T> = Future<void> Function(

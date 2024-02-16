@@ -1,15 +1,15 @@
 import 'package:state_notifier/state_notifier.dart';
 
-import '../../../action/internal/lifecycle_action.dart';
-import '../../../call_state.dart';
-import '../../../logger/impl/tagged_logger.dart';
-import '../../../models/call_created_data.dart';
-import '../../../models/call_metadata.dart';
-import '../../../models/call_participant_state.dart';
-import '../../../models/call_received_data.dart';
-import '../../../models/call_ringing_data.dart';
-import '../../../models/call_status.dart';
-import '../../../models/disconnect_reason.dart';
+import 'package:stream_video/src/action/internal/lifecycle_action.dart';
+import 'package:stream_video/src/call_state.dart';
+import 'package:stream_video/src/logger/impl/tagged_logger.dart';
+import 'package:stream_video/src/models/call_created_data.dart';
+import 'package:stream_video/src/models/call_metadata.dart';
+import 'package:stream_video/src/models/call_participant_state.dart';
+import 'package:stream_video/src/models/call_received_data.dart';
+import 'package:stream_video/src/models/call_ringing_data.dart';
+import 'package:stream_video/src/models/call_status.dart';
+import 'package:stream_video/src/models/disconnect_reason.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 

@@ -1,14 +1,14 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 
-import '../../exceptions/video_exception.dart';
-import '../../logger/stream_log.dart';
-import '../../platform_detector/platform_detector.dart';
-import '../../sfu/data/models/sfu_track_type.dart';
-import '../media/media_constraints.dart';
-import '../model/rtc_video_dimension.dart';
-import '../rtc_media_device/rtc_media_device.dart';
-import 'rtc_track.dart';
+import 'package:stream_video/src/exceptions/video_exception.dart';
+import 'package:stream_video/src/logger/stream_log.dart';
+import 'package:stream_video/src/platform_detector/platform_detector.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/webrtc/media/media_constraints.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_dimension.dart';
+import 'package:stream_video/src/webrtc/rtc_media_device/rtc_media_device.dart';
+import 'package:stream_video/src/webrtc/rtc_track/rtc_track.dart';
 
 const kLocalTrackIdPrefix = 'local';
 

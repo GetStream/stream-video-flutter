@@ -1,12 +1,12 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import '../../models/call_cid.dart';
-import '../../models/call_created_data.dart';
-import '../../models/call_metadata.dart';
-import '../../models/call_permission.dart';
-import '../../models/call_ringing_data.dart';
-import '../../models/call_session_data.dart';
+import 'package:stream_video/src/models/call_cid.dart';
+import 'package:stream_video/src/models/call_created_data.dart';
+import 'package:stream_video/src/models/call_metadata.dart';
+import 'package:stream_video/src/models/call_permission.dart';
+import 'package:stream_video/src/models/call_ringing_data.dart';
+import 'package:stream_video/src/models/call_session_data.dart';
 
 /// Represents the events coming in from the socket.
 @immutable

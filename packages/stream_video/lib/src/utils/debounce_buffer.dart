@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:rxdart/rxdart.dart';
 
-import 'completer.dart';
+import 'package:stream_video/src/utils/completer.dart';
 
 typedef OnBuffered<T, R> = FutureOr<R> Function(List<T> items);
 typedef OnCancel<R> = FutureOr<R> Function();
