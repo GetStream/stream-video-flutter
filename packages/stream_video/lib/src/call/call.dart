@@ -681,9 +681,18 @@ class Call {
       );
     }
 
+    var latencyHistory = state.value.latencyHistory;
+    if (publisherStats.latency != null) {
+      latencyHistory = [
+        ...state.value.latencyHistory.reversed.take(19).toList().reversed,
+        publisherStats.latency!,
+      ];
+    }
+
     _stateManager.lifecycleCallStats(
       publisherStats: publisherStats,
       subscriberStats: subscriberStats,
+      latencyHistory: latencyHistory,
     );
   }
 

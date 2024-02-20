@@ -37,6 +37,7 @@ class CallState extends Equatable {
       publisherStats: null,
       subscriberStats: null,
       localStats: null,
+      latencyHistory: const [],
     );
   }
 
@@ -76,6 +77,7 @@ class CallState extends Equatable {
       publisherStats: null,
       subscriberStats: null,
       localStats: null,
+      latencyHistory: const [],
     );
   }
 
@@ -106,6 +108,7 @@ class CallState extends Equatable {
     required this.publisherStats,
     required this.subscriberStats,
     required this.localStats,
+    required this.latencyHistory,
   });
 
   final String currentUserId;
@@ -133,6 +136,7 @@ class CallState extends Equatable {
   final PeerConnectionStats? publisherStats;
   final PeerConnectionStats? subscriberStats;
   final LocalStats? localStats;
+  final List<int> latencyHistory;
 
   String get callId => callCid.id;
 
@@ -174,6 +178,7 @@ class CallState extends Equatable {
     PeerConnectionStats? publisherStats,
     PeerConnectionStats? subscriberStats,
     LocalStats? localStats,
+    List<int>? latencyHistory,
   }) {
     return CallState._(
       currentUserId: currentUserId ?? this.currentUserId,
@@ -201,6 +206,7 @@ class CallState extends Equatable {
       publisherStats: publisherStats ?? this.publisherStats,
       subscriberStats: subscriberStats ?? this.subscriberStats,
       localStats: localStats ?? this.localStats,
+      latencyHistory: latencyHistory ?? this.latencyHistory,
     );
   }
 
@@ -230,6 +236,7 @@ class CallState extends Equatable {
         publisherStats,
         subscriberStats,
         localStats,
+        latencyHistory,
       ];
 
   @override

@@ -257,6 +257,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   }
 
   void lifecycleCallStats({
+    required List<int> latencyHistory,
     PeerConnectionStats? publisherStats,
     PeerConnectionStats? subscriberStats,
     LocalStats? localStats,
@@ -269,6 +270,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       publisherStats: publisherStats,
       subscriberStats: subscriberStats,
       localStats: localStats,
+      latencyHistory: latencyHistory,
     );
   }
 }
