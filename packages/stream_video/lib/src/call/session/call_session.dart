@@ -24,7 +24,6 @@ import '../../utils/debounce_buffer.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
 import '../../webrtc/model/stats/rtc_printable_stats.dart';
-import '../../webrtc/model/stats/rtc_raw_stats.dart';
 import '../../webrtc/model/stats/rtc_stats.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/rtc_manager.dart';

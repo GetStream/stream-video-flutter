@@ -45,6 +45,7 @@ class RtcOutboundRtpAudioStream extends RtcStats
     this.codecId,
     this.packetsSent,
     this.retransmittedBytesSent,
+    this.jitter,
   });
 
   final String? transportId;
@@ -62,6 +63,7 @@ class RtcOutboundRtpAudioStream extends RtcStats
   final String? codecId;
   final int? packetsSent;
   final int? retransmittedBytesSent;
+  final double? jitter;
 
   static RtcOutboundRtpAudioStream? fromJson(dynamic value) {
     if (value is Map) {
@@ -84,6 +86,7 @@ class RtcOutboundRtpAudioStream extends RtcStats
         codecId: value['codecId'],
         packetsSent: value['packetsSent'],
         retransmittedBytesSent: value['retransmittedBytesSent'],
+        jitter: value['jitter'],
       );
     }
     return null;
@@ -100,7 +103,8 @@ class RtcOutboundRtpAudioStream extends RtcStats
         'mediaType: $mediaType, bytesSent: $bytesSent, '
         'mediaSourceId: $mediaSourceId, remoteId: $remoteId, '
         'codecId: $codecId, packetsSent: $packetsSent, '
-        'retransmittedBytesSent: $retransmittedBytesSent}';
+        'retransmittedBytesSent: $retransmittedBytesSent} '
+        'jitter: $jitter';
   }
 
   @override

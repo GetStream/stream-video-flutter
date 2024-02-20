@@ -2,14 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
-import 'models/call_cid.dart';
-import 'models/call_egress.dart';
-import 'models/call_metadata.dart';
-import 'models/call_participant_state.dart';
-import 'models/call_permission.dart';
-import 'models/call_settings.dart';
-import 'models/call_status.dart';
-import 'webrtc/rtc_media_device/rtc_media_device.dart';
+import '../stream_video.dart';
 
 /// Represents the call's state.
 @immutable
@@ -41,6 +34,9 @@ class CallState extends Equatable {
       endedAt: null,
       liveStartedAt: null,
       liveEndedAt: null,
+      publisherStats: null,
+      subscriberStats: null,
+      localStats: null,
     );
   }
 
@@ -77,6 +73,9 @@ class CallState extends Equatable {
       endedAt: null,
       liveStartedAt: null,
       liveEndedAt: null,
+      publisherStats: null,
+      subscriberStats: null,
+      localStats: null,
     );
   }
 
@@ -104,6 +103,9 @@ class CallState extends Equatable {
     required this.endedAt,
     required this.liveStartedAt,
     required this.liveEndedAt,
+    required this.publisherStats,
+    required this.subscriberStats,
+    required this.localStats,
   });
 
   final String currentUserId;
@@ -128,6 +130,9 @@ class CallState extends Equatable {
   final DateTime? endedAt;
   final DateTime? liveStartedAt;
   final DateTime? liveEndedAt;
+  final PeerConnectionStats? publisherStats;
+  final PeerConnectionStats? subscriberStats;
+  final LocalStats? localStats;
 
   String get callId => callCid.id;
 
@@ -166,6 +171,9 @@ class CallState extends Equatable {
     DateTime? endedAt,
     DateTime? liveStartedAt,
     DateTime? liveEndedAt,
+    PeerConnectionStats? publisherStats,
+    PeerConnectionStats? subscriberStats,
+    LocalStats? localStats,
   }) {
     return CallState._(
       currentUserId: currentUserId ?? this.currentUserId,
@@ -190,6 +198,9 @@ class CallState extends Equatable {
       endedAt: endedAt ?? this.endedAt,
       liveStartedAt: liveStartedAt ?? this.liveStartedAt,
       liveEndedAt: liveEndedAt ?? this.liveEndedAt,
+      publisherStats: publisherStats ?? this.publisherStats,
+      subscriberStats: subscriberStats ?? this.subscriberStats,
+      localStats: localStats ?? this.localStats,
     );
   }
 
@@ -216,6 +227,9 @@ class CallState extends Equatable {
         endedAt,
         liveStartedAt,
         liveEndedAt,
+        publisherStats,
+        subscriberStats,
+        localStats,
       ];
 
   @override

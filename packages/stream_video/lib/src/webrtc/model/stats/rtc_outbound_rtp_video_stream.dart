@@ -77,6 +77,7 @@ class RtcOutboundRtpVideoStream extends RtcStats
     this.codecId,
     this.totalEncodedBytesTarget,
     this.retransmittedBytesSent,
+    this.jitter,
   });
 
   final String? transportId;
@@ -110,6 +111,7 @@ class RtcOutboundRtpVideoStream extends RtcStats
   final String? codecId;
   final int? totalEncodedBytesTarget;
   final int? retransmittedBytesSent;
+  final double? jitter;
 
   static RtcOutboundRtpVideoStream? fromJson(dynamic value) {
     if (value is Map) {
@@ -149,6 +151,7 @@ class RtcOutboundRtpVideoStream extends RtcStats
         codecId: value['codecId'],
         totalEncodedBytesTarget: value['totalEncodedBytesTarget'],
         retransmittedBytesSent: value['retransmittedBytesSent'],
+        jitter: value['jitter'],
       );
     }
     return null;
@@ -175,7 +178,8 @@ class RtcOutboundRtpVideoStream extends RtcStats
         'encoderImplementation: $encoderImplementation, remoteId: '
         '$remoteId, codecId: $codecId, '
         'totalEncodedBytesTarget: $totalEncodedBytesTarget, '
-        'retransmittedBytesSent: $retransmittedBytesSent}';
+        'retransmittedBytesSent: $retransmittedBytesSent} '
+        'jitter: $jitter';
   }
 
   @override

@@ -1,15 +1,8 @@
 import 'package:state_notifier/state_notifier.dart';
 
+import '../../../../stream_video.dart';
 import '../../../action/internal/lifecycle_action.dart';
-import '../../../call_state.dart';
-import '../../../logger/impl/tagged_logger.dart';
-import '../../../models/call_created_data.dart';
-import '../../../models/call_metadata.dart';
-import '../../../models/call_participant_state.dart';
 import '../../../models/call_received_data.dart';
-import '../../../models/call_ringing_data.dart';
-import '../../../models/call_status.dart';
-import '../../../models/disconnect_reason.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
@@ -260,6 +253,22 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     state = state.copyWith(
       status: const CallStatusMigrating(),
       callParticipants: const [],
+    );
+  }
+
+  void lifecycleCallStats({
+    PeerConnectionStats? publisherStats,
+    PeerConnectionStats? subscriberStats,
+    LocalStats? localStats,
+  }) {
+    _logger.d(
+      () =>
+          '[lifecycleCallStats] publisherStats: $publisherStats, subscriberStats: $subscriberStats, localStats: $localStats, state: $state',
+    );
+    state = state.copyWith(
+      publisherStats: publisherStats,
+      subscriberStats: subscriberStats,
+      localStats: localStats,
     );
   }
 }

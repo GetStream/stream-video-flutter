@@ -49,6 +49,9 @@ class RtcIceCandidatePair extends RtcStats {
     this.responsesReceived,
     this.state,
     this.consentRequestsSent,
+    this.currentRoundTripTime,
+    this.availableOutgoingBitrate,
+    this.availableIncomingBitrate,
   });
 
   final String? transportId;
@@ -70,6 +73,9 @@ class RtcIceCandidatePair extends RtcStats {
   final int? responsesReceived;
   final String? state;
   final int? consentRequestsSent;
+  final double? currentRoundTripTime;
+  final double? availableOutgoingBitrate;
+  final double? availableIncomingBitrate;
 
   static RtcIceCandidatePair? fromJson(dynamic value) {
     if (value is Map) {
@@ -96,6 +102,9 @@ class RtcIceCandidatePair extends RtcStats {
         responsesReceived: value['responsesReceived'],
         state: value['state'],
         consentRequestsSent: value['consentRequestsSent'],
+        currentRoundTripTime: value['currentRoundTripTime'],
+        availableOutgoingBitrate: value['availableOutgoingBitrate'],
+        availableIncomingBitrate: value['availableIncomingBitrate'],
       );
     }
     return null;
@@ -114,6 +123,9 @@ class RtcIceCandidatePair extends RtcStats {
         'nominated: $nominated, packetsSent: $packetsSent, '
         'totalRoundTripTime: $totalRoundTripTime, '
         'responsesReceived: $responsesReceived, state: $state, '
-        'consentRequestsSent: $consentRequestsSent}';
+        'consentRequestsSent: $consentRequestsSent} '
+        'currentRoundTripTime: $currentRoundTripTime, '
+        'availableOutgoingBitrate: $availableOutgoingBitrate, '
+        'availableIncomingBitrate: $availableIncomingBitrate';
   }
 }
