@@ -16,13 +16,15 @@
 // }
 
 import 'rtc_inbound_rtp.dart';
+import 'rtc_stats.dart';
 import 'rtc_writable.dart';
 
-class RtcRemoteInboundRtp implements RtcInboundRtp, RtcWritable {
+class RtcRemoteInboundRtp extends RtcStats
+    implements RtcInboundRtp, RtcWritable {
   const RtcRemoteInboundRtp({
-    this.id,
-    this.type,
-    this.timestamp,
+    super.id,
+    super.type,
+    super.timestamp,
     this.transportId,
     this.kind,
     this.outboundId,
@@ -36,9 +38,6 @@ class RtcRemoteInboundRtp implements RtcInboundRtp, RtcWritable {
     this.packetsLost,
   });
 
-  final String? id;
-  final String? type;
-  final double? timestamp;
   final String? transportId;
   final String? kind;
   final String? outboundId;

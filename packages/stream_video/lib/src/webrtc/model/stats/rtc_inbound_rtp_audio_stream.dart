@@ -32,13 +32,15 @@
 
 import '../../../utils/format.dart';
 import 'rtc_inbound_rtp.dart';
+import 'rtc_stats.dart';
 import 'rtc_writable.dart';
 
-class RtcInboundRtpAudioStream implements RtcInboundRtp, RtcWritable {
+class RtcInboundRtpAudioStream extends RtcStats
+    implements RtcInboundRtp, RtcWritable {
   const RtcInboundRtpAudioStream({
-    this.id,
-    this.type,
-    this.timestamp,
+    super.id,
+    super.type,
+    super.timestamp,
     this.transportId,
     this.totalAudioEnergy,
     this.lastPacketReceivedTimestamp,
@@ -67,9 +69,6 @@ class RtcInboundRtpAudioStream implements RtcInboundRtp, RtcWritable {
     this.fecPacketsDiscarded,
   });
 
-  final String? id;
-  final String? type;
-  final double? timestamp;
   final String? transportId;
   final double? totalAudioEnergy;
   final double? lastPacketReceivedTimestamp;

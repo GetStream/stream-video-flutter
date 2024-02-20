@@ -23,11 +23,13 @@
 //   consentRequestsSent: 0
 // }
 
-class RtcIceCandidatePair {
+import 'rtc_stats.dart';
+
+class RtcIceCandidatePair extends RtcStats {
   const RtcIceCandidatePair({
-    this.id,
-    this.type,
-    this.timestamp,
+    super.id,
+    super.type,
+    super.timestamp,
     this.transportId,
     this.requestsSent,
     this.localCandidateId,
@@ -49,9 +51,6 @@ class RtcIceCandidatePair {
     this.consentRequestsSent,
   });
 
-  final String? id;
-  final String? type;
-  final double? timestamp;
   final String? transportId;
   final int? requestsSent;
   final String? localCandidateId;

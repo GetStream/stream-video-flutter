@@ -25,6 +25,7 @@ import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
 import '../../webrtc/model/stats/rtc_printable_stats.dart';
 import '../../webrtc/model/stats/rtc_raw_stats.dart';
+import '../../webrtc/model/stats/rtc_stats.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
@@ -590,14 +591,16 @@ class CallSession extends Disposable {
 
   void _onStatsReceived(
     StreamPeerConnection pc,
-    RtcPrintableStats rtcStats,
+    List<RtcStats> rtcStats,
+    RtcPrintableStats rtcPrintableStats,
+    Map<String, dynamic> rtcRawStats,
   ) {
     _stats.emit(
       CallStats(
         peerType: pc.type,
-        printable: rtcStats,
-        // TODO implement raw stats
-        raw: RtcRawStats(),
+        stats: rtcStats,
+        printable: rtcPrintableStats,
+        raw: rtcRawStats,
       ),
     );
   }

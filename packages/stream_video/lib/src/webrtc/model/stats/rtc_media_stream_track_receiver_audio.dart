@@ -27,14 +27,15 @@
 // }
 
 import 'rtc_media_stream_track.dart';
+import 'rtc_stats.dart';
 import 'rtc_writable.dart';
 
-class RtcMediaStreamTrackRemoteAudio
+class RtcMediaStreamTrackRemoteAudio extends RtcStats
     implements RtcMediaStreamTrack, RtcWritable {
   const RtcMediaStreamTrackRemoteAudio({
-    this.id,
-    this.type,
-    this.timestamp,
+    super.id,
+    super.type,
+    super.timestamp,
     this.totalAudioEnergy,
     this.totalInterruptionDuration,
     this.removedSamplesForAcceleration,
@@ -59,9 +60,6 @@ class RtcMediaStreamTrackRemoteAudio
     this.silentConcealedSamples,
   });
 
-  final String? id;
-  final String? type;
-  final double? timestamp;
   final double? totalAudioEnergy;
   final double? totalInterruptionDuration;
   final int? removedSamplesForAcceleration;

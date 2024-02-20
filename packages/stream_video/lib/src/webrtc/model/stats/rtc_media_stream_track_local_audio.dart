@@ -11,14 +11,15 @@
 // }
 
 import 'rtc_media_stream_track.dart';
+import 'rtc_stats.dart';
 import 'rtc_writable.dart';
 
-class RtcMediaStreamTrackLocalAudio
+class RtcMediaStreamTrackLocalAudio extends RtcStats
     implements RtcMediaStreamTrack, RtcWritable {
   const RtcMediaStreamTrackLocalAudio({
-    this.id,
-    this.type,
-    this.timestamp,
+    super.id,
+    super.type,
+    super.timestamp,
     this.kind,
     this.mediaSourceId,
     this.trackIdentifier,
@@ -27,9 +28,6 @@ class RtcMediaStreamTrackLocalAudio
     this.ended,
   });
 
-  final String? id;
-  final String? type;
-  final double? timestamp;
   final String? kind;
   final String? mediaSourceId;
   final String? trackIdentifier;

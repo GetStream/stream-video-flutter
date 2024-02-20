@@ -1,17 +1,15 @@
+import 'rtc_stats.dart';
 import 'rtc_writable.dart';
 
-abstract class RtcMediaSource implements RtcWritable {
+abstract class RtcMediaSource extends RtcStats implements RtcWritable {
   const RtcMediaSource({
-    this.id,
-    this.type,
-    this.timestamp,
+    super.id,
+    super.type,
+    super.timestamp,
     this.kind,
     this.trackIdentifier,
   });
 
-  final String? id;
-  final String? type;
-  final double? timestamp;
   final String? kind;
   final String? trackIdentifier;
 }
