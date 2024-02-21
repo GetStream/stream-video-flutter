@@ -18,7 +18,7 @@ class BadgedCallOption extends StatelessWidget {
       children: [
         callControlOption,
         Positioned(
-          top: -4,
+          top: 0,
           right: 8,
           child: Badge(
             count: badgeCount,
@@ -41,7 +41,7 @@ class Badge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 18,
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.all(2),
       decoration: const BoxDecoration(
         color: AppColorPalette.appGreen,
         shape: BoxShape.circle,
@@ -49,6 +49,7 @@ class Badge extends StatelessWidget {
       child: Center(
         child: Text(
           count.toString(),
+          textAlign: TextAlign.center,
           style: const TextStyle(
             color: Colors.black,
             fontSize: 10,

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/src/call_screen/lobby_video.dart';
 
 import '../../stream_video_flutter.dart';
 import 'lobby_participants_view.dart';

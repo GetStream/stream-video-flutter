@@ -15,7 +15,8 @@ GoRouter initRouter(UserAuthController authNotifier) {
           $homeRoute,
           $lobbyRoute,
           $callRoute,
-          $participantsRoute,
+          $callParticipantsRoute,
+          $callStatsRoute,
         ],
         builder: (context, state, child) {
           return StreamChat(

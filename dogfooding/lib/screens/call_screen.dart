@@ -10,6 +10,7 @@ import 'package:flutter_dogfooding/router/routes.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:flutter_dogfooding/widgets/badged_call_option.dart';
 import 'package:flutter_dogfooding/widgets/call_duration_title.dart';
+import 'package:flutter_dogfooding/widgets/settings_menu.dart';
 import 'package:flutter_dogfooding/widgets/share_call_card.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide User;
@@ -38,6 +39,7 @@ class _CallScreenState extends State<CallScreen> {
 
   Channel? _channel;
   ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
+  bool _moreMenuVisible = false;
 
   @override
   void initState() {
@@ -104,7 +106,17 @@ class _CallScreenState extends State<CallScreen> {
   }
 
   void showParticipants(BuildContext context) {
-    ParticipantsRoute($extra: widget.call).push(context);
+    CallParticipantsRoute($extra: widget.call).push(context);
+  }
+
+  void showStats(BuildContext context) {
+    CallStatsRoute($extra: widget.call).push(context);
+  }
+
+  void toggleMoreMenu(BuildContext context) {
+    setState(() {
+      _moreMenuVisible = !_moreMenuVisible;
+    });
   }
 
   @override
@@ -131,8 +143,31 @@ class _CallScreenState extends State<CallScreen> {
                     participants: callState.callParticipants,
                     layoutMode: _currentLayoutMode,
                   ),
-                  if (call.state.valueOrNull?.otherParticipants.isEmpty ??
-                      false)
+                  if (_moreMenuVisible) ...[
+                    GestureDetector(
+                      onTap: () => setState(() => _moreMenuVisible = false),
+                      child: Container(color: Colors.black12),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: SettingsMenu(
+                        call: call,
+                        onReactionSend: (_) =>
+                            setState(() => _moreMenuVisible = false),
+                        onStatsPressed: () => setState(
+                          () {
+                            showStats(context);
+                            _moreMenuVisible = false;
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (!_moreMenuVisible &&
+                      (call.state.valueOrNull?.otherParticipants.isEmpty ??
+                          false))
                     Positioned(
                       bottom: 0,
                       left: 0,
@@ -179,11 +214,19 @@ class _CallScreenState extends State<CallScreen> {
                 color: Colors.black,
                 child: SafeArea(
                   child: Row(children: [
+                    CallControlOption(
+                        icon: const Icon(Icons.more_vert),
+                        backgroundColor: _moreMenuVisible
+                            ? AppColorPalette.primary
+                            : AppColorPalette.buttonSecondary,
+                        onPressed: () {
+                          toggleMoreMenu(context);
+                        }),
                     ToggleScreenShareOption(
                       call: call,
                       localParticipant: localParticipant,
                       screenShareConstraints: const ScreenShareConstraints(
-                        useiOSBroadcastExtension: true,
+                        useiOSBroadcastExtension: false,
                       ),
                       enabledScreenShareBackgroundColor:
                           AppColorPalette.primary,
