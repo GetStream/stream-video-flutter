@@ -650,7 +650,7 @@ class Call {
     final inboudRtpVideo =
         stats.stats.whereType<RtcInboundRtpVideoStream>().firstOrNull;
 
-    if (inboudRtpVideo != null) {
+    if (stats.peerType == StreamPeerType.subscriber && inboudRtpVideo != null) {
       final jitterInMs = ((inboudRtpVideo.jitter ?? 0) * 1000).toInt();
       final resolution = inboudRtpVideo.frameWidth != null &&
               inboudRtpVideo.frameHeight != null &&
@@ -671,18 +671,21 @@ class Call {
       final outgoingBitrate = candidatePair.availableOutgoingBitrate;
       final incomingBitrate = candidatePair.availableIncomingBitrate;
 
-      publisherStats = publisherStats.copyWith(
-        latency: latency != null ? (latency * 1000).toInt() : null,
-        bitrateKbps: outgoingBitrate != null ? outgoingBitrate / 1000 : null,
-      );
-
-      subscriberStats = subscriberStats.copyWith(
-        bitrateKbps: incomingBitrate != null ? incomingBitrate / 1000 : null,
-      );
+      if (stats.peerType == StreamPeerType.publisher) {
+        publisherStats = publisherStats.copyWith(
+          latency: latency != null ? (latency * 1000).toInt() : null,
+          bitrateKbps: outgoingBitrate != null ? outgoingBitrate / 1000 : null,
+        );
+      } else {
+        subscriberStats = subscriberStats.copyWith(
+          bitrateKbps: incomingBitrate != null ? incomingBitrate / 1000 : null,
+        );
+      }
     }
 
     var latencyHistory = state.value.latencyHistory;
-    if (publisherStats.latency != null) {
+    if (stats.peerType == StreamPeerType.publisher &&
+        publisherStats.latency != null) {
       latencyHistory = [
         ...state.value.latencyHistory.reversed.take(19).toList().reversed,
         publisherStats.latency!,
