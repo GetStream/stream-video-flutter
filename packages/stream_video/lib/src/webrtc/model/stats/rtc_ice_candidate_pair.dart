@@ -23,11 +23,13 @@
 //   consentRequestsSent: 0
 // }
 
-class RtcIceCandidatePair {
+import 'rtc_stats.dart';
+
+class RtcIceCandidatePair extends RtcStats {
   const RtcIceCandidatePair({
-    this.id,
-    this.type,
-    this.timestamp,
+    super.id,
+    super.type,
+    super.timestamp,
     this.transportId,
     this.requestsSent,
     this.localCandidateId,
@@ -47,11 +49,11 @@ class RtcIceCandidatePair {
     this.responsesReceived,
     this.state,
     this.consentRequestsSent,
+    this.currentRoundTripTime,
+    this.availableOutgoingBitrate,
+    this.availableIncomingBitrate,
   });
 
-  final String? id;
-  final String? type;
-  final double? timestamp;
   final String? transportId;
   final int? requestsSent;
   final String? localCandidateId;
@@ -71,6 +73,9 @@ class RtcIceCandidatePair {
   final int? responsesReceived;
   final String? state;
   final int? consentRequestsSent;
+  final double? currentRoundTripTime;
+  final double? availableOutgoingBitrate;
+  final double? availableIncomingBitrate;
 
   static RtcIceCandidatePair? fromJson(dynamic value) {
     if (value is Map) {
@@ -97,6 +102,9 @@ class RtcIceCandidatePair {
         responsesReceived: value['responsesReceived'],
         state: value['state'],
         consentRequestsSent: value['consentRequestsSent'],
+        currentRoundTripTime: value['currentRoundTripTime'],
+        availableOutgoingBitrate: value['availableOutgoingBitrate'],
+        availableIncomingBitrate: value['availableIncomingBitrate'],
       );
     }
     return null;
@@ -115,6 +123,9 @@ class RtcIceCandidatePair {
         'nominated: $nominated, packetsSent: $packetsSent, '
         'totalRoundTripTime: $totalRoundTripTime, '
         'responsesReceived: $responsesReceived, state: $state, '
-        'consentRequestsSent: $consentRequestsSent}';
+        'consentRequestsSent: $consentRequestsSent} '
+        'currentRoundTripTime: $currentRoundTripTime, '
+        'availableOutgoingBitrate: $availableOutgoingBitrate, '
+        'availableIncomingBitrate: $availableIncomingBitrate';
   }
 }

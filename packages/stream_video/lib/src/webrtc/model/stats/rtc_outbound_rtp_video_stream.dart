@@ -37,13 +37,15 @@
 
 import '../../../utils/format.dart';
 import 'rtc_outbound_rtp.dart';
+import 'rtc_stats.dart';
 import 'rtc_writable.dart';
 
-class RTCOutboundRTPVideoStream implements RtcOutboundRtp, RtcWritable {
-  const RTCOutboundRTPVideoStream({
-    this.id,
-    this.type,
-    this.timestamp,
+class RtcOutboundRtpVideoStream extends RtcStats
+    implements RtcOutboundRtp, RtcWritable {
+  const RtcOutboundRtpVideoStream({
+    super.id,
+    super.type,
+    super.timestamp,
     this.transportId,
     this.qpSum,
     this.headerBytesSent,
@@ -75,11 +77,9 @@ class RTCOutboundRTPVideoStream implements RtcOutboundRtp, RtcWritable {
     this.codecId,
     this.totalEncodedBytesTarget,
     this.retransmittedBytesSent,
+    this.jitter,
   });
 
-  final String? id;
-  final String? type;
-  final double? timestamp;
   final String? transportId;
   final int? qpSum;
   final int? headerBytesSent;
@@ -111,10 +111,11 @@ class RTCOutboundRTPVideoStream implements RtcOutboundRtp, RtcWritable {
   final String? codecId;
   final int? totalEncodedBytesTarget;
   final int? retransmittedBytesSent;
+  final double? jitter;
 
-  static RTCOutboundRTPVideoStream? fromJson(dynamic value) {
+  static RtcOutboundRtpVideoStream? fromJson(dynamic value) {
     if (value is Map) {
-      return RTCOutboundRTPVideoStream(
+      return RtcOutboundRtpVideoStream(
         id: value['id'],
         type: value['type'],
         timestamp: value['timestamp'],
@@ -150,6 +151,7 @@ class RTCOutboundRTPVideoStream implements RtcOutboundRtp, RtcWritable {
         codecId: value['codecId'],
         totalEncodedBytesTarget: value['totalEncodedBytesTarget'],
         retransmittedBytesSent: value['retransmittedBytesSent'],
+        jitter: value['jitter'],
       );
     }
     return null;
@@ -176,7 +178,8 @@ class RTCOutboundRTPVideoStream implements RtcOutboundRtp, RtcWritable {
         'encoderImplementation: $encoderImplementation, remoteId: '
         '$remoteId, codecId: $codecId, '
         'totalEncodedBytesTarget: $totalEncodedBytesTarget, '
-        'retransmittedBytesSent: $retransmittedBytesSent}';
+        'retransmittedBytesSent: $retransmittedBytesSent} '
+        'jitter: $jitter';
   }
 
   @override

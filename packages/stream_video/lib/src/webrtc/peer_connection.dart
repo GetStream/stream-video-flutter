@@ -10,6 +10,7 @@ import '../utils/none.dart';
 import '../utils/result.dart';
 import '../utils/standard.dart';
 import 'model/stats/rtc_printable_stats.dart';
+import 'model/stats/rtc_stats.dart';
 import 'model/stats/rtc_stats_mapper.dart';
 import 'peer_type.dart';
 import 'sdp/editor/sdp_editor.dart';
@@ -54,7 +55,9 @@ typedef OnTrack = void Function(
 /// {@endtemplate}
 typedef OnStats = void Function(
   StreamPeerConnection,
+  List<RtcStats>,
   RtcPrintableStats,
+  Map<String, dynamic>,
 );
 
 /// Wrapper around the WebRTC connection that contains tracks.
@@ -331,8 +334,15 @@ class StreamPeerConnection extends Disposable {
       (_) async {
         try {
           final stats = await pc.getStats();
-          final rtcStats = stats.toRtcStats();
-          onStats?.call(this, rtcStats);
+          final rtcPrintableStats = stats.toPrintableRtcStats();
+          final rawStats = stats.toRawStats();
+          final rtcStats = stats
+              .map((report) => report.toRtcStats())
+              .where((element) => element != null)
+              .cast<RtcStats>()
+              .toList();
+
+          onStats?.call(this, rtcStats, rtcPrintableStats, rawStats);
         } catch (e, stk) {
           _logger.e(() => '[getStats] failed: $e; $stk');
         }

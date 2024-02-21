@@ -23,14 +23,15 @@
 // }
 
 import 'rtc_media_stream_track.dart';
+import 'rtc_stats.dart';
 import 'rtc_writable.dart';
 
-class RtcMediaStreamTrackRemoteVideo
+class RtcMediaStreamTrackRemoteVideo extends RtcStats
     implements RtcMediaStreamTrack, RtcWritable {
   const RtcMediaStreamTrackRemoteVideo({
-    this.id,
-    this.type,
-    this.timestamp,
+    super.id,
+    super.type,
+    super.timestamp,
     this.kind,
     this.frameHeight,
     this.frameWidth,
@@ -51,9 +52,6 @@ class RtcMediaStreamTrackRemoteVideo
     this.sumOfSquaredFramesDuration,
   });
 
-  final String? id;
-  final String? type;
-  final double? timestamp;
   final String? kind;
   final int? frameHeight;
   final int? frameWidth;

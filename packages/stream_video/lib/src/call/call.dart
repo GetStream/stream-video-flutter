@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:meta/meta.dart';
@@ -20,6 +21,9 @@ import '../utils/cancelable_operation.dart';
 import '../utils/cancelables.dart';
 import '../utils/future.dart';
 import '../utils/standard.dart';
+import '../webrtc/model/stats/rtc_ice_candidate_pair.dart';
+import '../webrtc/model/stats/rtc_inbound_rtp_video_stream.dart';
+import '../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
 import 'permissions/permissions_manager.dart';
@@ -422,30 +426,36 @@ class Call {
       _logger.w(() => '[join] rejected (connected)');
       return const Result.success(none);
     }
+
     if (_getActiveCallCid() == callCid) {
       _logger.w(
         () => '[join] rejected (a call with the same cid is in progress)',
       );
       return Result.error('a call with the same cid is in progress');
     }
+
     if (_status.value == _ConnectionStatus.connecting) {
       _logger.v(() => '[join] await "connecting" change');
       final status = await _status.firstWhere(
         (it) => it != _ConnectionStatus.connecting,
         timeLimit: _preferences.connectTimeout,
       );
+
       if (status == _ConnectionStatus.connected) {
         return const Result.success(none);
       } else {
         return Result.error('original "connect" failed');
       }
     }
+
     await _setActiveCall(this);
     _status.value = _ConnectionStatus.connecting;
+
     final result = await _connect()
         .asCancelable()
         .storeIn(_idConnect, _cancelables)
         .valueOrDefault(Result.error('connect cancelled'));
+
     if (result.isSuccess) {
       _logger.v(() => '[join] finished: $result');
       _status.value = _ConnectionStatus.connected;
@@ -580,12 +590,110 @@ class Call {
         _onSfuEvent(event);
       }),
     );
-    _subscriptions.add(_idSessionStats, session.stats.listen(_stats.emit));
+
+    _subscriptions.add(
+      _idSessionStats,
+      session.stats.listen((stats) {
+        _logger.v(() => '[listenRtcStats] stats: $stats');
+        _stats.emit(stats);
+        processStats(stats);
+      }),
+    );
+
     _stateManager
         .lifecycleCallSessionStart(CallSessionStart(session.sessionId));
     final result = await session.start();
     _logger.v(() => '[startSession] completed: $result');
     return result;
+  }
+
+  void processStats(CallStats stats) {
+    var publisherStats =
+        state.value.publisherStats ?? PeerConnectionStats.empty();
+    var subscriberStats =
+        state.value.subscriberStats ?? PeerConnectionStats.empty();
+
+    if (stats.peerType == StreamPeerType.publisher) {
+      final mediaStatsF = stats.stats
+          .whereType<RtcOutboundRtpVideoStream>()
+          .where((s) => s.rid == 'f')
+          .map(MediaStatsInfo.fromRtcOutboundRtpVideoStream)
+          .firstOrNull;
+      final mediaStatsH = stats.stats
+          .whereType<RtcOutboundRtpVideoStream>()
+          .where((s) => s.rid == 'h')
+          .map(MediaStatsInfo.fromRtcOutboundRtpVideoStream)
+          .firstOrNull;
+      final mediaStatsQ = stats.stats
+          .whereType<RtcOutboundRtpVideoStream>()
+          .where((s) => s.rid == 'q')
+          .map(MediaStatsInfo.fromRtcOutboundRtpVideoStream)
+          .firstOrNull;
+
+      final allStats = [mediaStatsF, mediaStatsH, mediaStatsQ];
+      final mediaStats = allStats.firstWhereOrNull(
+        (s) => s?.width != null && s?.height != null && s?.fps != null,
+      );
+
+      final jitterInMs = ((mediaStats?.jitter ?? 0) * 1000).toInt();
+      final resolution = mediaStats != null
+          ? '${mediaStats.width} x ${mediaStats.height} @ ${mediaStats.fps}fps'
+          : null;
+
+      publisherStats = publisherStats.copyWith(
+        resolution: resolution,
+        qualityDropReason: mediaStats?.qualityLimit,
+        jitterInMs: jitterInMs,
+      );
+    }
+
+    final inboudRtpVideo =
+        stats.stats.whereType<RtcInboundRtpVideoStream>().firstOrNull;
+
+    if (inboudRtpVideo != null) {
+      final jitterInMs = ((inboudRtpVideo.jitter ?? 0) * 1000).toInt();
+      final resolution = inboudRtpVideo.frameWidth != null &&
+              inboudRtpVideo.frameHeight != null &&
+              inboudRtpVideo.framesPerSecond != null
+          ? '${inboudRtpVideo.frameWidth} x ${inboudRtpVideo.frameHeight} @ ${inboudRtpVideo.framesPerSecond}fps'
+          : null;
+
+      subscriberStats = subscriberStats.copyWith(
+        resolution: resolution,
+        jitterInMs: jitterInMs,
+      );
+    }
+
+    final candidatePair =
+        stats.stats.whereType<RtcIceCandidatePair>().firstOrNull;
+    if (candidatePair != null) {
+      final latency = candidatePair.currentRoundTripTime;
+      final outgoingBitrate = candidatePair.availableOutgoingBitrate;
+      final incomingBitrate = candidatePair.availableIncomingBitrate;
+
+      publisherStats = publisherStats.copyWith(
+        latency: latency != null ? (latency * 1000).toInt() : null,
+        bitrateKbps: outgoingBitrate != null ? outgoingBitrate / 1000 : null,
+      );
+
+      subscriberStats = subscriberStats.copyWith(
+        bitrateKbps: incomingBitrate != null ? incomingBitrate / 1000 : null,
+      );
+    }
+
+    var latencyHistory = state.value.latencyHistory;
+    if (publisherStats.latency != null) {
+      latencyHistory = [
+        ...state.value.latencyHistory.reversed.take(19).toList().reversed,
+        publisherStats.latency!,
+      ];
+    }
+
+    _stateManager.lifecycleCallStats(
+      publisherStats: publisherStats,
+      subscriberStats: subscriberStats,
+      latencyHistory: latencyHistory,
+    );
   }
 
   Future<Result<None>> _stopSession() async {
