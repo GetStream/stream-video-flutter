@@ -139,7 +139,7 @@ class _StreamDogFoodingAppContentState
     if (currentUser == null) return;
 
     final streamVideo = locator.get<StreamVideo>();
-    final call = streamVideo.makeCall(type: kCallType, id: callId);
+    final call = streamVideo.makeCall(callType: kCallType, id: callId);
 
     try {
       await call.getOrCreate();
