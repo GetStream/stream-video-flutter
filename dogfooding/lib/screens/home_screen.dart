@@ -64,10 +64,12 @@ class _HomeScreenState extends State<HomeScreen> {
     unawaited(showLoadingIndicator(context));
     _call = _streamVideo.makeCall(type: kCallType, id: callId);
 
+    bool isRinging = memberIds.isNotEmpty;
+
     try {
       await _call!.getOrCreate(
         memberIds: memberIds,
-        ringing: memberIds.isNotEmpty,
+        ringing: isRinging,
       );
     } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');
@@ -76,7 +78,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (mounted) {
       hideLoadingIndicator(context);
-      LobbyRoute($extra: _call!).push(context);
+
+      if (isRinging) {
+        CallRoute($extra: (
+          call: _call!,
+          connectOptions: const CallConnectOptions(),
+        )).push(context);
+      } else {
+        LobbyRoute($extra: _call!).push(context);
+      }
     }
   }
 

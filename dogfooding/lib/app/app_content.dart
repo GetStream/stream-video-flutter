@@ -262,6 +262,38 @@ class _StreamDogFoodingAppContentState
               topLeft: Radius.circular(32),
               topRight: Radius.circular(32),
             ),
+            callReactions: const [
+              CallReactionData(
+                type: 'Fireworks',
+                emojiCode: ':fireworks:',
+                icon: '🎉',
+              ),
+              CallReactionData(
+                type: 'Liked',
+                emojiCode: ':like:',
+                icon: '👍',
+              ),
+              CallReactionData(
+                type: 'Dislike',
+                emojiCode: ':dislike:',
+                icon: '👎',
+              ),
+              CallReactionData(
+                type: 'Smile',
+                emojiCode: ':smile:',
+                icon: '😊',
+              ),
+              CallReactionData(
+                type: 'Heart',
+                emojiCode: ':heart:',
+                icon: '♥️',
+              ),
+              CallReactionData(
+                emojiCode: ':raise-hand:',
+                type: 'Raise hand',
+                icon: '✋',
+              )
+            ],
             backgroundColor: colorTheme.barsBg,
             elevation: 8,
             padding: const EdgeInsets.all(14),

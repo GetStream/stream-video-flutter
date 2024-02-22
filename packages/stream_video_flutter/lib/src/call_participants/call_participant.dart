@@ -202,7 +202,7 @@ class StreamCallParticipant extends StatelessWidget {
                   ),
                   if (participant.reaction != null)
                     Align(
-                      alignment: Alignment.topRight,
+                      alignment: Alignment.topCenter,
                       child: Padding(
                         padding: const EdgeInsets.all(8),
                         child: Text(
