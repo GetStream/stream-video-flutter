@@ -4,19 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 
-class StatsLatencyChart extends StatefulWidget {
+class StatsLatencyChart extends StatelessWidget {
   const StatsLatencyChart({super.key, required this.latencyHistory});
 
   final List<int> latencyHistory;
 
   @override
-  State<StatsLatencyChart> createState() => _StatsLatencyChartState();
-}
-
-class _StatsLatencyChartState extends State<StatsLatencyChart> {
-  @override
   Widget build(BuildContext context) {
-    final sortedLatency = widget.latencyHistory.toList()..sort();
+    final sortedLatency = latencyHistory.toList()..sort();
     final maxLatency =
         max(100, ((sortedLatency.lastOrNull ?? 100) / 20).ceil() * 20);
 
@@ -72,7 +67,7 @@ class _StatsLatencyChartState extends State<StatsLatencyChart> {
           maxY: maxLatency.toDouble(),
           lineBarsData: [
             LineChartBarData(
-              spots: widget.latencyHistory.indexed
+              spots: latencyHistory.indexed
                   .map<FlSpot>(
                     (m) => FlSpot(m.$1.toDouble(), m.$2.toDouble()),
                   )
