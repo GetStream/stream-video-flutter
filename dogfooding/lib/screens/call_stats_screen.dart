@@ -5,19 +5,14 @@ import 'package:flutter_dogfooding/screens/stats_latency_chart.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-class CallStatsScreen extends StatefulWidget {
-  const CallStatsScreen({
+class CallStatsScreen extends StatelessWidget {
+  CallStatsScreen({
     super.key,
     required this.call,
   });
 
   final Call call;
 
-  @override
-  State<CallStatsScreen> createState() => _CallStatsScreenState();
-}
-
-class _CallStatsScreenState extends State<CallStatsScreen> {
   final _userAuthController = locator.get<UserAuthController>();
 
   @override
@@ -27,7 +22,7 @@ class _CallStatsScreenState extends State<CallStatsScreen> {
     final currentUser = _userAuthController.currentUser;
 
     return StreamBuilder<CallState>(
-        stream: widget.call.state.asStream(),
+        stream: call.state.asStream(),
         builder: (context, snapshot) {
           final state = snapshot.data;
           final subscriberBitrate = state?.subscriberStats?.bitrateKbps;
@@ -63,7 +58,7 @@ class _CallStatsScreenState extends State<CallStatsScreen> {
                       style: TextStyle(color: Colors.white),
                     ),
                     subtitle: Text(
-                      widget.call.callCid.value,
+                      call.callCid.value,
                       style: const TextStyle(color: Colors.white),
                     ),
                   ),
