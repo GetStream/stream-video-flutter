@@ -384,7 +384,7 @@ class StreamVideo {
         event.data.ringing) {
       _logger.v(() => '[onCoordinatorEvent] onCallRinging: ${event.data}');
       final call = _makeCallFromRinging(data: event.data);
-      _state.incomingCall.emit(call);
+      _state.incomingCall.value = call;
     } else if (event is CoordinatorConnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] connected ${event.userId}');
       _connectionState = ConnectionState.connected(
@@ -679,6 +679,10 @@ class StreamVideo {
       return const Result.failure(
         VideoError(message: 'Push notification manager not initialized.'),
       );
+    }
+
+    if (_state.incomingCall.valueOrNull?.callCid.value == cid) {
+      return Result.success(_state.incomingCall.value);
     }
 
     final callCid = StreamCallCid(cid: cid);
