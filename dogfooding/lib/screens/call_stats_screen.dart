@@ -53,8 +53,6 @@ class _CallStatsScreenState extends State<CallStatsScreen> {
                 ),
               ],
             ),
-            // StatItem(title = "Region", value = statsReport?.local?.sfu)
-            // StatItem(title = "Receive resolution", value = subscriberResolution)
             body: SingleChildScrollView(
               child: Column(
                 children: [
@@ -129,39 +127,30 @@ class _CallStatsScreenState extends State<CallStatsScreen> {
                       title: 'Latency',
                       value: state.publisherStats?.latency ?? 0,
                     ),
-
                     LatencyOrJitterItem(
                       title: 'Receive jitter',
                       value: state.subscriberStats?.jitterInMs,
                     ),
-
                     LatencyOrJitterItem(
                       title: 'Publish jitter',
                       value: state.publisherStats?.jitterInMs,
                     ),
-
                     StatsItem(
                       title: 'Publish quality drop reason',
                       value: state.publisherStats?.qualityDropReason,
                     ),
-
                     StatsItem(
                       title: 'Publish bitrate',
                       value: publisherBitrate == null
                           ? '--'
                           : '${state.publisherStats?.bitrateKbps} Kbps',
                     ),
-
                     StatsItem(
                       title: 'Receive bitrate',
                       value: subscriberBitrate == null
                           ? '--'
                           : '${state.subscriberStats?.bitrateKbps} Kbps',
                     ),
-                    // LatencyOrJitterItem(
-                    //   title: 'Publish resolution',
-                    //   value: state.publisherStats?.resolution,
-                    // ),
                   ]
                 ],
               ),
