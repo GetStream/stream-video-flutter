@@ -158,11 +158,13 @@ class _StreamDogFoodingAppContentState
     // return if the video user is not yet logged in.
     final currentUser = _userAuthController.currentUser;
     if (currentUser == null) return;
+
     try {
       final streamVideo = locator.get<StreamVideo>();
-      final call = streamVideo.makeCall(type: kCallType, id: callId);
+      final call = streamVideo.makeCall(callType: kCallType, id: callId);
 
       await call.getOrCreate();
+
       _router.push(LobbyRoute($extra: call).location, extra: call);
     } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');

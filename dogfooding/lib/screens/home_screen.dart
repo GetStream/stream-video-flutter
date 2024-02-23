@@ -3,15 +3,14 @@ import 'dart:async';
 
 // 🐦 Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
-import 'package:flutter_dogfooding/widgets/stream_button.dart';
-
-// 📦 Package imports:
-import 'package:stream_video_flutter/stream_video_flutter.dart';
-
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/router/routes.dart';
+import 'package:flutter_dogfooding/theme/app_palette.dart';
+import 'package:flutter_dogfooding/widgets/stream_button.dart';
+// 📦 Package imports:
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_background.dart';
+
 import '../app/user_auth_controller.dart';
 import '../di/injector.dart';
 import '../utils/assets.dart';
@@ -54,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (callId.isEmpty) callId = generateAlphanumericString(12);
 
     unawaited(showLoadingIndicator(context));
-    _call = _streamVideo.makeCall(type: kCallType, id: callId);
+    _call = _streamVideo.makeCall(callType: kCallType, id: callId);
 
     bool isRinging = memberIds.isNotEmpty;
 
