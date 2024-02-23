@@ -32,7 +32,7 @@ Future<void> main() async {
   );
 
   // Set up our call object
-  final call = client.makeCall(type: 'default', id: '345');
+  final call = client.makeCall(callType: StreamCallType(), id: '345');
   // Connect to the call we created
   await call.join();
 

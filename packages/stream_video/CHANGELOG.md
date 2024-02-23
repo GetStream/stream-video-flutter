@@ -14,6 +14,7 @@
 ✅ Added
 
 * Added `custom` field to `CallParticipantState` with custom user data.
+* Added `CallType` to statically track the type of call (audio, video, screen share).
 
 ## 0.3.1
 
