@@ -4,6 +4,7 @@ export 'open_api/video/coordinator/api.dart';
 export 'src/action/participant_action.dart';
 export 'src/call/call.dart';
 export 'src/call/call_connect_options.dart';
+export 'src/call/call_ringing_state.dart';
 export 'src/call_state.dart';
 export 'src/coordinator/coordinator_client.dart';
 export 'src/coordinator/models/coordinator_events.dart';

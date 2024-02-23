@@ -21,13 +21,15 @@
 
 import '../../../utils/format.dart';
 import 'rtc_outbound_rtp.dart';
+import 'rtc_stats.dart';
 import 'rtc_writable.dart';
 
-class RtcOutboundRtpAudioStream implements RtcOutboundRtp, RtcWritable {
+class RtcOutboundRtpAudioStream extends RtcStats
+    implements RtcOutboundRtp, RtcWritable {
   const RtcOutboundRtpAudioStream({
-    this.id,
-    this.type,
-    this.timestamp,
+    super.id,
+    super.type,
+    super.timestamp,
     this.transportId,
     this.headerBytesSent,
     this.nackCount,
@@ -43,11 +45,9 @@ class RtcOutboundRtpAudioStream implements RtcOutboundRtp, RtcWritable {
     this.codecId,
     this.packetsSent,
     this.retransmittedBytesSent,
+    this.jitter,
   });
 
-  final String? id;
-  final String? type;
-  final double? timestamp;
   final String? transportId;
   final int? headerBytesSent;
   final int? nackCount;
@@ -63,6 +63,7 @@ class RtcOutboundRtpAudioStream implements RtcOutboundRtp, RtcWritable {
   final String? codecId;
   final int? packetsSent;
   final int? retransmittedBytesSent;
+  final double? jitter;
 
   static RtcOutboundRtpAudioStream? fromJson(dynamic value) {
     if (value is Map) {
@@ -85,6 +86,7 @@ class RtcOutboundRtpAudioStream implements RtcOutboundRtp, RtcWritable {
         codecId: value['codecId'],
         packetsSent: value['packetsSent'],
         retransmittedBytesSent: value['retransmittedBytesSent'],
+        jitter: value['jitter'],
       );
     }
     return null;
@@ -101,7 +103,8 @@ class RtcOutboundRtpAudioStream implements RtcOutboundRtp, RtcWritable {
         'mediaType: $mediaType, bytesSent: $bytesSent, '
         'mediaSourceId: $mediaSourceId, remoteId: $remoteId, '
         'codecId: $codecId, packetsSent: $packetsSent, '
-        'retransmittedBytesSent: $retransmittedBytesSent}';
+        'retransmittedBytesSent: $retransmittedBytesSent} '
+        'jitter: $jitter';
   }
 
   @override

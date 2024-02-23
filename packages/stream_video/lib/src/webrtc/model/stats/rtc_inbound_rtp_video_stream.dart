@@ -39,13 +39,15 @@
 
 import '../../../utils/format.dart';
 import 'rtc_inbound_rtp.dart';
+import 'rtc_stats.dart';
 import 'rtc_writable.dart';
 
-class RtcInboundRtpVideoStream implements RtcInboundRtp, RtcWritable {
+class RtcInboundRtpVideoStream extends RtcStats
+    implements RtcInboundRtp, RtcWritable {
   const RtcInboundRtpVideoStream({
-    this.id,
-    this.type,
-    this.timestamp,
+    super.id,
+    super.type,
+    super.timestamp,
     this.transportId,
     this.qpSum,
     this.lastPacketReceivedTimestamp,
@@ -80,9 +82,6 @@ class RtcInboundRtpVideoStream implements RtcInboundRtp, RtcWritable {
     this.totalDecodeTime,
   });
 
-  final String? id;
-  final String? type;
-  final double? timestamp;
   final String? transportId;
   final int? qpSum;
   final double? lastPacketReceivedTimestamp;

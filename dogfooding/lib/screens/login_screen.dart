@@ -5,6 +5,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/app/user_auth_controller.dart';
+import 'package:flutter_dogfooding/theme/app_palette.dart';
+import 'package:flutter_dogfooding/widgets/stream_button.dart';
 
 // 📦 Package imports:
 import 'package:flutter_svg/flutter_svg.dart';
@@ -100,27 +102,24 @@ class _LoginScreenState extends State<LoginScreen> {
                   tag: 'stream_logo',
                   child: Image.asset(
                     streamVideoIconAsset,
-                    width: size.width * 0.3,
+                    width: size.width * 0.8,
                   ),
                 ),
                 const SizedBox(height: 36),
-                Text('Stream Meetings', style: theme.textTheme.bodyLarge),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 18,
-                  ),
-                  child: Text(
-                    'Please sign in with your Google Stream account.',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium,
+                Text('Stream', style: theme.textTheme.headlineMedium),
+                Text(
+                  '[Video Calling]',
+                  style: theme.textTheme.headlineMedium?.apply(
+                    color: AppColorPalette.appGreen,
                   ),
                 ),
+                const SizedBox(height: 48),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TextField(
                     controller: _emailController,
-                    style: const TextStyle(color: Colors.white),
+                    style:
+                        theme.textTheme.bodyMedium?.apply(color: Colors.white),
                     decoration: const InputDecoration(
                       labelText: 'Enter Email',
                       isDense: true,
@@ -129,16 +128,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _loginWithEmail,
-                  style: const ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll<Color>(
-                      Color(0xff005FFF),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: StreamButton.active(
+                    label: 'Sign up with email',
+                    icon: const Icon(
+                      Icons.email_outlined,
+                      color: Colors.white,
                     ),
+                    onPressed: _loginWithEmail,
                   ),
-                  child: const Text('Login with Email'),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Row(
@@ -162,25 +163,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: GoogleLoginButton(
                     onPressed: _loginWithGoogle,
                   ),
                 ),
+                const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: TextButton(
+                  child: StreamButton.tertiary(
                     onPressed: _loginAsGuest,
-                    child: const Text(
-                      'Continue As Guest',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
+                    label: 'Join As Guest',
                   ),
                 ),
               ],
@@ -195,12 +190,12 @@ class _LoginScreenState extends State<LoginScreen> {
 class GoogleLoginButton extends StatelessWidget {
   const GoogleLoginButton({
     super.key,
+    required this.onPressed,
     this.label = 'Login with Google',
-    this.onPressed,
   });
 
   final String label;
-  final VoidCallback? onPressed;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -216,41 +211,13 @@ class GoogleLoginButton extends StatelessWidget {
       return Text('Google SignIn is not supported on $currentPlatform.');
     }
 
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        elevation: 1,
-        fixedSize: const Size.fromHeight(56),
-        backgroundColor: const Color(0xff005FFF),
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(36),
-        ),
-      ),
+    return StreamButton.primary(
       onPressed: onPressed,
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          children: [
-            SvgPicture.asset(
-              googleLogoAsset,
-              semanticsLabel: 'Google Logo',
-            ),
-            const SizedBox(width: 24),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const Spacer(),
-            const Icon(
-              Icons.arrow_forward,
-              color: Colors.white,
-            ),
-          ],
-        ),
+      label: 'Continue with Google',
+      icon: SvgPicture.asset(
+        googleLogoAsset,
+        width: 24,
+        semanticsLabel: 'Google Logo',
       ),
     );
   }

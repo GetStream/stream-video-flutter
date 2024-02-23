@@ -86,6 +86,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
   @override
   SharedEmitter<CoordinatorEvent> get events => _events;
+
+  @override
+  bool get isConnected => _ws?.isConnected ?? false;
+
   final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
 
   final _connectionState = MutableStateEmitterImpl<CoordinatorConnectionState>(

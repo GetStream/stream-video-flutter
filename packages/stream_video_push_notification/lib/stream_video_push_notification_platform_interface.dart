@@ -23,6 +23,8 @@ typedef CallerCustomizationFunction = CallerCustomizationResponse Function({
   String? callerName,
 });
 
+typedef BackgroundVoipCallHandler = Future<void> Function();
+
 abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   StreamVideoPushNotificationPlatform() : super(token: _token);
 
@@ -47,6 +49,7 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   Future<void> init(
     Map<String, dynamic> pushParams,
     CallerCustomizationFunction? callerCustomizationCallback,
+    BackgroundVoipCallHandler? backgroundVoipCallHandler,
   ) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }

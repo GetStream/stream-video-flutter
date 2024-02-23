@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../call_participants/participant_label.dart';
 import 'lobby_participants_view.dart';
 
 /// A widget that can be shown before joining a call. Measures latencies
@@ -145,12 +144,14 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
         success: (it) {
           _logger.v(() => '[fetchCall] completed: ${it.data}');
           final metadata = it.data.data.metadata;
-          _users = metadata.users;
-          _participants = metadata.session.participants.values
-              .sortedBy((it) => it.joinedAt ?? DateTime.now())
-              .where((it) => it.userId != currentUserId)
-              .toList();
-          setState(() {});
+
+          setState(() {
+            _users = metadata.users;
+            _participants = metadata.session.participants.values
+                .sortedBy((it) => it.joinedAt ?? DateTime.now())
+                .where((it) => it.userId != currentUserId)
+                .toList();
+          });
         },
         failure: (it) {
           _logger.e(() => '[fetchCall] failed: ${it.error}');
@@ -197,11 +198,6 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
     final userAvatarTheme = widget.userAvatarTheme ?? theme.userAvatarTheme;
     final participantAvatarTheme =
         widget.participantAvatarTheme ?? theme.participantAvatarTheme;
-
-    final currentUser = StreamVideo.instance.currentUser;
-
-    final cameraEnabled = _cameraTrack != null;
-    final microphoneEnabled = _microphoneTrack != null;
 
     final participants = _participants
         .map((it) => _users[it.userId])
@@ -250,80 +246,14 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Container(
-                  constraints: const BoxConstraints(maxWidth: 420),
-                  height: 280,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(color: cardBackgroundColor),
-                      child: Builder(
-                        builder: (context) {
-                          Widget placeHolderBuilder(BuildContext context) {
-                            return Center(
-                              child: StreamUserAvatarTheme(
-                                data: userAvatarTheme,
-                                child: StreamUserAvatar(
-                                  user: currentUser,
-                                ),
-                              ),
-                            );
-                          }
-
-                          return Stack(
-                            children: [
-                              if (cameraEnabled)
-                                VideoTrackRenderer(
-                                  mirror: true,
-                                  videoTrack: _cameraTrack!,
-                                  placeholderBuilder: placeHolderBuilder,
-                                )
-                              else
-                                placeHolderBuilder(context),
-                              Align(
-                                alignment: Alignment.bottomLeft,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(16),
-                                      child: StreamParticipantLabel(
-                                        isAudioEnabled: microphoneEnabled,
-                                        isSpeaking: false,
-                                        participantName: currentUser.name,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                  ),
+                StreamLobbyVideo(
+                  call: widget.call,
+                  cardBackgroundColor: cardBackgroundColor,
+                  userAvatarTheme: userAvatarTheme,
+                  onMicrophoneTrackSet: (track) => _microphoneTrack = track,
+                  onCameraTrackSet: (track) => _cameraTrack = track,
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CallControlOption(
-                      icon: microphoneEnabled
-                          ? const Icon(Icons.mic_rounded)
-                          : const Icon(Icons.mic_off_rounded),
-                      onPressed: toggleMicrophone,
-                    ),
-                    const SizedBox(width: 16),
-                    CallControlOption(
-                      icon: cameraEnabled
-                          ? const Icon(Icons.videocam_rounded)
-                          : const Icon(Icons.videocam_off_rounded),
-                      onPressed: toggleCamera,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 Container(
                   constraints: const BoxConstraints(maxWidth: 360),
                   child: ClipRRect(

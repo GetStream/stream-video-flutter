@@ -57,30 +57,35 @@ class StreamParticipantLabel extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.85),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(10),
+        ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              participantName,
-              style:
-                  participantLabelTextStyle ?? theme.participantLabelTextStyle,
-              overflow: TextOverflow.ellipsis,
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                participantName,
+                style: participantLabelTextStyle ??
+                    theme.participantLabelTextStyle,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-          const SizedBox(width: 4),
-          StreamAudioIndicator(
-            isAudioEnabled: isAudioEnabled,
-            isSpeaking: isSpeaking,
-            audioLevelIndicatorColor: audioLevelIndicatorColor,
-            enabledMicrophoneColor: enabledMicrophoneColor,
-            disabledMicrophoneColor: disabledMicrophoneColor,
-          ),
-          const SizedBox(width: 2),
-        ],
+            const SizedBox(width: 4),
+            StreamAudioIndicator(
+              isAudioEnabled: isAudioEnabled,
+              isSpeaking: isSpeaking,
+              audioLevelIndicatorColor: audioLevelIndicatorColor,
+              enabledMicrophoneColor: enabledMicrophoneColor,
+              disabledMicrophoneColor: disabledMicrophoneColor,
+            ),
+            const SizedBox(width: 2),
+          ],
+        ),
       ),
     );
   }

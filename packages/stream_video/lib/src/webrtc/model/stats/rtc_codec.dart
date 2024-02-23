@@ -9,11 +9,13 @@
 //   payloadType: 101
 // }
 
-class RtcCodec {
+import 'rtc_stats.dart';
+
+class RtcCodec extends RtcStats {
   const RtcCodec({
-    this.id,
-    this.type,
-    this.timestamp,
+    super.id,
+    super.type,
+    super.timestamp,
     this.sdpFmtpLine,
     this.payloadType,
     this.transportId,
@@ -21,9 +23,6 @@ class RtcCodec {
     this.clockRate,
   });
 
-  final String? id;
-  final String? type;
-  final double? timestamp;
   final String? sdpFmtpLine;
   final int? payloadType;
   final String? transportId;

@@ -12,6 +12,7 @@ part 'call_kit_events.dart';
 /// [PushNotificationManager].
 typedef PNManagerProvider = PushNotificationManager Function(
   CoordinatorClient client,
+  StreamVideo streamVideo,
 );
 
 /// Interface for managing push notifications related to call events.

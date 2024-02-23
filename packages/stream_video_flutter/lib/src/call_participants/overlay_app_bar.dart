@@ -15,8 +15,6 @@ class OverlayAppBar extends StatelessWidget {
     this.showBackButton,
     this.backgroundColor,
     this.onBackPressed,
-    this.onParticipantsInfoTap,
-    this.participantsInfoBuilder,
   });
 
   /// Represents a call.
@@ -30,12 +28,6 @@ class OverlayAppBar extends StatelessWidget {
 
   /// The action to perform when the back button is pressed.
   final VoidCallback? onBackPressed;
-
-  /// The action to perform when the participants info button is tapped.
-  final VoidCallback? onParticipantsInfoTap;
-
-  /// Builder used to create a custom participants info screen.
-  final CallParticipantsInfoBuilder? participantsInfoBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -77,13 +69,6 @@ class OverlayAppBar extends StatelessWidget {
                     overflow: TextOverflow.visible,
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.group_rounded,
-                    color: Colors.white,
-                  ),
-                  onPressed: () => _onParticipantsInfoTap(context),
-                ),
               ],
             ),
           ),
@@ -109,25 +94,6 @@ class OverlayAppBar extends StatelessWidget {
       final callId = callState.callCid.id;
 
       return '$status: $callId';
-    }
-  }
-
-  void _onParticipantsInfoTap(BuildContext context) {
-    if (onParticipantsInfoTap != null) {
-      onParticipantsInfoTap!();
-    } else {
-      final usersProvider = StreamUsersConfiguration.of(context);
-
-      Navigator.of(context).push(
-        MaterialPageRoute<Widget>(
-          builder: (context) =>
-              participantsInfoBuilder?.call(context, call) ??
-              StreamCallParticipantsInfoMenu(
-                call: call,
-                usersProvider: usersProvider,
-              ),
-        ),
-      );
     }
   }
 }

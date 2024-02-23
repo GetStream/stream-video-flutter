@@ -22,6 +22,7 @@ class StreamUserAvatarThemeData with Diagnosticable {
     ),
     this.selectionColor = const Color(0xff005FFF),
     this.selectionThickness = 4,
+    this.initialsBackground,
   });
 
   /// Sizing constraints of the avatar.
@@ -32,6 +33,9 @@ class StreamUserAvatarThemeData with Diagnosticable {
 
   /// [TextStyle] for the initials text.
   final TextStyle initialsTextStyle;
+
+  /// Background color for the initials.
+  final Color? initialsBackground;
 
   /// Color of the selection.
   final Color selectionColor;
@@ -45,6 +49,7 @@ class StreamUserAvatarThemeData with Diagnosticable {
     BoxConstraints? constraints,
     BorderRadius? borderRadius,
     TextStyle? initialsTextStyle,
+    Color? initialsBackground,
     Color? selectionColor,
     double? selectionThickness,
   }) {
@@ -52,6 +57,7 @@ class StreamUserAvatarThemeData with Diagnosticable {
       constraints: constraints ?? this.constraints,
       borderRadius: borderRadius ?? this.borderRadius,
       initialsTextStyle: initialsTextStyle ?? this.initialsTextStyle,
+      initialsBackground: initialsBackground ?? this.initialsBackground,
       selectionColor: selectionColor ?? this.selectionColor,
       selectionThickness: selectionThickness ?? this.selectionThickness,
     );
@@ -66,6 +72,8 @@ class StreamUserAvatarThemeData with Diagnosticable {
       constraints: BoxConstraints.lerp(constraints, other.constraints, t)!,
       initialsTextStyle:
           TextStyle.lerp(initialsTextStyle, other.initialsTextStyle, t)!,
+      initialsBackground:
+          Color.lerp(initialsBackground, other.initialsBackground, t),
       selectionColor: Color.lerp(selectionColor, other.selectionColor, t)!,
       selectionThickness:
           lerpDouble(selectionThickness, other.selectionThickness, t)!,
@@ -77,6 +85,7 @@ class StreamUserAvatarThemeData with Diagnosticable {
         constraints,
         borderRadius,
         initialsTextStyle,
+        initialsBackground,
         selectionColor,
         selectionThickness,
       );
@@ -89,6 +98,7 @@ class StreamUserAvatarThemeData with Diagnosticable {
           constraints == other.constraints &&
           borderRadius == other.borderRadius &&
           initialsTextStyle == other.initialsTextStyle &&
+          initialsBackground == other.initialsBackground &&
           selectionColor == other.selectionColor &&
           selectionThickness == other.selectionThickness;
 
@@ -99,6 +109,7 @@ class StreamUserAvatarThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('borderRadius', borderRadius))
       ..add(DiagnosticsProperty('constraints', constraints))
       ..add(DiagnosticsProperty('initialsTextStyle', initialsTextStyle))
+      ..add(DiagnosticsProperty('initialsBackground', initialsBackground))
       ..add(DiagnosticsProperty('selectionColor', selectionColor))
       ..add(DiagnosticsProperty('selectionThickness', selectionThickness));
   }
@@ -110,6 +121,7 @@ class StreamUserAvatarThemeData with Diagnosticable {
       constraints: other.constraints,
       borderRadius: other.borderRadius,
       initialsTextStyle: other.initialsTextStyle,
+      initialsBackground: other.initialsBackground,
       selectionColor: other.selectionColor,
       selectionThickness: other.selectionThickness,
     );
