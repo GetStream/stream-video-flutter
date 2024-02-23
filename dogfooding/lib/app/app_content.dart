@@ -130,19 +130,40 @@ class _StreamDogFoodingAppContentState
   }
 
   Future<void> _handleDeepLink(Uri uri) async {
-    // Parse the call id from the deep link.
-    final callId = uri.queryParameters['id'];
+    final user = _userAuthController.currentUser;
+
+    if (user == null) {
+      return;
+    }
+
+    await AppInjector.reset();
+    TokenService.environment = Environment.fromHost(uri.host);
+    await AppInjector.init();
+
+    final authController = locator.get<UserAuthController>();
+    await authController.login(User(info: user));
+
+    String? callId;
+    for (final segment in uri.pathSegments.indexed) {
+      if (segment.$2 == 'join') {
+        // Next segment is the callId
+        callId = uri.pathSegments[segment.$1 + 1];
+        break;
+      }
+    }
+
+    callId ??= uri.queryParameters['id'];
     if (callId == null) return;
 
     // return if the video user is not yet logged in.
     final currentUser = _userAuthController.currentUser;
     if (currentUser == null) return;
-
-    final streamVideo = locator.get<StreamVideo>();
-    final call = streamVideo.makeCall(type: kCallType, id: callId);
-
     try {
+      final streamVideo = locator.get<StreamVideo>();
+      final call = streamVideo.makeCall(type: kCallType, id: callId);
+
       await call.getOrCreate();
+      _router.push(LobbyRoute($extra: call).location, extra: call);
     } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());
@@ -150,7 +171,6 @@ class _StreamDogFoodingAppContentState
     }
 
     // Navigate to the lobby screen.
-    _router.push(LobbyRoute($extra: call).location, extra: call);
   }
 
   void _onCallAccept(ActionCallAccept event) async {

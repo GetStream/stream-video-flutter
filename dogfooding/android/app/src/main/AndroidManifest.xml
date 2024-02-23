@@ -47,10 +47,13 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:host="getstream.io"
-                    android:pathPrefix="/video/demos"
-                    android:scheme="https" />
+                <data android:scheme="https" />
+                <data android:host="getstream.io" />
+                <data android:host="pronto.getstream.io" />
+                <data android:host="staging.getstream.io" />
+                <data android:host="stream-calls-dogfood.vercel.app"/>
+                <data android:pathPrefix="/join" />
+                <data android:pathPrefix="/video/demos/join" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

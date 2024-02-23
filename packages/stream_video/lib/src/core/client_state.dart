@@ -1,7 +1,6 @@
 import '../call/call.dart';
 import '../models/call_cid.dart';
 import '../models/user.dart';
-import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import 'connection_state.dart';
 

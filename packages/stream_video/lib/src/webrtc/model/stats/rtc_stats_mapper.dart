@@ -39,8 +39,8 @@ extension RtcStatsMapper on List<rtc.StatsReport> {
         ...rawStats,
         type: {
           'id': report.id,
+          'type': report.type,
           'timestamp': report.timestamp,
-          'values': report.values,
           ...report.values,
         },
       };
