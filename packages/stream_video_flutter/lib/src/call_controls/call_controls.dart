@@ -65,6 +65,7 @@ class StreamCallControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return PortraitCallControls(
       options: options,
+      backgroundColor: backgroundColor,
       elevation: elevation,
       spacing: spacing,
       padding: padding,
