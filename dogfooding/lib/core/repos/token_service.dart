@@ -4,6 +4,38 @@ import 'dart:convert';
 // 📦 Package imports:
 import 'package:http/http.dart' as http;
 
+enum Environment {
+  pronto(
+    'Pronto',
+    aliases: ['stream-calls-dogfood'],
+  ),
+  demo(
+    'Demo',
+    aliases: [''],
+  ),
+  staging(
+    'Staging',
+  );
+
+  final String displayName;
+  final List<String> aliases;
+
+  const Environment(
+    this.displayName, {
+    this.aliases = const [],
+  });
+
+  factory Environment.fromHost(String host) {
+    final hostParts = host.split('.');
+    final String envAlias = hostParts.length < 2 ? '' : hostParts[0];
+
+    return Environment.values.firstWhere(
+      (env) => env.name == envAlias || env.aliases.contains(envAlias),
+      orElse: () => Environment.demo,
+    );
+  }
+}
+
 class TokenResponse {
   final String token;
   final String apiKey;
@@ -15,6 +47,8 @@ class TokenResponse {
 }
 
 class TokenService {
+  static Environment environment = Environment.pronto;
+
   const TokenService();
 
   Future<TokenResponse> loadToken({
@@ -22,9 +56,10 @@ class TokenService {
     Duration? expiresIn,
   }) async {
     final queryParameters = <String, dynamic>{
-      'environment': 'pronto',
+      'environment': environment.name,
       'user_id': userId,
     };
+
     if (expiresIn != null) {
       queryParameters['exp'] = expiresIn.inSeconds.toString();
     }

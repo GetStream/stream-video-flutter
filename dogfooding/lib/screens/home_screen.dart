@@ -35,14 +35,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     StreamBackgroundService.init(
       StreamVideo.instance,
-      onNotificationClick: (call) async {
-        final extra = (
-          call: call,
-          connectOptions: const CallConnectOptions(),
-        );
-
-        CallRoute($extra: extra).push(context);
-      },
       onButtonClick: (call, type, serviceType) async {
         switch (serviceType) {
           case ServiceType.call:
