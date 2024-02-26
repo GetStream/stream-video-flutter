@@ -270,13 +270,29 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
 
   @override
   Widget build(BuildContext context) {
+    final streamVideoTheme = StreamVideoTheme.of(context);
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
-          Text(
-            'Current environment: ${selectedEnvironment.displayName}',
-            style: const TextStyle(color: Colors.white),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: AppColorPalette.appGreen,
+                width: 0.5,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(
+                selectedEnvironment.displayName,
+                style: streamVideoTheme.textTheme.footnoteBold
+                    .apply(color: AppColorPalette.appGreen),
+              ),
+            ),
           ),
           MenuAnchor(
             style: const MenuStyle(
