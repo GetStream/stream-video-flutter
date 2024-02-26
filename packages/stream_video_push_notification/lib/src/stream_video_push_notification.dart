@@ -76,7 +76,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         client.events.on<CoordinatorCallRejectedEvent>(
           (event) async {
             final callRingingState = await streamVideo.getCallRingingState(
-                type: event.callCid.type, id: event.callCid.id);
+                callType: event.callCid.type, id: event.callCid.id);
 
             switch (callRingingState) {
               case CallRingingState.accepted:
@@ -95,7 +95,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         client.events.on<CoordinatorCallAcceptedEvent>(
           (event) async {
             final callRingingState = await streamVideo.getCallRingingState(
-                type: event.callCid.type, id: event.callCid.id);
+                callType: event.callCid.type, id: event.callCid.id);
 
             switch (callRingingState) {
               case CallRingingState.accepted:

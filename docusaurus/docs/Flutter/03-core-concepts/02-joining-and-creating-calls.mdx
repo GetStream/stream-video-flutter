@@ -10,14 +10,14 @@ With authentication out of the way, we can now focus on creating and joining cal
 To create a call, we first call the `makeCall` function on the `StreamVideo` class and pass it the call type and ID. The most common call type is `default`, which enables full audio and video transmission. However, as we will learn later, there are multiple call types (and even custom types) from which you can choose based on your use case.
 
 ```dart
-final call = StreamVideo.instance.makeCall(type: 'default', id: 'Your-call-ID');
+final call = StreamVideo.instance.makeCall(callType: StreamCallType(), id: 'Your-call-ID');
 
 ```
 
 Calling `makeCall` returns a `Call` object for us to work with. However, it does neither connect nor start transmitting data automatically. To create and join the call, we must then invoke `getOrCreate` on the returned object.
 
 ```dart
-final call = StreamVideo.instance.makeCall(type: 'default', id: 'Your-call-ID');
+final call = StreamVideo.instance.makeCall(callType: StreamCallType(), id: 'Your-call-ID');
 await call.getOrCreate(); // New
 
 ```
@@ -36,7 +36,7 @@ By default, calling `getOrCreate` assigns `admin` permission to each user who is
 When call is already active you can still manage members:
 
 ```dart
-final call = client.makeCall(type: 'my-call-type', id: 'my-call-id');
+final call = client.makeCall(callType: StreamCallType(), id: 'my-call-id');
 call.getOrCreate(memberIds: ['alice', 'bob']);
 
 // grant access to more users
@@ -82,7 +82,7 @@ To join a call that already exists, you must first know two things:
 Similar to the flow of creating a call, we can use `makeCall` to construct a `Call` class for us to perform operations on.
 
 ```dart
-final call = StreamVideo.instance.makeCall(type: 'default', id: 'My-existing-call-ID');
+final call = StreamVideo.instance.makeCall(callType: StreamCallType(), id: 'My-existing-call-ID');
 
 ```
 

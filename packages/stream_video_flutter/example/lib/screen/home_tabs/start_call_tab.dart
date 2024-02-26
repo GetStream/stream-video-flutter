@@ -102,7 +102,8 @@ class _StartCallTabState extends State<StartCallTab>
 
     setState(() => _callInProgress = true);
 
-    final call = StreamVideo.instance.makeCall(type: 'default', id: callId);
+    final call = StreamVideo.instance
+        .makeCall(callType: StreamCallType(), id: callId);
     final result = await call.getOrCreate(
       ringing: _ringingCall,
       memberIds: [
