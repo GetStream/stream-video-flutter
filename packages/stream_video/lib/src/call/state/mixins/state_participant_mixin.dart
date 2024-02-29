@@ -16,7 +16,8 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
   ) {
     state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
-        if (participant.sessionId == action.sessionId) {
+        if (participant.sessionId == action.sessionId &&
+            participant.userId == action.userId) {
           return participant.copyWith(isPinned: action.pinned);
         }
 
@@ -30,7 +31,8 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
   ) {
     state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
-        if (participant.sessionId == action.sessionId) {
+        if (participant.sessionId == action.sessionId &&
+            participant.userId == action.userId) {
           return participant.copyWith(
             viewportVisibility: action.visibility,
           );
@@ -70,9 +72,11 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
       () =>
           '[participantUpdateSubscription] #${state.sessionId}; action: $action',
     );
+
     state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         final trackState = participant.publishedTracks[action.trackType];
+
         if (participant.userId == action.userId &&
             participant.sessionId == action.sessionId &&
             trackState is RemoteTrackState) {
@@ -89,6 +93,7 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
             },
           );
         }
+
         _logger.v(() => '[participantUpdateSubscription] pSame: $participant');
         return participant;
       }).toList(),
