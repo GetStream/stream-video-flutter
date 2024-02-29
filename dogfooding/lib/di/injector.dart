@@ -61,7 +61,7 @@ Future<void> _backgroundVoipCallHandler() async {
 /// and injecting them into the app.
 class AppInjector {
   // Register dependencies
-  static Future<void> init() async {
+  static Future<void> init({Environment? forceEnvironment}) async {
     // Google sign in
     locator.registerSingleton<GoogleSignIn>(
       GoogleSignIn(hostedDomain: 'getstream.io'),
@@ -69,8 +69,13 @@ class AppInjector {
 
     // App Preferences
     final prefs = await SharedPreferences.getInstance();
+    final appPrefs = AppPreferences(prefs: prefs);
 
-    locator.registerSingleton<AppPreferences>(AppPreferences(prefs: prefs));
+    if (forceEnvironment != null) {
+      await appPrefs.setEnvironment(forceEnvironment);
+    }
+
+    locator.registerSingleton<AppPreferences>(appPrefs);
 
     // Repositories
     locator.registerSingleton(const TokenService());
@@ -81,7 +86,7 @@ class AppInjector {
 
         // We need to register the video client here because we need it to
         // initialise the user auth repo.
-        registerStreamVideo(tokenResponse, user);
+        registerStreamVideo(tokenResponse, user, appPrefs.environment);
 
         return UserAuthRepository(
           videoClient: locator(),
@@ -112,7 +117,10 @@ class AppInjector {
   }
 
   static StreamVideo registerStreamVideo(
-      TokenResponse tokenResponse, User user) {
+    TokenResponse tokenResponse,
+    User user,
+    Environment environment,
+  ) {
     _setupLogger();
 
     return locator.registerSingleton(
@@ -125,7 +133,7 @@ class AppInjector {
           UserType.authenticated => (String userId) {
               final tokenService = locator<TokenService>();
               return tokenService
-                  .loadToken(userId: userId)
+                  .loadToken(userId: userId, environment: environment)
                   .then((response) => response.token);
             },
           _ => null,
