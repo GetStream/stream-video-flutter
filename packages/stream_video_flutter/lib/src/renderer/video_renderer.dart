@@ -94,6 +94,7 @@ class StreamVideoRenderer extends StatelessWidget {
     if (prevVisibility != visibility) {
       call.updateViewportVisibility(
         sessionId: participant.sessionId,
+        userId: participant.userId,
         visibility: visibility,
       );
     }
