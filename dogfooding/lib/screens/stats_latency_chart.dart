@@ -39,22 +39,22 @@ class StatsLatencyChart extends StatelessWidget {
               );
             },
           ),
-          titlesData: const FlTitlesData(
+          titlesData: FlTitlesData(
             show: true,
             rightTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 35,
-                interval: 20,
+                reservedSize: 40,
+                interval: maxLatency / 5,
               ),
             ),
-            topTitles: AxisTitles(
+            topTitles: const AxisTitles(
               sideTitles: SideTitles(showTitles: false),
             ),
-            bottomTitles: AxisTitles(
+            bottomTitles: const AxisTitles(
               sideTitles: SideTitles(showTitles: false),
             ),
-            leftTitles: AxisTitles(
+            leftTitles: const AxisTitles(
               sideTitles: SideTitles(showTitles: false),
             ),
           ),

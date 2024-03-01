@@ -80,7 +80,8 @@ class _StreamDogFoodingAppState extends State<StreamDogFoodingApp> {
     if (credentials == null) return;
 
     final authController = locator.get<UserAuthController>();
-    await authController.login(User(info: credentials.userInfo));
+    await authController.login(
+        User(info: credentials.userInfo), prefs.environment);
   }
 
   @override
