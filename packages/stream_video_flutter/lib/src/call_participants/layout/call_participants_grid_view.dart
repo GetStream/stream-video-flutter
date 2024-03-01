@@ -94,109 +94,6 @@ class MobileCallParticipantsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final participantsCount = participants.length;
-
-    if (participantsCount == 1) {
-      return Padding(
-        padding: padding,
-        child: itemBuilder(context, call, participants[0]),
-      );
-    }
-
-    if (participantsCount == 2) {
-      return Padding(
-        padding: padding,
-        child: Column(
-          children: [
-            Expanded(child: itemBuilder(context, call, participants[0])),
-            SizedBox(height: mainAxisSpacing),
-            Expanded(child: itemBuilder(context, call, participants[1])),
-          ],
-        ),
-      );
-    }
-
-    if (participantsCount == 3) {
-      return Padding(
-        padding: padding,
-        child: Column(
-          children: [
-            Expanded(child: itemBuilder(context, call, participants[0])),
-            SizedBox(height: mainAxisSpacing),
-            Expanded(
-              child: Row(
-                children: [
-                  Expanded(child: itemBuilder(context, call, participants[1])),
-                  SizedBox(width: crossAxisSpacing),
-                  Expanded(child: itemBuilder(context, call, participants[2])),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (participantsCount == 4) {
-      return Padding(
-        padding: padding,
-        child: Column(
-          children: [
-            Expanded(
-              child: Row(
-                children: [
-                  Expanded(child: itemBuilder(context, call, participants[0])),
-                  SizedBox(width: crossAxisSpacing),
-                  Expanded(child: itemBuilder(context, call, participants[1])),
-                ],
-              ),
-            ),
-            SizedBox(height: mainAxisSpacing),
-            Expanded(
-              child: Row(
-                children: [
-                  Expanded(child: itemBuilder(context, call, participants[2])),
-                  SizedBox(width: crossAxisSpacing),
-                  Expanded(child: itemBuilder(context, call, participants[3])),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (participantsCount == 5) {
-      return Padding(
-        padding: padding,
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  Expanded(child: itemBuilder(context, call, participants[0])),
-                  SizedBox(height: mainAxisSpacing),
-                  Expanded(child: itemBuilder(context, call, participants[1])),
-                ],
-              ),
-            ),
-            SizedBox(width: crossAxisSpacing),
-            Expanded(
-              child: Column(
-                children: [
-                  Expanded(child: itemBuilder(context, call, participants[2])),
-                  SizedBox(height: mainAxisSpacing),
-                  Expanded(child: itemBuilder(context, call, participants[3])),
-                  SizedBox(height: mainAxisSpacing),
-                  Expanded(child: itemBuilder(context, call, participants[4])),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     const pageSize = 6;
     final pages = participants.slices(pageSize);
 
@@ -220,21 +117,75 @@ class MobileCallParticipantsGrid extends StatelessWidget {
           itemCount: pages.length,
           scrollDirection: Axis.vertical,
           itemBuilder: (context, index) {
-            final page = pages.elementAt(index);
+            final pageParticipants = pages.elementAt(index);
+            final pageParticipantsCount = pageParticipants.length;
 
-            return TileView(
-              padding: padding,
-              mainAxisSpacing: mainAxisSpacing,
-              crossAxisSpacing: crossAxisSpacing,
-              mainAxisCount: mainAxisCount,
-              crossAxisCount: crossAxisCount,
-              crossAxisAlignment: WrapAlignment.start,
-              mainAxisAlignment: WrapAlignment.start,
-              children: page.map(
-                (participant) {
-                  return itemBuilder(context, call, participant);
-                },
-              ),
+            Widget getParticipantTile(int index) {
+              if (index < pageParticipantsCount) {
+                return Expanded(
+                  key: ValueKey(pageParticipants[index].sessionId),
+                  child: itemBuilder(context, call, pageParticipants[index]),
+                );
+              }
+
+              return const Spacer();
+            }
+
+            if (index == 0) {
+              return Column(
+                children: [
+                  if (pageParticipantsCount == 1) ...[
+                    Expanded(
+                      child: Padding(
+                        padding: padding,
+                        child: itemBuilder(context, call, pageParticipants[0]),
+                      ),
+                    ),
+                  ],
+                  if (pageParticipantsCount == 2) ...[
+                    getParticipantTile(0),
+                    SizedBox(height: mainAxisSpacing),
+                    getParticipantTile(1),
+                  ],
+                  if (pageParticipantsCount >= 3) ...[
+                    ...pageParticipants.mapIndexed((index, element) {
+                      if (index.isEven) {
+                        return Expanded(
+                          child: Row(
+                            children: [
+                              getParticipantTile(index),
+                              SizedBox(width: crossAxisSpacing),
+                              getParticipantTile(index + 1),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return SizedBox(height: mainAxisSpacing);
+                      }
+                    }),
+                  ],
+                ],
+              );
+            }
+
+            return Column(
+              children: [
+                ...List.generate(pageSize, (index) => index).map((index) {
+                  if (index.isEven) {
+                    return Expanded(
+                      child: Row(
+                        children: [
+                          getParticipantTile(index),
+                          SizedBox(width: crossAxisSpacing),
+                          getParticipantTile(index + 1),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return SizedBox(height: mainAxisSpacing);
+                  }
+                }),
+              ],
             );
           },
         );

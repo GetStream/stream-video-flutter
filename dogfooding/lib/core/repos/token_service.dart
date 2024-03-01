@@ -25,14 +25,18 @@ enum Environment {
     this.aliases = const [],
   });
 
+  factory Environment.fromSubdomain(String subdomain) {
+    return Environment.values.firstWhere(
+      (env) => env.name == subdomain || env.aliases.contains(subdomain),
+      orElse: () => Environment.demo,
+    );
+  }
+
   factory Environment.fromHost(String host) {
     final hostParts = host.split('.');
     final String envAlias = hostParts.length < 2 ? '' : hostParts[0];
 
-    return Environment.values.firstWhere(
-      (env) => env.name == envAlias || env.aliases.contains(envAlias),
-      orElse: () => Environment.demo,
-    );
+    return Environment.fromSubdomain(envAlias);
   }
 }
 
@@ -47,12 +51,11 @@ class TokenResponse {
 }
 
 class TokenService {
-  static Environment environment = Environment.pronto;
-
   const TokenService();
 
   Future<TokenResponse> loadToken({
     required String userId,
+    required Environment environment,
     Duration? expiresIn,
   }) async {
     final queryParameters = <String, dynamic>{

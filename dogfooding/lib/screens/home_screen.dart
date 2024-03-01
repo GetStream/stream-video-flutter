@@ -3,9 +3,11 @@ import 'dart:async';
 
 // 🐦 Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/router/routes.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
+import 'package:flutter_dogfooding/widgets/environment_switcher.dart';
 import 'package:flutter_dogfooding/widgets/stream_button.dart';
 // 📦 Package imports:
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -26,6 +28,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final _streamVideo = locator.get<StreamVideo>();
+  late final _appPreferences = locator.get<AppPreferences>();
   late final _userAuthController = locator.get<UserAuthController>();
   late final _callIdController = TextEditingController();
 
@@ -153,12 +156,21 @@ class _HomeScreenState extends State<HomeScreen> {
           style: theme.textTheme.bodyMedium,
         ),
         actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.logout,
-              color: Colors.white,
-            ),
-            onPressed: _userAuthController.logout,
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: EnvironmentBanner(
+                    currentEnvironment: _appPreferences.environment),
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.logout,
+                  color: Colors.white,
+                ),
+                onPressed: _userAuthController.logout,
+              ),
+            ],
           ),
         ],
       ),

@@ -32,14 +32,14 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     final credentials = prefs.userCredentials;
     if (credentials == null) return;
 
-    final tokenResponse = await locator
-        .get<TokenService>()
-        .loadToken(userId: credentials.userInfo.id);
+    final tokenResponse = await locator.get<TokenService>().loadToken(
+        userId: credentials.userInfo.id, environment: prefs.environment);
 
     // Initialise the video client.
     AppInjector.registerStreamVideo(
       tokenResponse,
       User(info: credentials.userInfo),
+      prefs.environment,
     );
 
     // Handle the message.
@@ -136,12 +136,13 @@ class _StreamDogFoodingAppContentState
       return;
     }
 
+    final environment = Environment.fromHost(uri.host);
+
     await AppInjector.reset();
-    TokenService.environment = Environment.fromHost(uri.host);
-    await AppInjector.init();
+    await AppInjector.init(forceEnvironment: environment);
 
     final authController = locator.get<UserAuthController>();
-    await authController.login(User(info: user));
+    await authController.login(User(info: user), environment);
 
     String? callId;
     for (final segment in uri.pathSegments.indexed) {
