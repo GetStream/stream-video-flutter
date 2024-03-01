@@ -58,7 +58,7 @@ class StreamVideoRenderer extends StatelessWidget {
     }
 
     return VisibilityDetector(
-      key: Key('${participant.sessionId}$trackState'),
+      key: Key('${participant.sessionId}${trackState?.muted}'),
       onVisibilityChanged: _onVisibilityChanged,
       child: child,
     );
@@ -66,7 +66,9 @@ class StreamVideoRenderer extends StatelessWidget {
 
   Widget _buildVideoTrackRenderer(BuildContext context, TrackState trackState) {
     // If the track is muted, display the placeholder.
-    if (trackState.muted) return placeholderBuilder.call(context);
+    if (trackState.muted) {
+      return placeholderBuilder.call(context);
+    }
 
     final videoTrack = call.getTrack(
       participant.trackIdPrefix,
@@ -74,9 +76,12 @@ class StreamVideoRenderer extends StatelessWidget {
     );
 
     // If the track is not available, display the placeholder.
-    if (videoTrack == null) return placeholderBuilder.call(context);
+    if (videoTrack == null) {
+      return placeholderBuilder.call(context);
+    }
 
     return VideoTrackRenderer(
+      key: ValueKey(videoTrack.trackId),
       videoFit: videoFit,
       videoTrack: videoTrack,
       mirror: participant.isLocal,
@@ -94,6 +99,7 @@ class StreamVideoRenderer extends StatelessWidget {
     if (prevVisibility != visibility) {
       call.updateViewportVisibility(
         sessionId: participant.sessionId,
+        userId: participant.userId,
         visibility: visibility,
       );
     }

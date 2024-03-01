@@ -1522,10 +1522,12 @@ class Call {
 
   Future<Result<None>> updateViewportVisibility({
     required String sessionId,
+    required String userId,
     required ViewportVisibility visibility,
   }) async {
     final action = UpdateViewportVisibility(
       sessionId: sessionId,
+      userId: userId,
       visibility: visibility,
     );
 
