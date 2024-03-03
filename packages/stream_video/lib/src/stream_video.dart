@@ -584,13 +584,14 @@ class StreamVideo {
     final callCid = payload['call_cid'] as String?;
     if (callCid == null) return false;
 
-    var callId = const Uuid().v4();
+    final callId = const Uuid().v4();
+    var cIdentifier = const Uuid().v4();
     var callType = StreamCallType();
 
     final splitCid = callCid.split(':');
     if (splitCid.length == 2) {
       callType = StreamCallType.fromString(splitCid.first);
-      callId = splitCid.last;
+      cIdentifier = splitCid.last;
     }
 
     final createdById = payload['created_by_id'] as String?;
@@ -599,7 +600,7 @@ class StreamVideo {
     final callRingingState = await getCallRingingState(
       type: callType.value,
       callType: callType,
-      id: callId,
+      id: cIdentifier,
     );
 
     switch (callRingingState) {
