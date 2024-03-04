@@ -584,6 +584,7 @@ class StreamVideo {
     final callCid = payload['call_cid'] as String?;
     if (callCid == null) return false;
 
+    final callUUID = const Uuid().v4();
     var callId = const Uuid().v4();
     var callType = StreamCallType();
 
@@ -606,7 +607,7 @@ class StreamVideo {
       case CallRingingState.ringing:
         unawaited(
           manager.showIncomingCall(
-            uuid: callId,
+            uuid: callUUID,
             handle: createdById,
             nameCaller: createdByName,
             callCid: callCid,
@@ -620,7 +621,7 @@ class StreamVideo {
       case CallRingingState.ended:
         unawaited(
           manager.showMissedCall(
-            uuid: callId,
+            uuid: callUUID,
             handle: createdById,
             nameCaller: createdByName,
             callCid: callCid,
