@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - dogfooding/**
 
 env:
   FLUTTER_VERSION: '3.16.9'
