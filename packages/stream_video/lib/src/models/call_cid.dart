@@ -6,13 +6,13 @@ import '../call/call_type.dart';
 @immutable
 class StreamCallCid with EquatableMixin {
   factory StreamCallCid({
-    required String cid
+    required String cid,
   }) {
     final typeAndId = cid.split(':');
     if (typeAndId.length != 2) {
       throw FormatException('invalid cid format: $cid');
     }
-    
+
     return StreamCallCid._(
       value: cid,
       type: StreamCallType.fromString(typeAndId.first),

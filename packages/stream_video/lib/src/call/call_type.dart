@@ -1,3 +1,5 @@
+import 'package:equatable/equatable.dart';
+
 /// The type of call to be made.
 ///
 /// The default type is [StreamCallType()] which is a normal call.
@@ -10,12 +12,11 @@
 /// ```dart
 /// StreamCallType.custom('custom_type');
 /// ```
-class StreamCallType {
+class StreamCallType with EquatableMixin {
+  factory StreamCallType() => const StreamCallType._('default');
+
   const StreamCallType._(this.value);
 
-  final String value;
-
-  factory StreamCallType() => const StreamCallType._('default');
   factory StreamCallType.liveStream() => const StreamCallType._('livestream');
   factory StreamCallType.development() => const StreamCallType._('development');
   factory StreamCallType.audioRoom() => const StreamCallType._('audio_room');
@@ -36,4 +37,12 @@ class StreamCallType {
         return StreamCallType.custom(type);
     }
   }
+
+  final String value;
+
+  @override
+  String toString() => value;
+
+  @override
+  List<Object?> get props => [value];
 }
