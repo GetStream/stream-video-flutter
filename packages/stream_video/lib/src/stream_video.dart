@@ -640,6 +640,7 @@ class StreamVideo {
       type != null || callType != null,
       'Either type or callType must be provided',
     );
+
     final call =
         makeCall(type: callType?.value ?? type, callType: callType, id: id);
     final callResult = await call.get();
@@ -651,12 +652,6 @@ class StreamVideo {
       },
       success: (success) {
         final callData = success.data;
-
-        if (callData.metadata.details.endedAt != null) {
-          _logger.e(() => '[getCallRingingState] call already ended');
-
-          return CallRingingState.ended;
-        }
 
         if (callData.metadata.session.acceptedBy
             .containsKey(_state.currentUser.id)) {
