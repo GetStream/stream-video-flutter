@@ -1,3 +1,7 @@
+## 0.3.3
+
+* Added `StreamCallType` class that replaces depricated String `type` parameter
+
 ## 0.3.2
 
 🐞 Fixed
