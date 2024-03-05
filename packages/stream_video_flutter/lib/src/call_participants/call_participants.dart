@@ -116,7 +116,9 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
     super.didUpdateWidget(oldWidget);
 
     if (!const ListEquality<CallParticipantState>().equals(
-        widget.participants.toList(), oldWidget.participants.toList())) {
+      widget.participants.toList(),
+      oldWidget.participants.toList(),
+    )) {
       _recalculateParticipants();
     }
   }

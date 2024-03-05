@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../stream_video.dart';
+import '../../version.g.dart';
 import '../action/internal/lifecycle_action.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../errors/video_error_composer.dart';
@@ -600,8 +601,19 @@ class Call {
       }),
     );
 
-    _stateManager
-        .lifecycleCallSessionStart(CallSessionStart(session.sessionId));
+    var localStats = state.value.localStats ?? LocalStats.empty();
+    localStats = localStats.copyWith(
+      sfu: session.config.sfuUrl,
+      sdkVersion: streamVideoVersion,
+      webRtcVersion:
+          CurrentPlatform.isAndroid ? androidWebRTCVersion : iosWebRTCVersion,
+    );
+
+    _stateManager.lifecycleCallSessionStart(
+      CallSessionStart(session.sessionId),
+      localStats: localStats,
+    );
+
     final result = await session.start();
     _logger.v(() => '[startSession] completed: $result');
     return result;

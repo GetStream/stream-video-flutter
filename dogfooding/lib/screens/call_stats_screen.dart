@@ -111,7 +111,7 @@ class CallStatsScreen extends StatelessWidget {
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
                       child: Text(
-                        'Very high latency values may reduce call quality, cause lag, and make the call less enjoyable.',
+                        'Review the key data points below to assess call performance.',
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
@@ -131,8 +131,16 @@ class CallStatsScreen extends StatelessWidget {
                       value: state.publisherStats?.jitterInMs,
                     ),
                     StatsItem(
-                      title: 'Publish quality drop reason',
-                      value: state.publisherStats?.qualityDropReason,
+                      title: 'Region',
+                      value: state.localStats?.sfu,
+                    ),
+                    StatsItem(
+                      title: 'SDK Version',
+                      value: state.localStats?.sdkVersion,
+                    ),
+                    StatsItem(
+                      title: 'WebRTC Version',
+                      value: state.localStats?.webRtcVersion,
                     ),
                     StatsItem(
                       title: 'Publish bitrate',
@@ -205,24 +213,28 @@ class StatsItem extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: theme.textTheme.footnote.apply(
-                  color: AppColorPalette.secondaryText,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.footnote.apply(
+                    color: AppColorPalette.secondaryText,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value ?? '',
-                style: theme.textTheme.title3,
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  value ?? '',
+                  style: theme.textTheme.title3,
+                ),
+              ],
+            ),
           ),
-          const Spacer(),
-          if (trailing != null) trailing!,
+          if (trailing != null) ...[
+            const Spacer(),
+            trailing!,
+          ],
         ],
       ),
     );
