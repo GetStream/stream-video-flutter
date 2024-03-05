@@ -5,12 +5,12 @@ description: How to listen and leverage call statistics
 ---
 
 There are two sources of statistics you can use to monitor the performance of your calls:
-- `call.stats` stream that provides real-time webRTC statistics
+- `Call.stats` stream that provides real-time webRTC statistics
 - `CallState` properties that contain some of the webRTC statistics processed and more useful for display purposes
 
 ## Stats stream
 
-If you want to tap in directly into the stream of webRTC stats you can do this with `stats` steam inside `Call` object. It provides a stream of `CallStats` objects for publisher and subscriber connections.
+If you want to tap in directly into the stream of webRTC stats you can do this with `stats` steam inside `Call` object. It provides a stream of [`CallStats`](https://github.com/GetStream/stream-video-flutter/blob/main/packages/stream_video/lib/src/models/call_stats.dart) objects for publisher and subscriber connections.
 We provide those statistics in three ways for ease of use:
 
 * `raw` - raw stats as they come from the webRTC
@@ -19,7 +19,7 @@ We provide those statistics in three ways for ease of use:
 
 ## CallState properties
 
-You can also access more processed data with useful information about the call. This data is available in `CallState` object. Here are some of the properties that you can use:
+You can also access more processed data with useful information about the call. This data is available in [`CallState`](https://github.com/GetStream/stream-video-flutter/blob/main/packages/stream_video/lib/src/call_state.dart) object. Here are some of the properties that you can use:
 
 `publisherStats` and `subscriberStats` - objects that contain the following data:
 * `latency` - the time it takes to deliver the data between the server and the app
