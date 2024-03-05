@@ -17,7 +17,7 @@ class CallStats {
   final StreamPeerType peerType;
   final List<RtcStats> stats;
   final RtcPrintableStats printable;
-  final Map<String, dynamic> raw;
+  final List<Map<String, dynamic>> raw;
 
   @override
   String toString() {
