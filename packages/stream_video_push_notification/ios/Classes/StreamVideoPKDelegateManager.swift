@@ -80,18 +80,11 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
         let defaultCallText = "Unknown Caller"
         
         let callCid = streamDict?["call_cid"] as? String ?? ""
-        var createdByName = streamDict?["created_by_display_name"] as? String
-        var createdById = streamDict?["created_by_id"] as? String
+        let createdByName = streamDict?["created_by_display_name"] as? String
+        let createdById = streamDict?["created_by_id"] as? String
 
-        let splitCid = callCid.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: true)
-        var callId = UUID().uuidString;
-        var callType = "";
+        var callUUID = UUID().uuidString;
 
-        if splitCid.count == 2 {
-            let callType = String(splitCid[0])
-            let callId = String(splitCid[1])
-        } 
-        
         let data: StreamVideoPushParams
         if let jsonData = self.defaultData {
             data = StreamVideoPushParams(args: jsonData)
@@ -99,7 +92,7 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
             data = StreamVideoPushParams(args: [String: Any]())
         }
         
-        data.callKitData.uuid = callId
+        data.callKitData.uuid = callUUID
         data.callKitData.nameCaller = createdByName ?? defaultCallText
         data.callKitData.handle = createdById ?? defaultCallText
         data.callKitData.type = 1 //video

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
@@ -66,7 +67,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         _idCallEnded,
         client.events.on<CoordinatorCallEndedEvent>(
           (event) {
-            FlutterCallkitIncoming.endCall(event.callCid.id);
+            endCallByCid(event.callCid.toString());
           },
         ),
       );
@@ -82,7 +83,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
               case CallRingingState.accepted:
               case CallRingingState.rejected:
               case CallRingingState.ended:
-                FlutterCallkitIncoming.endCall(event.callCid.id);
+                endCallByCid(event.callCid.toString());
               case CallRingingState.ringing:
                 break;
             }
@@ -102,7 +103,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
               case CallRingingState.rejected:
               case CallRingingState.ended:
                 await FlutterCallkitIncoming.silenceEvents();
-                await FlutterCallkitIncoming.endCall(event.callCid.id);
+                await endCallByCid(event.callCid.toString());
                 await Future<void>.delayed(const Duration(milliseconds: 300));
                 await FlutterCallkitIncoming.unsilenceEvents();
               case CallRingingState.ringing:
@@ -306,6 +307,16 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   @override
   Future<void> endCall(String uuid) => FlutterCallkitIncoming.endCall(uuid);
+
+  Future<void> endCallByCid(String cid) async {
+    final activeCalls = await this.activeCalls();
+    final calls =
+        activeCalls.where((call) => call.callCid == cid && call.uuid != null);
+
+    for (final call in calls) {
+      await endCall(call.uuid!);
+    }
+  }
 
   @override
   Future<String?> getDevicePushTokenVoIP() async {

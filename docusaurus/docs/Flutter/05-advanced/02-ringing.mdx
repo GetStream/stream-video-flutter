@@ -20,6 +20,10 @@ To receive push notifications from Stream Video, you'll need to:
 1. Configure your push notification provider on the Stream Dashboard.
 2. Add the client-side integration. For Flutter this guide demonstrates using Firebase Cloud Messaging (FCM) for Android and Apple Push Notification Service (APNs) for iOS devices.
 
+:::warning
+  To get the best experience we strongly suggest using APNs for iOS. While our goal is to ensure compatibility with both providers on iOS, Firebase is not yet fully supported.
+:::
+
 ### Integrating Firebase for Android
 
 #### Step 1 - Get the Firebase Credentials
