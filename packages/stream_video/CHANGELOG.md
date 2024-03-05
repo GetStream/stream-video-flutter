@@ -1,3 +1,14 @@
+## 0.3.3
+
+* Added `StreamCallType` class that replaces depricated String `type` parameter
+* Exapanded `CallStats` class with more structured WebRTC statistics as `stats` field
+* Changed `raw` statistics in `CallStats` to be of a Map<Stirng, dynamic> type
+* Added `publisherStats`, `subsciberStats` and `latencyHistory` to the `CallState` that hold some of the processed statistcs 
+
+Bug fixes
+* Fixes incoming call behavior when both CallKit and Stream incoming screen component is used 
+* Fixes the issue on Android that caused missed call notification when ringing with reused call id
+
 ## 0.3.2
 
 🐞 Fixed

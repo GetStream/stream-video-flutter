@@ -65,6 +65,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
         DisconnectReason.ended(),
       ),
       sessionId: '',
+      localStats: LocalStats.empty(),
+      publisherStats: PeerConnectionStats.empty(),
+      subscriberStats: PeerConnectionStats.empty(),
     );
   }
 
@@ -185,6 +188,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       ),
       sessionId: '',
       callParticipants: const [],
+      localStats: LocalStats.empty(),
+      publisherStats: PeerConnectionStats.empty(),
+      subscriberStats: PeerConnectionStats.empty(),
     );
   }
 
@@ -197,6 +203,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
         const DisconnectReason.timeout(),
       ),
       sessionId: '',
+      localStats: LocalStats.empty(),
+      publisherStats: PeerConnectionStats.empty(),
+      subscriberStats: PeerConnectionStats.empty(),
     );
   }
 
@@ -226,15 +235,20 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       status: CallStatus.disconnected(
         DisconnectReason.failure(stage.error),
       ),
+      localStats: LocalStats.empty(),
+      publisherStats: PeerConnectionStats.empty(),
+      subscriberStats: PeerConnectionStats.empty(),
     );
   }
 
   void lifecycleCallSessionStart(
-    CallSessionStart action,
-  ) {
+    CallSessionStart action, {
+    LocalStats? localStats,
+  }) {
     _logger.d(() => '[lifecycleCallSessionStart] state: $state');
     state = state.copyWith(
       sessionId: action.sessionId,
+      localStats: localStats,
       //status: CallStatus.connecting(),
     );
   }
@@ -260,16 +274,14 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     required List<int> latencyHistory,
     PeerConnectionStats? publisherStats,
     PeerConnectionStats? subscriberStats,
-    LocalStats? localStats,
   }) {
     _logger.d(
       () =>
-          '[lifecycleCallStats] publisherStats: $publisherStats, subscriberStats: $subscriberStats, localStats: $localStats, state: $state',
+          '[lifecycleCallStats] publisherStats: $publisherStats, subscriberStats: $subscriberStats, state: $state',
     );
     state = state.copyWith(
       publisherStats: publisherStats,
       subscriberStats: subscriberStats,
-      localStats: localStats,
       latencyHistory: latencyHistory,
     );
   }
