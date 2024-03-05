@@ -57,7 +57,7 @@ typedef OnStats = void Function(
   StreamPeerConnection,
   List<RtcStats>,
   RtcPrintableStats,
-  Map<String, dynamic>,
+  List<Map<String, dynamic>>,
 );
 
 /// Wrapper around the WebRTC connection that contains tracks.

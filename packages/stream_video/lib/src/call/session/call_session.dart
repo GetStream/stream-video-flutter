@@ -592,7 +592,7 @@ class CallSession extends Disposable {
     StreamPeerConnection pc,
     List<RtcStats> rtcStats,
     RtcPrintableStats rtcPrintableStats,
-    Map<String, dynamic> rtcRawStats,
+    List<Map<String, dynamic>> rtcRawStats,
   ) {
     _stats.emit(
       CallStats(
