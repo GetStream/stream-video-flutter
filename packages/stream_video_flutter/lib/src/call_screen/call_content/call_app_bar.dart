@@ -10,6 +10,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required this.call,
     this.showBackButton = true,
+    this.showLeaveCallAction = true,
     this.elevation = 1,
     this.backgroundColor,
     this.onBackPressed,
@@ -24,6 +25,9 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// Whether to show the leading back button.
   final bool showBackButton;
+
+  /// Whether to show the leading back button.
+  final bool showLeaveCallAction;
 
   /// The elevation for this [CallAppBar].
   final double elevation;
@@ -78,7 +82,11 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       actions: actions ??
           <Widget>[
-            LeaveCallOption(call: call),
+            if (showLeaveCallAction)
+              Transform.scale(
+                scale: 0.8,
+                child: LeaveCallOption(call: call),
+              ),
           ],
       title: title ??
           Text(
