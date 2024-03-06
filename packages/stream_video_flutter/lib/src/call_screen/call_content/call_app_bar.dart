@@ -26,7 +26,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// Whether to show the leading back button.
   final bool showBackButton;
 
-  /// Whether to show the leading back button.
+  /// Whether to show the leave call action button.
   final bool showLeaveCallAction;
 
   /// The elevation for this [CallAppBar].
