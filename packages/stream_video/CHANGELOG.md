@@ -1,3 +1,6 @@
+## 0.3.4
+* Sync version with `stream_video_flutter` 0.3.4
+
 ## 0.3.3
 
 * Added `StreamCallType` class that replaces depricated String `type` parameter
