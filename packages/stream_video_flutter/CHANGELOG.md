@@ -1,3 +1,8 @@
+## 0.3.4
+
+* Fixed the size of the LeaveCall aciton button in `CallAppBar`
+* Added `showLeaveCallAction` property to `CallAppBar`
+
 ## 0.3.3
 
 🚧 UI changes to SDK components
