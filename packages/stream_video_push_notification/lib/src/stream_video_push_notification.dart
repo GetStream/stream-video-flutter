@@ -24,6 +24,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   /// Factory for creating a new instance of [StreamVideoPushNotificationManager].
   ///   /// Parameters:
   /// * [callerCustomizationCallback] callback providing customized caller data used for call screen and CallKit call. (for iOS this will only work for foreground calls)
+  /// * [backgroundVoipCallHandler] handler called when there is a VoIP call and app is in terminated state (for iOS only) - this handler must be a top-level function
+  /// refere to documentation for more details (https://getstream.io/video/docs/flutter/advanced/adding_ringing_and_callkit/#integrating-apns-for-ios)
   static create({
     required StreamVideoPushProvider iosPushProvider,
     required StreamVideoPushProvider androidPushProvider,

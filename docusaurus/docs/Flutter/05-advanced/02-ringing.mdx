@@ -145,6 +145,21 @@ Future<void> _handleRemoteMessage(RemoteMessage message) async {
 }
 ```
 
+In a high-level widget in your app, add this code to listen to FCM messages:
+
+```
+@override
+void initState() {
+  ...
+  _observeFcmMessages()
+}
+
+_observeFcmMessages() {
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  _fcmSubscription = FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
+}
+```
+
 The code until this point handles calls for the background and foreground state of the app.
 To handle calls from a terminated state, we need to add some additional code.
 
@@ -249,21 +264,6 @@ Add these permissions to `Info.plist` in order to support video calling:
 ```
 
 #### Step 5 - Add code to handle CallKit events
-
-In a high-level widget in your app, add this code to listen to FCM messages:
-
-```
-@override
-void initState() {
-  ...
-  _observeFcmMessages()
-}
-
-_observeFcmMessages() {
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  _fcmSubscription = FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
-}
-```
 
 In a high-level widget in your app, add this code to listen to CallKit events:
 

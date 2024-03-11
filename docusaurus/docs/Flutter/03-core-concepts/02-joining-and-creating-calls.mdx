@@ -28,7 +28,7 @@ Although we are not passing any parameters to `getOrCreate` in the above example
 2. Ringing: If ringing is set to `true`, Stream will send a notification to the users on the call, triggering the platform call screen on iOS and Android.
 
 :::note
-  Depending on call permissions settings, call member may have different permissions than other users joining the call. For example, call can be configured so only members can join. See [here](#Restricting-access).
+  Depending on call permissions settings, call member may have different permissions than other users joining the call. For example, call can be configured so only members can join. See [here](#restricting-access).
 :::
 
 By default, calling `getOrCreate` assigns `admin` permission to each user who is supplied during creation.
@@ -83,15 +83,12 @@ Similar to the flow of creating a call, we can use `makeCall` to construct a `Ca
 
 ```dart
 final call = StreamVideo.instance.makeCall(callType: StreamCallType(), id: 'My-existing-call-ID');
-
 ```
 
-Next, with our class instantiated, we can connect to the call and SFU by invoking `connect`.
+Next, with our class instantiated, we can connect to the call and SFU by invoking `join`.
 
 ```dart
-final call = StreamVideo.instance.makeCall(type: 'default', id: 'My-existing-call-ID');
 await call.join();
-
 ```
 
 Unlike the call creation flow and functions, the user must have sufficient permissions to join the call or a `VideoError` will be returned. All users connected via the `join()` function have the permission type of `user` by default and are limited in the actions they can perform.
