@@ -48,6 +48,7 @@ const _idSessionEvents = 4;
 const _idSessionStats = 5;
 const _idConnect = 6;
 const _idAwait = 7;
+const _idSessionStatsSent = 8;
 
 const _tag = 'SV:Call';
 

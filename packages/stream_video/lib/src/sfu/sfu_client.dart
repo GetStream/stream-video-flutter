@@ -26,4 +26,8 @@ abstract class SfuClient {
   Future<Result<sfu.ICERestartResponse>> restartIce(
     sfu.ICERestartRequest request,
   );
+  
+  Future<Result<sfu.SendStatsResponse>> sendStats(
+    sfu.SendStatsRequest request,
+  );
 }
