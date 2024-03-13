@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_video/version.g.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
@@ -600,6 +602,23 @@ class CallSession extends Disposable {
         stats: rtcStats,
         printable: rtcPrintableStats,
         raw: rtcRawStats,
+      ),
+    );
+
+    sfuClient.sendStats(
+      sfu.SendStatsRequest(
+        sessionId: sessionId,
+        publisherStats: pc.type == StreamPeerType.publisher
+            ? jsonEncode(rtcRawStats)
+            : null,
+        subscriberStats: pc.type == StreamPeerType.subscriber
+            ? json.encode(
+                jsonEncode(rtcRawStats),
+              )
+            : null,
+        sdkVersion: streamVideoVersion,
+        webrtcVersion:
+            Platform.isAndroid ? androidWebRTCVersion : iosWebRTCVersion,
       ),
     );
   }

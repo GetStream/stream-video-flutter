@@ -123,6 +123,20 @@ class SfuClientImpl extends SfuClient {
       'x-client-request-id': const Uuid().v4(),
     });
   }
+
+  @override
+  Future<Result<sfu.SendStatsResponse>> sendStats(
+    sfu.SendStatsRequest request,
+  ) async {
+    try {
+      _logger.d(() => '[sendStats] request: $request');
+      final response = await _client.sendStats(_withAuthHeaders(), request);
+      _logger.v(() => '[sendStats] response: $response');
+      return Result.success(response);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
 }
 
 extension on sfu.SetPublisherRequest {
