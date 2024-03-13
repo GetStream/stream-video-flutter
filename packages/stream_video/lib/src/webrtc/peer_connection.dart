@@ -99,6 +99,8 @@ class StreamPeerConnection extends Disposable {
   /// {@macro onTrack}
   OnStats? onStats;
 
+  Stream<List<Map<String, dynamic>>> get statsStream => _statsController.stream;
+
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
 
   set reportingIntervalMs(int interval) {
@@ -333,10 +335,13 @@ class StreamPeerConnection extends Disposable {
   }
 
   Timer? _statsTimer;
+  final StreamController<List<Map<String, dynamic>>> _statsController =
+      StreamController.broadcast();
 
   void _startObservingStats() {
     // Stop previous timer if any.
     _stopObservingStats();
+
     // Start new timer.
     _statsTimer = Timer.periodic(
       Duration(milliseconds: _reportingIntervalMs),
@@ -352,6 +357,7 @@ class StreamPeerConnection extends Disposable {
               .toList();
 
           onStats?.call(this, rtcStats, rtcPrintableStats, rawStats);
+          _statsController.add(rawStats);
         } catch (e, stk) {
           _logger.e(() => '[getStats] failed: $e; $stk');
         }

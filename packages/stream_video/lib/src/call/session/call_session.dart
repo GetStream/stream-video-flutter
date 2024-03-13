@@ -83,6 +83,7 @@ class CallSession extends Disposable {
 
   RtcManager? rtcManager;
   StreamSubscription<SfuEvent>? eventsSubscription;
+  StreamSubscription<Map<String, dynamic>>? _statsSubscription;
   Timer? _peerConnectionCheckTimer;
 
   SharedEmitter<CallStats> get stats => _stats;
@@ -148,6 +149,20 @@ class CallSession extends Disposable {
         ..onRenegotiationNeeded = _onRenegotiationNeeded
         ..onRemoteTrackReceived = _onRemoteTrackReceived
         ..onStatsReceived = _onStatsReceived;
+
+      await _statsSubscription?.cancel();
+      _statsSubscription = rtcManager?.statsStream.listen((rawStats) {
+        sfuClient.sendStats(
+          sfu.SendStatsRequest(
+            sessionId: sessionId,
+            publisherStats: jsonEncode(rawStats['publisherStats']),
+            subscriberStats: jsonEncode(rawStats['subscriberStats']),
+            sdkVersion: streamVideoVersion,
+            webrtcVersion:
+                Platform.isAndroid ? androidWebRTCVersion : iosWebRTCVersion,
+          ),
+        );
+      });
 
       if (CurrentPlatform.isIos) {
         await rtcManager?.setAppleAudioConfiguration();
@@ -220,6 +235,8 @@ class CallSession extends Disposable {
     await _saBuffer.cancel();
     await eventsSubscription?.cancel();
     eventsSubscription = null;
+    await _statsSubscription?.cancel();
+    _statsSubscription = null;
     await sfuWS.disconnect();
     await rtcManager?.dispose();
     rtcManager = null;
@@ -602,23 +619,6 @@ class CallSession extends Disposable {
         stats: rtcStats,
         printable: rtcPrintableStats,
         raw: rtcRawStats,
-      ),
-    );
-
-    sfuClient.sendStats(
-      sfu.SendStatsRequest(
-        sessionId: sessionId,
-        publisherStats: pc.type == StreamPeerType.publisher
-            ? jsonEncode(rtcRawStats)
-            : null,
-        subscriberStats: pc.type == StreamPeerType.subscriber
-            ? json.encode(
-                jsonEncode(rtcRawStats),
-              )
-            : null,
-        sdkVersion: streamVideoVersion,
-        webrtcVersion:
-            Platform.isAndroid ? androidWebRTCVersion : iosWebRTCVersion,
       ),
     );
   }
