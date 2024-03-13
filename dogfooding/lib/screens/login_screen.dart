@@ -1,10 +1,13 @@
 // 🎯 Dart imports:
 import 'dart:async';
+import 'dart:math' as math;
 
 // 🐦 Flutter imports:
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/app/user_auth_controller.dart';
+import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
+import 'package:flutter_dogfooding/core/repos/token_service.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:flutter_dogfooding/widgets/stream_button.dart';
 
@@ -17,7 +20,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import '../di/injector.dart';
 import '../utils/assets.dart';
 import '../utils/loading_dialog.dart';
-import 'dart:math' as math;
+import '../widgets/environment_switcher.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,10 +30,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _appPreferences = locator<AppPreferences>();
   final _emailController = TextEditingController();
 
   Future<void> _loginWithGoogle() async {
     final googleService = locator<GoogleSignIn>();
+
     final googleUser = await googleService.signIn();
     if (googleUser == null) return debugPrint('Google login cancelled');
 
@@ -41,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
       image: googleUser.photoUrl,
     );
 
-    return _login(User(info: userInfo));
+    return _login(User(info: userInfo), _appPreferences.environment);
   }
 
   Future<void> _loginWithEmail() async {
@@ -54,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
       name: email,
     );
 
-    return _login(User(info: userInfo));
+    return _login(User(info: userInfo), _appPreferences.environment);
   }
 
   Future<void> _loginAsGuest() async {
@@ -67,15 +72,16 @@ class _LoginScreenState extends State<LoginScreen> {
           'https://vignette.wikia.nocookie.net/starwars/images/2/20/LukeTLJ.jpg',
     );
 
-    return _login(User(info: userInfo, type: UserType.guest));
+    return _login(User(info: userInfo, type: UserType.guest),
+        _appPreferences.environment);
   }
 
-  Future<void> _login(User user) async {
+  Future<void> _login(User user, Environment environment) async {
     if (mounted) unawaited(showLoadingIndicator(context));
 
     // Register StreamVideo client with the user.
     final authController = locator.get<UserAuthController>();
-    await authController.login(user);
+    await authController.login(user, environment);
 
     if (mounted) hideLoadingIndicator(context);
   }
@@ -92,6 +98,14 @@ class _LoginScreenState extends State<LoginScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColorPalette.backgroundColor,
+        actions: [
+          EnvironmentSwitcher(
+            currentEnvironment: _appPreferences.environment,
+          )
+        ],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

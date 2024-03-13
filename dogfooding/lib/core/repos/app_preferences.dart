@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 // 📦 Package imports:
+import 'package:flutter_dogfooding/core/repos/token_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // 🌎 Project imports:
@@ -16,6 +17,7 @@ class AppPreferences {
 
   static const String _kUserCredentialsPref = 'user_credentials';
   static const String _kApiKeyPref = 'api_key';
+  static const String _kEnvironemntPref = 'environment';
 
   UserCredentials? get userCredentials {
     final jsonString = _prefs.getString(_kUserCredentialsPref);
@@ -26,6 +28,8 @@ class AppPreferences {
   }
 
   String? get apiKey => _prefs.getString(_kApiKeyPref);
+  Environment get environment => Environment.fromSubdomain(
+      _prefs.getString(_kEnvironemntPref) ?? Environment.pronto.name);
 
   Future<bool> setUserCredentials(UserCredentials? credentials) {
     final jsonString = jsonEncode(credentials?.toJson());
@@ -34,6 +38,10 @@ class AppPreferences {
 
   Future<bool> setApiKey(String apiKey) {
     return _prefs.setString(_kApiKeyPref, apiKey);
+  }
+
+  Future<bool> setEnvironment(Environment environment) {
+    return _prefs.setString(_kEnvironemntPref, environment.name);
   }
 
   Future<bool> clearUserCredentials() async {

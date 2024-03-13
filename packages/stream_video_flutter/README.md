@@ -31,32 +31,42 @@ Stream provides UI components and state handling that make it easy to build vide
 Stream is free for most side and hobby projects. To qualify, your project/company needs to have < 5 team members and < $10k in monthly revenue. Makers get $100 in monthly credit for video for free.
 For more details, check out the [Maker Account](https://getstream.io/maker-account?utm_source=Github&utm_medium=Github_Repo_Content_Ad&utm_content=Developer&utm_campaign=Github_Flutter_Video_SDK&utm_term=DevRelOss).
 
-## 💡Supported Features💡
+## 💡 Features 💡
 
 Here are some of the features we support:
 
-* Developer experience: Great SDKs, docs, tutorials and support so you can build quickly
-* Edge network: Servers around the world ensure optimal latency and reliability
-* Chat: Stored chat, reactions, threads, typing indicators, URL previews etc
-* Security & Privacy: Based in USA and EU, Soc2 certified, GDPR compliant
-* Dynascale: Automatically switch resolutions, fps, bitrate, codecs and paginate video on large calls
-* Screensharing
-* Picture in picture support
-* Active speaker
-* Custom events
-* Geofencing
-* Notifications and ringing calls
-* Opus DTX & Red for reliable audio
-* Webhooks & SQS
-* Backstage mode
-* Flexible permissions system
-* Joining calls by ID, link or invite
-* Enabling and disabling audio and video when in calls
-* Flipping, Enabling and disabling camera in calls
-* Enabling and disabling speakerphone in calls
-* Push notification providers support
-* Call recording
-* Broadcasting to HLS
+> [!IMPORTANT]  
+> * Developer experience: Great SDKs, docs, tutorials and support so you can build quickly
+> * Edge network: Servers around the world ensure optimal latency and reliability
+> * Chat: Stored chat, reactions, threads, typing indicators, URL previews etc
+> * Security & Privacy: Based in USA and EU, Soc2 certified, GDPR compliant
+> * Dynascale: Automatically switch resolutions, fps, bitrate, codecs and paginate video on large calls
+> * Flexible permissions system
+> * Opus DTX & Red for reliable audio
+> * Webhooks & SQS
+> * Geofencing
+
+| Feature                                              | iOS | Android | Notes                                          |
+|------------------------------------------------------|-----|---------|------------------------------------------------|
+| Screensharing                                        | ✅   | ✅       | iOS supports both in-app and broadcast modes   |
+| Active speaker                                       | ✅   | ✅       |                                                |
+| Custom events                                        | ✅   | ✅       |                                                |
+| Notifications and ringing calls                      | ✅   | ✅       |                                                |
+| Backstage mode                                       | ✅   | ✅       |                                                |
+| Joining calls by ID, link or invite                  | ✅   | ✅       |                                                |
+| Enabling and disabling audio and video when in calls | ✅   | ✅       |                                                |
+| Flipping, Enabling and disabling camera in calls     | ✅   | ✅       |                                                |
+| Enabling and disabling speakerphone in calls         | ✅   | ✅       |                                                |
+| Push notification providers support                  | ✅   | ✅       |                                                |
+| Call recording                                       | ✅   | ✅       |                                                |
+| Broadcasting to HLS                                  | ✅   | ✅       |                                                |
+| Picture in picture support                           | ❌   | ❌       | In the Roadmap, part of the next major release |
+
+
+### Known Issues
+
+* Missed calls, not delivered when device was offline, might ring on Android instead of showing missed call notification
+
 
 ## 🗺️ Roadmap
 Video roadmap and changelog is available [here](https://github.com/GetStream/protocol/discussions/127). 

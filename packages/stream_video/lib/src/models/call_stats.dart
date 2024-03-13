@@ -17,7 +17,7 @@ class CallStats {
   final StreamPeerType peerType;
   final List<RtcStats> stats;
   final RtcPrintableStats printable;
-  final Map<String, dynamic> raw;
+  final List<Map<String, dynamic>> raw;
 
   @override
   String toString() {
@@ -164,26 +164,36 @@ class MediaStatsInfo {
 @immutable
 class LocalStats {
   const LocalStats({
-    required this.resolution,
-    required this.availableResolutions,
-    required this.maxResolution,
     required this.sfu,
-    required this.os,
     required this.sdkVersion,
-    required this.deviceModel,
+    required this.webRtcVersion,
   });
 
+  factory LocalStats.empty() => const LocalStats(
+        sfu: '',
+        sdkVersion: '',
+        webRtcVersion: '',
+      );
+
   final String sfu;
-  final String os;
   final String sdkVersion;
-  final String deviceModel;
-  final String? resolution;
-  final List<String>? availableResolutions;
-  final String? maxResolution;
+  final String webRtcVersion;
 
   @override
   String toString() {
-    return 'LocalStats{resolution: $resolution, availableResolutions: $availableResolutions, maxResolution: $maxResolution, sfu: $sfu, os: $os, sdkVersion: $sdkVersion, deviceModel: $deviceModel}';
+    return 'LocalStats{sfu: $sfu, sdkVersion: $sdkVersion, webRtcVersion: $webRtcVersion}';
+  }
+
+  LocalStats copyWith({
+    String? sfu,
+    String? sdkVersion,
+    String? webRtcVersion,
+  }) {
+    return LocalStats(
+      sfu: sfu ?? this.sfu,
+      sdkVersion: sdkVersion ?? this.sdkVersion,
+      webRtcVersion: webRtcVersion ?? this.webRtcVersion,
+    );
   }
 
   @override
@@ -191,21 +201,11 @@ class LocalStats {
       identical(this, other) ||
       other is LocalStats &&
           runtimeType == other.runtimeType &&
-          resolution == other.resolution &&
-          availableResolutions == other.availableResolutions &&
-          maxResolution == other.maxResolution &&
           sfu == other.sfu &&
-          os == other.os &&
           sdkVersion == other.sdkVersion &&
-          deviceModel == other.deviceModel;
+          webRtcVersion == other.webRtcVersion;
 
   @override
   int get hashCode =>
-      resolution.hashCode ^
-      availableResolutions.hashCode ^
-      maxResolution.hashCode ^
-      sfu.hashCode ^
-      os.hashCode ^
-      sdkVersion.hashCode ^
-      deviceModel.hashCode;
+      sfu.hashCode ^ sdkVersion.hashCode ^ webRtcVersion.hashCode;
 }

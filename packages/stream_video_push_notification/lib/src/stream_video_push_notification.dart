@@ -24,6 +24,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   /// Factory for creating a new instance of [StreamVideoPushNotificationManager].
   ///   /// Parameters:
   /// * [callerCustomizationCallback] callback providing customized caller data used for call screen and CallKit call. (for iOS this will only work for foreground calls)
+  /// * [backgroundVoipCallHandler] handler called when there is a VoIP call and app is in terminated state (for iOS only) - this handler must be a top-level function
+  /// refere to documentation for more details (https://getstream.io/video/docs/flutter/advanced/adding_ringing_and_callkit/#integrating-apns-for-ios)
   static create({
     required StreamVideoPushProvider iosPushProvider,
     required StreamVideoPushProvider androidPushProvider,
@@ -66,7 +68,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         _idCallEnded,
         client.events.on<CoordinatorCallEndedEvent>(
           (event) {
-            FlutterCallkitIncoming.endCall(event.callCid.id);
+            endCallByCid(event.callCid.toString());
           },
         ),
       );
@@ -76,13 +78,13 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         client.events.on<CoordinatorCallRejectedEvent>(
           (event) async {
             final callRingingState = await streamVideo.getCallRingingState(
-                type: event.callCid.type, id: event.callCid.id);
+                callType: event.callCid.type, id: event.callCid.id);
 
             switch (callRingingState) {
               case CallRingingState.accepted:
               case CallRingingState.rejected:
               case CallRingingState.ended:
-                FlutterCallkitIncoming.endCall(event.callCid.id);
+                endCallByCid(event.callCid.toString());
               case CallRingingState.ringing:
                 break;
             }
@@ -95,14 +97,14 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         client.events.on<CoordinatorCallAcceptedEvent>(
           (event) async {
             final callRingingState = await streamVideo.getCallRingingState(
-                type: event.callCid.type, id: event.callCid.id);
+                callType: event.callCid.type, id: event.callCid.id);
 
             switch (callRingingState) {
               case CallRingingState.accepted:
               case CallRingingState.rejected:
               case CallRingingState.ended:
                 await FlutterCallkitIncoming.silenceEvents();
-                await FlutterCallkitIncoming.endCall(event.callCid.id);
+                await endCallByCid(event.callCid.toString());
                 await Future<void>.delayed(const Duration(milliseconds: 300));
                 await FlutterCallkitIncoming.unsilenceEvents();
               case CallRingingState.ringing:
@@ -306,6 +308,16 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   @override
   Future<void> endCall(String uuid) => FlutterCallkitIncoming.endCall(uuid);
+
+  Future<void> endCallByCid(String cid) async {
+    final activeCalls = await this.activeCalls();
+    final calls =
+        activeCalls.where((call) => call.callCid == cid && call.uuid != null);
+
+    for (final call in calls) {
+      await endCall(call.uuid!);
+    }
+  }
 
   @override
   Future<String?> getDevicePushTokenVoIP() async {

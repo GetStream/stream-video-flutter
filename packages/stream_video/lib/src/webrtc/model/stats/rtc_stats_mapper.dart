@@ -29,21 +29,16 @@ const _space = ' ';
 const _lineFeed = '\n';
 
 extension RtcStatsMapper on List<rtc.StatsReport> {
-  Map<String, dynamic> toRawStats() {
-    var rawStats = <String, dynamic>{};
+  List<Map<String, dynamic>> toRawStats() {
+    final rawStats = <Map<String, dynamic>>[];
 
     for (final report in this) {
-      final type = report.type;
-
-      rawStats = {
-        ...rawStats,
-        type: {
+      rawStats.add({
           'id': report.id,
+          'type': report.type,
           'timestamp': report.timestamp,
-          'values': report.values,
           ...report.values,
-        },
-      };
+      });
     }
 
     return rawStats;

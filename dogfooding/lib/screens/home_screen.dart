@@ -3,15 +3,16 @@ import 'dart:async';
 
 // 🐦 Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/theme/app_palette.dart';
-import 'package:flutter_dogfooding/widgets/stream_button.dart';
-
-// 📦 Package imports:
-import 'package:stream_video_flutter/stream_video_flutter.dart';
-
+import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 // 🌎 Project imports:
 import 'package:flutter_dogfooding/router/routes.dart';
+import 'package:flutter_dogfooding/theme/app_palette.dart';
+import 'package:flutter_dogfooding/widgets/environment_switcher.dart';
+import 'package:flutter_dogfooding/widgets/stream_button.dart';
+// 📦 Package imports:
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_background.dart';
+
 import '../app/user_auth_controller.dart';
 import '../di/injector.dart';
 import '../utils/assets.dart';
@@ -27,6 +28,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final _streamVideo = locator.get<StreamVideo>();
+  late final _appPreferences = locator.get<AppPreferences>();
   late final _userAuthController = locator.get<UserAuthController>();
   late final _callIdController = TextEditingController();
 
@@ -36,14 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     StreamBackgroundService.init(
       StreamVideo.instance,
-      onNotificationClick: (call) async {
-        final extra = (
-          call: call,
-          connectOptions: const CallConnectOptions(),
-        );
-
-        CallRoute($extra: extra).push(context);
-      },
       onButtonClick: (call, type, serviceType) async {
         switch (serviceType) {
           case ServiceType.call:
@@ -62,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (callId.isEmpty) callId = generateAlphanumericString(12);
 
     unawaited(showLoadingIndicator(context));
-    _call = _streamVideo.makeCall(type: kCallType, id: callId);
+    _call = _streamVideo.makeCall(callType: kCallType, id: callId);
 
     bool isRinging = memberIds.isNotEmpty;
 
@@ -162,12 +156,21 @@ class _HomeScreenState extends State<HomeScreen> {
           style: theme.textTheme.bodyMedium,
         ),
         actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.logout,
-              color: Colors.white,
-            ),
-            onPressed: _userAuthController.logout,
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: EnvironmentBanner(
+                    currentEnvironment: _appPreferences.environment),
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.logout,
+                  color: Colors.white,
+                ),
+                onPressed: _userAuthController.logout,
+              ),
+            ],
           ),
         ],
       ),

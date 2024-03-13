@@ -20,6 +20,10 @@ To receive push notifications from Stream Video, you'll need to:
 1. Configure your push notification provider on the Stream Dashboard.
 2. Add the client-side integration. For Flutter this guide demonstrates using Firebase Cloud Messaging (FCM) for Android and Apple Push Notification Service (APNs) for iOS devices.
 
+:::warning
+  To get the best experience we strongly suggest using APNs for iOS. While our goal is to ensure compatibility with both providers on iOS, Firebase is not yet fully supported.
+:::
+
 ### Integrating Firebase for Android
 
 #### Step 1 - Get the Firebase Credentials
@@ -141,6 +145,21 @@ Future<void> _handleRemoteMessage(RemoteMessage message) async {
 }
 ```
 
+In a high-level widget in your app, add this code to listen to FCM messages:
+
+```
+@override
+void initState() {
+  ...
+  _observeFcmMessages()
+}
+
+_observeFcmMessages() {
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  _fcmSubscription = FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
+}
+```
+
 The code until this point handles calls for the background and foreground state of the app.
 To handle calls from a terminated state, we need to add some additional code.
 
@@ -245,21 +264,6 @@ Add these permissions to `Info.plist` in order to support video calling:
 ```
 
 #### Step 5 - Add code to handle CallKit events
-
-In a high-level widget in your app, add this code to listen to FCM messages:
-
-```
-@override
-void initState() {
-  ...
-  _observeFcmMessages()
-}
-
-_observeFcmMessages() {
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  _fcmSubscription = FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
-}
-```
 
 In a high-level widget in your app, add this code to listen to CallKit events:
 

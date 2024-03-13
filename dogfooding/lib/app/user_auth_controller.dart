@@ -43,9 +43,13 @@ class UserAuthController extends ChangeNotifier {
   UserInfo? _currentUser;
 
   /// Logs in the given [user] and returns the user credentials.
-  Future<UserCredentials> login(User user) async {
-    final tokenResponse = await _tokenService.loadToken(userId: user.id);
+  Future<UserCredentials> login(User user, Environment environment) async {
+    final tokenResponse = await _tokenService.loadToken(
+      userId: user.id,
+      environment: environment,
+    );
     await _prefs.setApiKey(tokenResponse.apiKey);
+    await _prefs.setEnvironment(environment);
 
     _authRepo ??=
         locator.get<UserAuthRepository>(param1: user, param2: tokenResponse);

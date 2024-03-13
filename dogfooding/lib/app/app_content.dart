@@ -32,14 +32,14 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     final credentials = prefs.userCredentials;
     if (credentials == null) return;
 
-    final tokenResponse = await locator
-        .get<TokenService>()
-        .loadToken(userId: credentials.userInfo.id);
+    final tokenResponse = await locator.get<TokenService>().loadToken(
+        userId: credentials.userInfo.id, environment: prefs.environment);
 
     // Initialise the video client.
     AppInjector.registerStreamVideo(
       tokenResponse,
       User(info: credentials.userInfo),
+      prefs.environment,
     );
 
     // Handle the message.
@@ -130,19 +130,43 @@ class _StreamDogFoodingAppContentState
   }
 
   Future<void> _handleDeepLink(Uri uri) async {
-    // Parse the call id from the deep link.
-    final callId = uri.queryParameters['id'];
+    final user = _userAuthController.currentUser;
+
+    if (user == null) {
+      return;
+    }
+
+    final environment = Environment.fromHost(uri.host);
+
+    await AppInjector.reset();
+    await AppInjector.init(forceEnvironment: environment);
+
+    final authController = locator.get<UserAuthController>();
+    await authController.login(User(info: user), environment);
+
+    String? callId;
+    for (final segment in uri.pathSegments.indexed) {
+      if (segment.$2 == 'join') {
+        // Next segment is the callId
+        callId = uri.pathSegments[segment.$1 + 1];
+        break;
+      }
+    }
+
+    callId ??= uri.queryParameters['id'];
     if (callId == null) return;
 
     // return if the video user is not yet logged in.
     final currentUser = _userAuthController.currentUser;
     if (currentUser == null) return;
 
-    final streamVideo = locator.get<StreamVideo>();
-    final call = streamVideo.makeCall(type: kCallType, id: callId);
-
     try {
+      final streamVideo = locator.get<StreamVideo>();
+      final call = streamVideo.makeCall(callType: kCallType, id: callId);
+
       await call.getOrCreate();
+
+      _router.push(LobbyRoute($extra: call).location, extra: call);
     } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());
@@ -150,7 +174,6 @@ class _StreamDogFoodingAppContentState
     }
 
     // Navigate to the lobby screen.
-    _router.push(LobbyRoute($extra: call).location, extra: call);
   }
 
   void _onCallAccept(ActionCallAccept event) async {

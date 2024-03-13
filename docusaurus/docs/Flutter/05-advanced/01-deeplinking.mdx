@@ -149,7 +149,7 @@ Future<void> _handleDeepLink(Uri uri) async {
   if (currentUser == null) return;
 
   final streamVideo = StreamVideo.instance;
-  final call = streamVideo.makeCall(type: kCallType, id: callId);
+  final call = streamVideo.makeCall(callType: kCallType, id: callId);
 
   try {
     await call.getOrCreate();
@@ -219,7 +219,7 @@ class _JoinScreenState extends State<JoinScreen> {
     try {
       final call = StreamVideo.instance.makeCall(
         id: callId,
-        type: 'default',
+        callType: StreamCallType(),
       );
 
       await call.join();

@@ -34,7 +34,7 @@ typedef Sort<T> = Comparator<T>;
 
 /// Widget that renders all the [StreamCallParticipant], based on the number
 /// of people in a call.
-class StreamCallParticipants extends StatelessWidget {
+class StreamCallParticipants extends StatefulWidget {
   /// Creates a new instance of [StreamCallParticipant].
   StreamCallParticipants({
     super.key,
@@ -98,8 +98,34 @@ class StreamCallParticipants extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final participants = [...this.participants].where(filter).sorted(sort);
+  State<StreamCallParticipants> createState() => _StreamCallParticipantsState();
+}
+
+class _StreamCallParticipantsState extends State<StreamCallParticipants> {
+  List<CallParticipantState> _participants = [];
+  CallParticipantState? _screenShareParticipant;
+
+  @override
+  void initState() {
+    _recalculateParticipants();
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant StreamCallParticipants oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (!const ListEquality<CallParticipantState>().equals(
+      widget.participants.toList(),
+      oldWidget.participants.toList(),
+    )) {
+      _recalculateParticipants();
+    }
+  }
+
+  void _recalculateParticipants() {
+    final participants = [...widget.participants].where(widget.filter).toList();
+    mergeSort(participants, compare: widget.sort);
 
     final screenShareParticipant = participants.firstWhereOrNull(
       (it) {
@@ -122,23 +148,33 @@ class StreamCallParticipants extends StatelessWidget {
       },
     );
 
-    if (screenShareParticipant != null) {
+    if (mounted) {
+      setState(() {
+        _participants = participants.toList();
+        _screenShareParticipant = screenShareParticipant;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_screenShareParticipant != null) {
       return ScreenShareCallParticipantsContent(
-        call: call,
-        participants: participants,
-        screenSharingParticipant: screenShareParticipant,
-        screenShareContentBuilder: screenShareContentBuilder,
-        screenShareParticipantBuilder: screenShareParticipantBuilder,
+        call: widget.call,
+        participants: _participants,
+        screenSharingParticipant: _screenShareParticipant!,
+        screenShareContentBuilder: widget.screenShareContentBuilder,
+        screenShareParticipantBuilder: widget.screenShareParticipantBuilder,
       );
     }
 
     return RegularCallParticipantsContent(
-      call: call,
-      participants: participants,
-      layoutMode: layoutMode,
-      enableLocalVideo: enableLocalVideo,
-      callParticipantBuilder: callParticipantBuilder,
-      localVideoParticipantBuilder: localVideoParticipantBuilder,
+      call: widget.call,
+      participants: _participants,
+      layoutMode: widget.layoutMode,
+      enableLocalVideo: widget.enableLocalVideo,
+      callParticipantBuilder: widget.callParticipantBuilder,
+      localVideoParticipantBuilder: widget.localVideoParticipantBuilder,
     );
   }
 }
