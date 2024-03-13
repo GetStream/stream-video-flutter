@@ -1,3 +1,6 @@
+## Unreleased
+* Added `keepConnectionsAliveWhenInBackground` to `StreamVideoOptions` to allow keeping websocket connections and event subscribtions open when app is in the background (false by default).
+
 ## 0.3.4
 * Sync version with `stream_video_flutter` 0.3.4
 

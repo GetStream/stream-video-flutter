@@ -404,7 +404,9 @@ class StreamVideo {
     try {
       final activeCallCid = _state.activeCall.valueOrNull?.callCid;
 
-      if (state.isPaused && activeCallCid == null) {
+      if (state.isPaused &&
+          activeCallCid == null &&
+          !_options.keepConnectionsAliveWhenInBackground) {
         _logger.i(() => '[onAppState] close connection');
         _subscriptions.cancel(_idEvents);
         await _client.closeConnection();
@@ -775,6 +777,7 @@ class StreamVideoOptions {
     this.muteAudioWhenInBackground = false,
     this.autoConnect = true,
     this.includeUserDetailsForAutoConnect = true,
+    this.keepConnectionsAliveWhenInBackground = false,
   });
 
   final String coordinatorRpcUrl;
@@ -794,4 +797,5 @@ class StreamVideoOptions {
   final bool muteAudioWhenInBackground;
   final bool autoConnect;
   final bool includeUserDetailsForAutoConnect;
+  final bool keepConnectionsAliveWhenInBackground;
 }
