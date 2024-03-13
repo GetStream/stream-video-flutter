@@ -25,6 +25,7 @@ import '../utils/standard.dart';
 import '../webrtc/model/stats/rtc_ice_candidate_pair.dart';
 import '../webrtc/model/stats/rtc_inbound_rtp_video_stream.dart';
 import '../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
+import '../webrtc/rtc_manager.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
 import 'permissions/permissions_manager.dart';
@@ -559,6 +560,8 @@ class Call {
     if (joinedResult is Success<CallJoinedData>) {
       _logger.v(() => '[joinIfNeeded] completed');
       _credentials = joinedResult.data.credentials;
+      _session?.rtcManager
+          ?.updateReportingInterval(joinedResult.data.reportingIntervalMs);
       return Result.success(joinedResult.data.credentials);
     }
     _logger.e(() => '[joinIfNeeded] failed: $joinedResult');
@@ -930,6 +933,9 @@ class Call {
       return;
     }
 
+    _session?.rtcManager
+        ?.updateReportingInterval(joinedResult.data.reportingIntervalMs);
+
     _logger.v(() => '[switchSfu] starting sfu session');
     final sessionResult = await _startSession(
       joinedResult.data.credentials,
@@ -1233,6 +1239,7 @@ class Call {
       wasCreated: joinResult.data.wasCreated,
       metadata: joinResult.data.metadata,
       credentials: joinResult.data.credentials,
+      reportingIntervalMs: joinResult.data.reportingIntervalMs,
     );
     _stateManager.lifecycleCallJoined(CallJoined(joined));
     _logger.v(() => '[joinCall] completed: $joined');

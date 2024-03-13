@@ -856,6 +856,11 @@ extension RtcManagerTrackHelper on RtcManager {
       return Result.failure(VideoErrors.compose(e, stk));
     }
   }
+
+  void updateReportingInterval(int reportingIntervalMs) {
+    _publisher.reportingIntervalMs = reportingIntervalMs;
+    _subscriber.reportingIntervalMs = reportingIntervalMs;
+  }
 }
 
 extension on RtcLocalTrack<VideoConstraints> {

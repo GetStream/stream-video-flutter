@@ -12,19 +12,22 @@ class CallJoinedData with EquatableMixin {
     required this.wasCreated,
     required this.metadata,
     required this.credentials,
+    required this.reportingIntervalMs,
   });
 
   final StreamCallCid callCid;
   final bool wasCreated;
   final CallMetadata metadata;
   final CallCredentials credentials;
+  final int reportingIntervalMs;
 
   @override
-  List<Object?> get props => [callCid, wasCreated, metadata, credentials];
+  List<Object?> get props =>
+      [callCid, wasCreated, metadata, credentials, reportingIntervalMs];
 
   @override
   String toString() {
     return 'CallJoined{callCid: $callCid, wasCreated: $wasCreated, '
-        'metadata: $metadata, credentials: $credentials}';
+        'metadata: $metadata, credentials: $credentials, reportingIntervalMs: $reportingIntervalMs}';
   }
 }

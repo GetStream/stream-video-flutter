@@ -80,6 +80,7 @@ class StreamPeerConnection extends Disposable {
   final StreamPeerType type;
   final rtc.RTCPeerConnection pc;
   final SdpEditor sdpEditor;
+  int _reportingIntervalMs = 2000;
 
   /// {@macro onStreamAdded}
   OnStreamAdded? onStreamAdded;
@@ -99,6 +100,14 @@ class StreamPeerConnection extends Disposable {
   OnStats? onStats;
 
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
+
+  set reportingIntervalMs(int interval) {
+    _reportingIntervalMs = interval;
+    if (_statsTimer != null) {
+      _stopObservingStats();
+    }
+    _startObservingStats();
+  }
 
   /// Creates an offer and sets it as the local description.
   Future<Result<rtc.RTCSessionDescription>> createOffer([
@@ -330,7 +339,7 @@ class StreamPeerConnection extends Disposable {
     _stopObservingStats();
     // Start new timer.
     _statsTimer = Timer.periodic(
-      const Duration(seconds: 2),
+      Duration(milliseconds: _reportingIntervalMs),
       (_) async {
         try {
           final stats = await pc.getStats();
