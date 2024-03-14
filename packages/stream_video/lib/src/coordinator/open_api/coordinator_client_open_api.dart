@@ -491,6 +491,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           members: result.members.toCallMembers(),
           users: result.members.toCallUsers(),
           duration: result.duration,
+          reportingIntervalMs: result.statsOptions.reportingIntervalMs,
         ),
       );
     } catch (e, stk) {

@@ -20,6 +20,7 @@ class JoinCallResponse {
     this.members = const [],
     this.membership,
     this.ownCapabilities = const [],
+    required this.statsOptions,
   });
 
   CallResponse call;
@@ -42,6 +43,8 @@ class JoinCallResponse {
 
   List<OwnCapability> ownCapabilities;
 
+  StatsOptions statsOptions;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is JoinCallResponse &&
      other.call == call &&
@@ -50,7 +53,8 @@ class JoinCallResponse {
      other.duration == duration &&
      other.members == members &&
      other.membership == membership &&
-     other.ownCapabilities == ownCapabilities;
+          other.ownCapabilities == ownCapabilities &&
+          other.statsOptions == statsOptions;
 
   @override
   int get hashCode =>
@@ -61,10 +65,12 @@ class JoinCallResponse {
     (duration.hashCode) +
     (members.hashCode) +
     (membership == null ? 0 : membership!.hashCode) +
-    (ownCapabilities.hashCode);
+      (ownCapabilities.hashCode) +
+      (statsOptions.hashCode);
 
   @override
-  String toString() => 'JoinCallResponse[call=$call, created=$created, credentials=$credentials, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities]';
+  String toString() =>
+      'JoinCallResponse[call=$call, created=$created, credentials=$credentials, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities, statsOptions=$statsOptions]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -79,6 +85,7 @@ class JoinCallResponse {
       json[r'membership'] = null;
     }
       json[r'own_capabilities'] = this.ownCapabilities;
+    json[r'stats_options'] = this.statsOptions;
     return json;
   }
 
@@ -108,6 +115,7 @@ class JoinCallResponse {
         members: MemberResponse.listFromJson(json[r'members']),
         membership: MemberResponse.fromJson(json[r'membership']),
         ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
+        statsOptions: StatsOptions.fromJson(json[r'stats_options'])!,
       );
     }
     return null;
@@ -161,6 +169,7 @@ class JoinCallResponse {
     'duration',
     'members',
     'own_capabilities',
+    'stats_options',
   };
 }
 

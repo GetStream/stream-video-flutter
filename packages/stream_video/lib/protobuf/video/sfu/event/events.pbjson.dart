@@ -317,6 +317,7 @@ const VideoLayerSetting$json = const {
     const {'1': 'scale_resolution_down_by', '3': 4, '4': 1, '5': 2, '10': 'scaleResolutionDownBy'},
     const {'1': 'priority', '3': 5, '4': 1, '5': 14, '6': '.stream.video.sfu.event.VideoLayerSetting.Priority', '10': 'priority'},
     const {'1': 'codec', '3': 6, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Codec', '10': 'codec'},
+    const {'1': 'max_framerate', '3': 7, '4': 1, '5': 13, '10': 'maxFramerate'},
   ],
   '4': const [VideoLayerSetting_Priority$json],
 };
@@ -333,7 +334,7 @@ const VideoLayerSetting_Priority$json = const {
 };
 
 /// Descriptor for `VideoLayerSetting`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List videoLayerSettingDescriptor = $convert.base64Decode('ChFWaWRlb0xheWVyU2V0dGluZxISCgRuYW1lGAEgASgJUgRuYW1lEhYKBmFjdGl2ZRgCIAEoCFIGYWN0aXZlEh8KC21heF9iaXRyYXRlGAMgASgFUgptYXhCaXRyYXRlEjcKGHNjYWxlX3Jlc29sdXRpb25fZG93bl9ieRgEIAEoAlIVc2NhbGVSZXNvbHV0aW9uRG93bkJ5Ek4KCHByaW9yaXR5GAUgASgOMjIuc3RyZWFtLnZpZGVvLnNmdS5ldmVudC5WaWRlb0xheWVyU2V0dGluZy5Qcmlvcml0eVIIcHJpb3JpdHkSNAoFY29kZWMYBiABKAsyHi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Db2RlY1IFY29kZWMiZwoIUHJpb3JpdHkSHQoZUFJJT1JJVFlfSElHSF9VTlNQRUNJRklFRBAAEhAKDFBSSU9SSVRZX0xPVxABEhMKD1BSSU9SSVRZX01FRElVTRACEhUKEVBSSU9SSVRZX1ZFUllfTE9XEAM=');
+final $typed_data.Uint8List videoLayerSettingDescriptor = $convert.base64Decode('ChFWaWRlb0xheWVyU2V0dGluZxISCgRuYW1lGAEgASgJUgRuYW1lEhYKBmFjdGl2ZRgCIAEoCFIGYWN0aXZlEh8KC21heF9iaXRyYXRlGAMgASgFUgptYXhCaXRyYXRlEjcKGHNjYWxlX3Jlc29sdXRpb25fZG93bl9ieRgEIAEoAlIVc2NhbGVSZXNvbHV0aW9uRG93bkJ5Ek4KCHByaW9yaXR5GAUgASgOMjIuc3RyZWFtLnZpZGVvLnNmdS5ldmVudC5WaWRlb0xheWVyU2V0dGluZy5Qcmlvcml0eVIIcHJpb3JpdHkSNAoFY29kZWMYBiABKAsyHi5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5Db2RlY1IFY29kZWMSIwoNbWF4X2ZyYW1lcmF0ZRgHIAEoDVIMbWF4RnJhbWVyYXRlImcKCFByaW9yaXR5Eh0KGVBSSU9SSVRZX0hJR0hfVU5TUEVDSUZJRUQQABIQCgxQUklPUklUWV9MT1cQARITCg9QUklPUklUWV9NRURJVU0QAhIVChFQUklPUklUWV9WRVJZX0xPVxAD');
 @$core.Deprecated('Use videoSenderDescriptor instead')
 const VideoSender$json = const {
   '1': 'VideoSender',

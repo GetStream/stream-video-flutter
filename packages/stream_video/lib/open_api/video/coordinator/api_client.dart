@@ -419,6 +419,8 @@ class ApiClient {
           return StartRecordingResponse.fromJson(value);
         case 'StartTranscriptionResponse':
           return StartTranscriptionResponse.fromJson(value);
+        case 'StatsOptions':
+          return StatsOptions.fromJson(value);
         case 'StopBroadcastingResponse':
           return StopBroadcastingResponse.fromJson(value);
         case 'StopLiveResponse':

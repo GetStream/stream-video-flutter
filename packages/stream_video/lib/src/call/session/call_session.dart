@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:stream_video/version.g.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
@@ -81,6 +83,7 @@ class CallSession extends Disposable {
 
   RtcManager? rtcManager;
   StreamSubscription<SfuEvent>? eventsSubscription;
+  StreamSubscription<Map<String, dynamic>>? _statsSubscription;
   Timer? _peerConnectionCheckTimer;
 
   SharedEmitter<CallStats> get stats => _stats;
@@ -146,6 +149,20 @@ class CallSession extends Disposable {
         ..onRenegotiationNeeded = _onRenegotiationNeeded
         ..onRemoteTrackReceived = _onRemoteTrackReceived
         ..onStatsReceived = _onStatsReceived;
+
+      await _statsSubscription?.cancel();
+      _statsSubscription = rtcManager?.statsStream.listen((rawStats) {
+        sfuClient.sendStats(
+          sfu.SendStatsRequest(
+            sessionId: sessionId,
+            publisherStats: jsonEncode(rawStats['publisherStats']),
+            subscriberStats: jsonEncode(rawStats['subscriberStats']),
+            sdkVersion: streamVideoVersion,
+            webrtcVersion:
+                Platform.isAndroid ? androidWebRTCVersion : iosWebRTCVersion,
+          ),
+        );
+      });
 
       if (CurrentPlatform.isIos) {
         await rtcManager?.setAppleAudioConfiguration();
@@ -218,6 +235,8 @@ class CallSession extends Disposable {
     await _saBuffer.cancel();
     await eventsSubscription?.cancel();
     eventsSubscription = null;
+    await _statsSubscription?.cancel();
+    _statsSubscription = null;
     await sfuWS.disconnect();
     await rtcManager?.dispose();
     rtcManager = null;
