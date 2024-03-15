@@ -37,6 +37,7 @@ class RtcMediaDeviceNotifier {
         return RtcMediaDevice(
           id: it.deviceId,
           label: it.label,
+          groupId: it.groupId,
           kind: RtcMediaDeviceKind.fromAlias(it.kind),
         );
       });

@@ -1192,11 +1192,24 @@ class Call {
       custom: custom,
     );
 
+    final mediaDevicesResult =
+        await RtcMediaDeviceNotifier.instance.enumerateDevices();
+    final mediaDevices = mediaDevicesResult.fold(
+      success: (success) => success.data,
+      failure: (failure) => <RtcMediaDevice>[],
+    );
+
     return response.fold(
       success: (it) {
         _stateManager.lifecycleCallCreated(
           CallCreated(it.data.data),
           ringing: ringing,
+          audioOutputs: mediaDevices
+              .where((d) => d.kind == RtcMediaDeviceKind.audioOutput)
+              .toList(),
+          audioInputs: mediaDevices
+              .where((d) => d.kind == RtcMediaDeviceKind.audioInput)
+              .toList(),
         );
         _logger.v(() => '[getOrCreate] completed: ${it.data}');
         return it;

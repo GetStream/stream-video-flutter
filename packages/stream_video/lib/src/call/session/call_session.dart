@@ -167,6 +167,13 @@ class CallSession extends Disposable {
       if (CurrentPlatform.isIos) {
         await rtcManager?.setAppleAudioConfiguration();
       }
+
+      unawaited(
+        Future.delayed(const Duration(milliseconds: 250), () async {
+          await _applyCurrentAudioOutputDevice();
+        }),
+      );
+
       _logger.v(() => '[start] completed');
       return const Result.success(none);
     } catch (e, stk) {
