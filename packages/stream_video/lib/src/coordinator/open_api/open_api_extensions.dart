@@ -178,6 +178,8 @@ extension CallSettingsExt on open.CallSettingsResponse {
         opusDtxEnabled: audio.opusDtxEnabled,
         redundantCodingEnabled: audio.redundantCodingEnabled,
         defaultDevice: audio.defaultDevice.toDomain(),
+        micDefaultOn: audio.micDefaultOn,
+        speakerDefaultOn: audio.speakerDefaultOn,
       ),
       video: StreamVideoSettings(
         accessRequestEnabled: video.accessRequestEnabled,
