@@ -150,6 +150,11 @@ class CallSession extends Disposable {
       if (CurrentPlatform.isIos) {
         await rtcManager?.setAppleAudioConfiguration();
       }
+
+      if (CurrentPlatform.isAndroid) {
+        await rtcManager?.setAndroidAudioConfiguration();
+      }
+
       _logger.v(() => '[start] completed');
       return const Result.success(none);
     } catch (e, stk) {

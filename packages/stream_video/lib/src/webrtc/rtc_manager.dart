@@ -841,7 +841,7 @@ extension RtcManagerTrackHelper on RtcManager {
     try {
       await rtc.Helper.setAppleAudioConfiguration(
         rtc.AppleAudioConfiguration(
-          appleAudioMode: rtc.AppleAudioMode.videoChat,
+          appleAudioMode: rtc.AppleAudioMode.spokenAudio,
           appleAudioCategory: rtc.AppleAudioCategory.playAndRecord,
           appleAudioCategoryOptions: {
             rtc.AppleAudioCategoryOption.mixWithOthers,
@@ -850,6 +850,17 @@ extension RtcManagerTrackHelper on RtcManager {
             rtc.AppleAudioCategoryOption.allowAirPlay,
           },
         ),
+      );
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  Future<Result<None>> setAndroidAudioConfiguration() async {
+    try {
+      await rtc.Helper.setAndroidAudioConfiguration(
+        rtc.AndroidAudioConfiguration.communication,
       );
       return const Result.success(none);
     } catch (e, stk) {
