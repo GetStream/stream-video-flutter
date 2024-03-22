@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_video_flutter/stream_video_flutter_background.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../call_diagnostics_content/call_diagnostics_content.dart';
@@ -32,6 +33,12 @@ typedef CallControlsBuilder = Widget Function(
   CallState callState,
 );
 
+typedef CallPictureInPictureBuilder = Widget Function(
+  BuildContext context,
+  Call call,
+  CallState callState,
+);
+
 /// Represents the UI in an active call that shows participants and their video,
 /// as well as some extra UI features to control the call settings, browse
 /// participants and more.
@@ -48,6 +55,8 @@ class StreamCallContent extends StatefulWidget {
     this.callParticipantsBuilder,
     this.callControlsBuilder,
     this.layoutMode = ParticipantLayoutMode.grid,
+    this.enablePictureInPicture = false,
+    this.callPictureInPictureBuilder,
   });
 
   /// Represents a call.
@@ -74,13 +83,21 @@ class StreamCallContent extends StatefulWidget {
   /// Builder used to create a custom call controls panel.
   final CallControlsBuilder? callControlsBuilder;
 
+  /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
+
+  /// Whether to enable picture in picture mode.
+  final bool enablePictureInPicture;
+
+  /// Builder used to create a custom picture in picture mode.
+  final CallPictureInPictureBuilder? callPictureInPictureBuilder;
 
   @override
   State<StreamCallContent> createState() => _StreamCallContentState();
 }
 
-class _StreamCallContentState extends State<StreamCallContent> {
+class _StreamCallContentState extends State<StreamCallContent>
+    with WidgetsBindingObserver {
   /// Represents a call.
   Call get call => widget.call;
 
@@ -90,9 +107,69 @@ class _StreamCallContentState extends State<StreamCallContent> {
   /// Controls the visibility of [CallDiagnosticsContent].
   bool _isStatsVisible = false;
 
+  /// Whether the picture in picture mode is on
+  bool _isPictureInPictureModeOn = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.enablePictureInPicture) {
+      StreamVideoFlutterBackground.togglePictureInPicture(enable: true);
+      WidgetsBinding.instance.addObserver(this);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant StreamCallContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.enablePictureInPicture != oldWidget.enablePictureInPicture) {
+      if (widget.enablePictureInPicture) {
+        StreamVideoFlutterBackground.togglePictureInPicture(enable: true);
+        WidgetsBinding.instance.addObserver(this);
+      } else {
+        StreamVideoFlutterBackground.togglePictureInPicture(enable: false);
+        WidgetsBinding.instance.removeObserver(this);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.enablePictureInPicture) {
+      StreamVideoFlutterBackground.togglePictureInPicture(enable: false);
+      WidgetsBinding.instance.removeObserver(this);
+    }
+
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {
+        _isPictureInPictureModeOn = false;
+      });
+    } else if (state == AppLifecycleState.inactive) {
+      setState(() {
+        _isPictureInPictureModeOn = true;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
+
+    if (_isPictureInPictureModeOn) {
+      return widget.callPictureInPictureBuilder
+              ?.call(context, call, callState) ??
+          StreamCallParticipants(
+            call: call,
+            participants: callState.callParticipants,
+            layoutMode: ParticipantLayoutMode.pictureInPicture,
+          );
+    }
 
     final Widget bodyWidget;
     if (callState.status.isConnected || callState.status.isFastReconnecting) {

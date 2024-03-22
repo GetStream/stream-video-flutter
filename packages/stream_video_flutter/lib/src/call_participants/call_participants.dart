@@ -158,6 +158,14 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.layoutMode == ParticipantLayoutMode.pictureInPicture) {
+      return widget.callParticipantBuilder(
+        context,
+        widget.call,
+        _participants.first,
+      );
+    }
+
     if (_screenShareParticipant != null) {
       return ScreenShareCallParticipantsContent(
         call: widget.call,
