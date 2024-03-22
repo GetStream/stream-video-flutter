@@ -86,10 +86,10 @@ class StreamCallContent extends StatefulWidget {
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
 
-  /// Whether to enable picture in picture mode.
+  /// Whether to enable picture-in-picture mode. (available only on Android)
   final bool enablePictureInPicture;
 
-  /// Builder used to create a custom picture in picture mode.
+  /// Builder used to create a custom picture in picture mode. (available only on Android)
   final CallPictureInPictureBuilder? callPictureInPictureBuilder;
 
   @override

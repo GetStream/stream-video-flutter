@@ -89,7 +89,7 @@ class StreamCallContainer extends StatefulWidget {
   /// Builder used to create a custom call content widget.
   final CallContentBuilder? callContentBuilder;
 
-  /// Whether to enable picture-in-picture mode.
+  /// Whether to enable picture-in-picture mode. (available only on Android)
   final bool enablePictureInPicture;
 
   @override
