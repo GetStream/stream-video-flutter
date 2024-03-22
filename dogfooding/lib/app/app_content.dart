@@ -77,6 +77,7 @@ class _StreamDogFoodingAppContentState
   void initState() {
     super.initState();
     initPushNotificationManagerIfAvailable();
+    _tryConsumingIncomingCallFromTerminatedState();
   }
 
   void initPushNotificationManagerIfAvailable() {
@@ -93,6 +94,43 @@ class _StreamDogFoodingAppContentState
   }
 
   final _callKitEventSubscriptions = Subscriptions();
+
+  void _tryConsumingIncomingCallFromTerminatedState() {
+    if (_router.routerDelegate.navigatorKey.currentContext == null) {
+      // App is not running yet. Postpone consuming after app is in the foreground
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        _consumeIncomingCall();
+      });
+    } else {
+      // no-op. If the app is already running we'll handle it via events
+    }
+  }
+
+  Future<void> _consumeIncomingCall() async {
+    final calls =
+        await StreamVideo.instance.pushNotificationManager?.activeCalls();
+
+    if (calls == null || calls.isEmpty) return;
+
+    final callResult = await StreamVideo.instance.consumeIncomingCall(
+      uuid: calls.first.uuid!,
+      cid: calls.first.callCid!,
+    );
+
+    callResult.fold(success: (result) async {
+      final call = result.data;
+      await call.accept();
+
+      final extra = (
+        call: result.data,
+        connectOptions: const CallConnectOptions(),
+      );
+
+      _router.push(CallRoute($extra: extra).location, extra: extra);
+    }, failure: (error) {
+      debugPrint('Error consuming incoming call: $error');
+    });
+  }
 
   void _observeCallKitEvents() {
     final streamVideo = locator.get<StreamVideo>();
