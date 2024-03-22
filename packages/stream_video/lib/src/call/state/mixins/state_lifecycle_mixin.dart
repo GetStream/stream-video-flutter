@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../../../stream_video.dart';
@@ -290,24 +291,39 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
 extension on CallMetadata {
   List<CallParticipantState> toCallParticipants(CallState state) {
     final result = <CallParticipantState>[];
-    for (final userId in members.keys) {
+
+    for (final participant in session.participants.values) {
+      final userId = participant.userId;
       final member = members[userId];
       final user = users[userId];
+      final currentState =
+          state.callParticipants.firstWhereOrNull((it) => it.userId == userId);
       final isLocal = state.currentUserId == userId;
+
       result.add(
-        CallParticipantState(
-          userId: userId,
-          role: member?.role ?? user?.role ?? '',
-          name: user?.name ?? '',
-          custom: user?.custom ?? {},
-          image: user?.image ?? '',
-          sessionId: '',
-          trackIdPrefix: '',
-          isLocal: isLocal,
-          isOnline: !isLocal,
-        ),
+        currentState?.copyWith(
+              role: member?.role ?? user?.role ?? '',
+              name: user?.name ?? '',
+              custom: user?.custom ?? {},
+              image: user?.image ?? '',
+              sessionId: participant.userSessionId,
+              isLocal: isLocal,
+              isOnline: !isLocal,
+            ) ??
+            CallParticipantState(
+              userId: userId,
+              role: member?.role ?? user?.role ?? '',
+              name: user?.name ?? '',
+              custom: user?.custom ?? {},
+              image: user?.image ?? '',
+              sessionId: participant.userSessionId,
+              trackIdPrefix: '',
+              isLocal: isLocal,
+              isOnline: !isLocal,
+            ),
       );
     }
+
     return result;
   }
 }

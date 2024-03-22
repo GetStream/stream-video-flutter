@@ -233,7 +233,7 @@ class Call {
 
   StreamCallCid get callCid => state.value.callCid;
 
-  String get type => state.value.callType;
+  StreamCallType get type => state.value.callType;
 
   String get id => state.value.callId;
 
@@ -534,14 +534,17 @@ class Call {
 
     _logger.v(() => '[join] starting sfu session');
     final sessionResult = await _startSession(joinedResult.data);
+
     if (sessionResult is! Success<None>) {
       _logger.w(() => '[join] sfu session start failed: $sessionResult');
       final error = (sessionResult as Failure).error;
       _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
       return sessionResult;
     }
+
     _logger.v(() => '[join] started session');
     _stateManager.lifecycleCallConnected(const CallConnected());
+
     await _applyConnectOptions();
 
     _logger.v(() => '[join] completed');

@@ -28,8 +28,11 @@ class _LobbyScreenState extends State<LobbyScreen> {
   RtcLocalCameraTrack? _cameraTrack;
 
   final _userAuthController = locator.get<UserAuthController>();
+  bool _isJoiningCall = false;
 
   void joinCallPressed() {
+    _isJoiningCall = true;
+
     var options = const CallConnectOptions();
 
     final cameraTrack = _cameraTrack;
@@ -47,6 +50,19 @@ class _LobbyScreenState extends State<LobbyScreen> {
     }
 
     widget.onJoinCallPressed(options);
+  }
+
+  @override
+  void dispose() {
+    // Dispose tracks if we closed lobby screen without joining the call.
+    if (!_isJoiningCall) {
+      _cameraTrack?.stop();
+      _microphoneTrack?.stop();
+    }
+
+    _cameraTrack = null;
+    _microphoneTrack = null;
+    super.dispose();
   }
 
   @override
