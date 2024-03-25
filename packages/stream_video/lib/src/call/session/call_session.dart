@@ -168,6 +168,8 @@ class CallSession extends Disposable {
         await rtcManager?.setAppleAudioConfiguration();
       }
 
+      //FIXME: This is a temporary fix for the issue where the audio output device is not set correctly
+      // we should remove the delay and figure out why it's not setting the device without it
       unawaited(
         Future.delayed(const Duration(milliseconds: 250), () async {
           await _applyCurrentAudioOutputDevice();
