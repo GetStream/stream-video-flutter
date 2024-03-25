@@ -41,6 +41,22 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
   RtcLocalAudioTrack? _microphoneTrack;
   RtcLocalCameraTrack? _cameraTrack;
 
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(Duration.zero, () {
+      final callSettings = widget.call.state.value.settings;
+      if (callSettings.audio.micDefaultOn) {
+        toggleMicrophone();
+      }
+
+      if (callSettings.video.cameraDefaultOn) {
+        toggleCamera();
+      }
+    });
+  }
+
   Future<void> toggleCamera() async {
     if (_cameraTrack != null) {
       await _cameraTrack?.stop();

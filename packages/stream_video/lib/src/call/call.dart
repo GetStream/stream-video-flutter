@@ -270,8 +270,7 @@ class Call {
 
   set connectOptions(CallConnectOptions connectOptions) {
     final status = _status.value;
-    if (status == _ConnectionStatus.connecting ||
-        status == _ConnectionStatus.connected) {
+    if (status == _ConnectionStatus.connected) {
       _logger.w(
         () => '[setConnectOptions] rejected (connectOptions must be'
             ' set before invoking `connect`)',
@@ -976,6 +975,17 @@ class Call {
     return [...?_session?.getTracks(trackIdPrefix)];
   }
 
+  void _setDefaultConnectOptions(CallSettings settings) {
+    connectOptions = connectOptions.copyWith(
+      camera: TrackOption.fromSetting(
+        enabled: settings.video.cameraDefaultOn,
+      ),
+      microphone: TrackOption.fromSetting(
+        enabled: settings.audio.micDefaultOn,
+      ),
+    );
+  }
+
   Future<void> _applyConnectOptions() async {
     _logger.d(() => '[applyConnectOptions] connectOptions: $_connectOptions');
     await _applyCameraOption(_connectOptions.camera);
@@ -1192,11 +1202,26 @@ class Call {
       custom: custom,
     );
 
+    final mediaDevicesResult =
+        await RtcMediaDeviceNotifier.instance.enumerateDevices();
+    final mediaDevices = mediaDevicesResult.fold(
+      success: (success) => success.data,
+      failure: (failure) => <RtcMediaDevice>[],
+    );
+
     return response.fold(
       success: (it) {
+        _setDefaultConnectOptions(it.data.data.metadata.settings);
+
         _stateManager.lifecycleCallCreated(
           CallCreated(it.data.data),
           ringing: ringing,
+          audioOutputs: mediaDevices
+              .where((d) => d.kind == RtcMediaDeviceKind.audioOutput)
+              .toList(),
+          audioInputs: mediaDevices
+              .where((d) => d.kind == RtcMediaDeviceKind.audioInput)
+              .toList(),
         );
         _logger.v(() => '[getOrCreate] completed: ${it.data}');
         return it;

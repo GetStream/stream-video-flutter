@@ -1,4 +1,5 @@
 import 'package:state_notifier/state_notifier.dart';
+import 'package:collection/collection.dart';
 
 import '../../../../stream_video.dart';
 import '../../../action/internal/lifecycle_action.dart';
@@ -101,7 +102,26 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleCallCreated(
     CallCreated stage, {
     bool ringing = false,
+    List<RtcMediaDevice>? audioOutputs,
+    List<RtcMediaDevice>? audioInputs,
   }) {
+    final defaultAudioOutput = audioOutputs?.firstWhereOrNull((device) {
+      if (stage.data.metadata.settings.audio.defaultDevice ==
+          AudioSettingsRequestDefaultDeviceEnum.speaker) {
+        return device.id.equalsIgnoreCase(
+          AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+        );
+      }
+
+      return !device.id.equalsIgnoreCase(
+        AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+      );
+    });
+
+    final defaultAudioInput = audioInputs
+            ?.firstWhereOrNull((d) => d.label == defaultAudioOutput?.label) ??
+        audioInputs?.firstOrNull;
+
     _logger.d(() => '[lifecycleCallCreated] ringing: $ringing, state: $state');
     state = state.copyWith(
       status: stage.data.toCallStatus(state: state, ringing: ringing),
@@ -118,6 +138,8 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       isBackstage: stage.data.metadata.details.backstage,
       isBroadcasting: stage.data.metadata.details.broadcasting,
       isRecording: stage.data.metadata.details.recording,
+      audioOutputDevice: defaultAudioOutput,
+      audioInputDevice: defaultAudioInput,
     );
   }
 
@@ -360,4 +382,8 @@ extension on CallRingingData {
       return status;
     }
   }
+}
+
+extension on String {
+  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
 }
