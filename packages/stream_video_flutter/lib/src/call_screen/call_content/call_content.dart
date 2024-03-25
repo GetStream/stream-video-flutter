@@ -115,7 +115,7 @@ class _StreamCallContentState extends State<StreamCallContent>
     super.initState();
 
     if (widget.enablePictureInPicture) {
-      StreamVideoFlutterBackground.togglePictureInPicture(enable: true);
+      StreamVideoFlutterBackground.setPictureInPictureEnabled(enable: true);
       WidgetsBinding.instance.addObserver(this);
     }
   }
@@ -125,10 +125,10 @@ class _StreamCallContentState extends State<StreamCallContent>
     super.didUpdateWidget(oldWidget);
     if (widget.enablePictureInPicture != oldWidget.enablePictureInPicture) {
       if (widget.enablePictureInPicture) {
-        StreamVideoFlutterBackground.togglePictureInPicture(enable: true);
+        StreamVideoFlutterBackground.setPictureInPictureEnabled(enable: true);
         WidgetsBinding.instance.addObserver(this);
       } else {
-        StreamVideoFlutterBackground.togglePictureInPicture(enable: false);
+        StreamVideoFlutterBackground.setPictureInPictureEnabled(enable: false);
         WidgetsBinding.instance.removeObserver(this);
       }
     }
@@ -137,7 +137,7 @@ class _StreamCallContentState extends State<StreamCallContent>
   @override
   void dispose() {
     if (widget.enablePictureInPicture) {
-      StreamVideoFlutterBackground.togglePictureInPicture(enable: false);
+      StreamVideoFlutterBackground.setPictureInPictureEnabled(enable: false);
       WidgetsBinding.instance.removeObserver(this);
     }
 

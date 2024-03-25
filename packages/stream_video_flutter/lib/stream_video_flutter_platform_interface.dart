@@ -59,7 +59,7 @@ abstract class StreamVideoFlutterPlatform extends PlatformInterface {
     throw UnimplementedError('isRunningService has not been implemented.');
   }
 
-  Future<void> togglePictureInPicture({required bool enable}) {
+  Future<void> setPictureInPictureEnabled({required bool enable}) {
     throw UnimplementedError('showPictureInPicture has not been implemented.');
   }
 }

@@ -105,7 +105,7 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
   }
 
   @override
-  Future<void> togglePictureInPicture({required bool enable}) async {
+  Future<void> setPictureInPictureEnabled({required bool enable}) async {
     if (enable) {
       return methodChannel.invokeMethod(
         'enablePictureInPictureMode',
