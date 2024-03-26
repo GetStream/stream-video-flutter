@@ -130,7 +130,10 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       settings: stage.data.metadata.settings,
       egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
-      callParticipants: stage.data.metadata.toCallParticipants(state),
+      callParticipants: stage.data.metadata.toCallParticipants(
+        state,
+        fromMembers: true,
+      ),
       createdAt: stage.data.metadata.details.createdAt,
       startsAt: stage.data.metadata.details.startsAt,
       endedAt: stage.data.metadata.details.endedAt,
@@ -155,7 +158,10 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       settings: stage.data.metadata.settings,
       egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
-      callParticipants: stage.data.metadata.toCallParticipants(state),
+      callParticipants: stage.data.metadata.toCallParticipants(
+        state,
+        fromMembers: true,
+      ),
       createdAt: stage.data.metadata.details.createdAt,
       startsAt: stage.data.metadata.details.startsAt,
       endedAt: stage.data.metadata.details.endedAt,
@@ -311,10 +317,21 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
 }
 
 extension on CallMetadata {
-  List<CallParticipantState> toCallParticipants(CallState state) {
+  List<CallParticipantState> toCallParticipants(
+    CallState state, {
+    bool fromMembers = false,
+  }) {
     final result = <CallParticipantState>[];
 
-    for (final participant in session.participants.values) {
+    final participantsData = fromMembers
+        ? members.values
+            .map((e) => (userId: e.userId, userSessionId: null))
+            .toList()
+        : session.participants.values
+            .map((e) => (userId: e.userId, userSessionId: e.userSessionId))
+            .toList();
+
+    for (final participant in participantsData) {
       final userId = participant.userId;
       final member = members[userId];
       final user = users[userId];
@@ -338,7 +355,7 @@ extension on CallMetadata {
               name: user?.name ?? '',
               custom: user?.custom ?? {},
               image: user?.image ?? '',
-              sessionId: participant.userSessionId,
+              sessionId: participant.userSessionId ?? '',
               trackIdPrefix: '',
               isLocal: isLocal,
               isOnline: !isLocal,
