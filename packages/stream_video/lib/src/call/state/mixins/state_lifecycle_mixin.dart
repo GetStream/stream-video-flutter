@@ -1,4 +1,6 @@
+import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
+import 'package:collection/collection.dart';
 
 import '../../../../stream_video.dart';
 import '../../../action/internal/lifecycle_action.dart';
@@ -101,7 +103,26 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   void lifecycleCallCreated(
     CallCreated stage, {
     bool ringing = false,
+    List<RtcMediaDevice>? audioOutputs,
+    List<RtcMediaDevice>? audioInputs,
   }) {
+    final defaultAudioOutput = audioOutputs?.firstWhereOrNull((device) {
+      if (stage.data.metadata.settings.audio.defaultDevice ==
+          AudioSettingsRequestDefaultDeviceEnum.speaker) {
+        return device.id.equalsIgnoreCase(
+          AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+        );
+      }
+
+      return !device.id.equalsIgnoreCase(
+        AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+      );
+    });
+
+    final defaultAudioInput = audioInputs
+            ?.firstWhereOrNull((d) => d.label == defaultAudioOutput?.label) ??
+        audioInputs?.firstOrNull;
+
     _logger.d(() => '[lifecycleCallCreated] ringing: $ringing, state: $state');
     state = state.copyWith(
       status: stage.data.toCallStatus(state: state, ringing: ringing),
@@ -109,7 +130,10 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       settings: stage.data.metadata.settings,
       egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
-      callParticipants: stage.data.metadata.toCallParticipants(state),
+      callParticipants: stage.data.metadata.toCallParticipants(
+        state,
+        fromMembers: true,
+      ),
       createdAt: stage.data.metadata.details.createdAt,
       startsAt: stage.data.metadata.details.startsAt,
       endedAt: stage.data.metadata.details.endedAt,
@@ -118,6 +142,8 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       isBackstage: stage.data.metadata.details.backstage,
       isBroadcasting: stage.data.metadata.details.broadcasting,
       isRecording: stage.data.metadata.details.recording,
+      audioOutputDevice: defaultAudioOutput,
+      audioInputDevice: defaultAudioInput,
     );
   }
 
@@ -132,7 +158,10 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       settings: stage.data.metadata.settings,
       egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
-      callParticipants: stage.data.metadata.toCallParticipants(state),
+      callParticipants: stage.data.metadata.toCallParticipants(
+        state,
+        fromMembers: true,
+      ),
       createdAt: stage.data.metadata.details.createdAt,
       startsAt: stage.data.metadata.details.startsAt,
       endedAt: stage.data.metadata.details.endedAt,
@@ -288,26 +317,52 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
 }
 
 extension on CallMetadata {
-  List<CallParticipantState> toCallParticipants(CallState state) {
+  List<CallParticipantState> toCallParticipants(
+    CallState state, {
+    bool fromMembers = false,
+  }) {
     final result = <CallParticipantState>[];
-    for (final userId in members.keys) {
+
+    final participantsData = fromMembers
+        ? members.values
+            .map((e) => (userId: e.userId, userSessionId: null))
+            .toList()
+        : session.participants.values
+            .map((e) => (userId: e.userId, userSessionId: e.userSessionId))
+            .toList();
+
+    for (final participant in participantsData) {
+      final userId = participant.userId;
       final member = members[userId];
       final user = users[userId];
+      final currentState =
+          state.callParticipants.firstWhereOrNull((it) => it.userId == userId);
       final isLocal = state.currentUserId == userId;
+
       result.add(
-        CallParticipantState(
-          userId: userId,
-          role: member?.role ?? user?.role ?? '',
-          name: user?.name ?? '',
-          custom: user?.custom ?? {},
-          image: user?.image ?? '',
-          sessionId: '',
-          trackIdPrefix: '',
-          isLocal: isLocal,
-          isOnline: !isLocal,
-        ),
+        currentState?.copyWith(
+              role: member?.role ?? user?.role ?? '',
+              name: user?.name ?? '',
+              custom: user?.custom ?? {},
+              image: user?.image ?? '',
+              sessionId: participant.userSessionId,
+              isLocal: isLocal,
+              isOnline: !isLocal,
+            ) ??
+            CallParticipantState(
+              userId: userId,
+              role: member?.role ?? user?.role ?? '',
+              name: user?.name ?? '',
+              custom: user?.custom ?? {},
+              image: user?.image ?? '',
+              sessionId: participant.userSessionId ?? '',
+              trackIdPrefix: '',
+              isLocal: isLocal,
+              isOnline: !isLocal,
+            ),
       );
     }
+
     return result;
   }
 }
@@ -360,4 +415,8 @@ extension on CallRingingData {
       return status;
     }
   }
+}
+
+extension on String {
+  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
 }

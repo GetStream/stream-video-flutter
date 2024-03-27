@@ -140,7 +140,7 @@ class CallState extends Equatable {
 
   String get callId => callCid.id;
 
-  String get callType => callCid.id;
+  StreamCallType get callType => callCid.type;
 
   CallParticipantState? get localParticipant {
     return callParticipants.firstWhereOrNull((element) => element.isLocal);

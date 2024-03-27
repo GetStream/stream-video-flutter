@@ -18,7 +18,6 @@ class CallConnectOptions with EquatableMixin {
     TrackOption? camera,
     TrackOption? microphone,
     TrackOption? screenShare,
-    Duration? dropTimeout,
   }) {
     return CallConnectOptions(
       camera: camera ?? this.camera,
@@ -42,6 +41,9 @@ class CallConnectOptions with EquatableMixin {
 
 abstract class TrackOption with EquatableMixin {
   const TrackOption();
+
+  factory TrackOption.fromSetting({required bool enabled}) =>
+      enabled ? TrackOption.enabled() : TrackOption.disabled();
 
   factory TrackOption.enabled() {
     return TrackEnabled._instance;

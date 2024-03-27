@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
+import '../../../stream_video.dart';
 import '../../errors/video_error.dart';
 import '../../logger/stream_log.dart';
 import '../../models/call_cid.dart';
@@ -176,6 +177,9 @@ extension CallSettingsExt on open.CallSettingsResponse {
         accessRequestEnabled: audio.accessRequestEnabled,
         opusDtxEnabled: audio.opusDtxEnabled,
         redundantCodingEnabled: audio.redundantCodingEnabled,
+        defaultDevice: audio.defaultDevice.toDomain(),
+        micDefaultOn: audio.micDefaultOn,
+        speakerDefaultOn: audio.speakerDefaultOn,
       ),
       video: StreamVideoSettings(
         accessRequestEnabled: video.accessRequestEnabled,
@@ -205,6 +209,16 @@ extension CallSettingsExt on open.CallSettingsResponse {
         names: geofencing.names,
       ),
     );
+  }
+}
+
+extension on open.AudioSettingsDefaultDeviceEnum {
+  AudioSettingsRequestDefaultDeviceEnum toDomain() {
+    if (this == open.AudioSettingsDefaultDeviceEnum.speaker) {
+      return AudioSettingsRequestDefaultDeviceEnum.speaker;
+    } else {
+      return AudioSettingsRequestDefaultDeviceEnum.earpiece;
+    }
   }
 }
 
