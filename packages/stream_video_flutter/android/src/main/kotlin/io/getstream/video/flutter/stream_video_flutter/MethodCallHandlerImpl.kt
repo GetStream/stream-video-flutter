@@ -2,10 +2,12 @@ package io.getstream.video.flutter.stream_video_flutter
 
 import android.Manifest
 import android.app.Activity
+import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Rational
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterFlags
@@ -15,12 +17,14 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
 import io.getstream.log.taggedLogger
+import io.getstream.video.flutter.stream_video_flutter.service.PictureInPictureHelper
 import io.getstream.video.flutter.stream_video_flutter.service.ServiceManager
 import io.getstream.video.flutter.stream_video_flutter.service.ServiceManagerImpl
 import io.getstream.video.flutter.stream_video_flutter.service.ServiceType
 import io.getstream.video.flutter.stream_video_flutter.service.StreamCallService
 import io.getstream.video.flutter.stream_video_flutter.service.StreamScreenShareService
 import io.getstream.video.flutter.stream_video_flutter.service.notification.NotificationPayload
+import io.getstream.video.flutter.stream_video_flutter.service.utils.putBoolean
 
 class MethodCallHandlerImpl(
     appContext: Context,
@@ -64,6 +68,15 @@ class MethodCallHandlerImpl(
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         logger.d { "[onMethodCall] method: ${call.method}" }
         when (call.method) {
+            "enablePictureInPictureMode" -> {
+                val activity = getActivity()
+                putBoolean(activity, PictureInPictureHelper.PIP_ENABLED_PREF_KEY, true)
+            }
+            "disablePictureInPictureMode" -> {
+                val activity = getActivity()
+                putBoolean(activity, PictureInPictureHelper.PIP_ENABLED_PREF_KEY, false)
+                PictureInPictureHelper.disablePictureInPicture(activity!!)
+            }
             "isBackgroundServiceRunning" -> {
                 val statusString = call.argument<String>("type")
                 val serviceType = ServiceType.valueOf(statusString ?: "call")
