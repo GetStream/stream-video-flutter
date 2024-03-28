@@ -233,7 +233,6 @@ class CallAcceptedEvent extends CallEvent {
     required this.createdAt,
   });
 
-  @override
   final StreamCallCid callCid;
   final CallUser acceptedBy;
   final DateTime createdAt;

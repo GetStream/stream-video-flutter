@@ -10,7 +10,6 @@ import '../../../models/call_track_state.dart';
 import '../../../models/disconnect_reason.dart';
 import '../../../sfu/data/events/sfu_events.dart';
 import '../../../sfu/sfu_extensions.dart';
-import '../../../utils/string.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 

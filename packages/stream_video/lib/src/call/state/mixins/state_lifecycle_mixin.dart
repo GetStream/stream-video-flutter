@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
-import 'package:collection/collection.dart';
 
 import '../../../../stream_video.dart';
 import '../../../action/internal/lifecycle_action.dart';
