@@ -28,6 +28,7 @@ import '../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
 import '../webrtc/rtc_manager.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
+import 'call_events.dart';
 import 'permissions/permissions_manager.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
@@ -242,12 +243,17 @@ class Call {
   SharedEmitter<CallStats> get stats => _stats;
   late final _stats = MutableSharedEmitterImpl<CallStats>();
 
+  @Deprecated('Use `callEvents` instead')
   SharedEmitter<SfuEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<SfuEvent>();
 
+  @Deprecated('Use `callEvents` instead')
   SharedEmitter<CoordinatorCallEvent> get coordinatorEvents =>
       _coordinatorEvents;
   final _coordinatorEvents = MutableSharedEmitterImpl<CoordinatorCallEvent>();
+
+  SharedEmitter<CallEvent> get callEvents => _callEvents;
+  final _callEvents = MutableSharedEmitterImpl<CallEvent>();
 
   OnCallPermissionRequest? onPermissionRequest;
 
@@ -294,6 +300,7 @@ class Call {
       _idCoordEvents,
       _coordinatorClient.events.on<CoordinatorCallEvent>((event) async {
         _coordinatorEvents.emit(event);
+        event.mapToCallEvent().emitIfNotNull(_callEvents);
         await _onCoordinatorEvent(event);
       }),
     );
@@ -593,6 +600,7 @@ class Call {
           () => '[listenSfuEvent] event.type: ${event.runtimeType}',
         );
         _events.emit(event);
+        event.mapToCallEvent(state.value).emitIfNotNull(_callEvents);
         _onSfuEvent(event);
       }),
     );
