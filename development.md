@@ -51,9 +51,9 @@
 - [x] Implement Chat overlay for Dogfooding app
 - [x] Support SFU migration
 - [x] Send raw stats to backend
+- [x] Bluetooth fixes (check support of BT media devices in flutter)
+- [x] Switch the earpiece/microphone button *(depends on "Bluetooth fixes")*
 - [ ] Video filters / audio filters
-- [ ] Bluetooth fixes (check support of BT media devices in flutter)
-- [ ] Switch the earpiece/microphone button *(depends on "Bluetooth fixes")*
 - [ ] Local audio levels (maybe from webrtc)
 - [ ] Test coverage 
 - - [ ] stream_video (75%)
