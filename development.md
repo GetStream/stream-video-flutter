@@ -23,14 +23,13 @@
 - [x] Android foreground service
 
 ### 0.3.0 milestone
-- [ ] Publish apps to Android/iOS [Deven]
-- - [ ] Check the stores' descriptions
-- - [ ] Publish Dogfooding app
-- [ ] Participant sort bug [Efthymis]
+- [x] Publish apps to Android/iOS [Deven]
+- - [x] Check the stores' descriptions
+- - [x] Publish Dogfooding app
+- [x] Participant sort bug [Efthymis]
 - [x] Android/iOS ringing flow
 - [x] Live streaming component(s) [Deven]
 - [x] Deeplinking
-- [ ] Tap to focus (flutter_webrtc) [Kanat]
 - [x] Push notifications [Maciej]
 - - [x] Customization of the incoming/outgoing call screens
 - - [x] Customizing CallKit ringing calls
@@ -46,10 +45,12 @@
 - [x] Support ICE restart reconnection [Maciej,Kanat]
 - [x] Update WebRTC version to m114 (livekit version) [Kanat]
 - [x] Fix analysis issues [Maciej]
+- [ ] Tap to focus (flutter_webrtc) [Kanat]
 
 ### 0.4.0 milestone
-- [ ] Implement Chat overlay for Dogfooding app
+- [x] Implement Chat overlay for Dogfooding app
 - [x] Support SFU migration
+- [x] Send raw stats to backend
 - [ ] Video filters / audio filters
 - [ ] Bluetooth fixes (check support of BT media devices in flutter)
 - [ ] Switch the earpiece/microphone button *(depends on "Bluetooth fixes")*
@@ -60,17 +61,18 @@
 - - [ ] stream_video_push_notification
 - - [ ] Coverage check for PRs
 - [ ] Align custom event support to other SDKs
-- [ ] Send raw stats to backend
 - [ ] Documentation parity
 - - [ ] UI components
 - - [ ] Cookbook
 - - [ ] Advanced guides
 
 ### 0.5.0 milestone
-- [ ] Dynascale 2.0
 - [ ] Picture-in-picture
+- - [x] Android
+- - [ ] iOS
+- [ ] Dynascale 2.0
 - [ ] SFU switching
 - [ ] Buttons to simulate ICE restarts / SFU switching
 - [ ] Proximity button support
-- [ ] Call stats component
+- [x] Call stats component
 - [ ] Transcription

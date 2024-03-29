@@ -300,7 +300,7 @@ class Call {
       _idCoordEvents,
       _coordinatorClient.events.on<CoordinatorCallEvent>((event) async {
         _coordinatorEvents.emit(event);
-        event.mapToCallEvent().emitIfNotNull(_callEvents);
+        event.mapToCallEvent(state.value).emitIfNotNull(_callEvents);
         await _onCoordinatorEvent(event);
       }),
     );
