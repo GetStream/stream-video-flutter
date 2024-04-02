@@ -1,3 +1,17 @@
+## 0.3.5
+✅ Added
+
+* Added `keepConnectionsAliveWhenInBackground` to `StreamVideoOptions` to allow keeping websocket connections and event subscribtions open when app is in the background (false by default).
+* Added support for Picture in Picture feature to Android - check out our [documentation](https://getstream.io/video/docs/flutter/advanced/picture_in_picture/) for more info
+* Added usage statictics reporting
+
+🐞 Fixed
+
+* Fixed handling of default audio output device setting from Stream dashboard 
+* Fixed handling of default camera/microphone state setting from Stream dashboard
+* Fixed an issue where call could sometimes loose participants state
+* Fixed an issue in `LobbyView` where camera/microphone state selected would not be correctly applied into the call
+
 ## 0.3.4
 
 * Fixed the size of the LeaveCall aciton button in `CallAppBar`
