@@ -56,7 +56,6 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
   RtcLocalCameraTrack? _cameraTrack;
   List<CallParticipant> _participants = <CallParticipant>[];
   Map<String, CallUser> _users = <String, CallUser>{};
-  bool _isJoiningCall = false;
 
   StreamSubscription<Object>? _fetchSubscription;
   StreamSubscription<Object>? _eventSubscription;
@@ -94,7 +93,6 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
   }
 
   void onJoinCallPressed() {
-    _isJoiningCall = true;
     var options = const CallConnectOptions();
 
     if (hasCameraEnabled) {
@@ -121,11 +119,8 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
 
   @override
   void dispose() {
-    // Dispose tracks if we closed lobby screen without joining the call.
-    if (!_isJoiningCall) {
-      _cameraTrack?.stop();
-      _microphoneTrack?.stop();
-    }
+    _cameraTrack?.stop();
+    _microphoneTrack?.stop();
 
     _cameraTrack = null;
     _microphoneTrack = null;
