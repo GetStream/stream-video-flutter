@@ -46,6 +46,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
     this.participantsGridCrossAxisSpacing = 8,
   });
 
+  // ignore: comment_references
   /// The fit of the [VideoRenderer] widget
   final VideoFit videoFit;
 
