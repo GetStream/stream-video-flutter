@@ -600,6 +600,7 @@ class StreamVideo {
     final createdByName = payload['created_by_display_name'] as String?;
 
     final callRingingState = await getCallRingingState(
+      // ignore: deprecated_member_use_from_same_package
       type: callType.value,
       callType: callType,
       id: callId,
@@ -643,8 +644,12 @@ class StreamVideo {
       'Either type or callType must be provided',
     );
 
-    final call =
-        makeCall(type: callType?.value ?? type, callType: callType, id: id);
+    final call = makeCall(
+      // ignore: deprecated_member_use_from_same_package
+      type: callType?.value ?? type,
+      callType: callType,
+      id: id,
+    );
     final callResult = await call.get();
 
     return callResult.fold(

@@ -4,13 +4,13 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
-import 'package:stream_video/version.g.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
+import '../../../version.g.dart';
 import '../../action/internal/rtc_action.dart';
 import '../../disposable.dart';
 import '../../errors/video_error.dart';
