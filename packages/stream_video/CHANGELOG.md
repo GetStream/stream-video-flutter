@@ -1,7 +1,7 @@
 ## Unrelease
 ✅ Added
 
-* Added `callEvents` stream to `Call` that replaces `events` and `coordinatorEvents` streams (both are now depricated)
+* Added `callEvents` stream to `Call` that replaces `events` and `coordinatorEvents` streams (both are now deprecated)
 
 ## 0.3.5
 ✅ Added
