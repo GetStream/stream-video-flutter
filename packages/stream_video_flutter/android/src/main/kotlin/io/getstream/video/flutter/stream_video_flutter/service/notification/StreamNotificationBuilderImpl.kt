@@ -135,6 +135,7 @@ internal class StreamNotificationBuilderImpl(
         }
 
         setOngoing(true)
+        setSilent(true)
         setContentIntent(contentIntent)
         setCategory(NotificationCompat.CATEGORY_CALL)
         setDefaults(NotificationCompat.DEFAULT_ALL)

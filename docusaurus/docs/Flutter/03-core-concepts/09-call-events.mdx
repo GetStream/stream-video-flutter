@@ -1,0 +1,70 @@
+---
+title: Call Events
+slug: /call-events
+description: How to listen and leverage call events
+---
+
+There are multiple events that you can listen to during a call. You can use them to update the UI, show notifications, or log the call events. You can listen to them via `callEvents` stream in the `Call` object.
+
+Here are some of the events you can listen to:
+
+
+| Call Event                                    | Description                                           |
+| --------------------------------------------- | ----------------------------------------------------- |
+| **General Call Events**                       |                                                       |
+| `StreamCallCreatedEvent`                      | Triggered when a call is created.                     |
+| `StreamCallJoinedEvent`                       | Triggered when a user joins a call.                   |
+| `StreamCallEndedEvent`                        | Triggered when the call ends.                         |
+| `StreamCallUpdatedEvent`                      | Triggered when the call metadata are updated.         |
+| **Participant Events**                        |                                                       |
+| `StreamCallParticipantJoinedEvent`            | Triggered when a participant joins the call.          |
+| `StreamCallParticipantLeftEvent`              | Triggered when a participant leaves the call.         |
+| `StreamCallDominantSpeakerChangedEvent`       | Triggered when the dominant speaker changes.          |
+| **Quality and Control Events**                |                                                       |
+| `StreamCallConnectionQualityChangedEvent`     | Triggered when connection quality changes for participants. |
+| `StreamCallAudioLevelChangedEvent`            | Triggered when audio levels change for participants.  |
+| `StreamCallPermissionRequestEvent`            | Triggered when there is a permission request for a call. |
+| `StreamCallPermissionsUpdatedEvent`           | Triggered when permissions for a call are updated.    |
+| **Call Ringing Events**                       |                                                       |
+| `StreamCallRingingEvent`                      | Triggered when the call is ringing.                   |
+| `StreamCallAcceptedEvent`                     | Triggered when the call is accepted.                  |
+| `StreamCallRejectedEvent`                     | Triggered when the call is rejected.                  |
+| **Media Events**                              |                                                       |
+| `StreamCallRecordingStartedEvent`             | Triggered when recording starts for a call.           |
+| `StreamCallRecordingStoppedEvent`             | Triggered when recording stops for a call.            |
+| `StreamCallBroadcastingStartedEvent`          | Triggered when broadcasting starts for a call.        |
+| `StreamCallBroadcastingStoppedEvent`          | Triggered when broadcasting stops for a call.         |
+| **Session Events**                            |                                                       |
+| `StreamCallSessionStartedEvent`               | Triggered when a new session starts for a call.       |
+| `StreamCallSessionEndedEvent`                 | Triggered when a session ends for a call.             |
+| `StreamCallSessionParticipantJoinedEvent`     | Triggered when a participant joins the call session.  |
+| `StreamCallSessionParticipantLeftEvent`       | Triggered when a participant leaves the call session. |
+| **Other Events**                              |                                                       |
+| `StreamCallUserBlockedEvent`                  | Triggered when a user is blocked in a call.           |
+| `StreamCallUserUnblockedEvent`                | Triggered when a user is unblocked in a call.         |
+| `StreamCallReactionEvent`                     | Triggered when someone sends a reaction during a call.|
+
+## Custom event
+
+Stream Video also supports custom events. This is a real-time layer that you can broadcast your own events to.
+
+### Sending custom events
+
+You can use the `sendCustomEvent` method of the `Call` instance to send custom events:
+
+```dart
+call.sendCustomEvent(
+    eventType: 'my-custom-event',
+    custom: {
+      'key': 'value',
+    },
+);
+```
+
+### Receiving custom events
+​
+You can listen to custom events by listening to the `StreamCallCustomEvent` event via the same `callEvents` stream:
+
+```dart
+call.callEvents.on<StreamCallCustomEvent>((event) { });
+```
