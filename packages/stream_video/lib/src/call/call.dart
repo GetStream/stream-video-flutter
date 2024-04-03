@@ -1767,7 +1767,6 @@ class Call {
   }
 
   Future<Result<None>> sendCustomEvent({
-    required StreamCallCid callCid,
     required String eventType,
     Map<String, Object> custom = const {},
   }) {

@@ -3,6 +3,10 @@
 
 * Added `callEvents` stream to `Call` that replaces `events` and `coordinatorEvents` streams (both are now deprecated)
 
+🚧 Breaking changes
+
+* Removed the `callCid` parameter requirement from `sendCustomEvent` method in `Call` class
+
 ## 0.3.5
 ✅ Added
 
