@@ -1,3 +1,6 @@
+## 0.3.5
+* Sync version with `stream_video_flutter` 0.3.5
+
 ## 0.3.4
 * Sync version with `stream_video_flutter` 0.3.4
 

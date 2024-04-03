@@ -56,13 +56,16 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
   RtcLocalCameraTrack? _cameraTrack;
   List<CallParticipant> _participants = <CallParticipant>[];
   Map<String, CallUser> _users = <String, CallUser>{};
-  bool _isJoiningCall = false;
 
   StreamSubscription<Object>? _fetchSubscription;
   StreamSubscription<Object>? _eventSubscription;
 
+  bool get hasCameraEnabled => _cameraTrack != null;
+
+  bool get hasMicrophoneEnabled => _microphoneTrack != null;
+
   Future<void> toggleCamera() async {
-    if (_cameraTrack != null) {
+    if (hasCameraEnabled) {
       await _cameraTrack?.stop();
       return setState(() => _cameraTrack = null);
     }
@@ -76,7 +79,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
   }
 
   Future<void> toggleMicrophone() async {
-    if (_microphoneTrack != null) {
+    if (hasMicrophoneEnabled) {
       await _microphoneTrack?.stop();
       return setState(() => _microphoneTrack = null);
     }
@@ -90,21 +93,17 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
   }
 
   void onJoinCallPressed() {
-    _isJoiningCall = true;
-
     var options = const CallConnectOptions();
 
-    final cameraTrack = _cameraTrack;
-    if (cameraTrack != null) {
+    if (hasCameraEnabled) {
       options = options.copyWith(
-        camera: TrackOption.provided(cameraTrack),
+        camera: TrackOption.enabled(),
       );
     }
 
-    final microphoneTrack = _microphoneTrack;
-    if (microphoneTrack != null) {
+    if (hasMicrophoneEnabled) {
       options = options.copyWith(
-        microphone: TrackOption.provided(microphoneTrack),
+        microphone: TrackOption.enabled(),
       );
     }
 
@@ -120,11 +119,8 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
 
   @override
   void dispose() {
-    // Dispose tracks if we closed lobby screen without joining the call.
-    if (!_isJoiningCall) {
-      _cameraTrack?.stop();
-      _microphoneTrack?.stop();
-    }
+    _cameraTrack?.stop();
+    _microphoneTrack?.stop();
 
     _cameraTrack = null;
     _microphoneTrack = null;
