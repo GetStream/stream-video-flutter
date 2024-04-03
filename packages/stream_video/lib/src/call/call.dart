@@ -28,7 +28,6 @@ import '../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
 import '../webrtc/rtc_manager.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
-import 'call_events.dart';
 import 'permissions/permissions_manager.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
@@ -252,8 +251,8 @@ class Call {
       _coordinatorEvents;
   final _coordinatorEvents = MutableSharedEmitterImpl<CoordinatorCallEvent>();
 
-  SharedEmitter<CallEvent> get callEvents => _callEvents;
-  final _callEvents = MutableSharedEmitterImpl<CallEvent>();
+  SharedEmitter<StreamCallEvent> get callEvents => _callEvents;
+  final _callEvents = MutableSharedEmitterImpl<StreamCallEvent>();
 
   OnCallPermissionRequest? onPermissionRequest;
 

@@ -8,8 +8,8 @@ import '../sfu/data/models/sfu_connection_info.dart';
 import '../sfu/sfu_extensions.dart';
 import '../shared_emitter.dart';
 
-abstract class CallEvent extends Equatable {
-  const CallEvent(this.callCid);
+abstract class StreamCallEvent extends Equatable {
+  const StreamCallEvent(this.callCid);
 
   final StreamCallCid callCid;
 
@@ -20,13 +20,13 @@ abstract class CallEvent extends Equatable {
   List<Object?> get props => [callCid];
 }
 
-abstract class SfuCallEvent extends CallEvent {
-  const SfuCallEvent(super.callCid);
+abstract class StreamSfuCallEvent extends StreamCallEvent {
+  const StreamSfuCallEvent(super.callCid);
 }
 
 /// Event that is triggered when the call is joined.
-class CallJoinedEvent extends SfuCallEvent {
-  const CallJoinedEvent(
+class StreamCallJoinedEvent extends StreamSfuCallEvent {
+  const StreamCallJoinedEvent(
     super.callCid, {
     required this.participants,
     required this.participantCount,
@@ -50,8 +50,8 @@ class CallJoinedEvent extends SfuCallEvent {
 }
 
 /// Event that is triggered when the connection quality changes for participants
-class CallConnectionQualityChangedEvent extends SfuCallEvent {
-  const CallConnectionQualityChangedEvent(
+class StreamCallConnectionQualityChangedEvent extends StreamSfuCallEvent {
+  const StreamCallConnectionQualityChangedEvent(
     super.callCid, {
     required this.connectionQualityUpdates,
   });
@@ -66,8 +66,8 @@ class CallConnectionQualityChangedEvent extends SfuCallEvent {
 }
 
 /// Event that is triggered when the audio levels change for participants
-class CallAudioLevelChangedEvent extends SfuCallEvent {
-  const CallAudioLevelChangedEvent(
+class StreamCallAudioLevelChangedEvent extends StreamSfuCallEvent {
+  const StreamCallAudioLevelChangedEvent(
     super.callCid, {
     required this.audioLevels,
   });
@@ -82,8 +82,8 @@ class CallAudioLevelChangedEvent extends SfuCallEvent {
 }
 
 /// Event that is triggered when a participant joins the call
-class CallParticipantJoinedEvent extends SfuCallEvent {
-  const CallParticipantJoinedEvent(
+class StreamCallParticipantJoinedEvent extends StreamSfuCallEvent {
+  const StreamCallParticipantJoinedEvent(
     super.callCid, {
     required this.participant,
   });
@@ -99,8 +99,8 @@ class CallParticipantJoinedEvent extends SfuCallEvent {
 }
 
 /// Event that is triggered when a participant leaves the call
-class CallParticipantLeftEvent extends SfuCallEvent {
-  const CallParticipantLeftEvent(
+class StreamCallParticipantLeftEvent extends StreamSfuCallEvent {
+  const StreamCallParticipantLeftEvent(
     super.callCid, {
     required this.participant,
   });
@@ -116,8 +116,8 @@ class CallParticipantLeftEvent extends SfuCallEvent {
 }
 
 /// Event that is triggered when the dominant speaker changes
-class CallDominantSpeakerChangedEvent extends SfuCallEvent {
-  const CallDominantSpeakerChangedEvent(
+class StreamCallDominantSpeakerChangedEvent extends StreamSfuCallEvent {
+  const StreamCallDominantSpeakerChangedEvent(
     super.callCid, {
     required this.userId,
     required this.sessionId,
@@ -134,32 +134,8 @@ class CallDominantSpeakerChangedEvent extends SfuCallEvent {
       ];
 }
 
-class CallSfuTrackPublishedEvent extends SfuCallEvent {
-  const CallSfuTrackPublishedEvent(
-    super.callCid, {
-    required this.userId,
-    required this.sessionId,
-    required this.trackType,
-    required this.participant,
-  });
-
-  final String userId;
-  final String sessionId;
-  final SfuTrackType trackType;
-  final CallParticipantState participant;
-
-  @override
-  List<Object?> get props => [
-        ...super.props,
-        userId,
-        sessionId,
-        trackType,
-        participant,
-      ];
-}
-
-class CallSfuTrackUnpublishedEvent extends SfuCallEvent {
-  const CallSfuTrackUnpublishedEvent(
+class StreamCallSfuTrackPublishedEvent extends StreamSfuCallEvent {
+  const StreamCallSfuTrackPublishedEvent(
     super.callCid, {
     required this.userId,
     required this.sessionId,
@@ -182,8 +158,32 @@ class CallSfuTrackUnpublishedEvent extends SfuCallEvent {
       ];
 }
 
-class CallGrantsUpdated extends SfuCallEvent {
-  const CallGrantsUpdated(
+class StreamCallSfuTrackUnpublishedEvent extends StreamSfuCallEvent {
+  const StreamCallSfuTrackUnpublishedEvent(
+    super.callCid, {
+    required this.userId,
+    required this.sessionId,
+    required this.trackType,
+    required this.participant,
+  });
+
+  final String userId;
+  final String sessionId;
+  final SfuTrackType trackType;
+  final CallParticipantState participant;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        userId,
+        sessionId,
+        trackType,
+        participant,
+      ];
+}
+
+class StreamCallGrantsUpdated extends StreamSfuCallEvent {
+  const StreamCallGrantsUpdated(
     super.callCid, {
     required this.currentGrants,
     required this.message,
@@ -201,8 +201,8 @@ class CallGrantsUpdated extends SfuCallEvent {
 }
 
 /// Event that is triggered when the call is connected
-class CallConnectedEvent extends CallEvent {
-  const CallConnectedEvent(
+class StreamCallConnectedEvent extends StreamCallEvent {
+  const StreamCallConnectedEvent(
     super.callCid, {
     required this.connectionId,
     required this.userId,
@@ -220,8 +220,8 @@ class CallConnectedEvent extends CallEvent {
 }
 
 /// Event that is triggered when the call is disconnected
-class CallDisconnectedEvent extends CallEvent {
-  const CallDisconnectedEvent(
+class StreamCallDisconnectedEvent extends StreamCallEvent {
+  const StreamCallDisconnectedEvent(
     super.callCid, {
     this.connectionId,
     this.userId,
@@ -245,8 +245,8 @@ class CallDisconnectedEvent extends CallEvent {
 }
 
 /// Event that is triggered when the call is created and another person is invited to participate.
-class CallCreatedEvent extends CallEvent {
-  const CallCreatedEvent(
+class StreamCallCreatedEvent extends StreamCallEvent {
+  const StreamCallCreatedEvent(
     super.callCid, {
     required this.metadata,
     required this.createdAt,
@@ -264,8 +264,8 @@ class CallCreatedEvent extends CallEvent {
 }
 
 /// Event that is triggered when the call is ringing.
-class CallRingingEvent extends CallEvent {
-  const CallRingingEvent(
+class StreamCallRingingEvent extends StreamCallEvent {
+  const StreamCallRingingEvent(
     super.callCid, {
     required this.ringing,
     required this.metadata,
@@ -289,8 +289,8 @@ class CallRingingEvent extends CallEvent {
 }
 
 /// Event that is triggered when the call is updated.
-class CallUpdatedEvent extends CallEvent {
-  const CallUpdatedEvent(
+class StreamCallUpdatedEvent extends StreamCallEvent {
+  const StreamCallUpdatedEvent(
     super.callCid, {
     required this.metadata,
     required this.capabilitiesByRole,
@@ -311,8 +311,8 @@ class CallUpdatedEvent extends CallEvent {
 }
 
 /// Event that is triggered when the call is ended.
-class CallEndedEvent extends CallEvent {
-  const CallEndedEvent(
+class StreamCallEndedEvent extends StreamCallEvent {
+  const StreamCallEndedEvent(
     super.callCid, {
     required this.endedBy,
     required this.createdAt,
@@ -332,8 +332,8 @@ class CallEndedEvent extends CallEvent {
 }
 
 /// Event that is triggered when the call is accepted.
-class CallAcceptedEvent extends CallEvent {
-  const CallAcceptedEvent(
+class StreamCallAcceptedEvent extends StreamCallEvent {
+  const StreamCallAcceptedEvent(
     super.callCid, {
     required this.acceptedBy,
     required this.createdAt,
@@ -353,8 +353,8 @@ class CallAcceptedEvent extends CallEvent {
 }
 
 /// Event that is triggered when the call is rejected.
-class CallRejectedEvent extends CallEvent {
-  const CallRejectedEvent(
+class StreamCallRejectedEvent extends StreamCallEvent {
+  const StreamCallRejectedEvent(
     super.callCid, {
     required this.rejectedBy,
     required this.createdAt,
@@ -374,8 +374,8 @@ class CallRejectedEvent extends CallEvent {
 }
 
 /// Event that is triggered when there is a permission request for a call.
-class CallPermissionRequestEvent extends CallEvent {
-  const CallPermissionRequestEvent(
+class StreamCallPermissionRequestEvent extends StreamCallEvent {
+  const StreamCallPermissionRequestEvent(
     super.callCid, {
     required this.createdAt,
     required this.permissions,
@@ -396,8 +396,8 @@ class CallPermissionRequestEvent extends CallEvent {
 }
 
 /// Event that is triggered when the permissions are updated for a call.
-class CallPermissionsUpdatedEvent extends CallEvent {
-  const CallPermissionsUpdatedEvent(
+class StreamCallPermissionsUpdatedEvent extends StreamCallEvent {
+  const StreamCallPermissionsUpdatedEvent(
     super.callCid, {
     required this.createdAt,
     required this.ownCapabilities,
@@ -418,8 +418,8 @@ class CallPermissionsUpdatedEvent extends CallEvent {
 }
 
 /// Event that is triggered when the recording is started for a call.
-class CallRecordingStartedEvent extends CallEvent {
-  const CallRecordingStartedEvent(
+class StreamCallRecordingStartedEvent extends StreamCallEvent {
+  const StreamCallRecordingStartedEvent(
     super.callCid, {
     required this.createdAt,
   });
@@ -434,8 +434,8 @@ class CallRecordingStartedEvent extends CallEvent {
 }
 
 /// Event that is triggered when the recording is stopped for a call.
-class CallRecordingStoppedEvent extends CallEvent {
-  const CallRecordingStoppedEvent(
+class StreamCallRecordingStoppedEvent extends StreamCallEvent {
+  const StreamCallRecordingStoppedEvent(
     super.callCid, {
     required this.createdAt,
   });
@@ -450,8 +450,8 @@ class CallRecordingStoppedEvent extends CallEvent {
 }
 
 /// Event that is triggered when the broadcasting is started for a call.
-class CallBroadcastingStartedEvent extends CallEvent {
-  const CallBroadcastingStartedEvent(
+class StreamCallBroadcastingStartedEvent extends StreamCallEvent {
+  const StreamCallBroadcastingStartedEvent(
     super.callCid, {
     required this.hlsPlaylistUrl,
     required this.createdAt,
@@ -469,8 +469,8 @@ class CallBroadcastingStartedEvent extends CallEvent {
 }
 
 /// Event that is triggered when the broadcasting is stopped for a call.
-class CallBroadcastingStoppedEvent extends CallEvent {
-  const CallBroadcastingStoppedEvent(
+class StreamCallBroadcastingStoppedEvent extends StreamCallEvent {
+  const StreamCallBroadcastingStoppedEvent(
     super.callCid, {
     required this.createdAt,
   });
@@ -485,8 +485,8 @@ class CallBroadcastingStoppedEvent extends CallEvent {
 }
 
 /// Event that is triggered when the user is blocked in a call.
-class CallUserBlockedEvent extends CallEvent {
-  const CallUserBlockedEvent(
+class StreamCallUserBlockedEvent extends StreamCallEvent {
+  const StreamCallUserBlockedEvent(
     super.callCid, {
     required this.createdAt,
     required this.user,
@@ -504,8 +504,8 @@ class CallUserBlockedEvent extends CallEvent {
 }
 
 /// Event that is triggered when the user is unblocked in a call.
-class CallUserUnblockedEvent extends CallEvent {
-  const CallUserUnblockedEvent(
+class StreamCallUserUnblockedEvent extends StreamCallEvent {
+  const StreamCallUserUnblockedEvent(
     super.callCid, {
     required this.createdAt,
     required this.user,
@@ -524,8 +524,8 @@ class CallUserUnblockedEvent extends CallEvent {
 }
 
 /// Event that is triggered when someone sends a reaction during a call
-class CallReactionEvent extends CallEvent {
-  const CallReactionEvent(
+class StreamCallReactionEvent extends StreamCallEvent {
+  const StreamCallReactionEvent(
     super.callCid, {
     required this.createdAt,
     required this.reactionType,
@@ -549,8 +549,8 @@ class CallReactionEvent extends CallEvent {
       ];
 }
 
-class CallCustomEvent extends CallEvent {
-  const CallCustomEvent(
+class StreamCallCustomEvent extends StreamCallEvent {
+  const StreamCallCustomEvent(
     super.callCid, {
     required this.senderUserId,
     required this.createdAt,
@@ -577,8 +577,8 @@ class CallCustomEvent extends CallEvent {
 }
 
 /// Event that is triggered when the new session is started for a call
-class CallSessionStartedEvent extends CallEvent {
-  const CallSessionStartedEvent(
+class StreamCallSessionStartedEvent extends StreamCallEvent {
+  const StreamCallSessionStartedEvent(
     super.callCid, {
     required this.createdAt,
     required this.sessionId,
@@ -599,8 +599,8 @@ class CallSessionStartedEvent extends CallEvent {
 }
 
 /// Event that is triggered when the session is ended for a call
-class CallSessionEndedEvent extends CallEvent {
-  const CallSessionEndedEvent(
+class StreamCallSessionEndedEvent extends StreamCallEvent {
+  const StreamCallSessionEndedEvent(
     super.callCid, {
     required this.createdAt,
     required this.sessionId,
@@ -621,8 +621,8 @@ class CallSessionEndedEvent extends CallEvent {
 }
 
 /// Event that is triggered when participant joins the call session
-class CallSessionParticipantJoinedEvent extends CallEvent {
-  const CallSessionParticipantJoinedEvent(
+class StreamCallSessionParticipantJoinedEvent extends StreamCallEvent {
+  const StreamCallSessionParticipantJoinedEvent(
     super.callCid, {
     required this.createdAt,
     required this.sessionId,
@@ -646,8 +646,8 @@ class CallSessionParticipantJoinedEvent extends CallEvent {
 }
 
 /// Event that is triggered when participant leaves the call session
-class CallSessionParticipantLeftEvent extends CallEvent {
-  const CallSessionParticipantLeftEvent(
+class StreamCallSessionParticipantLeftEvent extends StreamCallEvent {
+  const StreamCallSessionParticipantLeftEvent(
     super.callCid, {
     required this.createdAt,
     required this.sessionId,
@@ -670,8 +670,8 @@ class CallSessionParticipantLeftEvent extends CallEvent {
       ];
 }
 
-extension CallEventX on CallEvent? {
-  void emitIfNotNull(MutableSharedEmitter<CallEvent> emitter) {
+extension StreamCallEventX on StreamCallEvent? {
+  void emitIfNotNull(MutableSharedEmitter<StreamCallEvent> emitter) {
     if (this != null) {
       emitter.emit(this!);
     }
@@ -679,9 +679,9 @@ extension CallEventX on CallEvent? {
 }
 
 extension SfuEventX on SfuEvent {
-  CallEvent? mapToCallEvent(CallState state) {
+  StreamCallEvent? mapToCallEvent(CallState state) {
     return switch (this) {
-      final SfuJoinResponseEvent event => CallJoinedEvent(
+      final SfuJoinResponseEvent event => StreamCallJoinedEvent(
           StreamCallCid(cid: state.callId),
           participants: event.callState.participants
               .map((sfuParticipant) => sfuParticipant.toParticipantState(state))
@@ -691,43 +691,44 @@ extension SfuEventX on SfuEvent {
           startedAt: event.callState.startedAt,
         ),
       final SfuConnectionQualityChangedEvent event =>
-        CallConnectionQualityChangedEvent(
+        StreamCallConnectionQualityChangedEvent(
           StreamCallCid(cid: state.callId),
           connectionQualityUpdates: event.connectionQualityUpdates,
         ),
-      final SfuAudioLevelChangedEvent event => CallAudioLevelChangedEvent(
+      final SfuAudioLevelChangedEvent event => StreamCallAudioLevelChangedEvent(
           StreamCallCid(cid: state.callId),
           audioLevels: event.audioLevels,
         ),
-      final SfuParticipantJoinedEvent event => CallParticipantJoinedEvent(
+      final SfuParticipantJoinedEvent event => StreamCallParticipantJoinedEvent(
           StreamCallCid(cid: state.callId),
           participant: event.participant.toParticipantState(state),
         ),
-      final SfuParticipantLeftEvent event => CallParticipantLeftEvent(
+      final SfuParticipantLeftEvent event => StreamCallParticipantLeftEvent(
           StreamCallCid(cid: state.callId),
           participant: event.participant.toParticipantState(state),
         ),
       final SfuDominantSpeakerChangedEvent event =>
-        CallDominantSpeakerChangedEvent(
+        StreamCallDominantSpeakerChangedEvent(
           StreamCallCid(cid: state.callId),
           userId: event.userId,
           sessionId: event.sessionId,
         ),
-      final SfuTrackPublishedEvent event => CallSfuTrackPublishedEvent(
-          StreamCallCid(cid: state.callId),
-          userId: event.userId,
-          sessionId: event.sessionId,
-          trackType: event.trackType,
-          participant: event.participant.toParticipantState(state),
-        ),
-      final SfuTrackUnpublishedEvent event => CallSfuTrackUnpublishedEvent(
+      final SfuTrackPublishedEvent event => StreamCallSfuTrackPublishedEvent(
           StreamCallCid(cid: state.callId),
           userId: event.userId,
           sessionId: event.sessionId,
           trackType: event.trackType,
           participant: event.participant.toParticipantState(state),
         ),
-      final SfuCallGrantsUpdated event => CallGrantsUpdated(
+      final SfuTrackUnpublishedEvent event =>
+        StreamCallSfuTrackUnpublishedEvent(
+          StreamCallCid(cid: state.callId),
+          userId: event.userId,
+          sessionId: event.sessionId,
+          trackType: event.trackType,
+          participant: event.participant.toParticipantState(state),
+        ),
+      final SfuCallGrantsUpdated event => StreamCallGrantsUpdated(
           StreamCallCid(cid: state.callId),
           currentGrants: event.currentGrants,
           message: event.message,
@@ -739,99 +740,100 @@ extension SfuEventX on SfuEvent {
 }
 
 extension CoordinatorCallEventX on CoordinatorCallEvent {
-  CallEvent? mapToCallEvent(CallState state) {
+  StreamCallEvent? mapToCallEvent(CallState state) {
     return switch (this) {
-      final CoordinatorConnectedEvent event => CallConnectedEvent(
+      final CoordinatorConnectedEvent event => StreamCallConnectedEvent(
           StreamCallCid(cid: state.callId),
           connectionId: event.connectionId,
           userId: event.userId,
         ),
-      final CoordinatorDisconnectedEvent event => CallDisconnectedEvent(
+      final CoordinatorDisconnectedEvent event => StreamCallDisconnectedEvent(
           StreamCallCid(cid: state.callId),
           connectionId: event.connectionId,
           userId: event.userId,
           closeCode: event.closeCode,
           closeReason: event.closeReason,
         ),
-      final CoordinatorCallCreatedEvent event => CallCreatedEvent(
+      final CoordinatorCallCreatedEvent event => StreamCallCreatedEvent(
           event.callCid,
           metadata: event.metadata,
           createdAt: event.createdAt,
         ),
-      final CoordinatorCallRingingEvent event => CallRingingEvent(
+      final CoordinatorCallRingingEvent event => StreamCallRingingEvent(
           event.callCid,
           ringing: event.ringing,
           metadata: event.metadata,
           sessionId: event.sessionId,
           createdAt: event.createdAt,
         ),
-      final CoordinatorCallUpdatedEvent event => CallUpdatedEvent(
+      final CoordinatorCallUpdatedEvent event => StreamCallUpdatedEvent(
           event.callCid,
           metadata: event.metadata,
           capabilitiesByRole: event.capabilitiesByRole,
           createdAt: event.createdAt,
         ),
-      final CoordinatorCallEndedEvent event => CallEndedEvent(
+      final CoordinatorCallEndedEvent event => StreamCallEndedEvent(
           event.callCid,
           endedBy: event.endedBy,
           createdAt: event.createdAt,
         ),
-      final CoordinatorCallAcceptedEvent event => CallAcceptedEvent(
+      final CoordinatorCallAcceptedEvent event => StreamCallAcceptedEvent(
           event.callCid,
           acceptedBy: event.acceptedBy,
           createdAt: event.createdAt,
         ),
-      final CoordinatorCallRejectedEvent event => CallRejectedEvent(
+      final CoordinatorCallRejectedEvent event => StreamCallRejectedEvent(
           event.callCid,
           rejectedBy: event.rejectedBy,
           createdAt: event.createdAt,
         ),
       final CoordinatorCallPermissionRequestEvent event =>
-        CallPermissionRequestEvent(
+        StreamCallPermissionRequestEvent(
           event.callCid,
           createdAt: event.createdAt,
           permissions: event.permissions,
           user: event.user,
         ),
       final CoordinatorCallPermissionsUpdatedEvent event =>
-        CallPermissionsUpdatedEvent(
+        StreamCallPermissionsUpdatedEvent(
           event.callCid,
           createdAt: event.createdAt,
           ownCapabilities: event.ownCapabilities,
           user: event.user,
         ),
       final CoordinatorCallRecordingStartedEvent event =>
-        CallRecordingStartedEvent(
+        StreamCallRecordingStartedEvent(
           event.callCid,
           createdAt: event.createdAt,
         ),
       final CoordinatorCallRecordingStoppedEvent event =>
-        CallRecordingStoppedEvent(
+        StreamCallRecordingStoppedEvent(
           event.callCid,
           createdAt: event.createdAt,
         ),
       final CoordinatorCallBroadcastingStartedEvent event =>
-        CallBroadcastingStartedEvent(
+        StreamCallBroadcastingStartedEvent(
           event.callCid,
           hlsPlaylistUrl: event.hlsPlaylistUrl,
           createdAt: event.createdAt,
         ),
       final CoordinatorCallBroadcastingStoppedEvent event =>
-        CallBroadcastingStoppedEvent(
+        StreamCallBroadcastingStoppedEvent(
           event.callCid,
           createdAt: event.createdAt,
         ),
-      final CoordinatorCallUserBlockedEvent event => CallUserBlockedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          user: event.user,
-        ),
-      final CoordinatorCallUserUnblockedEvent event => CallUserUnblockedEvent(
+      final CoordinatorCallUserBlockedEvent event => StreamCallUserBlockedEvent(
           event.callCid,
           createdAt: event.createdAt,
           user: event.user,
         ),
-      final CoordinatorCallReactionEvent event => CallReactionEvent(
+      final CoordinatorCallUserUnblockedEvent event =>
+        StreamCallUserUnblockedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+          user: event.user,
+        ),
+      final CoordinatorCallReactionEvent event => StreamCallReactionEvent(
           event.callCid,
           createdAt: event.createdAt,
           reactionType: event.reactionType,
@@ -839,7 +841,7 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           emojiCode: event.emojiCode,
           custom: event.custom,
         ),
-      final CoordinatorCallCustomEvent event => CallCustomEvent(
+      final CoordinatorCallCustomEvent event => StreamCallCustomEvent(
           event.callCid,
           senderUserId: event.senderUserId,
           createdAt: event.createdAt,
@@ -847,20 +849,22 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           users: event.users,
           custom: event.custom,
         ),
-      final CoordinatorCallSessionStartedEvent event => CallSessionStartedEvent(
+      final CoordinatorCallSessionStartedEvent event =>
+        StreamCallSessionStartedEvent(
           event.callCid,
           createdAt: event.createdAt,
           sessionId: event.sessionId,
           metadata: event.metadata,
         ),
-      final CoordinatorCallSessionEndedEvent event => CallSessionEndedEvent(
+      final CoordinatorCallSessionEndedEvent event =>
+        StreamCallSessionEndedEvent(
           event.callCid,
           createdAt: event.createdAt,
           sessionId: event.sessionId,
           metadata: event.metadata,
         ),
       final CoordinatorCallSessionParticipantJoinedEvent event =>
-        CallSessionParticipantJoinedEvent(
+        StreamCallSessionParticipantJoinedEvent(
           event.callCid,
           createdAt: event.createdAt,
           sessionId: event.sessionId,
@@ -868,7 +872,7 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
           participant: event.participant,
         ),
       final CoordinatorCallSessionParticipantLeftEvent event =>
-        CallSessionParticipantLeftEvent(
+        StreamCallSessionParticipantLeftEvent(
           event.callCid,
           createdAt: event.createdAt,
           sessionId: event.sessionId,
