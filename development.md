@@ -45,7 +45,6 @@
 - [x] Support ICE restart reconnection [Maciej,Kanat]
 - [x] Update WebRTC version to m114 (livekit version) [Kanat]
 - [x] Fix analysis issues [Maciej]
-- [ ] Tap to focus (flutter_webrtc) [Kanat]
 
 ### 0.4.0 milestone
 - [x] Implement Chat overlay for Dogfooding app
@@ -53,6 +52,8 @@
 - [x] Send raw stats to backend
 - [x] Bluetooth fixes (check support of BT media devices in flutter)
 - [x] Switch the earpiece/microphone button *(depends on "Bluetooth fixes")*
+- [x] Align custom event support to other SDKs
+- [ ] Tap to focus (flutter_webrtc)
 - [ ] Video filters / audio filters
 - [ ] Local audio levels (maybe from webrtc)
 - [ ] Test coverage 
@@ -60,7 +61,6 @@
 - - [ ] stream_video_flutter (75%)
 - - [ ] stream_video_push_notification
 - - [ ] Coverage check for PRs
-- [ ] Align custom event support to other SDKs
 - [ ] Documentation parity
 - - [ ] UI components
 - - [ ] Cookbook
