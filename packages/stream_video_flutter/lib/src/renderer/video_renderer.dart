@@ -82,8 +82,9 @@ class StreamVideoRenderer extends StatelessWidget {
 
     var mirror = participant.isLocal;
 
-    // If the track is local and it's a back camera, don't mirror the video.
-    if (participant.isLocal && videoTrack is RtcLocalTrack<CameraConstraints>) {
+    if (videoTrack is RtcLocalScreenShareTrack) {
+      mirror = false;
+    } else if (videoTrack is RtcLocalTrack<CameraConstraints>) {
       final isBackCamera =
           videoTrack.mediaConstraints.facingMode == FacingMode.environment;
       mirror = !isBackCamera;
