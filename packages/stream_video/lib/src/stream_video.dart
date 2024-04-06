@@ -608,13 +608,11 @@ class StreamVideo {
 
     switch (callRingingState) {
       case CallRingingState.ringing:
-        unawaited(
-          manager.showIncomingCall(
-            uuid: callUUID,
-            handle: createdById,
-            nameCaller: createdByName,
-            callCid: callCid,
-          ),
+        await manager.showIncomingCall(
+          uuid: callUUID,
+          handle: createdById,
+          nameCaller: createdByName,
+          callCid: callCid,
         );
         return true;
       case CallRingingState.accepted:
@@ -622,13 +620,11 @@ class StreamVideo {
       case CallRingingState.rejected:
         return false;
       case CallRingingState.ended:
-        unawaited(
-          manager.showMissedCall(
-            uuid: callUUID,
-            handle: createdById,
-            nameCaller: createdByName,
-            callCid: callCid,
-          ),
+        await manager.showMissedCall(
+          uuid: callUUID,
+          handle: createdById,
+          nameCaller: createdByName,
+          callCid: callCid,
         );
         return false;
     }
