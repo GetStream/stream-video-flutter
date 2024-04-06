@@ -5,19 +5,21 @@ class CallerCustomizationResponse {
   final String? avatar;
   final String? name;
   final String? handle;
+  final bool? hasVideo;
 
-  CallerCustomizationResponse({this.name, this.handle, this.avatar});
+  CallerCustomizationResponse({this.name, this.handle, this.avatar, this.hasVideo});
 
   Map<String, dynamic> toJson() {
     return {
       "name": name,
       "handle": handle,
       "avatar": avatar,
+      "has_video": hasVideo,
     };
   }
 }
 
-typedef CallerCustomizationFunction = CallerCustomizationResponse Function({
+typedef CallerCustomizationFunction = Future<CallerCustomizationResponse> Function({
   required String callCid,
   String? callerHandle,
   String? callerName,

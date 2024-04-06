@@ -22,7 +22,7 @@ class MethodChannelStreamVideoPushNotification
         final handle = call.arguments["created_by_id"];
         final callId = call.arguments["call_cid"];
 
-        final result = callerCustomizationCallback?.call(
+        final result = await callerCustomizationCallback?.call(
           callCid: callId,
           callerName: name,
           callerHandle: handle,

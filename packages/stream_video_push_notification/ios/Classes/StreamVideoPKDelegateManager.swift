@@ -69,6 +69,7 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
                 if let customData = response as? [String: Any] {
                     streamDict?["created_by_display_name"] = customData["name"] as? String
                     streamDict?["created_by_id"] = customData["handle"] as? String
+                    streamDict?["has_video"] = customData["has_video"] as? Bool
                 }
                 
                 self.handleIncomingCall(streamDict: streamDict, state: state, completion: completion)
@@ -82,7 +83,7 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
         let callCid = streamDict?["call_cid"] as? String ?? ""
         let createdByName = streamDict?["created_by_display_name"] as? String
         let createdById = streamDict?["created_by_id"] as? String
-
+        let hasVideo = streamDict?["has_video"] as? Bool ?? true
         var callUUID = UUID().uuidString;
 
         let data: StreamVideoPushParams
@@ -95,7 +96,7 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
         data.callKitData.uuid = callUUID
         data.callKitData.nameCaller = createdByName ?? defaultCallText
         data.callKitData.handle = createdById ?? defaultCallText
-        data.callKitData.type = 1 //video
+        data.callKitData.type = hasVideo == true ? 1 : 0
         data.callKitData.extra = ["callCid": callCid]
         
         // Show call incoming notification.

@@ -218,8 +218,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? handle,
     String? nameCaller,
     bool hasVideo = true,
-  }) {
-    final customData = callerCustomizationCallback?.call(
+  }) async {
+    final customData = await callerCustomizationCallback?.call(
       callCid: callCid,
       callerName: nameCaller,
       callerHandle: handle,
@@ -230,7 +230,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       avatar: customData?.avatar ?? avatar,
       handle: customData?.handle ?? handle,
       nameCaller: customData?.name ?? nameCaller,
-      type: hasVideo ? 1 : 0,
+      type: customData?.hasVideo ?? hasVideo ? 1 : 0,
       extra: {'callCid': callCid},
     );
 
@@ -245,8 +245,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? handle,
     String? nameCaller,
     bool hasVideo = true,
-  }) {
-    final customData = callerCustomizationCallback?.call(
+  }) async {
+    final customData = await callerCustomizationCallback?.call(
       callCid: callCid,
       callerName: nameCaller,
       callerHandle: handle,
@@ -257,7 +257,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       avatar: customData?.avatar ?? avatar,
       handle: customData?.handle ?? handle,
       nameCaller: customData?.name ?? nameCaller,
-      type: hasVideo ? 1 : 0,
+      type: customData?.hasVideo ?? hasVideo ? 1 : 0,
       extra: {'callCid': callCid},
     );
 
