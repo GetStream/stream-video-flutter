@@ -1,3 +1,19 @@
+## 0.3.6
+✅ Added
+
+* Added `callEvents` stream to `Call` that replaces `events` and `coordinatorEvents` streams (both are now deprecated).
+* Added `callBackgroundBuilder` to `StreamOutg/oingCallContent`.
+
+🚧 Breaking changes
+
+* Removed the `callCid` parameter requirement from `sendCustomEvent()` method in `Call` class.
+
+🐞 Fixed
+
+* Fixed an issue that caused an empty Call participants list in CallState during ringing.
+* Fixed an issue that caused constant notification sound being triggered during the call on Android.
+* Disabled camera mirroring when using back camera and when screensharing.
+
 ## 0.3.5
 ✅ Added
 
