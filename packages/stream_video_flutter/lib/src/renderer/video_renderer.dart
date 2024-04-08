@@ -80,11 +80,21 @@ class StreamVideoRenderer extends StatelessWidget {
       return placeholderBuilder.call(context);
     }
 
+    var mirror = participant.isLocal;
+
+    if (videoTrack is RtcLocalScreenShareTrack) {
+      mirror = false;
+    } else if (videoTrack is RtcLocalTrack<CameraConstraints>) {
+      final isBackCamera =
+          videoTrack.mediaConstraints.facingMode == FacingMode.environment;
+      mirror = !isBackCamera;
+    }
+
     return VideoTrackRenderer(
       key: ValueKey(videoTrack.trackId),
       videoFit: videoFit,
       videoTrack: videoTrack,
-      mirror: participant.isLocal,
+      mirror: mirror,
       placeholderBuilder: placeholderBuilder,
     );
   }
