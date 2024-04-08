@@ -682,7 +682,7 @@ extension SfuEventX on SfuEvent {
   StreamCallEvent? mapToCallEvent(CallState state) {
     return switch (this) {
       final SfuJoinResponseEvent event => StreamCallJoinedEvent(
-          StreamCallCid(cid: state.callId),
+          state.callCid,
           participants: event.callState.participants
               .map((sfuParticipant) => sfuParticipant.toParticipantState(state))
               .toList(),
@@ -692,29 +692,29 @@ extension SfuEventX on SfuEvent {
         ),
       final SfuConnectionQualityChangedEvent event =>
         StreamCallConnectionQualityChangedEvent(
-          StreamCallCid(cid: state.callId),
+          state.callCid,
           connectionQualityUpdates: event.connectionQualityUpdates,
         ),
       final SfuAudioLevelChangedEvent event => StreamCallAudioLevelChangedEvent(
-          StreamCallCid(cid: state.callId),
+          state.callCid,
           audioLevels: event.audioLevels,
         ),
       final SfuParticipantJoinedEvent event => StreamCallParticipantJoinedEvent(
-          StreamCallCid(cid: state.callId),
+          state.callCid,
           participant: event.participant.toParticipantState(state),
         ),
       final SfuParticipantLeftEvent event => StreamCallParticipantLeftEvent(
-          StreamCallCid(cid: state.callId),
+          state.callCid,
           participant: event.participant.toParticipantState(state),
         ),
       final SfuDominantSpeakerChangedEvent event =>
         StreamCallDominantSpeakerChangedEvent(
-          StreamCallCid(cid: state.callId),
+          state.callCid,
           userId: event.userId,
           sessionId: event.sessionId,
         ),
       final SfuTrackPublishedEvent event => StreamCallSfuTrackPublishedEvent(
-          StreamCallCid(cid: state.callId),
+          state.callCid,
           userId: event.userId,
           sessionId: event.sessionId,
           trackType: event.trackType,
@@ -722,14 +722,14 @@ extension SfuEventX on SfuEvent {
         ),
       final SfuTrackUnpublishedEvent event =>
         StreamCallSfuTrackUnpublishedEvent(
-          StreamCallCid(cid: state.callId),
+          state.callCid,
           userId: event.userId,
           sessionId: event.sessionId,
           trackType: event.trackType,
           participant: event.participant.toParticipantState(state),
         ),
       final SfuCallGrantsUpdated event => StreamCallGrantsUpdated(
-          StreamCallCid(cid: state.callId),
+          state.callCid,
           currentGrants: event.currentGrants,
           message: event.message,
         ),
@@ -743,12 +743,12 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
   StreamCallEvent? mapToCallEvent(CallState state) {
     return switch (this) {
       final CoordinatorConnectedEvent event => StreamCallConnectedEvent(
-          StreamCallCid(cid: state.callId),
+          state.callCid,
           connectionId: event.connectionId,
           userId: event.userId,
         ),
       final CoordinatorDisconnectedEvent event => StreamCallDisconnectedEvent(
-          StreamCallCid(cid: state.callId),
+          state.callCid,
           connectionId: event.connectionId,
           userId: event.userId,
           closeCode: event.closeCode,
