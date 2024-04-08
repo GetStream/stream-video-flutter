@@ -71,9 +71,9 @@ class StreamOutgoingCallContent extends StatefulWidget {
   /// Builder used to create a custom widget for participants display names.
   final ParticipantsDisplayNameBuilder? participantsDisplayNameBuilder;
 
-  /// A widget that is placed behind the outgoing call UI instead of the default
+  /// A widget that is placed behind the outgoing call UI instead of the Stream default
   ///
-  /// background. Preferably use a [Stack] widget, like in the default [CallBackground].
+  /// Preferably use a [Stack] widget to layer your UI like in the default [CallBackground].
   final OutgoingCallBackground? callBackgroundBuilder;
 
   @override
