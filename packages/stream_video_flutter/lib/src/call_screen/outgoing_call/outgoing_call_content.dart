@@ -22,7 +22,6 @@ class StreamOutgoingCallContent extends StatefulWidget {
     super.key,
     required this.call,
     required this.callState,
-    this.backgroundWidget,
     this.onCancelCallTap,
     this.onMicrophoneTap,
     this.onCameraTap,
@@ -31,6 +30,7 @@ class StreamOutgoingCallContent extends StatefulWidget {
     this.singleParticipantTextStyle,
     this.multipleParticipantTextStyle,
     this.callingLabelTextStyle,
+    this.callBackgroundBuilder,
     this.participantsAvatarBuilder,
     this.participantsDisplayNameBuilder,
   });
@@ -74,7 +74,7 @@ class StreamOutgoingCallContent extends StatefulWidget {
   /// A widget that is placed behind the outgoing call UI instead of the default
   ///
   /// background. Preferably use a [Stack] widget, like in the default [CallBackground].
-  final OutgoingCallBackground? backgroundWidget;
+  final OutgoingCallBackground? callBackgroundBuilder;
 
   @override
   State<StreamOutgoingCallContent> createState() =>
@@ -152,7 +152,7 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
         ),
     );
 
-    return widget.backgroundWidget?.call(
+    return widget.callBackgroundBuilder?.call(
           widget.call,
           widget.callState,
           participants,
