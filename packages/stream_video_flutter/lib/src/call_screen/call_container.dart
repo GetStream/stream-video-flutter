@@ -47,7 +47,7 @@ class StreamCallContainer extends StatefulWidget {
   const StreamCallContainer({
     super.key,
     required this.call,
-    this.callConnectOptions = const CallConnectOptions(),
+    this.callConnectOptions,
     this.onBackPressed,
     this.onLeaveCallTap,
     this.onAcceptCallTap,
@@ -56,13 +56,14 @@ class StreamCallContainer extends StatefulWidget {
     this.incomingCallBuilder,
     this.outgoingCallBuilder,
     this.callContentBuilder,
+    this.enablePictureInPicture = false,
   });
 
   /// Represents a call.
   final Call call;
 
   /// Options used while connecting to the call.
-  final CallConnectOptions callConnectOptions;
+  final CallConnectOptions? callConnectOptions;
 
   /// The action to perform when the back button is pressed.
   final VoidCallback? onBackPressed;
@@ -87,6 +88,9 @@ class StreamCallContainer extends StatefulWidget {
 
   /// Builder used to create a custom call content widget.
   final CallContentBuilder? callContentBuilder;
+
+  /// Whether to enable picture-in-picture mode. (available only on Android)
+  final bool enablePictureInPicture;
 
   @override
   State<StreamCallContainer> createState() => _StreamCallContainerState();
@@ -154,6 +158,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
             callState: _callState,
             onBackPressed: widget.onBackPressed,
             onLeaveCallTap: widget.onLeaveCallTap,
+            enablePictureInPicture: widget.enablePictureInPicture,
           );
     }
   }
@@ -161,7 +166,9 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   Future<void> _connect() async {
     try {
       _logger.d(() => '[connect] no args');
-      call.connectOptions = widget.callConnectOptions;
+      if (widget.callConnectOptions != null) {
+        call.connectOptions = widget.callConnectOptions!;
+      }
       final result = await call.join();
       _logger.v(() => '[connect] completed: $result');
     } catch (e) {

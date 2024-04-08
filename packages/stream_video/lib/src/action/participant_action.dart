@@ -21,27 +21,31 @@ abstract class ParticipantAction extends StreamExternalAction
 class SetParticipantPinned extends ParticipantAction {
   const SetParticipantPinned({
     required this.sessionId,
+    required this.userId,
     required this.pinned,
   });
 
   final String sessionId;
+  final String userId;
   final bool pinned;
 
   @override
-  List<Object?> get props => [sessionId, pinned];
+  List<Object?> get props => [sessionId, userId, pinned];
 }
 
 class UpdateViewportVisibility extends ParticipantAction {
   const UpdateViewportVisibility({
     required this.sessionId,
+    required this.userId,
     required this.visibility,
   });
 
   final String sessionId;
+  final String userId;
   final ViewportVisibility visibility;
 
   @override
-  List<Object?> get props => [sessionId, visibility];
+  List<Object?> get props => [sessionId, userId, visibility];
 }
 
 class UpdateViewportVisibilities extends ParticipantAction {

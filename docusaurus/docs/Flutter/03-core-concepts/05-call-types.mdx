@@ -4,15 +4,28 @@ slug: /call-types
 description: How Call Types control features and permissions
 ---
 
-import WithExternalLinks from '../../../shared/video/_withExternalLinks';
+import CallTypesPage from "../../../shared/video/_call-types.md";
 
-<WithExternalLinks
-  mapping={{
-    '/tutorials/video-calling/':
-      'https://getstream.io/video/sdk/flutter/tutorial/video-calling/',
-    '/tutorials/audio-room/':
-      'https://getstream.io/video/sdk/flutter/tutorial/audio-room/',
-    '/tutorials/livestream/':
-      'https://getstream.io/video/sdk/flutter/tutorial/livestreaming/',
-  }}
-/>
+
+When you create a call like this
+
+```dart
+final call = client.makeCall(callType: StreamCallType(), "123")
+```
+
+You create a call of the type `default` with id `123`.
+
+There are 4 built-in call types, `default`, `audio_room`, `livestream` and `development`.
+
+You can also create your own types by calling `StreamCallType.custom`.
+  
+```dart
+final call = client.makeCall(callType: StreamCallType.custom("custom"), "123")
+```
+
+:::note
+  When using a custom call type, you need to make sure that the server is configured to handle the custom call type.
+  Also the `StreamCallType.custom` is lenient and will create a `StreamCallType` even if you misspell it.
+:::
+
+<CallTypesPage />

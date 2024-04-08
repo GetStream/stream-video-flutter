@@ -2,12 +2,14 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../stream_video.dart';
+import '../../version.g.dart';
 import '../action/internal/lifecycle_action.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../errors/video_error_composer.dart';
@@ -20,6 +22,10 @@ import '../utils/cancelable_operation.dart';
 import '../utils/cancelables.dart';
 import '../utils/future.dart';
 import '../utils/standard.dart';
+import '../webrtc/model/stats/rtc_ice_candidate_pair.dart';
+import '../webrtc/model/stats/rtc_inbound_rtp_video_stream.dart';
+import '../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
+import '../webrtc/rtc_manager.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
 import 'permissions/permissions_manager.dart';
@@ -227,7 +233,7 @@ class Call {
 
   StreamCallCid get callCid => state.value.callCid;
 
-  String get type => state.value.callType;
+  StreamCallType get type => state.value.callType;
 
   String get id => state.value.callId;
 
@@ -236,12 +242,17 @@ class Call {
   SharedEmitter<CallStats> get stats => _stats;
   late final _stats = MutableSharedEmitterImpl<CallStats>();
 
+  @Deprecated('Use `callEvents` instead')
   SharedEmitter<SfuEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<SfuEvent>();
 
+  @Deprecated('Use `callEvents` instead')
   SharedEmitter<CoordinatorCallEvent> get coordinatorEvents =>
       _coordinatorEvents;
   final _coordinatorEvents = MutableSharedEmitterImpl<CoordinatorCallEvent>();
+
+  SharedEmitter<StreamCallEvent> get callEvents => _callEvents;
+  final _callEvents = MutableSharedEmitterImpl<StreamCallEvent>();
 
   OnCallPermissionRequest? onPermissionRequest;
 
@@ -264,8 +275,7 @@ class Call {
 
   set connectOptions(CallConnectOptions connectOptions) {
     final status = _status.value;
-    if (status == _ConnectionStatus.connecting ||
-        status == _ConnectionStatus.connected) {
+    if (status == _ConnectionStatus.connected) {
       _logger.w(
         () => '[setConnectOptions] rejected (connectOptions must be'
             ' set before invoking `connect`)',
@@ -289,6 +299,7 @@ class Call {
       _idCoordEvents,
       _coordinatorClient.events.on<CoordinatorCallEvent>((event) async {
         _coordinatorEvents.emit(event);
+        event.mapToCallEvent(state.value).emitIfNotNull(_callEvents);
         await _onCoordinatorEvent(event);
       }),
     );
@@ -371,7 +382,8 @@ class Call {
   Future<Result<None>> reject() async {
     final state = this.state.value;
     final status = state.status;
-    if (status is! CallStatusIncoming || status.acceptedByMe) {
+    if ((status is! CallStatusIncoming || status.acceptedByMe) &&
+        status is! CallStatusOutgoing) {
       _logger.w(() => '[rejectCall] rejected (invalid status): $status');
       return Result.error('invalid status: $status');
     }
@@ -421,30 +433,36 @@ class Call {
       _logger.w(() => '[join] rejected (connected)');
       return const Result.success(none);
     }
+
     if (_getActiveCallCid() == callCid) {
       _logger.w(
         () => '[join] rejected (a call with the same cid is in progress)',
       );
       return Result.error('a call with the same cid is in progress');
     }
+
     if (_status.value == _ConnectionStatus.connecting) {
       _logger.v(() => '[join] await "connecting" change');
       final status = await _status.firstWhere(
         (it) => it != _ConnectionStatus.connecting,
         timeLimit: _preferences.connectTimeout,
       );
+
       if (status == _ConnectionStatus.connected) {
         return const Result.success(none);
       } else {
         return Result.error('original "connect" failed');
       }
     }
+
     await _setActiveCall(this);
     _status.value = _ConnectionStatus.connecting;
+
     final result = await _connect()
         .asCancelable()
         .storeIn(_idConnect, _cancelables)
         .valueOrDefault(Result.error('connect cancelled'));
+
     if (result.isSuccess) {
       _logger.v(() => '[join] finished: $result');
       _status.value = _ConnectionStatus.connected;
@@ -502,6 +520,7 @@ class Call {
     if (result.isFailure) {
       _logger.e(() => '[join] waiting failed: $result');
 
+      await reject();
       _stateManager.lifecycleCallTimeout(const CallTimeout());
 
       return result;
@@ -520,14 +539,17 @@ class Call {
 
     _logger.v(() => '[join] starting sfu session');
     final sessionResult = await _startSession(joinedResult.data);
+
     if (sessionResult is! Success<None>) {
       _logger.w(() => '[join] sfu session start failed: $sessionResult');
       final error = (sessionResult as Failure).error;
       _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
       return sessionResult;
     }
+
     _logger.v(() => '[join] started session');
     _stateManager.lifecycleCallConnected(const CallConnected());
+
     await _applyConnectOptions();
 
     _logger.v(() => '[join] completed');
@@ -545,6 +567,8 @@ class Call {
     if (joinedResult is Success<CallJoinedData>) {
       _logger.v(() => '[joinIfNeeded] completed');
       _credentials = joinedResult.data.credentials;
+      _session?.rtcManager
+          ?.updateReportingInterval(joinedResult.data.reportingIntervalMs);
       return Result.success(joinedResult.data.credentials);
     }
     _logger.e(() => '[joinIfNeeded] failed: $joinedResult');
@@ -575,15 +599,128 @@ class Call {
           () => '[listenSfuEvent] event.type: ${event.runtimeType}',
         );
         _events.emit(event);
+        event.mapToCallEvent(state.value).emitIfNotNull(_callEvents);
         _onSfuEvent(event);
       }),
     );
-    _subscriptions.add(_idSessionStats, session.stats.listen(_stats.emit));
-    _stateManager
-        .lifecycleCallSessionStart(CallSessionStart(session.sessionId));
+
+    _subscriptions.add(
+      _idSessionStats,
+      session.stats.listen((stats) {
+        _logger.v(() => '[listenRtcStats] stats: $stats');
+        _stats.emit(stats);
+        processStats(stats);
+      }),
+    );
+
+    var localStats = state.value.localStats ?? LocalStats.empty();
+    localStats = localStats.copyWith(
+      sfu: session.config.sfuUrl,
+      sdkVersion: streamVideoVersion,
+      webRtcVersion:
+          CurrentPlatform.isAndroid ? androidWebRTCVersion : iosWebRTCVersion,
+    );
+
+    _stateManager.lifecycleCallSessionStart(
+      CallSessionStart(session.sessionId),
+      localStats: localStats,
+    );
+
     final result = await session.start();
     _logger.v(() => '[startSession] completed: $result');
     return result;
+  }
+
+  void processStats(CallStats stats) {
+    var publisherStats =
+        state.value.publisherStats ?? PeerConnectionStats.empty();
+    var subscriberStats =
+        state.value.subscriberStats ?? PeerConnectionStats.empty();
+
+    if (stats.peerType == StreamPeerType.publisher) {
+      final mediaStatsF = stats.stats
+          .whereType<RtcOutboundRtpVideoStream>()
+          .where((s) => s.rid == 'f')
+          .map(MediaStatsInfo.fromRtcOutboundRtpVideoStream)
+          .firstOrNull;
+      final mediaStatsH = stats.stats
+          .whereType<RtcOutboundRtpVideoStream>()
+          .where((s) => s.rid == 'h')
+          .map(MediaStatsInfo.fromRtcOutboundRtpVideoStream)
+          .firstOrNull;
+      final mediaStatsQ = stats.stats
+          .whereType<RtcOutboundRtpVideoStream>()
+          .where((s) => s.rid == 'q')
+          .map(MediaStatsInfo.fromRtcOutboundRtpVideoStream)
+          .firstOrNull;
+
+      final allStats = [mediaStatsF, mediaStatsH, mediaStatsQ];
+      final mediaStats = allStats.firstWhereOrNull(
+        (s) => s?.width != null && s?.height != null && s?.fps != null,
+      );
+
+      final jitterInMs = ((mediaStats?.jitter ?? 0) * 1000).toInt();
+      final resolution = mediaStats != null
+          ? '${mediaStats.width} x ${mediaStats.height} @ ${mediaStats.fps}fps'
+          : null;
+
+      publisherStats = publisherStats.copyWith(
+        resolution: resolution,
+        qualityDropReason: mediaStats?.qualityLimit,
+        jitterInMs: jitterInMs,
+      );
+    }
+
+    final inboudRtpVideo =
+        stats.stats.whereType<RtcInboundRtpVideoStream>().firstOrNull;
+
+    if (stats.peerType == StreamPeerType.subscriber && inboudRtpVideo != null) {
+      final jitterInMs = ((inboudRtpVideo.jitter ?? 0) * 1000).toInt();
+      final resolution = inboudRtpVideo.frameWidth != null &&
+              inboudRtpVideo.frameHeight != null &&
+              inboudRtpVideo.framesPerSecond != null
+          ? '${inboudRtpVideo.frameWidth} x ${inboudRtpVideo.frameHeight} @ ${inboudRtpVideo.framesPerSecond}fps'
+          : null;
+
+      subscriberStats = subscriberStats.copyWith(
+        resolution: resolution,
+        jitterInMs: jitterInMs,
+      );
+    }
+
+    final candidatePair =
+        stats.stats.whereType<RtcIceCandidatePair>().firstOrNull;
+    if (candidatePair != null) {
+      final latency = candidatePair.currentRoundTripTime;
+      final outgoingBitrate = candidatePair.availableOutgoingBitrate;
+      final incomingBitrate = candidatePair.availableIncomingBitrate;
+
+      if (stats.peerType == StreamPeerType.publisher) {
+        publisherStats = publisherStats.copyWith(
+          latency: latency != null ? (latency * 1000).toInt() : null,
+          bitrateKbps: outgoingBitrate != null ? outgoingBitrate / 1000 : null,
+        );
+      } else {
+        subscriberStats = subscriberStats.copyWith(
+          bitrateKbps: incomingBitrate != null ? incomingBitrate / 1000 : null,
+        );
+      }
+    }
+
+    var latencyHistory = state.value.latencyHistory;
+    if (stats.peerType == StreamPeerType.publisher &&
+        publisherStats.latency != null) {
+      latencyHistory = [
+        ...state.value.latencyHistory.reversed.take(19).toList().reversed,
+        publisherStats.latency!,
+      ];
+    }
+
+    _stateManager.lifecycleCallStats(
+      publisherStats: publisherStats,
+      subscriberStats: subscriberStats,
+      latencyHistory: latencyHistory,
+    );
   }
 
   Future<Result<None>> _stopSession() async {
@@ -804,6 +941,9 @@ class Call {
       return;
     }
 
+    _session?.rtcManager
+        ?.updateReportingInterval(joinedResult.data.reportingIntervalMs);
+
     _logger.v(() => '[switchSfu] starting sfu session');
     final sessionResult = await _startSession(
       joinedResult.data.credentials,
@@ -843,6 +983,17 @@ class Call {
 
   List<RtcTrack> getTracks(String trackIdPrefix) {
     return [...?_session?.getTracks(trackIdPrefix)];
+  }
+
+  void _setDefaultConnectOptions(CallSettings settings) {
+    connectOptions = connectOptions.copyWith(
+      camera: TrackOption.fromSetting(
+        enabled: settings.video.cameraDefaultOn,
+      ),
+      microphone: TrackOption.fromSetting(
+        enabled: settings.audio.micDefaultOn,
+      ),
+    );
   }
 
   Future<void> _applyConnectOptions() async {
@@ -1050,7 +1201,7 @@ class Call {
     final response = await _coordinatorClient.getOrCreateCall(
       callCid: callCid,
       ringing: ringing,
-      members: memberIds.map((id) {
+      members: {...memberIds, currentUserId}.map((id) {
         return MemberRequest(
           userId: id,
           role: 'admin',
@@ -1061,11 +1212,26 @@ class Call {
       custom: custom,
     );
 
+    final mediaDevicesResult =
+        await RtcMediaDeviceNotifier.instance.enumerateDevices();
+    final mediaDevices = mediaDevicesResult.fold(
+      success: (success) => success.data,
+      failure: (failure) => <RtcMediaDevice>[],
+    );
+
     return response.fold(
       success: (it) {
+        _setDefaultConnectOptions(it.data.data.metadata.settings);
+
         _stateManager.lifecycleCallCreated(
           CallCreated(it.data.data),
           ringing: ringing,
+          audioOutputs: mediaDevices
+              .where((d) => d.kind == RtcMediaDeviceKind.audioOutput)
+              .toList(),
+          audioInputs: mediaDevices
+              .where((d) => d.kind == RtcMediaDeviceKind.audioInput)
+              .toList(),
         );
         _logger.v(() => '[getOrCreate] completed: ${it.data}');
         return it;
@@ -1107,6 +1273,7 @@ class Call {
       wasCreated: joinResult.data.wasCreated,
       metadata: joinResult.data.metadata,
       credentials: joinResult.data.credentials,
+      reportingIntervalMs: joinResult.data.reportingIntervalMs,
     );
     _stateManager.lifecycleCallJoined(CallJoined(joined));
     _logger.v(() => '[joinCall] completed: $joined');
@@ -1409,10 +1576,12 @@ class Call {
 
   Future<Result<None>> updateViewportVisibility({
     required String sessionId,
+    required String userId,
     required ViewportVisibility visibility,
   }) async {
     final action = UpdateViewportVisibility(
       sessionId: sessionId,
+      userId: userId,
       visibility: visibility,
     );
 
@@ -1598,7 +1767,6 @@ class Call {
   }
 
   Future<Result<None>> sendCustomEvent({
-    required StreamCallCid callCid,
     required String eventType,
     Map<String, Object> custom = const {},
   }) {

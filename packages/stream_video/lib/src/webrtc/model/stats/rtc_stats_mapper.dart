@@ -20,6 +20,7 @@ import 'rtc_remote_inbound_rtp.dart';
 import 'rtc_remote_inbound_rtp_audio_stream.dart';
 import 'rtc_remote_inbound_rtp_video_stream.dart';
 import 'rtc_report_type.dart';
+import 'rtc_stats.dart';
 import 'rtc_stats_property.dart';
 import 'rtc_video_source.dart';
 
@@ -28,36 +29,66 @@ const _space = ' ';
 const _lineFeed = '\n';
 
 extension RtcStatsMapper on List<rtc.StatsReport> {
-  RtcPrintableStats toRtcStats() {
+  List<Map<String, dynamic>> toRawStats() {
+    final rawStats = <Map<String, dynamic>>[];
+
+    for (final report in this) {
+      rawStats.add({
+          'id': report.id,
+          'type': report.type,
+          'timestamp': report.timestamp,
+          ...report.values,
+      });
+    }
+
+    return rawStats;
+  }
+
+  RtcPrintableStats toPrintableRtcStats() {
     final remoteStat = StringBuffer();
     final localStat = StringBuffer();
     final codecs = <String, RtcCodec>{};
+
     RtcIceCandidatePair? candidatePair;
 
     for (final report in this) {
       try {
         final reportType = RtcReportType.fromAlias(report.type);
-        if (reportType == RtcReportType.codec) {
-          report.extractCodec(codecs);
-        } else if (reportType == RtcReportType.candidatePair) {
-          final json = report.toJson();
-          candidatePair = RtcIceCandidatePair.fromJson(json);
-        } else if (reportType == RtcReportType.localCandidate &&
-            candidatePair != null) {
-          report.extractLocalCandidate(localStat, candidatePair);
-        } else if (reportType == RtcReportType.remoteCandidate &&
-            candidatePair != null) {
-          report.extractRemoteCandidate(remoteStat, candidatePair);
-        } else if (reportType == RtcReportType.inboundRtp) {
-          report.extractInboundRtp(remoteStat, codecs);
-        } else if (reportType == RtcReportType.outboundRtp) {
-          report.extractOutboundRtp(localStat, codecs);
-        } else if (reportType == RtcReportType.track) {
-          report.extractTrack(remoteStat: remoteStat, localStat: localStat);
-        } else if (reportType == RtcReportType.mediaSource) {
-          report.extractMediaSource(localStat);
-        } else if (reportType == RtcReportType.remoteInboundRtp) {
-          report.extractRemoteInboundRtp(localStat);
+        switch (reportType) {
+          case RtcReportType.codec:
+            report.extractCodec(codecs);
+            break;
+          case RtcReportType.candidatePair:
+            final json = report.toJson();
+            candidatePair = RtcIceCandidatePair.fromJson(json);
+            break;
+          case RtcReportType.remoteCandidate:
+            if (candidatePair != null) {
+              report.extractRemoteCandidate(localStat, candidatePair);
+            }
+            break;
+          case RtcReportType.localCandidate:
+            if (candidatePair != null) {
+              report.extractLocalCandidate(localStat, candidatePair);
+            }
+            break;
+          case RtcReportType.remoteInboundRtp:
+            report.extractRemoteInboundRtp(localStat);
+            break;
+          case RtcReportType.inboundRtp:
+            report.extractInboundRtp(remoteStat, codecs);
+            break;
+          case RtcReportType.outboundRtp:
+            report.extractOutboundRtp(localStat, codecs);
+            break;
+          case RtcReportType.track:
+            report.extractTrack(remoteStat: remoteStat, localStat: localStat);
+            break;
+          case RtcReportType.mediaSource:
+            report.extractMediaSource(localStat);
+            break;
+          default:
+            break;
         }
       } catch (e, stk) {
         streamLog.e(_tag, () => '[toRtcStats] failed: $e; $stk');
@@ -71,7 +102,96 @@ extension RtcStatsMapper on List<rtc.StatsReport> {
   }
 }
 
-extension on rtc.StatsReport {
+extension StatsReportX on rtc.StatsReport {
+  RtcStats? toRtcStats() {
+    final type = RtcReportType.fromAlias(this.type);
+
+    final kindValue = values[RtcKind.propertyName];
+    final kind = kindValue != null ? RtcKind.fromAlias(kindValue) : null;
+
+    final sourceValue = values[RtcSource.propertyName];
+    final source =
+        sourceValue != null ? RtcSource.fromValue(sourceValue) : null;
+
+    final json = toJson();
+
+    switch (type) {
+      case RtcReportType.codec:
+        return RtcCodec.fromJson(json);
+      case RtcReportType.candidatePair:
+        return RtcIceCandidatePair.fromJson(json);
+      case RtcReportType.remoteCandidate:
+        return RtcIceCandidate.fromJson(json);
+      case RtcReportType.localCandidate:
+        return RtcIceCandidate.fromJson(json);
+      case RtcReportType.inboundRtp:
+        if (kind == null) return null;
+
+        switch (kind) {
+          case RtcKind.audio:
+            return RtcInboundRtpAudioStream.fromJson(json);
+          case RtcKind.video:
+            return RtcInboundRtpVideoStream.fromJson(json);
+          case RtcKind.unknown:
+            return null;
+        }
+      case RtcReportType.remoteInboundRtp:
+        if (kind == null) return null;
+
+        switch (kind) {
+          case RtcKind.audio:
+            return RtcRemoteInboundRtpAudioStream.fromJson(json);
+          case RtcKind.video:
+            return RtcRemoteInboundRtpVideoStream.fromJson(json);
+          case RtcKind.unknown:
+            return null;
+        }
+      case RtcReportType.outboundRtp:
+        if (kind == null) return null;
+
+        switch (kind) {
+          case RtcKind.audio:
+            return RtcOutboundRtpAudioStream.fromJson(json);
+          case RtcKind.video:
+            return RtcOutboundRtpVideoStream.fromJson(json);
+          case RtcKind.unknown:
+            return null;
+        }
+      case RtcReportType.track:
+        if (kind == null || source == null) return null;
+
+        switch (kind) {
+          case RtcKind.audio:
+            if (source == RtcSource.remote) {
+              return RtcMediaStreamTrackRemoteAudio.fromJson(json);
+            } else {
+              return RtcMediaStreamTrackLocalAudio.fromJson(json);
+            }
+          case RtcKind.video:
+            if (source == RtcSource.remote) {
+              return RtcMediaStreamTrackRemoteVideo.fromJson(json);
+            } else {
+              return RtcMediaStreamTrackLocalVideo.fromJson(json);
+            }
+          case RtcKind.unknown:
+            return null;
+        }
+      case RtcReportType.mediaSource:
+        if (kind == null) return null;
+
+        switch (kind) {
+          case RtcKind.audio:
+            return RtcAudioSource.fromJson(json);
+          case RtcKind.video:
+            return RtcVideoSource.fromJson(json);
+          case RtcKind.unknown:
+            return null;
+        }
+      default:
+        return null;
+    }
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -183,7 +303,7 @@ extension on rtc.StatsReport {
         codecs[rtcBase.codecId]?.writeTo(localStat);
       }
     } else if (mediaType == RtcMediaType.video) {
-      final rtcBase = RTCOutboundRTPVideoStream.fromJson(json);
+      final rtcBase = RtcOutboundRtpVideoStream.fromJson(json);
       if (rtcBase != null) {
         localStat
           ..write(_lineFeed)

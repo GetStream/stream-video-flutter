@@ -1,7 +1,6 @@
 export 'call_content_theme.dart';
 export 'call_controls_theme.dart';
 export 'call_participant_theme.dart';
-export 'call_participants_info_menu_theme.dart';
 export 'incoming_outgoing_call_theme.dart';
 export 'lobby_view_theme.dart';
 export 'local_video_theme.dart';

@@ -130,3 +130,9 @@ env.g.dart
 /video-buddy-session.json
 /docusaurus/shared
 /docusaurus/docusaurus
+/.fvm/flutter_sdk
+/.fvm/fvm_config.json
+/.fvm/release
+/.fvm/version
+/.fvm/versions/3.16.0
+/.fvmrc

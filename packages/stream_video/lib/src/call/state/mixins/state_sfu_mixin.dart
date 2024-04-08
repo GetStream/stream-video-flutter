@@ -9,7 +9,7 @@ import '../../../models/call_status.dart';
 import '../../../models/call_track_state.dart';
 import '../../../models/disconnect_reason.dart';
 import '../../../sfu/data/events/sfu_events.dart';
-import '../../../utils/string.dart';
+import '../../../sfu/sfu_extensions.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
@@ -45,35 +45,9 @@ mixin StateSfuMixin on StateNotifier<CallState> {
     SfuJoinResponseEvent event,
   ) {
     _logger.d(() => '[sfuJoinResponse] ${state.sessionId}; event: $event');
-    final participants = event.callState.participants.map((aParticipant) {
-      final isLocal = aParticipant.userId == state.currentUserId;
-      final existing = state.callParticipants.firstWhereOrNull(
-        (it) =>
-            it.userId == aParticipant.userId &&
-            it.sessionId == aParticipant.sessionId,
-      );
-      final existingName = existing?.name ?? '';
-      final existingRole = existing?.role ?? '';
-      final existingImage = existing?.image ?? '';
-      return CallParticipantState(
-        userId: aParticipant.userId,
-        role: existingRole,
-        name: aParticipant.userName.ifEmpty(() => existingName),
-        custom: aParticipant.custom,
-        image: aParticipant.userImage.ifEmpty(() => existingImage),
-        sessionId: aParticipant.sessionId,
-        trackIdPrefix: aParticipant.trackLookupPrefix,
-        publishedTracks: {
-          for (final track in aParticipant.publishedTracks)
-            track: TrackState.base(isLocal: isLocal),
-        },
-        isLocal: isLocal,
-        isOnline: !isLocal,
-        isSpeaking: aParticipant.isSpeaking,
-        audioLevel: aParticipant.audioLevel,
-        isDominantSpeaker: aParticipant.isDominantSpeaker,
-      );
-    }).toList();
+    final participants = event.callState.participants
+        .map((sfuParticipant) => sfuParticipant.toParticipantState(state))
+        .toList();
 
     state = state.copyWith(
       callParticipants: participants,

@@ -149,6 +149,7 @@ part 'model/sort_param_request.dart';
 part 'model/start_broadcasting_response.dart';
 part 'model/start_recording_response.dart';
 part 'model/start_transcription_response.dart';
+part 'model/stats_options.dart';
 part 'model/stop_broadcasting_response.dart';
 part 'model/stop_live_response.dart';
 part 'model/stop_recording_response.dart';

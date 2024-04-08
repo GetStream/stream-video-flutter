@@ -16,11 +16,11 @@ class UserChatRepository {
 
   OwnUser? get currentUser => chatClient.state.currentUser;
 
-  Future<OwnUser> connectUser(User user) {
+  Future<OwnUser> connectUser(User user, Environment environment) {
     return chatClient.connectUserWithProvider(
       user,
       (userId) => tokenService
-          .loadToken(userId: userId)
+          .loadToken(userId: userId, environment: environment)
           .then((response) => response.token),
     );
   }

@@ -5,6 +5,8 @@ import 'package:uuid/uuid.dart';
 
 import '../open_api/video/coordinator/api.dart' as open;
 import 'call/call.dart';
+import 'call/call_ringing_state.dart';
+import 'call/call_type.dart';
 import 'coordinator/coordinator_client.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
@@ -141,7 +143,8 @@ class StreamVideo {
     );
 
     // Initialize the push notification manager if the provider is provided.
-    pushNotificationManager = pushNotificationManagerProvider?.call(_client);
+    pushNotificationManager =
+        pushNotificationManagerProvider?.call(_client, this);
 
     _state.user.value = user;
     final tokenProvider = switch (user.type) {
@@ -382,7 +385,7 @@ class StreamVideo {
         event.data.ringing) {
       _logger.v(() => '[onCoordinatorEvent] onCallRinging: ${event.data}');
       final call = _makeCallFromRinging(data: event.data);
-      _state.incomingCall.emit(call);
+      _state.incomingCall.value = call;
     } else if (event is CoordinatorConnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] connected ${event.userId}');
       _connectionState = ConnectionState.connected(
@@ -400,7 +403,10 @@ class StreamVideo {
     _logger.d(() => '[onAppState] state: $state');
     try {
       final activeCallCid = _state.activeCall.valueOrNull?.callCid;
-      if (state.isPaused && activeCallCid == null) {
+
+      if (state.isPaused &&
+          activeCallCid == null &&
+          !_options.keepConnectionsAliveWhenInBackground) {
         _logger.i(() => '[onAppState] close connection');
         _subscriptions.cancel(_idEvents);
         await _client.closeConnection();
@@ -454,12 +460,20 @@ class StreamVideo {
   }
 
   Call makeCall({
-    required String type,
+    @Deprecated('Use callType instead') String? type,
+    StreamCallType? callType,
     required String id,
     CallPreferences? preferences,
   }) {
+    assert(
+      type != null || callType != null,
+      'Either type or callType must be provided',
+    );
     return Call(
-      callCid: StreamCallCid.from(type: type, id: id),
+      callCid: StreamCallCid.from(
+        type: callType ?? StreamCallType.fromString(type!),
+        id: id,
+      ),
       coordinatorClient: _client,
       currentUser: _state.user,
       setActiveCall: _state.setActiveCall,
@@ -572,25 +586,107 @@ class StreamVideo {
     final callCid = payload['call_cid'] as String?;
     if (callCid == null) return false;
 
+    final callUUID = const Uuid().v4();
     var callId = const Uuid().v4();
+    var callType = StreamCallType();
+
     final splitCid = callCid.split(':');
     if (splitCid.length == 2) {
+      callType = StreamCallType.fromString(splitCid.first);
       callId = splitCid.last;
     }
 
     final createdById = payload['created_by_id'] as String?;
     final createdByName = payload['created_by_display_name'] as String?;
 
-    unawaited(
-      manager.showIncomingCall(
-        uuid: callId,
-        handle: createdById,
-        nameCaller: createdByName,
-        callCid: callCid,
-      ),
+    final callRingingState = await getCallRingingState(
+      // ignore: deprecated_member_use_from_same_package
+      type: callType.value,
+      callType: callType,
+      id: callId,
     );
 
-    return true;
+    switch (callRingingState) {
+      case CallRingingState.ringing:
+        unawaited(
+          manager.showIncomingCall(
+            uuid: callUUID,
+            handle: createdById,
+            nameCaller: createdByName,
+            callCid: callCid,
+          ),
+        );
+        return true;
+      case CallRingingState.accepted:
+        return false;
+      case CallRingingState.rejected:
+        return false;
+      case CallRingingState.ended:
+        unawaited(
+          manager.showMissedCall(
+            uuid: callUUID,
+            handle: createdById,
+            nameCaller: createdByName,
+            callCid: callCid,
+          ),
+        );
+        return false;
+    }
+  }
+
+  Future<CallRingingState> getCallRingingState({
+    @Deprecated('Use callType instead') String? type,
+    StreamCallType? callType,
+    required String id,
+  }) async {
+    assert(
+      type != null || callType != null,
+      'Either type or callType must be provided',
+    );
+
+    final call = makeCall(
+      // ignore: deprecated_member_use_from_same_package
+      type: callType?.value ?? type,
+      callType: callType,
+      id: id,
+    );
+    final callResult = await call.get();
+
+    return callResult.fold(
+      failure: (failure) {
+        _logger.e(() => '[getCallRingingState] failed: $failure');
+        return CallRingingState.ended;
+      },
+      success: (success) {
+        final callData = success.data;
+
+        if (callData.metadata.session.acceptedBy
+            .containsKey(_state.currentUser.id)) {
+          _logger.e(() => '[getCallRingingState] call already accepted');
+          return CallRingingState.accepted;
+        }
+
+        if (callData.metadata.session.rejectedBy
+            .containsKey(_state.currentUser.id)) {
+          _logger.e(() => '[getCallRingingState] call already rejected');
+          return CallRingingState.rejected;
+        }
+
+        final otherMembers = callData.metadata.members.keys.toList()
+          ..remove(_state.currentUser.id);
+        if (callData.metadata.session.rejectedBy.keys
+            .toSet()
+            .containsAll(otherMembers)) {
+          _logger.e(
+            () =>
+                '[getCallRingingState] call already rejected by all other members',
+          );
+          return CallRingingState.rejected;
+        }
+
+        return CallRingingState.ringing;
+      },
+    );
   }
 
   /// Consumes incoming voIP call and returns the [Call] object.
@@ -604,6 +700,10 @@ class StreamVideo {
       return const Result.failure(
         VideoError(message: 'Push notification manager not initialized.'),
       );
+    }
+
+    if (_state.incomingCall.valueOrNull?.callCid.value == cid) {
+      return Result.success(_state.incomingCall.value);
     }
 
     final callCid = StreamCallCid(cid: cid);
@@ -682,6 +782,7 @@ class StreamVideoOptions {
     this.muteAudioWhenInBackground = false,
     this.autoConnect = true,
     this.includeUserDetailsForAutoConnect = true,
+    this.keepConnectionsAliveWhenInBackground = false,
   });
 
   final String coordinatorRpcUrl;
@@ -701,4 +802,5 @@ class StreamVideoOptions {
   final bool muteAudioWhenInBackground;
   final bool autoConnect;
   final bool includeUserDetailsForAutoConnect;
+  final bool keepConnectionsAliveWhenInBackground;
 }

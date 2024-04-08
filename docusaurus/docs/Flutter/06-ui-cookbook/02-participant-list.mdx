@@ -26,7 +26,7 @@ Before building the actual view, let's take a look on how we can obtain and conn
 1. Get the call object using the `StreamVideo` class:
 
 ```dart
-  final callCid = StreamCallCid.from(type: type, id: id);
+  final callCid = StreamCallCid.from(callType: type, id: id);
   final data = await StreamVideo.instance.getOrCreateCall(cid: callCid);
   final call = Call.fromCreated(data: data.getDataOrNull()!.data);
 ```

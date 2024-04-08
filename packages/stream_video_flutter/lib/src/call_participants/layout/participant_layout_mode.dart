@@ -5,7 +5,9 @@ enum ParticipantLayoutMode {
   grid,
 
   /// The layout mode is set to spotlight view.
-  spotlight;
+  spotlight,
+
+  pictureInPicture;
 }
 
 extension SortingExtension on ParticipantLayoutMode {
@@ -14,6 +16,8 @@ extension SortingExtension on ParticipantLayoutMode {
       case ParticipantLayoutMode.grid:
         return CallParticipantSortingPresets.regular;
       case ParticipantLayoutMode.spotlight:
+        return CallParticipantSortingPresets.speaker;
+      case ParticipantLayoutMode.pictureInPicture:
         return CallParticipantSortingPresets.speaker;
     }
   }

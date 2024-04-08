@@ -23,7 +23,7 @@ call.setCameraEnabled(enabled: true);
 Conveniently attached to the `Call` class are a series of methods which can be used to flip the device’s camera, set the camera position and disable the camera all together.
 
 ```dart
-final call = StreamVideo.instance.makeCall(type: 'default', id: 'MY-CALL');
+final call = StreamVideo.instance.makeCall(callType: StreamCallType(), id: 'MY-CALL');
 call.flipCamera();
 call.setCameraPosition(CameraPosition.front);
 call.setCameraEnabled(enabled: false);

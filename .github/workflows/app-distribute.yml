@@ -4,8 +4,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - dogfooding/**
 
 env:
+  FLUTTER_VERSION: '3.16.9'
   FLUTTER_CHANNEL: stable
   ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
   MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
@@ -14,6 +17,8 @@ env:
   APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
   APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
   APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+  APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
+  FASTLANE_APPLE_ID: ${{ secrets.FASTLANE_APPLE_ID }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,6 +30,11 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 60
     steps:
+      - name: Install Bot SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -33,6 +43,7 @@ jobs:
         with:
           cache: true
           channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - name: Setup Melos
         run: flutter pub global activate melos
@@ -41,7 +52,9 @@ jobs:
         run: melos bootstrap
 
       - name: Prepare environment
-        run: echo "${{ env.ENV_PROPERTIES }}" > .env
+        run: |
+          echo "${{ env.ENV_PROPERTIES }}" > .env
+          echo "${{ env.APPSTORE_API_KEY }}" | base64 --decode > ~/.ssh/appstore_api_key
 
       - name: Setup Ruby and Gems
         uses: ruby/setup-ruby@v1
@@ -67,6 +80,7 @@ jobs:
         with:
           cache: true
           channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - name: Setup Melos
         run: flutter pub global activate melos
@@ -77,7 +91,7 @@ jobs:
       - name: Prepare environment
         run: |
           echo "${{ env.ENV_PROPERTIES }}" > .env
-          echo "${{ env.CREDENTIAL_FILE_CONTENT }}" | base64 --decode | jq > dogfooding/android/fastlane/firebase-service-account.json
+          echo "${{ env.CREDENTIAL_FILE_CONTENT }}" | base64 --decode | jq > dogfooding/android/firebase-service-account.json
 
       - name: Setup Ruby and Gems
         uses: ruby/setup-ruby@v1
@@ -85,38 +99,12 @@ jobs:
           working-directory: dogfooding/android
           bundler-cache: true
 
+      - name: Setup Keystore
+        run: |
+          echo ${{ secrets.KEYSTORE }} | base64 --decode > dogfooding/android/upload-keystore.jks
+          echo ${{ secrets.KEYSTORE_PROPERTIES }} | base64 --decode > dogfooding/android/key.properties
+
       - name: Build and Distribute
         run: |
           cd dogfooding/android
           bundle exec fastlane android build_and_deploy
-
-  build_and_deploy_web:
-    name: Build and Distribute Dogfooding Web
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          cache: true
-          channel: ${{ env.FLUTTER_CHANNEL }}
-
-      - name: Setup Melos
-        run: flutter pub global activate melos
-
-      - name: Bootstrap workspace
-        run: melos bootstrap
-
-      - name: Prepare environment
-        run: |
-          echo "${{ env.ENV_PROPERTIES }}" > .env
-          cd dogfooding && flutter pub run build_runner build --delete-conflicting-outputs
-
-      - name: Build and Distribute
-        uses: bluefireteam/flutter-gh-pages@v7
-        with:
-          baseHref: /stream-video-flutter/
-          workingDir: dogfooding

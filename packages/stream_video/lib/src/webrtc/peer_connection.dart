@@ -10,6 +10,7 @@ import '../utils/none.dart';
 import '../utils/result.dart';
 import '../utils/standard.dart';
 import 'model/stats/rtc_printable_stats.dart';
+import 'model/stats/rtc_stats.dart';
 import 'model/stats/rtc_stats_mapper.dart';
 import 'peer_type.dart';
 import 'sdp/editor/sdp_editor.dart';
@@ -54,7 +55,9 @@ typedef OnTrack = void Function(
 /// {@endtemplate}
 typedef OnStats = void Function(
   StreamPeerConnection,
+  List<RtcStats>,
   RtcPrintableStats,
+  List<Map<String, dynamic>>,
 );
 
 /// Wrapper around the WebRTC connection that contains tracks.
@@ -77,6 +80,7 @@ class StreamPeerConnection extends Disposable {
   final StreamPeerType type;
   final rtc.RTCPeerConnection pc;
   final SdpEditor sdpEditor;
+  int _reportingIntervalMs = 2000;
 
   /// {@macro onStreamAdded}
   OnStreamAdded? onStreamAdded;
@@ -95,7 +99,17 @@ class StreamPeerConnection extends Disposable {
   /// {@macro onTrack}
   OnStats? onStats;
 
+  Stream<List<Map<String, dynamic>>> get statsStream => _statsController.stream;
+
   final _pendingCandidates = <rtc.RTCIceCandidate>[];
+
+  set reportingIntervalMs(int interval) {
+    _reportingIntervalMs = interval;
+    if (_statsTimer != null) {
+      _stopObservingStats();
+    }
+    _startObservingStats();
+  }
 
   /// Creates an offer and sets it as the local description.
   Future<Result<rtc.RTCSessionDescription>> createOffer([
@@ -321,18 +335,29 @@ class StreamPeerConnection extends Disposable {
   }
 
   Timer? _statsTimer;
+  final StreamController<List<Map<String, dynamic>>> _statsController =
+      StreamController.broadcast();
 
   void _startObservingStats() {
     // Stop previous timer if any.
     _stopObservingStats();
+
     // Start new timer.
     _statsTimer = Timer.periodic(
-      const Duration(seconds: 2),
+      Duration(milliseconds: _reportingIntervalMs),
       (_) async {
         try {
           final stats = await pc.getStats();
-          final rtcStats = stats.toRtcStats();
-          onStats?.call(this, rtcStats);
+          final rtcPrintableStats = stats.toPrintableRtcStats();
+          final rawStats = stats.toRawStats();
+          final rtcStats = stats
+              .map((report) => report.toRtcStats())
+              .where((element) => element != null)
+              .cast<RtcStats>()
+              .toList();
+
+          onStats?.call(this, rtcStats, rtcPrintableStats, rawStats);
+          _statsController.add(rawStats);
         } catch (e, stk) {
           _logger.e(() => '[getStats] failed: $e; $stk');
         }

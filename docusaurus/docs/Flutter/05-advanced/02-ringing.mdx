@@ -20,6 +20,10 @@ To receive push notifications from Stream Video, you'll need to:
 1. Configure your push notification provider on the Stream Dashboard.
 2. Add the client-side integration. For Flutter this guide demonstrates using Firebase Cloud Messaging (FCM) for Android and Apple Push Notification Service (APNs) for iOS devices.
 
+:::warning
+  To get the best experience we strongly suggest using APNs for iOS. While our goal is to ensure compatibility with both providers on iOS, Firebase is not yet fully supported.
+:::
+
 ### Integrating Firebase for Android
 
 #### Step 1 - Get the Firebase Credentials
@@ -90,9 +94,13 @@ We recommend storing user credentials locally when the user logs in so you can l
 a push notification is received.
 
 - Add the following code in your `main.dart` as global functions to listen to background notifications:
+
 - Replace `yourUserCredentialsGetMethod()` with your implementation to get logged in user credentials
+
 - For `androidPushProvider` use the provider name created in [Step 2](#Step-2---Upload-the-Firebase-Credentials-to-Stream)
+
 - For `iosPushProvider` use the provider name we will create later in [APN integration](#Integrating-APNs-for-iOS​)
+
 - Add app icon Asset in Xcode for displaying in CallKit screen dedicated button (named `IconMask` in the code below). [See details here](https://developer.apple.com/documentation/callkit/cxproviderconfiguration/2274376-icontemplateimagedata)
 
 ```dart
@@ -141,11 +149,29 @@ Future<void> _handleRemoteMessage(RemoteMessage message) async {
 }
 ```
 
+In a high-level widget in your app, add this code to listen to FCM messages:
+
+```
+@override
+void initState() {
+  ...
+  _observeFcmMessages()
+}
+
+_observeFcmMessages() {
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  _fcmSubscription = FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
+}
+```
+
 The code until this point handles calls for the background and foreground state of the app.
 To handle calls from a terminated state, we need to add some additional code.
 
 In a high-level widget, add this method and call it from the `initState()` method:
-- add navigator key to MaterialApp widget: `navigatorKey: _navigatorKey`
+
+:::info
+Add navigator key to MaterialApp widget: `navigatorKey: _navigatorKey`.
+:::
 
 ```dart
 final _navigatorKey = GlobalKey<NavigatorState>();
@@ -171,10 +197,19 @@ Future<void> _consumeIncomingCall() async {
   final calls = await StreamVideo.instance.pushNotificationManager?.activeCalls();
   if (calls == null || calls.isEmpty) return;
 
-  final call = await StreamVideo.instance.consumeIncomingCall(
-    uuid: calls.first.uuid,
-    cid: calls.first.callCid,
+  final callResult = await StreamVideo.instance.consumeIncomingCall(
+    uuid: calls.first.uuid!,
+    cid: calls.first.callCid!,
   );
+
+  callResult.fold(success: (result) async {
+      final call = result.data;
+      await call.accept();
+
+      //Navigate to call screen <---- IMPLEMENT NAVIGATION HERE
+    }, failure: (error) {
+      debugPrint('Error consuming incoming call: $error');
+    });
 }
 ```
 
@@ -193,8 +228,11 @@ Remember to follow [official best practices](https://developer.android.com/devel
 - You will need to create **Certificate Signing Request** - [follow this steps](https://developer.apple.com/help/account/create-certificates/create-a-certificate-signing-request)
 
 - Convert the *aps.cer* file you created in the last step to a .p12 certificate file using keychain access. Make sure that you configure no password for the p12 file.
+
   - Add app.cer to login keychain
+
   - Find it in Certificate tab, right click and export as .p12 file
+
   - Remember not to set any password while exporting
 
 #### Step 2 - Upload the certificate and create a push provider
@@ -245,21 +283,6 @@ Add these permissions to `Info.plist` in order to support video calling:
 ```
 
 #### Step 5 - Add code to handle CallKit events
-
-In a high-level widget in your app, add this code to listen to FCM messages:
-
-```
-@override
-void initState() {
-  ...
-  _observeFcmMessages()
-}
-
-_observeFcmMessages() {
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  _fcmSubscription = FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
-}
-```
 
 In a high-level widget in your app, add this code to listen to CallKit events:
 
@@ -378,7 +401,49 @@ say you want to end all calls on the CallKit side, you can end them this way:
 StreamVideo.instance.pushNotificationManager?.endAllCalls();
 ```
 
-#### Step 6 - Add native code to the iOS project
+#### Step 6 - Add callback to handle call in terminated state
+
+When an iOS app is terminated, the Flutter engine is not running. The engine needs to be started up to handle Stream call events whenever a call is received by the app. The Stream SDK performs the job of running a Flutter engine instance whenever a call is received. However, on the app side, a callback handle needs to be registered that will connect to `StreamVideo`. 
+
+```dart
+@pragma('vm:entry-point')
+Future<void> _backgroundVoipCallHandler() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Get stored user credentials
+  var credentials = yourUserCredentialsGetMethod();
+  if (credentials == null) return;
+
+  // Initialise StreamVideo
+  StreamVideo(
+    // ...
+    // Make sure you initialise push notification manager
+    pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
+      iosPushProvider: const StreamVideoPushProvider.apn(
+        name: 'your-ios-provider-name',
+      ),
+      androidPushProvider: const StreamVideoPushProvider.firebase(
+        name: 'your-fcm-provider',
+      ),
+      pushParams: const StreamVideoPushParams(
+        appName: kAppName,
+        ios: IOSParams(iconName: 'IconMask'),
+      ),
+    ),
+  );
+}
+```
+
+The `_backgroundVoipCallHandler` method should then be set when StreamVideo is initialised:
+
+```dart
+  StreamVideo(
+    ...,
+    backgroundVoipCallHandler: _backgroundVoipCallHandler,
+  );
+```
+
+#### Step 7 - Add native code to the iOS project
 
 In your iOS project, add the following imports to your `AppDelegate.swift`:
 

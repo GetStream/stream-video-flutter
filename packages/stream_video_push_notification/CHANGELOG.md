@@ -1,3 +1,23 @@
+## 0.3.5
+* Sync version with `stream_video_flutter` 0.3.5
+
+## 0.3.4
+* Sync version with `stream_video_flutter` 0.3.4
+
+## 0.3.3
+
+* Added `StreamCallType` class that replaces depricated String `type` parameter
+
+## 0.3.2
+
+🐞 Fixed
+
+* Various fixes to call ringing and push notifications.
+- Fixes call ringing cancellation when app is terminated on iOS (requires additional setup - check Step 6 of the [APNS integration](https://getstream.io/video/docs/flutter/advanced/adding_ringing_and_callkit/#integrating-apns-for-ios)) in our documentation.
+- Fixes late push notification handling on Android, where already ended call was ringing if the device was offline and the push was delivered with a delay.
+- Fixes call ringing cancellation when caller timed out while calling
+* Fixed action tap callback on Android call notification.
+
 ## 0.3.1
 
 * Important: Fixes crash for CallKit on iOS.

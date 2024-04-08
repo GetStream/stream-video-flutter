@@ -117,6 +117,9 @@ class CoordinatorClientRetry extends CoordinatorClient {
   SharedEmitter<CoordinatorEvent> get events => _delegate.events;
 
   @override
+  bool get isConnected => _delegate.isConnected;
+
+  @override
   Future<Result<CallReceivedData>> getCall({
     required StreamCallCid callCid,
     int? membersLimit,

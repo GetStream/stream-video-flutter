@@ -202,7 +202,7 @@ class StreamCallParticipant extends StatelessWidget {
                   ),
                   if (participant.reaction != null)
                     Align(
-                      alignment: Alignment.topRight,
+                      alignment: Alignment.topCenter,
                       child: Padding(
                         padding: const EdgeInsets.all(8),
                         child: Text(
@@ -234,16 +234,12 @@ class StreamCallParticipant extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: StreamParticipantLabel.fromParticipant(
-                            participant: participant,
-                            audioLevelIndicatorColor: audioLevelIndicatorColor,
-                            disabledMicrophoneColor: disabledMicrophoneColor,
-                            enabledMicrophoneColor: enabledMicrophoneColor,
-                            participantLabelTextStyle:
-                                participantLabelTextStyle,
-                          ),
+                        StreamParticipantLabel.fromParticipant(
+                          participant: participant,
+                          audioLevelIndicatorColor: audioLevelIndicatorColor,
+                          disabledMicrophoneColor: disabledMicrophoneColor,
+                          enabledMicrophoneColor: enabledMicrophoneColor,
+                          participantLabelTextStyle: participantLabelTextStyle,
                         ),
                       ],
                     ),
@@ -251,13 +247,10 @@ class StreamCallParticipant extends StatelessWidget {
                 if (showConnectionQualityIndicator)
                   Align(
                     alignment: connectionLevelAlignment,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: StreamConnectionQualityIndicator(
-                        connectionQuality: participant.connectionQuality,
-                        activeColor: connectionLevelActiveColor,
-                        inactiveColor: connectionLevelInactiveColor,
-                      ),
+                    child: StreamConnectionQualityIndicator(
+                      connectionQuality: participant.connectionQuality,
+                      activeColor: connectionLevelActiveColor,
+                      inactiveColor: connectionLevelInactiveColor,
                     ),
                   ),
               ],

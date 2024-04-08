@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
@@ -9,6 +10,7 @@ import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
+import '../../../version.g.dart';
 import '../../action/internal/rtc_action.dart';
 import '../../disposable.dart';
 import '../../errors/video_error.dart';
@@ -24,7 +26,7 @@ import '../../utils/debounce_buffer.dart';
 import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
 import '../../webrtc/model/stats/rtc_printable_stats.dart';
-import '../../webrtc/model/stats/rtc_raw_stats.dart';
+import '../../webrtc/model/stats/rtc_stats.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
@@ -81,6 +83,7 @@ class CallSession extends Disposable {
 
   RtcManager? rtcManager;
   StreamSubscription<SfuEvent>? eventsSubscription;
+  StreamSubscription<Map<String, dynamic>>? _statsSubscription;
   Timer? _peerConnectionCheckTimer;
 
   SharedEmitter<CallStats> get stats => _stats;
@@ -147,9 +150,32 @@ class CallSession extends Disposable {
         ..onRemoteTrackReceived = _onRemoteTrackReceived
         ..onStatsReceived = _onStatsReceived;
 
+      await _statsSubscription?.cancel();
+      _statsSubscription = rtcManager?.statsStream.listen((rawStats) {
+        sfuClient.sendStats(
+          sfu.SendStatsRequest(
+            sessionId: sessionId,
+            publisherStats: jsonEncode(rawStats['publisherStats']),
+            subscriberStats: jsonEncode(rawStats['subscriberStats']),
+            sdkVersion: streamVideoVersion,
+            webrtcVersion:
+                Platform.isAndroid ? androidWebRTCVersion : iosWebRTCVersion,
+          ),
+        );
+      });
+
       if (CurrentPlatform.isIos) {
         await rtcManager?.setAppleAudioConfiguration();
       }
+
+      //FIXME: This is a temporary fix for the issue where the audio output device is not set correctly
+      // we should remove the delay and figure out why it's not setting the device without it
+      unawaited(
+        Future.delayed(const Duration(milliseconds: 250), () async {
+          await _applyCurrentAudioOutputDevice();
+        }),
+      );
+
       _logger.v(() => '[start] completed');
       return const Result.success(none);
     } catch (e, stk) {
@@ -218,6 +244,8 @@ class CallSession extends Disposable {
     await _saBuffer.cancel();
     await eventsSubscription?.cancel();
     eventsSubscription = null;
+    await _statsSubscription?.cancel();
+    _statsSubscription = null;
     await sfuWS.disconnect();
     await rtcManager?.dispose();
     rtcManager = null;
@@ -590,14 +618,16 @@ class CallSession extends Disposable {
 
   void _onStatsReceived(
     StreamPeerConnection pc,
-    RtcPrintableStats rtcStats,
+    List<RtcStats> rtcStats,
+    RtcPrintableStats rtcPrintableStats,
+    List<Map<String, dynamic>> rtcRawStats,
   ) {
     _stats.emit(
       CallStats(
         peerType: pc.type,
-        printable: rtcStats,
-        // TODO implement raw stats
-        raw: RtcRawStats(),
+        stats: rtcStats,
+        printable: rtcPrintableStats,
+        raw: rtcRawStats,
       ),
     );
   }

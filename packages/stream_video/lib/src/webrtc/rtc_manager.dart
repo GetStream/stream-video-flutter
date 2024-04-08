@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:rxdart/rxdart.dart';
 
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
@@ -90,6 +91,15 @@ class RtcManager extends Disposable {
     _subscriber.onStats = cb;
     _publisher.onStats = cb;
   }
+
+  Stream<Map<String, dynamic>> get statsStream => CombineLatestStream.combine2(
+        _subscriber.statsStream,
+        _publisher.statsStream,
+        (subscriber, publisher) => {
+          'subscriberStats': subscriber,
+          'publisherStats': publisher,
+        },
+      );
 
   OnLocalTrackMuted? onLocalTrackMuted;
   OnLocalTrackPublished? onLocalTrackPublished;
@@ -714,6 +724,18 @@ extension RtcManagerTrackHelper on RtcManager {
 
     // Track found, mute/unmute it.
     if (track != null) {
+      if (enabled &&
+          track is RtcLocalScreenShareTrack &&
+          !track.compareScreenShareMode(constraints)) {
+        // If existing screen share track has different broadcast extension constraints, unpublish it and create a new one.
+        await unpublishTrack(trackId: track.trackId);
+
+        return _createAndPublishTrack(
+          trackType: trackType,
+          constraints: constraints,
+        );
+      }
+
       final toggledTrack = await _toggleTrackMuteState(
         track: track,
         muted: !enabled,
@@ -843,6 +865,11 @@ extension RtcManagerTrackHelper on RtcManager {
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
     }
+  }
+
+  void updateReportingInterval(int reportingIntervalMs) {
+    _publisher.reportingIntervalMs = reportingIntervalMs;
+    _subscriber.reportingIntervalMs = reportingIntervalMs;
   }
 }
 
