@@ -87,7 +87,8 @@ class StreamVideoRenderer extends StatelessWidget {
     } else if (videoTrack is RtcLocalTrack<CameraConstraints>) {
       final isBackCamera =
           videoTrack.mediaConstraints.facingMode == FacingMode.environment;
-      mirror = !isBackCamera;
+
+      mirror = videoTrack.mediaConstraints.mirror ?? (mirror && !isBackCamera);
     }
 
     return VideoTrackRenderer(
