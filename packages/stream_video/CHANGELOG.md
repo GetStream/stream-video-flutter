@@ -1,7 +1,7 @@
 ## Unreleased
 ✅ Added
 
-* `mirror` parameter to `CameraConstraints`, that is used to determine if the camera for the given track should be mirrored or not. When set as null the default is true when f`acingMode` is set to `user` and false when facingMode is set to `environment`.
+* Added `mirror` parameter to `CameraConstraints`, which determines whether the camera for the given track should be mirrored or not. When set as null the default is true when `facingMode` is set to `user` and false when facingMode is set to `environment`.
 
 ## 0.3.6
 ✅ Added
