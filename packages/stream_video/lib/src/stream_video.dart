@@ -381,8 +381,15 @@ class StreamVideo extends Disposable {
   @override
   Future<void> dispose() async {
     _logger.i(() => '[dispose]');
-    await _disconnect();
+
+    if (!_connectionState.isDisconnected) {
+      await _client.disconnectUser();
+    }
+
+    _subscriptions.cancelAll();
     await pushNotificationManager?.dispose();
+    await _state.clear();
+
     return super.dispose();
   }
 
