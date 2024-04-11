@@ -1487,11 +1487,17 @@ class Call {
     required bool enabled,
     ScreenShareConstraints? constraints,
   }) async {
+    // Checks to ensure the user can share their screen.
+    final canShare = hasPermission(CallPermission.screenshare);
+    if (enabled && !canShare) {
+      return Result.error('Missing permission to share screen for the user');
+    }
+
     final result = await _session?.setScreenShareEnabled(
           enabled,
           constraints: constraints,
         ) ??
-        Result.error('Session is null');
+        Result.error('Call session is null, cannot start screen share');
 
     if (result.isSuccess) {
       _stateManager.participantSetScreenShareEnabled(
