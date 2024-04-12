@@ -109,7 +109,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     List<RtcMediaDevice>? audioOutputs,
     List<RtcMediaDevice>? audioInputs,
   }) {
-    final defaultAudioOutput = audioOutputs?.firstWhereOrNull((device) {
+    var defaultAudioOutput = audioOutputs?.firstWhereOrNull((device) {
       if (stage.data.metadata.settings.audio.defaultDevice ==
           AudioSettingsRequestDefaultDeviceEnum.speaker) {
         return device.id.equalsIgnoreCase(
@@ -121,6 +121,12 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
         AudioSettingsRequestDefaultDeviceEnum.speaker.value,
       );
     });
+
+    if (defaultAudioOutput == null &&
+        audioOutputs != null &&
+        audioOutputs.isNotEmpty) {
+      defaultAudioOutput = audioOutputs.first;
+    }
 
     final defaultAudioInput = audioInputs
             ?.firstWhereOrNull((d) => d.label == defaultAudioOutput?.label) ??
