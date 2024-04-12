@@ -81,7 +81,7 @@ class ToggleScreenShareOption extends StatelessWidget {
           constraints: screenShareConstraints,
         );
 
-        if (result.isFailure) {
+        if (Platform.isAndroid && result.isFailure) {
           await StreamBackgroundService()
               .stopScreenSharingNotificationService();
         }
