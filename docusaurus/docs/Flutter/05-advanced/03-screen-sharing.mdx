@@ -24,7 +24,7 @@ Both of these options use Apple's framework [ReplayKit](https://developer.apple.
 :::
 
 #### In-app sharing
-In-app screensharing only shares the application's screens. While on a call, screensharing can be enabled by calling `call.setScreenShareEnabled(enabled: true)` method.
+In-app screensharing only shares the application's screens. While in a call, screensharing can be enabled by calling `call.setScreenShareEnabled(enabled: true)` method.
 
 ```dart 
   void startSharing() {
@@ -47,20 +47,6 @@ When the method is invoked, ReplayKit will ask for the user's consent that their
 
 #### Broadcasting
 In most cases, you would need to share your screen while you are in the background, to be able to open other apps. For this, you need to create a Broadcast Upload Extension.
-
-##### Add dependencies
-
-You will need a dependency to `stream_video_screen_sharing` for native iOS code needed. If you already have a dependency on our `stream_video_flutter` package you don't have to do anything more - it already depend on screen sharing package.
-
-Otherwise add `stream_video_screen_sharing` to your dependencies, to do that just open `pubspec.yaml` and add it inside the dependencies section.
-
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  
-  stream_video_screen_sharing: ^0.1.1
-```
 
 ##### Toggle screen sharing with broadcast mode
 

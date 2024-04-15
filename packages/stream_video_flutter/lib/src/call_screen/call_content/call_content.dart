@@ -161,7 +161,7 @@ class _StreamCallContentState extends State<StreamCallContent>
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
 
-    if (_isPictureInPictureModeOn) {
+    if (_isPictureInPictureModeOn && CurrentPlatform.isAndroid) {
       return widget.callPictureInPictureBuilder
               ?.call(context, call, callState) ??
           StreamCallParticipants(
