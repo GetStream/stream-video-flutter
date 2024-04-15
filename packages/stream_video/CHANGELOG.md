@@ -10,7 +10,7 @@
 * Fixed an issue that might break screen sharing functionality.
 * Fixed an issue that caused output audio device not being set correctly.
 * Fixed an issue that still caused constant notification sound being triggered during the call on Android.
-* Fixed an issue that blocked volume adjastment during the call on Android.
+* Fixed an issue that blocked volume adjustment during the call on Android.
 
 ## 0.3.6
 ✅ Added
