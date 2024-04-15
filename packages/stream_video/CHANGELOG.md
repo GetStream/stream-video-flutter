@@ -1,7 +1,16 @@
-## Unreleased
+## 0.3.7
+* Updated minimum supported SDK version to Flutter 3.16
+
 ✅ Added
 
-* Added `mirror` parameter to `CameraConstraints`, which determines whether the camera for the given track should be mirrored or not. When set as null the default is true when `facingMode` is set to `user` and false when facingMode is set to `environment`.
+* Added `mirrorMode` parameter to `CameraConstraints`, which determines whether the camera for the given track should be mirrored or not. When set as `defaultMode` the mirroring is set as true, when `facingMode` is set to `user` and false when facingMode is set to `environment`.
+
+🐞 Fixed
+
+* Fixed an issue that might break screen sharing functionality.
+* Fixed an issue that caused output audio device not being set correctly.
+* Fixed an issue that still caused constant notification sound being triggered during the call on Android.
+* Fixed an issue that blocked volume adjustment during the call on Android.
 
 ## 0.3.6
 ✅ Added
