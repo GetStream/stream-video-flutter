@@ -13,6 +13,7 @@ import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'coordinator/retry/coordinator_client_retry.dart';
 import 'core/client_state.dart';
 import 'core/connection_state.dart';
+import 'disposable.dart';
 import 'errors/video_error.dart';
 import 'errors/video_error_composer.dart';
 import 'internal/_instance_holder.dart';
@@ -67,7 +68,7 @@ typedef LogHandlerFunction = void Function(
 ]);
 
 /// The client responsible for handling config and maintaining calls
-class StreamVideo {
+class StreamVideo extends Disposable {
   /// Creates a new Stream Video client associated with the
   /// Stream Video singleton instance
   ///
@@ -375,6 +376,21 @@ class StreamVideo {
       _logger.e(() => '[disconnect] failed: $e');
       return Result.failure(VideoErrors.compose(e, stk));
     }
+  }
+
+  @override
+  Future<void> dispose() async {
+    _logger.i(() => '[dispose]');
+
+    if (!_connectionState.isDisconnected) {
+      await _client.disconnectUser();
+    }
+
+    _subscriptions.cancelAll();
+    await pushNotificationManager?.dispose();
+    await _state.clear();
+
+    return super.dispose();
   }
 
   void _onEvent(CoordinatorEvent event) {
