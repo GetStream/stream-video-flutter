@@ -170,6 +170,8 @@ extension CallSettingsExt on open.CallSettingsResponse {
       video: StreamVideoSettings(
         accessRequestEnabled: video.accessRequestEnabled,
         enabled: video.enabled,
+        cameraDefaultOn: video.cameraDefaultOn,
+        cameraFacing: video.cameraFacing.toDomain(),
       ),
       screenShare: StreamScreenShareSettings(
         accessRequestEnabled: screensharing.accessRequestEnabled,
@@ -204,6 +206,18 @@ extension on open.AudioSettingsDefaultDeviceEnum {
       return AudioSettingsRequestDefaultDeviceEnum.speaker;
     } else {
       return AudioSettingsRequestDefaultDeviceEnum.earpiece;
+    }
+  }
+}
+
+extension on open.VideoSettingsCameraFacingEnum {
+  VideoSettingsRequestCameraFacingEnum toDomain() {
+    if (this == open.VideoSettingsCameraFacingEnum.front) {
+      return VideoSettingsRequestCameraFacingEnum.front;
+    } else if (this == open.VideoSettingsCameraFacingEnum.back) {
+      return VideoSettingsRequestCameraFacingEnum.back;
+    } else {
+      return VideoSettingsRequestCameraFacingEnum.external_;
     }
   }
 }
