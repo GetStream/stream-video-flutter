@@ -18,7 +18,7 @@ Find the call type you want to configure on the list of call types: https://dash
 * Set default camera facing
 * Set default audio output device
 
-![Advanced settings dashboard](../assets/core_concepts/advanced-settings.jpeg)
+![Advanced settings dashboard](../assets/core_concepts/advanced-settings.png)
 
 ### CallConnectOptions parameter
 ​
@@ -56,7 +56,11 @@ You can access current options by calling `call.connectOptions` on the `Call` ob
   final callOptions = call.connectOptions;
 ```
 
-:::note
+:::info
   When `getOrCreate` method is called, the default options will be created based on the Stream Dashboard settings.
   You can then leverage the `call.connectOptions` to modify the default settings and pass them to the `join` method at the end.
+:::
+
+:::note
+  `call.connectOptions` also has a setter but it should be used carefully. Depending on the moment in the call lifecycle, it might be overwritten by default configuration or it might be too late to apply the changes.
 :::
