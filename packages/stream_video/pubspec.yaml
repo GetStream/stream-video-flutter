@@ -32,7 +32,7 @@ dependencies:
   synchronized: ^3.1.0
   tart: ^0.5.1
   uuid: ^4.2.1
-  web: ^0.5.1
+  web: ^0.3.0
   web_socket_channel: ^2.4.0
   webrtc_interface: ^1.1.1
 
