@@ -1,0 +1,66 @@
+---
+title: Initial call configuration
+slug: /initial-call-configuration
+description: How to configure the initial call setup
+---
+
+There are two ways to configure the initial call setup:
+* Using the Stream Dashboard to setup the initial configuration per call type
+* Passing the initial configuration in by `CallConnectOptions` parameter
+
+### Stream Dashboard
+
+You can configure the initial call setup using the Stream Dashboard. This is useful when you want to set up the initial configuration for a specific call type.
+Find the call type you want to configure on the list of call types: https://dashboard.getstream.io/app/{YOUR-APP-ID}/video/call-types. Then under Video, Audio and Advanced settings sections you can set things like:
+
+* Turn camera on/off by default
+* Turn microphone on/off by default
+* Set default camera facing
+* Set default audio output device
+
+![Advanced settings dashboard](../assets/core_concepts/advanced-settings.png)
+
+### CallConnectOptions parameter
+​
+Using the `CallConnectOptions` class you can configure the initial call setup programmatically. It provides the following options:
+
+* Enabling or disabling the camera
+* Enabling or disabling the microphone
+* Enabling or disabling the screen sharing
+* Setting the camera facing mode
+* Setting the audio output device
+* Setting the audio input device
+
+You can provide this class as a parameter when joining a call:
+
+```dart
+  final call = client.makeCall(callType: StreamCallType(), id: '345');
+  await call.join(connectOptions: connectOptions);
+```
+
+Or by passing it to the `StreamCallContainer` widget
+
+```dart
+StreamCallContainer(
+          call: widget.call,
+          callConnectOptions: connectOptions,
+          ...
+);
+```
+
+You can access current options by calling `call.connectOptions` on the `Call` object.
+
+```dart
+  final call = client.makeCall(callType: StreamCallType(), id: '345');
+  await call.getOrCreate(connectOptions: connectOptions);
+  final callOptions = call.connectOptions;
+```
+
+:::info
+  When `getOrCreate` method is called, the default options will be created based on the Stream Dashboard settings.
+  You can then leverage the `call.connectOptions` to modify the default settings and pass them to the `join` method at the end.
+:::
+
+:::note
+  `call.connectOptions` also has a setter but it should be used carefully. Depending on the moment in the call lifecycle, it might be overwritten by default configuration or it might be too late to apply the changes.
+:::
