@@ -57,7 +57,7 @@ class CallConnectOptions with EquatableMixin {
         screenShare,
         audioOutputDevice,
         audioInputDevice,
-        cameraFacingMode
+        cameraFacingMode,
       ];
 
   @override
