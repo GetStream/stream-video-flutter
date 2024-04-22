@@ -105,33 +105,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
 
   void lifecycleCallCreated(
     CallCreated stage, {
+    required CallConnectOptions callConnectOptions,
     bool ringing = false,
-    List<RtcMediaDevice>? audioOutputs,
-    List<RtcMediaDevice>? audioInputs,
   }) {
-    var defaultAudioOutput = audioOutputs?.firstWhereOrNull((device) {
-      if (stage.data.metadata.settings.audio.defaultDevice ==
-          AudioSettingsRequestDefaultDeviceEnum.speaker) {
-        return device.id.equalsIgnoreCase(
-          AudioSettingsRequestDefaultDeviceEnum.speaker.value,
-        );
-      }
-
-      return !device.id.equalsIgnoreCase(
-        AudioSettingsRequestDefaultDeviceEnum.speaker.value,
-      );
-    });
-
-    if (defaultAudioOutput == null &&
-        audioOutputs != null &&
-        audioOutputs.isNotEmpty) {
-      defaultAudioOutput = audioOutputs.first;
-    }
-
-    final defaultAudioInput = audioInputs
-            ?.firstWhereOrNull((d) => d.label == defaultAudioOutput?.label) ??
-        audioInputs?.firstOrNull;
-
     _logger.d(() => '[lifecycleCallCreated] ringing: $ringing, state: $state');
     state = state.copyWith(
       status: stage.data.toCallStatus(state: state, ringing: ringing),
@@ -151,8 +127,8 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       isBackstage: stage.data.metadata.details.backstage,
       isBroadcasting: stage.data.metadata.details.broadcasting,
       isRecording: stage.data.metadata.details.recording,
-      audioOutputDevice: defaultAudioOutput,
-      audioInputDevice: defaultAudioInput,
+      audioOutputDevice: callConnectOptions.audioOutputDevice,
+      audioInputDevice: callConnectOptions.audioInputDevice,
     );
   }
 
@@ -427,8 +403,4 @@ extension on CallRingingData {
       return status;
     }
   }
-}
-
-extension on String {
-  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
 }
