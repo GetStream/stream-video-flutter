@@ -16,7 +16,7 @@ dependencies:
   equatable: ^2.0.5
   flutter:
     sdk: flutter
-  flutter_webrtc: ^0.9.47
+  flutter_webrtc: ^0.9.48
   plugin_platform_interface: ^2.1.7
   rate_limiter: ^1.0.0
   stream_video: ^0.3.7
