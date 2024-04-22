@@ -1,7 +1,7 @@
 ## 0.3.8
 
 🐞 Fixed
-* Fixed application of initial call configuration (via CallConnectOptions) and default settings from Stream Dashboard
+* Fixed application of initial call configuration (via `CallConnectOptions`) and default settings from Stream Dashboard
 * Default camera facing is now applied from Dashboard settings (was ignored previously)
 
 ✅ Added
