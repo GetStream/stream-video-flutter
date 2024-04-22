@@ -1,3 +1,13 @@
+## 0.3.8
+
+🐞 Fixed
+* Fixed application of initial call configuration (via CallConnectOptions) and default settings from Stream Dashboard
+* Default camera facing is now applied from Dashboard settings (was ignored previously)
+
+✅ Added
+* `audioOutputDevice`, `audioInputDevice` and `cameraFacingMode` added to `CallConnectOptions`
+* Optional `connectOptions` parameter added to `call.join()` method as a preferred way of setting initial call configuration - check out our [documentation](https://getstream.io/video/docs/flutter/initial-call-configuration/) for more info
+
 ## 0.3.7
 * Updated minimum supported SDK version to Flutter 3.16
 
