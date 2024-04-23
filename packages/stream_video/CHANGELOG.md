@@ -1,3 +1,6 @@
+## 0.3.9
+* Reverted `flutter_webrtc` dependency version back to `0.9.47` to fix the compilation issues for web in Flutter 3.19.
+
 ## 0.3.8
 
 🐞 Fixed
