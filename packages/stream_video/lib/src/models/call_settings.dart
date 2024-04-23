@@ -114,16 +114,19 @@ class StreamVideoSettings extends MediaSettings {
     super.accessRequestEnabled = false,
     this.enabled = false,
     this.cameraDefaultOn = true,
+    this.cameraFacing = VideoSettingsRequestCameraFacingEnum.front,
   });
 
   final bool enabled;
   final bool cameraDefaultOn;
+  final VideoSettingsRequestCameraFacingEnum cameraFacing;
 
   @override
   List<Object?> get props => [
         accessRequestEnabled,
         enabled,
         cameraDefaultOn,
+        cameraFacing,
       ];
 
   VideoSettingsRequest toOpenDto() {
@@ -131,6 +134,7 @@ class StreamVideoSettings extends MediaSettings {
       enabled: enabled,
       accessRequestEnabled: accessRequestEnabled,
       cameraDefaultOn: cameraDefaultOn,
+      cameraFacing: cameraFacing,
     );
   }
 }

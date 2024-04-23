@@ -166,10 +166,8 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   Future<void> _connect() async {
     try {
       _logger.d(() => '[connect] no args');
-      if (widget.callConnectOptions != null) {
-        call.connectOptions = widget.callConnectOptions!;
-      }
-      final result = await call.join();
+
+      final result = await call.join(connectOptions: widget.callConnectOptions);
       _logger.v(() => '[connect] completed: $result');
     } catch (e) {
       _logger.v(() => '[connect] failed: $e');

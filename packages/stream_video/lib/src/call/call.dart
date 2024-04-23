@@ -108,7 +108,12 @@ class Call {
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
       preferences: preferences,
-    ).also((it) => it._stateManager.lifecycleCallCreated(CallCreated(data)));
+    ).also(
+      (it) => it._stateManager.lifecycleCallCreated(
+        CallCreated(data),
+        callConnectOptions: it.connectOptions,
+      ),
+    );
   }
 
   /// Do not use the factory directly,
@@ -411,10 +416,12 @@ class Call {
   }
 
   @Deprecated('Lobby view no longer needs joining to coordinator')
-  Future<Result<None>> joinLobby() async {
+  Future<Result<None>> joinLobby({
+    CallConnectOptions? connectOptions,
+  }) async {
     _logger.d(() => '[joinLobby] no args');
     _stateManager.lifecycleCallJoining(const CallJoining());
-    final joinedResult = await _joinIfNeeded();
+    final joinedResult = await _joinIfNeeded(connectOptions: connectOptions);
     if (joinedResult is Success<CallCredentials>) {
       _logger.v(() => '[joinLobby] completed');
       return const Result.success(none);
@@ -427,7 +434,9 @@ class Call {
     }
   }
 
-  Future<Result<None>> join() async {
+  Future<Result<None>> join({
+    CallConnectOptions? connectOptions,
+  }) async {
     _logger.i(() => '[join] status: ${_status.value}');
     if (_status.value == _ConnectionStatus.connected) {
       _logger.w(() => '[join] rejected (connected)');
@@ -458,7 +467,7 @@ class Call {
     await _setActiveCall(this);
     _status.value = _ConnectionStatus.connecting;
 
-    final result = await _connect()
+    final result = await _connect(connectOptions: connectOptions)
         .asCancelable()
         .storeIn(_idConnect, _cancelables)
         .valueOrDefault(Result.error('connect cancelled'));
@@ -498,7 +507,9 @@ class Call {
     );
   }
 
-  Future<Result<None>> _connect() async {
+  Future<Result<None>> _connect({
+    CallConnectOptions? connectOptions,
+  }) async {
     _logger.d(() => '[join] options: $_connectOptions');
     final validation = await _stateManager.validateUserId(_getCurrentUserId);
     if (validation.isFailure) {
@@ -529,7 +540,7 @@ class Call {
     _stateManager
         .lifecycleCallConnectingAction(CallConnecting(_reconnectAttempt));
     _logger.v(() => '[join] joining to coordinator');
-    final joinedResult = await _joinIfNeeded();
+    final joinedResult = await _joinIfNeeded(connectOptions: connectOptions);
     if (joinedResult is! Success<CallCredentials>) {
       _logger.e(() => '[join] coordinator joining failed: $joinedResult');
       final error = (joinedResult as Failure).error;
@@ -556,14 +567,17 @@ class Call {
     return const Result.success(none);
   }
 
-  Future<Result<CallCredentials>> _joinIfNeeded() async {
+  Future<Result<CallCredentials>> _joinIfNeeded({
+    CallConnectOptions? connectOptions,
+  }) async {
     final creds = _credentials;
     if (creds != null) {
       _logger.w(() => '[joinIfNeeded] rejected (already joined): $creds');
       return Result.success(creds);
     }
     _logger.d(() => '[joinIfNeeded] no args');
-    final joinedResult = await _joinCall(create: true);
+    final joinedResult =
+        await _joinCall(create: true, connectOptions: connectOptions);
     if (joinedResult is Success<CallJoinedData>) {
       _logger.v(() => '[joinIfNeeded] completed');
       _credentials = joinedResult.data.credentials;
@@ -847,7 +861,7 @@ class Call {
       );
       await Future<void>.delayed(delay);
       _logger.v(() => '[fullReconnect] joining to coordinator');
-      final joinedResult = await _joinIfNeeded();
+      final joinedResult = await _joinIfNeeded(connectOptions: _connectOptions);
       if (joinedResult is! Success<CallCredentials>) {
         _logger.e(() => '[fullReconnect] joining failed: $joinedResult');
         continue;
@@ -931,7 +945,10 @@ class Call {
     await _stopSession();
     _stateManager.lifecycleCallMigrating();
     _logger.d(() => '[switchSfu] migratingFrom: $migratingFrom($sessionId)');
-    final joinedResult = await _joinCall(migratingFrom: migratingFrom);
+    final joinedResult = await _joinCall(
+      migratingFrom: migratingFrom,
+      connectOptions: _connectOptions,
+    );
 
     if (joinedResult is! Success<CallJoinedData>) {
       final failedResult = joinedResult as Failure;
@@ -985,30 +1002,92 @@ class Call {
     return [...?_session?.getTracks(trackIdPrefix)];
   }
 
-  void _setDefaultConnectOptions(CallSettings settings) {
-    connectOptions = connectOptions.copyWith(
+  Future<void> _applyCallSettingsToConnectOptions(CallSettings settings) async {
+    // Apply defaul audio output and input devices
+    final mediaDevicesResult =
+        await RtcMediaDeviceNotifier.instance.enumerateDevices();
+    final mediaDevices = mediaDevicesResult.fold(
+      success: (success) => success.data,
+      failure: (failure) => <RtcMediaDevice>[],
+    );
+
+    final audioOutputs = mediaDevices
+        .where((d) => d.kind == RtcMediaDeviceKind.audioOutput)
+        .toList();
+    final audioInputs = mediaDevices
+        .where((d) => d.kind == RtcMediaDeviceKind.audioInput)
+        .toList();
+
+    var defaultAudioOutput = audioOutputs.firstWhereOrNull((device) {
+      if (settings.audio.defaultDevice ==
+          AudioSettingsRequestDefaultDeviceEnum.speaker) {
+        return device.id.equalsIgnoreCase(
+          AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+        );
+      }
+
+      return !device.id.equalsIgnoreCase(
+        AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+      );
+    });
+
+    if (defaultAudioOutput == null && audioOutputs.isNotEmpty) {
+      defaultAudioOutput = audioOutputs.first;
+    }
+
+    final defaultAudioInput = audioInputs
+            .firstWhereOrNull((d) => d.label == defaultAudioOutput?.label) ??
+        audioInputs.firstOrNull;
+
+    _connectOptions = connectOptions.copyWith(
       camera: TrackOption.fromSetting(
         enabled: settings.video.cameraDefaultOn,
       ),
       microphone: TrackOption.fromSetting(
         enabled: settings.audio.micDefaultOn,
       ),
+      audioInputDevice: defaultAudioInput,
+      audioOutputDevice: defaultAudioOutput,
+      cameraFacingMode: settings.video.cameraFacing ==
+              VideoSettingsRequestCameraFacingEnum.front
+          ? FacingMode.user
+          : FacingMode.environment,
     );
   }
 
   Future<void> _applyConnectOptions() async {
     _logger.d(() => '[applyConnectOptions] connectOptions: $_connectOptions');
-    await _applyCameraOption(_connectOptions.camera);
+    await _applyCameraOption(
+      _connectOptions.camera,
+      _connectOptions.cameraFacingMode,
+    );
     await _applyMicrophoneOption(_connectOptions.microphone);
     await _applyScreenShareOption(_connectOptions.screenShare);
+
+    if (_connectOptions.audioInputDevice != null) {
+      await setAudioInputDevice(_connectOptions.audioInputDevice!);
+    }
+
+    if (_connectOptions.audioOutputDevice != null) {
+      await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
+    }
+
     _logger.v(() => '[applyConnectOptions] finished');
   }
 
-  Future<void> _applyCameraOption(TrackOption cameraOption) async {
+  Future<void> _applyCameraOption(
+    TrackOption cameraOption,
+    FacingMode facingMode,
+  ) async {
     if (cameraOption is TrackProvided) {
       await _setLocalTrack(cameraOption.track);
     } else if (cameraOption is TrackEnabled) {
-      await setCameraEnabled(enabled: true);
+      await setCameraEnabled(
+        enabled: true,
+        constraints: CameraConstraints(
+          facingMode: facingMode,
+        ),
+      );
     }
   }
 
@@ -1212,26 +1291,16 @@ class Call {
       custom: custom,
     );
 
-    final mediaDevicesResult =
-        await RtcMediaDeviceNotifier.instance.enumerateDevices();
-    final mediaDevices = mediaDevicesResult.fold(
-      success: (success) => success.data,
-      failure: (failure) => <RtcMediaDevice>[],
-    );
-
     return response.fold(
-      success: (it) {
-        _setDefaultConnectOptions(it.data.data.metadata.settings);
+      success: (it) async {
+        await _applyCallSettingsToConnectOptions(
+          it.data.data.metadata.settings,
+        );
 
         _stateManager.lifecycleCallCreated(
           CallCreated(it.data.data),
           ringing: ringing,
-          audioOutputs: mediaDevices
-              .where((d) => d.kind == RtcMediaDeviceKind.audioOutput)
-              .toList(),
-          audioInputs: mediaDevices
-              .where((d) => d.kind == RtcMediaDeviceKind.audioInput)
-              .toList(),
+          callConnectOptions: connectOptions,
         );
         _logger.v(() => '[getOrCreate] completed: ${it.data}');
         return it;
@@ -1248,6 +1317,7 @@ class Call {
   Future<Result<CallJoinedData>> _joinCall({
     bool create = false,
     String? migratingFrom,
+    CallConnectOptions? connectOptions,
   }) async {
     _logger.d(() => '[joinCall] cid: $callCid, migratingFrom: $migratingFrom');
     final joinResult = await _coordinatorClient.joinCall(
@@ -1266,7 +1336,19 @@ class Call {
         metadata: joinResult.data.metadata,
       ),
     );
-    _stateManager.lifecycleCallCreated(CallCreated(receivedOrCreated.data));
+
+    await _applyCallSettingsToConnectOptions(
+      receivedOrCreated.data.metadata.settings,
+    );
+
+    if (connectOptions != null) {
+      _connectOptions = _connectOptions.merge(connectOptions);
+    }
+
+    _stateManager.lifecycleCallCreated(
+      CallCreated(receivedOrCreated.data),
+      callConnectOptions: this.connectOptions,
+    );
     _logger.v(() => '[joinCall] joinedMetadata: ${joinResult.data.metadata}');
     final joined = CallJoinedData(
       callCid: callCid,
@@ -1423,6 +1505,10 @@ class Call {
         await _session?.flipCamera() ?? Result.error('Session is null');
 
     if (result.isSuccess) {
+      _connectOptions = connectOptions.copyWith(
+        cameraFacingMode: connectOptions.cameraFacingMode.flip(),
+      );
+
       _stateManager.participantFlipCamera(const FlipCamera());
     }
 
@@ -1453,8 +1539,10 @@ class Call {
       _stateManager.participantSetCameraEnabled(
         SetCameraEnabled(enabled: enabled),
       );
+
       _connectOptions = _connectOptions.copyWith(
         camera: enabled ? TrackOption.enabled() : TrackOption.disabled(),
+        cameraFacingMode: constraints?.facingMode ?? FacingMode.user,
       );
     }
 
@@ -1475,9 +1563,14 @@ class Call {
       _stateManager.participantSetMicrophoneEnabled(
         SetMicrophoneEnabled(enabled: enabled),
       );
+
       _connectOptions = _connectOptions.copyWith(
         microphone: enabled ? TrackOption.enabled() : TrackOption.disabled(),
       );
+
+      if (_connectOptions.audioOutputDevice != null) {
+        await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
+      }
     }
 
     return result;
@@ -1503,6 +1596,7 @@ class Call {
       _stateManager.participantSetScreenShareEnabled(
         SetScreenShareEnabled(enabled: enabled),
       );
+
       _connectOptions = _connectOptions.copyWith(
         screenShare: enabled ? TrackOption.enabled() : TrackOption.disabled(),
       );
@@ -1516,6 +1610,8 @@ class Call {
         Result.error('Session is null');
 
     if (result.isSuccess) {
+      _connectOptions = connectOptions.copyWith(audioInputDevice: device);
+
       _stateManager
           .participantSetAudioInputDevice(SetAudioInputDevice(device: device));
     }
@@ -1528,6 +1624,8 @@ class Call {
         Result.error('Session is null');
 
     if (result.isSuccess) {
+      _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
+
       _stateManager.participantSetAudioOutputDevice(
         SetAudioOutputDevice(device: device),
       );
@@ -1864,4 +1962,8 @@ enum TrackType {
         throw Exception('Unknown mute type: $this');
     }
   }
+}
+
+extension on String {
+  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
 }
