@@ -2,7 +2,7 @@ name: stream_video_flutter_workflow
 
 env:
   FLUTTER_CHANNEL: stable
-  FLUTTER_VERSION: 3.16.0
+  FLUTTER_VERSION: 3.19.0
   ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
 
 on:
