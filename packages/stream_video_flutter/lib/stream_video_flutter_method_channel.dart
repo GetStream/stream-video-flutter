@@ -22,7 +22,7 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
         onBackgroundNotificationContentClick?.call(callCid);
         break;
       case 'onBackgroundNotificationButtonClick':
-        final arguments = call.arguments as List<String>;
+        final arguments = (call.arguments as List).cast<String>();
 
         final buttonType = arguments[0];
         final callCid = arguments[1];
@@ -101,6 +101,19 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
       {
         'type': type.name,
       },
+    );
+  }
+
+  @override
+  Future<void> setPictureInPictureEnabled({required bool enable}) async {
+    if (enable) {
+      return methodChannel.invokeMethod(
+        'enablePictureInPictureMode',
+      );
+    }
+
+    return methodChannel.invokeMethod(
+      'disablePictureInPictureMode',
     );
   }
 }

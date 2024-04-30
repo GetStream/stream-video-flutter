@@ -77,17 +77,24 @@ class StreamAudioSettings extends MediaSettings {
     this.opusDtxEnabled = false,
     this.redundantCodingEnabled = false,
     this.defaultDevice = AudioSettingsRequestDefaultDeviceEnum.speaker,
+    this.micDefaultOn = true,
+    this.speakerDefaultOn = true,
   });
 
   final bool opusDtxEnabled;
   final bool redundantCodingEnabled;
   final AudioSettingsRequestDefaultDeviceEnum defaultDevice;
+  final bool micDefaultOn;
+  final bool speakerDefaultOn;
 
   @override
   List<Object?> get props => [
         accessRequestEnabled,
         opusDtxEnabled,
         redundantCodingEnabled,
+        defaultDevice,
+        micDefaultOn,
+        speakerDefaultOn,
       ];
 
   AudioSettingsRequest toOpenDto() {
@@ -96,6 +103,8 @@ class StreamAudioSettings extends MediaSettings {
       accessRequestEnabled: accessRequestEnabled,
       opusDtxEnabled: opusDtxEnabled,
       redundantCodingEnabled: redundantCodingEnabled,
+      micDefaultOn: micDefaultOn,
+      speakerDefaultOn: speakerDefaultOn,
     );
   }
 }
@@ -104,20 +113,28 @@ class StreamVideoSettings extends MediaSettings {
   const StreamVideoSettings({
     super.accessRequestEnabled = false,
     this.enabled = false,
+    this.cameraDefaultOn = true,
+    this.cameraFacing = VideoSettingsRequestCameraFacingEnum.front,
   });
 
   final bool enabled;
+  final bool cameraDefaultOn;
+  final VideoSettingsRequestCameraFacingEnum cameraFacing;
 
   @override
   List<Object?> get props => [
         accessRequestEnabled,
         enabled,
+        cameraDefaultOn,
+        cameraFacing,
       ];
 
   VideoSettingsRequest toOpenDto() {
     return VideoSettingsRequest(
       enabled: enabled,
       accessRequestEnabled: accessRequestEnabled,
+      cameraDefaultOn: cameraDefaultOn,
+      cameraFacing: cameraFacing,
     );
   }
 }

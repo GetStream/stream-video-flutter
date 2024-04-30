@@ -1,0 +1,51 @@
+---
+slug: /recording
+title: Recording
+---
+A key feature of modern communication tools is the ability to quickly and easily record calls. This functionality is used for everything from quality assurance and training to legal compliance or simply as a matter of convenience for keeping track of conversations and later reviewing them.
+
+In this guide, we will look at how developers using Stream Video can easily record their calls using our Flutter SDK. We will cover the technical details involved in starting, stopping, and observing the state of the call recording.
+
+### Recording
+The `Call` object provides access to the recording API, enabling you to start and stop call recordings. To initiate recording, you can use the `call.startRecording` method on the active call object. Additionally, you can check the current recording status by accessing the `callState.isRecording` property. Monitoring this property allows you to update your application's UI to indicate whether the current call is being recorded.
+
+```dart
+StreamCallContent(
+  call: call,
+  callState: callState,
+  callControlsBuilder: (context, call, callState) {
+    final recording = callState.isRecording; // `isRecording` tells us whether the call is currently being recorded
+    return StreamCallControls(options: [
+      // We can add a custom call option which can be used to start and stop recording
+      CallControlOption(
+        icon: recording
+            ? const Icon(Icons.emergency_recording,
+                color: Colors.red)
+            : const Icon(Icons.emergency_recording,
+                color: Colors.grey),
+        onPressed: () {
+          if (!recording) {
+            // If we are not recording, we can start recording the current call
+            call.startRecording();
+          } else {
+            // If we are recording, we can stop recording the current call
+            call.stopRecording();
+          }
+        },
+      ),
+    ]);
+  },
+);
+```
+
+### Permissions
+
+Before the user is allowed to start recording, the user must have the corresponding permissions. As a form of best practice, we encourage integrators to check the permissions before allowing users to execute a given action. Permissions for each app and user role can be found on the Stream dashboard. Please visit https://dashboard.getstream.io/ to view and change the permission scope for your app.
+
+### Retrieving the call recordings
+
+The call recording data can be retrieved by calling the `listRecordings()`. By default, this method will use the current call id (`CID`) to look up the recordings for the current call session. The method returns `List<CallRecording>` which allows you to loop over the different recording objects.
+
+:::tip
+Multiple recordings can be made during a single call session, and a single call CID can also be reused for multiple sessions.
+:::

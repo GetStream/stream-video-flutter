@@ -16,6 +16,7 @@ class CallParticipantState
     required this.userId,
     required this.role,
     required this.name,
+    required this.custom,
     this.image,
     required this.sessionId,
     required this.trackIdPrefix,
@@ -34,6 +35,7 @@ class CallParticipantState
   final String userId;
   final String role;
   final String name;
+  final Map<String, Object?> custom;
   final String? image;
   final String sessionId;
   final String trackIdPrefix;
@@ -54,6 +56,7 @@ class CallParticipantState
     String? userId,
     String? role,
     String? name,
+    Map<String, Object?>? custom,
     String? image,
     String? sessionId,
     String? trackIdPrefix,
@@ -72,6 +75,7 @@ class CallParticipantState
       userId: userId ?? this.userId,
       role: role ?? this.role,
       name: name ?? this.name,
+      custom: custom ?? this.custom,
       image: image ?? this.image,
       sessionId: sessionId ?? this.sessionId,
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
@@ -123,6 +127,7 @@ class CallParticipantState
         userId,
         role,
         name,
+        custom,
         image,
         sessionId,
         trackIdPrefix,

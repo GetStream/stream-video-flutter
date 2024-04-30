@@ -17,13 +17,14 @@
 //   relayProtocol: tcp,
 // }
 
+import 'rtc_stats.dart';
 import 'rtc_writable.dart';
 
-class RtcIceCandidate implements RtcWritable {
+class RtcIceCandidate extends RtcStats implements RtcWritable {
   const RtcIceCandidate({
-    this.id,
-    this.type,
-    this.timestamp,
+    super.id,
+    super.type,
+    super.timestamp,
     this.transportId,
     this.candidateType,
     this.protocol,
@@ -39,9 +40,6 @@ class RtcIceCandidate implements RtcWritable {
     this.relayProtocol,
   });
 
-  final String? id;
-  final String? type;
-  final double? timestamp;
   final String? transportId;
   final String? candidateType;
   final String? protocol;

@@ -1920,6 +1920,7 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
     ..a<$core.double>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'scaleResolutionDownBy', $pb.PbFieldType.OF)
     ..e<VideoLayerSetting_Priority>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'priority', $pb.PbFieldType.OE, defaultOrMaker: VideoLayerSetting_Priority.PRIORITY_HIGH_UNSPECIFIED, valueOf: VideoLayerSetting_Priority.valueOf, enumValues: VideoLayerSetting_Priority.values)
     ..aOM<$0.Codec>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'codec', subBuilder: $0.Codec.create)
+    ..a<$core.int>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'maxFramerate', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
@@ -1931,6 +1932,7 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
     $core.double? scaleResolutionDownBy,
     VideoLayerSetting_Priority? priority,
     $0.Codec? codec,
+    $core.int? maxFramerate,
   }) {
     final _result = create();
     if (name != null) {
@@ -1950,6 +1952,9 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
     }
     if (codec != null) {
       _result.codec = codec;
+    }
+    if (maxFramerate != null) {
+      _result.maxFramerate = maxFramerate;
     }
     return _result;
   }
@@ -2029,6 +2034,15 @@ class VideoLayerSetting extends $pb.GeneratedMessage {
   void clearCodec() => clearField(6);
   @$pb.TagNumber(6)
   $0.Codec ensureCodec() => $_ensure(5);
+
+  @$pb.TagNumber(7)
+  $core.int get maxFramerate => $_getIZ(6);
+  @$pb.TagNumber(7)
+  set maxFramerate($core.int v) { $_setUnsignedInt32(6, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasMaxFramerate() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearMaxFramerate() => clearField(7);
 }
 
 class VideoSender extends $pb.GeneratedMessage {

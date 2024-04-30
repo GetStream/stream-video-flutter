@@ -56,6 +56,18 @@ class SfuClientImpl extends SfuClient {
   }
 
   @override
+  Future<Result<sfu.ICERestartResponse>> restartIce(
+    sfu.ICERestartRequest request,
+  ) async {
+    try {
+      final response = await _client.iceRestart(_withAuthHeaders(), request);
+      return Result.success(response);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
   Future<Result<sfu.SetPublisherResponse>> setPublisher(
     sfu.SetPublisherRequest request,
   ) async {
@@ -110,6 +122,20 @@ class SfuClientImpl extends SfuClient {
       'X-Stream-Client': streamClientVersion,
       'x-client-request-id': const Uuid().v4(),
     });
+  }
+
+  @override
+  Future<Result<sfu.SendStatsResponse>> sendStats(
+    sfu.SendStatsRequest request,
+  ) async {
+    try {
+      _logger.d(() => '[sendStats] request: $request');
+      final response = await _client.sendStats(_withAuthHeaders(), request);
+      _logger.v(() => '[sendStats] response: $response');
+      return Result.success(response);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
   }
 }
 

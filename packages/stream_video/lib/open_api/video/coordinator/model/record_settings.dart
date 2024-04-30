@@ -69,7 +69,7 @@ class RecordSettings {
       return RecordSettings(
         audioOnly: mapValueOfType<bool>(json, r'audio_only')!,
         mode: RecordSettingsModeEnum.fromJson(json[r'mode'])!,
-        quality: RecordSettingsQualityEnum.fromJson(json[r'quality'])!,
+        quality: RecordSettingsQualityEnum.fromJson(json[r'quality']) ?? RecordSettingsQualityEnum.n720p,
       );
     }
     return null;

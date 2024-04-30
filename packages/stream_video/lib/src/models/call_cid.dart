@@ -1,22 +1,27 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../call/call_type.dart';
+
 @immutable
 class StreamCallCid with EquatableMixin {
-  factory StreamCallCid({required String cid}) {
+  factory StreamCallCid({
+    required String cid,
+  }) {
     final typeAndId = cid.split(':');
     if (typeAndId.length != 2) {
       throw FormatException('invalid cid format: $cid');
     }
+
     return StreamCallCid._(
       value: cid,
-      type: typeAndId.first,
+      type: StreamCallType.fromString(typeAndId.first),
       id: typeAndId.last,
     );
   }
 
   factory StreamCallCid.from({
-    required String type,
+    required StreamCallType type,
     required String id,
   }) {
     return StreamCallCid._(
@@ -33,7 +38,7 @@ class StreamCallCid with EquatableMixin {
   });
 
   final String value;
-  final String type;
+  final StreamCallType type;
   final String id;
 
   @override

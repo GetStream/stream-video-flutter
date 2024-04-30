@@ -7,6 +7,13 @@ import '../common/calling_participants.dart';
 import '../common/participant_avatars.dart';
 import 'outgoing_call_controls.dart';
 
+typedef OutgoingCallBackground = Widget Function(
+  Call call,
+  CallState callState,
+  List<UserInfo> participants,
+  Widget child,
+);
+
 /// Represents the Outgoing Call state and UI, when the user is calling
 /// other people.
 class StreamOutgoingCallContent extends StatefulWidget {
@@ -23,6 +30,7 @@ class StreamOutgoingCallContent extends StatefulWidget {
     this.singleParticipantTextStyle,
     this.multipleParticipantTextStyle,
     this.callingLabelTextStyle,
+    this.callBackgroundBuilder,
     this.participantsAvatarBuilder,
     this.participantsDisplayNameBuilder,
   });
@@ -63,6 +71,11 @@ class StreamOutgoingCallContent extends StatefulWidget {
   /// Builder used to create a custom widget for participants display names.
   final ParticipantsDisplayNameBuilder? participantsDisplayNameBuilder;
 
+  /// A widget that is placed behind the outgoing call UI instead of the Stream default
+  ///
+  /// Preferably use a [Stack] widget to layer your UI like in the default [CallBackground].
+  final OutgoingCallBackground? callBackgroundBuilder;
+
   @override
   State<StreamOutgoingCallContent> createState() =>
       _StreamOutgoingCallContentState();
@@ -90,9 +103,7 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
     final participants =
         widget.callState.otherParticipants.map((e) => e.toUserInfo()).toList();
 
-    return CallBackground(
-      participants: participants,
-      child: Material(
+    final child = Material(
         color: Colors.transparent,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -139,7 +150,17 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
             ),
           ],
         ),
-      ),
+    );
+
+    return widget.callBackgroundBuilder?.call(
+          widget.call,
+          widget.callState,
+          participants,
+          child,
+        ) ??
+        CallBackground(
+          participants: participants,
+          child: child,
     );
   }
 

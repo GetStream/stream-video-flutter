@@ -280,6 +280,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
           userId: e.userId,
           role: e.role,
           name: e.name,
+          custom: e.custom,
           sessionId: e.sessionId,
           trackIdPrefix: e.trackIdPrefix,
           image: e.image,

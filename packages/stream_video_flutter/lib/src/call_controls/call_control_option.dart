@@ -63,6 +63,7 @@ class CallControlOption extends StatelessWidget {
         backgroundColor: backgroundColor ?? theme.optionBackgroundColor,
         shape: shape ?? theme.optionShape,
         padding: padding ?? theme.optionPadding,
+        visualDensity: VisualDensity.comfortable,
         disabledBackgroundColor:
             disabledBackgroundColor ?? theme.inactiveOptionBackgroundColor,
       ),

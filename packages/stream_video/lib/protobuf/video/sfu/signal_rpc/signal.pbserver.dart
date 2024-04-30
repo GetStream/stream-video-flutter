@@ -23,6 +23,7 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
   $async.Future<$1.UpdateSubscriptionsResponse> updateSubscriptions($pb.ServerContext ctx, $1.UpdateSubscriptionsRequest request);
   $async.Future<$1.UpdateMuteStatesResponse> updateMuteStates($pb.ServerContext ctx, $1.UpdateMuteStatesRequest request);
   $async.Future<$1.ICERestartResponse> iceRestart($pb.ServerContext ctx, $1.ICERestartRequest request);
+  $async.Future<$1.SendStatsResponse> sendStats($pb.ServerContext ctx, $1.SendStatsRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
@@ -32,6 +33,7 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
       case 'UpdateSubscriptions': return $1.UpdateSubscriptionsRequest();
       case 'UpdateMuteStates': return $1.UpdateMuteStatesRequest();
       case 'IceRestart': return $1.ICERestartRequest();
+      case 'SendStats': return $1.SendStatsRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
@@ -44,6 +46,7 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
       case 'UpdateSubscriptions': return this.updateSubscriptions(ctx, request as $1.UpdateSubscriptionsRequest);
       case 'UpdateMuteStates': return this.updateMuteStates(ctx, request as $1.UpdateMuteStatesRequest);
       case 'IceRestart': return this.iceRestart(ctx, request as $1.ICERestartRequest);
+      case 'SendStats': return this.sendStats(ctx, request as $1.SendStatsRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

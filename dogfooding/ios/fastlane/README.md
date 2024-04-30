@@ -58,14 +58,6 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## iOS
 
-### ios match_appstore
-
-```sh
-[bundle exec] fastlane ios match_appstore
-```
-
-Installs all Certs and Profiles necessary for appstore
-
 ### ios archive
 
 ```sh
@@ -89,6 +81,18 @@ Installs all Certs and Profiles necessary for appstore
 ```
 
 
+
+### ios match_me
+
+```sh
+[bundle exec] fastlane ios match_me
+```
+
+If `readonly: true` (by default), installs all Certs and Profiles necessary for development and ad-hoc.
+If `readonly: false`, recreates all Profiles necessary for development and ad-hoc, updates them locally and remotely.
+
+If `register_device: false` (by default), no device registration.
+If `register_device: true`, will register a new device.
 
 ----
 

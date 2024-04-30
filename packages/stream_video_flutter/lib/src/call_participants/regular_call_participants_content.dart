@@ -53,8 +53,10 @@ class RegularCallParticipantsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final participantsTheme = StreamCallParticipantTheme.of(context);
+
     final remoteParticipants = participants.where((e) => !e.isLocal);
-    final localParticipant = participants.where((e) => e.isLocal).first;
+    final localParticipant = participants.where((e) => e.isLocal).firstOrNull;
 
     if (layoutMode == ParticipantLayoutMode.spotlight) {
       var spotlight = participants.first;
@@ -79,7 +81,7 @@ class RegularCallParticipantsContent extends StatelessWidget {
     final showLocalVideo = enableLocalVideo && remoteParticipants.isNotEmpty;
 
     final gridParticipants = [...participants];
-    if (showLocalVideo) {
+    if (showLocalVideo && localParticipant != null) {
       gridParticipants.remove(localParticipant);
     }
 
@@ -87,9 +89,12 @@ class RegularCallParticipantsContent extends StatelessWidget {
       call: call,
       participants: gridParticipants,
       itemBuilder: callParticipantBuilder,
+      padding: participantsTheme.participantsGridPadding,
+      mainAxisSpacing: participantsTheme.participantsGridMainAxisSpacing,
+      crossAxisSpacing: participantsTheme.participantsGridCrossAxisSpacing,
     );
 
-    if (showLocalVideo) {
+    if (showLocalVideo && localParticipant != null) {
       child = StreamLocalVideo(
         call: call,
         participant: localParticipant,

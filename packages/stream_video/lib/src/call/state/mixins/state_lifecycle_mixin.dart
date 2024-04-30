@@ -1,15 +1,9 @@
+import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
+import '../../../../stream_video.dart';
 import '../../../action/internal/lifecycle_action.dart';
-import '../../../call_state.dart';
-import '../../../logger/impl/tagged_logger.dart';
-import '../../../models/call_created_data.dart';
-import '../../../models/call_metadata.dart';
-import '../../../models/call_participant_state.dart';
 import '../../../models/call_received_data.dart';
-import '../../../models/call_ringing_data.dart';
-import '../../../models/call_status.dart';
-import '../../../models/disconnect_reason.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
@@ -72,6 +66,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
         DisconnectReason.ended(),
       ),
       sessionId: '',
+      localStats: LocalStats.empty(),
+      publisherStats: PeerConnectionStats.empty(),
+      subscriberStats: PeerConnectionStats.empty(),
     );
   }
 
@@ -84,23 +81,31 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       () => '[lifecycleCallReceived] ringing: $ringing'
           ', notify: $notify, state: $state',
     );
+    final status = stage.data.toCallStatus(state: state, ringing: ringing);
     state = state.copyWith(
-      status: stage.data.toCallStatus(state: state, ringing: ringing),
+      status: status,
       createdByUserId: stage.data.metadata.details.createdBy.id,
       settings: stage.data.metadata.settings,
       egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
-      callParticipants: stage.data.metadata.toCallParticipants(state),
+      callParticipants: stage.data.metadata.toCallParticipants(
+        state,
+        fromMembers: !status.isConnected,
+      ),
       createdAt: stage.data.metadata.details.createdAt,
       startsAt: stage.data.metadata.details.startsAt,
       endedAt: stage.data.metadata.details.endedAt,
       liveStartedAt: stage.data.metadata.session.liveStartedAt,
       liveEndedAt: stage.data.metadata.session.liveEndedAt,
+      isBackstage: stage.data.metadata.details.backstage,
+      isBroadcasting: stage.data.metadata.details.broadcasting,
+      isRecording: stage.data.metadata.details.recording,
     );
   }
 
   void lifecycleCallCreated(
     CallCreated stage, {
+    required CallConnectOptions callConnectOptions,
     bool ringing = false,
   }) {
     _logger.d(() => '[lifecycleCallCreated] ringing: $ringing, state: $state');
@@ -110,12 +115,20 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       settings: stage.data.metadata.settings,
       egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
-      callParticipants: stage.data.metadata.toCallParticipants(state),
+      callParticipants: stage.data.metadata.toCallParticipants(
+        state,
+        fromMembers: true,
+      ),
       createdAt: stage.data.metadata.details.createdAt,
       startsAt: stage.data.metadata.details.startsAt,
       endedAt: stage.data.metadata.details.endedAt,
       liveStartedAt: stage.data.metadata.session.liveStartedAt,
       liveEndedAt: stage.data.metadata.session.liveEndedAt,
+      isBackstage: stage.data.metadata.details.backstage,
+      isBroadcasting: stage.data.metadata.details.broadcasting,
+      isRecording: stage.data.metadata.details.recording,
+      audioOutputDevice: callConnectOptions.audioOutputDevice,
+      audioInputDevice: callConnectOptions.audioInputDevice,
     );
   }
 
@@ -130,12 +143,18 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       settings: stage.data.metadata.settings,
       egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
-      callParticipants: stage.data.metadata.toCallParticipants(state),
+      callParticipants: stage.data.metadata.toCallParticipants(
+        state,
+        fromMembers: true,
+      ),
       createdAt: stage.data.metadata.details.createdAt,
       startsAt: stage.data.metadata.details.startsAt,
       endedAt: stage.data.metadata.details.endedAt,
       liveStartedAt: stage.data.metadata.session.liveStartedAt,
       liveEndedAt: stage.data.metadata.session.liveEndedAt,
+      isBackstage: stage.data.metadata.details.backstage,
+      isBroadcasting: stage.data.metadata.details.broadcasting,
+      isRecording: stage.data.metadata.details.recording,
     );
   }
 
@@ -159,12 +178,18 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       settings: stage.data.metadata.settings,
       egress: stage.data.metadata.details.egress,
       ownCapabilities: stage.data.metadata.details.ownCapabilities.toList(),
-      callParticipants: stage.data.metadata.toCallParticipants(state),
+      callParticipants: stage.data.metadata.toCallParticipants(
+        state,
+        fromMembers: true,
+      ),
       createdAt: stage.data.metadata.details.createdAt,
       startsAt: stage.data.metadata.details.startsAt,
       endedAt: stage.data.metadata.details.endedAt,
       liveStartedAt: stage.data.metadata.session.liveStartedAt,
       liveEndedAt: stage.data.metadata.session.liveEndedAt,
+      isBackstage: stage.data.metadata.details.backstage,
+      isBroadcasting: stage.data.metadata.details.broadcasting,
+      isRecording: stage.data.metadata.details.recording,
     );
   }
 
@@ -180,6 +205,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       ),
       sessionId: '',
       callParticipants: const [],
+      localStats: LocalStats.empty(),
+      publisherStats: PeerConnectionStats.empty(),
+      subscriberStats: PeerConnectionStats.empty(),
     );
   }
 
@@ -192,6 +220,9 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
         const DisconnectReason.timeout(),
       ),
       sessionId: '',
+      localStats: LocalStats.empty(),
+      publisherStats: PeerConnectionStats.empty(),
+      subscriberStats: PeerConnectionStats.empty(),
     );
   }
 
@@ -201,7 +232,10 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     _logger.d(() => '[lifecycleCallConnectingAction] state: $state');
     final CallStatus status;
     if (stage.attempt > 0) {
-      status = CallStatus.reconnecting(stage.attempt);
+      status = CallStatus.reconnecting(
+        stage.attempt,
+        isFastReconnectAttempt: stage.isFastReconnectAttempt,
+      );
     } else {
       status = CallStatus.connecting();
     }
@@ -218,15 +252,20 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       status: CallStatus.disconnected(
         DisconnectReason.failure(stage.error),
       ),
+      localStats: LocalStats.empty(),
+      publisherStats: PeerConnectionStats.empty(),
+      subscriberStats: PeerConnectionStats.empty(),
     );
   }
 
   void lifecycleCallSessionStart(
-    CallSessionStart action,
-  ) {
+    CallSessionStart action, {
+    LocalStats? localStats,
+  }) {
     _logger.d(() => '[lifecycleCallSessionStart] state: $state');
     state = state.copyWith(
       sessionId: action.sessionId,
+      localStats: localStats,
       //status: CallStatus.connecting(),
     );
   }
@@ -239,28 +278,79 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       status: CallStatus.connected(),
     );
   }
+
+  void lifecycleCallMigrating() {
+    _logger.d(() => '[lifecycleCallMigrating] state: $state');
+    state = state.copyWith(
+      status: const CallStatusMigrating(),
+      callParticipants: const [],
+    );
+  }
+
+  void lifecycleCallStats({
+    required List<int> latencyHistory,
+    PeerConnectionStats? publisherStats,
+    PeerConnectionStats? subscriberStats,
+  }) {
+    _logger.d(
+      () =>
+          '[lifecycleCallStats] publisherStats: $publisherStats, subscriberStats: $subscriberStats, state: $state',
+    );
+    state = state.copyWith(
+      publisherStats: publisherStats,
+      subscriberStats: subscriberStats,
+      latencyHistory: latencyHistory,
+    );
+  }
 }
 
 extension on CallMetadata {
-  List<CallParticipantState> toCallParticipants(CallState state) {
+  List<CallParticipantState> toCallParticipants(
+    CallState state, {
+    bool fromMembers = false,
+  }) {
     final result = <CallParticipantState>[];
-    for (final userId in members.keys) {
+
+    final participantsData = fromMembers
+        ? members.values
+            .map((e) => (userId: e.userId, userSessionId: null))
+            .toList()
+        : session.participants.values
+            .map((e) => (userId: e.userId, userSessionId: e.userSessionId))
+            .toList();
+
+    for (final participant in participantsData) {
+      final userId = participant.userId;
       final member = members[userId];
       final user = users[userId];
+      final currentState =
+          state.callParticipants.firstWhereOrNull((it) => it.userId == userId);
       final isLocal = state.currentUserId == userId;
+
       result.add(
-        CallParticipantState(
-          userId: userId,
-          role: member?.role ?? user?.role ?? '',
-          name: user?.name ?? '',
-          image: user?.image ?? '',
-          sessionId: '',
-          trackIdPrefix: '',
-          isLocal: isLocal,
-          isOnline: !isLocal,
-        ),
+        currentState?.copyWith(
+              role: member?.role ?? user?.role ?? '',
+              name: user?.name ?? '',
+              custom: user?.custom ?? {},
+              image: user?.image ?? '',
+              sessionId: participant.userSessionId,
+              isLocal: isLocal,
+              isOnline: !isLocal,
+            ) ??
+            CallParticipantState(
+              userId: userId,
+              role: member?.role ?? user?.role ?? '',
+              name: user?.name ?? '',
+              custom: user?.custom ?? {},
+              image: user?.image ?? '',
+              sessionId: participant.userSessionId ?? '',
+              trackIdPrefix: '',
+              isLocal: isLocal,
+              isOnline: !isLocal,
+            ),
       );
     }
+
     return result;
   }
 }

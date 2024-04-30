@@ -10,6 +10,31 @@ import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
 import '../models/models.pbjson.dart' as $0;
 
+@$core.Deprecated('Use sendStatsRequestDescriptor instead')
+const SendStatsRequest$json = const {
+  '1': 'SendStatsRequest',
+  '2': const [
+    const {'1': 'session_id', '3': 1, '4': 1, '5': 9, '10': 'sessionId'},
+    const {'1': 'subscriber_stats', '3': 2, '4': 1, '5': 9, '10': 'subscriberStats'},
+    const {'1': 'publisher_stats', '3': 3, '4': 1, '5': 9, '10': 'publisherStats'},
+    const {'1': 'webrtc_version', '3': 4, '4': 1, '5': 9, '10': 'webrtcVersion'},
+    const {'1': 'sdk', '3': 5, '4': 1, '5': 9, '10': 'sdk'},
+    const {'1': 'sdk_version', '3': 6, '4': 1, '5': 9, '10': 'sdkVersion'},
+  ],
+};
+
+/// Descriptor for `SendStatsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sendStatsRequestDescriptor = $convert.base64Decode('ChBTZW5kU3RhdHNSZXF1ZXN0Eh0KCnNlc3Npb25faWQYASABKAlSCXNlc3Npb25JZBIpChBzdWJzY3JpYmVyX3N0YXRzGAIgASgJUg9zdWJzY3JpYmVyU3RhdHMSJwoPcHVibGlzaGVyX3N0YXRzGAMgASgJUg5wdWJsaXNoZXJTdGF0cxIlCg53ZWJydGNfdmVyc2lvbhgEIAEoCVINd2VicnRjVmVyc2lvbhIQCgNzZGsYBSABKAlSA3NkaxIfCgtzZGtfdmVyc2lvbhgGIAEoCVIKc2RrVmVyc2lvbg==');
+@$core.Deprecated('Use sendStatsResponseDescriptor instead')
+const SendStatsResponse$json = const {
+  '1': 'SendStatsResponse',
+  '2': const [
+    const {'1': 'error', '3': 1, '4': 1, '5': 11, '6': '.stream.video.sfu.models.Error', '10': 'error'},
+  ],
+};
+
+/// Descriptor for `SendStatsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sendStatsResponseDescriptor = $convert.base64Decode('ChFTZW5kU3RhdHNSZXNwb25zZRI0CgVlcnJvchgBIAEoCzIeLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkVycm9yUgVlcnJvcg==');
 @$core.Deprecated('Use iCERestartRequestDescriptor instead')
 const ICERestartRequest$json = const {
   '1': 'ICERestartRequest',
@@ -183,6 +208,7 @@ const $core.Map<$core.String, $core.dynamic> SignalServerServiceBase$json = cons
     const {'1': 'UpdateSubscriptions', '2': '.stream.video.sfu.signal.UpdateSubscriptionsRequest', '3': '.stream.video.sfu.signal.UpdateSubscriptionsResponse'},
     const {'1': 'UpdateMuteStates', '2': '.stream.video.sfu.signal.UpdateMuteStatesRequest', '3': '.stream.video.sfu.signal.UpdateMuteStatesResponse'},
     const {'1': 'IceRestart', '2': '.stream.video.sfu.signal.ICERestartRequest', '3': '.stream.video.sfu.signal.ICERestartResponse'},
+    const {'1': 'SendStats', '2': '.stream.video.sfu.signal.SendStatsRequest', '3': '.stream.video.sfu.signal.SendStatsResponse'},
   ],
 };
 
@@ -206,7 +232,9 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>> SignalServ
   '.stream.video.sfu.signal.UpdateMuteStatesResponse': UpdateMuteStatesResponse$json,
   '.stream.video.sfu.signal.ICERestartRequest': ICERestartRequest$json,
   '.stream.video.sfu.signal.ICERestartResponse': ICERestartResponse$json,
+  '.stream.video.sfu.signal.SendStatsRequest': SendStatsRequest$json,
+  '.stream.video.sfu.signal.SendStatsResponse': SendStatsResponse$json,
 };
 
 /// Descriptor for `SignalServer`. Decode as a `google.protobuf.ServiceDescriptorProto`.
-final $typed_data.Uint8List signalServerServiceDescriptor = $convert.base64Decode('CgxTaWduYWxTZXJ2ZXISawoMU2V0UHVibGlzaGVyEiwuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuU2V0UHVibGlzaGVyUmVxdWVzdBotLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlNldFB1Ymxpc2hlclJlc3BvbnNlEmUKClNlbmRBbnN3ZXISKi5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5TZW5kQW5zd2VyUmVxdWVzdBorLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlNlbmRBbnN3ZXJSZXNwb25zZRJeCgpJY2VUcmlja2xlEiMuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuSUNFVHJpY2tsZRorLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLklDRVRyaWNrbGVSZXNwb25zZRKAAQoTVXBkYXRlU3Vic2NyaXB0aW9ucxIzLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlVwZGF0ZVN1YnNjcmlwdGlvbnNSZXF1ZXN0GjQuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuVXBkYXRlU3Vic2NyaXB0aW9uc1Jlc3BvbnNlEncKEFVwZGF0ZU11dGVTdGF0ZXMSMC5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5VcGRhdGVNdXRlU3RhdGVzUmVxdWVzdBoxLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlVwZGF0ZU11dGVTdGF0ZXNSZXNwb25zZRJlCgpJY2VSZXN0YXJ0Eiouc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuSUNFUmVzdGFydFJlcXVlc3QaKy5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5JQ0VSZXN0YXJ0UmVzcG9uc2U=');
+final $typed_data.Uint8List signalServerServiceDescriptor = $convert.base64Decode('CgxTaWduYWxTZXJ2ZXISawoMU2V0UHVibGlzaGVyEiwuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuU2V0UHVibGlzaGVyUmVxdWVzdBotLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlNldFB1Ymxpc2hlclJlc3BvbnNlEmUKClNlbmRBbnN3ZXISKi5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5TZW5kQW5zd2VyUmVxdWVzdBorLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlNlbmRBbnN3ZXJSZXNwb25zZRJeCgpJY2VUcmlja2xlEiMuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuSUNFVHJpY2tsZRorLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLklDRVRyaWNrbGVSZXNwb25zZRKAAQoTVXBkYXRlU3Vic2NyaXB0aW9ucxIzLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlVwZGF0ZVN1YnNjcmlwdGlvbnNSZXF1ZXN0GjQuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuVXBkYXRlU3Vic2NyaXB0aW9uc1Jlc3BvbnNlEncKEFVwZGF0ZU11dGVTdGF0ZXMSMC5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5VcGRhdGVNdXRlU3RhdGVzUmVxdWVzdBoxLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlVwZGF0ZU11dGVTdGF0ZXNSZXNwb25zZRJlCgpJY2VSZXN0YXJ0Eiouc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuSUNFUmVzdGFydFJlcXVlc3QaKy5zdHJlYW0udmlkZW8uc2Z1LnNpZ25hbC5JQ0VSZXN0YXJ0UmVzcG9uc2USYgoJU2VuZFN0YXRzEikuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuU2VuZFN0YXRzUmVxdWVzdBoqLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlNlbmRTdGF0c1Jlc3BvbnNl');

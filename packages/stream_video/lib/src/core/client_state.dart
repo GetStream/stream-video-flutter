@@ -1,7 +1,6 @@
 import '../call/call.dart';
 import '../models/call_cid.dart';
 import '../models/user.dart';
-import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import 'connection_state.dart';
 
@@ -22,14 +21,14 @@ abstract class ClientState {
   StateEmitter<Call?> get activeCall;
 
   /// Emits when a call was created by another user with ringing set as True.
-  SharedEmitter<Call> get incomingCall;
+  StateEmitter<Call> get incomingCall;
 }
 
 class MutableClientState implements ClientState {
   MutableClientState(User user)
       : user = MutableStateEmitterImpl(user),
         activeCall = MutableStateEmitterImpl(null),
-        incomingCall = MutableSharedEmitterImpl(),
+        incomingCall = MutableStateEmitterImpl(null),
         connection = MutableStateEmitterImpl(
           ConnectionState.disconnected(user.id),
         );
@@ -41,7 +40,7 @@ class MutableClientState implements ClientState {
   final MutableStateEmitter<Call?> activeCall;
 
   @override
-  final MutableSharedEmitter<Call> incomingCall;
+  final MutableStateEmitter<Call> incomingCall;
 
   @override
   final MutableStateEmitter<ConnectionState> connection;

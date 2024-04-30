@@ -43,6 +43,8 @@ class StreamLobbyViewThemeData with Diagnosticable {
       selectionThickness: 4,
     ),
     this.participantListHeight = 90,
+    this.optionOffBackgroundColor = const Color(0xFFDC433B),
+    this.optionOffIconColor = Colors.white,
   });
 
   /// The color of the background behind avatar.
@@ -60,6 +62,12 @@ class StreamLobbyViewThemeData with Diagnosticable {
   /// Theme for the participant list height.
   final double participantListHeight;
 
+  /// The color of the background of microphone/camera options when they are off.
+  final Color optionOffBackgroundColor;
+
+  /// The color of the icon of microphone/camera options when they are off.
+  final Color optionOffIconColor;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   StreamLobbyViewThemeData copyWith({
@@ -68,6 +76,8 @@ class StreamLobbyViewThemeData with Diagnosticable {
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamUserAvatarThemeData? participantAvatarTheme,
     double? participantListHeight,
+    Color? optionOffBackgroundColor,
+    Color? optionOffIconColor,
   }) {
     return StreamLobbyViewThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -77,6 +87,9 @@ class StreamLobbyViewThemeData with Diagnosticable {
           participantAvatarTheme ?? this.participantAvatarTheme,
       participantListHeight:
           participantListHeight ?? this.participantListHeight,
+      optionOffBackgroundColor:
+          optionOffBackgroundColor ?? this.optionOffBackgroundColor,
+      optionOffIconColor: optionOffIconColor ?? this.optionOffIconColor,
     );
   }
 
@@ -99,6 +112,13 @@ class StreamLobbyViewThemeData with Diagnosticable {
         other.participantListHeight,
         t,
       )!,
+      optionOffBackgroundColor: Color.lerp(
+        optionOffBackgroundColor,
+        other.optionOffBackgroundColor,
+        t,
+      )!,
+      optionOffIconColor:
+          Color.lerp(optionOffIconColor, other.optionOffIconColor, t)!,
     );
   }
 
@@ -109,6 +129,8 @@ class StreamLobbyViewThemeData with Diagnosticable {
         userAvatarTheme,
         participantAvatarTheme,
         participantListHeight,
+        optionOffBackgroundColor,
+        optionOffIconColor,
       );
 
   @override
@@ -124,7 +146,9 @@ class StreamLobbyViewThemeData with Diagnosticable {
         other.cardBackgroundColor == cardBackgroundColor &&
         other.userAvatarTheme == userAvatarTheme &&
         other.participantAvatarTheme == participantAvatarTheme &&
-        other.participantListHeight == participantListHeight;
+        other.participantListHeight == participantListHeight &&
+        other.optionOffBackgroundColor == optionOffBackgroundColor &&
+        other.optionOffIconColor == optionOffIconColor;
   }
 
   @override
@@ -139,6 +163,15 @@ class StreamLobbyViewThemeData with Diagnosticable {
       )
       ..add(
         DiagnosticsProperty('participantListHeight', participantListHeight),
+      )
+      ..add(
+        DiagnosticsProperty(
+          'optionOffBackgroundColor',
+          optionOffBackgroundColor,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty('optionOffIconColor', optionOffIconColor),
       );
   }
 
@@ -151,6 +184,8 @@ class StreamLobbyViewThemeData with Diagnosticable {
       userAvatarTheme: other.userAvatarTheme,
       participantAvatarTheme: other.participantAvatarTheme,
       participantListHeight: other.participantListHeight,
+      optionOffBackgroundColor: other.optionOffBackgroundColor,
+      optionOffIconColor: other.optionOffIconColor,
     );
   }
 }

@@ -1,21 +1,8 @@
 import 'package:collection/collection.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
+import '../../../stream_video.dart';
 import '../../errors/video_error.dart';
-import '../../logger/stream_log.dart';
-import '../../models/call_cid.dart';
-import '../../models/call_credentials.dart';
-import '../../models/call_egress.dart';
-import '../../models/call_metadata.dart';
-import '../../models/call_permission.dart';
-import '../../models/call_reaction.dart';
-import '../../models/call_session_data.dart';
-import '../../models/call_settings.dart';
-import '../../models/guest_created_data.dart';
-import '../../models/push_device.dart';
-import '../../models/push_provider.dart';
-import '../../models/queried_calls.dart';
-import '../../models/queried_members.dart';
 import '../../utils/standard.dart';
 
 extension MemberExt on open.MemberResponse {
@@ -176,10 +163,15 @@ extension CallSettingsExt on open.CallSettingsResponse {
         accessRequestEnabled: audio.accessRequestEnabled,
         opusDtxEnabled: audio.opusDtxEnabled,
         redundantCodingEnabled: audio.redundantCodingEnabled,
+        defaultDevice: audio.defaultDevice.toDomain(),
+        micDefaultOn: audio.micDefaultOn,
+        speakerDefaultOn: audio.speakerDefaultOn,
       ),
       video: StreamVideoSettings(
         accessRequestEnabled: video.accessRequestEnabled,
         enabled: video.enabled,
+        cameraDefaultOn: video.cameraDefaultOn,
+        cameraFacing: video.cameraFacing.toDomain(),
       ),
       screenShare: StreamScreenShareSettings(
         accessRequestEnabled: screensharing.accessRequestEnabled,
@@ -205,6 +197,28 @@ extension CallSettingsExt on open.CallSettingsResponse {
         names: geofencing.names,
       ),
     );
+  }
+}
+
+extension on open.AudioSettingsDefaultDeviceEnum {
+  AudioSettingsRequestDefaultDeviceEnum toDomain() {
+    if (this == open.AudioSettingsDefaultDeviceEnum.speaker) {
+      return AudioSettingsRequestDefaultDeviceEnum.speaker;
+    } else {
+      return AudioSettingsRequestDefaultDeviceEnum.earpiece;
+    }
+  }
+}
+
+extension on open.VideoSettingsCameraFacingEnum {
+  VideoSettingsRequestCameraFacingEnum toDomain() {
+    if (this == open.VideoSettingsCameraFacingEnum.front) {
+      return VideoSettingsRequestCameraFacingEnum.front;
+    } else if (this == open.VideoSettingsCameraFacingEnum.back) {
+      return VideoSettingsRequestCameraFacingEnum.back;
+    } else {
+      return VideoSettingsRequestCameraFacingEnum.external_;
+    }
   }
 }
 

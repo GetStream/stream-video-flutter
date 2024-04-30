@@ -86,6 +86,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
   @override
   SharedEmitter<CoordinatorEvent> get events => _events;
+
+  @override
+  bool get isConnected => _ws?.isConnected ?? false;
+
   final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
 
   final _connectionState = MutableStateEmitterImpl<CoordinatorConnectionState>(
@@ -354,7 +358,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi.getCall(
-        callCid.type,
+        callCid.type.value,
         callCid.id,
         membersLimit: membersLimit,
         ring: ringing,
@@ -387,6 +391,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required StreamCallCid callCid,
     bool? ringing,
     List<open.MemberRequest>? members,
+    String? team,
+    bool? notify,
+    Map<String, Object> custom = const {},
   }) async {
     try {
       _logger.d(
@@ -399,13 +406,16 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi.getOrCreateCall(
-        callCid.type,
+        callCid.type.value,
         callCid.id,
         open.GetOrCreateCallRequest(
           data: open.CallRequest(
             members: members ?? [],
+            team: team,
+            custom: custom,
           ),
           ring: ringing,
+          notify: notify,
         ),
       );
       _logger.v(() => '[getOrCreateCall] completed: $result');
@@ -440,6 +450,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     String? datacenterId,
     bool? ringing,
     bool? create,
+    String? migratingFrom,
   }) async {
     try {
       _logger.d(
@@ -454,12 +465,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       final location = await _locationService.getLocation();
       _logger.v(() => '[joinCall] location: $location');
       final result = await _defaultApi.joinCall(
-        callCid.type,
+        callCid.type.value,
         callCid.id,
         open.JoinCallRequest(
           create: create,
           ring: ringing,
           location: location,
+          migratingFrom: migratingFrom,
         ),
       );
       _logger.v(() => '[joinCall] completed: $result');
@@ -479,6 +491,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           members: result.members.toCallMembers(),
           users: result.members.toCallUsers(),
           duration: result.duration,
+          reportingIntervalMs: result.statsOptions.reportingIntervalMs,
         ),
       );
     } catch (e, stk) {
@@ -505,7 +518,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi.sendEvent(
-        callCid.type,
+        callCid.type.value,
         callCid.id,
         open.SendEventRequest(
           custom: custom,
@@ -564,7 +577,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi.updateCallMembers(
-        callCid.type,
+        callCid.type.value,
         callCid.id,
         open.UpdateCallMembersRequest(
           updateMembers: updateMembers.toList(),
@@ -593,7 +606,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi.requestPermission(
-        callCid.type,
+        callCid.type.value,
         callCid.id,
         open.RequestPermissionRequest(
           permissions: [...permissions.map((e) => e.alias)],
@@ -622,7 +635,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi.updateUserPermissions(
-        callCid.type,
+        callCid.type.value,
         callCid.id,
         open.UpdateUserPermissionsRequest(
           userId: userId,
@@ -647,7 +660,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         _logger.e(() => '[startRecording] no connection established');
         return connectionResult;
       }
-      await _defaultApi.startRecording(callCid.type, callCid.id);
+      await _defaultApi.startRecording(callCid.type.value, callCid.id);
       return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -666,7 +679,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi.listRecordingsTypeIdSession1(
-        callCid.type,
+        callCid.type.value,
         callCid.id,
         sessionId,
       );
@@ -684,7 +697,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         _logger.e(() => '[stopRecording] no connection established');
         return connectionResult;
       }
-      await _defaultApi.stopRecording(callCid.type, callCid.id);
+      await _defaultApi.stopRecording(callCid.type.value, callCid.id);
       return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -700,7 +713,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi
-          .startBroadcasting(callCid.type, callCid.id)
+          .startBroadcasting(callCid.type.value, callCid.id)
           .then((it) => it?.playlistUrl);
       return Result.success(result);
     } catch (e, stk) {
@@ -716,7 +729,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         _logger.e(() => '[stopBroadcasting] no connection established');
         return connectionResult;
       }
-      await _defaultApi.stopBroadcasting(callCid.type, callCid.id);
+      await _defaultApi.stopBroadcasting(callCid.type.value, callCid.id);
       return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -737,7 +750,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi.sendVideoReaction(
-        callCid.type,
+        callCid.type.value,
         callCid.id,
         open.SendReactionRequest(
           type: reactionType,
@@ -772,7 +785,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       }
       final result = await _defaultApi.queryMembers(
         open.QueryMembersRequest(
-          type: callCid.type,
+          type: callCid.type.value,
           id: callCid.id,
           filterConditions: filterConditions,
           next: next,
@@ -835,7 +848,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi.blockUser(
-        callCid.type,
+        callCid.type.value,
         callCid.id,
         open.BlockUserRequest(userId: userId),
       );
@@ -860,7 +873,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi.unblockUser(
-        callCid.type,
+        callCid.type.value,
         callCid.id,
         open.UnblockUserRequest(userId: userId),
       );
@@ -881,7 +894,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         _logger.e(() => '[endCall] no connection established');
         return connectionResult;
       }
-      final result = await _defaultApi.endCall(callCid.type, callCid.id);
+      final result = await _defaultApi.endCall(callCid.type.value, callCid.id);
       if (result == null) {
         return Result.error('endCall result is null');
       }
@@ -905,7 +918,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi.goLive(
-        callCid.type,
+        callCid.type.value,
         callCid.id,
         open.GoLiveRequest(
           startHls: startHls,
@@ -931,7 +944,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         _logger.e(() => '[stopLive] no connection established');
         return connectionResult;
       }
-      final result = await _defaultApi.stopLive(callCid.type, callCid.id);
+      final result = await _defaultApi.stopLive(callCid.type.value, callCid.id);
       if (result == null) {
         return Result.error('stopLive result is null');
       }
@@ -958,7 +971,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi.muteUsers(
-        callCid.type,
+        callCid.type.value,
         callCid.id,
         open.MuteUsersRequest(
           userIds: userIds,
@@ -998,7 +1011,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi.updateCall(
-        callCid.type,
+        callCid.type.value,
         callCid.id,
         open.UpdateCallRequest(
           settingsOverride: open.CallSettingsRequest(
@@ -1031,7 +1044,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required StreamCallCid cid,
   }) async {
     try {
-      await _defaultApi.acceptCall(cid.type, cid.id);
+      await _defaultApi.acceptCall(cid.type.value, cid.id);
       return const Result.success(none);
     } catch (e) {
       return Result.failure(VideoErrors.compose(e));
@@ -1046,7 +1059,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required StreamCallCid cid,
   }) async {
     try {
-      await _defaultApi.rejectCall(cid.type, cid.id);
+      await _defaultApi.rejectCall(cid.type.value, cid.id);
       return const Result.success(none);
     } catch (e) {
       return Result.failure(VideoErrors.compose(e));

@@ -391,10 +391,10 @@ Open the `call_attachment.dart` file. Explore it to familiarize yourself with th
 ```dart title="/lib/screen/attachment/call_attachment.dart"
 Future<Call> _joinCall(BuildContext context, String cid) async {
   final parts = cid.split(':');
-  final type = parts[0];
+  final type = StreamCallType.fromString(parts[0]);
   final id = parts[1];
 
-  final call = await StreamVideo.instance.joinCall(type: type, id: id);
+  final call = await StreamVideo.instance.joinCall(callType: type, id: id);
   await call.join();
   return call;
 }
@@ -493,7 +493,7 @@ void _startCall(BuildContext context) async {
 
   final createCallResult = await StreamVideo.instance.createCall(
     id: 'call${Random().nextInt(10000)}',
-    type: "default",
+    callType: StreamCallType(),
     ringing: false,
     participantIds: [],
   );

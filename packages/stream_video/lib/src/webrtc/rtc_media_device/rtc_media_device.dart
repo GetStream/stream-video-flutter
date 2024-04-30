@@ -26,17 +26,19 @@ class RtcMediaDevice with EquatableMixin {
     required this.id,
     required this.label,
     required this.kind,
+    this.groupId,
   });
 
   final String id;
   final String label;
+  final String? groupId;
   final RtcMediaDeviceKind kind;
 
   @override
   String toString() {
-    return 'RtcMediaDevice{id: $id, label: $label, kind: $kind}';
+    return 'RtcMediaDevice{id: $id, label: $label, groupId: $groupId, kind: $kind}';
   }
 
   @override
-  List<Object?> get props => [id, kind, label];
+  List<Object?> get props => [id, kind, groupId, label];
 }

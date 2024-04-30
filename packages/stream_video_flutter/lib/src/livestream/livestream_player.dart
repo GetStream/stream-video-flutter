@@ -10,7 +10,6 @@ import '../../stream_video_flutter.dart';
 /// play/pause the stream, live/backstage indicator, participant count,
 /// call duration, mute/unmute call, expand/contract livestream.
 class LivestreamPlayer extends StatefulWidget {
-
   /// Creates a livestream player
   ///
   /// * [call] is the livestream call intended to be viewed.
@@ -252,11 +251,11 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   Future<void> _connect() async {
     try {
       _logger.d(() => '[connect] no args');
-      call.connectOptions = CallConnectOptions(
+      final connectOptions = CallConnectOptions(
         camera: TrackOption.disabled(),
         microphone: TrackOption.disabled(),
       );
-      final result = await call.join();
+      final result = await call.join(connectOptions: connectOptions);
       _logger.v(() => '[connect] completed: $result');
     } catch (e) {
       _logger.v(() => '[connect] failed: $e');

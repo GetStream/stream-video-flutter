@@ -2,6 +2,7 @@ name: stream_video_flutter_workflow
 
 env:
   FLUTTER_CHANNEL: stable
+  FLUTTER_VERSION: 3.16.0
   ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
 
 on:
@@ -37,6 +38,7 @@ jobs:
         with:
           cache: true
           channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           
       - name: Install Tools
         run: |
@@ -69,6 +71,7 @@ jobs:
         with:
           cache: true
           channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           
       - name: Install Tools
         run: |

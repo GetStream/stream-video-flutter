@@ -289,3 +289,14 @@ extension RtcLocalAudioTrackHardwareExt on RtcLocalAudioTrack {
     }
   }
 }
+
+extension RtcLocalScreenShareTrackExt on RtcLocalScreenShareTrack {
+  bool compareScreenShareMode(MediaConstraints? constraints) {
+    if (constraints is! ScreenShareConstraints) {
+      return true;
+    }
+
+    return mediaConstraints.useiOSBroadcastExtension ==
+        constraints.useiOSBroadcastExtension;
+  }
+}

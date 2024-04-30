@@ -23,6 +23,7 @@ class CoordinatorJoined extends CoordinatorModel {
     required this.members,
     required this.users,
     required this.duration,
+    required this.reportingIntervalMs,
   });
 
   final bool wasCreated;
@@ -31,6 +32,7 @@ class CoordinatorJoined extends CoordinatorModel {
   final Map<String, CallMember> members;
   final Map<String, CallUser> users;
   final String duration;
+  final int reportingIntervalMs;
 
   @override
   List<Object?> get props => [

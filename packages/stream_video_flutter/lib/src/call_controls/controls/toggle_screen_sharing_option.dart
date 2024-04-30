@@ -15,6 +15,10 @@ class ToggleScreenShareOption extends StatelessWidget {
     this.disabledScreenShareIcon = Icons.stop_screen_share,
     this.screenShareConstraints,
     this.screenSharingNotificationOptionsBuilder,
+    this.enabledScreenShareIconColor,
+    this.disabledScreenShareIconColor,
+    this.enabledScreenShareBackgroundColor,
+    this.disabledScreenShareBackgroundColor,
   });
 
   /// Represents a call.
@@ -29,6 +33,18 @@ class ToggleScreenShareOption extends StatelessWidget {
   /// The icon that is shown when the screen sharing is disabled.
   final IconData disabledScreenShareIcon;
 
+  /// Color of the icon when screen sharing is enabled
+  final Color? enabledScreenShareIconColor;
+
+  /// Color of the icon when screen sharing is disabled
+  final Color? disabledScreenShareIconColor;
+
+  /// Color of the background when screen sharing is enabled
+  final Color? enabledScreenShareBackgroundColor;
+
+  /// Color of the background when screen sharing is disabled
+  final Color? disabledScreenShareBackgroundColor;
+
   /// Constraints for screen sharing
   final ScreenShareConstraints? screenShareConstraints;
 
@@ -42,6 +58,11 @@ class ToggleScreenShareOption extends StatelessWidget {
       icon: enabled
           ? Icon(enabledScreenShareIcon)
           : Icon(disabledScreenShareIcon),
+      iconColor:
+          enabled ? enabledScreenShareIconColor : disabledScreenShareIconColor,
+      backgroundColor: enabled
+          ? enabledScreenShareBackgroundColor
+          : disabledScreenShareBackgroundColor,
       onPressed: () async {
         final toggledEnabled = !enabled;
 
@@ -60,7 +81,7 @@ class ToggleScreenShareOption extends StatelessWidget {
           constraints: screenShareConstraints,
         );
 
-        if (result.isFailure) {
+        if (Platform.isAndroid && result.isFailure) {
           await StreamBackgroundService()
               .stopScreenSharingNotificationService();
         }

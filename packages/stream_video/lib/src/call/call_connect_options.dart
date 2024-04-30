@@ -1,34 +1,64 @@
 import 'package:equatable/equatable.dart';
 
-import '../webrtc/media/media_constraints.dart';
-import '../webrtc/rtc_track/rtc_local_track.dart';
+import '../../stream_video.dart';
 
 class CallConnectOptions with EquatableMixin {
   const CallConnectOptions({
     this.camera = TrackDisabled._instance,
     this.microphone = TrackDisabled._instance,
     this.screenShare = TrackDisabled._instance,
+    this.audioOutputDevice,
+    this.audioInputDevice,
+    this.cameraFacingMode = FacingMode.user,
   });
 
   final TrackOption camera;
   final TrackOption microphone;
   final TrackOption screenShare;
 
+  final RtcMediaDevice? audioOutputDevice;
+  final RtcMediaDevice? audioInputDevice;
+
+  final FacingMode cameraFacingMode;
+
   CallConnectOptions copyWith({
     TrackOption? camera,
     TrackOption? microphone,
     TrackOption? screenShare,
-    Duration? dropTimeout,
+    RtcMediaDevice? audioOutputDevice,
+    RtcMediaDevice? audioInputDevice,
+    FacingMode? cameraFacingMode,
   }) {
     return CallConnectOptions(
       camera: camera ?? this.camera,
       microphone: microphone ?? this.microphone,
       screenShare: screenShare ?? this.screenShare,
+      audioOutputDevice: audioOutputDevice ?? this.audioOutputDevice,
+      audioInputDevice: audioInputDevice ?? this.audioInputDevice,
+      cameraFacingMode: cameraFacingMode ?? this.cameraFacingMode,
+    );
+  }
+
+  CallConnectOptions merge(CallConnectOptions other) {
+    return copyWith(
+      camera: other.camera,
+      microphone: other.microphone,
+      screenShare: other.screenShare,
+      audioOutputDevice: other.audioOutputDevice,
+      audioInputDevice: other.audioInputDevice,
+      cameraFacingMode: other.cameraFacingMode,
     );
   }
 
   @override
-  List<Object> get props => [camera, microphone, screenShare];
+  List<Object?> get props => [
+        camera,
+        microphone,
+        screenShare,
+        audioOutputDevice,
+        audioInputDevice,
+        cameraFacingMode,
+      ];
 
   @override
   String toString() {
@@ -36,12 +66,18 @@ class CallConnectOptions with EquatableMixin {
         'camera: $camera,'
         ' microphone: $microphone,'
         ' screenShare: $screenShare, '
+        ' audioOutput: $audioOutputDevice,'
+        ' audioInput: $audioInputDevice, '
+        ' cameraFacingMode: $cameraFacingMode'
         '}';
   }
 }
 
 abstract class TrackOption with EquatableMixin {
   const TrackOption();
+
+  factory TrackOption.fromSetting({required bool enabled}) =>
+      enabled ? TrackOption.enabled() : TrackOption.disabled();
 
   factory TrackOption.enabled() {
     return TrackEnabled._instance;

@@ -22,4 +22,12 @@ abstract class SfuClient {
   Future<Result<sfu.UpdateMuteStatesResponse>> updateMuteState(
     sfu.UpdateMuteStatesRequest request,
   );
+
+  Future<Result<sfu.ICERestartResponse>> restartIce(
+    sfu.ICERestartRequest request,
+  );
+  
+  Future<Result<sfu.SendStatsResponse>> sendStats(
+    sfu.SendStatsRequest request,
+  );
 }
