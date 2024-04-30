@@ -16,7 +16,26 @@ The `AddReactionOption` is the call control responsible for adding reactions to 
 
 You can add the control to your control bar by customising the `StreamCallControls` widget:
 
-// Add code for reaction control customisation
+```dart
+StreamCallContent(
+    call: call,
+    callState: state,
+    callControlsBuilder: (context, call, state) {
+    return StreamCallControls(
+      options: [
+        ...defaultCallControlOptions(
+          call: call,
+          localParticipant: state.localParticipant!,
+        ),
+        AddReactionOption(
+          call: call,
+          localParticipant: state.localParticipant!,
+        ),
+      ],
+    );
+  },
+)
+```
 
 This reaction shows up on the participant video on the upper right hand corner:
 
@@ -27,4 +46,35 @@ This reaction shows up on the participant video on the upper right hand corner:
 The default reactions supplied by the SDK are `like`, `raised-hand`, and `fireworks`. However, you can
 replace these with your own reactions via the `CallControlsTheme`:
 
-// Add code for adding your own reactions
+```dart
+MaterialApp(
+  theme: ThemeData(
+    textTheme: GoogleFonts.robotoMonoTextTheme(),
+    extensions: <ThemeExtension<dynamic>>[
+      lightAppTheme.copyWith(
+        callControlsTheme: StreamCallControlsThemeData(
+          callReactions: [
+            CallReactionData(
+              type: 'reaction',
+              emojiCode: ':like:',
+              icon: '👍',
+            ),
+            CallReactionData(
+              type: 'raised-hand',
+              emojiCode: ':raise-hand:',
+              icon: '✋',
+            ),
+            CallReactionData(
+              type: 'reaction',
+              emojiCode: ':fireworks:',
+              icon: '🎉',
+            ),
+            // Add your reaction here
+          ],
+        ),
+      ),
+    ],
+  ),
+  // ...
+);
+```
