@@ -11,4 +11,30 @@ When building your own video experience, you may want to customise the widget sh
 video track is disabled. You can do this via the `videoPlaceholderBuilder` parameter of the
 `StreamCallParticipant` widget:
 
-// Add code for video fallback
+```dart
+StreamCallContainer(
+  call: call,
+  callConnectOptions: options,
+  callContentBuilder: (context, call, state) {
+    return StreamCallContent(
+      call: call,
+      callState: state,
+      callParticipantsBuilder: (context, call, state) {
+        return StreamCallParticipants(
+          call: call,
+          participants: state.callParticipants,
+          callParticipantBuilder: (context, call, state) {
+            return StreamCallParticipant(
+              call: call,
+              participant: state,
+              videoPlaceholderBuilder: (context, call, state) {
+                // Build your placeholder here
+              },
+            );
+          },
+        );
+      },
+    );
+  },
+),
+```
