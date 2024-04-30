@@ -8,16 +8,22 @@ with or without a call lobby.
 
 ## Adding a call lobby in your call flow
 
-The Flutter SDK for Stream Video provides an inbuilt `LobbyView` widget which makes it effortless to
+The Flutter SDK for Stream Video provides an inbuilt `StreamLobbyView` widget which makes it effortless to
 incorporate a lobby into your video flow.
 
 The inbuilt widget contains a variety of things required for a call lobby: a preview of the user's video,
 controls for video and audio, the users already in the call, and of course, a join call button.
 
-To do this, first create a call with the appropriate details and pass it along to the `LobbyView` widget:
+To do this, first create a call with the appropriate details and pass it along to the `StreamLobbyView` widget:
 
-// Add code for joining a lobby
+```dart
+final call = StreamVideo.instance.makeCall(callType: StreamCallType(), id: callId);
 
-
-
+StreamLobbyView(
+  call: call,
+  onJoinCallPressed: (options) {
+    // Navigate to your call screen
+  },
+),
+```
 
