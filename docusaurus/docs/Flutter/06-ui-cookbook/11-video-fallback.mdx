@@ -3,7 +3,7 @@
 Video fallbacks are shown when the user's video track is disabled and ensures all participants are
 identifiable in a video calling experience.
 
-// Add photo of video fallback
+![Video Fallback](../assets/cookbook/video_fallback.png)
 
 ## Adding a video fallback
 
@@ -29,6 +29,12 @@ StreamCallContainer(
               participant: state,
               videoPlaceholderBuilder: (context, call, state) {
                 // Build your placeholder here
+                return Center(
+                  child: Text(
+                    state.name,
+                    style: TextStyle(fontSize: 32),
+                  ),
+                );
               },
             );
           },
