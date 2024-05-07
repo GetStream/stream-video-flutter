@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:rxdart/rxdart.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
@@ -82,7 +83,10 @@ class CallSession extends Disposable {
   final OnFullReconnectNeeded onFullReconnectNeeded;
 
   RtcManager? rtcManager;
-  StreamSubscription<SfuEvent>? eventsSubscription;
+
+  BehaviorSubject<RtcManager>? _rtcManagerSubject;
+  StreamSubscription<SfuEvent>? _eventsSubscription;
+  StreamSubscription<SfuEvent>? _delayedEventsSubscription;
   StreamSubscription<Map<String, dynamic>>? _statsSubscription;
   Timer? _peerConnectionCheckTimer;
 
@@ -106,8 +110,23 @@ class CallSession extends Disposable {
   Future<Result<None>> start() async {
     try {
       _logger.d(() => '[start] no args');
-      await eventsSubscription?.cancel();
-      eventsSubscription = sfuWS.events.listen(_onSfuEvent);
+
+      await _eventsSubscription?.cancel();
+      await _delayedEventsSubscription?.cancel();
+      await _rtcManagerSubject?.close();
+
+      // Listen to SFU events
+      _eventsSubscription = sfuWS.events.listen(_onSfuEvent);
+
+      _rtcManagerSubject = BehaviorSubject();
+      // Delay SFU events that require RTCManager to be initialized
+      _delayedEventsSubscription = _rtcManagerSubject!
+          .take(1)
+          .switchMap((_) => sfuWS.events.asStream())
+          .listen(
+            _onDelayedSfuEvent,
+          );
+
       final wsResult = await sfuWS.connect();
       if (wsResult.isFailure) {
         _logger.e(() => '[start] ws connect failed: $wsResult');
@@ -150,6 +169,8 @@ class CallSession extends Disposable {
         ..onRemoteTrackReceived = _onRemoteTrackReceived
         ..onStatsReceived = _onStatsReceived;
 
+      _rtcManagerSubject!.add(rtcManager!);
+
       await _statsSubscription?.cancel();
       _statsSubscription = rtcManager?.statsStream.listen((rawStats) {
         sfuClient.sendStats(
@@ -183,8 +204,10 @@ class CallSession extends Disposable {
       final genericSdp = await RtcManager.getGenericSdp();
       _logger.v(() => '[fastReconnect] genericSdp.len: ${genericSdp.length}');
 
-      await eventsSubscription?.cancel();
-      eventsSubscription = sfuWS.events.listen(_onSfuEvent);
+      await _eventsSubscription?.cancel();
+      await _delayedEventsSubscription?.cancel();
+      _eventsSubscription = sfuWS.events.listen(_onSfuEvent);
+      _delayedEventsSubscription = sfuWS.events.listen(_onDelayedSfuEvent);
       await sfuWS.connect();
 
       sfuWS.send(
@@ -234,8 +257,10 @@ class CallSession extends Disposable {
     _logger.d(() => '[dispose] no args');
     await _stats.close();
     await _saBuffer.cancel();
-    await eventsSubscription?.cancel();
-    eventsSubscription = null;
+    await _eventsSubscription?.cancel();
+    _eventsSubscription = null;
+    await _delayedEventsSubscription?.cancel();
+    _delayedEventsSubscription = null;
     await _statsSubscription?.cancel();
     _statsSubscription = null;
     await sfuWS.disconnect();
@@ -268,11 +293,7 @@ class CallSession extends Disposable {
 
   Future<void> _onSfuEvent(SfuEvent event) async {
     _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
-    if (event is SfuSubscriberOfferEvent) {
-      await _onSubscriberOffer(event);
-    } else if (event is SfuIceTrickleEvent) {
-      await _onRemoteIceCandidate(event);
-    } else if (event is SfuParticipantLeftEvent) {
+    if (event is SfuParticipantLeftEvent) {
       await _onParticipantLeft(event);
     } else if (event is SfuTrackPublishedEvent) {
       await _onTrackPublished(event);
@@ -298,6 +319,15 @@ class CallSession extends Disposable {
       stateManager.sfuTrackUnpublished(event);
     } else if (event is SfuDominantSpeakerChangedEvent) {
       stateManager.sfuDominantSpeakerChanged(event);
+    }
+  }
+
+  Future<void> _onDelayedSfuEvent(SfuEvent event) async {
+    _logger.log(event.logPriority, () => '[onDelayedSfuEvent] event: $event');
+    if (event is SfuSubscriberOfferEvent) {
+      await _onSubscriberOffer(event);
+    } else if (event is SfuIceTrickleEvent) {
+      await _onRemoteIceCandidate(event);
     }
   }
 
@@ -395,6 +425,7 @@ class CallSession extends Disposable {
   Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {
     final offerSdp = event.sdp;
     _logger.i(() => '[onSubscriberOffer] event: $event');
+
     final answerSdp = await rtcManager?.onSubscriberOffer(offerSdp);
     if (answerSdp == null) {
       _logger.w(() => '[onSubscriberOffer] rejected (answerSdp is null)');
