@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:rxdart/rxdart.dart';
 
+import '../../stream_video.dart';
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';
@@ -661,6 +662,17 @@ extension RtcManagerTrackHelper on RtcManager {
     }
 
     try {
+      if (CurrentPlatform.isIos &&
+          device.id.equalsIgnoreCase(
+            AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+          )) {
+        await setAppleAudioConfiguration(
+          speakerOn: true,
+        );
+      } else {
+        await setAppleAudioConfiguration();
+      }
+
       // Change the audio output device for all remote audio tracks.
       await rtc.Helper.selectAudioOutput(device.id);
       for (final audioTrack in audioTracks) {
@@ -847,13 +859,18 @@ extension RtcManagerTrackHelper on RtcManager {
     return Result.error('Unsupported trackType $trackType');
   }
 
-  Future<Result<None>> setAppleAudioConfiguration() async {
+  Future<Result<None>> setAppleAudioConfiguration({
+    bool speakerOn = false,
+  }) async {
     try {
       await rtc.Helper.setAppleAudioConfiguration(
         rtc.AppleAudioConfiguration(
-          appleAudioMode: rtc.AppleAudioMode.videoChat,
+          appleAudioMode: speakerOn
+              ? rtc.AppleAudioMode.videoChat
+              : rtc.AppleAudioMode.voiceChat,
           appleAudioCategory: rtc.AppleAudioCategory.playAndRecord,
           appleAudioCategoryOptions: {
+            if (speakerOn) rtc.AppleAudioCategoryOption.defaultToSpeaker,
             rtc.AppleAudioCategoryOption.mixWithOthers,
             rtc.AppleAudioCategoryOption.allowBluetooth,
             rtc.AppleAudioCategoryOption.allowBluetoothA2DP,
@@ -899,4 +916,8 @@ extension on RtcLocalTrack<VideoConstraints> {
     }
     return dimension;
   }
+}
+
+extension on String {
+  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
 }

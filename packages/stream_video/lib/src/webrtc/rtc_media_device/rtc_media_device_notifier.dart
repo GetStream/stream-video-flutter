@@ -1,6 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:rxdart/rxdart.dart';
 
+import '../../../stream_video.dart';
 import '../../errors/video_error_composer.dart';
 import '../../utils/result.dart';
 import 'rtc_media_device.dart';
@@ -33,14 +35,29 @@ class RtcMediaDeviceNotifier {
     try {
       final devices = await rtc.navigator.mediaDevices.enumerateDevices();
 
-      final mediaDevices = devices.map((it) {
-        return RtcMediaDevice(
-          id: it.deviceId,
-          label: it.label,
-          groupId: it.groupId,
-          kind: RtcMediaDeviceKind.fromAlias(it.kind),
-        );
-      });
+      final mediaDevices = [
+        ...devices.map((it) {
+          return RtcMediaDevice(
+            id: it.deviceId,
+            label: it.label,
+            groupId: it.groupId,
+            kind: RtcMediaDeviceKind.fromAlias(it.kind),
+          );
+        }),
+        if (CurrentPlatform.isIos &&
+            (kind == null || kind == RtcMediaDeviceKind.audioOutput) &&
+            devices.none(
+              (d) => d.deviceId.equalsIgnoreCase(
+                AudioSettingsRequestDefaultDeviceEnum.earpiece.value,
+              ),
+            ))
+          RtcMediaDevice(
+            id: AudioSettingsRequestDefaultDeviceEnum.earpiece.value,
+            label: AudioSettingsRequestDefaultDeviceEnum.earpiece.value
+                .capitalizeFirstLetter(),
+            kind: RtcMediaDeviceKind.audioOutput,
+          ),
+      ];
 
       if (kind != null) {
         final devices = mediaDevices.where((d) => d.kind == kind);
@@ -68,4 +85,9 @@ class RtcMediaDeviceNotifier {
   Future<Result<List<RtcMediaDevice>>> videoInputs() {
     return enumerateDevices(kind: RtcMediaDeviceKind.videoInput);
   }
+}
+
+extension on String {
+  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
+  String capitalizeFirstLetter() => '${this[0].toUpperCase()}${substring(1)}';
 }

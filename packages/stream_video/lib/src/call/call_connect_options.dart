@@ -9,6 +9,7 @@ class CallConnectOptions with EquatableMixin {
     this.screenShare = TrackDisabled._instance,
     this.audioOutputDevice,
     this.audioInputDevice,
+    this.speakerDefaultOn = false,
     this.cameraFacingMode = FacingMode.user,
   });
 
@@ -18,6 +19,7 @@ class CallConnectOptions with EquatableMixin {
 
   final RtcMediaDevice? audioOutputDevice;
   final RtcMediaDevice? audioInputDevice;
+  final bool speakerDefaultOn;
 
   final FacingMode cameraFacingMode;
 
@@ -28,6 +30,7 @@ class CallConnectOptions with EquatableMixin {
     RtcMediaDevice? audioOutputDevice,
     RtcMediaDevice? audioInputDevice,
     FacingMode? cameraFacingMode,
+    bool? speakerDefaultOn,
   }) {
     return CallConnectOptions(
       camera: camera ?? this.camera,
@@ -36,6 +39,7 @@ class CallConnectOptions with EquatableMixin {
       audioOutputDevice: audioOutputDevice ?? this.audioOutputDevice,
       audioInputDevice: audioInputDevice ?? this.audioInputDevice,
       cameraFacingMode: cameraFacingMode ?? this.cameraFacingMode,
+      speakerDefaultOn: speakerDefaultOn ?? this.speakerDefaultOn,
     );
   }
 
@@ -47,6 +51,7 @@ class CallConnectOptions with EquatableMixin {
       audioOutputDevice: other.audioOutputDevice,
       audioInputDevice: other.audioInputDevice,
       cameraFacingMode: other.cameraFacingMode,
+      speakerDefaultOn: other.speakerDefaultOn,
     );
   }
 
@@ -58,6 +63,7 @@ class CallConnectOptions with EquatableMixin {
         audioOutputDevice,
         audioInputDevice,
         cameraFacingMode,
+        speakerDefaultOn,
       ];
 
   @override
@@ -68,7 +74,8 @@ class CallConnectOptions with EquatableMixin {
         ' screenShare: $screenShare, '
         ' audioOutput: $audioOutputDevice,'
         ' audioInput: $audioInputDevice, '
-        ' cameraFacingMode: $cameraFacingMode'
+        ' cameraFacingMode: $cameraFacingMode, '
+        ' speakerDefaultOn: $speakerDefaultOn'
         '}';
   }
 }

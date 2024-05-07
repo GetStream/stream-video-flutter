@@ -1052,6 +1052,7 @@ class Call {
               VideoSettingsRequestCameraFacingEnum.front
           ? FacingMode.user
           : FacingMode.environment,
+      speakerDefaultOn: settings.audio.speakerDefaultOn,
     );
   }
 
@@ -1070,6 +1071,12 @@ class Call {
 
     if (_connectOptions.audioOutputDevice != null) {
       await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
+    } else {
+      if (CurrentPlatform.isIos) {
+        await _session?.rtcManager?.setAppleAudioConfiguration(
+          speakerOn: _connectOptions.speakerDefaultOn,
+        );
+      }
     }
 
     _logger.v(() => '[applyConnectOptions] finished');
