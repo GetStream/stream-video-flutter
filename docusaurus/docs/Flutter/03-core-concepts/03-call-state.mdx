@@ -67,10 +67,10 @@ Overall, `callParticipants` is a powerful tool that provides you with a lot of c
 - Viewport Visibility
 
 ```dart
-for(final user in call.state.value.callParticipants){
-	if(user.isdominantSpeaker){
-		setState(()=> dominantSpeaker = user);
-	}
+for (final user in call.state.value.callParticipants){
+  if (user.isDominantSpeaker){
+    setState(() => dominantSpeaker = user);
+  }
 }
 ```
 

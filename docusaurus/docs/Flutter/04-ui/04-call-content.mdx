@@ -9,7 +9,7 @@ Similar to `StreamCallContainer`, `CallContent` allows for the display of partic
 However, unlike `StreamCallContainer`, the sole responsibility of `StreamCallContent` is to render the call participants and controls. `StreamCallContent` does not monitor or respond to call lifecycle events, such as incoming and outgoing calls.
 
 ```dart
-const StreamCallContent({
+  const StreamCallContent({
     super.key,
     required this.call,
     required this.callState,
@@ -19,6 +19,9 @@ const StreamCallContent({
     this.overlayAppBarBuilder,
     this.callParticipantsBuilder,
     this.callControlsBuilder,
+    this.layoutMode = ParticipantLayoutMode.grid,
+    this.enablePictureInPicture = false,
+    this.callPictureInPictureBuilder,
   });
 ```
 

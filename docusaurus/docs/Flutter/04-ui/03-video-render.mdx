@@ -18,10 +18,11 @@ When in doubt, we recommend starting with `StreamCallParticipant` unless there i
 ### Customizing `StreamCallParticipant`
 
 ```dart
-const StreamCallParticipant({
+  const StreamCallParticipant({
     super.key,
     required this.call,
     required this.participant,
+    this.videoFit,
     this.backgroundColor,
     this.borderRadius,
     this.userAvatarTheme,
@@ -49,7 +50,7 @@ Call Participant allows you to customize everything from the background color an
 To use the widget, you need to supply two arguments: the current `call` and `participant` to render. Both of these parameters can be fetched from either `activeCall` or `callState`.
 
 ```dart
-StreamCallContent(
+  StreamCallContent(
     call: call,
     callState: callState,
     callParticipantsBuilder: (context, call, callState) {
@@ -64,7 +65,7 @@ StreamCallContent(
 ### Using `StreamVideoRenderer` directly:
 
 ```dart
-StreamCallContent(
+  StreamCallContent(
     call: call,
     callState: callState,
     callParticipantsBuilder: (context, call, callState) {
