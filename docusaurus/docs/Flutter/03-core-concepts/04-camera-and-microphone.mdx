@@ -47,9 +47,9 @@ For this, the `RtcMediaDeviceNotifier` can be used. Encapsulated in this class a
 
 ```dart
 RtcMediaDeviceNotifier.instance.onDeviceChange.listen((devices) {
-    final audioInputDevice = devices.where((device) => device.kind == RtcMediaDeviceKind.audioInput);
-    call.setAudioInputDevice(audioInputDevice.first);
-  });
+  final audioInputDevice = devices.where((device) => device.kind == RtcMediaDeviceKind.audioInput);
+  call.setAudioInputDevice(audioInputDevice.first);
+});
 ```
 
 For the times where listening to hardware changes are not required, convince methods can be used to fetch the connected devices by their `RtcMediaDeviceKind`.

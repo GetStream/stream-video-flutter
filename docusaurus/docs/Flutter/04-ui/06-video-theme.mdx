@@ -31,18 +31,20 @@ Some high-level properties such as `textTheme` or `colorTheme` can be set applic
 In contrast, larger components such as `StreamCallParticipant`, `StreamLobbyView`, etc. have been addressed with smaller theme objects.
 
 ```dart
-factory StreamVideoTheme({
-  required Brightness brightness,
-  StreamTextTheme? textTheme,
-  StreamColorTheme? colorTheme,
-  StreamCallControlsThemeData? callControlsTheme,
-  StreamUserAvatarThemeData? userAvatarTheme,
-  StreamLobbyViewThemeData? lobbyViewTheme,
-  StreamCallParticipantThemeData? callParticipantTheme,
-  StreamLocalVideoThemeData? localVideoTheme,
-  StreamIncomingOutgoingCallThemeData? incomingCallTheme,
-  StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
-}); 
+  factory StreamVideoTheme({
+    required Brightness brightness,
+    StreamTextTheme? textTheme,
+    StreamColorTheme? colorTheme,
+    StreamCallContentThemeData? callContentTheme,
+    StreamCallControlsThemeData? callControlsTheme,
+    StreamUserAvatarThemeData? userAvatarTheme,
+    StreamLobbyViewThemeData? lobbyViewTheme,
+    StreamCallParticipantThemeData? callParticipantTheme,
+    StreamLocalVideoThemeData? localVideoTheme,
+    StreamIncomingOutgoingCallThemeData? incomingCallTheme,
+    StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
+    StreamLivestreamThemeData? livestreamTheme,
+  });
 ```
 
 ### Stream Video Theme in use
