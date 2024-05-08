@@ -31,6 +31,7 @@ import '../../webrtc/peer_connection.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
+import '../../ws/ws.dart';
 import '../state/call_state_notifier.dart';
 import 'call_session_config.dart';
 
@@ -238,7 +239,9 @@ class CallSession extends Disposable {
     eventsSubscription = null;
     await _statsSubscription?.cancel();
     _statsSubscription = null;
-    await sfuWS.disconnect();
+    await sfuWS.disconnect(
+      StreamWebSocketCloseCode.closeSocketFromClient.value,
+    );
     await rtcManager?.dispose();
     rtcManager = null;
     _peerConnectionCheckTimer?.cancel();
