@@ -86,7 +86,6 @@ class CallSession extends Disposable {
 
   BehaviorSubject<RtcManager>? _rtcManagerSubject;
   StreamSubscription<SfuEvent>? _eventsSubscription;
-  StreamSubscription<SfuEvent>? _delayedEventsSubscription;
   StreamSubscription<Map<String, dynamic>>? _statsSubscription;
   Timer? _peerConnectionCheckTimer;
 
@@ -112,20 +111,22 @@ class CallSession extends Disposable {
       _logger.d(() => '[start] no args');
 
       await _eventsSubscription?.cancel();
-      await _delayedEventsSubscription?.cancel();
       await _rtcManagerSubject?.close();
 
-      // Listen to SFU events
-      _eventsSubscription = sfuWS.events.listen(_onSfuEvent);
-
       _rtcManagerSubject = BehaviorSubject();
-      // Delay SFU events that require RTCManager to be initialized
-      _delayedEventsSubscription = _rtcManagerSubject!
-          .take(1)
-          .switchMap((_) => sfuWS.events.asStream())
-          .listen(
-            _onDelayedSfuEvent,
-          );
+
+      // Buffer sfu events until rtc manager is set
+      final bufferedStream =
+          sfuWS.events.asStream().buffer(_rtcManagerSubject!);
+
+      // Handle buffored events and then listen to sfu events as normal
+      _eventsSubscription = bufferedStream.asyncExpand((bufferedEvents) async* {
+        for (final event in bufferedEvents) {
+          await _onSfuEvent(event);
+        }
+
+        yield* sfuWS.events.asStream();
+      }).listen(_onSfuEvent);
 
       final wsResult = await sfuWS.connect();
       if (wsResult.isFailure) {
@@ -205,9 +206,7 @@ class CallSession extends Disposable {
       _logger.v(() => '[fastReconnect] genericSdp.len: ${genericSdp.length}');
 
       await _eventsSubscription?.cancel();
-      await _delayedEventsSubscription?.cancel();
       _eventsSubscription = sfuWS.events.listen(_onSfuEvent);
-      _delayedEventsSubscription = sfuWS.events.listen(_onDelayedSfuEvent);
       await sfuWS.connect();
 
       sfuWS.send(
@@ -259,8 +258,6 @@ class CallSession extends Disposable {
     await _saBuffer.cancel();
     await _eventsSubscription?.cancel();
     _eventsSubscription = null;
-    await _delayedEventsSubscription?.cancel();
-    _delayedEventsSubscription = null;
     await _statsSubscription?.cancel();
     _statsSubscription = null;
     await sfuWS.disconnect();
@@ -293,7 +290,11 @@ class CallSession extends Disposable {
 
   Future<void> _onSfuEvent(SfuEvent event) async {
     _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
-    if (event is SfuParticipantLeftEvent) {
+    if (event is SfuSubscriberOfferEvent) {
+      await _onSubscriberOffer(event);
+    } else if (event is SfuIceTrickleEvent) {
+      await _onRemoteIceCandidate(event);
+    } else if (event is SfuParticipantLeftEvent) {
       await _onParticipantLeft(event);
     } else if (event is SfuTrackPublishedEvent) {
       await _onTrackPublished(event);
@@ -319,15 +320,6 @@ class CallSession extends Disposable {
       stateManager.sfuTrackUnpublished(event);
     } else if (event is SfuDominantSpeakerChangedEvent) {
       stateManager.sfuDominantSpeakerChanged(event);
-    }
-  }
-
-  Future<void> _onDelayedSfuEvent(SfuEvent event) async {
-    _logger.log(event.logPriority, () => '[onDelayedSfuEvent] event: $event');
-    if (event is SfuSubscriberOfferEvent) {
-      await _onSubscriberOffer(event);
-    } else if (event is SfuIceTrickleEvent) {
-      await _onRemoteIceCandidate(event);
     }
   }
 
