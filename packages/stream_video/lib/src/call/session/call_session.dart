@@ -119,7 +119,7 @@ class CallSession extends Disposable {
       final bufferedStream =
           sfuWS.events.asStream().buffer(_rtcManagerSubject!);
 
-      // Handle buffored events and then listen to sfu events as normal
+      // Handle buffered events and then listen to sfu events as normal
       _eventsSubscription = bufferedStream.asyncExpand((bufferedEvents) async* {
         for (final event in bufferedEvents) {
           await _onSfuEvent(event);
