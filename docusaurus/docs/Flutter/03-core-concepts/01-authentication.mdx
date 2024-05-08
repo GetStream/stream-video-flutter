@@ -26,6 +26,7 @@ factory StreamVideo(
     muteAudioWhenInBackground: false,
     autoConnect: true,
     includeUserDetailsForAutoConnect: true,
+    keepConnectionsAliveWhenInBackground: false,
   ),
   required User user,
   String? userToken,
@@ -33,7 +34,6 @@ factory StreamVideo(
   OnTokenUpdated? onTokenUpdated,
   bool failIfSingletonExists = true,
   PNManagerProvider? pushNotificationManagerProvider,
-  CallTypeFactory? customCallTypeFactory,
 });
 ```
 

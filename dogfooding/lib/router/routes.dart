@@ -64,7 +64,7 @@ class CallRoute extends GoRouteData {
 
   final ({
     Call call,
-    CallConnectOptions connectOptions,
+    CallConnectOptions? connectOptions,
   }) $extra;
 
   @override

@@ -23,19 +23,23 @@ StreamCallContainer(
 You can customize the widget rendered while app is in Picture-in-Picture mode by providing `callPictureInPictureBuilder` to `StreamCallContent`.
 
 ```dart
-StreamCallContainer(
+  StreamCallContainer(
     call: widget.call,
     callContentBuilder: (
-      BuildContext context,
-      Call call,
-      CallState callState,
-    ) {
+        BuildContext context,
+        Call call,
+        CallState callState,
+        ) {
       return StreamCallContent(
         call: call,
         callState: callState,
         enablePictureInPicture: true,
-        callPictureInPictureBuilder: (context, call, callState) => // YOUR CUSTOM WIDGET
-    })
+        callPictureInPictureBuilder: (context, call, callState) {
+          // YOUR CUSTOM WIDGET
+        }
+      );
+    },
+  );
 ```
 
 ### Android Configuration

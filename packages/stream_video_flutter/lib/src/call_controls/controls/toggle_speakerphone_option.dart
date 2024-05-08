@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../../utils/extensions.dart';
 
 // These are eyeballed device IDs for the speaker and earpiece.
 // based on Android and iOS enumerated devices.
@@ -111,8 +112,4 @@ class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
       },
     );
   }
-}
-
-extension on String {
-  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
 }

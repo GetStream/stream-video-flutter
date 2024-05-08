@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:rxdart/rxdart.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
@@ -31,6 +32,7 @@ import '../../webrtc/peer_connection.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
+import '../../ws/ws.dart';
 import '../state/call_state_notifier.dart';
 import 'call_session_config.dart';
 
@@ -82,7 +84,9 @@ class CallSession extends Disposable {
   final OnFullReconnectNeeded onFullReconnectNeeded;
 
   RtcManager? rtcManager;
-  StreamSubscription<SfuEvent>? eventsSubscription;
+
+  BehaviorSubject<RtcManager>? _rtcManagerSubject;
+  StreamSubscription<SfuEvent>? _eventsSubscription;
   StreamSubscription<Map<String, dynamic>>? _statsSubscription;
   Timer? _peerConnectionCheckTimer;
 
@@ -106,8 +110,25 @@ class CallSession extends Disposable {
   Future<Result<None>> start() async {
     try {
       _logger.d(() => '[start] no args');
-      await eventsSubscription?.cancel();
-      eventsSubscription = sfuWS.events.listen(_onSfuEvent);
+
+      await _eventsSubscription?.cancel();
+      await _rtcManagerSubject?.close();
+
+      _rtcManagerSubject = BehaviorSubject();
+
+      // Buffer sfu events until rtc manager is set
+      final bufferedStream =
+          sfuWS.events.asStream().buffer(_rtcManagerSubject!);
+
+      // Handle buffered events and then listen to sfu events as normal
+      _eventsSubscription = bufferedStream.asyncExpand((bufferedEvents) async* {
+        for (final event in bufferedEvents) {
+          await _onSfuEvent(event);
+        }
+
+        yield* sfuWS.events.asStream();
+      }).listen(_onSfuEvent);
+
       final wsResult = await sfuWS.connect();
       if (wsResult.isFailure) {
         _logger.e(() => '[start] ws connect failed: $wsResult');
@@ -150,6 +171,8 @@ class CallSession extends Disposable {
         ..onRemoteTrackReceived = _onRemoteTrackReceived
         ..onStatsReceived = _onStatsReceived;
 
+      _rtcManagerSubject!.add(rtcManager!);
+
       await _statsSubscription?.cancel();
       _statsSubscription = rtcManager?.statsStream.listen((rawStats) {
         sfuClient.sendStats(
@@ -163,10 +186,6 @@ class CallSession extends Disposable {
           ),
         );
       });
-
-      if (CurrentPlatform.isIos) {
-        await rtcManager?.setAppleAudioConfiguration();
-      }
 
       _logger.v(() => '[start] completed');
       return const Result.success(none);
@@ -183,8 +202,8 @@ class CallSession extends Disposable {
       final genericSdp = await RtcManager.getGenericSdp();
       _logger.v(() => '[fastReconnect] genericSdp.len: ${genericSdp.length}');
 
-      await eventsSubscription?.cancel();
-      eventsSubscription = sfuWS.events.listen(_onSfuEvent);
+      await _eventsSubscription?.cancel();
+      _eventsSubscription = sfuWS.events.listen(_onSfuEvent);
       await sfuWS.connect();
 
       sfuWS.send(
@@ -234,11 +253,13 @@ class CallSession extends Disposable {
     _logger.d(() => '[dispose] no args');
     await _stats.close();
     await _saBuffer.cancel();
-    await eventsSubscription?.cancel();
-    eventsSubscription = null;
+    await _eventsSubscription?.cancel();
+    _eventsSubscription = null;
     await _statsSubscription?.cancel();
     _statsSubscription = null;
-    await sfuWS.disconnect();
+    await sfuWS.disconnect(
+      StreamWebSocketCloseCode.closeSocketFromClient.value,
+    );
     await rtcManager?.dispose();
     rtcManager = null;
     _peerConnectionCheckTimer?.cancel();
@@ -395,6 +416,7 @@ class CallSession extends Disposable {
   Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {
     final offerSdp = event.sdp;
     _logger.i(() => '[onSubscriberOffer] event: $event');
+
     final answerSdp = await rtcManager?.onSubscriberOffer(offerSdp);
     if (answerSdp == null) {
       _logger.w(() => '[onSubscriberOffer] rejected (answerSdp is null)');

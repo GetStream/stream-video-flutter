@@ -20,6 +20,7 @@ import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../utils/cancelable_operation.dart';
 import '../utils/cancelables.dart';
+import '../utils/extensions.dart';
 import '../utils/future.dart';
 import '../utils/standard.dart';
 import '../webrtc/model/stats/rtc_ice_candidate_pair.dart';
@@ -1052,6 +1053,7 @@ class Call {
               VideoSettingsRequestCameraFacingEnum.front
           ? FacingMode.user
           : FacingMode.environment,
+      speakerDefaultOn: settings.audio.speakerDefaultOn,
     );
   }
 
@@ -1070,6 +1072,12 @@ class Call {
 
     if (_connectOptions.audioOutputDevice != null) {
       await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
+    } else {
+      if (CurrentPlatform.isIos) {
+        await _session?.rtcManager?.setAppleAudioConfiguration(
+          speakerOn: _connectOptions.speakerDefaultOn,
+        );
+      }
     }
 
     _logger.v(() => '[applyConnectOptions] finished');
@@ -1962,8 +1970,4 @@ enum TrackType {
         throw Exception('Unknown mute type: $this');
     }
   }
-}
-
-extension on String {
-  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
 }

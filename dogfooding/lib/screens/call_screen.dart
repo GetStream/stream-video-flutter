@@ -25,11 +25,11 @@ class CallScreen extends StatefulWidget {
   const CallScreen({
     super.key,
     required this.call,
-    this.connectOptions = const CallConnectOptions(),
+    this.connectOptions,
   });
 
   final Call call;
-  final CallConnectOptions connectOptions;
+  final CallConnectOptions? connectOptions;
 
   @override
   State<CallScreen> createState() => _CallScreenState();
