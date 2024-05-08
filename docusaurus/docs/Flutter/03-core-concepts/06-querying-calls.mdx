@@ -67,6 +67,7 @@ To add a sort, it is simple as specifying a list of sorts to the `queryCalls` fu
 
 ```dart
 final result = await video.queryCalls(
+  // ...
   sorts: [
     SortParamRequest(field: 'starts_at', direction: -1),
   ],
