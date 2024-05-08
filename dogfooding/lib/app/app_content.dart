@@ -123,7 +123,7 @@ class _StreamDogFoodingAppContentState
 
       final extra = (
         call: result.data,
-        connectOptions: const CallConnectOptions(),
+        connectOptions: null,
       );
 
       _router.push(CallRoute($extra: extra).location, extra: extra);
@@ -237,7 +237,7 @@ class _StreamDogFoodingAppContentState
     // Navigate to the call screen.
     final extra = (
       call: callToJoin,
-      connectOptions: const CallConnectOptions(),
+      connectOptions: null,
     );
     _router.push(CallRoute($extra: extra).location, extra: extra);
   }
