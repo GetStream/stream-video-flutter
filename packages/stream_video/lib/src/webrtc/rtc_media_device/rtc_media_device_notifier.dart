@@ -4,6 +4,7 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../stream_video.dart';
 import '../../errors/video_error_composer.dart';
+import '../../utils/extensions.dart';
 import '../../utils/result.dart';
 import 'rtc_media_device.dart';
 
@@ -85,9 +86,4 @@ class RtcMediaDeviceNotifier {
   Future<Result<List<RtcMediaDevice>>> videoInputs() {
     return enumerateDevices(kind: RtcMediaDeviceKind.videoInput);
   }
-}
-
-extension on String {
-  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
-  String capitalizeFirstLetter() => '${this[0].toUpperCase()}${substring(1)}';
 }

@@ -20,6 +20,7 @@ import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../utils/cancelable_operation.dart';
 import '../utils/cancelables.dart';
+import '../utils/extensions.dart';
 import '../utils/future.dart';
 import '../utils/standard.dart';
 import '../webrtc/model/stats/rtc_ice_candidate_pair.dart';
@@ -1969,8 +1970,4 @@ enum TrackType {
         throw Exception('Unknown mute type: $this');
     }
   }
-}
-
-extension on String {
-  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
 }

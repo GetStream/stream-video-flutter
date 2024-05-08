@@ -11,6 +11,7 @@ import '../models/call_cid.dart';
 import '../platform_detector/platform_detector.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
 import '../sfu/data/models/sfu_track_type.dart';
+import '../utils/extensions.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
 import 'codecs_helper.dart' as codecs;
@@ -916,8 +917,4 @@ extension on RtcLocalTrack<VideoConstraints> {
     }
     return dimension;
   }
-}
-
-extension on String {
-  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
 }

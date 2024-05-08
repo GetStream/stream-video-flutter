@@ -20,6 +20,8 @@ extension StringExtension on String {
 
     return resultBuffer.toString();
   }
+
+  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
 }
 
 /// Extensions on [List].
