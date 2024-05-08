@@ -96,7 +96,8 @@ RouteBase get $callRoute => GoRouteData.$route(
 
 extension $CallRouteExtension on CallRoute {
   static CallRoute _fromState(GoRouterState state) => CallRoute(
-        $extra: state.extra as ({Call call, CallConnectOptions connectOptions}),
+        $extra:
+            state.extra as ({Call call, CallConnectOptions? connectOptions}),
       );
 
   String get location => GoRouteData.$location(

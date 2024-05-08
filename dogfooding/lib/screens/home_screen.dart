@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (isRinging) {
         CallRoute($extra: (
           call: _call!,
-          connectOptions: const CallConnectOptions(),
+          connectOptions: null,
         )).push(context);
       } else {
         LobbyRoute($extra: _call!).push(context);
