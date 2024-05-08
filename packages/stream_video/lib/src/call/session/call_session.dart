@@ -186,10 +186,6 @@ class CallSession extends Disposable {
         );
       });
 
-      if (CurrentPlatform.isIos) {
-        await rtcManager?.setAppleAudioConfiguration();
-      }
-
       _logger.v(() => '[start] completed');
       return const Result.success(none);
     } catch (e, stk) {

@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../utils/extensions.dart';
 
 /// A widget that represents a call control option to toggle if the
 /// speakerphone is on or off.
@@ -121,8 +122,4 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
       padding: const EdgeInsets.all(16),
     );
   }
-}
-
-extension on String {
-  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
 }
