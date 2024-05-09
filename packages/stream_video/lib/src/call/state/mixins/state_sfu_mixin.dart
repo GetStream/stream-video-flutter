@@ -207,4 +207,37 @@ mixin StateSfuMixin on StateNotifier<CallState> {
       ],
     );
   }
+
+  void sfuParticipantUpdated(
+    SfuParticipantUpdatedEvent event,
+  ) {
+    _logger.d(
+      () => '[sfuParticipantUpdated] ${state.sessionId}; event: $event',
+    );
+    final participant = event.participant;
+
+    final participants = state.callParticipants.map((it) {
+      if (it.userId == participant.userId &&
+          it.sessionId == participant.sessionId) {
+        return it.copyWith(
+          name: participant.userName,
+          custom: participant.custom,
+          image: participant.userImage,
+          trackIdPrefix: participant.trackLookupPrefix,
+          audioLevel: participant.audioLevel,
+          isSpeaking: participant.isSpeaking,
+          isDominantSpeaker: participant.isDominantSpeaker,
+          connectionQuality: participant.connectionQuality,
+          role: participant.roles.firstOrNull ?? '',
+        );
+      } else {
+        return it;
+      }
+    });
+    state = state.copyWith(
+      callParticipants: [
+        ...participants,
+      ],
+    );
+  }
 }

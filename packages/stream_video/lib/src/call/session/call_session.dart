@@ -307,6 +307,8 @@ class CallSession extends Disposable {
       stateManager.sfuJoinResponse(event);
     } else if (event is SfuParticipantJoinedEvent) {
       stateManager.sfuParticipantJoined(event);
+    } else if (event is SfuParticipantUpdatedEvent) {
+      stateManager.sfuParticipantUpdated(event);
     } else if (event is SfuParticipantLeftEvent) {
       stateManager.sfuParticipantLeft(event);
     } else if (event is SfuConnectionQualityChangedEvent) {

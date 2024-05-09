@@ -129,6 +129,20 @@ class SfuParticipantJoinedEvent extends SfuEvent {
 }
 
 @internal
+class SfuParticipantUpdatedEvent extends SfuEvent {
+  const SfuParticipantUpdatedEvent({
+    required this.callCid,
+    required this.participant,
+  });
+
+  final String callCid;
+  final SfuParticipant participant;
+
+  @override
+  List<Object> get props => [callCid, participant];
+} 
+
+@internal
 class SfuParticipantLeftEvent extends SfuEvent {
   const SfuParticipantLeftEvent({
     required this.callCid,
