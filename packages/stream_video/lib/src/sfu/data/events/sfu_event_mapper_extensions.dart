@@ -144,6 +144,12 @@ extension SfuEventMapper on sfu_events.SfuEvent {
         return SfuGoAwayEvent(
           goAwayReason: payload.reason.toDomain(),
         );
+      case sfu_events.SfuEvent_EventPayload.participantUpdated:
+        final payload = participantUpdated;
+        return SfuParticipantUpdatedEvent(
+          callCid: payload.callCid,
+          participant: payload.participant.toDomain(),
+        );
       default:
         return const SfuUnknownEvent();
     }

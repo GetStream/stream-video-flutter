@@ -25,6 +25,10 @@ abstract class SignalServer {
   Future<ICERestartResponse> iceRestart(twirp.Context ctx, ICERestartRequest req);
   
   Future<SendStatsResponse> sendStats(twirp.Context ctx, SendStatsRequest req);
+  
+  Future<StartNoiseCancellationResponse> startNoiseCancellation(twirp.Context ctx, StartNoiseCancellationRequest req);
+  
+  Future<StopNoiseCancellationResponse> stopNoiseCancellation(twirp.Context ctx, StopNoiseCancellationRequest req);
 }
 
 
@@ -176,8 +180,7 @@ class SignalServerJSONClient implements SignalServer {
   }
 
   @override
-  Future<SendStatsResponse> sendStats(
-      twirp.Context ctx, SendStatsRequest req) async {
+  Future<SendStatsResponse> sendStats(twirp.Context ctx, SendStatsRequest req) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'SendStats');
@@ -186,13 +189,55 @@ class SignalServerJSONClient implements SignalServer {
     })(ctx, req);
   }
 
-  Future<SendStatsResponse> callSendStats(
-      twirp.Context ctx, SendStatsRequest req) async {
+  Future<SendStatsResponse> callSendStats(twirp.Context ctx, SendStatsRequest req) async {
     try {
-      Uri url = Uri.parse(
-          baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendStats');
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendStats');
       final data = await doJSONRequest(ctx, url, hooks, req);
       final SendStatsResponse res = SendStatsResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StartNoiseCancellationResponse> startNoiseCancellation(twirp.Context ctx, StartNoiseCancellationRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'signal');
+    ctx = twirp.withServiceName(ctx, 'SignalServer');
+    ctx = twirp.withMethodName(ctx, 'StartNoiseCancellation');
+    return interceptor((ctx, req) {
+      return callStartNoiseCancellation(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StartNoiseCancellationResponse> callStartNoiseCancellation(twirp.Context ctx, StartNoiseCancellationRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/StartNoiseCancellation');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final StartNoiseCancellationResponse res = StartNoiseCancellationResponse.create();
+      res.mergeFromProto3Json(json.decode(data));
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StopNoiseCancellationResponse> stopNoiseCancellation(twirp.Context ctx, StopNoiseCancellationRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'signal');
+    ctx = twirp.withServiceName(ctx, 'SignalServer');
+    ctx = twirp.withMethodName(ctx, 'StopNoiseCancellation');
+    return interceptor((ctx, req) {
+      return callStopNoiseCancellation(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StopNoiseCancellationResponse> callStopNoiseCancellation(twirp.Context ctx, StopNoiseCancellationRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/StopNoiseCancellation');
+      final data = await doJSONRequest(ctx, url, hooks, req);
+      final StopNoiseCancellationResponse res = StopNoiseCancellationResponse.create();
       res.mergeFromProto3Json(json.decode(data));
       return Future.value(res);
     } catch (e) {
@@ -350,8 +395,7 @@ class SignalServerProtobufClient implements SignalServer {
   }
 
   @override
-  Future<SendStatsResponse> sendStats(
-      twirp.Context ctx, SendStatsRequest req) async {
+  Future<SendStatsResponse> sendStats(twirp.Context ctx, SendStatsRequest req) async {
     ctx = twirp.withPackageName(ctx, 'signal');
     ctx = twirp.withServiceName(ctx, 'SignalServer');
     ctx = twirp.withMethodName(ctx, 'SendStats');
@@ -360,13 +404,55 @@ class SignalServerProtobufClient implements SignalServer {
     })(ctx, req);
   }
 
-  Future<SendStatsResponse> callSendStats(
-      twirp.Context ctx, SendStatsRequest req) async {
+  Future<SendStatsResponse> callSendStats(twirp.Context ctx, SendStatsRequest req) async {
     try {
-      Uri url = Uri.parse(
-          baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendStats');
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/SendStats');
       final data = await doProtobufRequest(ctx, url, hooks, req);
       final SendStatsResponse res = SendStatsResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StartNoiseCancellationResponse> startNoiseCancellation(twirp.Context ctx, StartNoiseCancellationRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'signal');
+    ctx = twirp.withServiceName(ctx, 'SignalServer');
+    ctx = twirp.withMethodName(ctx, 'StartNoiseCancellation');
+    return interceptor((ctx, req) {
+      return callStartNoiseCancellation(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StartNoiseCancellationResponse> callStartNoiseCancellation(twirp.Context ctx, StartNoiseCancellationRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/StartNoiseCancellation');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final StartNoiseCancellationResponse res = StartNoiseCancellationResponse.create();
+      res.mergeFromBuffer(data);
+      return Future.value(res);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<StopNoiseCancellationResponse> stopNoiseCancellation(twirp.Context ctx, StopNoiseCancellationRequest req) async {
+    ctx = twirp.withPackageName(ctx, 'signal');
+    ctx = twirp.withServiceName(ctx, 'SignalServer');
+    ctx = twirp.withMethodName(ctx, 'StopNoiseCancellation');
+    return interceptor((ctx, req) {
+      return callStopNoiseCancellation(ctx, req);
+    })(ctx, req);
+  }
+
+  Future<StopNoiseCancellationResponse> callStopNoiseCancellation(twirp.Context ctx, StopNoiseCancellationRequest req) async {
+    try {
+      Uri url = Uri.parse(baseUrl + prefix + 'stream.video.sfu.signal.SignalServer/StopNoiseCancellation');
+      final data = await doProtobufRequest(ctx, url, hooks, req);
+      final StopNoiseCancellationResponse res = StopNoiseCancellationResponse.create();
       res.mergeFromBuffer(data);
       return Future.value(res);
     } catch (e) {
