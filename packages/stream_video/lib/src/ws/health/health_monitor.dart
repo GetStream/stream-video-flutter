@@ -46,7 +46,7 @@ class HealthMonitorImpl implements HealthMonitor {
   bool _started = false;
   Timer? _pingTimer;
   Timer? _pongTimer;
-  StreamSubscription<ConnectivityResult>? _networkChangeSubscription;
+  StreamSubscription<List<ConnectivityResult>>? _networkChangeSubscription;
 
   @override
   bool get isStarted => _started;
@@ -143,7 +143,7 @@ class HealthMonitorImpl implements HealthMonitor {
     _networkChangeSubscription =
         Connectivity().onConnectivityChanged.listen((result) {
       _logger.v(() => '[onConnectivityChanged] result: $result');
-      if (result == ConnectivityResult.none) {
+      if (result.contains(ConnectivityResult.none)) {
         listener.onNetworkDisconnected();
         _stopPinging();
         _stopPongTimer();
@@ -162,6 +162,6 @@ class HealthMonitorImpl implements HealthMonitor {
   // ignore: unused_element
   Future<bool> _isNetworkConnected() async {
     final result = await Connectivity().checkConnectivity();
-    return result != ConnectivityResult.none;
+    return !result.contains(ConnectivityResult.none);
   }
 }
