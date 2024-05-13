@@ -45,6 +45,9 @@ jobs:
           flutter pub global activate melos
           
       - name: Bootstrap Workspace
+        run: melos postclean
+
+      - name: Bootstrap Workspace
         run: melos bootstrap --verbose
 
       - name: Prepare environment
