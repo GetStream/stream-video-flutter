@@ -4,8 +4,6 @@
 * Bumped `connectivity_plus` dependency to `6.0.3` 
 
 > Note, that this changes the plugin requirements:
-> - Flutter >=3.19.0
-> - Dart >=3.3.0
 > - compileSDK 34 for Android part
 > - Java 17 for Android part
 > - Gradle 8.4 for Android part
