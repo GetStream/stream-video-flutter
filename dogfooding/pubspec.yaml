@@ -10,7 +10,7 @@ environment:
 dependencies:
   crypto: ^3.0.3
   cupertino_icons: ^1.0.5
-  device_info_plus: ^9.0.3
+  device_info_plus: ^10.1.0
   envied: ^0.3.0+3
   firebase_auth: ^4.7.3
   firebase_core: ^2.15.1

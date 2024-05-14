@@ -13,7 +13,7 @@ environment:
 
 dependencies:
   cupertino_icons: ^1.0.5
-  device_info_plus: ^9.0.3
+  device_info_plus: ^10.1.0
   envied: ^0.3.0+3
   flutter:
     sdk: flutter
