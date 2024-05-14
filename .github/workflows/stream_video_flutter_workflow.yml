@@ -69,6 +69,12 @@ jobs:
         with:
           fetch-depth: 0
           
+      - name: ⚙️ Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "zulu"
+          java-version: "17"
+
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
