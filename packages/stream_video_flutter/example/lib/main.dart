@@ -1,12 +1,14 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 
+import 'app.dart';
 import 'core/token_service.dart';
+import 'firebase_options.dart';
 import 'log_config.dart';
-import 'screen/login_screen.dart';
 
 const _tag = 'MyApp';
 
@@ -14,6 +16,10 @@ Future<void> main() async {
   //useProxy('192.168.1.73:8888');
 
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   await _setupLogger();
 
@@ -24,7 +30,7 @@ Future<Result<None>> _connectUser(UserInfo user) async {
   streamLog.i(_tag, () => '[connectUser] user: $user');
 
   final tokenResponse = await const TokenService().loadToken(
-    environment: Environment.demo,
+    environment: Environment.pronto,
     userId: user.id,
   );
 
@@ -32,6 +38,18 @@ Future<Result<None>> _connectUser(UserInfo user) async {
     tokenResponse.apiKey,
     user: User(info: user),
     userToken: tokenResponse.token,
+    pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
+      iosPushProvider: const StreamVideoPushProvider.apn(
+        name: 'flutter-apn',
+      ),
+      androidPushProvider: const StreamVideoPushProvider.firebase(
+        name: 'flutter-firebase',
+      ),
+      pushParams: const StreamVideoPushParams(
+        appName: 'Stream Dogfooding',
+        ios: IOSParams(iconName: 'IconMask'),
+      ),
+    ),
   );
   await client.connect();
 
@@ -75,40 +93,4 @@ Future<void> _setupLogger() async {
   }
   StreamLog().validator = (priority, _) => true;
   StreamLog().logger = CompositeStreamLogger(children);
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({
-    super.key,
-    required this.connectUser,
-  });
-
-  final ConnectUser connectUser;
-
-  @override
-  Widget build(BuildContext context) {
-    Call? activeCall;
-    if (StreamVideo.isInitialized()) {
-      activeCall = StreamVideo.instance.activeCall;
-    }
-    streamLog.i(_tag, () => '[build] activeCall: $activeCall');
-
-    final darkAppTheme = StreamVideoTheme.dark();
-    final lightAppTheme = StreamVideoTheme.light();
-
-    return MaterialApp(
-      title: 'Stream Video UI Example',
-      theme: ThemeData(
-        textTheme: GoogleFonts.robotoMonoTextTheme(),
-        extensions: <ThemeExtension<dynamic>>[lightAppTheme],
-      ),
-      darkTheme: ThemeData(
-        textTheme: GoogleFonts.robotoMonoTextTheme(),
-        extensions: <ThemeExtension<dynamic>>[darkAppTheme],
-      ),
-      themeMode: ThemeMode.dark,
-      home: LoginScreen(connectUser: connectUser),
-      debugShowCheckedModeBanner: false,
-    );
-  }
 }

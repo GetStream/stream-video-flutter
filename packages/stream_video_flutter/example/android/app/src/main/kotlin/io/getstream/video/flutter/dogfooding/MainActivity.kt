@@ -1,4 +1,4 @@
-package com.example.stream_video_flutter_example
+package io.getstream.video.flutter.dogfooding
 
 import io.flutter.embedding.android.FlutterActivity
 

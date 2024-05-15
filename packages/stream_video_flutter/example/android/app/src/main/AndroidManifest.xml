@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.stream_video_flutter_example">
+    package="io.getstream.video.flutter.dogfooding">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-feature android:name="android.hardware.camera"/>
@@ -19,7 +19,7 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
    <application
-        android:label="example"
+        android:label="DemoApp"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
