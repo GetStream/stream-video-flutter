@@ -269,6 +269,7 @@ class Call {
   CallSession? _session;
 
   CallConnectOptions _connectOptions = const CallConnectOptions();
+  CallConnectOptions? _connectOptionsOverride;
 
   @override
   String toString() {
@@ -276,7 +277,7 @@ class Call {
   }
 
   CallConnectOptions get connectOptions {
-    return _connectOptions;
+    return _connectOptionsOverride ?? _connectOptions;
   }
 
   set connectOptions(CallConnectOptions connectOptions) {
@@ -289,7 +290,7 @@ class Call {
       return;
     }
     _logger.d(() => '[setConnectOptions] connectOptions: $connectOptions)');
-    _connectOptions = connectOptions;
+    _connectOptionsOverride = connectOptions;
   }
 
   void _observeState() {
@@ -1351,6 +1352,11 @@ class Call {
 
     if (connectOptions != null) {
       _connectOptions = _connectOptions.merge(connectOptions);
+    }
+
+    if (_connectOptionsOverride != null) {
+      _connectOptions = _connectOptions.merge(_connectOptionsOverride!);
+      _connectOptionsOverride = null;
     }
 
     _stateManager.lifecycleCallCreated(
