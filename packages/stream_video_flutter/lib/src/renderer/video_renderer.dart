@@ -41,6 +41,7 @@ class StreamVideoRenderer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final trackState = participant.publishedTracks[videoTrackType];
+    var trackID = call.getTrack(participant.trackIdPrefix, videoTrackType);
 
     final Widget child;
     if (trackState == null) {
@@ -58,7 +59,7 @@ class StreamVideoRenderer extends StatelessWidget {
     }
 
     return VisibilityDetector(
-      key: Key('${participant.sessionId}${trackState?.muted}'),
+      key: Key('${participant.sessionId}$trackState${trackState?.muted}'),
       onVisibilityChanged: _onVisibilityChanged,
       child: child,
     );
