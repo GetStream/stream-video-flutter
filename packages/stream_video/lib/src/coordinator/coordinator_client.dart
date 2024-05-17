@@ -76,7 +76,7 @@ abstract class CoordinatorClient {
 
   Future<Result<None>> acceptCall({required StreamCallCid cid});
 
-  Future<Result<None>> rejectCall({required StreamCallCid cid});
+  Future<Result<None>> rejectCall({required StreamCallCid cid, String? reason});
 
   /// Sends a custom event to the API to notify if we've changed something
   /// in the state of the call.

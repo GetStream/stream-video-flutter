@@ -22,6 +22,10 @@ dependencies:
   stream_video: ^0.4.1
   visibility_detector: ^0.4.0+2
 
+dependency_overrides:
+  stream_video:
+    path: ../stream_video
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

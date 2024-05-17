@@ -1057,9 +1057,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<None>> rejectCall({
     required StreamCallCid cid,
+    String? reason,
   }) async {
     try {
-      await _defaultApi.rejectCall(cid.type.value, cid.id);
+      await _defaultApi.rejectCall(cid.type.value, cid.id, reason);
       return const Result.success(none);
     } catch (e) {
       return Result.failure(VideoErrors.compose(e));

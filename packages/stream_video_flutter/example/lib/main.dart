@@ -3,12 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 
 import 'app.dart';
+import 'core/auth_repository.dart';
 import 'core/token_service.dart';
 import 'firebase_options.dart';
 import 'log_config.dart';
+import 'model/credentials.dart';
+import 'stream_video_sdk.dart';
 
 const _tag = 'MyApp';
 
@@ -23,7 +25,11 @@ Future<void> main() async {
 
   await _setupLogger();
 
-  runApp(const MyApp(connectUser: _connectUser));
+  runApp(
+    const MyApp(
+      connectUser: _connectUser,
+    ),
+  );
 }
 
 Future<Result<None>> _connectUser(UserInfo user) async {
@@ -33,27 +39,27 @@ Future<Result<None>> _connectUser(UserInfo user) async {
     environment: Environment.pronto,
     userId: user.id,
   );
+  final apiKey = tokenResponse.apiKey;
+  final token = UserToken.jwt(tokenResponse.token);
 
-  final client = StreamVideo(
-    tokenResponse.apiKey,
-    user: User(info: user),
-    userToken: tokenResponse.token,
-    pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
-      iosPushProvider: const StreamVideoPushProvider.apn(
-        name: 'flutter-apn',
-      ),
-      androidPushProvider: const StreamVideoPushProvider.firebase(
-        name: 'flutter-firebase',
-      ),
-      pushParams: const StreamVideoPushParams(
-        appName: 'Stream Dogfooding',
-        ios: IOSParams(iconName: 'IconMask'),
-      ),
+  streamLog.i(_tag, () => '[connectUser] api_key: ${tokenResponse.apiKey}');
+  final client = await StreamVideoSdk.initialize(
+    apiKey: apiKey,
+    user: user,
+    userToken: token,
+  );
+  final authRepository = await AuthRepository.getInstance();
+  await authRepository.setCredentials(
+    AuthCredentials(
+      apiKey: apiKey,
+      token: token,
+      userInfo: user,
     ),
   );
+
   await client.connect();
 
-  StreamBackgroundService.init(
+  /*StreamBackgroundService.init(
     StreamVideo.instance,
     onNotificationClick: (call) async {
       streamLog.i(_tag, () => '[onNotificationClick] call: $call');
@@ -63,7 +69,7 @@ Future<Result<None>> _connectUser(UserInfo user) async {
       streamLog.i(_tag, () => '[onPlatformUiLayerDestroyed] call: $call');
       // TODO
     },
-  );
+  );*/
 
   return const Result.success(none);
 }

@@ -45,4 +45,10 @@ final sampleUsers = <UserInfo>[
     role: 'admin',
     image: 'https://ca.slack-edge.com/T02RM6X6B-U05UD37MA1G-f062f8b7afc2-512',
   ),
+  const UserInfo(
+    id: 'kanat',
+    name: 'Kanat',
+    role: 'admin',
+    image: 'https://ca.slack-edge.com/T02RM6X6B-U034NG4FPNG-9a37493e25e0-512',
+  ),
 ];

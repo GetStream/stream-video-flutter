@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 
 class UserInfo extends Equatable {
@@ -26,6 +28,17 @@ class UserInfo extends Equatable {
       'teams': teams,
       'extra_data': extraData,
     };
+  }
+
+  static UserInfo fromJson(Map<String, dynamic> json) {
+    return UserInfo(
+      id: json['id'],
+      role: json['role'],
+      name: json['name'],
+      image: json['image'],
+      teams: List<String>.from(jsonDecode(json['teams'])),
+      extraData: Map<String, Object?>.from(jsonDecode(json['extraData'])),
+    );
   }
 
   @override

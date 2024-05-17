@@ -1124,14 +1124,16 @@ class DefaultApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> rejectCallWithHttpInfo(String type, String id,) async {
+  Future<Response> rejectCallWithHttpInfo(String type, String id, String? reason,) async {
     // ignore: prefer_const_declarations
     final path = r'/call/{type}/{id}/reject'
       .replaceAll('{type}', type)
       .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
-    Object? postBody;
+    Object? postBody = <String, dynamic>{
+      if (reason != null) r'reason': reason,
+    };
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
@@ -1160,8 +1162,8 @@ class DefaultApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<RejectCallResponse?> rejectCall(String type, String id,) async {
-    final response = await rejectCallWithHttpInfo(type, id,);
+  Future<RejectCallResponse?> rejectCall(String type, String id, String? reason,) async {
+    final response = await rejectCallWithHttpInfo(type, id, reason,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
