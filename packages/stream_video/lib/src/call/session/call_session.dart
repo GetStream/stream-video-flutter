@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:rxdart/rxdart.dart';
+import 'package:system_info2/system_info2.dart';
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
@@ -90,6 +92,8 @@ class CallSession extends Disposable {
   StreamSubscription<Map<String, dynamic>>? _statsSubscription;
   Timer? _peerConnectionCheckTimer;
 
+  sfu_models.ClientDetails? _clientDetails;
+
   SharedEmitter<CallStats> get stats => _stats;
   late final _stats = MutableSharedEmitterImpl<CallStats>();
 
@@ -107,9 +111,87 @@ class CallSession extends Disposable {
     onCancel: () => Result.error('UpdateViewportVisibility cancelled'),
   );
 
+  Future<void> _ensureClientDetails() async {
+    if (_clientDetails != null) return;
+
+    try {
+      sfu_models.Device? device;
+      sfu_models.Browser? browser;
+
+      var os = sfu_models.OS(
+        name: SysInfo.operatingSystemName,
+        version: SysInfo.operatingSystemVersion,
+        architecture: SysInfo.rawKernelArchitecture,
+      );
+
+      if (CurrentPlatform.isAndroid) {
+        final deviceInfo = await DeviceInfoPlugin().androidInfo;
+        os = sfu_models.OS(
+          name: 'Android',
+          version: deviceInfo.version.release,
+          architecture: SysInfo.rawKernelArchitecture,
+        );
+        device = sfu_models.Device(
+          name: '${deviceInfo.manufacturer} : ${deviceInfo.model}',
+        );
+      } else if (CurrentPlatform.isIos) {
+        final deviceInfo = await DeviceInfoPlugin().iosInfo;
+        os = sfu_models.OS(
+          name: 'iOS',
+          version: deviceInfo.systemVersion,
+          architecture: SysInfo.rawKernelArchitecture,
+        );
+        device = sfu_models.Device(
+          name: deviceInfo.model,
+        );
+      } else if (CurrentPlatform.isWeb) {
+        final browserInfo = await DeviceInfoPlugin().webBrowserInfo;
+        browser = sfu_models.Browser(
+          name: browserInfo.browserName.name,
+          version: browserInfo.vendorSub,
+        );
+      } else if (CurrentPlatform.isMacOS) {
+        final deviceInfo = await DeviceInfoPlugin().macOsInfo;
+        device = sfu_models.Device(
+          name: deviceInfo.model,
+          version: deviceInfo.osRelease,
+        );
+      } else if (CurrentPlatform.isWindows) {
+        final deviceInfo = await DeviceInfoPlugin().windowsInfo;
+        device = sfu_models.Device(
+          name: deviceInfo.productName,
+          version: deviceInfo.buildNumber.toString(),
+        );
+      } else if (CurrentPlatform.isLinux) {
+        final deviceInfo = await DeviceInfoPlugin().linuxInfo;
+        device = sfu_models.Device(
+          name: deviceInfo.name,
+          version: deviceInfo.version,
+        );
+      }
+
+      final versionSplit = streamVideoVersion.split('.');
+      _clientDetails = sfu_models.ClientDetails(
+        sdk: sfu_models.Sdk(
+          type: sfu_models.SdkType.SDK_TYPE_FLUTTER,
+          major: versionSplit.first,
+          minor: versionSplit.skip(1).first,
+          patch: versionSplit.last,
+        ),
+        os: os,
+        device: device,
+        browser: browser,
+      );
+    } catch (e) {
+      _logger.e(() => '[_ensureClientDetails] failed: $e');
+    }
+  }
+
   Future<Result<None>> start() async {
     try {
       _logger.d(() => '[start] no args');
+
+      await _ensureClientDetails();
 
       await _eventsSubscription?.cancel();
       await _rtcManagerSubject?.close();
@@ -117,17 +199,22 @@ class CallSession extends Disposable {
       _rtcManagerSubject = BehaviorSubject();
 
       // Buffer sfu events until rtc manager is set
-      final bufferedStream =
-          sfuWS.events.asStream().buffer(_rtcManagerSubject!);
+      final bufferedStream = sfuWS.events
+          .asStream()
+          .takeWhile((_) => !_rtcManagerSubject!.hasValue)
+          .buffer(_rtcManagerSubject!)
+          .expand((event) => event);
+
+      // Delay rest of the sfu events until rtc manager is set
+      final delayedStream = Rx.combineLatest2(
+        _rtcManagerSubject!,
+        sfuWS.events.asStream(),
+        (_, event) => event,
+      ).skip(1);
 
       // Handle buffered events and then listen to sfu events as normal
-      _eventsSubscription = bufferedStream.asyncExpand((bufferedEvents) async* {
-        for (final event in bufferedEvents) {
-          await _onSfuEvent(event);
-        }
-
-        yield* sfuWS.events.asStream();
-      }).listen(_onSfuEvent);
+      _eventsSubscription =
+          bufferedStream.mergeWith([delayedStream]).listen(_onSfuEvent);
 
       final wsResult = await sfuWS.connect();
       if (wsResult.isFailure) {
@@ -140,6 +227,7 @@ class CallSession extends Disposable {
       sfuWS.send(
         sfu_events.SfuRequest(
           joinRequest: sfu_events.JoinRequest(
+            clientDetails: _clientDetails,
             token: config.sfuToken,
             sessionId: sessionId,
             subscriberSdp: genericSdp,
@@ -202,6 +290,8 @@ class CallSession extends Disposable {
       final genericSdp = await RtcManager.getGenericSdp();
       _logger.v(() => '[fastReconnect] genericSdp.len: ${genericSdp.length}');
 
+      await _ensureClientDetails();
+
       await _eventsSubscription?.cancel();
       _eventsSubscription = sfuWS.events.listen(_onSfuEvent);
       await sfuWS.connect();
@@ -209,6 +299,7 @@ class CallSession extends Disposable {
       sfuWS.send(
         sfu_events.SfuRequest(
           joinRequest: sfu_events.JoinRequest(
+            clientDetails: _clientDetails,
             token: config.sfuToken,
             sessionId: sessionId,
             subscriberSdp: genericSdp,
