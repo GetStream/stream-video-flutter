@@ -199,17 +199,22 @@ class CallSession extends Disposable {
       _rtcManagerSubject = BehaviorSubject();
 
       // Buffer sfu events until rtc manager is set
-      final bufferedStream =
-          sfuWS.events.asStream().buffer(_rtcManagerSubject!);
+      final bufferedStream = sfuWS.events
+          .asStream()
+          .takeWhile((_) => !_rtcManagerSubject!.hasValue)
+          .buffer(_rtcManagerSubject!)
+          .expand((event) => event);
+
+      // Delay rest of the sfu events until rtc manager is set
+      final delayedStream = Rx.combineLatest2(
+        _rtcManagerSubject!,
+        sfuWS.events.asStream(),
+        (_, event) => event,
+      ).skip(1);
 
       // Handle buffered events and then listen to sfu events as normal
-      _eventsSubscription = bufferedStream.asyncExpand((bufferedEvents) async* {
-        for (final event in bufferedEvents) {
-          await _onSfuEvent(event);
-        }
-
-        yield* sfuWS.events.asStream();
-      }).listen(_onSfuEvent);
+      _eventsSubscription =
+          bufferedStream.mergeWith([delayedStream]).listen(_onSfuEvent);
 
       final wsResult = await sfuWS.connect();
       if (wsResult.isFailure) {
