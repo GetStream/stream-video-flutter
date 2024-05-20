@@ -1,3 +1,17 @@
+## 0.4.1
+
+🚧 Build breaking changes
+* Bumped `connectivity_plus` dependency to `6.0.3` 
+
+> Note, that this changes the plugin requirements:
+> - compileSDK 34 for Android part
+> - Java 17 for Android part
+> - Gradle 8.4 for Android part
+
+🐞 Fixed
+* Added foreground service type to service declaration in AndroidManifest
+
+
 ## 0.4.0
 
 🚧 Breaking changes
