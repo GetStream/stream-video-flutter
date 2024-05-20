@@ -132,18 +132,8 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants> {
         final screenShareTrack = it.screenShareTrack;
         final isScreenShareEnabled = it.isScreenShareEnabled;
 
-        // If the screen share track is local, we don't have to subscribe to
-        // anything and we can directly use the mute state.
-        if (screenShareTrack is! RemoteTrackState) return isScreenShareEnabled;
+        if (screenShareTrack == null || !isScreenShareEnabled) return false;
 
-        // If the screen share track is remote and already subscribed and
-        // received, we can directly use the mute state.
-        if (screenShareTrack.subscribed && screenShareTrack.received) {
-          return isScreenShareEnabled;
-        }
-
-        // If it's not yet subscribed, we have to show it in order for it to
-        // start the subscription process.
         return true;
       },
     );
