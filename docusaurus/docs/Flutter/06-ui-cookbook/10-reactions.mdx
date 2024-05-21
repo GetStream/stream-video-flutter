@@ -1,0 +1,76 @@
+# Reactions
+
+Reactions in video calls add a layer of nonverbal communication, adding engagement and enhancing
+the overall experience. They are a great way for users to communicate even when on mute.
+
+![User Reaction](../assets/cookbook/reaction_user.png)
+
+The Flutter SDK for Stream Video has inbuilt support for displaying reactions as well as reaction
+controls to add reactions for a user.
+
+## Reaction Control
+
+The `AddReactionOption` is the call control responsible for adding reactions to a video call.
+
+![Add Reaction Option](../assets/cookbook/add_reaction_option.png)
+
+You can add the control to your control bar by customising the `StreamCallControls` widget:
+
+```dart
+StreamCallContent(
+    call: call,
+    callState: state,
+    callControlsBuilder: (context, call, state) {
+    return StreamCallControls(
+      options: [
+        ...defaultCallControlOptions(
+          call: call,
+          localParticipant: state.localParticipant!,
+        ),
+        AddReactionOption(
+          call: call,
+          localParticipant: state.localParticipant!,
+        ),
+      ],
+    );
+  },
+)
+```
+
+## Customising Reactions
+
+The default reactions supplied by the SDK are `like`, `raised-hand`, and `fireworks`. However, you can
+replace these with your own reactions via the `CallControlsTheme`:
+
+```dart
+MaterialApp(
+  theme: ThemeData(
+    textTheme: GoogleFonts.robotoMonoTextTheme(),
+    extensions: <ThemeExtension<dynamic>>[
+      lightAppTheme.copyWith(
+        callControlsTheme: StreamCallControlsThemeData(
+          callReactions: [
+            CallReactionData(
+              type: 'reaction',
+              emojiCode: ':like:',
+              icon: '👍',
+            ),
+            CallReactionData(
+              type: 'raised-hand',
+              emojiCode: ':raise-hand:',
+              icon: '✋',
+            ),
+            CallReactionData(
+              type: 'reaction',
+              emojiCode: ':fireworks:',
+              icon: '🎉',
+            ),
+            // Add your reaction here
+          ],
+        ),
+      ),
+    ],
+  ),
+  // ...
+);
+```
