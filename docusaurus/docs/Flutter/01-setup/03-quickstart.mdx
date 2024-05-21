@@ -3,8 +3,17 @@ slug: /quickstart
 title: Quickstart
 ---
 
+The Flutter Video for Stream Video is a highly customizable SDK that facilitates adding calling (audio and video) support to your apps.
 
-In this guide, we will cover the basics of making your first call using Stream Video. If you haven't already, we recommend starting with the **introduction** and **installation** steps first, as this guide will build on the material covered in those sections.
+The SDK consists of three parts:
+
+* Low-level client ([stream_video](https://pub.dev/packages/stream_video)): Responsible for establishing calls, built on top of WebRTC.
+* UI SDK ([stream_video_flutter](https://pub.dev/packages/stream_video_flutter)): Flutter widgets for different types of call flows.
+* VoIP SDK ([stream_video_push_notification](https://pub.dev/packages/stream_video_push_notification)): Adds native calling interface support for Android and iOS (CallKit).
+
+In this guide, we will build a video calling app that shows how you can integrate the SDK in few simple steps.
+
+If you haven't already, we recommend starting with the [introduction](https://getstream.io/video/docs/flutter/) and [installation](https://getstream.io/video/docs/flutter/installation/) steps first, as this guide will build on the material covered in those sections.
 
 ### Client Setup
 
@@ -21,23 +30,20 @@ Future<void> main() async {
   // Ensure Flutter is able to communicate with Plugins
   WidgetsFlutterBinding.ensureInitialized();
 
-	// Initialize Stream video and set the API key along with the user for our app.
+  // Initialize Stream video and set the API key along with the user for our app.
   final client = StreamVideo(
-    'YOUR-API-KEY',
-    user: User.regular(userId: 'testing', name: 'Test User'),
-    userToken: 'YOUR-USER-TOKEN',
-    options: const StreamVideoOptions(
-      logPriority: Priority.info,
-    ),
+    'REPLACE_WITH_API_KEY',
+    user: User.regular(userId: 'REPLACE_WITH_USER_ID', name: 'Test User'),
+    userToken: 'REPLACE_WITH_TOKEN',
   );
 
   // Set up our call object
-  final call = client.makeCall(callType: StreamCallType(), id: '345');
+  final call = client.makeCall(callType: StreamCallType(), id: 'REPLACE_WITH_CALL_ID');
   // Connect to the call we created
   await call.join();
 
   runApp(
-    StreamVideoGettingStarted(
+    DemoAppHome(
       call: call,
     ),
   );
@@ -50,20 +56,6 @@ In the code above, we are performing a few key steps:
 2. Defining the user we would like to connect as to participate in a call.
 3. Creating an object for our call, giving it the call type and unique ID.
 4. Connecting to the call we defined.
-
-
-Although it is not shown in the example above, users can choose to customize many different aspects of the SDK during initialization. Here are a few of the parameters which can be overridden during initialization:
-
-| Parameter | Description  |
-| --- | --- |
-| apiKey | Stream Video API key obtained from the Dashboard of your project. |
-| latencySettings | Controls the number of rounds and timeout duration for measuring latency when first connecting to a call. |
-| retryPolicy | Allows for custom handling of retries such as override the default number of max retries, passing in a custom backoff function and more.  |
-| sdpPolicy | Controls whether SDP Munging is enabled and gives access to functions supporting SDP Munging. |
-| logPriority | Allows for customizing the level of logs displayed while developing or running your application. |
-| logHandlerFunction | Can be overridden to intercept logs and perform custom actions such as sending device logs to a capture service.  |
-| muteVideoWhenInBackground | Indicates whether the SDK should disable the video track when the app moves from the foreground to background. We highly recommend you set this to true if your app does not support picture-in-picture mode. |
-| muteAudioWhenInBackground | Indicates whether the SDK should disable the audio track when the app moves from the foreground to background. We highly recommend you set this to true if your app does not support picture-in-picture mode. |
 
 ### Call UI
 
