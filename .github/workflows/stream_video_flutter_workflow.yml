@@ -2,7 +2,7 @@ name: stream_video_flutter_workflow
 
 env:
   FLUTTER_CHANNEL: stable
-  FLUTTER_VERSION: 3.16.0
+  FLUTTER_VERSION: 3.19.5
   ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
 
 on:
@@ -45,6 +45,9 @@ jobs:
           flutter pub global activate melos
           
       - name: Bootstrap Workspace
+        run: melos postclean
+
+      - name: Bootstrap Workspace
         run: melos bootstrap --verbose
 
       - name: Prepare environment
@@ -66,6 +69,12 @@ jobs:
         with:
           fetch-depth: 0
           
+      - name: ⚙️ Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "zulu"
+          java-version: "17"
+
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:

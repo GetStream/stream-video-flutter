@@ -34,16 +34,17 @@ Developers can easily respond to user actions, such as accepting or declining a 
 To replace default screens, such as the one displayed when an incoming call is detected, developers can use one of the many optional builders available.
 
 ```dart
-@override
+  @override
   Widget build(BuildContext context) {
-   return Scaffold(
-    body: StreamCallContainer(
-      call: widget.call,
-      incomingCallBuilder: (context, call, callState) {
-        return CustomIncomingCallScreen(call: call, state: callState);
-      },
-    ),
-);
+    return Scaffold(
+      body: StreamCallContainer(
+        call: widget.call,
+        incomingCallBuilder: (context, call, callState) {
+          return CustomIncomingCallScreen(call: call, state: callState);
+        },
+      ),
+    );
+  }
 ```
 
 All the `builders` exposed by `StreamCallContainer` provide users with an ongoing `Call` object and the associated `CallState`. These can be used to subscribe to changes and display different UI options depending on the events.

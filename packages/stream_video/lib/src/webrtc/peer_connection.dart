@@ -277,6 +277,7 @@ class StreamPeerConnection extends Disposable {
       ..onAddStream = null
       ..onRemoveStream = null
       ..onAddTrack = null
+      ..onTrack = null
       ..onRemoveTrack = null
       ..onIceCandidate = null
       ..onIceConnectionState = null

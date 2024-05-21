@@ -1,10 +1,10 @@
 // ignore_for_file: avoid_web_libraries_in_flutter, implementation_imports
 
-import 'dart:html' as html;
 import 'dart:js_util' as jsutil;
 
 import 'package:dart_webrtc/src/media_stream_track_impl.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:web/web.dart' as web;
 
 const audioContainerId = 'stream_audio_container';
 const audioPrefix = 'stream_audio_';
@@ -13,25 +13,25 @@ void startAudio(String id, rtc.MediaStreamTrack track) {
   if (track is! MediaStreamTrackWeb) return;
 
   final elementId = audioPrefix + id;
-  var audioElement = html.document.getElementById(elementId);
+  var audioElement = web.document.getElementById(elementId);
   if (audioElement == null) {
-    audioElement = html.AudioElement()
+    audioElement = web.HTMLAudioElement()
       ..id = elementId
       ..autoplay = true;
     findOrCreateAudioContainer().append(audioElement);
   }
 
-  if (audioElement is! html.AudioElement) return;
+  if (audioElement is! web.HTMLAudioElement) return;
 
-  final audioStream = html.MediaStream();
+  final audioStream = web.MediaStream();
   audioStream.addTrack(track.jsTrack);
   audioElement.srcObject = audioStream;
 }
 
 void stopAudio(String id) {
-  final audioElement = html.document.getElementById(audioPrefix + id);
+  final audioElement = web.document.getElementById(audioPrefix + id);
   if (audioElement != null) {
-    if (audioElement is html.AudioElement) {
+    if (audioElement is web.HTMLAudioElement) {
       audioElement.srcObject = null;
     }
     audioElement.remove();
@@ -39,20 +39,20 @@ void stopAudio(String id) {
 }
 
 void setSinkId(String id, String deviceId) {
-  final audioElement = html.document.getElementById(audioPrefix + id);
-  if (audioElement is html.AudioElement &&
+  final audioElement = web.document.getElementById(audioPrefix + id);
+  if (audioElement is web.HTMLAudioElement &&
       jsutil.hasProperty(audioElement, 'setSinkId')) {
-    audioElement.setSinkId(deviceId);
+    jsutil.setProperty(audioElement, 'setSinkId', deviceId);
   }
 }
 
-html.DivElement findOrCreateAudioContainer() {
-  var div = html.document.getElementById(audioContainerId);
-  if (div != null) return div as html.DivElement;
+web.HTMLDivElement findOrCreateAudioContainer() {
+  var div = web.document.getElementById(audioContainerId);
+  if (div != null) return div as web.HTMLDivElement;
 
-  div = html.DivElement()
+  div = web.HTMLDivElement()
     ..id = audioContainerId
     ..style.display = 'none';
-  html.document.body?.append(div);
-  return div as html.DivElement;
+  web.document.body?.append(div);
+  return div as web.HTMLDivElement;
 }

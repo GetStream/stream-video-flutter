@@ -1,3 +1,14 @@
+## 0.4.2
+* Sync version with `stream_video_flutter` 0.4.2
+
+## 0.4.1
+* Sync version with `stream_video_flutter` 0.4.1
+
+## 0.4.0
+
+🚧 Breaking changes
+* Updated minimum supported dart SDK version to `3.3.0` (which requires min Flutter SDK `3.19.0`)
+
 ## 0.3.9
 * Sync version with `stream_video_flutter` 0.3.9
 

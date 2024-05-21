@@ -1,3 +1,40 @@
+## 0.4.2
+
+✅ Added
+* Added `ClientDetails` to SFU's `join` request.
+
+🐞 Fixed
+* Tweaked SFU events handling to ensure there is no gap in handling them.
+* Fixed camera and microphone toggling on incoming/outgoing screen.
+* Fixed screen sharing not working when camera track was enabled.
+* Fixed issues with video freezing sometimes.
+
+## 0.4.1
+
+🚧 Build breaking changes
+* Bumped `connectivity_plus` dependency to `6.0.3` 
+
+> Note, that this changes the plugin requirements:
+> - compileSDK 34 for Android part
+> - Java 17 for Android part
+> - Gradle 8.4 for Android part
+
+🐞 Fixed
+* Added foreground service type to service declaration in AndroidManifest
+
+
+## 0.4.0
+
+🚧 Breaking changes
+* Updated minimum supported dart SDK version to `3.3.0` (which requires min Flutter SDK `3.19.0`)
+
+* Updated `flutter_webrtc` to 0.10.4
+
+🐞 Fixed
+* Fixed an issue where subscriber offer events might be missed causing missing video/audio tracks for call participants.
+* Fixed speakerphone/earpiece switching on iOS.
+* User is now diconnected immedietaly when leaving the call.
+
 ## 0.3.9
 * Reverted `flutter_webrtc` dependency version back to `0.9.47` to fix the compilation issues for web in Flutter 3.19.
 

@@ -24,6 +24,8 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
   $async.Future<$1.UpdateMuteStatesResponse> updateMuteStates($pb.ServerContext ctx, $1.UpdateMuteStatesRequest request);
   $async.Future<$1.ICERestartResponse> iceRestart($pb.ServerContext ctx, $1.ICERestartRequest request);
   $async.Future<$1.SendStatsResponse> sendStats($pb.ServerContext ctx, $1.SendStatsRequest request);
+  $async.Future<$1.StartNoiseCancellationResponse> startNoiseCancellation($pb.ServerContext ctx, $1.StartNoiseCancellationRequest request);
+  $async.Future<$1.StopNoiseCancellationResponse> stopNoiseCancellation($pb.ServerContext ctx, $1.StopNoiseCancellationRequest request);
 
   $pb.GeneratedMessage createRequest($core.String method) {
     switch (method) {
@@ -34,6 +36,8 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
       case 'UpdateMuteStates': return $1.UpdateMuteStatesRequest();
       case 'IceRestart': return $1.ICERestartRequest();
       case 'SendStats': return $1.SendStatsRequest();
+      case 'StartNoiseCancellation': return $1.StartNoiseCancellationRequest();
+      case 'StopNoiseCancellation': return $1.StopNoiseCancellationRequest();
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }
@@ -47,6 +51,8 @@ abstract class SignalServerServiceBase extends $pb.GeneratedService {
       case 'UpdateMuteStates': return this.updateMuteStates(ctx, request as $1.UpdateMuteStatesRequest);
       case 'IceRestart': return this.iceRestart(ctx, request as $1.ICERestartRequest);
       case 'SendStats': return this.sendStats(ctx, request as $1.SendStatsRequest);
+      case 'StartNoiseCancellation': return this.startNoiseCancellation(ctx, request as $1.StartNoiseCancellationRequest);
+      case 'StopNoiseCancellation': return this.stopNoiseCancellation(ctx, request as $1.StopNoiseCancellationRequest);
       default: throw $core.ArgumentError('Unknown method: $method');
     }
   }

@@ -43,9 +43,7 @@ class RegularCallParticipantsContent extends StatelessWidget {
     CallParticipantState participant,
   ) {
     return StreamCallParticipant(
-      // We use the sessionId as the key to avoid rebuilding the widget
-      // when the participant changes.
-      key: ValueKey(participant.sessionId),
+      key: ValueKey(participant.userId),
       call: call,
       participant: participant,
     );

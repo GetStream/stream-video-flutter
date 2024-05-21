@@ -55,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final userInfo = UserInfo(
       role: 'admin',
-      id: email,
+      id: email.replaceAll('@', '_').replaceAll('.', '_'),
       name: email,
     );
 

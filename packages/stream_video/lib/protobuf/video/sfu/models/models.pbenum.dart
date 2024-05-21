@@ -197,3 +197,45 @@ class GoAwayReason extends $pb.ProtobufEnum {
   const GoAwayReason._($core.int v, $core.String n) : super(v, n);
 }
 
+class CallEndedReason extends $pb.ProtobufEnum {
+  static const CallEndedReason CALL_ENDED_REASON_UNSPECIFIED = CallEndedReason._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CALL_ENDED_REASON_UNSPECIFIED');
+  static const CallEndedReason CALL_ENDED_REASON_ENDED = CallEndedReason._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CALL_ENDED_REASON_ENDED');
+  static const CallEndedReason CALL_ENDED_REASON_LIVE_ENDED = CallEndedReason._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CALL_ENDED_REASON_LIVE_ENDED');
+  static const CallEndedReason CALL_ENDED_REASON_KICKED = CallEndedReason._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'CALL_ENDED_REASON_KICKED');
+
+  static const $core.List<CallEndedReason> values = <CallEndedReason> [
+    CALL_ENDED_REASON_UNSPECIFIED,
+    CALL_ENDED_REASON_ENDED,
+    CALL_ENDED_REASON_LIVE_ENDED,
+    CALL_ENDED_REASON_KICKED,
+  ];
+
+  static final $core.Map<$core.int, CallEndedReason> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static CallEndedReason? valueOf($core.int value) => _byValue[value];
+
+  const CallEndedReason._($core.int v, $core.String n) : super(v, n);
+}
+
+class WebsocketReconnectStrategy extends $pb.ProtobufEnum {
+  static const WebsocketReconnectStrategy WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED = WebsocketReconnectStrategy._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED');
+  static const WebsocketReconnectStrategy WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT = WebsocketReconnectStrategy._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT');
+  static const WebsocketReconnectStrategy WEBSOCKET_RECONNECT_STRATEGY_FAST = WebsocketReconnectStrategy._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'WEBSOCKET_RECONNECT_STRATEGY_FAST');
+  static const WebsocketReconnectStrategy WEBSOCKET_RECONNECT_STRATEGY_CLEAN = WebsocketReconnectStrategy._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'WEBSOCKET_RECONNECT_STRATEGY_CLEAN');
+  static const WebsocketReconnectStrategy WEBSOCKET_RECONNECT_STRATEGY_FULL = WebsocketReconnectStrategy._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'WEBSOCKET_RECONNECT_STRATEGY_FULL');
+  static const WebsocketReconnectStrategy WEBSOCKET_RECONNECT_STRATEGY_MIGRATE = WebsocketReconnectStrategy._(5, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'WEBSOCKET_RECONNECT_STRATEGY_MIGRATE');
+
+  static const $core.List<WebsocketReconnectStrategy> values = <WebsocketReconnectStrategy> [
+    WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
+    WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT,
+    WEBSOCKET_RECONNECT_STRATEGY_FAST,
+    WEBSOCKET_RECONNECT_STRATEGY_CLEAN,
+    WEBSOCKET_RECONNECT_STRATEGY_FULL,
+    WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+  ];
+
+  static final $core.Map<$core.int, WebsocketReconnectStrategy> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static WebsocketReconnectStrategy? valueOf($core.int value) => _byValue[value];
+
+  const WebsocketReconnectStrategy._($core.int v, $core.String n) : super(v, n);
+}
+

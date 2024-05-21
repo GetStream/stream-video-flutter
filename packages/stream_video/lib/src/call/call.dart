@@ -20,6 +20,7 @@ import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../utils/cancelable_operation.dart';
 import '../utils/cancelables.dart';
+import '../utils/extensions.dart';
 import '../utils/future.dart';
 import '../utils/standard.dart';
 import '../webrtc/model/stats/rtc_ice_candidate_pair.dart';
@@ -268,6 +269,7 @@ class Call {
   CallSession? _session;
 
   CallConnectOptions _connectOptions = const CallConnectOptions();
+  CallConnectOptions? _connectOptionsOverride;
 
   @override
   String toString() {
@@ -275,7 +277,7 @@ class Call {
   }
 
   CallConnectOptions get connectOptions {
-    return _connectOptions;
+    return _connectOptionsOverride ?? _connectOptions;
   }
 
   set connectOptions(CallConnectOptions connectOptions) {
@@ -288,7 +290,7 @@ class Call {
       return;
     }
     _logger.d(() => '[setConnectOptions] connectOptions: $connectOptions)');
-    _connectOptions = connectOptions;
+    _connectOptionsOverride = connectOptions;
   }
 
   void _observeState() {
@@ -1052,6 +1054,7 @@ class Call {
               VideoSettingsRequestCameraFacingEnum.front
           ? FacingMode.user
           : FacingMode.environment,
+      speakerDefaultOn: settings.audio.speakerDefaultOn,
     );
   }
 
@@ -1070,6 +1073,12 @@ class Call {
 
     if (_connectOptions.audioOutputDevice != null) {
       await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
+    } else {
+      if (CurrentPlatform.isIos) {
+        await _session?.rtcManager?.setAppleAudioConfiguration(
+          speakerOn: _connectOptions.speakerDefaultOn,
+        );
+      }
     }
 
     _logger.v(() => '[applyConnectOptions] finished');
@@ -1343,6 +1352,11 @@ class Call {
 
     if (connectOptions != null) {
       _connectOptions = _connectOptions.merge(connectOptions);
+    }
+
+    if (_connectOptionsOverride != null) {
+      _connectOptions = _connectOptions.merge(_connectOptionsOverride!);
+      _connectOptionsOverride = null;
     }
 
     _stateManager.lifecycleCallCreated(
@@ -1962,8 +1976,4 @@ enum TrackType {
         throw Exception('Unknown mute type: $this');
     }
   }
-}
-
-extension on String {
-  bool equalsIgnoreCase(String other) => toUpperCase() == other.toUpperCase();
 }

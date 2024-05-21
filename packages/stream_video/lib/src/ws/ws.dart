@@ -13,6 +13,13 @@ import 'connect/connect.dart'
 
 export 'package:web_socket_channel/web_socket_channel.dart';
 
+enum StreamWebSocketCloseCode {
+  closeSocketFromClient(1000);
+
+  const StreamWebSocketCloseCode(this.value);
+  final int value;
+}
+
 /// A simple wrapper around [WebSocketChannel] to make it easier to use.
 abstract class StreamWebSocket {
   /// Creates a new instance of [StreamWebSocket].

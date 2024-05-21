@@ -130,6 +130,34 @@ const GoAwayReason$json = const {
 
 /// Descriptor for `GoAwayReason`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List goAwayReasonDescriptor = $convert.base64Decode('CgxHb0F3YXlSZWFzb24SHgoaR09fQVdBWV9SRUFTT05fVU5TUEVDSUZJRUQQABIgChxHT19BV0FZX1JFQVNPTl9TSFVUVElOR19ET1dOEAESHAoYR09fQVdBWV9SRUFTT05fUkVCQUxBTkNFEAI=');
+@$core.Deprecated('Use callEndedReasonDescriptor instead')
+const CallEndedReason$json = const {
+  '1': 'CallEndedReason',
+  '2': const [
+    const {'1': 'CALL_ENDED_REASON_UNSPECIFIED', '2': 0},
+    const {'1': 'CALL_ENDED_REASON_ENDED', '2': 1},
+    const {'1': 'CALL_ENDED_REASON_LIVE_ENDED', '2': 2},
+    const {'1': 'CALL_ENDED_REASON_KICKED', '2': 3},
+  ],
+};
+
+/// Descriptor for `CallEndedReason`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List callEndedReasonDescriptor = $convert.base64Decode('Cg9DYWxsRW5kZWRSZWFzb24SIQodQ0FMTF9FTkRFRF9SRUFTT05fVU5TUEVDSUZJRUQQABIbChdDQUxMX0VOREVEX1JFQVNPTl9FTkRFRBABEiAKHENBTExfRU5ERURfUkVBU09OX0xJVkVfRU5ERUQQAhIcChhDQUxMX0VOREVEX1JFQVNPTl9LSUNLRUQQAw==');
+@$core.Deprecated('Use websocketReconnectStrategyDescriptor instead')
+const WebsocketReconnectStrategy$json = const {
+  '1': 'WebsocketReconnectStrategy',
+  '2': const [
+    const {'1': 'WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED', '2': 0},
+    const {'1': 'WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT', '2': 1},
+    const {'1': 'WEBSOCKET_RECONNECT_STRATEGY_FAST', '2': 2},
+    const {'1': 'WEBSOCKET_RECONNECT_STRATEGY_CLEAN', '2': 3},
+    const {'1': 'WEBSOCKET_RECONNECT_STRATEGY_FULL', '2': 4},
+    const {'1': 'WEBSOCKET_RECONNECT_STRATEGY_MIGRATE', '2': 5},
+  ],
+};
+
+/// Descriptor for `WebsocketReconnectStrategy`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List websocketReconnectStrategyDescriptor = $convert.base64Decode('ChpXZWJzb2NrZXRSZWNvbm5lY3RTdHJhdGVneRIsCihXRUJTT0NLRVRfUkVDT05ORUNUX1NUUkFURUdZX1VOU1BFQ0lGSUVEEAASKwonV0VCU09DS0VUX1JFQ09OTkVDVF9TVFJBVEVHWV9ESVNDT05ORUNUEAESJQohV0VCU09DS0VUX1JFQ09OTkVDVF9TVFJBVEVHWV9GQVNUEAISJgoiV0VCU09DS0VUX1JFQ09OTkVDVF9TVFJBVEVHWV9DTEVBThADEiUKIVdFQlNPQ0tFVF9SRUNPTk5FQ1RfU1RSQVRFR1lfRlVMTBAEEigKJFdFQlNPQ0tFVF9SRUNPTk5FQ1RfU1RSQVRFR1lfTUlHUkFURRAF');
 @$core.Deprecated('Use callStateDescriptor instead')
 const CallState$json = const {
   '1': 'CallState',

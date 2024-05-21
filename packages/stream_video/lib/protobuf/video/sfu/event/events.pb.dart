@@ -36,6 +36,8 @@ enum SfuEvent_EventPayload {
   goAway, 
   iceRestart, 
   pinsUpdated, 
+  callEnded, 
+  participantUpdated, 
   notSet
 }
 
@@ -59,10 +61,12 @@ class SfuEvent extends $pb.GeneratedMessage {
     20 : SfuEvent_EventPayload.goAway,
     21 : SfuEvent_EventPayload.iceRestart,
     22 : SfuEvent_EventPayload.pinsUpdated,
+    23 : SfuEvent_EventPayload.callEnded,
+    24 : SfuEvent_EventPayload.participantUpdated,
     0 : SfuEvent_EventPayload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SfuEvent', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24])
     ..aOM<SubscriberOffer>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscriberOffer', subBuilder: SubscriberOffer.create)
     ..aOM<PublisherAnswer>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'publisherAnswer', subBuilder: PublisherAnswer.create)
     ..aOM<ConnectionQualityChanged>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'connectionQualityChanged', subBuilder: ConnectionQualityChanged.create)
@@ -81,6 +85,8 @@ class SfuEvent extends $pb.GeneratedMessage {
     ..aOM<GoAway>(20, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'goAway', subBuilder: GoAway.create)
     ..aOM<ICERestart>(21, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'iceRestart', subBuilder: ICERestart.create)
     ..aOM<PinsChanged>(22, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'pinsUpdated', subBuilder: PinsChanged.create)
+    ..aOM<CallEnded>(23, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callEnded', subBuilder: CallEnded.create)
+    ..aOM<ParticipantUpdated>(24, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participantUpdated', subBuilder: ParticipantUpdated.create)
     ..hasRequiredFields = false
   ;
 
@@ -104,6 +110,8 @@ class SfuEvent extends $pb.GeneratedMessage {
     GoAway? goAway,
     ICERestart? iceRestart,
     PinsChanged? pinsUpdated,
+    CallEnded? callEnded,
+    ParticipantUpdated? participantUpdated,
   }) {
     final _result = create();
     if (subscriberOffer != null) {
@@ -159,6 +167,12 @@ class SfuEvent extends $pb.GeneratedMessage {
     }
     if (pinsUpdated != null) {
       _result.pinsUpdated = pinsUpdated;
+    }
+    if (callEnded != null) {
+      _result.callEnded = callEnded;
+    }
+    if (participantUpdated != null) {
+      _result.participantUpdated = participantUpdated;
     }
     return _result;
   }
@@ -383,6 +397,28 @@ class SfuEvent extends $pb.GeneratedMessage {
   void clearPinsUpdated() => clearField(22);
   @$pb.TagNumber(22)
   PinsChanged ensurePinsUpdated() => $_ensure(17);
+
+  @$pb.TagNumber(23)
+  CallEnded get callEnded => $_getN(18);
+  @$pb.TagNumber(23)
+  set callEnded(CallEnded v) { setField(23, v); }
+  @$pb.TagNumber(23)
+  $core.bool hasCallEnded() => $_has(18);
+  @$pb.TagNumber(23)
+  void clearCallEnded() => clearField(23);
+  @$pb.TagNumber(23)
+  CallEnded ensureCallEnded() => $_ensure(18);
+
+  @$pb.TagNumber(24)
+  ParticipantUpdated get participantUpdated => $_getN(19);
+  @$pb.TagNumber(24)
+  set participantUpdated(ParticipantUpdated v) { setField(24, v); }
+  @$pb.TagNumber(24)
+  $core.bool hasParticipantUpdated() => $_has(19);
+  @$pb.TagNumber(24)
+  void clearParticipantUpdated() => clearField(24);
+  @$pb.TagNumber(24)
+  ParticipantUpdated ensureParticipantUpdated() => $_ensure(19);
 }
 
 class PinsChanged extends $pb.GeneratedMessage {
@@ -429,16 +465,21 @@ class PinsChanged extends $pb.GeneratedMessage {
 class Error extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Error', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
     ..aOM<$0.Error>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error', subBuilder: $0.Error.create)
+    ..e<$0.WebsocketReconnectStrategy>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reconnectStrategy', $pb.PbFieldType.OE, defaultOrMaker: $0.WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED, valueOf: $0.WebsocketReconnectStrategy.valueOf, enumValues: $0.WebsocketReconnectStrategy.values)
     ..hasRequiredFields = false
   ;
 
   Error._() : super();
   factory Error({
     $0.Error? error,
+    $0.WebsocketReconnectStrategy? reconnectStrategy,
   }) {
     final _result = create();
     if (error != null) {
       _result.error = error;
+    }
+    if (reconnectStrategy != null) {
+      _result.reconnectStrategy = reconnectStrategy;
     }
     return _result;
   }
@@ -473,6 +514,15 @@ class Error extends $pb.GeneratedMessage {
   void clearError() => clearField(4);
   @$pb.TagNumber(4)
   $0.Error ensureError() => $_ensure(0);
+
+  @$pb.TagNumber(5)
+  $0.WebsocketReconnectStrategy get reconnectStrategy => $_getN(1);
+  @$pb.TagNumber(5)
+  set reconnectStrategy($0.WebsocketReconnectStrategy v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasReconnectStrategy() => $_has(1);
+  @$pb.TagNumber(5)
+  void clearReconnectStrategy() => clearField(5);
 }
 
 class ICETrickle extends $pb.GeneratedMessage {
@@ -1288,6 +1338,69 @@ class ParticipantLeft extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static ParticipantLeft getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ParticipantLeft>(create);
   static ParticipantLeft? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get callCid => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set callCid($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCallCid() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCallCid() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $0.Participant get participant => $_getN(1);
+  @$pb.TagNumber(2)
+  set participant($0.Participant v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasParticipant() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearParticipant() => clearField(2);
+  @$pb.TagNumber(2)
+  $0.Participant ensureParticipant() => $_ensure(1);
+}
+
+class ParticipantUpdated extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ParticipantUpdated', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'callCid')
+    ..aOM<$0.Participant>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'participant', subBuilder: $0.Participant.create)
+    ..hasRequiredFields = false
+  ;
+
+  ParticipantUpdated._() : super();
+  factory ParticipantUpdated({
+    $core.String? callCid,
+    $0.Participant? participant,
+  }) {
+    final _result = create();
+    if (callCid != null) {
+      _result.callCid = callCid;
+    }
+    if (participant != null) {
+      _result.participant = participant;
+    }
+    return _result;
+  }
+  factory ParticipantUpdated.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ParticipantUpdated.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ParticipantUpdated clone() => ParticipantUpdated()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ParticipantUpdated copyWith(void Function(ParticipantUpdated) updates) => super.copyWith((message) => updates(message as ParticipantUpdated)) as ParticipantUpdated; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ParticipantUpdated create() => ParticipantUpdated._();
+  ParticipantUpdated createEmptyInstance() => create();
+  static $pb.PbList<ParticipantUpdated> createRepeated() => $pb.PbList<ParticipantUpdated>();
+  @$core.pragma('dart2js:noInline')
+  static ParticipantUpdated getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ParticipantUpdated>(create);
+  static ParticipantUpdated? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get callCid => $_getSZ(0);
@@ -2271,6 +2384,53 @@ class GoAway extends $pb.GeneratedMessage {
   $0.GoAwayReason get reason => $_getN(0);
   @$pb.TagNumber(1)
   set reason($0.GoAwayReason v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasReason() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearReason() => clearField(1);
+}
+
+class CallEnded extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CallEnded', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'stream.video.sfu.event'), createEmptyInstance: create)
+    ..e<$0.CallEndedReason>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reason', $pb.PbFieldType.OE, defaultOrMaker: $0.CallEndedReason.CALL_ENDED_REASON_UNSPECIFIED, valueOf: $0.CallEndedReason.valueOf, enumValues: $0.CallEndedReason.values)
+    ..hasRequiredFields = false
+  ;
+
+  CallEnded._() : super();
+  factory CallEnded({
+    $0.CallEndedReason? reason,
+  }) {
+    final _result = create();
+    if (reason != null) {
+      _result.reason = reason;
+    }
+    return _result;
+  }
+  factory CallEnded.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CallEnded.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CallEnded clone() => CallEnded()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CallEnded copyWith(void Function(CallEnded) updates) => super.copyWith((message) => updates(message as CallEnded)) as CallEnded; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CallEnded create() => CallEnded._();
+  CallEnded createEmptyInstance() => create();
+  static $pb.PbList<CallEnded> createRepeated() => $pb.PbList<CallEnded>();
+  @$core.pragma('dart2js:noInline')
+  static CallEnded getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CallEnded>(create);
+  static CallEnded? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $0.CallEndedReason get reason => $_getN(0);
+  @$pb.TagNumber(1)
+  set reason($0.CallEndedReason v) { setField(1, v); }
   @$pb.TagNumber(1)
   $core.bool hasReason() => $_has(0);
   @$pb.TagNumber(1)
