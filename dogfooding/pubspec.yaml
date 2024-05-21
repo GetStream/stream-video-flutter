@@ -29,8 +29,8 @@ dependencies:
   share_plus: ^7.1.0
   shared_preferences: ^2.2.0
   stream_chat_flutter: ^8.0.0-beta.3
-  stream_video_flutter: ^0.4.0
-  stream_video_push_notification: ^0.4.0
+  stream_video_flutter: ^0.4.2
+  stream_video_push_notification: ^0.4.2
   uni_links: ^0.5.1
 
 dev_dependencies:
