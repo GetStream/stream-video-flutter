@@ -832,6 +832,7 @@ class Call {
     _status.value = _ConnectionStatus.connecting;
     _logger.w(() => '[fullReconnect] >>>>>>>>>>>>>>>> reason: $reason');
     _subscriptions.cancel(_idSessionEvents);
+    final sessionId = _session?.sessionId;
     await _session?.dispose();
     _session = null;
 
@@ -869,7 +870,7 @@ class Call {
         continue;
       }
       _logger.v(() => '[fullReconnect] starting session');
-      result = await _startSession(joinedResult.data);
+      result = await _startSession(joinedResult.data, sessionId);
       if (result is! Success<None>) {
         _logger.w(() => '[fullReconnect] session start failed: $result');
         continue;
