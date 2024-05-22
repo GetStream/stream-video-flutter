@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -15,7 +16,9 @@ import 'screen/login_screen.dart';
 // As this runs in a separate isolate, we need to setup the app again.
 @pragma('vm:entry-point')
 Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
-  debugPrint('[onFirebaseBackgroundMessage] message: ${message.toMap()}');
+  debugPrint(
+    '[onFirebaseBackgroundMessage] message: ${jsonEncode(message.toMap())}',
+  );
   // Initialise Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await initNotifications();
@@ -108,14 +111,14 @@ Future<void> showNotification(
 
   final notificationId = Object.hash(callCid, type);
 
-  final title = 'Call "$callCid"';
-  final String body;
+  final body = 'Call "$callCid"';
+  final String title;
   if (type == 'call.ring') {
-    body = 'Incoming call from $fromUser';
+    title = 'Incoming call from $fromUser';
   } else if (type == 'call.missed') {
-    body = 'Missed call from $fromUser';
+    title = 'Missed call from $fromUser';
   } else {
-    body = 'Unknown call from $fromUser';
+    title = 'Unknown call from $fromUser';
   }
 
   await flutterLocalNotificationsPlugin.show(

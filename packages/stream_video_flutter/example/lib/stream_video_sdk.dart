@@ -10,6 +10,7 @@ class StreamVideoSdk {
     required String apiKey,
     required UserInfo user,
     required UserToken userToken,
+    StreamVideoOptions options = const StreamVideoOptions(),
   }) async {
     if (StreamVideo.isInitialized()) {
       streamLog.d(_tag, () => '[initialize] reset instance');
@@ -32,18 +33,7 @@ class StreamVideoSdk {
           ios: IOSParams(iconName: 'IconMask'),
         ),
       ),
-      options: const StreamVideoOptions(
-        // coordinatorRpcUrl: 'http://192.168.1.73:3030/video',
-        // coordinatorWsUrl: 'ws://192.168.1.73:8800/video/connect',
-
-        // iOS
-        // coordinatorRpcUrl: 'http://localhost:3030/video',
-        // coordinatorWsUrl: 'ws://localhost:8800/video/connect',
-
-        // Android
-        coordinatorRpcUrl: 'http://10.0.2.2:3030/video',
-        coordinatorWsUrl: 'ws://10.0.2.2:8800/video/connect',
-      ),
+      options: options,
     );
   }
 }

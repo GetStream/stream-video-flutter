@@ -15,6 +15,7 @@ dependencies:
   cupertino_icons: ^1.0.5
   device_info_plus: ^9.0.3
   envied: ^0.3.0+3
+  firebase_core: ^2.15.1
   firebase_messaging: ^14.5.0
   flutter:
     sdk: flutter

@@ -10,6 +10,7 @@ import 'core/token_service.dart';
 import 'firebase_options.dart';
 import 'log_config.dart';
 import 'model/credentials.dart';
+import 'stream_video_options.dart';
 import 'stream_video_sdk.dart';
 
 const _tag = 'MyApp';
@@ -47,6 +48,7 @@ Future<Result<None>> _connectUser(UserInfo user) async {
     apiKey: apiKey,
     user: user,
     userToken: token,
+    options: DefaultVideoOptions.remote,
   );
   final authRepository = await AuthRepository.getInstance();
   await authRepository.setCredentials(
