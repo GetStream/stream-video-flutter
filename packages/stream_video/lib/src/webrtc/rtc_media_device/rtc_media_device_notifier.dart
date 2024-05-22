@@ -5,8 +5,6 @@ import 'package:rxdart/rxdart.dart';
 import '../../../stream_video.dart';
 import '../../errors/video_error_composer.dart';
 import '../../utils/extensions.dart';
-import '../../utils/result.dart';
-import 'rtc_media_device.dart';
 
 class RtcMediaDeviceNotifier {
   RtcMediaDeviceNotifier._internal() {
