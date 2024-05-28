@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -14,7 +14,8 @@ class TranscriptionSettingsRequest {
   /// Returns a new [TranscriptionSettingsRequest] instance.
   TranscriptionSettingsRequest({
     this.closedCaptionMode,
-    this.mode,
+    this.languages = const [],
+    required this.mode,
   });
 
   ///
@@ -25,21 +26,25 @@ class TranscriptionSettingsRequest {
   ///
   String? closedCaptionMode;
 
-  TranscriptionSettingsRequestModeEnum? mode;
+  List<String> languages;
+
+  TranscriptionSettingsRequestModeEnum mode;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is TranscriptionSettingsRequest &&
-     other.closedCaptionMode == closedCaptionMode &&
-     other.mode == mode;
+    other.closedCaptionMode == closedCaptionMode &&
+    _deepEquality.equals(other.languages, languages) &&
+    other.mode == mode;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (closedCaptionMode == null ? 0 : closedCaptionMode!.hashCode) +
-    (mode == null ? 0 : mode!.hashCode);
+    (languages.hashCode) +
+    (mode.hashCode);
 
   @override
-  String toString() => 'TranscriptionSettingsRequest[closedCaptionMode=$closedCaptionMode, mode=$mode]';
+  String toString() => 'TranscriptionSettingsRequest[closedCaptionMode=$closedCaptionMode, languages=$languages, mode=$mode]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -48,11 +53,8 @@ class TranscriptionSettingsRequest {
     } else {
       json[r'closed_caption_mode'] = null;
     }
-    if (this.mode != null) {
+      json[r'languages'] = this.languages;
       json[r'mode'] = this.mode;
-    } else {
-      json[r'mode'] = null;
-    }
     return json;
   }
 
@@ -76,7 +78,10 @@ class TranscriptionSettingsRequest {
 
       return TranscriptionSettingsRequest(
         closedCaptionMode: mapValueOfType<String>(json, r'closed_caption_mode'),
-        mode: TranscriptionSettingsRequestModeEnum.fromJson(json[r'mode']),
+        languages: json[r'languages'] is Iterable
+            ? (json[r'languages'] as Iterable).cast<String>().toList(growable: false)
+            : const [],
+        mode: TranscriptionSettingsRequestModeEnum.fromJson(json[r'mode'])!,
       );
     }
     return null;
@@ -124,6 +129,7 @@ class TranscriptionSettingsRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'mode',
   };
 }
 

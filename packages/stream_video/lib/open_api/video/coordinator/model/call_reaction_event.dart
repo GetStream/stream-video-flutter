@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -30,10 +30,10 @@ class CallReactionEvent {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallReactionEvent &&
-     other.callCid == callCid &&
-     other.createdAt == createdAt &&
-     other.reaction == reaction &&
-     other.type == type;
+    other.callCid == callCid &&
+    other.createdAt == createdAt &&
+    other.reaction == reaction &&
+    other.type == type;
 
   @override
   int get hashCode =>
@@ -75,7 +75,7 @@ class CallReactionEvent {
 
       return CallReactionEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
-        createdAt: mapDateTime(json, r'created_at', '')!,
+        createdAt: mapDateTime(json, r'created_at', r'')!,
         reaction: ReactionResponse.fromJson(json[r'reaction'])!,
         type: mapValueOfType<String>(json, r'type')!,
       );

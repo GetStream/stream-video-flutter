@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -29,10 +29,10 @@ class CallRecording {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallRecording &&
-     other.endTime == endTime &&
-     other.filename == filename &&
-     other.startTime == startTime &&
-     other.url == url;
+    other.endTime == endTime &&
+    other.filename == filename &&
+    other.startTime == startTime &&
+    other.url == url;
 
   @override
   int get hashCode =>
@@ -73,9 +73,9 @@ class CallRecording {
       }());
 
       return CallRecording(
-        endTime: mapDateTime(json, r'end_time', '')!,
+        endTime: mapDateTime(json, r'end_time', r'')!,
         filename: mapValueOfType<String>(json, r'filename')!,
-        startTime: mapDateTime(json, r'start_time', '')!,
+        startTime: mapDateTime(json, r'start_time', r'')!,
         url: mapValueOfType<String>(json, r'url')!,
       );
     }

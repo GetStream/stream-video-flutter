@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -13,39 +13,59 @@ part of openapi.api;
 class HealthCheckEvent {
   /// Returns a new [HealthCheckEvent] instance.
   HealthCheckEvent({
+    required this.cid,
     required this.connectionId,
     required this.createdAt,
+    this.me,
     this.type = 'health.check',
   });
 
-  /// The connection_id for this client
+  String cid;
+
   String connectionId;
 
   DateTime createdAt;
 
-  /// The type of event: \"health.check\" in this case
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  OwnUser? me;
+
   String type;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is HealthCheckEvent &&
-     other.connectionId == connectionId &&
-     other.createdAt == createdAt &&
-     other.type == type;
+    other.cid == cid &&
+    other.connectionId == connectionId &&
+    other.createdAt == createdAt &&
+    other.me == me &&
+    other.type == type;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (cid.hashCode) +
     (connectionId.hashCode) +
     (createdAt.hashCode) +
+    (me == null ? 0 : me!.hashCode) +
     (type.hashCode);
 
   @override
-  String toString() => 'HealthCheckEvent[connectionId=$connectionId, createdAt=$createdAt, type=$type]';
+  String toString() => 'HealthCheckEvent[cid=$cid, connectionId=$connectionId, createdAt=$createdAt, me=$me, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'cid'] = this.cid;
       json[r'connection_id'] = this.connectionId;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+    if (this.me != null) {
+      json[r'me'] = this.me;
+    } else {
+      json[r'me'] = null;
+    }
       json[r'type'] = this.type;
     return json;
   }
@@ -69,8 +89,10 @@ class HealthCheckEvent {
       }());
 
       return HealthCheckEvent(
+        cid: mapValueOfType<String>(json, r'cid') ?? '',
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
-        createdAt: mapDateTime(json, r'created_at', '')!,
+        createdAt: mapDateTime(json, r'created_at', r'')!,
+        me: OwnUser.fromJson(json[r'me']),
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
@@ -119,6 +141,8 @@ class HealthCheckEvent {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    // This was part of open api gen but at the moment of writing does not show up in the response.
+    //'cid',
     'connection_id',
     'created_at',
     'type',

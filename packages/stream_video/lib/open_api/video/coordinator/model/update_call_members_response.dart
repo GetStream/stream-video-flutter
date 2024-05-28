@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -24,8 +24,8 @@ class UpdateCallMembersResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UpdateCallMembersResponse &&
-     other.duration == duration &&
-     other.members == members;
+    other.duration == duration &&
+    _deepEquality.equals(other.members, members);
 
   @override
   int get hashCode =>

@@ -133,9 +133,9 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<List<CallRecording>>> listRecordings(String sessionId) async {
-    _logger.d(() => '[queryRecordings] Call $callCid Session $sessionId');
-    final result = await coordinatorClient.listRecordings(callCid, sessionId);
+  Future<Result<List<CallRecording>>> listRecordings() async {
+    _logger.d(() => '[queryRecordings] Call $callCid');
+    final result = await coordinatorClient.listRecordings(callCid);
     _logger.v(() => '[queryRecordings] result: $result');
     return result;
   }
@@ -273,7 +273,7 @@ class PermissionsManager {
     required Map<String, Object> filterConditions,
     String? next,
     String? prev,
-    List<SortParamRequest> sorts = const [],
+    List<SortParam> sorts = const [],
     int? limit,
   }) async {
     if (!hasPermission(CallPermission.readCall)) {

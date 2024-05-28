@@ -163,7 +163,7 @@ extension CallSettingsExt on open.CallSettingsResponse {
         accessRequestEnabled: audio.accessRequestEnabled,
         opusDtxEnabled: audio.opusDtxEnabled,
         redundantCodingEnabled: audio.redundantCodingEnabled,
-        defaultDevice: audio.defaultDevice.toDomain(),
+        defaultDevice: audio.defaultDevice.toRequestDomain(),
         micDefaultOn: audio.micDefaultOn,
         speakerDefaultOn: audio.speakerDefaultOn,
       ),
@@ -171,7 +171,7 @@ extension CallSettingsExt on open.CallSettingsResponse {
         accessRequestEnabled: video.accessRequestEnabled,
         enabled: video.enabled,
         cameraDefaultOn: video.cameraDefaultOn,
-        cameraFacing: video.cameraFacing.toDomain(),
+        cameraFacing: video.cameraFacing.toRequestDomain(),
       ),
       screenShare: StreamScreenShareSettings(
         accessRequestEnabled: screensharing.accessRequestEnabled,
@@ -179,16 +179,16 @@ extension CallSettingsExt on open.CallSettingsResponse {
       ),
       recording: StreamRecordingSettings(
         audioOnly: recording.audioOnly,
-        mode: recording.mode.toDomain(),
-        quality: recording.quality.toDomain(),
+        mode: RecordSettingsMode.fromString(recording.mode),
+        quality: RecordSettingsQuality.fromString(recording.quality),
       ),
       broadcasting: StreamBroadcastingSettings(
         enabled: broadcasting.enabled,
-        hls: broadcasting.hls.toDomain(),
+        hls: broadcasting.hls.toSettingsDomain(),
       ),
       transcription: StreamTranscriptionSettings(
         closedCaptionMode: transcription.closedCaptionMode,
-        mode: transcription.mode.toDomain(),
+        mode: transcription.mode.toSettingsDomain(),
       ),
       backstage: StreamBackstageSettings(
         enabled: backstage.enabled,
@@ -198,11 +198,12 @@ extension CallSettingsExt on open.CallSettingsResponse {
       ),
     );
   }
+
 }
 
-extension on open.AudioSettingsDefaultDeviceEnum {
-  AudioSettingsRequestDefaultDeviceEnum toDomain() {
-    if (this == open.AudioSettingsDefaultDeviceEnum.speaker) {
+extension on open.AudioSettingsResponseDefaultDeviceEnum {
+  AudioSettingsRequestDefaultDeviceEnum toRequestDomain() {
+    if (this == open.AudioSettingsResponseDefaultDeviceEnum.speaker) {
       return AudioSettingsRequestDefaultDeviceEnum.speaker;
     } else {
       return AudioSettingsRequestDefaultDeviceEnum.earpiece;
@@ -210,11 +211,11 @@ extension on open.AudioSettingsDefaultDeviceEnum {
   }
 }
 
-extension on open.VideoSettingsCameraFacingEnum {
-  VideoSettingsRequestCameraFacingEnum toDomain() {
-    if (this == open.VideoSettingsCameraFacingEnum.front) {
+extension on open.VideoSettingsResponseCameraFacingEnum {
+  VideoSettingsRequestCameraFacingEnum toRequestDomain() {
+    if (this == open.VideoSettingsResponseCameraFacingEnum.front) {
       return VideoSettingsRequestCameraFacingEnum.front;
-    } else if (this == open.VideoSettingsCameraFacingEnum.back) {
+    } else if (this == open.VideoSettingsResponseCameraFacingEnum.back) {
       return VideoSettingsRequestCameraFacingEnum.back;
     } else {
       return VideoSettingsRequestCameraFacingEnum.external_;
@@ -222,11 +223,11 @@ extension on open.VideoSettingsCameraFacingEnum {
   }
 }
 
-extension on open.TranscriptionSettingsModeEnum {
-  TranscriptionSettingsMode toDomain() {
-    if (this == open.TranscriptionSettingsModeEnum.autoOn) {
+extension on open.TranscriptionSettingsResponseModeEnum {
+  TranscriptionSettingsMode toSettingsDomain() {
+    if (this == open.TranscriptionSettingsResponseModeEnum.autoOn) {
       return TranscriptionSettingsMode.autoOn;
-    } else if (this == open.TranscriptionSettingsModeEnum.available) {
+    } else if (this == open.TranscriptionSettingsResponseModeEnum.available) {
       return TranscriptionSettingsMode.available;
     } else {
       return TranscriptionSettingsMode.disabled;
@@ -234,43 +235,13 @@ extension on open.TranscriptionSettingsModeEnum {
   }
 }
 
-extension on open.HLSSettings {
-  StreamHlsSettings toDomain() {
+extension on open.HLSSettingsResponse {
+  StreamHlsSettings toSettingsDomain() {
     return StreamHlsSettings(
       autoOn: autoOn,
       enabled: enabled,
       qualityTracks: List.unmodifiable(qualityTracks),
     );
-  }
-}
-
-extension on open.RecordSettingsModeEnum {
-  RecordSettingsMode toDomain() {
-    if (this == open.RecordSettingsModeEnum.autoOn) {
-      return RecordSettingsMode.autoOn;
-    } else if (this == open.RecordSettingsModeEnum.available) {
-      return RecordSettingsMode.available;
-    } else {
-      return RecordSettingsMode.disabled;
-    }
-  }
-}
-
-extension on open.RecordSettingsQualityEnum {
-  RecordSettingsQuality toDomain() {
-    if (this == open.RecordSettingsQualityEnum.n1440p) {
-      return RecordSettingsQuality.n1440p;
-    } else if (this == open.RecordSettingsQualityEnum.n1080p) {
-      return RecordSettingsQuality.n1080p;
-    } else if (this == open.RecordSettingsQualityEnum.n720p) {
-      return RecordSettingsQuality.n720p;
-    } else if (this == open.RecordSettingsQualityEnum.n480p) {
-      return RecordSettingsQuality.n480p;
-    } else if (this == open.RecordSettingsQualityEnum.n360p) {
-      return RecordSettingsQuality.n360p;
-    } else {
-      return RecordSettingsQuality.audioOnly;
-    }
   }
 }
 
@@ -331,7 +302,7 @@ extension QueryCallsResponseExt on open.QueryCallsResponse {
   }
 }
 
-extension QueryMembersResponseExt on open.QueryMembersResponse {
+extension QueryMembersResponseExt on open.QueryCallMembersResponse {
   QueriedMembers toQueriedMembers(StreamCallCid callCid) {
     return QueriedMembers(
       members: members.toCallMembers(),
@@ -407,7 +378,7 @@ extension CreateDeviceRequestPushProviderEnumX
 
 extension DeviceExt on open.Device {
   PushDevice? toPushDevice() {
-    final parsedProvider = PushProvider.fromAlias(pushProvider);
+    final parsedProvider = PushProvider.fromAlias(pushProviderName);
     if (parsedProvider == null) {
       streamLog.e(
         'DeviceExt',

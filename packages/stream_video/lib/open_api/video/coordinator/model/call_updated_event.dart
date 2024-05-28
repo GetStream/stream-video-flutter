@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -34,11 +34,11 @@ class CallUpdatedEvent {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallUpdatedEvent &&
-     other.call == call &&
-     other.callCid == callCid &&
-     other.capabilitiesByRole == capabilitiesByRole &&
-     other.createdAt == createdAt &&
-     other.type == type;
+    other.call == call &&
+    other.callCid == callCid &&
+    _deepEquality.equals(other.capabilitiesByRole, capabilitiesByRole) &&
+    other.createdAt == createdAt &&
+    other.type == type;
 
   @override
   int get hashCode =>
@@ -95,9 +95,9 @@ class CallUpdatedEvent {
   }
 
   static Map<String, List<String>> capabilitiesFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+      dynamic json, {
+        bool growable = false,
+      }) {
     final map = <String, List<String>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
@@ -109,10 +109,7 @@ class CallUpdatedEvent {
     return growable ? map : Map.unmodifiable(map);
   }
 
-  static List<CallUpdatedEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static List<CallUpdatedEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <CallUpdatedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -140,19 +137,13 @@ class CallUpdatedEvent {
   }
 
   // maps a json object with a list of CallUpdatedEvent-objects as value to a dart map
-  static Map<String, List<CallUpdatedEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static Map<String, List<CallUpdatedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<CallUpdatedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallUpdatedEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+        map[entry.key] = CallUpdatedEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -167,3 +158,4 @@ class CallUpdatedEvent {
     'type',
   };
 }
+

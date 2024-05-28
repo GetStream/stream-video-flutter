@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -13,13 +13,19 @@ part of openapi.api;
 class TargetResolution {
   /// Returns a new [TargetResolution] instance.
   TargetResolution({
-    required this.bitrate,
+    this.bitrate,
     required this.height,
     required this.width,
   });
 
   /// Maximum value: 6000000
-  int bitrate;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? bitrate;
 
   /// Minimum value: 240
   /// Maximum value: 2560
@@ -31,14 +37,14 @@ class TargetResolution {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is TargetResolution &&
-     other.bitrate == bitrate &&
-     other.height == height &&
-     other.width == width;
+    other.bitrate == bitrate &&
+    other.height == height &&
+    other.width == width;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (bitrate.hashCode) +
+    (bitrate == null ? 0 : bitrate!.hashCode) +
     (height.hashCode) +
     (width.hashCode);
 
@@ -47,7 +53,11 @@ class TargetResolution {
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.bitrate != null) {
       json[r'bitrate'] = this.bitrate;
+    } else {
+      json[r'bitrate'] = null;
+    }
       json[r'height'] = this.height;
       json[r'width'] = this.width;
     return json;
@@ -72,7 +82,7 @@ class TargetResolution {
       }());
 
       return TargetResolution(
-        bitrate: mapValueOfType<int>(json, r'bitrate')!,
+        bitrate: mapValueOfType<int>(json, r'bitrate'),
         height: mapValueOfType<int>(json, r'height')!,
         width: mapValueOfType<int>(json, r'width')!,
       );
@@ -122,7 +132,6 @@ class TargetResolution {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'bitrate',
     'height',
     'width',
   };

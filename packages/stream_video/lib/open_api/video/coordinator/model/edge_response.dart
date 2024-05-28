@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -47,16 +47,16 @@ class EdgeResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is EdgeResponse &&
-     other.continentCode == continentCode &&
-     other.countryIsoCode == countryIsoCode &&
-     other.green == green &&
-     other.id == id &&
-     other.latencyTestUrl == latencyTestUrl &&
-     other.latitude == latitude &&
-     other.longitude == longitude &&
-     other.red == red &&
-     other.subdivisionIsoCode == subdivisionIsoCode &&
-     other.yellow == yellow;
+    other.continentCode == continentCode &&
+    other.countryIsoCode == countryIsoCode &&
+    other.green == green &&
+    other.id == id &&
+    other.latencyTestUrl == latencyTestUrl &&
+    other.latitude == latitude &&
+    other.longitude == longitude &&
+    other.red == red &&
+    other.subdivisionIsoCode == subdivisionIsoCode &&
+    other.yellow == yellow;
 
   @override
   int get hashCode =>
