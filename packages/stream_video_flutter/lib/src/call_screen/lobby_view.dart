@@ -315,7 +315,7 @@ extension on CallUser {
       id: id,
       name: name,
       image: image,
-      role: role,
+      role: roles.firstOrNull ?? '',
       teams: teams,
     );
   }

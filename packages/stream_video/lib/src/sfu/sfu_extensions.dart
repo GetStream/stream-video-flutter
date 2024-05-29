@@ -11,12 +11,12 @@ extension SfuParticipantX on SfuParticipant {
     );
 
     final existingName = existing?.name ?? '';
-    final existingRole = existing?.role ?? '';
+    final existingRoles = existing?.roles ?? [];
     final existingImage = existing?.image ?? '';
 
     return CallParticipantState(
       userId: userId,
-      role: existingRole,
+      roles: existingRoles,
       name: userName.ifEmpty(() => existingName),
       custom: custom,
       image: userImage.ifEmpty(() => existingImage),
