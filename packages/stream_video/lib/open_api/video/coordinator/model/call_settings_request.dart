@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -20,6 +20,7 @@ class CallSettingsRequest {
     this.recording,
     this.ring,
     this.screensharing,
+    this.thumbnails,
     this.transcription,
     this.video,
   });
@@ -86,6 +87,14 @@ class CallSettingsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
+  ThumbnailsSettingsRequest? thumbnails;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
   TranscriptionSettingsRequest? transcription;
 
   ///
@@ -98,15 +107,16 @@ class CallSettingsRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallSettingsRequest &&
-     other.audio == audio &&
-     other.backstage == backstage &&
-     other.broadcasting == broadcasting &&
-     other.geofencing == geofencing &&
-     other.recording == recording &&
-     other.ring == ring &&
-     other.screensharing == screensharing &&
-     other.transcription == transcription &&
-     other.video == video;
+    other.audio == audio &&
+    other.backstage == backstage &&
+    other.broadcasting == broadcasting &&
+    other.geofencing == geofencing &&
+    other.recording == recording &&
+    other.ring == ring &&
+    other.screensharing == screensharing &&
+    other.thumbnails == thumbnails &&
+    other.transcription == transcription &&
+    other.video == video;
 
   @override
   int get hashCode =>
@@ -118,11 +128,12 @@ class CallSettingsRequest {
     (recording == null ? 0 : recording!.hashCode) +
     (ring == null ? 0 : ring!.hashCode) +
     (screensharing == null ? 0 : screensharing!.hashCode) +
+    (thumbnails == null ? 0 : thumbnails!.hashCode) +
     (transcription == null ? 0 : transcription!.hashCode) +
     (video == null ? 0 : video!.hashCode);
 
   @override
-  String toString() => 'CallSettingsRequest[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, recording=$recording, ring=$ring, screensharing=$screensharing, transcription=$transcription, video=$video]';
+  String toString() => 'CallSettingsRequest[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, recording=$recording, ring=$ring, screensharing=$screensharing, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -160,6 +171,11 @@ class CallSettingsRequest {
       json[r'screensharing'] = this.screensharing;
     } else {
       json[r'screensharing'] = null;
+    }
+    if (this.thumbnails != null) {
+      json[r'thumbnails'] = this.thumbnails;
+    } else {
+      json[r'thumbnails'] = null;
     }
     if (this.transcription != null) {
       json[r'transcription'] = this.transcription;
@@ -200,6 +216,7 @@ class CallSettingsRequest {
         recording: RecordSettingsRequest.fromJson(json[r'recording']),
         ring: RingSettingsRequest.fromJson(json[r'ring']),
         screensharing: ScreensharingSettingsRequest.fromJson(json[r'screensharing']),
+        thumbnails: ThumbnailsSettingsRequest.fromJson(json[r'thumbnails']),
         transcription: TranscriptionSettingsRequest.fromJson(json[r'transcription']),
         video: VideoSettingsRequest.fromJson(json[r'video']),
       );

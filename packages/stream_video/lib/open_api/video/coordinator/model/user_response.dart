@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -13,21 +13,37 @@ part of openapi.api;
 class UserResponse {
   /// Returns a new [UserResponse] instance.
   UserResponse({
+    required this.banned,
     required this.createdAt,
     this.custom = const {},
+    this.deactivatedAt,
     this.deletedAt,
     required this.id,
     this.image,
+    required this.language,
+    this.lastActive,
     this.name,
+    required this.online,
+    this.revokeTokensIssuedBefore,
     required this.role,
     this.teams = const [],
     required this.updatedAt,
   });
 
+  bool banned;
+
   /// Date/time of creation
   DateTime createdAt;
 
-  Map<String, Object?> custom;
+  Map<String, Object> custom;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? deactivatedAt;
 
   /// Date/time of deletion
   ///
@@ -48,6 +64,16 @@ class UserResponse {
   ///
   String? image;
 
+  String language;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? lastActive;
+
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -55,6 +81,16 @@ class UserResponse {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   String? name;
+
+  bool online;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? revokeTokensIssuedBefore;
 
   String role;
 
@@ -65,36 +101,54 @@ class UserResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserResponse &&
-     other.createdAt == createdAt &&
-     other.custom == custom &&
-     other.deletedAt == deletedAt &&
-     other.id == id &&
-     other.image == image &&
-     other.name == name &&
-     other.role == role &&
-     other.teams == teams &&
-     other.updatedAt == updatedAt;
+    other.banned == banned &&
+    other.createdAt == createdAt &&
+    _deepEquality.equals(other.custom, custom) &&
+    other.deactivatedAt == deactivatedAt &&
+    other.deletedAt == deletedAt &&
+    other.id == id &&
+    other.image == image &&
+    other.language == language &&
+    other.lastActive == lastActive &&
+    other.name == name &&
+    other.online == online &&
+    other.revokeTokensIssuedBefore == revokeTokensIssuedBefore &&
+    other.role == role &&
+    _deepEquality.equals(other.teams, teams) &&
+    other.updatedAt == updatedAt;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (banned.hashCode) +
     (createdAt.hashCode) +
     (custom.hashCode) +
+    (deactivatedAt == null ? 0 : deactivatedAt!.hashCode) +
     (deletedAt == null ? 0 : deletedAt!.hashCode) +
     (id.hashCode) +
     (image == null ? 0 : image!.hashCode) +
+    (language.hashCode) +
+    (lastActive == null ? 0 : lastActive!.hashCode) +
     (name == null ? 0 : name!.hashCode) +
+    (online.hashCode) +
+    (revokeTokensIssuedBefore == null ? 0 : revokeTokensIssuedBefore!.hashCode) +
     (role.hashCode) +
     (teams.hashCode) +
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'UserResponse[createdAt=$createdAt, custom=$custom, deletedAt=$deletedAt, id=$id, image=$image, name=$name, role=$role, teams=$teams, updatedAt=$updatedAt]';
+  String toString() => 'UserResponse[banned=$banned, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, image=$image, language=$language, lastActive=$lastActive, name=$name, online=$online, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'banned'] = this.banned;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'custom'] = this.custom;
+    if (this.deactivatedAt != null) {
+      json[r'deactivated_at'] = this.deactivatedAt!.toUtc().toIso8601String();
+    } else {
+      json[r'deactivated_at'] = null;
+    }
     if (this.deletedAt != null) {
       json[r'deleted_at'] = this.deletedAt!.toUtc().toIso8601String();
     } else {
@@ -106,10 +160,22 @@ class UserResponse {
     } else {
       json[r'image'] = null;
     }
+      json[r'language'] = this.language;
+    if (this.lastActive != null) {
+      json[r'last_active'] = this.lastActive!.toUtc().toIso8601String();
+    } else {
+      json[r'last_active'] = null;
+    }
     if (this.name != null) {
       json[r'name'] = this.name;
     } else {
       json[r'name'] = null;
+    }
+      json[r'online'] = this.online;
+    if (this.revokeTokensIssuedBefore != null) {
+      json[r'revoke_tokens_issued_before'] = this.revokeTokensIssuedBefore!.toUtc().toIso8601String();
+    } else {
+      json[r'revoke_tokens_issued_before'] = null;
     }
       json[r'role'] = this.role;
       json[r'teams'] = this.teams;
@@ -136,17 +202,23 @@ class UserResponse {
       }());
 
       return UserResponse(
-        createdAt: mapDateTime(json, r'created_at', '')!,
-        custom: mapCastOfType<String, Object?>(json, r'custom')!,
-        deletedAt: mapDateTime(json, r'deleted_at', ''),
+        banned: mapValueOfType<bool>(json, r'banned')!,
+        createdAt: mapDateTime(json, r'created_at', r'')!,
+        custom: mapCastOfType<String, Object>(json, r'custom')!,
+        deactivatedAt: mapDateTime(json, r'deactivated_at', r''),
+        deletedAt: mapDateTime(json, r'deleted_at', r''),
         id: mapValueOfType<String>(json, r'id')!,
         image: mapValueOfType<String>(json, r'image'),
+        language: mapValueOfType<String>(json, r'language')!,
+        lastActive: mapDateTime(json, r'last_active', r''),
         name: mapValueOfType<String>(json, r'name'),
+        online: mapValueOfType<bool>(json, r'online')!,
+        revokeTokensIssuedBefore: mapDateTime(json, r'revoke_tokens_issued_before', r''),
         role: mapValueOfType<String>(json, r'role')!,
-        teams: json[r'teams'] is List
-            ? (json[r'teams'] as List).cast<String>()
+        teams: json[r'teams'] is Iterable
+            ? (json[r'teams'] as Iterable).cast<String>().toList(growable: false)
             : const [],
-        updatedAt: mapDateTime(json, r'updated_at', '')!,
+        updatedAt: mapDateTime(json, r'updated_at', r'')!,
       );
     }
     return null;
@@ -194,9 +266,12 @@ class UserResponse {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'banned',
     'created_at',
     'custom',
     'id',
+    'language',
+    'online',
     'role',
     'teams',
     'updated_at',

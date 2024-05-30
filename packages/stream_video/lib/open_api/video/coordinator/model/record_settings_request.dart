@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -14,7 +14,7 @@ class RecordSettingsRequest {
   /// Returns a new [RecordSettingsRequest] instance.
   RecordSettingsRequest({
     this.audioOnly,
-    this.mode,
+    required this.mode,
     this.quality,
   });
 
@@ -26,21 +26,21 @@ class RecordSettingsRequest {
   ///
   bool? audioOnly;
 
-  RecordSettingsRequestModeEnum? mode;
+  RecordSettingsRequestModeEnum mode;
 
   RecordSettingsRequestQualityEnum? quality;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is RecordSettingsRequest &&
-     other.audioOnly == audioOnly &&
-     other.mode == mode &&
-     other.quality == quality;
+    other.audioOnly == audioOnly &&
+    other.mode == mode &&
+    other.quality == quality;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (audioOnly == null ? 0 : audioOnly!.hashCode) +
-    (mode == null ? 0 : mode!.hashCode) +
+    (mode.hashCode) +
     (quality == null ? 0 : quality!.hashCode);
 
   @override
@@ -53,11 +53,7 @@ class RecordSettingsRequest {
     } else {
       json[r'audio_only'] = null;
     }
-    if (this.mode != null) {
       json[r'mode'] = this.mode;
-    } else {
-      json[r'mode'] = null;
-    }
     if (this.quality != null) {
       json[r'quality'] = this.quality;
     } else {
@@ -86,7 +82,7 @@ class RecordSettingsRequest {
 
       return RecordSettingsRequest(
         audioOnly: mapValueOfType<bool>(json, r'audio_only'),
-        mode: RecordSettingsRequestModeEnum.fromJson(json[r'mode']),
+        mode: RecordSettingsRequestModeEnum.fromJson(json[r'mode'])!,
         quality: RecordSettingsRequestQualityEnum.fromJson(json[r'quality']),
       );
     }
@@ -135,6 +131,7 @@ class RecordSettingsRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'mode',
   };
 }
 
@@ -228,7 +225,6 @@ class RecordSettingsRequestQualityEnum {
 
   String toJson() => value;
 
-  static const audioOnly = RecordSettingsRequestQualityEnum._(r'audio-only');
   static const n360p = RecordSettingsRequestQualityEnum._(r'360p');
   static const n480p = RecordSettingsRequestQualityEnum._(r'480p');
   static const n720p = RecordSettingsRequestQualityEnum._(r'720p');
@@ -237,7 +233,6 @@ class RecordSettingsRequestQualityEnum {
 
   /// List of all possible values in this [enum][RecordSettingsRequestQualityEnum].
   static const values = <RecordSettingsRequestQualityEnum>[
-    audioOnly,
     n360p,
     n480p,
     n720p,
@@ -281,7 +276,6 @@ class RecordSettingsRequestQualityEnumTypeTransformer {
   RecordSettingsRequestQualityEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'audio-only': return RecordSettingsRequestQualityEnum.audioOnly;
         case r'360p': return RecordSettingsRequestQualityEnum.n360p;
         case r'480p': return RecordSettingsRequestQualityEnum.n480p;
         case r'720p': return RecordSettingsRequestQualityEnum.n720p;

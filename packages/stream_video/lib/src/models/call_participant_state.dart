@@ -14,7 +14,7 @@ class CallParticipantState
     implements Comparable<CallParticipantState> {
   const CallParticipantState({
     required this.userId,
-    required this.role,
+    required this.roles,
     required this.name,
     required this.custom,
     this.image,
@@ -33,7 +33,7 @@ class CallParticipantState
   });
 
   final String userId;
-  final String role;
+  final List<String> roles;
   final String name;
   final Map<String, Object?> custom;
   final String? image;
@@ -54,7 +54,7 @@ class CallParticipantState
   /// replaced with the new values.
   CallParticipantState copyWith({
     String? userId,
-    String? role,
+    List<String>? roles,
     String? name,
     Map<String, Object?>? custom,
     String? image,
@@ -73,7 +73,7 @@ class CallParticipantState
   }) {
     return CallParticipantState(
       userId: userId ?? this.userId,
-      role: role ?? this.role,
+      roles: roles ?? this.roles,
       name: name ?? this.name,
       custom: custom ?? this.custom,
       image: image ?? this.image,
@@ -111,7 +111,7 @@ class CallParticipantState
 
   @override
   String toString() {
-    return 'CallParticipantState{userId: $userId, role: $role, name: $name, '
+    return 'CallParticipantState{userId: $userId, role: $roles, name: $name, '
         'sessionId: $sessionId, '
         'trackId: $trackIdPrefix, image: $image, '
         'publishedTracks: $publishedTracks, '
@@ -125,7 +125,7 @@ class CallParticipantState
   @override
   List<Object?> get props => [
         userId,
-        role,
+        roles,
         name,
         custom,
         image,

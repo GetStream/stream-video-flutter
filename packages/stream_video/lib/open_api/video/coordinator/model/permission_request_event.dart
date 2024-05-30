@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -34,11 +34,11 @@ class PermissionRequestEvent {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is PermissionRequestEvent &&
-     other.callCid == callCid &&
-     other.createdAt == createdAt &&
-     other.permissions == permissions &&
-     other.type == type &&
-     other.user == user;
+    other.callCid == callCid &&
+    other.createdAt == createdAt &&
+    _deepEquality.equals(other.permissions, permissions) &&
+    other.type == type &&
+    other.user == user;
 
   @override
   int get hashCode =>
@@ -82,9 +82,9 @@ class PermissionRequestEvent {
 
       return PermissionRequestEvent(
         callCid: mapValueOfType<String>(json, r'call_cid')!,
-        createdAt: mapDateTime(json, r'created_at', '')!,
-        permissions: json[r'permissions'] is List
-            ? (json[r'permissions'] as List).cast<String>()
+        createdAt: mapDateTime(json, r'created_at', r'')!,
+        permissions: json[r'permissions'] is Iterable
+            ? (json[r'permissions'] as Iterable).cast<String>().toList(growable: false)
             : const [],
         type: mapValueOfType<String>(json, r'type')!,
         user: UserResponse.fromJson(json[r'user'])!,

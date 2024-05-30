@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -68,15 +68,15 @@ class CallSessionResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallSessionResponse &&
-     other.acceptedBy == acceptedBy &&
-     other.endedAt == endedAt &&
-     other.id == id &&
-     other.liveEndedAt == liveEndedAt &&
-     other.liveStartedAt == liveStartedAt &&
-     other.participants == participants &&
-     other.participantsCountByRole == participantsCountByRole &&
-     other.rejectedBy == rejectedBy &&
-     other.startedAt == startedAt;
+    _deepEquality.equals(other.acceptedBy, acceptedBy) &&
+    other.endedAt == endedAt &&
+    other.id == id &&
+    other.liveEndedAt == liveEndedAt &&
+    other.liveStartedAt == liveStartedAt &&
+    _deepEquality.equals(other.participants, participants) &&
+    _deepEquality.equals(other.participantsCountByRole, participantsCountByRole) &&
+    _deepEquality.equals(other.rejectedBy, rejectedBy) &&
+    other.startedAt == startedAt;
 
   @override
   int get hashCode =>
@@ -141,6 +141,7 @@ class CallSessionResponse {
         });
         return true;
       }());
+
       return CallSessionResponse(
         acceptedBy: mapCastOfType<String, String>(json, r'accepted_by')!
             .convertValueToDateTime(),

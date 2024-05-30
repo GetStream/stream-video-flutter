@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -13,23 +13,15 @@ part of openapi.api;
 class CreateDeviceRequest {
   /// Returns a new [CreateDeviceRequest] instance.
   CreateDeviceRequest({
-    this.id,
-    this.pushProvider,
+    required this.id,
+    required this.pushProvider,
     this.pushProviderName,
-    this.user,
-    this.userId,
     this.voipToken,
   });
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? id;
+  String id;
 
-  CreateDeviceRequestPushProviderEnum? pushProvider;
+  CreateDeviceRequestPushProviderEnum pushProvider;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -45,72 +37,34 @@ class CreateDeviceRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserRequest? user;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? userId;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
   bool? voipToken;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CreateDeviceRequest &&
-     other.id == id &&
-     other.pushProvider == pushProvider &&
-     other.pushProviderName == pushProviderName &&
-     other.user == user &&
-     other.userId == userId &&
-     other.voipToken == voipToken;
+    other.id == id &&
+    other.pushProvider == pushProvider &&
+    other.pushProviderName == pushProviderName &&
+    other.voipToken == voipToken;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (id == null ? 0 : id!.hashCode) +
-    (pushProvider == null ? 0 : pushProvider!.hashCode) +
+    (id.hashCode) +
+    (pushProvider.hashCode) +
     (pushProviderName == null ? 0 : pushProviderName!.hashCode) +
-    (user == null ? 0 : user!.hashCode) +
-    (userId == null ? 0 : userId!.hashCode) +
     (voipToken == null ? 0 : voipToken!.hashCode);
 
   @override
-  String toString() => 'CreateDeviceRequest[id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, user=$user, userId=$userId, voipToken=$voipToken]';
+  String toString() => 'CreateDeviceRequest[id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, voipToken=$voipToken]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.id != null) {
       json[r'id'] = this.id;
-    } else {
-      json[r'id'] = null;
-    }
-    if (this.pushProvider != null) {
       json[r'push_provider'] = this.pushProvider;
-    } else {
-      json[r'push_provider'] = null;
-    }
     if (this.pushProviderName != null) {
       json[r'push_provider_name'] = this.pushProviderName;
     } else {
       json[r'push_provider_name'] = null;
-    }
-    if (this.user != null) {
-      json[r'user'] = this.user;
-    } else {
-      json[r'user'] = null;
-    }
-    if (this.userId != null) {
-      json[r'user_id'] = this.userId;
-    } else {
-      json[r'user_id'] = null;
     }
     if (this.voipToken != null) {
       json[r'voip_token'] = this.voipToken;
@@ -139,11 +93,9 @@ class CreateDeviceRequest {
       }());
 
       return CreateDeviceRequest(
-        id: mapValueOfType<String>(json, r'id'),
-        pushProvider: CreateDeviceRequestPushProviderEnum.fromJson(json[r'push_provider']),
+        id: mapValueOfType<String>(json, r'id')!,
+        pushProvider: CreateDeviceRequestPushProviderEnum.fromJson(json[r'push_provider'])!,
         pushProviderName: mapValueOfType<String>(json, r'push_provider_name'),
-        user: UserRequest.fromJson(json[r'user']),
-        userId: mapValueOfType<String>(json, r'user_id'),
         voipToken: mapValueOfType<bool>(json, r'voip_token'),
       );
     }
@@ -192,6 +144,8 @@ class CreateDeviceRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'id',
+    'push_provider',
   };
 }
 

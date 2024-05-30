@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -26,9 +26,9 @@ class UpdateUserPermissionsRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UpdateUserPermissionsRequest &&
-     other.grantPermissions == grantPermissions &&
-     other.revokePermissions == revokePermissions &&
-     other.userId == userId;
+    _deepEquality.equals(other.grantPermissions, grantPermissions) &&
+    _deepEquality.equals(other.revokePermissions, revokePermissions) &&
+    other.userId == userId;
 
   @override
   int get hashCode =>
@@ -67,11 +67,11 @@ class UpdateUserPermissionsRequest {
       }());
 
       return UpdateUserPermissionsRequest(
-        grantPermissions: json[r'grant_permissions'] is List
-            ? (json[r'grant_permissions'] as List).cast<String>()
+        grantPermissions: json[r'grant_permissions'] is Iterable
+            ? (json[r'grant_permissions'] as Iterable).cast<String>().toList(growable: false)
             : const [],
-        revokePermissions: json[r'revoke_permissions'] is List
-            ? (json[r'revoke_permissions'] as List).cast<String>()
+        revokePermissions: json[r'revoke_permissions'] is Iterable
+            ? (json[r'revoke_permissions'] as Iterable).cast<String>().toList(growable: false)
             : const [],
         userId: mapValueOfType<String>(json, r'user_id')!,
       );

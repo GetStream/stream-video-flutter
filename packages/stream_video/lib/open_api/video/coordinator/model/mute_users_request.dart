@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -16,6 +16,7 @@ class MuteUsersRequest {
     this.audio,
     this.muteAllUsers,
     this.screenshare,
+    this.screenshareAudio,
     this.userIds = const [],
     this.video,
   });
@@ -44,6 +45,14 @@ class MuteUsersRequest {
   ///
   bool? screenshare;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? screenshareAudio;
+
   List<String> userIds;
 
   ///
@@ -56,11 +65,12 @@ class MuteUsersRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is MuteUsersRequest &&
-     other.audio == audio &&
-     other.muteAllUsers == muteAllUsers &&
-     other.screenshare == screenshare &&
-     other.userIds == userIds &&
-     other.video == video;
+    other.audio == audio &&
+    other.muteAllUsers == muteAllUsers &&
+    other.screenshare == screenshare &&
+    other.screenshareAudio == screenshareAudio &&
+    _deepEquality.equals(other.userIds, userIds) &&
+    other.video == video;
 
   @override
   int get hashCode =>
@@ -68,11 +78,12 @@ class MuteUsersRequest {
     (audio == null ? 0 : audio!.hashCode) +
     (muteAllUsers == null ? 0 : muteAllUsers!.hashCode) +
     (screenshare == null ? 0 : screenshare!.hashCode) +
+    (screenshareAudio == null ? 0 : screenshareAudio!.hashCode) +
     (userIds.hashCode) +
     (video == null ? 0 : video!.hashCode);
 
   @override
-  String toString() => 'MuteUsersRequest[audio=$audio, muteAllUsers=$muteAllUsers, screenshare=$screenshare, userIds=$userIds, video=$video]';
+  String toString() => 'MuteUsersRequest[audio=$audio, muteAllUsers=$muteAllUsers, screenshare=$screenshare, screenshareAudio=$screenshareAudio, userIds=$userIds, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -90,6 +101,11 @@ class MuteUsersRequest {
       json[r'screenshare'] = this.screenshare;
     } else {
       json[r'screenshare'] = null;
+    }
+    if (this.screenshareAudio != null) {
+      json[r'screenshare_audio'] = this.screenshareAudio;
+    } else {
+      json[r'screenshare_audio'] = null;
     }
       json[r'user_ids'] = this.userIds;
     if (this.video != null) {
@@ -122,8 +138,9 @@ class MuteUsersRequest {
         audio: mapValueOfType<bool>(json, r'audio'),
         muteAllUsers: mapValueOfType<bool>(json, r'mute_all_users'),
         screenshare: mapValueOfType<bool>(json, r'screenshare'),
-        userIds: json[r'user_ids'] is List
-            ? (json[r'user_ids'] as List).cast<String>()
+        screenshareAudio: mapValueOfType<bool>(json, r'screenshare_audio'),
+        userIds: json[r'user_ids'] is Iterable
+            ? (json[r'user_ids'] as Iterable).cast<String>().toList(growable: false)
             : const [],
         video: mapValueOfType<bool>(json, r'video'),
       );

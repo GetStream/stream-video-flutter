@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -16,9 +16,11 @@ class UserRequest {
     this.custom = const {},
     required this.id,
     this.image,
+    this.invisible,
+    this.language,
     this.name,
-    this.role,
-    this.teams = const [],
+    this.privacySettings,
+    this.pushNotifications,
   });
 
   Map<String, Object> custom;
@@ -33,6 +35,22 @@ class UserRequest {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   String? image;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? invisible;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? language;
 
   /// Optional name of user
   ///
@@ -49,18 +67,26 @@ class UserRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  String? role;
+  PrivacySettings? privacySettings;
 
-  List<String> teams;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  PushNotificationSettingsInput? pushNotifications;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserRequest &&
-     other.custom == custom &&
-     other.id == id &&
-     other.image == image &&
-     other.name == name &&
-     other.role == role &&
-     other.teams == teams;
+    _deepEquality.equals(other.custom, custom) &&
+    other.id == id &&
+    other.image == image &&
+    other.invisible == invisible &&
+    other.language == language &&
+    other.name == name &&
+    other.privacySettings == privacySettings &&
+    other.pushNotifications == pushNotifications;
 
   @override
   int get hashCode =>
@@ -68,12 +94,14 @@ class UserRequest {
     (custom.hashCode) +
     (id.hashCode) +
     (image == null ? 0 : image!.hashCode) +
+    (invisible == null ? 0 : invisible!.hashCode) +
+    (language == null ? 0 : language!.hashCode) +
     (name == null ? 0 : name!.hashCode) +
-    (role == null ? 0 : role!.hashCode) +
-    (teams.hashCode);
+    (privacySettings == null ? 0 : privacySettings!.hashCode) +
+    (pushNotifications == null ? 0 : pushNotifications!.hashCode);
 
   @override
-  String toString() => 'UserRequest[custom=$custom, id=$id, image=$image, name=$name, role=$role, teams=$teams]';
+  String toString() => 'UserRequest[custom=$custom, id=$id, image=$image, invisible=$invisible, language=$language, name=$name, privacySettings=$privacySettings, pushNotifications=$pushNotifications]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -84,17 +112,31 @@ class UserRequest {
     } else {
       json[r'image'] = null;
     }
+    if (this.invisible != null) {
+      json[r'invisible'] = this.invisible;
+    } else {
+      json[r'invisible'] = null;
+    }
+    if (this.language != null) {
+      json[r'language'] = this.language;
+    } else {
+      json[r'language'] = null;
+    }
     if (this.name != null) {
       json[r'name'] = this.name;
     } else {
       json[r'name'] = null;
     }
-    if (this.role != null) {
-      json[r'role'] = this.role;
+    if (this.privacySettings != null) {
+      json[r'privacy_settings'] = this.privacySettings;
     } else {
-      json[r'role'] = null;
+      json[r'privacy_settings'] = null;
     }
-      json[r'teams'] = this.teams;
+    if (this.pushNotifications != null) {
+      json[r'push_notifications'] = this.pushNotifications;
+    } else {
+      json[r'push_notifications'] = null;
+    }
     return json;
   }
 
@@ -120,11 +162,11 @@ class UserRequest {
         custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
         id: mapValueOfType<String>(json, r'id')!,
         image: mapValueOfType<String>(json, r'image'),
+        invisible: mapValueOfType<bool>(json, r'invisible'),
+        language: mapValueOfType<String>(json, r'language'),
         name: mapValueOfType<String>(json, r'name'),
-        role: mapValueOfType<String>(json, r'role'),
-        teams: json[r'teams'] is List
-            ? (json[r'teams'] as List).cast<String>()
-            : const [],
+        privacySettings: PrivacySettings.fromJson(json[r'privacy_settings']),
+        pushNotifications: PushNotificationSettingsInput.fromJson(json[r'push_notifications']),
       );
     }
     return null;

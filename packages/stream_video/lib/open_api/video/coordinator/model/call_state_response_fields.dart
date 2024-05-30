@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -36,10 +36,10 @@ class CallStateResponseFields {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallStateResponseFields &&
-     other.call == call &&
-     other.members == members &&
-     other.membership == membership &&
-     other.ownCapabilities == ownCapabilities;
+    other.call == call &&
+    _deepEquality.equals(other.members, members) &&
+    other.membership == membership &&
+    _deepEquality.equals(other.ownCapabilities, ownCapabilities);
 
   @override
   int get hashCode =>

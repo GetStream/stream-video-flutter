@@ -5,7 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video/stream_video.dart';
+import 'package:stream_video/stream_video.dart' hide CallEvent;
 import 'package:stream_video_push_notification/stream_video_push_notification_platform_interface.dart';
 
 import 'stream_video_push_params.dart';

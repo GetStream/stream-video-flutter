@@ -1419,12 +1419,7 @@ class Call {
   }
 
   Future<Result<List<CallRecording>>> listRecordings() async {
-    final sessionId = _session?.sessionId;
-    if (sessionId == null) {
-      return Result.error('Session not found');
-    }
-
-    return _permissionsManager.listRecordings(sessionId);
+    return _permissionsManager.listRecordings();
   }
 
   Future<Result<None>> stopRecording() async {
@@ -1844,7 +1839,7 @@ class Call {
     required Map<String, Object> filterConditions,
     String? next,
     String? prev,
-    List<SortParamRequest> sorts = const [],
+    List<SortParam> sorts = const [],
     int? limit,
   }) {
     return _permissionsManager.queryMembers(

@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -47,14 +47,14 @@ class JoinCallResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is JoinCallResponse &&
-     other.call == call &&
-     other.created == created &&
-     other.credentials == credentials &&
-     other.duration == duration &&
-     other.members == members &&
-     other.membership == membership &&
-          other.ownCapabilities == ownCapabilities &&
-          other.statsOptions == statsOptions;
+    other.call == call &&
+    other.created == created &&
+    other.credentials == credentials &&
+    other.duration == duration &&
+    _deepEquality.equals(other.members, members) &&
+    other.membership == membership &&
+    _deepEquality.equals(other.ownCapabilities, ownCapabilities) &&
+    other.statsOptions == statsOptions;
 
   @override
   int get hashCode =>
@@ -65,12 +65,11 @@ class JoinCallResponse {
     (duration.hashCode) +
     (members.hashCode) +
     (membership == null ? 0 : membership!.hashCode) +
-      (ownCapabilities.hashCode) +
-      (statsOptions.hashCode);
+    (ownCapabilities.hashCode) +
+    (statsOptions.hashCode);
 
   @override
-  String toString() =>
-      'JoinCallResponse[call=$call, created=$created, credentials=$credentials, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities, statsOptions=$statsOptions]';
+  String toString() => 'JoinCallResponse[call=$call, created=$created, credentials=$credentials, duration=$duration, members=$members, membership=$membership, ownCapabilities=$ownCapabilities, statsOptions=$statsOptions]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -85,7 +84,7 @@ class JoinCallResponse {
       json[r'membership'] = null;
     }
       json[r'own_capabilities'] = this.ownCapabilities;
-    json[r'stats_options'] = this.statsOptions;
+      json[r'stats_options'] = this.statsOptions;
     return json;
   }
 

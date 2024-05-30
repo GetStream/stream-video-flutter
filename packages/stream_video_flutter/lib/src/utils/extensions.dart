@@ -54,7 +54,7 @@ extension CallParticipantExtension on CallParticipantState {
   /// Maps [CallParticipantState] into [UserInfo].
   UserInfo toUserInfo() => UserInfo(
         id: userId,
-        role: role,
+        role: roles.firstOrNull ?? '',
         name: name.ifEmpty(() => userId),
         image: image,
       );

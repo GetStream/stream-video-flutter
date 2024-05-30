@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -27,9 +27,9 @@ class CreateGuestResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CreateGuestResponse &&
-     other.accessToken == accessToken &&
-     other.duration == duration &&
-     other.user == user;
+    other.accessToken == accessToken &&
+    other.duration == duration &&
+    other.user == user;
 
   @override
   int get hashCode =>

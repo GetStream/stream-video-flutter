@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -29,10 +29,10 @@ class CallParticipantResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallParticipantResponse &&
-     other.joinedAt == joinedAt &&
-     other.role == role &&
-     other.user == user &&
-     other.userSessionId == userSessionId;
+    other.joinedAt == joinedAt &&
+    other.role == role &&
+    other.user == user &&
+    other.userSessionId == userSessionId;
 
   @override
   int get hashCode =>
@@ -73,7 +73,7 @@ class CallParticipantResponse {
       }());
 
       return CallParticipantResponse(
-        joinedAt: mapDateTime(json, r'joined_at', '')!,
+        joinedAt: mapDateTime(json, r'joined_at', r'')!,
         role: mapValueOfType<String>(json, r'role')!,
         user: UserResponse.fromJson(json[r'user'])!,
         userSessionId: mapValueOfType<String>(json, r'user_session_id')!,

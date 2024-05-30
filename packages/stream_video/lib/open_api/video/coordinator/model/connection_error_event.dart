@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -23,24 +23,24 @@ class ConnectionErrorEvent {
 
   DateTime createdAt;
 
-  APIError? error;
+  APIError error;
 
   /// The type of event: \"connection.ok\" in this case
   String type;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is ConnectionErrorEvent &&
-     other.connectionId == connectionId &&
-     other.createdAt == createdAt &&
-     other.error == error &&
-     other.type == type;
+    other.connectionId == connectionId &&
+    other.createdAt == createdAt &&
+    other.error == error &&
+    other.type == type;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (connectionId.hashCode) +
     (createdAt.hashCode) +
-    (error == null ? 0 : error!.hashCode) +
+    (error.hashCode) +
     (type.hashCode);
 
   @override
@@ -50,11 +50,7 @@ class ConnectionErrorEvent {
     final json = <String, dynamic>{};
       json[r'connection_id'] = this.connectionId;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    if (this.error != null) {
       json[r'error'] = this.error;
-    } else {
-      json[r'error'] = null;
-    }
       json[r'type'] = this.type;
     return json;
   }
@@ -79,8 +75,8 @@ class ConnectionErrorEvent {
 
       return ConnectionErrorEvent(
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
-        createdAt: mapDateTime(json, r'created_at', '')!,
-        error: APIError.fromJson(json[r'error']),
+        createdAt: mapDateTime(json, r'created_at', r'')!,
+        error: APIError.fromJson(json[r'error'])!,
         type: mapValueOfType<String>(json, r'type')!,
       );
     }

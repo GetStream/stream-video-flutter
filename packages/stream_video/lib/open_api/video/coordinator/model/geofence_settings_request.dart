@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -20,7 +20,7 @@ class GeofenceSettingsRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is GeofenceSettingsRequest &&
-     other.names == names;
+    _deepEquality.equals(other.names, names);
 
   @override
   int get hashCode =>
@@ -55,8 +55,8 @@ class GeofenceSettingsRequest {
       }());
 
       return GeofenceSettingsRequest(
-        names: json[r'names'] is List
-            ? (json[r'names'] as List).cast<String>()
+        names: json[r'names'] is Iterable
+            ? (json[r'names'] as Iterable).cast<String>().toList(growable: false)
             : const [],
       );
     }
