@@ -779,8 +779,6 @@ class CallSession extends Disposable {
     }
 
     _logger.v(() => '[setSubscriptions] updated: $subscriptions');
-    print(":::X");
-    print(subscriptions.values);
     final result = await sfuClient.update(
       sessionId: sessionId,
       subscriptions: subscriptions.values,
