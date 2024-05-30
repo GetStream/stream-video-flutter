@@ -24,7 +24,7 @@ class SubscriptionChange {
     required this.trackIdPrefix,
     required this.trackType,
   })  : trackId = '$trackIdPrefix:$trackType',
-        subscribed = true;
+        subscribed = false;
 
   final String userId;
   final String sessionId;

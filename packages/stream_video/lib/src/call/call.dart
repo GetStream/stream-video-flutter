@@ -1780,6 +1780,7 @@ class Call {
             sessionId: sessionId,
             trackIdPrefix: trackIdPrefix,
             trackType: trackType,
+            videoDimension: videoDimension,
           ),
         ) ??
         Result.error('Session is null');
