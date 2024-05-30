@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
-import '../../../action/internal/coordinator_action.dart';
 import '../../../call_state.dart';
 import '../../../coordinator/models/coordinator_events.dart';
 import '../../../logger/impl/tagged_logger.dart';
@@ -13,23 +12,6 @@ import '../../../models/disconnect_reason.dart';
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
 mixin StateCoordinatorMixin on StateNotifier<CallState> {
-  void coordinatorUpdateUsers(
-    UpdateUsers action,
-  ) {
-    state = state.copyWith(
-      callParticipants: state.callParticipants.map(
-        (participant) {
-          final user = action.users[participant.userId];
-          if (user == null) return participant;
-          return participant.copyWith(
-            roles: user.roles,
-            name: user.name,
-            image: user.image,
-          );
-        },
-      ).toList(),
-    );
-  }
 
   void coordinatorCallAccepted(
     CoordinatorCallAcceptedEvent event,

@@ -1,23 +1,25 @@
 import 'package:state_notifier/state_notifier.dart';
 
-import '../../../action/internal/rtc_action.dart';
 import '../../../call_state.dart';
 import '../../../logger/impl/tagged_logger.dart';
 import '../../../models/call_track_state.dart';
+import '../../../sfu/data/models/sfu_track_type.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
 mixin StateRtcMixin on StateNotifier<CallState> {
-  void rtcUpdateSubscriberTrack(
-    UpdateSubscriberTrack action,
-  ) {
+  void rtcUpdateSubscriberTrack({
+    required String trackIdPrefix,
+    required SfuTrackType trackType,
+  }) {
     _logger.d(
-      () => '[rtcUpdateSubscriberTrack] ${state.sessionId}; action: $action',
+      () =>
+          '[rtcUpdateSubscriberTrack] ${state.sessionId}; trackIdPrefix: $trackIdPrefix; trackType: $trackType',
     );
     state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
-        final trackState = participant.publishedTracks[action.trackType];
-        if (participant.trackIdPrefix == action.trackIdPrefix &&
+        final trackState = participant.publishedTracks[trackType];
+        if (participant.trackIdPrefix == trackIdPrefix &&
             trackState is RemoteTrackState) {
           _logger.v(
             () => '[rtcUpdateSubscriberTrack] pFound: $participant',
@@ -25,7 +27,7 @@ mixin StateRtcMixin on StateNotifier<CallState> {
           return participant.copyWith(
             publishedTracks: {
               ...participant.publishedTracks,
-              action.trackType: trackState.copyWith(
+              trackType: trackState.copyWith(
                 muted: false,
                 subscribed: true,
                 received: true,
