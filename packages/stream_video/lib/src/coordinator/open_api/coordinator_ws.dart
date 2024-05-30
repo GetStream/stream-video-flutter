@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:web_socket_channel/web_socket_channel.dart';
-
 import '../../../composed_version.dart';
 import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../core/video_error.dart';
@@ -15,7 +13,7 @@ import '../../types/other.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
 import '../../ws/health/health_monitor.dart';
-import '../coordinator_ws.dart';
+import '../../ws/ws.dart';
 import '../models/coordinator_events.dart';
 import 'error/open_api_error.dart';
 import 'error/open_api_error_code.dart';
@@ -34,10 +32,10 @@ String _buildUrl(String baseUrl, String apiKey) {
       '&X-Stream-Client=$streamClientVersion';
 }
 
-class CoordinatorWebSocketOpenApi extends CoordinatorWebSocket
+class CoordinatorWebSocket extends StreamWebSocket
     with ConnectionStateMixin
     implements HealthListener {
-  CoordinatorWebSocketOpenApi(
+  CoordinatorWebSocket(
     String url, {
     Iterable<String>? protocols,
     required this.apiKey,
