@@ -9,7 +9,7 @@ extension MemberExt on open.MemberResponse {
   CallMember toCallMember() {
     return CallMember(
       userId: userId,
-      role: role ?? '',
+      roles: role != null ? [role!] : [],
       custom: custom,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -33,7 +33,7 @@ extension UserExt on open.UserResponse {
     return CallUser(
       id: id,
       teams: teams,
-      role: role,
+      roles: [role],
       name: name ?? '',
       image: image ?? '',
       createdAt: createdAt,
@@ -46,7 +46,7 @@ extension UserExt on open.UserResponse {
   CallMember toCallMember() {
     return CallMember(
       userId: id,
-      role: role,
+      roles: [role],
       custom: custom,
       createdAt: createdAt,
       updatedAt: updatedAt,

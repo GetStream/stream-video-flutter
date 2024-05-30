@@ -59,8 +59,29 @@ Comparator<CallParticipantState> reactionType(String type) {
 /// participants who have a specific role.
 Comparator<CallParticipantState> role(List<String> roles) {
   return (CallParticipantState a, CallParticipantState b) {
-    if (roles.contains(a.role) && !roles.contains(b.role)) return -1;
-    if (!roles.contains(a.role) && roles.contains(b.role)) return 1;
+    final aMatches = a.roles.fold(
+      0,
+      (matches, value) {
+        if (roles.contains(value)) {
+          return matches + 1;
+        } else {
+          return matches;
+        }
+      },
+    );
+    final bMatches = b.roles.fold(
+      0,
+          (matches, value) {
+        if (roles.contains(value)) {
+          return matches + 1;
+        } else {
+          return matches;
+        }
+      },
+    );
+
+    if (aMatches > bMatches) return -1;
+    if (bMatches < aMatches) return 1;
     return 0;
   };
 }

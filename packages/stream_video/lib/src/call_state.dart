@@ -277,7 +277,7 @@ extension on CallMetadata {
       result.add(
         CallParticipantState(
           userId: userId,
-          role: member?.role ?? user?.role ?? '',
+          roles: member?.roles ?? user?.roles ?? [],
           name: user?.name ?? '',
           custom: user?.custom ?? {},
           image: user?.image ?? '',
