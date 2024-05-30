@@ -538,7 +538,7 @@ class Call {
       return result;
     }
 
-    _stateManager.lifecycleCallConnectingAction(attempt: _reconnectAttempt);
+    _stateManager.lifecycleCallConnecting(attempt: _reconnectAttempt);
     _logger.v(() => '[join] joining to coordinator');
     final joinedResult = await _joinIfNeeded(connectOptions: connectOptions);
     if (joinedResult is! Success<CallCredentials>) {
@@ -763,7 +763,7 @@ class Call {
     if (_status.value == _ConnectionStatus.reconnecting) return;
     _status.value = _ConnectionStatus.reconnecting;
 
-    _stateManager.lifecycleCallConnectingAction(
+    _stateManager.lifecycleCallConnecting(
       attempt: 1,
       isFastReconnectAttempt: true,
     );
@@ -841,7 +841,7 @@ class Call {
     final startTime = DateTime.now().toUtc().millisecondsSinceEpoch;
     while (true) {
       _reconnectAttempt++;
-      _stateManager.lifecycleCallConnectingAction(attempt: _reconnectAttempt);
+      _stateManager.lifecycleCallConnecting(attempt: _reconnectAttempt);
       if (_status.value == _ConnectionStatus.disconnected) {
         _logger.w(
           () =>
@@ -1140,7 +1140,7 @@ class Call {
       } else {
         streamLog.e(
           _tag,
-          () => '[composeControlAction] failed: $mediaConstraints',
+          () => '[_setLocalTrack] failed: $mediaConstraints',
         );
       }
     }
@@ -1698,13 +1698,13 @@ class Call {
     required String userId,
     required ViewportVisibility visibility,
   }) async {
-    final action = VisibilityChange(
+    final change = VisibilityChange(
       sessionId: sessionId,
       userId: userId,
       visibility: visibility,
     );
 
-    final result = await _session?.updateViewportVisibility(action) ??
+    final result = await _session?.updateViewportVisibility(change) ??
         Result.error('Session is null');
 
     if (result.isSuccess) {

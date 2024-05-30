@@ -755,9 +755,9 @@ class CallSession extends Disposable {
   }
 
   Future<Result<None>> updateViewportVisibilities(
-    List<VisibilityChange> actions,
+    List<VisibilityChange> visibilityChanges,
   ) async {
-    _logger.d(() => '[updateViewportVisibilities] actions: $actions');
+    _logger.d(() => '[updateViewportVisibilities] changes: $visibilityChanges');
     // Nothing to do here, this is handled by the UI
     return const Result.success(none);
   }
@@ -765,7 +765,7 @@ class CallSession extends Disposable {
   Future<Result<None>> setSubscriptions(
     List<SubscriptionChange> subscriptionChanges,
   ) async {
-    _logger.d(() => '[setSubscriptions] actions: $subscriptionChanges');
+    _logger.d(() => '[setSubscriptions] subscriptionChanges: $subscriptionChanges');
 
     final participants = stateManager.callState.callParticipants;
     final exclude = {SfuTrackType.video, SfuTrackType.screenShare};
@@ -774,8 +774,8 @@ class CallSession extends Disposable {
     };
     _logger.v(() => '[setSubscriptions] source: $subscriptions');
     for (final change in subscriptionChanges) {
-      final actionSubscriptions = change.getSubscriptions();
-      subscriptions.addAll(actionSubscriptions);
+      final changeSubscriptions = change.getSubscriptions();
+      subscriptions.addAll(changeSubscriptions);
     }
 
     _logger.v(() => '[setSubscriptions] updated: $subscriptions');
@@ -791,14 +791,14 @@ class CallSession extends Disposable {
   Future<Result<None>> updateSubscription(
     SubscriptionChange subscriptionChange,
   ) async {
-    _logger.d(() => '[updateSubscription] action: $subscriptionChange');
+    _logger.d(() => '[updateSubscription] subscriptionChange: $subscriptionChange');
     return _saBuffer.post(subscriptionChange);
   }
 
   Future<Result<None>> updateSubscriptions(
     List<SubscriptionChange> changes,
   ) async {
-    _logger.d(() => '[updateSubscriptions] actions: $changes');
+    _logger.d(() => '[updateSubscriptions] changes: $changes');
     final participants = stateManager.callState.callParticipants;
     final subscriptions = <String, SfuSubscriptionDetails>{
       ...participants.getSubscriptions(),

@@ -65,4 +65,11 @@ class SubscriptionChange {
 
     return subscriptions;
   }
+
+  @override
+  String toString() {
+    return 'SubscriptionChange{userId: $userId, sessionId: $sessionId, '
+        'trackIdPrefix: $trackIdPrefix, trackType: $trackType, dimension: $videoDimension, '
+        'subscribed: $subscribed, trackId: $trackId}';
+  }
 }

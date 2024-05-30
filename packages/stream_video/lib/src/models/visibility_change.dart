@@ -12,4 +12,10 @@ class VisibilityChange {
   final ViewportVisibility visibility;
 
   List<Object?> get props => [sessionId, userId, visibility];
+
+  @override
+  String toString() {
+    return 'SubscriptionChange{sessionId: $sessionId, userId: $userId, '
+        'visibility: $visibility';
+  }
 }

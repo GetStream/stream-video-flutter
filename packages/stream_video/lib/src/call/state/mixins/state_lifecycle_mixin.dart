@@ -214,7 +214,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     );
   }
 
-  void lifecycleCallConnectingAction({
+  void lifecycleCallConnecting({
     required int attempt,
     bool isFastReconnectAttempt = false,
   }) {
