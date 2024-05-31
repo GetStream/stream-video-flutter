@@ -12,10 +12,10 @@ dependencies:
   cupertino_icons: ^1.0.5
   device_info_plus: ^10.1.0
   envied: ^0.3.0+3
-  firebase_auth: ^4.7.3
-  firebase_core: ^2.15.1
-  firebase_crashlytics: ^3.3.5
-  firebase_messaging: ^14.6.6
+  firebase_auth: ^4.19.6
+  firebase_core: ^2.31.1
+  firebase_crashlytics: ^3.5.6
+  firebase_messaging: ^14.9.3
   fl_chart: ^0.66.2
   flutter:
     sdk: flutter

@@ -5,27 +5,15 @@ import 'package:rxdart/rxdart.dart';
 import '../../stream_video.dart';
 import '../disposable.dart';
 import '../errors/video_error_composer.dart';
-import '../logger/impl/tagged_logger.dart';
-import '../logger/stream_log.dart';
-import '../models/call_cid.dart';
-import '../platform_detector/platform_detector.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
-import '../sfu/data/models/sfu_track_type.dart';
 import '../utils/extensions.dart';
-import '../utils/none.dart';
-import '../utils/result.dart';
 import 'codecs_helper.dart' as codecs;
-import 'media/media_constraints.dart';
 import 'model/rtc_audio_bitrate_preset.dart';
 import 'model/rtc_tracks_info.dart';
-import 'model/rtc_video_dimension.dart';
 import 'model/rtc_video_encoding.dart';
 import 'model/rtc_video_parameters.dart';
 import 'peer_connection.dart';
-import 'peer_type.dart';
-import 'rtc_media_device/rtc_media_device.dart';
 import 'rtc_parser.dart';
-import 'rtc_track/rtc_track.dart';
 
 /// {@template OnLocalTrackMuted}
 /// Callback for when a local track is muted.

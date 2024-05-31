@@ -631,8 +631,11 @@ class Call {
     localStats = localStats.copyWith(
       sfu: session.config.sfuUrl,
       sdkVersion: streamVideoVersion,
-      webRtcVersion:
-          CurrentPlatform.isAndroid ? androidWebRTCVersion : iosWebRTCVersion,
+      webRtcVersion: switch (CurrentPlatform.type) {
+        PlatformType.android => androidWebRTCVersion,
+        PlatformType.ios => iosWebRTCVersion,
+        _ => null,
+      },
     );
 
     _stateManager.lifecycleCallSessionStart(
