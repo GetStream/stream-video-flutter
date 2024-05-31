@@ -20,7 +20,6 @@ import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
 import '../../sfu/sfu_client.dart';
-import '../../sfu/sfu_client_impl.dart';
 import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
 import '../../utils/debounce_buffer.dart';
@@ -52,7 +51,7 @@ class CallSession extends Disposable {
     required this.stateManager,
     required this.onFullReconnectNeeded,
     required SdpEditor sdpEditor,
-  })  : sfuClient = SfuClientImpl(
+  })  : sfuClient = SfuClient(
           baseUrl: config.sfuUrl,
           sfuToken: config.sfuToken,
         ),
