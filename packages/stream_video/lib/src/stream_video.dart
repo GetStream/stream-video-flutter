@@ -55,7 +55,7 @@ const _idEvents = 1;
 const _idAppState = 2;
 const _idActiveCall = 4;
 
-const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com/video';
+const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com';
 const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
 
 /// Handler function used for logging.
@@ -522,7 +522,7 @@ class StreamVideo extends Disposable {
     String? next,
     String? prev,
     int? limit,
-    List<open.SortParamRequest>? sorts,
+    List<open.SortParam>? sorts,
   }) {
     return _client.queryCalls(
       filterConditions: filterConditions,
@@ -549,7 +549,6 @@ class StreamVideo extends Disposable {
       id: pushToken,
       pushProvider: pushProvider,
       pushProviderName: pushProviderName,
-      userId: currentUser.id,
       voipToken: voipToken,
     );
   }

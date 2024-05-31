@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -15,6 +15,7 @@ class ScreensharingSettingsRequest {
   ScreensharingSettingsRequest({
     this.accessRequestEnabled,
     this.enabled,
+    this.targetResolution,
   });
 
   ///
@@ -33,19 +34,29 @@ class ScreensharingSettingsRequest {
   ///
   bool? enabled;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  TargetResolution? targetResolution;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is ScreensharingSettingsRequest &&
-     other.accessRequestEnabled == accessRequestEnabled &&
-     other.enabled == enabled;
+    other.accessRequestEnabled == accessRequestEnabled &&
+    other.enabled == enabled &&
+    other.targetResolution == targetResolution;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (accessRequestEnabled == null ? 0 : accessRequestEnabled!.hashCode) +
-    (enabled == null ? 0 : enabled!.hashCode);
+    (enabled == null ? 0 : enabled!.hashCode) +
+    (targetResolution == null ? 0 : targetResolution!.hashCode);
 
   @override
-  String toString() => 'ScreensharingSettingsRequest[accessRequestEnabled=$accessRequestEnabled, enabled=$enabled]';
+  String toString() => 'ScreensharingSettingsRequest[accessRequestEnabled=$accessRequestEnabled, enabled=$enabled, targetResolution=$targetResolution]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -58,6 +69,11 @@ class ScreensharingSettingsRequest {
       json[r'enabled'] = this.enabled;
     } else {
       json[r'enabled'] = null;
+    }
+    if (this.targetResolution != null) {
+      json[r'target_resolution'] = this.targetResolution;
+    } else {
+      json[r'target_resolution'] = null;
     }
     return json;
   }
@@ -83,6 +99,7 @@ class ScreensharingSettingsRequest {
       return ScreensharingSettingsRequest(
         accessRequestEnabled: mapValueOfType<bool>(json, r'access_request_enabled'),
         enabled: mapValueOfType<bool>(json, r'enabled'),
+        targetResolution: TargetResolution.fromJson(json[r'target_resolution']),
       );
     }
     return null;

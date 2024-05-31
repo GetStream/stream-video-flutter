@@ -22,7 +22,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
           final user = action.users[participant.userId];
           if (user == null) return participant;
           return participant.copyWith(
-            role: user.role,
+            roles: user.roles,
             name: user.name,
             image: user.image,
           );
@@ -278,7 +278,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       if (userId == e.userId) {
         return CallParticipantState(
           userId: e.userId,
-          role: e.role,
+          roles: e.roles,
           name: e.name,
           custom: e.custom,
           sessionId: e.sessionId,

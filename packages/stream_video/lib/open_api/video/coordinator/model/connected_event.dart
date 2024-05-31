@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -31,10 +31,10 @@ class ConnectedEvent {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is ConnectedEvent &&
-     other.connectionId == connectionId &&
-     other.createdAt == createdAt &&
-     other.me == me &&
-     other.type == type;
+    other.connectionId == connectionId &&
+    other.createdAt == createdAt &&
+    other.me == me &&
+    other.type == type;
 
   @override
   int get hashCode =>
@@ -76,7 +76,7 @@ class ConnectedEvent {
 
       return ConnectedEvent(
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
-        createdAt: mapDateTime(json, r'created_at', '')!,
+        createdAt: mapDateTime(json, r'created_at', r'')!,
         me: OwnUserResponse.fromJson(json[r'me'])!,
         type: mapValueOfType<String>(json, r'type')!,
       );

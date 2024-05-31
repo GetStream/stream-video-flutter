@@ -212,7 +212,7 @@ class StreamRecordingSettings extends AbstractSettings {
   const StreamRecordingSettings({
     this.audioOnly = false,
     this.mode = RecordSettingsMode.disabled,
-    this.quality = RecordSettingsQuality.audioOnly,
+    this.quality = RecordSettingsQuality.n360p,
   });
 
   final bool audioOnly;
@@ -308,10 +308,22 @@ enum RecordSettingsMode {
         return RecordSettingsRequestModeEnum.autoOn;
     }
   }
+
+  static RecordSettingsMode fromString(String value) {
+    switch (value) {
+      case 'available':
+        return RecordSettingsMode.available;
+      case 'disabled':
+        return RecordSettingsMode.disabled;
+      case 'autoOn':
+        return RecordSettingsMode.autoOn;
+      default:
+        return RecordSettingsMode.disabled;
+    }
+  }
 }
 
 enum RecordSettingsQuality {
-  audioOnly,
   n360p,
   n480p,
   n720p,
@@ -323,8 +335,6 @@ enum RecordSettingsQuality {
 
   RecordSettingsRequestQualityEnum toOpenDto() {
     switch (this) {
-      case RecordSettingsQuality.audioOnly:
-        return RecordSettingsRequestQualityEnum.audioOnly;
       case RecordSettingsQuality.n360p:
         return RecordSettingsRequestQualityEnum.n360p;
       case RecordSettingsQuality.n480p:
@@ -335,6 +345,23 @@ enum RecordSettingsQuality {
         return RecordSettingsRequestQualityEnum.n1080p;
       case RecordSettingsQuality.n1440p:
         return RecordSettingsRequestQualityEnum.n1440p;
+    }
+  }
+
+  static RecordSettingsQuality fromString(String quality) {
+    switch (quality) {
+      case 'n360p':
+        return RecordSettingsQuality.n360p;
+      case 'n480p':
+        return RecordSettingsQuality.n480p;
+      case 'n720p':
+        return RecordSettingsQuality.n720p;
+      case 'n1080p':
+        return RecordSettingsQuality.n1080p;
+      case 'n1440p':
+        return RecordSettingsQuality.n1440p;
+      default:
+        return RecordSettingsQuality.n360p;
     }
   }
 }

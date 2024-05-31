@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -78,13 +78,13 @@ class JoinCallRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is JoinCallRequest &&
-     other.create == create &&
-     other.data == data &&
-     other.location == location &&
-     other.membersLimit == membersLimit &&
-     other.migratingFrom == migratingFrom &&
-     other.notify == notify &&
-     other.ring == ring;
+    other.create == create &&
+    other.data == data &&
+    other.location == location &&
+    other.membersLimit == membersLimit &&
+    other.migratingFrom == migratingFrom &&
+    other.notify == notify &&
+    other.ring == ring;
 
   @override
   int get hashCode =>

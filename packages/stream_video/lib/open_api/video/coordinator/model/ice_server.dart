@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -26,9 +26,9 @@ class ICEServer {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is ICEServer &&
-     other.password == password &&
-     other.urls == urls &&
-     other.username == username;
+    other.password == password &&
+    _deepEquality.equals(other.urls, urls) &&
+    other.username == username;
 
   @override
   int get hashCode =>
@@ -68,8 +68,8 @@ class ICEServer {
 
       return ICEServer(
         password: mapValueOfType<String>(json, r'password')!,
-        urls: json[r'urls'] is List
-            ? (json[r'urls'] as List).cast<String>()
+        urls: json[r'urls'] is Iterable
+            ? (json[r'urls'] as Iterable).cast<String>().toList(growable: false)
             : const [],
         username: mapValueOfType<String>(json, r'username')!,
       );

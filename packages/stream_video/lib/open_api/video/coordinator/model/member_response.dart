@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -54,13 +54,13 @@ class MemberResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is MemberResponse &&
-     other.createdAt == createdAt &&
-     other.custom == custom &&
-     other.deletedAt == deletedAt &&
-     other.role == role &&
-     other.updatedAt == updatedAt &&
-     other.user == user &&
-     other.userId == userId;
+    other.createdAt == createdAt &&
+    _deepEquality.equals(other.custom, custom) &&
+    other.deletedAt == deletedAt &&
+    other.role == role &&
+    other.updatedAt == updatedAt &&
+    other.user == user &&
+    other.userId == userId;
 
   @override
   int get hashCode =>
@@ -115,11 +115,11 @@ class MemberResponse {
       }());
 
       return MemberResponse(
-        createdAt: mapDateTime(json, r'created_at', '')!,
+        createdAt: mapDateTime(json, r'created_at', r'')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
-        deletedAt: mapDateTime(json, r'deleted_at', ''),
+        deletedAt: mapDateTime(json, r'deleted_at', r''),
         role: mapValueOfType<String>(json, r'role'),
-        updatedAt: mapDateTime(json, r'updated_at', '')!,
+        updatedAt: mapDateTime(json, r'updated_at', r'')!,
         user: UserResponse.fromJson(json[r'user'])!,
         userId: mapValueOfType<String>(json, r'user_id')!,
       );

@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -40,9 +40,9 @@ class UpdateCallRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UpdateCallRequest &&
-     other.custom == custom &&
-     other.settingsOverride == settingsOverride &&
-     other.startsAt == startsAt;
+    _deepEquality.equals(other.custom, custom) &&
+    other.settingsOverride == settingsOverride &&
+    other.startsAt == startsAt;
 
   @override
   int get hashCode =>
@@ -91,7 +91,7 @@ class UpdateCallRequest {
       return UpdateCallRequest(
         custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
         settingsOverride: CallSettingsRequest.fromJson(json[r'settings_override']),
-        startsAt: mapDateTime(json, r'starts_at', ''),
+        startsAt: mapDateTime(json, r'starts_at', r''),
       );
     }
     return null;
