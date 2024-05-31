@@ -10,7 +10,6 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../stream_video.dart';
 import '../../version.g.dart';
-import '../action/internal/lifecycle_action.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../errors/video_error_composer.dart';
 import '../models/call_received_data.dart';
@@ -111,7 +110,7 @@ class Call {
       preferences: preferences,
     ).also(
       (it) => it._stateManager.lifecycleCallCreated(
-        CallCreated(data),
+        data,
         callConnectOptions: it.connectOptions,
       ),
     );
@@ -140,7 +139,7 @@ class Call {
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
       preferences: preferences,
-    ).also((it) => it._stateManager.lifecycleCallRinging(CallRinging(data)));
+    ).also((it) => it._stateManager.lifecycleCallRinging(data));
   }
 
   factory Call._internal({
@@ -323,7 +322,7 @@ class Call {
           return;
         }
         _logger.d(() => '[observeUserId] userId: $userId');
-        _stateManager.lifecycleUpdateUserId(SetUserId(userId));
+        _stateManager.lifecycleUpdateUserId(userId);
       }),
     );
   }
@@ -381,7 +380,7 @@ class Call {
     }
     final result = await _coordinatorClient.acceptCall(cid: state.callCid);
     if (result is Success<None>) {
-      _stateManager.lifecycleCallAccepted(const CallAccepted());
+      _stateManager.lifecycleCallAccepted();
     }
     return result;
   }
@@ -396,7 +395,7 @@ class Call {
     }
     final result = await _coordinatorClient.rejectCall(cid: state.callCid);
     if (result is Success<None>) {
-      _stateManager.lifecycleCallRejected(const CallRejected());
+      _stateManager.lifecycleCallRejected();
     }
     return result;
   }
@@ -412,7 +411,7 @@ class Call {
     _status.value = _ConnectionStatus.disconnected;
     await _clear('end');
     final result = await _permissionsManager.endCall();
-    _stateManager.lifecycleCallEnded(const CallEnded());
+    _stateManager.lifecycleCallEnded();
     _logger.v(() => '[end] completed: $result');
     return result;
   }
@@ -422,7 +421,7 @@ class Call {
     CallConnectOptions? connectOptions,
   }) async {
     _logger.d(() => '[joinLobby] no args');
-    _stateManager.lifecycleCallJoining(const CallJoining());
+    _stateManager.lifecycleCallJoining();
     final joinedResult = await _joinIfNeeded(connectOptions: connectOptions);
     if (joinedResult is Success<CallCredentials>) {
       _logger.v(() => '[joinLobby] completed');
@@ -431,7 +430,7 @@ class Call {
       final failedResult = joinedResult as Failure;
       _logger.e(() => '[joinLobby] failed: $failedResult');
       final error = failedResult.error;
-      _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
+      _stateManager.lifecycleCallConnectFailed(error: error);
       return failedResult;
     }
   }
@@ -534,19 +533,18 @@ class Call {
       _logger.e(() => '[join] waiting failed: $result');
 
       await reject();
-      _stateManager.lifecycleCallTimeout(const CallTimeout());
+      _stateManager.lifecycleCallTimeout();
 
       return result;
     }
 
-    _stateManager
-        .lifecycleCallConnectingAction(CallConnecting(_reconnectAttempt));
+    _stateManager.lifecycleCallConnecting(attempt: _reconnectAttempt);
     _logger.v(() => '[join] joining to coordinator');
     final joinedResult = await _joinIfNeeded(connectOptions: connectOptions);
     if (joinedResult is! Success<CallCredentials>) {
       _logger.e(() => '[join] coordinator joining failed: $joinedResult');
       final error = (joinedResult as Failure).error;
-      _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
+      _stateManager.lifecycleCallConnectFailed(error: error);
       return result;
     }
 
@@ -556,12 +554,12 @@ class Call {
     if (sessionResult is! Success<None>) {
       _logger.w(() => '[join] sfu session start failed: $sessionResult');
       final error = (sessionResult as Failure).error;
-      _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
+      _stateManager.lifecycleCallConnectFailed(error: error);
       return sessionResult;
     }
 
     _logger.v(() => '[join] started session');
-    _stateManager.lifecycleCallConnected(const CallConnected());
+    _stateManager.lifecycleCallConnected();
 
     await _applyConnectOptions();
 
@@ -641,7 +639,7 @@ class Call {
     );
 
     _stateManager.lifecycleCallSessionStart(
-      CallSessionStart(session.sessionId),
+      sessionId: session.sessionId,
       localStats: localStats,
     );
 
@@ -768,7 +766,10 @@ class Call {
     if (_status.value == _ConnectionStatus.reconnecting) return;
     _status.value = _ConnectionStatus.reconnecting;
 
-    _stateManager.lifecycleCallConnectingAction(CallConnecting.fastReconnect());
+    _stateManager.lifecycleCallConnecting(
+      attempt: 1,
+      isFastReconnectAttempt: true,
+    );
 
     var tryFastReconnect = true;
     _logger.w(() => '[reconnect] starting timer');
@@ -814,7 +815,7 @@ class Call {
           () => '[reconnect] fast reconnect successful',
         );
 
-        _stateManager.lifecycleCallConnected(const CallConnected());
+        _stateManager.lifecycleCallConnected();
         _status.value = _ConnectionStatus.connected;
       }
     } else {
@@ -843,8 +844,7 @@ class Call {
     final startTime = DateTime.now().toUtc().millisecondsSinceEpoch;
     while (true) {
       _reconnectAttempt++;
-      _stateManager
-          .lifecycleCallConnectingAction(CallConnecting(_reconnectAttempt));
+      _stateManager.lifecycleCallConnecting(attempt: _reconnectAttempt);
       if (_status.value == _ConnectionStatus.disconnected) {
         _logger.w(
           () =>
@@ -886,11 +886,11 @@ class Call {
       _logger.e(() => '[fullReconnect] <<<<<<<<<<<<<<< failed: $result');
       _status.value = _ConnectionStatus.disconnected;
       final error = (result as Failure).error;
-      _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
+      _stateManager.lifecycleCallConnectFailed(error: error);
       return;
     }
     _logger.v(() => '[fullReconnect] <<<<<<<<<<<<<<< completed');
-    _stateManager.lifecycleCallConnected(const CallConnected());
+    _stateManager.lifecycleCallConnected();
     _status.value = _ConnectionStatus.connected;
     await _applyConnectOptions();
     _logger.v(() => '[fullReconnect] <<<<<<<<<<<<<<< side effects applied');
@@ -934,7 +934,7 @@ class Call {
     }
     _status.value = _ConnectionStatus.disconnected;
     await _clear('leave');
-    _stateManager.lifecycleCallDisconnected(const CallDisconnected());
+    _stateManager.lifecycleCallDisconnected();
     _logger.v(() => '[leave] finished');
     return const Result.success(none);
   }
@@ -960,7 +960,7 @@ class Call {
       final failedResult = joinedResult as Failure;
       _logger.e(() => '[switchSfu] failed: $failedResult');
       final error = failedResult.error;
-      _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
+      _stateManager.lifecycleCallConnectFailed(error: error);
       return;
     }
 
@@ -975,11 +975,11 @@ class Call {
     if (sessionResult is! Success<None>) {
       _logger.w(() => '[switchSfu] sfu session start failed: $sessionResult');
       final error = (sessionResult as Failure).error;
-      _stateManager.lifecycleCallConnectFailed(ConnectFailed(error));
+      _stateManager.lifecycleCallConnectFailed(error: error);
       return;
     }
     _logger.v(() => '[switchSfu] started session');
-    _stateManager.lifecycleCallConnected(const CallConnected());
+    _stateManager.lifecycleCallConnected();
     await _applyConnectOptions();
 
     _logger.v(() => '[switchSfu] completed');
@@ -1132,21 +1132,18 @@ class Call {
     if (result.isSuccess) {
       final mediaConstraints = track.mediaConstraints;
       if (mediaConstraints is AudioConstraints) {
-        const action = SetMicrophoneEnabled(enabled: true);
-        _logger.v(() => '[setLocalTrack] composed action: $action');
+        _logger.v(() => '[setLocalTrack]: setMicrophoneEnabled true');
         await setMicrophoneEnabled(enabled: true);
       } else if (mediaConstraints is CameraConstraints) {
-        const action = SetCameraEnabled(enabled: true);
-        _logger.v(() => '[setLocalTrack] composed action: $action');
+        _logger.v(() => '[setLocalTrack]: setCameraEnabled true');
         await setCameraEnabled(enabled: true);
       } else if (mediaConstraints is ScreenShareConstraints) {
-        const action = SetScreenShareEnabled(enabled: true);
-        _logger.v(() => '[setLocalTrack] composed action: $action');
+        _logger.v(() => '[setLocalTrack] setScreenShareEnabled true');
         await setScreenShareEnabled(enabled: true);
       } else {
         streamLog.e(
           _tag,
-          () => '[composeControlAction] failed: $mediaConstraints',
+          () => '[_setLocalTrack] failed: $mediaConstraints',
         );
       }
     }
@@ -1256,7 +1253,7 @@ class Call {
     return response.fold(
       success: (it) {
         _stateManager.lifecycleCallReceived(
-          CallReceived(it.data),
+          it.data,
           ringing: ringing,
           notify: notify,
         );
@@ -1311,7 +1308,7 @@ class Call {
         );
 
         _stateManager.lifecycleCallCreated(
-          CallCreated(it.data.data),
+          it.data.data,
           ringing: ringing,
           callConnectOptions: connectOptions,
         );
@@ -1364,7 +1361,7 @@ class Call {
     }
 
     _stateManager.lifecycleCallCreated(
-      CallCreated(receivedOrCreated.data),
+      receivedOrCreated.data,
       callConnectOptions: this.connectOptions,
     );
     _logger.v(() => '[joinCall] joinedMetadata: ${joinResult.data.metadata}');
@@ -1375,7 +1372,7 @@ class Call {
       credentials: joinResult.data.credentials,
       reportingIntervalMs: joinResult.data.reportingIntervalMs,
     );
-    _stateManager.lifecycleCallJoined(CallJoined(joined));
+    _stateManager.lifecycleCallJoined(joined);
     _logger.v(() => '[joinCall] completed: $joined');
     return Result.success(joined);
   }
@@ -1506,7 +1503,7 @@ class Call {
 
     if (result.isSuccess) {
       _stateManager.participantUpdateCameraPosition(
-        SetCameraPosition(cameraPosition: cameraPosition),
+        cameraPosition: cameraPosition,
       );
     }
 
@@ -1522,7 +1519,7 @@ class Call {
         cameraFacingMode: connectOptions.cameraFacingMode.flip(),
       );
 
-      _stateManager.participantFlipCamera(const FlipCamera());
+      _stateManager.participantFlipCamera();
     }
 
     return result;
@@ -1533,8 +1530,7 @@ class Call {
         Result.error('Session is null');
 
     if (result.isSuccess) {
-      _stateManager
-          .participantSetVideoInputDevice(SetVideoInputDevice(device: device));
+      _stateManager.participantSetVideoInputDevice(device: device);
     }
 
     return result;
@@ -1550,7 +1546,7 @@ class Call {
 
     if (result.isSuccess) {
       _stateManager.participantSetCameraEnabled(
-        SetCameraEnabled(enabled: enabled),
+        enabled: enabled,
       );
 
       _connectOptions = _connectOptions.copyWith(
@@ -1574,7 +1570,7 @@ class Call {
 
     if (result.isSuccess) {
       _stateManager.participantSetMicrophoneEnabled(
-        SetMicrophoneEnabled(enabled: enabled),
+        enabled: enabled,
       );
 
       _connectOptions = _connectOptions.copyWith(
@@ -1607,7 +1603,7 @@ class Call {
 
     if (result.isSuccess) {
       _stateManager.participantSetScreenShareEnabled(
-        SetScreenShareEnabled(enabled: enabled),
+        enabled: enabled,
       );
 
       _connectOptions = _connectOptions.copyWith(
@@ -1625,8 +1621,7 @@ class Call {
     if (result.isSuccess) {
       _connectOptions = connectOptions.copyWith(audioInputDevice: device);
 
-      _stateManager
-          .participantSetAudioInputDevice(SetAudioInputDevice(device: device));
+      _stateManager.participantSetAudioInputDevice(device: device);
     }
 
     return result;
@@ -1640,21 +1635,31 @@ class Call {
       _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
 
       _stateManager.participantSetAudioOutputDevice(
-        SetAudioOutputDevice(device: device),
+        device: device,
       );
     }
 
     return result;
   }
 
-  Future<Result<None>> setParticipantPinned(
-    SetParticipantPinned action,
-  ) async {
-    final result = await _session?.setParticipantPinned(action) ??
+  Future<Result<None>> setParticipantPinned({
+    required String sessionId,
+    required String userId,
+    required bool pinned,
+  }) async {
+    final result = await _session?.setParticipantPinned(
+          sessionId: sessionId,
+          userId: userId,
+          pinned: pinned,
+        ) ??
         Result.error('Session is null');
 
     if (result.isSuccess) {
-      _stateManager.setParticipantPinned(action);
+      _stateManager.setParticipantPinned(
+        sessionId: sessionId,
+        userId: userId,
+        pinned: pinned,
+      );
     }
 
     return result;
@@ -1696,39 +1701,29 @@ class Call {
     required String userId,
     required ViewportVisibility visibility,
   }) async {
-    final action = UpdateViewportVisibility(
+    final change = VisibilityChange(
       sessionId: sessionId,
       userId: userId,
       visibility: visibility,
     );
 
-    final result = await _session?.updateViewportVisibility(action) ??
+    final result = await _session?.updateViewportVisibility(change) ??
         Result.error('Session is null');
 
     if (result.isSuccess) {
-      _stateManager.participantUpdateViewportVisibility(action);
-    }
-
-    return result;
-  }
-
-  Future<Result<None>> updateViewportVisibilities(
-    List<UpdateViewportVisibility> actions,
-  ) async {
-    final result = await _session?.updateViewportVisibilities(actions) ??
-        Result.error('Session is null');
-
-    if (result.isSuccess) {
-      _stateManager.participantUpdateViewportVisibilities(
-        UpdateViewportVisibilities(actions),
+      _stateManager.participantUpdateViewportVisibility(
+        sessionId: sessionId,
+        userId: userId,
+        visibility: visibility,
       );
     }
 
     return result;
   }
 
-  Future<Result<None>> setSubscriptions(List<SetSubscription> actions) async {
-    final result = await _session?.setSubscriptions(actions) ??
+  Future<Result<None>> setSubscriptions(
+      List<SubscriptionChange> changes) async {
+    final result = await _session?.setSubscriptions(changes) ??
         Result.error('Session is null');
 
     // TODO: Verify this is not needed
@@ -1740,27 +1735,13 @@ class Call {
     return result;
   }
 
-  Future<Result<None>> updateSubscriptions(
-    List<SubscriptionAction> actions,
-  ) async {
-    final result = await _session?.updateSubscriptions(actions) ??
-        Result.error('Session is null');
-
-    if (result.isSuccess) {
-      _stateManager
-          .participantUpdateSubscriptions(UpdateSubscriptions(actions));
-    }
-
-    return result;
-  }
-
   Future<Result<None>> setSubscription({
     required String userId,
     required String sessionId,
     required String trackIdPrefix,
     required Map<SfuTrackTypeVideo, RtcVideoDimension> trackTypes,
   }) async {
-    final action = SetSubscription(
+    final change = SubscriptionChange.set(
       userId: userId,
       sessionId: sessionId,
       trackIdPrefix: trackIdPrefix,
@@ -1768,7 +1749,7 @@ class Call {
     );
 
     final result = await _session?.setSubscriptions([
-          action,
+          change,
         ]) ??
         Result.error('Session is null');
 
@@ -1796,19 +1777,25 @@ class Call {
     required SfuTrackTypeVideo trackType,
     RtcVideoDimension? videoDimension,
   }) async {
-    final action = UpdateSubscription(
-      userId: userId,
-      sessionId: sessionId,
-      trackIdPrefix: trackIdPrefix,
-      trackType: trackType,
-      videoDimension: videoDimension,
-    );
-
-    final result = await _session?.updateSubscription(action) ??
+    final result = await _session?.updateSubscription(
+          SubscriptionChange.update(
+            userId: userId,
+            sessionId: sessionId,
+            trackIdPrefix: trackIdPrefix,
+            trackType: trackType,
+            videoDimension: videoDimension,
+          ),
+        ) ??
         Result.error('Session is null');
 
     if (result.isSuccess) {
-      _stateManager.participantUpdateSubscription(action);
+      _stateManager.participantUpdateSubscription(
+        userId: userId,
+        sessionId: sessionId,
+        trackIdPrefix: trackIdPrefix,
+        trackType: trackType,
+        videoDimension: videoDimension,
+      );
     }
 
     return result;
@@ -1821,18 +1808,23 @@ class Call {
     required SfuTrackTypeVideo trackType,
     RtcVideoDimension? videoDimension,
   }) async {
-    final action = RemoveSubscription(
-      userId: userId,
-      sessionId: sessionId,
-      trackIdPrefix: trackIdPrefix,
-      trackType: trackType,
-    );
-
-    final result = await _session?.updateSubscription(action) ??
+    final result = await _session?.updateSubscription(
+          SubscriptionChange.update(
+            userId: userId,
+            sessionId: sessionId,
+            trackIdPrefix: trackIdPrefix,
+            trackType: trackType,
+          ),
+        ) ??
         Result.error('Session is null');
 
     if (result.isSuccess) {
-      _stateManager.participantRemoveSubscription(action);
+      _stateManager.participantRemoveSubscription(
+        userId: userId,
+        sessionId: sessionId,
+        trackIdPrefix: trackIdPrefix,
+        trackType: trackType,
+      );
     }
 
     return result;
@@ -1932,7 +1924,7 @@ extension on CallStateNotifier {
       return Result.error('no userId');
     }
     if (stateUserId.isEmpty || stateUserId != currentUserId) {
-      lifecycleUpdateUserId(SetUserId(currentUserId));
+      lifecycleUpdateUserId(currentUserId);
     }
     return const Result.success(none);
   }

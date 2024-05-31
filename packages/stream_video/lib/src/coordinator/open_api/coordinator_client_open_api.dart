@@ -35,7 +35,7 @@ import '../coordinator_client.dart';
 import '../models/coordinator_connection_state.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_models.dart';
-import 'coordinator_ws_open_api.dart';
+import 'coordinator_ws.dart';
 import 'open_api_extensions.dart';
 
 const _waitForConnectionTimeout = 5000;
@@ -97,7 +97,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   );
 
   UserInfo? _user;
-  CoordinatorWebSocketOpenApi? _ws;
+  CoordinatorWebSocket? _ws;
   StreamSubscription<CoordinatorEvent>? _wsSubscription;
 
   @override
@@ -233,11 +233,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     );
   }
 
-  CoordinatorWebSocketOpenApi _createWebSocket(
+  CoordinatorWebSocket _createWebSocket(
     UserInfo user, {
     bool includeUserDetails = false,
   }) {
-    return CoordinatorWebSocketOpenApi(
+    return CoordinatorWebSocket(
       _wsUrl,
       apiKey: _apiKey,
       userInfo: user,

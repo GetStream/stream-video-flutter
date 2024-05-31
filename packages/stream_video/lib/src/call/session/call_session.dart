@@ -13,7 +13,6 @@ import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
 import '../../../version.g.dart';
-import '../../action/internal/rtc_action.dart';
 import '../../disposable.dart';
 import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
@@ -21,7 +20,6 @@ import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/data/models/sfu_subscription_details.dart';
 import '../../sfu/sfu_client.dart';
-import '../../sfu/sfu_client_impl.dart';
 import '../../sfu/ws/sfu_ws.dart';
 import '../../shared_emitter.dart';
 import '../../utils/debounce_buffer.dart';
@@ -53,7 +51,7 @@ class CallSession extends Disposable {
     required this.stateManager,
     required this.onFullReconnectNeeded,
     required SdpEditor sdpEditor,
-  })  : sfuClient = SfuClientImpl(
+  })  : sfuClient = SfuClient(
           baseUrl: config.sfuUrl,
           sfuToken: config.sfuToken,
         ),
@@ -98,13 +96,13 @@ class CallSession extends Disposable {
 
   SharedEmitter<SfuEvent> get events => sfuWS.events;
 
-  late final _saBuffer = DebounceBuffer<SubscriptionAction, Result<None>>(
+  late final _saBuffer = DebounceBuffer<SubscriptionChange, Result<None>>(
     duration: _debounceDuration,
     onBuffered: updateSubscriptions,
-    onCancel: () => Result.error('SubscriptionAction cancelled'),
+    onCancel: () => Result.error('SubscriptionChange cancelled'),
   );
 
-  late final _vvBuffer = DebounceBuffer<UpdateViewportVisibility, Result<None>>(
+  late final _vvBuffer = DebounceBuffer<VisibilityChange, Result<None>>(
     duration: _debounceDuration,
     onBuffered: updateViewportVisibilities,
     onCancel: () => Result.error('UpdateViewportVisibility cancelled'),
@@ -710,10 +708,8 @@ class CallSession extends Disposable {
     }
 
     return stateManager.rtcUpdateSubscriberTrack(
-      UpdateSubscriberTrack(
-        trackIdPrefix: remoteTrack.trackIdPrefix,
-        trackType: remoteTrack.trackType,
-      ),
+      trackIdPrefix: remoteTrack.trackIdPrefix,
+      trackType: remoteTrack.trackType,
     );
   }
 
@@ -741,33 +737,36 @@ class CallSession extends Disposable {
     );
   }
 
-  Future<Result<None>> setParticipantPinned(
-    SetParticipantPinned action,
-  ) async {
-    _logger.d(() => '[setParticipantPinned] action: $action');
+  Future<Result<None>> setParticipantPinned({
+    required String sessionId,
+    required String userId,
+    required bool pinned,
+  }) async {
+    _logger.d(() => '[setParticipantPinned]');
     // Nothing to do here, this is handled by the UI
     return const Result.success(none);
   }
 
   Future<Result<None>> updateViewportVisibility(
-    UpdateViewportVisibility action,
+    VisibilityChange visibilityChange,
   ) async {
-    _logger.d(() => '[updateViewportVisibility] action: $action');
-    return _vvBuffer.post(action);
+    _logger.d(
+        () => '[updateViewportVisibility] visibilityChange: $visibilityChange');
+    return _vvBuffer.post(visibilityChange);
   }
 
   Future<Result<None>> updateViewportVisibilities(
-    List<UpdateViewportVisibility> actions,
+    List<VisibilityChange> visibilityChanges,
   ) async {
-    _logger.d(() => '[updateViewportVisibilities] actions: $actions');
+    _logger.d(() => '[updateViewportVisibilities] changes: $visibilityChanges');
     // Nothing to do here, this is handled by the UI
     return const Result.success(none);
   }
 
   Future<Result<None>> setSubscriptions(
-    List<SetSubscription> actions,
+    List<SubscriptionChange> subscriptionChanges,
   ) async {
-    _logger.d(() => '[setSubscriptions] actions: $actions');
+    _logger.d(() => '[setSubscriptions] subscriptionChanges: $subscriptionChanges');
 
     final participants = stateManager.callState.callParticipants;
     final exclude = {SfuTrackType.video, SfuTrackType.screenShare};
@@ -775,9 +774,9 @@ class CallSession extends Disposable {
       ...participants.getSubscriptions(exclude: exclude),
     };
     _logger.v(() => '[setSubscriptions] source: $subscriptions');
-    for (final action in actions) {
-      final actionSubscriptions = action.getSubscriptions();
-      subscriptions.addAll(actionSubscriptions);
+    for (final change in subscriptionChanges) {
+      final changeSubscriptions = change.getSubscriptions();
+      subscriptions.addAll(changeSubscriptions);
     }
 
     _logger.v(() => '[setSubscriptions] updated: $subscriptions');
@@ -791,26 +790,26 @@ class CallSession extends Disposable {
   }
 
   Future<Result<None>> updateSubscription(
-    SubscriptionAction action,
+    SubscriptionChange subscriptionChange,
   ) async {
-    _logger.d(() => '[updateSubscription] action: $action');
-    return _saBuffer.post(action);
+    _logger.d(() => '[updateSubscription] subscriptionChange: $subscriptionChange');
+    return _saBuffer.post(subscriptionChange);
   }
 
   Future<Result<None>> updateSubscriptions(
-    List<SubscriptionAction> actions,
+    List<SubscriptionChange> changes,
   ) async {
-    _logger.d(() => '[updateSubscriptions] actions: $actions');
+    _logger.d(() => '[updateSubscriptions] changes: $changes');
     final participants = stateManager.callState.callParticipants;
     final subscriptions = <String, SfuSubscriptionDetails>{
       ...participants.getSubscriptions(),
     };
     _logger.v(() => '[updateSubscriptions] source: $subscriptions');
-    for (final action in actions) {
-      if (action is UpdateSubscription) {
-        subscriptions[action.trackId] = action.toSubscription();
-      } else if (action is RemoveSubscription) {
-        subscriptions.remove(action.trackId);
+    for (final change in changes) {
+      if (change.subscribed) {
+        subscriptions[change.trackId!] = change.toSubscription();
+      } else if (!change.subscribed) {
+        subscriptions.remove(change.trackId);
       }
     }
     _logger.v(() => '[updateSubscriptions] updated: $subscriptions');
@@ -975,40 +974,6 @@ extension on SfuClient {
         return const Result.success(none);
       },
     );
-  }
-}
-
-extension on UpdateSubscription {
-  SfuSubscriptionDetails toSubscription() {
-    return SfuSubscriptionDetails(
-      userId: userId,
-      sessionId: sessionId,
-      trackIdPrefix: trackIdPrefix,
-      trackType: trackType,
-      dimension: videoDimension,
-    );
-  }
-}
-
-extension on SetSubscription {
-  Map<String, SfuSubscriptionDetails> getSubscriptions() {
-    final subscriptions = <String, SfuSubscriptionDetails>{};
-
-    for (final trackType in trackTypes.keys) {
-      final dimension = trackTypes[trackType];
-
-      final detail = SfuSubscriptionDetails(
-        userId: userId,
-        sessionId: sessionId,
-        trackIdPrefix: trackIdPrefix,
-        trackType: trackType,
-        dimension: dimension,
-      );
-
-      subscriptions[detail.trackId] = detail;
-    }
-
-    return subscriptions;
   }
 }
 
