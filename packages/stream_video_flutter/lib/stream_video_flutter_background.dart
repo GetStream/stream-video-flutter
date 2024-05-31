@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 
-import '../src/call_background/model/notification_payload.dart';
-import 'src/call_background/model/service_type.dart';
+import 'stream_video_flutter.dart';
 import 'stream_video_flutter_platform_interface.dart';
 
 typedef OnNotificationContentClick = void Function(String callCid);
@@ -100,6 +97,6 @@ mixin StreamVideoFlutterBackground {
     if (kIsWeb) {
       return false;
     }
-    return Platform.isAndroid;
+    return CurrentPlatform.isAndroid;
   }
 }
