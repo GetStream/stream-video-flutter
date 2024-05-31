@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -268,8 +267,11 @@ class CallSession extends Disposable {
             publisherStats: jsonEncode(rawStats['publisherStats']),
             subscriberStats: jsonEncode(rawStats['subscriberStats']),
             sdkVersion: streamVideoVersion,
-            webrtcVersion:
-                Platform.isAndroid ? androidWebRTCVersion : iosWebRTCVersion,
+            webrtcVersion: switch (CurrentPlatform.type) {
+              PlatformType.android => androidWebRTCVersion,
+              PlatformType.ios => iosWebRTCVersion,
+              _ => null,
+            },
           ),
         );
       });
