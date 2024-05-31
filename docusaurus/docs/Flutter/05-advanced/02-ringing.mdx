@@ -26,15 +26,15 @@ To receive push notifications from Stream Video, you'll need to:
 
 ### Creating a ringing Call
 
-To create a ringing call, you need to follow the same steps as in the basic call flow with the difference of adding the `ringing` and `memberIds` paramteres to `getOrCreateCall` method.
+To create a ringing call, you need to follow the same steps as in the basic call flow with the difference of adding the `ringing` and `memberIds` parameters to the `getOrCreateCall()` method.
 
 ```dart
 final call = StreamVideo.instance.makeCall(callType: StreamCallType(), id: 'Your-call-ID');
 await call.getOrCreate(memberIds: ['user1_id', 'user2_id'], ringing: true);
 ```
 
-`ringing` set to true, will make Stream send a notification to the users on the call, triggering the platform call screen on iOS and Android.
-`memberIds` is a list of user IDs we would like to immediately add to the call, combined with a `ringing` parameter will trigger the call to ring on the other side.
+* Setting `ringing` to true will make Stream send a notification to the users on the call, triggering the platform call screen on iOS and Android.
+* `memberIds` is a list of user IDs to immediately add to the call. Combining this with a `ringing` parameter will trigger the call to ring on the devices of the members.
 
 In subsequent steps, we will show you how to configure your Stream app in the Dashboard and your Flutter app to properly send and receive ringing notifications.
 
@@ -43,7 +43,7 @@ In subsequent steps, we will show you how to configure your Stream app in the Da
 #### Configuring Push Notification Manager
 
 To handle push notifications, you need to configure the `pushNotificationManagerProvider` in the `StreamVideo` instance.
-It manages device token registration, incoming call handling and listening to call events (for example to end call on collee side when caller ends the call).
+It manages device token registration, incoming call handling, and listening to call events (for example to end the call on the callee side when the caller ends the call).
 
 When creating a `StreamVideo` instance, you need to pass a `pushNotificationManagerProvider` parameter. This parameter is an instance of `StreamVideoPushNotificationManager` that is created using the `StreamVideoPushNotificationManager.create` method.
 
@@ -74,8 +74,8 @@ When creating a `StreamVideo` instance, you need to pass a `pushNotificationMana
 
 #### Handling CallKit events (for both iOS and Android)
 
-CallKit events are events exposed by `flutter_callkit_incoming` package that we utilize to handle incoming calls on both iOS and Android.
-It's important to handle these events to ensure a seamless calling experience regardles of which provider is used for push.
+CallKit events are events exposed by the `flutter_callkit_incoming` package that we utilize to handle incoming calls on both iOS and Android.
+It is important to handle these events to ensure a seamless calling experience regardless of which provider is used for push.
 
 In a high-level widget in your app, add this code to listen to CallKit events:
 
