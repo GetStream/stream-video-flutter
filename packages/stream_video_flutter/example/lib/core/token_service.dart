@@ -44,6 +44,7 @@ class TokenService {
 }
 
 enum Environment {
+  prontoStaging('pronto-staging'),
   pronto('pronto'),
   demo('demo');
 
