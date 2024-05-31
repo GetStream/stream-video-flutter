@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -30,10 +30,10 @@ class CallLiveStartedEvent {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallLiveStartedEvent &&
-     other.call == call &&
-     other.callCid == callCid &&
-     other.createdAt == createdAt &&
-     other.type == type;
+    other.call == call &&
+    other.callCid == callCid &&
+    other.createdAt == createdAt &&
+    other.type == type;
 
   @override
   int get hashCode =>
@@ -76,7 +76,7 @@ class CallLiveStartedEvent {
       return CallLiveStartedEvent(
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
-        createdAt: mapDateTime(json, r'created_at', '')!,
+        createdAt: mapDateTime(json, r'created_at', r'')!,
         type: mapValueOfType<String>(json, r'type')!,
       );
     }

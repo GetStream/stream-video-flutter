@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -13,10 +13,20 @@ part of openapi.api;
 class GoLiveRequest {
   /// Returns a new [GoLiveRequest] instance.
   GoLiveRequest({
+    this.recordingStorageName,
     this.startHls,
     this.startRecording,
     this.startTranscription,
+    this.transcriptionStorageName,
   });
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? recordingStorageName;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -42,24 +52,41 @@ class GoLiveRequest {
   ///
   bool? startTranscription;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? transcriptionStorageName;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is GoLiveRequest &&
-     other.startHls == startHls &&
-     other.startRecording == startRecording &&
-     other.startTranscription == startTranscription;
+    other.recordingStorageName == recordingStorageName &&
+    other.startHls == startHls &&
+    other.startRecording == startRecording &&
+    other.startTranscription == startTranscription &&
+    other.transcriptionStorageName == transcriptionStorageName;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (recordingStorageName == null ? 0 : recordingStorageName!.hashCode) +
     (startHls == null ? 0 : startHls!.hashCode) +
     (startRecording == null ? 0 : startRecording!.hashCode) +
-    (startTranscription == null ? 0 : startTranscription!.hashCode);
+    (startTranscription == null ? 0 : startTranscription!.hashCode) +
+    (transcriptionStorageName == null ? 0 : transcriptionStorageName!.hashCode);
 
   @override
-  String toString() => 'GoLiveRequest[startHls=$startHls, startRecording=$startRecording, startTranscription=$startTranscription]';
+  String toString() => 'GoLiveRequest[recordingStorageName=$recordingStorageName, startHls=$startHls, startRecording=$startRecording, startTranscription=$startTranscription, transcriptionStorageName=$transcriptionStorageName]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.recordingStorageName != null) {
+      json[r'recording_storage_name'] = this.recordingStorageName;
+    } else {
+      json[r'recording_storage_name'] = null;
+    }
     if (this.startHls != null) {
       json[r'start_hls'] = this.startHls;
     } else {
@@ -74,6 +101,11 @@ class GoLiveRequest {
       json[r'start_transcription'] = this.startTranscription;
     } else {
       json[r'start_transcription'] = null;
+    }
+    if (this.transcriptionStorageName != null) {
+      json[r'transcription_storage_name'] = this.transcriptionStorageName;
+    } else {
+      json[r'transcription_storage_name'] = null;
     }
     return json;
   }
@@ -97,9 +129,11 @@ class GoLiveRequest {
       }());
 
       return GoLiveRequest(
+        recordingStorageName: mapValueOfType<String>(json, r'recording_storage_name'),
         startHls: mapValueOfType<bool>(json, r'start_hls'),
         startRecording: mapValueOfType<bool>(json, r'start_recording'),
         startTranscription: mapValueOfType<bool>(json, r'start_transcription'),
+        transcriptionStorageName: mapValueOfType<String>(json, r'transcription_storage_name'),
       );
     }
     return null;

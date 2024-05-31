@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -34,11 +34,11 @@ class CallMemberUpdatedEvent {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallMemberUpdatedEvent &&
-     other.call == call &&
-     other.callCid == callCid &&
-     other.createdAt == createdAt &&
-     other.members == members &&
-     other.type == type;
+    other.call == call &&
+    other.callCid == callCid &&
+    other.createdAt == createdAt &&
+    _deepEquality.equals(other.members, members) &&
+    other.type == type;
 
   @override
   int get hashCode =>
@@ -83,7 +83,7 @@ class CallMemberUpdatedEvent {
       return CallMemberUpdatedEvent(
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
-        createdAt: mapDateTime(json, r'created_at', '')!,
+        createdAt: mapDateTime(json, r'created_at', r'')!,
         members: MemberResponse.listFromJson(json[r'members']),
         type: mapValueOfType<String>(json, r'type')!,
       );

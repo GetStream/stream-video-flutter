@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -16,6 +16,7 @@ class AudioSettingsRequest {
     this.accessRequestEnabled,
     required this.defaultDevice,
     this.micDefaultOn,
+    this.noiseCancellation,
     this.opusDtxEnabled,
     this.redundantCodingEnabled,
     this.speakerDefaultOn,
@@ -45,6 +46,14 @@ class AudioSettingsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
+  NoiseCancellationSettings? noiseCancellation;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
   bool? opusDtxEnabled;
 
   ///
@@ -65,12 +74,13 @@ class AudioSettingsRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is AudioSettingsRequest &&
-     other.accessRequestEnabled == accessRequestEnabled &&
-     other.defaultDevice == defaultDevice &&
-     other.micDefaultOn == micDefaultOn &&
-     other.opusDtxEnabled == opusDtxEnabled &&
-     other.redundantCodingEnabled == redundantCodingEnabled &&
-     other.speakerDefaultOn == speakerDefaultOn;
+    other.accessRequestEnabled == accessRequestEnabled &&
+    other.defaultDevice == defaultDevice &&
+    other.micDefaultOn == micDefaultOn &&
+    other.noiseCancellation == noiseCancellation &&
+    other.opusDtxEnabled == opusDtxEnabled &&
+    other.redundantCodingEnabled == redundantCodingEnabled &&
+    other.speakerDefaultOn == speakerDefaultOn;
 
   @override
   int get hashCode =>
@@ -78,12 +88,13 @@ class AudioSettingsRequest {
     (accessRequestEnabled == null ? 0 : accessRequestEnabled!.hashCode) +
     (defaultDevice.hashCode) +
     (micDefaultOn == null ? 0 : micDefaultOn!.hashCode) +
+    (noiseCancellation == null ? 0 : noiseCancellation!.hashCode) +
     (opusDtxEnabled == null ? 0 : opusDtxEnabled!.hashCode) +
     (redundantCodingEnabled == null ? 0 : redundantCodingEnabled!.hashCode) +
     (speakerDefaultOn == null ? 0 : speakerDefaultOn!.hashCode);
 
   @override
-  String toString() => 'AudioSettingsRequest[accessRequestEnabled=$accessRequestEnabled, defaultDevice=$defaultDevice, micDefaultOn=$micDefaultOn, opusDtxEnabled=$opusDtxEnabled, redundantCodingEnabled=$redundantCodingEnabled, speakerDefaultOn=$speakerDefaultOn]';
+  String toString() => 'AudioSettingsRequest[accessRequestEnabled=$accessRequestEnabled, defaultDevice=$defaultDevice, micDefaultOn=$micDefaultOn, noiseCancellation=$noiseCancellation, opusDtxEnabled=$opusDtxEnabled, redundantCodingEnabled=$redundantCodingEnabled, speakerDefaultOn=$speakerDefaultOn]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -97,6 +108,11 @@ class AudioSettingsRequest {
       json[r'mic_default_on'] = this.micDefaultOn;
     } else {
       json[r'mic_default_on'] = null;
+    }
+    if (this.noiseCancellation != null) {
+      json[r'noise_cancellation'] = this.noiseCancellation;
+    } else {
+      json[r'noise_cancellation'] = null;
     }
     if (this.opusDtxEnabled != null) {
       json[r'opus_dtx_enabled'] = this.opusDtxEnabled;
@@ -138,6 +154,7 @@ class AudioSettingsRequest {
         accessRequestEnabled: mapValueOfType<bool>(json, r'access_request_enabled'),
         defaultDevice: AudioSettingsRequestDefaultDeviceEnum.fromJson(json[r'default_device'])!,
         micDefaultOn: mapValueOfType<bool>(json, r'mic_default_on'),
+        noiseCancellation: NoiseCancellationSettings.fromJson(json[r'noise_cancellation']),
         opusDtxEnabled: mapValueOfType<bool>(json, r'opus_dtx_enabled'),
         redundantCodingEnabled: mapValueOfType<bool>(json, r'redundant_coding_enabled'),
         speakerDefaultOn: mapValueOfType<bool>(json, r'speaker_default_on'),

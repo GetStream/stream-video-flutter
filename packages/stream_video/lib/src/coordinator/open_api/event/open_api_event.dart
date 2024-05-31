@@ -110,10 +110,10 @@ class OpenApiEvent with EquatableMixin {
         final event = open.CallRecordingStoppedEvent.fromJson(jsonObj);
         return result.copyWith(callRecordingStopped: event);
       case EventType.callBroadcastingStarted:
-        final event = open.CallBroadcastingStartedEvent.fromJson(jsonObj);
+        final event = open.CallHLSBroadcastingStartedEvent.fromJson(jsonObj);
         return result.copyWith(callBroadcastingStarted: event);
       case EventType.callBroadcastingStopped:
-        final event = open.CallBroadcastingStoppedEvent.fromJson(jsonObj);
+        final event = open.CallHLSBroadcastingStoppedEvent.fromJson(jsonObj);
         return result.copyWith(callBroadcastingStopped: event);
       case EventType.callLiveStarted:
         final event = open.CallLiveStartedEvent.fromJson(jsonObj);
@@ -143,7 +143,7 @@ class OpenApiEvent with EquatableMixin {
         final event = open.CallNotificationEvent.fromJson(jsonObj);
         return result.copyWith(callNotification: event);
       case EventType.callUserMuted:
-        final event = open.CallUserMuted.fromJson(jsonObj);
+        final event = open.CallUserMutedEvent.fromJson(jsonObj);
         return result.copyWith(callUserMuted: event);
       case EventType.callRecordingReady:
         final event = open.CallRecordingReadyEvent.fromJson(jsonObj);
@@ -177,15 +177,15 @@ class OpenApiEvent with EquatableMixin {
   final open.UnblockedUserEvent? callUserUnblocked;
   final open.CallRecordingStartedEvent? callRecordingStarted;
   final open.CallRecordingStoppedEvent? callRecordingStopped;
-  final open.CallBroadcastingStartedEvent? callBroadcastingStarted;
-  final open.CallBroadcastingStoppedEvent? callBroadcastingStopped;
+  final open.CallHLSBroadcastingStartedEvent? callBroadcastingStarted;
+  final open.CallHLSBroadcastingStoppedEvent? callBroadcastingStopped;
   final open.CallLiveStartedEvent? callLiveStarted;
   final open.CallMemberAddedEvent? callMemberAdded;
   final open.CallMemberRemovedEvent? callMemberRemoved;
   final open.CallMemberUpdatedEvent? callMemberUpdated;
   final open.CallMemberUpdatedPermissionEvent? callMemberUpdatedPermission;
   final open.CallReactionEvent? callReaction;
-  final open.CallUserMuted? callUserMuted;
+  final open.CallUserMutedEvent? callUserMuted;
   final open.CallRecordingReadyEvent? callRecordingReady;
   final open.CallRecordingFailedEvent? callRecordingFailed;
   final open.CustomVideoEvent? custom;
@@ -212,15 +212,15 @@ class OpenApiEvent with EquatableMixin {
     open.UnblockedUserEvent? callUserUnblocked,
     open.CallRecordingStartedEvent? callRecordingStarted,
     open.CallRecordingStoppedEvent? callRecordingStopped,
-    open.CallBroadcastingStartedEvent? callBroadcastingStarted,
-    open.CallBroadcastingStoppedEvent? callBroadcastingStopped,
+    open.CallHLSBroadcastingStartedEvent? callBroadcastingStarted,
+    open.CallHLSBroadcastingStoppedEvent? callBroadcastingStopped,
     open.CallLiveStartedEvent? callLiveStarted,
     open.CallMemberAddedEvent? callMemberAdded,
     open.CallMemberRemovedEvent? callMemberRemoved,
     open.CallMemberUpdatedEvent? callMemberUpdated,
     open.CallMemberUpdatedPermissionEvent? callMemberUpdatedPermission,
     open.CallReactionEvent? callReaction,
-    open.CallUserMuted? callUserMuted,
+    open.CallUserMutedEvent? callUserMuted,
     open.CallRecordingReadyEvent? callRecordingReady,
     open.CallRecordingFailedEvent? callRecordingFailed,
     open.CustomVideoEvent? custom,

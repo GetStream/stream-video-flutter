@@ -1,3 +1,14 @@
+## 0.4.2
+
+✅ Added
+* Added `ClientDetails` to SFU's `join` request.
+
+🐞 Fixed
+* Tweaked SFU events handling to ensure there is no gap in handling them.
+* Fixed camera and microphone toggling on incoming/outgoing screen.
+* Fixed screen sharing not working when camera track was enabled.
+* Fixed issues with video freezing sometimes.
+
 ## 0.4.1
 
 🚧 Build breaking changes

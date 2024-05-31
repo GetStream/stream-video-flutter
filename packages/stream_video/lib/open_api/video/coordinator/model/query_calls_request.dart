@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -49,7 +49,7 @@ class QueryCallsRequest {
   ///
   String? prev;
 
-  List<SortParamRequest> sort;
+  List<SortParam> sort;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -61,12 +61,12 @@ class QueryCallsRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is QueryCallsRequest &&
-     other.filterConditions == filterConditions &&
-     other.limit == limit &&
-     other.next == next &&
-     other.prev == prev &&
-     other.sort == sort &&
-     other.watch == watch;
+    _deepEquality.equals(other.filterConditions, filterConditions) &&
+    other.limit == limit &&
+    other.next == next &&
+    other.prev == prev &&
+    _deepEquality.equals(other.sort, sort) &&
+    other.watch == watch;
 
   @override
   int get hashCode =>
@@ -131,7 +131,7 @@ class QueryCallsRequest {
         limit: mapValueOfType<int>(json, r'limit'),
         next: mapValueOfType<String>(json, r'next'),
         prev: mapValueOfType<String>(json, r'prev'),
-        sort: SortParamRequest.listFromJson(json[r'sort']),
+        sort: SortParam.listFromJson(json[r'sort']),
         watch: mapValueOfType<bool>(json, r'watch'),
       );
     }

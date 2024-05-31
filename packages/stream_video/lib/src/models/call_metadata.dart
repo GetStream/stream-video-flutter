@@ -94,7 +94,7 @@ class CallDetails with EquatableMixin {
 class CallMember with EquatableMixin {
   const CallMember({
     required this.userId,
-    required this.role,
+    required this.roles,
     required this.custom,
     this.createdAt,
     this.updatedAt,
@@ -102,7 +102,7 @@ class CallMember with EquatableMixin {
   });
 
   final String userId;
-  final String role;
+  final List<String> roles;
   final Map<String, Object?> custom;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -111,7 +111,7 @@ class CallMember with EquatableMixin {
   @override
   List<Object?> get props => [
         userId,
-        role,
+        roles,
         createdAt,
         updatedAt,
         deletedAt,
@@ -119,7 +119,7 @@ class CallMember with EquatableMixin {
 
   @override
   String toString() {
-    return 'CallMember{userId: $userId, role: $role,'
+    return 'CallMember{userId: $userId, role: $roles,'
         ' createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt}';
   }
 }
@@ -129,7 +129,7 @@ class CallUser with EquatableMixin {
   const CallUser({
     required this.id,
     required this.name,
-    required this.role,
+    required this.roles,
     required this.image,
     this.custom = const {},
     this.teams = const [],
@@ -140,7 +140,7 @@ class CallUser with EquatableMixin {
 
   final String id;
   final String name;
-  final String role;
+  final List<String> roles;
   final String image;
   final Map<String, Object?> custom;
   final List<String> teams;
@@ -152,7 +152,7 @@ class CallUser with EquatableMixin {
   List<Object?> get props => [
         id,
         name,
-        role,
+        roles,
         image,
         teams,
         createdAt,
@@ -166,7 +166,7 @@ class CallUser with EquatableMixin {
     return 'CallUser{'
         'id: $id'
         ', name: $name'
-        ', role: $role'
+        ', role: $roles'
         ', image: $image'
         ', teams: $teams'
         ', createdAt: $createdAt'

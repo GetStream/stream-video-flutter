@@ -35,7 +35,7 @@ import '../coordinator_client.dart';
 import '../models/coordinator_connection_state.dart';
 import '../models/coordinator_events.dart';
 import '../models/coordinator_models.dart';
-import 'coordinator_ws_open_api.dart';
+import 'coordinator_ws.dart';
 import 'open_api_extensions.dart';
 
 const _waitForConnectionTimeout = 5000;
@@ -79,9 +79,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       getConnectionId: () => _ws?.connectionId,
     ),
   );
-  late final _defaultApi = open.DefaultApi(_apiClient);
+  late final _defaultApi = open.ProductvideoApi(_apiClient);
   // ignore: unused_field
-  late final _serverSideApi = open.ServerSideApi(_apiClient);
+  //late final _serverSideApi = open.ServerSideApi(_apiClient);
   late final _locationService = LocationService();
 
   @override
@@ -97,7 +97,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   );
 
   UserInfo? _user;
-  CoordinatorWebSocketOpenApi? _ws;
+  CoordinatorWebSocket? _ws;
   StreamSubscription<CoordinatorEvent>? _wsSubscription;
 
   @override
@@ -233,11 +233,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     );
   }
 
-  CoordinatorWebSocketOpenApi _createWebSocket(
+  CoordinatorWebSocket _createWebSocket(
     UserInfo user, {
     bool includeUserDetails = false,
   }) {
-    return CoordinatorWebSocketOpenApi(
+    return CoordinatorWebSocket(
       _wsUrl,
       apiKey: _apiKey,
       userInfo: user,
@@ -253,7 +253,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required String id,
     required PushProvider pushProvider,
     String? pushProviderName,
-    String? userId,
     bool? voipToken,
   }) async {
     try {
@@ -267,7 +266,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         id: id,
         pushProvider: pushProvider.toOpenDTO(),
         pushProviderName: pushProviderName,
-        userId: userId,
         voipToken: voipToken,
       );
       _logger.d(() => '[createDevice] input: $input');
@@ -325,7 +323,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi.deleteDevice(
-        id: id,
+        id,
         userId: userId,
       );
       _logger.v(() => '[deleteDevice] completed: $result');
@@ -517,10 +515,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         _logger.e(() => '[sendCustomEvent] no connection established');
         return connectionResult;
       }
-      final result = await _defaultApi.sendEvent(
+      final result = await _defaultApi.sendCallEvent(
         callCid.type.value,
         callCid.id,
-        open.SendEventRequest(
+        open.SendCallEventRequest(
           custom: custom,
         ),
       );
@@ -653,14 +651,23 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   @override
-  Future<Result<None>> startRecording(StreamCallCid callCid) async {
+  Future<Result<None>> startRecording(
+    StreamCallCid callCid, {
+    String? recordingExternalStorage,
+  }) async {
     try {
       final connectionResult = await _waitUntilConnected();
       if (connectionResult is Failure) {
         _logger.e(() => '[startRecording] no connection established');
         return connectionResult;
       }
-      await _defaultApi.startRecording(callCid.type.value, callCid.id);
+      await _defaultApi.startRecording(
+        callCid.type.value,
+        callCid.id,
+        open.StartRecordingRequest(
+          recordingExternalStorage: recordingExternalStorage,
+        ),
+      );
       return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -670,7 +677,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<List<open.CallRecording>>> listRecordings(
     StreamCallCid callCid,
-    String sessionId,
   ) async {
     try {
       final connectionResult = await _waitUntilConnected();
@@ -678,10 +684,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         _logger.e(() => '[listRecordings] no connection established');
         return connectionResult;
       }
-      final result = await _defaultApi.listRecordingsTypeIdSession1(
+      final result = await _defaultApi.listRecordings(
         callCid.type.value,
         callCid.id,
-        sessionId,
       );
       return Result.success(result?.recordings ?? []);
     } catch (e, stk) {
@@ -713,7 +718,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         return connectionResult;
       }
       final result = await _defaultApi
-          .startBroadcasting(callCid.type.value, callCid.id)
+          .startHLSBroadcasting(callCid.type.value, callCid.id)
           .then((it) => it?.playlistUrl);
       return Result.success(result);
     } catch (e, stk) {
@@ -729,7 +734,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         _logger.e(() => '[stopBroadcasting] no connection established');
         return connectionResult;
       }
-      await _defaultApi.stopBroadcasting(callCid.type.value, callCid.id);
+      await _defaultApi.stopHLSBroadcasting(callCid.type.value, callCid.id);
       return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -774,7 +779,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required Map<String, Object> filterConditions,
     String? next,
     String? prev,
-    List<open.SortParamRequest> sorts = const [],
+    List<open.SortParam> sorts = const [],
     int? limit,
   }) async {
     try {
@@ -783,8 +788,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         _logger.e(() => '[queryMembers] no connection established');
         return connectionResult;
       }
-      final result = await _defaultApi.queryMembers(
-        open.QueryMembersRequest(
+      final result = await _defaultApi.queryCallMembers(
+        open.QueryCallMembersRequest(
           type: callCid.type.value,
           id: callCid.id,
           filterConditions: filterConditions,
@@ -809,7 +814,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required Map<String, Object> filterConditions,
     String? next,
     String? prev,
-    List<open.SortParamRequest> sorts = const [],
+    List<open.SortParam> sorts = const [],
     int? limit,
   }) async {
     try {
@@ -1071,14 +1076,12 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<GuestCreatedData>> loadGuest({
     required String id,
     String? name,
-    String? role,
     String? image,
-    List<String>? teams,
     Map<String, Object> custom = const {},
   }) async {
     try {
       _logger.d(() => '[loadGuest] id: $id');
-      final defaultApi = open.DefaultApi(
+      final defaultApi = open.ProductvideoApi(
         open.ApiClient(
           basePath: _rpcUrl,
           authentication: _Authentication(
@@ -1095,8 +1098,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             custom: custom,
             image: image,
             name: name,
-            role: role,
-            teams: teams ?? [],
           ),
         ),
       );

@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video/stream_video.dart';
+import 'package:stream_video/stream_video.dart' hide CallEvent;
 import 'package:stream_video_push_notification/stream_video_push_notification_platform_interface.dart';
 
 import 'stream_video_push_params.dart';
@@ -63,6 +62,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required this.pushParams,
     this.callerCustomizationCallback,
   }) : _client = client {
+    if (CurrentPlatform.isWeb) return;
+
     subscribeToEvents() {
       _subscriptions.add(
         _idCallEnded,
@@ -287,6 +288,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   @override
   Future<List<CallData>> activeCalls() async {
+    if (CurrentPlatform.isWeb) return [];
+
     final activeCalls = await FlutterCallkitIncoming.activeCalls();
     if (activeCalls is! List) return [];
 
@@ -321,9 +324,9 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   @override
   Future<String?> getDevicePushTokenVoIP() async {
-    if (Platform.isIOS) {
+    if (CurrentPlatform.isIos) {
       return await StreamTokenProvider.getVoIPToken();
-    } else if (Platform.isAndroid) {
+    } else if (CurrentPlatform.isAndroid) {
       return await StreamTokenProvider.getFirebaseToken();
     }
 

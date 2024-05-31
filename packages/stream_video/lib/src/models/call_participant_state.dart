@@ -1,9 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+import 'user_info.dart';
 
 import '../sfu/data/models/sfu_connection_quality.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../sorting/call_participant_sorting_presets.dart';
+import '../utils/string.dart';
 import 'call_reaction.dart';
 import 'call_track_state.dart';
 import 'viewport_visibility.dart';
@@ -14,7 +16,7 @@ class CallParticipantState
     implements Comparable<CallParticipantState> {
   const CallParticipantState({
     required this.userId,
-    required this.role,
+    required this.roles,
     required this.name,
     required this.custom,
     this.image,
@@ -33,7 +35,7 @@ class CallParticipantState
   });
 
   final String userId;
-  final String role;
+  final List<String> roles;
   final String name;
   final Map<String, Object?> custom;
   final String? image;
@@ -54,7 +56,7 @@ class CallParticipantState
   /// replaced with the new values.
   CallParticipantState copyWith({
     String? userId,
-    String? role,
+    List<String>? roles,
     String? name,
     Map<String, Object?>? custom,
     String? image,
@@ -73,7 +75,7 @@ class CallParticipantState
   }) {
     return CallParticipantState(
       userId: userId ?? this.userId,
-      role: role ?? this.role,
+      roles: roles ?? this.roles,
       name: name ?? this.name,
       custom: custom ?? this.custom,
       image: image ?? this.image,
@@ -111,7 +113,7 @@ class CallParticipantState
 
   @override
   String toString() {
-    return 'CallParticipantState{userId: $userId, role: $role, name: $name, '
+    return 'CallParticipantState{userId: $userId, role: $roles, name: $name, '
         'sessionId: $sessionId, '
         'trackId: $trackIdPrefix, image: $image, '
         'publishedTracks: $publishedTracks, '
@@ -125,7 +127,7 @@ class CallParticipantState
   @override
   List<Object?> get props => [
         userId,
-        role,
+        roles,
         name,
         custom,
         image,
@@ -166,4 +168,11 @@ class CallParticipantState
   bool get isScreenShareEnabled {
     return !(screenShareTrack?.muted ?? true);
   }
+
+  UserInfo toUserInfo() => UserInfo(
+    id: userId,
+    role: roles.firstOrNull ?? '',
+    name: name.ifEmpty(() => userId),
+    image: image,
+  );
 }

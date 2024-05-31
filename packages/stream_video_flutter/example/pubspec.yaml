@@ -13,7 +13,7 @@ environment:
 
 dependencies:
   cupertino_icons: ^1.0.5
-  device_info_plus: ^9.0.3
+  device_info_plus: ^10.1.0
   envied: ^0.3.0+3
   firebase_core: ^2.15.1
   firebase_messaging: ^14.5.0
@@ -28,8 +28,8 @@ dependencies:
   path_provider: ^2.1.0
   share_plus: ^7.1.0
   shared_preferences: ^2.2.0
-  stream_video: ^0.4.1
-  stream_video_flutter: ^0.4.1
+  stream_video: ^0.4.2
+  stream_video_flutter: ^0.4.2
   stream_video_push_notification: ^0.4.0
 
 dependency_overrides:

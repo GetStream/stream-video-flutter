@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -38,9 +38,9 @@ class HLSSettingsRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is HLSSettingsRequest &&
-     other.autoOn == autoOn &&
-     other.enabled == enabled &&
-     other.qualityTracks == qualityTracks;
+    other.autoOn == autoOn &&
+    other.enabled == enabled &&
+    _deepEquality.equals(other.qualityTracks, qualityTracks);
 
   @override
   int get hashCode =>
@@ -89,8 +89,8 @@ class HLSSettingsRequest {
       return HLSSettingsRequest(
         autoOn: mapValueOfType<bool>(json, r'auto_on'),
         enabled: mapValueOfType<bool>(json, r'enabled'),
-        qualityTracks: json[r'quality_tracks'] is List
-            ? (json[r'quality_tracks'] as List).cast<String>()
+        qualityTracks: json[r'quality_tracks'] is Iterable
+            ? (json[r'quality_tracks'] as Iterable).cast<String>().toList(growable: false)
             : const [],
       );
     }
@@ -139,6 +139,7 @@ class HLSSettingsRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'quality_tracks',
   };
 }
 

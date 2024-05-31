@@ -37,7 +37,6 @@ abstract class CoordinatorClient {
     required String id,
     required PushProvider pushProvider,
     String? pushProviderName,
-    String? userId,
     bool? voipToken,
   });
 
@@ -131,12 +130,14 @@ abstract class CoordinatorClient {
   });
 
   /// Starts recording for the call described by the given [callCid].
-  Future<Result<None>> startRecording(StreamCallCid callCid);
+  Future<Result<None>> startRecording(
+    StreamCallCid callCid, {
+    String? recordingExternalStorage,
+  });
 
   /// Returns a list of recording for the associated [callCid] and [sessionId].
   Future<Result<List<open.CallRecording>>> listRecordings(
     StreamCallCid callCid,
-    String sessionId,
   );
 
   /// Stops recording for the call described by the given [callCid].
@@ -161,7 +162,7 @@ abstract class CoordinatorClient {
     required Map<String, Object> filterConditions,
     String? next,
     String? prev,
-    List<open.SortParamRequest> sorts = const [],
+    List<open.SortParam> sorts = const [],
     int? limit,
   });
 
@@ -169,7 +170,7 @@ abstract class CoordinatorClient {
     required Map<String, Object> filterConditions,
     String? next,
     String? prev,
-    List<open.SortParamRequest> sorts = const [],
+    List<open.SortParam> sorts = const [],
     int? limit,
   });
 
@@ -226,9 +227,7 @@ abstract class CoordinatorClient {
   Future<Result<GuestCreatedData>> loadGuest({
     required String id,
     String? name,
-    String? role,
     String? image,
-    List<String>? teams,
     Map<String, Object> custom = const {},
   });
 }

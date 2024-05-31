@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -25,8 +25,8 @@ class UpdateCallMembersRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UpdateCallMembersRequest &&
-     other.removeMembers == removeMembers &&
-     other.updateMembers == updateMembers;
+    _deepEquality.equals(other.removeMembers, removeMembers) &&
+    _deepEquality.equals(other.updateMembers, updateMembers);
 
   @override
   int get hashCode =>
@@ -63,8 +63,8 @@ class UpdateCallMembersRequest {
       }());
 
       return UpdateCallMembersRequest(
-        removeMembers: json[r'remove_members'] is List
-            ? (json[r'remove_members'] as List).cast<String>()
+        removeMembers: json[r'remove_members'] is Iterable
+            ? (json[r'remove_members'] as Iterable).cast<String>().toList(growable: false)
             : const [],
         updateMembers: MemberRequest.listFromJson(json[r'update_members']),
       );
