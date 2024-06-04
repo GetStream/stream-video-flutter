@@ -1065,7 +1065,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     String? reason,
   }) async {
     try {
-      await _defaultApi.rejectCall(cid.type.value, cid.id, reason);
+      await _defaultApi.rejectCall(
+        cid.type.value,
+        cid.id,
+        open.RejectCallRequest(
+          reason: reason,
+        ),
+      );
       return const Result.success(none);
     } catch (e) {
       return Result.failure(VideoErrors.compose(e));

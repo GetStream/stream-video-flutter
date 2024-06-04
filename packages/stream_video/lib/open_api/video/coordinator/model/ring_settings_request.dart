@@ -15,6 +15,7 @@ class RingSettingsRequest {
   RingSettingsRequest({
     required this.autoCancelTimeoutMs,
     required this.incomingCallTimeoutMs,
+    this.missedCallTimeoutMs,
   });
 
   /// Minimum value: 5000
@@ -25,24 +26,41 @@ class RingSettingsRequest {
   /// Maximum value: 180000
   int incomingCallTimeoutMs;
 
+  /// Minimum value: 5000
+  /// Maximum value: 180000
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? missedCallTimeoutMs;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is RingSettingsRequest &&
     other.autoCancelTimeoutMs == autoCancelTimeoutMs &&
-    other.incomingCallTimeoutMs == incomingCallTimeoutMs;
+    other.incomingCallTimeoutMs == incomingCallTimeoutMs &&
+    other.missedCallTimeoutMs == missedCallTimeoutMs;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (autoCancelTimeoutMs.hashCode) +
-    (incomingCallTimeoutMs.hashCode);
+    (incomingCallTimeoutMs.hashCode) +
+    (missedCallTimeoutMs == null ? 0 : missedCallTimeoutMs!.hashCode);
 
   @override
-  String toString() => 'RingSettingsRequest[autoCancelTimeoutMs=$autoCancelTimeoutMs, incomingCallTimeoutMs=$incomingCallTimeoutMs]';
+  String toString() => 'RingSettingsRequest[autoCancelTimeoutMs=$autoCancelTimeoutMs, incomingCallTimeoutMs=$incomingCallTimeoutMs, missedCallTimeoutMs=$missedCallTimeoutMs]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'auto_cancel_timeout_ms'] = this.autoCancelTimeoutMs;
       json[r'incoming_call_timeout_ms'] = this.incomingCallTimeoutMs;
+    if (this.missedCallTimeoutMs != null) {
+      json[r'missed_call_timeout_ms'] = this.missedCallTimeoutMs;
+    } else {
+      json[r'missed_call_timeout_ms'] = null;
+    }
     return json;
   }
 
@@ -67,6 +85,7 @@ class RingSettingsRequest {
       return RingSettingsRequest(
         autoCancelTimeoutMs: mapValueOfType<int>(json, r'auto_cancel_timeout_ms')!,
         incomingCallTimeoutMs: mapValueOfType<int>(json, r'incoming_call_timeout_ms')!,
+        missedCallTimeoutMs: mapValueOfType<int>(json, r'missed_call_timeout_ms'),
       );
     }
     return null;

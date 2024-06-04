@@ -15,6 +15,7 @@ class ChannelResponse {
   ChannelResponse({
     this.autoTranslationEnabled,
     this.autoTranslationLanguage,
+    this.blocked,
     required this.cid,
     this.config,
     this.cooldown,
@@ -57,6 +58,15 @@ class ChannelResponse {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   String? autoTranslationLanguage;
+
+  /// Whether this channel is blocked by current user or not
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? blocked;
 
   /// Channel CID (<type>:<id>)
   String cid;
@@ -204,6 +214,7 @@ class ChannelResponse {
   bool operator ==(Object other) => identical(this, other) || other is ChannelResponse &&
     other.autoTranslationEnabled == autoTranslationEnabled &&
     other.autoTranslationLanguage == autoTranslationLanguage &&
+    other.blocked == blocked &&
     other.cid == cid &&
     other.config == config &&
     other.cooldown == cooldown &&
@@ -233,6 +244,7 @@ class ChannelResponse {
     // ignore: unnecessary_parenthesis
     (autoTranslationEnabled == null ? 0 : autoTranslationEnabled!.hashCode) +
     (autoTranslationLanguage == null ? 0 : autoTranslationLanguage!.hashCode) +
+    (blocked == null ? 0 : blocked!.hashCode) +
     (cid.hashCode) +
     (config == null ? 0 : config!.hashCode) +
     (cooldown == null ? 0 : cooldown!.hashCode) +
@@ -258,7 +270,7 @@ class ChannelResponse {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'ChannelResponse[autoTranslationEnabled=$autoTranslationEnabled, autoTranslationLanguage=$autoTranslationLanguage, cid=$cid, config=$config, cooldown=$cooldown, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, deletedAt=$deletedAt, disabled=$disabled, frozen=$frozen, hidden=$hidden, hideMessagesBefore=$hideMessagesBefore, id=$id, lastMessageAt=$lastMessageAt, memberCount=$memberCount, members=$members, muteExpiresAt=$muteExpiresAt, muted=$muted, ownCapabilities=$ownCapabilities, team=$team, truncatedAt=$truncatedAt, truncatedBy=$truncatedBy, type=$type, updatedAt=$updatedAt]';
+  String toString() => 'ChannelResponse[autoTranslationEnabled=$autoTranslationEnabled, autoTranslationLanguage=$autoTranslationLanguage, blocked=$blocked, cid=$cid, config=$config, cooldown=$cooldown, createdAt=$createdAt, createdBy=$createdBy, custom=$custom, deletedAt=$deletedAt, disabled=$disabled, frozen=$frozen, hidden=$hidden, hideMessagesBefore=$hideMessagesBefore, id=$id, lastMessageAt=$lastMessageAt, memberCount=$memberCount, members=$members, muteExpiresAt=$muteExpiresAt, muted=$muted, ownCapabilities=$ownCapabilities, team=$team, truncatedAt=$truncatedAt, truncatedBy=$truncatedBy, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -271,6 +283,11 @@ class ChannelResponse {
       json[r'auto_translation_language'] = this.autoTranslationLanguage;
     } else {
       json[r'auto_translation_language'] = null;
+    }
+    if (this.blocked != null) {
+      json[r'blocked'] = this.blocked;
+    } else {
+      json[r'blocked'] = null;
     }
       json[r'cid'] = this.cid;
     if (this.config != null) {
@@ -371,6 +388,7 @@ class ChannelResponse {
       return ChannelResponse(
         autoTranslationEnabled: mapValueOfType<bool>(json, r'auto_translation_enabled'),
         autoTranslationLanguage: mapValueOfType<String>(json, r'auto_translation_language'),
+        blocked: mapValueOfType<bool>(json, r'blocked'),
         cid: mapValueOfType<String>(json, r'cid')!,
         config: ChannelConfigWithInfo.fromJson(json[r'config']),
         cooldown: mapValueOfType<int>(json, r'cooldown'),

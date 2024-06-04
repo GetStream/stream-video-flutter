@@ -10,14 +10,15 @@
 
 part of openapi.api;
 
-class CallRejectedEvent {
-  /// Returns a new [CallRejectedEvent] instance.
-  CallRejectedEvent({
+class CallMissedEvent {
+  /// Returns a new [CallMissedEvent] instance.
+  CallMissedEvent({
     required this.call,
     required this.callCid,
     required this.createdAt,
-    this.reason,
-    this.type = 'call.rejected',
+    this.members = const [],
+    required this.sessionId,
+    this.type = 'call.missed',
     required this.user,
   });
 
@@ -27,25 +28,24 @@ class CallRejectedEvent {
 
   DateTime createdAt;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? reason;
+  /// List of members who missed the call
+  List<MemberResponse> members;
 
-  /// The type of event: \"call.rejected\" in this case
+  /// Call session ID
+  String sessionId;
+
+  /// The type of event: \"call.notification\" in this case
   String type;
 
   UserResponse user;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is CallRejectedEvent &&
+  bool operator ==(Object other) => identical(this, other) || other is CallMissedEvent &&
     other.call == call &&
     other.callCid == callCid &&
     other.createdAt == createdAt &&
-    other.reason == reason &&
+    _deepEquality.equals(other.members, members) &&
+    other.sessionId == sessionId &&
     other.type == type &&
     other.user == user;
 
@@ -55,32 +55,30 @@ class CallRejectedEvent {
     (call.hashCode) +
     (callCid.hashCode) +
     (createdAt.hashCode) +
-    (reason == null ? 0 : reason!.hashCode) +
+    (members.hashCode) +
+    (sessionId.hashCode) +
     (type.hashCode) +
     (user.hashCode);
 
   @override
-  String toString() => 'CallRejectedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, reason=$reason, type=$type, user=$user]';
+  String toString() => 'CallMissedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, sessionId=$sessionId, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'call'] = this.call;
       json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    if (this.reason != null) {
-      json[r'reason'] = this.reason;
-    } else {
-      json[r'reason'] = null;
-    }
+      json[r'members'] = this.members;
+      json[r'session_id'] = this.sessionId;
       json[r'type'] = this.type;
       json[r'user'] = this.user;
     return json;
   }
 
-  /// Returns a new [CallRejectedEvent] instance and imports its values from
+  /// Returns a new [CallMissedEvent] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static CallRejectedEvent? fromJson(dynamic value) {
+  static CallMissedEvent? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -89,17 +87,18 @@ class CallRejectedEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "CallRejectedEvent[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "CallRejectedEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "CallMissedEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "CallMissedEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return CallRejectedEvent(
+      return CallMissedEvent(
         call: CallResponse.fromJson(json[r'call'])!,
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        reason: mapValueOfType<String>(json, r'reason'),
+        members: MemberResponse.listFromJson(json[r'members']),
+        sessionId: mapValueOfType<String>(json, r'session_id')!,
         type: mapValueOfType<String>(json, r'type')!,
         user: UserResponse.fromJson(json[r'user'])!,
       );
@@ -107,11 +106,11 @@ class CallRejectedEvent {
     return null;
   }
 
-  static List<CallRejectedEvent> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <CallRejectedEvent>[];
+  static List<CallMissedEvent> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <CallMissedEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = CallRejectedEvent.fromJson(row);
+        final value = CallMissedEvent.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -120,12 +119,12 @@ class CallRejectedEvent {
     return result.toList(growable: growable);
   }
 
-  static Map<String, CallRejectedEvent> mapFromJson(dynamic json) {
-    final map = <String, CallRejectedEvent>{};
+  static Map<String, CallMissedEvent> mapFromJson(dynamic json) {
+    final map = <String, CallMissedEvent>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = CallRejectedEvent.fromJson(entry.value);
+        final value = CallMissedEvent.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -134,14 +133,14 @@ class CallRejectedEvent {
     return map;
   }
 
-  // maps a json object with a list of CallRejectedEvent-objects as value to a dart map
-  static Map<String, List<CallRejectedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<CallRejectedEvent>>{};
+  // maps a json object with a list of CallMissedEvent-objects as value to a dart map
+  static Map<String, List<CallMissedEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<CallMissedEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = CallRejectedEvent.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = CallMissedEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -152,6 +151,8 @@ class CallRejectedEvent {
     'call',
     'call_cid',
     'created_at',
+    'members',
+    'session_id',
     'type',
     'user',
   };

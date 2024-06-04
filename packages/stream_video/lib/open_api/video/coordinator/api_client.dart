@@ -236,6 +236,8 @@ class ApiClient {
           return CallMemberUpdatedEvent.fromJson(value);
         case 'CallMemberUpdatedPermissionEvent':
           return CallMemberUpdatedPermissionEvent.fromJson(value);
+        case 'CallMissedEvent':
+          return CallMissedEvent.fromJson(value);
         case 'CallNotificationEvent':
           return CallNotificationEvent.fromJson(value);
         case 'CallParticipantResponse':
@@ -378,6 +380,10 @@ class ApiClient {
           return JoinCallResponse.fromJson(value);
         case 'LabelThresholds':
           return LabelThresholds.fromJson(value);
+        case 'LimitsSettingsRequest':
+          return LimitsSettingsRequest.fromJson(value);
+        case 'LimitsSettingsResponse':
+          return LimitsSettingsResponse.fromJson(value);
         case 'ListDevicesResponse':
           return ListDevicesResponse.fromJson(value);
         case 'ListRecordingsResponse':
@@ -446,6 +452,8 @@ class ApiClient {
           return RecordSettingsRequest.fromJson(value);
         case 'RecordSettingsResponse':
           return RecordSettingsResponse.fromJson(value);
+        case 'RejectCallRequest':
+          return RejectCallRequest.fromJson(value);
         case 'RejectCallResponse':
           return RejectCallResponse.fromJson(value);
         case 'RequestPermissionRequest':

@@ -24,6 +24,7 @@ class OwnCapability {
   String toJson() => value;
 
   static const blockUsers = OwnCapability._(r'block-users');
+  static const changeMaxDuration = OwnCapability._(r'change-max-duration');
   static const createCall = OwnCapability._(r'create-call');
   static const createReaction = OwnCapability._(r'create-reaction');
   static const enableNoiseCancellation = OwnCapability._(r'enable-noise-cancellation');
@@ -52,6 +53,7 @@ class OwnCapability {
   /// List of all possible values in this [enum][OwnCapability].
   static const values = <OwnCapability>[
     blockUsers,
+    changeMaxDuration,
     createCall,
     createReaction,
     enableNoiseCancellation,
@@ -115,6 +117,7 @@ class OwnCapabilityTypeTransformer {
     if (data != null) {
       switch (data) {
         case r'block-users': return OwnCapability.blockUsers;
+        case r'change-max-duration': return OwnCapability.changeMaxDuration;
         case r'create-call': return OwnCapability.createCall;
         case r'create-reaction': return OwnCapability.createReaction;
         case r'enable-noise-cancellation': return OwnCapability.enableNoiseCancellation;
