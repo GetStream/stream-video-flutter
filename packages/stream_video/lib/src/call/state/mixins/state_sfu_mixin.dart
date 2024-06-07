@@ -181,7 +181,7 @@ mixin StateSfuMixin on StateNotifier<CallState> {
     final isLocal = state.currentUserId == event.participant.userId;
     final participant = CallParticipantState(
       userId: event.participant.userId,
-      role: '',
+      roles: const [],
       name: event.participant.userName,
       custom: event.participant.custom,
       image: event.participant.userImage,
@@ -228,7 +228,7 @@ mixin StateSfuMixin on StateNotifier<CallState> {
           isSpeaking: participant.isSpeaking,
           isDominantSpeaker: participant.isDominantSpeaker,
           connectionQuality: participant.connectionQuality,
-          role: participant.roles.firstOrNull ?? '',
+          roles: participant.roles,
         );
       } else {
         return it;

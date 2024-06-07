@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -13,52 +13,36 @@ part of openapi.api;
 class RingSettingsRequest {
   /// Returns a new [RingSettingsRequest] instance.
   RingSettingsRequest({
-    this.autoCancelTimeoutMs,
-    this.incomingCallTimeoutMs,
+    required this.autoCancelTimeoutMs,
+    required this.incomingCallTimeoutMs,
   });
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  int? autoCancelTimeoutMs;
+  /// Minimum value: 5000
+  /// Maximum value: 180000
+  int autoCancelTimeoutMs;
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  int? incomingCallTimeoutMs;
+  /// Minimum value: 5000
+  /// Maximum value: 180000
+  int incomingCallTimeoutMs;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is RingSettingsRequest &&
-     other.autoCancelTimeoutMs == autoCancelTimeoutMs &&
-     other.incomingCallTimeoutMs == incomingCallTimeoutMs;
+    other.autoCancelTimeoutMs == autoCancelTimeoutMs &&
+    other.incomingCallTimeoutMs == incomingCallTimeoutMs;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (autoCancelTimeoutMs == null ? 0 : autoCancelTimeoutMs!.hashCode) +
-    (incomingCallTimeoutMs == null ? 0 : incomingCallTimeoutMs!.hashCode);
+    (autoCancelTimeoutMs.hashCode) +
+    (incomingCallTimeoutMs.hashCode);
 
   @override
   String toString() => 'RingSettingsRequest[autoCancelTimeoutMs=$autoCancelTimeoutMs, incomingCallTimeoutMs=$incomingCallTimeoutMs]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.autoCancelTimeoutMs != null) {
       json[r'auto_cancel_timeout_ms'] = this.autoCancelTimeoutMs;
-    } else {
-      json[r'auto_cancel_timeout_ms'] = null;
-    }
-    if (this.incomingCallTimeoutMs != null) {
       json[r'incoming_call_timeout_ms'] = this.incomingCallTimeoutMs;
-    } else {
-      json[r'incoming_call_timeout_ms'] = null;
-    }
     return json;
   }
 
@@ -81,8 +65,8 @@ class RingSettingsRequest {
       }());
 
       return RingSettingsRequest(
-        autoCancelTimeoutMs: mapValueOfType<int>(json, r'auto_cancel_timeout_ms'),
-        incomingCallTimeoutMs: mapValueOfType<int>(json, r'incoming_call_timeout_ms'),
+        autoCancelTimeoutMs: mapValueOfType<int>(json, r'auto_cancel_timeout_ms')!,
+        incomingCallTimeoutMs: mapValueOfType<int>(json, r'incoming_call_timeout_ms')!,
       );
     }
     return null;
@@ -130,6 +114,8 @@ class RingSettingsRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'auto_cancel_timeout_ms',
+    'incoming_call_timeout_ms',
   };
 }
 

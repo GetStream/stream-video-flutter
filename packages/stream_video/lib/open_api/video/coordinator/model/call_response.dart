@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -29,6 +29,7 @@ class CallResponse {
     required this.settings,
     this.startsAt,
     this.team,
+    this.thumbnails,
     required this.transcribing,
     required this.type,
     required this.updatedAt,
@@ -96,6 +97,14 @@ class CallResponse {
   ///
   String? team;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  ThumbnailResponse? thumbnails;
+
   bool transcribing;
 
   /// The type of call
@@ -106,25 +115,26 @@ class CallResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallResponse &&
-     other.backstage == backstage &&
-     other.blockedUserIds == blockedUserIds &&
-     other.cid == cid &&
-     other.createdAt == createdAt &&
-     other.createdBy == createdBy &&
-     other.currentSessionId == currentSessionId &&
-     other.custom == custom &&
-     other.egress == egress &&
-     other.endedAt == endedAt &&
-     other.id == id &&
-     other.ingress == ingress &&
-     other.recording == recording &&
-     other.session == session &&
-     other.settings == settings &&
-     other.startsAt == startsAt &&
-     other.team == team &&
-     other.transcribing == transcribing &&
-     other.type == type &&
-     other.updatedAt == updatedAt;
+    other.backstage == backstage &&
+    _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
+    other.cid == cid &&
+    other.createdAt == createdAt &&
+    other.createdBy == createdBy &&
+    other.currentSessionId == currentSessionId &&
+    _deepEquality.equals(other.custom, custom) &&
+    other.egress == egress &&
+    other.endedAt == endedAt &&
+    other.id == id &&
+    other.ingress == ingress &&
+    other.recording == recording &&
+    other.session == session &&
+    other.settings == settings &&
+    other.startsAt == startsAt &&
+    other.team == team &&
+    other.thumbnails == thumbnails &&
+    other.transcribing == transcribing &&
+    other.type == type &&
+    other.updatedAt == updatedAt;
 
   @override
   int get hashCode =>
@@ -145,12 +155,13 @@ class CallResponse {
     (settings.hashCode) +
     (startsAt == null ? 0 : startsAt!.hashCode) +
     (team == null ? 0 : team!.hashCode) +
+    (thumbnails == null ? 0 : thumbnails!.hashCode) +
     (transcribing.hashCode) +
     (type.hashCode) +
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
+  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, thumbnails=$thumbnails, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -186,6 +197,11 @@ class CallResponse {
     } else {
       json[r'team'] = null;
     }
+    if (this.thumbnails != null) {
+      json[r'thumbnails'] = this.thumbnails;
+    } else {
+      json[r'thumbnails'] = null;
+    }
       json[r'transcribing'] = this.transcribing;
       json[r'type'] = this.type;
       json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
@@ -212,26 +228,27 @@ class CallResponse {
 
       return CallResponse(
         backstage: mapValueOfType<bool>(json, r'backstage')!,
-        blockedUserIds: json[r'blocked_user_ids'] is List
-            ? (json[r'blocked_user_ids'] as List).cast<String>()
+        blockedUserIds: json[r'blocked_user_ids'] is Iterable
+            ? (json[r'blocked_user_ids'] as Iterable).cast<String>().toList(growable: false)
             : const [],
         cid: mapValueOfType<String>(json, r'cid')!,
-        createdAt: mapDateTime(json, r'created_at', '')!,
+        createdAt: mapDateTime(json, r'created_at', r'')!,
         createdBy: UserResponse.fromJson(json[r'created_by'])!,
         currentSessionId: mapValueOfType<String>(json, r'current_session_id')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         egress: EgressResponse.fromJson(json[r'egress'])!,
-        endedAt: mapDateTime(json, r'ended_at', ''),
+        endedAt: mapDateTime(json, r'ended_at', r''),
         id: mapValueOfType<String>(json, r'id')!,
         ingress: CallIngressResponse.fromJson(json[r'ingress'])!,
         recording: mapValueOfType<bool>(json, r'recording')!,
         session: CallSessionResponse.fromJson(json[r'session']),
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,
-        startsAt: mapDateTime(json, r'starts_at', ''),
+        startsAt: mapDateTime(json, r'starts_at', r''),
         team: mapValueOfType<String>(json, r'team'),
+        thumbnails: ThumbnailResponse.fromJson(json[r'thumbnails']),
         transcribing: mapValueOfType<bool>(json, r'transcribing')!,
         type: mapValueOfType<String>(json, r'type')!,
-        updatedAt: mapDateTime(json, r'updated_at', '')!,
+        updatedAt: mapDateTime(json, r'updated_at', r'')!,
       );
     }
     return null;

@@ -64,7 +64,6 @@ class CallParticipantsList extends StatelessWidget {
                               child: StreamUserAvatar(
                                 user: UserInfo(
                                   id: participant.userId,
-                                  role: participant.role,
                                   name: participant.name
                                       .ifEmpty(() => participant.userId),
                                   image: participant.image,

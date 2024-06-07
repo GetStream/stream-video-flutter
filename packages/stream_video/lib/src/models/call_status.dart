@@ -82,6 +82,33 @@ abstract class CallStatus extends Equatable {
   bool get isJoining => this is CallStatusJoining;
 
   bool get isJoined => this is CallStatusJoined;
+
+  /// Returns human readable text representation of [CallStatus].
+  String toStatusString() {
+    if (isIdle) {
+      return 'Idle';
+    } else if (isOutgoing) {
+      return 'Outgoing';
+    } else if (isIncoming) {
+      return 'Incoming';
+    } else if (isJoining) {
+      return 'Joining';
+    } else if (isJoined) {
+      return 'Joined';
+    } else if (isReconnecting) {
+      return 'Reconnecting';
+    } else if (isMigrating) {
+      return 'Migrating';
+    } else if (isConnecting) {
+      return 'Connecting';
+    } else if (isConnected) {
+      return 'Connected';
+    } else if (isDisconnected) {
+      return 'Disconnected';
+    } else {
+      return '';
+    }
+  }
 }
 
 mixin CallStatusConnectable implements CallStatus {}

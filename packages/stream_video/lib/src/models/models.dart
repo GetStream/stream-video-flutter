@@ -21,6 +21,8 @@ export 'push_device.dart';
 export 'push_provider.dart';
 export 'queried_calls.dart';
 export 'queried_members.dart';
+export 'subscription_change.dart';
 export 'user.dart';
 export 'user_info.dart';
 export 'viewport_visibility.dart';
+export 'visibility_change.dart';

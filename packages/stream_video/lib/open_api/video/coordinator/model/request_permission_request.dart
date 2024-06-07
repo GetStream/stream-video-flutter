@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -20,7 +20,7 @@ class RequestPermissionRequest {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is RequestPermissionRequest &&
-     other.permissions == permissions;
+    _deepEquality.equals(other.permissions, permissions);
 
   @override
   int get hashCode =>
@@ -55,8 +55,8 @@ class RequestPermissionRequest {
       }());
 
       return RequestPermissionRequest(
-        permissions: json[r'permissions'] is List
-            ? (json[r'permissions'] as List).cast<String>()
+        permissions: json[r'permissions'] is Iterable
+            ? (json[r'permissions'] as Iterable).cast<String>().toList(growable: false)
             : const [],
       );
     }

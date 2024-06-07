@@ -1,7 +1,7 @@
 //
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
-// @dart=2.12
+// @dart=2.18
 
 // ignore_for_file: unused_element, unused_import
 // ignore_for_file: always_put_required_named_parameters_first
@@ -52,15 +52,15 @@ class VideoSettingsRequest {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  TargetResolutionRequest? targetResolution;
+  TargetResolution? targetResolution;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is VideoSettingsRequest &&
-     other.accessRequestEnabled == accessRequestEnabled &&
-     other.cameraDefaultOn == cameraDefaultOn &&
-     other.cameraFacing == cameraFacing &&
-     other.enabled == enabled &&
-     other.targetResolution == targetResolution;
+    other.accessRequestEnabled == accessRequestEnabled &&
+    other.cameraDefaultOn == cameraDefaultOn &&
+    other.cameraFacing == cameraFacing &&
+    other.enabled == enabled &&
+    other.targetResolution == targetResolution;
 
   @override
   int get hashCode =>
@@ -127,7 +127,7 @@ class VideoSettingsRequest {
         cameraDefaultOn: mapValueOfType<bool>(json, r'camera_default_on'),
         cameraFacing: VideoSettingsRequestCameraFacingEnum.fromJson(json[r'camera_facing']),
         enabled: mapValueOfType<bool>(json, r'enabled'),
-        targetResolution: TargetResolutionRequest.fromJson(json[r'target_resolution']),
+        targetResolution: TargetResolution.fromJson(json[r'target_resolution']),
       );
     }
     return null;
