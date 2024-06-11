@@ -485,9 +485,12 @@ Future<void> _backgroundVoipCallHandler() async {
 The `_backgroundVoipCallHandler` method should then be set when StreamVideo is initialised:
 
 ```dart
-  StreamVideo(
-    ...,
-    backgroundVoipCallHandler: _backgroundVoipCallHandler,
+StreamVideo(
+    // ...
+    pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
+      // ...
+      backgroundVoipCallHandler: _backgroundVoipCallHandler,
+    ),
   );
 ```
 
