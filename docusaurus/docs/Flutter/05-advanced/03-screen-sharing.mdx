@@ -114,15 +114,50 @@ With that, the setup for the broadcast upload extension is done.
 The Stream Video SDK has support for screen sharing from an Android device. The SDK is using the [Android Media Projection API](https://developer.android.com/guide/topics/large-screens/media-projection) for the capture. To initiate screen sharing, user consent is mandatory.
 
 When using the `ToggleScreenShareOption` within the` stream_video_flutter` package, permission handling is seamlessly integrated. However, if you opt to initiate screen sharing via the `setScreenShareEnabled()` method on the `Call` object, you will be responsible for securing the necessary permissions and initiating a foreground service. The foreground service is essential for displaying a notification to the user while screen sharing is active.
+It is also required to start [media projection foreground service](https://developer.android.com/reference/android/media/projection/MediaProjectionManager#getMediaProjection(int,%20android.content.Intent)) from Android version 10 onwards.
 
+From android 14 onwards, it is also required to activly ask users for a permission to share their screen. You can do this by calling `call.requestScreenSharePermission()` method.
 Below is an example snippet that demonstrates how to use our built in `StreamBackgroundService` class to manage these requirements:
 
 ```dart
-if (/*sharing enabled*/) {
-  await StreamBackgroundService().startScreenSharingNotificationService(call);
-} else {
-  await StreamBackgroundService().stopScreenSharingNotificationService();
-}
+  void startScreemSharing() {
+    if (CurrentPlatform.isAndroid) {
+      // Check if the user has granted permission to share their screen
+      if (!await call.requestScreenSharePermission()) {
+        return;
+      }
+
+      // Start the screen sharing notification service
+      await StreamBackgroundService()
+          .startScreenSharingNotificationService(call);
+    }
+
+    // Enable screen sharing
+    final result = await call.setScreenShareEnabled(
+      enabled: true,
+    );
+
+    // Stop the screen sharing notification service if the operation failed
+    if (CurrentPlatform.isAndroid && result.isFailure) {
+      await StreamBackgroundService()
+          .stopScreenSharingNotificationService();
+    }
+  }
+```
+
+Remember to stop the foreground service when the screen sharing is disabled:
+
+```dart
+  void stopScreenSharing() async {
+    final result = await call.setScreenShareEnabled(
+      enabled: false,
+    );
+
+    if (CurrentPlatform.isAndroid) {
+      await StreamBackgroundService()
+          .stopScreenSharingNotificationService();
+    }
+  }
 ```
 
 You can customize the notification content and behavior by initiating `StreamBackgroundService`:
@@ -143,13 +178,4 @@ StreamBackgroundService.init(
     }
   },
 );
-```
-
-In case of using `flutter_background` you will also need to add a media projection service declaration in `AndroidManifest.xml`.
-
-```xml
-<service android:name="de.julianassmann.flutter_background.IsolateHolderService"
-    android:foregroundServiceType="mediaProjection"
-    android:enabled="true"
-    android:exported="false"/>
 ```
