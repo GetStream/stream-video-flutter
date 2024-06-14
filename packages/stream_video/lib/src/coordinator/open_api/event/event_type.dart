@@ -8,6 +8,7 @@ enum EventType {
   callCreated('call.created'),
   callAccepted('call.accepted'),
   callRejected('call.rejected'),
+  callMissed('call.missed'),
   callRing('call.ring'),
   callUpdated('call.updated'),
   callEnded('call.ended'),

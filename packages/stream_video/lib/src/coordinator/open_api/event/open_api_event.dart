@@ -14,6 +14,7 @@ class OpenApiEvent with EquatableMixin {
     this.connected,
     this.healthCheck,
     this.callCreated,
+    this.callMissed,
     this.callRing,
     this.callNotification,
     this.callAccepted,
@@ -151,6 +152,9 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callRecordingFailed:
         final event = open.CallRecordingFailedEvent.fromJson(jsonObj);
         return result.copyWith(callRecordingFailed: event);
+      case EventType.callMissed:
+        final event = open.CallMissedEvent.fromJson(jsonObj);
+        return result.copyWith(callMissed: event);
       case EventType.unknown:
         streamLog.e(_tag, () => '[fromJson] unexpected event: $jsonObj');
         return result.copyWith(unknown: jsonObj);
@@ -161,6 +165,7 @@ class OpenApiEvent with EquatableMixin {
   final open.ConnectedEvent? connected;
   final open.HealthCheckEvent? healthCheck;
   final open.CallCreatedEvent? callCreated;
+  final open.CallMissedEvent? callMissed;
   final open.CallRingEvent? callRing;
   final open.CallNotificationEvent? callNotification;
   final open.CallAcceptedEvent? callAccepted;
@@ -196,6 +201,7 @@ class OpenApiEvent with EquatableMixin {
     open.ConnectedEvent? connected,
     open.HealthCheckEvent? healthCheck,
     open.CallCreatedEvent? callCreated,
+    open.CallMissedEvent? callMissed,
     open.CallRingEvent? callRing,
     open.CallNotificationEvent? callNotification,
     open.CallAcceptedEvent? callAccepted,
@@ -231,6 +237,7 @@ class OpenApiEvent with EquatableMixin {
       connected: connected ?? this.connected,
       healthCheck: healthCheck ?? this.healthCheck,
       callCreated: callCreated ?? this.callCreated,
+      callMissed: callMissed ?? this.callMissed,
       callRing: callRing ?? this.callRing,
       callNotification: callNotification ?? this.callNotification,
       callAccepted: callAccepted ?? this.callAccepted,
@@ -279,6 +286,7 @@ class OpenApiEvent with EquatableMixin {
         connected,
         healthCheck,
         callCreated,
+        callMissed,
         callRing,
         callNotification,
         callAccepted,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../../utils/extensions.dart';
 import '../common/call_background.dart';
 import '../common/calling_participants.dart';
 import '../common/participant_avatars.dart';
@@ -152,7 +151,7 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
     if (widget.onDeclineCallTap != null) {
       widget.onDeclineCallTap!();
     } else {
-      await widget.call.reject();
+      await widget.call.reject(reason: 'decline');
       await widget.call.leave();
     }
   }

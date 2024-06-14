@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import '../../stream_video_flutter.dart';
-import '../utils/extensions.dart';
 import 'indicators/connection_quality_indicator.dart';
 import 'participant_label.dart';
 

@@ -33,6 +33,14 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           ),
           createdAt: event.createdAt,
         );
+      case EventType.callMissed:
+        final event = callMissed!;
+        final call = event.call;
+        return CoordinatorCallMissedEvent(
+          callCid: StreamCallCid(cid: call.cid),
+          sessionId: event.sessionId,
+          createdAt: event.createdAt,
+        );
       case EventType.callRing:
         final event = callRing!;
         final call = event.call;
