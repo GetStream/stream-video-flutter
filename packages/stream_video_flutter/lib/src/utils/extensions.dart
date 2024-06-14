@@ -1,7 +1,5 @@
 import 'dart:math';
 
-import '../../stream_video_flutter.dart';
-
 /// Extensions on [String].
 extension StringExtension on String {
   /// Returns initials for a string

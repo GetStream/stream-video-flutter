@@ -125,6 +125,28 @@ class CoordinatorCallRingingEvent extends CoordinatorCallEvent {
       ];
 }
 
+/// Sent when someone misses a call.
+class CoordinatorCallMissedEvent extends CoordinatorCallEvent {
+  const CoordinatorCallMissedEvent({
+    required this.callCid,
+    required this.sessionId,
+    required this.createdAt,
+  });
+
+  final String sessionId;
+  final DateTime createdAt;
+
+  @override
+  final StreamCallCid callCid;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        sessionId,
+        createdAt,
+      ];
+}
+
 /// Sent when a call gets updated.
 class CoordinatorCallUpdatedEvent extends CoordinatorCallEvent {
   const CoordinatorCallUpdatedEvent({

@@ -179,6 +179,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     _logger.d(() => '[leave] no args');
     // play tone
     final bool popped;
+
     if (mounted) {
       popped = await Navigator.maybePop(context);
     } else {

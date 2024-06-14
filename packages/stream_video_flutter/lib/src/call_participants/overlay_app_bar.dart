@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../utils/extensions.dart';
 
 /// A widget that represents a semi-transparent toolbar that is displayed
 /// over the [StreamCallParticipants] widget on mobile devices in landscape

@@ -597,11 +597,6 @@ class StreamVideo extends Disposable {
     final sender = payload['sender'] as String?;
     if (sender != 'stream.video') return false;
 
-    // Only handle ringing calls.
-    final type = payload['type'] as String?;
-    if (type != 'call.ring') return false;
-
-    // Return if the payload does not contain a call cid.
     final callCid = payload['call_cid'] as String?;
     if (callCid == null) return false;
 
@@ -617,6 +612,22 @@ class StreamVideo extends Disposable {
 
     final createdById = payload['created_by_id'] as String?;
     final createdByName = payload['created_by_display_name'] as String?;
+
+    final type = payload['type'] as String?;
+    if (type == 'call.missed') {
+      unawaited(
+        manager.showMissedCall(
+          uuid: callUUID,
+          handle: createdById,
+          nameCaller: createdByName,
+          callCid: callCid,
+        ),
+      );
+
+      return true;
+    } else if (type != 'call.ring') {
+      return false;
+    }
 
     final callRingingState = await getCallRingingState(
       // ignore: deprecated_member_use_from_same_package
@@ -641,14 +652,6 @@ class StreamVideo extends Disposable {
       case CallRingingState.rejected:
         return false;
       case CallRingingState.ended:
-        unawaited(
-          manager.showMissedCall(
-            uuid: callUUID,
-            handle: createdById,
-            nameCaller: createdByName,
-            callCid: callCid,
-          ),
-        );
         return false;
     }
   }
