@@ -1,12 +1,17 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import 'app.dart';
+import 'core/auth_repository.dart';
 import 'core/token_service.dart';
+import 'firebase_options.dart';
 import 'log_config.dart';
-import 'screen/login_screen.dart';
+import 'model/credentials.dart';
+import 'stream_video_options.dart';
+import 'stream_video_sdk.dart';
 
 const _tag = 'MyApp';
 
@@ -15,27 +20,48 @@ Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   await _setupLogger();
 
-  runApp(const MyApp(connectUser: _connectUser));
+  runApp(
+    const MyApp(
+      connectUser: _connectUser,
+    ),
+  );
 }
 
 Future<Result<None>> _connectUser(UserInfo user) async {
   streamLog.i(_tag, () => '[connectUser] user: $user');
 
   final tokenResponse = await const TokenService().loadToken(
-    environment: Environment.demo,
+    environment: Environment.prontoStaging,
     userId: user.id,
   );
+  final apiKey = tokenResponse.apiKey;
+  final token = UserToken.jwt(tokenResponse.token);
 
-  final client = StreamVideo(
-    tokenResponse.apiKey,
-    user: User(info: user),
-    userToken: tokenResponse.token,
+  streamLog.i(_tag, () => '[connectUser] api_key: ${tokenResponse.apiKey}');
+  final client = await StreamVideoSdk.initialize(
+    apiKey: apiKey,
+    user: user,
+    userToken: token,
+    options: DefaultVideoOptions.remote,
   );
+  final authRepository = await AuthRepository.getInstance();
+  await authRepository.setCredentials(
+    AuthCredentials(
+      apiKey: apiKey,
+      token: token,
+      userInfo: user,
+    ),
+  );
+
   await client.connect();
 
-  StreamBackgroundService.init(
+  /*StreamBackgroundService.init(
     StreamVideo.instance,
     onNotificationClick: (call) async {
       streamLog.i(_tag, () => '[onNotificationClick] call: $call');
@@ -45,7 +71,7 @@ Future<Result<None>> _connectUser(UserInfo user) async {
       streamLog.i(_tag, () => '[onPlatformUiLayerDestroyed] call: $call');
       // TODO
     },
-  );
+  );*/
 
   return const Result.success(none);
 }
@@ -75,40 +101,4 @@ Future<void> _setupLogger() async {
   }
   StreamLog().validator = (priority, _) => true;
   StreamLog().logger = CompositeStreamLogger(children);
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({
-    super.key,
-    required this.connectUser,
-  });
-
-  final ConnectUser connectUser;
-
-  @override
-  Widget build(BuildContext context) {
-    Call? activeCall;
-    if (StreamVideo.isInitialized()) {
-      activeCall = StreamVideo.instance.activeCall;
-    }
-    streamLog.i(_tag, () => '[build] activeCall: $activeCall');
-
-    final darkAppTheme = StreamVideoTheme.dark();
-    final lightAppTheme = StreamVideoTheme.light();
-
-    return MaterialApp(
-      title: 'Stream Video UI Example',
-      theme: ThemeData(
-        textTheme: GoogleFonts.robotoMonoTextTheme(),
-        extensions: <ThemeExtension<dynamic>>[lightAppTheme],
-      ),
-      darkTheme: ThemeData(
-        textTheme: GoogleFonts.robotoMonoTextTheme(),
-        extensions: <ThemeExtension<dynamic>>[darkAppTheme],
-      ),
-      themeMode: ThemeMode.dark,
-      home: LoginScreen(connectUser: connectUser),
-      debugShowCheckedModeBanner: false,
-    );
-  }
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../core/auth_repository.dart';
 import 'home_tabs/join_call_tab.dart';
 import 'home_tabs/start_call_tab.dart';
 
@@ -73,6 +74,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _logout() async {
     await _streamVideo.disconnect();
+    final authRepository = await AuthRepository.getInstance();
+    await authRepository.clearCredentials();
 
     if (mounted) {
       Navigator.of(context).pop();
@@ -89,6 +92,14 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context) => StreamCallContainer(
           call: call,
           callConnectOptions: options,
+          onDeclineCallTap: () async {
+            await call.reject(reason: 'decline');
+            await call.leave();
+          },
+          onCancelCallTap: () async {
+            await call.reject(reason: 'cancel');
+            await call.leave();
+          },
         ),
       ),
     );

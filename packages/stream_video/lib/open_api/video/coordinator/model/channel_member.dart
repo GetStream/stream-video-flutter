@@ -22,6 +22,7 @@ class ChannelMember {
     this.inviteRejectedAt,
     this.invited,
     this.isModerator,
+    required this.notificationsMuted,
     required this.shadowBanned,
     this.status,
     required this.updatedAt,
@@ -91,6 +92,8 @@ class ChannelMember {
   ///
   bool? isModerator;
 
+  bool notificationsMuted;
+
   /// Whether member is shadow banned in this channel or not
   bool shadowBanned;
 
@@ -132,6 +135,7 @@ class ChannelMember {
     other.inviteRejectedAt == inviteRejectedAt &&
     other.invited == invited &&
     other.isModerator == isModerator &&
+    other.notificationsMuted == notificationsMuted &&
     other.shadowBanned == shadowBanned &&
     other.status == status &&
     other.updatedAt == updatedAt &&
@@ -150,6 +154,7 @@ class ChannelMember {
     (inviteRejectedAt == null ? 0 : inviteRejectedAt!.hashCode) +
     (invited == null ? 0 : invited!.hashCode) +
     (isModerator == null ? 0 : isModerator!.hashCode) +
+    (notificationsMuted.hashCode) +
     (shadowBanned.hashCode) +
     (status == null ? 0 : status!.hashCode) +
     (updatedAt.hashCode) +
@@ -157,7 +162,7 @@ class ChannelMember {
     (userId == null ? 0 : userId!.hashCode);
 
   @override
-  String toString() => 'ChannelMember[banExpires=$banExpires, banned=$banned, channelRole=$channelRole, createdAt=$createdAt, deletedAt=$deletedAt, inviteAcceptedAt=$inviteAcceptedAt, inviteRejectedAt=$inviteRejectedAt, invited=$invited, isModerator=$isModerator, shadowBanned=$shadowBanned, status=$status, updatedAt=$updatedAt, user=$user, userId=$userId]';
+  String toString() => 'ChannelMember[banExpires=$banExpires, banned=$banned, channelRole=$channelRole, createdAt=$createdAt, deletedAt=$deletedAt, inviteAcceptedAt=$inviteAcceptedAt, inviteRejectedAt=$inviteRejectedAt, invited=$invited, isModerator=$isModerator, notificationsMuted=$notificationsMuted, shadowBanned=$shadowBanned, status=$status, updatedAt=$updatedAt, user=$user, userId=$userId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -194,6 +199,7 @@ class ChannelMember {
     } else {
       json[r'is_moderator'] = null;
     }
+      json[r'notifications_muted'] = this.notificationsMuted;
       json[r'shadow_banned'] = this.shadowBanned;
     if (this.status != null) {
       json[r'status'] = this.status;
@@ -242,6 +248,7 @@ class ChannelMember {
         inviteRejectedAt: mapDateTime(json, r'invite_rejected_at', r''),
         invited: mapValueOfType<bool>(json, r'invited'),
         isModerator: mapValueOfType<bool>(json, r'is_moderator'),
+        notificationsMuted: mapValueOfType<bool>(json, r'notifications_muted')!,
         shadowBanned: mapValueOfType<bool>(json, r'shadow_banned')!,
         status: mapValueOfType<String>(json, r'status'),
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
@@ -297,6 +304,7 @@ class ChannelMember {
     'banned',
     'channel_role',
     'created_at',
+    'notifications_muted',
     'shadow_banned',
     'updated_at',
   };

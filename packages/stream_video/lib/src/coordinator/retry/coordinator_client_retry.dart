@@ -265,9 +265,10 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<None>> rejectCall({required StreamCallCid cid}) {
+  Future<Result<None>> rejectCall(
+      {required StreamCallCid cid, String? reason}) {
     return _retryManager.execute(
-      () => _delegate.rejectCall(cid: cid),
+      () => _delegate.rejectCall(cid: cid, reason: reason),
       (error, nextAttemptDelay) async {
         _logRetry('rejectCall', error, nextAttemptDelay);
       },

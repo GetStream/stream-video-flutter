@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app_config.dart';
+import '../core/auth_repository.dart';
 import 'home_screen.dart';
 
 typedef ConnectUser = Future<Result<None>> Function(
@@ -22,6 +23,20 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool loggingIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    restoreLoggedInUser();
+  }
+
+  Future<void> restoreLoggedInUser() async {
+    final authRepository = await AuthRepository.getInstance();
+    final credentials = authRepository.getCredentials();
+    if (credentials != null) {
+      await _onUserTap(credentials.userInfo);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -15,30 +15,36 @@ class RingSettingsResponse {
   RingSettingsResponse({
     required this.autoCancelTimeoutMs,
     required this.incomingCallTimeoutMs,
+    required this.missedCallTimeoutMs,
   });
 
   int autoCancelTimeoutMs;
 
   int incomingCallTimeoutMs;
 
+  int missedCallTimeoutMs;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is RingSettingsResponse &&
     other.autoCancelTimeoutMs == autoCancelTimeoutMs &&
-    other.incomingCallTimeoutMs == incomingCallTimeoutMs;
+    other.incomingCallTimeoutMs == incomingCallTimeoutMs &&
+    other.missedCallTimeoutMs == missedCallTimeoutMs;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (autoCancelTimeoutMs.hashCode) +
-    (incomingCallTimeoutMs.hashCode);
+    (incomingCallTimeoutMs.hashCode) +
+    (missedCallTimeoutMs.hashCode);
 
   @override
-  String toString() => 'RingSettingsResponse[autoCancelTimeoutMs=$autoCancelTimeoutMs, incomingCallTimeoutMs=$incomingCallTimeoutMs]';
+  String toString() => 'RingSettingsResponse[autoCancelTimeoutMs=$autoCancelTimeoutMs, incomingCallTimeoutMs=$incomingCallTimeoutMs, missedCallTimeoutMs=$missedCallTimeoutMs]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'auto_cancel_timeout_ms'] = this.autoCancelTimeoutMs;
       json[r'incoming_call_timeout_ms'] = this.incomingCallTimeoutMs;
+      json[r'missed_call_timeout_ms'] = this.missedCallTimeoutMs;
     return json;
   }
 
@@ -63,6 +69,7 @@ class RingSettingsResponse {
       return RingSettingsResponse(
         autoCancelTimeoutMs: mapValueOfType<int>(json, r'auto_cancel_timeout_ms')!,
         incomingCallTimeoutMs: mapValueOfType<int>(json, r'incoming_call_timeout_ms')!,
+        missedCallTimeoutMs: mapValueOfType<int>(json, r'missed_call_timeout_ms')!,
       );
     }
     return null;
@@ -112,6 +119,7 @@ class RingSettingsResponse {
   static const requiredKeys = <String>{
     'auto_cancel_timeout_ms',
     'incoming_call_timeout_ms',
+    'missed_call_timeout_ms',
   };
 }
 

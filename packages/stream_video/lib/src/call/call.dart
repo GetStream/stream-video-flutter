@@ -374,6 +374,7 @@ class Call {
 
   Future<Result<None>> accept() async {
     final state = this.state.value;
+    _logger.i(() => '[reject] ${_status.value}; state: $state');
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
       _logger.w(() => '[acceptCall] rejected (invalid status): $status');
@@ -386,15 +387,17 @@ class Call {
     return result;
   }
 
-  Future<Result<None>> reject() async {
+  Future<Result<None>> reject({String? reason}) async {
     final state = this.state.value;
+    _logger.i(() => '[reject] ${_status.value}; state: $state');
     final status = state.status;
     if ((status is! CallStatusIncoming || status.acceptedByMe) &&
         status is! CallStatusOutgoing) {
       _logger.w(() => '[rejectCall] rejected (invalid status): $status');
       return Result.error('invalid status: $status');
     }
-    final result = await _coordinatorClient.rejectCall(cid: state.callCid);
+    final result =
+        await _coordinatorClient.rejectCall(cid: state.callCid, reason: reason);
     if (result is Success<None>) {
       _stateManager.lifecycleCallRejected();
     }

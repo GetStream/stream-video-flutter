@@ -17,6 +17,7 @@ class CallSettingsResponse {
     required this.backstage,
     required this.broadcasting,
     required this.geofencing,
+    required this.limits,
     required this.recording,
     required this.ring,
     required this.screensharing,
@@ -32,6 +33,8 @@ class CallSettingsResponse {
   BroadcastSettingsResponse broadcasting;
 
   GeofenceSettingsResponse geofencing;
+
+  LimitsSettingsResponse limits;
 
   RecordSettingsResponse recording;
 
@@ -51,6 +54,7 @@ class CallSettingsResponse {
     other.backstage == backstage &&
     other.broadcasting == broadcasting &&
     other.geofencing == geofencing &&
+    other.limits == limits &&
     other.recording == recording &&
     other.ring == ring &&
     other.screensharing == screensharing &&
@@ -65,6 +69,7 @@ class CallSettingsResponse {
     (backstage.hashCode) +
     (broadcasting.hashCode) +
     (geofencing.hashCode) +
+    (limits.hashCode) +
     (recording.hashCode) +
     (ring.hashCode) +
     (screensharing.hashCode) +
@@ -73,7 +78,7 @@ class CallSettingsResponse {
     (video.hashCode);
 
   @override
-  String toString() => 'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, recording=$recording, ring=$ring, screensharing=$screensharing, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
+  String toString() => 'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, geofencing=$geofencing, limits=$limits, recording=$recording, ring=$ring, screensharing=$screensharing, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -81,6 +86,7 @@ class CallSettingsResponse {
       json[r'backstage'] = this.backstage;
       json[r'broadcasting'] = this.broadcasting;
       json[r'geofencing'] = this.geofencing;
+      json[r'limits'] = this.limits;
       json[r'recording'] = this.recording;
       json[r'ring'] = this.ring;
       json[r'screensharing'] = this.screensharing;
@@ -113,6 +119,7 @@ class CallSettingsResponse {
         backstage: BackstageSettingsResponse.fromJson(json[r'backstage'])!,
         broadcasting: BroadcastSettingsResponse.fromJson(json[r'broadcasting'])!,
         geofencing: GeofenceSettingsResponse.fromJson(json[r'geofencing'])!,
+        limits: LimitsSettingsResponse.fromJson(json[r'limits'])!,
         recording: RecordSettingsResponse.fromJson(json[r'recording'])!,
         ring: RingSettingsResponse.fromJson(json[r'ring'])!,
         screensharing: ScreensharingSettingsResponse.fromJson(json[r'screensharing'])!,
@@ -170,6 +177,7 @@ class CallSettingsResponse {
     'backstage',
     'broadcasting',
     'geofencing',
+    'limits',
     'recording',
     'ring',
     'screensharing',

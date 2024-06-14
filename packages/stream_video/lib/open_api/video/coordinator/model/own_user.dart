@@ -14,6 +14,7 @@ class OwnUser {
   /// Returns a new [OwnUser] instance.
   OwnUser({
     required this.banned,
+    this.blockedUserIds = const [],
     this.channelMutes = const [],
     required this.createdAt,
     this.custom = const {},
@@ -39,6 +40,8 @@ class OwnUser {
   });
 
   bool banned;
+
+  List<String> blockedUserIds;
 
   List<ChannelMute> channelMutes;
 
@@ -123,6 +126,7 @@ class OwnUser {
   @override
   bool operator ==(Object other) => identical(this, other) || other is OwnUser &&
     other.banned == banned &&
+    _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
     _deepEquality.equals(other.channelMutes, channelMutes) &&
     other.createdAt == createdAt &&
     _deepEquality.equals(other.custom, custom) &&
@@ -150,6 +154,7 @@ class OwnUser {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (banned.hashCode) +
+    (blockedUserIds.hashCode) +
     (channelMutes.hashCode) +
     (createdAt.hashCode) +
     (custom.hashCode) +
@@ -174,11 +179,12 @@ class OwnUser {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'OwnUser[banned=$banned, channelMutes=$channelMutes, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, devices=$devices, id=$id, invisible=$invisible, language=$language, lastActive=$lastActive, latestHiddenChannels=$latestHiddenChannels, mutes=$mutes, online=$online, privacySettings=$privacySettings, pushNotifications=$pushNotifications, role=$role, teams=$teams, totalUnreadCount=$totalUnreadCount, unreadChannels=$unreadChannels, unreadCount=$unreadCount, unreadThreads=$unreadThreads, updatedAt=$updatedAt]';
+  String toString() => 'OwnUser[banned=$banned, blockedUserIds=$blockedUserIds, channelMutes=$channelMutes, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, devices=$devices, id=$id, invisible=$invisible, language=$language, lastActive=$lastActive, latestHiddenChannels=$latestHiddenChannels, mutes=$mutes, online=$online, privacySettings=$privacySettings, pushNotifications=$pushNotifications, role=$role, teams=$teams, totalUnreadCount=$totalUnreadCount, unreadChannels=$unreadChannels, unreadCount=$unreadCount, unreadThreads=$unreadThreads, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'banned'] = this.banned;
+      json[r'blocked_user_ids'] = this.blockedUserIds;
       json[r'channel_mutes'] = this.channelMutes;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'custom'] = this.custom;
@@ -248,6 +254,9 @@ class OwnUser {
 
       return OwnUser(
         banned: mapValueOfType<bool>(json, r'banned')!,
+        blockedUserIds: json[r'blocked_user_ids'] is Iterable
+            ? (json[r'blocked_user_ids'] as Iterable).cast<String>().toList(growable: false)
+            : const [],
         channelMutes: ChannelMute.listFromJson(json[r'channel_mutes']),
         createdAt: mapDateTime(json, r'created_at', r'')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,

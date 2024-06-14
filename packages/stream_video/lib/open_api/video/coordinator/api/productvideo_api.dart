@@ -1455,20 +1455,22 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<Response> rejectCallWithHttpInfo(String type, String id,) async {
+  ///
+  /// * [RejectCallRequest] rejectCallRequest (required):
+  Future<Response> rejectCallWithHttpInfo(String type, String id, RejectCallRequest rejectCallRequest,) async {
     // ignore: prefer_const_declarations
     final path = r'/video/call/{type}/{id}/reject'
       .replaceAll('{type}', type)
       .replaceAll('{id}', id);
 
     // ignore: prefer_final_locals
-    Object? postBody;
+    Object? postBody = rejectCallRequest;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
     final formParams = <String, String>{};
 
-    const contentTypes = <String>[];
+    const contentTypes = <String>['application/json'];
 
 
     return apiClient.invokeAPI(
@@ -1491,8 +1493,10 @@ class ProductvideoApi {
   /// * [String] type (required):
   ///
   /// * [String] id (required):
-  Future<RejectCallResponse?> rejectCall(String type, String id,) async {
-    final response = await rejectCallWithHttpInfo(type, id,);
+  ///
+  /// * [RejectCallRequest] rejectCallRequest (required):
+  Future<RejectCallResponse?> rejectCall(String type, String id, RejectCallRequest rejectCallRequest,) async {
+    final response = await rejectCallWithHttpInfo(type, id, rejectCallRequest,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
