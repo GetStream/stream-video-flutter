@@ -766,7 +766,8 @@ class CallSession extends Disposable {
   Future<Result<None>> setSubscriptions(
     List<SubscriptionChange> subscriptionChanges,
   ) async {
-    _logger.d(() => '[setSubscriptions] subscriptionChanges: $subscriptionChanges');
+    _logger.d(
+        () => '[setSubscriptions] subscriptionChanges: $subscriptionChanges');
 
     final participants = stateManager.callState.callParticipants;
     final exclude = {SfuTrackType.video, SfuTrackType.screenShare};
@@ -792,7 +793,8 @@ class CallSession extends Disposable {
   Future<Result<None>> updateSubscription(
     SubscriptionChange subscriptionChange,
   ) async {
-    _logger.d(() => '[updateSubscription] subscriptionChange: $subscriptionChange');
+    _logger.d(
+        () => '[updateSubscription] subscriptionChange: $subscriptionChange');
     return _saBuffer.post(subscriptionChange);
   }
 
@@ -885,6 +887,7 @@ class CallSession extends Disposable {
       enabled: enabled,
       constraints: constraints,
     );
+
     return result.map((_) => none);
   }
 

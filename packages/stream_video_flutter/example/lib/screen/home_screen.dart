@@ -18,15 +18,18 @@ class _HomeScreenState extends State<HomeScreen> {
   final StreamVideo _streamVideo = StreamVideo.instance;
   late final currentUser = _streamVideo.currentUser;
 
-  StreamSubscription<Call>? _onIncomingCallSubscription;
+  StreamSubscription<Call?>? _onIncomingCallSubscription;
 
   @override
   void initState() {
     super.initState();
     _onIncomingCallSubscription?.cancel();
-    _onIncomingCallSubscription = _streamVideo.state.incomingCall.listen(
-      _onNavigateToCall,
-    );
+    _onIncomingCallSubscription =
+        _streamVideo.state.incomingCall.listen((call) {
+      if (call != null) {
+        _onNavigateToCall(call);
+      }
+    });
   }
 
   @override
