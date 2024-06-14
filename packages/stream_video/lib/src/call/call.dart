@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
@@ -1586,6 +1587,10 @@ class Call {
     }
 
     return result;
+  }
+
+  Future<bool> requestScreenSharePermission() {
+    return Helper.requestCapturePermission();
   }
 
   Future<Result<None>> setScreenShareEnabled({
