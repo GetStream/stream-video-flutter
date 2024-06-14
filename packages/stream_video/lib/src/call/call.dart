@@ -1635,6 +1635,10 @@ class Call {
     return result;
   }
 
+  Future<bool> requestScreenSharePermission() {
+    return Helper.requestCapturePermission();
+  }
+
   Future<Result<None>> setScreenShareEnabled({
     required bool enabled,
     ScreenShareConstraints? constraints,
