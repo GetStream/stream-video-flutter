@@ -7,21 +7,36 @@ import 'package:http/http.dart' as http;
 enum Environment {
   pronto(
     'Pronto',
+    'pronto',
+    'pronto.getstream.io',
     aliases: ['stream-calls-dogfood'],
+  ),
+  prontoStaging(
+    'Pronto Staging',
+    'pronto',
+    'pronto-staging.getstream.io',
   ),
   demo(
     'Demo',
+    'demo',
+    'demo.getstream.io',
     aliases: [''],
   ),
   staging(
     'Staging',
+    'staging',
+    'pronto.getstream.io',
   );
 
   final String displayName;
+  final String envName;
+  final String hostName;
   final List<String> aliases;
 
   const Environment(
-    this.displayName, {
+    this.displayName,
+    this.envName,
+    this.hostName, {
     this.aliases = const [],
   });
 
@@ -59,7 +74,7 @@ class TokenService {
     Duration? expiresIn,
   }) async {
     final queryParameters = <String, dynamic>{
-      'environment': environment.name,
+      'environment': environment.envName,
       'user_id': userId,
     };
 
@@ -69,7 +84,7 @@ class TokenService {
 
     final uri = Uri(
       scheme: 'https',
-      host: 'pronto.getstream.io',
+      host: environment.hostName,
       path: '/api/auth/create-token',
       queryParameters: queryParameters,
     );

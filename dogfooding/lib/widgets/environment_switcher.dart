@@ -109,10 +109,12 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
                         child: Center(
                           child: Text(
                             env.displayName,
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: selectedEnvironment == env
-                                    ? AppColorPalette.appGreen
-                                    : Colors.white),
+                              color: selectedEnvironment == env
+                                  ? AppColorPalette.appGreen
+                                  : Colors.white,
+                            ),
                           ),
                         ),
                       ),
