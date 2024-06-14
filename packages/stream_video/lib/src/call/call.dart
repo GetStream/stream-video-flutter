@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
@@ -40,7 +41,9 @@ typedef OnCallPermissionRequest = void Function(
 typedef GetCurrentUserId = String? Function();
 
 typedef SetActiveCall = Future<void> Function(Call?);
-typedef GetActiveCallCid = StreamCallCid? Function();
+typedef SetOutgoingCall = Future<void> Function(Call?);
+typedef GetActiveCall = Call? Function();
+typedef GetOutgoingCall = Call? Function();
 
 const _idState = 1;
 const _idUserId = 2;
@@ -67,7 +70,9 @@ class Call {
     required CoordinatorClient coordinatorClient,
     required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
-    required GetActiveCallCid getActiveCallCid,
+    required SetOutgoingCall setOutgoingCall,
+    required GetActiveCall getActiveCall,
+    required GetOutgoingCall getOutgoingCall,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -78,7 +83,9 @@ class Call {
       coordinatorClient: coordinatorClient,
       currentUser: currentUser,
       setActiveCall: setActiveCall,
-      getActiveCallCid: getActiveCallCid,
+      setOutgoingCall: setOutgoingCall,
+      getActiveCall: getActiveCall,
+      getOutgoingCall: getOutgoingCall,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
       preferences: preferences,
@@ -93,7 +100,9 @@ class Call {
     required CoordinatorClient coordinatorClient,
     required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
-    required GetActiveCallCid getActiveCallCid,
+    required SetOutgoingCall setOutgoingCall,
+    required GetActiveCall getActiveCall,
+    required GetOutgoingCall getOutgoingCall,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -104,7 +113,9 @@ class Call {
       coordinatorClient: coordinatorClient,
       currentUser: currentUser,
       setActiveCall: setActiveCall,
-      getActiveCallCid: getActiveCallCid,
+      setOutgoingCall: setOutgoingCall,
+      getActiveCall: getActiveCall,
+      getOutgoingCall: getOutgoingCall,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
       preferences: preferences,
@@ -124,7 +135,9 @@ class Call {
     required CoordinatorClient coordinatorClient,
     required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
-    required GetActiveCallCid getActiveCallCid,
+    required SetOutgoingCall setOutgoingCall,
+    required GetActiveCall getActiveCall,
+    required GetOutgoingCall getOutgoingCall,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -135,7 +148,9 @@ class Call {
       coordinatorClient: coordinatorClient,
       currentUser: currentUser,
       setActiveCall: setActiveCall,
-      getActiveCallCid: getActiveCallCid,
+      setOutgoingCall: setOutgoingCall,
+      getActiveCall: getActiveCall,
+      getOutgoingCall: getOutgoingCall,
       retryPolicy: retryPolicy,
       sdpPolicy: sdpPolicy,
       preferences: preferences,
@@ -147,7 +162,9 @@ class Call {
     required CoordinatorClient coordinatorClient,
     required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
-    required GetActiveCallCid getActiveCallCid,
+    required SetOutgoingCall setOutgoingCall,
+    required GetActiveCall getActiveCall,
+    required GetOutgoingCall getOutgoingCall,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
     CallPreferences? preferences,
@@ -171,7 +188,9 @@ class Call {
       coordinatorClient: coordinatorClient,
       currentUser: currentUser,
       setActiveCall: setActiveCall,
-      getActiveCallCid: getActiveCallCid,
+      setOutgoingCall: setOutgoingCall,
+      getActiveCall: getActiveCall,
+      getOutgoingCall: getOutgoingCall,
       preferences: finalCallPreferences,
       stateManager: stateManager,
       credentials: credentials,
@@ -184,7 +203,9 @@ class Call {
   Call._({
     required StateEmitter<User?> currentUser,
     required SetActiveCall setActiveCall,
-    required GetActiveCallCid getActiveCallCid,
+    required SetOutgoingCall setOutgoingCall,
+    required GetActiveCall getActiveCall,
+    required GetOutgoingCall getOutgoingCall,
     required CoordinatorClient coordinatorClient,
     required CallPreferences preferences,
     required CallStateNotifier stateManager,
@@ -205,7 +226,9 @@ class Call {
             .whereNotNull()
             .distinct(),
         _setActiveCall = setActiveCall,
-        _getActiveCallCid = getActiveCallCid,
+        _setOutgoingCall = setOutgoingCall,
+        _getActiveCall = getActiveCall,
+        _getOutgoingCall = getOutgoingCall,
         _coordinatorClient = coordinatorClient,
         _preferences = preferences,
         _retryPolicy = retryPolicy,
@@ -225,7 +248,9 @@ class Call {
   final GetCurrentUserId _getCurrentUserId;
   final Stream<String> _currentUserIdUpdates;
   final SetActiveCall _setActiveCall;
-  final GetActiveCallCid _getActiveCallCid;
+  final SetOutgoingCall _setOutgoingCall;
+  final GetActiveCall _getActiveCall;
+  final GetOutgoingCall _getOutgoingCall;
   final CoordinatorClient _coordinatorClient;
   final RetryPolicy _retryPolicy;
   final CallPreferences _preferences;
@@ -239,6 +264,8 @@ class Call {
   StreamCallCid get callCid => state.value.callCid;
 
   StreamCallType get type => state.value.callType;
+
+  bool get isActiveCall => _getActiveCall()?.callCid == callCid;
 
   String get id => state.value.callId;
 
@@ -379,6 +406,21 @@ class Call {
       _logger.w(() => '[acceptCall] rejected (invalid status): $status');
       return Result.error('invalid status: $status');
     }
+
+    final outgoingCall = _getOutgoingCall();
+    if (outgoingCall?.callCid != callCid) {
+      await outgoingCall?.reject(reason: 'cancel');
+      await outgoingCall?.leave();
+      await _setOutgoingCall(null);
+    }
+
+    final activeCall = _getActiveCall();
+    if (activeCall?.callCid != callCid) {
+      await activeCall?.reject(reason: 'cancel');
+      await activeCall?.leave();
+      await _setActiveCall(null);
+    }
+
     final result = await _coordinatorClient.acceptCall(cid: state.callCid);
     if (result is Success<None>) {
       _stateManager.lifecycleCallAccepted();
@@ -447,7 +489,7 @@ class Call {
       return const Result.success(none);
     }
 
-    if (_getActiveCallCid() == callCid) {
+    if (_getActiveCall()?.callCid == callCid) {
       _logger.w(
         () => '[join] rejected (a call with the same cid is in progress)',
       );
@@ -996,6 +1038,7 @@ class Call {
     await _session?.dispose();
     _session = null;
     await _setActiveCall(null);
+    await _setOutgoingCall(null);
     _logger.v(() => '[clear] completed');
   }
 
@@ -1288,6 +1331,10 @@ class Call {
     if (currentUserId == null) {
       _logger.e(() => '[getOrCreate] failed (no userId)');
       return Result.error('[getOrCreate] failed; no user_id found');
+    }
+
+    if (ringing) {
+      await _setOutgoingCall(this);
     }
 
     final response = await _coordinatorClient.getOrCreateCall(

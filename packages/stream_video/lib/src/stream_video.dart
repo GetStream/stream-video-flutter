@@ -493,7 +493,9 @@ class StreamVideo extends Disposable {
       coordinatorClient: _client,
       currentUser: _state.user,
       setActiveCall: _state.setActiveCall,
-      getActiveCallCid: _state.getActiveCallCid,
+      setOutgoingCall: _state.setOutgoingCall,
+      getActiveCall: _state.getActiveCall,
+      getOutgoingCall: _state.getOutgoingCall,
       retryPolicy: _options.retryPolicy,
       sdpPolicy: _options.sdpPolicy,
       preferences: preferences,
@@ -509,7 +511,9 @@ class StreamVideo extends Disposable {
       coordinatorClient: _client,
       currentUser: _state.user,
       setActiveCall: _state.setActiveCall,
-      getActiveCallCid: _state.getActiveCallCid,
+      setOutgoingCall: _state.setOutgoingCall,
+      getActiveCall: _state.getActiveCall,
+      getOutgoingCall: _state.getOutgoingCall,
       retryPolicy: _options.retryPolicy,
       sdpPolicy: _options.sdpPolicy,
       preferences: preferences,
@@ -718,7 +722,7 @@ class StreamVideo extends Disposable {
     }
 
     if (_state.incomingCall.valueOrNull?.callCid.value == cid) {
-      return Result.success(_state.incomingCall.value);
+      return Result.success(_state.incomingCall.value!);
     }
 
     final callCid = StreamCallCid(cid: cid);

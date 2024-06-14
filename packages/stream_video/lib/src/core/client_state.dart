@@ -1,5 +1,4 @@
 import '../call/call.dart';
-import '../models/call_cid.dart';
 import '../models/user.dart';
 import '../state_emitter.dart';
 import 'connection_state.dart';
@@ -21,7 +20,10 @@ abstract class ClientState {
   StateEmitter<Call?> get activeCall;
 
   /// Emits when a call was created by another user with ringing set as True.
-  StateEmitter<Call> get incomingCall;
+  StateEmitter<Call?> get incomingCall;
+
+  /// Emits when a call was created by another user with ringing set as True.
+  StateEmitter<Call?> get outgoingCall;
 }
 
 class MutableClientState implements ClientState {
@@ -29,6 +31,7 @@ class MutableClientState implements ClientState {
       : user = MutableStateEmitterImpl(user),
         activeCall = MutableStateEmitterImpl(null),
         incomingCall = MutableStateEmitterImpl(null),
+        outgoingCall = MutableStateEmitterImpl(null),
         connection = MutableStateEmitterImpl(
           ConnectionState.disconnected(user.id),
         );
@@ -40,7 +43,10 @@ class MutableClientState implements ClientState {
   final MutableStateEmitter<Call?> activeCall;
 
   @override
-  final MutableStateEmitter<Call> incomingCall;
+  final MutableStateEmitter<Call?> incomingCall;
+
+  @override
+  final MutableStateEmitter<Call?> outgoingCall;
 
   @override
   final MutableStateEmitter<ConnectionState> connection;
@@ -50,16 +56,23 @@ class MutableClientState implements ClientState {
 
   Future<void> clear() async {
     activeCall.value = null;
+    outgoingCall.value = null;
     connection.value = ConnectionState.disconnected(user.value.id);
   }
 
-  StreamCallCid? getActiveCallCid() => activeCall.valueOrNull?.callCid;
+  Call? getActiveCall() => activeCall.valueOrNull;
+  Call? getOutgoingCall() => outgoingCall.valueOrNull;
 
   Future<void> setActiveCall(Call? call) async {
-    final ongoingCall = activeCall.valueOrNull;
-    if (ongoingCall != null && call != null) {
-      await ongoingCall.leave();
+    final currentlyActiveCall = activeCall.valueOrNull;
+    if (currentlyActiveCall != null && call != null) {
+      await currentlyActiveCall.leave();
     }
+
     activeCall.value = call;
+  }
+
+  Future<void> setOutgoingCall(Call? call) async {
+    outgoingCall.value = call;
   }
 }

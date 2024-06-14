@@ -70,7 +70,6 @@ class CoordinatorWebSocket extends StreamWebSocket
 
   bool _refreshToken = false;
 
-  @override
   SharedEmitter<CoordinatorEvent> get events => _events;
   final _events = MutableSharedEmitterImpl<CoordinatorEvent>();
 
