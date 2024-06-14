@@ -22,7 +22,7 @@ abstract class ClientState {
   /// Emits when a call was created by another user with ringing set as True.
   StateEmitter<Call?> get incomingCall;
 
-  /// Emits when a call was created by another user with ringing set as True.
+  /// Emits when a call was created by current user with ringing set as True.
   StateEmitter<Call?> get outgoingCall;
 }
 
