@@ -39,6 +39,6 @@ class AuthRepository {
   }
 
   Future<bool> clearCredentials() async {
-    return await _prefs.remove(_kAuthCredentialsPref);
+    return _prefs.remove(_kAuthCredentialsPref);
   }
 }

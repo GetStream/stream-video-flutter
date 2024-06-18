@@ -389,6 +389,10 @@ class Call {
       return _stateManager.coordinatorCallRecordingStarted(event);
     } else if (event is CoordinatorCallRecordingStoppedEvent) {
       return _stateManager.coordinatorCallRecordingStopped(event);
+    } else if (event is CoordinatorCallTranscriptionStartedEvent) {
+      return _stateManager.coordinatorCallTranscriptionStarted(event);
+    } else if (event is CoordinatorCallTranscriptionStoppedEvent) {
+      return _stateManager.coordinatorCallTranscriptionStopped(event);
     } else if (event is CoordinatorCallBroadcastingStartedEvent) {
       return _stateManager.coordinatorCallBroadcastingStarted(event);
     } else if (event is CoordinatorCallBroadcastingStoppedEvent) {
@@ -1482,6 +1486,30 @@ class Call {
     return result;
   }
 
+  Future<Result<None>> startTranscription() async {
+    final result = await _permissionsManager.startTranscription();
+
+    if (result.isSuccess) {
+      _stateManager.setCallTranscribing(isTranscribing: true);
+    }
+
+    return result;
+  }
+
+  Future<Result<List<CallTranscription>>> listTranscriptions() async {
+    return _permissionsManager.listTranscriptions();
+  }
+
+  Future<Result<None>> stopTranscription() async {
+    final result = await _permissionsManager.stopTranscription();
+
+    if (result.isSuccess) {
+      _stateManager.setCallTranscribing(isTranscribing: false);
+    }
+
+    return result;
+  }
+
   /// Starts the broadcasting of the call.
   Future<Result<String?>> startHLS() async {
     final result = await _permissionsManager.startBroadcasting();
@@ -1776,7 +1804,8 @@ class Call {
   }
 
   Future<Result<None>> setSubscriptions(
-      List<SubscriptionChange> changes) async {
+    List<SubscriptionChange> changes,
+  ) async {
     final result = await _session?.setSubscriptions(changes) ??
         Result.error('Session is null');
 

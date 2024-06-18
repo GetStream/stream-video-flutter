@@ -56,7 +56,7 @@ void main() {
       userId: '3',
       sessionId: '3',
       custom: {},
-      roles: const ['admin'],
+      roles: ['admin'],
       trackIdPrefix: '123',
       publishedTracks: {},
       connectionQuality: SfuConnectionQuality.excellent,
