@@ -134,6 +134,10 @@ class _CallScreenState extends State<CallScreen> {
         body: StreamCallContainer(
           call: widget.call,
           callConnectOptions: widget.connectOptions,
+          onCancelCallTap: () async {
+            await widget.call.reject();
+            await widget.call.leave();
+          },
           callContentBuilder: (
             BuildContext context,
             Call call,
