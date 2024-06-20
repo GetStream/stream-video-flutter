@@ -79,6 +79,15 @@ final class StreamTokenProvider {
     }).map((event) => event.body['deviceTokenVoIP']);
   }
 
+  static Future<String?> getAPNToken() async {
+    if (!CurrentPlatform.isIos) return null;
+
+    final token = await FirebaseMessaging.instance.getAPNSToken();
+    if (token is! String || token.isEmpty) return null;
+
+    return token;
+  }
+
   /// Gets the current push token for the device.
   static Future<String?> getFirebaseToken() async {
     final token = await FirebaseMessaging.instance.getToken();

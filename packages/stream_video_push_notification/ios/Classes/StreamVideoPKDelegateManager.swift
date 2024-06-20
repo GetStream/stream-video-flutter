@@ -3,7 +3,7 @@ import PushKit
 import Flutter
 import flutter_callkit_incoming
 
-public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
+public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate, UNUserNotificationCenterDelegate {
     public static let shared = StreamVideoPKDelegateManager()
     
     private var pushRegistry: PKPushRegistry?
@@ -15,9 +15,27 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate {
     }
     
     @objc public func registerForPushNotifications() {
+        UNUserNotificationCenter.current().delegate = self
+        UNUserNotificationCenter
+                    .current()
+                    .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+                        if granted {
+                            DispatchQueue.main.async {
+                                UIApplication.shared.registerForRemoteNotifications()
+                            }
+                        }
+                    }
+        
         pushRegistry = PKPushRegistry(queue: DispatchQueue.main)
         pushRegistry?.delegate = self
         pushRegistry?.desiredPushTypes = [.voIP]
+    }
+    
+    public func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                       willPresent notification: UNNotification,
+                                       withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        let payloadDict = notification.request.content
+        completionHandler([.banner, .sound])
     }
     
     public func initChannel(mainChannel: FlutterMethodChannel) {
