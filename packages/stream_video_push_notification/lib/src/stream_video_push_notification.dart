@@ -181,17 +181,27 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       return;
     }
 
-    void registerDevice(String token) {
+    void registerDevice(String token, bool isVoIP) {
       _client.createDevice(
         id: token,
-        voipToken: pushProvider.isVoIP,
+        voipToken: isVoIP,
         pushProvider: pushProvider.type,
         pushProviderName: pushProvider.name,
       );
     }
 
+    if (CurrentPlatform.isIos) {
+      StreamTokenProvider.getAPNToken().then((token) {
+        if (token != null) {
+          registerDevice(token, false);
+        }
+      });
+    }
+
     _subscriptions.addIfAbsent(
-        _idToken, () => pushProvider.onTokenRefresh.listen(registerDevice));
+        _idToken,
+        () => pushProvider.onTokenRefresh
+            .listen((token) => registerDevice(token, true)));
   }
 
   @override
@@ -381,7 +391,7 @@ const _defaultPushParams = StreamVideoPushParams(
     audioSessionPreferredSampleRate: 44100.0,
     audioSessionPreferredIOBufferDuration: 0.005,
     supportsDTMF: true,
-    supportsHolding: true,
+    supportsHolding: false,
     supportsGrouping: false,
     supportsUngrouping: false,
     ringtonePath: 'system_ringtone_default',
