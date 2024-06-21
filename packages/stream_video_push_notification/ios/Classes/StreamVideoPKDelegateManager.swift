@@ -35,7 +35,12 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate, UNU
                                        willPresent notification: UNNotification,
                                        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let payloadDict = notification.request.content
-        completionHandler([.banner, .sound])
+      
+        if #available(iOS 14.0, *) {
+            completionHandler([.list, .banner, .sound])
+        } else {
+            completionHandler([.alert])
+        }
     }
     
     public func initChannel(mainChannel: FlutterMethodChannel) {
