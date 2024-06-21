@@ -1,3 +1,5 @@
+// ignore_for_file: unreachable_from_main
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -64,7 +66,8 @@ Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
     final receiverId = payload['receiver_id'] as String?;
     if (receiverId != credentials.userInfo.id) {
       debugPrint(
-          'Not a call for this user($receiverId != ${credentials.userInfo.id})');
+        'Not a call for this user($receiverId != ${credentials.userInfo.id})',
+      );
       return;
     }
     final createdByDisplayName = payload['created_by_display_name'] as String?;
@@ -105,7 +108,10 @@ Future<void> initNotifications() async {
 }
 
 Future<void> showNotification(
-    String? callCid, String? type, String? fromUser) async {
+  String? callCid,
+  String? type,
+  String? fromUser,
+) async {
   const platformChannelSpecifics =
       ln.NotificationDetails(android: androidPlatformChannelSpecifics);
 
@@ -152,7 +158,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
-  dispose() {
+  void dispose() {
     _fcmSubscription?.cancel();
     super.dispose();
   }

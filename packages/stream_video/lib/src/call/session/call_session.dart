@@ -751,14 +751,17 @@ class CallSession extends Disposable {
     VisibilityChange visibilityChange,
   ) async {
     _logger.d(
-        () => '[updateViewportVisibility] visibilityChange: $visibilityChange');
+      () => '[updateViewportVisibility] visibilityChange: $visibilityChange',
+    );
     return _vvBuffer.post(visibilityChange);
   }
 
   Future<Result<None>> updateViewportVisibilities(
     List<VisibilityChange> visibilityChanges,
   ) async {
-    _logger.d(() => '[updateViewportVisibilities] changes: $visibilityChanges');
+    _logger.d(
+      () => '[updateViewportVisibilities] changes: $visibilityChanges',
+    );
     // Nothing to do here, this is handled by the UI
     return const Result.success(none);
   }
@@ -767,7 +770,8 @@ class CallSession extends Disposable {
     List<SubscriptionChange> subscriptionChanges,
   ) async {
     _logger.d(
-        () => '[setSubscriptions] subscriptionChanges: $subscriptionChanges');
+      () => '[setSubscriptions] subscriptionChanges: $subscriptionChanges',
+    );
 
     final participants = stateManager.callState.callParticipants;
     final exclude = {SfuTrackType.video, SfuTrackType.screenShare};
@@ -794,7 +798,8 @@ class CallSession extends Disposable {
     SubscriptionChange subscriptionChange,
   ) async {
     _logger.d(
-        () => '[updateSubscription] subscriptionChange: $subscriptionChange');
+      () => '[updateSubscription] subscriptionChange: $subscriptionChange',
+    );
     return _saBuffer.post(subscriptionChange);
   }
 

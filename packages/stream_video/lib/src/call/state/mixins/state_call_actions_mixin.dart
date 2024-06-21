@@ -19,6 +19,13 @@ mixin StateCallActionsMixin on StateNotifier<CallState> {
     );
   }
 
+  void setCallTranscribing({required bool isTranscribing}) {
+    _logger.e(() => '[setCallTranscribing] isTranscribing:$isTranscribing');
+    state = state.copyWith(
+      isTranscribing: isTranscribing,
+    );
+  }
+
   void setCallBroadcasting({
     required bool isBroadcasting,
     String? hlsPlaylistUrl,

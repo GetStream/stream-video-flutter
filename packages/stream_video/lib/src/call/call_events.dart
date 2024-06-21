@@ -449,6 +449,38 @@ class StreamCallRecordingStoppedEvent extends StreamCallEvent {
       ];
 }
 
+/// Event that is triggered when the transcription is started for a call.
+class StreamCallTranscriptionStartedEvent extends StreamCallEvent {
+  const StreamCallTranscriptionStartedEvent(
+    super.callCid, {
+    required this.createdAt,
+  });
+
+  final DateTime createdAt;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+      ];
+}
+
+/// Event that is triggered when the transcription is stopped for a call.
+class StreamCallTranscriptionStoppedEvent extends StreamCallEvent {
+  const StreamCallTranscriptionStoppedEvent(
+    super.callCid, {
+    required this.createdAt,
+  });
+
+  final DateTime createdAt;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+      ];
+}
+
 /// Event that is triggered when the broadcasting is started for a call.
 class StreamCallBroadcastingStartedEvent extends StreamCallEvent {
   const StreamCallBroadcastingStartedEvent(
@@ -808,6 +840,16 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
         ),
       final CoordinatorCallRecordingStoppedEvent event =>
         StreamCallRecordingStoppedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+        ),
+      final CoordinatorCallTranscriptionStartedEvent event =>
+        StreamCallTranscriptionStartedEvent(
+          event.callCid,
+          createdAt: event.createdAt,
+        ),
+      final CoordinatorCallTranscriptionStoppedEvent event =>
+        StreamCallTranscriptionStoppedEvent(
           event.callCid,
           createdAt: event.createdAt,
         ),

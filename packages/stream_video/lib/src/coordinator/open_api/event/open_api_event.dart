@@ -42,6 +42,9 @@ class OpenApiEvent with EquatableMixin {
     this.callUserMuted,
     this.callRecordingReady,
     this.callRecordingFailed,
+    this.callTranscriptionStarted,
+    this.callTranscriptionStopped,
+    this.callTranscriptionFailed,
     this.custom,
     this.unknown,
   });
@@ -155,6 +158,15 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callMissed:
         final event = open.CallMissedEvent.fromJson(jsonObj);
         return result.copyWith(callMissed: event);
+      case EventType.callTranscriptionStarted:
+        final event = open.CallTranscriptionStartedEvent.fromJson(jsonObj);
+        return result.copyWith(callTranscriptionStarted: event);
+      case EventType.callTranscriptionStopped:
+        final event = open.CallTranscriptionStoppedEvent.fromJson(jsonObj);
+        return result.copyWith(callTranscriptionStopped: event);
+      case EventType.callTranscriptionFailed:
+        final event = open.CallTranscriptionFailedEvent.fromJson(jsonObj);
+        return result.copyWith(callTranscriptionFailed: event);
       case EventType.unknown:
         streamLog.e(_tag, () => '[fromJson] unexpected event: $jsonObj');
         return result.copyWith(unknown: jsonObj);
@@ -193,6 +205,9 @@ class OpenApiEvent with EquatableMixin {
   final open.CallUserMutedEvent? callUserMuted;
   final open.CallRecordingReadyEvent? callRecordingReady;
   final open.CallRecordingFailedEvent? callRecordingFailed;
+  final open.CallTranscriptionStartedEvent? callTranscriptionStarted;
+  final open.CallTranscriptionStoppedEvent? callTranscriptionStopped;
+  final open.CallTranscriptionFailedEvent? callTranscriptionFailed;
   final open.CustomVideoEvent? custom;
   final Object? unknown;
 
@@ -229,6 +244,9 @@ class OpenApiEvent with EquatableMixin {
     open.CallUserMutedEvent? callUserMuted,
     open.CallRecordingReadyEvent? callRecordingReady,
     open.CallRecordingFailedEvent? callRecordingFailed,
+    open.CallTranscriptionStartedEvent? callTranscriptionStarted,
+    open.CallTranscriptionStoppedEvent? callTranscriptionStopped,
+    open.CallTranscriptionFailedEvent? callTranscriptionFailed,
     open.CustomVideoEvent? custom,
     Object? unknown,
   }) {
@@ -272,6 +290,12 @@ class OpenApiEvent with EquatableMixin {
       callUserMuted: callUserMuted ?? this.callUserMuted,
       callRecordingReady: callRecordingReady ?? this.callRecordingReady,
       callRecordingFailed: callRecordingFailed ?? this.callRecordingFailed,
+      callTranscriptionStarted:
+          callTranscriptionStarted ?? this.callTranscriptionStarted,
+      callTranscriptionStopped:
+          callTranscriptionStopped ?? this.callTranscriptionStopped,
+      callTranscriptionFailed:
+          callTranscriptionFailed ?? this.callTranscriptionFailed,
       custom: custom ?? this.custom,
       unknown: unknown ?? this.unknown,
     );
@@ -311,6 +335,12 @@ class OpenApiEvent with EquatableMixin {
         callMemberUpdated,
         callMemberUpdatedPermission,
         callReaction,
+        callUserMuted,
+        callRecordingReady,
+        callRecordingFailed,
+        callTranscriptionStarted,
+        callTranscriptionStopped,
+        callTranscriptionFailed,
         custom,
         unknown,
       ];

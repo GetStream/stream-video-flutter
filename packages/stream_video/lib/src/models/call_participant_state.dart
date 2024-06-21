@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'user_info.dart';
 
 import '../sfu/data/models/sfu_connection_quality.dart';
 import '../sfu/data/models/sfu_track_type.dart';
@@ -8,6 +7,7 @@ import '../sorting/call_participant_sorting_presets.dart';
 import '../utils/string.dart';
 import 'call_reaction.dart';
 import 'call_track_state.dart';
+import 'user_info.dart';
 import 'viewport_visibility.dart';
 
 @immutable
@@ -170,9 +170,9 @@ class CallParticipantState
   }
 
   UserInfo toUserInfo() => UserInfo(
-    id: userId,
-    role: roles.firstOrNull ?? '',
-    name: name.ifEmpty(() => userId),
-    image: image,
-  );
+        id: userId,
+        role: roles.firstOrNull ?? '',
+        name: name.ifEmpty(() => userId),
+        image: image,
+      );
 }

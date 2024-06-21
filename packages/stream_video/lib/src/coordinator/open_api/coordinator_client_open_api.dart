@@ -710,6 +710,65 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   @override
+  Future<Result<None>> startTranscription(
+    StreamCallCid callCid, {
+    String? transcriptionExternalStorage,
+  }) async {
+    try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[startTranscription] no connection established');
+        return connectionResult;
+      }
+      await _defaultApi.startTranscription(
+        callCid.type.value,
+        callCid.id,
+        open.StartTranscriptionRequest(
+          transcriptionExternalStorage: transcriptionExternalStorage,
+        ),
+      );
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  Future<Result<List<open.CallTranscription>>> listTranscriptions(
+    StreamCallCid callCid,
+  ) async {
+    try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[listTranscriptions] no connection established');
+        return connectionResult;
+      }
+      final result = await _defaultApi.listTranscriptions(
+        callCid.type.value,
+        callCid.id,
+      );
+      return Result.success(result?.transcriptions ?? []);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
+  Future<Result<None>> stopTranscription(StreamCallCid callCid) async {
+    try {
+      final connectionResult = await _waitUntilConnected();
+      if (connectionResult is Failure) {
+        _logger.e(() => '[stopTranscription] no connection established');
+        return connectionResult;
+      }
+      await _defaultApi.stopTranscription(callCid.type.value, callCid.id);
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  @override
   Future<Result<String?>> startBroadcasting(StreamCallCid callCid) async {
     try {
       final connectionResult = await _waitUntilConnected();
