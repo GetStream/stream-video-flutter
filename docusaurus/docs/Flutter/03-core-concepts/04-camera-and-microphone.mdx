@@ -5,13 +5,6 @@ title: Camera and Microphone
 
 Working with hardware devices can always have some level of complexity to it but the SDK does a lot to abstract the complexities and expose an intuitive interface for querying the connected devices and changing them throughout the call.
 
-For turning the user’s camera on and off, the following methods can be invoked directly on the `Call` class:
-
-```dart
-call.setMicrophoneEnabled(enabled: true);
-call.setCameraEnabled(enabled: true);
-```
-
 :::note
   As a reminder, before attempting to access the user’s connected devices,
   please ensure the appropriate permissions are set in both the iOS `plist` file
@@ -20,16 +13,21 @@ call.setCameraEnabled(enabled: true);
 
 ### Camera Operations
 
-Conveniently attached to the `Call` class are a series of methods which can be used to flip the device’s camera, set the camera position and disable the camera all together.
+Conveniently attached to the `Call` class are a series of methods which can be used to flip the device’s camera, set the camera position, and disable the camera all together.
 
 ```dart
-final call = StreamVideo.instance.makeCall(callType: StreamCallType(), id: 'MY-CALL');
 call.flipCamera();
 call.setCameraPosition(CameraPosition.front);
 call.setCameraEnabled(enabled: false);
 ```
 
-### Microphone Operations
+You can fetch the current camera via the call state:
+
+```dart
+var camera = call.state.value.videoInputDevice;
+```
+
+### Audio Operations
 
 Similar the Camera API, the `Call` object also includes methods for performing audio actions like disabling the audio devices, configuring the audio input device and audio output device.
 
@@ -37,6 +35,13 @@ Similar the Camera API, the `Call` object also includes methods for performing a
 call.setAudioInputDevice(device);
 call.setAudioOutputDevice(device);
 call.setMicrophoneEnabled(enabled: true);
+```
+
+You can fetch the current input and output device via the call state:
+
+```dart
+var microphone = call.state.value.audioInputDevice;
+var speaker = call.state.value.audioOutputDevice;
 ```
 
 ### Listing Connected Devices
@@ -52,7 +57,7 @@ RtcMediaDeviceNotifier.instance.onDeviceChange.listen((devices) {
 });
 ```
 
-For the times where listening to hardware changes are not required, convince methods can be used to fetch the connected devices by their `RtcMediaDeviceKind`.
+When you need to fetch the list of video and audio devices available on the device, you can use the `RtcMediaDeviceNotifier` class:
 
 ```dart
 final videoDevices = RtcMediaDeviceNotifier.instance.audioOutputs();
