@@ -41,7 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
       onButtonClick: (call, type, serviceType) async {
         switch (serviceType) {
           case ServiceType.call:
-            call.end();
+            call.reject();
+            call.leave();
           case ServiceType.screenSharing:
             StreamVideoFlutterBackground.stopService(ServiceType.screenSharing);
             call.setScreenShareEnabled(enabled: false);
