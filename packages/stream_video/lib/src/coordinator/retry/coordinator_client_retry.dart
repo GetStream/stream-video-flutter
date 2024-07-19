@@ -265,8 +265,10 @@ class CoordinatorClientRetry extends CoordinatorClient {
   }
 
   @override
-  Future<Result<None>> rejectCall(
-      {required StreamCallCid cid, String? reason}) {
+  Future<Result<None>> rejectCall({
+    required StreamCallCid cid,
+    String? reason,
+  }) {
     return _retryManager.execute(
       () => _delegate.rejectCall(cid: cid, reason: reason),
       (error, nextAttemptDelay) async {
@@ -489,6 +491,44 @@ class CoordinatorClientRetry extends CoordinatorClient {
       () => _delegate.stopRecording(callCid),
       (error, nextAttemptDelay) async {
         _logRetry('stopRecording', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> startTranscription(
+    StreamCallCid callCid, {
+    String? transcriptionExternalStorage,
+  }) {
+    return _retryManager.execute(
+      () => _delegate.startTranscription(
+        callCid,
+        transcriptionExternalStorage: transcriptionExternalStorage,
+      ),
+      (error, nextAttemptDelay) async {
+        _logRetry('startTranscription', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<None>> stopTranscription(StreamCallCid callCid) {
+    return _retryManager.execute(
+      () => _delegate.stopTranscription(callCid),
+      (error, nextAttemptDelay) async {
+        _logRetry('stopTranscription', error, nextAttemptDelay);
+      },
+    );
+  }
+
+  @override
+  Future<Result<List<open.CallTranscription>>> listTranscriptions(
+    StreamCallCid callCid,
+  ) {
+    return _retryManager.execute(
+      () => _delegate.listTranscriptions(callCid),
+      (error, nextAttemptDelay) async {
+        _logRetry('listTranscriptions', error, nextAttemptDelay);
       },
     );
   }

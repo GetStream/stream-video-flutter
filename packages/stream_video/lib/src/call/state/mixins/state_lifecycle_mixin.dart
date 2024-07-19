@@ -94,6 +94,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       isBackstage: data.metadata.details.backstage,
       isBroadcasting: data.metadata.details.broadcasting,
       isRecording: data.metadata.details.recording,
+      isTranscribing: data.metadata.details.transcribing,
     );
   }
 
@@ -121,6 +122,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       isBackstage: data.metadata.details.backstage,
       isBroadcasting: data.metadata.details.broadcasting,
       isRecording: data.metadata.details.recording,
+      isTranscribing: data.metadata.details.transcribing,
       audioOutputDevice: callConnectOptions.audioOutputDevice,
       audioInputDevice: callConnectOptions.audioInputDevice,
     );
@@ -149,6 +151,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       isBackstage: data.metadata.details.backstage,
       isBroadcasting: data.metadata.details.broadcasting,
       isRecording: data.metadata.details.recording,
+      isTranscribing: data.metadata.details.transcribing,
     );
   }
 
@@ -182,6 +185,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       isBackstage: data.metadata.details.backstage,
       isBroadcasting: data.metadata.details.broadcasting,
       isRecording: data.metadata.details.recording,
+      isTranscribing: data.metadata.details.transcribing,
     );
   }
 

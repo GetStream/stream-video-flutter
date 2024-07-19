@@ -34,6 +34,9 @@ enum EventType {
   callUserMuted('call.user_muted'),
   callRecordingReady('call.recording_ready'),
   callRecordingFailed('call.recording_failed'),
+  callTranscriptionStarted('call.transcription_started'),
+  callTranscriptionStopped('call.transcription_stopped'),
+  callTranscriptionFailed('call.transcription_failed'),
   custom('custom'),
   unknown('unknown');
 
