@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'call_content/picture_in_picture/picture_in_picture_configuration.dart';
 
 /// Builder used to create a custom incoming call widget.
 typedef IncomingCallBuilder = Widget Function(
