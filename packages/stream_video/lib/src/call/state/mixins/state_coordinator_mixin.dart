@@ -12,7 +12,6 @@ import '../../../models/disconnect_reason.dart';
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
 mixin StateCoordinatorMixin on StateNotifier<CallState> {
-
   void coordinatorCallAccepted(
     CoordinatorCallAcceptedEvent event,
   ) {
@@ -178,6 +177,40 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
 
     state = state.copyWith(
       isRecording: false,
+    );
+  }
+
+  void coordinatorCallTranscriptionStarted(
+    CoordinatorCallTranscriptionStartedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () =>
+            '[coordinatorCallTranscriptionStarted] rejected (status is not Active)',
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      isTranscribing: true,
+    );
+  }
+
+  void coordinatorCallTranscriptionStopped(
+    CoordinatorCallTranscriptionStoppedEvent event,
+  ) {
+    final status = state.status;
+    if (status is! CallStatusActive) {
+      _logger.w(
+        () =>
+            '[coordinatorCallTranscriptionStopped] rejected (status is not Active)',
+      );
+      return;
+    }
+
+    state = state.copyWith(
+      isTranscribing: false,
     );
   }
 

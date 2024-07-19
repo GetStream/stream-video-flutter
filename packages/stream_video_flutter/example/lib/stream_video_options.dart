@@ -2,13 +2,13 @@ import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:stream_video/stream_video.dart';
 
-class DefaultVideoOptions {
+mixin DefaultVideoOptions {
   static StreamVideoOptions get remote {
     return const StreamVideoOptions();
   }
 
   static StreamVideoOptions get local {
-    return StreamVideoOptions(
+    return const StreamVideoOptions(
       coordinatorRpcUrl: 'http://10.0.0.53:3030/video',
       coordinatorWsUrl: 'ws://10.0.0.53:8800/video/connect',
     );
