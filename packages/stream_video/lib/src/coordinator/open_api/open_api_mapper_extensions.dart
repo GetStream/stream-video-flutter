@@ -215,6 +215,24 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           emojiCode: event.reaction.emojiCode,
           custom: event.reaction.custom,
         );
+      case EventType.callTranscriptionStarted:
+        final event = callTranscriptionStarted!;
+        return CoordinatorCallTranscriptionStartedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+        );
+      case EventType.callTranscriptionStopped:
+        final event = callTranscriptionStopped!;
+        return CoordinatorCallTranscriptionStoppedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+        );
+      case EventType.callTranscriptionFailed:
+        final event = callTranscriptionFailed!;
+        return CoordinatorCallTranscriptionFailedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+        );
       case EventType.callNotification:
         // TODO: Handle event
         break;

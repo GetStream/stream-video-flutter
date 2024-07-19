@@ -1,3 +1,5 @@
+// ignore_for_file: comment_references
+
 import '../../open_api/video/coordinator/api.dart' as open;
 import '../models/call_cid.dart';
 import '../models/call_metadata.dart';
@@ -142,6 +144,19 @@ abstract class CoordinatorClient {
 
   /// Stops recording for the call described by the given [callCid].
   Future<Result<None>> stopRecording(StreamCallCid callCid);
+
+  /// Starts transcription for the call described by the given [callCid].
+  Future<Result<None>> startTranscription(
+    StreamCallCid callCid, {
+    String? transcriptionExternalStorage,
+  });
+
+  Future<Result<List<open.CallTranscription>>> listTranscriptions(
+    StreamCallCid callCid,
+  );
+
+  /// Stops transcription for the call described by the given [callCid].
+  Future<Result<None>> stopTranscription(StreamCallCid callCid);
 
   /// Starts broadcasting for the call described by the given [callCid].
   Future<Result<String?>> startBroadcasting(StreamCallCid callCid);

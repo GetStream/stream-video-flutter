@@ -19,7 +19,7 @@ enum Environment {
   demo(
     'Demo',
     'demo',
-    'demo.getstream.io',
+    'pronto.getstream.io',
     aliases: [''],
   ),
   staging(
