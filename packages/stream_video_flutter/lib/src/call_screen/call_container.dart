@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import 'call_content/picture_in_picture/picture_in_picture_configuration.dart';
 
 /// Builder used to create a custom incoming call widget.
 typedef IncomingCallBuilder = Widget Function(
@@ -56,7 +57,7 @@ class StreamCallContainer extends StatefulWidget {
     this.incomingCallBuilder,
     this.outgoingCallBuilder,
     this.callContentBuilder,
-    this.enablePictureInPicture = false,
+    this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
   });
 
   /// Represents a call.
@@ -89,8 +90,8 @@ class StreamCallContainer extends StatefulWidget {
   /// Builder used to create a custom call content widget.
   final CallContentBuilder? callContentBuilder;
 
-  /// Whether to enable picture-in-picture mode. (available only on Android)
-  final bool enablePictureInPicture;
+  /// Configuration for picture-in-picture mode.
+  final PictureInPictureConfiguration pictureInPictureConfiguration;
 
   @override
   State<StreamCallContainer> createState() => _StreamCallContainerState();
@@ -158,7 +159,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
             callState: _callState,
             onBackPressed: widget.onBackPressed,
             onLeaveCallTap: widget.onLeaveCallTap,
-            enablePictureInPicture: widget.enablePictureInPicture,
+            pictureInPictureConfiguration: widget.pictureInPictureConfiguration,
           );
     }
   }

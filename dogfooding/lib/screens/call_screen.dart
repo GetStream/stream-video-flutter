@@ -147,7 +147,10 @@ class _CallScreenState extends State<CallScreen> {
               call: call,
               callState: callState,
               layoutMode: _currentLayoutMode,
-              enablePictureInPicture: true,
+              pictureInPictureConfiguration:
+                  const PictureInPictureConfiguration(
+                enablePictureInPicture: true,
+              ),
               callParticipantsBuilder: (context, call, callState) {
                 return Stack(
                   children: [

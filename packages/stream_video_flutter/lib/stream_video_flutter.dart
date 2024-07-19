@@ -25,6 +25,8 @@ export 'src/call_participants/local_video.dart';
 export 'src/call_screen/call_container.dart';
 export 'src/call_screen/call_content/call_app_bar.dart';
 export 'src/call_screen/call_content/call_content.dart';
+export 'src/call_screen/call_content/picture_in_picture/picture_in_picture_configuration.dart';
+export 'src/call_screen/call_content/picture_in_picture/stream_picture_in_picture_ui_kit_view.dart';
 export 'src/call_screen/incoming_call/incoming_call_content.dart';
 export 'src/call_screen/lobby_video.dart';
 export 'src/call_screen/lobby_view.dart';
