@@ -413,14 +413,14 @@ class Call {
 
     final outgoingCall = _getOutgoingCall();
     if (outgoingCall?.callCid != callCid) {
-      await outgoingCall?.reject(reason: 'cancel');
+      await outgoingCall?.reject(reason: CallRejectReason.cancel());
       await outgoingCall?.leave();
       await _setOutgoingCall(null);
     }
 
     final activeCall = _getActiveCall();
     if (activeCall?.callCid != callCid) {
-      await activeCall?.reject(reason: 'cancel');
+      await activeCall?.reject(reason: CallRejectReason.cancel());
       await activeCall?.leave();
       await _setActiveCall(null);
     }
@@ -432,7 +432,7 @@ class Call {
     return result;
   }
 
-  Future<Result<None>> reject({String? reason}) async {
+  Future<Result<None>> reject({CallRejectReason? reason}) async {
     final state = this.state.value;
     _logger.i(() => '[reject] ${_status.value}; state: $state');
     final status = state.status;
@@ -441,8 +441,10 @@ class Call {
       _logger.w(() => '[rejectCall] rejected (invalid status): $status');
       return Result.error('invalid status: $status');
     }
-    final result =
-        await _coordinatorClient.rejectCall(cid: state.callCid, reason: reason);
+    final result = await _coordinatorClient.rejectCall(
+      cid: state.callCid,
+      reason: reason?.value,
+    );
     if (result is Success<None>) {
       _stateManager.lifecycleCallRejected();
     }
@@ -581,7 +583,7 @@ class Call {
     if (result.isFailure) {
       _logger.e(() => '[join] waiting failed: $result');
 
-      await reject();
+      await reject(reason: CallRejectReason.timeout());
       _stateManager.lifecycleCallTimeout();
 
       return result;

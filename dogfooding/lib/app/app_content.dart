@@ -254,7 +254,9 @@ class _StreamDogFoodingAppContentState
     final callToReject = call.getDataOrNull();
     if (callToReject == null) return;
 
-    final result = await callToReject.reject();
+    final result = await callToReject.reject(
+      reason: CallRejectReason.decline(),
+    );
     if (result is Failure) {
       debugPrint('Error rejecting call: ${result.error}');
     }
