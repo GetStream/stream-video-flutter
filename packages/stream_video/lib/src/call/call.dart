@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -1056,6 +1057,16 @@ class Call {
 
   List<RtcTrack> getTracks(String trackIdPrefix) {
     return [...?_session?.getTracks(trackIdPrefix)];
+  }
+
+  Future<ByteBuffer?> takeScreenshot(
+    CallParticipantState participant, {
+    SfuTrackType? trackType,
+  }) async {
+    final track =
+        getTrack(participant.trackIdPrefix, trackType ?? SfuTrackType.video);
+
+    return track?.captureScreenshot();
   }
 
   Future<void> _applyCallSettingsToConnectOptions(CallSettings settings) async {
