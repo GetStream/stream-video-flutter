@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:meta/meta.dart';
 
@@ -63,6 +65,14 @@ abstract class RtcTrack {
     } catch (_) {
       streamLog.w('SV:RtcTrack', () => 'Failed to disable track $trackId');
     }
+  }
+
+  Future<ByteBuffer?> captureScreenshot() async {
+    if (isVideoTrack) {
+      return mediaStream.getVideoTracks().first.captureFrame();
+    }
+
+    return null;
   }
 
   Future<void> start();
