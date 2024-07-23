@@ -612,6 +612,7 @@ class StreamVideo extends Disposable {
 
     final createdById = payload['created_by_id'] as String?;
     final createdByName = payload['created_by_display_name'] as String?;
+    final hasVideo = payload['video'] as String?;
 
     final type = payload['type'] as String?;
     if (type == 'call.missed') {
@@ -644,6 +645,7 @@ class StreamVideo extends Disposable {
             handle: createdById,
             nameCaller: createdByName,
             callCid: callCid,
+            hasVideo: hasVideo != 'false',
           ),
         );
         return true;
