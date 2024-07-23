@@ -34,6 +34,7 @@ lecle_yoyo_player
 stream_video
 stream_video_push_notification
 screensharing
+screenshare
 Livestreaming
 livestreaming
 callee
