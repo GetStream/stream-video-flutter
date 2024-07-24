@@ -3,25 +3,36 @@ slug: /installation
 title: Installation
 ---
 
-### Creating a Project
+The Flutter SDK for Stream Video is distributed through [pub.dev](https://pub.dev).
+The SDK contains three different packages: [stream_video_flutter](https://pub.dev/packages/stream_video_flutter), [stream_video](https://pub.dev/packages/stream_video), and [stream_video_push_notification](https://pub.dev/packages/stream_video_push_notification).
+Releases and changes are published on the [Github releases page](https://github.com/GetStream/stream-video-flutter/releases).
 
-To get started with the `StreamVideo` Flutter SDK, open your terminal or IDE and create a new project:
+### Adding the SDK to your project
 
-```shell
-flutter create video_demo
+To add the Flutter SDK, you can add the latest dependencies for the SDK to your `pubspec.yaml` file:
+
+```yaml
+dependencies:
+
+  stream_video: ^latest
+  stream_video_flutter: ^latest
+  stream_video_push_notification: ^latest
 ```
 
-Next, in your project directory (`video_demo`), install the Stream Video SDK using the following:
+Additionally, you can also run the `flutter pub add` command in the terminal to do this:
 
 ```shell
 flutter pub add stream_video_flutter
+flutter pub add stream_video
+flutter pub add stream_video_push_notification
 ```
 
-This will automatically install the latest version of the Stream SDK from pub to the dependencies section of your `pubspec.yaml`.
+This command will automatically install the latest versions of the Stream SDK packages from pub.dev to the dependencies section of your `pubspec.yaml`.
 
 ### Permissions
 
-Making video calls requires the usage of the device's camera and microphone. Therefore, before you can make and answer calls, you need to request permission to use them within your application.
+Making video calls requires the usage of the device's camera and microphone.
+Therefore, before you can make and answer calls, you need to request permission to use them within your application.
 
 The following permissions must be granted for both Android and iOS:
 
@@ -34,11 +45,24 @@ The following permissions must be granted for both Android and iOS:
 
 ![Xcode Permission configuration](../assets/installation/ios_permission.png)
 
-For iOS, you need to add the following keys and values to your `Info.plist` file at a minimum:
+For iOS, we recommend you add the following keys and values to your `Info.plist` file at a minimum:
 
-`Privacy - Camera Usage Description` - "<Your_app_name> requires camera access to capture and transmit video"
-
-`Privacy - Microphone Usage Description` - "<Your_app_name> requires microphone access to capture and transmit audio"
+```xml
+<key>NSCameraUsageDescription</key>
+<string>$(PRODUCT_NAME) Camera Usage!</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>$(PRODUCT_NAME) Microphone Usage!</string>
+<key>UIApplicationSupportsIndirectInputEvents</key>
+<true/>
+<key>UIBackgroundModes</key>
+<array>
+    <string>audio</string>
+    <string>fetch</string>
+    <string>processing</string>
+    <string>remote-notification</string>
+    <string>voip</string>
+</array>
+```
 
 #### Android
 
@@ -59,15 +83,11 @@ With Android specifically, you will also need to add additional permission if yo
 ```xml
 <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
 <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+<uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
 ```
 
-## Platform Version
+### VoIP Calling
 
-Stream's Flutter Video SDK is supported on Android and iOS devices running the following versions and higher:
+We also ship the [stream_video_push_notification](https://pub.dev/packages/stream_video_push_notification) package to allow you to add integrations with native calling interfaces such as [CallKit](https://developer.apple.com/documentation/callkit/).
+Please check out our [ringing guide](https://getstream.io/video/docs/flutter/advanced/adding_ringing_and_callkit/) for additional setup needed for integration.
 
-- Android: SDK version 21 and above
-- iOS: iOS 13 and above
-
-:::note
-For iOS, when setting the minimum version, please also be sure to update the `deployment_target` in your project's Podfile.
-:::
