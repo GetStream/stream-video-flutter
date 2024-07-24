@@ -1475,8 +1475,12 @@ class Call {
     return _permissionsManager.unblockUser(userId);
   }
 
-  Future<Result<None>> startRecording() async {
-    final result = await _permissionsManager.startRecording();
+  Future<Result<None>> startRecording({
+    String? recordingExternalStorage,
+  }) async {
+    final result = await _permissionsManager.startRecording(
+      recordingExternalStorage: recordingExternalStorage,
+    );
 
     if (result.isSuccess) {
       _stateManager.setCallRecording(isRecording: true);
