@@ -96,11 +96,11 @@ class _HomeScreenState extends State<HomeScreen> {
           call: call,
           callConnectOptions: options,
           onDeclineCallTap: () async {
-            await call.reject(reason: 'decline');
+            await call.reject(reason: CallRejectReason.decline());
             await call.leave();
           },
           onCancelCallTap: () async {
-            await call.reject(reason: 'cancel');
+            await call.reject(reason: CallRejectReason.cancel());
             await call.leave();
           },
         ),

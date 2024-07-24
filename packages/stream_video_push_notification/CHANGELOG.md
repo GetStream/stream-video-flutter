@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- CallKit now displays appropriate video and audio call labels.
+
 ## 0.4.2
 * Sync version with `stream_video_flutter` 0.4.2
 

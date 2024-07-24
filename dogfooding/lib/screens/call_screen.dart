@@ -135,7 +135,7 @@ class _CallScreenState extends State<CallScreen> {
           call: widget.call,
           callConnectOptions: widget.connectOptions,
           onCancelCallTap: () async {
-            await widget.call.reject();
+            await widget.call.reject(reason: CallRejectReason.cancel());
             await widget.call.leave();
           },
           callContentBuilder: (

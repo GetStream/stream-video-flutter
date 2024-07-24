@@ -105,6 +105,8 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate, UNU
         let callCid = streamDict?["call_cid"] as? String ?? ""
         let createdByName = streamDict?["created_by_display_name"] as? String
         let createdById = streamDict?["created_by_id"] as? String
+        let videoIncluded = streamDict?["video"] as? String
+        let videoData = videoIncluded == "false" ? 0 : 1
 
         var callUUID = UUID().uuidString;
 
@@ -118,7 +120,7 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate, UNU
         data.callKitData.uuid = callUUID
         data.callKitData.nameCaller = createdByName ?? defaultCallText
         data.callKitData.handle = createdById ?? defaultCallText
-        data.callKitData.type = 1 //video
+        data.callKitData.type = videoData
         data.callKitData.extra = ["callCid": callCid]
         
         // Show call incoming notification.

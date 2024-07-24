@@ -122,13 +122,18 @@ class PermissionsManager {
     return result;
   }
 
-  Future<Result<None>> startRecording() async {
+  Future<Result<None>> startRecording({
+    String? recordingExternalStorage,
+  }) async {
     if (!hasPermission(CallPermission.startRecordCall)) {
       _logger.w(() => '[startRecording] rejected (no permission)');
       return Result.error('Cannot start recording (no permission)');
     }
     _logger.d(() => '[startRecording] no args');
-    final result = await coordinatorClient.startRecording(callCid);
+    final result = await coordinatorClient.startRecording(
+      callCid,
+      recordingExternalStorage: recordingExternalStorage,
+    );
     _logger.v(() => '[startRecording] result: $result');
     return result;
   }
