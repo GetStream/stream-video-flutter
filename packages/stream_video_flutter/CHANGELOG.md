@@ -1,8 +1,34 @@
-## Upcoming
+## 0.4.3
+
+🐞 Fixed
+* Fixed reconnection flow.
+* Fixed compilation errors on web.
+* Fixed screen-sharing not working on some versions of Android.
+* Fixed accepting incoming call during another call (or outgoing call).
+* Fixed CallKit incomming push label and Android accept call buttons icons for audio-only calls.
 
 ✅ Added
+* Added support for missed calls. Push notificationa and `CallMissedEvent` event will be send now when user misses the call.
+* Added support for call transcription [check transcription cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/transcriptions/)
+    * Added `startTranscription()`, `stopTranscription()` and `listTranscriptions()` methods to `Call` class.
+* Added option to take a screenshot during the call [check screenshot documentation](https://getstream.io/video/docs/flutter/screenshots/)
+    * Added `takeScreenshot()` method to `Call` class.
+* Added `recordingExternalStorage` optional param to `call.startRecording()` method.
+* Added `requestScreenSharePermission()` method to `Call` class that ensures correct permissions are given for screen-sharing on Android.
 
-- CallKit now displays appropriate video and audio call labels.
+🔄 Changed
+* Changed `role` member to `roles`, to reflect posibility of user having mutliple roles, in `CallParticipantState` and `CallMember`.
+* Changed `SortParamRequest` to `SortParam`.
+
+🔄 Changed some of the signatures
+* `listRecordings()` method in PermissionsManager doesn't require `sessionId` param now.
+* `setParticipantPinned()` method in `Call` and `CallSession` now requires `sessionId`, `userId` and `pinned` params instead of `SetParticipantPinned` action.
+* `updateViewportVisibility()` method in `CallSession` now requires `visibilityChange` param instead of `UpdateViewportVisibility` action.
+* `setSubscriptions()` and `updateSubscription()` methods in `CallSession` now requires list of `subscriptionChanges` param instead of list of `SetSubscription` actions.
+* Added optional `reason` param to `reject()` method in `Call` class.
+
+Removed
+* Removed `updateSubscriptions` method from `Call`.
 
 ## 0.4.2
 

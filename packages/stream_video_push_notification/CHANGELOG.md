@@ -1,4 +1,4 @@
-## Upcoming
+## 0.4.3
 
 ✅ Added
 
