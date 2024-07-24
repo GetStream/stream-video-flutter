@@ -5,10 +5,10 @@
 * Fixed compilation errors on web.
 * Fixed screen-sharing not working on some versions of Android.
 * Fixed accepting incoming call during another call (or outgoing call).
-* Fixed CallKit incomming push label and Android accept call buttons icons for audio-only calls.
+* Fixed CallKit incoming push label and Android accept call button icons for audio-only calls.
 
 ✅ Added
-* Added support for missed calls. Push notificationa and `CallMissedEvent` event will be send now when user misses the call.
+* Added support for missed calls. Push notifications and `CallMissedEvent` event will be sent now when the user misses the call.
 * Added support for call transcription [check transcription cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/transcriptions/)
     * Added `startTranscription()`, `stopTranscription()` and `listTranscriptions()` methods to `Call` class.
 * Added option to take a screenshot during the call [check screenshot documentation](https://getstream.io/video/docs/flutter/screenshots/)
@@ -17,14 +17,14 @@
 * Added `requestScreenSharePermission()` method to `Call` class that ensures correct permissions are given for screen-sharing on Android.
 
 🔄 Changed
-* Changed `role` member to `roles`, to reflect posibility of user having mutliple roles, in `CallParticipantState` and `CallMember`.
+* Changed `role` member to `roles`, to reflect the possibility of the user having multiple roles, in `CallParticipantState` and `CallMember`.
 * Changed `SortParamRequest` to `SortParam`.
 
 🔄 Changed some of the signatures
 * `listRecordings()` method in PermissionsManager doesn't require `sessionId` param now.
-* `setParticipantPinned()` method in `Call` and `CallSession` now requires `sessionId`, `userId` and `pinned` params instead of `SetParticipantPinned` action.
+* `setParticipantPinned()` method in `Call` and `CallSession` now requires `sessionId`, `userId`, and `pinned` params instead of `SetParticipantPinned` action.
 * `updateViewportVisibility()` method in `CallSession` now requires `visibilityChange` param instead of `UpdateViewportVisibility` action.
-* `setSubscriptions()` and `updateSubscription()` methods in `CallSession` now requires list of `subscriptionChanges` param instead of list of `SetSubscription` actions.
+* `setSubscriptions()` and `updateSubscription()` methods in `CallSession` now require a list of `subscriptionChanges` param instead of a list of `SetSubscription` actions.
 * Added optional `reason` param to `reject()` method in `Call` class.
 
 Removed
