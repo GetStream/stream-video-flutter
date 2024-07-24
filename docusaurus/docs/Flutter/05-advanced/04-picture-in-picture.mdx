@@ -77,7 +77,7 @@ For Android, you can customize the widget rendered while app is in Picture-in-Pi
 
 ### Local camera feed in Picture-in-Picture mode
 
-By defaul iOS is not allowing usage of local camera feed when app is in the background. That includes Picture in picture mode and Split View mode. To enable it you need to request the [multitasking-camera-access](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_developer_avfoundation_multitasking-camera-access) permission directly from Apple (this will change from iOS 18).
+By default iOS is not allowing usage of local camera feed when app is in the background. That includes Picture in picture mode and Split View mode. To enable it you need to request the [multitasking-camera-access](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_developer_avfoundation_multitasking-camera-access) permission directly from Apple (this will change from iOS 18).
 If you already have the permission you have to enable local feed support in our PiP implementation by setting `ignoreLocalParticipantVideo` to `false`.
 
 ```dart
