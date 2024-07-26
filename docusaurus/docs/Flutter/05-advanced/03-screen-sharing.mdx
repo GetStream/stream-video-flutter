@@ -46,11 +46,11 @@ If you use our UI components you can also add `ToggleScreenShareOption` as one o
 When the method is invoked, ReplayKit will ask for the user's consent that their screen will be shared. Only after the permission is granted, the screensharing starts.
 
 #### Broadcasting
-In most cases, you would need to share your screen while you are in the background, to be able to open other apps. For this, you need to create a Broadcast Upload Extension.
+In most cases, you would need to share your screen while the app in the background, to be able to open other apps. For this, you need to create a Broadcast Upload Extension.
 
 ##### Toggle screen sharing with broadcast mode
 
-If you want to start screen sharing in broadcast mode on iOS you will need to toggle on using `ScreenShareConstraints`. Just set the flag to true inside `ToggleScreenShareOption` or when you use `call.setScreenShareEnabled()` directly.
+If you want to start screen sharing in broadcast mode on iOS you will need to toggle it by setting `useiOSBroadcastExtension` flag to true in `ScreenShareConstraints`. You can set the constraints inside `ToggleScreenShareOption` or when you use `call.setScreenShareEnabled()` directly.
 
 ```dart
 const constraints = ScreenShareConstraints(
@@ -85,18 +85,21 @@ After you create the extension, there should be a class called `SampleHandler`, 
 
 ![Screen sharing dashboard](../assets/advanced_assets/broadcast-handler-implementation.png)
 
-:::tip
-If Xcode cannot find the `stream_video_screen_sharing` module add this code block to your app's Podfile file:
+To have access to our Handler implementation add `stream_video_screen_sharing` package to your app's `pubspec.yaml` file:
 
-```Podfile
-target 'ScreenSharing' do
-  use_frameworks!
-  pod 'stream_video_flutter', :path => File.join('.symlinks', 'plugins', 'stream_video_flutter', 'ios')
-end
+```yaml
+dependencies:
+  stream_video_screen_sharing: ^<latest_version>
 ```
 
-Replace `ScreenSharing` with your extension name.
-:::
+Then for native code to see it, add it as a dependency manully for the extension target in the Podfile file:
+
+```Podfile
+target 'YOUR_EXTENSION_NAME' do
+  use_frameworks!
+  pod 'stream_video_screen_sharing', :path => File.join('.symlinks', 'plugins', 'stream_video_screen_sharing', 'ios')
+end
+```
 
 ##### Setup app groups
 
@@ -179,3 +182,21 @@ StreamBackgroundService.init(
   },
 );
 ```
+
+### Screen sharing settings
+
+You can customize the screen sharing behavior by providing `ScreenShareConstraints` to the `ToggleScreenShareOption` widget or `setScreenShareEnabled()` method.
+
+You can specify the following settings:
+
+- `useiOSBroadcastExtension` - Set to `true` to enable broadcast mode on iOS.
+
+- `captureScreenAudio` - Set to `true` to capture audio from the screen.
+
+- `sourceId` - The deviceId of an audio source, if you want to capture audio from a specific source.
+
+- `maxFrameRate` - The maximum frame rate for the screen sharing video.
+
+- `params` - The video parameters for the screen sharing video.
+
+For `params` you can use one of our predefined presets in `RtcVideoParametersPresets`.

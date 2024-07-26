@@ -53,6 +53,17 @@
 - [x] Bluetooth fixes (check support of BT media devices in flutter)
 - [x] Switch the earpiece/microphone button *(depends on "Bluetooth fixes")*
 - [x] Align custom event support to other SDKs
+- [x] Picture-in-picture
+- - [x] Android
+- - [x] iOS
+- [x] Call stats component
+- [x] Transcription
+
+### 0.5.0 milestone
+- [ ] Documentation parity
+- - [ ] UI components
+- - [ ] Cookbook
+- - [ ] Advanced guides
 - [ ] Tap to focus (flutter_webrtc)
 - [ ] Video filters / audio filters
 - [ ] Local audio levels (maybe from webrtc)
@@ -61,18 +72,8 @@
 - - [ ] stream_video_flutter (75%)
 - - [ ] stream_video_push_notification
 - - [ ] Coverage check for PRs
-- [ ] Documentation parity
-- - [ ] UI components
-- - [ ] Cookbook
-- - [ ] Advanced guides
-
-### 0.5.0 milestone
-- [ ] Picture-in-picture
-- - [x] Android
-- - [ ] iOS
 - [ ] Dynascale 2.0
 - [ ] SFU switching
 - [ ] Buttons to simulate ICE restarts / SFU switching
 - [ ] Proximity button support
-- [x] Call stats component
-- [ ] Transcription
+- [ ] Reconnection v2

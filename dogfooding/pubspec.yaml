@@ -31,6 +31,7 @@ dependencies:
   stream_chat_flutter: ^8.0.0-beta.3
   stream_video_flutter: ^0.4.2
   stream_video_push_notification: ^0.4.2
+  stream_video_screen_sharing: ^0.4.2
   uni_links: ^0.5.1
 
 dev_dependencies:
