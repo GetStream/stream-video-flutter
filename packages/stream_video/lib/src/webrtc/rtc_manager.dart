@@ -11,7 +11,6 @@ import 'codecs_helper.dart' as codecs;
 import 'model/rtc_audio_bitrate_preset.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_encoding.dart';
-import 'model/rtc_video_parameters.dart';
 import 'peer_connection.dart';
 import 'rtc_parser.dart';
 
