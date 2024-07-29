@@ -492,7 +492,7 @@ void _startCall(BuildContext context) async {
 
   final createCallResult = await StreamVideo.instance.createCall(
     id: 'call${Random().nextInt(10000)}',
-    callType: StreamCallType(),
+    callType: StreamCallType.defaultType(),
     ringing: false,
     participantIds: [],
   );

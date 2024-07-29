@@ -602,7 +602,7 @@ class StreamVideo extends Disposable {
 
     final callUUID = const Uuid().v4();
     var callId = const Uuid().v4();
-    var callType = StreamCallType();
+    var callType = StreamCallType.defaultType();
 
     final splitCid = callCid.split(':');
     if (splitCid.length == 2) {

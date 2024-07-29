@@ -7,7 +7,7 @@ void main() {
       test('should create the default call types', () {
         expect(
           StreamCallType.fromString('default'),
-          StreamCallType(),
+          StreamCallType.defaultType(),
         );
         expect(
           StreamCallType.fromString('livestream'),
