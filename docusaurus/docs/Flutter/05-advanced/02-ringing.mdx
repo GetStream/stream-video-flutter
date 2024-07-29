@@ -260,7 +260,7 @@ Add these permissions to `AndroidManifest.xml` in order to support video calling
 
 #### Step 5 - Add code to listen to push notifications
 
-We recommend storing user credentials locally when the user logs in so you can log the user in when
+We recommend storing user credentials locally when the user logs in so you can automatically set up the user when
 a push notification is received.
 
 - Add the following code in your `main.dart` as global functions to listen to background notifications:
@@ -317,7 +317,7 @@ Future<void> _handleRemoteMessage(RemoteMessage message) async {
 
 In a high-level widget in your app, add this code to listen to FCM messages:
 
-```
+```dart
 @override
 void initState() {
   ...

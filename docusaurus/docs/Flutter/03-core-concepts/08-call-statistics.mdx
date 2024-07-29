@@ -10,7 +10,7 @@ There are two sources of statistics you can use to monitor the performance of yo
 
 ## Stats stream
 
-If you want to tap in directly into the stream of webRTC stats you can do this with `stats` steam inside `Call` object. It provides a stream of [`CallStats`](https://github.com/GetStream/stream-video-flutter/blob/main/packages/stream_video/lib/src/models/call_stats.dart) objects for publisher and subscriber connections.
+If you want to tap in directly into the stream of webRTC stats you can do this with `stats` stream inside `Call` object. It provides a stream of [`CallStats`](https://github.com/GetStream/stream-video-flutter/blob/main/packages/stream_video/lib/src/models/call_stats.dart) objects for publisher and subscriber connections.
 We provide those statistics in three ways for ease of use:
 
 * `raw` - raw stats as they come from the webRTC
@@ -26,7 +26,7 @@ You can also access more processed data with useful information about the call. 
 * `jitterInMs` -  the variation in the delay of receiving packets of data over a network
 * `bitrateKbps` - the rate at which data is transmitted from the app to the server (publisher) or from the server to the app (subscriber)
 
-`localStats` - object that contain the following data:
+`localStats` - object that contains the following data:
 * `sfu` - the server we are connected to
 * `sdkVersion` - the version of the Stream SDK
 * `webRtcVersion` - the version of the webRTC
