@@ -30,7 +30,6 @@ Before building the actual view, let's take a look on how we can obtain and conn
   final data = await StreamVideo.instance.getOrCreateCall(cid: callCid);
   final call = Call.fromCreated(data: data.getDataOrNull()!.data);
 ```
-//TODO Cover call options configuration once https://github.com/GetStream/stream-video-flutter/pull/278 is merged
 
 You can see that as a first step, we need to create a `StreamCallCid` object based on `type` and `id`, later use a `StreamVideo` instance to get or create a call and lastly - use a factory method to create a `Call` object itself.
 

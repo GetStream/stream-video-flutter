@@ -79,6 +79,6 @@ To use the widget, you need to supply two arguments: the current `call` and `par
   );
 ```
 
-Video Render is the lowest level for displaying a participant's video in Flutter. Unlike `StreamCallParticipant`, the options exposed by `StreamVideoRenderer` are minimal and focuses more on video fit and layout, determining which track types to display, and providing callbacks for handling changes to the video rendering.
+Video Render is the lowest level component for displaying a participant's video in Flutter. Unlike `StreamCallParticipant`, the options exposed by `StreamVideoRenderer` are minimal and focuses more on video fit and layout, determining which track types to display, and providing callbacks for handling changes to the video rendering.
 
 Both `StreamVideoRenderer` and `StreamCallParticipant` can be used as part of other components, such as `StreamCallContent`, or as standalone widgets in your application, as long as the `call` and `participant` parameters are supplied.
