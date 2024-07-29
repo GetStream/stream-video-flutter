@@ -8,7 +8,8 @@ abstract class StreamVideoScreenSharingPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static StreamVideoScreenSharingPlatform _instance = MethodChannelStreamVideoScreenSharing();
+  static StreamVideoScreenSharingPlatform _instance =
+      MethodChannelStreamVideoScreenSharing();
 
   /// The default instance of [StreamVideoScreenSharingPlatform] to use.
   ///
@@ -21,9 +22,5 @@ abstract class StreamVideoScreenSharingPlatform extends PlatformInterface {
   static set instance(StreamVideoScreenSharingPlatform instance) {
     PlatformInterface.verifyToken(instance, _token);
     _instance = instance;
-  }
-
-  Future<String?> getPlatformVersion() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }

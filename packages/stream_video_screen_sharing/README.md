@@ -1,15 +1,2 @@
-# stream_video_screen_sharing
-
-A new Flutter plugin project.
-
-## Getting Started
-
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
-
-For help getting started with Flutter development, view the
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
+## Stream Video Screen Sharing
+This plugin includes a native Swift implementation of `BroadcastSampleHandler`, essential for the `broadcast` screen sharing mode on iOS. For more information, you can refer to the relevant documentation [here](https://getstream.io/video/docs/flutter/advanced/screen_sharing/#ios).
