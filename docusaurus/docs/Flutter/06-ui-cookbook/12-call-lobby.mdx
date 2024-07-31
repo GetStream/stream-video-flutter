@@ -17,7 +17,7 @@ controls for video and audio, the users already in the call, and of course, a jo
 To do this, first create a call with the appropriate details and pass it along to the `StreamLobbyView` widget:
 
 ```dart
-final call = StreamVideo.instance.makeCall(callType: StreamCallType(), id: callId);
+final call = StreamVideo.instance.makeCall(callType: StreamCallType.defaultType(), id: callId);
 
 StreamLobbyView(
   call: call,

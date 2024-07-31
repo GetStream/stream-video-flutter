@@ -34,7 +34,7 @@ To receive push notifications from Stream Video, you'll need to:
 To create a ringing call, you need to follow the same steps as in the basic call flow with the difference of adding the `ringing` and `memberIds` parameters to the `getOrCreateCall()` method.
 
 ```dart
-final call = StreamVideo.instance.makeCall(callType: StreamCallType(), id: 'Your-call-ID');
+final call = StreamVideo.instance.makeCall(callType: StreamCallType.defaultType(), id: 'Your-call-ID');
 await call.getOrCreate(memberIds: ['user1_id', 'user2_id'], ringing: true);
 ```
 

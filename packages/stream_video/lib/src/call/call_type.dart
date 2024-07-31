@@ -13,10 +13,12 @@ import 'package:equatable/equatable.dart';
 /// StreamCallType.custom('custom_type');
 /// ```
 class StreamCallType with EquatableMixin {
+  @Deprecated('Use StreamCallType.defaultType() instead')
   factory StreamCallType() => const StreamCallType._('default');
 
   const StreamCallType._(this.value);
 
+  factory StreamCallType.defaultType() => const StreamCallType._('default');
   factory StreamCallType.liveStream() => const StreamCallType._('livestream');
   factory StreamCallType.development() => const StreamCallType._('development');
   factory StreamCallType.audioRoom() => const StreamCallType._('audio_room');
@@ -26,7 +28,7 @@ class StreamCallType with EquatableMixin {
   factory StreamCallType.fromString(String type) {
     switch (type) {
       case 'default':
-        return StreamCallType();
+        return StreamCallType.defaultType();
       case 'livestream':
         return StreamCallType.liveStream();
       case 'development':
