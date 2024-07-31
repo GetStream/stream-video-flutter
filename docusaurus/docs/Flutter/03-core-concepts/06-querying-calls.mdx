@@ -75,3 +75,12 @@ final result = await video.queryCalls(
 ```
 
 The `queryCalls` function can take multiple sort parameters, which can be combined with filtering to give you powerful control over the data in your application.
+
+### Watching calls
+​
+If you specify `watch` parameter as `true`, the SDK will create a subscription to the call data on the server and you'll be able to receive updates in real-time.
+
+The server will send updates to the client when the call data changes (for example, members are updated, a call session has started, etc...). This is useful for showing a live preview of who is in the call or building a call dashboard.
+
+You can listen to the call events via `StreamVideo.instance.events` stream
+

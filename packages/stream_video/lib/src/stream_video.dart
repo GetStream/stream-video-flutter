@@ -527,6 +527,7 @@ class StreamVideo extends Disposable {
     String? prev,
     int? limit,
     List<open.SortParam>? sorts,
+    bool? watch,
   }) {
     return _client.queryCalls(
       filterConditions: filterConditions,
@@ -534,6 +535,7 @@ class StreamVideo extends Disposable {
       limit: limit,
       prev: prev,
       sorts: sorts ?? [],
+      watch: watch,
     );
   }
 

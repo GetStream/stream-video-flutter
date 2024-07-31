@@ -334,6 +334,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     String? prev,
     List<open.SortParam> sorts = const [],
     int? limit,
+    bool? watch,
   }) {
     return _retryManager.execute(
       () => _delegate.queryCalls(
@@ -342,6 +343,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
         prev: prev,
         sorts: sorts,
         limit: limit,
+        watch: watch,
       ),
       (error, nextAttemptDelay) async {
         _logRetry('queryCalls', error, nextAttemptDelay);
