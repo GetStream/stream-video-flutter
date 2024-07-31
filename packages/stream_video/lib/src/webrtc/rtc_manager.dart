@@ -1,6 +1,9 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_video/stream_video.dart';
 
 import '../../stream_video.dart';
 import '../disposable.dart';
@@ -402,13 +405,35 @@ extension PublisherRtcManager on RtcManager {
 
     // use constraints passed to getUserMedia by default
     final dimension = track.getVideoDimension();
-
     _logger.v(() => '[publishVideoTrack] dimension: $dimension');
 
-    final encodings = codecs.computeVideoEncodings(
-      dimension: dimension,
-      isScreenShare: track.trackType == SfuTrackType.screenShare,
-    );
+    List<RTCRtpEncoding> encodings;
+
+    if (track.trackType == SfuTrackType.screenShare) {
+      final physicalSize =
+          WidgetsBinding.instance.platformDispatcher.views.first.physicalSize;
+      final screenDimension = RtcVideoDimension(
+        width: physicalSize.width.toInt(),
+        height: physicalSize.height.toInt(),
+      );
+
+      _logger.v(() => '[publishVideoTrack] screenDimension: $screenDimension');
+
+      // Simulcast is not supported for screen share tracks, but all three are required for Android to work.
+      encodings = codecs.encodingsFromPresets(
+        screenDimension,
+        presets: {
+          'f': track.mediaConstraints.params,
+          'h': track.mediaConstraints.params,
+          'q': track.mediaConstraints.params,
+        },
+      );
+    } else {
+      encodings = codecs.computeVideoEncodings(
+        dimension: dimension,
+        isScreenShare: track.trackType == SfuTrackType.screenShare,
+      );
+    }
 
     for (final encoding in encodings) {
       _logger.v(() => '[publishVideoTrack] encoding: ${encoding.toMap()}');
