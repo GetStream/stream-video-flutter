@@ -35,7 +35,7 @@ List<rtc.RTCRtpEncoding> computeVideoEncodings({
     );
   });
 
-  return _encodingsFromPresets(dimension, presets: presets);
+  return encodingsFromPresets(dimension, presets: presets);
 }
 
 Map<String, RtcVideoParameters> _presetsForDimension({
@@ -65,7 +65,7 @@ Map<String, RtcVideoParameters> _presetsForDimension({
   return _defaultSimulcast_4x3;
 }
 
-List<rtc.RTCRtpEncoding> _encodingsFromPresets(
+List<rtc.RTCRtpEncoding> encodingsFromPresets(
   RtcVideoDimension dimension, {
   required Map<String, RtcVideoParameters> presets,
 }) {
