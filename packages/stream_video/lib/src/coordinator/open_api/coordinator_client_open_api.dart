@@ -875,6 +875,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     String? prev,
     List<open.SortParam> sorts = const [],
     int? limit,
+    bool? watch,
   }) async {
     try {
       final connectionResult = await _waitUntilConnected();
@@ -889,6 +890,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           prev: prev,
           sort: sorts,
           limit: limit,
+          watch: watch,
         ),
       );
       if (result == null) {
