@@ -1,4 +1,4 @@
-## Upcoming
+## 0.4.4
 
 ✅ Added
 * Added `watch` parameter to `StreamVideo.queryCalls()` method, allowing you to subscribe to queried call events.  For more information, refer to the [documentation](https://getstream.io/video/docs/flutter/querying-calls/).
