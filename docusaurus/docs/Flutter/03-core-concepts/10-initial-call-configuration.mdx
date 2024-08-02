@@ -34,7 +34,7 @@ Using the `CallConnectOptions` class you can configure the initial call setup pr
 You can provide this class as a parameter when joining a call:
 
 ```dart
-  final call = client.makeCall(callType: StreamCallType(), id: '345');
+  final call = client.makeCall(callType: StreamCallType.defaultType(), id: '345');
   await call.join(connectOptions: connectOptions);
 ```
 
@@ -51,7 +51,7 @@ StreamCallContainer(
 You can access current options by calling `call.connectOptions` on the `Call` object.
 
 ```dart
-  final call = client.makeCall(callType: StreamCallType(), id: '345');
+  final call = client.makeCall(callType: StreamCallType.defaultType(), id: '345');
   await call.getOrCreate();
   final callOptions = call.connectOptions;
 ```

@@ -219,7 +219,7 @@ class _JoinScreenState extends State<JoinScreen> {
     try {
       final call = StreamVideo.instance.makeCall(
         id: callId,
-        callType: StreamCallType(),
+        callType: StreamCallType.defaultType(),
       );
 
       await call.join();

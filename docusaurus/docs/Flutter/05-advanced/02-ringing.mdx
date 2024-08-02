@@ -15,6 +15,11 @@ allows you to add an immersive calling experience to your application.
 
 Ringing requires push/VoIP notifications to be sent to your device. Stream Video sends push/VoIP notifications to members that have at least one registered device.
 
+Push notifications are sent in the following scenarios:
+- you create a call with the `ring` value set to true. In this case, a notification that shows a ringing screen is sent.
+- you create a call with the `notify` value set to true. In this case, a regular push notification is sent.
+- you haven't answered a call. In this case, a missed call notification is sent (regular push notification).
+
 To receive push notifications from Stream Video, you'll need to:
 
 1. Configure your push notification provider on the Stream Dashboard.
@@ -29,7 +34,7 @@ To receive push notifications from Stream Video, you'll need to:
 To create a ringing call, you need to follow the same steps as in the basic call flow with the difference of adding the `ringing` and `memberIds` parameters to the `getOrCreateCall()` method.
 
 ```dart
-final call = StreamVideo.instance.makeCall(callType: StreamCallType(), id: 'Your-call-ID');
+final call = StreamVideo.instance.makeCall(callType: StreamCallType.defaultType(), id: 'Your-call-ID');
 await call.getOrCreate(memberIds: ['user1_id', 'user2_id'], ringing: true);
 ```
 
@@ -260,7 +265,7 @@ Add these permissions to `AndroidManifest.xml` in order to support video calling
 
 #### Step 5 - Add code to listen to push notifications
 
-We recommend storing user credentials locally when the user logs in so you can log the user in when
+We recommend storing user credentials locally when the user logs in so you can automatically set up the user when
 a push notification is received.
 
 - Add the following code in your `main.dart` as global functions to listen to background notifications:
@@ -317,7 +322,7 @@ Future<void> _handleRemoteMessage(RemoteMessage message) async {
 
 In a high-level widget in your app, add this code to listen to FCM messages:
 
-```
+```dart
 @override
 void initState() {
   ...

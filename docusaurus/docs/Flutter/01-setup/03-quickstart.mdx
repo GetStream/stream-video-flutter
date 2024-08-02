@@ -31,8 +31,8 @@ Future<void> main() async {
     ),
   );
 
-  // Set up our call object
-  final call = client.makeCall(callType: StreamCallType(), id: '345');
+  // Set up our call object and pass it the call type and ID. The most common call type is `default`, which enables full audio and video transmission
+  final call = client.makeCall(callType: StreamCallType.defaultType(), id: '345');
   // Connect to the call we created
   await call.join();
 
@@ -48,7 +48,7 @@ In the code above, we are performing a few key steps:
 
 1. Initializing our SDK with the API key for our application.
 2. Defining the user we would like to connect as to participate in a call.
-3. Creating an object for our call, giving it the call type and unique ID.
+3. Creating an object for our call, giving it the "default" call type and unique ID.
 4. Connecting to the call we defined.
 
 

@@ -187,6 +187,7 @@ abstract class CoordinatorClient {
     String? prev,
     List<open.SortParam> sorts = const [],
     int? limit,
+    bool? watch,
   });
 
   Future<Result<None>> blockUser({
