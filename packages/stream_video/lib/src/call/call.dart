@@ -275,15 +275,6 @@ class Call {
   SharedEmitter<CallStats> get stats => _stats;
   late final _stats = MutableSharedEmitterImpl<CallStats>();
 
-  @Deprecated('Use `callEvents` instead')
-  SharedEmitter<SfuEvent> get events => _events;
-  final _events = MutableSharedEmitterImpl<SfuEvent>();
-
-  @Deprecated('Use `callEvents` instead')
-  SharedEmitter<CoordinatorCallEvent> get coordinatorEvents =>
-      _coordinatorEvents;
-  final _coordinatorEvents = MutableSharedEmitterImpl<CoordinatorCallEvent>();
-
   SharedEmitter<StreamCallEvent> get callEvents => _callEvents;
   final _callEvents = MutableSharedEmitterImpl<StreamCallEvent>();
 
@@ -332,7 +323,6 @@ class Call {
     _subscriptions.add(
       _idCoordEvents,
       _coordinatorClient.events.on<CoordinatorCallEvent>((event) async {
-        _coordinatorEvents.emit(event);
         event.mapToCallEvent(state.value).emitIfNotNull(_callEvents);
         await _onCoordinatorEvent(event);
       }),
@@ -664,7 +654,6 @@ class Call {
           event.logPriority,
           () => '[listenSfuEvent] event.type: ${event.runtimeType}',
         );
-        _events.emit(event);
         event.mapToCallEvent(state.value).emitIfNotNull(_callEvents);
         _onSfuEvent(event);
       }),

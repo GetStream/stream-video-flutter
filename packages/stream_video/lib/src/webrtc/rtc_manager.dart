@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video/stream_video.dart';
 
 import '../../stream_video.dart';
 import '../disposable.dart';

@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../widgets/floating_view/floating_view_alignment.dart';
 
 /// Defines default property values for [StreamLocalVideo] widgets.
 @immutable
