@@ -46,7 +46,7 @@ If you use our UI components you can also add `ToggleScreenShareOption` as one o
 When the method is invoked, ReplayKit will ask for the user's consent that their screen will be shared. Only after the permission is granted, the screensharing starts.
 
 #### Broadcasting
-In most cases, you would need to share your screen while the app in the background, to be able to open other apps. For this, you need to create a Broadcast Upload Extension.
+In most cases, you would need to share your screen while the app is in the background, to be able to open other apps. For this, you need to create a Broadcast Upload Extension.
 
 ##### Toggle screen sharing with broadcast mode
 
@@ -71,6 +71,8 @@ call.setScreenShareEnabled(enabled: true, constraints: constraints);
 ```
 
 ##### Add Broadcast Upload Extension
+
+iOS requires the use of Broadcast Upload Extensions to facilitate screen sharing when your app is in the background. This extension provides the necessary framework to handle capturing and broadcasting the screen content.
 
 Now add the extension, without UI, to your project in Xcode:
 
@@ -100,6 +102,10 @@ target 'YOUR_EXTENSION_NAME' do
   pod 'stream_video_screen_sharing', :path => File.join('.symlinks', 'plugins', 'stream_video_screen_sharing', 'ios')
 end
 ```
+
+:::note
+Replace `YOUR_EXTENSION_NAME` with the name of the extension you created.
+:::
 
 ##### Setup app groups
 

@@ -130,34 +130,20 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         // has changed.
         trackSize = .init(width: Int(frame.width), height: Int(frame.height))
         
-//        log.debug("→ Received frame with trackSize:\(trackSize)")
-        
         defer {
             handleFrameSkippingIfRequired()
         }
         
         guard shouldRenderFrame else {
-//            log.debug("→ Skipping frame.")
             return
         }
-        
-        // let pixelBuffer: RTCVideoFrameBuffer? = {
-        //     if let i420buffer = frame.buffer as? RTCI420Buffer {
-        //         return i420buffer
-        //     } else {
-        //         return frame.buffer
-        //     }
-        // }()
-        
+
         if
             let yuvBuffer = bufferTransformer.transformAndResizeIfRequired(frame, targetSize: contentSize)?
             .buffer as? StreamRTCYUVBuffer,
             let sampleBuffer = yuvBuffer.sampleBuffer {
-//            log.debug("➕ Buffer for trackId:\(track?.trackId ?? "n/a") added.")
             bufferPublisher.send(sampleBuffer)
-        } else {
-//            log.warning("Failed to convert \(type(of: frame.buffer)) CMSampleBuffer.")
-        }
+        } 
     }
     
     // MARK: - Private helpers
@@ -181,21 +167,17 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             buffer.isValid
         else {
             contentView.renderingComponent.flush()
-//            log.debug("🔥 Display layer flushed.")
             return
         }
         
-//        log.debug("⚙️ Processing buffer for trackId:\(trackId).")
         if #available(iOS 14.0, *) {
             if contentView.renderingComponent.requiresFlushToResumeDecoding == true {
                 contentView.renderingComponent.flush()
-//                log.debug("🔥 Display layer for track:\(trackId) flushed.")
             }
         }
         
         if contentView.renderingComponent.isReadyForMoreMediaData {
             contentView.renderingComponent.enqueue(buffer)
-//            log.debug("✅ Buffer for trackId:\(trackId) enqueued.")
         }
     }
     
@@ -213,7 +195,6 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             .sink { [weak self] in self?.process($0) }
         
         track.add(self)
-//        log.debug("⏳ Frame streaming for Picture-in-Picture started.")
     }
     
     /// A method that stops the frame consumption from the track. Used automatically when the rendering
@@ -224,7 +205,6 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         bufferUpdatesCancellable = nil
         track?.remove(self)
         contentView.renderingComponent.flush()
-//        log.debug("Frame streaming for Picture-in-Picture stopped.")
     }
     
     /// A method used to calculate rendering required properties, every time the trackSize changes.
@@ -245,10 +225,6 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
          /// We update the provided windowSizePolicy with the size of the track we received, transformed
         /// to the value that fits.
         pictureInPictureWindowSizePolicy.trackSize = trackSize
-
-//        log.debug(
-//            "contentSize:\(contentSize), trackId:\(track?.trackId ?? "n/a") trackSize:\(trackSize) requiresResize:\(requiresResize) noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering) skippedFrames:\(skippedFrames) widthDiffRatio:\(widthDiffRatio) heightDiffRatio:\(heightDiffRatio)"
-//        )
     }
     
     /// A method used to handle the frameSkipping(step) during frame consumption.
@@ -259,7 +235,6 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             } else {
                 skippedFrames += 1
             }
-//            log.debug("noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering) skippedFrames:\(skippedFrames)")
         } else if skippedFrames > 0 {
             skippedFrames = 0
         }

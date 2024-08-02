@@ -52,12 +52,10 @@ final class StreamPictureInPictureTrackStateAdapter {
                 .sink { [weak self] _ in
                     self?.checkTracksState()
                 }
-//            log.debug("✅ Activated.")
         } else {
             /// If 'isActive' is false, it cancels the observer.
             observerCancellable?.cancel()
             observerCancellable = nil
-//            log.debug("❌ Disabled.")
         }
     }
     

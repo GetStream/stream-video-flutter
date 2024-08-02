@@ -94,32 +94,27 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     public func pictureInPictureControllerWillStartPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-//        log.debug("Will start with trackId:\(track?.trackId ?? "n/a")")
     }
     
     public func pictureInPictureControllerDidStartPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-//        log.debug("Did start with trackId:\(track?.trackId ?? "n/a")")
     }
     
     public func pictureInPictureController(
         _ pictureInPictureController: AVPictureInPictureController,
         failedToStartPictureInPictureWithError error: Error
     ) {
-//        log.error("Failed for trackId:\(track?.trackId ?? "na/a") with error:\(error)")
     }
     
     public func pictureInPictureControllerWillStopPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-//        log.debug("Will stop for trackId:\(track?.trackId ?? "n/a")")
     }
     
     public func pictureInPictureControllerDidStopPictureInPicture(
         _ pictureInPictureController: AVPictureInPictureController
     ) {
-//        log.debug("Did stop for trackId:\(track?.trackId ?? "n/a")")
     }
     
     // MARK: - Private helpers
@@ -139,7 +134,6 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
                     .publisher(for: \.isPictureInPicturePossible)
                     .removeDuplicates()
                     .sink {$0}
-//                    .sink { log.debug("isPictureInPicturePossible:\($0)") }
                     .store(in: &cancellableBag)
                 
                 pictureInPictureController?
@@ -178,7 +172,6 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     }
     
     private func didUpdatePictureInPictureActiveState(_ isActive: Bool) {
-//        log.debug("isPictureInPictureActive:\(isActive)")
         trackStateAdapter.isEnabled = isActive
     }
 }
