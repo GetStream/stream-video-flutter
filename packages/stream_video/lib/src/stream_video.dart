@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:async/async.dart' as async;
-import 'package:stream_video/open_api/video/coordinator/api.dart';
 import 'package:uuid/uuid.dart';
 
-import '../open_api/video/coordinator/api.dart' as open;
+import '../open_api/video/coordinator/api.dart';
 import 'call/call.dart';
 import 'call/call_ringing_state.dart';
 import 'call/call_type.dart';
@@ -477,18 +476,13 @@ class StreamVideo extends Disposable {
   }
 
   Call makeCall({
-    @Deprecated('Use callType instead') String? type,
-    StreamCallType? callType,
+    required StreamCallType callType,
     required String id,
     CallPreferences? preferences,
   }) {
-    assert(
-      type != null || callType != null,
-      'Either type or callType must be provided',
-    );
     return Call(
       callCid: StreamCallCid.from(
-        type: callType ?? StreamCallType.fromString(type!),
+        type: callType,
         id: id,
       ),
       coordinatorClient: _client,
@@ -527,7 +521,7 @@ class StreamVideo extends Disposable {
     String? next,
     String? prev,
     int? limit,
-    List<open.SortParam>? sorts,
+    List<SortParam>? sorts,
     bool? watch,
   }) {
     return _client.queryCalls(
@@ -643,8 +637,6 @@ class StreamVideo extends Disposable {
     }
 
     final callRingingState = await getCallRingingState(
-      // ignore: deprecated_member_use_from_same_package
-      type: callType.value,
       callType: callType,
       id: callId,
     );
@@ -671,21 +663,14 @@ class StreamVideo extends Disposable {
   }
 
   Future<CallRingingState> getCallRingingState({
-    @Deprecated('Use callType instead') String? type,
-    StreamCallType? callType,
+    required StreamCallType callType,
     required String id,
   }) async {
-    assert(
-      type != null || callType != null,
-      'Either type or callType must be provided',
-    );
-
     final call = makeCall(
-      // ignore: deprecated_member_use_from_same_package
-      type: callType?.value ?? type,
       callType: callType,
       id: id,
     );
+
     final callResult = await call.get();
 
     return callResult.fold(
