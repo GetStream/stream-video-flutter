@@ -1,3 +1,16 @@
+## Upcoming
+
+✅ Added
+* Added `watch` parameter to `StreamVideo.queryCalls()` method, allowing you to subscribe to queried call events.  For more information, refer to the [documentation](https://getstream.io/video/docs/flutter/querying-calls/).
+* Introduced `listRecordings()` to `StreamVideo` object, enabling you to query call recordings using a provided call CID.
+
+🔄 Changed
+* The default constructor for `StreamCallType` is now deprecated. Instead, use the `StreamCallType.defaultType()` factory constuctor.
+
+🐞 Fixed
+* Improved the quality of screen sharing. It now correctly respects the parameters set in `ScreenSharingConstraints` to adjust the quality. 
+* The `FloatingViewAlignment` enum is now properly exported in the `stream_video_flutter` package.
+
 ## 0.4.3
 
 🐞 Fixed

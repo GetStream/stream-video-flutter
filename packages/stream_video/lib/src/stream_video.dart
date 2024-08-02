@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:async/async.dart' as async;
+import 'package:stream_video/open_api/video/coordinator/api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../open_api/video/coordinator/api.dart' as open;
@@ -570,6 +571,15 @@ class StreamVideo extends Disposable {
   }) {
     _logger.d(() => '[removeDevice] pushToken: $pushToken');
     return _client.deleteDevice(id: pushToken, userId: currentUser.id);
+  }
+
+  Future<Result<List<CallRecording>>> listRecordings(
+    StreamCallCid callCid,
+  ) async {
+    _logger.d(() => '[listRecordings] Call $callCid');
+    final result = await _client.listRecordings(callCid);
+    _logger.v(() => '[listRecordings] result: $result');
+    return result;
   }
 
   StreamSubscription<T>? onCallKitEvent<T extends CallKitEvent>(
