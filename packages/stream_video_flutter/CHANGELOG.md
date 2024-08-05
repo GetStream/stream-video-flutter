@@ -7,8 +7,8 @@
 * The implementation of `BroadcastSampleHandler`, used for `broadcast` screen-sharing mode on iOS is now moved from `stream_video_flutter` package to a separate [stream_video_screen_sharing](https://pub.dev/packages/stream_video_screen_sharing) package.
 Migration steps:
 - Add `stream_video_screen_sharing` dependency to your `pubspec.yaml` file
-- Replace the import in SampleHandler.swift file from `stream_video_flutter` to `stream_video_screen_sharing`
-- Replace the dependance added to the extension target in `Podfile` file from `stream_video_flutter` to `stream_video_screen_sharing`
+- Replace the import in `SampleHandler.swift` file from `stream_video_flutter` to `stream_video_screen_sharing`
+- Replace the dependancy added to the extension target in `Podfile` file from `stream_video_flutter` to `stream_video_screen_sharing`
 
 For complete screen-sharing guide please refer to the [documentaiton](https://getstream.io/video/docs/flutter/advanced/screen_sharing/)
 
