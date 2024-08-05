@@ -36,7 +36,7 @@ end
 
 target 'ScreenSharing' do
   use_frameworks!
-  pod 'stream_video_flutter', :path => File.join('.symlinks', 'plugins', 'stream_video_flutter', 'ios')
+  pod 'stream_video_screen_sharing', :path => File.join('.symlinks', 'plugins', 'stream_video_screen_sharing', 'ios')
 end
 
 post_install do |installer|

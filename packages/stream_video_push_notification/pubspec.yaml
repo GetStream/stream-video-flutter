@@ -16,6 +16,7 @@ dependencies:
   firebase_messaging: ^14.6.6
   flutter:
     sdk: flutter
+  flutter_webrtc: ^0.11.6
   flutter_callkit_incoming: ^2.0.4
   json_annotation: ^4.8.0
   meta: ^1.9.1

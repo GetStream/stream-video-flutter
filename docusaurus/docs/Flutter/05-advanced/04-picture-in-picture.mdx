@@ -6,41 +6,19 @@ title: Picture in Picture (PiP)
 
 Picture in picture (PIP) keeps the call running and visible while you navigate to other apps.
 
-:::info
-  At the moment Picture in Picture is only supported on Android.
-:::
-
 ### Enable Picture-in-Picture
-You can enable Picture in Picture by setting the `enablePictureInPicture` property to `true` in the `StreamCallContainer` or `StreamCallContent` widget.
+You can enable Picture in Picture by setting the `enablePictureInPicture` property to `true` in the `PictureInPictureConfiguration` provided to `StreamCallContainer` or `StreamCallContent` widget.
 
 ```dart
 StreamCallContainer(
     call: widget.call,
-    enablePictureInPicture: true,
+    pictureInPictureConfiguration: const PictureInPictureConfiguration(
+        enablePictureInPicture: true,
+    ),
 )
 ```
 
-You can customize the widget rendered while app is in Picture-in-Picture mode by providing `callPictureInPictureBuilder` to `StreamCallContent`.
-
-```dart
-  StreamCallContainer(
-    call: widget.call,
-    callContentBuilder: (
-        BuildContext context,
-        Call call,
-        CallState callState,
-        ) {
-      return StreamCallContent(
-        call: call,
-        callState: callState,
-        enablePictureInPicture: true,
-        callPictureInPictureBuilder: (context, call, callState) {
-          // YOUR CUSTOM WIDGET
-        }
-      );
-    },
-  );
-```
+## Android
 
 ### Android Configuration
 To enable Picture in Picture on Android, you need to add the following configuration to your `AndroidManifest.xml` file.
@@ -65,6 +43,85 @@ class MainActivity: FlutterActivity() {
         PictureInPictureHelper.enterPictureInPictureIfInCall(this)
     }
 }
+```
+
+### Android Customization
+
+For Android, you can customize the widget rendered while app is in Picture-in-Picture mode by providing `callPictureInPictureBuilder` to `PictureInPictureConfiguration`.
+
+```dart
+  StreamCallContainer(
+    call: widget.call,
+    callContentBuilder: (
+        BuildContext context,
+        Call call,
+        CallState callState,
+        ) {
+      return StreamCallContent(
+        call: call,
+        callState: callState,
+        pictureInPictureConfiguration: const PictureInPictureConfiguration(
+          enablePictureInPicture: true,
+          androidPiPConfiguration: AndroidPictureInPictureConfiguration(
+            callPictureInPictureBuilder: (context, call, callState) {
+              // YOUR CUSTOM WIDGET
+            },
+          )
+        ),
+      );
+    },
+  );
+```
+
+## iOS
+
+### Local camera feed in Picture-in-Picture mode
+
+By default iOS is not allowing usage of local camera feed when app is in the background. That includes Picture in picture mode and Split View mode. To enable it you need to request the [multitasking-camera-access](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_developer_avfoundation_multitasking-camera-access) permission directly from Apple (this will change from iOS 18).
+If you already have the permission you have to enable local feed support in our PiP implementation by setting `ignoreLocalParticipantVideo` to `false`.
+
+```dart
+  StreamCallContainer(
+    call: widget.call,
+    callContentBuilder: (
+        BuildContext context,
+        Call call,
+        CallState callState,
+        ) {
+      return StreamCallContent(
+        call: call,
+        callState: callState,
+        pictureInPictureConfiguration: const PictureInPictureConfiguration(
+          enablePictureInPicture: true,
+          iOSPiPConfiguration: IOSPictureInPictureConfiguration(
+            ignoreLocalParticipantVideo: false,
+          )
+        ),
+      );
+    },
+  );
+```
+
+### Enabling PiP support with custom call content widget
+
+If you are not using our `StreamCallContent` and instead building custom call content widget you can still enable Picture in Picture mode by adding `StreamPictureInPictureUiKitView` anywhere in the widget tree. This widget will handle the Picture in Picture mode in iOS for you.
+
+```dart
+  StreamCallContainer(
+    call: widget.call,
+    callContentBuilder: (
+        BuildContext context,
+        Call call,
+        CallState callState,
+        ) {
+      return Stack(
+        children: [
+          StreamPictureInPictureUiKitView(call: call),
+          // YOUR CUSTOM WIDGET
+        ],
+      );
+    },
+  );
 ```
 
 Done. Now after leaving the app, you'll see that the call will be still alive in the background like the one below:
