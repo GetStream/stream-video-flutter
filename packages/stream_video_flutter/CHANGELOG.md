@@ -3,6 +3,9 @@
 ✅ Added
 * Picture in Picture (PiP) is now also supported on iOS. For more information, refer to the [documentation](https://getstream.io/video/docs/flutter/advanced/picture_in_picture/)
 
+🐞 Fixed
+* Fixed an issue where the microphone was being muted when the app was running in the background on Android versions greater than 14.
+
 🚧 Breaking changes
 * The implementation of `BroadcastSampleHandler`, used for `broadcast` screen-sharing mode on iOS is now moved from `stream_video_flutter` package to a separate [stream_video_screen_sharing](https://pub.dev/packages/stream_video_screen_sharing) package.
 Migration steps:
