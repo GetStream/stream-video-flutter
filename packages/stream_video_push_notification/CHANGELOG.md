@@ -1,3 +1,8 @@
+## 0.5.0
+
+🐞 Fixed
+* Fixed an issue where the microphone was being muted when the app was running in the background on Android versions greater than 14.
+
 ## 0.4.4
 * Sync version with `stream_video_flutter` 0.4.4
 
