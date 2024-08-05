@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="io.getstream.video.flutter.stream_video_flutter">
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
@@ -9,7 +10,7 @@
     <application>
 
         <service android:name=".service.StreamCallService"
-            android:foregroundServiceType="phoneCall"
+            android:foregroundServiceType="microphone|phoneCall"
             android:exported="false" />
 
         <service android:name=".service.StreamScreenShareService"
