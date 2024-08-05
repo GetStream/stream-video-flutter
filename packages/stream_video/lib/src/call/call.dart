@@ -58,6 +58,7 @@ const _tag = 'SV:Call';
 
 const _reconnectTimeout = Duration(seconds: 30);
 const _fastReconnectTimeout = Duration(seconds: kDebugMode ? 10 : 3);
+const _reactionAutoDismissTime = Duration(seconds: 5);
 
 int _callSeq = 1;
 
@@ -289,6 +290,8 @@ class Call {
   CallConnectOptions _connectOptions = const CallConnectOptions();
   CallConnectOptions? _connectOptionsOverride;
 
+  final List<Timer> _reactionTimers = [];
+
   @override
   String toString() {
     return 'Call{cid: $callCid}';
@@ -389,6 +392,12 @@ class Call {
     } else if (event is CoordinatorCallBroadcastingStoppedEvent) {
       return _stateManager.coordinatorCallBroadcastingStopped(event);
     } else if (event is CoordinatorCallReactionEvent) {
+      _reactionTimers.add(
+        Timer(_reactionAutoDismissTime, () {
+          _stateManager.resetCallReaction(event.user.id);
+        }),
+      );
+
       return _stateManager.coordinatorCallReaction(event);
     }
   }
@@ -1028,6 +1037,9 @@ class Call {
 
   Future<void> _clear(String src) async {
     _logger.d(() => '[clear] src: $src');
+    for (final timer in _reactionTimers) {
+      timer.cancel();
+    }
     _status.value = _ConnectionStatus.disconnected;
     _subscriptions.cancelAll();
     _cancelables.cancelAll();
