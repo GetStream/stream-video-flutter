@@ -178,7 +178,15 @@ class StreamBackgroundService {
         if (onButtonClick != null) {
           await onButtonClick.call(call, ButtonType.cancel, serviceType);
         } else {
-          await call.leave();
+          if (serviceType == ServiceType.call) {
+            await call.leave();
+            await call.reject(reason: CallRejectReason.cancel());
+          } else if (serviceType == ServiceType.screenSharing) {
+            await StreamVideoFlutterBackground.stopService(
+              ServiceType.screenSharing,
+            );
+            await call.setScreenShareEnabled(enabled: false);
+          }
         }
       }
     };
