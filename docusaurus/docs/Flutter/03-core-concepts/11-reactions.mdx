@@ -6,13 +6,15 @@ description: How to use reactions during the call
 
 ## Reactions
 ​
-It's easy to add reactions to your call.
+Reactions in video calling enable participants to express emotions and non-verbal cues without interrupting the flow of conversation. They also help create a more interactive and responsive virtual meeting environment.
+
+It is easy to create reactions with Stream Video's Flutter SDK.
 
 ```dart
 await call.sendReaction(reactionType: 'fireworks');
 ```
 
-You can also add custom data to the reaction and specify a specific emoji
+You can also add custom data to the reaction and specify a specific emoji:
 
 ```dart
 await call.sendReaction(
