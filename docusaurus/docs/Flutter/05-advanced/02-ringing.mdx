@@ -199,6 +199,20 @@ say you want to end all calls on the CallKit side, you can end them this way:
 StreamVideo.instance.pushNotificationManager?.endAllCalls();
 ```
 
+#### Handling calls while in the foreground
+
+You can manage an incoming call by listening to Stream events and displaying the incoming call screen within your app.
+
+```dart
+StreamVideo.instance.state.incomingCall.listen(_onNavigateToCall);
+```
+
+If you navigate to your call screen, that uses `StreamCallContainer`, while the call is still ringing (not yet accepted) the incoming call screen will be displayed.
+
+:::info
+This method will not show an incoming call screen when the app is in the background or terminated state. To handle this, you would need proper VoIP push handling. Additionally, if VoIP push/CallKit is configured, it will display a ringing notification while also showing the incoming screen when the app is in the foreground.
+:::
+
 ### Integrating Firebase for Android
 
 #### Step 1 - Get the Firebase Credentials
