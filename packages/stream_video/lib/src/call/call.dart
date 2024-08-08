@@ -58,7 +58,6 @@ const _tag = 'SV:Call';
 
 const _reconnectTimeout = Duration(seconds: 30);
 const _fastReconnectTimeout = Duration(seconds: kDebugMode ? 10 : 3);
-const _reactionAutoDismissTime = Duration(seconds: 5);
 
 int _callSeq = 1;
 
@@ -393,7 +392,7 @@ class Call {
       return _stateManager.coordinatorCallBroadcastingStopped(event);
     } else if (event is CoordinatorCallReactionEvent) {
       _reactionTimers.add(
-        Timer(_reactionAutoDismissTime, () {
+        Timer(_preferences.reactionAutoDismissTime, () {
           _stateManager.resetCallReaction(event.user.id);
         }),
       );
