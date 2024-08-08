@@ -45,13 +45,13 @@ internal fun Context.registerReceiverAsFlow(vararg actions: String): Flow<Intent
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(
                     receiver,
                     intentFilter,
                     RECEIVER_NOT_EXPORTED
             )
-        }else {
+        } else {
             registerReceiver(
                     receiver,
                     intentFilter
