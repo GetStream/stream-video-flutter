@@ -161,9 +161,9 @@ mixin StateSfuMixin on StateNotifier<CallState> {
           return it.userId == participant.userId &&
               it.sessionId == participant.sessionId;
         });
-        if (state.sessionId == update?.sessionId) {
+        if (update != null) {
           return participant.copyWith(
-            connectionQuality: update?.connectionQuality,
+            connectionQuality: update.connectionQuality,
           );
         } else {
           return participant;

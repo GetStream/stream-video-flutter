@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+* Fixed reaction dismissal. Sent and received reactions are now correctly dismissed after 5s timeout (configurable in `CallPreferences`).
+* Fixed cancel button behaviour in screen-sharing notification on Android. It will now correctly stop screen-sharing process.
+* Fixed connection quality updates for other call participants.
+
 ## 0.5.0
 
 ✅ Added
