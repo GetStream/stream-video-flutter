@@ -24,6 +24,7 @@ class CallResponse {
     this.endedAt,
     required this.id,
     required this.ingress,
+    this.joinAheadTimeSeconds,
     required this.recording,
     this.session,
     required this.settings,
@@ -67,6 +68,14 @@ class CallResponse {
   String id;
 
   CallIngressResponse ingress;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? joinAheadTimeSeconds;
 
   bool recording;
 
@@ -126,6 +135,7 @@ class CallResponse {
     other.endedAt == endedAt &&
     other.id == id &&
     other.ingress == ingress &&
+    other.joinAheadTimeSeconds == joinAheadTimeSeconds &&
     other.recording == recording &&
     other.session == session &&
     other.settings == settings &&
@@ -150,6 +160,7 @@ class CallResponse {
     (endedAt == null ? 0 : endedAt!.hashCode) +
     (id.hashCode) +
     (ingress.hashCode) +
+    (joinAheadTimeSeconds == null ? 0 : joinAheadTimeSeconds!.hashCode) +
     (recording.hashCode) +
     (session == null ? 0 : session!.hashCode) +
     (settings.hashCode) +
@@ -161,7 +172,7 @@ class CallResponse {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, thumbnails=$thumbnails, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
+  String toString() => 'CallResponse[backstage=$backstage, blockedUserIds=$blockedUserIds, cid=$cid, createdAt=$createdAt, createdBy=$createdBy, currentSessionId=$currentSessionId, custom=$custom, egress=$egress, endedAt=$endedAt, id=$id, ingress=$ingress, joinAheadTimeSeconds=$joinAheadTimeSeconds, recording=$recording, session=$session, settings=$settings, startsAt=$startsAt, team=$team, thumbnails=$thumbnails, transcribing=$transcribing, type=$type, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -180,6 +191,11 @@ class CallResponse {
     }
       json[r'id'] = this.id;
       json[r'ingress'] = this.ingress;
+    if (this.joinAheadTimeSeconds != null) {
+      json[r'join_ahead_time_seconds'] = this.joinAheadTimeSeconds;
+    } else {
+      json[r'join_ahead_time_seconds'] = null;
+    }
       json[r'recording'] = this.recording;
     if (this.session != null) {
       json[r'session'] = this.session;
@@ -240,6 +256,7 @@ class CallResponse {
         endedAt: mapDateTime(json, r'ended_at', r''),
         id: mapValueOfType<String>(json, r'id')!,
         ingress: CallIngressResponse.fromJson(json[r'ingress'])!,
+        joinAheadTimeSeconds: mapValueOfType<int>(json, r'join_ahead_time_seconds'),
         recording: mapValueOfType<bool>(json, r'recording')!,
         session: CallSessionResponse.fromJson(json[r'session']),
         settings: CallSettingsResponse.fromJson(json[r'settings'])!,

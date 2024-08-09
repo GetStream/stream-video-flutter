@@ -93,6 +93,33 @@ await call.join();
 
 Unlike the call creation flow and functions, the user must have sufficient permissions to join the call or a `VideoError` will be returned. All users connected via the `join()` function have the permission type of `user` by default and are limited in the actions they can perform.
 
+#### Backstage setup
+
+The backstage feature makes it easy to build a use-case where you and your co-hosts can setup your camera before going live. Only after you call `call.goLive()` the regular users be allowed to join the livestream.
+
+However, you can also specify a `joinAheadTimeSeconds`, which allows regular users to join the livestream before it is live, in the specified join time before the stream starts.
+
+Here's an example how to do that:
+
+```dart
+final call = StreamVideo.instance.makeCall(callType: StreamCallType.livestream(), id: 'my-call-id');
+
+const backstageSetting = StreamBackstageSettings(
+  enabled: true,
+  joinAheadTimeSeconds: 300,
+);
+
+await call.getOrCreate(
+  memberIds: ['alice', 'bob'],
+  startsAt: DateTime.now().add(const Duration(seconds: 500)),
+  backstage: backstageSetting,
+);
+
+await call.join();
+```
+
+In the code snippet above, we are creating a call that starts 500 seconds from now. We are also enabling backstage mode, with a `joinAheadTimeSeconds` of 300 seconds. That means that regular users will be able to join the call 200 seconds from now.
+
 ### Restricting access
 
 You can restrict access to a call by tweaking the [Call Type](https://getstream.io/video/docs/flutter/call-types/) permissions and roles. A typical use case is to restrict access to a call to a specific set of users -> call members.

@@ -35,10 +35,10 @@ To create a ringing call, you need to follow the same steps as in the basic call
 
 ```dart
 final call = StreamVideo.instance.makeCall(callType: StreamCallType.defaultType(), id: 'Your-call-ID');
-await call.getOrCreate(memberIds: ['user1_id', 'user2_id'], ringing: true);
+await call.getOrCreate(memberIds: ['user1_id', 'user2_id'], ringing: true, video: true);
 ```
 
-* Setting `ringing` to true will make Stream send a notification to the users on the call, triggering the platform call screen on iOS and Android.
+* When you set `ringing` to true, Stream will send a notification to the users on the call, triggering the platform call screen on iOS and Android. The ringing notification will indicate whether it's a video call or an audio-only call, depending on whether you set the `video` parameter to true or false.
 * `memberIds` is a list of user IDs to immediately add to the call. Combining this with a `ringing` parameter will trigger the call to ring on the devices of the members.
 
 In subsequent steps, we will show you how to configure your Stream app in the Dashboard and your Flutter app to properly send and receive ringing notifications.

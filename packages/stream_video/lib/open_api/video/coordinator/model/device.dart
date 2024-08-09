@@ -19,6 +19,7 @@ class Device {
     required this.id,
     required this.pushProvider,
     this.pushProviderName,
+    required this.userId,
     this.voip,
   });
 
@@ -43,10 +44,13 @@ class Device {
   ///
   String? disabledReason;
 
+  /// Device ID
   String id;
 
+  /// Push provider
   String pushProvider;
 
+  /// Push provider name
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -54,6 +58,9 @@ class Device {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   String? pushProviderName;
+
+  /// User ID
+  String userId;
 
   /// When true the token is for Apple VoIP push notifications
   ///
@@ -72,6 +79,7 @@ class Device {
     other.id == id &&
     other.pushProvider == pushProvider &&
     other.pushProviderName == pushProviderName &&
+    other.userId == userId &&
     other.voip == voip;
 
   @override
@@ -83,10 +91,11 @@ class Device {
     (id.hashCode) +
     (pushProvider.hashCode) +
     (pushProviderName == null ? 0 : pushProviderName!.hashCode) +
+    (userId.hashCode) +
     (voip == null ? 0 : voip!.hashCode);
 
   @override
-  String toString() => 'Device[createdAt=$createdAt, disabled=$disabled, disabledReason=$disabledReason, id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, voip=$voip]';
+  String toString() => 'Device[createdAt=$createdAt, disabled=$disabled, disabledReason=$disabledReason, id=$id, pushProvider=$pushProvider, pushProviderName=$pushProviderName, userId=$userId, voip=$voip]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -108,6 +117,7 @@ class Device {
     } else {
       json[r'push_provider_name'] = null;
     }
+      json[r'user_id'] = this.userId;
     if (this.voip != null) {
       json[r'voip'] = this.voip;
     } else {
@@ -141,6 +151,7 @@ class Device {
         id: mapValueOfType<String>(json, r'id')!,
         pushProvider: mapValueOfType<String>(json, r'push_provider')!,
         pushProviderName: mapValueOfType<String>(json, r'push_provider_name'),
+        userId: mapValueOfType<String>(json, r'user_id')!,
         voip: mapValueOfType<bool>(json, r'voip'),
       );
     }
@@ -192,6 +203,7 @@ class Device {
     'created_at',
     'id',
     'push_provider',
+    'user_id',
   };
 }
 

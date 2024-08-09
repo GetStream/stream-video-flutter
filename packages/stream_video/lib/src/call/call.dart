@@ -1295,6 +1295,7 @@ class Call {
     int? membersLimit,
     bool ringing = false,
     bool notify = false,
+    bool video = false,
   }) async {
     _logger.d(
       () => '[get] cid: $callCid, membersLimit: $membersLimit'
@@ -1311,6 +1312,7 @@ class Call {
       membersLimit: membersLimit,
       ringing: ringing,
       notify: notify,
+      video: video,
     );
 
     return response.fold(
@@ -1335,8 +1337,13 @@ class Call {
   Future<Result<CallReceivedOrCreatedData>> getOrCreate({
     List<String> memberIds = const [],
     bool ringing = false,
+    bool video = false,
     String? team,
     bool? notify,
+    DateTime? startsAt,
+    StreamBackstageSettings? backstage,
+    int? maxDuration,
+    int? maxParticipants,
     Map<String, Object> custom = const {},
   }) async {
     _logger.d(
@@ -1354,6 +1361,19 @@ class Call {
       await _setOutgoingCall(this);
     }
 
+    LimitsSettingsRequest? limits;
+    if (maxDuration != null || maxParticipants != null) {
+      limits = LimitsSettingsRequest(
+        maxDurationSeconds: maxDuration,
+        maxParticipants: maxParticipants,
+      );
+    }
+
+    final settingsOverride = CallSettingsRequest(
+      backstage: backstage?.toOpenDto(),
+      limits: limits,
+    );
+
     final response = await _coordinatorClient.getOrCreateCall(
       callCid: callCid,
       ringing: ringing,
@@ -1365,6 +1385,9 @@ class Call {
       }).toList(),
       team: team,
       notify: notify,
+      video: video,
+      startsAt: startsAt,
+      settingsOverride: settingsOverride,
       custom: custom,
     );
 
@@ -1393,6 +1416,7 @@ class Call {
   /// and joins the call immediately.
   Future<Result<CallJoinedData>> _joinCall({
     bool create = false,
+    bool video = false,
     String? migratingFrom,
     CallConnectOptions? connectOptions,
   }) async {
@@ -1401,6 +1425,7 @@ class Call {
       callCid: callCid,
       create: create,
       migratingFrom: migratingFrom,
+      video: video,
     );
     if (joinResult is! Success<CoordinatorJoined>) {
       _logger.e(() => '[joinCall] join failed: $joinResult');

@@ -556,7 +556,7 @@ class StreamVideo extends Disposable {
 
   /// Gets a list of devices used to receive push notifications.
   Future<Result<List<PushDevice>>> getDevices() {
-    return _client.listDevices(userId: currentUser.id);
+    return _client.listDevices();
   }
 
   /// Removes a device used to receive push notifications.
