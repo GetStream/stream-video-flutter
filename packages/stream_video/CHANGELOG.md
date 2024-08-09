@@ -1,5 +1,13 @@
 ## Upcoming
 
+✅ Added
+* Added `backstage` parameter to `call.getOtCreate()` method with backstage settings. For more information, refer to the [documentation](https://getstream.io/video/docs/flutter/joining-and-creating-calls/#backstage-setup)
+    * Ability to join call in advance with `joinAheadTimeSeconds` parameter (part of `StreamBackstageSettings`)
+* Added `startsAt` parameter to `call.getOtCreate()` method
+* Added `maxDuration` and `maxParticipants` parameters to `call.getOtCreate()` method
+* Added `video` parameter to `call.getOtCreate()`, `call.getCall()` and `call.join()` methods. This parameter is used to distinguish between audio-only and video calls for ringing purposes.
+    * ❗Important❗ the `video` parameter is `false` by default. If you want your call to be treated as a video call while ringing set it to `true`.
+
 🐞 Fixed
 * Fixed reaction dismissal. Sent and received reactions are now correctly dismissed after 5s timeout (configurable in `CallPreferences`).
 * Fixed cancel button behaviour in screen-sharing notification on Android. It will now correctly stop screen-sharing process.

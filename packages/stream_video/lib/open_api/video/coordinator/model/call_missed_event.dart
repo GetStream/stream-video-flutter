@@ -17,6 +17,7 @@ class CallMissedEvent {
     required this.callCid,
     required this.createdAt,
     this.members = const [],
+    required this.notifyUser,
     required this.sessionId,
     this.type = 'call.missed',
     required this.user,
@@ -30,6 +31,8 @@ class CallMissedEvent {
 
   /// List of members who missed the call
   List<MemberResponse> members;
+
+  bool notifyUser;
 
   /// Call session ID
   String sessionId;
@@ -45,6 +48,7 @@ class CallMissedEvent {
     other.callCid == callCid &&
     other.createdAt == createdAt &&
     _deepEquality.equals(other.members, members) &&
+    other.notifyUser == notifyUser &&
     other.sessionId == sessionId &&
     other.type == type &&
     other.user == user;
@@ -56,12 +60,13 @@ class CallMissedEvent {
     (callCid.hashCode) +
     (createdAt.hashCode) +
     (members.hashCode) +
+    (notifyUser.hashCode) +
     (sessionId.hashCode) +
     (type.hashCode) +
     (user.hashCode);
 
   @override
-  String toString() => 'CallMissedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, sessionId=$sessionId, type=$type, user=$user]';
+  String toString() => 'CallMissedEvent[call=$call, callCid=$callCid, createdAt=$createdAt, members=$members, notifyUser=$notifyUser, sessionId=$sessionId, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -69,6 +74,7 @@ class CallMissedEvent {
       json[r'call_cid'] = this.callCid;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'members'] = this.members;
+      json[r'notify_user'] = this.notifyUser;
       json[r'session_id'] = this.sessionId;
       json[r'type'] = this.type;
       json[r'user'] = this.user;
@@ -98,6 +104,7 @@ class CallMissedEvent {
         callCid: mapValueOfType<String>(json, r'call_cid')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
         members: MemberResponse.listFromJson(json[r'members']),
+        notifyUser: mapValueOfType<bool>(json, r'notify_user')!,
         sessionId: mapValueOfType<String>(json, r'session_id')!,
         type: mapValueOfType<String>(json, r'type')!,
         user: UserResponse.fromJson(json[r'user'])!,
@@ -152,6 +159,7 @@ class CallMissedEvent {
     'call_cid',
     'created_at',
     'members',
+    'notify_user',
     'session_id',
     'type',
     'user',

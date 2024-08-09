@@ -230,6 +230,11 @@ class RecordSettingsRequestQualityEnum {
   static const n720p = RecordSettingsRequestQualityEnum._(r'720p');
   static const n1080p = RecordSettingsRequestQualityEnum._(r'1080p');
   static const n1440p = RecordSettingsRequestQualityEnum._(r'1440p');
+  static const portrait360x640 = RecordSettingsRequestQualityEnum._(r'portrait-360x640');
+  static const portrait480x854 = RecordSettingsRequestQualityEnum._(r'portrait-480x854');
+  static const portrait720x1280 = RecordSettingsRequestQualityEnum._(r'portrait-720x1280');
+  static const portrait1080x1920 = RecordSettingsRequestQualityEnum._(r'portrait-1080x1920');
+  static const portrait1440x2560 = RecordSettingsRequestQualityEnum._(r'portrait-1440x2560');
 
   /// List of all possible values in this [enum][RecordSettingsRequestQualityEnum].
   static const values = <RecordSettingsRequestQualityEnum>[
@@ -238,6 +243,11 @@ class RecordSettingsRequestQualityEnum {
     n720p,
     n1080p,
     n1440p,
+    portrait360x640,
+    portrait480x854,
+    portrait720x1280,
+    portrait1080x1920,
+    portrait1440x2560,
   ];
 
   static RecordSettingsRequestQualityEnum? fromJson(dynamic value) => RecordSettingsRequestQualityEnumTypeTransformer().decode(value);
@@ -281,6 +291,11 @@ class RecordSettingsRequestQualityEnumTypeTransformer {
         case r'720p': return RecordSettingsRequestQualityEnum.n720p;
         case r'1080p': return RecordSettingsRequestQualityEnum.n1080p;
         case r'1440p': return RecordSettingsRequestQualityEnum.n1440p;
+        case r'portrait-360x640': return RecordSettingsRequestQualityEnum.portrait360x640;
+        case r'portrait-480x854': return RecordSettingsRequestQualityEnum.portrait480x854;
+        case r'portrait-720x1280': return RecordSettingsRequestQualityEnum.portrait720x1280;
+        case r'portrait-1080x1920': return RecordSettingsRequestQualityEnum.portrait1080x1920;
+        case r'portrait-1440x2560': return RecordSettingsRequestQualityEnum.portrait1440x2560;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');

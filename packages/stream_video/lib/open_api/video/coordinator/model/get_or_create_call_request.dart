@@ -17,6 +17,7 @@ class GetOrCreateCallRequest {
     this.membersLimit,
     this.notify,
     this.ring,
+    this.video,
   });
 
   ///
@@ -54,12 +55,21 @@ class GetOrCreateCallRequest {
   ///
   bool? ring;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? video;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is GetOrCreateCallRequest &&
     other.data == data &&
     other.membersLimit == membersLimit &&
     other.notify == notify &&
-    other.ring == ring;
+    other.ring == ring &&
+    other.video == video;
 
   @override
   int get hashCode =>
@@ -67,10 +77,11 @@ class GetOrCreateCallRequest {
     (data == null ? 0 : data!.hashCode) +
     (membersLimit == null ? 0 : membersLimit!.hashCode) +
     (notify == null ? 0 : notify!.hashCode) +
-    (ring == null ? 0 : ring!.hashCode);
+    (ring == null ? 0 : ring!.hashCode) +
+    (video == null ? 0 : video!.hashCode);
 
   @override
-  String toString() => 'GetOrCreateCallRequest[data=$data, membersLimit=$membersLimit, notify=$notify, ring=$ring]';
+  String toString() => 'GetOrCreateCallRequest[data=$data, membersLimit=$membersLimit, notify=$notify, ring=$ring, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -93,6 +104,11 @@ class GetOrCreateCallRequest {
       json[r'ring'] = this.ring;
     } else {
       json[r'ring'] = null;
+    }
+    if (this.video != null) {
+      json[r'video'] = this.video;
+    } else {
+      json[r'video'] = null;
     }
     return json;
   }
@@ -120,6 +136,7 @@ class GetOrCreateCallRequest {
         membersLimit: mapValueOfType<int>(json, r'members_limit'),
         notify: mapValueOfType<bool>(json, r'notify'),
         ring: mapValueOfType<bool>(json, r'ring'),
+        video: mapValueOfType<bool>(json, r'video'),
       );
     }
     return null;

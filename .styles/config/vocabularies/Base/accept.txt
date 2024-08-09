@@ -14,7 +14,7 @@ Podfile
 protobuf
 protos
 proto
-Livestream
+[Ll]ivestream
 grayscale
 uni_links
 browsable

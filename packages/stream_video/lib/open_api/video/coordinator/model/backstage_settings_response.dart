@@ -14,25 +14,41 @@ class BackstageSettingsResponse {
   /// Returns a new [BackstageSettingsResponse] instance.
   BackstageSettingsResponse({
     required this.enabled,
+    this.joinAheadTimeSeconds,
   });
 
   bool enabled;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? joinAheadTimeSeconds;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is BackstageSettingsResponse &&
-    other.enabled == enabled;
+    other.enabled == enabled &&
+    other.joinAheadTimeSeconds == joinAheadTimeSeconds;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (enabled.hashCode);
+    (enabled.hashCode) +
+    (joinAheadTimeSeconds == null ? 0 : joinAheadTimeSeconds!.hashCode);
 
   @override
-  String toString() => 'BackstageSettingsResponse[enabled=$enabled]';
+  String toString() => 'BackstageSettingsResponse[enabled=$enabled, joinAheadTimeSeconds=$joinAheadTimeSeconds]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'enabled'] = this.enabled;
+    if (this.joinAheadTimeSeconds != null) {
+      json[r'join_ahead_time_seconds'] = this.joinAheadTimeSeconds;
+    } else {
+      json[r'join_ahead_time_seconds'] = null;
+    }
     return json;
   }
 
@@ -56,6 +72,7 @@ class BackstageSettingsResponse {
 
       return BackstageSettingsResponse(
         enabled: mapValueOfType<bool>(json, r'enabled')!,
+        joinAheadTimeSeconds: mapValueOfType<int>(json, r'join_ahead_time_seconds'),
       );
     }
     return null;
