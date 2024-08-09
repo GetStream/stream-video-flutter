@@ -39,6 +39,7 @@ internal fun Intent.setNotificationAction(
     packageName: String,
     action: NotificationAction,
 ): Intent {
+    setPackage(packageName)
     putExtra(KEY_CID, action.callCid)
     this.action = when (action) {
         is NotificationAction.Accept -> "$packageName.${NotificationAction.Accept.SUFFIX}"
