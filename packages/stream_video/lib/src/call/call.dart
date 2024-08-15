@@ -17,6 +17,7 @@ import '../errors/video_error_composer.dart';
 import '../models/call_received_data.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
+import '../sfu/data/models/sfu_error.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../utils/cancelable_operation.dart';
@@ -620,21 +621,27 @@ class Call {
   Future<Result<CallCredentials>> _joinIfNeeded({
     CallConnectOptions? connectOptions,
   }) async {
+    _logger.d(() => '[joinIfNeeded] options: $connectOptions');
+
     final creds = _credentials;
     if (creds != null) {
       _logger.w(() => '[joinIfNeeded] rejected (already joined): $creds');
       return Result.success(creds);
     }
-    _logger.d(() => '[joinIfNeeded] no args');
+
     final joinedResult =
         await _joinCall(create: true, connectOptions: connectOptions);
+
     if (joinedResult is Success<CallJoinedData>) {
       _logger.v(() => '[joinIfNeeded] completed');
+
       _credentials = joinedResult.data.credentials;
       _session?.rtcManager
           ?.updateReportingInterval(joinedResult.data.reportingIntervalMs);
+
       return Result.success(joinedResult.data.credentials);
     }
+
     _logger.e(() => '[joinIfNeeded] failed: $joinedResult');
     return joinedResult as Failure;
   }
@@ -801,16 +808,60 @@ class Call {
   }
 
   Future<void> _onSfuEvent(SfuEvent sfuEvent) async {
+    _logger.w(() => '[onSfuEvent] event: $sfuEvent');
+
+    //connection breaks
     if (sfuEvent is SfuSocketDisconnected) {
-      await _reconnect(sfuEvent.reason);
-    } else if (sfuEvent is SfuSocketFailed) {
-      await _reconnect(sfuEvent.error);
-    } else if (sfuEvent is SfuGoAwayEvent) {
+      _logger.w(
+          () => '[onSfuEvent] socket disconnected, performing fast reconnect');
+      await _fastReconnect(sfuEvent.reason);
+    }
+    //connection breaks
+    else if (sfuEvent is SfuSocketFailed) {
+      _logger.w(() => '[onSfuEvent] socket failed, performing fast reconnect');
+      await _fastReconnect(sfuEvent.error);
+    }
+    // swtich sfu
+    else if (sfuEvent is SfuGoAwayEvent) {
+      _logger.w(() => '[onSfuEvent] go away, switching sfu');
       await _switchSfu(sfuEvent.goAwayReason);
+    }
+    // error event
+    else if (sfuEvent is SfuErrorEvent) {
+      switch (sfuEvent.error.reconnectStrategy) {
+        case SfuReconnectionStrategy.unspecified:
+          _logger.w(() =>
+              '[onSfuEvent] SFU error unspecified, performing fast reconnect');
+          await _fastReconnect(sfuEvent.error);
+          break;
+        case SfuReconnectionStrategy.full:
+          _logger.w(
+              () => '[onSfuEvent] SFU error full, performing full reconnect');
+          await _fullReconnect(sfuEvent.error, forceRejoin: true);
+          break;
+        case SfuReconnectionStrategy.fast:
+          _logger.w(
+              () => '[onSfuEvent] SFU error fast, performing fast reconnect');
+          await _fastReconnect(sfuEvent.error);
+          break;
+        case SfuReconnectionStrategy.migrate:
+          _logger.w(() => '[onSfuEvent] SFU error migrate, switching sfu');
+          await _switchSfu(SfuGoAwayReason.migrate);
+          break;
+        case SfuReconnectionStrategy.disconnect:
+          _logger.w(() => '[onSfuEvent] SFU error disconnect, leaving call');
+          await leave();
+          break;
+        case SfuReconnectionStrategy.clean:
+          _logger.w(
+              () => '[onSfuEvent] SFU error clean, performing full reconnect');
+          await _fullReconnect(sfuEvent.error);
+          break;
+      }
     }
   }
 
-  Future<void> _reconnect(dynamic reason) async {
+  Future<void> _fastReconnect(dynamic reason) async {
     //one reconnect attempt at a time
     if (_status.value == _ConnectionStatus.reconnecting) return;
     _status.value = _ConnectionStatus.reconnecting;
@@ -821,9 +872,9 @@ class Call {
     );
 
     var tryFastReconnect = true;
-    _logger.w(() => '[reconnect] starting timer');
+    _logger.w(() => '[fastReconnect] starting timer');
     final timer = Timer(_fastReconnectTimeout, () {
-      _logger.w(() => '[reconnect] too late for fast reconnect');
+      _logger.w(() => '[fastReconnect] too late for fast reconnect');
       tryFastReconnect = false;
     });
 
@@ -835,55 +886,65 @@ class Call {
         .timeout(
       _reconnectTimeout,
       onTimeout: () {
-        _logger.w(() => '[reconnect] timeout');
-
+        _logger.w(() => '[fastReconnect] timeout');
         return InternetConnectionStatus.disconnected;
       },
     );
 
+    timer.cancel();
+
     //no internet connection after _reconnectTimeout, leave the call
     if (connectionStatus != InternetConnectionStatus.connected) {
-      timer.cancel();
       await leave();
       return;
     }
 
     if (_session != null && tryFastReconnect) {
-      _logger.w(() => '[reconnect] trying fast reconnect');
-      timer.cancel();
+      _logger.w(() => '[fastReconnect] trying fast reconnect');
 
       final result = await _session!.fastReconnect();
       if (!result.isSuccess) {
         _logger.w(
           () =>
-              '[reconnect] fast reconnect failed, doing full reconnect: ${result.fold(success: (success) => '', failure: (failure) => failure.error.message)}',
+              '[fastReconnect] fast reconnect failed, doing full reconnect: ${result.fold(success: (success) => '', failure: (failure) => failure.error.message)}',
         );
+
         await _fullReconnect(reason);
       } else {
         _logger.w(
-          () => '[reconnect] fast reconnect successful',
+          () => '[fastReconnect] fast reconnect successful',
         );
 
         _stateManager.lifecycleCallConnected();
         _status.value = _ConnectionStatus.connected;
       }
     } else {
-      _logger.w(() => '[reconnect] doing full reconnect');
+      _logger.w(() =>
+          '[fastReconnect] fast reconnect not possible, doing full reconnect');
       await _fullReconnect(reason);
     }
   }
 
-  Future<void> _fullReconnect(dynamic reason) async {
+  Future<void> _fullReconnect(
+    dynamic reason, {
+    bool forceRejoin = false,
+  }) async {
+    _logger
+        .d(() => '[fullReconnect] reason: $reason, forceRejoin: $forceRejoin');
+
     if (_status.value == _ConnectionStatus.disconnected) {
       _logger.w(() => '[fullReconnect] rejected (disconnected)');
       return;
     }
+
     if (_status.value == _ConnectionStatus.connecting) {
       _logger.w(() => '[fullReconnect] rejected (connecting)');
       return;
     }
+
     _status.value = _ConnectionStatus.connecting;
     _logger.w(() => '[fullReconnect] >>>>>>>>>>>>>>>> reason: $reason');
+
     _subscriptions.cancel(_idSessionEvents);
     final sessionId = _session?.sessionId;
     await _session?.dispose();
@@ -891,9 +952,11 @@ class Call {
 
     Result<None> result;
     final startTime = DateTime.now().toUtc().millisecondsSinceEpoch;
+
     while (true) {
       _reconnectAttempt++;
       _stateManager.lifecycleCallConnecting(attempt: _reconnectAttempt);
+
       if (_status.value == _ConnectionStatus.disconnected) {
         _logger.w(
           () =>
@@ -902,6 +965,7 @@ class Call {
         _logger.v(() => '[fullReconnect] <<<<<<<<<<<<<<< rejected');
         return;
       }
+
       final elapsed = DateTime.now().toUtc().millisecondsSinceEpoch - startTime;
       final retryPolicy = _retryPolicy;
       if (elapsed > retryPolicy.config.callRejoinTimeout.inMilliseconds) {
@@ -909,27 +973,37 @@ class Call {
         result = Result.error('was unable to reconnect in 15 seconds');
         break;
       }
+
       final delay = retryPolicy.backoff(_reconnectAttempt);
       _logger.v(
         () => '[fullReconnect] attempt: $_reconnectAttempt, '
             'elapsed: $elapsed, delay: $delay',
       );
+
       await Future<void>.delayed(delay);
       _logger.v(() => '[fullReconnect] joining to coordinator');
+
+      if (forceRejoin) {
+        _credentials = null;
+      }
+
       final joinedResult = await _joinIfNeeded(connectOptions: _connectOptions);
       if (joinedResult is! Success<CallCredentials>) {
         _logger.e(() => '[fullReconnect] joining failed: $joinedResult');
         continue;
       }
+
       _logger.v(() => '[fullReconnect] starting session');
       result = await _startSession(joinedResult.data, sessionId);
       if (result is! Success<None>) {
         _logger.w(() => '[fullReconnect] session start failed: $result');
         continue;
       }
+
       _logger.v(() => '[fullReconnect] session started');
       break;
     }
+
     _reconnectAttempt = 0;
     if (result.isFailure) {
       _logger.e(() => '[fullReconnect] <<<<<<<<<<<<<<< failed: $result');
