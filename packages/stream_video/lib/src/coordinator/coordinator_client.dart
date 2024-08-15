@@ -1,5 +1,7 @@
 // ignore_for_file: comment_references
 
+import 'package:stream_video/open_api/video/coordinator/api.dart';
+
 import '../../open_api/video/coordinator/api.dart' as open;
 import '../models/call_cid.dart';
 import '../models/call_metadata.dart';
@@ -42,9 +44,7 @@ abstract class CoordinatorClient {
     bool? voipToken,
   });
 
-  Future<Result<List<PushDevice>>> listDevices({
-    required String userId,
-  });
+  Future<Result<List<PushDevice>>> listDevices();
 
   Future<Result<None>> deleteDevice({
     required String id,
@@ -56,6 +56,7 @@ abstract class CoordinatorClient {
     int? membersLimit,
     bool? ringing,
     bool? notify,
+    bool? video,
   });
 
   Future<Result<CallReceivedOrCreatedData>> getOrCreateCall({
@@ -64,6 +65,9 @@ abstract class CoordinatorClient {
     List<open.MemberRequest>? members,
     String? team,
     bool? notify,
+    bool? video,
+    DateTime? startsAt,
+    CallSettingsRequest? settingsOverride,
     Map<String, Object> custom = const {},
   });
 
@@ -73,6 +77,7 @@ abstract class CoordinatorClient {
     bool? ringing,
     bool? create,
     String? migratingFrom,
+    bool? video,
   });
 
   Future<Result<None>> acceptCall({required StreamCallCid cid});

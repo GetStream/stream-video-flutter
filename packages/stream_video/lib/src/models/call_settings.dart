@@ -164,16 +164,19 @@ class StreamScreenShareSettings extends MediaSettings {
 class StreamBackstageSettings extends AbstractSettings {
   const StreamBackstageSettings({
     this.enabled = false,
+    this.joinAheadTimeSeconds,
   });
 
   final bool enabled;
+  final int? joinAheadTimeSeconds;
 
   @override
-  List<Object?> get props => [enabled];
+  List<Object?> get props => [enabled, joinAheadTimeSeconds];
 
   BackstageSettingsRequest toOpenDto() {
     return BackstageSettingsRequest(
       enabled: enabled,
+      joinAheadTimeSeconds: joinAheadTimeSeconds,
     );
   }
 }
