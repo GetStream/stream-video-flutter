@@ -1,10 +1,14 @@
 ---
-title: Keeping the call alive in the background
-slug: /keeping-the-call-alive-in-the-background
+title: Background modes
+slug: /background-modes
 description: How to keep the call alive in the background
 ---
 
-Ensuring uninterrupted video and audio calls is vital. Our SDK includes a feature to keep calls active in the background, allowing users to multitask seamlessly. On this page, you will learn how to implement and tailor this feature to your needs.
+Ensuring that calls continue seamlessly when the app is in the background is essential for delivering a reliable and smooth user experience.  On this page, you will learn how to make sure that calls remain active in the background on both Android and iOS.
+
+## Android
+
+Our SDK includes a dedicated service to keep calls active in the background, allowing users to multitask seamlessly.
 
 ### Starting the Android foreground service
 
@@ -18,13 +22,13 @@ StreamBackgroundService.init(
 
 Our foreground service displays a notification indicating an ongoing call. This notification allows users to either exit the call or seamlessly return to it. It appears during active calls and vanishes when the user leaves the call.
 
-![Active call notification](../assets/core_concepts/active_call_notification.png)
+![Active call notification](../assets/advanced_assets/active_call_notification.png)
 
 ### Screen sharing notification
 
 When a user shares their screen, the SDK displays a notification to indicate that the screen is being shared. This notification allows users to either stop sharing their screen or return to the call. It appears during active screen sharing and vanishes when the user stops sharing their screen.
 
-![Screen sharing notification](../assets/core_concepts/screen_sharing_notification.png)
+![Screen sharing notification](../assets/advanced_assets/screen_sharing_notification.png)
 
 ### Customizing the notification
 
@@ -69,4 +73,44 @@ By default, the SDK handles button tap by canceling the call when the user taps 
         }
       },
     );
+```
+
+### Required permissions
+
+We require the following permissions to create an appropriate foreground service: `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_PHONE_CALL`, and `FOREGROUND_SERVICE_MICROPHONE`. Additionally, the `FOREGROUND_SERVICE_MEDIA_PROJECTION` permission is necessary for the screen sharing functionality. They are added out-of-the-box in as part of our `stream_video_flutter` package.
+
+## iOS
+
+iOS background modes provide the necessary framework to maintain connectivity, handle incoming calls, and manage ongoing calls even when the app isn't in the foreground. By using the appropriate background modes, your app can stay responsive to call events without being suspended by the system.
+
+### Enabling background modes
+
+* In Xcode, go to your app's target, select the Signing & Capabilities tab.
+
+* Click the + Capability button and add Background Modes.
+
+* Check the relevant background modes, specifically:
+  * Audio, AirPlay, and Picture in Picture: For ongoing audio/video calls while the app is backgrounded.
+  * Voice over IP (VoIP): This mode is critical for managing incoming and ongoing voice calls.
+  * Remote notifications
+  * Background processing
+
+![Active call notification](../assets/advanced_assets/background_modes.png)
+
+### Info.plist
+
+Make sure to add relevant permissions to your `Info.plist` file and `BGTaskSchedulerPermittedIdentifiers` to support background tasks.
+
+```plist
+<key>BGTaskSchedulerPermittedIdentifiers</key>
+<array>
+	 <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+</array>
+<key>UIBackgroundModes</key>
+<array>
+	<string>audio</string>
+	<string>processing</string>
+	<string>remote-notification</string>
+	<string>voip</string>
+</array>
 ```
