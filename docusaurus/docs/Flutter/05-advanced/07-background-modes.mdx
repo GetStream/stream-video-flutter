@@ -8,11 +8,11 @@ Ensuring that calls continue seamlessly when the app is in the background is ess
 
 ## Android
 
-Our SDK includes a dedicated service to keep calls active in the background, allowing users to multitask seamlessly.
+The Stream Video Flutter SDK includes a dedicated service to keep calls active in the background, allowing users to multitask seamlessly.
 
 ### Starting the Android foreground service
 
-Our SDK ensures continuous calls by initiating an Android foreground service. This service keeps the process active and the call running, even if the application's UI is no longer visible. The SDK already provides the required declarations in the manifest, all you have to do is to initialize the service somewhere after starting the app.
+The Stream Video Flutter SDK ensures continuous calls by initiating an Android foreground service. This service keeps the process active and the call running, even if the application's UI is no longer visible. The SDK already provides the required declarations in the manifest, all you have to do is to initialize the service somewhere after starting the app.
 
 ```dart
 StreamBackgroundService.init(
@@ -121,4 +121,4 @@ Make sure to add relevant permissions to your `Info.plist` file as well as the `
 
 ## Picture in Picture (PiP)
 
-To enhance the user experience even more, consider enabling Picture in Picture (PiP) mode. PiP allows users to continue watching videos or participating in calls while using other apps. Our SDK supports PiP mode on both iOS and Android, making it easy to enable this feature in your app. Check out our [Picture in Picture](https://getstream.io/video/docs/flutter/advanced/picture_in_picture/) guide to learn more.
+To enhance the user experience even more, consider enabling Picture in Picture (PiP) mode. PiP allows users to continue watching videos or participating in calls while using other apps. The Stream Video Flutter SDK supports PiP mode on both iOS and Android, making it easy to enable this feature in your app. Check out our [Picture in Picture](https://getstream.io/video/docs/flutter/advanced/picture_in_picture/) guide to learn more.
