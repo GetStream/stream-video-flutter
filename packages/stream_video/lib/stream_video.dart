@@ -1,6 +1,19 @@
 library stream_video;
 
-export 'open_api/video/coordinator/api.dart';
+export 'open_api/video/coordinator/api.dart'
+    hide
+        Action,
+        ActionLog,
+        Attachment,
+        Channel,
+        ChannelConfig,
+        Message,
+        Poll,
+        PollOption,
+        PollVote,
+        Reaction,
+        ReactionGroupResponse,
+        ReviewQueueItem;
 export 'src/call/call.dart';
 export 'src/call/call_connect_options.dart';
 export 'src/call/call_events.dart';

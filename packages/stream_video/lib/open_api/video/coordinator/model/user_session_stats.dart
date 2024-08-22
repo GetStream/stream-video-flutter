@@ -62,6 +62,7 @@ class UserSessionStats {
     this.timeline,
     required this.totalPixelsIn,
     required this.totalPixelsOut,
+    this.truncated,
     this.webrtcVersion,
   });
 
@@ -137,7 +138,7 @@ class UserSessionStats {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  Stats? jitter;
+  TimeStats? jitter;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -145,7 +146,7 @@ class UserSessionStats {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  Stats? latency;
+  TimeStats? latency;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -241,7 +242,7 @@ class UserSessionStats {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  Stats? publisherJitter;
+  TimeStats? publisherJitter;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -249,7 +250,7 @@ class UserSessionStats {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  Stats? publisherLatency;
+  TimeStats? publisherLatency;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -341,7 +342,7 @@ class UserSessionStats {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  Stats? subscriberJitter;
+  TimeStats? subscriberJitter;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -349,7 +350,7 @@ class UserSessionStats {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  Stats? subscriberLatency;
+  TimeStats? subscriberLatency;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -372,6 +373,14 @@ class UserSessionStats {
   int totalPixelsIn;
 
   int totalPixelsOut;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? truncated;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -432,6 +441,7 @@ class UserSessionStats {
     other.timeline == timeline &&
     other.totalPixelsIn == totalPixelsIn &&
     other.totalPixelsOut == totalPixelsOut &&
+    other.truncated == truncated &&
     other.webrtcVersion == webrtcVersion;
 
   @override
@@ -486,10 +496,11 @@ class UserSessionStats {
     (timeline == null ? 0 : timeline!.hashCode) +
     (totalPixelsIn.hashCode) +
     (totalPixelsOut.hashCode) +
+    (truncated == null ? 0 : truncated!.hashCode) +
     (webrtcVersion == null ? 0 : webrtcVersion!.hashCode);
 
   @override
-  String toString() => 'UserSessionStats[browser=$browser, browserVersion=$browserVersion, currentIp=$currentIp, currentSfu=$currentSfu, deviceModel=$deviceModel, deviceVersion=$deviceVersion, distanceToSfuKilometers=$distanceToSfuKilometers, freezeDurationSeconds=$freezeDurationSeconds, geolocation=$geolocation, jitter=$jitter, latency=$latency, maxFirPerSecond=$maxFirPerSecond, maxFreezeFraction=$maxFreezeFraction, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxFreezesPerSecond=$maxFreezesPerSecond, maxNackPerSecond=$maxNackPerSecond, maxPliPerSecond=$maxPliPerSecond, maxPublishingVideoQuality=$maxPublishingVideoQuality, maxReceivingVideoQuality=$maxReceivingVideoQuality, os=$os, osVersion=$osVersion, packetLossFraction=$packetLossFraction, pubSubHints=$pubSubHints, publishedTracks=$publishedTracks, publisherAudioMos=$publisherAudioMos, publisherJitter=$publisherJitter, publisherLatency=$publisherLatency, publisherNoiseCancellationSeconds=$publisherNoiseCancellationSeconds, publisherPacketLossFraction=$publisherPacketLossFraction, publisherQualityLimitationFraction=$publisherQualityLimitationFraction, publisherVideoQualityLimitationDurationSeconds=$publisherVideoQualityLimitationDurationSeconds, publishingAudioCodec=$publishingAudioCodec, publishingDurationSeconds=$publishingDurationSeconds, publishingVideoCodec=$publishingVideoCodec, qualityScore=$qualityScore, receivingAudioCodec=$receivingAudioCodec, receivingDurationSeconds=$receivingDurationSeconds, receivingVideoCodec=$receivingVideoCodec, sdk=$sdk, sdkVersion=$sdkVersion, sessionId=$sessionId, subscriberAudioMos=$subscriberAudioMos, subscriberJitter=$subscriberJitter, subscriberLatency=$subscriberLatency, subscriberVideoQualityThrottledDurationSeconds=$subscriberVideoQualityThrottledDurationSeconds, subsessions=$subsessions, timeline=$timeline, totalPixelsIn=$totalPixelsIn, totalPixelsOut=$totalPixelsOut, webrtcVersion=$webrtcVersion]';
+  String toString() => 'UserSessionStats[browser=$browser, browserVersion=$browserVersion, currentIp=$currentIp, currentSfu=$currentSfu, deviceModel=$deviceModel, deviceVersion=$deviceVersion, distanceToSfuKilometers=$distanceToSfuKilometers, freezeDurationSeconds=$freezeDurationSeconds, geolocation=$geolocation, jitter=$jitter, latency=$latency, maxFirPerSecond=$maxFirPerSecond, maxFreezeFraction=$maxFreezeFraction, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxFreezesPerSecond=$maxFreezesPerSecond, maxNackPerSecond=$maxNackPerSecond, maxPliPerSecond=$maxPliPerSecond, maxPublishingVideoQuality=$maxPublishingVideoQuality, maxReceivingVideoQuality=$maxReceivingVideoQuality, os=$os, osVersion=$osVersion, packetLossFraction=$packetLossFraction, pubSubHints=$pubSubHints, publishedTracks=$publishedTracks, publisherAudioMos=$publisherAudioMos, publisherJitter=$publisherJitter, publisherLatency=$publisherLatency, publisherNoiseCancellationSeconds=$publisherNoiseCancellationSeconds, publisherPacketLossFraction=$publisherPacketLossFraction, publisherQualityLimitationFraction=$publisherQualityLimitationFraction, publisherVideoQualityLimitationDurationSeconds=$publisherVideoQualityLimitationDurationSeconds, publishingAudioCodec=$publishingAudioCodec, publishingDurationSeconds=$publishingDurationSeconds, publishingVideoCodec=$publishingVideoCodec, qualityScore=$qualityScore, receivingAudioCodec=$receivingAudioCodec, receivingDurationSeconds=$receivingDurationSeconds, receivingVideoCodec=$receivingVideoCodec, sdk=$sdk, sdkVersion=$sdkVersion, sessionId=$sessionId, subscriberAudioMos=$subscriberAudioMos, subscriberJitter=$subscriberJitter, subscriberLatency=$subscriberLatency, subscriberVideoQualityThrottledDurationSeconds=$subscriberVideoQualityThrottledDurationSeconds, subsessions=$subsessions, timeline=$timeline, totalPixelsIn=$totalPixelsIn, totalPixelsOut=$totalPixelsOut, truncated=$truncated, webrtcVersion=$webrtcVersion]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -682,6 +693,11 @@ class UserSessionStats {
     }
       json[r'total_pixels_in'] = this.totalPixelsIn;
       json[r'total_pixels_out'] = this.totalPixelsOut;
+    if (this.truncated != null) {
+      json[r'truncated'] = this.truncated;
+    } else {
+      json[r'truncated'] = null;
+    }
     if (this.webrtcVersion != null) {
       json[r'webrtc_version'] = this.webrtcVersion;
     } else {
@@ -718,8 +734,8 @@ class UserSessionStats {
         distanceToSfuKilometers: mapValueOfType<double>(json, r'distance_to_sfu_kilometers'),
         freezeDurationSeconds: mapValueOfType<int>(json, r'freeze_duration_seconds')!,
         geolocation: GeolocationResult.fromJson(json[r'geolocation']),
-        jitter: Stats.fromJson(json[r'jitter']),
-        latency: Stats.fromJson(json[r'latency']),
+        jitter: TimeStats.fromJson(json[r'jitter']),
+        latency: TimeStats.fromJson(json[r'latency']),
         maxFirPerSecond: mapValueOfType<double>(json, r'max_fir_per_second'),
         maxFreezeFraction: mapValueOfType<double>(json, r'max_freeze_fraction')!,
         maxFreezesDurationSeconds: mapValueOfType<int>(json, r'max_freezes_duration_seconds')!,
@@ -734,8 +750,8 @@ class UserSessionStats {
         pubSubHints: MediaPubSubHint.fromJson(json[r'pub_sub_hints']),
         publishedTracks: PublishedTrackInfo.listFromJson(json[r'published_tracks']),
         publisherAudioMos: MOSStats.fromJson(json[r'publisher_audio_mos']),
-        publisherJitter: Stats.fromJson(json[r'publisher_jitter']),
-        publisherLatency: Stats.fromJson(json[r'publisher_latency']),
+        publisherJitter: TimeStats.fromJson(json[r'publisher_jitter']),
+        publisherLatency: TimeStats.fromJson(json[r'publisher_latency']),
         publisherNoiseCancellationSeconds: mapValueOfType<double>(json, r'publisher_noise_cancellation_seconds'),
         publisherPacketLossFraction: mapValueOfType<double>(json, r'publisher_packet_loss_fraction')!,
         publisherQualityLimitationFraction: mapValueOfType<double>(json, r'publisher_quality_limitation_fraction'),
@@ -751,13 +767,14 @@ class UserSessionStats {
         sdkVersion: mapValueOfType<String>(json, r'sdk_version'),
         sessionId: mapValueOfType<String>(json, r'session_id')!,
         subscriberAudioMos: MOSStats.fromJson(json[r'subscriber_audio_mos']),
-        subscriberJitter: Stats.fromJson(json[r'subscriber_jitter']),
-        subscriberLatency: Stats.fromJson(json[r'subscriber_latency']),
+        subscriberJitter: TimeStats.fromJson(json[r'subscriber_jitter']),
+        subscriberLatency: TimeStats.fromJson(json[r'subscriber_latency']),
         subscriberVideoQualityThrottledDurationSeconds: mapValueOfType<double>(json, r'subscriber_video_quality_throttled_duration_seconds'),
         subsessions: Subsession.listFromJson(json[r'subsessions']),
         timeline: CallTimeline.fromJson(json[r'timeline']),
         totalPixelsIn: mapValueOfType<int>(json, r'total_pixels_in')!,
         totalPixelsOut: mapValueOfType<int>(json, r'total_pixels_out')!,
+        truncated: mapValueOfType<bool>(json, r'truncated'),
         webrtcVersion: mapValueOfType<String>(json, r'webrtc_version'),
       );
     }

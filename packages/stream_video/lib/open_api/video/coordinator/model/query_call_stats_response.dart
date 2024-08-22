@@ -19,7 +19,7 @@ class QueryCallStatsResponse {
     this.reports = const [],
   });
 
-  /// Duration of the request in human-readable format
+  /// Duration of the request in milliseconds
   String duration;
 
   ///

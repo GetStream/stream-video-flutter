@@ -10,64 +10,80 @@
 
 part of openapi.api;
 
-class SortParam {
-  /// Returns a new [SortParam] instance.
-  SortParam({
-    this.direction,
-    this.field,
+class Action {
+  /// Returns a new [Action] instance.
+  Action({
+    required this.name,
+    this.style,
+    required this.text,
+    required this.type,
+    this.value,
   });
 
-  /// Direction of sorting, -1 for descending, 1 for ascending
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  int? direction;
+  String name;
 
-  /// Name of field to sort by
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  String? field;
+  String? style;
+
+  String text;
+
+  String type;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? value;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is SortParam &&
-    other.direction == direction &&
-    other.field == field;
+  bool operator ==(Object other) => identical(this, other) || other is Action &&
+    other.name == name &&
+    other.style == style &&
+    other.text == text &&
+    other.type == type &&
+    other.value == value;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (direction == null ? 0 : direction!.hashCode) +
-    (field == null ? 0 : field!.hashCode);
+    (name.hashCode) +
+    (style == null ? 0 : style!.hashCode) +
+    (text.hashCode) +
+    (type.hashCode) +
+    (value == null ? 0 : value!.hashCode);
 
   @override
-  String toString() => 'SortParam[direction=$direction, field=$field]';
+  String toString() => 'Action[name=$name, style=$style, text=$text, type=$type, value=$value]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.direction != null) {
-      json[r'direction'] = this.direction;
+      json[r'name'] = this.name;
+    if (this.style != null) {
+      json[r'style'] = this.style;
     } else {
-      json[r'direction'] = null;
+      json[r'style'] = null;
     }
-    if (this.field != null) {
-      json[r'field'] = this.field;
+      json[r'text'] = this.text;
+      json[r'type'] = this.type;
+    if (this.value != null) {
+      json[r'value'] = this.value;
     } else {
-      json[r'field'] = null;
+      json[r'value'] = null;
     }
     return json;
   }
 
-  /// Returns a new [SortParam] instance and imports its values from
+  /// Returns a new [Action] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static SortParam? fromJson(dynamic value) {
+  static Action? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -76,25 +92,28 @@ class SortParam {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "SortParam[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "SortParam[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "Action[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "Action[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return SortParam(
-        direction: mapValueOfType<int>(json, r'direction'),
-        field: mapValueOfType<String>(json, r'field'),
+      return Action(
+        name: mapValueOfType<String>(json, r'name')!,
+        style: mapValueOfType<String>(json, r'style'),
+        text: mapValueOfType<String>(json, r'text')!,
+        type: mapValueOfType<String>(json, r'type')!,
+        value: mapValueOfType<String>(json, r'value'),
       );
     }
     return null;
   }
 
-  static List<SortParam> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <SortParam>[];
+  static List<Action> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <Action>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = SortParam.fromJson(row);
+        final value = Action.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -103,12 +122,12 @@ class SortParam {
     return result.toList(growable: growable);
   }
 
-  static Map<String, SortParam> mapFromJson(dynamic json) {
-    final map = <String, SortParam>{};
+  static Map<String, Action> mapFromJson(dynamic json) {
+    final map = <String, Action>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = SortParam.fromJson(entry.value);
+        final value = Action.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -117,14 +136,14 @@ class SortParam {
     return map;
   }
 
-  // maps a json object with a list of SortParam-objects as value to a dart map
-  static Map<String, List<SortParam>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<SortParam>>{};
+  // maps a json object with a list of Action-objects as value to a dart map
+  static Map<String, List<Action>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<Action>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = SortParam.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = Action.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -132,6 +151,9 @@ class SortParam {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'name',
+    'text',
+    'type',
   };
 }
 

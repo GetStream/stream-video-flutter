@@ -13,12 +13,24 @@ part of openapi.api;
 class CallEvent {
   /// Returns a new [CallEvent] instance.
   CallEvent({
+    this.additional = const {},
+    this.component,
     required this.description,
     required this.endTimestamp,
     required this.severity,
     required this.timestamp,
     required this.type,
   });
+
+  Map<String, Object> additional;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? component;
 
   String description;
 
@@ -32,6 +44,8 @@ class CallEvent {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallEvent &&
+    _deepEquality.equals(other.additional, additional) &&
+    other.component == component &&
     other.description == description &&
     other.endTimestamp == endTimestamp &&
     other.severity == severity &&
@@ -41,6 +55,8 @@ class CallEvent {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (additional.hashCode) +
+    (component == null ? 0 : component!.hashCode) +
     (description.hashCode) +
     (endTimestamp.hashCode) +
     (severity.hashCode) +
@@ -48,10 +64,16 @@ class CallEvent {
     (type.hashCode);
 
   @override
-  String toString() => 'CallEvent[description=$description, endTimestamp=$endTimestamp, severity=$severity, timestamp=$timestamp, type=$type]';
+  String toString() => 'CallEvent[additional=$additional, component=$component, description=$description, endTimestamp=$endTimestamp, severity=$severity, timestamp=$timestamp, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+      json[r'additional'] = this.additional;
+    if (this.component != null) {
+      json[r'component'] = this.component;
+    } else {
+      json[r'component'] = null;
+    }
       json[r'description'] = this.description;
       json[r'end_timestamp'] = this.endTimestamp;
       json[r'severity'] = this.severity;
@@ -79,6 +101,8 @@ class CallEvent {
       }());
 
       return CallEvent(
+        additional: mapCastOfType<String, Object>(json, r'additional') ?? const {},
+        component: mapValueOfType<String>(json, r'component'),
         description: mapValueOfType<String>(json, r'description')!,
         endTimestamp: mapValueOfType<int>(json, r'end_timestamp')!,
         severity: mapValueOfType<int>(json, r'severity')!,

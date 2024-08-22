@@ -15,6 +15,7 @@ class BroadcastSettingsRequest {
   BroadcastSettingsRequest({
     this.enabled,
     this.hls,
+    this.rtmp,
   });
 
   ///
@@ -33,19 +34,29 @@ class BroadcastSettingsRequest {
   ///
   HLSSettingsRequest? hls;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  RTMPSettingsRequest? rtmp;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is BroadcastSettingsRequest &&
     other.enabled == enabled &&
-    other.hls == hls;
+    other.hls == hls &&
+    other.rtmp == rtmp;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (enabled == null ? 0 : enabled!.hashCode) +
-    (hls == null ? 0 : hls!.hashCode);
+    (hls == null ? 0 : hls!.hashCode) +
+    (rtmp == null ? 0 : rtmp!.hashCode);
 
   @override
-  String toString() => 'BroadcastSettingsRequest[enabled=$enabled, hls=$hls]';
+  String toString() => 'BroadcastSettingsRequest[enabled=$enabled, hls=$hls, rtmp=$rtmp]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -58,6 +69,11 @@ class BroadcastSettingsRequest {
       json[r'hls'] = this.hls;
     } else {
       json[r'hls'] = null;
+    }
+    if (this.rtmp != null) {
+      json[r'rtmp'] = this.rtmp;
+    } else {
+      json[r'rtmp'] = null;
     }
     return json;
   }
@@ -83,6 +99,7 @@ class BroadcastSettingsRequest {
       return BroadcastSettingsRequest(
         enabled: mapValueOfType<bool>(json, r'enabled'),
         hls: HLSSettingsRequest.fromJson(json[r'hls']),
+        rtmp: RTMPSettingsRequest.fromJson(json[r'rtmp']),
       );
     }
     return null;

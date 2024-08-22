@@ -10,42 +10,37 @@
 
 part of openapi.api;
 
-class Stats {
-  /// Returns a new [Stats] instance.
-  Stats({
-    required this.averageSeconds,
-    required this.maxSeconds,
+class StopRTMPBroadcastsResponse {
+  /// Returns a new [StopRTMPBroadcastsResponse] instance.
+  StopRTMPBroadcastsResponse({
+    required this.duration,
   });
 
-  double averageSeconds;
-
-  double maxSeconds;
+  /// Duration of the request in milliseconds
+  String duration;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Stats &&
-    other.averageSeconds == averageSeconds &&
-    other.maxSeconds == maxSeconds;
+  bool operator ==(Object other) => identical(this, other) || other is StopRTMPBroadcastsResponse &&
+    other.duration == duration;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (averageSeconds.hashCode) +
-    (maxSeconds.hashCode);
+    (duration.hashCode);
 
   @override
-  String toString() => 'Stats[averageSeconds=$averageSeconds, maxSeconds=$maxSeconds]';
+  String toString() => 'StopRTMPBroadcastsResponse[duration=$duration]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'average_seconds'] = this.averageSeconds;
-      json[r'max_seconds'] = this.maxSeconds;
+      json[r'duration'] = this.duration;
     return json;
   }
 
-  /// Returns a new [Stats] instance and imports its values from
+  /// Returns a new [StopRTMPBroadcastsResponse] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static Stats? fromJson(dynamic value) {
+  static StopRTMPBroadcastsResponse? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -54,25 +49,24 @@ class Stats {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Stats[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Stats[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "StopRTMPBroadcastsResponse[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "StopRTMPBroadcastsResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return Stats(
-        averageSeconds: mapValueOfType<double>(json, r'average_seconds')!,
-        maxSeconds: mapValueOfType<double>(json, r'max_seconds')!,
+      return StopRTMPBroadcastsResponse(
+        duration: mapValueOfType<String>(json, r'duration')!,
       );
     }
     return null;
   }
 
-  static List<Stats> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <Stats>[];
+  static List<StopRTMPBroadcastsResponse> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <StopRTMPBroadcastsResponse>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = Stats.fromJson(row);
+        final value = StopRTMPBroadcastsResponse.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -81,12 +75,12 @@ class Stats {
     return result.toList(growable: growable);
   }
 
-  static Map<String, Stats> mapFromJson(dynamic json) {
-    final map = <String, Stats>{};
+  static Map<String, StopRTMPBroadcastsResponse> mapFromJson(dynamic json) {
+    final map = <String, StopRTMPBroadcastsResponse>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = Stats.fromJson(entry.value);
+        final value = StopRTMPBroadcastsResponse.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -95,14 +89,14 @@ class Stats {
     return map;
   }
 
-  // maps a json object with a list of Stats-objects as value to a dart map
-  static Map<String, List<Stats>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<Stats>>{};
+  // maps a json object with a list of StopRTMPBroadcastsResponse-objects as value to a dart map
+  static Map<String, List<StopRTMPBroadcastsResponse>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<StopRTMPBroadcastsResponse>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Stats.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = StopRTMPBroadcastsResponse.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -110,8 +104,7 @@ class Stats {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'average_seconds',
-    'max_seconds',
+    'duration',
   };
 }
 

@@ -14,6 +14,7 @@ class OwnUserResponse {
   /// Returns a new [OwnUserResponse] instance.
   OwnUserResponse({
     required this.banned,
+    this.blockedUserIds = const [],
     this.channelMutes = const [],
     required this.createdAt,
     this.custom = const {},
@@ -41,6 +42,8 @@ class OwnUserResponse {
   });
 
   bool banned;
+
+  List<String> blockedUserIds;
 
   List<ChannelMute> channelMutes;
 
@@ -90,7 +93,7 @@ class OwnUserResponse {
 
   List<String> latestHiddenChannels;
 
-  List<UserMute> mutes;
+  List<UserMuteResponse> mutes;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -108,7 +111,7 @@ class OwnUserResponse {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  PrivacySettings? privacySettings;
+  PrivacySettingsResponse? privacySettings;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -116,7 +119,7 @@ class OwnUserResponse {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  PushNotificationSettings? pushNotifications;
+  PushNotificationSettingsResponse? pushNotifications;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -141,6 +144,7 @@ class OwnUserResponse {
   @override
   bool operator ==(Object other) => identical(this, other) || other is OwnUserResponse &&
     other.banned == banned &&
+    _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
     _deepEquality.equals(other.channelMutes, channelMutes) &&
     other.createdAt == createdAt &&
     _deepEquality.equals(other.custom, custom) &&
@@ -170,6 +174,7 @@ class OwnUserResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (banned.hashCode) +
+    (blockedUserIds.hashCode) +
     (channelMutes.hashCode) +
     (createdAt.hashCode) +
     (custom.hashCode) +
@@ -196,11 +201,12 @@ class OwnUserResponse {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'OwnUserResponse[banned=$banned, channelMutes=$channelMutes, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, devices=$devices, id=$id, image=$image, invisible=$invisible, language=$language, lastActive=$lastActive, latestHiddenChannels=$latestHiddenChannels, mutes=$mutes, name=$name, online=$online, privacySettings=$privacySettings, pushNotifications=$pushNotifications, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, totalUnreadCount=$totalUnreadCount, unreadChannels=$unreadChannels, unreadThreads=$unreadThreads, updatedAt=$updatedAt]';
+  String toString() => 'OwnUserResponse[banned=$banned, blockedUserIds=$blockedUserIds, channelMutes=$channelMutes, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, devices=$devices, id=$id, image=$image, invisible=$invisible, language=$language, lastActive=$lastActive, latestHiddenChannels=$latestHiddenChannels, mutes=$mutes, name=$name, online=$online, privacySettings=$privacySettings, pushNotifications=$pushNotifications, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, totalUnreadCount=$totalUnreadCount, unreadChannels=$unreadChannels, unreadThreads=$unreadThreads, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'banned'] = this.banned;
+      json[r'blocked_user_ids'] = this.blockedUserIds;
       json[r'channel_mutes'] = this.channelMutes;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'custom'] = this.custom;
@@ -272,14 +278,17 @@ class OwnUserResponse {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          //assert(json.containsKey(key), 'Required key "OwnUserResponse[$key]" is missing from JSON.');
-          //assert(json[key] != null, 'Required key "OwnUserResponse[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "OwnUserResponse[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "OwnUserResponse[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
       return OwnUserResponse(
-        banned: mapValueOfType<bool>(json, r'banned') ?? false,
+        banned: mapValueOfType<bool>(json, r'banned')!,
+        blockedUserIds: json[r'blocked_user_ids'] is Iterable
+            ? (json[r'blocked_user_ids'] as Iterable).cast<String>().toList(growable: false)
+            : const [],
         channelMutes: ChannelMute.listFromJson(json[r'channel_mutes']),
         createdAt: mapDateTime(json, r'created_at', r'')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
@@ -288,25 +297,25 @@ class OwnUserResponse {
         devices: Device.listFromJson(json[r'devices']),
         id: mapValueOfType<String>(json, r'id')!,
         image: mapValueOfType<String>(json, r'image'),
-        invisible: mapValueOfType<bool>(json, r'invisible') ?? false,
+        invisible: mapValueOfType<bool>(json, r'invisible')!,
         language: mapValueOfType<String>(json, r'language')!,
         lastActive: mapDateTime(json, r'last_active', r''),
         latestHiddenChannels: json[r'latest_hidden_channels'] is Iterable
             ? (json[r'latest_hidden_channels'] as Iterable).cast<String>().toList(growable: false)
             : const [],
-        mutes: UserMute.listFromJson(json[r'mutes']),
+        mutes: UserMuteResponse.listFromJson(json[r'mutes']),
         name: mapValueOfType<String>(json, r'name'),
-        online: mapValueOfType<bool>(json, r'online') ?? false,
-        privacySettings: PrivacySettings.fromJson(json[r'privacy_settings']),
-        pushNotifications: PushNotificationSettings.fromJson(json[r'push_notifications']),
+        online: mapValueOfType<bool>(json, r'online')!,
+        privacySettings: PrivacySettingsResponse.fromJson(json[r'privacy_settings']),
+        pushNotifications: PushNotificationSettingsResponse.fromJson(json[r'push_notifications']),
         revokeTokensIssuedBefore: mapDateTime(json, r'revoke_tokens_issued_before', r''),
         role: mapValueOfType<String>(json, r'role')!,
         teams: json[r'teams'] is Iterable
             ? (json[r'teams'] as Iterable).cast<String>().toList(growable: false)
             : const [],
-        totalUnreadCount: mapValueOfType<int>(json, r'total_unread_count') ?? 0,
-        unreadChannels: mapValueOfType<int>(json, r'unread_channels') ?? 0,
-        unreadThreads: mapValueOfType<int>(json, r'unread_threads') ?? 0,
+        totalUnreadCount: mapValueOfType<int>(json, r'total_unread_count')!,
+        unreadChannels: mapValueOfType<int>(json, r'unread_channels')!,
+        unreadThreads: mapValueOfType<int>(json, r'unread_threads')!,
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
       );
     }

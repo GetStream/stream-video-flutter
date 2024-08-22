@@ -19,7 +19,7 @@ class GoLiveResponse {
 
   CallResponse call;
 
-  /// Duration of the request in human-readable format
+  /// Duration of the request in milliseconds
   String duration;
 
   @override
