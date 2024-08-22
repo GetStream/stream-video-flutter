@@ -77,7 +77,7 @@ By default, the SDK handles button tap by canceling the call when the user taps 
 
 ### Required permissions
 
-We require the following permissions to create an appropriate foreground service: `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_PHONE_CALL`, and `FOREGROUND_SERVICE_MICROPHONE`. Additionally, the `FOREGROUND_SERVICE_MEDIA_PROJECTION` permission is necessary for the screen sharing functionality. They are added out-of-the-box in as part of our `stream_video_flutter` package.
+We require the following permissions to create an appropriate foreground service: `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_PHONE_CALL`, and `FOREGROUND_SERVICE_MICROPHONE`. Additionally, the `FOREGROUND_SERVICE_MEDIA_PROJECTION` permission is necessary for the screen sharing functionality. They are added out-of-the-box as part of our `stream_video_flutter` package.
 
 ## iOS
 
@@ -99,9 +99,13 @@ iOS background modes provide the necessary framework to maintain connectivity, h
 
 ### Info.plist
 
-Make sure to add relevant permissions to your `Info.plist` file and `BGTaskSchedulerPermittedIdentifiers` to support background tasks.
+Make sure to add relevant permissions to your `Info.plist` file as well as the `BGTaskSchedulerPermittedIdentifiers` to support background tasks.
 
 ```plist
+<key>NSCameraUsageDescription</key>
+<string>$(PRODUCT_NAME) needs access to your camera for video calls.</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>$(PRODUCT_NAME) needs access to your microphone for voice and video calls.</string>
 <key>BGTaskSchedulerPermittedIdentifiers</key>
 <array>
 	 <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
