@@ -14,6 +14,7 @@ class BackstageSettingsRequest {
   /// Returns a new [BackstageSettingsRequest] instance.
   BackstageSettingsRequest({
     this.enabled,
+    this.joinAheadTimeSeconds,
   });
 
   ///
@@ -24,17 +25,27 @@ class BackstageSettingsRequest {
   ///
   bool? enabled;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? joinAheadTimeSeconds;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is BackstageSettingsRequest &&
-    other.enabled == enabled;
+    other.enabled == enabled &&
+    other.joinAheadTimeSeconds == joinAheadTimeSeconds;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (enabled == null ? 0 : enabled!.hashCode);
+    (enabled == null ? 0 : enabled!.hashCode) +
+    (joinAheadTimeSeconds == null ? 0 : joinAheadTimeSeconds!.hashCode);
 
   @override
-  String toString() => 'BackstageSettingsRequest[enabled=$enabled]';
+  String toString() => 'BackstageSettingsRequest[enabled=$enabled, joinAheadTimeSeconds=$joinAheadTimeSeconds]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -42,6 +53,11 @@ class BackstageSettingsRequest {
       json[r'enabled'] = this.enabled;
     } else {
       json[r'enabled'] = null;
+    }
+    if (this.joinAheadTimeSeconds != null) {
+      json[r'join_ahead_time_seconds'] = this.joinAheadTimeSeconds;
+    } else {
+      json[r'join_ahead_time_seconds'] = null;
     }
     return json;
   }
@@ -66,6 +82,7 @@ class BackstageSettingsRequest {
 
       return BackstageSettingsRequest(
         enabled: mapValueOfType<bool>(json, r'enabled'),
+        joinAheadTimeSeconds: mapValueOfType<int>(json, r'join_ahead_time_seconds'),
       );
     }
     return null;

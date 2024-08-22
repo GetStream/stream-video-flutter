@@ -18,6 +18,7 @@ class CallRequest {
     this.settingsOverride,
     this.startsAt,
     this.team,
+    this.video,
   });
 
   Map<String, Object> custom;
@@ -48,13 +49,22 @@ class CallRequest {
   ///
   String? team;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? video;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is CallRequest &&
     _deepEquality.equals(other.custom, custom) &&
     _deepEquality.equals(other.members, members) &&
     other.settingsOverride == settingsOverride &&
     other.startsAt == startsAt &&
-    other.team == team;
+    other.team == team &&
+    other.video == video;
 
   @override
   int get hashCode =>
@@ -63,10 +73,11 @@ class CallRequest {
     (members.hashCode) +
     (settingsOverride == null ? 0 : settingsOverride!.hashCode) +
     (startsAt == null ? 0 : startsAt!.hashCode) +
-    (team == null ? 0 : team!.hashCode);
+    (team == null ? 0 : team!.hashCode) +
+    (video == null ? 0 : video!.hashCode);
 
   @override
-  String toString() => 'CallRequest[custom=$custom, members=$members, settingsOverride=$settingsOverride, startsAt=$startsAt, team=$team]';
+  String toString() => 'CallRequest[custom=$custom, members=$members, settingsOverride=$settingsOverride, startsAt=$startsAt, team=$team, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -86,6 +97,11 @@ class CallRequest {
       json[r'team'] = this.team;
     } else {
       json[r'team'] = null;
+    }
+    if (this.video != null) {
+      json[r'video'] = this.video;
+    } else {
+      json[r'video'] = null;
     }
     return json;
   }
@@ -114,6 +130,7 @@ class CallRequest {
         settingsOverride: CallSettingsRequest.fromJson(json[r'settings_override']),
         startsAt: mapDateTime(json, r'starts_at', r''),
         team: mapValueOfType<String>(json, r'team'),
+        video: mapValueOfType<bool>(json, r'video'),
       );
     }
     return null;

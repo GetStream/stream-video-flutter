@@ -20,6 +20,7 @@ class JoinCallRequest {
     this.migratingFrom,
     this.notify,
     this.ring,
+    this.video,
   });
 
   /// if true the call will be created if it doesn't exist
@@ -76,6 +77,14 @@ class JoinCallRequest {
   ///
   bool? ring;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? video;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is JoinCallRequest &&
     other.create == create &&
@@ -84,7 +93,8 @@ class JoinCallRequest {
     other.membersLimit == membersLimit &&
     other.migratingFrom == migratingFrom &&
     other.notify == notify &&
-    other.ring == ring;
+    other.ring == ring &&
+    other.video == video;
 
   @override
   int get hashCode =>
@@ -95,10 +105,11 @@ class JoinCallRequest {
     (membersLimit == null ? 0 : membersLimit!.hashCode) +
     (migratingFrom == null ? 0 : migratingFrom!.hashCode) +
     (notify == null ? 0 : notify!.hashCode) +
-    (ring == null ? 0 : ring!.hashCode);
+    (ring == null ? 0 : ring!.hashCode) +
+    (video == null ? 0 : video!.hashCode);
 
   @override
-  String toString() => 'JoinCallRequest[create=$create, data=$data, location=$location, membersLimit=$membersLimit, migratingFrom=$migratingFrom, notify=$notify, ring=$ring]';
+  String toString() => 'JoinCallRequest[create=$create, data=$data, location=$location, membersLimit=$membersLimit, migratingFrom=$migratingFrom, notify=$notify, ring=$ring, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -133,6 +144,11 @@ class JoinCallRequest {
     } else {
       json[r'ring'] = null;
     }
+    if (this.video != null) {
+      json[r'video'] = this.video;
+    } else {
+      json[r'video'] = null;
+    }
     return json;
   }
 
@@ -162,6 +178,7 @@ class JoinCallRequest {
         migratingFrom: mapValueOfType<String>(json, r'migrating_from'),
         notify: mapValueOfType<bool>(json, r'notify'),
         ring: mapValueOfType<bool>(json, r'ring'),
+        video: mapValueOfType<bool>(json, r'video'),
       );
     }
     return null;
