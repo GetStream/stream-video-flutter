@@ -17,6 +17,7 @@ class StreamLobbyVideo extends StatefulWidget {
     this.userAvatarTheme,
     this.onMicrophoneTrackSet,
     this.onCameraTrackSet,
+    this.streamVideo,
   });
 
   /// Represents a call.
@@ -30,6 +31,11 @@ class StreamLobbyVideo extends StatefulWidget {
 
   final FutureOr<void> Function(RtcLocalAudioTrack?)? onMicrophoneTrackSet;
   final FutureOr<void> Function(RtcLocalCameraTrack?)? onCameraTrackSet;
+
+  /// An instance of [StreamVideo].
+  ///
+  /// If not provided, it will be obtained via StreamVideo.instance
+  final StreamVideo? streamVideo;
 
   @override
   State<StreamLobbyVideo> createState() => _StreamLobbyVideoState();
@@ -100,7 +106,8 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
         widget.cardBackgroundColor ?? theme.cardBackgroundColor;
     final userAvatarTheme = widget.userAvatarTheme ?? theme.userAvatarTheme;
 
-    final currentUser = StreamVideo.instance.currentUser;
+    final currentUser =
+        (widget.streamVideo ?? StreamVideo.instance).currentUser;
 
     final cameraEnabled = _cameraTrack != null;
     final microphoneEnabled = _microphoneTrack != null;

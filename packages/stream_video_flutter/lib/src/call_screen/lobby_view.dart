@@ -20,6 +20,7 @@ class StreamLobbyView extends StatefulWidget {
     this.cardBackgroundColor,
     this.userAvatarTheme,
     this.participantAvatarTheme,
+    this.streamVideo,
   });
 
   /// Represents a call.
@@ -44,6 +45,11 @@ class StreamLobbyView extends StatefulWidget {
 
   /// Theme for the participant avatar.
   final StreamUserAvatarThemeData? participantAvatarTheme;
+
+  /// An instance of [StreamVideo].
+  ///
+  /// If not provided, it will be obtained via StreamVideo.instance
+  final StreamVideo? streamVideo;
 
   @override
   State<StreamLobbyView> createState() => _StreamLobbyViewState();
@@ -132,7 +138,8 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
   void _fetchCall() {
     // Obtains SFU credentials and picks the best server, but doesn't
     // connect to the call yet.
-    final currentUserId = StreamVideo.instance.currentUser.id;
+    final currentUserId =
+        (widget.streamVideo ?? StreamVideo.instance).currentUser.id;
     _logger.d(() => '[fetchCall] currentUserId: $currentUserId');
     _fetchSubscription?.cancel();
     _fetchSubscription = widget.call.getOrCreate().asStream().listen((result) {
@@ -158,7 +165,8 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
 
   void _listenEvents() {
     _eventSubscription?.cancel();
-    _eventSubscription = StreamVideo.instance.events.listen((event) {
+    _eventSubscription =
+        (widget.streamVideo ?? StreamVideo.instance).events.listen((event) {
       if (event is CoordinatorCallSessionParticipantLeftEvent) {
         _logger.d(() => '[listenEvents] #userLeft; user: ${event.user}');
         _participants.removeWhere(
