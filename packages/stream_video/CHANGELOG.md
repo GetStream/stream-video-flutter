@@ -9,9 +9,11 @@
     * ❗Important❗ the `video` parameter is `false` by default. If you want your call to be treated as a video call while ringing set it to `true`.
 
 🐞 Fixed
-* Fixed reaction dismissal. Sent and received reactions are now correctly dismissed after 5s timeout (configurable in `CallPreferences`).
-* Fixed cancel button behaviour in screen-sharing notification on Android. It will now correctly stop screen-sharing process.
-* Fixed connection quality updates for other call participants.
+* Fixed reaction dismissal: Sent and received reactions are now correctly dismissed after a 5-second timeout (configurable in `CallPreferences`).
+* Fixed the cancel button behavior in the screen-sharing notification on Android. It will now correctly stop the screen-sharing process.
+* Fixed the issue with the cancel button in the call-in-progress notification was not stopping the call.
+* Fixed the connection quality updates for other call participants.
+* Fixed an issue where declining a ringing call when the app was in a terminated state did not stop the ringing on the caller's end.
 
 ## 0.5.0
 
