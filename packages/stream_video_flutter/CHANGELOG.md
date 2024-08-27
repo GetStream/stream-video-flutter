@@ -7,6 +7,7 @@
 * Added `maxDuration` and `maxParticipants` parameters to `call.getOtCreate()` method
 * Added `video` parameter to `call.getOtCreate()`, `call.getCall()` and `call.join()` methods. This parameter is used to distinguish between audio-only and video calls for ringing purposes.
     * ❗Important❗ the `video` parameter is `false` by default. If you want your call to be treated as a video call while ringing set it to `true`.
+* Added `streamVideo` paramter to `StreamLobbyView` and `StreamLobbyVideo` widgets provide a custom `StreamVideo` instance.
 
 🐞 Fixed
 * Fixed reaction dismissal: Sent and received reactions are now correctly dismissed after a 5-second timeout (configurable in `CallPreferences`).
