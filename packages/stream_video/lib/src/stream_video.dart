@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:async/async.dart' as async;
+import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../open_api/video/coordinator/api.dart';
 import 'call/call.dart';
+import 'call/call_reject_reason.dart';
 import 'call/call_ringing_state.dart';
 import 'call/call_type.dart';
 import 'coordinator/coordinator_client.dart';
@@ -586,6 +588,99 @@ class StreamVideo extends Disposable {
     }
 
     return manager.on<T>(onEvent);
+  }
+
+  CompositeSubscription observeCoreCallKitEvents({
+    void Function(Call)? onCallAccepted,
+  }) {
+    final callKitEventSubscriptions = CompositeSubscription();
+
+    observeCallAcceptCallKitEvent(onCallAccepted: onCallAccepted)
+        ?.addTo(callKitEventSubscriptions);
+
+    observeCallDeclinedCallKitEvent()?.addTo(callKitEventSubscriptions);
+    observeCallEndedCallKitEvent()?.addTo(callKitEventSubscriptions);
+
+    return callKitEventSubscriptions;
+  }
+
+  StreamSubscription<ActionCallAccept>? observeCallAcceptCallKitEvent({
+    void Function(Call)? onCallAccepted,
+  }) {
+    return onCallKitEvent<ActionCallAccept>(
+      (event) => _onCallAccept(
+        event,
+        onCallAccepted: onCallAccepted,
+      ),
+    );
+  }
+
+  StreamSubscription<ActionCallDecline>? observeCallDeclinedCallKitEvent() {
+    return onCallKitEvent<ActionCallDecline>(_onCallDecline);
+  }
+
+  StreamSubscription<ActionCallEnded>? observeCallEndedCallKitEvent() {
+    return onCallKitEvent<ActionCallEnded>(_onCallEnded);
+  }
+
+  Future<void> _onCallAccept(
+    ActionCallAccept event, {
+    void Function(Call)? onCallAccepted,
+  }) async {
+    _logger.d(() => '[onCallAccept] event: $event');
+
+    final uuid = event.data.uuid;
+    final cid = event.data.callCid;
+    if (uuid == null || cid == null) return;
+
+    final call = await consumeIncomingCall(uuid: uuid, cid: cid);
+    final callToJoin = call.getDataOrNull();
+    if (callToJoin == null) return;
+
+    final acceptResult = await callToJoin.accept();
+
+    // Return if cannot accept call
+    if (acceptResult.isFailure) {
+      _logger.d(() => '[onCallAccept] error accepting call: $call');
+      return;
+    }
+
+    onCallAccepted?.call(callToJoin);
+  }
+
+  Future<void> _onCallDecline(ActionCallDecline event) async {
+    _logger.d(() => '[onCallDecline] event: $event');
+
+    final uuid = event.data.uuid;
+    final cid = event.data.callCid;
+    if (uuid == null || cid == null) return;
+
+    final call = await consumeIncomingCall(uuid: uuid, cid: cid);
+    final callToReject = call.getDataOrNull();
+    if (callToReject == null) return;
+
+    final result = await callToReject.reject(
+      reason: CallRejectReason.decline(),
+    );
+
+    if (result is Failure) {
+      _logger.d(() => '[onCallDecline] error rejecting call: ${result.error}');
+    }
+  }
+
+  Future<void> _onCallEnded(ActionCallEnded event) async {
+    final uuid = event.data.uuid;
+    final cid = event.data.callCid;
+    if (uuid == null || cid == null) return;
+
+    final call = activeCall;
+    if (call == null || call.callCid.value != cid) return;
+
+    final result = await call.leave();
+
+    if (result is Failure) {
+      _logger.d(() => '[onCallDecline] error leaving call: ${result.error}');
+    }
   }
 
   /// Handle incoming VoIP push notifications.

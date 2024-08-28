@@ -377,7 +377,7 @@ extension CreateDeviceRequestPushProviderEnumX
 
 extension DeviceExt on open.Device {
   PushDevice? toPushDevice() {
-    final parsedProvider = PushProvider.fromAlias(pushProviderName);
+    final parsedProvider = PushProvider.fromAlias(pushProvider);
     if (parsedProvider == null) {
       streamLog.e(
         'DeviceExt',
