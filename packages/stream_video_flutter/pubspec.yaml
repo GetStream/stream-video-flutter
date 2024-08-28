@@ -31,10 +31,6 @@ dev_dependencies:
     sdk: flutter
   mocktail: ^1.0.0
 
-false_secrets:
-  - /example/android/app/google-services.json
-  - /example/lib/firebase_options.dart
-
 flutter:
   assets:
     - images/
