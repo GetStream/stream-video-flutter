@@ -61,7 +61,7 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
             style: const MenuStyle(
               alignment: Alignment.bottomLeft,
               backgroundColor:
-                  MaterialStatePropertyAll(AppColorPalette.backgroundColor),
+                  WidgetStatePropertyAll(AppColorPalette.backgroundColor),
             ),
             alignmentOffset: const Offset(-70, 0),
             builder: (

@@ -73,7 +73,6 @@ class _StreamDogFoodingAppContentState
     extends State<StreamDogFoodingAppContent> {
   late final _userAuthController = locator.get<UserAuthController>();
 
-  late final _logger = taggedLogger(tag: 'StreamDogFoodingAppContent');
   late final _router = initRouter(_userAuthController);
 
   final _compositeSubscription = CompositeSubscription();
@@ -386,16 +385,5 @@ class _StreamDogFoodingAppContentState
         ),
       ),
     );
-  }
-}
-
-extension on Subscriptions {
-  void addAll<T>(Iterable<StreamSubscription<T>?> subscriptions) {
-    for (var i = 0; i < subscriptions.length; i++) {
-      final subscription = subscriptions.elementAt(i);
-      if (subscription == null) continue;
-
-      add(i + 100, subscription);
-    }
   }
 }
