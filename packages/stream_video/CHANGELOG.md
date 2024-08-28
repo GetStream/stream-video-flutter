@@ -1,4 +1,4 @@
-## Upcoming
+## 0.5.1
 
 ✅ Added
 * Added `backstage` parameter to `call.getOtCreate()` method with backstage settings. For more information, refer to the [documentation](https://getstream.io/video/docs/flutter/joining-and-creating-calls/#backstage-setup)

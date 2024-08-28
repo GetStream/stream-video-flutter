@@ -1,3 +1,6 @@
+## 0.5.1
+* Sync version with `stream_video_flutter` 0.5.1
+
 ## 0.5.0
 
 🐞 Fixed

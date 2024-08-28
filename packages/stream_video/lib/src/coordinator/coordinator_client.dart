@@ -1,7 +1,5 @@
 // ignore_for_file: comment_references
 
-import 'package:stream_video/open_api/video/coordinator/api.dart';
-
 import '../../open_api/video/coordinator/api.dart' as open;
 import '../models/call_cid.dart';
 import '../models/call_metadata.dart';
@@ -67,7 +65,7 @@ abstract class CoordinatorClient {
     bool? notify,
     bool? video,
     DateTime? startsAt,
-    CallSettingsRequest? settingsOverride,
+    open.CallSettingsRequest? settingsOverride,
     Map<String, Object> custom = const {},
   });
 
