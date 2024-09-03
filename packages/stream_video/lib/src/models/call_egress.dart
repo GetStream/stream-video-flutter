@@ -31,15 +31,15 @@ class CallEgress with EquatableMixin {
 class CallEgressRtmp {
   const CallEgressRtmp({
     required this.name,
-    required this.streamKey,
-    required this.url,
+    this.streamKey,
+    this.url,
   });
 
   final String name;
 
-  final String streamKey;
+  final String? streamKey;
 
-  final String url;
+  final String? url;
 
   /// Returns a copy of this [CallEgressRtmp] with the given fields
   /// replaced with the new values.

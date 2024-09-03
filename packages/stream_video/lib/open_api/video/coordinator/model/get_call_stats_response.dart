@@ -13,6 +13,7 @@ part of openapi.api;
 class GetCallStatsResponse {
   /// Returns a new [GetCallStatsResponse] instance.
   GetCallStatsResponse({
+    this.aggregated,
     required this.callDurationSeconds,
     required this.callStatus,
     this.callTimeline,
@@ -29,6 +30,14 @@ class GetCallStatsResponse {
     this.sfus = const [],
   });
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  AggregatedStats? aggregated;
+
   int callDurationSeconds;
 
   String callStatus;
@@ -41,7 +50,7 @@ class GetCallStatsResponse {
   ///
   CallTimeline? callTimeline;
 
-  /// Duration of the request in human-readable format
+  /// Duration of the request in milliseconds
   String duration;
 
   ///
@@ -50,7 +59,7 @@ class GetCallStatsResponse {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  Stats? jitter;
+  TimeStats? jitter;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -58,7 +67,7 @@ class GetCallStatsResponse {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  Stats? latency;
+  TimeStats? latency;
 
   int maxFreezesDurationSeconds;
 
@@ -78,6 +87,7 @@ class GetCallStatsResponse {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is GetCallStatsResponse &&
+    other.aggregated == aggregated &&
     other.callDurationSeconds == callDurationSeconds &&
     other.callStatus == callStatus &&
     other.callTimeline == callTimeline &&
@@ -96,6 +106,7 @@ class GetCallStatsResponse {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
+    (aggregated == null ? 0 : aggregated!.hashCode) +
     (callDurationSeconds.hashCode) +
     (callStatus.hashCode) +
     (callTimeline == null ? 0 : callTimeline!.hashCode) +
@@ -112,10 +123,15 @@ class GetCallStatsResponse {
     (sfus.hashCode);
 
   @override
-  String toString() => 'GetCallStatsResponse[callDurationSeconds=$callDurationSeconds, callStatus=$callStatus, callTimeline=$callTimeline, duration=$duration, jitter=$jitter, latency=$latency, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxParticipants=$maxParticipants, maxTotalQualityLimitationDurationSeconds=$maxTotalQualityLimitationDurationSeconds, participantReport=$participantReport, publishingParticipants=$publishingParticipants, qualityScore=$qualityScore, sfuCount=$sfuCount, sfus=$sfus]';
+  String toString() => 'GetCallStatsResponse[aggregated=$aggregated, callDurationSeconds=$callDurationSeconds, callStatus=$callStatus, callTimeline=$callTimeline, duration=$duration, jitter=$jitter, latency=$latency, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxParticipants=$maxParticipants, maxTotalQualityLimitationDurationSeconds=$maxTotalQualityLimitationDurationSeconds, participantReport=$participantReport, publishingParticipants=$publishingParticipants, qualityScore=$qualityScore, sfuCount=$sfuCount, sfus=$sfus]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.aggregated != null) {
+      json[r'aggregated'] = this.aggregated;
+    } else {
+      json[r'aggregated'] = null;
+    }
       json[r'call_duration_seconds'] = this.callDurationSeconds;
       json[r'call_status'] = this.callStatus;
     if (this.callTimeline != null) {
@@ -164,12 +180,13 @@ class GetCallStatsResponse {
       }());
 
       return GetCallStatsResponse(
+        aggregated: AggregatedStats.fromJson(json[r'aggregated']),
         callDurationSeconds: mapValueOfType<int>(json, r'call_duration_seconds')!,
         callStatus: mapValueOfType<String>(json, r'call_status')!,
         callTimeline: CallTimeline.fromJson(json[r'call_timeline']),
         duration: mapValueOfType<String>(json, r'duration')!,
-        jitter: Stats.fromJson(json[r'jitter']),
-        latency: Stats.fromJson(json[r'latency']),
+        jitter: TimeStats.fromJson(json[r'jitter']),
+        latency: TimeStats.fromJson(json[r'latency']),
         maxFreezesDurationSeconds: mapValueOfType<int>(json, r'max_freezes_duration_seconds')!,
         maxParticipants: mapValueOfType<int>(json, r'max_participants')!,
         maxTotalQualityLimitationDurationSeconds: mapValueOfType<int>(json, r'max_total_quality_limitation_duration_seconds')!,

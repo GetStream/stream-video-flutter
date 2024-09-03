@@ -1959,7 +1959,7 @@ class Call {
     required Map<String, Object> filterConditions,
     String? next,
     String? prev,
-    List<SortParam> sorts = const [],
+    List<SortParamRequest> sorts = const [],
     int? limit,
   }) {
     return _permissionsManager.queryMembers(

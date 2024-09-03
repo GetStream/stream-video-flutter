@@ -1,5 +1,4 @@
 import '../../../open_api/video/coordinator/api.dart' as open;
-import '../../../open_api/video/coordinator/api.dart';
 import '../../errors/video_error.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/call_cid.dart';
@@ -146,7 +145,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     bool? notify,
     bool? video,
     DateTime? startsAt,
-    CallSettingsRequest? settingsOverride,
+    open.CallSettingsRequest? settingsOverride,
     Map<String, Object> custom = const {},
   }) {
     return _retryManager.execute(
@@ -339,7 +338,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     required Map<String, Object> filterConditions,
     String? next,
     String? prev,
-    List<open.SortParam> sorts = const [],
+    List<open.SortParamRequest> sorts = const [],
     int? limit,
     bool? watch,
   }) {
@@ -364,7 +363,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     required Map<String, Object> filterConditions,
     String? next,
     String? prev,
-    List<open.SortParam> sorts = const [],
+    List<open.SortParamRequest> sorts = const [],
     int? limit,
   }) {
     return _retryManager.execute(

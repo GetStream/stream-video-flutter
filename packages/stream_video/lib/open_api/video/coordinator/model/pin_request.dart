@@ -17,8 +17,10 @@ class PinRequest {
     required this.userId,
   });
 
+  /// the session ID of the user who pinned the message
   String sessionId;
 
+  /// the user ID of the user who pinned the message
   String userId;
 
   @override

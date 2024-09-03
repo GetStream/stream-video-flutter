@@ -15,30 +15,36 @@ class BroadcastSettingsResponse {
   BroadcastSettingsResponse({
     required this.enabled,
     required this.hls,
+    required this.rtmp,
   });
 
   bool enabled;
 
   HLSSettingsResponse hls;
 
+  RTMPSettingsResponse rtmp;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is BroadcastSettingsResponse &&
     other.enabled == enabled &&
-    other.hls == hls;
+    other.hls == hls &&
+    other.rtmp == rtmp;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (enabled.hashCode) +
-    (hls.hashCode);
+    (hls.hashCode) +
+    (rtmp.hashCode);
 
   @override
-  String toString() => 'BroadcastSettingsResponse[enabled=$enabled, hls=$hls]';
+  String toString() => 'BroadcastSettingsResponse[enabled=$enabled, hls=$hls, rtmp=$rtmp]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'enabled'] = this.enabled;
       json[r'hls'] = this.hls;
+      json[r'rtmp'] = this.rtmp;
     return json;
   }
 
@@ -63,6 +69,7 @@ class BroadcastSettingsResponse {
       return BroadcastSettingsResponse(
         enabled: mapValueOfType<bool>(json, r'enabled')!,
         hls: HLSSettingsResponse.fromJson(json[r'hls'])!,
+        rtmp: RTMPSettingsResponse.fromJson(json[r'rtmp'])!,
       );
     }
     return null;
@@ -112,6 +119,7 @@ class BroadcastSettingsResponse {
   static const requiredKeys = <String>{
     'enabled',
     'hls',
+    'rtmp',
   };
 }
 

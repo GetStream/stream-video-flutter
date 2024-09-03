@@ -14,13 +14,12 @@ class UserUpdatedEvent {
   /// Returns a new [UserUpdatedEvent] instance.
   UserUpdatedEvent({
     required this.createdAt,
+    this.receivedAt,
     this.type = 'user.updated',
-    this.user,
+    required this.user,
   });
 
   DateTime createdAt;
-
-  String type;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -28,11 +27,16 @@ class UserUpdatedEvent {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  UserObject? user;
+  DateTime? receivedAt;
+
+  String type;
+
+  UserEventPayload user;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserUpdatedEvent &&
     other.createdAt == createdAt &&
+    other.receivedAt == receivedAt &&
     other.type == type &&
     other.user == user;
 
@@ -40,21 +44,23 @@ class UserUpdatedEvent {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (createdAt.hashCode) +
+    (receivedAt == null ? 0 : receivedAt!.hashCode) +
     (type.hashCode) +
-    (user == null ? 0 : user!.hashCode);
+    (user.hashCode);
 
   @override
-  String toString() => 'UserUpdatedEvent[createdAt=$createdAt, type=$type, user=$user]';
+  String toString() => 'UserUpdatedEvent[createdAt=$createdAt, receivedAt=$receivedAt, type=$type, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-      json[r'type'] = this.type;
-    if (this.user != null) {
-      json[r'user'] = this.user;
+    if (this.receivedAt != null) {
+      json[r'received_at'] = this.receivedAt!.toUtc().toIso8601String();
     } else {
-      json[r'user'] = null;
+      json[r'received_at'] = null;
     }
+      json[r'type'] = this.type;
+      json[r'user'] = this.user;
     return json;
   }
 
@@ -78,8 +84,9 @@ class UserUpdatedEvent {
 
       return UserUpdatedEvent(
         createdAt: mapDateTime(json, r'created_at', r'')!,
+        receivedAt: mapDateTime(json, r'received_at', r''),
         type: mapValueOfType<String>(json, r'type')!,
-        user: UserObject.fromJson(json[r'user']),
+        user: UserEventPayload.fromJson(json[r'user'])!,
       );
     }
     return null;
@@ -129,6 +136,7 @@ class UserUpdatedEvent {
   static const requiredKeys = <String>{
     'created_at',
     'type',
+    'user',
   };
 }
 

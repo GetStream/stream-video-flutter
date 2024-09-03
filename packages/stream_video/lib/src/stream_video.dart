@@ -523,7 +523,7 @@ class StreamVideo extends Disposable {
     String? next,
     String? prev,
     int? limit,
-    List<SortParam>? sorts,
+    List<SortParamRequest>? sorts,
     bool? watch,
   }) {
     return _client.queryCalls(

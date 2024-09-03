@@ -19,10 +19,13 @@ class CreateDeviceRequest {
     this.voipToken,
   });
 
+  /// Device ID
   String id;
 
+  /// Push provider
   CreateDeviceRequestPushProviderEnum pushProvider;
 
+  /// Push provider name
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -31,6 +34,7 @@ class CreateDeviceRequest {
   ///
   String? pushProviderName;
 
+  /// When true the token is for Apple VoIP push notifications
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -149,7 +153,7 @@ class CreateDeviceRequest {
   };
 }
 
-
+/// Push provider
 class CreateDeviceRequestPushProviderEnum {
   /// Instantiate a new enum with the provided [value].
   const CreateDeviceRequestPushProviderEnum._(this.value);

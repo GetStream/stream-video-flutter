@@ -21,6 +21,7 @@ class QueryCallsResponse {
 
   List<CallStateResponseFields> calls;
 
+  /// Duration of the request in milliseconds
   String duration;
 
   ///

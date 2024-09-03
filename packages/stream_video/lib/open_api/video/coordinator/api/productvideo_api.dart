@@ -385,6 +385,86 @@ class ProductvideoApi {
     return null;
   }
 
+  /// Delete Call
+  ///
+  ///   Sends events: - call.deleted  Required permissions: - DeleteCall
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [DeleteCallRequest] deleteCallRequest (required):
+  Future<Response> deleteCallWithHttpInfo(
+    String type,
+    String id,
+    DeleteCallRequest deleteCallRequest,
+  ) async {
+    // ignore: prefer_const_declarations
+    final path = r'/video/call/{type}/{id}/delete'
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody = deleteCallRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Delete Call
+  ///
+  ///   Sends events: - call.deleted  Required permissions: - DeleteCall
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [DeleteCallRequest] deleteCallRequest (required):
+  Future<DeleteCallResponse?> deleteCall(
+    String type,
+    String id,
+    DeleteCallRequest deleteCallRequest,
+  ) async {
+    final response = await deleteCallWithHttpInfo(
+      type,
+      id,
+      deleteCallRequest,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'DeleteCallResponse',
+      ) as DeleteCallResponse;
+    }
+    return null;
+  }
+
   /// Delete device
   ///
   /// Deletes one device
@@ -2091,6 +2171,86 @@ class ProductvideoApi {
     return null;
   }
 
+  /// Start RTMP broadcasts
+  ///
+  /// Starts RTMP broadcasts for the provided RTMP destinations  Required permissions: - StartBroadcasting
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [StartRTMPBroadcastsRequest] startRTMPBroadcastsRequest (required):
+  Future<Response> startRTMPBroadcastWithHttpInfo(
+    String type,
+    String id,
+    StartRTMPBroadcastsRequest startRTMPBroadcastsRequest,
+  ) async {
+    // ignore: prefer_const_declarations
+    final path = r'/video/call/{type}/{id}/rtmp_broadcasts'
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody = startRTMPBroadcastsRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Start RTMP broadcasts
+  ///
+  /// Starts RTMP broadcasts for the provided RTMP destinations  Required permissions: - StartBroadcasting
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [StartRTMPBroadcastsRequest] startRTMPBroadcastsRequest (required):
+  Future<StartRTMPBroadcastsResponse?> startRTMPBroadcast(
+    String type,
+    String id,
+    StartRTMPBroadcastsRequest startRTMPBroadcastsRequest,
+  ) async {
+    final response = await startRTMPBroadcastWithHttpInfo(
+      type,
+      id,
+      startRTMPBroadcastsRequest,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StartRTMPBroadcastsResponse',
+      ) as StartRTMPBroadcastsResponse;
+    }
+    return null;
+  }
+
   /// Start recording
   ///
   /// Starts recording  Sends events: - call.recording_started  Required permissions: - StartRecording
@@ -2251,6 +2411,79 @@ class ProductvideoApi {
     return null;
   }
 
+  /// Stop all RTMP broadcasts for a call
+  ///
+  /// Stop all RTMP broadcasts for the provided call  Required permissions: - StopBroadcasting
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  Future<Response> stopAllRTMPBroadcastsWithHttpInfo(
+    String type,
+    String id,
+  ) async {
+    // ignore: prefer_const_declarations
+    final path = r'/video/call/{type}/{id}/rtmp_broadcasts/stop'
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Stop all RTMP broadcasts for a call
+  ///
+  /// Stop all RTMP broadcasts for the provided call  Required permissions: - StopBroadcasting
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  Future<StopAllRTMPBroadcastsResponse?> stopAllRTMPBroadcasts(
+    String type,
+    String id,
+  ) async {
+    final response = await stopAllRTMPBroadcastsWithHttpInfo(
+      type,
+      id,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StopAllRTMPBroadcastsResponse',
+      ) as StopAllRTMPBroadcastsResponse;
+    }
+    return null;
+  }
+
   /// Stop HLS broadcasting
   ///
   /// Stops HLS broadcasting  Required permissions: - StopBroadcasting
@@ -2393,6 +2626,94 @@ class ProductvideoApi {
         await _decodeBodyBytes(response),
         'StopLiveResponse',
       ) as StopLiveResponse;
+    }
+    return null;
+  }
+
+  /// Stop RTMP broadcasts
+  ///
+  /// Stop RTMP broadcasts for the provided RTMP destinations  Required permissions: - StopBroadcasting
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [String] name (required):
+  ///
+  /// * [Object] body (required):
+  Future<Response> stopRTMPBroadcastWithHttpInfo(
+    String type,
+    String id,
+    String name,
+    Object body,
+  ) async {
+    // ignore: prefer_const_declarations
+    final path = r'/video/call/{type}/{id}/rtmp_broadcasts/{name}/stop'
+        .replaceAll('{type}', type)
+        .replaceAll('{id}', id)
+        .replaceAll('{name}', name);
+
+    // ignore: prefer_final_locals
+    Object? postBody = body;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Stop RTMP broadcasts
+  ///
+  /// Stop RTMP broadcasts for the provided RTMP destinations  Required permissions: - StopBroadcasting
+  ///
+  /// Parameters:
+  ///
+  /// * [String] type (required):
+  ///
+  /// * [String] id (required):
+  ///
+  /// * [String] name (required):
+  ///
+  /// * [Object] body (required):
+  Future<StopRTMPBroadcastsResponse?> stopRTMPBroadcast(
+    String type,
+    String id,
+    String name,
+    Object body,
+  ) async {
+    final response = await stopRTMPBroadcastWithHttpInfo(
+      type,
+      id,
+      name,
+      body,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'StopRTMPBroadcastsResponse',
+      ) as StopRTMPBroadcastsResponse;
     }
     return null;
   }
