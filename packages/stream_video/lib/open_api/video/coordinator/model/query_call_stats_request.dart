@@ -48,7 +48,7 @@ class QueryCallStatsRequest {
   ///
   String? prev;
 
-  List<SortParam> sort;
+  List<SortParamRequest> sort;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is QueryCallStatsRequest &&
@@ -115,7 +115,7 @@ class QueryCallStatsRequest {
         limit: mapValueOfType<int>(json, r'limit'),
         next: mapValueOfType<String>(json, r'next'),
         prev: mapValueOfType<String>(json, r'prev'),
-        sort: SortParam.listFromJson(json[r'sort']),
+        sort: SortParamRequest.listFromJson(json[r'sort']),
       );
     }
     return null;

@@ -21,6 +21,7 @@ class CreateGuestResponse {
   /// the access token to authenticate the user
   String accessToken;
 
+  /// Duration of the request in milliseconds
   String duration;
 
   UserResponse user;

@@ -52,7 +52,7 @@ class QueryCallMembersRequest {
   ///
   String? prev;
 
-  List<SortParam> sort;
+  List<SortParamRequest> sort;
 
   String type;
 
@@ -128,7 +128,7 @@ class QueryCallMembersRequest {
         limit: mapValueOfType<int>(json, r'limit'),
         next: mapValueOfType<String>(json, r'next'),
         prev: mapValueOfType<String>(json, r'prev'),
-        sort: SortParam.listFromJson(json[r'sort']),
+        sort: SortParamRequest.listFromJson(json[r'sort']),
         type: mapValueOfType<String>(json, r'type')!,
       );
     }

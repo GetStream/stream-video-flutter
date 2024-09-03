@@ -16,15 +16,19 @@ class WSEvent {
     this.blockedByUser,
     required this.callCid,
     required this.createdAt,
-    this.type = 'user.updated',
+    this.type = 'user.unbanned',
     required this.user,
     required this.call,
     this.members = const [],
     required this.hlsPlaylistUrl,
     this.capabilitiesByRole = const {},
+    required this.notifyUser,
     required this.sessionId,
     required this.reaction,
     required this.callRecording,
+    this.reason,
+    required this.video,
+    required this.name,
     required this.participant,
     required this.callTranscription,
     required this.fromUserId,
@@ -35,13 +39,15 @@ class WSEvent {
     required this.error,
     this.custom = const {},
     required this.cid,
+    this.item,
+    this.message,
+    this.objectId,
     this.permissions = const [],
     this.ownCapabilities = const [],
     required this.channelId,
     required this.channelType,
     required this.createdBy,
     this.expiration,
-    this.reason,
     required this.shadow,
     this.team,
     required this.deleteConversationChannels,
@@ -77,12 +83,26 @@ class WSEvent {
   /// The capabilities by role for this call
   Map<String, List<String>> capabilitiesByRole;
 
+  bool notifyUser;
+
   /// Call session ID
   String sessionId;
 
   ReactionResponse reaction;
 
   CallRecording callRecording;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? reason;
+
+  bool video;
+
+  String name;
 
   CallParticipantResponse participant;
 
@@ -105,6 +125,30 @@ class WSEvent {
 
   String cid;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  ReviewQueueItem? item;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  Message? message;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? objectId;
+
   /// The list of permissions requested by the user
   List<String> permissions;
 
@@ -124,14 +168,6 @@ class WSEvent {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   DateTime? expiration;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? reason;
 
   bool shadow;
 
@@ -170,9 +206,13 @@ class WSEvent {
     _deepEquality.equals(other.members, members) &&
     other.hlsPlaylistUrl == hlsPlaylistUrl &&
     _deepEquality.equals(other.capabilitiesByRole, capabilitiesByRole) &&
+    other.notifyUser == notifyUser &&
     other.sessionId == sessionId &&
     other.reaction == reaction &&
     other.callRecording == callRecording &&
+    other.reason == reason &&
+    other.video == video &&
+    other.name == name &&
     other.participant == participant &&
     other.callTranscription == callTranscription &&
     other.fromUserId == fromUserId &&
@@ -183,13 +223,15 @@ class WSEvent {
     other.error == error &&
     _deepEquality.equals(other.custom, custom) &&
     other.cid == cid &&
+    other.item == item &&
+    other.message == message &&
+    other.objectId == objectId &&
     _deepEquality.equals(other.permissions, permissions) &&
     _deepEquality.equals(other.ownCapabilities, ownCapabilities) &&
     other.channelId == channelId &&
     other.channelType == channelType &&
     other.createdBy == createdBy &&
     other.expiration == expiration &&
-    other.reason == reason &&
     other.shadow == shadow &&
     other.team == team &&
     other.deleteConversationChannels == deleteConversationChannels &&
@@ -210,9 +252,13 @@ class WSEvent {
     (members.hashCode) +
     (hlsPlaylistUrl.hashCode) +
     (capabilitiesByRole.hashCode) +
+    (notifyUser.hashCode) +
     (sessionId.hashCode) +
     (reaction.hashCode) +
     (callRecording.hashCode) +
+    (reason == null ? 0 : reason!.hashCode) +
+    (video.hashCode) +
+    (name.hashCode) +
     (participant.hashCode) +
     (callTranscription.hashCode) +
     (fromUserId.hashCode) +
@@ -223,13 +269,15 @@ class WSEvent {
     (error.hashCode) +
     (custom.hashCode) +
     (cid.hashCode) +
+    (item == null ? 0 : item!.hashCode) +
+    (message == null ? 0 : message!.hashCode) +
+    (objectId == null ? 0 : objectId!.hashCode) +
     (permissions.hashCode) +
     (ownCapabilities.hashCode) +
     (channelId.hashCode) +
     (channelType.hashCode) +
     (createdBy.hashCode) +
     (expiration == null ? 0 : expiration!.hashCode) +
-    (reason == null ? 0 : reason!.hashCode) +
     (shadow.hashCode) +
     (team == null ? 0 : team!.hashCode) +
     (deleteConversationChannels.hashCode) +
@@ -239,7 +287,7 @@ class WSEvent {
     (targetUsers.hashCode);
 
   @override
-  String toString() => 'WSEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, call=$call, members=$members, hlsPlaylistUrl=$hlsPlaylistUrl, capabilitiesByRole=$capabilitiesByRole, sessionId=$sessionId, reaction=$reaction, callRecording=$callRecording, participant=$participant, callTranscription=$callTranscription, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, closedCaption=$closedCaption, connectionId=$connectionId, me=$me, error=$error, custom=$custom, cid=$cid, permissions=$permissions, ownCapabilities=$ownCapabilities, channelId=$channelId, channelType=$channelType, createdBy=$createdBy, expiration=$expiration, reason=$reason, shadow=$shadow, team=$team, deleteConversationChannels=$deleteConversationChannels, hardDelete=$hardDelete, markMessagesDeleted=$markMessagesDeleted, targetUser=$targetUser, targetUsers=$targetUsers]';
+  String toString() => 'WSEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, call=$call, members=$members, hlsPlaylistUrl=$hlsPlaylistUrl, capabilitiesByRole=$capabilitiesByRole, notifyUser=$notifyUser, sessionId=$sessionId, reaction=$reaction, callRecording=$callRecording, reason=$reason, video=$video, name=$name, participant=$participant, callTranscription=$callTranscription, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, closedCaption=$closedCaption, connectionId=$connectionId, me=$me, error=$error, custom=$custom, cid=$cid, item=$item, message=$message, objectId=$objectId, permissions=$permissions, ownCapabilities=$ownCapabilities, channelId=$channelId, channelType=$channelType, createdBy=$createdBy, expiration=$expiration, shadow=$shadow, team=$team, deleteConversationChannels=$deleteConversationChannels, hardDelete=$hardDelete, markMessagesDeleted=$markMessagesDeleted, targetUser=$targetUser, targetUsers=$targetUsers]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -256,9 +304,17 @@ class WSEvent {
       json[r'members'] = this.members;
       json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
       json[r'capabilities_by_role'] = this.capabilitiesByRole;
+      json[r'notify_user'] = this.notifyUser;
       json[r'session_id'] = this.sessionId;
       json[r'reaction'] = this.reaction;
       json[r'call_recording'] = this.callRecording;
+    if (this.reason != null) {
+      json[r'reason'] = this.reason;
+    } else {
+      json[r'reason'] = null;
+    }
+      json[r'video'] = this.video;
+      json[r'name'] = this.name;
       json[r'participant'] = this.participant;
       json[r'call_transcription'] = this.callTranscription;
       json[r'from_user_id'] = this.fromUserId;
@@ -269,6 +325,21 @@ class WSEvent {
       json[r'error'] = this.error;
       json[r'custom'] = this.custom;
       json[r'cid'] = this.cid;
+    if (this.item != null) {
+      json[r'item'] = this.item;
+    } else {
+      json[r'item'] = null;
+    }
+    if (this.message != null) {
+      json[r'message'] = this.message;
+    } else {
+      json[r'message'] = null;
+    }
+    if (this.objectId != null) {
+      json[r'object_id'] = this.objectId;
+    } else {
+      json[r'object_id'] = null;
+    }
       json[r'permissions'] = this.permissions;
       json[r'own_capabilities'] = this.ownCapabilities;
       json[r'channel_id'] = this.channelId;
@@ -278,11 +349,6 @@ class WSEvent {
       json[r'expiration'] = this.expiration!.toUtc().toIso8601String();
     } else {
       json[r'expiration'] = null;
-    }
-    if (this.reason != null) {
-      json[r'reason'] = this.reason;
-    } else {
-      json[r'reason'] = null;
     }
       json[r'shadow'] = this.shadow;
     if (this.team != null) {
@@ -329,10 +395,16 @@ class WSEvent {
         call: CallResponse.fromJson(json[r'call'])!,
         members: MemberResponse.listFromJson(json[r'members']),
         hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
-        capabilitiesByRole: mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? {},
+        capabilitiesByRole: json[r'capabilities_by_role'] == null
+          ? const {}
+            : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
+        notifyUser: mapValueOfType<bool>(json, r'notify_user')!,
         sessionId: mapValueOfType<String>(json, r'session_id')!,
         reaction: ReactionResponse.fromJson(json[r'reaction'])!,
         callRecording: CallRecording.fromJson(json[r'call_recording'])!,
+        reason: mapValueOfType<String>(json, r'reason'),
+        video: mapValueOfType<bool>(json, r'video')!,
+        name: mapValueOfType<String>(json, r'name')!,
         participant: CallParticipantResponse.fromJson(json[r'participant'])!,
         callTranscription: CallTranscription.fromJson(json[r'call_transcription'])!,
         fromUserId: mapValueOfType<String>(json, r'from_user_id')!,
@@ -345,6 +417,9 @@ class WSEvent {
         error: APIError.fromJson(json[r'error'])!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         cid: mapValueOfType<String>(json, r'cid')!,
+        item: ReviewQueueItem.fromJson(json[r'item']),
+        message: Message.fromJson(json[r'message']),
+        objectId: mapValueOfType<String>(json, r'object_id'),
         permissions: json[r'permissions'] is Iterable
             ? (json[r'permissions'] as Iterable).cast<String>().toList(growable: false)
             : const [],
@@ -353,7 +428,6 @@ class WSEvent {
         channelType: mapValueOfType<String>(json, r'channel_type')!,
         createdBy: UserObject.fromJson(json[r'created_by'])!,
         expiration: mapDateTime(json, r'expiration', r''),
-        reason: mapValueOfType<String>(json, r'reason'),
         shadow: mapValueOfType<bool>(json, r'shadow')!,
         team: mapValueOfType<String>(json, r'team'),
         deleteConversationChannels: mapValueOfType<bool>(json, r'delete_conversation_channels')!,
@@ -418,9 +492,12 @@ class WSEvent {
     'members',
     'hls_playlist_url',
     'capabilities_by_role',
+    'notify_user',
     'session_id',
     'reaction',
     'call_recording',
+    'video',
+    'name',
     'participant',
     'call_transcription',
     'from_user_id',

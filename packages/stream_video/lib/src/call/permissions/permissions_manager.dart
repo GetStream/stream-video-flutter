@@ -307,7 +307,7 @@ class PermissionsManager {
     required Map<String, Object> filterConditions,
     String? next,
     String? prev,
-    List<SortParam> sorts = const [],
+    List<SortParamRequest> sorts = const [],
     int? limit,
   }) async {
     if (!hasPermission(CallPermission.readCall)) {

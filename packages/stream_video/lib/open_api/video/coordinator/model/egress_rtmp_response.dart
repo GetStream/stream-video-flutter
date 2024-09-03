@@ -14,37 +14,63 @@ class EgressRTMPResponse {
   /// Returns a new [EgressRTMPResponse] instance.
   EgressRTMPResponse({
     required this.name,
-    required this.streamKey,
-    required this.url,
+    required this.startedAt,
+    this.streamKey,
+    this.streamUrl,
   });
 
   String name;
 
-  String streamKey;
+  DateTime startedAt;
 
-  String url;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? streamKey;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? streamUrl;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is EgressRTMPResponse &&
     other.name == name &&
+    other.startedAt == startedAt &&
     other.streamKey == streamKey &&
-    other.url == url;
+    other.streamUrl == streamUrl;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (name.hashCode) +
-    (streamKey.hashCode) +
-    (url.hashCode);
+    (startedAt.hashCode) +
+    (streamKey == null ? 0 : streamKey!.hashCode) +
+    (streamUrl == null ? 0 : streamUrl!.hashCode);
 
   @override
-  String toString() => 'EgressRTMPResponse[name=$name, streamKey=$streamKey, url=$url]';
+  String toString() => 'EgressRTMPResponse[name=$name, startedAt=$startedAt, streamKey=$streamKey, streamUrl=$streamUrl]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'name'] = this.name;
+      json[r'started_at'] = this.startedAt.toUtc().toIso8601String();
+    if (this.streamKey != null) {
       json[r'stream_key'] = this.streamKey;
-      json[r'url'] = this.url;
+    } else {
+      json[r'stream_key'] = null;
+    }
+    if (this.streamUrl != null) {
+      json[r'stream_url'] = this.streamUrl;
+    } else {
+      json[r'stream_url'] = null;
+    }
     return json;
   }
 
@@ -68,8 +94,9 @@ class EgressRTMPResponse {
 
       return EgressRTMPResponse(
         name: mapValueOfType<String>(json, r'name')!,
-        streamKey: mapValueOfType<String>(json, r'stream_key')!,
-        url: mapValueOfType<String>(json, r'url')!,
+        startedAt: mapDateTime(json, r'started_at', r'')!,
+        streamKey: mapValueOfType<String>(json, r'stream_key'),
+        streamUrl: mapValueOfType<String>(json, r'stream_url'),
       );
     }
     return null;
@@ -118,8 +145,7 @@ class EgressRTMPResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'name',
-    'stream_key',
-    'url',
+    'started_at',
   };
 }
 

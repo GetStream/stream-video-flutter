@@ -49,7 +49,7 @@ class QueryCallsRequest {
   ///
   String? prev;
 
-  List<SortParam> sort;
+  List<SortParamRequest> sort;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -131,7 +131,7 @@ class QueryCallsRequest {
         limit: mapValueOfType<int>(json, r'limit'),
         next: mapValueOfType<String>(json, r'next'),
         prev: mapValueOfType<String>(json, r'prev'),
-        sort: SortParam.listFromJson(json[r'sort']),
+        sort: SortParamRequest.listFromJson(json[r'sort']),
         watch: mapValueOfType<bool>(json, r'watch'),
       );
     }

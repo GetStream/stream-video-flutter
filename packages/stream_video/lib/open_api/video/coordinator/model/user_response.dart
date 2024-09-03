@@ -14,6 +14,7 @@ class UserResponse {
   /// Returns a new [UserResponse] instance.
   UserResponse({
     required this.banned,
+    this.blockedUserIds = const [],
     required this.createdAt,
     this.custom = const {},
     this.deactivatedAt,
@@ -30,13 +31,18 @@ class UserResponse {
     required this.updatedAt,
   });
 
+  /// Whether a user is banned or not
   bool banned;
+
+  List<String> blockedUserIds;
 
   /// Date/time of creation
   DateTime createdAt;
 
+  /// Custom data for this object
   Map<String, Object> custom;
 
+  /// Date of deactivation
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -54,6 +60,7 @@ class UserResponse {
   ///
   DateTime? deletedAt;
 
+  /// Unique user identifier
   String id;
 
   ///
@@ -64,8 +71,10 @@ class UserResponse {
   ///
   String? image;
 
+  /// Preferred language of a user
   String language;
 
+  /// Date of last activity
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -74,6 +83,7 @@ class UserResponse {
   ///
   DateTime? lastActive;
 
+  /// Optional name of user
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -82,8 +92,10 @@ class UserResponse {
   ///
   String? name;
 
+  /// Whether a user online or not
   bool online;
 
+  /// Revocation date for tokens
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
@@ -92,8 +104,10 @@ class UserResponse {
   ///
   DateTime? revokeTokensIssuedBefore;
 
+  /// Determines the set of user permissions
   String role;
 
+  /// List of teams user is a part of
   List<String> teams;
 
   /// Date/time of the last update
@@ -102,6 +116,7 @@ class UserResponse {
   @override
   bool operator ==(Object other) => identical(this, other) || other is UserResponse &&
     other.banned == banned &&
+    _deepEquality.equals(other.blockedUserIds, blockedUserIds) &&
     other.createdAt == createdAt &&
     _deepEquality.equals(other.custom, custom) &&
     other.deactivatedAt == deactivatedAt &&
@@ -121,6 +136,7 @@ class UserResponse {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (banned.hashCode) +
+    (blockedUserIds.hashCode) +
     (createdAt.hashCode) +
     (custom.hashCode) +
     (deactivatedAt == null ? 0 : deactivatedAt!.hashCode) +
@@ -137,11 +153,12 @@ class UserResponse {
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'UserResponse[banned=$banned, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, image=$image, language=$language, lastActive=$lastActive, name=$name, online=$online, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, updatedAt=$updatedAt]';
+  String toString() => 'UserResponse[banned=$banned, blockedUserIds=$blockedUserIds, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, id=$id, image=$image, language=$language, lastActive=$lastActive, name=$name, online=$online, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'banned'] = this.banned;
+      json[r'blocked_user_ids'] = this.blockedUserIds;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'custom'] = this.custom;
     if (this.deactivatedAt != null) {
@@ -203,6 +220,9 @@ class UserResponse {
 
       return UserResponse(
         banned: mapValueOfType<bool>(json, r'banned')!,
+        blockedUserIds: json[r'blocked_user_ids'] is Iterable
+            ? (json[r'blocked_user_ids'] as Iterable).cast<String>().toList(growable: false)
+            : const [],
         createdAt: mapDateTime(json, r'created_at', r'')!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
         deactivatedAt: mapDateTime(json, r'deactivated_at', r''),
@@ -267,6 +287,7 @@ class UserResponse {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'banned',
+    'blocked_user_ids',
     'created_at',
     'custom',
     'id',

@@ -145,7 +145,7 @@ extension EgressRtmpExt on open.EgressRTMPResponse {
     return CallEgressRtmp(
       name: name,
       streamKey: streamKey,
-      url: url,
+      url: streamUrl,
     );
   }
 }

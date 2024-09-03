@@ -830,7 +830,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required Map<String, Object> filterConditions,
     String? next,
     String? prev,
-    List<open.SortParam> sorts = const [],
+    List<open.SortParamRequest> sorts = const [],
     int? limit,
   }) async {
     try {
@@ -865,7 +865,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required Map<String, Object> filterConditions,
     String? next,
     String? prev,
-    List<open.SortParam> sorts = const [],
+    List<open.SortParamRequest> sorts = const [],
     int? limit,
     bool? watch,
   }) async {
