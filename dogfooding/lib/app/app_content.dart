@@ -8,6 +8,7 @@ import 'package:flutter_dogfooding/core/repos/token_service.dart';
 import 'package:flutter_dogfooding/router/routes.dart';
 import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -36,11 +37,13 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         userId: credentials.userInfo.id, environment: prefs.environment);
 
     // Initialise the video client.
-    AppInjector.registerStreamVideo(
+    final streamVideo = AppInjector.registerStreamVideo(
       tokenResponse,
       User(info: credentials.userInfo),
       prefs.environment,
     );
+
+    streamVideo.observeCallDeclinedCallKitEvent();
 
     // Handle the message.
     await _handleRemoteMessage(message);
@@ -70,8 +73,9 @@ class _StreamDogFoodingAppContentState
     extends State<StreamDogFoodingAppContent> {
   late final _userAuthController = locator.get<UserAuthController>();
 
-  late final _logger = taggedLogger(tag: 'StreamDogFoodingAppContent');
   late final _router = initRouter(_userAuthController);
+
+  final _compositeSubscription = CompositeSubscription();
 
   @override
   void initState() {
@@ -92,8 +96,6 @@ class _StreamDogFoodingAppContentState
     // Observe call kit events.
     _observeCallKitEvents();
   }
-
-  final _callKitEventSubscriptions = Subscriptions();
 
   void _tryConsumingIncomingCallFromTerminatedState() {
     if (_router.routerDelegate.navigatorKey.currentContext == null) {
@@ -134,28 +136,37 @@ class _StreamDogFoodingAppContentState
 
   void _observeCallKitEvents() {
     final streamVideo = locator.get<StreamVideo>();
-    _callKitEventSubscriptions.addAll([
-      streamVideo.onCallKitEvent<ActionCallAccept>(_onCallAccept),
-      streamVideo.onCallKitEvent<ActionCallDecline>(_onCallDecline),
-      streamVideo.onCallKitEvent<ActionCallEnded>(_onCallEnded),
-    ]);
-  }
 
-  StreamSubscription<RemoteMessage>? _fcmSubscription;
+    _compositeSubscription.add(
+      streamVideo.observeCoreCallKitEvents(
+        onCallAccepted: (callToJoin) {
+          // Navigate to the call screen.
+          final extra = (
+            call: callToJoin,
+            connectOptions: null,
+          );
+
+          _router.push(CallRoute($extra: extra).location, extra: extra);
+        },
+      ),
+    );
+  }
 
   _observeFcmMessages() {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    _fcmSubscription = FirebaseMessaging.onMessage.listen(_handleRemoteMessage);
+    _compositeSubscription.add(
+      FirebaseMessaging.onMessage.listen(_handleRemoteMessage),
+    );
   }
-
-  StreamSubscription<Uri?>? _deepLinkSubscription;
 
   Future<void> _observeDeepLinks() async {
     // The app was in the background.
     if (!kIsWeb) {
-      _deepLinkSubscription = uriLinkStream.listen((uri) {
+      final deepLinkSubscription = uriLinkStream.listen((uri) {
         if (mounted && uri != null) _handleDeepLink(uri);
       });
+
+      _compositeSubscription.add(deepLinkSubscription);
     }
 
     // The app was terminated.
@@ -214,75 +225,9 @@ class _StreamDogFoodingAppContentState
     // Navigate to the lobby screen.
   }
 
-  void _onCallAccept(ActionCallAccept event) async {
-    _logger.d(() => '[onCallAccept] event: $event');
-    final streamVideo = locator.get<StreamVideo>();
-
-    final uuid = event.data.uuid;
-    final cid = event.data.callCid;
-    if (uuid == null || cid == null) return;
-
-    final call = await streamVideo.consumeIncomingCall(uuid: uuid, cid: cid);
-    final callToJoin = call.getDataOrNull();
-    if (callToJoin == null) return;
-
-    var acceptResult = await callToJoin.accept();
-
-    // Return if cannot accept call
-    if (acceptResult.isFailure) {
-      debugPrint('Error accepting call: $call');
-      return;
-    }
-
-    // Navigate to the call screen.
-    final extra = (
-      call: callToJoin,
-      connectOptions: null,
-    );
-    _router.push(CallRoute($extra: extra).location, extra: extra);
-  }
-
-  void _onCallDecline(ActionCallDecline event) async {
-    _logger.d(() => '[onCallDecline] event: $event');
-    final streamVideo = locator.get<StreamVideo>();
-
-    final uuid = event.data.uuid;
-    final cid = event.data.callCid;
-    if (uuid == null || cid == null) return;
-
-    final call = await streamVideo.consumeIncomingCall(uuid: uuid, cid: cid);
-    final callToReject = call.getDataOrNull();
-    if (callToReject == null) return;
-
-    final result = await callToReject.reject(
-      reason: CallRejectReason.decline(),
-    );
-    if (result is Failure) {
-      debugPrint('Error rejecting call: ${result.error}');
-    }
-  }
-
-  void _onCallEnded(ActionCallEnded event) async {
-    final streamVideo = locator.get<StreamVideo>();
-
-    final uuid = event.data.uuid;
-    final cid = event.data.callCid;
-    if (uuid == null || cid == null) return;
-
-    final call = streamVideo.activeCall;
-    if (call == null || call.callCid.value != cid) return;
-
-    final result = await call.leave();
-    if (result is Failure) {
-      debugPrint('Error leaving call: ${result.error}');
-    }
-  }
-
   @override
   void dispose() {
-    _fcmSubscription?.cancel();
-    _deepLinkSubscription?.cancel();
-    _callKitEventSubscriptions.cancelAll();
+    _compositeSubscription.dispose();
     _userAuthController.dispose();
     _router.dispose();
     super.dispose();
@@ -440,16 +385,5 @@ class _StreamDogFoodingAppContentState
         ),
       ),
     );
-  }
-}
-
-extension on Subscriptions {
-  void addAll<T>(Iterable<StreamSubscription<T>?> subscriptions) {
-    for (var i = 0; i < subscriptions.length; i++) {
-      final subscription = subscriptions.elementAt(i);
-      if (subscription == null) continue;
-
-      add(i + 100, subscription);
-    }
   }
 }

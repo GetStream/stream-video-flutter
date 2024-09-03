@@ -85,7 +85,9 @@ It is important to handle these events to ensure a seamless calling experience r
 In a high-level widget in your app, add this code to listen to CallKit events:
 
 ```dart
-final _callKitEventSubscriptions = Subscriptions();
+import 'package:rxdart/rxdart.dart';
+
+final _compositeSubscription = CompositeSubscription();
 
 @override
 void initState() {
@@ -95,80 +97,25 @@ void initState() {
 
 void _observeCallKitEvents() {
   final streamVideo = StreamVideo.instance;
-  _callKitEventSubscriptions.addAll([
-    streamVideo.onCallKitEvent<ActionCallAccept>(_onCallAccept),
-    streamVideo.onCallKitEvent<ActionCallDecline>(_onCallDecline),
-    streamVideo.onCallKitEvent<ActionCallEnded>(_onCallEnded),
-    // You can add additional events if you need to handle them
-    // As an example, handling mute events from CallKit
-  ]);
-}
 
-void _onCallAccept(ActionCallAccept event) async {
-  final streamVideo = StreamVideo.instance;
+  // You can use our helper method to observe core CallKit events
+  // It will handled call accepted, declined and ended events
+  _compositeSubscription.add(
+      streamVideo.observeCoreCallKitEvents(
+        onCallAccepted: (callToJoin) {
+          // <---- IMPLEMENT NAVIGATION TO CALL SCREEN HERE
+        },
+      ),
+    );
 
-  final uuid = event.data.uuid;
-  final cid = event.data.callCid;
-  if (uuid == null || cid == null) return;
-
-  final call = await streamVideo.consumeIncomingCall(uuid: uuid, cid: cid);
-  final callToJoin = call.getDataOrNull();
-  if (callToJoin == null) return;
-
-  var acceptResult = await callToJoin.accept();
-
-  // Return if cannot accept call
-  if(acceptResult.isFailure) {
-    debugPrint('Error accepting call: $call');
-    return;
-  }
-
-  // Data for next screen
-  final extra = (
-    call: callToJoin,
-    connectOptions: const CallConnectOptions(),
-  );
-
-  // Navigate to next screen if needed
-}
-
-void _onCallDecline(ActionCallDecline event) async {
-  final streamVideo = StreamVideo.instance;
-
-  final uuid = event.data.uuid;
-  final cid = event.data.callCid;
-  if (uuid == null || cid == null) return;
-
-  final call = await streamVideo.consumeIncomingCall(uuid: uuid, cid: cid);
-  final callToReject = call.getDataOrNull();
-  if (callToReject == null) return;
-
-  final result = await callToReject.reject(reason: CallRejectReason.decline());
-  if (result is Failure) {
-    debugPrint('Error rejecting call: ${result.error}');
-  }
-}
-
-void _onCallEnded(ActionCallEnded event) async {
-  final streamVideo = StreamVideo.instance;
-
-  final uuid = event.data.uuid;
-  final cid = event.data.callCid;
-  if (uuid == null || cid == null) return;
-
-  final call = streamVideo.activeCall;
-  if (call == null || call.callCid.value != cid) return;
-
-  final result = await call.leave();
-  if (result is Failure) {
-    debugPrint('Error leaving call: ${result.error}');
-  }
+  // Or you can handle them by yourself, and/or add additional events such as handling mute events from CallKit 
+  // _compositeSubscription.add(streamVideo.onCallKitEvent<ActionCallToggleMute>(_onCallToggleMute));
 }
 
 @override
 void dispose() {
   // ...
-  _callKitEventSubscriptions.cancelAll();
+  _compositeSubscription.cancelAll();
 }
 ```
 
@@ -319,6 +266,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       ),
     );
 
+    // Observe Declined CallKit event to handle declining the call even when app is terminated
+    streamVideo.observeCallDeclinedCallKitEvent();
+
     // Pass it along to the handler
     await _handleRemoteMessage(message);
   } catch (e, stk) {
@@ -449,9 +399,9 @@ Add these permissions to `Info.plist` in order to support video calling:
 
 ```plist
 <key>NSCameraUsageDescription</key>
-<string>$(PRODUCT_NAME) Camera Usage!</string>
+<string>$(PRODUCT_NAME) needs access to your camera for video calls.</string>
 <key>NSMicrophoneUsageDescription</key>
-<string>$(PRODUCT_NAME) Microphone Usage!</string>
+<string>$(PRODUCT_NAME) needs access to your microphone for voice and video calls.</string>
 <key>UIApplicationSupportsIndirectInputEvents</key>
 <true/>
 <key>BGTaskSchedulerPermittedIdentifiers</key>
