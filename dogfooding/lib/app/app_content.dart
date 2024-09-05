@@ -109,12 +109,14 @@ class _StreamDogFoodingAppContentState
   }
 
   Future<void> _consumeIncomingCall() async {
-    final calls =
-        await StreamVideo.instance.pushNotificationManager?.activeCalls();
+    if (!locator.isRegistered<StreamVideo>()) return;
+
+    final streamVideo = locator.get<StreamVideo>();
+    final calls = await streamVideo.pushNotificationManager?.activeCalls();
 
     if (calls == null || calls.isEmpty) return;
 
-    final callResult = await StreamVideo.instance.consumeIncomingCall(
+    final callResult = await streamVideo.consumeIncomingCall(
       uuid: calls.first.uuid!,
       cid: calls.first.callCid!,
     );
