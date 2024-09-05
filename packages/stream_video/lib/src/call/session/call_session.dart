@@ -115,11 +115,7 @@ class CallSession extends Disposable {
       sfu_models.Device? device;
       sfu_models.Browser? browser;
 
-      var os = sfu_models.OS(
-        name: SysInfo.operatingSystemName,
-        version: SysInfo.operatingSystemVersion,
-        architecture: SysInfo.rawKernelArchitecture,
-      );
+      var os = sfu_models.OS();
 
       if (CurrentPlatform.isAndroid) {
         final deviceInfo = await DeviceInfoPlugin().androidInfo;
