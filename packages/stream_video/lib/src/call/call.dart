@@ -404,24 +404,27 @@ class Call {
 
   Future<Result<None>> accept() async {
     final state = this.state.value;
-    _logger.i(() => '[reject] ${_status.value}; state: $state');
+    _logger.i(() => '[accept] ${_status.value}; state: $state');
+
     final status = state.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) {
-      _logger.w(() => '[acceptCall] rejected (invalid status): $status');
+      _logger.w(() => '[accept] rejected (invalid status): $status');
       return Result.error('invalid status: $status');
     }
 
     final outgoingCall = _getOutgoingCall();
-    if (outgoingCall?.callCid != callCid) {
-      await outgoingCall?.reject(reason: CallRejectReason.cancel());
-      await outgoingCall?.leave();
+    if (outgoingCall != null && outgoingCall.callCid != callCid) {
+      _logger.i(() => '[accept] canceling outgoing call: $outgoingCall');
+      await outgoingCall.reject(reason: CallRejectReason.cancel());
+      await outgoingCall.leave();
       await _setOutgoingCall(null);
     }
 
     final activeCall = _getActiveCall();
-    if (activeCall?.callCid != callCid) {
-      await activeCall?.reject(reason: CallRejectReason.cancel());
-      await activeCall?.leave();
+    if (activeCall != null && activeCall.callCid != callCid) {
+      _logger.i(() => '[accept] canceling another active call: $activeCall');
+      await activeCall.reject(reason: CallRejectReason.cancel());
+      await activeCall.leave();
       await _setActiveCall(null);
     }
 

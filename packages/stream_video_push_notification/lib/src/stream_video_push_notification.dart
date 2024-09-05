@@ -78,17 +78,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         _idCallRejected,
         client.events.on<CoordinatorCallRejectedEvent>(
           (event) async {
-            final callRingingState = await streamVideo.getCallRingingState(
-                callType: event.callCid.type, id: event.callCid.id);
-
-            switch (callRingingState) {
-              case CallRingingState.accepted:
-              case CallRingingState.rejected:
-              case CallRingingState.ended:
-                endCallByCid(event.callCid.toString());
-              case CallRingingState.ringing:
-                break;
-            }
+            endCallByCid(event.callCid.toString());
           },
         ),
       );
@@ -97,19 +87,9 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         _idCallAccepted,
         client.events.on<CoordinatorCallAcceptedEvent>(
           (event) async {
-            final callRingingState = await streamVideo.getCallRingingState(
-                callType: event.callCid.type, id: event.callCid.id);
-
-            switch (callRingingState) {
-              case CallRingingState.accepted:
-              case CallRingingState.rejected:
-              case CallRingingState.ended:
-                await FlutterCallkitIncoming.silenceEvents();
-                await endCallByCid(event.callCid.toString());
-                await Future<void>.delayed(const Duration(milliseconds: 300));
-                await FlutterCallkitIncoming.unsilenceEvents();
-              case CallRingingState.ringing:
-                break;
+            if (streamVideo.activeCall?.state.value.status
+                is! CallStatusActive) {
+              await endCallByCid(event.callCid.toString());
             }
           },
         ),
