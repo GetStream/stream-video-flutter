@@ -65,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
       await _call!.getOrCreate(
         memberIds: memberIds,
         ringing: isRinging,
+        video: true,
       );
     } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');

@@ -129,11 +129,7 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate, UNU
             fromPushKit: true
         )
         
-        // Complete after a delay to ensure that the incoming call notification
-        // is displayed before completing the push notification handling.
-       DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-           completion()
-       }
+        completion()
     }
     
 }
