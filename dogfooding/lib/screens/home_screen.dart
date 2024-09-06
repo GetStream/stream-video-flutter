@@ -12,6 +12,7 @@ import 'package:flutter_dogfooding/widgets/stream_button.dart';
 // 📦 Package imports:
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_background.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../app/user_auth_controller.dart';
 import '../di/injector.dart';
@@ -36,6 +37,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
+    [
+      Permission.notification,
+      Permission.camera,
+      Permission.microphone,
+    ].request();
+
     StreamBackgroundService.init(
       StreamVideo.instance,
       onButtonClick: (call, type, serviceType) async {
@@ -49,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       },
     );
+
     super.initState();
   }
 
