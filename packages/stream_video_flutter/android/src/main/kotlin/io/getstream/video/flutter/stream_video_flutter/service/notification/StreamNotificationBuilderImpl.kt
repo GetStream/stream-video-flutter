@@ -225,7 +225,7 @@ internal class StreamNotificationBuilderImpl(
     @RequiresApi(Build.VERSION_CODES.O)
     private fun getDefaultNotificationChannel(context: Context): (() -> NotificationChannel) {
         return {
-            NotificationChannel(
+            val channel = NotificationChannel(
                 context.getString(R.string.stream_call_notification_channel_id),
                 context.getString(R.string.stream_call_notification_channel_name),
                 NotificationManager.IMPORTANCE_HIGH
