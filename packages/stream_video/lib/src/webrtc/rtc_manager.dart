@@ -226,6 +226,7 @@ class RtcManager extends Disposable {
 
   @override
   Future<void> dispose() async {
+    _logger.d(() => '[dispose] no args');
     for (final trackSid in [...publishedTracks.keys]) {
       await unpublishTrack(trackId: trackSid);
     }
