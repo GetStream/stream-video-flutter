@@ -1,3 +1,14 @@
+## 0.5.2
+
+🐞 Fixed
+* Fixed CallKit integration on iOS when app is in a terminated state. It now correctly openes the app when the call is accepted.
+* Fixed `onLeaveCallTap` callback in `StreamCallContent`. It's now correctly handled.
+* (Android) Prevented the app from crashing when microphone permission is not granted and actove call foreground services is started. The service will now not start if no permission is granted.
+* (Android) Marked the active call notification channel's lockscreen visibility as public to ensure it shows when the Android device is locked.
+
+🔄 Changed
+* `SortParam` changed to `SortParamRequest` in `queryMembers()` method inside `Call` and `StreamVideo` class
+
 ## 0.5.1
 
 ✅ Added

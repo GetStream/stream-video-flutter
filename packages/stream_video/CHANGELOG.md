@@ -1,3 +1,8 @@
+## 0.5.2
+
+🔄 Changed
+* `SortParam` changed to `SortParamRequest` in `queryMembers()` method inside `Call` and `StreamVideo` class
+
 ## 0.5.1
 
 ✅ Added
