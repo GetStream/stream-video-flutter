@@ -1,0 +1,169 @@
+---
+slug: /participant-sorting
+title: Participant
+sidebar_position: 9
+---
+
+The Participant Sorting API is a powerful tool built on top of the internal `Comparator<T>` API, providing developers with the ability to sort participants in various scenarios. This API offers common comparators and built-in presets that can be easily customized or used out-of-the-box, making participant sorting a seamless experience.
+
+When dealing with real-time communication applications, it is often necessary to sort participants based on specific criteria. Whether you need to adjust the sorting in existing view layouts or define new sorting presets, the Participant Sorting API is here to simplify the process.
+
+By utilizing the `Comparator<T>` API and the provided built-in comparators and presets, developers can effortlessly sort participants according to their requirements.
+
+## `Comparator<T>` API overview
+​
+
+The `Comparator<T>` API serves as the foundation for the Participant Sorting API. It defines the function type `Comparator<T>`, which takes two arguments a and b of type T and returns -1, 0, or 1, depending on the comparison between the two values. This allows developers to create custom comparators tailored to their specific requirements.
+
+This API can be seamlessly used with Dart's List.sort method to sort any type of data.
+
+```dart
+class Participant {
+  Participant(this.id, this.name, this.age);
+
+  final int id;
+  final String name;
+  final int age;
+}
+
+// Comparator that sorts by name in ascending order
+int byName(Participant a, Participant b) {
+  return a.name.compareTo(b.name);
+}
+
+// Comparator that sorts by id in ascending order
+int byId(Participant a, Participant b) {
+  return a.id.compareTo(b.id);
+}
+
+// Comparator that sorts by age in ascending order
+int byAge(Participant a, Participant b) {
+  return a.age.compareTo(b.age);
+}
+
+// Creates a new comparator that sorts by name in descending order
+Comparator<Participant> byNameDescending = (a, b) => byName(b, a);
+
+// Conditional comparator for sorting by age if enabled
+Comparator<Participant> byAgeIfEnabled(bool isSortByAgeEnabled) {
+  return (a, b) => isSortByAgeEnabled ? byAge(b, a) : 0;
+}
+
+// Combines multiple comparators into one
+Comparator<Participant> combineComparators(List<Comparator<Participant>> comparators) {
+  return (a, b) {
+    for (final comparator in comparators) {
+      final result = comparator(a, b);
+      if (result != 0) return result;
+    }
+    return 0;
+  };
+}
+
+// Sorting criteria combining multiple comparators
+Comparator<Participant> sortingCriteria = combineComparators([
+  byNameDescending,
+  byAgeIfEnabled(true), // You can toggle this flag for conditional sorting
+  byId,
+]);
+
+void main() {
+  // Example participants
+  final p1 = Participant(2, 'Alice', 25);
+  final p2 = Participant(1, 'Bob', 30);
+  final p3 = Participant(3, 'Charlie', 22);
+
+  // Participants array
+  final participants = [p1, p2, p3];
+
+  // Sorting the array based on the defined criteria
+  participants.sort(sortingCriteria);
+
+  // Output sorted participants
+  for (final p in participants) {
+    print('${p.name} (${p.id}) - Age: ${p.age}');
+  }
+}
+```
+
+## Built-in common comparators
+​
+The Participant Sorting API provides a set of common comparators that cover common sorting scenarios. These comparators are specifically designed for participant sorting and offer convenience when defining sorting criteria.
+
+The built-in common comparators include:
+
+* `dominantSpeaker`: Sorts participants based on their dominance in the call.
+* `speaking`: Sorts participants based on whether they are currently speaking.
+* `screenSharing`: Sorts participants based on whether they are currently screen sharing.
+* `publishingVideo`: Sorts participants based on whether they are currently publishing video.
+* `publishingAudio`: Sorts participants based on whether they are currently publishing audio.
+* `pinned`: Sorts participants based on whether they are pinned in the user interface.
+* `reactionType(type)`: Sorts participants based on the type of reaction they have.
+* `byRole(...roles)`: Sorts participants based on their assigned role.
+* `byName`: Sorts participants based on their names.
+
+All of these comparators are available in the `stream_video` package and can be imported as follows:
+
+```dart
+import 'package:stream_video/stream_video.dart';
+```
+
+These built-in comparators serve as a starting point for sorting participants and can be used individually or combined to create more complex sorting criteria.
+
+## Built-in sorting presets
+​
+To further simplify participant sorting, the Participant Sorting API offers built-in presets. These presets are pre-configured sorting criteria linked to specific call types, reducing the effort required to define sorting rules.
+
+The following presets are available:
+
+* `regular`: The default sorting preset applicable to general call scenarios.
+* `speaker`: A preset specifically designed for the 'default' call type, optimizing participant sorting for speaker layout view.
+* `livestreamOrAudioRoom`: A preset tailored for the 'livestream' and 'audio_room' call types, ensuring optimal participant sorting in livestream or audio room scenarios.
+
+All of these presets are available in the `stream_video` package and can be imported as follows:
+
+```dart
+import 'package:stream_video/stream_video.dart';
+```
+
+## Sorting customization
+
+By default participant sorting is set depending on the participants layout mode set in the `StreamCallContent` widget:
+
+```dart
+Comparator<CallParticipantState> get sorting {
+  switch (this) {
+    case ParticipantLayoutMode.grid:
+      return CallParticipantSortingPresets.regular;
+    case ParticipantLayoutMode.spotlight:
+      return CallParticipantSortingPresets.speaker;
+    case ParticipantLayoutMode.pictureInPicture:
+      return CallParticipantSortingPresets.speaker;
+  }
+}
+```
+
+If you want to customize it, providing different preset or even your own custom sorting coparator, you can do it by providing `sort` parameter to `StreamCallParticipants` widget and using it in the `StreamCallContent's` `callParticipantsBuilder`:
+
+```dart
+StreamCallContainer(
+  ...,
+  callContentBuilder: (
+    BuildContext context,
+    Call call,
+    CallState callState,
+  ) {
+    return StreamCallContent(
+      call: call,
+      callState: callState,
+      callParticipantsBuilder: (context, call, callState) {
+        return StreamCallParticipants(
+              call: call,
+              participants: callState.callParticipants,
+              sort: screenSharing,
+          );
+      },
+    );
+  },
+);
+```

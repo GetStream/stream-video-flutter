@@ -8,7 +8,7 @@ mixin CallParticipantSortingPresets {
     screenSharing,
     ifInvisibleBy(dominantSpeaker),
     ifInvisibleBy(speaking),
-    ifInvisibleBy(reactionType('raised-hand')),
+    ifInvisibleBy(byReactionType('raised-hand')),
     ifInvisibleBy(publishingVideo),
     ifInvisibleBy(publishingAudio),
   ]);
@@ -19,7 +19,7 @@ mixin CallParticipantSortingPresets {
     screenSharing,
     dominantSpeaker,
     ifInvisibleBy(speaking),
-    ifInvisibleBy(reactionType('raised-hand')),
+    ifInvisibleBy(byReactionType('raised-hand')),
     ifInvisibleBy(publishingVideo),
     ifInvisibleBy(publishingAudio),
   ]);
@@ -29,9 +29,9 @@ mixin CallParticipantSortingPresets {
       combineComparators<CallParticipantState>([
     ifInvisibleBy(dominantSpeaker),
     ifInvisibleBy(speaking),
-    ifInvisibleBy(reactionType('raised-hand')),
+    ifInvisibleBy(byReactionType('raised-hand')),
     ifInvisibleBy(publishingVideo),
     ifInvisibleBy(publishingAudio),
-    role(['admin', 'host', 'speaker']),
+    byRole(['admin', 'host', 'speaker']),
   ]);
 }
