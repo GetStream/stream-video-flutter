@@ -9,7 +9,8 @@ API
 timeframe
 APNs
 Telehealth
-Flutter
+telemedicine
+[Ff]lutter
 Podfile
 protobuf
 protos
@@ -38,3 +39,4 @@ screensharing
 Livestreaming
 livestreaming
 callee
+audio_room
