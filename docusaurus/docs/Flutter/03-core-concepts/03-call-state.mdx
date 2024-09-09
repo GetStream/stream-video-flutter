@@ -3,11 +3,22 @@ slug: /call-and-participant-state
 title: Call and Participant State
 ---
 
-When a `Call` is created, users can subscribe to receive notifications about any changes that may occur during the call's lifecycle.
+When you join a call, we'll automatically expose state in 3 different places: the Stream Video Client, the Call, and the participants.
 
+```dart
+var clientState = streamVideo.state;
+var callState = call.state;
+var participants = call.state.value.callParticipants;
+```
+
+ ### Call State
+
+When a `Call` is created, users can subscribe to receive notifications about any changes that may occur during the call's lifecycle.
 To access the state of a call, use `call.state.value` to obtain the latest `CallState` snapshot, or use `valueStream` to listen for real-time changes to the `CallState`.
 
-This functionality is particularly useful for determining which parts of the UI or application to render based on the current state or lifecycle of the ongoing call. For example, you may want to display an indicator to users when a call is being recorded.
+This functionality is particularly useful for determining which parts of the UI or application to render based on the current state or lifecycle of the ongoing call.
+
+For example, you may want to display an indicator to users when a call is being recorded:
 
 ```dart
 StreamBuilder<CallState>(
@@ -23,9 +34,38 @@ StreamBuilder<CallState>(
 ),
 ```
 
+The following fields are available on the call:
+
+| Attribute | Description|
+| --------- | ---------- |
+| `currentUserId` | The user ID of the local user. |
+| `callParticipants` | The list of call participants. |
+| `isRingingFlow` | If this call has `ringing` set to true. |
+| `sessionId` | The current session ID for the call. |
+| `status` | The current call state - see next section for more information. |
+| `liveStartedAt` | When call was set as live. |
+| `liveEndedAt` | When call was set as not live. |
+| `localParticipant` | Shortcut to your own participant state. |
+| `otherParticipants` | The list of call participants other than yourself. |
+| `isRecording` | If the call is being recorded or not. |
+| `settings` | The settings for this call. |
+| `ownCapabilities` | Which actions you have permission to do. |
+| `capabilitiesByRole` | What different roles (user, admin, moderator etc.) are allowed to do. |
+| `isBackstage` | If a call is in backstage mode or not. |
+| `isBroadcasting` | If a call is broadcasting (to HLS) or not. |
+| `createdAt` | When the call was created. |
+| `startsAt` | When the call is scheduled to start. |
+| `endedAt` | When the call ended. |
+| `createdByUserId` | User ID which created the call. |
+| `isTranscribing` | A boolean indicating if transcriptions are active or or not for this call. |
+| `egress` | Contains URL for playlist of recording. |
+| `reconnectionStatus` | whether the call is reconnecting. |
+| `duration` | The duration of the call. |
+
+
 ## Understanding Call Status
 
-The `CallStatus` property of the `CallState` object indicates the current state of the call. Depending on where you are in the call lifecycle, `CallStatus` can have one of the following possible values.
+The `status` property of the `CallState` object indicates the current state of the call. Depending on where you are in the call lifecycle, `CallStatus` can have one of the following possible values.
 
 | Call Status            | Description                                                                                                                            |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -43,28 +83,15 @@ By checking the `CallStatus` value in the `CallState` object, you can determine 
 
 ### Participant State
 
-In the call state, you can find the parameter `callParticipants`. This parameter allows you to access and manipulate the participants present on the call. By using `callParticipants`, you can easily map over the participants and observe changes in their configuration.
+```dart
+var participants = call.state.value.callParticipants;
+var localParticipant = call.state.value.localParticipant;
+```
 
+In the call state, you can find the parameter `callParticipants`. This parameter allows you to access and manipulate the participants present on the call. By using `callParticipants`, you can easily map over the participants and observe changes in their configuration.
 For instance, you can keep track of which participant is currently speaking, which participant is the dominant speaker, and which participant is pinned to the call. Additionally, `callParticipants` allows you to monitor other changes to the call's configuration as well.
 
 Overall, `callParticipants` is a powerful tool that provides you with a lot of control and insight into the call's current state and configuration. By leveraging this parameter effectively, you can create more advanced and robust call applications.
-
-- User Id
-- Role
-- Name
-- Image
-- Session Id
-- TrackId Prefix
-- PublishedTracks
-- Is Local
-- Connection Quality
-- Is Online
-- Audio Level
-- Is Speaking
-- Is Dominant Speaker
-- Is Pinned
-- Reaction
-- Viewport Visibility
 
 ```dart
 for (final user in call.state.value.callParticipants){
@@ -74,4 +101,41 @@ for (final user in call.state.value.callParticipants){
 }
 ```
 
-Combining `CallState` and `CallParticipantState` makes building custom UIs and integrations a breeze. If there is a property or API that is not exposed for your specific use case, feel free to reach out to us. We are constantly iterating and exposing APIs based on your feedback.
+The following fields are available on the participant:
+
+| Attribute | Description|
+| --------- | ---------- |
+| `userId` | The unique call id of the participant. |
+| `role` | The user's role in the call. |
+| `custom` | Any custom data added to the user. |
+| `trackIdPrefix` | Returns the user's track ID prefix. |
+| `publishedTracks` | Returns the participant's tracks. |
+| `isSpeaking` | Returns whether the participant is speaking. |
+| `isDominantSpeaker` | Returns whether the participant is a dominant speaker. |
+| `isPinned` | Returns whether the participant is pinned. |
+| `isLocal` | Returns whether the participant is a dominant speaker. |
+| `isOnline` | Returns whether the participant is online. |
+| `sessionId` | Returns whether the participant is speaking. |
+| `connectionQuality` | The participant's connection quality. |
+| `joinedAt` | Returns the date when the user joined the call. |
+| `audioLevel` | The audio level for the user. |
+| `reaction` | The current reaction added by the user. |
+| `viewportVisibility` | The user's visibility on the screen. |
+
+Combining `CallState` and `CallParticipantState` makes building custom UIs and integrations a breeze.
+If there is a property or API that is not exposed for your specific use case, feel free to reach out to us.
+We are constantly iterating and exposing APIs based on your feedback.
+
+### Client State
+
+```dart
+// Client state is available in the client object
+var clientState = StreamVideo.instance.state;
+```
+
+| Attribute | Description|
+| --------- | ---------- |
+| `user` | The user you're currently authenticated as. |
+| `connection` | The connection state of Stream Video. |
+| `activeCall` | The call you've currently joined. |
+| `incomingCall` | Contains the incoming call if `ringing` is set to true. |

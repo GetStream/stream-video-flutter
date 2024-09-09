@@ -3,8 +3,18 @@ slug: /quickstart
 title: Quickstart
 ---
 
+The Flutter Video for Stream Video is a highly customizable SDK that facilitates adding calling (audio and video) support to your apps.
 
-In this guide, we will cover the basics of making your first call using Stream Video. If you haven't already, we recommend starting with the **introduction** and **installation** steps first, as this guide will build on the material covered in those sections.
+The SDK consists of four parts:
+
+* Low-level client ([stream_video](https://pub.dev/packages/stream_video)): Responsible for establishing calls, built on top of WebRTC.
+* UI SDK ([stream_video_flutter](https://pub.dev/packages/stream_video_flutter)): Flutter widgets for different types of call flows.
+* VoIP SDK ([stream_video_push_notification](https://pub.dev/packages/stream_video_push_notification)): Adds native calling interface support for Android and iOS (CallKit).
+* Screen sharing SDK ([stream_video_screen_sharing](https://pub.dev/packages/stream_video_screen_sharing)): Includes a native Swift implementation of `BroadcastSampleHandler`, essential for the `broadcast` screen sharing mode on iOS.
+
+In this guide, we will build a video calling app that shows how you can integrate the SDK in few simple steps.
+
+If you haven't already, we recommend starting with the [introduction](https://getstream.io/video/docs/flutter/) and [installation](https://getstream.io/video/docs/flutter/installation/) steps first, as this guide will build on the material covered in those sections.
 
 ### Client Setup
 
@@ -23,21 +33,18 @@ Future<void> main() async {
 
 	// Initialize Stream video and set the API key along with the user for our app.
   final client = StreamVideo(
-    'YOUR-API-KEY',
-    user: User.regular(userId: 'testing', name: 'Test User'),
-    userToken: 'YOUR-USER-TOKEN',
-    options: const StreamVideoOptions(
-      logPriority: Priority.info,
-    ),
+    'REPLACE_WITH_API_KEY',
+     user: User.regular(userId: 'REPLACE_WITH_USER_ID', name: 'Test User'),
+     userToken: 'REPLACE_WITH_TOKEN',
   );
 
   // Set up our call object and pass it the call type and ID. The most common call type is `default`, which enables full audio and video transmission
-  final call = client.makeCall(callType: StreamCallType.defaultType(), id: '345');
+  final call = client.makeCall(callType: StreamCallType.defaultType(), id: 'REPLACE_WITH_CALL_ID');
   // Connect to the call we created
   await call.join();
 
   runApp(
-    StreamVideoGettingStarted(
+    DemoAppHome(
       call: call,
     ),
   );

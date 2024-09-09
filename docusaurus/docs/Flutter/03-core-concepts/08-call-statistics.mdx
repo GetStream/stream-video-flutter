@@ -13,25 +13,27 @@ There are two sources of statistics you can use to monitor the performance of yo
 If you want to tap in directly into the stream of webRTC stats you can do this with `stats` stream inside `Call` object. It provides a stream of [`CallStats`](https://github.com/GetStream/stream-video-flutter/blob/main/packages/stream_video/lib/src/models/call_stats.dart) objects for publisher and subscriber connections.
 We provide those statistics in three ways for ease of use:
 
-* `raw` - raw stats as they come from the webRTC
-* `printable` - representation of the stats that can be easily printed to the console or as a block of text
-* `stats` - webRTC stats but in a structured form
+* `raw` - Raw stats as they come from WebRTC.
+* `printable` - Representation of the stats that can be easily printed to the console or as a block of text.
+* `stats` - WebRTC stats but in a structured form.
 
 ## CallState properties
 
 You can also access more processed data with useful information about the call. This data is available in [`CallState`](https://github.com/GetStream/stream-video-flutter/blob/main/packages/stream_video/lib/src/call_state.dart) object. Here are some of the properties that you can use:
 
 `publisherStats` and `subscriberStats` - objects that contain the following data:
-* `latency` - the time it takes to deliver the data between the server and the app
-* `jitterInMs` -  the variation in the delay of receiving packets of data over a network
-* `bitrateKbps` - the rate at which data is transmitted from the app to the server (publisher) or from the server to the app (subscriber)
 
-`localStats` - object that contains the following data:
-* `sfu` - the server we are connected to
-* `sdkVersion` - the version of the Stream SDK
-* `webRtcVersion` - the version of the webRTC
+* `latency` - The time it takes to deliver the data between the server and the app.
+* `jitterInMs` -  The variation in the delay of receiving packets of data over a network.
+* `bitrateKbps` - The rate at which data is transmitted from the app to the server (publisher) or from the server to the app (subscriber).
 
-`latencyHistory` - array of latency values for the last 10 seconds
+`localStats` - An object that contains the following data:
+
+* `sfu` - The server to which the device is connected.
+* `sdkVersion` - The version of the Stream SDK.
+* `webRtcVersion` - The version of WebRTC.
+
+`latencyHistory` - Array of latency values for the last 10 seconds.
 
 ## Example usage
 

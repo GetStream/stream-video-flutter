@@ -4,52 +4,32 @@ title: Introduction
 description: Introduction to Stream's Video SDK
 ---
 
-Welcome to the Stream [Flutter SDK](https://getstream.io/video/sdk/flutter/) - a comprehensive toolkit designed to help developers quickly implement real-time video calling, audio rooms, and live streaming directly into their Flutter app, all in Dart.
 
-Our Flutter SDK comes with out-of-the-box widgets such as calling indicators, participant screens, and more. These components make it simple and intuitive to add rich experiences with just a few lines of code. Additionally, advanced features such as CallKit integration, push notifications, and background track handling are supported, all with minimal overhead.
+Welcome to the [Stream Video Flutter SDK](https://getstream.io/video/sdk/flutter/) - a comprehensive toolkit designed to help you swiftly implement features such as video calling, audio calling, audio rooms, and livestreaming within your app.
 
-If you are new to the Stream Video SDK, we recommend starting with the following three tutorials:
+Our goal is to ensure an optimal developer experience that enables your application to go live within days.
+
+Our Flutter SDK is furnished with user-friendly UI components and versatile state objects, making your development process seamless.
+Moreover, all calls are routed through Stream's global edge network, thereby ensuring lower latency and higher reliability due to proximity to end users.
+
+If you're new to Stream Video SDK, we recommend starting with the following three tutorials:
 - [Video & Audio Calling Tutorial](https://getstream.io/video/sdk/flutter/tutorial/video-calling/)
 - [Audio Room Tutorial](https://getstream.io/video/sdk/flutter/tutorial/audio-room/)
 - [Livestream Tutorial](https://getstream.io/video/sdk/flutter/tutorial/livestreaming/)
 
+After the tutorials, the documentation explains how to use the
 
-After the tutorials the documentation explains how to use the SDK. Our Flutter SDK is divided into three parts to help you quickly and effectively build video and voice applications with Stream:
+* Core concepts such as initiating a call, switching the camera view, and more
+* Effective utilization of our UI components
+* Insights on building your own UI with our UI Cookbook
 
-1. `stream_video_flutter`
-2. `stream_video`
-3. `stream_video_push_notification`
+ It also explains advanced features such as:
 
-### Stream Video Flutter
+ * Picture-in-Picture support
+ * Ringing
+ * Recording
+ * Broadcasting
+ * Requesting & Granting permissions
+ * Audio & Video Filters
 
-Stream Video Flutter includes all of our modular, pre-made widgets, which developers can use to quickly build with Stream. In addition to the UI components, this package also includes all of our Flutter-specific handling and logic, such as background handling, push notification support, and more.
-
-These screens and widgets include:
-
-- Call Controls
-- Call Screen
-- Lobby Screen
-- Participant Rendering and Layout
-- etc.
-
-### Stream Video
-
-Stream Video is our base package, which acts as a low-level wrapper around the Stream Video API. It allows you to authenticate users, listen to events, and perform low-level operations such as creating a call, joining, inviting, sorting, and permission handling.
-
-The entry point for interacting directly with the Stream API is the `StreamVideo` class. This class is a singleton that can be accessed throughout your application via the static `instance` method.
-
-For example:
-
-```dart
-StreamVideo.instance.makeCall(callType: StreamCallType.defaultType(), id: "YOUR-CALL-ID");
-```
-
-We will look at these concepts in more detail in the following sections.
-
-While developers are free to use `stream_video` in their applications directly, we recommend using our `stream_video_flutter` package instead since it contains many Flutter-specific configurations and behavior handling not included in the base package.
-
-### Push Notifications
-
-Push notifications are implemented and handled by `stream_video_push_notification`. This package configures the integration between Flutter and the underlying platform (iOS and Android), allowing for seamless integration and handling of push and call notifications to the device. Our push service is backed by Firebase Cloud Messaging.
-
-Please refer to our push notifications section for a more detailed guide.
+ If you feel like anything is missing or could be improved, please don't hesitate to [contact us](product@getstream.io). We're happy to help.
