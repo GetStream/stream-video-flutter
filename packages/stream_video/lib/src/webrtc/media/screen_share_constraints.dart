@@ -9,7 +9,7 @@ class ScreenShareConstraints extends VideoConstraints {
     this.captureScreenAudio = false,
     String? sourceId,
     super.maxFrameRate,
-    super.params = RtcVideoParametersPresets.h720_16x9,
+    super.params = RtcVideoParametersPresets.h1080_16x9,
   }) : super(deviceId: sourceId);
 
   ScreenShareConstraints.from({
