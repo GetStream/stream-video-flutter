@@ -1,37 +1,55 @@
 ---
 slug: /joining-and-creating-calls
 title: Joining and Creating Calls
+sidebar_position: 2
 ---
-
-With authentication out of the way, we can now focus on creating and joining calls. Before proceeding, we highly recommend that you read the previous section on authentication, as the two are closely related.
 
 ### Creating Calls
 
-To create a call, we first call the `makeCall` function on the `StreamVideo` class and pass it the call type and ID. The most common call type is `default`, which enables full audio and video transmission. However, as we will learn later, there are multiple call types (and even custom types) from which you can choose based on your use case.
+To create a call, we first call the `makeCall` function on the `StreamVideo` class and pass it the call type and ID.
+The most common call type is `default`, which enables full audio and video transmission.
+However, there are multiple call types (and even custom types) from which you can choose based on your use case.
+
+Call type | Name | Short overview
+--- | --- | ---
+default | Default | simple 1-1 calls for larger group video calling with sensible defaults
+audio_room | Audio | pre-configured for a workflow around requesting permissions in audio settings (speaking, etc.)
+livestream | Livestream | access to calls is granted to all authenticated users, useful in one-to-many settings (such as livestreaming)
+development | Development | should only be used for testing, permissions are open and everything is enabled (use carefully)
+
+You can read more about call types [here](https://getstream.io/video/docs/flutter/call-types/).
+
 
 ```dart
 final call = StreamVideo.instance.makeCall(callType: StreamCallType.defaultType(), id: 'Your-call-ID');
-
+await call.getOrCreate();
 ```
 
-Calling `makeCall` returns a `Call` object for us to work with. However, it does neither connect nor start transmitting data automatically. To create and join the call, we must then invoke `getOrCreate` on the returned object.
+Calling `makeCall` returns a `Call` object for us to work with. However, it neither connects nor starts transmitting data automatically.
+To create and join the call, we must then invoke `getOrCreate` on the returned object which creates the call if it doesn't exist and returns the existing call if it does.
 
-```dart
-final call = StreamVideo.instance.makeCall(callType: StreamCallType.defaultType(), id: 'Your-call-ID');
-await call.getOrCreate(); // New
+For the call ID there are a few things to note:
 
-```
+* You can reuse the same call multiple times.
+* If you have a unique id for the call we recommend passing that as the id.
+* If you don't have a unique id you can leave it empty and we'll generate one for you.
 
-Although we are not passing any parameters to `getOrCreate` in the above example, it is important to note a few things:
+As an example, if you're building a telemedicine app, calls will be connected to an appointment. Using your own appointment id as the **Call ID** makes it easy to find the call later.
 
-1. Members: Upon creation, we can supply a list of user IDs we would like to immediately add to the call.
-2. Ringing: If ringing is set to `true`, Stream will send a notification to the users on the call, triggering the platform call screen on iOS and Android.
+### Managing Members and Ringing Calls
+
+You can pass certain arguments to the `call.getOrCreate()` method used in the previous example:
+
+1. `members`: Upon creation, we can supply a list of user IDs we would like to immediately add to the call.
+2. `ringing`: If ringing is set to `true`, Stream will send a VoIP notification to the users on the call, triggering the platform call screen on iOS and Android.
+3. `video`: When ringing, the notification will indicate whether it's a video call or an audio-only call, depending on whether you set the `video` parameter to true or false.
+4. `custom`: Any custom data associated with the call.
+5. `team`: A team is a part of [Stream Video multi-tenancy support](https://getstream.io/video/docs/api/multi-tenant/). You can separate different groups of videos and calls using this argument.
+6. `notify` If notify is set to true, Stream will send a standard non-VoIP push notification to all the users in the call.
 
 :::note
-  Depending on call permissions settings, call member may have different permissions than other users joining the call. For example, call can be configured so only members can join. See [here](#restricting-access).
+By default, calling `getOrCreate()` assigns `admin` permission to each user who is supplied during creation. Depending on call permissions settings, call member may have different permissions than other users joining the call. For example, call can be configured so only members can join. See [here](#restricting-access) for more information.
 :::
-
-By default, calling `getOrCreate` assigns `admin` permission to each user who is supplied during creation.
 
 When call is already active you can still manage members:
 
@@ -83,6 +101,7 @@ Similar to the flow of creating a call, we can use `makeCall` to construct a `Ca
 
 ```dart
 final call = StreamVideo.instance.makeCall(callType: StreamCallType.defaultType(), id: 'My-existing-call-ID');
+await call.getOrCreate();
 ```
 
 Next, with our class instantiated, we can connect to the call and SFU by invoking `join`.
@@ -124,6 +143,8 @@ In the code snippet above, we are creating a call that starts 500 seconds from n
 
 You can restrict access to a call by tweaking the [Call Type](https://getstream.io/video/docs/flutter/call-types/) permissions and roles. A typical use case is to restrict access to a call to a specific set of users -> call members.
 
+#### Step 1: Set up the roles and permissions
+​
 On our [dashboard](https://dashboard.getstream.io), navigate to the **Video & Audio -> Roles & Permissions** section and select the appropriate role and scope. In this example, we will use `my-call-type` scope.
 
 By default, all users unless specified otherwise, have the `user` role.
@@ -136,4 +157,4 @@ Next, let's ensure that the `call_member` role has the `JoinCall` permission for
 
 ![Grant JoinCall](../assets/core_concepts/call_member-grant-joincall.png)
 
-That's it. In just a few lines, we have created our first calls, and they are ready for the world to join. To learn how to observe events and the state of a call, please read the next chapter.
+Once this is set, we can proceed with setting up a call instance.

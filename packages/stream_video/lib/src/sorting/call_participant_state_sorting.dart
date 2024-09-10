@@ -47,7 +47,7 @@ int pinned(CallParticipantState a, CallParticipantState b) {
 
 /// A comparator creator which will set up a comparator which prioritizes
 /// participants who have a specific reaction.
-Comparator<CallParticipantState> reactionType(String type) {
+Comparator<CallParticipantState> byReactionType(String type) {
   return (CallParticipantState a, CallParticipantState b) {
     if (a.reaction?.type == type && b.reaction?.type != type) return -1;
     if (a.reaction?.type != type && b.reaction?.type == type) return 1;
@@ -57,7 +57,7 @@ Comparator<CallParticipantState> reactionType(String type) {
 
 /// A comparator creator which will set up a comparator which prioritizes
 /// participants who have a specific role.
-Comparator<CallParticipantState> role(List<String> roles) {
+Comparator<CallParticipantState> byRole(List<String> roles) {
   return (CallParticipantState a, CallParticipantState b) {
     final aMatches = a.roles.fold(
       0,
@@ -71,7 +71,7 @@ Comparator<CallParticipantState> role(List<String> roles) {
     );
     final bMatches = b.roles.fold(
       0,
-          (matches, value) {
+      (matches, value) {
         if (roles.contains(value)) {
           return matches + 1;
         } else {
@@ -84,6 +84,11 @@ Comparator<CallParticipantState> role(List<String> roles) {
     if (bMatches < aMatches) return 1;
     return 0;
   };
+}
+
+/// A comparator which sorts participants by name.
+int byName(CallParticipantState a, CallParticipantState b) {
+  return a.name.compareTo(b.name);
 }
 
 /// Creates a new combined [Comparator] which sorts items
