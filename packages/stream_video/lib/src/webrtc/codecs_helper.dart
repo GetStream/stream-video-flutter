@@ -9,15 +9,15 @@ import 'model/rtc_video_dimension.dart';
 import 'model/rtc_video_parameters.dart';
 
 List<rtc.RTCRtpEncoding> findOptimalVideoLayers({
-  required RtcVideoDimension dimentions,
+  required RtcVideoDimension dimensions,
   RtcVideoParameters targetResolution = RtcVideoParametersPresets.h720_16x9,
 }) {
   final optimalVideoLayers = <rtc.RTCRtpEncoding>[];
 
   final maxBitrate = getComputedMaxBitrate(
     targetResolution,
-    dimentions.width,
-    dimentions.height,
+    dimensions.width,
+    dimensions.height,
   );
 
   var downscaleFactor = 1;
@@ -36,7 +36,7 @@ List<rtc.RTCRtpEncoding> findOptimalVideoLayers({
   }
 
   return withSimulcastConstraints(
-    dimentions: dimentions,
+    dimensions: dimensions,
     optimalVideoLayers: optimalVideoLayers,
   );
 }
@@ -63,12 +63,12 @@ int getComputedMaxBitrate(
 }
 
 List<rtc.RTCRtpEncoding> withSimulcastConstraints({
-  required RtcVideoDimension dimentions,
+  required RtcVideoDimension dimensions,
   required List<rtc.RTCRtpEncoding> optimalVideoLayers,
 }) {
   var layers = <rtc.RTCRtpEncoding>[];
 
-  final size = max(dimentions.width, dimentions.height);
+  final size = max(dimensions.width, dimensions.height);
   if (size <= 320) {
     // provide only one layer 320x240 (q), the one with the highest quality
     layers = optimalVideoLayers.where((layer) => layer.rid == 'f').toList();
@@ -94,7 +94,7 @@ List<rtc.RTCRtpEncoding> withSimulcastConstraints({
 }
 
 List<rtc.RTCRtpEncoding> findOptimalScreenSharingLayers({
-  required RtcVideoDimension dimentions,
+  required RtcVideoDimension dimensions,
   RtcVideoParameters targetResolution = RtcVideoParametersPresets.h1080_16x9,
 }) {
   final optimalVideoLayers = <rtc.RTCRtpEncoding>[];

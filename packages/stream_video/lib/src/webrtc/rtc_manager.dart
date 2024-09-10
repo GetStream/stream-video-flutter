@@ -420,12 +420,12 @@ extension PublisherRtcManager on RtcManager {
       _logger.v(() => '[publishVideoTrack] screenDimension: $screenDimension');
 
       encodings = codecs.findOptimalScreenSharingLayers(
-        dimentions: screenDimension,
+        dimensions: screenDimension,
         targetResolution: track.mediaConstraints.params,
       );
     } else {
       encodings = codecs.findOptimalVideoLayers(
-        dimentions: dimension,
+        dimensions: dimension,
         targetResolution: track.mediaConstraints.params,
       );
     }
