@@ -1,6 +1,7 @@
 ---
 slug: /querying-calls
 title: Querying Calls
+sidebar_position: 6
 ---
 
 For many different use cases, such as video calls, livestreams, or audio rooms, you may want to search and filter calls based on different criteria, such as:
@@ -9,7 +10,11 @@ For many different use cases, such as video calls, livestreams, or audio rooms, 
 - Calls that are currently live
 - Popular livestreams or audio rooms with a link to the recording.
 
-To facilitate these, the SDK provides methods which allows users to quickly perform sorting and filtering using the `queryCalls` method on `StreamVideo`.
+To facilitate these, the SDK provides methods which allows users to quickly perform sorting and filtering using the `queryCalls()` method on `StreamVideo`:
+
+```dart
+var calls = StreamVideo.instance.queryCalls(filterConditions: {});
+```
 
 ### Filtering
 
