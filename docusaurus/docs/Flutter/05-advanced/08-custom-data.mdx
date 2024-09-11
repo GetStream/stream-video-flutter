@@ -1,0 +1,69 @@
+---
+title: Custom Data
+slug: /custom-data
+sidebar_position: 8
+description: 
+---
+
+Custom data is additional information that can be added to the default data of Stream. It is a dictionary of key-value pairs that can be attached to users, events, and pretty much almost every domain model in the Stream SDK.
+
+On Flutter, custom data is represented by the `Map<String, Object>`. This means that the key must be a string and the value can be any object.
+
+## Adding Custom Data
+
+Adding extra data can be done through the Server-Side SDKs or through the Client SDKs. In the Flutter Stream Video SDK, you can add extra data when creating/updating a call, updating a user and sending event or reaction.
+
+```dart
+// Example of updating the call custom data.
+widget.call.update(custom: {'mycustomfield': 'mycustomvalue'});
+
+// Example of sending a reaction with custom data.
+widget.call.sendReaction(
+  reactionType: 'raise-hand',
+  emojiCode: ':smile:',
+  custom: {'mycustomfield': 'mycustomvalue'},
+);
+
+// Example of sending a custom event with custom data.
+widget.call.sendCustomEvent(
+  eventType: 'my-custom-event',
+  custom: {'mycustomfield': 'mycustomvalue'},
+);
+
+// Example of updating the user custom data while initializing the StreamVideo.
+StreamVideo(
+  apiKey,
+  user: User.regular(userId: 'userId', extraData: {'mycustomfield': 'mycustomvalue'}),
+  userToken: token,
+);
+```
+
+## Reading Custom Data
+​
+Reading the custom data is as simple as accessing the `custom` field of the object. For example, to read the custom data of a reaction, you can access the `custom` field of the reaction event object.
+
+```dart
+widget.call.callEvents.listen((event) {
+  if (event is StreamCallReactionEvent) {
+    final customData = event.custom;
+  }
+});
+```
+
+For `Call` object the custom data are stored in call metadata that can be accessed when calling `getOrCreate()` or `get()` method.
+
+```dart
+final result = await call.getOrCreate();
+final customData = result.fold(
+   success: (success) => success.data.data.metadata.details.custom,
+   failure: (_) => null,
+);
+
+//or
+
+final result = await call.get();
+final customData = result.fold(
+   success: (success) => success.data.metadata.details.custom,
+   failure: (_) => null,
+);
+```
