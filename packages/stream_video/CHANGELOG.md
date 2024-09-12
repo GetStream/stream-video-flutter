@@ -1,3 +1,10 @@
+## 0.5.3
+
+🐞 Fixed
+* Enhanced video quality for a smoother experience.
+* Resolved an issue where the participant's state showed an empty roles list.
+* Fixed a bug that caused the CallKit ringing notification to continue after a call was accepted.
+
 ## 0.5.2
 
 🔄 Changed
