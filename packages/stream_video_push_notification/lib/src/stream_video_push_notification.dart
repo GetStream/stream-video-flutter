@@ -87,9 +87,18 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         _idCallAccepted,
         client.events.on<CoordinatorCallAcceptedEvent>(
           (event) async {
+            // end CallKit call on other devices if the call was accepted on one of them
             if (streamVideo.activeCall?.state.value.status
                 is! CallStatusActive) {
               await endCallByCid(event.callCid.toString());
+            }
+            // if the call was accepted on the same device, end the CallKit call silently
+            // (in case it was accepted from the app and not from the CallKit UI)
+            else {
+              await FlutterCallkitIncoming.silenceEvents();
+              await endCallByCid(event.callCid.toString());
+              await Future<void>.delayed(const Duration(milliseconds: 300));
+              await FlutterCallkitIncoming.unsilenceEvents();
             }
           },
         ),
