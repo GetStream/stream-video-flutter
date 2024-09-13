@@ -2,7 +2,7 @@
 title: Custom Data
 slug: /custom-data
 sidebar_position: 8
-description: Learn how to add and read custom data in the Stream Flutter SDK.
+description: Learn how to add and read custom data in the Stream Video Flutter SDK.
 ---
 
 Custom data is additional information that can be added to the default data of Stream. It is a dictionary of key-value pairs that can be attached to users, events, and pretty much almost every domain model in the Stream SDK.
@@ -15,17 +15,17 @@ Adding extra data can be done through the Server-Side SDKs or through the Client
 
 ```dart
 // Example of updating the call custom data.
-widget.call.update(custom: {'mycustomfield': 'mycustomvalue'});
+call.update(custom: {'mycustomfield': 'mycustomvalue'});
 
 // Example of sending a reaction with custom data.
-widget.call.sendReaction(
+call.sendReaction(
   reactionType: 'raise-hand',
   emojiCode: ':smile:',
   custom: {'mycustomfield': 'mycustomvalue'},
 );
 
 // Example of sending a custom event with custom data.
-widget.call.sendCustomEvent(
+call.sendCustomEvent(
   eventType: 'my-custom-event',
   custom: {'mycustomfield': 'mycustomvalue'},
 );
@@ -43,7 +43,7 @@ StreamVideo(
 Reading the custom data is as simple as accessing the `custom` field of the object. For example, to read the custom data of a reaction, you can access the `custom` field of the reaction event object.
 
 ```dart
-widget.call.callEvents.listen((event) {
+call.callEvents.listen((event) {
   if (event is StreamCallReactionEvent) {
     final customData = event.custom;
   }
