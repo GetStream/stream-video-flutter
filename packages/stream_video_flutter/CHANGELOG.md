@@ -1,3 +1,8 @@
+## 0.5.3
+
+🚧 Breaking changes
+* The regular push notification handling has been removed from iOS, providing more control over the implementation. VoIP push notifications will continue to be handled as before. For more details, refer to the documentation.
+
 ## 0.5.2
 
 🐞 Fixed

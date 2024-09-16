@@ -13,7 +13,26 @@ import stream_video_push_notification
         
         // Register for push notifications.
         StreamVideoPKDelegateManager.shared.registerForPushNotifications()
+        UNUserNotificationCenter.current().delegate = self
         
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
+    
+    // This method will be called when notification is received
+    override func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                         willPresent notification: UNNotification,
+                                         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        let streamDict = notification.request.content.userInfo["stream"] as? [String: Any]
+        if(streamDict?["sender"] as? String != "stream.video") {
+            return completionHandler([])
+        }
+        
+        if #available(iOS 14.0, *) {
+            completionHandler([.list, .banner, .sound])
+        } else {
+            completionHandler([.alert])
+        }
+    }
+    
+    
 }
