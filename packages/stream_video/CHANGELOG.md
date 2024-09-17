@@ -1,7 +1,14 @@
-## 0.5.3
+## 0.5.4
 
 🚧 Breaking changes
 * The regular push notification handling has been removed from iOS, providing more control over the implementation. VoIP push notifications will continue to be handled as before. For more details, refer to the documentation.
+
+## 0.5.3
+
+🐞 Fixed
+* Improved video quality for a smoother experience.
+* Resolved an issue where the participant's state showed an empty roles list.
+* Fixed a bug that caused the CallKit ringing notification to continue after a call was accepted.
 
 ## 0.5.2
 
