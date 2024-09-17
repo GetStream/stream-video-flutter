@@ -84,7 +84,7 @@ class ServiceManagerImpl(
     }
 
     /**
-     * Start the foreground service.
+     * Stop the foreground service.
      */
     override fun stop(type: ServiceType): Boolean {
         logger.d { "[stop] type: $type" }
