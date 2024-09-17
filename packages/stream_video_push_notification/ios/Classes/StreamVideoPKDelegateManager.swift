@@ -15,32 +15,9 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate, UNU
     }
     
     @objc public func registerForPushNotifications() {
-        UNUserNotificationCenter.current().delegate = self
-        UNUserNotificationCenter
-                    .current()
-                    .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-                        if granted {
-                            DispatchQueue.main.async {
-                                UIApplication.shared.registerForRemoteNotifications()
-                            }
-                        }
-                    }
-        
         pushRegistry = PKPushRegistry(queue: DispatchQueue.main)
         pushRegistry?.delegate = self
         pushRegistry?.desiredPushTypes = [.voIP]
-    }
-    
-    public func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                       willPresent notification: UNNotification,
-                                       withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        let payloadDict = notification.request.content
-      
-        if #available(iOS 14.0, *) {
-            completionHandler([.list, .banner, .sound])
-        } else {
-            completionHandler([.alert])
-        }
     }
     
     public func initChannel(mainChannel: FlutterMethodChannel) {
