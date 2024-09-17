@@ -14,7 +14,7 @@ Push notifications are sent in the following scenarios:
 
 ## Android and Firebase Cloud Messaging (FCM)
 
-For FCM the steps taken in [ringing documentation](https://getstream.io/video/docs/flutter/advanced/ringing_and_callkit/) are enough and will also handle standard push notificiations.
+For FCM the steps taken in [ringing documentation](https://getstream.io/video/docs/flutter/advanced/ringing_and_callkit/) are enough and will also handle standard push notifications.
 
 In case of missed call the notification will be shown using [flutter_callkit_incoming](https://pub.dev/packages/flutter_callkit_incoming) package. It can be configured by `pushParams` when initializing `StreamVideo`:
 
@@ -42,7 +42,7 @@ StreamVideo(
 );
 ```
 
-If you want to handle missed call notification differently or handle the notification about incomming call (when `notify` is set to true) use the existing `_handleRemoteMessage()` method (see [ringing documentation](https://getstream.io/video/docs/flutter/advanced/ringing_and_callkit/)):
+If you want to handle missed call notification differently or handle the notification about incoming call (when `notify` is set to true) use the existing `_handleRemoteMessage()` method (see [ringing documentation](https://getstream.io/video/docs/flutter/advanced/ringing_and_callkit/)):
 
 ```dart
 Future<bool> _handleRemoteMessage(RemoteMessage message) async {
