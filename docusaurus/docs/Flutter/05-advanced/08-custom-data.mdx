@@ -13,24 +13,34 @@ In the SDK, custom data is represented by the `Map<String, Object>`. This means 
 
 Adding extra data can be done through the Server-Side SDKs or through the Client SDKs. In the Flutter Stream Video SDK, you can add extra data when creating/updating a call, updating a user and sending event or reaction.
 
-```dart
-// Example of updating the call custom data.
-call.update(custom: {'mycustomfield': 'mycustomvalue'});
+###### Example of updating the call custom data
 
-// Example of sending a reaction with custom data.
+```dart
+call.update(custom: {'mycustomfield': 'mycustomvalue'});
+```
+
+###### Example of sending a reaction with custom data
+
+```dart
 call.sendReaction(
   reactionType: 'raise-hand',
   emojiCode: ':smile:',
   custom: {'mycustomfield': 'mycustomvalue'},
 );
+```
 
-// Example of sending a custom event with custom data.
+###### Example of sending a custom event with custom data
+
+```dart
 call.sendCustomEvent(
   eventType: 'my-custom-event',
   custom: {'mycustomfield': 'mycustomvalue'},
 );
+```
 
-// Example of updating the user custom data while initializing the StreamVideo.
+###### Example of updating the user custom data while initializing the StreamVideo
+
+```dart
 StreamVideo(
   apiKey,
   user: User.regular(userId: 'userId', extraData: {'mycustomfield': 'mycustomvalue'}),
@@ -50,7 +60,7 @@ call.callEvents.listen((event) {
 });
 ```
 
-For `Call` object the custom data are stored in call metadata that can be accessed when calling `getOrCreate()` or `get()` method.
+For `Call` object the custom data is stored in call metadata that can be accessed when calling `getOrCreate()` or `get()` method.
 
 ```dart
 final result = await call.getOrCreate();
