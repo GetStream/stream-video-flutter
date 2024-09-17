@@ -1,0 +1,163 @@
+---
+title: Push Notifications
+slug: /push-notifications
+sidebar_position: 3
+description: Learn how to enable push notifications in the Stream Video Flutter SDK.
+---
+
+Apart from the VoIP notifications for call ringing features, Stream Video Flutter SDK also supports standard push notifications. This guide will show you how to enable push notifications in your Flutter app using the Stream Video SDK.
+
+Push notifications are sent in the following scenarios:
+- you create a call with the `ring` value set to true. In this case, a notification that shows a ringing screen is sent. (covered in the [ringing documentation](https://getstream.io/video/docs/flutter/advanced/ringing_and_callkit/))
+- you create a call with the `notify` value set to true. In this case, a regular push notification is sent.
+- you haven't answered a call. In this case, a missed call notification is sent (regular push notification).
+
+## Android and Firebase Cloud Messaging (FCM)
+
+For FCM the steps taken in [ringing documentation](https://getstream.io/video/docs/flutter/advanced/ringing_and_callkit/) are enough and will also handle standard push notifications.
+
+In case of missed call the notification will be shown using [flutter_callkit_incoming](https://pub.dev/packages/flutter_callkit_incoming) package. It can be configured by `pushParams` when initializing `StreamVideo`:
+
+```dart
+StreamVideo(
+  apiKey,
+  user: user,
+  pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
+    iosPushProvider: const StreamVideoPushProvider.apn(
+      name: 'apn',
+    ),
+    androidPushProvider: const StreamVideoPushProvider.firebase(
+      name: 'firebase',
+    ),
+    pushParams: const StreamVideoPushParams(
+      appName: kAppName,
+      ios: IOSParams(iconName: 'IconMask'),
+      missedCallNotification: NotificationParams(
+        showNotification: true,
+        subtitle: 'Missed Call',
+        callbackText: 'Call Back',
+      )
+    ),
+  ),
+);
+```
+
+If you want to handle missed call notification differently or handle the notification about incoming call (when `notify` is set to true) use the existing `_handleRemoteMessage()` method (see [ringing documentation](https://getstream.io/video/docs/flutter/advanced/ringing_and_callkit/)):
+
+```dart
+Future<bool> _handleRemoteMessage(RemoteMessage message) async {
+  final payload = message.data;
+
+  final sender = payload['sender'] as String?;
+  final type = payload['type'] as String?;
+
+  if (sender == 'stream.video' && type == 'call.notification') {
+    final callCid = payload['call_cid'] as String?;
+    // Show notification, for example using `flutter_local_notifications` package
+  }
+
+  final streamVideo = locator.get<StreamVideo>();
+  return streamVideo.handleVoipPushNotification(
+    message.data,
+    handleMissedCall: false, //<-- Add this flag if you dont want a default missed call notification handling
+  );
+}
+```
+
+## iOS and Apple Push Notification Service (APNs)
+
+For APNs the standard push notifications have to be handled separately of VoIP notifications. When APN push provider is registered for iOS, both VoIP and standard push notifications are send using APN by Stream Video SDK.
+
+### Registering APN device token
+
+First you need to register APN device token as it is separate from the VoIP token (registered out-of-the-box by the Stream Video SDK). To do this just set `registerApnDeviceToken` to true when initializing `StreamVideo` instance:
+
+```dart
+StreamVideo(
+  apiKey,
+  user: user,
+  pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
+    iosPushProvider: const StreamVideoPushProvider.apn(
+      name: 'flutter-apn',
+    ),
+    androidPushProvider: const StreamVideoPushProvider.firebase(
+      name: 'flutter-firebase',
+    ),
+    pushParams: const StreamVideoPushParams(
+        appName: kAppName,
+        ios: StreamIOSParams(iconName: 'IconMask'),
+    ),
+    registerApnDeviceToken: true, // <--- Add this line
+  ),
+);
+``` 
+
+### Handling standard push notifications
+
+Next, you need to handle the push notifications in your app. 
+
+To do this, you need to add the following code to your `AppDelegate.swift` file:
+
+```swift
+@objc class AppDelegate: FlutterAppDelegate {
+override func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        GeneratedPluginRegistrant.register(with: self)
+        
+        // Register for push notifications.
+        StreamVideoPKDelegateManager.shared.registerForPushNotifications() // <--- Add will only handle VoIP notifications
+        UNUserNotificationCenter.current().delegate = self // <--- Add this line to handle standard push notifications
+        
+        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+
+// This method will be called when notification is received
+override func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                    willPresent notification: UNNotification,
+                                    withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+  let streamDict = notification.request.content.userInfo["stream"] as? [String: Any]
+  if(streamDict?["sender"] as? String != "stream.video") {
+      return completionHandler([])
+  }
+  
+  if #available(iOS 14.0, *) {
+      completionHandler([.list, .banner, .sound])
+  } else {
+      completionHandler([.alert])
+  }
+}
+}
+```
+
+If you want to handle the notification tap event, for example to navigate to the call screen when you `notify` about it, you can add the following code to your `AppDelegate.swift` file:
+
+```swift
+// This method will be called when notification is tapped
+override func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                      didReceive response: UNNotificationResponse,
+                                      withCompletionHandler completionHandler: @escaping () -> Void) {
+    
+    let streamDict = response.notification.request.content.userInfo["stream"] as? [String: Any]
+    if(streamDict?["sender"] as? String != "stream.video") {
+        return;
+    }
+    
+    if(streamDict?["type"] as? String == "call.notification") {
+        let callCid = streamDict?["call_cid"] as? String
+        print("Call notification received with call cid: \(callCid)")
+        //Navigate to call, for example implementing method channel
+    }
+
+    completionHandler()
+}
+```
+
+### Push notification permission
+
+Remember, that in order to receive push notifications, you need to ask the user for relevant permission. One way of doing it is using [permission_handler](https://pub.dev/packages/permission_handler) plugin.
+
+```dart
+Permission.notification.request();
+```
