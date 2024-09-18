@@ -238,6 +238,12 @@ class StreamBackgroundService {
     NotificationOptionsBuilder optionsBuilder,
   ) {
     return call.state.listen((value) async {
+      _logger.v(() => '[listenState] call service update, state: $value');
+
+      if (value.status is CallStatusDisconnected) {
+        return;
+      }
+
       try {
         final result = await StreamVideoFlutterBackground.updateService(
           NotificationPayload(
