@@ -38,7 +38,7 @@ Future<void> _backgroundVoipCallHandler() async {
     user: User(info: userCredentials.userInfo),
     userToken: userCredentials.token.rawValue,
     options: const StreamVideoOptions(
-      logPriority: Priority.info,
+      logPriority: Priority.verbose,
       muteAudioWhenInBackground: true,
       muteVideoWhenInBackground: true,
     ),
@@ -192,7 +192,7 @@ StreamVideo _initStreamVideo(
     user: user,
     tokenLoader: tokenLoader,
     options: const StreamVideoOptions(
-      logPriority: Priority.info,
+      logPriority: Priority.verbose,
       muteAudioWhenInBackground: true,
       muteVideoWhenInBackground: true,
     ),
