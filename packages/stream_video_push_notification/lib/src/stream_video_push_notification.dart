@@ -31,6 +31,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     CallerCustomizationFunction? callerCustomizationCallback,
     BackgroundVoipCallHandler? backgroundVoipCallHandler,
     StreamVideoPushParams? pushParams,
+    bool registerApnDeviceToken = false,
   }) {
     return (CoordinatorClient client, StreamVideo streamVideo) {
       final params = _defaultPushParams.merge(pushParams);
@@ -50,6 +51,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         androidPushProvider: androidPushProvider,
         pushParams: params,
         callerCustomizationCallback: callerCustomizationCallback,
+        registerApnDeviceToken: registerApnDeviceToken,
       );
     };
   }
@@ -61,6 +63,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required this.androidPushProvider,
     required this.pushParams,
     this.callerCustomizationCallback,
+    this.registerApnDeviceToken = false,
   }) : _client = client {
     if (CurrentPlatform.isWeb) return;
 
@@ -151,6 +154,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   final StreamVideoPushProvider androidPushProvider;
   final StreamVideoPushParams pushParams;
   final CallerCustomizationFunction? callerCustomizationCallback;
+  final bool registerApnDeviceToken;
 
   final _logger = taggedLogger(tag: 'SV:PNManager');
   bool? _wasWsConnected;
@@ -179,7 +183,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       );
     }
 
-    if (CurrentPlatform.isIos) {
+    if (CurrentPlatform.isIos && registerApnDeviceToken) {
       StreamTokenProvider.getAPNToken().then((token) {
         if (token != null) {
           registerDevice(token, false);
@@ -196,10 +200,15 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   @override
   void unregisterDevice() async {
     final token = await getDevicePushTokenVoIP();
-    if (token == null) return;
+    if (token != null) {
+      _client.deleteDevice(id: token);
+      _subscriptions.cancel(_idToken);
+    }
 
-    _client.deleteDevice(id: token);
-    _subscriptions.cancel(_idToken);
+    final apnToken = await StreamTokenProvider.getAPNToken();
+    if (apnToken != null) {
+      _client.deleteDevice(id: apnToken);
+    }
   }
 
   @override

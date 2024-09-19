@@ -53,6 +53,7 @@ Future<void> _backgroundVoipCallHandler() async {
         appName: kAppName,
         ios: IOSParams(iconName: 'IconMask'),
       ),
+      registerApnDeviceToken: true,
     ),
   );
 }
@@ -207,6 +208,7 @@ StreamVideo _initStreamVideo(
         ios: IOSParams(iconName: 'IconMask'),
       ),
       backgroundVoipCallHandler: _backgroundVoipCallHandler,
+      registerApnDeviceToken: true,
     ),
   );
 

@@ -34,6 +34,7 @@ mixin StreamVideoFlutterBackground {
     if (!isAndroid) {
       return false;
     }
+
     return StreamVideoFlutterPlatform.instance.updateBackgroundService(
       payload: options,
       type: type,
