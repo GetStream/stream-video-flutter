@@ -62,8 +62,8 @@ jobs:
       - name: "Stream Video Flutter Analyze"
         run: cd packages/stream_video_flutter/lib && dart analyze --no-fatal-warnings .
 
-      - name: "Stream Video Flutter Background Analyze"
-        run: cd packages/stream_video_flutter_background/lib && dart analyze --no-fatal-warnings .
-
       - name: "Stream Video Push Notification Analyze"
         run: cd packages/stream_video_push_notification/lib && dart analyze --no-fatal-warnings .
+
+      - name: "Stream Video Flutter Screen Sharing Analyze"
+        run: cd packages/stream_video_screen_sharing/lib && dart analyze --no-fatal-warnings .
