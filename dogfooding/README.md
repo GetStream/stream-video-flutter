@@ -1,6 +1,8 @@
-# Dogfooding
+# Dogfooding App
 
-This is a Dogfooding App - demo application built using the [Stream Video Flutter](https://pub.dev/packages/stream_video_flutter) package. It showcases the core features of the package and serves as an internal testing tool for the Stream team. It's a great starting point to explore how the Stream Video SDK works in real-world scenarios.
+The Dogfooding App is built using the [Stream Video Flutter](https://pub.dev/packages/stream_video_flutter) package, designed to showcase both core and advanced features of the package. It also serves as an internal testing tool for the Stream team.
+
+For a more basic example of how to use the Stream Video Flutter package, check out the [example app here](https://github.com/GetStream/stream-video-flutter/tree/main/packages/stream_video_flutter/example).
 
 ## Features
 

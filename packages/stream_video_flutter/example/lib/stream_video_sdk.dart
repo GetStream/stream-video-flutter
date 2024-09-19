@@ -29,7 +29,7 @@ class StreamVideoSdk {
           name: 'flutter-firebase',
         ),
         pushParams: const StreamVideoPushParams(
-          appName: 'Stream Dogfooding',
+          appName: 'Stream Example',
           ios: IOSParams(iconName: 'IconMask'),
         ),
       ),
