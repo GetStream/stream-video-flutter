@@ -40,6 +40,7 @@ Future<Result<None>> _connectUser(UserInfo user) async {
     environment: Environment.prontoStaging,
     userId: user.id,
   );
+
   final apiKey = tokenResponse.apiKey;
   final token = UserToken.jwt(tokenResponse.token);
 
@@ -50,6 +51,7 @@ Future<Result<None>> _connectUser(UserInfo user) async {
     userToken: token,
     options: DefaultVideoOptions.remote,
   );
+
   final authRepository = await AuthRepository.getInstance();
   await authRepository.setCredentials(
     AuthCredentials(
@@ -60,19 +62,6 @@ Future<Result<None>> _connectUser(UserInfo user) async {
   );
 
   await client.connect();
-
-  /*StreamBackgroundService.init(
-    StreamVideo.instance,
-    onNotificationClick: (call) async {
-      streamLog.i(_tag, () => '[onNotificationClick] call: $call');
-      // TODO navigate to call
-    },
-    onPlatformUiLayerDestroyed: (call) async {
-      streamLog.i(_tag, () => '[onPlatformUiLayerDestroyed] call: $call');
-      // TODO
-    },
-  );*/
-
   return const Result.success(none);
 }
 
@@ -86,7 +75,7 @@ Future<void> _setupLogger() async {
       sender: (logFile) async {
         consoleLogger.log(
           Priority.debug,
-          'DogFoodingApp',
+          'Stream ExampleApp',
           () => '[send] logFile: $logFile(${logFile.existsSync()})',
         );
         await Share.shareXFiles(

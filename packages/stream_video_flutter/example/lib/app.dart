@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:example/stream_video_sdk.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -30,58 +31,58 @@ Future<void> _onFirebaseBackgroundMessage(RemoteMessage message) async {
   final authRepository = await AuthRepository.getInstance();
   final credentials = authRepository.getCredentials();
   if (credentials == null) return;
-  /*final client = await StreamVideoSdk.initialize(
+
+  final client = await StreamVideoSdk.initialize(
     apiKey: credentials.apiKey,
     user: credentials.userInfo,
     userToken: credentials.token,
   );
-  final handled = await client.handleVoipPushNotification(message.data);
-  if (!handled) {
-  }
-  */
 
+  client.observeCallDeclinedCallKitEvent();
+
+  await _handlePushNotification(message);
+
+  await StreamVideo.reset(disconnect: true);
+}
+
+Future<bool> _handlePushNotification(RemoteMessage message) async {
   try {
     final payload = message.data;
     // Only handle messages from stream.video
     final sender = payload['sender'] as String?;
     if (sender != 'stream.video') {
       debugPrint('Not a stream.video message');
-      return;
+      return false;
     }
 
     // Only handle ringing calls.
     final type = payload['type'] as String?;
     if (type != 'call.ring' && type != 'call.missed') {
       debugPrint('Not a call.ring or call.missed message');
-      return;
+      return false;
     }
 
     // Return if the payload does not contain a call cid.
     final callCid = payload['call_cid'] as String?;
     if (callCid == null) {
       debugPrint('No call cid in payload');
-      return;
+      return false;
     }
 
-    final receiverId = payload['receiver_id'] as String?;
-    if (receiverId != credentials.userInfo.id) {
-      debugPrint(
-        'Not a call for this user($receiverId != ${credentials.userInfo.id})',
-      );
-      return;
-    }
     final createdByDisplayName = payload['created_by_display_name'] as String?;
     if (createdByDisplayName == null) {
       debugPrint('No created_by_display_name in payload');
-      return;
+      return false;
     }
 
     await showNotification(callCid, type, createdByDisplayName);
+    return true;
   } catch (e, stk) {
     debugPrint('Error handling remote message: $e');
     debugPrint(stk.toString());
+
+    return false;
   }
-  await StreamVideo.reset(disconnect: true);
 }
 
 final ln.FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -176,7 +177,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<bool> _onFirebaseForegroundMessage(RemoteMessage message) async {
     debugPrint('[onFirebaseForegroundMessage] message: ${message.toMap()}');
-    return StreamVideo.instance.handleVoipPushNotification(message.data);
+    return _handlePushNotification(message);
   }
 
   @override
@@ -191,7 +192,7 @@ class _MyAppState extends State<MyApp> {
     final lightAppTheme = StreamVideoTheme.light();
 
     return MaterialApp(
-      title: 'Stream Video UI Example',
+      title: 'Stream Video Example',
       theme: ThemeData(
         textTheme: GoogleFonts.robotoMonoTextTheme(),
         extensions: <ThemeExtension<dynamic>>[lightAppTheme],

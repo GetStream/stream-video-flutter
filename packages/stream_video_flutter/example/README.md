@@ -1,16 +1,52 @@
-# example
+# Stream Video Flutter Example App
 
-An example project for the stream_video_flutter package.
+This is an example app built using the [Stream Video Flutter](https://pub.dev/packages/stream_video_flutter) package, designed to showcase both core features of the package. It's a great starting point to explore how the Stream Video SDK works in real-world scenarios.
+
+For a more advanced example of how to use the Stream Video Flutter package, check out the [dogfooding app here](https://github.com/GetStream/stream-video-flutter/tree/main/dogfooding).
+
+## Features
+
+- **Video Calls**: Test various aspects of video call functionality.
+    - Create or join a video meeting (with or without a Lobby).
+    - Make direct calls to other users (without CallKit integration - only in-app ringing screen)
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+To set up and run the app, follow these steps:
 
-A few resources to get you started if this is your first Flutter project:
+1. Clone the repo and install the dependencies
+First, clone the repository to your local machine and install the required Flutter packages:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```bash
+git clone https://github.com/GetStream/stream-video-flutter.git
+cd stream-video-flutter/packages/stream_video_flutter/example
+flutter pub get
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+2. Run the app
+Once the setup is complete, you can run the app using Flutter:
+
+```bash
+## Ensure you're in the example directory
+flutter run
+```
+
+The app should now launch on your connected device or simulator.
+
+## License
+
+```
+Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+
+Licensed under the Stream License;
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
