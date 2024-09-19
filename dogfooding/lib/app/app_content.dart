@@ -152,6 +152,19 @@ class _StreamDogFoodingAppContentState
         },
       ),
     );
+
+    // UNCOMMENT THIS TO SHOW IN-APP INCOMING SCREEN
+    // _compositeSubscription.add(streamVideo.state.incomingCall.listen((call) {
+    //   if (call == null) return;
+
+    //   // Navigate to the call screen.
+    //   final extra = (
+    //     call: call,
+    //     connectOptions: null,
+    //   );
+
+    //   _router.push(CallRoute($extra: extra).location, extra: extra);
+    // }));
   }
 
   _observeFcmMessages() {
