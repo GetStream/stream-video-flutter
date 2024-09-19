@@ -30,7 +30,7 @@ dependencies:
   rxdart: ^0.28.0
   share_plus: ^10.0.2
   shared_preferences: ^2.3.2
-  stream_chat_flutter: ^8.0.0
+  stream_chat_flutter: ^8.1.0
   stream_video_flutter: ^0.5.3
   stream_video_push_notification: ^0.5.3
   stream_video_screen_sharing: ^0.5.3
