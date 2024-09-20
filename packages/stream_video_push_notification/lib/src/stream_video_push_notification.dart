@@ -24,13 +24,14 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   ///   /// Parameters:
   /// * [callerCustomizationCallback] callback providing customized caller data used for call screen and CallKit call. (for iOS this will only work for foreground calls)
   /// * [backgroundVoipCallHandler] handler called when there is a VoIP call and app is in terminated state (for iOS only) - this handler must be a top-level function
-  /// refere to documentation for more details (https://getstream.io/video/docs/flutter/advanced/adding_ringing_and_callkit/#integrating-apns-for-ios)
+  /// refer to documentation for more details (https://getstream.io/video/docs/flutter/advanced/ringing_and_callkit/#integrating-apns-for-ios)
   static create({
     required StreamVideoPushProvider iosPushProvider,
     required StreamVideoPushProvider androidPushProvider,
     CallerCustomizationFunction? callerCustomizationCallback,
     BackgroundVoipCallHandler? backgroundVoipCallHandler,
     StreamVideoPushParams? pushParams,
+    bool registerApnDeviceToken = false,
   }) {
     return (CoordinatorClient client, StreamVideo streamVideo) {
       final params = _defaultPushParams.merge(pushParams);
@@ -50,6 +51,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         androidPushProvider: androidPushProvider,
         pushParams: params,
         callerCustomizationCallback: callerCustomizationCallback,
+        registerApnDeviceToken: registerApnDeviceToken,
       );
     };
   }
@@ -61,6 +63,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required this.androidPushProvider,
     required this.pushParams,
     this.callerCustomizationCallback,
+    this.registerApnDeviceToken = false,
   }) : _client = client {
     if (CurrentPlatform.isWeb) return;
 
@@ -87,9 +90,18 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         _idCallAccepted,
         client.events.on<CoordinatorCallAcceptedEvent>(
           (event) async {
+            // end CallKit call on other devices if the call was accepted on one of them
             if (streamVideo.activeCall?.state.value.status
                 is! CallStatusActive) {
               await endCallByCid(event.callCid.toString());
+            }
+            // if the call was accepted on the same device, end the CallKit call silently
+            // (in case it was accepted from the app and not from the CallKit UI)
+            else {
+              await FlutterCallkitIncoming.silenceEvents();
+              await endCallByCid(event.callCid.toString());
+              await Future<void>.delayed(const Duration(milliseconds: 300));
+              await FlutterCallkitIncoming.unsilenceEvents();
             }
           },
         ),
@@ -142,6 +154,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   final StreamVideoPushProvider androidPushProvider;
   final StreamVideoPushParams pushParams;
   final CallerCustomizationFunction? callerCustomizationCallback;
+  final bool registerApnDeviceToken;
 
   final _logger = taggedLogger(tag: 'SV:PNManager');
   bool? _wasWsConnected;
@@ -170,7 +183,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       );
     }
 
-    if (CurrentPlatform.isIos) {
+    if (CurrentPlatform.isIos && registerApnDeviceToken) {
       StreamTokenProvider.getAPNToken().then((token) {
         if (token != null) {
           registerDevice(token, false);
@@ -187,10 +200,15 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   @override
   void unregisterDevice() async {
     final token = await getDevicePushTokenVoIP();
-    if (token == null) return;
+    if (token != null) {
+      _client.deleteDevice(id: token);
+      _subscriptions.cancel(_idToken);
+    }
 
-    _client.deleteDevice(id: token);
-    _subscriptions.cancel(_idToken);
+    final apnToken = await StreamTokenProvider.getAPNToken();
+    if (apnToken != null) {
+      _client.deleteDevice(id: apnToken);
+    }
   }
 
   @override

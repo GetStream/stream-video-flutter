@@ -1,5 +1,6 @@
 ---
 slug: /recording
+sidebar_position: 6
 title: Recording
 ---
 A key feature of modern communication tools is the ability to quickly and easily record calls. This functionality is used for everything from quality assurance and training to legal compliance or simply as a matter of convenience for keeping track of conversations and later reviewing them.
@@ -47,8 +48,6 @@ Before the user is allowed to start recording, the user must have the correspond
 The call recording data can be retrieved by calling the `listRecordings()` method of `Call` class. By default, this method will use the current call id (`CID`) to look up the recordings for the current call session. The method returns `List<CallRecording>` which allows you to loop over the different recording objects.
 
 You can also call the `listRecordings()` method on the `StreamVideo` instance and specify the `cid` of the call you want to retrieve recordings for.
-
-```dart
 
 :::tip
 Multiple recordings can be made during a single call session, and a single call CID can also be reused for multiple sessions.

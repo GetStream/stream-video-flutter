@@ -216,6 +216,7 @@ class _StreamCallContentState extends State<StreamCallContent>
           CallAppBar(
             call: call,
             onBackPressed: widget.onBackPressed,
+            onLeaveCallTap: widget.onLeaveCallTap,
           ),
       body: Stack(
         children: [
@@ -250,7 +251,6 @@ class _StreamCallContentState extends State<StreamCallContent>
               StreamCallControls.withDefaultOptions(
                 call: call,
                 localParticipant: localParticipant,
-                onLeaveCallTap: widget.onLeaveCallTap,
               )
           : null,
     );

@@ -378,6 +378,7 @@ class StreamPeerConnection extends Disposable {
 
   @override
   Future<void> dispose() async {
+    _logger.d(() => '[dispose] no args');
     _dropRtcCallbacks();
     _stopObservingStats();
     onStreamAdded = null;

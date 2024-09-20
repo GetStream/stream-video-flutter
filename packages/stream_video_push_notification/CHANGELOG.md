@@ -1,3 +1,19 @@
+## 0.5.4
+
+* Dependency updates
+    * **Flutter SDK** constraint updated to >=3.22.0 (**Dart SDK** to >=3.4.0 <4.0.0)
+    * **json_annotation** updated from ^4.8.0 to ^4.9.0
+    * **firebase_core updated** from ^2.15.1 to ^3.4.0
+    * **firebase_messaging** updated from ^14.5.0 to ^15.1.1
+
+## 0.5.3
+* Sync version with `stream_video_flutter` 0.5.3
+
+## 0.5.2
+
+🐞 Fixed
+* Fixed CallKit integration on iOS when app is in a terminated state. It now correctly openes the app when the call is accepted.
+
 ## 0.5.1
 * Sync version with `stream_video_flutter` 0.5.1
 
@@ -53,7 +69,7 @@
 🐞 Fixed
 
 * Various fixes to call ringing and push notifications.
-- Fixes call ringing cancellation when app is terminated on iOS (requires additional setup - check Step 6 of the [APNS integration](https://getstream.io/video/docs/flutter/advanced/adding_ringing_and_callkit/#integrating-apns-for-ios)) in our documentation.
+- Fixes call ringing cancellation when app is terminated on iOS (requires additional setup - check Step 6 of the [APNS integration](https://getstream.io/video/docs/flutter/advanced/ringing_and_callkit/#integrating-apns-for-ios)) in our documentation.
 - Fixes late push notification handling on Android, where already ended call was ringing if the device was offline and the push was delivered with a delay.
 - Fixes call ringing cancellation when caller timed out while calling
 * Fixed action tap callback on Android call notification.

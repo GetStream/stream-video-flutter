@@ -74,9 +74,19 @@ class CallParticipantsList extends StatelessWidget {
                               child: Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 16),
-                                child: Text(
-                                  participant.name,
-                                  overflow: TextOverflow.ellipsis,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      participant.name,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      participant.roles.join(', '),
+                                      style: textTheme.footnoteItalic,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),

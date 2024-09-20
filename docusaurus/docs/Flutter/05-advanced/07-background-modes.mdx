@@ -1,6 +1,7 @@
 ---
 title: Background modes
 slug: /background-modes
+sidebar_position: 8
 description: How to keep the call alive in the background
 ---
 
@@ -78,6 +79,10 @@ By default, the SDK handles button tap by canceling the call when the user taps 
 ### Required permissions
 
 We require the following permissions to create an appropriate foreground service: `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_PHONE_CALL`, and `FOREGROUND_SERVICE_MICROPHONE`. Additionally, the `FOREGROUND_SERVICE_MEDIA_PROJECTION` permission is necessary for the screen sharing functionality. They are added out-of-the-box as part of our `stream_video_flutter` package.
+
+:::note
+Because of the foreground service type it requires a microphone (`RECORD_AUDIO`) permission to be enabled. Make sure the user grants the permission before beginning the call, otherwise the service will not be able to start.
+:::
 
 ## iOS
 

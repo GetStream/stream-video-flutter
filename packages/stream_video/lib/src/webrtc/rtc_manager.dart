@@ -226,6 +226,7 @@ class RtcManager extends Disposable {
 
   @override
   Future<void> dispose() async {
+    _logger.d(() => '[dispose] no args');
     for (final trackSid in [...publishedTracks.keys]) {
       await unpublishTrack(trackId: trackSid);
     }
@@ -410,6 +411,7 @@ extension PublisherRtcManager on RtcManager {
     if (track.trackType == SfuTrackType.screenShare) {
       final physicalSize =
           WidgetsBinding.instance.platformDispatcher.views.first.physicalSize;
+
       final screenDimension = RtcVideoDimension(
         width: physicalSize.width.toInt(),
         height: physicalSize.height.toInt(),
@@ -417,19 +419,14 @@ extension PublisherRtcManager on RtcManager {
 
       _logger.v(() => '[publishVideoTrack] screenDimension: $screenDimension');
 
-      // Simulcast is not supported for screen share tracks, but all three are required for Android to work.
-      encodings = codecs.encodingsFromPresets(
-        screenDimension,
-        presets: {
-          'f': track.mediaConstraints.params,
-          'h': track.mediaConstraints.params,
-          'q': track.mediaConstraints.params,
-        },
+      encodings = codecs.findOptimalScreenSharingLayers(
+        dimensions: screenDimension,
+        targetResolution: track.mediaConstraints.params,
       );
     } else {
-      encodings = codecs.computeVideoEncodings(
-        dimension: dimension,
-        isScreenShare: track.trackType == SfuTrackType.screenShare,
+      encodings = codecs.findOptimalVideoLayers(
+        dimensions: dimension,
+        targetResolution: track.mediaConstraints.params,
       );
     }
 

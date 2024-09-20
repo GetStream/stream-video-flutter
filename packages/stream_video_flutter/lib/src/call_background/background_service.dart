@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:permission_handler/permission_handler.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../stream_video_flutter_background.dart';
@@ -112,6 +113,14 @@ class StreamBackgroundService {
     OnUiLayerDestroyed? onUiLayerDestroyed,
   }) async {
     try {
+      if (!await Permission.microphone.isGranted) {
+        _logger.d(
+          () =>
+              '[onConnected] cannot start the service, microphone permission is not granted',
+        );
+        return;
+      }
+
       final result = await StreamVideoFlutterBackground.startService(
         NotificationPayload(
           callCid: call.callCid.value,
@@ -119,6 +128,7 @@ class StreamBackgroundService {
         ),
         ServiceType.call,
       );
+
       _logger.d(() => '[onConnected] call service start result: $result');
       if (result) {
         StreamVideoFlutterBackground.setOnNotificationContentClick(
@@ -228,6 +238,12 @@ class StreamBackgroundService {
     NotificationOptionsBuilder optionsBuilder,
   ) {
     return call.state.listen((value) async {
+      _logger.v(() => '[listenState] call service update, state: $value');
+
+      if (value.status is CallStatusDisconnected) {
+        return;
+      }
+
       try {
         final result = await StreamVideoFlutterBackground.updateService(
           NotificationPayload(

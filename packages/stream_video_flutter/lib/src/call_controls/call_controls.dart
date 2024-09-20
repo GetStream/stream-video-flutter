@@ -22,7 +22,6 @@ class StreamCallControls extends StatelessWidget {
   factory StreamCallControls.withDefaultOptions({
     required Call call,
     required CallParticipantState localParticipant,
-    VoidCallback? onLeaveCallTap,
     Color? backgroundColor,
     double? elevation,
     double? spacing,
@@ -33,7 +32,6 @@ class StreamCallControls extends StatelessWidget {
       options: defaultCallControlOptions(
         call: call,
         localParticipant: localParticipant,
-        onLeaveCallTap: onLeaveCallTap,
       ),
       backgroundColor: backgroundColor,
       elevation: elevation,

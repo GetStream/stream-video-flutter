@@ -1,7 +1,7 @@
 ---
-id: adding_ringing_and_callkit
+id: ringing_and_callkit
 sidebar_position: 2
-title: Adding Ringing and CallKit
+title: Ringing and CallKit
 ---
 
 Adding Ringing And CallKit To Your Application
@@ -14,11 +14,6 @@ Ringing is done through a custom interface for Android and CallKit for iOS. An e
 allows you to add an immersive calling experience to your application.
 
 Ringing requires push/VoIP notifications to be sent to your device. Stream Video sends push/VoIP notifications to members that have at least one registered device.
-
-Push notifications are sent in the following scenarios:
-- you create a call with the `ring` value set to true. In this case, a notification that shows a ringing screen is sent.
-- you create a call with the `notify` value set to true. In this case, a regular push notification is sent.
-- you haven't answered a call. In this case, a missed call notification is sent (regular push notification).
 
 To receive push notifications from Stream Video, you'll need to:
 

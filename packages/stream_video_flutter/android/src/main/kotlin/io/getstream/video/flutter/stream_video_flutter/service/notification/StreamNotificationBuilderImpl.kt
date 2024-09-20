@@ -145,7 +145,8 @@ internal class StreamNotificationBuilderImpl(
         if (!contentText.isNullOrEmpty()) {
             setContentText(contentText)
         }
-        priority = NotificationCompat.PRIORITY_LOW
+
+        priority = NotificationCompat.PRIORITY_MAX
 
         addAction(actionBuilder.createCancelAction(getNotificationId(), payload.callCid, type))
 
@@ -178,7 +179,7 @@ internal class StreamNotificationBuilderImpl(
         setSilent(true)
         setSound(null)
 
-        priority = NotificationCompat.PRIORITY_LOW
+        priority = NotificationCompat.PRIORITY_MAX
 
         val notificationLargeLayout = NotificationLayout(
             context, R.layout.stream_notification_large,
@@ -224,11 +225,14 @@ internal class StreamNotificationBuilderImpl(
     @RequiresApi(Build.VERSION_CODES.O)
     private fun getDefaultNotificationChannel(context: Context): (() -> NotificationChannel) {
         return {
-            NotificationChannel(
+            val channel = NotificationChannel(
                 context.getString(R.string.stream_call_notification_channel_id),
                 context.getString(R.string.stream_call_notification_channel_name),
-                NotificationManager.IMPORTANCE_DEFAULT,
+                NotificationManager.IMPORTANCE_HIGH
             )
+
+            channel.lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC
+            channel
         }
     }
 

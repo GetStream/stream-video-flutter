@@ -6,7 +6,6 @@ import '../../../stream_video_flutter.dart';
 List<Widget> defaultCallControlOptions({
   required Call call,
   required CallParticipantState localParticipant,
-  VoidCallback? onLeaveCallTap,
 }) {
   return [
     ToggleSpeakerphoneOption(call: call),

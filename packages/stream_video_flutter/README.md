@@ -60,12 +60,7 @@ Here are some of the features we support:
 | Push notification providers support                  | ✅   | ✅       |                                                |
 | Call recording                                       | ✅   | ✅       |                                                |
 | Broadcasting to HLS                                  | ✅   | ✅       |                                                |
-| Picture in picture support                           | ❌   | ✅       | In the Roadmap, part of the next major release |
-
-
-### Known Issues
-
-* Missed calls, not delivered when device was offline, might ring on Android instead of showing missed call notification
+| Picture in picture support                           | ✅   | ✅       |                                                |
 
 
 ## 🗺️ Roadmap

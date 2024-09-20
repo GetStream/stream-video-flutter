@@ -1,13 +1,31 @@
 ---
 slug: /client-and-authentication
 title: Client and Authentication
+sidebar_position: 1
 ---
 
-### Client Overview
+import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
 
 `StreamVideo` is the main class used for creating class, performing authentication and listening to core events dispatched by Stream’s servers.
 
-Before users are able to join or create a call, the client must first be configured with an `apiKey` obtained from the Stream Dashboard for the given project.
+Before joining a call, it is necessary to set up the video client. Here's a basic example:
+
+ ```dart
+ final client = StreamVideo(
+   'REPLACE_WITH_API_KEY',
+   user: User.regular(
+     userId: 'REPLACE_WITH_USER_ID',
+     name: 'John Doe',
+   ),
+   userToken: 'REPLACE_WITH_TOKEN',
+ );
+ ```
+
+* The API Key can be found in your Stream dashboard.
+* The User can be either authenticated, anonymous or guest.
+* Note: You can store custom data on the user object, if required.
+
+`StreamVideo` is the main class used for creating class, performing authentication and listening to core events dispatched by Stream’s servers.
 
 The initialization constructor for `StreamVideo` also exposes many customization options which can be overridden based on the project needs such as the logging level, SDP policy, retry policy, etc.
 
@@ -37,10 +55,11 @@ factory StreamVideo(
 });
 ```
 
-The SDK tries to connect automatically by default. You can set `autoConnect` to false in `StreamVideoOptions`
-to change this behaviour.
+:::note
+The SDK tries to connect to Stream's backend automatically by default. You can set `autoConnect` to false in `StreamVideoOptions` to change this behaviour.
+:::
 
-To connect later, you can use the `connect()` method:
+If you choose to connect later, you can use the `connect()` method to connect to Stream Video:
 
 ```dart
     StreamVideo.instance.connect();
@@ -60,18 +79,22 @@ or use the `includeUserDetails` parameter when using the `connect()` method:
 
 All tokens must be generated via a backend SDK and cannot be created from a frontend client. This step is typically included whenever a new user is registered on your backend.
 
-There are a few ways in which users can connect using our SDK. We support both long lived tokens and dynamic tokens via two parameters accessible on the `StreamVideo` class:
+Here's a valid user and token to help you get started on the client side, before integrating with your backend API.
+
+<TokenSnippet sampleApp='meeting' displayStyle='credentials'/>
+
+There are a few ways in which users can connect using our SDK.
+We support both long lived tokens and dynamic tokens via two parameters accessible on the `StreamVideo` class:
 
 - `StreamVideo(apiKey, user: User, userToken: String)`
 - `StreamVideo(apiKey, user: User, tokenLoader: TokenLoader)`
 
-For situations where your backend does not require tokens to be refreshed, the first variant can be used by simply passing in a `User` object and the `userToken` as a `String`.
-
-*Dynamic tokens*
+For situations where your backend does not require tokens to be refreshed, the first variant of the two above can be used by simply passing in a `User` object and the `userToken` as a `String`.
 
 Using the second variant, a Token Loader can be used to dynamically load a token from a server. On expiration, the SDK automatically calls the Token Loader to obtain a new token.
 
-As long as your handler returns a `String` it will satisfy the contract of `TokenLoader`
+As long as your handler returns a `String` it will satisfy the contract of `TokenLoader`.
+Here is an example of how you could write the token loader
 
 ```dart
 Future<String> _tokenLoader(String userId) async {
@@ -95,7 +118,7 @@ StreamVideo(
 );
 ```
 
-### Anonymous users
+### Anonymous / Guest users
 
 For use-cases like live streaming or guest meeting, you may want to allow users to join a call without creating an account.
 
@@ -113,6 +136,7 @@ final result = await client.connect();
 final userToken = result.getDataOrNull();
 final userInfo = client.currentUser;
 ```
+
 :::note
 `userInfo.id` will be slightly different from what you passed in. This is because the SDK will generate a unique ID for the user.
 Please use the generated ID across your app.

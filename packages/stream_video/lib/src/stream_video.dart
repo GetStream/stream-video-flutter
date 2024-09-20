@@ -686,7 +686,10 @@ class StreamVideo extends Disposable {
   /// Handle incoming VoIP push notifications.
   ///
   /// Returns `true` if the notification was handled, `false` otherwise.
-  Future<bool> handleVoipPushNotification(Map<String, dynamic> payload) async {
+  Future<bool> handleVoipPushNotification(
+    Map<String, dynamic> payload, {
+    bool handleMissedCall = true,
+  }) async {
     _logger.d(() => '[handleVoipPushNotification] payload: $payload');
     final manager = pushNotificationManager;
     if (manager == null) {
@@ -716,7 +719,7 @@ class StreamVideo extends Disposable {
     final hasVideo = payload['video'] as String?;
 
     final type = payload['type'] as String?;
-    if (type == 'call.missed') {
+    if (handleMissedCall && type == 'call.missed') {
       unawaited(
         manager.showMissedCall(
           uuid: callUUID,

@@ -246,7 +246,7 @@ class _CallScreenState extends State<CallScreen> {
                         call: call,
                         localParticipant: localParticipant,
                         screenShareConstraints: const ScreenShareConstraints(
-                          useiOSBroadcastExtension: false,
+                          useiOSBroadcastExtension: true,
                         ),
                         enabledScreenShareBackgroundColor:
                             AppColorPalette.primary,

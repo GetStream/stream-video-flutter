@@ -1,3 +1,40 @@
+## 0.5.4
+
+🐞 Fixed
+* Fixed an issue where active call foreground service was recreated after being stopped when ringing call was declined and in-app incoming screen was displayed.
+
+🚧 Breaking changes
+* The regular push notification handling has been removed from iOS, providing more control over the implementation. VoIP push notifications will continue to be handled as before. For more details, refer to the documentation.
+
+* Dependency updates
+    * **Flutter SDK** constraint updated to >=3.22.0 (**Dart SDK** to >=3.4.0 <4.0.0)
+    * **internet_connection_checker** updated from ^1.0.0+1 to ^2.0.0
+    * **rxdart** updated from ^0.27.7 to ^0.28.0
+    * **web** updated from ^0.5.1 to ^1.0.0
+    * **web_socket_channel** updated from ^2.4.0 to ^3.0.1
+    * **firebase_core updated** from ^2.15.1 to ^3.4.0
+    * **firebase_messaging** updated from ^14.5.0 to ^15.1.1
+    * **share_plus** updated from ^7.1.0 to ^10.0.2
+    * **json_annotation** updated from ^4.8.0 to ^4.9.0
+
+## 0.5.3
+
+🐞 Fixed
+* Improved video quality for a smoother experience.
+* Resolved an issue where the participant's state showed an empty roles list.
+* Fixed a bug that caused the CallKit ringing notification to continue after a call was accepted.
+
+## 0.5.2
+
+🐞 Fixed
+* Fixed CallKit integration on iOS when app is in a terminated state. It now correctly openes the app when the call is accepted.
+* Fixed `onLeaveCallTap` callback in `StreamCallContent`. It's now correctly handled.
+* (Android) Prevented the app from crashing when microphone permission is not granted and actove call foreground services is started. The service will now not start if no permission is granted.
+* (Android) Marked the active call notification channel's lockscreen visibility as public to ensure it shows when the Android device is locked.
+
+🔄 Changed
+* `SortParam` changed to `SortParamRequest` in `queryMembers()` method inside `Call` and `StreamVideo` class
+
 ## 0.5.1
 
 ✅ Added
@@ -208,7 +245,7 @@ Bug fixes
 🐞 Fixed
 
 * Various fixes to call ringing and push notifications.
-- Fixes call ringing cancellation when app is terminated on iOS (requires additional setup - check Step 6 of the [APNS integration](https://getstream.io/video/docs/flutter/advanced/adding_ringing_and_callkit/#integrating-apns-for-ios)) in our documentation.
+- Fixes call ringing cancellation when app is terminated on iOS (requires additional setup - check Step 6 of the [APNS integration](https://getstream.io/video/docs/flutter/advanced/ringing_and_callkit/#integrating-apns-for-ios)) in our documentation.
 - Fixes late push notification handling on Android, where already ended call was ringing if the device was offline and the push was delivered with a delay.
 - Fixes call ringing cancellation when caller timed out while calling
 * Fixed action tap callback on Android call notification.
