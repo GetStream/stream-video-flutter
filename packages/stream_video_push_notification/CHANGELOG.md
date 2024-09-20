@@ -1,3 +1,11 @@
+## 0.5.4
+
+* Dependency updates
+    * **Flutter SDK** constraint updated to >=3.22.0 (**Dart SDK** to >=3.4.0 <4.0.0)
+    * **json_annotation** updated from ^4.8.0 to ^4.9.0
+    * **firebase_core updated** from ^2.15.1 to ^3.4.0
+    * **firebase_messaging** updated from ^14.5.0 to ^15.1.1
+
 ## 0.5.3
 * Sync version with `stream_video_flutter` 0.5.3
 

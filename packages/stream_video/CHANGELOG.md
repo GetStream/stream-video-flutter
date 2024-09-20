@@ -6,6 +6,13 @@
 🚧 Breaking changes
 * The regular push notification handling has been removed from iOS, providing more control over the implementation. VoIP push notifications will continue to be handled as before. For more details, refer to the documentation.
 
+* Dependency updates
+    * Flutter SDK constraint updated to >=3.22.0 (Dart SDK to >=3.4.0 <4.0.0)
+    * `internet_connection_checker` updated from ^1.0.0+1 to ^2.0.0
+    * `rxdart` updated from ^0.27.7 to ^0.28.0
+    * `web` updated from ^0.5.1 to ^1.0.0
+    * `web_socket_channel` updated from ^2.4.0 to ^3.0.1
+
 ## 0.5.3
 
 🐞 Fixed
