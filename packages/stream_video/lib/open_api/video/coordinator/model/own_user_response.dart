@@ -37,6 +37,7 @@ class OwnUserResponse {
     this.teams = const [],
     required this.totalUnreadCount,
     required this.unreadChannels,
+    required this.unreadCount,
     required this.unreadThreads,
     required this.updatedAt,
   });
@@ -137,6 +138,8 @@ class OwnUserResponse {
 
   int unreadChannels;
 
+  int unreadCount;
+
   int unreadThreads;
 
   DateTime updatedAt;
@@ -167,6 +170,7 @@ class OwnUserResponse {
     _deepEquality.equals(other.teams, teams) &&
     other.totalUnreadCount == totalUnreadCount &&
     other.unreadChannels == unreadChannels &&
+    other.unreadCount == unreadCount &&
     other.unreadThreads == unreadThreads &&
     other.updatedAt == updatedAt;
 
@@ -197,11 +201,12 @@ class OwnUserResponse {
     (teams.hashCode) +
     (totalUnreadCount.hashCode) +
     (unreadChannels.hashCode) +
+    (unreadCount.hashCode) +
     (unreadThreads.hashCode) +
     (updatedAt.hashCode);
 
   @override
-  String toString() => 'OwnUserResponse[banned=$banned, blockedUserIds=$blockedUserIds, channelMutes=$channelMutes, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, devices=$devices, id=$id, image=$image, invisible=$invisible, language=$language, lastActive=$lastActive, latestHiddenChannels=$latestHiddenChannels, mutes=$mutes, name=$name, online=$online, privacySettings=$privacySettings, pushNotifications=$pushNotifications, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, totalUnreadCount=$totalUnreadCount, unreadChannels=$unreadChannels, unreadThreads=$unreadThreads, updatedAt=$updatedAt]';
+  String toString() => 'OwnUserResponse[banned=$banned, blockedUserIds=$blockedUserIds, channelMutes=$channelMutes, createdAt=$createdAt, custom=$custom, deactivatedAt=$deactivatedAt, deletedAt=$deletedAt, devices=$devices, id=$id, image=$image, invisible=$invisible, language=$language, lastActive=$lastActive, latestHiddenChannels=$latestHiddenChannels, mutes=$mutes, name=$name, online=$online, privacySettings=$privacySettings, pushNotifications=$pushNotifications, revokeTokensIssuedBefore=$revokeTokensIssuedBefore, role=$role, teams=$teams, totalUnreadCount=$totalUnreadCount, unreadChannels=$unreadChannels, unreadCount=$unreadCount, unreadThreads=$unreadThreads, updatedAt=$updatedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -261,6 +266,7 @@ class OwnUserResponse {
       json[r'teams'] = this.teams;
       json[r'total_unread_count'] = this.totalUnreadCount;
       json[r'unread_channels'] = this.unreadChannels;
+      json[r'unread_count'] = this.unreadCount;
       json[r'unread_threads'] = this.unreadThreads;
       json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
     return json;
@@ -315,6 +321,7 @@ class OwnUserResponse {
             : const [],
         totalUnreadCount: mapValueOfType<int>(json, r'total_unread_count')!,
         unreadChannels: mapValueOfType<int>(json, r'unread_channels')!,
+        unreadCount: mapValueOfType<int>(json, r'unread_count')!,
         unreadThreads: mapValueOfType<int>(json, r'unread_threads')!,
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
       );
@@ -378,6 +385,7 @@ class OwnUserResponse {
     'teams',
     'total_unread_count',
     'unread_channels',
+    'unread_count',
     'unread_threads',
     'updated_at',
   };

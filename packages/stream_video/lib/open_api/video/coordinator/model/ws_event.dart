@@ -29,6 +29,8 @@ class WSEvent {
     this.reason,
     required this.video,
     required this.name,
+    required this.anonymousParticipantCount,
+    this.participantsCountByRole = const {},
     required this.participant,
     required this.callTranscription,
     required this.fromUserId,
@@ -38,7 +40,6 @@ class WSEvent {
     required this.me,
     required this.error,
     this.custom = const {},
-    required this.cid,
     this.item,
     this.message,
     this.objectId,
@@ -46,6 +47,7 @@ class WSEvent {
     this.ownCapabilities = const [],
     required this.channelId,
     required this.channelType,
+    required this.cid,
     required this.createdBy,
     this.expiration,
     required this.shadow,
@@ -102,7 +104,12 @@ class WSEvent {
 
   bool video;
 
+  /// Name of the given RTMP broadcast
   String name;
+
+  int anonymousParticipantCount;
+
+  Map<String, int> participantsCountByRole;
 
   CallParticipantResponse participant;
 
@@ -116,14 +123,12 @@ class WSEvent {
 
   String connectionId;
 
-  OwnUser me;
+  OwnUserResponse me;
 
   APIError error;
 
   /// Custom data for this object
   Map<String, Object> custom;
-
-  String cid;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -158,6 +163,8 @@ class WSEvent {
   String channelId;
 
   String channelType;
+
+  String cid;
 
   UserObject createdBy;
 
@@ -213,6 +220,8 @@ class WSEvent {
     other.reason == reason &&
     other.video == video &&
     other.name == name &&
+    other.anonymousParticipantCount == anonymousParticipantCount &&
+    _deepEquality.equals(other.participantsCountByRole, participantsCountByRole) &&
     other.participant == participant &&
     other.callTranscription == callTranscription &&
     other.fromUserId == fromUserId &&
@@ -222,7 +231,6 @@ class WSEvent {
     other.me == me &&
     other.error == error &&
     _deepEquality.equals(other.custom, custom) &&
-    other.cid == cid &&
     other.item == item &&
     other.message == message &&
     other.objectId == objectId &&
@@ -230,6 +238,7 @@ class WSEvent {
     _deepEquality.equals(other.ownCapabilities, ownCapabilities) &&
     other.channelId == channelId &&
     other.channelType == channelType &&
+    other.cid == cid &&
     other.createdBy == createdBy &&
     other.expiration == expiration &&
     other.shadow == shadow &&
@@ -259,6 +268,8 @@ class WSEvent {
     (reason == null ? 0 : reason!.hashCode) +
     (video.hashCode) +
     (name.hashCode) +
+    (anonymousParticipantCount.hashCode) +
+    (participantsCountByRole.hashCode) +
     (participant.hashCode) +
     (callTranscription.hashCode) +
     (fromUserId.hashCode) +
@@ -268,7 +279,6 @@ class WSEvent {
     (me.hashCode) +
     (error.hashCode) +
     (custom.hashCode) +
-    (cid.hashCode) +
     (item == null ? 0 : item!.hashCode) +
     (message == null ? 0 : message!.hashCode) +
     (objectId == null ? 0 : objectId!.hashCode) +
@@ -276,6 +286,7 @@ class WSEvent {
     (ownCapabilities.hashCode) +
     (channelId.hashCode) +
     (channelType.hashCode) +
+    (cid.hashCode) +
     (createdBy.hashCode) +
     (expiration == null ? 0 : expiration!.hashCode) +
     (shadow.hashCode) +
@@ -287,7 +298,7 @@ class WSEvent {
     (targetUsers.hashCode);
 
   @override
-  String toString() => 'WSEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, call=$call, members=$members, hlsPlaylistUrl=$hlsPlaylistUrl, capabilitiesByRole=$capabilitiesByRole, notifyUser=$notifyUser, sessionId=$sessionId, reaction=$reaction, callRecording=$callRecording, reason=$reason, video=$video, name=$name, participant=$participant, callTranscription=$callTranscription, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, closedCaption=$closedCaption, connectionId=$connectionId, me=$me, error=$error, custom=$custom, cid=$cid, item=$item, message=$message, objectId=$objectId, permissions=$permissions, ownCapabilities=$ownCapabilities, channelId=$channelId, channelType=$channelType, createdBy=$createdBy, expiration=$expiration, shadow=$shadow, team=$team, deleteConversationChannels=$deleteConversationChannels, hardDelete=$hardDelete, markMessagesDeleted=$markMessagesDeleted, targetUser=$targetUser, targetUsers=$targetUsers]';
+  String toString() => 'WSEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, call=$call, members=$members, hlsPlaylistUrl=$hlsPlaylistUrl, capabilitiesByRole=$capabilitiesByRole, notifyUser=$notifyUser, sessionId=$sessionId, reaction=$reaction, callRecording=$callRecording, reason=$reason, video=$video, name=$name, anonymousParticipantCount=$anonymousParticipantCount, participantsCountByRole=$participantsCountByRole, participant=$participant, callTranscription=$callTranscription, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, closedCaption=$closedCaption, connectionId=$connectionId, me=$me, error=$error, custom=$custom, item=$item, message=$message, objectId=$objectId, permissions=$permissions, ownCapabilities=$ownCapabilities, channelId=$channelId, channelType=$channelType, cid=$cid, createdBy=$createdBy, expiration=$expiration, shadow=$shadow, team=$team, deleteConversationChannels=$deleteConversationChannels, hardDelete=$hardDelete, markMessagesDeleted=$markMessagesDeleted, targetUser=$targetUser, targetUsers=$targetUsers]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -315,6 +326,8 @@ class WSEvent {
     }
       json[r'video'] = this.video;
       json[r'name'] = this.name;
+      json[r'anonymous_participant_count'] = this.anonymousParticipantCount;
+      json[r'participants_count_by_role'] = this.participantsCountByRole;
       json[r'participant'] = this.participant;
       json[r'call_transcription'] = this.callTranscription;
       json[r'from_user_id'] = this.fromUserId;
@@ -324,7 +337,6 @@ class WSEvent {
       json[r'me'] = this.me;
       json[r'error'] = this.error;
       json[r'custom'] = this.custom;
-      json[r'cid'] = this.cid;
     if (this.item != null) {
       json[r'item'] = this.item;
     } else {
@@ -344,6 +356,7 @@ class WSEvent {
       json[r'own_capabilities'] = this.ownCapabilities;
       json[r'channel_id'] = this.channelId;
       json[r'channel_type'] = this.channelType;
+      json[r'cid'] = this.cid;
       json[r'created_by'] = this.createdBy;
     if (this.expiration != null) {
       json[r'expiration'] = this.expiration!.toUtc().toIso8601String();
@@ -395,6 +408,7 @@ class WSEvent {
         call: CallResponse.fromJson(json[r'call'])!,
         members: MemberResponse.listFromJson(json[r'members']),
         hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
+        // MANUAL_EDIT: List to List<String>
         capabilitiesByRole: json[r'capabilities_by_role'] == null
           ? const {}
             : mapCastOfType<String, List<String>>(json, r'capabilities_by_role') ?? const {},
@@ -405,6 +419,8 @@ class WSEvent {
         reason: mapValueOfType<String>(json, r'reason'),
         video: mapValueOfType<bool>(json, r'video')!,
         name: mapValueOfType<String>(json, r'name')!,
+        anonymousParticipantCount: mapValueOfType<int>(json, r'anonymous_participant_count')!,
+        participantsCountByRole: mapCastOfType<String, int>(json, r'participants_count_by_role')!,
         participant: CallParticipantResponse.fromJson(json[r'participant'])!,
         callTranscription: CallTranscription.fromJson(json[r'call_transcription'])!,
         fromUserId: mapValueOfType<String>(json, r'from_user_id')!,
@@ -413,10 +429,9 @@ class WSEvent {
             : const [],
         closedCaption: CallClosedCaption.fromJson(json[r'closed_caption'])!,
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
-        me: OwnUser.fromJson(json[r'me'])!,
+        me: OwnUserResponse.fromJson(json[r'me'])!,
         error: APIError.fromJson(json[r'error'])!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
-        cid: mapValueOfType<String>(json, r'cid')!,
         item: ReviewQueueItem.fromJson(json[r'item']),
         message: Message.fromJson(json[r'message']),
         objectId: mapValueOfType<String>(json, r'object_id'),
@@ -426,6 +441,7 @@ class WSEvent {
         ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
         channelId: mapValueOfType<String>(json, r'channel_id')!,
         channelType: mapValueOfType<String>(json, r'channel_type')!,
+        cid: mapValueOfType<String>(json, r'cid')!,
         createdBy: UserObject.fromJson(json[r'created_by'])!,
         expiration: mapDateTime(json, r'expiration', r''),
         shadow: mapValueOfType<bool>(json, r'shadow')!,
@@ -498,6 +514,8 @@ class WSEvent {
     'call_recording',
     'video',
     'name',
+    'anonymous_participant_count',
+    'participants_count_by_role',
     'participant',
     'call_transcription',
     'from_user_id',
@@ -507,11 +525,11 @@ class WSEvent {
     'me',
     'error',
     'custom',
-    'cid',
     'permissions',
     'own_capabilities',
     'channel_id',
     'channel_type',
+    'cid',
     'created_by',
     'shadow',
     'delete_conversation_channels',

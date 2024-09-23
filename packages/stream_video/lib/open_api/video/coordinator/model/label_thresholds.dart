@@ -17,8 +17,6 @@ class LabelThresholds {
     this.flag,
   });
 
-  /// Threshold for automatic message block
-  ///
   /// Minimum value: 0
   /// Maximum value: 1
   ///
@@ -29,8 +27,6 @@ class LabelThresholds {
   ///
   double? block;
 
-  /// Threshold for automatic message flag
-  ///
   /// Minimum value: 0
   /// Maximum value: 1
   ///

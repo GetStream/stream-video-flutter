@@ -13,14 +13,11 @@ part of openapi.api;
 class ModerationPayload {
   /// Returns a new [ModerationPayload] instance.
   ModerationPayload({
-    required this.createdAt,
     this.custom = const {},
     this.images = const [],
     this.texts = const [],
     this.videos = const [],
   });
-
-  DateTime createdAt;
 
   Map<String, Object> custom;
 
@@ -32,7 +29,6 @@ class ModerationPayload {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is ModerationPayload &&
-    other.createdAt == createdAt &&
     _deepEquality.equals(other.custom, custom) &&
     _deepEquality.equals(other.images, images) &&
     _deepEquality.equals(other.texts, texts) &&
@@ -41,18 +37,16 @@ class ModerationPayload {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (createdAt.hashCode) +
     (custom.hashCode) +
     (images.hashCode) +
     (texts.hashCode) +
     (videos.hashCode);
 
   @override
-  String toString() => 'ModerationPayload[createdAt=$createdAt, custom=$custom, images=$images, texts=$texts, videos=$videos]';
+  String toString() => 'ModerationPayload[custom=$custom, images=$images, texts=$texts, videos=$videos]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
       json[r'custom'] = this.custom;
       json[r'images'] = this.images;
       json[r'texts'] = this.texts;
@@ -79,7 +73,6 @@ class ModerationPayload {
       }());
 
       return ModerationPayload(
-        createdAt: mapDateTime(json, r'created_at', r'')!,
         custom: mapCastOfType<String, Object>(json, r'custom') ?? const {},
         images: json[r'images'] is Iterable
             ? (json[r'images'] as Iterable).cast<String>().toList(growable: false)
@@ -137,7 +130,6 @@ class ModerationPayload {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'created_at',
   };
 }
 
