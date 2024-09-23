@@ -13,112 +13,27 @@ part of openapi.api;
 class StartRTMPBroadcastsRequest {
   /// Returns a new [StartRTMPBroadcastsRequest] instance.
   StartRTMPBroadcastsRequest({
-    this.layout,
-    required this.name,
-    this.password,
-    this.quality,
-    this.streamKey,
-    required this.streamUrl,
-    this.username,
+    this.broadcasts = const [],
   });
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  LayoutSettings? layout;
-
-  String name;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? password;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? quality;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? streamKey;
-
-  String streamUrl;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? username;
+  /// List of broadcasts to start
+  List<RTMPBroadcastRequest> broadcasts;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is StartRTMPBroadcastsRequest &&
-    other.layout == layout &&
-    other.name == name &&
-    other.password == password &&
-    other.quality == quality &&
-    other.streamKey == streamKey &&
-    other.streamUrl == streamUrl &&
-    other.username == username;
+    _deepEquality.equals(other.broadcasts, broadcasts);
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (layout == null ? 0 : layout!.hashCode) +
-    (name.hashCode) +
-    (password == null ? 0 : password!.hashCode) +
-    (quality == null ? 0 : quality!.hashCode) +
-    (streamKey == null ? 0 : streamKey!.hashCode) +
-    (streamUrl.hashCode) +
-    (username == null ? 0 : username!.hashCode);
+    (broadcasts.hashCode);
 
   @override
-  String toString() => 'StartRTMPBroadcastsRequest[layout=$layout, name=$name, password=$password, quality=$quality, streamKey=$streamKey, streamUrl=$streamUrl, username=$username]';
+  String toString() => 'StartRTMPBroadcastsRequest[broadcasts=$broadcasts]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.layout != null) {
-      json[r'layout'] = this.layout;
-    } else {
-      json[r'layout'] = null;
-    }
-      json[r'name'] = this.name;
-    if (this.password != null) {
-      json[r'password'] = this.password;
-    } else {
-      json[r'password'] = null;
-    }
-    if (this.quality != null) {
-      json[r'quality'] = this.quality;
-    } else {
-      json[r'quality'] = null;
-    }
-    if (this.streamKey != null) {
-      json[r'stream_key'] = this.streamKey;
-    } else {
-      json[r'stream_key'] = null;
-    }
-      json[r'stream_url'] = this.streamUrl;
-    if (this.username != null) {
-      json[r'username'] = this.username;
-    } else {
-      json[r'username'] = null;
-    }
+      json[r'broadcasts'] = this.broadcasts;
     return json;
   }
 
@@ -141,13 +56,7 @@ class StartRTMPBroadcastsRequest {
       }());
 
       return StartRTMPBroadcastsRequest(
-        layout: LayoutSettings.fromJson(json[r'layout']),
-        name: mapValueOfType<String>(json, r'name')!,
-        password: mapValueOfType<String>(json, r'password'),
-        quality: mapValueOfType<String>(json, r'quality'),
-        streamKey: mapValueOfType<String>(json, r'stream_key'),
-        streamUrl: mapValueOfType<String>(json, r'stream_url')!,
-        username: mapValueOfType<String>(json, r'username'),
+        broadcasts: RTMPBroadcastRequest.listFromJson(json[r'broadcasts']),
       );
     }
     return null;
@@ -195,8 +104,7 @@ class StartRTMPBroadcastsRequest {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    'name',
-    'stream_url',
+    'broadcasts',
   };
 }
 

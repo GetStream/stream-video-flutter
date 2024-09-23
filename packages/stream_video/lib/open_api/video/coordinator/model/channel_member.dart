@@ -17,6 +17,7 @@ class ChannelMember {
     required this.banned,
     required this.channelRole,
     required this.createdAt,
+    this.custom = const {},
     this.deletedAt,
     this.inviteAcceptedAt,
     this.inviteRejectedAt,
@@ -47,6 +48,8 @@ class ChannelMember {
 
   /// Date/time of creation
   DateTime createdAt;
+
+  Map<String, Object> custom;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -130,6 +133,7 @@ class ChannelMember {
     other.banned == banned &&
     other.channelRole == channelRole &&
     other.createdAt == createdAt &&
+    _deepEquality.equals(other.custom, custom) &&
     other.deletedAt == deletedAt &&
     other.inviteAcceptedAt == inviteAcceptedAt &&
     other.inviteRejectedAt == inviteRejectedAt &&
@@ -149,6 +153,7 @@ class ChannelMember {
     (banned.hashCode) +
     (channelRole.hashCode) +
     (createdAt.hashCode) +
+    (custom.hashCode) +
     (deletedAt == null ? 0 : deletedAt!.hashCode) +
     (inviteAcceptedAt == null ? 0 : inviteAcceptedAt!.hashCode) +
     (inviteRejectedAt == null ? 0 : inviteRejectedAt!.hashCode) +
@@ -162,7 +167,7 @@ class ChannelMember {
     (userId == null ? 0 : userId!.hashCode);
 
   @override
-  String toString() => 'ChannelMember[banExpires=$banExpires, banned=$banned, channelRole=$channelRole, createdAt=$createdAt, deletedAt=$deletedAt, inviteAcceptedAt=$inviteAcceptedAt, inviteRejectedAt=$inviteRejectedAt, invited=$invited, isModerator=$isModerator, notificationsMuted=$notificationsMuted, shadowBanned=$shadowBanned, status=$status, updatedAt=$updatedAt, user=$user, userId=$userId]';
+  String toString() => 'ChannelMember[banExpires=$banExpires, banned=$banned, channelRole=$channelRole, createdAt=$createdAt, custom=$custom, deletedAt=$deletedAt, inviteAcceptedAt=$inviteAcceptedAt, inviteRejectedAt=$inviteRejectedAt, invited=$invited, isModerator=$isModerator, notificationsMuted=$notificationsMuted, shadowBanned=$shadowBanned, status=$status, updatedAt=$updatedAt, user=$user, userId=$userId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -174,6 +179,7 @@ class ChannelMember {
       json[r'banned'] = this.banned;
       json[r'channel_role'] = this.channelRole;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+      json[r'custom'] = this.custom;
     if (this.deletedAt != null) {
       json[r'deleted_at'] = this.deletedAt!.toUtc().toIso8601String();
     } else {
@@ -243,6 +249,7 @@ class ChannelMember {
         banned: mapValueOfType<bool>(json, r'banned')!,
         channelRole: mapValueOfType<String>(json, r'channel_role')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
+        custom: mapCastOfType<String, Object>(json, r'custom')!,
         deletedAt: mapDateTime(json, r'deleted_at', r''),
         inviteAcceptedAt: mapDateTime(json, r'invite_accepted_at', r''),
         inviteRejectedAt: mapDateTime(json, r'invite_rejected_at', r''),
@@ -304,6 +311,7 @@ class ChannelMember {
     'banned',
     'channel_role',
     'created_at',
+    'custom',
     'notifications_muted',
     'shadow_banned',
     'updated_at',

@@ -13,14 +13,21 @@ part of openapi.api;
 class HealthCheckEvent {
   /// Returns a new [HealthCheckEvent] instance.
   HealthCheckEvent({
-    required this.cid,
+    this.cid,
     required this.connectionId,
     required this.createdAt,
     this.me,
+    this.receivedAt,
     this.type = 'health.check',
   });
 
-  String cid;
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? cid;
 
   String connectionId;
 
@@ -32,7 +39,15 @@ class HealthCheckEvent {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  OwnUser? me;
+  OwnUserResponse? me;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? receivedAt;
 
   String type;
 
@@ -42,29 +57,40 @@ class HealthCheckEvent {
     other.connectionId == connectionId &&
     other.createdAt == createdAt &&
     other.me == me &&
+    other.receivedAt == receivedAt &&
     other.type == type;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (cid.hashCode) +
+    (cid == null ? 0 : cid!.hashCode) +
     (connectionId.hashCode) +
     (createdAt.hashCode) +
     (me == null ? 0 : me!.hashCode) +
+    (receivedAt == null ? 0 : receivedAt!.hashCode) +
     (type.hashCode);
 
   @override
-  String toString() => 'HealthCheckEvent[cid=$cid, connectionId=$connectionId, createdAt=$createdAt, me=$me, type=$type]';
+  String toString() => 'HealthCheckEvent[cid=$cid, connectionId=$connectionId, createdAt=$createdAt, me=$me, receivedAt=$receivedAt, type=$type]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
+    if (this.cid != null) {
       json[r'cid'] = this.cid;
+    } else {
+      json[r'cid'] = null;
+    }
       json[r'connection_id'] = this.connectionId;
       json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
     if (this.me != null) {
       json[r'me'] = this.me;
     } else {
       json[r'me'] = null;
+    }
+    if (this.receivedAt != null) {
+      json[r'received_at'] = this.receivedAt!.toUtc().toIso8601String();
+    } else {
+      json[r'received_at'] = null;
     }
       json[r'type'] = this.type;
     return json;
@@ -89,10 +115,11 @@ class HealthCheckEvent {
       }());
 
       return HealthCheckEvent(
-        cid: mapValueOfType<String>(json, r'cid') ?? '',
+        cid: mapValueOfType<String>(json, r'cid'),
         connectionId: mapValueOfType<String>(json, r'connection_id')!,
         createdAt: mapDateTime(json, r'created_at', r'')!,
-        me: OwnUser.fromJson(json[r'me']),
+        me: OwnUserResponse.fromJson(json[r'me']),
+        receivedAt: mapDateTime(json, r'received_at', r''),
         type: mapValueOfType<String>(json, r'type')!,
       );
     }
@@ -141,8 +168,6 @@ class HealthCheckEvent {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
-    // This was part of open api gen but at the moment of writing does not show up in the response.
-    //'cid',
     'connection_id',
     'created_at',
     'type',

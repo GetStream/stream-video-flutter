@@ -14,14 +14,16 @@ export 'open_api/video/coordinator/api.dart'
         Message,
         ModerationCustomActionEvent,
         ModerationFlaggedEvent,
-        ModerationMarkSafeEvent,
+        ModerationMarkReviewedEvent,
         ModerationPayload,
         Poll,
         PollOption,
         PollVote,
         Reaction,
         ReactionGroupResponse,
-        ReviewQueueItem;
+        ReviewQueueItem,
+        TypingIndicators,
+        TypingIndicatorsResponse;
 export 'src/call/call.dart';
 export 'src/call/call_connect_options.dart';
 export 'src/call/call_events.dart';

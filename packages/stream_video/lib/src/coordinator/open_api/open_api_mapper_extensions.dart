@@ -122,6 +122,16 @@ extension WebsocketEventMapperExt on OpenApiEvent {
           user: event.participant.user.toCallUser(),
           participant: event.participant.toCallParticipant(),
         );
+      case EventType.callSessionParticipantCountUpdated:
+        final event = callSessionParticipantCountUpdated!;
+
+        return CoordinatorCallSessionParticipantCountUpdatedEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          sessionId: event.sessionId,
+          anonymousParticipantCount: event.anonymousParticipantCount,
+          participantsCountByRole: event.participantsCountByRole,
+        );
       case EventType.callPermissionRequest:
         final event = callPermissionRequest!;
         return CoordinatorCallPermissionRequestEvent(
@@ -232,6 +242,16 @@ extension WebsocketEventMapperExt on OpenApiEvent {
         return CoordinatorCallTranscriptionFailedEvent(
           callCid: StreamCallCid(cid: event.callCid),
           createdAt: event.createdAt,
+        );
+      case EventType.callClosedCaption:
+        final event = callClosedCaption!;
+        return CoordinatorCallClosedCaptionEvent(
+          callCid: StreamCallCid(cid: event.callCid),
+          createdAt: event.createdAt,
+          startTime: event.closedCaption.startTime,
+          endTime: event.closedCaption.endTime,
+          speakerId: event.closedCaption.speakerId,
+          text: event.closedCaption.text,
         );
       case EventType.callNotification:
         // TODO: Handle event
