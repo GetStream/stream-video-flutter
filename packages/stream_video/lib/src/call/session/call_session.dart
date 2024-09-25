@@ -376,6 +376,7 @@ class CallSession extends Disposable {
 
   Future<void> _onSfuEvent(SfuEvent event) async {
     _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
+
     if (event is SfuSubscriberOfferEvent) {
       await _onSubscriberOffer(event);
     } else if (event is SfuIceTrickleEvent) {
@@ -611,6 +612,10 @@ class CallSession extends Disposable {
       if (pc.pc.connectionState !=
           RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
         _peerConnectionCheckTimer = null;
+        _logger.d(
+          () =>
+              '[_onSubsciberDisconnectedOrFaild] PC not connected after timeout, performing full reconnect',
+        );
         onFullReconnectNeeded();
       }
     });
@@ -639,6 +644,10 @@ class CallSession extends Disposable {
       if (pc.pc.connectionState !=
           RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
         _peerConnectionCheckTimer = null;
+        _logger.d(
+          () =>
+              '[_onPublisherDisconnectedOrFailed] PC not connected after timeout, performing full reconnect',
+        );
         onFullReconnectNeeded();
       }
     });
