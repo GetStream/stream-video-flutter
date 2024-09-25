@@ -6,9 +6,9 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 import '../../stream_video.dart';
 import '../../version.g.dart';
@@ -881,23 +881,23 @@ class Call {
       tryFastReconnect = false;
     });
 
-    final connectionStatus = await InternetConnectionChecker.createInstance(
+    final connectionStatus = await InternetConnection.createInstance(
       checkInterval: const Duration(seconds: 1),
     )
         .onStatusChange
-        .firstWhere((status) => status == InternetConnectionStatus.connected)
+        .firstWhere((status) => status == InternetStatus.connected)
         .timeout(
       _reconnectTimeout,
       onTimeout: () {
-        _logger.w(() => '[fastReconnect] timeout');
-        return InternetConnectionStatus.disconnected;
+        _logger.w(() => '[reconnect] timeout');
+        return InternetStatus.disconnected;
       },
     );
 
     timer.cancel();
 
     //no internet connection after _reconnectTimeout, leave the call
-    if (connectionStatus != InternetConnectionStatus.connected) {
+    if (connectionStatus != InternetStatus.connected) {
       await leave();
       return;
     }

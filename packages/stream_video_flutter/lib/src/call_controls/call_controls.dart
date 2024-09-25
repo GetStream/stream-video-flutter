@@ -67,6 +67,7 @@ class StreamCallControls extends StatelessWidget {
       spacing: spacing,
       padding: padding,
       borderRadius: borderRadius,
+      backgroundColor: backgroundColor,
     );
   }
 }
