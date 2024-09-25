@@ -14,7 +14,6 @@ class RTMPSettingsRequest {
   /// Returns a new [RTMPSettingsRequest] instance.
   RTMPSettingsRequest({
     this.enabled,
-    this.maxDurationMinutes,
     this.quality,
   });
 
@@ -26,33 +25,22 @@ class RTMPSettingsRequest {
   ///
   bool? enabled;
 
-  /// Minimum value: 1
-  /// Maximum value: 480
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  int? maxDurationMinutes;
-
+  /// Resolution to set for the RTMP stream
   RTMPSettingsRequestQualityEnum? quality;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is RTMPSettingsRequest &&
     other.enabled == enabled &&
-    other.maxDurationMinutes == maxDurationMinutes &&
     other.quality == quality;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (enabled == null ? 0 : enabled!.hashCode) +
-    (maxDurationMinutes == null ? 0 : maxDurationMinutes!.hashCode) +
     (quality == null ? 0 : quality!.hashCode);
 
   @override
-  String toString() => 'RTMPSettingsRequest[enabled=$enabled, maxDurationMinutes=$maxDurationMinutes, quality=$quality]';
+  String toString() => 'RTMPSettingsRequest[enabled=$enabled, quality=$quality]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -60,11 +48,6 @@ class RTMPSettingsRequest {
       json[r'enabled'] = this.enabled;
     } else {
       json[r'enabled'] = null;
-    }
-    if (this.maxDurationMinutes != null) {
-      json[r'max_duration_minutes'] = this.maxDurationMinutes;
-    } else {
-      json[r'max_duration_minutes'] = null;
     }
     if (this.quality != null) {
       json[r'quality'] = this.quality;
@@ -94,7 +77,6 @@ class RTMPSettingsRequest {
 
       return RTMPSettingsRequest(
         enabled: mapValueOfType<bool>(json, r'enabled'),
-        maxDurationMinutes: mapValueOfType<int>(json, r'max_duration_minutes'),
         quality: RTMPSettingsRequestQualityEnum.fromJson(json[r'quality']),
       );
     }
@@ -146,7 +128,7 @@ class RTMPSettingsRequest {
   };
 }
 
-
+/// Resolution to set for the RTMP stream
 class RTMPSettingsRequestQualityEnum {
   /// Instantiate a new enum with the provided [value].
   const RTMPSettingsRequestQualityEnum._(this.value);

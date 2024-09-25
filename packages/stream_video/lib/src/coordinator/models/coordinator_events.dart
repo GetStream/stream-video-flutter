@@ -580,6 +580,62 @@ class CoordinatorCallSessionParticipantLeftEvent extends CoordinatorCallEvent {
       ];
 }
 
+class CoordinatorCallSessionParticipantCountUpdatedEvent
+    extends CoordinatorCallEvent {
+  const CoordinatorCallSessionParticipantCountUpdatedEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.sessionId,
+    required this.participantsCountByRole,
+    required this.anonymousParticipantCount,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final String sessionId;
+  final Map<String, int> participantsCountByRole;
+  final int anonymousParticipantCount;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        sessionId,
+        participantsCountByRole,
+        anonymousParticipantCount,
+      ];
+}
+
+class CoordinatorCallClosedCaptionEvent extends CoordinatorCallEvent {
+  const CoordinatorCallClosedCaptionEvent({
+    required this.callCid,
+    required this.createdAt,
+    required this.startTime,
+    required this.endTime,
+    required this.speakerId,
+    required this.text,
+  });
+
+  @override
+  final StreamCallCid callCid;
+  final DateTime createdAt;
+  final DateTime startTime;
+  final DateTime endTime;
+  final String speakerId;
+  final String text;
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        createdAt,
+        startTime,
+        endTime,
+        speakerId,
+        text,
+      ];
+}
+
 // Unknown event.
 class CoordinatorUnknownEvent extends CoordinatorEvent {
   const CoordinatorUnknownEvent();

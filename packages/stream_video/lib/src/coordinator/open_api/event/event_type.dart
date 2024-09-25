@@ -16,6 +16,7 @@ enum EventType {
   callSessionEnded('call.session_ended'),
   callSessionParticipantJoined('call.session_participant_joined'),
   callSessionParticipantLeft('call.session_participant_left'),
+  callSessionParticipantCountUpdated('call.session_participant_count_updated'),
   callPermissionRequest('call.permission_request'),
   callPermissionsUpdated('call.permissions_updated'),
   callUserBlocked('call.blocked_user'),
@@ -37,6 +38,7 @@ enum EventType {
   callTranscriptionStarted('call.transcription_started'),
   callTranscriptionStopped('call.transcription_stopped'),
   callTranscriptionFailed('call.transcription_failed'),
+  callClosedCaption('call.closed_caption'),
   custom('custom'),
   unknown('unknown');
 

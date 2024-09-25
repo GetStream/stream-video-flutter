@@ -25,6 +25,7 @@ class OpenApiEvent with EquatableMixin {
     this.callSessionEnded,
     this.callSessionParticipantJoined,
     this.callSessionParticipantLeft,
+    this.callSessionParticipantCountUpdated,
     this.callPermissionRequest,
     this.callPermissionsUpdated,
     this.callUserBlocked,
@@ -45,6 +46,7 @@ class OpenApiEvent with EquatableMixin {
     this.callTranscriptionStarted,
     this.callTranscriptionStopped,
     this.callTranscriptionFailed,
+    this.callClosedCaption,
     this.custom,
     this.unknown,
   });
@@ -95,6 +97,10 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callSessionParticipantLeft:
         final event = open.CallSessionParticipantLeftEvent.fromJson(jsonObj);
         return result.copyWith(callSessionParticipantLeft: event);
+      case EventType.callSessionParticipantCountUpdated:
+        final event =
+            open.CallSessionParticipantCountsUpdatedEvent.fromJson(jsonObj);
+        return result.copyWith(callSessionParticipantCountUpdated: event);
       case EventType.callPermissionRequest:
         final event = open.PermissionRequestEvent.fromJson(jsonObj);
         return result.copyWith(callPermissionRequest: event);
@@ -167,6 +173,9 @@ class OpenApiEvent with EquatableMixin {
       case EventType.callTranscriptionFailed:
         final event = open.CallTranscriptionFailedEvent.fromJson(jsonObj);
         return result.copyWith(callTranscriptionFailed: event);
+      case EventType.callClosedCaption:
+        final event = open.ClosedCaptionEvent.fromJson(jsonObj);
+        return result.copyWith(callClosedCaption: event);
       case EventType.unknown:
         streamLog.e(_tag, () => '[fromJson] unexpected event: $jsonObj');
         return result.copyWith(unknown: jsonObj);
@@ -188,6 +197,8 @@ class OpenApiEvent with EquatableMixin {
   final open.CallSessionEndedEvent? callSessionEnded;
   final open.CallSessionParticipantJoinedEvent? callSessionParticipantJoined;
   final open.CallSessionParticipantLeftEvent? callSessionParticipantLeft;
+  final open.CallSessionParticipantCountsUpdatedEvent?
+      callSessionParticipantCountUpdated;
   final open.PermissionRequestEvent? callPermissionRequest;
   final open.UpdatedCallPermissionsEvent? callPermissionsUpdated;
   final open.BlockedUserEvent? callUserBlocked;
@@ -208,6 +219,7 @@ class OpenApiEvent with EquatableMixin {
   final open.CallTranscriptionStartedEvent? callTranscriptionStarted;
   final open.CallTranscriptionStoppedEvent? callTranscriptionStopped;
   final open.CallTranscriptionFailedEvent? callTranscriptionFailed;
+  final open.ClosedCaptionEvent? callClosedCaption;
   final open.CustomVideoEvent? custom;
   final Object? unknown;
 
@@ -227,6 +239,8 @@ class OpenApiEvent with EquatableMixin {
     open.CallSessionEndedEvent? callSessionEnded,
     open.CallSessionParticipantJoinedEvent? callSessionParticipantJoined,
     open.CallSessionParticipantLeftEvent? callSessionParticipantLeft,
+    open.CallSessionParticipantCountsUpdatedEvent?
+        callSessionParticipantCountUpdated,
     open.PermissionRequestEvent? callPermissionRequest,
     open.UpdatedCallPermissionsEvent? callPermissionsUpdated,
     open.BlockedUserEvent? callUserBlocked,
@@ -247,6 +261,7 @@ class OpenApiEvent with EquatableMixin {
     open.CallTranscriptionStartedEvent? callTranscriptionStarted,
     open.CallTranscriptionStoppedEvent? callTranscriptionStopped,
     open.CallTranscriptionFailedEvent? callTranscriptionFailed,
+    open.ClosedCaptionEvent? callClosedCaption,
     open.CustomVideoEvent? custom,
     Object? unknown,
   }) {
@@ -268,6 +283,8 @@ class OpenApiEvent with EquatableMixin {
           callSessionParticipantJoined ?? this.callSessionParticipantJoined,
       callSessionParticipantLeft:
           callSessionParticipantLeft ?? this.callSessionParticipantLeft,
+      callSessionParticipantCountUpdated: callSessionParticipantCountUpdated ??
+          this.callSessionParticipantCountUpdated,
       callPermissionRequest:
           callPermissionRequest ?? this.callPermissionRequest,
       callPermissionsUpdated:
@@ -296,6 +313,7 @@ class OpenApiEvent with EquatableMixin {
           callTranscriptionStopped ?? this.callTranscriptionStopped,
       callTranscriptionFailed:
           callTranscriptionFailed ?? this.callTranscriptionFailed,
+      callClosedCaption: callClosedCaption ?? this.callClosedCaption,
       custom: custom ?? this.custom,
       unknown: unknown ?? this.unknown,
     );
@@ -321,6 +339,7 @@ class OpenApiEvent with EquatableMixin {
         callSessionEnded,
         callSessionParticipantJoined,
         callSessionParticipantLeft,
+        callSessionParticipantCountUpdated,
         callPermissionRequest,
         callPermissionsUpdated,
         callUserBlocked,
@@ -341,6 +360,7 @@ class OpenApiEvent with EquatableMixin {
         callTranscriptionStarted,
         callTranscriptionStopped,
         callTranscriptionFailed,
+        callClosedCaption,
         custom,
         unknown,
       ];

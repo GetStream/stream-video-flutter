@@ -20,6 +20,7 @@ class APIError {
     this.exceptionFields = const {},
     required this.message,
     required this.moreInfo,
+    this.unrecoverable,
   });
 
   /// Response HTTP status code
@@ -43,6 +44,15 @@ class APIError {
   /// URL with additional information
   String moreInfo;
 
+  /// Flag that indicates if the error is unrecoverable, requests that return unrecoverable errors should not be retried, this error only applies to the request that caused it
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? unrecoverable;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is APIError &&
     other.statusCode == statusCode &&
@@ -51,7 +61,8 @@ class APIError {
     other.duration == duration &&
     _deepEquality.equals(other.exceptionFields, exceptionFields) &&
     other.message == message &&
-    other.moreInfo == moreInfo;
+    other.moreInfo == moreInfo &&
+    other.unrecoverable == unrecoverable;
 
   @override
   int get hashCode =>
@@ -62,10 +73,11 @@ class APIError {
     (duration.hashCode) +
     (exceptionFields.hashCode) +
     (message.hashCode) +
-    (moreInfo.hashCode);
+    (moreInfo.hashCode) +
+    (unrecoverable == null ? 0 : unrecoverable!.hashCode);
 
   @override
-  String toString() => 'APIError[statusCode=$statusCode, code=$code, details=$details, duration=$duration, exceptionFields=$exceptionFields, message=$message, moreInfo=$moreInfo]';
+  String toString() => 'APIError[statusCode=$statusCode, code=$code, details=$details, duration=$duration, exceptionFields=$exceptionFields, message=$message, moreInfo=$moreInfo, unrecoverable=$unrecoverable]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -76,6 +88,11 @@ class APIError {
       json[r'exception_fields'] = this.exceptionFields;
       json[r'message'] = this.message;
       json[r'more_info'] = this.moreInfo;
+    if (this.unrecoverable != null) {
+      json[r'unrecoverable'] = this.unrecoverable;
+    } else {
+      json[r'unrecoverable'] = null;
+    }
     return json;
   }
 
@@ -107,6 +124,7 @@ class APIError {
         exceptionFields: mapCastOfType<String, String>(json, r'exception_fields') ?? const {},
         message: mapValueOfType<String>(json, r'message')!,
         moreInfo: mapValueOfType<String>(json, r'more_info')!,
+        unrecoverable: mapValueOfType<bool>(json, r'unrecoverable'),
       );
     }
     return null;
