@@ -6,9 +6,9 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 import '../../stream_video.dart';
 import '../../version.g.dart';
