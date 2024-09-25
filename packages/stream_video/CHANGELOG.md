@@ -1,3 +1,8 @@
+## Unreleased
+
+🐞 Fixed
+* Migrated from `internet_connection_checker` to `internet_connection_checker_plus` due to [license issues](https://github.com/github/dmca/blob/master/2024/09/2024-09-04-internet-connection-checker-plus.md)
+
 ## 0.5.4
 
 🐞 Fixed
