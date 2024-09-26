@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_links/app_links.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -10,7 +11,6 @@ import 'package:flutter_dogfooding/theme/app_palette.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-import 'package:uni_links/uni_links.dart';
 
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
@@ -177,8 +177,8 @@ class _StreamDogFoodingAppContentState
   Future<void> _observeDeepLinks() async {
     // The app was in the background.
     if (!kIsWeb) {
-      final deepLinkSubscription = uriLinkStream.listen((uri) {
-        if (mounted && uri != null) _handleDeepLink(uri);
+      final deepLinkSubscription = AppLinks().uriLinkStream.listen((uri) {
+        if (mounted) _handleDeepLink(uri);
       });
 
       _compositeSubscription.add(deepLinkSubscription);
@@ -186,7 +186,7 @@ class _StreamDogFoodingAppContentState
 
     // The app was terminated.
     try {
-      final initialUri = await getInitialUri();
+      final initialUri = await AppLinks().getInitialLink();
       if (initialUri != null) _handleDeepLink(initialUri);
     } catch (e) {
       debugPrint(e.toString());

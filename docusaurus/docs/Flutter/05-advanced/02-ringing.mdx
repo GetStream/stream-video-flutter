@@ -118,22 +118,6 @@ void dispose() {
 Remember to implement navigation in a marked line.
 :::
 
-Please add an additional extension at the end of the class / in a different file that we added to make
-subscriptions simpler:
-
-```dart
-extension on Subscriptions {
-  void addAll<T>(Iterable<StreamSubscription<T>?> subscriptions) {
-    for (var i = 0; i < subscriptions.length; i++) {
-      final subscription = subscriptions.elementAt(i);
-      if (subscription == null) continue;
-
-      add(i + 100, subscription);
-    }
-  }
-}
-```
-
 If you need to manage the CallKit call, you can use the `StreamVideo.pushNotificationManager`. As an example, let's
 say you want to end all calls on the CallKit side, you can end them this way:
 
