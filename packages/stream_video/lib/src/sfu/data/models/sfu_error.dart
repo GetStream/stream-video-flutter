@@ -54,17 +54,30 @@ enum SfuReconnectionStrategy {
   /// and establish a new WebSocket connection.
   fast,
 
-  /// SDK should drop existing pc instances and creates a fresh WebSocket connection,
-  /// ensuring a clean state for the reconnection.
-  clean,
-
   /// SDK should obtain new credentials from the coordinator, drops existing pc instances, and initializes
   /// a completely new WebSocket connection, ensuring a comprehensive reset.
-  full,
+  rejoin,
 
   /// SDK should migrate to a new SFU instance
   migrate;
 
   @override
   String toString() => name;
+
+  WebsocketReconnectStrategy toDto() {
+    switch (this) {
+      case SfuReconnectionStrategy.disconnect:
+        return WebsocketReconnectStrategy
+            .WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT;
+      case SfuReconnectionStrategy.fast:
+        return WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST;
+      case SfuReconnectionStrategy.rejoin:
+        return WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN;
+      case SfuReconnectionStrategy.migrate:
+        return WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE;
+      default:
+        return WebsocketReconnectStrategy
+            .WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED;
+    }
+  }
 }

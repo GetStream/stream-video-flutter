@@ -187,6 +187,21 @@ class SfuWebSocket extends StreamWebSocket
     return super.disconnect(closeCode, closeReason);
   }
 
+  void leave({
+    String? sessionId,
+    String? reason,
+  }) {
+    _logger.d(() => '[leave] no args');
+    send(
+      sfu_events.SfuRequest(
+        leaveCallRequest: sfu_events.LeaveCallRequest(
+          sessionId: sessionId,
+          reason: reason,
+        ),
+      ),
+    );
+  }
+
   void sendPing() {
     _logger.d(() => '[sendPing] no args');
     send(

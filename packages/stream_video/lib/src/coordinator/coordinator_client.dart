@@ -71,7 +71,6 @@ abstract class CoordinatorClient {
 
   Future<Result<models.CoordinatorJoined>> joinCall({
     required StreamCallCid callCid,
-    String? datacenterId,
     bool? ringing,
     bool? create,
     String? migratingFrom,

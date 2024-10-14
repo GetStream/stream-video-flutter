@@ -24,6 +24,9 @@ abstract class ClientState {
 
   /// Emits when a call was created by current user with ringing set as True.
   StateEmitter<Call?> get outgoingCall;
+
+  Future<void> setOutgoingCall(Call? call);
+  Future<void> setActiveCall(Call? call);
 }
 
 class MutableClientState implements ClientState {
@@ -63,6 +66,7 @@ class MutableClientState implements ClientState {
   Call? getActiveCall() => activeCall.valueOrNull;
   Call? getOutgoingCall() => outgoingCall.valueOrNull;
 
+  @override
   Future<void> setActiveCall(Call? call) async {
     final currentlyActiveCall = activeCall.valueOrNull;
     if (currentlyActiveCall != null && call != null) {
@@ -72,6 +76,7 @@ class MutableClientState implements ClientState {
     activeCall.value = call;
   }
 
+  @override
   Future<void> setOutgoingCall(Call? call) async {
     outgoingCall.value = call;
   }

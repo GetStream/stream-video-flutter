@@ -87,6 +87,9 @@ extension SfuEventMapper on sfu_events.SfuEvent {
         return SfuJoinResponseEvent(
           callState: joinResponse.callState.toDomain(),
           isReconnected: joinResponse.reconnected,
+          fastReconnectDeadline: Duration(
+            seconds: joinResponse.fastReconnectDeadlineSeconds,
+          ),
         );
       case sfu_events.SfuEvent_EventPayload.participantJoined:
         return SfuParticipantJoinedEvent(
@@ -151,6 +154,8 @@ extension SfuEventMapper on sfu_events.SfuEvent {
           callCid: payload.callCid,
           participant: payload.participant.toDomain(),
         );
+      case sfu_events.SfuEvent_EventPayload.participantMigrationComplete:
+        return const SfuParticipantMigrationCompleteEvent();
       default:
         return const SfuUnknownEvent();
     }
@@ -298,17 +303,14 @@ extension SfuWebsocketReconnectStrategyExtension
   SfuReconnectionStrategy toDomain() {
     switch (this) {
       case sfu_models
-            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_CLEAN:
-        return SfuReconnectionStrategy.clean;
-      case sfu_models
             .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT:
         return SfuReconnectionStrategy.disconnect;
       case sfu_models
             .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST:
         return SfuReconnectionStrategy.fast;
       case sfu_models
-            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FULL:
-        return SfuReconnectionStrategy.full;
+            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN:
+        return SfuReconnectionStrategy.rejoin;
       case sfu_models
             .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE:
         return SfuReconnectionStrategy.migrate;

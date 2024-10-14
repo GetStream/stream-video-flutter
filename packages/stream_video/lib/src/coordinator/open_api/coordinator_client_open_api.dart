@@ -434,7 +434,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   @override
   Future<Result<CoordinatorJoined>> joinCall({
     required StreamCallCid callCid,
-    String? datacenterId,
     bool? ringing,
     bool? create,
     String? migratingFrom,
@@ -442,7 +441,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(
-        () => '[joinCall] cid: $callCid, dataCenterId: $datacenterId'
+        () => '[joinCall] cid: $callCid'
             ', ringing: $ringing, create: $create , migratingFrom: $migratingFrom'
             ', video: $video',
       );
@@ -482,6 +481,11 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           users: result.members.toCallUsers(),
           duration: result.duration,
           reportingIntervalMs: result.statsOptions.reportingIntervalMs,
+          ownCapabilities: result.ownCapabilities
+              .map(
+                (it) => CallPermission.fromAlias(it.value),
+              )
+              .toList(),
         ),
       );
     } catch (e, stk) {
