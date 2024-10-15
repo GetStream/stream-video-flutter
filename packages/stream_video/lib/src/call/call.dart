@@ -632,8 +632,10 @@ class Call {
         //     previousSession?.rtcManager?.getPublisherTracks().toList() ?? [];
 
         _logger.d(() => '[join] starting sfu session');
-        final sessionResult =
-            await _startSession(_session!, reconnectDetails: reconnectDetails);
+        final sessionResult = await _startSession(
+          _session!,
+          reconnectDetails: reconnectDetails,
+        );
 
         if (sessionResult is! Success<None>) {
           _logger.e(() => '[join] sfu session start failed: $sessionResult');
@@ -1020,6 +1022,11 @@ class Call {
         if (strategy == SfuReconnectionStrategy.fast) {
           _reconnectAttempts++;
         }
+
+        _stateManager.lifecycleCallConnecting(
+          attempt: _reconnectAttempts,
+          isFastReconnectAttempt: strategy == SfuReconnectionStrategy.fast,
+        );
 
         _logger.d(
           () => '[reconnect] strategy: $strategy, attempt: $_reconnectAttempts',

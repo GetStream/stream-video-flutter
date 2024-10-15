@@ -357,8 +357,7 @@ class CallSession extends Disposable {
             token: config.sfuToken,
             sessionId: sessionId,
             subscriberSdp: genericSdp,
-            //check if needed
-            fastReconnect: true,
+            reconnectDetails: getReconnectDetails(SfuReconnectionStrategy.fast),
           ),
         ),
       );
@@ -375,13 +374,6 @@ class CallSession extends Disposable {
         );
 
         await rtcManager?.publisher.pc.restartIce();
-
-        // await sfuClient.restartIce(
-        //   sfu.ICERestartRequest(
-        //     sessionId: sessionId,
-        //     peerType: sfu_models.PeerType.PEER_TYPE_SUBSCRIBER,
-        //   ),
-        // );
 
         _logger.d(() => '[fastReconnect] completed');
         return Result.success(
