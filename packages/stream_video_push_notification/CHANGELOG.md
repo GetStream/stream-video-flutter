@@ -1,3 +1,6 @@
+## 0.5.5
+* Sync version with `stream_video_flutter` 0.5.5
+
 ## 0.5.4
 
 * Dependency updates
