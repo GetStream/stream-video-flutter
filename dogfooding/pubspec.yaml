@@ -31,10 +31,10 @@ dependencies:
   share_plus: ^10.0.2
   shared_preferences: ^2.3.2
   stream_chat_flutter: ^8.1.0
-  stream_video_flutter: ^0.5.4
-  stream_video_push_notification: ^0.5.4
-  stream_video_screen_sharing: ^0.5.4
-  uni_links: ^0.5.1
+  stream_video_flutter: ^0.5.5
+  stream_video_push_notification: ^0.5.5
+  stream_video_screen_sharing: ^0.5.5
+  app_links: ^6.3.2
 
 dependency_overrides:
   archive: ^3.6.1
