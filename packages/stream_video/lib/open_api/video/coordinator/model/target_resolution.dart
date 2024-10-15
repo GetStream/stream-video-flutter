@@ -28,11 +28,11 @@ class TargetResolution {
   int? bitrate;
 
   /// Minimum value: 240
-  /// Maximum value: 2560
+  /// Maximum value: 3840
   int height;
 
   /// Minimum value: 240
-  /// Maximum value: 2560
+  /// Maximum value: 3840
   int width;
 
   @override

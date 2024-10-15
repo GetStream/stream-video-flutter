@@ -100,58 +100,55 @@ class Flag2 {
   UserObject? user;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Flag2 &&
-          other.createdAt == createdAt &&
-          _deepEquality.equals(other.custom, custom) &&
-          other.entityCreatorId == entityCreatorId &&
-          other.entityId == entityId &&
-          other.entityType == entityType &&
-          _deepEquality.equals(other.labels, labels) &&
-          other.moderationPayload == moderationPayload &&
-          other.moderationPayloadHash == moderationPayloadHash &&
-          other.reason == reason &&
-          _deepEquality.equals(other.result, result) &&
-          other.reviewQueueItemId == reviewQueueItemId &&
-          other.type == type &&
-          other.updatedAt == updatedAt &&
-          other.user == user;
+  bool operator ==(Object other) => identical(this, other) || other is Flag2 &&
+    other.createdAt == createdAt &&
+    _deepEquality.equals(other.custom, custom) &&
+    other.entityCreatorId == entityCreatorId &&
+    other.entityId == entityId &&
+    other.entityType == entityType &&
+    _deepEquality.equals(other.labels, labels) &&
+    other.moderationPayload == moderationPayload &&
+    other.moderationPayloadHash == moderationPayloadHash &&
+    other.reason == reason &&
+    _deepEquality.equals(other.result, result) &&
+    other.reviewQueueItemId == reviewQueueItemId &&
+    other.type == type &&
+    other.updatedAt == updatedAt &&
+    other.user == user;
 
   @override
   int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (createdAt.hashCode) +
-      (custom.hashCode) +
-      (entityCreatorId == null ? 0 : entityCreatorId!.hashCode) +
-      (entityId.hashCode) +
-      (entityType.hashCode) +
-      (labels.hashCode) +
-      (moderationPayload == null ? 0 : moderationPayload!.hashCode) +
-      (moderationPayloadHash == null ? 0 : moderationPayloadHash!.hashCode) +
-      (reason == null ? 0 : reason!.hashCode) +
-      (result.hashCode) +
-      (reviewQueueItemId == null ? 0 : reviewQueueItemId!.hashCode) +
-      (type == null ? 0 : type!.hashCode) +
-      (updatedAt.hashCode) +
-      (user == null ? 0 : user!.hashCode);
+    // ignore: unnecessary_parenthesis
+    (createdAt.hashCode) +
+    (custom.hashCode) +
+    (entityCreatorId == null ? 0 : entityCreatorId!.hashCode) +
+    (entityId.hashCode) +
+    (entityType.hashCode) +
+    (labels.hashCode) +
+    (moderationPayload == null ? 0 : moderationPayload!.hashCode) +
+    (moderationPayloadHash == null ? 0 : moderationPayloadHash!.hashCode) +
+    (reason == null ? 0 : reason!.hashCode) +
+    (result.hashCode) +
+    (reviewQueueItemId == null ? 0 : reviewQueueItemId!.hashCode) +
+    (type == null ? 0 : type!.hashCode) +
+    (updatedAt.hashCode) +
+    (user == null ? 0 : user!.hashCode);
 
   @override
-  String toString() =>
-      'Flag2[createdAt=$createdAt, custom=$custom, entityCreatorId=$entityCreatorId, entityId=$entityId, entityType=$entityType, labels=$labels, moderationPayload=$moderationPayload, moderationPayloadHash=$moderationPayloadHash, reason=$reason, result=$result, reviewQueueItemId=$reviewQueueItemId, type=$type, updatedAt=$updatedAt, user=$user]';
+  String toString() => 'Flag2[createdAt=$createdAt, custom=$custom, entityCreatorId=$entityCreatorId, entityId=$entityId, entityType=$entityType, labels=$labels, moderationPayload=$moderationPayload, moderationPayloadHash=$moderationPayloadHash, reason=$reason, result=$result, reviewQueueItemId=$reviewQueueItemId, type=$type, updatedAt=$updatedAt, user=$user]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'custom'] = this.custom;
+      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+      json[r'custom'] = this.custom;
     if (this.entityCreatorId != null) {
       json[r'entity_creator_id'] = this.entityCreatorId;
     } else {
       json[r'entity_creator_id'] = null;
     }
-    json[r'entity_id'] = this.entityId;
-    json[r'entity_type'] = this.entityType;
-    json[r'labels'] = this.labels;
+      json[r'entity_id'] = this.entityId;
+      json[r'entity_type'] = this.entityType;
+      json[r'labels'] = this.labels;
     if (this.moderationPayload != null) {
       json[r'moderation_payload'] = this.moderationPayload;
     } else {
@@ -167,7 +164,7 @@ class Flag2 {
     } else {
       json[r'reason'] = null;
     }
-    json[r'result'] = this.result;
+      json[r'result'] = this.result;
     if (this.reviewQueueItemId != null) {
       json[r'review_queue_item_id'] = this.reviewQueueItemId;
     } else {
@@ -178,7 +175,7 @@ class Flag2 {
     } else {
       json[r'type'] = null;
     }
-    json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
+      json[r'updated_at'] = this.updatedAt.toUtc().toIso8601String();
     if (this.user != null) {
       json[r'user'] = this.user;
     } else {
@@ -199,10 +196,8 @@ class Flag2 {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "Flag2[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "Flag2[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "Flag2[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "Flag2[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -214,18 +209,14 @@ class Flag2 {
         entityId: mapValueOfType<String>(json, r'entity_id')!,
         entityType: mapValueOfType<String>(json, r'entity_type')!,
         labels: json[r'labels'] is Iterable
-            ? (json[r'labels'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
+            ? (json[r'labels'] as Iterable).cast<String>().toList(growable: false)
             : const [],
-        moderationPayload:
-            ModerationPayload.fromJson(json[r'moderation_payload']),
-        moderationPayloadHash:
-            mapValueOfType<String>(json, r'moderation_payload_hash'),
+        moderationPayload: ModerationPayload.fromJson(json[r'moderation_payload']),
+        moderationPayloadHash: mapValueOfType<String>(json, r'moderation_payload_hash'),
         reason: mapValueOfType<String>(json, r'reason'),
+        // MANUAL_EDIT: mapListOfMapFromJson() instead of mapFromJson()
         result: mapListOfMapFromJson(json[r'result']),
-        reviewQueueItemId:
-            mapValueOfType<String>(json, r'review_queue_item_id'),
+        reviewQueueItemId: mapValueOfType<String>(json, r'review_queue_item_id'),
         type: mapValueOfType<String>(json, r'type'),
         updatedAt: mapDateTime(json, r'updated_at', r'')!,
         user: UserObject.fromJson(json[r'user']),
@@ -234,7 +225,7 @@ class Flag2 {
     return null;
   }
 
-  static List<Map<String, Object>> mapListOfMapFromJson(dynamic json) {
+    static List<Map<String, Object>> mapListOfMapFromJson(dynamic json) {
     if (json is! List) {
       return [];
     }
@@ -250,10 +241,7 @@ class Flag2 {
     return result;
   }
 
-  static List<Flag2> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static List<Flag2> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <Flag2>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -281,19 +269,13 @@ class Flag2 {
   }
 
   // maps a json object with a list of Flag2-objects as value to a dart map
-  static Map<String, List<Flag2>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static Map<String, List<Flag2>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<Flag2>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Flag2.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+        map[entry.key] = Flag2.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -308,3 +290,4 @@ class Flag2 {
     'updated_at',
   };
 }
+

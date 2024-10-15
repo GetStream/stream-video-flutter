@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-class LayoutSettings {
-  /// Returns a new [LayoutSettings] instance.
-  LayoutSettings({
+class LayoutSettingsRequest {
+  /// Returns a new [LayoutSettingsRequest] instance.
+  LayoutSettingsRequest({
     this.externalAppUrl,
     this.externalCssUrl,
     required this.name,
@@ -35,12 +35,12 @@ class LayoutSettings {
   ///
   String? externalCssUrl;
 
-  LayoutSettingsNameEnum name;
+  LayoutSettingsRequestNameEnum name;
 
   Map<String, Object> options;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is LayoutSettings &&
+  bool operator ==(Object other) => identical(this, other) || other is LayoutSettingsRequest &&
     other.externalAppUrl == externalAppUrl &&
     other.externalCssUrl == externalCssUrl &&
     other.name == name &&
@@ -55,7 +55,7 @@ class LayoutSettings {
     (options.hashCode);
 
   @override
-  String toString() => 'LayoutSettings[externalAppUrl=$externalAppUrl, externalCssUrl=$externalCssUrl, name=$name, options=$options]';
+  String toString() => 'LayoutSettingsRequest[externalAppUrl=$externalAppUrl, externalCssUrl=$externalCssUrl, name=$name, options=$options]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -74,10 +74,10 @@ class LayoutSettings {
     return json;
   }
 
-  /// Returns a new [LayoutSettings] instance and imports its values from
+  /// Returns a new [LayoutSettingsRequest] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static LayoutSettings? fromJson(dynamic value) {
+  static LayoutSettingsRequest? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -86,27 +86,27 @@ class LayoutSettings {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "LayoutSettings[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "LayoutSettings[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "LayoutSettingsRequest[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "LayoutSettingsRequest[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return LayoutSettings(
+      return LayoutSettingsRequest(
         externalAppUrl: mapValueOfType<String>(json, r'external_app_url'),
         externalCssUrl: mapValueOfType<String>(json, r'external_css_url'),
-        name: LayoutSettingsNameEnum.fromJson(json[r'name'])!,
+        name: LayoutSettingsRequestNameEnum.fromJson(json[r'name'])!,
         options: mapCastOfType<String, Object>(json, r'options') ?? const {},
       );
     }
     return null;
   }
 
-  static List<LayoutSettings> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <LayoutSettings>[];
+  static List<LayoutSettingsRequest> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <LayoutSettingsRequest>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = LayoutSettings.fromJson(row);
+        final value = LayoutSettingsRequest.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -115,12 +115,12 @@ class LayoutSettings {
     return result.toList(growable: growable);
   }
 
-  static Map<String, LayoutSettings> mapFromJson(dynamic json) {
-    final map = <String, LayoutSettings>{};
+  static Map<String, LayoutSettingsRequest> mapFromJson(dynamic json) {
+    final map = <String, LayoutSettingsRequest>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = LayoutSettings.fromJson(entry.value);
+        final value = LayoutSettingsRequest.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -129,14 +129,14 @@ class LayoutSettings {
     return map;
   }
 
-  // maps a json object with a list of LayoutSettings-objects as value to a dart map
-  static Map<String, List<LayoutSettings>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<LayoutSettings>>{};
+  // maps a json object with a list of LayoutSettingsRequest-objects as value to a dart map
+  static Map<String, List<LayoutSettingsRequest>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<LayoutSettingsRequest>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = LayoutSettings.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = LayoutSettingsRequest.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -149,9 +149,9 @@ class LayoutSettings {
 }
 
 
-class LayoutSettingsNameEnum {
+class LayoutSettingsRequestNameEnum {
   /// Instantiate a new enum with the provided [value].
-  const LayoutSettingsNameEnum._(this.value);
+  const LayoutSettingsRequestNameEnum._(this.value);
 
   /// The underlying value of this enum member.
   final String value;
@@ -161,14 +161,14 @@ class LayoutSettingsNameEnum {
 
   String toJson() => value;
 
-  static const spotlight = LayoutSettingsNameEnum._(r'spotlight');
-  static const grid = LayoutSettingsNameEnum._(r'grid');
-  static const singleParticipant = LayoutSettingsNameEnum._(r'single-participant');
-  static const mobile = LayoutSettingsNameEnum._(r'mobile');
-  static const custom = LayoutSettingsNameEnum._(r'custom');
+  static const spotlight = LayoutSettingsRequestNameEnum._(r'spotlight');
+  static const grid = LayoutSettingsRequestNameEnum._(r'grid');
+  static const singleParticipant = LayoutSettingsRequestNameEnum._(r'single-participant');
+  static const mobile = LayoutSettingsRequestNameEnum._(r'mobile');
+  static const custom = LayoutSettingsRequestNameEnum._(r'custom');
 
-  /// List of all possible values in this [enum][LayoutSettingsNameEnum].
-  static const values = <LayoutSettingsNameEnum>[
+  /// List of all possible values in this [enum][LayoutSettingsRequestNameEnum].
+  static const values = <LayoutSettingsRequestNameEnum>[
     spotlight,
     grid,
     singleParticipant,
@@ -176,13 +176,13 @@ class LayoutSettingsNameEnum {
     custom,
   ];
 
-  static LayoutSettingsNameEnum? fromJson(dynamic value) => LayoutSettingsNameEnumTypeTransformer().decode(value);
+  static LayoutSettingsRequestNameEnum? fromJson(dynamic value) => LayoutSettingsRequestNameEnumTypeTransformer().decode(value);
 
-  static List<LayoutSettingsNameEnum> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <LayoutSettingsNameEnum>[];
+  static List<LayoutSettingsRequestNameEnum> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <LayoutSettingsRequestNameEnum>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = LayoutSettingsNameEnum.fromJson(row);
+        final value = LayoutSettingsRequestNameEnum.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -192,16 +192,16 @@ class LayoutSettingsNameEnum {
   }
 }
 
-/// Transformation class that can [encode] an instance of [LayoutSettingsNameEnum] to String,
-/// and [decode] dynamic data back to [LayoutSettingsNameEnum].
-class LayoutSettingsNameEnumTypeTransformer {
-  factory LayoutSettingsNameEnumTypeTransformer() => _instance ??= const LayoutSettingsNameEnumTypeTransformer._();
+/// Transformation class that can [encode] an instance of [LayoutSettingsRequestNameEnum] to String,
+/// and [decode] dynamic data back to [LayoutSettingsRequestNameEnum].
+class LayoutSettingsRequestNameEnumTypeTransformer {
+  factory LayoutSettingsRequestNameEnumTypeTransformer() => _instance ??= const LayoutSettingsRequestNameEnumTypeTransformer._();
 
-  const LayoutSettingsNameEnumTypeTransformer._();
+  const LayoutSettingsRequestNameEnumTypeTransformer._();
 
-  String encode(LayoutSettingsNameEnum data) => data.value;
+  String encode(LayoutSettingsRequestNameEnum data) => data.value;
 
-  /// Decodes a [dynamic value][data] to a LayoutSettingsNameEnum.
+  /// Decodes a [dynamic value][data] to a LayoutSettingsRequestNameEnum.
   ///
   /// If [allowNull] is true and the [dynamic value][data] cannot be decoded successfully,
   /// then null is returned. However, if [allowNull] is false and the [dynamic value][data]
@@ -209,14 +209,14 @@ class LayoutSettingsNameEnumTypeTransformer {
   ///
   /// The [allowNull] is very handy when an API changes and a new enum value is added or removed,
   /// and users are still using an old app with the old code.
-  LayoutSettingsNameEnum? decode(dynamic data, {bool allowNull = true}) {
+  LayoutSettingsRequestNameEnum? decode(dynamic data, {bool allowNull = true}) {
     if (data != null) {
       switch (data) {
-        case r'spotlight': return LayoutSettingsNameEnum.spotlight;
-        case r'grid': return LayoutSettingsNameEnum.grid;
-        case r'single-participant': return LayoutSettingsNameEnum.singleParticipant;
-        case r'mobile': return LayoutSettingsNameEnum.mobile;
-        case r'custom': return LayoutSettingsNameEnum.custom;
+        case r'spotlight': return LayoutSettingsRequestNameEnum.spotlight;
+        case r'grid': return LayoutSettingsRequestNameEnum.grid;
+        case r'single-participant': return LayoutSettingsRequestNameEnum.singleParticipant;
+        case r'mobile': return LayoutSettingsRequestNameEnum.mobile;
+        case r'custom': return LayoutSettingsRequestNameEnum.custom;
         default:
           if (!allowNull) {
             throw ArgumentError('Unknown enum value to decode: $data');
@@ -226,8 +226,8 @@ class LayoutSettingsNameEnumTypeTransformer {
     return null;
   }
 
-  /// Singleton [LayoutSettingsNameEnumTypeTransformer] instance.
-  static LayoutSettingsNameEnumTypeTransformer? _instance;
+  /// Singleton [LayoutSettingsRequestNameEnumTypeTransformer] instance.
+  static LayoutSettingsRequestNameEnumTypeTransformer? _instance;
 }
 
 

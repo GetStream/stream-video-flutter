@@ -32,6 +32,7 @@ class UserSessionStats {
     this.maxPliPerSecond,
     this.maxPublishingVideoQuality,
     this.maxReceivingVideoQuality,
+    required this.minEventTs,
     this.os,
     this.osVersion,
     required this.packetLossFraction,
@@ -199,6 +200,8 @@ class UserSessionStats {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   VideoQuality? maxReceivingVideoQuality;
+
+  int minEventTs;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -411,6 +414,7 @@ class UserSessionStats {
     other.maxPliPerSecond == maxPliPerSecond &&
     other.maxPublishingVideoQuality == maxPublishingVideoQuality &&
     other.maxReceivingVideoQuality == maxReceivingVideoQuality &&
+    other.minEventTs == minEventTs &&
     other.os == os &&
     other.osVersion == osVersion &&
     other.packetLossFraction == packetLossFraction &&
@@ -466,6 +470,7 @@ class UserSessionStats {
     (maxPliPerSecond == null ? 0 : maxPliPerSecond!.hashCode) +
     (maxPublishingVideoQuality == null ? 0 : maxPublishingVideoQuality!.hashCode) +
     (maxReceivingVideoQuality == null ? 0 : maxReceivingVideoQuality!.hashCode) +
+    (minEventTs.hashCode) +
     (os == null ? 0 : os!.hashCode) +
     (osVersion == null ? 0 : osVersion!.hashCode) +
     (packetLossFraction.hashCode) +
@@ -500,7 +505,7 @@ class UserSessionStats {
     (webrtcVersion == null ? 0 : webrtcVersion!.hashCode);
 
   @override
-  String toString() => 'UserSessionStats[browser=$browser, browserVersion=$browserVersion, currentIp=$currentIp, currentSfu=$currentSfu, deviceModel=$deviceModel, deviceVersion=$deviceVersion, distanceToSfuKilometers=$distanceToSfuKilometers, freezeDurationSeconds=$freezeDurationSeconds, geolocation=$geolocation, jitter=$jitter, latency=$latency, maxFirPerSecond=$maxFirPerSecond, maxFreezeFraction=$maxFreezeFraction, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxFreezesPerSecond=$maxFreezesPerSecond, maxNackPerSecond=$maxNackPerSecond, maxPliPerSecond=$maxPliPerSecond, maxPublishingVideoQuality=$maxPublishingVideoQuality, maxReceivingVideoQuality=$maxReceivingVideoQuality, os=$os, osVersion=$osVersion, packetLossFraction=$packetLossFraction, pubSubHints=$pubSubHints, publishedTracks=$publishedTracks, publisherAudioMos=$publisherAudioMos, publisherJitter=$publisherJitter, publisherLatency=$publisherLatency, publisherNoiseCancellationSeconds=$publisherNoiseCancellationSeconds, publisherPacketLossFraction=$publisherPacketLossFraction, publisherQualityLimitationFraction=$publisherQualityLimitationFraction, publisherVideoQualityLimitationDurationSeconds=$publisherVideoQualityLimitationDurationSeconds, publishingAudioCodec=$publishingAudioCodec, publishingDurationSeconds=$publishingDurationSeconds, publishingVideoCodec=$publishingVideoCodec, qualityScore=$qualityScore, receivingAudioCodec=$receivingAudioCodec, receivingDurationSeconds=$receivingDurationSeconds, receivingVideoCodec=$receivingVideoCodec, sdk=$sdk, sdkVersion=$sdkVersion, sessionId=$sessionId, subscriberAudioMos=$subscriberAudioMos, subscriberJitter=$subscriberJitter, subscriberLatency=$subscriberLatency, subscriberVideoQualityThrottledDurationSeconds=$subscriberVideoQualityThrottledDurationSeconds, subsessions=$subsessions, timeline=$timeline, totalPixelsIn=$totalPixelsIn, totalPixelsOut=$totalPixelsOut, truncated=$truncated, webrtcVersion=$webrtcVersion]';
+  String toString() => 'UserSessionStats[browser=$browser, browserVersion=$browserVersion, currentIp=$currentIp, currentSfu=$currentSfu, deviceModel=$deviceModel, deviceVersion=$deviceVersion, distanceToSfuKilometers=$distanceToSfuKilometers, freezeDurationSeconds=$freezeDurationSeconds, geolocation=$geolocation, jitter=$jitter, latency=$latency, maxFirPerSecond=$maxFirPerSecond, maxFreezeFraction=$maxFreezeFraction, maxFreezesDurationSeconds=$maxFreezesDurationSeconds, maxFreezesPerSecond=$maxFreezesPerSecond, maxNackPerSecond=$maxNackPerSecond, maxPliPerSecond=$maxPliPerSecond, maxPublishingVideoQuality=$maxPublishingVideoQuality, maxReceivingVideoQuality=$maxReceivingVideoQuality, minEventTs=$minEventTs, os=$os, osVersion=$osVersion, packetLossFraction=$packetLossFraction, pubSubHints=$pubSubHints, publishedTracks=$publishedTracks, publisherAudioMos=$publisherAudioMos, publisherJitter=$publisherJitter, publisherLatency=$publisherLatency, publisherNoiseCancellationSeconds=$publisherNoiseCancellationSeconds, publisherPacketLossFraction=$publisherPacketLossFraction, publisherQualityLimitationFraction=$publisherQualityLimitationFraction, publisherVideoQualityLimitationDurationSeconds=$publisherVideoQualityLimitationDurationSeconds, publishingAudioCodec=$publishingAudioCodec, publishingDurationSeconds=$publishingDurationSeconds, publishingVideoCodec=$publishingVideoCodec, qualityScore=$qualityScore, receivingAudioCodec=$receivingAudioCodec, receivingDurationSeconds=$receivingDurationSeconds, receivingVideoCodec=$receivingVideoCodec, sdk=$sdk, sdkVersion=$sdkVersion, sessionId=$sessionId, subscriberAudioMos=$subscriberAudioMos, subscriberJitter=$subscriberJitter, subscriberLatency=$subscriberLatency, subscriberVideoQualityThrottledDurationSeconds=$subscriberVideoQualityThrottledDurationSeconds, subsessions=$subsessions, timeline=$timeline, totalPixelsIn=$totalPixelsIn, totalPixelsOut=$totalPixelsOut, truncated=$truncated, webrtcVersion=$webrtcVersion]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -587,6 +592,7 @@ class UserSessionStats {
     } else {
       json[r'max_receiving_video_quality'] = null;
     }
+      json[r'min_event_ts'] = this.minEventTs;
     if (this.os != null) {
       json[r'os'] = this.os;
     } else {
@@ -744,6 +750,7 @@ class UserSessionStats {
         maxPliPerSecond: mapValueOfType<double>(json, r'max_pli_per_second'),
         maxPublishingVideoQuality: VideoQuality.fromJson(json[r'max_publishing_video_quality']),
         maxReceivingVideoQuality: VideoQuality.fromJson(json[r'max_receiving_video_quality']),
+        minEventTs: mapValueOfType<int>(json, r'min_event_ts')!,
         os: mapValueOfType<String>(json, r'os'),
         osVersion: mapValueOfType<String>(json, r'os_version'),
         packetLossFraction: mapValueOfType<double>(json, r'packet_loss_fraction')!,
@@ -826,6 +833,7 @@ class UserSessionStats {
     'freeze_duration_seconds',
     'max_freeze_fraction',
     'max_freezes_duration_seconds',
+    'min_event_ts',
     'packet_loss_fraction',
     'publisher_packet_loss_fraction',
     'publishing_duration_seconds',
