@@ -1,10 +1,15 @@
+## 0.5.5
+
+🐞 Fixed
+* Migrated from `internet_connection_checker` to `internet_connection_checker_plus` due to [license issues](https://github.com/github/dmca/blob/master/2024/09/2024-09-04-internet-connection-checker-plus.md)
+
 ## 0.5.4
 
 🐞 Fixed
 * Fixed an issue where active call foreground service was recreated after being stopped when ringing call was declined and in-app incoming screen was displayed.
 
 🚧 Breaking changes
-* The regular push notification handling has been removed from iOS, providing more control over the implementation. VoIP push notifications will continue to be handled as before. For more details, refer to the documentation.
+* The regular push notification handling has been removed from iOS, providing more control over the implementation. VoIP push notifications will continue to be handled as before. For more details, refer to the [documentation](https://getstream.io/video/docs/flutter/push-notifications/).
 
 * Dependency updates
     * Flutter SDK constraint updated to >=3.22.0 (Dart SDK to >=3.4.0 <4.0.0)

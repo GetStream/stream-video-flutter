@@ -6,14 +6,7 @@ import '../../../stream_video_flutter_background.dart';
 import '../call_diagnostics_content/call_diagnostics_content.dart';
 
 /// Builder used to create a custom call app bar.
-typedef CallAppBarBuilder = PreferredSizeWidget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
-
-/// Builder used to create a custom call app bar in landscape mode.
-typedef OverlayAppBarBuilder = Widget Function(
+typedef CallAppBarBuilder = PreferredSizeWidget? Function(
   BuildContext context,
   Call call,
   CallState callState,
@@ -45,7 +38,6 @@ class StreamCallContent extends StatefulWidget {
     this.onBackPressed,
     this.onLeaveCallTap,
     this.callAppBarBuilder,
-    this.overlayAppBarBuilder,
     this.callParticipantsBuilder,
     this.callControlsBuilder,
     this.layoutMode = ParticipantLayoutMode.grid,
@@ -66,9 +58,6 @@ class StreamCallContent extends StatefulWidget {
 
   /// Builder used to create a custom call app bar.
   final CallAppBarBuilder? callAppBarBuilder;
-
-  /// Builder used to create a custom call app bar in landscape mode.
-  final OverlayAppBarBuilder? overlayAppBarBuilder;
 
   /// Builder used to create a custom participants grid.
   final CallParticipantsBuilder? callParticipantsBuilder;
