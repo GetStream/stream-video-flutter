@@ -3,7 +3,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:example/stream_video_sdk.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +14,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'core/auth_repository.dart';
 import 'firebase_options.dart';
 import 'screen/login_screen.dart';
+import 'stream_video_sdk.dart';
 
 // As this runs in a separate isolate, we need to setup the app again.
 @pragma('vm:entry-point')

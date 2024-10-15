@@ -1,7 +1,9 @@
-## Unreleased
+## 0.5.5
 
 🐞 Fixed
-* Migrated from `internet_connection_checker` to `internet_connection_checker_plus` due to [license issues](https://github.com/github/dmca/blob/master/2024/09/2024-09-04-internet-connection-checker-plus.md)
+* Migrated from `internet_connection_checker` to `internet_connection_checker_plus` due to [license issues](https://github.com/github/dmca/blob/master/2024/09/2024-09-04-internet-connection-checker-plus.md).
+* `callAppBarBuilder` in `StreamCallContent` can now return null in order to hide the app bar.
+* `backgroundColor` field in `StreamCallControls` is now correctly applied.
 
 ## 0.5.4
 
