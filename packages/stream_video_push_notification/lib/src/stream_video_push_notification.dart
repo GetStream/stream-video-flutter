@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/stream_video.dart' hide CallEvent;
 import 'package:stream_video_push_notification/stream_video_push_notification_platform_interface.dart';
 
@@ -66,6 +67,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     this.registerApnDeviceToken = false,
   }) : _client = client {
     if (CurrentPlatform.isWeb) return;
+
+    SharedPreferences.getInstance().then((prefs) => _sharedPreferences = prefs);
 
     subscribeToEvents() {
       _subscriptions.add(
@@ -155,6 +158,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   final StreamVideoPushParams pushParams;
   final CallerCustomizationFunction? callerCustomizationCallback;
   final bool registerApnDeviceToken;
+  late SharedPreferences _sharedPreferences;
 
   final _logger = taggedLogger(tag: 'SV:PNManager');
   bool? _wasWsConnected;
@@ -174,7 +178,14 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       return;
     }
 
-    void registerDevice(String token, bool isVoIP) {
+    void registerDevice(String token, bool isVoIP) async {
+      final tokenKey = isVoIP ? 'userDeviceTokenVoIP' : 'userDeviceToken';
+
+      final storedToken = _sharedPreferences.getString(tokenKey);
+      if (storedToken == token) return;
+
+      await _sharedPreferences.setString(tokenKey, token);
+
       _client.createDevice(
         id: token,
         voipToken: isVoIP,
@@ -197,6 +208,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
             .listen((token) => registerDevice(token, true)));
   }
 
+  Future<void> removedStoredTokens() async {
+    await _sharedPreferences.remove('userDeviceToken');
+    await _sharedPreferences.remove('userDeviceTokenVoIP');
+  }
+
   @override
   void unregisterDevice() async {
     final token = await getDevicePushTokenVoIP();
@@ -209,6 +225,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     if (apnToken != null) {
       _client.deleteDevice(id: apnToken);
     }
+
+    removedStoredTokens();
   }
 
   @override
