@@ -66,7 +66,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     );
   }
 
-  void lifecycleCallReceived(
+  void updateFromCallReceivedData(
     CallReceivedData data, {
     bool ringing = false,
     bool notify = false,
@@ -75,54 +75,64 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       () => '[lifecycleCallReceived] ringing: $ringing'
           ', notify: $notify, state: $state',
     );
+
     final status = data.toCallStatus(state: state, ringing: ringing);
     state = state.copyWith(
-      status: status,
+      status: data.toCallStatus(state: state, ringing: ringing),
+      isBackstage: data.metadata.details.backstage,
+      isRecording: data.metadata.details.recording,
+      isTranscribing: data.metadata.details.transcribing,
+      isBroadcasting: data.metadata.details.broadcasting,
+      blockedUserIds: data.metadata.details.blockedUserIds.toList(),
+      createdAt: data.metadata.details.createdAt,
+      updatedAt: data.metadata.details.updatedAt,
+      startsAt: data.metadata.details.startsAt,
+      endedAt: data.metadata.details.endedAt,
       createdByUserId: data.metadata.details.createdBy.id,
-      settings: data.metadata.settings,
+      custom: data.metadata.details.custom,
       egress: data.metadata.details.egress,
+      rtmpIngress: data.metadata.details.rtmpIngress,
+      settings: data.metadata.settings,
       ownCapabilities: data.metadata.details.ownCapabilities.toList(),
       callParticipants: data.metadata.toCallParticipants(
         state,
         fromMembers: !status.isConnected,
       ),
-      createdAt: data.metadata.details.createdAt,
-      startsAt: data.metadata.details.startsAt,
-      endedAt: data.metadata.details.endedAt,
       liveStartedAt: data.metadata.session.liveStartedAt,
       liveEndedAt: data.metadata.session.liveEndedAt,
-      isBackstage: data.metadata.details.backstage,
-      isBroadcasting: data.metadata.details.broadcasting,
-      isRecording: data.metadata.details.recording,
-      isTranscribing: data.metadata.details.transcribing,
     );
   }
 
-  void lifecycleCallCreated(
+  void updateFromCallCreatedData(
     CallCreatedData data, {
     required CallConnectOptions callConnectOptions,
     bool ringing = false,
   }) {
     _logger.d(() => '[lifecycleCallCreated] ringing: $ringing, state: $state');
+
     state = state.copyWith(
       status: data.toCallStatus(state: state, ringing: ringing),
+      isBackstage: data.metadata.details.backstage,
+      isRecording: data.metadata.details.recording,
+      isTranscribing: data.metadata.details.transcribing,
+      isBroadcasting: data.metadata.details.broadcasting,
+      blockedUserIds: data.metadata.details.blockedUserIds.toList(),
+      createdAt: data.metadata.details.createdAt,
+      updatedAt: data.metadata.details.updatedAt,
+      startsAt: data.metadata.details.startsAt,
+      endedAt: data.metadata.details.endedAt,
       createdByUserId: data.metadata.details.createdBy.id,
-      settings: data.metadata.settings,
+      custom: data.metadata.details.custom,
       egress: data.metadata.details.egress,
+      rtmpIngress: data.metadata.details.rtmpIngress,
+      settings: data.metadata.settings,
       ownCapabilities: data.metadata.details.ownCapabilities.toList(),
       callParticipants: data.metadata.toCallParticipants(
         state,
         fromMembers: true,
       ),
-      createdAt: data.metadata.details.createdAt,
-      startsAt: data.metadata.details.startsAt,
-      endedAt: data.metadata.details.endedAt,
       liveStartedAt: data.metadata.session.liveStartedAt,
       liveEndedAt: data.metadata.session.liveEndedAt,
-      isBackstage: data.metadata.details.backstage,
-      isBroadcasting: data.metadata.details.broadcasting,
-      isRecording: data.metadata.details.recording,
-      isTranscribing: data.metadata.details.transcribing,
       audioOutputDevice: callConnectOptions.audioOutputDevice,
       audioInputDevice: callConnectOptions.audioInputDevice,
     );
@@ -163,34 +173,51 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   }
 
   void lifecycleCallJoined(
-    CallJoinedData data,
-  ) {
+    CallJoinedData data, {
+    CallConnectOptions? callConnectOptions,
+  }) {
     final status = state.status.isJoining ? CallStatus.joined() : state.status;
     _logger.d(() => '[lifecycleCallJoined] state: $state;\nnewStatus: $status');
+
     state = state.copyWith(
       status: status,
+      isBackstage: data.metadata.details.backstage,
+      isRecording: data.metadata.details.recording,
+      isTranscribing: data.metadata.details.transcribing,
+      isBroadcasting: data.metadata.details.broadcasting,
+      blockedUserIds: data.metadata.details.blockedUserIds.toList(),
+      createdAt: data.metadata.details.createdAt,
+      updatedAt: data.metadata.details.updatedAt,
+      startsAt: data.metadata.details.startsAt,
+      endedAt: data.metadata.details.endedAt,
       createdByUserId: data.metadata.details.createdBy.id,
-      settings: data.metadata.settings,
+      custom: data.metadata.details.custom,
       egress: data.metadata.details.egress,
+      rtmpIngress: data.metadata.details.rtmpIngress,
+      settings: data.metadata.settings,
       ownCapabilities: data.metadata.details.ownCapabilities.toList(),
       callParticipants: data.metadata.toCallParticipants(
         state,
         fromMembers: true,
       ),
-      createdAt: data.metadata.details.createdAt,
-      startsAt: data.metadata.details.startsAt,
-      endedAt: data.metadata.details.endedAt,
       liveStartedAt: data.metadata.session.liveStartedAt,
       liveEndedAt: data.metadata.session.liveEndedAt,
-      isBackstage: data.metadata.details.backstage,
-      isBroadcasting: data.metadata.details.broadcasting,
-      isRecording: data.metadata.details.recording,
-      isTranscribing: data.metadata.details.transcribing,
+      audioOutputDevice: callConnectOptions?.audioOutputDevice,
+      audioInputDevice: callConnectOptions?.audioInputDevice,
+    );
+  }
+
+  void lifecycleCallReconnectingFailed() {
+    _logger.w(() => '[lifecycleCallReconnectingFailed] state: $state');
+
+    state = state.copyWith(
+      status: CallStatus.reconnectingFailed(),
     );
   }
 
   void lifecycleCallDisconnected() {
     _logger.w(() => '[lifecycleCallDisconnected] state: $state');
+
     state = state.copyWith(
       status: CallStatus.disconnected(
         DisconnectReason.cancelled(
@@ -207,6 +234,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
 
   void lifecycleCallTimeout() {
     _logger.e(() => '[lifecycleCallTimeout] state: $state');
+
     state = state.copyWith(
       status: CallStatus.disconnected(
         const DisconnectReason.timeout(),
@@ -259,7 +287,6 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     state = state.copyWith(
       sessionId: sessionId,
       localStats: localStats,
-      //status: CallStatus.connecting(),
     );
   }
 
@@ -292,6 +319,19 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       subscriberStats: subscriberStats,
       latencyHistory: latencyHistory,
     );
+  }
+
+  Future<Result<None>> validateUserId(String currentUserId) async {
+    final stateUserId = state.currentUserId;
+    if (currentUserId.isEmpty) {
+      return Result.error('no userId');
+    }
+
+    if (stateUserId.isEmpty || stateUserId != currentUserId) {
+      lifecycleUpdateUserId(currentUserId);
+    }
+
+    return const Result.success(none);
   }
 }
 
@@ -353,6 +393,7 @@ extension on CallCreatedData {
   }) {
     final status = state.status;
     final createdByMe = state.currentUserId == metadata.details.createdBy.id;
+
     if (ringing && !status.isOutgoing && createdByMe) {
       return CallStatus.outgoing();
     } else if (ringing && !status.isIncoming && !createdByMe) {
@@ -370,6 +411,7 @@ extension on CallReceivedData {
   }) {
     final status = state.status;
     final createdByMe = state.currentUserId == metadata.details.createdBy.id;
+
     if (ringing && !status.isOutgoing && createdByMe) {
       return CallStatus.outgoing();
     } else if (ringing && !status.isIncoming && !createdByMe) {

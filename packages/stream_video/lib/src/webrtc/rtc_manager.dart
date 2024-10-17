@@ -41,11 +41,10 @@ class RtcManager extends Disposable {
     required this.sessionId,
     required this.callCid,
     required this.publisherId,
-    required StreamPeerConnection publisher,
-    required StreamPeerConnection subscriber,
-  })  : _publisher = publisher,
-        _subscriber = subscriber {
-    _subscriber.onTrack = _onRemoteTrack;
+    required this.publisher,
+    required this.subscriber,
+  }) {
+    subscriber.onTrack = _onRemoteTrack;
   }
 
   final _logger = taggedLogger(tag: _tag);
@@ -53,39 +52,39 @@ class RtcManager extends Disposable {
   final String sessionId;
   final StreamCallCid callCid;
   final String publisherId;
-  final StreamPeerConnection _publisher;
-  final StreamPeerConnection _subscriber;
+  final StreamPeerConnection publisher;
+  final StreamPeerConnection subscriber;
 
   final publishedTracks = < /*trackId*/ String, RtcTrack>{};
 
   set onPublisherIceCandidate(OnIceCandidate? cb) {
-    _publisher.onIceCandidate = cb;
+    publisher.onIceCandidate = cb;
   }
 
   set onSubscriberIceCandidate(OnIceCandidate? cb) {
-    _subscriber.onIceCandidate = cb;
+    subscriber.onIceCandidate = cb;
   }
 
-  set onSubscriberDisconnectedOrFailed(OnDisconnectedOrFailed? cb) {
-    _subscriber.onDisconnectedOrFailed = cb;
+  set onSubscriberFailure(OnFailure? cb) {
+    subscriber.onFailure = cb;
   }
 
-  set onPublisherDisconnectedOrFailed(OnDisconnectedOrFailed? cb) {
-    _publisher.onDisconnectedOrFailed = cb;
+  set onPublisherFailure(OnFailure? cb) {
+    publisher.onFailure = cb;
   }
 
   set onRenegotiationNeeded(OnRenegotiationNeeded? cb) {
-    _publisher.onRenegotiationNeeded = cb;
+    publisher.onRenegotiationNeeded = cb;
   }
 
   set onStatsReceived(OnStats? cb) {
-    _subscriber.onStats = cb;
-    _publisher.onStats = cb;
+    subscriber.onStats = cb;
+    publisher.onStats = cb;
   }
 
   Stream<Map<String, dynamic>> get statsStream => CombineLatestStream.combine2(
-        _subscriber.statsStream,
-        _publisher.statsStream,
+        subscriber.statsStream,
+        publisher.statsStream,
         (subscriber, publisher) => {
           'subscriberStats': subscriber,
           'publisherStats': publisher,
@@ -120,10 +119,10 @@ class RtcManager extends Disposable {
   }
 
   Future<String?> onSubscriberOffer(String offerSdp) async {
-    final result = await _subscriber.setRemoteOffer(offerSdp);
+    final result = await subscriber.setRemoteOffer(offerSdp);
     if (result.isFailure) return null;
 
-    final rtcAnswer = await _subscriber.createAnswer();
+    final rtcAnswer = await subscriber.createAnswer();
     return rtcAnswer.getDataOrNull()?.sdp;
   }
 
@@ -133,9 +132,9 @@ class RtcManager extends Disposable {
   }) async {
     final candidate = RtcIceCandidateParser.fromJsonString(iceCandidate);
     if (peerType == StreamPeerType.publisher) {
-      return _publisher.addIceCandidate(candidate);
+      return publisher.addIceCandidate(candidate);
     } else if (peerType == StreamPeerType.subscriber) {
-      return _subscriber.addIceCandidate(candidate);
+      return subscriber.addIceCandidate(candidate);
     }
     return Result.error('unexpected peerType: $peerType');
   }
@@ -193,7 +192,7 @@ class RtcManager extends Disposable {
     final sender = publishedTrack.transceiver?.sender;
     if (sender != null) {
       try {
-        await _publisher.pc.removeTrack(sender);
+        await publisher.pc.removeTrack(sender);
       } catch (e) {
         _logger.w(() => '[unpublishTrack] removeTrack failed: $e');
       }
@@ -201,7 +200,7 @@ class RtcManager extends Disposable {
   }
 
   Future<void> onPublishQualityChanged(Set<String> rids) async {
-    final transceivers = await _publisher.pc.getTransceivers();
+    final transceivers = await publisher.pc.getTransceivers();
     for (final transceiver in transceivers) {
       if (transceiver.sender.track?.kind == 'video') {
         var changed = false;
@@ -238,8 +237,8 @@ class RtcManager extends Disposable {
     onRemoteTrackReceived = null;
     onStatsReceived = null;
 
-    await _publisher.dispose();
-    await _subscriber.dispose();
+    await publisher.dispose();
+    await subscriber.dispose();
 
     return super.dispose();
   }
@@ -359,7 +358,7 @@ extension PublisherRtcManager on RtcManager {
     _logger.i(() => '[publishAudioTrack] track: $track');
     publishedTracks[track.trackId] = track;
 
-    final transceiverResult = await _publisher.addAudioTransceiver(
+    final transceiverResult = await publisher.addAudioTransceiver(
       stream: track.mediaStream,
       track: track.mediaTrack,
       encodings: [
@@ -434,7 +433,7 @@ extension PublisherRtcManager on RtcManager {
       _logger.v(() => '[publishVideoTrack] encoding: ${encoding.toMap()}');
     }
 
-    final transceiverResult = await _publisher.addVideoTransceiver(
+    final transceiverResult = await publisher.addVideoTransceiver(
       stream: track.mediaStream,
       track: track.mediaTrack,
       encodings: encodings,
@@ -894,8 +893,8 @@ extension RtcManagerTrackHelper on RtcManager {
   }
 
   void updateReportingInterval(int reportingIntervalMs) {
-    _publisher.reportingIntervalMs = reportingIntervalMs;
-    _subscriber.reportingIntervalMs = reportingIntervalMs;
+    publisher.reportingIntervalMs = reportingIntervalMs;
+    subscriber.reportingIntervalMs = reportingIntervalMs;
   }
 }
 

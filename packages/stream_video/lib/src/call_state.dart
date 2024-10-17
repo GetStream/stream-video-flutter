@@ -24,12 +24,14 @@ class CallState extends Equatable {
       isBackstage: false,
       settings: const CallSettings(),
       egress: const CallEgress(),
+      rtmpIngress: '',
       videoInputDevice: null,
       audioInputDevice: null,
       audioOutputDevice: null,
       ownCapabilities: List.unmodifiable(const []),
       callParticipants: List.unmodifiable(const []),
       createdAt: null,
+      updatedAt: null,
       startsAt: null,
       endedAt: null,
       liveStartedAt: null,
@@ -38,6 +40,8 @@ class CallState extends Equatable {
       subscriberStats: null,
       localStats: null,
       latencyHistory: const [],
+      blockedUserIds: const [],
+      custom: const {},
     );
   }
 
@@ -60,6 +64,7 @@ class CallState extends Equatable {
       isBackstage: metadata.details.backstage,
       settings: metadata.settings,
       egress: metadata.details.egress,
+      rtmpIngress: metadata.details.rtmpIngress,
       videoInputDevice: null,
       audioInputDevice: null,
       audioOutputDevice: null,
@@ -70,6 +75,7 @@ class CallState extends Equatable {
         ),
       ),
       createdAt: null,
+      updatedAt: null,
       startsAt: null,
       endedAt: null,
       liveStartedAt: null,
@@ -78,6 +84,8 @@ class CallState extends Equatable {
       subscriberStats: null,
       localStats: null,
       latencyHistory: const [],
+      blockedUserIds: List.unmodifiable(metadata.details.blockedUserIds),
+      custom: metadata.details.custom,
     );
   }
 
@@ -95,12 +103,14 @@ class CallState extends Equatable {
     required this.isBackstage,
     required this.settings,
     required this.egress,
+    required this.rtmpIngress,
     required this.ownCapabilities,
     required this.callParticipants,
     required this.videoInputDevice,
     required this.audioInputDevice,
     required this.audioOutputDevice,
     required this.createdAt,
+    required this.updatedAt,
     required this.startsAt,
     required this.endedAt,
     required this.liveStartedAt,
@@ -109,6 +119,8 @@ class CallState extends Equatable {
     required this.subscriberStats,
     required this.localStats,
     required this.latencyHistory,
+    required this.blockedUserIds,
+    required this.custom,
   });
 
   final String currentUserId;
@@ -119,6 +131,7 @@ class CallState extends Equatable {
   final CallStatus status;
   final CallSettings settings;
   final CallEgress egress;
+  final String rtmpIngress;
   final bool isRecording;
   final bool isBroadcasting;
   final bool isTranscribing;
@@ -131,12 +144,15 @@ class CallState extends Equatable {
   final DateTime? createdAt;
   final DateTime? startsAt;
   final DateTime? endedAt;
+  final DateTime? updatedAt;
   final DateTime? liveStartedAt;
   final DateTime? liveEndedAt;
   final PeerConnectionStats? publisherStats;
   final PeerConnectionStats? subscriberStats;
   final LocalStats? localStats;
   final List<int> latencyHistory;
+  final List<String> blockedUserIds;
+  final Map<String, Object> custom;
 
   String get callId => callCid.id;
 
@@ -165,12 +181,14 @@ class CallState extends Equatable {
     bool? isBackstage,
     CallSettings? settings,
     CallEgress? egress,
+    String? rtmpIngress,
     RtcMediaDevice? videoInputDevice,
     RtcMediaDevice? audioInputDevice,
     RtcMediaDevice? audioOutputDevice,
     List<CallPermission>? ownCapabilities,
     List<CallParticipantState>? callParticipants,
     DateTime? createdAt,
+    DateTime? updatedAt,
     DateTime? startsAt,
     DateTime? endedAt,
     DateTime? liveStartedAt,
@@ -179,6 +197,8 @@ class CallState extends Equatable {
     PeerConnectionStats? subscriberStats,
     LocalStats? localStats,
     List<int>? latencyHistory,
+    List<String>? blockedUserIds,
+    Map<String, Object>? custom,
   }) {
     return CallState._(
       currentUserId: currentUserId ?? this.currentUserId,
@@ -193,12 +213,14 @@ class CallState extends Equatable {
       isBackstage: isBackstage ?? this.isBackstage,
       settings: settings ?? this.settings,
       egress: egress ?? this.egress,
+      rtmpIngress: rtmpIngress ?? this.rtmpIngress,
       videoInputDevice: videoInputDevice ?? this.videoInputDevice,
       audioInputDevice: audioInputDevice ?? this.audioInputDevice,
       audioOutputDevice: audioOutputDevice ?? this.audioOutputDevice,
       ownCapabilities: ownCapabilities ?? this.ownCapabilities,
       callParticipants: callParticipants ?? this.callParticipants,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       startsAt: startsAt ?? this.startsAt,
       endedAt: endedAt ?? this.endedAt,
       liveStartedAt: liveStartedAt ?? this.liveStartedAt,
@@ -207,6 +229,8 @@ class CallState extends Equatable {
       subscriberStats: subscriberStats ?? this.subscriberStats,
       localStats: localStats ?? this.localStats,
       latencyHistory: latencyHistory ?? this.latencyHistory,
+      blockedUserIds: blockedUserIds ?? this.blockedUserIds,
+      custom: custom ?? this.custom,
     );
   }
 
@@ -223,12 +247,14 @@ class CallState extends Equatable {
         isBackstage,
         settings,
         egress,
+        rtmpIngress,
         videoInputDevice,
         audioInputDevice,
         audioOutputDevice,
         ownCapabilities,
         callParticipants,
         createdAt,
+        updatedAt,
         startsAt,
         endedAt,
         liveStartedAt,
@@ -237,6 +263,8 @@ class CallState extends Equatable {
         subscriberStats,
         localStats,
         latencyHistory,
+        blockedUserIds,
+        custom,
       ];
 
   @override

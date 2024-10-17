@@ -403,6 +403,7 @@ class StreamVideo extends Disposable {
         event.data.ringing) {
       _logger.v(() => '[onCoordinatorEvent] onCallRinging: ${event.data}');
       final call = _makeCallFromRinging(data: event.data);
+
       _state.incomingCall.value = call;
     } else if (event is CoordinatorConnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] connected ${event.userId}');
@@ -488,11 +489,7 @@ class StreamVideo extends Disposable {
         id: id,
       ),
       coordinatorClient: _client,
-      currentUser: _state.user,
-      setActiveCall: _state.setActiveCall,
-      setOutgoingCall: _state.setOutgoingCall,
-      getActiveCall: _state.getActiveCall,
-      getOutgoingCall: _state.getOutgoingCall,
+      streamVideo: this,
       retryPolicy: _options.retryPolicy,
       sdpPolicy: _options.sdpPolicy,
       preferences: preferences,
@@ -506,11 +503,7 @@ class StreamVideo extends Disposable {
     return Call.fromRinging(
       data: data,
       coordinatorClient: _client,
-      currentUser: _state.user,
-      setActiveCall: _state.setActiveCall,
-      setOutgoingCall: _state.setOutgoingCall,
-      getActiveCall: _state.getActiveCall,
-      getOutgoingCall: _state.getOutgoingCall,
+      streamVideo: this,
       retryPolicy: _options.retryPolicy,
       sdpPolicy: _options.sdpPolicy,
       preferences: preferences,
@@ -768,7 +761,6 @@ class StreamVideo extends Disposable {
       callType: callType,
       id: id,
     );
-
     final callResult = await call.get();
 
     return callResult.fold(

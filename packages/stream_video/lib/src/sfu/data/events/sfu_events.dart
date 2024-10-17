@@ -35,13 +35,15 @@ class SfuJoinResponseEvent extends SfuEvent {
   const SfuJoinResponseEvent({
     required this.callState,
     this.isReconnected = false,
+    this.fastReconnectDeadline = Duration.zero,
   });
 
   final SfuCallState callState;
   final bool isReconnected;
+  final Duration fastReconnectDeadline;
 
   @override
-  List<Object> get props => [callState, isReconnected];
+  List<Object> get props => [callState, isReconnected, fastReconnectDeadline];
 }
 
 @internal
@@ -140,7 +142,15 @@ class SfuParticipantUpdatedEvent extends SfuEvent {
 
   @override
   List<Object> get props => [callCid, participant];
-} 
+}
+
+@internal
+class SfuParticipantMigrationCompleteEvent extends SfuEvent {
+  const SfuParticipantMigrationCompleteEvent();
+
+  @override
+  List<Object> get props => [];
+}
 
 @internal
 class SfuParticipantLeftEvent extends SfuEvent {
