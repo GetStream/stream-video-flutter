@@ -118,9 +118,11 @@ StreamVideo(
 );
 ```
 
-### Anonymous / Guest users
+### Guest / Anonymous users
 
 For use-cases like live streaming or guest meeting, you may want to allow users to join a call without creating an account.
+
+#### Guest Users
 
 For these use-cases, the SDK has a guest endpoint which can be used to create a temporary user
 
@@ -142,3 +144,31 @@ final userInfo = client.currentUser;
 Please use the generated ID across your app.
 :::
 
+#### Anonymous Users
+
+```dart
+final anonymous = User.anonymous();
+final client = StreamVideo(
+  apiKey,
+  user: anonymous,
+);
+```
+
+Anonymous users don't establish an active web socket connection, therefore they won't receive any events. They are just able to watch a livestream or join a call.
+
+The token for an anonymous user should contain the `call_cids` field, which is an array of the call `cid`'s that the user is allowed to join.
+
+Here's an example JWT token payload for an anonymous user:
+
+```swift
+{
+  "iss": "@stream-io/dashboard",
+  "iat": 1726406693,
+  "exp": 1726493093,
+  "user_id": "!anon",
+  "role": "viewer",
+  "call_cids": [
+    "livestream:123"
+  ]
+}
+```
