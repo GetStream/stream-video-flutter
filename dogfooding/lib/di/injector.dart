@@ -41,6 +41,7 @@ Future<void> _backgroundVoipCallHandler() async {
       logPriority: Priority.verbose,
       muteAudioWhenInBackground: true,
       muteVideoWhenInBackground: true,
+      keepConnectionsAliveWhenInBackground: true,
     ),
     pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
       iosPushProvider: const StreamVideoPushProvider.apn(
@@ -195,6 +196,7 @@ StreamVideo _initStreamVideo(
       logPriority: Priority.verbose,
       muteAudioWhenInBackground: true,
       muteVideoWhenInBackground: true,
+      keepConnectionsAliveWhenInBackground: true,
     ),
     pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
       iosPushProvider: const StreamVideoPushProvider.apn(

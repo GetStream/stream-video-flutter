@@ -98,6 +98,8 @@ class _StreamDogFoodingAppContentState
   }
 
   void _tryConsumingIncomingCallFromTerminatedState() {
+    if (CurrentPlatform.isIos) return;
+
     if (_router.routerDelegate.navigatorKey.currentContext == null) {
       // App is not running yet. Postpone consuming after app is in the foreground
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {

@@ -50,6 +50,10 @@ When creating a `StreamVideo` instance, you need to pass a `pushNotificationMana
 ```dart
  StreamVideo(
       // ...
+       options: const StreamVideoOptions(
+        // It's important to keep connections alive when the app is in the background to properly handle incoming calls while the app is in the background
+        keepConnectionsAliveWhenInBackground: true,
+      ),
       // Make sure you initialise push notification manager
       pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
         iosPushProvider: const StreamVideoPushProvider.apn(
@@ -297,6 +301,9 @@ void initState() {
 }
 
 void _tryConsumingIncomingCallFromTerminatedState() {
+  // This is only relevant for Android.
+  if (CurrentPlatform.isIos) return;
+
   if (_navigatorKey.currentContext == null) {
     // App is not running yet. Postpone consuming after app is in the foreground
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
