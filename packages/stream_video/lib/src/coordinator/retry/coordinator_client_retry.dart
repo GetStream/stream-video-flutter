@@ -567,6 +567,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     StreamTranscriptionSettings? transcription,
     StreamBackstageSettings? backstage,
     StreamGeofencingSettings? geofencing,
+    StreamLimitsSettings? limits,
   }) {
     return _retryManager.execute(
       () => _delegate.updateCall(
@@ -580,6 +581,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
         transcription: transcription,
         backstage: backstage,
         geofencing: geofencing,
+        limits: limits,
       ),
       (error, nextAttemptDelay) async {
         _logRetry('updateCall', error, nextAttemptDelay);

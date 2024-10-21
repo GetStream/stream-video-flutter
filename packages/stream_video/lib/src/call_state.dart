@@ -45,50 +45,6 @@ class CallState extends Equatable {
     );
   }
 
-  factory CallState.fromMetadata({
-    required String currentUserId,
-    required StreamCallCid callCid,
-    required bool ringing,
-    required CallMetadata metadata,
-  }) {
-    return CallState._(
-      currentUserId: currentUserId,
-      callCid: callCid,
-      createdByUserId: metadata.details.createdBy.id,
-      isRingingFlow: ringing,
-      sessionId: '',
-      status: metadata.toCallStatus(currentUserId, ringing: ringing),
-      isRecording: metadata.details.recording,
-      isBroadcasting: metadata.details.broadcasting,
-      isTranscribing: metadata.details.transcribing,
-      isBackstage: metadata.details.backstage,
-      settings: metadata.settings,
-      egress: metadata.details.egress,
-      rtmpIngress: metadata.details.rtmpIngress,
-      videoInputDevice: null,
-      audioInputDevice: null,
-      audioOutputDevice: null,
-      ownCapabilities: List.unmodifiable(metadata.details.ownCapabilities),
-      callParticipants: List.unmodifiable(
-        metadata.toCallParticipants(
-          currentUserId,
-        ),
-      ),
-      createdAt: null,
-      updatedAt: null,
-      startsAt: null,
-      endedAt: null,
-      liveStartedAt: null,
-      liveEndedAt: null,
-      publisherStats: null,
-      subscriberStats: null,
-      localStats: null,
-      latencyHistory: const [],
-      blockedUserIds: List.unmodifiable(metadata.details.blockedUserIds),
-      custom: metadata.details.custom,
-    );
-  }
-
   /// TODO
   const CallState._({
     required this.currentUserId,
@@ -234,6 +190,28 @@ class CallState extends Equatable {
     );
   }
 
+  CallState copyFromMetadata(CallMetadata metadata) {
+    return copyWith(
+      isBackstage: metadata.details.backstage,
+      isRecording: metadata.details.recording,
+      isTranscribing: metadata.details.transcribing,
+      isBroadcasting: metadata.details.broadcasting,
+      blockedUserIds: metadata.details.blockedUserIds.toList(),
+      createdAt: metadata.details.createdAt,
+      updatedAt: metadata.details.updatedAt,
+      startsAt: metadata.details.startsAt,
+      endedAt: metadata.details.endedAt,
+      createdByUserId: metadata.details.createdBy.id,
+      custom: metadata.details.custom,
+      egress: metadata.details.egress,
+      rtmpIngress: metadata.details.rtmpIngress,
+      settings: metadata.settings,
+      ownCapabilities: metadata.details.ownCapabilities.toList(),
+      liveStartedAt: metadata.session.liveStartedAt,
+      liveEndedAt: metadata.session.liveEndedAt,
+    );
+  }
+
   @override
   List<Object?> get props => [
         currentUserId,
@@ -296,26 +274,52 @@ extension on CallMetadata {
     }
   }
 
-  List<CallParticipantState> toCallParticipants(String currentUserId) {
+  List<CallParticipantState> toCallParticipants(
+    CallState state, {
+    bool fromMembers = false,
+  }) {
     final result = <CallParticipantState>[];
-    for (final userId in members.keys) {
+
+    final participantsData = fromMembers
+        ? members.values
+            .map((e) => (userId: e.userId, userSessionId: null))
+            .toList()
+        : session.participants.values
+            .map((e) => (userId: e.userId, userSessionId: e.userSessionId))
+            .toList();
+
+    for (final participant in participantsData) {
+      final userId = participant.userId;
       final member = members[userId];
       final user = users[userId];
-      final isLocal = currentUserId == userId;
+      final currentState =
+          state.callParticipants.firstWhereOrNull((it) => it.userId == userId);
+      final isLocal = state.currentUserId == userId;
+
       result.add(
-        CallParticipantState(
-          userId: userId,
-          roles: member?.roles ?? user?.roles ?? [],
-          name: user?.name ?? '',
-          custom: user?.custom ?? {},
-          image: user?.image ?? '',
-          sessionId: '',
-          trackIdPrefix: '',
-          isLocal: isLocal,
-          isOnline: !isLocal,
-        ),
+        currentState?.copyWith(
+              roles: member?.roles ?? user?.roles ?? [],
+              name: user?.name ?? '',
+              custom: user?.custom ?? {},
+              image: user?.image ?? '',
+              sessionId: participant.userSessionId,
+              isLocal: isLocal,
+              isOnline: !isLocal,
+            ) ??
+            CallParticipantState(
+              userId: userId,
+              roles: member?.roles ?? user?.roles ?? [],
+              name: user?.name ?? '',
+              custom: user?.custom ?? {},
+              image: user?.image ?? '',
+              sessionId: participant.userSessionId ?? '',
+              trackIdPrefix: '',
+              isLocal: isLocal,
+              isOnline: !isLocal,
+            ),
       );
     }
+
     return result;
   }
 }

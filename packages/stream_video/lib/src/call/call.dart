@@ -345,7 +345,7 @@ class Call {
 
   Future<void> _onStateChanged(CallState state) async {
     final status = state.status;
-    _logger.v(() => '[onStateChanged] status: $status');
+    // _logger.v(() => '[onStateChanged] status: $status');
 
     if (status is CallStatusDisconnected) {
       await _clear('status-disconnected');
@@ -366,45 +366,55 @@ class Call {
           '[onCoordinatorEvent] event.type: ${event.runtimeType}, calStatus: ${state.value.status}',
     );
 
-    if (event is CoordinatorCallPermissionRequestEvent) {
-      // Notify the client about the permission request.
-      return onPermissionRequest?.call(event);
-    }
-
-    if (event is CoordinatorCallRejectedEvent) {
-      return _stateManager.coordinatorCallRejected(event);
-    } else if (event is CoordinatorCallAcceptedEvent) {
-      return _stateManager.coordinatorCallAccepted(event);
-    } else if (event is CoordinatorCallEndedEvent) {
-      return _stateManager.coordinatorCallEnded(event);
-    } else if (event is CoordinatorCallPermissionsUpdatedEvent) {
-      return _stateManager.coordinatorCallPermissionsUpdated(event);
-    } else if (event is CoordinatorCallRecordingStartedEvent) {
-      return _stateManager.coordinatorCallRecordingStarted(event);
-    } else if (event is CoordinatorCallRecordingStoppedEvent) {
-      return _stateManager.coordinatorCallRecordingStopped(event);
-    } else if (event is CoordinatorCallTranscriptionStartedEvent) {
-      return _stateManager.coordinatorCallTranscriptionStarted(event);
-    } else if (event is CoordinatorCallTranscriptionStoppedEvent) {
-      return _stateManager.coordinatorCallTranscriptionStopped(event);
-    } else if (event is CoordinatorCallBroadcastingStartedEvent) {
-      return _stateManager.coordinatorCallBroadcastingStarted(event);
-    } else if (event is CoordinatorCallBroadcastingStoppedEvent) {
-      return _stateManager.coordinatorCallBroadcastingStopped(event);
-    } else if (event is CoordinatorCallReactionEvent) {
-      _reactionTimers.add(
-        Timer(_preferences.reactionAutoDismissTime, () {
-          _stateManager.resetCallReaction(event.user.id);
-        }),
-      );
-
-      return _stateManager.coordinatorCallReaction(event);
-    } else if (event is CoordinatorCallUpdatedEvent) {
-      //TODO update CallDetails, settings and capabilitiesByRole
-    } else if (event is CoordinatorCallUserBlockedEvent) {
-      //TODO
-    } else if (event is CoordinatorCallUserUnblockedEvent) {
-      //TODO
+    switch (event) {
+      case CoordinatorCallPermissionRequestEvent _:
+        // Notify the client about the permission request.
+        return onPermissionRequest?.call(event);
+      case CoordinatorCallRejectedEvent _:
+        return _stateManager.coordinatorCallRejected(event);
+      case CoordinatorCallAcceptedEvent _:
+        return _stateManager.coordinatorCallAccepted(event);
+      case CoordinatorCallEndedEvent _:
+        return _stateManager.coordinatorCallEnded(event);
+      case CoordinatorCallPermissionsUpdatedEvent _:
+        return _stateManager.coordinatorCallPermissionsUpdated(event);
+      case CoordinatorCallRecordingStartedEvent _:
+        return _stateManager.coordinatorCallRecordingStarted(event);
+      case CoordinatorCallRecordingStoppedEvent _:
+        return _stateManager.coordinatorCallRecordingStopped(event);
+      case CoordinatorCallRecordingFailedEvent _:
+        return _stateManager.coordinatorCallRecordingFailed(event);
+      case CoordinatorCallTranscriptionStartedEvent _:
+        return _stateManager.coordinatorCallTranscriptionStarted(event);
+      case CoordinatorCallTranscriptionStoppedEvent _:
+        return _stateManager.coordinatorCallTranscriptionStopped(event);
+      case CoordinatorCallTranscriptionFailedEvent _:
+        return _stateManager.coordinatorCallTranscriptionFailed(event);
+      case CoordinatorCallBroadcastingStartedEvent _:
+        return _stateManager.coordinatorCallBroadcastingStarted(event);
+      case CoordinatorCallBroadcastingStoppedEvent _:
+        return _stateManager.coordinatorCallBroadcastingStopped(event);
+      case CoordinatorCallBroadcastingFailedEvent _:
+        return _stateManager.coordinatorCallBroadcastingFailed(event);
+      case CoordinatorCallRingingEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+      case CoordinatorCallMissedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+      case CoordinatorCallSessionEndedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+      case CoordinatorCallSessionStartedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+      case CoordinatorCallUpdatedEvent _:
+        return _stateManager.callMetadataChanged(event.metadata);
+      case CoordinatorCallReactionEvent _:
+        _reactionTimers.add(
+          Timer(_preferences.reactionAutoDismissTime, () {
+            _stateManager.resetCallReaction(event.user.id);
+          }),
+        );
+        return _stateManager.coordinatorCallReaction(event);
+      default:
+        break;
     }
   }
 
@@ -566,11 +576,6 @@ class Call {
       final performingFastReconnect =
           _reconnectStrategy == SfuReconnectionStrategy.fast;
 
-      _stateManager.lifecycleCallConnecting(
-        attempt: _reconnectAttempts,
-        isFastReconnectAttempt: performingFastReconnect,
-      );
-
       final result = await _awaitIfNeeded();
       if (result.isFailure) {
         _logger.e(() => '[join] waiting failed: $result');
@@ -580,6 +585,11 @@ class Call {
 
         return result;
       }
+
+      _stateManager.lifecycleCallConnecting(
+        attempt: _reconnectAttempts,
+        isFastReconnectAttempt: performingFastReconnect,
+      );
 
       final joinedResult = await _joinIfNeeded(
         connectOptions: connectOptions,
@@ -803,6 +813,7 @@ class Call {
     StreamTranscriptionSettings? transcription,
     StreamBackstageSettings? backstage,
     StreamGeofencingSettings? geofencing,
+    StreamLimitsSettings? limits,
   }) {
     return _coordinatorClient.updateCall(
       callCid: callCid,
@@ -815,6 +826,7 @@ class Call {
       transcription: transcription,
       backstage: backstage,
       geofencing: geofencing,
+      limits: limits,
     );
   }
 
@@ -834,10 +846,10 @@ class Call {
     _subscriptions.add(
       _idSessionEvents,
       session.events.listen((event) {
-        _logger.log(
-          event.logPriority,
-          () => '[listenSfuEvent] event.type: ${event.runtimeType}',
-        );
+        // _logger.log(
+        //   event.logPriority,
+        //   () => '[listenSfuEvent] event.type: ${event.runtimeType}',
+        // );
         event.mapToCallEvent(state.value).emitIfNotNull(_callEvents);
         _onSfuEvent(event);
       }),
@@ -975,9 +987,13 @@ class Call {
   }
 
   Future<void> _onSfuEvent(SfuEvent sfuEvent) async {
-    _logger.w(() => '[onSfuEvent] event: $sfuEvent');
+    // _logger.w(() => '[onSfuEvent] event: $sfuEvent');
 
-    if (sfuEvent is SfuGoAwayEvent) {
+    if (sfuEvent is SfuSocketDisconnected) {
+      // await _reconnect(sfuEvent.reason);
+    } else if (sfuEvent is SfuSocketFailed) {
+      // await _reconnect(sfuEvent.error);
+    } else if (sfuEvent is SfuGoAwayEvent) {
       _logger.w(() => '[onSfuEvent] go away, migrating sfu');
       await _reconnect(SfuReconnectionStrategy.migrate);
     }
@@ -1466,8 +1482,7 @@ class Call {
     bool? notify,
     DateTime? startsAt,
     StreamBackstageSettings? backstage,
-    int? maxDuration,
-    int? maxParticipants,
+    StreamLimitsSettings? limits,
     Map<String, Object> custom = const {},
   }) async {
     _logger.d(
@@ -1481,17 +1496,9 @@ class Call {
       await _streamVideo.state.setOutgoingCall(this);
     }
 
-    LimitsSettingsRequest? limits;
-    if (maxDuration != null || maxParticipants != null) {
-      limits = LimitsSettingsRequest(
-        maxDurationSeconds: maxDuration,
-        maxParticipants: maxParticipants,
-      );
-    }
-
     final settingsOverride = CallSettingsRequest(
       backstage: backstage?.toOpenDto(),
-      limits: limits,
+      limits: limits?.toOpenDto(),
     );
 
     final response = await _coordinatorClient.getOrCreateCall(
@@ -1724,6 +1731,10 @@ class Call {
     required bool enabled,
     CameraConstraints? constraints,
   }) async {
+    if (enabled && !hasPermission(CallPermission.sendVideo)) {
+      return Result.error('Missing permission to send video');
+    }
+
     final result =
         await _session?.setCameraEnabled(enabled, constraints: constraints) ??
             Result.error('Session is null');
@@ -1746,6 +1757,10 @@ class Call {
     required bool enabled,
     AudioConstraints? constraints,
   }) async {
+    if (enabled && !hasPermission(CallPermission.sendAudio)) {
+      return Result.error('Missing permission to send video');
+    }
+
     final result = await _session?.setMicrophoneEnabled(
           enabled,
           constraints: constraints,

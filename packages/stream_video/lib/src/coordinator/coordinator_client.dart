@@ -240,6 +240,7 @@ abstract class CoordinatorClient {
     StreamTranscriptionSettings? transcription,
     StreamBackstageSettings? backstage,
     StreamGeofencingSettings? geofencing,
+    StreamLimitsSettings? limits,
   });
 
   Future<Result<GuestCreatedData>> loadGuest({
