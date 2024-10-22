@@ -184,14 +184,18 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       final storedToken = _sharedPreferences.getString(tokenKey);
       if (storedToken == token) return;
 
-      await _sharedPreferences.setString(tokenKey, token);
-
-      _client.createDevice(
+      _client
+          .createDevice(
         id: token,
         voipToken: isVoIP,
         pushProvider: pushProvider.type,
         pushProviderName: pushProvider.name,
-      );
+      )
+          .then((result) {
+        if (result is Success) {
+          _sharedPreferences.setString(tokenKey, token);
+        }
+      });
     }
 
     if (CurrentPlatform.isIos && registerApnDeviceToken) {
