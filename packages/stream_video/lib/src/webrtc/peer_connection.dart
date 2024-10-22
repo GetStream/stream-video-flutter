@@ -37,9 +37,8 @@ typedef OnIceCandidate = void Function(
 /// {@template onIceCandidate}
 /// Handler whenever [rtc.RTCIceConnectionState]s is [rtc.RTCIceConnectionState.RTCIceConnectionStateFailed] or [rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected].
 /// {@endtemplate}
-typedef OnFailure = void Function(
+typedef OnIssue = void Function(
   StreamPeerConnection,
-  rtc.RTCIceConnectionState,
 );
 
 /// {@template onTrack}
@@ -91,7 +90,7 @@ class StreamPeerConnection extends Disposable {
   /// {@macro onIceCandidate}
   OnIceCandidate? onIceCandidate;
 
-  OnFailure? onFailure;
+  OnIssue? onIssue;
 
   /// {@macro onTrack}
   OnTrack? onTrack;
@@ -327,8 +326,8 @@ class StreamPeerConnection extends Disposable {
       case rtc.RTCIceConnectionState.RTCIceConnectionStateClosed:
         return _stopObservingStats();
       case rtc.RTCIceConnectionState.RTCIceConnectionStateFailed:
-        onFailure?.call(this, state);
-        return _stopObservingStats();
+      case rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected:
+        onIssue?.call(this);
       default:
         break;
     }

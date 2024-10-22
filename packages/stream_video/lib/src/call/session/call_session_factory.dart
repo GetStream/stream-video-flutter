@@ -27,7 +27,7 @@ class CallSessionFactory {
     String? sessionId,
     required CallCredentials credentials,
     required CallStateNotifier stateManager,
-    required OnPeerConnectionFailure onPeerConnectionFailure,
+    required OnPeerConnectionIssue onPeerConnectionFailure,
   }) async {
     final finalSessionId = sessionId ?? const Uuid().v4();
     _logger.d(() => '[makeCallSession] sessionId: $finalSessionId($sessionId)');
@@ -54,7 +54,7 @@ class CallSessionFactory {
       config: sessionConfig,
       stateManager: stateManager,
       sdpEditor: sdpEditor,
-      onPeerConnectionFailure: onPeerConnectionFailure,
+      onPeerConnectionIssue: onPeerConnectionFailure,
     );
   }
 

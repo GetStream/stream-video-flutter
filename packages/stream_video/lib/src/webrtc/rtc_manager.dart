@@ -55,7 +55,7 @@ class RtcManager extends Disposable {
   final StreamPeerConnection publisher;
   final StreamPeerConnection subscriber;
 
-  final publishedTracks = < /*trackId*/ String, RtcTrack>{};
+  final tracks = < /*trackId*/ String, RtcTrack>{};
 
   set onPublisherIceCandidate(OnIceCandidate? cb) {
     publisher.onIceCandidate = cb;
@@ -65,12 +65,12 @@ class RtcManager extends Disposable {
     subscriber.onIceCandidate = cb;
   }
 
-  set onSubscriberFailure(OnFailure? cb) {
-    subscriber.onFailure = cb;
+  set onSubscriberIssue(OnIssue? cb) {
+    subscriber.onIssue = cb;
   }
 
-  set onPublisherFailure(OnFailure? cb) {
-    publisher.onFailure = cb;
+  set onPublisherIssue(OnIssue? cb) {
+    publisher.onIssue = cb;
   }
 
   set onRenegotiationNeeded(OnRenegotiationNeeded? cb) {
@@ -176,12 +176,12 @@ class RtcManager extends Disposable {
     );
 
     onRemoteTrackReceived?.call(pc, remoteTrack);
-    publishedTracks[remoteTrack.trackId] = remoteTrack;
+    tracks[remoteTrack.trackId] = remoteTrack;
     _logger.v(() => '[onRemoteTrack] published: ${remoteTrack.trackId}');
   }
 
   Future<void> unpublishTrack({required String trackId}) async {
-    final publishedTrack = publishedTracks.remove(trackId);
+    final publishedTrack = tracks.remove(trackId);
     if (publishedTrack == null) {
       _logger.w(() => '[unpublishTrack] rejected (track not found): $trackId');
       return;
@@ -226,11 +226,11 @@ class RtcManager extends Disposable {
   @override
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
-    for (final trackSid in [...publishedTracks.keys]) {
+    for (final trackSid in [...tracks.keys]) {
       await unpublishTrack(trackId: trackSid);
     }
 
-    publishedTracks.clear();
+    tracks.clear();
 
     onLocalTrackMuted = null;
     onLocalTrackPublished = null;
@@ -245,12 +245,12 @@ class RtcManager extends Disposable {
 
   RtcTrack? getTrack(String trackId) {
     _logger.d(() => '[getTrack] trackId: $trackId');
-    return publishedTracks[trackId];
+    return tracks[trackId];
   }
 
   List<RtcTrack> getTracks(String trackIdPrefix) {
     return [
-      ...publishedTracks.values.where((track) {
+      ...tracks.values.where((track) {
         return track.trackIdPrefix == trackIdPrefix;
       }),
     ];
@@ -259,7 +259,11 @@ class RtcManager extends Disposable {
 
 extension PublisherRtcManager on RtcManager {
   List<RtcLocalTrack> getPublisherTracks() {
-    return [...publishedTracks.values.whereType<RtcLocalTrack>()];
+    return [...tracks.values.whereType<RtcLocalTrack>()];
+  }
+
+  List<RtcRemoteTrack> getSubscriberTracks() {
+    return [...tracks.values.whereType<RtcRemoteTrack>()];
   }
 
   RtcLocalTrack? getPublisherTrackByType(SfuTrackType trackType) {
@@ -356,7 +360,7 @@ extension PublisherRtcManager on RtcManager {
     // Adding early as we need to access it in the onPublisherNegotiationNeeded
     // callback.
     _logger.i(() => '[publishAudioTrack] track: $track');
-    publishedTracks[track.trackId] = track;
+    tracks[track.trackId] = track;
 
     final transceiverResult = await publisher.addAudioTransceiver(
       stream: track.mediaStream,
@@ -382,7 +386,7 @@ extension PublisherRtcManager on RtcManager {
 
     // Notify listeners.
     onLocalTrackPublished?.call(updatedTrack);
-    publishedTracks[updatedTrack.trackId] = updatedTrack;
+    tracks[updatedTrack.trackId] = updatedTrack;
 
     return Result.success(updatedTrack);
   }
@@ -399,7 +403,7 @@ extension PublisherRtcManager on RtcManager {
     // Adding early as we need to access it in the onPublisherNegotiationNeeded
     // callback.
     _logger.i(() => '[publishVideoTrack] track: $track');
-    publishedTracks[track.trackId] = track;
+    tracks[track.trackId] = track;
 
     // use constraints passed to getUserMedia by default
     final dimension = track.getVideoDimension();
@@ -456,13 +460,13 @@ extension PublisherRtcManager on RtcManager {
 
     // Notify listeners.
     onLocalTrackPublished?.call(updatedTrack);
-    publishedTracks[updatedTrack.trackId] = updatedTrack;
+    tracks[updatedTrack.trackId] = updatedTrack;
 
     return Result.success(updatedTrack);
   }
 
   Future<Result<RtcLocalTrack>> muteTrack({required String trackId}) async {
-    final track = publishedTracks[trackId];
+    final track = tracks[trackId];
     if (track == null) {
       _logger.w(() => 'muteTrack: track not found');
       return Result.error('Track not found');
@@ -484,7 +488,7 @@ extension PublisherRtcManager on RtcManager {
   }
 
   Future<Result<RtcLocalTrack>> unmuteTrack({required String trackId}) async {
-    final track = publishedTracks[trackId];
+    final track = tracks[trackId];
     if (track == null) {
       _logger.w(() => 'unmuteTrack: track not found');
       return Result.error('Track not found');
@@ -498,7 +502,7 @@ extension PublisherRtcManager on RtcManager {
     // If the track was released before, restart it.
     if (track.stopTrackOnMute) {
       final updatedTrack = await track.recreate();
-      publishedTracks[trackId] = updatedTrack;
+      tracks[trackId] = updatedTrack;
       onLocalTrackMuted?.call(updatedTrack, false);
 
       return Result.success(updatedTrack);
@@ -581,7 +585,7 @@ extension PublisherRtcManager on RtcManager {
       ),
     );
 
-    publishedTracks[updatedTrack.trackId] = updatedTrack;
+    tracks[updatedTrack.trackId] = updatedTrack;
     return Result.success(updatedTrack);
   }
 }
@@ -605,7 +609,7 @@ extension RtcManagerTrackHelper on RtcManager {
     }
 
     final updatedTrack = await track.flipCamera();
-    publishedTracks[updatedTrack.trackId] = updatedTrack;
+    tracks[updatedTrack.trackId] = updatedTrack;
 
     return Result.success(updatedTrack);
   }
@@ -625,7 +629,7 @@ extension RtcManagerTrackHelper on RtcManager {
     }
 
     final updatedTrack = await track.selectVideoInput(device);
-    publishedTracks[updatedTrack.trackId] = updatedTrack;
+    tracks[updatedTrack.trackId] = updatedTrack;
 
     return Result.success(updatedTrack);
   }
@@ -645,7 +649,7 @@ extension RtcManagerTrackHelper on RtcManager {
     }
 
     final updatedTrack = await track.selectAudioInput(device);
-    publishedTracks[updatedTrack.trackId] = updatedTrack;
+    tracks[updatedTrack.trackId] = updatedTrack;
 
     return Result.success(updatedTrack);
   }
@@ -654,7 +658,7 @@ extension RtcManagerTrackHelper on RtcManager {
     required RtcMediaDevice device,
   }) async {
     // Get all remote audio tracks.
-    final audioTracks = publishedTracks.values
+    final audioTracks = tracks.values
         .whereType<RtcRemoteTrack>()
         .where((it) => it.trackType == SfuTrackType.audio);
 
@@ -663,7 +667,7 @@ extension RtcManagerTrackHelper on RtcManager {
     if (CurrentPlatform.isWeb) {
       for (final audioTrack in audioTracks) {
         final updatedTrack = audioTrack.setSinkId(device.id);
-        publishedTracks[updatedTrack.trackId] = updatedTrack;
+        tracks[updatedTrack.trackId] = updatedTrack;
       }
 
       return const Result.success(none);
@@ -685,7 +689,7 @@ extension RtcManagerTrackHelper on RtcManager {
       await rtc.Helper.selectAudioOutput(device.id);
       for (final audioTrack in audioTracks) {
         final updatedTrack = audioTrack.copyWith(audioSinkId: device.id);
-        publishedTracks[updatedTrack.trackId] = updatedTrack;
+        tracks[updatedTrack.trackId] = updatedTrack;
       }
 
       return const Result.success(none);

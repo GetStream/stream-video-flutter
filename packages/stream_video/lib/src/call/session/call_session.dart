@@ -41,7 +41,7 @@ const _tag = 'SV:CallSession';
 const _debounceDuration = Duration(milliseconds: 200);
 const _migrationCompleteEventTimeout = Duration(seconds: 7);
 
-typedef OnPeerConnectionFailure = void Function();
+typedef OnPeerConnectionIssue = void Function(StreamPeerConnection pc);
 
 class CallSession extends Disposable {
   CallSession({
@@ -50,7 +50,7 @@ class CallSession extends Disposable {
     required this.sessionId,
     required this.config,
     required this.stateManager,
-    required this.onPeerConnectionFailure,
+    required this.onPeerConnectionIssue,
     required SdpEditor sdpEditor,
     this.joinResponseTimeout = const Duration(seconds: 5),
   })  : sfuClient = SfuClient(
@@ -82,7 +82,7 @@ class CallSession extends Disposable {
   final SfuClient sfuClient;
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
-  final OnPeerConnectionFailure onPeerConnectionFailure;
+  final OnPeerConnectionIssue onPeerConnectionIssue;
 
   final Duration joinResponseTimeout;
   final BehaviorSubject<Map<String, SfuSubscriptionDetails>>
@@ -280,8 +280,8 @@ class CallSession extends Disposable {
       )
         ..onPublisherIceCandidate = _onLocalIceCandidate
         ..onSubscriberIceCandidate = _onLocalIceCandidate
-        ..onSubscriberFailure = _onSubsciberFailure
-        ..onPublisherFailure = _onPublisherFailure
+        ..onPublisherIssue = onPeerConnectionIssue
+        ..onSubscriberIssue = onPeerConnectionIssue
         ..onLocalTrackMuted = _onLocalTrackMuted
         ..onLocalTrackPublished = _onLocalTrackPublished
         ..onRenegotiationNeeded = _onRenegotiationNeeded
@@ -374,6 +374,13 @@ class CallSession extends Disposable {
         );
 
         await rtcManager?.publisher.pc.restartIce();
+
+        final announcedTracks =
+            rtcManager!.tracks.values.whereType<RtcRemoteTrack>().toList();
+
+        for (final track in announcedTracks) {
+          await _onRemoteTrackReceived(rtcManager!.publisher, track);
+        }
 
         _logger.d(() => '[fastReconnect] completed');
         return Result.success(
@@ -675,20 +682,6 @@ class CallSession extends Disposable {
       ),
     );
     _logger.v(() => '[onLocalIceCandidate] result: $result');
-  }
-
-  Future<void> _onSubsciberFailure(
-    StreamPeerConnection pc,
-    rtc.RTCIceConnectionState state,
-  ) async {
-    onPeerConnectionFailure();
-  }
-
-  Future<void> _onPublisherFailure(
-    StreamPeerConnection pc,
-    rtc.RTCIceConnectionState state,
-  ) async {
-    onPeerConnectionFailure();
   }
 
   Future<void> _onRenegotiationNeeded(StreamPeerConnection pc) async {
