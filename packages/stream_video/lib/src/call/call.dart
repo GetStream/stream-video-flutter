@@ -1794,9 +1794,6 @@ class Call {
     required bool enabled,
     AudioConstraints? constraints,
   }) async {
-    await _reconnect(SfuReconnectionStrategy.migrate);
-    return Result.success(none);
-
     if (enabled && !hasPermission(CallPermission.sendAudio)) {
       return Result.error('Missing permission to send video');
     }
