@@ -217,6 +217,7 @@ class Call {
 
   CallCredentials? _credentials;
   CallSession? _session;
+  CallSession? _previousSession;
 
   int _reconnectAttempts = 0;
   Duration _fastReconnectDeadline = Duration.zero;
@@ -589,7 +590,7 @@ class Call {
 
       _stateManager.lifecycleCallConnecting(
         attempt: _reconnectAttempts,
-        isFastReconnectAttempt: performingFastReconnect,
+        strategy: _reconnectStrategy,
       );
 
       final joinedResult = await _joinIfNeeded(
@@ -606,13 +607,14 @@ class Call {
 
       _credentials = joinedResult.data;
 
-      final previousSession = _session;
-      final isWsHealthy = previousSession?.sfuWS.isConnected ?? false;
+      _previousSession = _session;
+
+      final isWsHealthy = _previousSession?.sfuWS.isConnected ?? false;
 
       final reconnectDetails =
           _reconnectStrategy == SfuReconnectionStrategy.unspecified
               ? null
-              : previousSession?.getReconnectDetails(_reconnectStrategy);
+              : _previousSession?.getReconnectDetails(_reconnectStrategy);
 
       if (performingRejoin || performingMigration || !isWsHealthy) {
         _logger.v(
@@ -623,7 +625,7 @@ class Call {
         _session = await _sessionFactory.makeCallSession(
           // a new session_id is necessary for the REJOIN strategy.
           // we use the previous session_id if available
-          sessionId: performingRejoin ? null : previousSession?.sessionId,
+          sessionId: performingRejoin ? null : _previousSession?.sessionId,
           credentials: _credentials!,
           stateManager: _stateManager,
           onPeerConnectionFailure: (pc) async {
@@ -640,10 +642,10 @@ class Call {
               '[join] reusing previous sfu session (rejoin: $performingRejoin, migration: $performingMigration, wsHealthy: $isWsHealthy)',
         );
 
-        _session = previousSession;
+        _session = _previousSession;
       }
 
-      if (_session?.sessionSeq != previousSession?.sessionSeq) {
+      if (_session?.sessionSeq != _previousSession?.sessionSeq) {
         _logger.d(() => '[join] starting sfu session');
 
         final sessionResult = await _startSession(
@@ -679,20 +681,24 @@ class Call {
 
       if (performingRejoin) {
         _logger.v(() => '[join] leaving previous session');
-        previousSession?.leave(
+        _previousSession?.leave(
           reason:
               'Closing previous WS after reconnect with strategy: ${_reconnectStrategy.name}',
         );
-        await previousSession?.dispose();
+        await _previousSession?.dispose();
       } else if (!isWsHealthy) {
         _logger.v(() => '[join] closing unhealthy WS');
-        await previousSession?.close(
+        await _previousSession?.close(
           StreamWebSocketCloseCode.disposeOldSocket,
           closeReason: 'Closing unhealthy WS after reconnect',
         );
       }
 
-      _stateManager.lifecycleCallConnected();
+      // For migration we have to wait for confirmation before we can complete the flow
+      if (_reconnectStrategy != SfuReconnectionStrategy.migrate) {
+        _previousSession = null;
+        _stateManager.lifecycleCallConnected();
+      }
 
       _logger.v(() => '[join] apllying connect options');
       await _applyConnectOptions();
@@ -1041,13 +1047,13 @@ class Call {
       _reconnectStrategy = strategy;
 
       do {
-        if (strategy == SfuReconnectionStrategy.fast) {
+        if (strategy != SfuReconnectionStrategy.migrate) {
           _reconnectAttempts++;
         }
 
         _stateManager.lifecycleCallConnecting(
           attempt: _reconnectAttempts,
-          isFastReconnectAttempt: strategy == SfuReconnectionStrategy.fast,
+          strategy: strategy,
         );
 
         _logger.d(
@@ -1117,7 +1123,18 @@ class Call {
   Future<void> _reconnectMigrate() async {
     _reconnectStrategy = SfuReconnectionStrategy.migrate;
     await _join();
-    await _session?.waitForMigrationComplete();
+    final result = await _session?.waitForMigrationComplete();
+
+    await _previousSession?.close(StreamWebSocketCloseCode.disposeOldSocket);
+
+    result?.fold(
+      success: (_) {
+        _stateManager.lifecycleCallConnected();
+      },
+      failure: (_) {
+        _reconnectStrategy = SfuReconnectionStrategy.rejoin;
+      },
+    );
   }
 
   Future<InternetStatus> awaitNetworkAvailable() async {
@@ -1777,6 +1794,9 @@ class Call {
     required bool enabled,
     AudioConstraints? constraints,
   }) async {
+    await _reconnect(SfuReconnectionStrategy.migrate);
+    return Result.success(none);
+
     if (enabled && !hasPermission(CallPermission.sendAudio)) {
       return Result.error('Missing permission to send video');
     }

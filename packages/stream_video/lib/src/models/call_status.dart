@@ -37,6 +37,10 @@ abstract class CallStatus extends Equatable {
     );
   }
 
+  factory CallStatus.migrating() {
+    return const CallStatusMigrating();
+  }
+
   factory CallStatus.reconnectingFailed() {
     return CallStatusReconnectionFailed();
   }

@@ -4,6 +4,7 @@ import 'package:state_notifier/state_notifier.dart';
 import '../../../../stream_video.dart';
 import '../../../errors/video_error.dart';
 import '../../../models/call_received_data.dart';
+import '../../../sfu/data/models/sfu_error.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordNotifier');
 
@@ -248,14 +249,17 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
 
   void lifecycleCallConnecting({
     required int attempt,
-    bool isFastReconnectAttempt = false,
+    SfuReconnectionStrategy? strategy,
   }) {
     _logger.d(() => '[lifecycleCallConnectingAction] state: $state');
     final CallStatus status;
-    if (attempt > 0) {
+
+    if (strategy == SfuReconnectionStrategy.migrate) {
+      status = CallStatus.migrating();
+    } else if (strategy != SfuReconnectionStrategy.unspecified) {
       status = CallStatus.reconnecting(
         attempt,
-        isFastReconnectAttempt: isFastReconnectAttempt,
+        isFastReconnectAttempt: strategy == SfuReconnectionStrategy.fast,
       );
     } else {
       status = CallStatus.connecting();
@@ -294,14 +298,6 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     _logger.d(() => '[lifecycleCallConnected] state: $state');
     state = state.copyWith(
       status: CallStatus.connected(),
-    );
-  }
-
-  void lifecycleCallMigrating() {
-    _logger.d(() => '[lifecycleCallMigrating] state: $state');
-    state = state.copyWith(
-      status: const CallStatusMigrating(),
-      callParticipants: const [],
     );
   }
 
