@@ -81,7 +81,10 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         _idCallRejected,
         client.events.on<CoordinatorCallRejectedEvent>(
           (event) async {
-            endCallByCid(event.callCid.toString());
+            if (event.rejectedByUserId == event.metadata.details.createdBy.id ||
+                event.rejectedByUserId != streamVideo.currentUser.id) {
+              endCallByCid(event.callCid.toString());
+            }
           },
         ),
       );
@@ -90,11 +93,14 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         _idCallAccepted,
         client.events.on<CoordinatorCallAcceptedEvent>(
           (event) async {
+            if (event.acceptedByUserId != streamVideo.currentUser.id) return;
+
             // end CallKit call on other devices if the call was accepted on one of them
             if (streamVideo.activeCall?.state.value.status
                 is! CallStatusActive) {
               await endCallByCid(event.callCid.toString());
             }
+
             // if the call was accepted on the same device, end the CallKit call silently
             // (in case it was accepted from the app and not from the CallKit UI)
             else {

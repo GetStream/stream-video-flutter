@@ -35,10 +35,11 @@ mixin StateSfuMixin on StateNotifier<CallState> {
         ),
         callParticipants: callParticipants,
       );
+    } else {
+      state = state.copyWith(
+        callParticipants: callParticipants,
+      );
     }
-    state = state.copyWith(
-      callParticipants: callParticipants,
-    );
   }
 
   void sfuJoinResponse(

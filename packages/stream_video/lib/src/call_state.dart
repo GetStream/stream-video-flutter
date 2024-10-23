@@ -191,6 +191,8 @@ class CallState extends Equatable {
   }
 
   CallState copyFromMetadata(CallMetadata metadata) {
+    final capabilities = metadata.details.ownCapabilities.toList();
+
     return copyWith(
       isBackstage: metadata.details.backstage,
       isRecording: metadata.details.recording,
@@ -206,7 +208,7 @@ class CallState extends Equatable {
       egress: metadata.details.egress,
       rtmpIngress: metadata.details.rtmpIngress,
       settings: metadata.settings,
-      ownCapabilities: metadata.details.ownCapabilities.toList(),
+      ownCapabilities: capabilities.isEmpty ? null : capabilities,
       liveStartedAt: metadata.session.liveStartedAt,
       liveEndedAt: metadata.session.liveEndedAt,
     );

@@ -111,59 +111,38 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   }) {
     _logger.d(() => '[lifecycleCallCreated] ringing: $ringing, state: $state');
 
-    state = state.copyWith(
-      status: data.toCallStatus(state: state, ringing: ringing),
-      isBackstage: data.metadata.details.backstage,
-      isRecording: data.metadata.details.recording,
-      isTranscribing: data.metadata.details.transcribing,
-      isBroadcasting: data.metadata.details.broadcasting,
-      blockedUserIds: data.metadata.details.blockedUserIds.toList(),
-      createdAt: data.metadata.details.createdAt,
-      updatedAt: data.metadata.details.updatedAt,
-      startsAt: data.metadata.details.startsAt,
-      endedAt: data.metadata.details.endedAt,
-      createdByUserId: data.metadata.details.createdBy.id,
-      custom: data.metadata.details.custom,
-      egress: data.metadata.details.egress,
-      rtmpIngress: data.metadata.details.rtmpIngress,
-      settings: data.metadata.settings,
-      ownCapabilities: data.metadata.details.ownCapabilities.toList(),
-      callParticipants: data.metadata.toCallParticipants(
-        state,
-        fromMembers: true,
-      ),
-      liveStartedAt: data.metadata.session.liveStartedAt,
-      liveEndedAt: data.metadata.session.liveEndedAt,
-      audioOutputDevice: callConnectOptions.audioOutputDevice,
-      audioInputDevice: callConnectOptions.audioInputDevice,
-    );
+    state = state
+        .copyFromMetadata(
+          data.metadata,
+        )
+        .copyWith(
+          status: data.toCallStatus(state: state, ringing: ringing),
+          callParticipants: data.metadata.toCallParticipants(
+            state,
+            fromMembers: true,
+          ),
+          audioOutputDevice: callConnectOptions.audioOutputDevice,
+          audioInputDevice: callConnectOptions.audioInputDevice,
+        );
   }
 
   void lifecycleCallRinging(
     CallRingingData data,
   ) {
     _logger.d(() => '[lifecycleCallRinging] state: $state');
-    state = state.copyWith(
-      status: data.toCallStatus(state: state),
-      createdByUserId: data.metadata.details.createdBy.id,
-      isRingingFlow: data.ringing,
-      settings: data.metadata.settings,
-      egress: data.metadata.details.egress,
-      ownCapabilities: data.metadata.details.ownCapabilities.toList(),
-      callParticipants: data.metadata.toCallParticipants(
-        state,
-        fromMembers: true,
-      ),
-      createdAt: data.metadata.details.createdAt,
-      startsAt: data.metadata.details.startsAt,
-      endedAt: data.metadata.details.endedAt,
-      liveStartedAt: data.metadata.session.liveStartedAt,
-      liveEndedAt: data.metadata.session.liveEndedAt,
-      isBackstage: data.metadata.details.backstage,
-      isBroadcasting: data.metadata.details.broadcasting,
-      isRecording: data.metadata.details.recording,
-      isTranscribing: data.metadata.details.transcribing,
-    );
+    state = state
+        .copyFromMetadata(
+          data.metadata,
+        )
+        .copyWith(
+          status: data.toCallStatus(state: state),
+          isRingingFlow: data.ringing,
+          ownCapabilities: data.metadata.details.ownCapabilities.toList(),
+          callParticipants: data.metadata.toCallParticipants(
+            state,
+            fromMembers: true,
+          ),
+        );
   }
 
   void lifecycleCallJoining() {
@@ -180,32 +159,20 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     final status = state.status.isJoining ? CallStatus.joined() : state.status;
     _logger.d(() => '[lifecycleCallJoined] state: $state;\nnewStatus: $status');
 
-    state = state.copyWith(
-      status: status,
-      isBackstage: data.metadata.details.backstage,
-      isRecording: data.metadata.details.recording,
-      isTranscribing: data.metadata.details.transcribing,
-      isBroadcasting: data.metadata.details.broadcasting,
-      blockedUserIds: data.metadata.details.blockedUserIds.toList(),
-      createdAt: data.metadata.details.createdAt,
-      updatedAt: data.metadata.details.updatedAt,
-      startsAt: data.metadata.details.startsAt,
-      endedAt: data.metadata.details.endedAt,
-      createdByUserId: data.metadata.details.createdBy.id,
-      custom: data.metadata.details.custom,
-      egress: data.metadata.details.egress,
-      rtmpIngress: data.metadata.details.rtmpIngress,
-      settings: data.metadata.settings,
-      ownCapabilities: data.metadata.details.ownCapabilities.toList(),
-      callParticipants: data.metadata.toCallParticipants(
-        state,
-        fromMembers: true,
-      ),
-      liveStartedAt: data.metadata.session.liveStartedAt,
-      liveEndedAt: data.metadata.session.liveEndedAt,
-      audioOutputDevice: callConnectOptions?.audioOutputDevice,
-      audioInputDevice: callConnectOptions?.audioInputDevice,
-    );
+    state = state
+        .copyFromMetadata(
+          data.metadata,
+        )
+        .copyWith(
+          status: status,
+          ownCapabilities: data.metadata.details.ownCapabilities.toList(),
+          callParticipants: data.metadata.toCallParticipants(
+            state,
+            fromMembers: true,
+          ),
+          audioOutputDevice: callConnectOptions?.audioOutputDevice,
+          audioInputDevice: callConnectOptions?.audioInputDevice,
+        );
   }
 
   void lifecycleCallReconnectingFailed() {
