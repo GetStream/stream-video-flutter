@@ -1,3 +1,8 @@
+## Unreleased
+
+🔄 Dependency updates
+* Updated firebase dependencies to fix Xcode 16 build issues
+
 ## 0.5.5
 * Sync version with `stream_video_flutter` 0.5.5
 

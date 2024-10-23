@@ -21,6 +21,9 @@ const _idCallRejected = 6;
 
 /// Implementation of [PushNotificationManager] for Stream Video.
 class StreamVideoPushNotificationManager implements PushNotificationManager {
+  static const userDeviceTokenKey = 'io.getstream.userDeviceToken';
+  static const userDeviceTokenVoIPKey = 'io.getstream.userDeviceTokenVoIP';
+
   /// Factory for creating a new instance of [StreamVideoPushNotificationManager].
   ///   /// Parameters:
   /// * [callerCustomizationCallback] callback providing customized caller data used for call screen and CallKit call. (for iOS this will only work for foreground calls)
@@ -179,7 +182,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     }
 
     void registerDevice(String token, bool isVoIP) async {
-      final tokenKey = isVoIP ? 'userDeviceTokenVoIP' : 'userDeviceToken';
+      final tokenKey = isVoIP ? userDeviceTokenVoIPKey : userDeviceTokenKey;
 
       final storedToken = _sharedPreferences.getString(tokenKey);
       if (storedToken == token) return;
@@ -213,8 +216,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   Future<void> removedStoredTokens() async {
-    await _sharedPreferences.remove('userDeviceToken');
-    await _sharedPreferences.remove('userDeviceTokenVoIP');
+    await _sharedPreferences.remove(userDeviceTokenKey);
+    await _sharedPreferences.remove(userDeviceTokenVoIPKey);
   }
 
   @override
