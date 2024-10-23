@@ -121,6 +121,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
             state,
             fromMembers: true,
           ),
+          isRingingFlow: ringing,
           audioOutputDevice: callConnectOptions.audioOutputDevice,
           audioInputDevice: callConnectOptions.audioInputDevice,
         );

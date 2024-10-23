@@ -82,7 +82,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         client.events.on<CoordinatorCallRejectedEvent>(
           (event) async {
             if (event.rejectedByUserId == event.metadata.details.createdBy.id ||
-                event.rejectedByUserId != streamVideo.currentUser.id) {
+                event.rejectedByUserId == streamVideo.currentUser.id) {
               endCallByCid(event.callCid.toString());
             }
           },
