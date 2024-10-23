@@ -262,6 +262,7 @@ class StreamVideo extends Disposable {
   /// Connects the user to the Stream Video service.
   Future<Result<UserToken>> connect({
     bool includeUserDetails = true,
+    bool registerPushDevice = true,
   }) async {
     if (currentUserType == UserType.anonymous) {
       _logger.w(() => '[connect] rejected (anonymous user)');
@@ -271,6 +272,7 @@ class StreamVideo extends Disposable {
     }
     _connectOperation ??= _connect(
       includeUserDetails: includeUserDetails,
+      registerPushDevice: registerPushDevice,
     ).asCancelable();
     return _connectOperation!
         .valueOrDefault(Result.error('connect was cancelled'))
@@ -293,6 +295,7 @@ class StreamVideo extends Disposable {
 
   Future<Result<UserToken>> _connect({
     bool includeUserDetails = false,
+    bool registerPushDevice = true,
   }) async {
     _logger.i(() => '[connect] currentUser.id: ${_state.currentUser.id}');
     if (_connectionState.isConnected) {
@@ -339,7 +342,9 @@ class StreamVideo extends Disposable {
       _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
 
       // Register device with push notification manager.
-      pushNotificationManager?.registerDevice();
+      if (registerPushDevice) {
+        pushNotificationManager?.registerDevice();
+      }
 
       if (pushNotificationManager != null) {
         _subscriptions.add(
