@@ -127,6 +127,7 @@ extension SfuEventMapper on sfu_events.SfuEvent {
             code: error.error.code.toDomain(),
             message: error.error.message,
             shouldRetry: error.error.shouldRetry,
+            reconnectStrategy: error.reconnectStrategy.toDomain(),
           ),
         );
       case sfu_events.SfuEvent_EventPayload.callGrantsUpdated:
@@ -288,6 +289,31 @@ extension SfuErrorCodeExtension on sfu_models.ErrorCode {
         return SfuErrorCode.unauthenticated;
       default:
         throw StateError('unexpected error code: $this');
+    }
+  }
+}
+
+extension SfuWebsocketReconnectStrategyExtension
+    on sfu_models.WebsocketReconnectStrategy {
+  SfuReconnectionStrategy toDomain() {
+    switch (this) {
+      case sfu_models
+            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_CLEAN:
+        return SfuReconnectionStrategy.clean;
+      case sfu_models
+            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT:
+        return SfuReconnectionStrategy.disconnect;
+      case sfu_models
+            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST:
+        return SfuReconnectionStrategy.fast;
+      case sfu_models
+            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FULL:
+        return SfuReconnectionStrategy.full;
+      case sfu_models
+            .WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE:
+        return SfuReconnectionStrategy.migrate;
+      default:
+        return SfuReconnectionStrategy.unspecified;
     }
   }
 }

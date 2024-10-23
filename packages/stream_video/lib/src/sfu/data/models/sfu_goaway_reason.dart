@@ -1,6 +1,7 @@
 enum SfuGoAwayReason {
   rebalance,
   shuttingDown,
+  migrate,
   unspecified;
 
   @override
