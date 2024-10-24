@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/stream_video.dart' hide CallEvent;
 import 'package:stream_video_push_notification/stream_video_push_notification_platform_interface.dart';
 
@@ -20,6 +21,9 @@ const _idCallRejected = 6;
 
 /// Implementation of [PushNotificationManager] for Stream Video.
 class StreamVideoPushNotificationManager implements PushNotificationManager {
+  static const userDeviceTokenKey = 'io.getstream.userDeviceToken';
+  static const userDeviceTokenVoIPKey = 'io.getstream.userDeviceTokenVoIP';
+
   /// Factory for creating a new instance of [StreamVideoPushNotificationManager].
   ///   /// Parameters:
   /// * [callerCustomizationCallback] callback providing customized caller data used for call screen and CallKit call. (for iOS this will only work for foreground calls)
@@ -66,6 +70,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     this.registerApnDeviceToken = false,
   }) : _client = client {
     if (CurrentPlatform.isWeb) return;
+
+    SharedPreferences.getInstance().then((prefs) => _sharedPreferences = prefs);
 
     subscribeToEvents() {
       _subscriptions.add(
@@ -155,6 +161,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   final StreamVideoPushParams pushParams;
   final CallerCustomizationFunction? callerCustomizationCallback;
   final bool registerApnDeviceToken;
+  late SharedPreferences _sharedPreferences;
 
   final _logger = taggedLogger(tag: 'SV:PNManager');
   bool? _wasWsConnected;
@@ -174,13 +181,24 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       return;
     }
 
-    void registerDevice(String token, bool isVoIP) {
-      _client.createDevice(
+    void registerDevice(String token, bool isVoIP) async {
+      final tokenKey = isVoIP ? userDeviceTokenVoIPKey : userDeviceTokenKey;
+
+      final storedToken = _sharedPreferences.getString(tokenKey);
+      if (storedToken == token) return;
+
+      _client
+          .createDevice(
         id: token,
         voipToken: isVoIP,
         pushProvider: pushProvider.type,
         pushProviderName: pushProvider.name,
-      );
+      )
+          .then((result) {
+        if (result is Success) {
+          _sharedPreferences.setString(tokenKey, token);
+        }
+      });
     }
 
     if (CurrentPlatform.isIos && registerApnDeviceToken) {
@@ -197,6 +215,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
             .listen((token) => registerDevice(token, true)));
   }
 
+  Future<void> removedStoredTokens() async {
+    await _sharedPreferences.remove(userDeviceTokenKey);
+    await _sharedPreferences.remove(userDeviceTokenVoIPKey);
+  }
+
   @override
   void unregisterDevice() async {
     final token = await getDevicePushTokenVoIP();
@@ -209,6 +232,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     if (apnToken != null) {
       _client.deleteDevice(id: apnToken);
     }
+
+    removedStoredTokens();
   }
 
   @override
