@@ -1,3 +1,14 @@
+## Unreleased
+
+🔄 Dependency updates
+* Updated firebase dependencies to fix Xcode 16 build issues
+
+✅ Added
+* Added `registerPushDevice` optional parameter (default as true) to `StreamVideo.connect()` method that can prevent automatic push token registration.
+
+🐞 Fixed
+* Automatic push token registration done by `StreamVideo` now stores registered token in `SharedPreferences` and will now only perform API call when token changes.
+
 ## 0.5.5
 
 🐞 Fixed
