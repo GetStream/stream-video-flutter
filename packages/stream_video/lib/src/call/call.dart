@@ -16,7 +16,6 @@ import '../coordinator/models/coordinator_models.dart';
 import '../coordinator/open_api/error/open_api_error.dart';
 import '../errors/video_error_composer.dart';
 import '../models/call_received_data.dart';
-import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
 import '../sfu/data/models/sfu_error.dart';
 import '../shared_emitter.dart';

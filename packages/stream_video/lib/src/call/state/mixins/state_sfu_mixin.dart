@@ -5,9 +5,7 @@ import '../../../call_state.dart';
 import '../../../logger/impl/tagged_logger.dart';
 import '../../../models/call_participant_state.dart';
 import '../../../models/call_preferences.dart';
-import '../../../models/call_status.dart';
 import '../../../models/call_track_state.dart';
-import '../../../models/disconnect_reason.dart';
 import '../../../sfu/data/events/sfu_events.dart';
 import '../../../sfu/sfu_extensions.dart';
 
