@@ -8,7 +8,7 @@ on:
       - dogfooding/**
 
 env:
-  FLUTTER_VERSION: '3.19.5'
+  FLUTTER_VERSION: '3.24.3'
   FLUTTER_CHANNEL: stable
   ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
   MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
