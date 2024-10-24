@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
         video: true,
       );
     } catch (e, stk) {
-      debugPrint('Error joining or creating call: $e.');
+      debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());
     }
 
