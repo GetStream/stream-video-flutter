@@ -100,6 +100,7 @@ class WebhookEvent {
 
   bool video;
 
+  /// Name of the given RTMP broadcast
   String name;
 
   CallParticipantResponse participant;
@@ -196,97 +197,94 @@ class WebhookEvent {
   DateTime? receivedAt;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is WebhookEvent &&
-          other.blockedByUser == blockedByUser &&
-          other.callCid == callCid &&
-          other.createdAt == createdAt &&
-          other.type == type &&
-          other.user == user &&
-          other.call == call &&
-          _deepEquality.equals(other.members, members) &&
-          other.hlsPlaylistUrl == hlsPlaylistUrl &&
-          _deepEquality.equals(other.capabilitiesByRole, capabilitiesByRole) &&
-          other.notifyUser == notifyUser &&
-          other.sessionId == sessionId &&
-          other.reaction == reaction &&
-          other.callRecording == callRecording &&
-          other.reason == reason &&
-          other.video == video &&
-          other.name == name &&
-          other.participant == participant &&
-          other.callTranscription == callTranscription &&
-          other.fromUserId == fromUserId &&
-          _deepEquality.equals(other.mutedUserIds, mutedUserIds) &&
-          other.closedCaption == closedCaption &&
-          _deepEquality.equals(other.custom, custom) &&
-          other.item == item &&
-          other.message == message &&
-          other.objectId == objectId &&
-          _deepEquality.equals(other.permissions, permissions) &&
-          _deepEquality.equals(other.ownCapabilities, ownCapabilities) &&
-          other.channelId == channelId &&
-          other.channelType == channelType &&
-          other.cid == cid &&
-          other.createdBy == createdBy &&
-          other.expiration == expiration &&
-          other.shadow == shadow &&
-          other.team == team &&
-          other.deleteConversationChannels == deleteConversationChannels &&
-          other.hardDelete == hardDelete &&
-          other.markMessagesDeleted == markMessagesDeleted &&
-          other.targetUser == targetUser &&
-          _deepEquality.equals(other.targetUsers, targetUsers) &&
-          other.receivedAt == receivedAt;
+  bool operator ==(Object other) => identical(this, other) || other is WebhookEvent &&
+    other.blockedByUser == blockedByUser &&
+    other.callCid == callCid &&
+    other.createdAt == createdAt &&
+    other.type == type &&
+    other.user == user &&
+    other.call == call &&
+    _deepEquality.equals(other.members, members) &&
+    other.hlsPlaylistUrl == hlsPlaylistUrl &&
+    _deepEquality.equals(other.capabilitiesByRole, capabilitiesByRole) &&
+    other.notifyUser == notifyUser &&
+    other.sessionId == sessionId &&
+    other.reaction == reaction &&
+    other.callRecording == callRecording &&
+    other.reason == reason &&
+    other.video == video &&
+    other.name == name &&
+    other.participant == participant &&
+    other.callTranscription == callTranscription &&
+    other.fromUserId == fromUserId &&
+    _deepEquality.equals(other.mutedUserIds, mutedUserIds) &&
+    other.closedCaption == closedCaption &&
+    _deepEquality.equals(other.custom, custom) &&
+    other.item == item &&
+    other.message == message &&
+    other.objectId == objectId &&
+    _deepEquality.equals(other.permissions, permissions) &&
+    _deepEquality.equals(other.ownCapabilities, ownCapabilities) &&
+    other.channelId == channelId &&
+    other.channelType == channelType &&
+    other.cid == cid &&
+    other.createdBy == createdBy &&
+    other.expiration == expiration &&
+    other.shadow == shadow &&
+    other.team == team &&
+    other.deleteConversationChannels == deleteConversationChannels &&
+    other.hardDelete == hardDelete &&
+    other.markMessagesDeleted == markMessagesDeleted &&
+    other.targetUser == targetUser &&
+    _deepEquality.equals(other.targetUsers, targetUsers) &&
+    other.receivedAt == receivedAt;
 
   @override
   int get hashCode =>
-      // ignore: unnecessary_parenthesis
-      (blockedByUser == null ? 0 : blockedByUser!.hashCode) +
-      (callCid.hashCode) +
-      (createdAt.hashCode) +
-      (type.hashCode) +
-      (user.hashCode) +
-      (call.hashCode) +
-      (members.hashCode) +
-      (hlsPlaylistUrl.hashCode) +
-      (capabilitiesByRole.hashCode) +
-      (notifyUser.hashCode) +
-      (sessionId.hashCode) +
-      (reaction.hashCode) +
-      (callRecording.hashCode) +
-      (reason == null ? 0 : reason!.hashCode) +
-      (video.hashCode) +
-      (name.hashCode) +
-      (participant.hashCode) +
-      (callTranscription.hashCode) +
-      (fromUserId.hashCode) +
-      (mutedUserIds.hashCode) +
-      (closedCaption.hashCode) +
-      (custom.hashCode) +
-      (item == null ? 0 : item!.hashCode) +
-      (message == null ? 0 : message!.hashCode) +
-      (objectId == null ? 0 : objectId!.hashCode) +
-      (permissions.hashCode) +
-      (ownCapabilities.hashCode) +
-      (channelId.hashCode) +
-      (channelType.hashCode) +
-      (cid.hashCode) +
-      (createdBy.hashCode) +
-      (expiration == null ? 0 : expiration!.hashCode) +
-      (shadow.hashCode) +
-      (team == null ? 0 : team!.hashCode) +
-      (deleteConversationChannels.hashCode) +
-      (hardDelete.hashCode) +
-      (markMessagesDeleted.hashCode) +
-      (targetUser == null ? 0 : targetUser!.hashCode) +
-      (targetUsers.hashCode) +
-      (receivedAt == null ? 0 : receivedAt!.hashCode);
+    // ignore: unnecessary_parenthesis
+    (blockedByUser == null ? 0 : blockedByUser!.hashCode) +
+    (callCid.hashCode) +
+    (createdAt.hashCode) +
+    (type.hashCode) +
+    (user.hashCode) +
+    (call.hashCode) +
+    (members.hashCode) +
+    (hlsPlaylistUrl.hashCode) +
+    (capabilitiesByRole.hashCode) +
+    (notifyUser.hashCode) +
+    (sessionId.hashCode) +
+    (reaction.hashCode) +
+    (callRecording.hashCode) +
+    (reason == null ? 0 : reason!.hashCode) +
+    (video.hashCode) +
+    (name.hashCode) +
+    (participant.hashCode) +
+    (callTranscription.hashCode) +
+    (fromUserId.hashCode) +
+    (mutedUserIds.hashCode) +
+    (closedCaption.hashCode) +
+    (custom.hashCode) +
+    (item == null ? 0 : item!.hashCode) +
+    (message == null ? 0 : message!.hashCode) +
+    (objectId == null ? 0 : objectId!.hashCode) +
+    (permissions.hashCode) +
+    (ownCapabilities.hashCode) +
+    (channelId.hashCode) +
+    (channelType.hashCode) +
+    (cid.hashCode) +
+    (createdBy.hashCode) +
+    (expiration == null ? 0 : expiration!.hashCode) +
+    (shadow.hashCode) +
+    (team == null ? 0 : team!.hashCode) +
+    (deleteConversationChannels.hashCode) +
+    (hardDelete.hashCode) +
+    (markMessagesDeleted.hashCode) +
+    (targetUser == null ? 0 : targetUser!.hashCode) +
+    (targetUsers.hashCode) +
+    (receivedAt == null ? 0 : receivedAt!.hashCode);
 
   @override
-  String toString() =>
-      'WebhookEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, call=$call, members=$members, hlsPlaylistUrl=$hlsPlaylistUrl, capabilitiesByRole=$capabilitiesByRole, notifyUser=$notifyUser, sessionId=$sessionId, reaction=$reaction, callRecording=$callRecording, reason=$reason, video=$video, name=$name, participant=$participant, callTranscription=$callTranscription, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, closedCaption=$closedCaption, custom=$custom, item=$item, message=$message, objectId=$objectId, permissions=$permissions, ownCapabilities=$ownCapabilities, channelId=$channelId, channelType=$channelType, cid=$cid, createdBy=$createdBy, expiration=$expiration, shadow=$shadow, team=$team, deleteConversationChannels=$deleteConversationChannels, hardDelete=$hardDelete, markMessagesDeleted=$markMessagesDeleted, targetUser=$targetUser, targetUsers=$targetUsers, receivedAt=$receivedAt]';
+  String toString() => 'WebhookEvent[blockedByUser=$blockedByUser, callCid=$callCid, createdAt=$createdAt, type=$type, user=$user, call=$call, members=$members, hlsPlaylistUrl=$hlsPlaylistUrl, capabilitiesByRole=$capabilitiesByRole, notifyUser=$notifyUser, sessionId=$sessionId, reaction=$reaction, callRecording=$callRecording, reason=$reason, video=$video, name=$name, participant=$participant, callTranscription=$callTranscription, fromUserId=$fromUserId, mutedUserIds=$mutedUserIds, closedCaption=$closedCaption, custom=$custom, item=$item, message=$message, objectId=$objectId, permissions=$permissions, ownCapabilities=$ownCapabilities, channelId=$channelId, channelType=$channelType, cid=$cid, createdBy=$createdBy, expiration=$expiration, shadow=$shadow, team=$team, deleteConversationChannels=$deleteConversationChannels, hardDelete=$hardDelete, markMessagesDeleted=$markMessagesDeleted, targetUser=$targetUser, targetUsers=$targetUsers, receivedAt=$receivedAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -295,31 +293,31 @@ class WebhookEvent {
     } else {
       json[r'blocked_by_user'] = null;
     }
-    json[r'call_cid'] = this.callCid;
-    json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
-    json[r'type'] = this.type;
-    json[r'user'] = this.user;
-    json[r'call'] = this.call;
-    json[r'members'] = this.members;
-    json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
-    json[r'capabilities_by_role'] = this.capabilitiesByRole;
-    json[r'notify_user'] = this.notifyUser;
-    json[r'session_id'] = this.sessionId;
-    json[r'reaction'] = this.reaction;
-    json[r'call_recording'] = this.callRecording;
+      json[r'call_cid'] = this.callCid;
+      json[r'created_at'] = this.createdAt.toUtc().toIso8601String();
+      json[r'type'] = this.type;
+      json[r'user'] = this.user;
+      json[r'call'] = this.call;
+      json[r'members'] = this.members;
+      json[r'hls_playlist_url'] = this.hlsPlaylistUrl;
+      json[r'capabilities_by_role'] = this.capabilitiesByRole;
+      json[r'notify_user'] = this.notifyUser;
+      json[r'session_id'] = this.sessionId;
+      json[r'reaction'] = this.reaction;
+      json[r'call_recording'] = this.callRecording;
     if (this.reason != null) {
       json[r'reason'] = this.reason;
     } else {
       json[r'reason'] = null;
     }
-    json[r'video'] = this.video;
-    json[r'name'] = this.name;
-    json[r'participant'] = this.participant;
-    json[r'call_transcription'] = this.callTranscription;
-    json[r'from_user_id'] = this.fromUserId;
-    json[r'muted_user_ids'] = this.mutedUserIds;
-    json[r'closed_caption'] = this.closedCaption;
-    json[r'custom'] = this.custom;
+      json[r'video'] = this.video;
+      json[r'name'] = this.name;
+      json[r'participant'] = this.participant;
+      json[r'call_transcription'] = this.callTranscription;
+      json[r'from_user_id'] = this.fromUserId;
+      json[r'muted_user_ids'] = this.mutedUserIds;
+      json[r'closed_caption'] = this.closedCaption;
+      json[r'custom'] = this.custom;
     if (this.item != null) {
       json[r'item'] = this.item;
     } else {
@@ -335,32 +333,32 @@ class WebhookEvent {
     } else {
       json[r'object_id'] = null;
     }
-    json[r'permissions'] = this.permissions;
-    json[r'own_capabilities'] = this.ownCapabilities;
-    json[r'channel_id'] = this.channelId;
-    json[r'channel_type'] = this.channelType;
-    json[r'cid'] = this.cid;
-    json[r'created_by'] = this.createdBy;
+      json[r'permissions'] = this.permissions;
+      json[r'own_capabilities'] = this.ownCapabilities;
+      json[r'channel_id'] = this.channelId;
+      json[r'channel_type'] = this.channelType;
+      json[r'cid'] = this.cid;
+      json[r'created_by'] = this.createdBy;
     if (this.expiration != null) {
       json[r'expiration'] = this.expiration!.toUtc().toIso8601String();
     } else {
       json[r'expiration'] = null;
     }
-    json[r'shadow'] = this.shadow;
+      json[r'shadow'] = this.shadow;
     if (this.team != null) {
       json[r'team'] = this.team;
     } else {
       json[r'team'] = null;
     }
-    json[r'delete_conversation_channels'] = this.deleteConversationChannels;
-    json[r'hard_delete'] = this.hardDelete;
-    json[r'mark_messages_deleted'] = this.markMessagesDeleted;
+      json[r'delete_conversation_channels'] = this.deleteConversationChannels;
+      json[r'hard_delete'] = this.hardDelete;
+      json[r'mark_messages_deleted'] = this.markMessagesDeleted;
     if (this.targetUser != null) {
       json[r'target_user'] = this.targetUser;
     } else {
       json[r'target_user'] = null;
     }
-    json[r'target_users'] = this.targetUsers;
+      json[r'target_users'] = this.targetUsers;
     if (this.receivedAt != null) {
       json[r'received_at'] = this.receivedAt!.toUtc().toIso8601String();
     } else {
@@ -381,10 +379,8 @@ class WebhookEvent {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key),
-              'Required key "WebhookEvent[$key]" is missing from JSON.');
-          assert(json[key] != null,
-              'Required key "WebhookEvent[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "WebhookEvent[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "WebhookEvent[$key]" has a null value in JSON.');
         });
         return true;
       }());
@@ -398,6 +394,7 @@ class WebhookEvent {
         call: CallResponse.fromJson(json[r'call'])!,
         members: MemberResponse.listFromJson(json[r'members']),
         hlsPlaylistUrl: mapValueOfType<String>(json, r'hls_playlist_url')!,
+        // MANUAL_EDIT: List to List<String>
         capabilitiesByRole: json[r'capabilities_by_role'] == null
             ? const {}
             : mapCastOfType<String, List<String>>(
@@ -411,13 +408,10 @@ class WebhookEvent {
         video: mapValueOfType<bool>(json, r'video')!,
         name: mapValueOfType<String>(json, r'name')!,
         participant: CallParticipantResponse.fromJson(json[r'participant'])!,
-        callTranscription:
-            CallTranscription.fromJson(json[r'call_transcription'])!,
+        callTranscription: CallTranscription.fromJson(json[r'call_transcription'])!,
         fromUserId: mapValueOfType<String>(json, r'from_user_id')!,
         mutedUserIds: json[r'muted_user_ids'] is Iterable
-            ? (json[r'muted_user_ids'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
+            ? (json[r'muted_user_ids'] as Iterable).cast<String>().toList(growable: false)
             : const [],
         closedCaption: CallClosedCaption.fromJson(json[r'closed_caption'])!,
         custom: mapCastOfType<String, Object>(json, r'custom')!,
@@ -425,9 +419,7 @@ class WebhookEvent {
         message: Message.fromJson(json[r'message']),
         objectId: mapValueOfType<String>(json, r'object_id'),
         permissions: json[r'permissions'] is Iterable
-            ? (json[r'permissions'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
+            ? (json[r'permissions'] as Iterable).cast<String>().toList(growable: false)
             : const [],
         ownCapabilities: OwnCapability.listFromJson(json[r'own_capabilities']),
         channelId: mapValueOfType<String>(json, r'channel_id')!,
@@ -437,16 +429,12 @@ class WebhookEvent {
         expiration: mapDateTime(json, r'expiration', r''),
         shadow: mapValueOfType<bool>(json, r'shadow')!,
         team: mapValueOfType<String>(json, r'team'),
-        deleteConversationChannels:
-            mapValueOfType<bool>(json, r'delete_conversation_channels')!,
+        deleteConversationChannels: mapValueOfType<bool>(json, r'delete_conversation_channels')!,
         hardDelete: mapValueOfType<bool>(json, r'hard_delete')!,
-        markMessagesDeleted:
-            mapValueOfType<bool>(json, r'mark_messages_deleted')!,
+        markMessagesDeleted: mapValueOfType<bool>(json, r'mark_messages_deleted')!,
         targetUser: mapValueOfType<String>(json, r'target_user'),
         targetUsers: json[r'target_users'] is Iterable
-            ? (json[r'target_users'] as Iterable)
-                .cast<String>()
-                .toList(growable: false)
+            ? (json[r'target_users'] as Iterable).cast<String>().toList(growable: false)
             : const [],
         receivedAt: mapDateTime(json, r'received_at', r''),
       );
@@ -454,10 +442,7 @@ class WebhookEvent {
     return null;
   }
 
-  static List<WebhookEvent> listFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static List<WebhookEvent> listFromJson(dynamic json, {bool growable = false,}) {
     final result = <WebhookEvent>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
@@ -485,19 +470,13 @@ class WebhookEvent {
   }
 
   // maps a json object with a list of WebhookEvent-objects as value to a dart map
-  static Map<String, List<WebhookEvent>> mapListFromJson(
-    dynamic json, {
-    bool growable = false,
-  }) {
+  static Map<String, List<WebhookEvent>> mapListFromJson(dynamic json, {bool growable = false,}) {
     final map = <String, List<WebhookEvent>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = WebhookEvent.listFromJson(
-          entry.value,
-          growable: growable,
-        );
+        map[entry.key] = WebhookEvent.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;
@@ -537,3 +516,4 @@ class WebhookEvent {
     'mark_messages_deleted',
   };
 }
+

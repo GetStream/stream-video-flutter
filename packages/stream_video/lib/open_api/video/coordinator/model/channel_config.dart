@@ -28,6 +28,8 @@ class ChannelConfig {
     required this.maxMessageLength,
     required this.mutes,
     required this.name,
+    this.partitionSize,
+    this.partitionTtl,
     required this.polls,
     required this.pushNotifications,
     required this.quotes,
@@ -86,6 +88,22 @@ class ChannelConfig {
 
   String name;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? partitionSize;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? partitionTtl;
+
   bool polls;
 
   bool pushNotifications;
@@ -127,6 +145,8 @@ class ChannelConfig {
     other.maxMessageLength == maxMessageLength &&
     other.mutes == mutes &&
     other.name == name &&
+    other.partitionSize == partitionSize &&
+    other.partitionTtl == partitionTtl &&
     other.polls == polls &&
     other.pushNotifications == pushNotifications &&
     other.quotes == quotes &&
@@ -158,6 +178,8 @@ class ChannelConfig {
     (maxMessageLength.hashCode) +
     (mutes.hashCode) +
     (name.hashCode) +
+    (partitionSize == null ? 0 : partitionSize!.hashCode) +
+    (partitionTtl == null ? 0 : partitionTtl!.hashCode) +
     (polls.hashCode) +
     (pushNotifications.hashCode) +
     (quotes.hashCode) +
@@ -172,7 +194,7 @@ class ChannelConfig {
     (urlEnrichment.hashCode);
 
   @override
-  String toString() => 'ChannelConfig[allowedFlagReasons=$allowedFlagReasons, automod=$automod, automodBehavior=$automodBehavior, automodThresholds=$automodThresholds, blocklist=$blocklist, blocklistBehavior=$blocklistBehavior, blocklists=$blocklists, commands=$commands, connectEvents=$connectEvents, createdAt=$createdAt, customEvents=$customEvents, markMessagesPending=$markMessagesPending, maxMessageLength=$maxMessageLength, mutes=$mutes, name=$name, polls=$polls, pushNotifications=$pushNotifications, quotes=$quotes, reactions=$reactions, readEvents=$readEvents, reminders=$reminders, replies=$replies, search=$search, typingEvents=$typingEvents, updatedAt=$updatedAt, uploads=$uploads, urlEnrichment=$urlEnrichment]';
+  String toString() => 'ChannelConfig[allowedFlagReasons=$allowedFlagReasons, automod=$automod, automodBehavior=$automodBehavior, automodThresholds=$automodThresholds, blocklist=$blocklist, blocklistBehavior=$blocklistBehavior, blocklists=$blocklists, commands=$commands, connectEvents=$connectEvents, createdAt=$createdAt, customEvents=$customEvents, markMessagesPending=$markMessagesPending, maxMessageLength=$maxMessageLength, mutes=$mutes, name=$name, partitionSize=$partitionSize, partitionTtl=$partitionTtl, polls=$polls, pushNotifications=$pushNotifications, quotes=$quotes, reactions=$reactions, readEvents=$readEvents, reminders=$reminders, replies=$replies, search=$search, typingEvents=$typingEvents, updatedAt=$updatedAt, uploads=$uploads, urlEnrichment=$urlEnrichment]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -203,6 +225,16 @@ class ChannelConfig {
       json[r'max_message_length'] = this.maxMessageLength;
       json[r'mutes'] = this.mutes;
       json[r'name'] = this.name;
+    if (this.partitionSize != null) {
+      json[r'partition_size'] = this.partitionSize;
+    } else {
+      json[r'partition_size'] = null;
+    }
+    if (this.partitionTtl != null) {
+      json[r'partition_ttl'] = this.partitionTtl;
+    } else {
+      json[r'partition_ttl'] = null;
+    }
       json[r'polls'] = this.polls;
       json[r'push_notifications'] = this.pushNotifications;
       json[r'quotes'] = this.quotes;
@@ -256,6 +288,8 @@ class ChannelConfig {
         maxMessageLength: mapValueOfType<int>(json, r'max_message_length')!,
         mutes: mapValueOfType<bool>(json, r'mutes')!,
         name: mapValueOfType<String>(json, r'name')!,
+        partitionSize: mapValueOfType<int>(json, r'partition_size'),
+        partitionTtl: mapValueOfType<int>(json, r'partition_ttl'),
         polls: mapValueOfType<bool>(json, r'polls')!,
         pushNotifications: mapValueOfType<bool>(json, r'push_notifications')!,
         quotes: mapValueOfType<bool>(json, r'quotes')!,

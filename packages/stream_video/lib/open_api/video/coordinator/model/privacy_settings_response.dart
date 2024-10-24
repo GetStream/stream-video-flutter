@@ -23,7 +23,7 @@ class PrivacySettingsResponse {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  ReadReceipts? readReceipts;
+  ReadReceiptsResponse? readReceipts;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -31,7 +31,7 @@ class PrivacySettingsResponse {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  TypingIndicators? typingIndicators;
+  TypingIndicatorsResponse? typingIndicators;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is PrivacySettingsResponse &&
@@ -81,8 +81,8 @@ class PrivacySettingsResponse {
       }());
 
       return PrivacySettingsResponse(
-        readReceipts: ReadReceipts.fromJson(json[r'read_receipts']),
-        typingIndicators: TypingIndicators.fromJson(json[r'typing_indicators']),
+        readReceipts: ReadReceiptsResponse.fromJson(json[r'read_receipts']),
+        typingIndicators: TypingIndicatorsResponse.fromJson(json[r'typing_indicators']),
       );
     }
     return null;
